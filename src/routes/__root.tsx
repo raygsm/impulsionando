@@ -1,4 +1,6 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { Toaster } from "@/components/ui/sonner";
+import { supabase as supabaseAuth } from "@/integrations/supabase/client";
 import {
   Outlet,
   Link,
@@ -77,14 +79,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Impulsionando Sistemas" },
+      { name: "description", content: "Plataforma SaaS multiempresa, multinicho e modular para clínicas, bares, cervejarias, serviços e varejo." },
+      { name: "author", content: "Impulsionando Sistemas" },
+      { property: "og:title", content: "Impulsionando Sistemas" },
+      { property: "og:description", content: "Plataforma SaaS multiempresa e multinicho." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
@@ -115,11 +116,22 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+      <AuthSync />
+      <Toaster richColors position="top-right" />
       <Outlet />
     </QueryClientProvider>
   );
+}
+
+function AuthSync() {
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    const { data: sub } = supabaseAuth.auth.onAuthStateChange(() => {
+      queryClient.invalidateQueries();
+    });
+    return () => sub.subscription.unsubscribe();
+  }, [queryClient]);
+  return null;
 }
