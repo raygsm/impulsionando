@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, PlayCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logoAsset from "@/assets/logo-impulsionando.png.asset.json";
 
@@ -40,7 +40,20 @@ export function PublicHeader() {
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
             <Link to="/auth">Entrar</Link>
           </Button>
-          <Button asChild size="sm" className="gap-2">
+          <Button
+            asChild
+            size="sm"
+            className="gap-2 bg-gradient-primary shadow-elegant hover:shadow-card-hover relative"
+          >
+            <Link to="/demo">
+              <PlayCircle className="w-4 h-4" />
+              <span>Demonstração</span>
+              <span className="hidden sm:inline-flex ml-1 text-[10px] uppercase tracking-wider bg-white/20 px-1.5 py-0.5 rounded">
+                grátis
+              </span>
+            </Link>
+          </Button>
+          <Button asChild size="sm" variant="outline" className="gap-2 hidden md:inline-flex">
             <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
               <MessageCircle className="w-4 h-4" />
               <span className="hidden sm:inline">WhatsApp</span>

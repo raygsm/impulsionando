@@ -17,10 +17,13 @@ import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PlanosRouteImport } from './routes/planos'
 import { Route as OrcamentoRouteImport } from './routes/orcamento'
 import { Route as ModulosRouteImport } from './routes/modulos'
+import { Route as DemoRouteImport } from './routes/demo'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DemoWhiteLabelRouteImport } from './routes/demo.white-label'
+import { Route as DemoClienteFinalRouteImport } from './routes/demo.cliente-final'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
 import { Route as AuthenticatedUnitsRouteImport } from './routes/_authenticated/units'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -118,6 +121,11 @@ const ModulosRoute = ModulosRouteImport.update({
   path: '/modulos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContatoRoute = ContatoRouteImport.update({
   id: '/contato',
   path: '/contato',
@@ -136,6 +144,16 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const DemoWhiteLabelRoute = DemoWhiteLabelRouteImport.update({
+  id: '/white-label',
+  path: '/white-label',
+  getParentRoute: () => DemoRoute,
+} as any)
+const DemoClienteFinalRoute = DemoClienteFinalRouteImport.update({
+  id: '/cliente-final',
+  path: '/cliente-final',
+  getParentRoute: () => DemoRoute,
 } as any)
 const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
   id: '/users',
@@ -450,6 +468,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/contato': typeof ContatoRoute
+  '/demo': typeof DemoRouteWithChildren
   '/modulos': typeof ModulosRoute
   '/orcamento': typeof OrcamentoRoute
   '/planos': typeof PlanosRoute
@@ -477,6 +496,8 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/units': typeof AuthenticatedUnitsRoute
   '/users': typeof AuthenticatedUsersRoute
+  '/demo/cliente-final': typeof DemoClienteFinalRoute
+  '/demo/white-label': typeof DemoWhiteLabelRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
@@ -519,6 +540,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/contato': typeof ContatoRoute
+  '/demo': typeof DemoRouteWithChildren
   '/modulos': typeof ModulosRoute
   '/orcamento': typeof OrcamentoRoute
   '/planos': typeof PlanosRoute
@@ -539,6 +561,8 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/units': typeof AuthenticatedUnitsRoute
   '/users': typeof AuthenticatedUsersRoute
+  '/demo/cliente-final': typeof DemoClienteFinalRoute
+  '/demo/white-label': typeof DemoWhiteLabelRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
@@ -583,6 +607,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/contato': typeof ContatoRoute
+  '/demo': typeof DemoRouteWithChildren
   '/modulos': typeof ModulosRoute
   '/orcamento': typeof OrcamentoRoute
   '/planos': typeof PlanosRoute
@@ -610,6 +635,8 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/units': typeof AuthenticatedUnitsRoute
   '/_authenticated/users': typeof AuthenticatedUsersRoute
+  '/demo/cliente-final': typeof DemoClienteFinalRoute
+  '/demo/white-label': typeof DemoWhiteLabelRoute
   '/_authenticated/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/_authenticated/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/_authenticated/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
@@ -654,6 +681,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/contato'
+    | '/demo'
     | '/modulos'
     | '/orcamento'
     | '/planos'
@@ -681,6 +709,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/units'
     | '/users'
+    | '/demo/cliente-final'
+    | '/demo/white-label'
     | '/agenda/appointments'
     | '/agenda/professionals'
     | '/agenda/schedules'
@@ -723,6 +753,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/contato'
+    | '/demo'
     | '/modulos'
     | '/orcamento'
     | '/planos'
@@ -743,6 +774,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/units'
     | '/users'
+    | '/demo/cliente-final'
+    | '/demo/white-label'
     | '/agenda/appointments'
     | '/agenda/professionals'
     | '/agenda/schedules'
@@ -786,6 +819,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/contato'
+    | '/demo'
     | '/modulos'
     | '/orcamento'
     | '/planos'
@@ -813,6 +847,8 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/units'
     | '/_authenticated/users'
+    | '/demo/cliente-final'
+    | '/demo/white-label'
     | '/_authenticated/agenda/appointments'
     | '/_authenticated/agenda/professionals'
     | '/_authenticated/agenda/schedules'
@@ -857,6 +893,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ContatoRoute: typeof ContatoRoute
+  DemoRoute: typeof DemoRouteWithChildren
   ModulosRoute: typeof ModulosRoute
   OrcamentoRoute: typeof OrcamentoRoute
   PlanosRoute: typeof PlanosRoute
@@ -925,6 +962,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ModulosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contato': {
       id: '/contato'
       path: '/contato'
@@ -952,6 +996,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/demo/white-label': {
+      id: '/demo/white-label'
+      path: '/white-label'
+      fullPath: '/demo/white-label'
+      preLoaderRoute: typeof DemoWhiteLabelRouteImport
+      parentRoute: typeof DemoRoute
+    }
+    '/demo/cliente-final': {
+      id: '/demo/cliente-final'
+      path: '/cliente-final'
+      fullPath: '/demo/cliente-final'
+      preLoaderRoute: typeof DemoClienteFinalRouteImport
+      parentRoute: typeof DemoRoute
     }
     '/_authenticated/users': {
       id: '/_authenticated/users'
@@ -1549,11 +1607,24 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface DemoRouteChildren {
+  DemoClienteFinalRoute: typeof DemoClienteFinalRoute
+  DemoWhiteLabelRoute: typeof DemoWhiteLabelRoute
+}
+
+const DemoRouteChildren: DemoRouteChildren = {
+  DemoClienteFinalRoute: DemoClienteFinalRoute,
+  DemoWhiteLabelRoute: DemoWhiteLabelRoute,
+}
+
+const DemoRouteWithChildren = DemoRoute._addFileChildren(DemoRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ContatoRoute: ContatoRoute,
+  DemoRoute: DemoRouteWithChildren,
   ModulosRoute: ModulosRoute,
   OrcamentoRoute: OrcamentoRoute,
   PlanosRoute: PlanosRoute,

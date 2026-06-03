@@ -1,9 +1,10 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import type { CurrentUser } from "@/lib/auth";
+import logoAsset from "@/assets/logo-impulsionando.png.asset.json";
 import {
   LayoutDashboard, Building2, Tags, MapPin, Layers, Users, KeyRound,
-  SlidersHorizontal, FileSearch, Boxes, Sparkles, KanbanSquare, UserPlus, GitBranch, CalendarClock,
+  SlidersHorizontal, FileSearch, Boxes, KanbanSquare, UserPlus, GitBranch, CalendarClock,
   Calendar, Users2, Wrench, Clock, UsersRound,
   Wallet, ArrowLeftRight, FolderTree, CreditCard, Percent,
   Package, Truck, ArrowDownUp,
@@ -76,9 +77,7 @@ export function Sidebar({ currentUser }: { currentUser: CurrentUser }) {
   return (
     <aside className="hidden lg:flex flex-col w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border shrink-0">
       <div className="h-16 px-5 flex items-center gap-2 border-b border-sidebar-border">
-        <div className="w-8 h-8 rounded-md bg-gradient-primary flex items-center justify-center text-primary-foreground">
-          <Sparkles className="w-4 h-4" />
-        </div>
+        <img src={logoAsset.url} alt="Impulsionando" className="h-9 w-auto" />
         <div className="leading-tight">
           <div className="text-sm font-semibold tracking-tight">Impulsionando</div>
           <div className="text-[10px] uppercase text-sidebar-foreground/60 tracking-wider">Tecnologia</div>
