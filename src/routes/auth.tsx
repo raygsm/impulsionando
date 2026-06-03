@@ -14,7 +14,7 @@ export const Route = createFileRoute("/auth")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Acessar — Impulsionando Sistemas" },
+      { title: "Acessar — Impulsionando Tecnologia" },
       { name: "description", content: "Plataforma SaaS multiempresa, multinicho e modular." },
     ],
   }),
@@ -97,7 +97,7 @@ function AuthPage() {
             <div className="w-9 h-9 rounded-lg bg-white/15 backdrop-blur flex items-center justify-center">
               <Sparkles className="w-5 h-5" />
             </div>
-            Impulsionando Sistemas
+            Impulsionando Tecnologia
           </div>
         </div>
         <div className="relative z-10 max-w-md space-y-6">
@@ -123,7 +123,7 @@ function AuthPage() {
             ))}
           </div>
         </div>
-        <div className="relative z-10 text-xs text-white/60">© Impulsionando Sistemas</div>
+        <div className="relative z-10 text-xs text-white/60">© Impulsionando Tecnologia</div>
         <div className="pointer-events-none absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full bg-accent/30 blur-3xl" />
       </div>
 
