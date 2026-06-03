@@ -170,6 +170,7 @@ export type Database = {
       }
       company_settings: {
         Row: {
+          category: string
           company_id: string
           created_at: string
           id: string
@@ -179,6 +180,7 @@ export type Database = {
           value_type: string
         }
         Insert: {
+          category?: string
           company_id: string
           created_at?: string
           id?: string
@@ -188,6 +190,7 @@ export type Database = {
           value_type?: string
         }
         Update: {
+          category?: string
           company_id?: string
           created_at?: string
           id?: string
@@ -462,6 +465,86 @@ export type Database = {
             columns: ["unit_id"]
             isOneToOne: false
             referencedRelation: "company_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      setting_definitions: {
+        Row: {
+          category: string
+          created_at: string
+          default_value: Json | null
+          description: string | null
+          id: string
+          is_company_editable: boolean
+          key: string
+          label: string
+          sort_order: number
+          updated_at: string
+          value_type: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          default_value?: Json | null
+          description?: string | null
+          id?: string
+          is_company_editable?: boolean
+          key: string
+          label: string
+          sort_order?: number
+          updated_at?: string
+          value_type: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          default_value?: Json | null
+          description?: string | null
+          id?: string
+          is_company_editable?: boolean
+          key?: string
+          label?: string
+          sort_order?: number
+          updated_at?: string
+          value_type?: string
+        }
+        Relationships: []
+      }
+      user_permission_overrides: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          effect: string
+          id: string
+          permission_id: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          effect: string
+          id?: string
+          permission_id: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          effect?: string
+          id?: string
+          permission_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_permission_overrides_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
             referencedColumns: ["id"]
           },
         ]
