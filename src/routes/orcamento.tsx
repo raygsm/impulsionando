@@ -390,10 +390,12 @@ function ResultCard({
   rec,
   answers,
   onRestart,
+  onClearDraft,
 }: {
   rec: Recomendacao;
   answers: Answers;
   onRestart: () => void;
+  onClearDraft: () => void;
 }) {
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
