@@ -15,8 +15,46 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { toast } from "sonner";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+
+/* --------------------- Validation helpers --------------------- */
+
+// Aceita 10 ou 11 dígitos (fixo / celular BR) após remover máscara
+const phoneDigits = (v: string) => v.replace(/\D/g, "");
+function formatPhoneBR(v: string): string {
+  const d = phoneDigits(v).slice(0, 11);
+  if (d.length <= 2) return d;
+  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
+
+const leadSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, "Informe seu nome (mínimo 2 caracteres).")
+    .max(120, "Nome muito longo (máx. 120).")
+    .regex(/^[\p{L}\p{M}'.\- ]+$/u, "Use apenas letras e espaços."),
+  whatsapp: z
+    .string()
+    .trim()
+    .min(1, "Informe um WhatsApp para contato.")
+    .refine((v) => {
+      const d = phoneDigits(v);
+      return d.length === 10 || d.length === 11;
+    }, "WhatsApp inválido. Use DDD + número (ex.: (21) 99999-9999)."),
+  email: z
+    .string()
+    .trim()
+    .max(200, "E-mail muito longo (máx. 200).")
+    .email("E-mail inválido.")
+    .optional()
+    .or(z.literal("")),
+});
+type LeadErrors = Partial<Record<"name" | "whatsapp" | "email", string>>;
 
 type SearchParams = {
   segmento?: string;
@@ -314,6 +352,7 @@ function ResultCard({
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [email, setEmail] = useState("");
+  const [errors, setErrors] = useState<LeadErrors>({});
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -322,17 +361,39 @@ function ResultCard({
   );
   const whatsURL = `https://wa.me/5521993075000?text=${whatsText}`;
 
+  function validate(): { ok: boolean; data?: z.infer<typeof leadSchema> } {
+    const parsed = leadSchema.safeParse({ name, whatsapp, email });
+    if (!parsed.success) {
+      const errs: LeadErrors = {};
+      parsed.error.issues.forEach((i) => {
+        const k = i.path[0] as keyof LeadErrors;
+        if (k && !errs[k]) errs[k] = i.message;
+      });
+      setErrors(errs);
+      // foca o primeiro campo inválido
+      const order: (keyof LeadErrors)[] = ["name", "whatsapp", "email"];
+      const first = order.find((k) => errs[k]);
+      if (first && typeof document !== "undefined") {
+        document.getElementById(`lead-${first}`)?.focus();
+      }
+      return { ok: false };
+    }
+    setErrors({});
+    return { ok: true, data: parsed.data };
+  }
+
   async function submit(openWhats: boolean) {
-    if (!name.trim() || !whatsapp.trim()) {
-      toast.error("Informe nome e WhatsApp para que possamos te responder.");
+    const { ok, data } = validate();
+    if (!ok || !data) {
+      toast.error("Revise os campos destacados antes de enviar.");
       return;
     }
     setSaving(true);
     const { error } = await supabase.from("marketing_leads").insert({
       source: "orcamento",
-      name: name.trim(),
-      phone: whatsapp.trim(),
-      email: email.trim() || null,
+      name: data.name,
+      phone: phoneDigits(data.whatsapp),
+      email: data.email ? data.email : null,
       message: `Plano ${rec.plano} · Módulos: ${rec.modulos.join(", ") || "—"}`,
       answers: answers as never,
       recommended_plan: rec.plano,
@@ -349,6 +410,9 @@ function ResultCard({
     toast.success("Recebemos seu briefing! Nosso time entrará em contato.");
     if (openWhats) window.open(whatsURL, "_blank", "noopener,noreferrer");
   }
+
+  const fieldError = (msg?: string) =>
+    msg ? <p className="text-[11px] text-destructive mt-1">{msg}</p> : null;
 
   return (
     <Card className="p-6 sm:p-8 space-y-6 shadow-elegant">
@@ -393,15 +457,54 @@ function ResultCard({
           <div className="grid sm:grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label htmlFor="lead-name" className="text-xs">Seu nome *</Label>
-              <Input id="lead-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Como podemos te chamar?" />
+              <Input
+                id="lead-name"
+                value={name}
+                onChange={(e) => { setName(e.target.value); if (errors.name) setErrors({ ...errors, name: undefined }); }}
+                onBlur={() => { if (name) validate(); }}
+                placeholder="Como podemos te chamar?"
+                aria-invalid={!!errors.name}
+                maxLength={120}
+                className={cn(errors.name && "border-destructive focus-visible:ring-destructive")}
+              />
+              {fieldError(errors.name)}
             </div>
             <div className="space-y-1">
-              <Label htmlFor="lead-whats" className="text-xs">WhatsApp *</Label>
-              <Input id="lead-whats" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="(21) 99999-9999" inputMode="tel" />
+              <Label htmlFor="lead-whatsapp" className="text-xs">WhatsApp *</Label>
+              <Input
+                id="lead-whatsapp"
+                value={whatsapp}
+                onChange={(e) => {
+                  setWhatsapp(formatPhoneBR(e.target.value));
+                  if (errors.whatsapp) setErrors({ ...errors, whatsapp: undefined });
+                }}
+                onBlur={() => { if (whatsapp) validate(); }}
+                placeholder="(21) 99999-9999"
+                inputMode="tel"
+                autoComplete="tel-national"
+                aria-invalid={!!errors.whatsapp}
+                maxLength={16}
+                className={cn(errors.whatsapp && "border-destructive focus-visible:ring-destructive")}
+              />
+              {fieldError(errors.whatsapp) ?? (
+                <p className="text-[11px] text-muted-foreground mt-1">DDD + número, com 10 ou 11 dígitos.</p>
+              )}
             </div>
             <div className="sm:col-span-2 space-y-1">
               <Label htmlFor="lead-email" className="text-xs">E-mail (opcional)</Label>
-              <Input id="lead-email" value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="voce@empresa.com" />
+              <Input
+                id="lead-email"
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); if (errors.email) setErrors({ ...errors, email: undefined }); }}
+                onBlur={() => { if (email) validate(); }}
+                type="email"
+                placeholder="voce@empresa.com"
+                aria-invalid={!!errors.email}
+                maxLength={200}
+                autoComplete="email"
+                className={cn(errors.email && "border-destructive focus-visible:ring-destructive")}
+              />
+              {fieldError(errors.email)}
             </div>
           </div>
           <p className="text-[11px] text-muted-foreground">
@@ -445,6 +548,7 @@ function ResultCard({
     </Card>
   );
 }
+
 
 
 const VALID_DORES = new Set<string>(DORES.map((d) => d.value));
@@ -594,18 +698,33 @@ function OrcamentoPage() {
               )}
             </div>
 
+            {!canNext && (
+              <p className="text-xs text-muted-foreground -mt-2">
+                {current.key === "dores"
+                  ? "Selecione pelo menos uma opção para receber sugestões de módulos."
+                  : "Faça uma seleção para avançar."}
+              </p>
+            )}
+
             <div className="flex items-center justify-between pt-2">
               <Button variant="ghost" onClick={back} disabled={step === 0} className="gap-1">
                 <ArrowLeft className="w-4 h-4" /> Voltar
               </Button>
-              <Button
-                onClick={next}
-                disabled={!canNext}
-                className="gap-1 bg-gradient-primary shadow-elegant"
-              >
-                {step === total - 1 ? "Ver recomendação" : "Avançar"}
-                <ArrowRight className="w-4 h-4" />
-              </Button>
+              <div className="flex flex-col items-end gap-1">
+                <Button
+                  onClick={next}
+                  disabled={!canNext}
+                  className="gap-1 bg-gradient-primary shadow-elegant"
+                >
+                  {step === total - 1 ? "Ver recomendação" : "Avançar"}
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+                {step < total - 1 && (
+                  <span className="text-[11px] text-muted-foreground">
+                    Próximo: {STEPS[step + 1].title}
+                  </span>
+                )}
+              </div>
             </div>
           </Card>
         )}
