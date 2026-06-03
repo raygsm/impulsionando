@@ -17,6 +17,7 @@ import { Route as AuthenticatedUnitsRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSectorsRouteImport } from './routes/_authenticated/sectors'
 import { Route as AuthenticatedSalesRouteImport } from './routes/_authenticated/sales'
+import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedPermissionsRouteImport } from './routes/_authenticated/permissions'
 import { Route as AuthenticatedNichesRouteImport } from './routes/_authenticated/niches'
 import { Route as AuthenticatedModulesRouteImport } from './routes/_authenticated/modules'
@@ -94,6 +95,11 @@ const AuthenticatedSectorsRoute = AuthenticatedSectorsRouteImport.update({
 const AuthenticatedSalesRoute = AuthenticatedSalesRouteImport.update({
   id: '/sales',
   path: '/sales',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPermissionsRoute =
@@ -330,6 +336,7 @@ export interface FileRoutesByFullPath {
   '/modules': typeof AuthenticatedModulesRoute
   '/niches': typeof AuthenticatedNichesRoute
   '/permissions': typeof AuthenticatedPermissionsRoute
+  '/reports': typeof AuthenticatedReportsRoute
   '/sales': typeof AuthenticatedSalesRouteWithChildren
   '/sectors': typeof AuthenticatedSectorsRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -374,6 +381,7 @@ export interface FileRoutesByTo {
   '/modules': typeof AuthenticatedModulesRoute
   '/niches': typeof AuthenticatedNichesRoute
   '/permissions': typeof AuthenticatedPermissionsRoute
+  '/reports': typeof AuthenticatedReportsRoute
   '/sectors': typeof AuthenticatedSectorsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/units': typeof AuthenticatedUnitsRoute
@@ -423,6 +431,7 @@ export interface FileRoutesById {
   '/_authenticated/modules': typeof AuthenticatedModulesRoute
   '/_authenticated/niches': typeof AuthenticatedNichesRoute
   '/_authenticated/permissions': typeof AuthenticatedPermissionsRoute
+  '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/sales': typeof AuthenticatedSalesRouteWithChildren
   '/_authenticated/sectors': typeof AuthenticatedSectorsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -473,6 +482,7 @@ export interface FileRouteTypes {
     | '/modules'
     | '/niches'
     | '/permissions'
+    | '/reports'
     | '/sales'
     | '/sectors'
     | '/settings'
@@ -517,6 +527,7 @@ export interface FileRouteTypes {
     | '/modules'
     | '/niches'
     | '/permissions'
+    | '/reports'
     | '/sectors'
     | '/settings'
     | '/units'
@@ -565,6 +576,7 @@ export interface FileRouteTypes {
     | '/_authenticated/modules'
     | '/_authenticated/niches'
     | '/_authenticated/permissions'
+    | '/_authenticated/reports'
     | '/_authenticated/sales'
     | '/_authenticated/sectors'
     | '/_authenticated/settings'
@@ -661,6 +673,13 @@ declare module '@tanstack/react-router' {
       path: '/sales'
       fullPath: '/sales'
       preLoaderRoute: typeof AuthenticatedSalesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reports': {
+      id: '/_authenticated/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AuthenticatedReportsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/permissions': {
@@ -1067,6 +1086,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedModulesRoute: typeof AuthenticatedModulesRoute
   AuthenticatedNichesRoute: typeof AuthenticatedNichesRoute
   AuthenticatedPermissionsRoute: typeof AuthenticatedPermissionsRoute
+  AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
   AuthenticatedSalesRoute: typeof AuthenticatedSalesRouteWithChildren
   AuthenticatedSectorsRoute: typeof AuthenticatedSectorsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -1087,6 +1107,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedModulesRoute: AuthenticatedModulesRoute,
   AuthenticatedNichesRoute: AuthenticatedNichesRoute,
   AuthenticatedPermissionsRoute: AuthenticatedPermissionsRoute,
+  AuthenticatedReportsRoute: AuthenticatedReportsRoute,
   AuthenticatedSalesRoute: AuthenticatedSalesRouteWithChildren,
   AuthenticatedSectorsRoute: AuthenticatedSectorsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
@@ -1105,3 +1126,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
