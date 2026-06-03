@@ -128,7 +128,7 @@ function RootComponent() {
 function AuthSync() {
   const queryClient = useQueryClient();
   useEffect(() => {
-    const { data: sub } = supabaseAuth.onAuthStateChange(() => {
+    const { data: sub } = supabaseAuth.auth.onAuthStateChange(() => {
       queryClient.invalidateQueries();
     });
     return () => sub.subscription.unsubscribe();
