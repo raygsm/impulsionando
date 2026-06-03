@@ -45,7 +45,7 @@ function Page() {
       leadsWon: leads.filter((l) => l.status === "won").length,
       leadsLost: leads.filter((l) => l.status === "lost").length,
       oppsCount: opps.length,
-      oppsWonValue: won.reduce((a, b) => a + Number(b.amount ?? 0), 0),
+      oppsWonValue: won.reduce((a, b) => a + Number(b.value ?? 0), 0),
       conv: leads.length ? (leads.filter((l) => l.status === "won").length / leads.length) * 100 : 0,
     };
   }, [data]);
