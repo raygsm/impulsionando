@@ -22,6 +22,7 @@ import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ShowroomFitnessRouteImport } from './routes/showroom.fitness'
 import { Route as DemoWhiteLabelRouteImport } from './routes/demo.white-label'
 import { Route as DemoClienteFinalRouteImport } from './routes/demo.cliente-final'
 import { Route as DemoChecklistRouteImport } from './routes/demo.checklist'
@@ -146,6 +147,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShowroomFitnessRoute = ShowroomFitnessRouteImport.update({
+  id: '/showroom/fitness',
+  path: '/showroom/fitness',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoWhiteLabelRoute = DemoWhiteLabelRouteImport.update({
@@ -519,6 +525,7 @@ export interface FileRoutesByFullPath {
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
+  '/showroom/fitness': typeof ShowroomFitnessRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
@@ -587,6 +594,7 @@ export interface FileRoutesByTo {
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
+  '/showroom/fitness': typeof ShowroomFitnessRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
@@ -664,6 +672,7 @@ export interface FileRoutesById {
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
+  '/showroom/fitness': typeof ShowroomFitnessRoute
   '/_authenticated/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/_authenticated/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/_authenticated/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
@@ -741,6 +750,7 @@ export interface FileRouteTypes {
     | '/demo/checklist'
     | '/demo/cliente-final'
     | '/demo/white-label'
+    | '/showroom/fitness'
     | '/agenda/appointments'
     | '/agenda/professionals'
     | '/agenda/schedules'
@@ -809,6 +819,7 @@ export interface FileRouteTypes {
     | '/demo/checklist'
     | '/demo/cliente-final'
     | '/demo/white-label'
+    | '/showroom/fitness'
     | '/agenda/appointments'
     | '/agenda/professionals'
     | '/agenda/schedules'
@@ -885,6 +896,7 @@ export interface FileRouteTypes {
     | '/demo/checklist'
     | '/demo/cliente-final'
     | '/demo/white-label'
+    | '/showroom/fitness'
     | '/_authenticated/agenda/appointments'
     | '/_authenticated/agenda/professionals'
     | '/_authenticated/agenda/schedules'
@@ -939,6 +951,7 @@ export interface RootRouteChildren {
   ResetPasswordSentRoute: typeof ResetPasswordSentRoute
   SolucoesRoute: typeof SolucoesRoute
   TermosRoute: typeof TermosRoute
+  ShowroomFitnessRoute: typeof ShowroomFitnessRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1032,6 +1045,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/showroom/fitness': {
+      id: '/showroom/fitness'
+      path: '/showroom/fitness'
+      fullPath: '/showroom/fitness'
+      preLoaderRoute: typeof ShowroomFitnessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo/white-label': {
@@ -1697,17 +1717,8 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordSentRoute: ResetPasswordSentRoute,
   SolucoesRoute: SolucoesRoute,
   TermosRoute: TermosRoute,
+  ShowroomFitnessRoute: ShowroomFitnessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
