@@ -13,6 +13,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { LGPDBanner } from "@/components/marketing/LGPDBanner";
 
 function NotFoundComponent() {
   return (
@@ -125,6 +126,7 @@ function RootComponent() {
       <AuthSync />
       <Toaster richColors position="top-right" />
       <Outlet />
+      <LGPDBanner />
     </QueryClientProvider>
   );
 }
