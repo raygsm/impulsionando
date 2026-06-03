@@ -366,6 +366,17 @@ function ModulosPage() {
                       </span>
                     ))}
                   </div>
+                  <Button asChild size="sm" variant="outline" className="mt-4 w-full gap-2">
+                    <Link
+                      to="/orcamento"
+                      search={{
+                        ...(MODULE_TO_DOR[m.id] ? { dores: MODULE_TO_DOR[m.id] } : {}),
+                        origem: `modulos:${m.id}`,
+                      }}
+                    >
+                      Quero este módulo <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </Button>
                 </Card>
               ))}
             </div>
