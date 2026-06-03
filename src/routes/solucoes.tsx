@@ -3,7 +3,7 @@ import {
   ArrowRight, MessageCircle, Sparkles, CheckCircle2,
   Stethoscope, Scissors, UtensilsCrossed, Store, Briefcase, GraduationCap,
   Calendar, Users, CreditCard, BarChart3, Bot, FileText, Share2, Globe, Cog, Plug, ShieldCheck,
-  Zap, Workflow, Layers, Building2,
+  Zap, Workflow, Layers, Building2, Dumbbell, PlayCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -42,6 +42,17 @@ export const Route = createFileRoute("/solucoes")({
 });
 
 const SEGMENTS = [
+  {
+    icon: Dumbbell,
+    title: "Academias, CrossFit, Funcional e Personal",
+    desc: "Aulas, check-in, mensalidades, avaliação física, retenção e fidelização. Showroom navegável e mapa visual da operação prontos.",
+    modules: ["Agenda de Aulas", "Check-in", "Pagamentos", "CRM", "Avaliação Física"],
+    segmento: "fitness",
+    dores: ["agenda", "vendas", "crm", "financeiro"],
+    showroom: "/showroom/fitness" as const,
+    comoFunciona: "/como-funciona/fitness" as const,
+    destaque: true,
+  },
   {
     icon: Stethoscope,
     title: "Clínicas e Saúde",

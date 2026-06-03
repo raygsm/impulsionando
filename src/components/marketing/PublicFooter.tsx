@@ -44,6 +44,9 @@ export function PublicFooter() {
                 ▶ Acessar Sistema DEMO
               </Link>
             </li>
+            <li><Link to="/showroom/fitness" className="hover:text-foreground">Showroom Fitness</Link></li>
+            <li><Link to="/como-funciona/fitness" className="hover:text-foreground">Como funciona (Fitness)</Link></li>
+            <li><Link to="/trabalhe-conosco" className="hover:text-foreground">Trabalhe conosco</Link></li>
             <li><Link to="/termos" className="hover:text-foreground">Termos de Uso</Link></li>
             <li><Link to="/privacidade" className="hover:text-foreground">Política de Privacidade</Link></li>
             <li><Link to="/auth" className="hover:text-foreground">Área do cliente</Link></li>
