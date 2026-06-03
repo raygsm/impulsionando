@@ -29,7 +29,7 @@ function Page() {
       const [leads, opps] = await Promise.all([
         supabase.from("crm_leads").select("id, name, status, source, score, created_at, owner_user_id")
           .eq("company_id", companyId).gte("created_at", `${from}T00:00:00`).lte("created_at", `${to}T23:59:59`).order("created_at", { ascending: false }),
-        supabase.from("crm_opportunities").select("id, status, amount, created_at, closed_at")
+        supabase.from("crm_opportunities").select("id, status, value, created_at, closed_at")
           .eq("company_id", companyId).gte("created_at", `${from}T00:00:00`).lte("created_at", `${to}T23:59:59`),
       ]);
       return { leads: leads.data ?? [], opps: opps.data ?? [] };
