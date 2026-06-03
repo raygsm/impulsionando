@@ -79,7 +79,8 @@ function AuthPage() {
       if (error) {
         return toast.error("Não foi possível processar a solicitação. Verifique o e-mail e tente novamente.");
       }
-      setResetSent(true);
+      setResetOpen(false);
+      navigate({ to: "/reset-password-sent" });
     } catch {
       toast.error("Erro de conexão. Verifique sua internet e tente novamente.");
     } finally {
