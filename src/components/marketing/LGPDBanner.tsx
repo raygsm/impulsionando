@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Cookie, X, Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { CONSENT_STORAGE_KEY as STORAGE_KEY, emitConsentChanged } from "@/lib/consent";
 
-const STORAGE_KEY = "lgpd-consent-v1";
 
 interface ConsentChoice {
   essential: true;
@@ -38,7 +38,9 @@ export function LGPDBanner() {
       version: "1.0",
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(full));
+    emitConsentChanged(full);
     setOpen(false);
+
 
     // Se logado, persiste no banco
     const { data: { user } } = await supabase.auth.getUser();
