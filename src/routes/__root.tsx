@@ -124,12 +124,37 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthSync />
+      <AnalyticsTracker />
       <Toaster richColors position="top-right" />
       <Outlet />
       <LGPDBanner />
     </QueryClientProvider>
   );
 }
+
+function AnalyticsTracker() {
+  const router = useRouter();
+  useEffect(() => {
+    // Importa lazy para não rodar em SSR e isolar o módulo
+    import("@/lib/analytics").then(({ initAnalytics, trackPageView }) => {
+      initAnalytics();
+      // Primeiro page_view
+      trackPageView(window.location.pathname + window.location.search);
+      // Próximas navegações
+      const unsub = router.subscribe("onResolved", () => {
+        trackPageView(window.location.pathname + window.location.search);
+      });
+      (window as unknown as { __unsubAnalytics?: () => void }).__unsubAnalytics = unsub;
+    });
+    return () => {
+      const w = window as unknown as { __unsubAnalytics?: () => void };
+      w.__unsubAnalytics?.();
+      w.__unsubAnalytics = undefined;
+    };
+  }, [router]);
+  return null;
+}
+
 
 function AuthSync() {
   const queryClient = useQueryClient();
