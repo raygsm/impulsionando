@@ -246,6 +246,37 @@ const MODULES: Mod[] = [
 
 const CATEGORIES = ["Atendimento", "Vendas & Caixa", "Marketing & Crescimento", "Gestão & Operação"] as const;
 
+// Map module id → "dor" used by /orcamento briefing
+const MODULE_TO_DOR: Record<string, string> = {
+  agenda: "agenda",
+  whatsapp: "whatsapp",
+  crm: "crm",
+  pdv: "vendas",
+  vendas: "vendas",
+  estoque: "estoque",
+  financeiro: "financeiro",
+  pagamentos: "financeiro",
+  relatorios: "relatorios",
+  bi: "relatorios",
+};
+
+function modulesToDores(mods: string[]): string[] {
+  const out = new Set<string>();
+  mods.forEach((m) => {
+    const key = m.toLowerCase().replace(/\s+/g, "");
+    const slug = key.includes("agenda") ? "agenda"
+      : key.includes("whatsapp") ? "whatsapp"
+      : key.includes("crm") ? "crm"
+      : key.includes("pdv") || key.includes("venda") ? "vendas"
+      : key.includes("estoque") ? "estoque"
+      : key.includes("financ") || key.includes("pagamento") ? "financeiro"
+      : key.includes("relat") || key === "bi" ? "relatorios"
+      : "";
+    if (slug) out.add(slug);
+  });
+  return Array.from(out);
+}
+
 function ModulosPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
