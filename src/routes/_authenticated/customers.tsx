@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, EmptyState } from "@/components/app/PageElements";
 import { CompanyPicker } from "@/components/app/CompanyPicker";
 import { useActiveCompany } from "@/hooks/use-active-company";
+import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ const emptyForm = {
 function Page() {
   const { companyId } = useActiveCompany();
   const { data: me } = useCurrentUser();
+  const { data: userPerms } = useUserPermissions(companyId ?? undefined);
   const qc = useQueryClient();
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
@@ -180,7 +182,9 @@ function Page() {
                 </div>
               </div>
               <Button size="sm" variant="ghost" onClick={() => openEdit(c)} disabled={!!c.anonymized_at}><Pencil className="w-4 h-4" /></Button>
-              <Button size="sm" variant="ghost" title="Anonimizar (LGPD)" onClick={() => setAnonTarget(c)} disabled={!!c.anonymized_at}><ShieldOff className="w-4 h-4" /></Button>
+              {(me?.isSuperAdmin || userPerms?.has("customer.anonymize")) && (
+                <Button size="sm" variant="ghost" title="Anonimizar (LGPD)" onClick={() => setAnonTarget(c)} disabled={!!c.anonymized_at}><ShieldOff className="w-4 h-4" /></Button>
+              )}
               <Button size="sm" variant="ghost" onClick={() => { if (confirm(`Excluir ${c.name}?`)) del.mutate(c.id); }}><Trash2 className="w-4 h-4" /></Button>
             </div>
           ))}
