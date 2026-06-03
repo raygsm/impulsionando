@@ -42,7 +42,7 @@ function SettingsPage() {
   });
 
   const upsert = useMutation({
-    mutationFn: async (payload: { key: string; value_type: string; value: unknown }) => {
+    mutationFn: async (payload: { key: string; value_type: string; value: string | number | boolean | null }) => {
       const { error } = await supabase.from("company_settings").upsert(
         { company_id: companyId, key: payload.key, value_type: payload.value_type, value: payload.value },
         { onConflict: "company_id,key" }
