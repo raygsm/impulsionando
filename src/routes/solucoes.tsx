@@ -3,7 +3,7 @@ import {
   ArrowRight, MessageCircle, Sparkles, CheckCircle2,
   Stethoscope, Scissors, UtensilsCrossed, Store, Briefcase, GraduationCap,
   Calendar, Users, CreditCard, BarChart3, Bot, FileText, Share2, Globe, Cog, Plug, ShieldCheck,
-  Zap, Workflow, Layers, Building2,
+  Zap, Workflow, Layers, Building2, Dumbbell, PlayCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
