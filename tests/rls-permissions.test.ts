@@ -92,12 +92,13 @@ describe("/users — user_profiles RLS", () => {
       expect(other ?? []).toHaveLength(0);
     });
     it("pode criar user_profile na própria empresa", async () => {
+      // usa perfil diferente do que o target já possui
       const { error } = await clients.staff.from("user_profiles").insert({
-        user_id: users.target, company_id: companyA, profile_id: PROFILES.recepcao,
-        email: emails.target, display_name: "y",
+        user_id: users.outsider, company_id: companyA, profile_id: PROFILES.recepcao,
+        email: emails.outsider, display_name: "y",
       });
       expect(error).toBeNull();
-      await admin.from("user_profiles").delete().eq("user_id", users.target).eq("company_id", companyA);
+      await admin.from("user_profiles").delete().eq("user_id", users.outsider).eq("company_id", companyA);
     });
     it("é bloqueado ao atribuir perfil master (trigger)", async () => {
       const { error } = await clients.staff.from("user_profiles").insert({
