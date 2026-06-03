@@ -34,8 +34,8 @@ function CommPage() {
   });
 
   const setStatus = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const patch: Record<string, unknown> = { status };
+    mutationFn: async ({ id, status }: { id: string; status: "pending" | "approved" | "paid" | "canceled" }) => {
+      const patch: { status: typeof status; paid_at?: string } = { status };
       if (status === "paid") patch.paid_at = new Date().toISOString();
       const { error } = await supabase.from("fin_commissions").update(patch).eq("id", id);
       if (error) throw error;
