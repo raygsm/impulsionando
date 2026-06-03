@@ -408,7 +408,12 @@ function ModulosPage() {
                   ))}
                 </div>
                 <Button asChild size="sm" variant="outline" className="mt-5 w-full">
-                  <Link to="/orcamento">Quero esse combo</Link>
+                  <Link
+                    to="/orcamento"
+                    search={{ dores: modulesToDores(c.mods).join(","), origem: `combo:${c.t}` }}
+                  >
+                    Quero esse combo
+                  </Link>
                 </Button>
               </Card>
             ))}
