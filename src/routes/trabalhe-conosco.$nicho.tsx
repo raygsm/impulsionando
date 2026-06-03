@@ -105,7 +105,7 @@ function TrabalheConoscoNicho() {
       const up = await supabase.storage.from("talent-resumes").upload(path, resume, { contentType: resume.type, upsert: false });
       if (up.error) throw up.error;
 
-      const ins = await supabase.from("talent_applications").insert({
+      const ins = await (supabase.from("talent_applications" as never) as any).insert({
         niche_slug: nicho,
         role: form.role,
         full_name: form.full_name.trim(),

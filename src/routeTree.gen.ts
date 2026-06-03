@@ -23,6 +23,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TrabalheConoscoIndexRouteImport } from './routes/trabalhe-conosco.index'
+import { Route as TrabalheConoscoNichoRouteImport } from './routes/trabalhe-conosco.$nicho'
 import { Route as ShowroomFitnessRouteImport } from './routes/showroom.fitness'
 import { Route as DemoWhiteLabelRouteImport } from './routes/demo.white-label'
 import { Route as DemoClienteFinalRouteImport } from './routes/demo.cliente-final'
@@ -154,6 +155,11 @@ const IndexRoute = IndexRouteImport.update({
 const TrabalheConoscoIndexRoute = TrabalheConoscoIndexRouteImport.update({
   id: '/trabalhe-conosco/',
   path: '/trabalhe-conosco/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrabalheConoscoNichoRoute = TrabalheConoscoNichoRouteImport.update({
+  id: '/trabalhe-conosco/$nicho',
+  path: '/trabalhe-conosco/$nicho',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShowroomFitnessRoute = ShowroomFitnessRouteImport.update({
@@ -539,6 +545,7 @@ export interface FileRoutesByFullPath {
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
+  '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
@@ -610,6 +617,7 @@ export interface FileRoutesByTo {
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
+  '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trabalhe-conosco': typeof TrabalheConoscoIndexRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
@@ -690,6 +698,7 @@ export interface FileRoutesById {
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
+  '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/_authenticated/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/_authenticated/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
@@ -770,6 +779,7 @@ export interface FileRouteTypes {
     | '/demo/cliente-final'
     | '/demo/white-label'
     | '/showroom/fitness'
+    | '/trabalhe-conosco/$nicho'
     | '/trabalhe-conosco/'
     | '/agenda/appointments'
     | '/agenda/professionals'
@@ -841,6 +851,7 @@ export interface FileRouteTypes {
     | '/demo/cliente-final'
     | '/demo/white-label'
     | '/showroom/fitness'
+    | '/trabalhe-conosco/$nicho'
     | '/trabalhe-conosco'
     | '/agenda/appointments'
     | '/agenda/professionals'
@@ -920,6 +931,7 @@ export interface FileRouteTypes {
     | '/demo/cliente-final'
     | '/demo/white-label'
     | '/showroom/fitness'
+    | '/trabalhe-conosco/$nicho'
     | '/trabalhe-conosco/'
     | '/_authenticated/agenda/appointments'
     | '/_authenticated/agenda/professionals'
@@ -977,6 +989,7 @@ export interface RootRouteChildren {
   TermosRoute: typeof TermosRoute
   ComoFuncionaFitnessRoute: typeof ComoFuncionaFitnessRoute
   ShowroomFitnessRoute: typeof ShowroomFitnessRoute
+  TrabalheConoscoNichoRoute: typeof TrabalheConoscoNichoRoute
   TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
 }
 
@@ -1078,6 +1091,13 @@ declare module '@tanstack/react-router' {
       path: '/trabalhe-conosco'
       fullPath: '/trabalhe-conosco/'
       preLoaderRoute: typeof TrabalheConoscoIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trabalhe-conosco/$nicho': {
+      id: '/trabalhe-conosco/$nicho'
+      path: '/trabalhe-conosco/$nicho'
+      fullPath: '/trabalhe-conosco/$nicho'
+      preLoaderRoute: typeof TrabalheConoscoNichoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/showroom/fitness': {
@@ -1759,6 +1779,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermosRoute: TermosRoute,
   ComoFuncionaFitnessRoute: ComoFuncionaFitnessRoute,
   ShowroomFitnessRoute: ShowroomFitnessRoute,
+  TrabalheConoscoNichoRoute: TrabalheConoscoNichoRoute,
   TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
 }
 export const routeTree = rootRouteImport
