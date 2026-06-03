@@ -76,10 +76,8 @@ function BoardPage() {
 
   const moveOpp = useMutation({
     mutationFn: async ({ id, stage_id, status }: { id: string; stage_id: string; status: "open"|"won"|"lost" }) => {
-      const patch: Record<string, unknown> = { stage_id, status };
-      if (status !== "open") patch.closed_at = new Date().toISOString();
-      else patch.closed_at = null;
-      const { error } = await supabase.from("crm_opportunities").update(patch).eq("id", id);
+      const closed_at = status !== "open" ? new Date().toISOString() : null;
+      const { error } = await supabase.from("crm_opportunities").update({ stage_id, status, closed_at }).eq("id", id);
       if (error) throw error;
     },
     onMutate: async ({ id, stage_id, status }) => {
