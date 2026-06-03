@@ -29,6 +29,7 @@ import { Route as AuthenticatedAccessProfilesRouteImport } from './routes/_authe
 import { Route as AuthenticatedFinanceIndexRouteImport } from './routes/_authenticated/finance.index'
 import { Route as AuthenticatedCrmIndexRouteImport } from './routes/_authenticated/crm.index'
 import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenticated/agenda.index'
+import { Route as AuthenticatedFinanceTransactionsRouteImport } from './routes/_authenticated/finance.transactions'
 import { Route as AuthenticatedFinanceMethodsRouteImport } from './routes/_authenticated/finance.methods'
 import { Route as AuthenticatedFinanceCategoriesRouteImport } from './routes/_authenticated/finance.categories'
 import { Route as AuthenticatedFinanceAccountsRouteImport } from './routes/_authenticated/finance.accounts'
@@ -145,6 +146,12 @@ const AuthenticatedAgendaIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedAgendaRoute,
   } as any)
+const AuthenticatedFinanceTransactionsRoute =
+  AuthenticatedFinanceTransactionsRouteImport.update({
+    id: '/transactions',
+    path: '/transactions',
+    getParentRoute: () => AuthenticatedFinanceRoute,
+  } as any)
 const AuthenticatedFinanceMethodsRoute =
   AuthenticatedFinanceMethodsRouteImport.update({
     id: '/methods',
@@ -245,6 +252,7 @@ export interface FileRoutesByFullPath {
   '/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
   '/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
   '/finance/methods': typeof AuthenticatedFinanceMethodsRoute
+  '/finance/transactions': typeof AuthenticatedFinanceTransactionsRoute
   '/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/crm/': typeof AuthenticatedCrmIndexRoute
   '/finance/': typeof AuthenticatedFinanceIndexRoute
@@ -275,6 +283,7 @@ export interface FileRoutesByTo {
   '/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
   '/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
   '/finance/methods': typeof AuthenticatedFinanceMethodsRoute
+  '/finance/transactions': typeof AuthenticatedFinanceTransactionsRoute
   '/agenda': typeof AuthenticatedAgendaIndexRoute
   '/crm': typeof AuthenticatedCrmIndexRoute
   '/finance': typeof AuthenticatedFinanceIndexRoute
@@ -310,6 +319,7 @@ export interface FileRoutesById {
   '/_authenticated/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
   '/_authenticated/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
   '/_authenticated/finance/methods': typeof AuthenticatedFinanceMethodsRoute
+  '/_authenticated/finance/transactions': typeof AuthenticatedFinanceTransactionsRoute
   '/_authenticated/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/_authenticated/crm/': typeof AuthenticatedCrmIndexRoute
   '/_authenticated/finance/': typeof AuthenticatedFinanceIndexRoute
@@ -345,6 +355,7 @@ export interface FileRouteTypes {
     | '/finance/accounts'
     | '/finance/categories'
     | '/finance/methods'
+    | '/finance/transactions'
     | '/agenda/'
     | '/crm/'
     | '/finance/'
@@ -375,6 +386,7 @@ export interface FileRouteTypes {
     | '/finance/accounts'
     | '/finance/categories'
     | '/finance/methods'
+    | '/finance/transactions'
     | '/agenda'
     | '/crm'
     | '/finance'
@@ -409,6 +421,7 @@ export interface FileRouteTypes {
     | '/_authenticated/finance/accounts'
     | '/_authenticated/finance/categories'
     | '/_authenticated/finance/methods'
+    | '/_authenticated/finance/transactions'
     | '/_authenticated/agenda/'
     | '/_authenticated/crm/'
     | '/_authenticated/finance/'
@@ -562,6 +575,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgendaIndexRouteImport
       parentRoute: typeof AuthenticatedAgendaRoute
     }
+    '/_authenticated/finance/transactions': {
+      id: '/_authenticated/finance/transactions'
+      path: '/transactions'
+      fullPath: '/finance/transactions'
+      preLoaderRoute: typeof AuthenticatedFinanceTransactionsRouteImport
+      parentRoute: typeof AuthenticatedFinanceRoute
+    }
     '/_authenticated/finance/methods': {
       id: '/_authenticated/finance/methods'
       path: '/methods'
@@ -693,6 +713,7 @@ interface AuthenticatedFinanceRouteChildren {
   AuthenticatedFinanceAccountsRoute: typeof AuthenticatedFinanceAccountsRoute
   AuthenticatedFinanceCategoriesRoute: typeof AuthenticatedFinanceCategoriesRoute
   AuthenticatedFinanceMethodsRoute: typeof AuthenticatedFinanceMethodsRoute
+  AuthenticatedFinanceTransactionsRoute: typeof AuthenticatedFinanceTransactionsRoute
   AuthenticatedFinanceIndexRoute: typeof AuthenticatedFinanceIndexRoute
 }
 
@@ -700,6 +721,7 @@ const AuthenticatedFinanceRouteChildren: AuthenticatedFinanceRouteChildren = {
   AuthenticatedFinanceAccountsRoute: AuthenticatedFinanceAccountsRoute,
   AuthenticatedFinanceCategoriesRoute: AuthenticatedFinanceCategoriesRoute,
   AuthenticatedFinanceMethodsRoute: AuthenticatedFinanceMethodsRoute,
+  AuthenticatedFinanceTransactionsRoute: AuthenticatedFinanceTransactionsRoute,
   AuthenticatedFinanceIndexRoute: AuthenticatedFinanceIndexRoute,
 }
 
