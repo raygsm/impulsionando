@@ -22,6 +22,7 @@ import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TrabalheConoscoIndexRouteImport } from './routes/trabalhe-conosco.index'
 import { Route as ShowroomFitnessRouteImport } from './routes/showroom.fitness'
 import { Route as DemoWhiteLabelRouteImport } from './routes/demo.white-label'
 import { Route as DemoClienteFinalRouteImport } from './routes/demo.cliente-final'
@@ -148,6 +149,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrabalheConoscoIndexRoute = TrabalheConoscoIndexRouteImport.update({
+  id: '/trabalhe-conosco/',
+  path: '/trabalhe-conosco/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShowroomFitnessRoute = ShowroomFitnessRouteImport.update({
@@ -533,6 +539,7 @@ export interface FileRoutesByFullPath {
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
+  '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
@@ -603,6 +610,7 @@ export interface FileRoutesByTo {
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
+  '/trabalhe-conosco': typeof TrabalheConoscoIndexRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
@@ -682,6 +690,7 @@ export interface FileRoutesById {
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
+  '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/_authenticated/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/_authenticated/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/_authenticated/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
@@ -761,6 +770,7 @@ export interface FileRouteTypes {
     | '/demo/cliente-final'
     | '/demo/white-label'
     | '/showroom/fitness'
+    | '/trabalhe-conosco/'
     | '/agenda/appointments'
     | '/agenda/professionals'
     | '/agenda/schedules'
@@ -831,6 +841,7 @@ export interface FileRouteTypes {
     | '/demo/cliente-final'
     | '/demo/white-label'
     | '/showroom/fitness'
+    | '/trabalhe-conosco'
     | '/agenda/appointments'
     | '/agenda/professionals'
     | '/agenda/schedules'
@@ -909,6 +920,7 @@ export interface FileRouteTypes {
     | '/demo/cliente-final'
     | '/demo/white-label'
     | '/showroom/fitness'
+    | '/trabalhe-conosco/'
     | '/_authenticated/agenda/appointments'
     | '/_authenticated/agenda/professionals'
     | '/_authenticated/agenda/schedules'
@@ -965,6 +977,7 @@ export interface RootRouteChildren {
   TermosRoute: typeof TermosRoute
   ComoFuncionaFitnessRoute: typeof ComoFuncionaFitnessRoute
   ShowroomFitnessRoute: typeof ShowroomFitnessRoute
+  TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1058,6 +1071,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trabalhe-conosco/': {
+      id: '/trabalhe-conosco/'
+      path: '/trabalhe-conosco'
+      fullPath: '/trabalhe-conosco/'
+      preLoaderRoute: typeof TrabalheConoscoIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/showroom/fitness': {
@@ -1739,6 +1759,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermosRoute: TermosRoute,
   ComoFuncionaFitnessRoute: ComoFuncionaFitnessRoute,
   ShowroomFitnessRoute: ShowroomFitnessRoute,
+  TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
