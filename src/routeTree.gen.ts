@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
 import { Route as AuthenticatedUnitsRouteImport } from './routes/_authenticated/units'
 import { Route as AuthenticatedSectorsRouteImport } from './routes/_authenticated/sectors'
 import { Route as AuthenticatedNichesRouteImport } from './routes/_authenticated/niches'
@@ -31,6 +32,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedUnitsRoute = AuthenticatedUnitsRouteImport.update({
   id: '/units',
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/niches': typeof AuthenticatedNichesRoute
   '/sectors': typeof AuthenticatedSectorsRoute
   '/units': typeof AuthenticatedUnitsRoute
+  '/users': typeof AuthenticatedUsersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -75,6 +82,7 @@ export interface FileRoutesByTo {
   '/niches': typeof AuthenticatedNichesRoute
   '/sectors': typeof AuthenticatedSectorsRoute
   '/units': typeof AuthenticatedUnitsRoute
+  '/users': typeof AuthenticatedUsersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/_authenticated/niches': typeof AuthenticatedNichesRoute
   '/_authenticated/sectors': typeof AuthenticatedSectorsRoute
   '/_authenticated/units': typeof AuthenticatedUnitsRoute
+  '/_authenticated/users': typeof AuthenticatedUsersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/niches'
     | '/sectors'
     | '/units'
+    | '/users'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/niches'
     | '/sectors'
     | '/units'
+    | '/users'
   id:
     | '__root__'
     | '/'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/_authenticated/niches'
     | '/_authenticated/sectors'
     | '/_authenticated/units'
+    | '/_authenticated/users'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -146,6 +158,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/users': {
+      id: '/_authenticated/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AuthenticatedUsersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/units': {
       id: '/_authenticated/units'
@@ -191,6 +210,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedNichesRoute: typeof AuthenticatedNichesRoute
   AuthenticatedSectorsRoute: typeof AuthenticatedSectorsRoute
   AuthenticatedUnitsRoute: typeof AuthenticatedUnitsRoute
+  AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -199,6 +219,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedNichesRoute: AuthenticatedNichesRoute,
   AuthenticatedSectorsRoute: AuthenticatedSectorsRoute,
   AuthenticatedUnitsRoute: AuthenticatedUnitsRoute,
+  AuthenticatedUsersRoute: AuthenticatedUsersRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
