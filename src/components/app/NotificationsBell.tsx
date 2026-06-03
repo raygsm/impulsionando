@@ -118,13 +118,13 @@ function NotificationItem({
           </div>
         </div>
         {n.action_url && (
-          <Link
-            to={n.action_url}
+          <a
+            href={n.action_url}
             className="text-xs text-primary hover:underline mt-2 inline-block"
             onClick={() => !n.is_read && onRead()}
           >
             {n.action_label ?? "Ver detalhes"} →
-          </Link>
+          </a>
         )}
       </div>
     </li>
