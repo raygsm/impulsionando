@@ -18,8 +18,22 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
+type SearchParams = {
+  segmento?: string;
+  dores?: string; // comma-separated
+  plano?: string; // Essencial | Integrado | Avançado | Sob Medida
+  perfil?: string; // final | white-label
+  origem?: string; // page slug for tracking
+};
 
 export const Route = createFileRoute("/orcamento")({
+  validateSearch: (search: Record<string, unknown>): SearchParams => ({
+    segmento: typeof search.segmento === "string" ? search.segmento : undefined,
+    dores: typeof search.dores === "string" ? search.dores : undefined,
+    plano: typeof search.plano === "string" ? search.plano : undefined,
+    perfil: typeof search.perfil === "string" ? search.perfil : undefined,
+    origem: typeof search.origem === "string" ? search.origem : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Orçamento automático — Impulsionando Tecnologia" },
