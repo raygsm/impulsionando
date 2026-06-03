@@ -43,6 +43,7 @@ const emptyForm = {
 function Page() {
   const { companyId } = useActiveCompany();
   const { data: me } = useCurrentUser();
+  const { data: userPerms } = useUserPermissions(companyId ?? undefined);
   const qc = useQueryClient();
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
