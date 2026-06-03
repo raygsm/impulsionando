@@ -455,6 +455,7 @@ function ResultCard({
       return;
     }
     setSaved(true);
+    onClearDraft();
     toast.success("Recebemos seu briefing! Nosso time entrará em contato.");
     if (openWhats) window.open(whatsURL, "_blank", "noopener,noreferrer");
   }
