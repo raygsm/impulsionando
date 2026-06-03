@@ -7,7 +7,6 @@ import {
   HelpCircle,
   Loader2,
   MessageCircle,
-  RotateCcw,
   Save,
   Sparkles,
   Trash2,
