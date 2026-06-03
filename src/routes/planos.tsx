@@ -263,7 +263,7 @@ function PlanosPage() {
                   className={cn("mt-6 w-full", plan.highlight && "bg-gradient-primary shadow-elegant")}
                   variant={plan.highlight ? "default" : "outline"}
                 >
-                  <Link to="/orcamento">{plan.cta}</Link>
+                  <Link to="/orcamento" search={{ plano: plan.name, origem: "planos" }}>{plan.cta}</Link>
                 </Button>
               </Card>
             );
@@ -371,7 +371,7 @@ function PlanosPage() {
             </p>
             <div className="flex flex-wrap gap-3 pt-2">
               <Button asChild size="lg" className="gap-2 bg-white text-primary hover:bg-white/90">
-                <Link to="/orcamento">Fazer briefing <ArrowRight className="w-4 h-4" /></Link>
+                <Link to="/orcamento" search={{ origem: "planos:cta" }}>Fazer briefing <ArrowRight className="w-4 h-4" /></Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white">
                 <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">

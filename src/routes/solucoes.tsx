@@ -47,36 +47,48 @@ const SEGMENTS = [
     title: "Clínicas e Saúde",
     desc: "Agenda multiprofissional, prontuário leve, lembretes automáticos e pagamento antes da consulta.",
     modules: ["Agenda Online", "WhatsApp", "Pagamentos", "CRM"],
+    segmento: "saude",
+    dores: ["agenda", "whatsapp", "crm"],
   },
   {
     icon: Scissors,
     title: "Estética, Salões e Barbearias",
     desc: "Profissionais, comissão, pacotes, fidelidade e confirmação automática pelo WhatsApp.",
     modules: ["Agenda Online", "PDV", "WhatsApp", "Financeiro"],
+    segmento: "estetica",
+    dores: ["agenda", "vendas", "whatsapp", "financeiro"],
   },
   {
     icon: UtensilsCrossed,
     title: "Bares, Restaurantes e Delivery",
     desc: "PDV no balcão, comanda, controle de estoque, pedidos online e baixa automática no caixa.",
     modules: ["PDV", "Estoque", "Pagamentos", "Relatórios"],
+    segmento: "alimentacao",
+    dores: ["vendas", "estoque", "relatorios"],
   },
   {
     icon: Store,
     title: "Varejo e E-commerce",
     desc: "Venda integrada (loja + online), múltiplas unidades, emissão fiscal e relatórios consolidados.",
     modules: ["PDV", "Estoque", "Emissão Fiscal", "BI"],
+    segmento: "varejo",
+    dores: ["vendas", "estoque", "relatorios"],
   },
   {
     icon: Briefcase,
     title: "Prestadores de Serviços",
     desc: "Propostas, orçamentos, contratos, recebimentos recorrentes e follow-up de clientes.",
     modules: ["CRM", "Pagamentos", "WhatsApp", "Sites"],
+    segmento: "servicos",
+    dores: ["crm", "whatsapp", "financeiro"],
   },
   {
     icon: GraduationCap,
     title: "Educação e Cursos",
     desc: "Matrículas, turmas, mensalidades, certificados e acompanhamento de alunos.",
     modules: ["CRM", "Pagamentos", "Sites", "Relatórios"],
+    segmento: "educacao",
+    dores: ["crm", "financeiro", "relatorios"],
   },
 ];
 
@@ -132,7 +144,7 @@ function SolucoesPage() {
             </p>
             <div className="flex flex-wrap gap-3 pt-2">
               <Button asChild size="lg" className="gap-2 bg-white text-primary hover:bg-white/90">
-                <Link to="/orcamento">Montar minha solução <ArrowRight className="w-4 h-4" /></Link>
+                <Link to="/orcamento" search={{ origem: "solucoes" }}>Montar minha solução <ArrowRight className="w-4 h-4" /></Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="gap-2 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white">
                 <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
@@ -170,7 +182,7 @@ function SolucoesPage() {
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {SEGMENTS.map(({ icon: Icon, title, desc, modules }) => (
+            {SEGMENTS.map(({ icon: Icon, title, desc, modules, segmento, dores }) => (
               <Card key={title} className="p-6 hover:shadow-elegant transition-shadow flex flex-col">
                 <div className="w-11 h-11 rounded-md bg-gradient-primary flex items-center justify-center text-primary-foreground mb-4">
                   <Icon className="w-5 h-5" />
@@ -184,6 +196,14 @@ function SolucoesPage() {
                     </span>
                   ))}
                 </div>
+                <Button asChild size="sm" variant="outline" className="mt-5 w-full gap-2">
+                  <Link
+                    to="/orcamento"
+                    search={{ segmento, dores: dores.join(","), origem: "solucoes" }}
+                  >
+                    Quero esta solução <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </Button>
               </Card>
             ))}
           </div>
@@ -266,7 +286,7 @@ function SolucoesPage() {
             </p>
             <div className="flex flex-wrap gap-3 pt-2">
               <Button asChild size="lg" className="gap-2 bg-white text-primary hover:bg-white/90">
-                <Link to="/orcamento">Começar briefing <ArrowRight className="w-4 h-4" /></Link>
+                <Link to="/orcamento" search={{ origem: "solucoes" }}>Começar briefing <ArrowRight className="w-4 h-4" /></Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white">
                 <Link to="/demo">Ver o sistema em ação</Link>

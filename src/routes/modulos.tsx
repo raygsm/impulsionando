@@ -246,6 +246,37 @@ const MODULES: Mod[] = [
 
 const CATEGORIES = ["Atendimento", "Vendas & Caixa", "Marketing & Crescimento", "Gestão & Operação"] as const;
 
+// Map module id → "dor" used by /orcamento briefing
+const MODULE_TO_DOR: Record<string, string> = {
+  agenda: "agenda",
+  whatsapp: "whatsapp",
+  crm: "crm",
+  pdv: "vendas",
+  vendas: "vendas",
+  estoque: "estoque",
+  financeiro: "financeiro",
+  pagamentos: "financeiro",
+  relatorios: "relatorios",
+  bi: "relatorios",
+};
+
+function modulesToDores(mods: string[]): string[] {
+  const out = new Set<string>();
+  mods.forEach((m) => {
+    const key = m.toLowerCase().replace(/\s+/g, "");
+    const slug = key.includes("agenda") ? "agenda"
+      : key.includes("whatsapp") ? "whatsapp"
+      : key.includes("crm") ? "crm"
+      : key.includes("pdv") || key.includes("venda") ? "vendas"
+      : key.includes("estoque") ? "estoque"
+      : key.includes("financ") || key.includes("pagamento") ? "financeiro"
+      : key.includes("relat") || key === "bi" ? "relatorios"
+      : "";
+    if (slug) out.add(slug);
+  });
+  return Array.from(out);
+}
+
 function ModulosPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -269,7 +300,7 @@ function ModulosPage() {
             </p>
             <div className="flex flex-wrap gap-3 pt-2">
               <Button asChild size="lg" className="gap-2 bg-white text-primary hover:bg-white/90">
-                <Link to="/orcamento">Montar meu sistema <ArrowRight className="w-4 h-4" /></Link>
+                <Link to="/orcamento" search={{ origem: "modulos" }}>Montar meu sistema <ArrowRight className="w-4 h-4" /></Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="gap-2 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white">
                 <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
@@ -335,6 +366,17 @@ function ModulosPage() {
                       </span>
                     ))}
                   </div>
+                  <Button asChild size="sm" variant="outline" className="mt-4 w-full gap-2">
+                    <Link
+                      to="/orcamento"
+                      search={{
+                        ...(MODULE_TO_DOR[m.id] ? { dores: MODULE_TO_DOR[m.id] } : {}),
+                        origem: `modulos:${m.id}`,
+                      }}
+                    >
+                      Quero este módulo <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </Button>
                 </Card>
               ))}
             </div>
@@ -366,7 +408,12 @@ function ModulosPage() {
                   ))}
                 </div>
                 <Button asChild size="sm" variant="outline" className="mt-5 w-full">
-                  <Link to="/orcamento">Quero esse combo</Link>
+                  <Link
+                    to="/orcamento"
+                    search={{ dores: modulesToDores(c.mods).join(","), origem: `combo:${c.t}` }}
+                  >
+                    Quero esse combo
+                  </Link>
                 </Button>
               </Card>
             ))}
@@ -387,7 +434,7 @@ function ModulosPage() {
             </p>
             <div className="flex flex-wrap gap-3 pt-2">
               <Button asChild size="lg" className="gap-2 bg-white text-primary hover:bg-white/90">
-                <Link to="/orcamento">Fazer briefing agora <ArrowRight className="w-4 h-4" /></Link>
+                <Link to="/orcamento" search={{ origem: "modulos:cta" }}>Fazer briefing agora <ArrowRight className="w-4 h-4" /></Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white">
                 <Link to="/planos">Ver planos e preços</Link>
