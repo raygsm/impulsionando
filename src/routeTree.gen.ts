@@ -17,6 +17,7 @@ import { Route as AuthenticatedUnitsRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSectorsRouteImport } from './routes/_authenticated/sectors'
 import { Route as AuthenticatedSalesRouteImport } from './routes/_authenticated/sales'
+import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedPermissionsRouteImport } from './routes/_authenticated/permissions'
 import { Route as AuthenticatedNichesRouteImport } from './routes/_authenticated/niches'
 import { Route as AuthenticatedModulesRouteImport } from './routes/_authenticated/modules'
@@ -30,6 +31,7 @@ import { Route as AuthenticatedAuditRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
 import { Route as AuthenticatedAccessProfilesRouteImport } from './routes/_authenticated/access-profiles'
 import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
+import { Route as AuthenticatedReportsIndexRouteImport } from './routes/_authenticated/reports.index'
 import { Route as AuthenticatedInventoryIndexRouteImport } from './routes/_authenticated/inventory.index'
 import { Route as AuthenticatedFinanceIndexRouteImport } from './routes/_authenticated/finance.index'
 import { Route as AuthenticatedCrmIndexRouteImport } from './routes/_authenticated/crm.index'
@@ -37,6 +39,11 @@ import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenti
 import { Route as AuthenticatedSalesOrdersRouteImport } from './routes/_authenticated/sales.orders'
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
 import { Route as AuthenticatedSalesCashRouteImport } from './routes/_authenticated/sales.cash'
+import { Route as AuthenticatedReportsSalesRouteImport } from './routes/_authenticated/reports.sales'
+import { Route as AuthenticatedReportsInventoryRouteImport } from './routes/_authenticated/reports.inventory'
+import { Route as AuthenticatedReportsFinanceRouteImport } from './routes/_authenticated/reports.finance'
+import { Route as AuthenticatedReportsCrmRouteImport } from './routes/_authenticated/reports.crm'
+import { Route as AuthenticatedReportsAgendaRouteImport } from './routes/_authenticated/reports.agenda'
 import { Route as AuthenticatedInventorySuppliersRouteImport } from './routes/_authenticated/inventory.suppliers'
 import { Route as AuthenticatedInventoryProductsRouteImport } from './routes/_authenticated/inventory.products'
 import { Route as AuthenticatedInventoryMovementsRouteImport } from './routes/_authenticated/inventory.movements'
@@ -94,6 +101,11 @@ const AuthenticatedSectorsRoute = AuthenticatedSectorsRouteImport.update({
 const AuthenticatedSalesRoute = AuthenticatedSalesRouteImport.update({
   id: '/sales',
   path: '/sales',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPermissionsRoute =
@@ -163,6 +175,12 @@ const AuthenticatedSalesIndexRoute = AuthenticatedSalesIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedSalesRoute,
 } as any)
+const AuthenticatedReportsIndexRoute =
+  AuthenticatedReportsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedReportsRoute,
+  } as any)
 const AuthenticatedInventoryIndexRoute =
   AuthenticatedInventoryIndexRouteImport.update({
     id: '/',
@@ -202,6 +220,35 @@ const AuthenticatedSalesCashRoute = AuthenticatedSalesCashRouteImport.update({
   path: '/cash',
   getParentRoute: () => AuthenticatedSalesRoute,
 } as any)
+const AuthenticatedReportsSalesRoute =
+  AuthenticatedReportsSalesRouteImport.update({
+    id: '/sales',
+    path: '/sales',
+    getParentRoute: () => AuthenticatedReportsRoute,
+  } as any)
+const AuthenticatedReportsInventoryRoute =
+  AuthenticatedReportsInventoryRouteImport.update({
+    id: '/inventory',
+    path: '/inventory',
+    getParentRoute: () => AuthenticatedReportsRoute,
+  } as any)
+const AuthenticatedReportsFinanceRoute =
+  AuthenticatedReportsFinanceRouteImport.update({
+    id: '/finance',
+    path: '/finance',
+    getParentRoute: () => AuthenticatedReportsRoute,
+  } as any)
+const AuthenticatedReportsCrmRoute = AuthenticatedReportsCrmRouteImport.update({
+  id: '/crm',
+  path: '/crm',
+  getParentRoute: () => AuthenticatedReportsRoute,
+} as any)
+const AuthenticatedReportsAgendaRoute =
+  AuthenticatedReportsAgendaRouteImport.update({
+    id: '/agenda',
+    path: '/agenda',
+    getParentRoute: () => AuthenticatedReportsRoute,
+  } as any)
 const AuthenticatedInventorySuppliersRoute =
   AuthenticatedInventorySuppliersRouteImport.update({
     id: '/suppliers',
@@ -330,6 +377,7 @@ export interface FileRoutesByFullPath {
   '/modules': typeof AuthenticatedModulesRoute
   '/niches': typeof AuthenticatedNichesRoute
   '/permissions': typeof AuthenticatedPermissionsRoute
+  '/reports': typeof AuthenticatedReportsRouteWithChildren
   '/sales': typeof AuthenticatedSalesRouteWithChildren
   '/sectors': typeof AuthenticatedSectorsRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -353,6 +401,11 @@ export interface FileRoutesByFullPath {
   '/inventory/movements': typeof AuthenticatedInventoryMovementsRoute
   '/inventory/products': typeof AuthenticatedInventoryProductsRoute
   '/inventory/suppliers': typeof AuthenticatedInventorySuppliersRoute
+  '/reports/agenda': typeof AuthenticatedReportsAgendaRoute
+  '/reports/crm': typeof AuthenticatedReportsCrmRoute
+  '/reports/finance': typeof AuthenticatedReportsFinanceRoute
+  '/reports/inventory': typeof AuthenticatedReportsInventoryRoute
+  '/reports/sales': typeof AuthenticatedReportsSalesRoute
   '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
@@ -360,6 +413,7 @@ export interface FileRoutesByFullPath {
   '/crm/': typeof AuthenticatedCrmIndexRoute
   '/finance/': typeof AuthenticatedFinanceIndexRoute
   '/inventory/': typeof AuthenticatedInventoryIndexRoute
+  '/reports/': typeof AuthenticatedReportsIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
 }
@@ -396,6 +450,11 @@ export interface FileRoutesByTo {
   '/inventory/movements': typeof AuthenticatedInventoryMovementsRoute
   '/inventory/products': typeof AuthenticatedInventoryProductsRoute
   '/inventory/suppliers': typeof AuthenticatedInventorySuppliersRoute
+  '/reports/agenda': typeof AuthenticatedReportsAgendaRoute
+  '/reports/crm': typeof AuthenticatedReportsCrmRoute
+  '/reports/finance': typeof AuthenticatedReportsFinanceRoute
+  '/reports/inventory': typeof AuthenticatedReportsInventoryRoute
+  '/reports/sales': typeof AuthenticatedReportsSalesRoute
   '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
@@ -403,6 +462,7 @@ export interface FileRoutesByTo {
   '/crm': typeof AuthenticatedCrmIndexRoute
   '/finance': typeof AuthenticatedFinanceIndexRoute
   '/inventory': typeof AuthenticatedInventoryIndexRoute
+  '/reports': typeof AuthenticatedReportsIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
 }
@@ -423,6 +483,7 @@ export interface FileRoutesById {
   '/_authenticated/modules': typeof AuthenticatedModulesRoute
   '/_authenticated/niches': typeof AuthenticatedNichesRoute
   '/_authenticated/permissions': typeof AuthenticatedPermissionsRoute
+  '/_authenticated/reports': typeof AuthenticatedReportsRouteWithChildren
   '/_authenticated/sales': typeof AuthenticatedSalesRouteWithChildren
   '/_authenticated/sectors': typeof AuthenticatedSectorsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -446,6 +507,11 @@ export interface FileRoutesById {
   '/_authenticated/inventory/movements': typeof AuthenticatedInventoryMovementsRoute
   '/_authenticated/inventory/products': typeof AuthenticatedInventoryProductsRoute
   '/_authenticated/inventory/suppliers': typeof AuthenticatedInventorySuppliersRoute
+  '/_authenticated/reports/agenda': typeof AuthenticatedReportsAgendaRoute
+  '/_authenticated/reports/crm': typeof AuthenticatedReportsCrmRoute
+  '/_authenticated/reports/finance': typeof AuthenticatedReportsFinanceRoute
+  '/_authenticated/reports/inventory': typeof AuthenticatedReportsInventoryRoute
+  '/_authenticated/reports/sales': typeof AuthenticatedReportsSalesRoute
   '/_authenticated/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
   '/_authenticated/sales/orders': typeof AuthenticatedSalesOrdersRoute
@@ -453,6 +519,7 @@ export interface FileRoutesById {
   '/_authenticated/crm/': typeof AuthenticatedCrmIndexRoute
   '/_authenticated/finance/': typeof AuthenticatedFinanceIndexRoute
   '/_authenticated/inventory/': typeof AuthenticatedInventoryIndexRoute
+  '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
 }
@@ -473,6 +540,7 @@ export interface FileRouteTypes {
     | '/modules'
     | '/niches'
     | '/permissions'
+    | '/reports'
     | '/sales'
     | '/sectors'
     | '/settings'
@@ -496,6 +564,11 @@ export interface FileRouteTypes {
     | '/inventory/movements'
     | '/inventory/products'
     | '/inventory/suppliers'
+    | '/reports/agenda'
+    | '/reports/crm'
+    | '/reports/finance'
+    | '/reports/inventory'
+    | '/reports/sales'
     | '/sales/cash'
     | '/sales/new'
     | '/sales/orders'
@@ -503,6 +576,7 @@ export interface FileRouteTypes {
     | '/crm/'
     | '/finance/'
     | '/inventory/'
+    | '/reports/'
     | '/sales/'
     | '/sales/cash/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -539,6 +613,11 @@ export interface FileRouteTypes {
     | '/inventory/movements'
     | '/inventory/products'
     | '/inventory/suppliers'
+    | '/reports/agenda'
+    | '/reports/crm'
+    | '/reports/finance'
+    | '/reports/inventory'
+    | '/reports/sales'
     | '/sales/cash'
     | '/sales/new'
     | '/sales/orders'
@@ -546,6 +625,7 @@ export interface FileRouteTypes {
     | '/crm'
     | '/finance'
     | '/inventory'
+    | '/reports'
     | '/sales'
     | '/sales/cash/$id'
   id:
@@ -565,6 +645,7 @@ export interface FileRouteTypes {
     | '/_authenticated/modules'
     | '/_authenticated/niches'
     | '/_authenticated/permissions'
+    | '/_authenticated/reports'
     | '/_authenticated/sales'
     | '/_authenticated/sectors'
     | '/_authenticated/settings'
@@ -588,6 +669,11 @@ export interface FileRouteTypes {
     | '/_authenticated/inventory/movements'
     | '/_authenticated/inventory/products'
     | '/_authenticated/inventory/suppliers'
+    | '/_authenticated/reports/agenda'
+    | '/_authenticated/reports/crm'
+    | '/_authenticated/reports/finance'
+    | '/_authenticated/reports/inventory'
+    | '/_authenticated/reports/sales'
     | '/_authenticated/sales/cash'
     | '/_authenticated/sales/new'
     | '/_authenticated/sales/orders'
@@ -595,6 +681,7 @@ export interface FileRouteTypes {
     | '/_authenticated/crm/'
     | '/_authenticated/finance/'
     | '/_authenticated/inventory/'
+    | '/_authenticated/reports/'
     | '/_authenticated/sales/'
     | '/_authenticated/sales/cash/$id'
   fileRoutesById: FileRoutesById
@@ -661,6 +748,13 @@ declare module '@tanstack/react-router' {
       path: '/sales'
       fullPath: '/sales'
       preLoaderRoute: typeof AuthenticatedSalesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reports': {
+      id: '/_authenticated/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AuthenticatedReportsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/permissions': {
@@ -754,6 +848,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSalesIndexRouteImport
       parentRoute: typeof AuthenticatedSalesRoute
     }
+    '/_authenticated/reports/': {
+      id: '/_authenticated/reports/'
+      path: '/'
+      fullPath: '/reports/'
+      preLoaderRoute: typeof AuthenticatedReportsIndexRouteImport
+      parentRoute: typeof AuthenticatedReportsRoute
+    }
     '/_authenticated/inventory/': {
       id: '/_authenticated/inventory/'
       path: '/'
@@ -802,6 +903,41 @@ declare module '@tanstack/react-router' {
       fullPath: '/sales/cash'
       preLoaderRoute: typeof AuthenticatedSalesCashRouteImport
       parentRoute: typeof AuthenticatedSalesRoute
+    }
+    '/_authenticated/reports/sales': {
+      id: '/_authenticated/reports/sales'
+      path: '/sales'
+      fullPath: '/reports/sales'
+      preLoaderRoute: typeof AuthenticatedReportsSalesRouteImport
+      parentRoute: typeof AuthenticatedReportsRoute
+    }
+    '/_authenticated/reports/inventory': {
+      id: '/_authenticated/reports/inventory'
+      path: '/inventory'
+      fullPath: '/reports/inventory'
+      preLoaderRoute: typeof AuthenticatedReportsInventoryRouteImport
+      parentRoute: typeof AuthenticatedReportsRoute
+    }
+    '/_authenticated/reports/finance': {
+      id: '/_authenticated/reports/finance'
+      path: '/finance'
+      fullPath: '/reports/finance'
+      preLoaderRoute: typeof AuthenticatedReportsFinanceRouteImport
+      parentRoute: typeof AuthenticatedReportsRoute
+    }
+    '/_authenticated/reports/crm': {
+      id: '/_authenticated/reports/crm'
+      path: '/crm'
+      fullPath: '/reports/crm'
+      preLoaderRoute: typeof AuthenticatedReportsCrmRouteImport
+      parentRoute: typeof AuthenticatedReportsRoute
+    }
+    '/_authenticated/reports/agenda': {
+      id: '/_authenticated/reports/agenda'
+      path: '/agenda'
+      fullPath: '/reports/agenda'
+      preLoaderRoute: typeof AuthenticatedReportsAgendaRouteImport
+      parentRoute: typeof AuthenticatedReportsRoute
     }
     '/_authenticated/inventory/suppliers': {
       id: '/_authenticated/inventory/suppliers'
@@ -1023,6 +1159,27 @@ const AuthenticatedInventoryRouteWithChildren =
     AuthenticatedInventoryRouteChildren,
   )
 
+interface AuthenticatedReportsRouteChildren {
+  AuthenticatedReportsAgendaRoute: typeof AuthenticatedReportsAgendaRoute
+  AuthenticatedReportsCrmRoute: typeof AuthenticatedReportsCrmRoute
+  AuthenticatedReportsFinanceRoute: typeof AuthenticatedReportsFinanceRoute
+  AuthenticatedReportsInventoryRoute: typeof AuthenticatedReportsInventoryRoute
+  AuthenticatedReportsSalesRoute: typeof AuthenticatedReportsSalesRoute
+  AuthenticatedReportsIndexRoute: typeof AuthenticatedReportsIndexRoute
+}
+
+const AuthenticatedReportsRouteChildren: AuthenticatedReportsRouteChildren = {
+  AuthenticatedReportsAgendaRoute: AuthenticatedReportsAgendaRoute,
+  AuthenticatedReportsCrmRoute: AuthenticatedReportsCrmRoute,
+  AuthenticatedReportsFinanceRoute: AuthenticatedReportsFinanceRoute,
+  AuthenticatedReportsInventoryRoute: AuthenticatedReportsInventoryRoute,
+  AuthenticatedReportsSalesRoute: AuthenticatedReportsSalesRoute,
+  AuthenticatedReportsIndexRoute: AuthenticatedReportsIndexRoute,
+}
+
+const AuthenticatedReportsRouteWithChildren =
+  AuthenticatedReportsRoute._addFileChildren(AuthenticatedReportsRouteChildren)
+
 interface AuthenticatedSalesCashRouteChildren {
   AuthenticatedSalesCashIdRoute: typeof AuthenticatedSalesCashIdRoute
 }
@@ -1067,6 +1224,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedModulesRoute: typeof AuthenticatedModulesRoute
   AuthenticatedNichesRoute: typeof AuthenticatedNichesRoute
   AuthenticatedPermissionsRoute: typeof AuthenticatedPermissionsRoute
+  AuthenticatedReportsRoute: typeof AuthenticatedReportsRouteWithChildren
   AuthenticatedSalesRoute: typeof AuthenticatedSalesRouteWithChildren
   AuthenticatedSectorsRoute: typeof AuthenticatedSectorsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -1087,6 +1245,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedModulesRoute: AuthenticatedModulesRoute,
   AuthenticatedNichesRoute: AuthenticatedNichesRoute,
   AuthenticatedPermissionsRoute: AuthenticatedPermissionsRoute,
+  AuthenticatedReportsRoute: AuthenticatedReportsRouteWithChildren,
   AuthenticatedSalesRoute: AuthenticatedSalesRouteWithChildren,
   AuthenticatedSectorsRoute: AuthenticatedSectorsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
