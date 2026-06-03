@@ -83,9 +83,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "Plataforma SaaS multiempresa, multinicho e modular para clínicas, bares, cervejarias, serviços e varejo." },
       { name: "author", content: "Impulsionando Sistemas" },
       { property: "og:title", content: "Impulsionando Sistemas" },
-      { property: "og:description", content: "Plataforma SaaS multiempresa e multinicho." },
+      { property: "og:description", content: "Plataforma SaaS multiempresa, multinicho e modular para clínicas, bares, cervejarias, serviços e varejo." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Impulsionando Sistemas" },
+      { name: "twitter:description", content: "Plataforma SaaS multiempresa, multinicho e modular para clínicas, bares, cervejarias, serviços e varejo." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4e0bfa78-94a8-42f0-baaa-b767f52dadf8/id-preview-3294bcb5--d5a31290-577c-4ca5-895e-72d4b8643439.lovable.app-1780487616429.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4e0bfa78-94a8-42f0-baaa-b767f52dadf8/id-preview-3294bcb5--d5a31290-577c-4ca5-895e-72d4b8643439.lovable.app-1780487616429.png" },
     ],
     links: [
       {
