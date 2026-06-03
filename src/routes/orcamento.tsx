@@ -1,6 +1,16 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, CheckCircle2, HelpCircle, Loader2, MessageCircle, Sparkles } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  HelpCircle,
+  Loader2,
+  MessageCircle,
+  Save,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { Button } from "@/components/ui/button";
@@ -149,6 +159,41 @@ const INITIAL: Answers = {
   urgencia: "",
   perfil: "",
 };
+
+/* --------------------- Draft persistence --------------------- */
+
+const DRAFT_KEY = "impulsionando:orcamento:draft";
+const DRAFT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 dias
+
+function saveDraft(answers: Answers, step: number) {
+  try {
+    localStorage.setItem(
+      DRAFT_KEY,
+      JSON.stringify({ answers, step, savedAt: Date.now() })
+    );
+  } catch {}
+}
+
+function loadDraft(): { answers: Answers; step: number } | null {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data.savedAt || Date.now() - data.savedAt > DRAFT_MAX_AGE_MS) {
+      localStorage.removeItem(DRAFT_KEY);
+      return null;
+    }
+    return { answers: data.answers as Answers, step: data.step as number };
+  } catch {
+    return null;
+  }
+}
+
+function clearDraft() {
+  try {
+    localStorage.removeItem(DRAFT_KEY);
+  } catch {}
+}
 
 /* --------------------- Lógica de recomendação --------------------- */
 
@@ -344,10 +389,12 @@ function ResultCard({
   rec,
   answers,
   onRestart,
+  onClearDraft,
 }: {
   rec: Recomendacao;
   answers: Answers;
   onRestart: () => void;
+  onClearDraft: () => void;
 }) {
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
@@ -407,6 +454,7 @@ function ResultCard({
       return;
     }
     setSaved(true);
+    onClearDraft();
     toast.success("Recebemos seu briefing! Nosso time entrará em contato.");
     if (openWhats) window.open(whatsURL, "_blank", "noopener,noreferrer");
   }
@@ -587,12 +635,66 @@ function buildPrefill(s: SearchParams): { answers: Answers; firstStep: number; h
   return { answers: a, firstStep: Math.min(firstStep, STEPS.length - 1), hasPrefill };
 }
 
+function mergeDraftWithPrefill(
+  draft: { answers: Answers; step: number } | null,
+  prefill: { answers: Answers; firstStep: number; hasPrefill: boolean }
+): { answers: Answers; step: number; source: "draft" | "prefill" | "fresh" } {
+  // URL prefill sempre tem prioridade sobre draft (ação deliberada do usuário)
+  if (prefill.hasPrefill) {
+    return { answers: prefill.answers, step: prefill.firstStep, source: "prefill" };
+  }
+  if (draft) {
+    return { answers: draft.answers, step: draft.step, source: "draft" };
+  }
+  return { answers: prefill.answers, step: prefill.firstStep, source: "fresh" };
+}
+
 function OrcamentoPage() {
   const search = Route.useSearch();
-  const initial = useMemo(() => buildPrefill(search), [search]);
-  const [a, setA] = useState<Answers>(initial.answers);
-  const [step, setStep] = useState(initial.firstStep);
+  const prefill = useMemo(() => buildPrefill(search), [search]);
+
+  const [mounted, setMounted] = useState(false);
+  const [a, setA] = useState<Answers>(prefill.answers);
+  const [step, setStep] = useState(prefill.firstStep);
   const [done, setDone] = useState(false);
+  const [draftToastShown, setDraftToastShown] = useState(false);
+  const draftSavedRef = useRef(false);
+
+  // Hydration-safe: only read localStorage after mount
+  useEffect(() => {
+    setMounted(true);
+    const draft = loadDraft();
+    const merged = mergeDraftWithPrefill(draft, prefill);
+    setA(merged.answers);
+    setStep(merged.step);
+    if (merged.source === "draft" && !draftToastShown) {
+      setDraftToastShown(true);
+      toast.info("Continuando de onde você parou. O rascunho foi restaurado.", {
+        duration: 5000,
+        action: {
+          label: "Recomeçar",
+          onClick: () => {
+            clearDraft();
+            setA(INITIAL);
+            setStep(0);
+            toast.success("Rascunho removido. Comece do início.");
+          },
+        },
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Auto-save draft whenever answers or step change (throttle via ref to avoid first render save)
+  useEffect(() => {
+    if (!mounted) return;
+    // Debounce: só salva 800ms após a última mudança para não floodar
+    const t = setTimeout(() => {
+      saveDraft(a, step);
+      draftSavedRef.current = true;
+    }, 800);
+    return () => clearTimeout(t);
+  }, [a, step, mounted]);
 
   const total = STEPS.length;
   const current = STEPS[step];
@@ -611,9 +713,11 @@ function OrcamentoPage() {
     if (step > 0) setStep((s) => s - 1);
   }
   function reset() {
+    clearDraft();
     setA(INITIAL);
     setStep(0);
     setDone(false);
+    draftSavedRef.current = false;
   }
   function toggleDor(v: string) {
     setA((prev) => ({
@@ -621,6 +725,9 @@ function OrcamentoPage() {
       dores: prev.dores.includes(v) ? prev.dores.filter((x) => x !== v) : [...prev.dores, v],
     }));
   }
+
+  const hasAnyAnswer =
+    !!a.perfil || !!a.segmento || !!a.tamanho || !!a.unidades || a.dores.length > 0 || !!a.urgencia;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -634,7 +741,7 @@ function OrcamentoPage() {
           <p className="text-muted-foreground max-w-xl mx-auto">
             Responda 6 perguntas e receba uma recomendação personalizada de módulos e plano — sem cadastro.
           </p>
-          {initial.hasPrefill && !done && (
+          {prefill.hasPrefill && !done && (
             <div className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-primary/5 text-primary border border-primary/20">
               <CheckCircle2 className="w-3.5 h-3.5" />
               Pré-preenchemos com sua escolha{search.plano ? ` (${search.plano})` : ""}. Confira e avance.
@@ -642,12 +749,31 @@ function OrcamentoPage() {
           )}
         </div>
 
-
         {done ? (
-          <ResultCard rec={recomendar(a)} answers={a} onRestart={reset} />
+          <ResultCard rec={recomendar(a)} answers={a} onRestart={reset} onClearDraft={clearDraft} />
         ) : (
           <Card className="p-6 sm:p-8 space-y-6">
-            <StepHeader title={current.title} helper={current.helper} step={step + 1} total={total} />
+            <div className="flex items-center justify-between">
+              <StepHeader title={current.title} helper={current.helper} step={step + 1} total={total} />
+              {hasAnyAnswer && (
+                <button
+                  type="button"
+                  onClick={reset}
+                  className="shrink-0 ml-3 flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-destructive transition-colors"
+                  title="Limpar rascunho e recomeçar"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Limpar</span>
+                </button>
+              )}
+            </div>
+
+            {draftSavedRef.current && (
+              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground -mt-2">
+                <Save className="w-3 h-3" />
+                <span>Rascunho salvo automaticamente</span>
+              </div>
+            )}
 
             <div className="space-y-3">
               {current.key === "perfil" && (
