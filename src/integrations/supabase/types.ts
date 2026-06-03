@@ -1208,6 +1208,239 @@ export type Database = {
           },
         ]
       }
+      inv_categories: {
+        Row: {
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_categories_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inv_movements: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          kind: string
+          notes: string | null
+          performed_by: string | null
+          product_id: string
+          quantity: number
+          reason: string | null
+          reference: string | null
+          unit_cost: number | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          kind: string
+          notes?: string | null
+          performed_by?: string | null
+          product_id: string
+          quantity: number
+          reason?: string | null
+          reference?: string | null
+          unit_cost?: number | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          notes?: string | null
+          performed_by?: string | null
+          product_id?: string
+          quantity?: number
+          reason?: string | null
+          reference?: string | null
+          unit_cost?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_movements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_movements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "inv_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inv_products: {
+        Row: {
+          allow_negative: boolean
+          barcode: string | null
+          category_id: string | null
+          company_id: string
+          cost_price: number
+          created_at: string
+          current_stock: number
+          description: string | null
+          id: string
+          is_active: boolean
+          max_stock: number | null
+          min_stock: number
+          name: string
+          sale_price: number
+          sku: string | null
+          supplier_id: string | null
+          track_stock: boolean
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          allow_negative?: boolean
+          barcode?: string | null
+          category_id?: string | null
+          company_id: string
+          cost_price?: number
+          created_at?: string
+          current_stock?: number
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          max_stock?: number | null
+          min_stock?: number
+          name: string
+          sale_price?: number
+          sku?: string | null
+          supplier_id?: string | null
+          track_stock?: boolean
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          allow_negative?: boolean
+          barcode?: string | null
+          category_id?: string | null
+          company_id?: string
+          cost_price?: number
+          created_at?: string
+          current_stock?: number
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          max_stock?: number | null
+          min_stock?: number
+          name?: string
+          sale_price?: number
+          sku?: string | null
+          supplier_id?: string | null
+          track_stock?: boolean
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "inv_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_products_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_products_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "inv_suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inv_suppliers: {
+        Row: {
+          company_id: string
+          created_at: string
+          document: string | null
+          email: string | null
+          id: string
+          is_active: boolean
+          legal_name: string | null
+          name: string
+          notes: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          document?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          legal_name?: string | null
+          name: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          document?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          legal_name?: string | null
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_suppliers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       modules: {
         Row: {
           category: string | null
