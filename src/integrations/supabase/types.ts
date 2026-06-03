@@ -2472,6 +2472,19 @@ export type Database = {
       }
       is_impulsionando_staff: { Args: { _user: string }; Returns: boolean }
       is_super_admin: { Args: { _user: string }; Returns: boolean }
+      notify_user: {
+        Args: {
+          _action_label?: string
+          _action_url?: string
+          _category: string
+          _company_id: string
+          _message?: string
+          _severity: string
+          _title: string
+          _user_id: string
+        }
+        Returns: string
+      }
       sales_cash_session_close: {
         Args: { _counts: Json; _notes?: string; _session_id: string }
         Returns: string
