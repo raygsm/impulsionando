@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
 import { Route as AuthenticatedUnitsRouteImport } from './routes/_authenticated/units'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSectorsRouteImport } from './routes/_authenticated/sectors'
 import { Route as AuthenticatedPermissionsRouteImport } from './routes/_authenticated/permissions'
 import { Route as AuthenticatedNichesRouteImport } from './routes/_authenticated/niches'
@@ -44,6 +45,11 @@ const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
 const AuthenticatedUnitsRoute = AuthenticatedUnitsRouteImport.update({
   id: '/units',
   path: '/units',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSectorsRoute = AuthenticatedSectorsRouteImport.update({
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/niches': typeof AuthenticatedNichesRoute
   '/permissions': typeof AuthenticatedPermissionsRoute
   '/sectors': typeof AuthenticatedSectorsRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/units': typeof AuthenticatedUnitsRoute
   '/users': typeof AuthenticatedUsersRoute
 }
@@ -107,6 +114,7 @@ export interface FileRoutesByTo {
   '/niches': typeof AuthenticatedNichesRoute
   '/permissions': typeof AuthenticatedPermissionsRoute
   '/sectors': typeof AuthenticatedSectorsRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/units': typeof AuthenticatedUnitsRoute
   '/users': typeof AuthenticatedUsersRoute
 }
@@ -122,6 +130,7 @@ export interface FileRoutesById {
   '/_authenticated/niches': typeof AuthenticatedNichesRoute
   '/_authenticated/permissions': typeof AuthenticatedPermissionsRoute
   '/_authenticated/sectors': typeof AuthenticatedSectorsRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/units': typeof AuthenticatedUnitsRoute
   '/_authenticated/users': typeof AuthenticatedUsersRoute
 }
@@ -137,6 +146,7 @@ export interface FileRouteTypes {
     | '/niches'
     | '/permissions'
     | '/sectors'
+    | '/settings'
     | '/units'
     | '/users'
   fileRoutesByTo: FileRoutesByTo
@@ -150,6 +160,7 @@ export interface FileRouteTypes {
     | '/niches'
     | '/permissions'
     | '/sectors'
+    | '/settings'
     | '/units'
     | '/users'
   id:
@@ -164,6 +175,7 @@ export interface FileRouteTypes {
     | '/_authenticated/niches'
     | '/_authenticated/permissions'
     | '/_authenticated/sectors'
+    | '/_authenticated/settings'
     | '/_authenticated/units'
     | '/_authenticated/users'
   fileRoutesById: FileRoutesById
@@ -209,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/units'
       fullPath: '/units'
       preLoaderRoute: typeof AuthenticatedUnitsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/sectors': {
@@ -271,6 +290,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedNichesRoute: typeof AuthenticatedNichesRoute
   AuthenticatedPermissionsRoute: typeof AuthenticatedPermissionsRoute
   AuthenticatedSectorsRoute: typeof AuthenticatedSectorsRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedUnitsRoute: typeof AuthenticatedUnitsRoute
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
 }
@@ -283,6 +303,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedNichesRoute: AuthenticatedNichesRoute,
   AuthenticatedPermissionsRoute: AuthenticatedPermissionsRoute,
   AuthenticatedSectorsRoute: AuthenticatedSectorsRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedUnitsRoute: AuthenticatedUnitsRoute,
   AuthenticatedUsersRoute: AuthenticatedUsersRoute,
 }
