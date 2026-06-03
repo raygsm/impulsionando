@@ -4,6 +4,8 @@ import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CurrentUser } from "@/lib/auth";
 import { NAV_GROUPS, TOP_ITEMS, type NavItem, type NavGroup } from "./nav-config";
+import { useUserPermissions } from "@/hooks/use-user-permissions";
+import { useActiveCompany } from "@/hooks/use-active-company";
 
 function isItemActive(pathname: string, to: string) {
   return pathname === to || pathname.startsWith(to + "/");
@@ -39,15 +41,15 @@ function NavLinkRow({
 function Group({
   group,
   pathname,
-  isSuper,
+  filterItem,
   onNavigate,
 }: {
   group: NavGroup;
   pathname: string;
-  isSuper: boolean;
+  filterItem: (i: NavItem) => boolean;
   onNavigate?: () => void;
 }) {
-  const items = group.items.filter((i) => !i.superOnly || isSuper);
+  const items = group.items.filter(filterItem);
   if (items.length === 0) return null;
 
   const hasActive = items.some((i) => isItemActive(pathname, i.to));
@@ -90,11 +92,23 @@ export function SidebarNav({
 }) {
   const location = useLocation();
   const isSuper = currentUser.isSuperAdmin;
+  const { companyId } = useActiveCompany();
+  const { data: perms, isLoading: permsLoading } = useUserPermissions(companyId);
+
+  // Super admin enxerga tudo. Enquanto as permissões carregam, mostra apenas
+  // itens sem `perm` (não-restritos) e os marcados como superOnly se aplicáveis.
+  const filterItem = (i: NavItem): boolean => {
+    if (i.superOnly) return isSuper;
+    if (isSuper) return true;
+    if (!i.perm) return true;
+    if (permsLoading || !perms) return false;
+    return perms.has(i.perm);
+  };
 
   return (
     <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-1">
       <div className="space-y-1">
-        {TOP_ITEMS.map((it) => (
+        {TOP_ITEMS.filter(filterItem).map((it) => (
           <NavLinkRow
             key={it.to}
             item={it}
@@ -108,7 +122,7 @@ export function SidebarNav({
           key={g.label}
           group={g}
           pathname={location.pathname}
-          isSuper={isSuper}
+          filterItem={filterItem}
           onNavigate={onNavigate}
         />
       ))}
