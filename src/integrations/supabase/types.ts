@@ -1666,6 +1666,78 @@ export type Database = {
         }
         Relationships: []
       }
+      marketing_leads: {
+        Row: {
+          answers: Json | null
+          assigned_to: string | null
+          company: string | null
+          created_at: string
+          email: string | null
+          id: string
+          ip_address: string | null
+          message: string | null
+          name: string | null
+          notes: string | null
+          page_url: string | null
+          phone: string | null
+          recommended_modules: string[] | null
+          recommended_plan: string | null
+          source: string
+          status: string
+          updated_at: string
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          answers?: Json | null
+          assigned_to?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          ip_address?: string | null
+          message?: string | null
+          name?: string | null
+          notes?: string | null
+          page_url?: string | null
+          phone?: string | null
+          recommended_modules?: string[] | null
+          recommended_plan?: string | null
+          source: string
+          status?: string
+          updated_at?: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          answers?: Json | null
+          assigned_to?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          ip_address?: string | null
+          message?: string | null
+          name?: string | null
+          notes?: string | null
+          page_url?: string | null
+          phone?: string | null
+          recommended_modules?: string[] | null
+          recommended_plan?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: []
+      }
       modules: {
         Row: {
           category: string | null

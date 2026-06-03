@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, CheckCircle2, HelpCircle, MessageCircle, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, HelpCircle, Loader2, MessageCircle, Sparkles } from "lucide-react";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
@@ -13,7 +14,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/orcamento")({
   head: () => ({
@@ -284,10 +288,54 @@ function MultiChips({
   );
 }
 
-function ResultCard({ rec, onRestart }: { rec: Recomendacao; onRestart: () => void }) {
-  const whats = encodeURIComponent(
+function ResultCard({
+  rec,
+  answers,
+  onRestart,
+}: {
+  rec: Recomendacao;
+  answers: Answers;
+  onRestart: () => void;
+}) {
+  const [name, setName] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [email, setEmail] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const whatsText = encodeURIComponent(
     `Olá! Fiz o briefing no site. Recomendação: Plano ${rec.plano} com módulos: ${rec.modulos.join(", ") || "—"}. Quero falar com um especialista.`
   );
+  const whatsURL = `https://wa.me/5521993075000?text=${whatsText}`;
+
+  async function submit(openWhats: boolean) {
+    if (!name.trim() || !whatsapp.trim()) {
+      toast.error("Informe nome e WhatsApp para que possamos te responder.");
+      return;
+    }
+    setSaving(true);
+    const { error } = await supabase.from("marketing_leads").insert({
+      source: "orcamento",
+      name: name.trim(),
+      phone: whatsapp.trim(),
+      email: email.trim() || null,
+      message: `Plano ${rec.plano} · Módulos: ${rec.modulos.join(", ") || "—"}`,
+      answers: answers as never,
+      recommended_plan: rec.plano,
+      recommended_modules: rec.modulos,
+      page_url: typeof window !== "undefined" ? window.location.href : null,
+      user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
+    });
+    setSaving(false);
+    if (error) {
+      toast.error("Não foi possível enviar agora. Tente novamente.");
+      return;
+    }
+    setSaved(true);
+    toast.success("Recebemos seu briefing! Nosso time entrará em contato.");
+    if (openWhats) window.open(whatsURL, "_blank", "noopener,noreferrer");
+  }
+
   return (
     <Card className="p-6 sm:p-8 space-y-6 shadow-elegant">
       <div className="flex items-start gap-3">
@@ -325,13 +373,54 @@ function ResultCard({ rec, onRestart }: { rec: Recomendacao; onRestart: () => vo
         <span className="font-medium">Por que esse plano?</span> {rec.motivo}
       </div>
 
+      {!saved && (
+        <div className="rounded-lg border border-border p-4 sm:p-5 space-y-3 bg-card">
+          <div className="text-sm font-semibold">Receba sua proposta personalizada</div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label htmlFor="lead-name" className="text-xs">Seu nome *</Label>
+              <Input id="lead-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Como podemos te chamar?" />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="lead-whats" className="text-xs">WhatsApp *</Label>
+              <Input id="lead-whats" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="(21) 99999-9999" inputMode="tel" />
+            </div>
+            <div className="sm:col-span-2 space-y-1">
+              <Label htmlFor="lead-email" className="text-xs">E-mail (opcional)</Label>
+              <Input id="lead-email" value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="voce@empresa.com" />
+            </div>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Ao enviar você concorda com nossa{" "}
+            <Link to="/privacidade" className="underline">Política de Privacidade</Link>.
+          </p>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row gap-3">
-        <Button asChild size="lg" className="gap-2 bg-gradient-primary shadow-elegant">
-          <a href={`https://wa.me/5521993075000?text=${whats}`} target="_blank" rel="noopener noreferrer">
-            <MessageCircle className="w-4 h-4" />
-            Falar com especialista
-          </a>
-        </Button>
+        {!saved ? (
+          <>
+            <Button
+              size="lg"
+              className="gap-2 bg-gradient-primary shadow-elegant"
+              onClick={() => submit(true)}
+              disabled={saving}
+            >
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageCircle className="w-4 h-4" />}
+              Enviar e falar no WhatsApp
+            </Button>
+            <Button size="lg" variant="outline" onClick={() => submit(false)} disabled={saving}>
+              Só enviar para receber depois
+            </Button>
+          </>
+        ) : (
+          <Button asChild size="lg" className="gap-2 bg-gradient-primary shadow-elegant">
+            <a href={whatsURL} target="_blank" rel="noopener noreferrer">
+              <MessageCircle className="w-4 h-4" />
+              Falar no WhatsApp agora
+            </a>
+          </Button>
+        )}
         <Button asChild variant="outline" size="lg">
           <Link to="/demo">Ver o sistema funcionando</Link>
         </Button>
@@ -342,6 +431,7 @@ function ResultCard({ rec, onRestart }: { rec: Recomendacao; onRestart: () => vo
     </Card>
   );
 }
+
 
 function OrcamentoPage() {
   const [a, setA] = useState<Answers>(INITIAL);
@@ -391,7 +481,7 @@ function OrcamentoPage() {
         </div>
 
         {done ? (
-          <ResultCard rec={recomendar(a)} onRestart={reset} />
+          <ResultCard rec={recomendar(a)} answers={a} onRestart={reset} />
         ) : (
           <Card className="p-6 sm:p-8 space-y-6">
             <StepHeader title={current.title} helper={current.helper} step={step + 1} total={total} />

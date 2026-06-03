@@ -5,8 +5,9 @@ import {
   Wallet, ArrowLeftRight, FolderTree, CreditCard, Percent,
   Package, Truck, ArrowDownUp,
   ShoppingCart, Receipt, Plus, Wallet as WalletIcon,
-  Contact, BarChart3, ShieldCheck,
+  Contact, BarChart3, ShieldCheck, Inbox,
 } from "lucide-react";
+
 
 export interface NavItem {
   to: string;
@@ -50,11 +51,13 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: "/crm/board", label: "Kanban", icon: KanbanSquare, perm: "crm.opportunity.read" },
       { to: "/crm/leads", label: "Leads", icon: UserPlus, perm: "crm.lead.read" },
+      { to: "/marketing/leads", label: "Leads do site", icon: Inbox, superOnly: true },
       { to: "/crm/pipelines", label: "Funis", icon: GitBranch, perm: "crm.pipeline.read" },
       { to: "/crm/activities", label: "Atividades", icon: CalendarClock, perm: "crm.activity.read" },
       { to: "/customers", label: "Clientes", icon: Contact, perm: "customer.read" },
     ],
   },
+
   {
     label: "Agenda",
     items: [
