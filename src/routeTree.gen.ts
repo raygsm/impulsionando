@@ -54,6 +54,7 @@ import { Route as AuthenticatedAgendaServicesRouteImport } from './routes/_authe
 import { Route as AuthenticatedAgendaSchedulesRouteImport } from './routes/_authenticated/agenda.schedules'
 import { Route as AuthenticatedAgendaProfessionalsRouteImport } from './routes/_authenticated/agenda.professionals'
 import { Route as AuthenticatedAgendaAppointmentsRouteImport } from './routes/_authenticated/agenda.appointments'
+import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -301,6 +302,12 @@ const AuthenticatedAgendaAppointmentsRoute =
     path: '/appointments',
     getParentRoute: () => AuthenticatedAgendaRoute,
   } as any)
+const AuthenticatedSalesCashIdRoute =
+  AuthenticatedSalesCashIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedSalesCashRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -339,7 +346,7 @@ export interface FileRoutesByFullPath {
   '/inventory/movements': typeof AuthenticatedInventoryMovementsRoute
   '/inventory/products': typeof AuthenticatedInventoryProductsRoute
   '/inventory/suppliers': typeof AuthenticatedInventorySuppliersRoute
-  '/sales/cash': typeof AuthenticatedSalesCashRoute
+  '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
   '/agenda/': typeof AuthenticatedAgendaIndexRoute
@@ -347,6 +354,7 @@ export interface FileRoutesByFullPath {
   '/finance/': typeof AuthenticatedFinanceIndexRoute
   '/inventory/': typeof AuthenticatedInventoryIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
+  '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -380,7 +388,7 @@ export interface FileRoutesByTo {
   '/inventory/movements': typeof AuthenticatedInventoryMovementsRoute
   '/inventory/products': typeof AuthenticatedInventoryProductsRoute
   '/inventory/suppliers': typeof AuthenticatedInventorySuppliersRoute
-  '/sales/cash': typeof AuthenticatedSalesCashRoute
+  '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
   '/agenda': typeof AuthenticatedAgendaIndexRoute
@@ -388,6 +396,7 @@ export interface FileRoutesByTo {
   '/finance': typeof AuthenticatedFinanceIndexRoute
   '/inventory': typeof AuthenticatedInventoryIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
+  '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -428,7 +437,7 @@ export interface FileRoutesById {
   '/_authenticated/inventory/movements': typeof AuthenticatedInventoryMovementsRoute
   '/_authenticated/inventory/products': typeof AuthenticatedInventoryProductsRoute
   '/_authenticated/inventory/suppliers': typeof AuthenticatedInventorySuppliersRoute
-  '/_authenticated/sales/cash': typeof AuthenticatedSalesCashRoute
+  '/_authenticated/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
   '/_authenticated/sales/orders': typeof AuthenticatedSalesOrdersRoute
   '/_authenticated/agenda/': typeof AuthenticatedAgendaIndexRoute
@@ -436,6 +445,7 @@ export interface FileRoutesById {
   '/_authenticated/finance/': typeof AuthenticatedFinanceIndexRoute
   '/_authenticated/inventory/': typeof AuthenticatedInventoryIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
+  '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -484,6 +494,7 @@ export interface FileRouteTypes {
     | '/finance/'
     | '/inventory/'
     | '/sales/'
+    | '/sales/cash/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -525,6 +536,7 @@ export interface FileRouteTypes {
     | '/finance'
     | '/inventory'
     | '/sales'
+    | '/sales/cash/$id'
   id:
     | '__root__'
     | '/'
@@ -572,6 +584,7 @@ export interface FileRouteTypes {
     | '/_authenticated/finance/'
     | '/_authenticated/inventory/'
     | '/_authenticated/sales/'
+    | '/_authenticated/sales/cash/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -897,6 +910,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgendaAppointmentsRouteImport
       parentRoute: typeof AuthenticatedAgendaRoute
     }
+    '/_authenticated/sales/cash/$id': {
+      id: '/_authenticated/sales/cash/$id'
+      path: '/$id'
+      fullPath: '/sales/cash/$id'
+      preLoaderRoute: typeof AuthenticatedSalesCashIdRouteImport
+      parentRoute: typeof AuthenticatedSalesCashRoute
+    }
   }
 }
 
@@ -984,15 +1004,29 @@ const AuthenticatedInventoryRouteWithChildren =
     AuthenticatedInventoryRouteChildren,
   )
 
+interface AuthenticatedSalesCashRouteChildren {
+  AuthenticatedSalesCashIdRoute: typeof AuthenticatedSalesCashIdRoute
+}
+
+const AuthenticatedSalesCashRouteChildren: AuthenticatedSalesCashRouteChildren =
+  {
+    AuthenticatedSalesCashIdRoute: AuthenticatedSalesCashIdRoute,
+  }
+
+const AuthenticatedSalesCashRouteWithChildren =
+  AuthenticatedSalesCashRoute._addFileChildren(
+    AuthenticatedSalesCashRouteChildren,
+  )
+
 interface AuthenticatedSalesRouteChildren {
-  AuthenticatedSalesCashRoute: typeof AuthenticatedSalesCashRoute
+  AuthenticatedSalesCashRoute: typeof AuthenticatedSalesCashRouteWithChildren
   AuthenticatedSalesNewRoute: typeof AuthenticatedSalesNewRoute
   AuthenticatedSalesOrdersRoute: typeof AuthenticatedSalesOrdersRoute
   AuthenticatedSalesIndexRoute: typeof AuthenticatedSalesIndexRoute
 }
 
 const AuthenticatedSalesRouteChildren: AuthenticatedSalesRouteChildren = {
-  AuthenticatedSalesCashRoute: AuthenticatedSalesCashRoute,
+  AuthenticatedSalesCashRoute: AuthenticatedSalesCashRouteWithChildren,
   AuthenticatedSalesNewRoute: AuthenticatedSalesNewRoute,
   AuthenticatedSalesOrdersRoute: AuthenticatedSalesOrdersRoute,
   AuthenticatedSalesIndexRoute: AuthenticatedSalesIndexRoute,

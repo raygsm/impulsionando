@@ -7,7 +7,7 @@ import {
   Calendar, Users2, Wrench, Clock, UsersRound,
   Wallet, ArrowLeftRight, FolderTree, CreditCard, Percent,
   Package, Truck, ArrowDownUp,
-  ShoppingCart, Receipt, Plus,
+  ShoppingCart, Receipt, Plus, Wallet as WalletIcon,
 } from "lucide-react";
 
 interface NavItem {
