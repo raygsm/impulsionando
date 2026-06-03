@@ -129,9 +129,11 @@ function Page() {
   const anonymize = useMutation({
     mutationFn: async () => {
       if (!anonTarget) throw new Error("Sem cliente");
+      const reason = anonReason.trim();
+      if (!reason) throw new Error("Informe o motivo da anonimização para prosseguir.");
       const { error } = await supabase.rpc("customer_anonymize", {
         _customer_id: anonTarget.id,
-        _reason: anonReason.trim() || undefined,
+        _reason: reason,
       });
       if (error) throw error;
     },
@@ -250,7 +252,7 @@ function Page() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAnonTarget(null)}>Cancelar</Button>
-            <Button variant="destructive" onClick={() => anonymize.mutate()} disabled={anonymize.isPending}>
+            <Button variant="destructive" onClick={() => anonymize.mutate()} disabled={anonymize.isPending || !anonReason.trim()}>
               <ShieldOff className="w-4 h-4 mr-1" />Confirmar anonimização
             </Button>
           </DialogFooter>

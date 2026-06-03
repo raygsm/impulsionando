@@ -110,9 +110,56 @@ describe("customer.anonymize permission gating", () => {
     expect(row?.name).toBe("Cliente Teste Anonimização");
   });
 
-  it("gestor with permission successfully anonymizes the customer", async () => {
+  it("gestor with permission cannot anonymize without a reason (clean validation error)", async () => {
+    // Need a fresh customer since the previous test anonymized the shared one
+    const { data: cust2, error: cust2Err } = await admin
+      .from("customers")
+      .insert({
+        company_id: companyId,
+        name: "Cliente Teste Motivo",
+        email: `cust-reason-${RUN}@example.com`,
+        is_active: true,
+      })
+      .select("id")
+      .single();
+    if (cust2Err) throw cust2Err;
+
+    const { data, error } = await clients.gestor.rpc("customer_anonymize", {
+      _customer_id: cust2.id,
+      _reason: "",
+    });
+    expect(data).toBeNull();
+    expect(error).not.toBeNull();
+    expect(error!.message.toLowerCase()).toMatch(/motivo|reason|obrigat|requer|empty|vazio/);
+
+    const { data: row } = await admin
+      .from("customers")
+      .select("anonymized_at, name")
+      .eq("id", cust2.id)
+      .single();
+    expect(row?.anonymized_at).toBeNull();
+    expect(row?.name).toBe("Cliente Teste Motivo");
+
+    // Cleanup
+    await admin.from("customers").delete().eq("id", cust2.id);
+  });
+
+  it("gestor with permission successfully anonymizes the customer with a reason", async () => {
+    // Need a fresh customer
+    const { data: cust3, error: cust3Err } = await admin
+      .from("customers")
+      .insert({
+        company_id: companyId,
+        name: "Cliente Teste Sucesso",
+        email: `cust-ok-${RUN}@example.com`,
+        is_active: true,
+      })
+      .select("id")
+      .single();
+    if (cust3Err) throw cust3Err;
+
     const { error } = await clients.gestor.rpc("customer_anonymize", {
-      _customer_id: customerId,
+      _customer_id: cust3.id,
       _reason: "solicitação LGPD do titular",
     });
     expect(error).toBeNull();
@@ -120,12 +167,12 @@ describe("customer.anonymize permission gating", () => {
     const { data: row } = await admin
       .from("customers")
       .select("anonymized_at, anonymized_by, anonymization_reason, name, email, is_active")
-      .eq("id", customerId)
+      .eq("id", cust3.id)
       .single();
     expect(row?.anonymized_at).not.toBeNull();
     expect(row?.anonymized_by).toBe(users.gestor);
     expect(row?.anonymization_reason).toBe("solicitação LGPD do titular");
     expect(row?.is_active).toBe(false);
-    expect(row?.name).not.toBe("Cliente Teste Anonimização");
+    expect(row?.name).not.toBe("Cliente Teste Sucesso");
   });
 });
