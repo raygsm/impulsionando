@@ -24,6 +24,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DemoWhiteLabelRouteImport } from './routes/demo.white-label'
 import { Route as DemoClienteFinalRouteImport } from './routes/demo.cliente-final'
+import { Route as DemoChecklistRouteImport } from './routes/demo.checklist'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
 import { Route as AuthenticatedUnitsRouteImport } from './routes/_authenticated/units'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -155,6 +156,11 @@ const DemoWhiteLabelRoute = DemoWhiteLabelRouteImport.update({
 const DemoClienteFinalRoute = DemoClienteFinalRouteImport.update({
   id: '/cliente-final',
   path: '/cliente-final',
+  getParentRoute: () => DemoRoute,
+} as any)
+const DemoChecklistRoute = DemoChecklistRouteImport.update({
+  id: '/checklist',
+  path: '/checklist',
   getParentRoute: () => DemoRoute,
 } as any)
 const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
@@ -510,6 +516,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/units': typeof AuthenticatedUnitsRoute
   '/users': typeof AuthenticatedUsersRoute
+  '/demo/checklist': typeof DemoChecklistRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
@@ -577,6 +584,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/units': typeof AuthenticatedUnitsRoute
   '/users': typeof AuthenticatedUsersRoute
+  '/demo/checklist': typeof DemoChecklistRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
@@ -653,6 +661,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/units': typeof AuthenticatedUnitsRoute
   '/_authenticated/users': typeof AuthenticatedUsersRoute
+  '/demo/checklist': typeof DemoChecklistRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/_authenticated/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
@@ -729,6 +738,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/units'
     | '/users'
+    | '/demo/checklist'
     | '/demo/cliente-final'
     | '/demo/white-label'
     | '/agenda/appointments'
@@ -796,6 +806,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/units'
     | '/users'
+    | '/demo/checklist'
     | '/demo/cliente-final'
     | '/demo/white-label'
     | '/agenda/appointments'
@@ -871,6 +882,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/units'
     | '/_authenticated/users'
+    | '/demo/checklist'
     | '/demo/cliente-final'
     | '/demo/white-label'
     | '/_authenticated/agenda/appointments'
@@ -1034,6 +1046,13 @@ declare module '@tanstack/react-router' {
       path: '/cliente-final'
       fullPath: '/demo/cliente-final'
       preLoaderRoute: typeof DemoClienteFinalRouteImport
+      parentRoute: typeof DemoRoute
+    }
+    '/demo/checklist': {
+      id: '/demo/checklist'
+      path: '/checklist'
+      fullPath: '/demo/checklist'
+      preLoaderRoute: typeof DemoChecklistRouteImport
       parentRoute: typeof DemoRoute
     }
     '/_authenticated/users': {
@@ -1651,11 +1670,13 @@ const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface DemoRouteChildren {
+  DemoChecklistRoute: typeof DemoChecklistRoute
   DemoClienteFinalRoute: typeof DemoClienteFinalRoute
   DemoWhiteLabelRoute: typeof DemoWhiteLabelRoute
 }
 
 const DemoRouteChildren: DemoRouteChildren = {
+  DemoChecklistRoute: DemoChecklistRoute,
   DemoClienteFinalRoute: DemoClienteFinalRoute,
   DemoWhiteLabelRoute: DemoWhiteLabelRoute,
 }
