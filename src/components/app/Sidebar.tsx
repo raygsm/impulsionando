@@ -57,6 +57,12 @@ const NAV: NavItem[] = [
   { to: "/sales/new", label: "Nova venda (PDV)", icon: Plus, group: "Vendas" },
   { to: "/sales/orders", label: "Pedidos", icon: Receipt, group: "Vendas" },
   { to: "/sales/cash", label: "Fechamento de caixa", icon: WalletIcon, group: "Vendas" },
+  { to: "/reports", label: "Visão geral", icon: BarChart3, group: "Relatórios" },
+  { to: "/reports/sales", label: "Vendas", icon: ShoppingCart, group: "Relatórios" },
+  { to: "/reports/finance", label: "Financeiro", icon: Wallet, group: "Relatórios" },
+  { to: "/reports/inventory", label: "Estoque", icon: Package, group: "Relatórios" },
+  { to: "/reports/agenda", label: "Agenda", icon: Calendar, group: "Relatórios" },
+  { to: "/reports/crm", label: "CRM", icon: UserPlus, group: "Relatórios" },
 ];
 
 export function Sidebar({ currentUser }: { currentUser: CurrentUser }) {
