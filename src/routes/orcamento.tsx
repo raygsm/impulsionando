@@ -15,8 +15,46 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { toast } from "sonner";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+
+/* --------------------- Validation helpers --------------------- */
+
+// Aceita 10 ou 11 dígitos (fixo / celular BR) após remover máscara
+const phoneDigits = (v: string) => v.replace(/\D/g, "");
+function formatPhoneBR(v: string): string {
+  const d = phoneDigits(v).slice(0, 11);
+  if (d.length <= 2) return d;
+  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
+
+const leadSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, "Informe seu nome (mínimo 2 caracteres).")
+    .max(120, "Nome muito longo (máx. 120).")
+    .regex(/^[\p{L}\p{M}'.\- ]+$/u, "Use apenas letras e espaços."),
+  whatsapp: z
+    .string()
+    .trim()
+    .min(1, "Informe um WhatsApp para contato.")
+    .refine((v) => {
+      const d = phoneDigits(v);
+      return d.length === 10 || d.length === 11;
+    }, "WhatsApp inválido. Use DDD + número (ex.: (21) 99999-9999)."),
+  email: z
+    .string()
+    .trim()
+    .max(200, "E-mail muito longo (máx. 200).")
+    .email("E-mail inválido.")
+    .optional()
+    .or(z.literal("")),
+});
+type LeadErrors = Partial<Record<"name" | "whatsapp" | "email", string>>;
 
 type SearchParams = {
   segmento?: string;
