@@ -31,6 +31,7 @@ import { Route as AuthenticatedCrmPipelinesRouteImport } from './routes/_authent
 import { Route as AuthenticatedCrmLeadsRouteImport } from './routes/_authenticated/crm.leads'
 import { Route as AuthenticatedCrmBoardRouteImport } from './routes/_authenticated/crm.board'
 import { Route as AuthenticatedCrmActivitiesRouteImport } from './routes/_authenticated/crm.activities'
+import { Route as AuthenticatedAgendaWaitlistRouteImport } from './routes/_authenticated/agenda.waitlist'
 import { Route as AuthenticatedAgendaServicesRouteImport } from './routes/_authenticated/agenda.services'
 import { Route as AuthenticatedAgendaSchedulesRouteImport } from './routes/_authenticated/agenda.schedules'
 import { Route as AuthenticatedAgendaProfessionalsRouteImport } from './routes/_authenticated/agenda.professionals'
@@ -150,6 +151,12 @@ const AuthenticatedCrmActivitiesRoute =
     path: '/activities',
     getParentRoute: () => AuthenticatedCrmRoute,
   } as any)
+const AuthenticatedAgendaWaitlistRoute =
+  AuthenticatedAgendaWaitlistRouteImport.update({
+    id: '/waitlist',
+    path: '/waitlist',
+    getParentRoute: () => AuthenticatedAgendaRoute,
+  } as any)
 const AuthenticatedAgendaServicesRoute =
   AuthenticatedAgendaServicesRouteImport.update({
     id: '/services',
@@ -195,6 +202,7 @@ export interface FileRoutesByFullPath {
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
   '/agenda/services': typeof AuthenticatedAgendaServicesRoute
+  '/agenda/waitlist': typeof AuthenticatedAgendaWaitlistRoute
   '/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/crm/board': typeof AuthenticatedCrmBoardRoute
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
@@ -220,6 +228,7 @@ export interface FileRoutesByTo {
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
   '/agenda/services': typeof AuthenticatedAgendaServicesRoute
+  '/agenda/waitlist': typeof AuthenticatedAgendaWaitlistRoute
   '/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/crm/board': typeof AuthenticatedCrmBoardRoute
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
@@ -249,6 +258,7 @@ export interface FileRoutesById {
   '/_authenticated/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/_authenticated/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
   '/_authenticated/agenda/services': typeof AuthenticatedAgendaServicesRoute
+  '/_authenticated/agenda/waitlist': typeof AuthenticatedAgendaWaitlistRoute
   '/_authenticated/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/_authenticated/crm/board': typeof AuthenticatedCrmBoardRoute
   '/_authenticated/crm/leads': typeof AuthenticatedCrmLeadsRoute
@@ -278,6 +288,7 @@ export interface FileRouteTypes {
     | '/agenda/professionals'
     | '/agenda/schedules'
     | '/agenda/services'
+    | '/agenda/waitlist'
     | '/crm/activities'
     | '/crm/board'
     | '/crm/leads'
@@ -303,6 +314,7 @@ export interface FileRouteTypes {
     | '/agenda/professionals'
     | '/agenda/schedules'
     | '/agenda/services'
+    | '/agenda/waitlist'
     | '/crm/activities'
     | '/crm/board'
     | '/crm/leads'
@@ -331,6 +343,7 @@ export interface FileRouteTypes {
     | '/_authenticated/agenda/professionals'
     | '/_authenticated/agenda/schedules'
     | '/_authenticated/agenda/services'
+    | '/_authenticated/agenda/waitlist'
     | '/_authenticated/crm/activities'
     | '/_authenticated/crm/board'
     | '/_authenticated/crm/leads'
@@ -501,6 +514,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCrmActivitiesRouteImport
       parentRoute: typeof AuthenticatedCrmRoute
     }
+    '/_authenticated/agenda/waitlist': {
+      id: '/_authenticated/agenda/waitlist'
+      path: '/waitlist'
+      fullPath: '/agenda/waitlist'
+      preLoaderRoute: typeof AuthenticatedAgendaWaitlistRouteImport
+      parentRoute: typeof AuthenticatedAgendaRoute
+    }
     '/_authenticated/agenda/services': {
       id: '/_authenticated/agenda/services'
       path: '/services'
@@ -537,6 +557,7 @@ interface AuthenticatedAgendaRouteChildren {
   AuthenticatedAgendaProfessionalsRoute: typeof AuthenticatedAgendaProfessionalsRoute
   AuthenticatedAgendaSchedulesRoute: typeof AuthenticatedAgendaSchedulesRoute
   AuthenticatedAgendaServicesRoute: typeof AuthenticatedAgendaServicesRoute
+  AuthenticatedAgendaWaitlistRoute: typeof AuthenticatedAgendaWaitlistRoute
   AuthenticatedAgendaIndexRoute: typeof AuthenticatedAgendaIndexRoute
 }
 
@@ -545,6 +566,7 @@ const AuthenticatedAgendaRouteChildren: AuthenticatedAgendaRouteChildren = {
   AuthenticatedAgendaProfessionalsRoute: AuthenticatedAgendaProfessionalsRoute,
   AuthenticatedAgendaSchedulesRoute: AuthenticatedAgendaSchedulesRoute,
   AuthenticatedAgendaServicesRoute: AuthenticatedAgendaServicesRoute,
+  AuthenticatedAgendaWaitlistRoute: AuthenticatedAgendaWaitlistRoute,
   AuthenticatedAgendaIndexRoute: AuthenticatedAgendaIndexRoute,
 }
 
