@@ -81,7 +81,7 @@ export function Sidebar({ currentUser }: { currentUser: CurrentUser }) {
         </div>
         <div className="leading-tight">
           <div className="text-sm font-semibold tracking-tight">Impulsionando</div>
-          <div className="text-[10px] uppercase text-sidebar-foreground/60 tracking-wider">Sistemas</div>
+          <div className="text-[10px] uppercase text-sidebar-foreground/60 tracking-wider">Tecnologia</div>
         </div>
       </div>
 
