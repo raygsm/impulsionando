@@ -1,4 +1,6 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { Toaster } from "@/components/ui/sonner";
+import { supabase as supabaseAuth } from "@/integrations/supabase/client";
 import {
   Outlet,
   Link,
