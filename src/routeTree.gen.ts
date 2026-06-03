@@ -23,6 +23,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedCrmRouteImport } from './routes/_authenticated/crm'
 import { Route as AuthenticatedCompaniesRouteImport } from './routes/_authenticated/companies'
 import { Route as AuthenticatedAuditRouteImport } from './routes/_authenticated/audit'
+import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
 import { Route as AuthenticatedAccessProfilesRouteImport } from './routes/_authenticated/access-profiles'
 import { Route as AuthenticatedCrmIndexRouteImport } from './routes/_authenticated/crm.index'
 import { Route as AuthenticatedCrmPipelinesRouteImport } from './routes/_authenticated/crm.pipelines'
@@ -100,6 +101,11 @@ const AuthenticatedAuditRoute = AuthenticatedAuditRouteImport.update({
   path: '/audit',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAgendaRoute = AuthenticatedAgendaRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAccessProfilesRoute =
   AuthenticatedAccessProfilesRouteImport.update({
     id: '/access-profiles',
@@ -138,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
+  '/agenda': typeof AuthenticatedAgendaRoute
   '/audit': typeof AuthenticatedAuditRoute
   '/companies': typeof AuthenticatedCompaniesRoute
   '/crm': typeof AuthenticatedCrmRouteWithChildren
@@ -159,6 +166,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
+  '/agenda': typeof AuthenticatedAgendaRoute
   '/audit': typeof AuthenticatedAuditRoute
   '/companies': typeof AuthenticatedCompaniesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -181,6 +189,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/access-profiles': typeof AuthenticatedAccessProfilesRoute
+  '/_authenticated/agenda': typeof AuthenticatedAgendaRoute
   '/_authenticated/audit': typeof AuthenticatedAuditRoute
   '/_authenticated/companies': typeof AuthenticatedCompaniesRoute
   '/_authenticated/crm': typeof AuthenticatedCrmRouteWithChildren
@@ -204,6 +213,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/access-profiles'
+    | '/agenda'
     | '/audit'
     | '/companies'
     | '/crm'
@@ -225,6 +235,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/access-profiles'
+    | '/agenda'
     | '/audit'
     | '/companies'
     | '/dashboard'
@@ -246,6 +257,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/access-profiles'
+    | '/_authenticated/agenda'
     | '/_authenticated/audit'
     | '/_authenticated/companies'
     | '/_authenticated/crm'
@@ -370,6 +382,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAuditRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/agenda': {
+      id: '/_authenticated/agenda'
+      path: '/agenda'
+      fullPath: '/agenda'
+      preLoaderRoute: typeof AuthenticatedAgendaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/access-profiles': {
       id: '/_authenticated/access-profiles'
       path: '/access-profiles'
@@ -436,6 +455,7 @@ const AuthenticatedCrmRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccessProfilesRoute: typeof AuthenticatedAccessProfilesRoute
+  AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRoute
   AuthenticatedAuditRoute: typeof AuthenticatedAuditRoute
   AuthenticatedCompaniesRoute: typeof AuthenticatedCompaniesRoute
   AuthenticatedCrmRoute: typeof AuthenticatedCrmRouteWithChildren
@@ -451,6 +471,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccessProfilesRoute: AuthenticatedAccessProfilesRoute,
+  AuthenticatedAgendaRoute: AuthenticatedAgendaRoute,
   AuthenticatedAuditRoute: AuthenticatedAuditRoute,
   AuthenticatedCompaniesRoute: AuthenticatedCompaniesRoute,
   AuthenticatedCrmRoute: AuthenticatedCrmRouteWithChildren,
@@ -475,3 +496,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
