@@ -1603,6 +1603,133 @@ export type Database = {
         }
         Relationships: []
       }
+      sales_cash_session_counts: {
+        Row: {
+          counted_amount: number
+          created_at: string
+          difference: number
+          expected_amount: number
+          id: string
+          payment_method_id: string
+          session_id: string
+          updated_at: string
+        }
+        Insert: {
+          counted_amount?: number
+          created_at?: string
+          difference?: number
+          expected_amount?: number
+          id?: string
+          payment_method_id: string
+          session_id: string
+          updated_at?: string
+        }
+        Update: {
+          counted_amount?: number
+          created_at?: string
+          difference?: number
+          expected_amount?: number
+          id?: string
+          payment_method_id?: string
+          session_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_cash_session_counts_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "fin_payment_methods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_cash_session_counts_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sales_cash_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_cash_sessions: {
+        Row: {
+          account_id: string
+          closed_at: string | null
+          closed_by: string | null
+          closing_amount: number | null
+          company_id: string
+          created_at: string
+          difference_total: number | null
+          expected_total: number | null
+          id: string
+          notes: string | null
+          opened_at: string
+          opened_by: string
+          opening_amount: number
+          status: string
+          unit_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          closed_at?: string | null
+          closed_by?: string | null
+          closing_amount?: number | null
+          company_id: string
+          created_at?: string
+          difference_total?: number | null
+          expected_total?: number | null
+          id?: string
+          notes?: string | null
+          opened_at?: string
+          opened_by: string
+          opening_amount?: number
+          status?: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          closed_at?: string | null
+          closed_by?: string | null
+          closing_amount?: number | null
+          company_id?: string
+          created_at?: string
+          difference_total?: number | null
+          expected_total?: number | null
+          id?: string
+          notes?: string | null
+          opened_at?: string
+          opened_by?: string
+          opening_amount?: number
+          status?: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_cash_sessions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "fin_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_cash_sessions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_cash_sessions_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "company_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sales_order_items: {
         Row: {
           company_id: string
@@ -2012,6 +2139,10 @@ export type Database = {
       current_user_company_ids: { Args: never; Returns: string[] }
       is_impulsionando_staff: { Args: { _user: string }; Returns: boolean }
       is_super_admin: { Args: { _user: string }; Returns: boolean }
+      sales_cash_session_close: {
+        Args: { _counts: Json; _notes?: string; _session_id: string }
+        Returns: string
+      }
       user_belongs_to_company: {
         Args: { _company: string; _user: string }
         Returns: boolean
