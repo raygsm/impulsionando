@@ -37,8 +37,13 @@ export function PublicFooter() {
         </div>
 
         <div>
-          <div className="text-sm font-semibold mb-3">Legal</div>
+          <div className="text-sm font-semibold mb-3">Experimente</div>
           <ul className="space-y-2 text-sm text-muted-foreground">
+            <li>
+              <Link to="/demo" className="inline-flex items-center gap-1 text-primary hover:underline font-medium">
+                ▶ Acessar Sistema DEMO
+              </Link>
+            </li>
             <li><Link to="/termos" className="hover:text-foreground">Termos de Uso</Link></li>
             <li><Link to="/privacidade" className="hover:text-foreground">Política de Privacidade</Link></li>
             <li><Link to="/auth" className="hover:text-foreground">Área do cliente</Link></li>
