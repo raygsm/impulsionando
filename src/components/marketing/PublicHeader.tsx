@@ -17,9 +17,9 @@ const NAV = [
 export function PublicHeader() {
   return (
     <header className="sticky top-0 z-30 w-full border-b border-border bg-background/80 backdrop-blur">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-        <Link to="/" className="flex items-center gap-2">
-          <img src={logoAsset.url} alt="Impulsionando Tecnologia" className="h-10 w-auto" />
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+        <Link to="/" className="flex items-center gap-2 shrink-0">
+          <img src={logoAsset.url} alt="Impulsionando Tecnologia" className="h-14 md:h-16 w-auto" />
         </Link>
 
         <nav className="hidden lg:flex items-center gap-1">
