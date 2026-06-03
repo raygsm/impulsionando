@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ResetPasswordSentRouteImport } from './routes/reset-password-sent'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -70,6 +71,11 @@ import { Route as AuthenticatedAgendaProfessionalsRouteImport } from './routes/_
 import { Route as AuthenticatedAgendaAppointmentsRouteImport } from './routes/_authenticated/agenda.appointments'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
 
+const ResetPasswordSentRoute = ResetPasswordSentRouteImport.update({
+  id: '/reset-password-sent',
+  path: '/reset-password-sent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
@@ -402,6 +408,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/reset-password-sent': typeof ResetPasswordSentRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/audit': typeof AuthenticatedAuditRoute
@@ -463,6 +470,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/reset-password-sent': typeof ResetPasswordSentRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/audit': typeof AuthenticatedAuditRoute
   '/companies': typeof AuthenticatedCompaniesRoute
@@ -519,6 +527,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/reset-password-sent': typeof ResetPasswordSentRoute
   '/_authenticated/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/_authenticated/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/_authenticated/audit': typeof AuthenticatedAuditRoute
@@ -582,6 +591,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/reset-password'
+    | '/reset-password-sent'
     | '/access-profiles'
     | '/agenda'
     | '/audit'
@@ -643,6 +653,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/reset-password'
+    | '/reset-password-sent'
     | '/access-profiles'
     | '/audit'
     | '/companies'
@@ -698,6 +709,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/reset-password'
+    | '/reset-password-sent'
     | '/_authenticated/access-profiles'
     | '/_authenticated/agenda'
     | '/_authenticated/audit'
@@ -761,10 +773,18 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ResetPasswordSentRoute: typeof ResetPasswordSentRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reset-password-sent': {
+      id: '/reset-password-sent'
+      path: '/reset-password-sent'
+      fullPath: '/reset-password-sent'
+      preLoaderRoute: typeof ResetPasswordSentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
@@ -1394,6 +1414,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ResetPasswordSentRoute: ResetPasswordSentRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
