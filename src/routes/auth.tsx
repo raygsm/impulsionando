@@ -141,7 +141,45 @@ function AuthPage() {
                   <Input id="li-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="li-pw">Senha</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="li-pw">Senha</Label>
+                    <Dialog open={resetOpen} onOpenChange={(o) => { setResetOpen(o); if (o) setResetEmail(email); }}>
+                      <DialogTrigger asChild>
+                        <button type="button" className="text-xs text-primary hover:underline">
+                          Esqueci a senha
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Recuperar senha</DialogTitle>
+                          <DialogDescription>
+                            Enviaremos um link para redefinição no e-mail informado.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={handleResetPassword} className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="reset-email">E-mail</Label>
+                            <Input
+                              id="reset-email"
+                              type="email"
+                              required
+                              value={resetEmail}
+                              onChange={(e) => setResetEmail(e.target.value)}
+                              placeholder="voce@empresa.com"
+                            />
+                          </div>
+                          <DialogFooter>
+                            <Button type="button" variant="outline" onClick={() => setResetOpen(false)}>
+                              Cancelar
+                            </Button>
+                            <Button type="submit" disabled={resetLoading} className="bg-gradient-primary">
+                              {resetLoading ? "Enviando..." : "Enviar link"}
+                            </Button>
+                          </DialogFooter>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                   <Input id="li-pw" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
                 </div>
                 <Button type="submit" className="w-full bg-gradient-primary shadow-elegant" disabled={loading}>
