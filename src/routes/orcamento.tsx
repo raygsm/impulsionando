@@ -447,9 +447,9 @@ function ResultCard({
 }
 
 
-const VALID_DORES = new Set(DORES.map((d) => d.value));
-const VALID_SEGMENTOS = new Set(SEGMENTOS.map((s) => s.value));
-const VALID_PERFIS = new Set(PERFIL.map((p) => p.value));
+const VALID_DORES = new Set<string>(DORES.map((d) => d.value));
+const VALID_SEGMENTOS = new Set<string>(SEGMENTOS.map((s) => s.value));
+const VALID_PERFIS = new Set<string>(PERFIL.map((p) => p.value));
 
 function buildPrefill(s: SearchParams): { answers: Answers; firstStep: number; hasPrefill: boolean } {
   const a: Answers = { ...INITIAL };
