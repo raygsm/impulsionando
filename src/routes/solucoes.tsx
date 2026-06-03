@@ -19,7 +19,16 @@ function ComingSoon({ title, description }: { title: string; description: string
 export { ComingSoon };
 
 export const Route = createFileRoute("/solucoes")({
-  head: () => ({ meta: [{ title: "Soluções — Impulsionando Tecnologia" }] }),
+  head: () => ({
+    meta: [
+      { title: "Soluções para empresas — Atendimento, Vendas, Gestão | Impulsionando Tecnologia" },
+      { name: "description", content: "Soluções modulares para atendimento, agenda, vendas, pagamentos, gestão e crescimento. Sistemas que conversam entre si, sem retrabalho." },
+      { property: "og:title", content: "Soluções — Impulsionando Tecnologia" },
+      { property: "og:description", content: "Atendimento, agenda, vendas, pagamentos e gestão em um só sistema." },
+      { name: "twitter:title", content: "Soluções — Impulsionando Tecnologia" },
+      { name: "twitter:description", content: "Tudo o que sua empresa precisa para crescer com organização." },
+    ],
+  }),
   component: () => (
     <ComingSoon
       title="Soluções"
