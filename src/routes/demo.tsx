@@ -36,9 +36,14 @@ function DemoLanding() {
               são totalmente navegáveis, com todos os painéis, permissionamentos, setores e usuários
               configurados — exatamente como no sistema real.
             </p>
-            <div className="mt-3 inline-flex items-center gap-2 text-xs text-muted-foreground">
-              <HelpCircle className="w-3.5 h-3.5" />
-              Durante toda a navegação, ícones de interrogação explicam cada recurso.
+            <div className="mt-4 flex items-center justify-center gap-3 flex-wrap">
+              <div className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+                <HelpCircle className="w-3.5 h-3.5" />
+                Durante toda a navegação, ícones de interrogação explicam cada recurso.
+              </div>
+              <Button asChild size="sm" variant="outline">
+                <Link to="/demo/checklist">Ver checklist de prontidão</Link>
+              </Button>
             </div>
           </div>
 
