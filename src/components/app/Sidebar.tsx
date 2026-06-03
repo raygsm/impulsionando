@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import type { CurrentUser } from "@/lib/auth";
 import {
   LayoutDashboard, Building2, Tags, MapPin, Layers, Users, KeyRound,
-  SlidersHorizontal, FileSearch, Boxes, Sparkles,
+  SlidersHorizontal, FileSearch, Boxes, Sparkles, KanbanSquare, UserPlus, GitBranch, CalendarClock,
 } from "lucide-react";
 
 interface NavItem {
@@ -11,6 +11,7 @@ interface NavItem {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   superOnly?: boolean;
+  group?: string;
 }
 
 const NAV: NavItem[] = [
@@ -25,6 +26,10 @@ const NAV: NavItem[] = [
   { to: "/modules", label: "Módulos", icon: Boxes },
   { to: "/settings", label: "Configurações", icon: SlidersHorizontal },
   { to: "/audit", label: "Auditoria", icon: FileSearch },
+  { to: "/crm/board", label: "Kanban", icon: KanbanSquare, group: "CRM" },
+  { to: "/crm/leads", label: "Leads", icon: UserPlus, group: "CRM" },
+  { to: "/crm/pipelines", label: "Funis", icon: GitBranch, group: "CRM" },
+  { to: "/crm/activities", label: "Atividades", icon: CalendarClock, group: "CRM" },
 ];
 
 export function Sidebar({ currentUser }: { currentUser: CurrentUser }) {
@@ -44,25 +49,40 @@ export function Sidebar({ currentUser }: { currentUser: CurrentUser }) {
       </div>
 
       <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
-        {items.map((it) => {
-          const Icon = it.icon;
-          const active = location.pathname === it.to;
-          return (
-            <Link
-              key={it.to}
-              to={it.to}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
-                active
-                  ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-elegant"
-                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              )}
-            >
-              <Icon className="w-4 h-4 shrink-0" />
-              <span>{it.label}</span>
-            </Link>
-          );
-        })}
+        {(() => {
+          const rendered: React.ReactNode[] = [];
+          let lastGroup: string | undefined = undefined;
+          items.forEach((it) => {
+            if (it.group !== lastGroup) {
+              lastGroup = it.group;
+              if (it.group) {
+                rendered.push(
+                  <div key={`g-${it.group}`} className="px-3 pt-4 pb-1 text-[10px] uppercase tracking-wider text-sidebar-foreground/40">
+                    {it.group}
+                  </div>
+                );
+              }
+            }
+            const Icon = it.icon;
+            const active = location.pathname === it.to || location.pathname.startsWith(it.to + "/");
+            rendered.push(
+              <Link
+                key={it.to}
+                to={it.to}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
+                  active
+                    ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-elegant"
+                    : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                )}
+              >
+                <Icon className="w-4 h-4 shrink-0" />
+                <span>{it.label}</span>
+              </Link>
+            );
+          });
+          return rendered;
+        })()}
       </nav>
 
       <div className="p-3 border-t border-sidebar-border text-xs text-sidebar-foreground/60">

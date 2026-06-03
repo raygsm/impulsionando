@@ -259,6 +259,288 @@ export type Database = {
           },
         ]
       }
+      crm_activities: {
+        Row: {
+          activity_type: string
+          company_id: string
+          content: string | null
+          created_at: string
+          created_by: string | null
+          done_at: string | null
+          due_at: string | null
+          id: string
+          lead_id: string | null
+          opportunity_id: string | null
+          owner_user_id: string | null
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          activity_type: string
+          company_id: string
+          content?: string | null
+          created_at?: string
+          created_by?: string | null
+          done_at?: string | null
+          due_at?: string | null
+          id?: string
+          lead_id?: string | null
+          opportunity_id?: string | null
+          owner_user_id?: string | null
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          activity_type?: string
+          company_id?: string
+          content?: string | null
+          created_at?: string
+          created_by?: string | null
+          done_at?: string | null
+          due_at?: string | null
+          id?: string
+          lead_id?: string | null
+          opportunity_id?: string | null
+          owner_user_id?: string | null
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_activities_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_activities_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "crm_opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_leads: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          document: string | null
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          owner_user_id: string | null
+          phone: string | null
+          score: number
+          source: string | null
+          status: string
+          tags: string[]
+          unit_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          document?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          owner_user_id?: string | null
+          phone?: string | null
+          score?: number
+          source?: string | null
+          status?: string
+          tags?: string[]
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          document?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          owner_user_id?: string | null
+          phone?: string | null
+          score?: number
+          source?: string | null
+          status?: string
+          tags?: string[]
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_opportunities: {
+        Row: {
+          closed_at: string | null
+          company_id: string
+          created_at: string
+          currency: string
+          expected_close_at: string | null
+          id: string
+          lead_id: string | null
+          lost_reason: string | null
+          owner_user_id: string | null
+          pipeline_id: string
+          sort_order: number
+          stage_id: string
+          status: string
+          title: string
+          updated_at: string
+          value: number
+        }
+        Insert: {
+          closed_at?: string | null
+          company_id: string
+          created_at?: string
+          currency?: string
+          expected_close_at?: string | null
+          id?: string
+          lead_id?: string | null
+          lost_reason?: string | null
+          owner_user_id?: string | null
+          pipeline_id: string
+          sort_order?: number
+          stage_id: string
+          status?: string
+          title: string
+          updated_at?: string
+          value?: number
+        }
+        Update: {
+          closed_at?: string | null
+          company_id?: string
+          created_at?: string
+          currency?: string
+          expected_close_at?: string | null
+          id?: string
+          lead_id?: string | null
+          lost_reason?: string | null
+          owner_user_id?: string | null
+          pipeline_id?: string
+          sort_order?: number
+          stage_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_opportunities_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_opportunities_pipeline_id_fkey"
+            columns: ["pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "crm_pipelines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_opportunities_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "crm_stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_pipelines: {
+        Row: {
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_default: boolean
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_stages: {
+        Row: {
+          color: string
+          company_id: string
+          created_at: string
+          id: string
+          name: string
+          pipeline_id: string
+          sort_order: number
+          stage_type: string
+          updated_at: string
+          win_probability: number
+        }
+        Insert: {
+          color?: string
+          company_id: string
+          created_at?: string
+          id?: string
+          name: string
+          pipeline_id: string
+          sort_order?: number
+          stage_type?: string
+          updated_at?: string
+          win_probability?: number
+        }
+        Update: {
+          color?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          pipeline_id?: string
+          sort_order?: number
+          stage_type?: string
+          updated_at?: string
+          win_probability?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_stages_pipeline_id_fkey"
+            columns: ["pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "crm_pipelines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       modules: {
         Row: {
           category: string | null
