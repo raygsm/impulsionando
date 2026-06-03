@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, EmptyState } from "@/components/app/PageElements";
 import { Card } from "@/components/ui/card";
@@ -9,9 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Trash2 } from "lucide-react";
+import { Save, RotateCcw } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 
 export const Route = createFileRoute("/_authenticated/settings")({
@@ -19,15 +20,24 @@ export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
 });
 
+interface Definition {
+  id: string; key: string; label: string; description: string | null;
+  category: string; value_type: "text" | "number" | "boolean" | "json";
+  default_value: unknown; is_company_editable: boolean; sort_order: number;
+}
+
+interface SettingRow {
+  id: string; key: string; value: unknown; value_type: string; category: string;
+}
+
 function SettingsPage() {
   const qc = useQueryClient();
   const { data: me } = useCurrentUser();
   const [companyId, setCompanyId] = useState<string>("");
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ key: "", value_type: "boolean" as "boolean" | "text" | "number", value: "" });
+  const [dirty, setDirty] = useState<Record<string, unknown>>({});
 
   const { data: companies } = useQuery({
-    queryKey: ["companies-opt"],
+    queryKey: ["companies-opt-settings"],
     queryFn: async () => {
       const data = (await supabase.from("companies").select("id, name").order("name")).data ?? [];
       if (data.length && !companyId) setCompanyId(data[0].id);
@@ -35,103 +45,115 @@ function SettingsPage() {
     },
   });
 
+  const { data: defs } = useQuery({
+    queryKey: ["setting-definitions"],
+    queryFn: async () => (await supabase.from("setting_definitions").select("*").order("category").order("sort_order")).data as Definition[] ?? [],
+  });
+
   const { data: settings } = useQuery({
     queryKey: ["company-settings", companyId],
     enabled: !!companyId,
-    queryFn: async () => (await supabase.from("company_settings").select("*").eq("company_id", companyId).order("key")).data ?? [],
+    queryFn: async () => (await supabase.from("company_settings").select("id, key, value, value_type, category").eq("company_id", companyId)).data as SettingRow[] ?? [],
   });
 
+  const settingMap = useMemo(() => new Map(settings?.map((s) => [s.key, s.value])), [settings]);
+  const categories = useMemo(() => [...new Set(defs?.map((d) => d.category) ?? [])], [defs]);
+
   const upsert = useMutation({
-    mutationFn: async (payload: { key: string; value_type: string; value: string | number | boolean | null }) => {
-      const { error } = await supabase.from("company_settings").upsert(
-        { company_id: companyId, key: payload.key, value_type: payload.value_type, value: payload.value },
-        { onConflict: "company_id,key" }
-      );
+    mutationFn: async (changes: { key: string; value: unknown; value_type: string; category: string }[]) => {
+      if (!changes.length) return;
+      const rows = changes.map((c) => ({
+        company_id: companyId, key: c.key, value: c.value as never,
+        value_type: c.value_type, category: c.category,
+      }));
+      const { error } = await supabase.from("company_settings").upsert(rows, { onConflict: "company_id,key" });
       if (error) throw error;
     },
-    onSuccess: () => { toast.success("Configuração salva"); qc.invalidateQueries({ queryKey: ["company-settings"] }); setOpen(false); setForm({ key: "", value_type: "boolean", value: "" }); },
+    onSuccess: () => {
+      toast.success("Configurações salvas");
+      setDirty({});
+      qc.invalidateQueries({ queryKey: ["company-settings"] });
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const remove = useMutation({
-    mutationFn: async (key: string) => { const { error } = await supabase.from("company_settings").delete().eq("company_id", companyId).eq("key", key); if (error) throw error; },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["company-settings"] }),
-  });
-
-  function parseValue(): string | number | boolean | null {
-    if (form.value_type === "boolean") return form.value === "true";
-    if (form.value_type === "number") return Number(form.value);
-    return form.value;
+  function valueOf(def: Definition): unknown {
+    if (def.key in dirty) return dirty[def.key];
+    if (settingMap.has(def.key)) return settingMap.get(def.key);
+    return def.default_value;
   }
+
+  function setVal(key: string, v: unknown) { setDirty((d) => ({ ...d, [key]: v })); }
+
+  function save() {
+    if (!defs) return;
+    const changes = Object.entries(dirty).map(([key, value]) => {
+      const def = defs.find((d) => d.key === key)!;
+      return { key, value, value_type: def.value_type, category: def.category };
+    });
+    upsert.mutate(changes);
+  }
+
+  const dirtyCount = Object.keys(dirty).length;
+
+  if (!companies?.length) return <EmptyState title="Nenhuma empresa" description="Crie uma empresa antes de parametrizar." />;
 
   return (
     <div>
       <PageHeader
         title="Configurações"
-        description="Parâmetros chave/valor por empresa. Expansão completa na Sprint 2."
+        description="Central de parametrização por empresa."
         action={
-          <div className="flex gap-2">
-            <Select value={companyId} onValueChange={setCompanyId}>
+          <div className="flex gap-2 items-center">
+            {dirtyCount > 0 && <Badge variant="outline">{dirtyCount} alteração(ões)</Badge>}
+            <Select value={companyId} onValueChange={(v) => { setCompanyId(v); setDirty({}); }}>
               <SelectTrigger className="w-64"><SelectValue placeholder="Empresa" /></SelectTrigger>
               <SelectContent>{companies?.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
             </Select>
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild><Button className="bg-gradient-primary shadow-elegant"><Plus className="w-4 h-4 mr-2" />Nova configuração</Button></DialogTrigger>
-              <DialogContent>
-                <DialogHeader><DialogTitle>Nova configuração</DialogTitle></DialogHeader>
-                <div className="space-y-4">
-                  <div className="space-y-2"><Label>Chave</Label><Input placeholder="ex: white_label.enabled" value={form.key} onChange={(e) => setForm({ ...form, key: e.target.value })} /></div>
-                  <div className="space-y-2"><Label>Tipo</Label>
-                    <Select value={form.value_type} onValueChange={(v) => setForm({ ...form, value_type: v as typeof form.value_type, value: "" })}>
-                      <SelectTrigger /><SelectContent>
-                        <SelectItem value="boolean">SIM/NÃO</SelectItem>
-                        <SelectItem value="text">Texto</SelectItem>
-                        <SelectItem value="number">Número</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2"><Label>Valor</Label>
-                    {form.value_type === "boolean" ? (
-                      <div className="flex items-center gap-3 border rounded-md p-3">
-                        <Switch checked={form.value === "true"} onCheckedChange={(v) => setForm({ ...form, value: String(v) })} />
-                        <span className="text-sm">{form.value === "true" ? "SIM" : "NÃO"}</span>
-                      </div>
-                    ) : (
-                      <Input type={form.value_type === "number" ? "number" : "text"} value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} />
-                    )}
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
-                  <Button disabled={!form.key} onClick={() => upsert.mutate({ key: form.key, value_type: form.value_type, value: parseValue() })}>Salvar</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <Button variant="ghost" disabled={!dirtyCount} onClick={() => setDirty({})}><RotateCcw className="w-4 h-4 mr-1" />Descartar</Button>
+            <Button className="bg-gradient-primary shadow-elegant" disabled={!dirtyCount || upsert.isPending} onClick={save}>
+              <Save className="w-4 h-4 mr-2" />Salvar
+            </Button>
           </div>
         }
       />
-      {settings?.length === 0 ? (
-        <EmptyState title="Nenhuma configuração definida" description="Crie a primeira configuração desta empresa." />
-      ) : (
-        <Card className="shadow-card divide-y">
-          {settings?.map((s) => (
-            <div key={s.id} className="flex items-center justify-between p-4 gap-4">
-              <div className="min-w-0">
-                <div className="font-mono text-sm">{s.key}</div>
-                <div className="text-xs text-muted-foreground">tipo: {s.value_type}</div>
-              </div>
-              <div className="text-sm font-medium flex items-center gap-3">
-                <span>{typeof s.value === "boolean" ? (s.value ? "SIM" : "NÃO") : String(s.value ?? "—")}</span>
-                {me?.isSuperAdmin && (
-                  <Button size="icon" variant="ghost" onClick={() => remove.mutate(s.key)}>
-                    <Trash2 className="w-4 h-4 text-destructive" />
-                  </Button>
-                )}
-              </div>
-            </div>
-          ))}
-        </Card>
-      )}
+
+      <Tabs defaultValue={categories[0] ?? "geral"} className="space-y-4">
+        <TabsList>{categories.map((c) => <TabsTrigger key={c} value={c} className="capitalize">{c}</TabsTrigger>)}</TabsList>
+        {categories.map((cat) => (
+          <TabsContent key={cat} value={cat}>
+            <Card className="shadow-card divide-y">
+              {defs?.filter((d) => d.category === cat).map((def) => {
+                const v = valueOf(def);
+                const editable = me?.isSuperAdmin || def.is_company_editable;
+                return (
+                  <div key={def.id} className="p-4 grid md:grid-cols-[1fr_320px] gap-4 items-center">
+                    <div>
+                      <Label className="text-sm font-medium">{def.label}</Label>
+                      <div className="font-mono text-[10px] text-muted-foreground">{def.key}</div>
+                      {def.description && <p className="text-xs text-muted-foreground mt-1">{def.description}</p>}
+                    </div>
+                    <div>
+                      {def.value_type === "boolean" ? (
+                        <div className="flex items-center gap-3 border rounded-md px-3 py-2">
+                          <Switch checked={!!v} disabled={!editable} onCheckedChange={(b) => setVal(def.key, b)} />
+                          <span className="text-sm">{v ? "Ativo" : "Inativo"}</span>
+                        </div>
+                      ) : def.value_type === "number" ? (
+                        <Input type="number" disabled={!editable} value={typeof v === "number" ? v : Number(v) || 0}
+                          onChange={(e) => setVal(def.key, Number(e.target.value))} />
+                      ) : (
+                        <Input disabled={!editable} value={typeof v === "string" ? v : JSON.stringify(v) ?? ""}
+                          onChange={(e) => setVal(def.key, e.target.value)} />
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </Card>
+          </TabsContent>
+        ))}
+      </Tabs>
     </div>
   );
 }
