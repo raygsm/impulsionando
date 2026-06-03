@@ -31,6 +31,7 @@ import { Route as AuthenticatedCrmPipelinesRouteImport } from './routes/_authent
 import { Route as AuthenticatedCrmLeadsRouteImport } from './routes/_authenticated/crm.leads'
 import { Route as AuthenticatedCrmBoardRouteImport } from './routes/_authenticated/crm.board'
 import { Route as AuthenticatedCrmActivitiesRouteImport } from './routes/_authenticated/crm.activities'
+import { Route as AuthenticatedAgendaServicesRouteImport } from './routes/_authenticated/agenda.services'
 import { Route as AuthenticatedAgendaProfessionalsRouteImport } from './routes/_authenticated/agenda.professionals'
 
 const AuthRoute = AuthRouteImport.update({
@@ -147,6 +148,12 @@ const AuthenticatedCrmActivitiesRoute =
     path: '/activities',
     getParentRoute: () => AuthenticatedCrmRoute,
   } as any)
+const AuthenticatedAgendaServicesRoute =
+  AuthenticatedAgendaServicesRouteImport.update({
+    id: '/services',
+    path: '/services',
+    getParentRoute: () => AuthenticatedAgendaRoute,
+  } as any)
 const AuthenticatedAgendaProfessionalsRoute =
   AuthenticatedAgendaProfessionalsRouteImport.update({
     id: '/professionals',
@@ -171,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/units': typeof AuthenticatedUnitsRoute
   '/users': typeof AuthenticatedUsersRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
+  '/agenda/services': typeof AuthenticatedAgendaServicesRoute
   '/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/crm/board': typeof AuthenticatedCrmBoardRoute
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
@@ -193,6 +201,7 @@ export interface FileRoutesByTo {
   '/units': typeof AuthenticatedUnitsRoute
   '/users': typeof AuthenticatedUsersRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
+  '/agenda/services': typeof AuthenticatedAgendaServicesRoute
   '/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/crm/board': typeof AuthenticatedCrmBoardRoute
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
@@ -219,6 +228,7 @@ export interface FileRoutesById {
   '/_authenticated/units': typeof AuthenticatedUnitsRoute
   '/_authenticated/users': typeof AuthenticatedUsersRoute
   '/_authenticated/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
+  '/_authenticated/agenda/services': typeof AuthenticatedAgendaServicesRoute
   '/_authenticated/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/_authenticated/crm/board': typeof AuthenticatedCrmBoardRoute
   '/_authenticated/crm/leads': typeof AuthenticatedCrmLeadsRoute
@@ -245,6 +255,7 @@ export interface FileRouteTypes {
     | '/units'
     | '/users'
     | '/agenda/professionals'
+    | '/agenda/services'
     | '/crm/activities'
     | '/crm/board'
     | '/crm/leads'
@@ -267,6 +278,7 @@ export interface FileRouteTypes {
     | '/units'
     | '/users'
     | '/agenda/professionals'
+    | '/agenda/services'
     | '/crm/activities'
     | '/crm/board'
     | '/crm/leads'
@@ -292,6 +304,7 @@ export interface FileRouteTypes {
     | '/_authenticated/units'
     | '/_authenticated/users'
     | '/_authenticated/agenda/professionals'
+    | '/_authenticated/agenda/services'
     | '/_authenticated/crm/activities'
     | '/_authenticated/crm/board'
     | '/_authenticated/crm/leads'
@@ -462,6 +475,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCrmActivitiesRouteImport
       parentRoute: typeof AuthenticatedCrmRoute
     }
+    '/_authenticated/agenda/services': {
+      id: '/_authenticated/agenda/services'
+      path: '/services'
+      fullPath: '/agenda/services'
+      preLoaderRoute: typeof AuthenticatedAgendaServicesRouteImport
+      parentRoute: typeof AuthenticatedAgendaRoute
+    }
     '/_authenticated/agenda/professionals': {
       id: '/_authenticated/agenda/professionals'
       path: '/professionals'
@@ -474,11 +494,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAgendaRouteChildren {
   AuthenticatedAgendaProfessionalsRoute: typeof AuthenticatedAgendaProfessionalsRoute
+  AuthenticatedAgendaServicesRoute: typeof AuthenticatedAgendaServicesRoute
   AuthenticatedAgendaIndexRoute: typeof AuthenticatedAgendaIndexRoute
 }
 
 const AuthenticatedAgendaRouteChildren: AuthenticatedAgendaRouteChildren = {
   AuthenticatedAgendaProfessionalsRoute: AuthenticatedAgendaProfessionalsRoute,
+  AuthenticatedAgendaServicesRoute: AuthenticatedAgendaServicesRoute,
   AuthenticatedAgendaIndexRoute: AuthenticatedAgendaIndexRoute,
 }
 
