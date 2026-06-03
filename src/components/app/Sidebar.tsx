@@ -5,6 +5,7 @@ import {
   LayoutDashboard, Building2, Tags, MapPin, Layers, Users, KeyRound,
   SlidersHorizontal, FileSearch, Boxes, Sparkles, KanbanSquare, UserPlus, GitBranch, CalendarClock,
   Calendar, Users2, Wrench, Clock, UsersRound,
+  Wallet, ArrowLeftRight, FolderTree, CreditCard, Percent,
 } from "lucide-react";
 
 interface NavItem {
