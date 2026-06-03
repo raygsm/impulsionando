@@ -4,6 +4,7 @@ import type { CurrentUser } from "@/lib/auth";
 import {
   LayoutDashboard, Building2, Tags, MapPin, Layers, Users, KeyRound,
   SlidersHorizontal, FileSearch, Boxes, Sparkles, KanbanSquare, UserPlus, GitBranch, CalendarClock,
+  Calendar, Users2, Wrench, Clock, UsersRound,
 } from "lucide-react";
 
 interface NavItem {
@@ -30,6 +31,12 @@ const NAV: NavItem[] = [
   { to: "/crm/leads", label: "Leads", icon: UserPlus, group: "CRM" },
   { to: "/crm/pipelines", label: "Funis", icon: GitBranch, group: "CRM" },
   { to: "/crm/activities", label: "Atividades", icon: CalendarClock, group: "CRM" },
+  { to: "/agenda", label: "Hoje", icon: Calendar, group: "Agenda" },
+  { to: "/agenda/appointments", label: "Agendamentos", icon: CalendarClock, group: "Agenda" },
+  { to: "/agenda/professionals", label: "Profissionais", icon: Users2, group: "Agenda" },
+  { to: "/agenda/services", label: "Serviços", icon: Wrench, group: "Agenda" },
+  { to: "/agenda/schedules", label: "Horários", icon: Clock, group: "Agenda" },
+  { to: "/agenda/waitlist", label: "Fila", icon: UsersRound, group: "Agenda" },
 ];
 
 export function Sidebar({ currentUser }: { currentUser: CurrentUser }) {

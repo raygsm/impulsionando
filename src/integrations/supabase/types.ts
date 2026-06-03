@@ -14,6 +14,306 @@ export type Database = {
   }
   public: {
     Tables: {
+      agenda_appointments: {
+        Row: {
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string | null
+          ends_at: string
+          id: string
+          lead_id: string | null
+          notes: string | null
+          price: number
+          professional_id: string
+          service_id: string
+          starts_at: string
+          status: string
+          unit_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          customer_email?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          ends_at: string
+          id?: string
+          lead_id?: string | null
+          notes?: string | null
+          price?: number
+          professional_id: string
+          service_id: string
+          starts_at: string
+          status?: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          ends_at?: string
+          id?: string
+          lead_id?: string | null
+          notes?: string | null
+          price?: number
+          professional_id?: string
+          service_id?: string
+          starts_at?: string
+          status?: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      agenda_blocks: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          ends_at: string
+          id: string
+          professional_id: string | null
+          reason: string | null
+          starts_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          ends_at: string
+          id?: string
+          professional_id?: string | null
+          reason?: string | null
+          starts_at: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string
+          id?: string
+          professional_id?: string | null
+          reason?: string | null
+          starts_at?: string
+        }
+        Relationships: []
+      }
+      agenda_professional_services: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          professional_id: string
+          service_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          professional_id: string
+          service_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          professional_id?: string
+          service_id?: string
+        }
+        Relationships: []
+      }
+      agenda_professionals: {
+        Row: {
+          bio: string | null
+          color: string
+          commission_pct: number
+          company_id: string
+          created_at: string
+          email: string | null
+          id: string
+          is_active: boolean
+          name: string
+          phone: string | null
+          unit_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          bio?: string | null
+          color?: string
+          commission_pct?: number
+          company_id: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          phone?: string | null
+          unit_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          bio?: string | null
+          color?: string
+          commission_pct?: number
+          company_id?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          phone?: string | null
+          unit_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      agenda_schedules: {
+        Row: {
+          company_id: string
+          created_at: string
+          end_time: string
+          id: string
+          is_active: boolean
+          professional_id: string
+          start_time: string
+          updated_at: string
+          weekday: number
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          end_time: string
+          id?: string
+          is_active?: boolean
+          professional_id: string
+          start_time: string
+          updated_at?: string
+          weekday: number
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          end_time?: string
+          id?: string
+          is_active?: boolean
+          professional_id?: string
+          start_time?: string
+          updated_at?: string
+          weekday?: number
+        }
+        Relationships: []
+      }
+      agenda_services: {
+        Row: {
+          color: string
+          company_id: string
+          created_at: string
+          description: string | null
+          duration_min: number
+          id: string
+          is_active: boolean
+          name: string
+          price: number
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          duration_min?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          price?: number
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          duration_min?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      agenda_waitlist: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string | null
+          id: string
+          notes: string | null
+          position: number
+          preferred_date: string | null
+          professional_id: string | null
+          service_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          customer_email?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          id?: string
+          notes?: string | null
+          position?: number
+          preferred_date?: string | null
+          professional_id?: string | null
+          service_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          id?: string
+          notes?: string | null
+          position?: number
+          preferred_date?: string | null
+          professional_id?: string | null
+          service_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
