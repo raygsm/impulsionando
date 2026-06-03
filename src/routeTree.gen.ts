@@ -17,6 +17,7 @@ import { Route as AuthenticatedUnitsRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedSectorsRouteImport } from './routes/_authenticated/sectors'
 import { Route as AuthenticatedPermissionsRouteImport } from './routes/_authenticated/permissions'
 import { Route as AuthenticatedNichesRouteImport } from './routes/_authenticated/niches'
+import { Route as AuthenticatedModulesRouteImport } from './routes/_authenticated/modules'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCompaniesRouteImport } from './routes/_authenticated/companies'
 import { Route as AuthenticatedAccessProfilesRouteImport } from './routes/_authenticated/access-profiles'
@@ -61,6 +62,11 @@ const AuthenticatedNichesRoute = AuthenticatedNichesRouteImport.update({
   path: '/niches',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedModulesRoute = AuthenticatedModulesRouteImport.update({
+  id: '/modules',
+  path: '/modules',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -84,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/companies': typeof AuthenticatedCompaniesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/modules': typeof AuthenticatedModulesRoute
   '/niches': typeof AuthenticatedNichesRoute
   '/permissions': typeof AuthenticatedPermissionsRoute
   '/sectors': typeof AuthenticatedSectorsRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/companies': typeof AuthenticatedCompaniesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/modules': typeof AuthenticatedModulesRoute
   '/niches': typeof AuthenticatedNichesRoute
   '/permissions': typeof AuthenticatedPermissionsRoute
   '/sectors': typeof AuthenticatedSectorsRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/_authenticated/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/_authenticated/companies': typeof AuthenticatedCompaniesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/modules': typeof AuthenticatedModulesRoute
   '/_authenticated/niches': typeof AuthenticatedNichesRoute
   '/_authenticated/permissions': typeof AuthenticatedPermissionsRoute
   '/_authenticated/sectors': typeof AuthenticatedSectorsRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/access-profiles'
     | '/companies'
     | '/dashboard'
+    | '/modules'
     | '/niches'
     | '/permissions'
     | '/sectors'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/access-profiles'
     | '/companies'
     | '/dashboard'
+    | '/modules'
     | '/niches'
     | '/permissions'
     | '/sectors'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/_authenticated/access-profiles'
     | '/_authenticated/companies'
     | '/_authenticated/dashboard'
+    | '/_authenticated/modules'
     | '/_authenticated/niches'
     | '/_authenticated/permissions'
     | '/_authenticated/sectors'
@@ -220,6 +232,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedNichesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/modules': {
+      id: '/_authenticated/modules'
+      path: '/modules'
+      fullPath: '/modules'
+      preLoaderRoute: typeof AuthenticatedModulesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -248,6 +267,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccessProfilesRoute: typeof AuthenticatedAccessProfilesRoute
   AuthenticatedCompaniesRoute: typeof AuthenticatedCompaniesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedModulesRoute: typeof AuthenticatedModulesRoute
   AuthenticatedNichesRoute: typeof AuthenticatedNichesRoute
   AuthenticatedPermissionsRoute: typeof AuthenticatedPermissionsRoute
   AuthenticatedSectorsRoute: typeof AuthenticatedSectorsRoute
@@ -259,6 +279,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccessProfilesRoute: AuthenticatedAccessProfilesRoute,
   AuthenticatedCompaniesRoute: AuthenticatedCompaniesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedModulesRoute: AuthenticatedModulesRoute,
   AuthenticatedNichesRoute: AuthenticatedNichesRoute,
   AuthenticatedPermissionsRoute: AuthenticatedPermissionsRoute,
   AuthenticatedSectorsRoute: AuthenticatedSectorsRoute,
