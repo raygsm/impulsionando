@@ -13,6 +13,8 @@ export interface NavItem {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   superOnly?: boolean;
+  /** Código de permissão necessário. Se ausente, o item é visível por padrão. */
+  perm?: string;
 }
 
 export interface NavGroup {
@@ -21,9 +23,8 @@ export interface NavGroup {
   defaultOpen?: boolean;
 }
 
-/** Itens que ficam fora de qualquer grupo (sempre visíveis no topo). */
 export const TOP_ITEMS: NavItem[] = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, perm: "dashboard.read" },
 ];
 
 export const NAV_GROUPS: NavGroup[] = [
@@ -33,83 +34,83 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: "/companies", label: "Empresas", icon: Building2, superOnly: true },
       { to: "/niches", label: "Nichos", icon: Tags, superOnly: true },
-      { to: "/units", label: "Unidades", icon: MapPin },
-      { to: "/sectors", label: "Setores", icon: Layers },
-      { to: "/users", label: "Usuários", icon: Users },
-      { to: "/access-profiles", label: "Perfis", icon: KeyRound },
+      { to: "/units", label: "Unidades", icon: MapPin, perm: "units.read" },
+      { to: "/sectors", label: "Setores", icon: Layers, perm: "sectors.read" },
+      { to: "/users", label: "Usuários", icon: Users, perm: "users.read" },
+      { to: "/access-profiles", label: "Perfis", icon: KeyRound, perm: "profiles.read" },
       { to: "/permissions", label: "Permissões", icon: KeyRound, superOnly: true },
-      { to: "/modules", label: "Módulos", icon: Boxes },
-      { to: "/settings", label: "Configurações", icon: SlidersHorizontal },
-      { to: "/audit", label: "Auditoria", icon: FileSearch },
+      { to: "/modules", label: "Módulos", icon: Boxes, perm: "modules.read" },
+      { to: "/settings", label: "Configurações", icon: SlidersHorizontal, perm: "settings.read" },
+      { to: "/audit", label: "Auditoria", icon: FileSearch, perm: "audit.read" },
     ],
   },
   {
     label: "CRM",
     items: [
-      { to: "/crm/board", label: "Kanban", icon: KanbanSquare },
-      { to: "/crm/leads", label: "Leads", icon: UserPlus },
-      { to: "/crm/pipelines", label: "Funis", icon: GitBranch },
-      { to: "/crm/activities", label: "Atividades", icon: CalendarClock },
-      { to: "/customers", label: "Clientes", icon: Contact },
+      { to: "/crm/board", label: "Kanban", icon: KanbanSquare, perm: "crm.opportunity.read" },
+      { to: "/crm/leads", label: "Leads", icon: UserPlus, perm: "crm.lead.read" },
+      { to: "/crm/pipelines", label: "Funis", icon: GitBranch, perm: "crm.pipeline.read" },
+      { to: "/crm/activities", label: "Atividades", icon: CalendarClock, perm: "crm.activity.read" },
+      { to: "/customers", label: "Clientes", icon: Contact, perm: "customer.read" },
     ],
   },
   {
     label: "Agenda",
     items: [
-      { to: "/agenda", label: "Hoje", icon: Calendar },
-      { to: "/agenda/appointments", label: "Agendamentos", icon: CalendarClock },
-      { to: "/agenda/professionals", label: "Profissionais", icon: Users2 },
-      { to: "/agenda/services", label: "Serviços", icon: Wrench },
-      { to: "/agenda/schedules", label: "Horários", icon: Clock },
-      { to: "/agenda/waitlist", label: "Fila", icon: UsersRound },
+      { to: "/agenda", label: "Hoje", icon: Calendar, perm: "agenda.appointment.read" },
+      { to: "/agenda/appointments", label: "Agendamentos", icon: CalendarClock, perm: "agenda.appointment.read" },
+      { to: "/agenda/professionals", label: "Profissionais", icon: Users2, perm: "agenda.professional.read" },
+      { to: "/agenda/services", label: "Serviços", icon: Wrench, perm: "agenda.service.read" },
+      { to: "/agenda/schedules", label: "Horários", icon: Clock, perm: "agenda.schedule.write" },
+      { to: "/agenda/waitlist", label: "Fila", icon: UsersRound, perm: "agenda.waitlist.write" },
     ],
   },
   {
     label: "Financeiro",
     items: [
-      { to: "/finance", label: "Visão geral", icon: Wallet },
-      { to: "/finance/transactions", label: "Lançamentos", icon: ArrowLeftRight },
-      { to: "/finance/accounts", label: "Contas", icon: Wallet },
-      { to: "/finance/categories", label: "Categorias", icon: FolderTree },
-      { to: "/finance/methods", label: "Métodos", icon: CreditCard },
-      { to: "/finance/commissions", label: "Comissões", icon: Percent },
+      { to: "/finance", label: "Visão geral", icon: Wallet, perm: "finance.transaction.read" },
+      { to: "/finance/transactions", label: "Lançamentos", icon: ArrowLeftRight, perm: "finance.transaction.read" },
+      { to: "/finance/accounts", label: "Contas", icon: Wallet, perm: "finance.account.write" },
+      { to: "/finance/categories", label: "Categorias", icon: FolderTree, perm: "finance.category.write" },
+      { to: "/finance/methods", label: "Métodos", icon: CreditCard, perm: "finance.method.write" },
+      { to: "/finance/commissions", label: "Comissões", icon: Percent, perm: "finance.commission.read" },
     ],
   },
   {
     label: "Estoque",
     items: [
-      { to: "/inventory", label: "Visão geral", icon: Package },
-      { to: "/inventory/products", label: "Produtos", icon: Boxes },
-      { to: "/inventory/movements", label: "Movimentações", icon: ArrowDownUp },
-      { to: "/inventory/categories", label: "Categorias", icon: FolderTree },
-      { to: "/inventory/suppliers", label: "Fornecedores", icon: Truck },
+      { to: "/inventory", label: "Visão geral", icon: Package, perm: "inventory.product.read" },
+      { to: "/inventory/products", label: "Produtos", icon: Boxes, perm: "inventory.product.read" },
+      { to: "/inventory/movements", label: "Movimentações", icon: ArrowDownUp, perm: "inventory.movement.read" },
+      { to: "/inventory/categories", label: "Categorias", icon: FolderTree, perm: "inventory.category.read" },
+      { to: "/inventory/suppliers", label: "Fornecedores", icon: Truck, perm: "inventory.supplier.read" },
     ],
   },
   {
     label: "Vendas",
     items: [
-      { to: "/sales", label: "Visão geral", icon: ShoppingCart },
-      { to: "/sales/new", label: "Nova venda (PDV)", icon: Plus },
-      { to: "/sales/orders", label: "Pedidos", icon: Receipt },
-      { to: "/sales/cash", label: "Fechamento de caixa", icon: WalletIcon },
+      { to: "/sales", label: "Visão geral", icon: ShoppingCart, perm: "sales.order.read" },
+      { to: "/sales/new", label: "Nova venda (PDV)", icon: Plus, perm: "sales.order.write" },
+      { to: "/sales/orders", label: "Pedidos", icon: Receipt, perm: "sales.order.read" },
+      { to: "/sales/cash", label: "Fechamento de caixa", icon: WalletIcon, perm: "sales.cashsession.read" },
     ],
   },
   {
     label: "Relatórios",
     items: [
-      { to: "/reports", label: "Visão geral", icon: BarChart3 },
-      { to: "/reports/sales", label: "Vendas", icon: ShoppingCart },
-      { to: "/reports/finance", label: "Financeiro", icon: Wallet },
-      { to: "/reports/inventory", label: "Estoque", icon: Package },
-      { to: "/reports/agenda", label: "Agenda", icon: Calendar },
-      { to: "/reports/crm", label: "CRM", icon: UserPlus },
+      { to: "/reports", label: "Visão geral", icon: BarChart3, perm: "report.read" },
+      { to: "/reports/sales", label: "Vendas", icon: ShoppingCart, perm: "report.read" },
+      { to: "/reports/finance", label: "Financeiro", icon: Wallet, perm: "report.read" },
+      { to: "/reports/inventory", label: "Estoque", icon: Package, perm: "report.read" },
+      { to: "/reports/agenda", label: "Agenda", icon: Calendar, perm: "report.read" },
+      { to: "/reports/crm", label: "CRM", icon: UserPlus, perm: "report.read" },
     ],
   },
   {
     label: "BI",
     items: [
-      { to: "/bi", label: "Visão geral", icon: BarChart3 },
-      { to: "/bi/company", label: "Cliente", icon: Building2 },
+      { to: "/bi", label: "Visão geral", icon: BarChart3, perm: "bi.read" },
+      { to: "/bi/company", label: "Cliente", icon: Building2, perm: "bi.read" },
       { to: "/bi/master", label: "Master", icon: Building2, superOnly: true },
       { to: "/bi/niches", label: "Por nicho", icon: Tags, superOnly: true },
     ],
