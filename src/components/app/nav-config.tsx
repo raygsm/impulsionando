@@ -5,7 +5,7 @@ import {
   Wallet, ArrowLeftRight, FolderTree, CreditCard, Percent,
   Package, Truck, ArrowDownUp,
   ShoppingCart, Receipt, Plus, Wallet as WalletIcon,
-  Contact, BarChart3, ShieldCheck, Inbox,
+  Contact, BarChart3, ShieldCheck, Inbox, GraduationCap,
 } from "lucide-react";
 
 
