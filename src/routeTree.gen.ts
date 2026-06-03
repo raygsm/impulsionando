@@ -26,6 +26,7 @@ import { Route as ShowroomFitnessRouteImport } from './routes/showroom.fitness'
 import { Route as DemoWhiteLabelRouteImport } from './routes/demo.white-label'
 import { Route as DemoClienteFinalRouteImport } from './routes/demo.cliente-final'
 import { Route as DemoChecklistRouteImport } from './routes/demo.checklist'
+import { Route as ComoFuncionaFitnessRouteImport } from './routes/como-funciona.fitness'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
 import { Route as AuthenticatedUnitsRouteImport } from './routes/_authenticated/units'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -168,6 +169,11 @@ const DemoChecklistRoute = DemoChecklistRouteImport.update({
   id: '/checklist',
   path: '/checklist',
   getParentRoute: () => DemoRoute,
+} as any)
+const ComoFuncionaFitnessRoute = ComoFuncionaFitnessRouteImport.update({
+  id: '/como-funciona/fitness',
+  path: '/como-funciona/fitness',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
   id: '/users',
@@ -522,6 +528,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/units': typeof AuthenticatedUnitsRoute
   '/users': typeof AuthenticatedUsersRoute
+  '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
@@ -591,6 +598,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/units': typeof AuthenticatedUnitsRoute
   '/users': typeof AuthenticatedUsersRoute
+  '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
@@ -669,6 +677,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/units': typeof AuthenticatedUnitsRoute
   '/_authenticated/users': typeof AuthenticatedUsersRoute
+  '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
@@ -747,6 +756,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/units'
     | '/users'
+    | '/como-funciona/fitness'
     | '/demo/checklist'
     | '/demo/cliente-final'
     | '/demo/white-label'
@@ -816,6 +826,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/units'
     | '/users'
+    | '/como-funciona/fitness'
     | '/demo/checklist'
     | '/demo/cliente-final'
     | '/demo/white-label'
@@ -893,6 +904,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/units'
     | '/_authenticated/users'
+    | '/como-funciona/fitness'
     | '/demo/checklist'
     | '/demo/cliente-final'
     | '/demo/white-label'
@@ -951,6 +963,7 @@ export interface RootRouteChildren {
   ResetPasswordSentRoute: typeof ResetPasswordSentRoute
   SolucoesRoute: typeof SolucoesRoute
   TermosRoute: typeof TermosRoute
+  ComoFuncionaFitnessRoute: typeof ComoFuncionaFitnessRoute
   ShowroomFitnessRoute: typeof ShowroomFitnessRoute
 }
 
@@ -1074,6 +1087,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/demo/checklist'
       preLoaderRoute: typeof DemoChecklistRouteImport
       parentRoute: typeof DemoRoute
+    }
+    '/como-funciona/fitness': {
+      id: '/como-funciona/fitness'
+      path: '/como-funciona/fitness'
+      fullPath: '/como-funciona/fitness'
+      preLoaderRoute: typeof ComoFuncionaFitnessRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/users': {
       id: '/_authenticated/users'
@@ -1717,6 +1737,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordSentRoute: ResetPasswordSentRoute,
   SolucoesRoute: SolucoesRoute,
   TermosRoute: TermosRoute,
+  ComoFuncionaFitnessRoute: ComoFuncionaFitnessRoute,
   ShowroomFitnessRoute: ShowroomFitnessRoute,
 }
 export const routeTree = rootRouteImport
