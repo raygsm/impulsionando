@@ -47,6 +47,8 @@ function Page() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<CustomerRow | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [anonTarget, setAnonTarget] = useState<CustomerRow | null>(null);
+  const [anonReason, setAnonReason] = useState("");
 
   const { data: units } = useQuery({
     queryKey: ["company-units", companyId], enabled: !!companyId,
