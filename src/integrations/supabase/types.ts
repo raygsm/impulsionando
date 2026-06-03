@@ -23,6 +23,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           customer_email: string | null
+          customer_id: string | null
           customer_name: string
           customer_phone: string | null
           ends_at: string
@@ -45,6 +46,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           customer_email?: string | null
+          customer_id?: string | null
           customer_name: string
           customer_phone?: string | null
           ends_at: string
@@ -67,6 +69,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           customer_email?: string | null
+          customer_id?: string | null
           customer_name?: string
           customer_phone?: string | null
           ends_at?: string
@@ -81,7 +84,15 @@ export type Database = {
           unit_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "agenda_appointments_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       agenda_blocks: {
         Row: {
@@ -837,6 +848,97 @@ export type Database = {
             columns: ["pipeline_id"]
             isOneToOne: false
             referencedRelation: "crm_pipelines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customers: {
+        Row: {
+          address_city: string | null
+          address_line: string | null
+          address_state: string | null
+          address_zip: string | null
+          birthdate: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          document: string | null
+          email: string | null
+          gender: string | null
+          id: string
+          is_active: boolean
+          lead_id: string | null
+          name: string
+          notes: string | null
+          phone: string | null
+          tags: string[]
+          unit_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          address_city?: string | null
+          address_line?: string | null
+          address_state?: string | null
+          address_zip?: string | null
+          birthdate?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          document?: string | null
+          email?: string | null
+          gender?: string | null
+          id?: string
+          is_active?: boolean
+          lead_id?: string | null
+          name: string
+          notes?: string | null
+          phone?: string | null
+          tags?: string[]
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address_city?: string | null
+          address_line?: string | null
+          address_state?: string | null
+          address_zip?: string | null
+          birthdate?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          document?: string | null
+          email?: string | null
+          gender?: string | null
+          id?: string
+          is_active?: boolean
+          lead_id?: string | null
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          tags?: string[]
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customers_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customers_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "company_units"
             referencedColumns: ["id"]
           },
         ]
@@ -1799,6 +1901,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           customer_doc: string | null
+          customer_id: string | null
           customer_lead_id: string | null
           customer_name: string | null
           discount: number
@@ -1818,6 +1921,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           customer_doc?: string | null
+          customer_id?: string | null
           customer_lead_id?: string | null
           customer_name?: string | null
           discount?: number
@@ -1837,6 +1941,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           customer_doc?: string | null
+          customer_id?: string | null
           customer_lead_id?: string | null
           customer_name?: string | null
           discount?: number
@@ -1855,6 +1960,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_orders_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
             referencedColumns: ["id"]
           },
           {

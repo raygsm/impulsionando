@@ -8,6 +8,7 @@ import {
   Wallet, ArrowLeftRight, FolderTree, CreditCard, Percent,
   Package, Truck, ArrowDownUp,
   ShoppingCart, Receipt, Plus, Wallet as WalletIcon,
+  Contact,
 } from "lucide-react";
 
 interface NavItem {
@@ -34,6 +35,7 @@ const NAV: NavItem[] = [
   { to: "/crm/leads", label: "Leads", icon: UserPlus, group: "CRM" },
   { to: "/crm/pipelines", label: "Funis", icon: GitBranch, group: "CRM" },
   { to: "/crm/activities", label: "Atividades", icon: CalendarClock, group: "CRM" },
+  { to: "/customers", label: "Clientes", icon: Contact, group: "CRM" },
   { to: "/agenda", label: "Hoje", icon: Calendar, group: "Agenda" },
   { to: "/agenda/appointments", label: "Agendamentos", icon: CalendarClock, group: "Agenda" },
   { to: "/agenda/professionals", label: "Profissionais", icon: Users2, group: "Agenda" },
