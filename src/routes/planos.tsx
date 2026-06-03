@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  ArrowRight, MessageCircle, Sparkles, CheckCircle2, X, Minus, HelpCircle, Star,
+  ArrowRight, MessageCircle, Sparkles, CheckCircle2, Minus, HelpCircle, Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -387,6 +387,3 @@ function PlanosPage() {
     </div>
   );
 }
-
-// keep X import used to avoid TS unused warning in strict configs
-void X;
