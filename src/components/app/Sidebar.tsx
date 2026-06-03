@@ -7,6 +7,7 @@ import {
   Calendar, Users2, Wrench, Clock, UsersRound,
   Wallet, ArrowLeftRight, FolderTree, CreditCard, Percent,
   Package, Truck, ArrowDownUp,
+  ShoppingCart, Receipt, Plus,
 } from "lucide-react";
 
 interface NavItem {
@@ -50,6 +51,9 @@ const NAV: NavItem[] = [
   { to: "/inventory/movements", label: "Movimentações", icon: ArrowDownUp, group: "Estoque" },
   { to: "/inventory/categories", label: "Categorias", icon: FolderTree, group: "Estoque" },
   { to: "/inventory/suppliers", label: "Fornecedores", icon: Truck, group: "Estoque" },
+  { to: "/sales", label: "Visão geral", icon: ShoppingCart, group: "Vendas" },
+  { to: "/sales/new", label: "Nova venda (PDV)", icon: Plus, group: "Vendas" },
+  { to: "/sales/orders", label: "Pedidos", icon: Receipt, group: "Vendas" },
 ];
 
 export function Sidebar({ currentUser }: { currentUser: CurrentUser }) {

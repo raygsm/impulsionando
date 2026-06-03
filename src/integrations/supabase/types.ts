@@ -1603,6 +1603,218 @@ export type Database = {
         }
         Relationships: []
       }
+      sales_order_items: {
+        Row: {
+          company_id: string
+          created_at: string
+          description: string
+          discount: number
+          id: string
+          order_id: string
+          product_id: string | null
+          quantity: number
+          total: number
+          unit_price: number
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          description: string
+          discount?: number
+          id?: string
+          order_id: string
+          product_id?: string | null
+          quantity: number
+          total?: number
+          unit_price?: number
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          description?: string
+          discount?: number
+          id?: string
+          order_id?: string
+          product_id?: string | null
+          quantity?: number
+          total?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_order_items_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "sales_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "inv_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_orders: {
+        Row: {
+          cancelled_at: string | null
+          company_id: string
+          confirmed_at: string | null
+          created_at: string
+          created_by: string | null
+          customer_doc: string | null
+          customer_lead_id: string | null
+          customer_name: string | null
+          discount: number
+          id: string
+          notes: string | null
+          number: number
+          status: string
+          subtotal: number
+          total: number
+          unit_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          company_id: string
+          confirmed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_doc?: string | null
+          customer_lead_id?: string | null
+          customer_name?: string | null
+          discount?: number
+          id?: string
+          notes?: string | null
+          number?: number
+          status?: string
+          subtotal?: number
+          total?: number
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          company_id?: string
+          confirmed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_doc?: string | null
+          customer_lead_id?: string | null
+          customer_name?: string | null
+          discount?: number
+          id?: string
+          notes?: string | null
+          number?: number
+          status?: string
+          subtotal?: number
+          total?: number
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_orders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_orders_customer_lead_id_fkey"
+            columns: ["customer_lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_orders_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "company_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_payments: {
+        Row: {
+          account_id: string | null
+          amount: number
+          company_id: string
+          created_at: string
+          fin_transaction_id: string | null
+          id: string
+          order_id: string
+          payment_method_id: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          amount: number
+          company_id: string
+          created_at?: string
+          fin_transaction_id?: string | null
+          id?: string
+          order_id: string
+          payment_method_id?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          amount?: number
+          company_id?: string
+          created_at?: string
+          fin_transaction_id?: string | null
+          id?: string
+          order_id?: string
+          payment_method_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_payments_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "fin_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_payments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_payments_fin_transaction_id_fkey"
+            columns: ["fin_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "fin_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_payments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "sales_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_payments_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "fin_payment_methods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sectors: {
         Row: {
           company_id: string
