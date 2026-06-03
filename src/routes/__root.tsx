@@ -77,14 +77,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Impulsionando Sistemas" },
+      { name: "description", content: "Plataforma SaaS multiempresa, multinicho e modular para clínicas, bares, cervejarias, serviços e varejo." },
+      { name: "author", content: "Impulsionando Sistemas" },
+      { property: "og:title", content: "Impulsionando Sistemas" },
+      { property: "og:description", content: "Plataforma SaaS multiempresa e multinicho." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
