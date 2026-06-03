@@ -858,6 +858,9 @@ export type Database = {
           address_line: string | null
           address_state: string | null
           address_zip: string | null
+          anonymization_reason: string | null
+          anonymized_at: string | null
+          anonymized_by: string | null
           birthdate: string | null
           company_id: string
           created_at: string
@@ -880,6 +883,9 @@ export type Database = {
           address_line?: string | null
           address_state?: string | null
           address_zip?: string | null
+          anonymization_reason?: string | null
+          anonymized_at?: string | null
+          anonymized_by?: string | null
           birthdate?: string | null
           company_id: string
           created_at?: string
@@ -902,6 +908,9 @@ export type Database = {
           address_line?: string | null
           address_state?: string | null
           address_zip?: string | null
+          anonymization_reason?: string | null
+          anonymized_at?: string | null
+          anonymized_by?: string | null
           birthdate?: string | null
           company_id?: string
           created_at?: string
@@ -2249,6 +2258,10 @@ export type Database = {
     }
     Functions: {
       current_user_company_ids: { Args: never; Returns: string[] }
+      customer_anonymize: {
+        Args: { _customer_id: string; _reason?: string }
+        Returns: string
+      }
       is_impulsionando_staff: { Args: { _user: string }; Returns: boolean }
       is_super_admin: { Args: { _user: string }; Returns: boolean }
       sales_cash_session_close: {
