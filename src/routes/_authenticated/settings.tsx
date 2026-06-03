@@ -58,7 +58,7 @@ function SettingsPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["company-settings"] }),
   });
 
-  function parseValue(): unknown {
+  function parseValue(): string | number | boolean | null {
     if (form.value_type === "boolean") return form.value === "true";
     if (form.value_type === "number") return Number(form.value);
     return form.value;
