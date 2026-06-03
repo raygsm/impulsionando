@@ -129,7 +129,7 @@ function Page() {
       if (!anonTarget) throw new Error("Sem cliente");
       const { error } = await supabase.rpc("customer_anonymize", {
         _customer_id: anonTarget.id,
-        _reason: anonReason.trim() || null,
+        _reason: anonReason.trim() || undefined,
       });
       if (error) throw error;
     },
