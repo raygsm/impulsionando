@@ -43,6 +43,17 @@ export const Route = createFileRoute("/solucoes")({
 
 const SEGMENTS = [
   {
+    icon: Dumbbell,
+    title: "Academias, CrossFit, Funcional e Personal",
+    desc: "Aulas, check-in, mensalidades, avaliação física, retenção e fidelização. Showroom navegável e mapa visual da operação prontos.",
+    modules: ["Agenda de Aulas", "Check-in", "Pagamentos", "CRM", "Avaliação Física"],
+    segmento: "fitness",
+    dores: ["agenda", "vendas", "crm", "financeiro"],
+    showroom: "/showroom/fitness" as const,
+    comoFunciona: "/como-funciona/fitness" as const,
+    destaque: true,
+  },
+  {
     icon: Stethoscope,
     title: "Clínicas e Saúde",
     desc: "Agenda multiprofissional, prontuário leve, lembretes automáticos e pagamento antes da consulta.",
