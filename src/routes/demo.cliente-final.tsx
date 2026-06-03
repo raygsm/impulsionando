@@ -8,6 +8,8 @@ import {
   SectionHeader,
   type DemoNavItem,
 } from "@/components/demo/DemoShell";
+import { DemoWelcome } from "@/components/demo/DemoWelcome";
+import { Calendar as CalIcon, ShoppingCart as CartIcon, Wallet as WalletIcon, BarChart3 as BIIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -112,6 +114,32 @@ function ClienteFinalDemo() {
       activeId={active}
       onSelect={setActive}
     >
+      <DemoWelcome
+        storageKey={STORAGE}
+        trackLabel="Cliente Final"
+        intro="Esta demonstração reproduz fielmente o sistema que seu negócio receberá: agenda, CRM, vendas, estoque, financeiro, comissões e BI já populados e funcionando ponta a ponta. Tudo opera como em produção — você navega, cadastra, filtra e gera relatórios."
+        loginEmail="seu-email@empresa.com.br"
+        loginPassword="senha definida no convite"
+        accessNote="No sistema real, cada usuário recebe convite por e-mail, define a senha e acessa apenas os módulos liberados para seu perfil dentro da sua empresa."
+        highlights={[
+          { icon: CalIcon, title: "Agenda inteligente", text: "Bloqueio de conflitos, fila de espera e visão por profissional." },
+          { icon: CartIcon, title: "PDV completo", text: "Pedidos, formas de pagamento, comandas e fechamento de caixa." },
+          { icon: WalletIcon, title: "Financeiro integrado", text: "Contas, categorias, comissões e fluxo de caixa em tempo real." },
+          { icon: BIIcon, title: "BI operacional", text: "KPIs consolidados de todos os módulos em um único painel." },
+        ]}
+        flows={[
+          "Venda no PDV → baixa de estoque → lançamento financeiro automático",
+          "Agendamento → notificação ao profissional → conclusão gera comissão",
+          "Lead no CRM → qualificação → conversão em cliente e venda",
+          "Estoque mínimo → alerta in-app → ordem de compra ao fornecedor",
+        ]}
+        integrations={[
+          "WhatsApp para confirmação de agendamentos e atendimento",
+          "Pix, cartões (crédito/débito), dinheiro e boleto no PDV",
+          "Emissão de comprovantes e relatórios PDF/Excel",
+          "Notificações in-app por categoria (agenda, vendas, estoque)",
+        ]}
+      />
       {active === "dashboard" && <DashboardSection />}
       {active === "agenda" && <AgendaSection />}
       {active === "crm" && <CRMSection />}
