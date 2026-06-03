@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import type { CurrentUser } from "@/lib/auth";
+import { MobileSidebar } from "./MobileSidebar";
 
 export function Topbar({ currentUser }: { currentUser: CurrentUser }) {
   const navigate = useNavigate();
@@ -18,7 +19,8 @@ export function Topbar({ currentUser }: { currentUser: CurrentUser }) {
   }
 
   return (
-    <header className="h-16 border-b border-border bg-card/50 backdrop-blur sticky top-0 z-10 flex items-center px-6 gap-4">
+    <header className="h-16 border-b border-border bg-card/50 backdrop-blur sticky top-0 z-10 flex items-center px-4 lg:px-6 gap-3 lg:gap-4">
+      <MobileSidebar currentUser={currentUser} />
       <div className="flex-1 max-w-md relative">
         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
         <Input placeholder="Buscar..." className="pl-9 bg-background" />
