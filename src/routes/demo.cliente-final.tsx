@@ -8,6 +8,8 @@ import {
   SectionHeader,
   type DemoNavItem,
 } from "@/components/demo/DemoShell";
+import { DemoWelcome } from "@/components/demo/DemoWelcome";
+import { Calendar as CalIcon, ShoppingCart as CartIcon, Wallet as WalletIcon, BarChart3 as BIIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
