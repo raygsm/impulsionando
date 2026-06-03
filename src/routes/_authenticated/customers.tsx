@@ -29,6 +29,8 @@ type CustomerRow = {
   address_line: string | null; address_city: string | null; address_state: string | null; address_zip: string | null;
   tags: string[]; notes: string | null; lead_id: string | null; is_active: boolean;
   created_at: string;
+  anonymized_at: string | null;
+  anonymization_reason: string | null;
 };
 
 const emptyForm = {
