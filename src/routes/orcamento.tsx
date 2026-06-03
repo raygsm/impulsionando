@@ -698,18 +698,33 @@ function OrcamentoPage() {
               )}
             </div>
 
+            {!canNext && (
+              <p className="text-xs text-muted-foreground -mt-2">
+                {current.key === "dores"
+                  ? "Selecione pelo menos uma opção para receber sugestões de módulos."
+                  : "Faça uma seleção para avançar."}
+              </p>
+            )}
+
             <div className="flex items-center justify-between pt-2">
               <Button variant="ghost" onClick={back} disabled={step === 0} className="gap-1">
                 <ArrowLeft className="w-4 h-4" /> Voltar
               </Button>
-              <Button
-                onClick={next}
-                disabled={!canNext}
-                className="gap-1 bg-gradient-primary shadow-elegant"
-              >
-                {step === total - 1 ? "Ver recomendação" : "Avançar"}
-                <ArrowRight className="w-4 h-4" />
-              </Button>
+              <div className="flex flex-col items-end gap-1">
+                <Button
+                  onClick={next}
+                  disabled={!canNext}
+                  className="gap-1 bg-gradient-primary shadow-elegant"
+                >
+                  {step === total - 1 ? "Ver recomendação" : "Avançar"}
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+                {step < total - 1 && (
+                  <span className="text-[11px] text-muted-foreground">
+                    Próximo: {STEPS[step + 1].title}
+                  </span>
+                )}
+              </div>
             </div>
           </Card>
         )}
