@@ -5,6 +5,7 @@ import {
   LayoutDashboard, Building2, Tags, MapPin, Layers, Users, KeyRound,
   SlidersHorizontal, FileSearch, Boxes, Sparkles, KanbanSquare, UserPlus, GitBranch, CalendarClock,
   Calendar, Users2, Wrench, Clock, UsersRound,
+  Wallet, ArrowLeftRight, FolderTree, CreditCard, Percent,
 } from "lucide-react";
 
 interface NavItem {
@@ -37,6 +38,12 @@ const NAV: NavItem[] = [
   { to: "/agenda/services", label: "Serviços", icon: Wrench, group: "Agenda" },
   { to: "/agenda/schedules", label: "Horários", icon: Clock, group: "Agenda" },
   { to: "/agenda/waitlist", label: "Fila", icon: UsersRound, group: "Agenda" },
+  { to: "/finance", label: "Visão geral", icon: Wallet, group: "Financeiro" },
+  { to: "/finance/transactions", label: "Lançamentos", icon: ArrowLeftRight, group: "Financeiro" },
+  { to: "/finance/accounts", label: "Contas", icon: Wallet, group: "Financeiro" },
+  { to: "/finance/categories", label: "Categorias", icon: FolderTree, group: "Financeiro" },
+  { to: "/finance/methods", label: "Métodos", icon: CreditCard, group: "Financeiro" },
+  { to: "/finance/commissions", label: "Comissões", icon: Percent, group: "Financeiro" },
 ];
 
 export function Sidebar({ currentUser }: { currentUser: CurrentUser }) {
