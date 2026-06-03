@@ -161,6 +161,41 @@ const INITIAL: Answers = {
   perfil: "",
 };
 
+/* --------------------- Draft persistence --------------------- */
+
+const DRAFT_KEY = "impulsionando:orcamento:draft";
+const DRAFT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 dias
+
+function saveDraft(answers: Answers, step: number) {
+  try {
+    localStorage.setItem(
+      DRAFT_KEY,
+      JSON.stringify({ answers, step, savedAt: Date.now() })
+    );
+  } catch {}
+}
+
+function loadDraft(): { answers: Answers; step: number } | null {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data.savedAt || Date.now() - data.savedAt > DRAFT_MAX_AGE_MS) {
+      localStorage.removeItem(DRAFT_KEY);
+      return null;
+    }
+    return { answers: data.answers as Answers, step: data.step as number };
+  } catch {
+    return null;
+  }
+}
+
+function clearDraft() {
+  try {
+    localStorage.removeItem(DRAFT_KEY);
+  } catch {}
+}
+
 /* --------------------- Lógica de recomendação --------------------- */
 
 interface Recomendacao {
