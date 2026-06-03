@@ -62,10 +62,11 @@ function SettingsPage() {
   const upsert = useMutation({
     mutationFn: async (changes: { key: string; value: unknown; value_type: string; category: string }[]) => {
       if (!changes.length) return;
-      const { error } = await supabase.from("company_settings").upsert(
-        changes.map((c) => ({ company_id: companyId, ...c })),
-        { onConflict: "company_id,key" }
-      );
+      const rows = changes.map((c) => ({
+        company_id: companyId, key: c.key, value: c.value as never,
+        value_type: c.value_type, category: c.category,
+      }));
+      const { error } = await supabase.from("company_settings").upsert(rows, { onConflict: "company_id,key" });
       if (error) throw error;
     },
     onSuccess: () => {
