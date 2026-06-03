@@ -26,6 +26,7 @@ import { Route as AuthenticatedAuditRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
 import { Route as AuthenticatedAccessProfilesRouteImport } from './routes/_authenticated/access-profiles'
 import { Route as AuthenticatedCrmIndexRouteImport } from './routes/_authenticated/crm.index'
+import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenticated/agenda.index'
 import { Route as AuthenticatedCrmPipelinesRouteImport } from './routes/_authenticated/crm.pipelines'
 import { Route as AuthenticatedCrmLeadsRouteImport } from './routes/_authenticated/crm.leads'
 import { Route as AuthenticatedCrmBoardRouteImport } from './routes/_authenticated/crm.board'
@@ -117,6 +118,12 @@ const AuthenticatedCrmIndexRoute = AuthenticatedCrmIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedCrmRoute,
 } as any)
+const AuthenticatedAgendaIndexRoute =
+  AuthenticatedAgendaIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAgendaRoute,
+  } as any)
 const AuthenticatedCrmPipelinesRoute =
   AuthenticatedCrmPipelinesRouteImport.update({
     id: '/pipelines',
@@ -144,7 +151,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
-  '/agenda': typeof AuthenticatedAgendaRoute
+  '/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/audit': typeof AuthenticatedAuditRoute
   '/companies': typeof AuthenticatedCompaniesRoute
   '/crm': typeof AuthenticatedCrmRouteWithChildren
@@ -160,13 +167,13 @@ export interface FileRoutesByFullPath {
   '/crm/board': typeof AuthenticatedCrmBoardRoute
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
   '/crm/pipelines': typeof AuthenticatedCrmPipelinesRoute
+  '/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/crm/': typeof AuthenticatedCrmIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
-  '/agenda': typeof AuthenticatedAgendaRoute
   '/audit': typeof AuthenticatedAuditRoute
   '/companies': typeof AuthenticatedCompaniesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -181,6 +188,7 @@ export interface FileRoutesByTo {
   '/crm/board': typeof AuthenticatedCrmBoardRoute
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
   '/crm/pipelines': typeof AuthenticatedCrmPipelinesRoute
+  '/agenda': typeof AuthenticatedAgendaIndexRoute
   '/crm': typeof AuthenticatedCrmIndexRoute
 }
 export interface FileRoutesById {
@@ -189,7 +197,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/access-profiles': typeof AuthenticatedAccessProfilesRoute
-  '/_authenticated/agenda': typeof AuthenticatedAgendaRoute
+  '/_authenticated/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/_authenticated/audit': typeof AuthenticatedAuditRoute
   '/_authenticated/companies': typeof AuthenticatedCompaniesRoute
   '/_authenticated/crm': typeof AuthenticatedCrmRouteWithChildren
@@ -205,6 +213,7 @@ export interface FileRoutesById {
   '/_authenticated/crm/board': typeof AuthenticatedCrmBoardRoute
   '/_authenticated/crm/leads': typeof AuthenticatedCrmLeadsRoute
   '/_authenticated/crm/pipelines': typeof AuthenticatedCrmPipelinesRoute
+  '/_authenticated/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/_authenticated/crm/': typeof AuthenticatedCrmIndexRoute
 }
 export interface FileRouteTypes {
@@ -229,13 +238,13 @@ export interface FileRouteTypes {
     | '/crm/board'
     | '/crm/leads'
     | '/crm/pipelines'
+    | '/agenda/'
     | '/crm/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/access-profiles'
-    | '/agenda'
     | '/audit'
     | '/companies'
     | '/dashboard'
@@ -250,6 +259,7 @@ export interface FileRouteTypes {
     | '/crm/board'
     | '/crm/leads'
     | '/crm/pipelines'
+    | '/agenda'
     | '/crm'
   id:
     | '__root__'
@@ -273,6 +283,7 @@ export interface FileRouteTypes {
     | '/_authenticated/crm/board'
     | '/_authenticated/crm/leads'
     | '/_authenticated/crm/pipelines'
+    | '/_authenticated/agenda/'
     | '/_authenticated/crm/'
   fileRoutesById: FileRoutesById
 }
@@ -403,6 +414,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCrmIndexRouteImport
       parentRoute: typeof AuthenticatedCrmRoute
     }
+    '/_authenticated/agenda/': {
+      id: '/_authenticated/agenda/'
+      path: '/'
+      fullPath: '/agenda/'
+      preLoaderRoute: typeof AuthenticatedAgendaIndexRouteImport
+      parentRoute: typeof AuthenticatedAgendaRoute
+    }
     '/_authenticated/crm/pipelines': {
       id: '/_authenticated/crm/pipelines'
       path: '/pipelines'
@@ -434,6 +452,17 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAgendaRouteChildren {
+  AuthenticatedAgendaIndexRoute: typeof AuthenticatedAgendaIndexRoute
+}
+
+const AuthenticatedAgendaRouteChildren: AuthenticatedAgendaRouteChildren = {
+  AuthenticatedAgendaIndexRoute: AuthenticatedAgendaIndexRoute,
+}
+
+const AuthenticatedAgendaRouteWithChildren =
+  AuthenticatedAgendaRoute._addFileChildren(AuthenticatedAgendaRouteChildren)
+
 interface AuthenticatedCrmRouteChildren {
   AuthenticatedCrmActivitiesRoute: typeof AuthenticatedCrmActivitiesRoute
   AuthenticatedCrmBoardRoute: typeof AuthenticatedCrmBoardRoute
@@ -455,7 +484,7 @@ const AuthenticatedCrmRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccessProfilesRoute: typeof AuthenticatedAccessProfilesRoute
-  AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRoute
+  AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRouteWithChildren
   AuthenticatedAuditRoute: typeof AuthenticatedAuditRoute
   AuthenticatedCompaniesRoute: typeof AuthenticatedCompaniesRoute
   AuthenticatedCrmRoute: typeof AuthenticatedCrmRouteWithChildren
@@ -471,7 +500,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccessProfilesRoute: AuthenticatedAccessProfilesRoute,
-  AuthenticatedAgendaRoute: AuthenticatedAgendaRoute,
+  AuthenticatedAgendaRoute: AuthenticatedAgendaRouteWithChildren,
   AuthenticatedAuditRoute: AuthenticatedAuditRoute,
   AuthenticatedCompaniesRoute: AuthenticatedCompaniesRoute,
   AuthenticatedCrmRoute: AuthenticatedCrmRouteWithChildren,
