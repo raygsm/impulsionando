@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Sparkles, ShieldCheck, Layers, Zap } from "lucide-react";
 
@@ -26,6 +27,9 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [resetOpen, setResetOpen] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -57,6 +61,20 @@ function AuthPage() {
     setLoading(false);
     if (error) return toast.error(error.message);
     toast.success("Conta criada. Verifique seu e-mail se necessário e faça login.");
+  }
+
+  async function handleResetPassword(e: React.FormEvent) {
+    e.preventDefault();
+    const target = (resetEmail || email).trim();
+    if (!target) return toast.error("Informe o e-mail para recuperação.");
+    setResetLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(target, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setResetLoading(false);
+    if (error) return toast.error(error.message);
+    toast.success("Se o e-mail estiver cadastrado, enviaremos as instruções de redefinição.");
+    setResetOpen(false);
   }
 
   return (
@@ -123,7 +141,45 @@ function AuthPage() {
                   <Input id="li-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="li-pw">Senha</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="li-pw">Senha</Label>
+                    <Dialog open={resetOpen} onOpenChange={(o) => { setResetOpen(o); if (o) setResetEmail(email); }}>
+                      <DialogTrigger asChild>
+                        <button type="button" className="text-xs text-primary hover:underline">
+                          Esqueci a senha
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Recuperar senha</DialogTitle>
+                          <DialogDescription>
+                            Enviaremos um link para redefinição no e-mail informado.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={handleResetPassword} className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="reset-email">E-mail</Label>
+                            <Input
+                              id="reset-email"
+                              type="email"
+                              required
+                              value={resetEmail}
+                              onChange={(e) => setResetEmail(e.target.value)}
+                              placeholder="voce@empresa.com"
+                            />
+                          </div>
+                          <DialogFooter>
+                            <Button type="button" variant="outline" onClick={() => setResetOpen(false)}>
+                              Cancelar
+                            </Button>
+                            <Button type="submit" disabled={resetLoading} className="bg-gradient-primary">
+                              {resetLoading ? "Enviando..." : "Enviar link"}
+                            </Button>
+                          </DialogFooter>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                   <Input id="li-pw" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
                 </div>
                 <Button type="submit" className="w-full bg-gradient-primary shadow-elegant" disabled={loading}>
