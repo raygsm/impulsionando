@@ -263,7 +263,7 @@ function PlanosPage() {
                   className={cn("mt-6 w-full", plan.highlight && "bg-gradient-primary shadow-elegant")}
                   variant={plan.highlight ? "default" : "outline"}
                 >
-                  <Link to="/orcamento">{plan.cta}</Link>
+                  <Link to="/orcamento" search={{ plano: plan.name, origem: "planos" }}>{plan.cta}</Link>
                 </Button>
               </Card>
             );
