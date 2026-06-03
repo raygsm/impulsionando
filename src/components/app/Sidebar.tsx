@@ -8,6 +8,7 @@ import {
   Wallet, ArrowLeftRight, FolderTree, CreditCard, Percent,
   Package, Truck, ArrowDownUp,
   ShoppingCart, Receipt, Plus, Wallet as WalletIcon,
+  Contact,
 } from "lucide-react";
 
 interface NavItem {
