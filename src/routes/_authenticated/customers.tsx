@@ -231,6 +231,27 @@ function Page() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!anonTarget} onOpenChange={(o) => { if (!o) { setAnonTarget(null); setAnonReason(""); } }}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Anonimizar cliente (LGPD)</DialogTitle></DialogHeader>
+          <div className="space-y-3 text-sm">
+            <p className="text-muted-foreground">
+              Esta ação atende ao direito ao esquecimento. Dados pessoais (nome, contato, documento, endereço) de <b>{anonTarget?.name}</b> serão removidos permanentemente. O histórico de vendas e agendamentos é preservado para fins fiscais e contábeis. <b>Não é reversível.</b>
+            </p>
+            <div>
+              <Label>Motivo / referência da solicitação</Label>
+              <Textarea rows={3} value={anonReason} onChange={(e) => setAnonReason(e.target.value)} placeholder="Ex: solicitação do titular em 03/06/2026, protocolo #123" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAnonTarget(null)}>Cancelar</Button>
+            <Button variant="destructive" onClick={() => anonymize.mutate()} disabled={anonymize.isPending}>
+              <ShieldOff className="w-4 h-4 mr-1" />Confirmar anonimização
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
