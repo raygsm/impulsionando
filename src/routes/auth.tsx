@@ -67,14 +67,26 @@ function AuthPage() {
     e.preventDefault();
     const target = (resetEmail || email).trim();
     if (!target) return toast.error("Informe o e-mail para recuperação.");
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(target)) {
+      return toast.error("Informe um endereço de e-mail válido.");
+    }
     setResetLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(target, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-    setResetLoading(false);
-    if (error) return toast.error(error.message);
-    toast.success("Se o e-mail estiver cadastrado, enviaremos as instruções de redefinição.");
-    setResetOpen(false);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(target, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) {
+        // Mensagem genérica para não expor se o e-mail existe ou não
+        return toast.error("Não foi possível processar a solicitação. Verifique o e-mail e tente novamente.");
+      }
+      toast.success("Se o e-mail estiver cadastrado, enviaremos as instruções de redefinição.");
+      setResetOpen(false);
+    } catch {
+      toast.error("Erro de conexão. Verifique sua internet e tente novamente.");
+    } finally {
+      setResetLoading(false);
+    }
   }
 
   return (
