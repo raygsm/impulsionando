@@ -191,7 +191,7 @@ function CloseDialog({ sessionId, companyId, onClose }: { sessionId: string; com
       const { error } = await supabase.rpc("sales_cash_session_close", {
         _session_id: sessionId,
         _counts: payload,
-        _notes: notes || null,
+        _notes: notes || undefined,
       });
       if (error) throw error;
     },
