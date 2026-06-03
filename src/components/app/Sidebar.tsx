@@ -63,6 +63,10 @@ const NAV: NavItem[] = [
   { to: "/reports/inventory", label: "Estoque", icon: Package, group: "Relatórios" },
   { to: "/reports/agenda", label: "Agenda", icon: Calendar, group: "Relatórios" },
   { to: "/reports/crm", label: "CRM", icon: UserPlus, group: "Relatórios" },
+  { to: "/bi", label: "Visão geral", icon: BarChart3, group: "BI" },
+  { to: "/bi/company", label: "Cliente", icon: Building2, group: "BI" },
+  { to: "/bi/master", label: "Master", icon: Building2, group: "BI", superOnly: true },
+  { to: "/bi/niches", label: "Por nicho", icon: Tags, group: "BI", superOnly: true },
 ];
 
 export function Sidebar({ currentUser }: { currentUser: CurrentUser }) {

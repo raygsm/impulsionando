@@ -36,6 +36,7 @@ import { Route as AuthenticatedReportsIndexRouteImport } from './routes/_authent
 import { Route as AuthenticatedInventoryIndexRouteImport } from './routes/_authenticated/inventory.index'
 import { Route as AuthenticatedFinanceIndexRouteImport } from './routes/_authenticated/finance.index'
 import { Route as AuthenticatedCrmIndexRouteImport } from './routes/_authenticated/crm.index'
+import { Route as AuthenticatedBiIndexRouteImport } from './routes/_authenticated/bi.index'
 import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenticated/agenda.index'
 import { Route as AuthenticatedSalesOrdersRouteImport } from './routes/_authenticated/sales.orders'
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
@@ -58,6 +59,9 @@ import { Route as AuthenticatedCrmPipelinesRouteImport } from './routes/_authent
 import { Route as AuthenticatedCrmLeadsRouteImport } from './routes/_authenticated/crm.leads'
 import { Route as AuthenticatedCrmBoardRouteImport } from './routes/_authenticated/crm.board'
 import { Route as AuthenticatedCrmActivitiesRouteImport } from './routes/_authenticated/crm.activities'
+import { Route as AuthenticatedBiNichesRouteImport } from './routes/_authenticated/bi.niches'
+import { Route as AuthenticatedBiMasterRouteImport } from './routes/_authenticated/bi.master'
+import { Route as AuthenticatedBiCompanyRouteImport } from './routes/_authenticated/bi.company'
 import { Route as AuthenticatedAgendaWaitlistRouteImport } from './routes/_authenticated/agenda.waitlist'
 import { Route as AuthenticatedAgendaServicesRouteImport } from './routes/_authenticated/agenda.services'
 import { Route as AuthenticatedAgendaSchedulesRouteImport } from './routes/_authenticated/agenda.schedules'
@@ -204,6 +208,11 @@ const AuthenticatedCrmIndexRoute = AuthenticatedCrmIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedCrmRoute,
 } as any)
+const AuthenticatedBiIndexRoute = AuthenticatedBiIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedBiRoute,
+} as any)
 const AuthenticatedAgendaIndexRoute =
   AuthenticatedAgendaIndexRouteImport.update({
     id: '/',
@@ -331,6 +340,21 @@ const AuthenticatedCrmActivitiesRoute =
     path: '/activities',
     getParentRoute: () => AuthenticatedCrmRoute,
   } as any)
+const AuthenticatedBiNichesRoute = AuthenticatedBiNichesRouteImport.update({
+  id: '/niches',
+  path: '/niches',
+  getParentRoute: () => AuthenticatedBiRoute,
+} as any)
+const AuthenticatedBiMasterRoute = AuthenticatedBiMasterRouteImport.update({
+  id: '/master',
+  path: '/master',
+  getParentRoute: () => AuthenticatedBiRoute,
+} as any)
+const AuthenticatedBiCompanyRoute = AuthenticatedBiCompanyRouteImport.update({
+  id: '/company',
+  path: '/company',
+  getParentRoute: () => AuthenticatedBiRoute,
+} as any)
 const AuthenticatedAgendaWaitlistRoute =
   AuthenticatedAgendaWaitlistRouteImport.update({
     id: '/waitlist',
@@ -374,7 +398,7 @@ export interface FileRoutesByFullPath {
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/audit': typeof AuthenticatedAuditRoute
-  '/bi': typeof AuthenticatedBiRoute
+  '/bi': typeof AuthenticatedBiRouteWithChildren
   '/companies': typeof AuthenticatedCompaniesRoute
   '/crm': typeof AuthenticatedCrmRouteWithChildren
   '/customers': typeof AuthenticatedCustomersRoute
@@ -395,6 +419,9 @@ export interface FileRoutesByFullPath {
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
   '/agenda/services': typeof AuthenticatedAgendaServicesRoute
   '/agenda/waitlist': typeof AuthenticatedAgendaWaitlistRoute
+  '/bi/company': typeof AuthenticatedBiCompanyRoute
+  '/bi/master': typeof AuthenticatedBiMasterRoute
+  '/bi/niches': typeof AuthenticatedBiNichesRoute
   '/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/crm/board': typeof AuthenticatedCrmBoardRoute
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
@@ -417,6 +444,7 @@ export interface FileRoutesByFullPath {
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
   '/agenda/': typeof AuthenticatedAgendaIndexRoute
+  '/bi/': typeof AuthenticatedBiIndexRoute
   '/crm/': typeof AuthenticatedCrmIndexRoute
   '/finance/': typeof AuthenticatedFinanceIndexRoute
   '/inventory/': typeof AuthenticatedInventoryIndexRoute
@@ -429,7 +457,6 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/audit': typeof AuthenticatedAuditRoute
-  '/bi': typeof AuthenticatedBiRoute
   '/companies': typeof AuthenticatedCompaniesRoute
   '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -445,6 +472,9 @@ export interface FileRoutesByTo {
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
   '/agenda/services': typeof AuthenticatedAgendaServicesRoute
   '/agenda/waitlist': typeof AuthenticatedAgendaWaitlistRoute
+  '/bi/company': typeof AuthenticatedBiCompanyRoute
+  '/bi/master': typeof AuthenticatedBiMasterRoute
+  '/bi/niches': typeof AuthenticatedBiNichesRoute
   '/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/crm/board': typeof AuthenticatedCrmBoardRoute
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
@@ -467,6 +497,7 @@ export interface FileRoutesByTo {
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
   '/agenda': typeof AuthenticatedAgendaIndexRoute
+  '/bi': typeof AuthenticatedBiIndexRoute
   '/crm': typeof AuthenticatedCrmIndexRoute
   '/finance': typeof AuthenticatedFinanceIndexRoute
   '/inventory': typeof AuthenticatedInventoryIndexRoute
@@ -482,7 +513,7 @@ export interface FileRoutesById {
   '/_authenticated/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/_authenticated/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/_authenticated/audit': typeof AuthenticatedAuditRoute
-  '/_authenticated/bi': typeof AuthenticatedBiRoute
+  '/_authenticated/bi': typeof AuthenticatedBiRouteWithChildren
   '/_authenticated/companies': typeof AuthenticatedCompaniesRoute
   '/_authenticated/crm': typeof AuthenticatedCrmRouteWithChildren
   '/_authenticated/customers': typeof AuthenticatedCustomersRoute
@@ -503,6 +534,9 @@ export interface FileRoutesById {
   '/_authenticated/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
   '/_authenticated/agenda/services': typeof AuthenticatedAgendaServicesRoute
   '/_authenticated/agenda/waitlist': typeof AuthenticatedAgendaWaitlistRoute
+  '/_authenticated/bi/company': typeof AuthenticatedBiCompanyRoute
+  '/_authenticated/bi/master': typeof AuthenticatedBiMasterRoute
+  '/_authenticated/bi/niches': typeof AuthenticatedBiNichesRoute
   '/_authenticated/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/_authenticated/crm/board': typeof AuthenticatedCrmBoardRoute
   '/_authenticated/crm/leads': typeof AuthenticatedCrmLeadsRoute
@@ -525,6 +559,7 @@ export interface FileRoutesById {
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
   '/_authenticated/sales/orders': typeof AuthenticatedSalesOrdersRoute
   '/_authenticated/agenda/': typeof AuthenticatedAgendaIndexRoute
+  '/_authenticated/bi/': typeof AuthenticatedBiIndexRoute
   '/_authenticated/crm/': typeof AuthenticatedCrmIndexRoute
   '/_authenticated/finance/': typeof AuthenticatedFinanceIndexRoute
   '/_authenticated/inventory/': typeof AuthenticatedInventoryIndexRoute
@@ -561,6 +596,9 @@ export interface FileRouteTypes {
     | '/agenda/schedules'
     | '/agenda/services'
     | '/agenda/waitlist'
+    | '/bi/company'
+    | '/bi/master'
+    | '/bi/niches'
     | '/crm/activities'
     | '/crm/board'
     | '/crm/leads'
@@ -583,6 +621,7 @@ export interface FileRouteTypes {
     | '/sales/new'
     | '/sales/orders'
     | '/agenda/'
+    | '/bi/'
     | '/crm/'
     | '/finance/'
     | '/inventory/'
@@ -595,7 +634,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/access-profiles'
     | '/audit'
-    | '/bi'
     | '/companies'
     | '/customers'
     | '/dashboard'
@@ -611,6 +649,9 @@ export interface FileRouteTypes {
     | '/agenda/schedules'
     | '/agenda/services'
     | '/agenda/waitlist'
+    | '/bi/company'
+    | '/bi/master'
+    | '/bi/niches'
     | '/crm/activities'
     | '/crm/board'
     | '/crm/leads'
@@ -633,6 +674,7 @@ export interface FileRouteTypes {
     | '/sales/new'
     | '/sales/orders'
     | '/agenda'
+    | '/bi'
     | '/crm'
     | '/finance'
     | '/inventory'
@@ -668,6 +710,9 @@ export interface FileRouteTypes {
     | '/_authenticated/agenda/schedules'
     | '/_authenticated/agenda/services'
     | '/_authenticated/agenda/waitlist'
+    | '/_authenticated/bi/company'
+    | '/_authenticated/bi/master'
+    | '/_authenticated/bi/niches'
     | '/_authenticated/crm/activities'
     | '/_authenticated/crm/board'
     | '/_authenticated/crm/leads'
@@ -690,6 +735,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sales/new'
     | '/_authenticated/sales/orders'
     | '/_authenticated/agenda/'
+    | '/_authenticated/bi/'
     | '/_authenticated/crm/'
     | '/_authenticated/finance/'
     | '/_authenticated/inventory/'
@@ -895,6 +941,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCrmIndexRouteImport
       parentRoute: typeof AuthenticatedCrmRoute
     }
+    '/_authenticated/bi/': {
+      id: '/_authenticated/bi/'
+      path: '/'
+      fullPath: '/bi/'
+      preLoaderRoute: typeof AuthenticatedBiIndexRouteImport
+      parentRoute: typeof AuthenticatedBiRoute
+    }
     '/_authenticated/agenda/': {
       id: '/_authenticated/agenda/'
       path: '/'
@@ -1049,6 +1102,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCrmActivitiesRouteImport
       parentRoute: typeof AuthenticatedCrmRoute
     }
+    '/_authenticated/bi/niches': {
+      id: '/_authenticated/bi/niches'
+      path: '/niches'
+      fullPath: '/bi/niches'
+      preLoaderRoute: typeof AuthenticatedBiNichesRouteImport
+      parentRoute: typeof AuthenticatedBiRoute
+    }
+    '/_authenticated/bi/master': {
+      id: '/_authenticated/bi/master'
+      path: '/master'
+      fullPath: '/bi/master'
+      preLoaderRoute: typeof AuthenticatedBiMasterRouteImport
+      parentRoute: typeof AuthenticatedBiRoute
+    }
+    '/_authenticated/bi/company': {
+      id: '/_authenticated/bi/company'
+      path: '/company'
+      fullPath: '/bi/company'
+      preLoaderRoute: typeof AuthenticatedBiCompanyRouteImport
+      parentRoute: typeof AuthenticatedBiRoute
+    }
     '/_authenticated/agenda/waitlist': {
       id: '/_authenticated/agenda/waitlist'
       path: '/waitlist'
@@ -1114,6 +1188,24 @@ const AuthenticatedAgendaRouteChildren: AuthenticatedAgendaRouteChildren = {
 
 const AuthenticatedAgendaRouteWithChildren =
   AuthenticatedAgendaRoute._addFileChildren(AuthenticatedAgendaRouteChildren)
+
+interface AuthenticatedBiRouteChildren {
+  AuthenticatedBiCompanyRoute: typeof AuthenticatedBiCompanyRoute
+  AuthenticatedBiMasterRoute: typeof AuthenticatedBiMasterRoute
+  AuthenticatedBiNichesRoute: typeof AuthenticatedBiNichesRoute
+  AuthenticatedBiIndexRoute: typeof AuthenticatedBiIndexRoute
+}
+
+const AuthenticatedBiRouteChildren: AuthenticatedBiRouteChildren = {
+  AuthenticatedBiCompanyRoute: AuthenticatedBiCompanyRoute,
+  AuthenticatedBiMasterRoute: AuthenticatedBiMasterRoute,
+  AuthenticatedBiNichesRoute: AuthenticatedBiNichesRoute,
+  AuthenticatedBiIndexRoute: AuthenticatedBiIndexRoute,
+}
+
+const AuthenticatedBiRouteWithChildren = AuthenticatedBiRoute._addFileChildren(
+  AuthenticatedBiRouteChildren,
+)
 
 interface AuthenticatedCrmRouteChildren {
   AuthenticatedCrmActivitiesRoute: typeof AuthenticatedCrmActivitiesRoute
@@ -1234,7 +1326,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccessProfilesRoute: typeof AuthenticatedAccessProfilesRoute
   AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRouteWithChildren
   AuthenticatedAuditRoute: typeof AuthenticatedAuditRoute
-  AuthenticatedBiRoute: typeof AuthenticatedBiRoute
+  AuthenticatedBiRoute: typeof AuthenticatedBiRouteWithChildren
   AuthenticatedCompaniesRoute: typeof AuthenticatedCompaniesRoute
   AuthenticatedCrmRoute: typeof AuthenticatedCrmRouteWithChildren
   AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRoute
@@ -1256,7 +1348,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccessProfilesRoute: AuthenticatedAccessProfilesRoute,
   AuthenticatedAgendaRoute: AuthenticatedAgendaRouteWithChildren,
   AuthenticatedAuditRoute: AuthenticatedAuditRoute,
-  AuthenticatedBiRoute: AuthenticatedBiRoute,
+  AuthenticatedBiRoute: AuthenticatedBiRouteWithChildren,
   AuthenticatedCompaniesRoute: AuthenticatedCompaniesRoute,
   AuthenticatedCrmRoute: AuthenticatedCrmRouteWithChildren,
   AuthenticatedCustomersRoute: AuthenticatedCustomersRoute,
