@@ -154,68 +154,40 @@ function AuthPage() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="li-pw">Senha</Label>
-                    <Dialog open={resetOpen} onOpenChange={(o) => { setResetOpen(o); if (!o) setResetSent(false); if (o) setResetEmail(email); }}>
+                    <Dialog open={resetOpen} onOpenChange={(o) => { setResetOpen(o); if (o) setResetEmail(email); }}>
                       <DialogTrigger asChild>
                         <button type="button" className="text-xs text-primary hover:underline">
                           Esqueci a senha
                         </button>
                       </DialogTrigger>
                       <DialogContent className="sm:max-w-md">
-                        {resetSent ? (
-                          <div className="flex flex-col items-center text-center space-y-4 py-2">
-                            <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                              <MailCheck className="w-6 h-6 text-green-600 dark:text-green-400" />
-                            </div>
-                            <div className="space-y-2">
-                              <DialogTitle>Verifique seu e-mail</DialogTitle>
-                              <DialogDescription>
-                                Se o endereço informado estiver associado a uma conta, você receberá em breve um e-mail com instruções para redefinir sua senha.
-                              </DialogDescription>
-                            </div>
-                            <div className="bg-muted rounded-lg p-4 text-left text-sm space-y-2 w-full">
-                              <p className="font-medium text-foreground">Instruções de segurança:</p>
-                              <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                                <li>O link de redefinição expira em 1 hora.</li>
-                                <li>Se não receber o e-mail em alguns minutos, verifique a caixa de spam ou lixo eletrônico.</li>
-                                <li>Nunca compartilhe o link de redefinição com terceiros.</li>
-                                <li>Caso não tenha solicitado esta recuperação, ignore o e-mail.</li>
-                              </ul>
-                            </div>
-                            <Button onClick={() => setResetOpen(false)} className="w-full bg-gradient-primary">
-                              Entendido
-                            </Button>
+                        <DialogHeader>
+                          <DialogTitle>Recuperar senha</DialogTitle>
+                          <DialogDescription>
+                            Enviaremos um link para redefinição no e-mail informado.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={handleResetPassword} className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="reset-email">E-mail</Label>
+                            <Input
+                              id="reset-email"
+                              type="email"
+                              required
+                              value={resetEmail}
+                              onChange={(e) => setResetEmail(e.target.value)}
+                              placeholder="voce@empresa.com"
+                            />
                           </div>
-                        ) : (
-                          <>
-                            <DialogHeader>
-                              <DialogTitle>Recuperar senha</DialogTitle>
-                              <DialogDescription>
-                                Enviaremos um link para redefinição no e-mail informado.
-                              </DialogDescription>
-                            </DialogHeader>
-                            <form onSubmit={handleResetPassword} className="space-y-4">
-                              <div className="space-y-2">
-                                <Label htmlFor="reset-email">E-mail</Label>
-                                <Input
-                                  id="reset-email"
-                                  type="email"
-                                  required
-                                  value={resetEmail}
-                                  onChange={(e) => setResetEmail(e.target.value)}
-                                  placeholder="voce@empresa.com"
-                                />
-                              </div>
-                              <DialogFooter>
-                                <Button type="button" variant="outline" onClick={() => setResetOpen(false)}>
-                                  Cancelar
-                                </Button>
-                                <Button type="submit" disabled={resetLoading} className="bg-gradient-primary">
-                                  {resetLoading ? "Enviando..." : "Enviar link"}
-                                </Button>
-                              </DialogFooter>
-                            </form>
-                          </>
-                        )}
+                          <DialogFooter>
+                            <Button type="button" variant="outline" onClick={() => setResetOpen(false)}>
+                              Cancelar
+                            </Button>
+                            <Button type="submit" disabled={resetLoading} className="bg-gradient-primary">
+                              {resetLoading ? "Enviando..." : "Enviar link"}
+                            </Button>
+                          </DialogFooter>
+                        </form>
                       </DialogContent>
                     </Dialog>
                   </div>
