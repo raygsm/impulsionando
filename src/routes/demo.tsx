@@ -4,7 +4,7 @@ import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Store, ArrowRight, HelpCircle, Sparkles, ShieldCheck, Zap } from "lucide-react";
+import { Building2, Store, ArrowRight, HelpCircle, Sparkles, ShieldCheck, Zap, LogIn, Workflow, Plug, KeyRound, Smartphone, Database, MessageCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export const Route = createFileRoute("/demo")({
