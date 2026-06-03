@@ -320,7 +320,7 @@ function ResultCard({
       phone: whatsapp.trim(),
       email: email.trim() || null,
       message: `Plano ${rec.plano} · Módulos: ${rec.modulos.join(", ") || "—"}`,
-      answers: answers as unknown as Record<string, unknown>,
+      answers: answers as never,
       recommended_plan: rec.plano,
       recommended_modules: rec.modulos,
       page_url: typeof window !== "undefined" ? window.location.href : null,
@@ -481,7 +481,7 @@ function OrcamentoPage() {
         </div>
 
         {done ? (
-          <ResultCard rec={recomendar(a)} onRestart={reset} />
+          <ResultCard rec={recomendar(a)} answers={a} onRestart={reset} />
         ) : (
           <Card className="p-6 sm:p-8 space-y-6">
             <StepHeader title={current.title} helper={current.helper} step={step + 1} total={total} />
