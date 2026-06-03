@@ -952,6 +952,78 @@ export type Database = {
           },
         ]
       }
+      data_deletion_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          id: string
+          processed_at: string | null
+          reason: string | null
+          scheduled_for: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          processed_at?: string | null
+          reason?: string | null
+          scheduled_for?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          processed_at?: string | null
+          reason?: string | null
+          scheduled_for?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      data_export_requests: {
+        Row: {
+          created_at: string
+          download_url: string | null
+          expires_at: string | null
+          id: string
+          notes: string | null
+          processed_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          download_url?: string | null
+          expires_at?: string | null
+          id?: string
+          notes?: string | null
+          processed_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          download_url?: string | null
+          expires_at?: string | null
+          id?: string
+          notes?: string | null
+          processed_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       fin_accounts: {
         Row: {
           company_id: string
@@ -1552,6 +1624,48 @@ export type Database = {
           },
         ]
       }
+      lgpd_consents: {
+        Row: {
+          accepted: boolean
+          accepted_at: string | null
+          consent_type: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          revoked_at: string | null
+          terms_version: string
+          updated_at: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          accepted?: boolean
+          accepted_at?: string | null
+          consent_type: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          revoked_at?: string | null
+          terms_version?: string
+          updated_at?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          accepted?: boolean
+          accepted_at?: string | null
+          consent_type?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          revoked_at?: string | null
+          terms_version?: string
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       modules: {
         Row: {
           category: string | null
@@ -1626,6 +1740,100 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      notification_preferences: {
+        Row: {
+          category: string
+          channel: string
+          company_id: string | null
+          created_at: string
+          enabled: boolean
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          channel: string
+          company_id?: string | null
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          channel?: string
+          company_id?: string | null
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          action_label: string | null
+          action_url: string | null
+          category: string
+          company_id: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string | null
+          read_at: string | null
+          severity: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          action_label?: string | null
+          action_url?: string | null
+          category?: string
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          read_at?: string | null
+          severity?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          action_label?: string | null
+          action_url?: string | null
+          category?: string
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          read_at?: string | null
+          severity?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       permissions: {
         Row: {
