@@ -42,6 +42,7 @@ import { Route as AuthenticatedSalesCashRouteImport } from './routes/_authentica
 import { Route as AuthenticatedReportsSalesRouteImport } from './routes/_authenticated/reports.sales'
 import { Route as AuthenticatedReportsInventoryRouteImport } from './routes/_authenticated/reports.inventory'
 import { Route as AuthenticatedReportsFinanceRouteImport } from './routes/_authenticated/reports.finance'
+import { Route as AuthenticatedReportsCrmRouteImport } from './routes/_authenticated/reports.crm'
 import { Route as AuthenticatedReportsAgendaRouteImport } from './routes/_authenticated/reports.agenda'
 import { Route as AuthenticatedInventorySuppliersRouteImport } from './routes/_authenticated/inventory.suppliers'
 import { Route as AuthenticatedInventoryProductsRouteImport } from './routes/_authenticated/inventory.products'
@@ -237,6 +238,11 @@ const AuthenticatedReportsFinanceRoute =
     path: '/finance',
     getParentRoute: () => AuthenticatedReportsRoute,
   } as any)
+const AuthenticatedReportsCrmRoute = AuthenticatedReportsCrmRouteImport.update({
+  id: '/crm',
+  path: '/crm',
+  getParentRoute: () => AuthenticatedReportsRoute,
+} as any)
 const AuthenticatedReportsAgendaRoute =
   AuthenticatedReportsAgendaRouteImport.update({
     id: '/agenda',
@@ -396,6 +402,7 @@ export interface FileRoutesByFullPath {
   '/inventory/products': typeof AuthenticatedInventoryProductsRoute
   '/inventory/suppliers': typeof AuthenticatedInventorySuppliersRoute
   '/reports/agenda': typeof AuthenticatedReportsAgendaRoute
+  '/reports/crm': typeof AuthenticatedReportsCrmRoute
   '/reports/finance': typeof AuthenticatedReportsFinanceRoute
   '/reports/inventory': typeof AuthenticatedReportsInventoryRoute
   '/reports/sales': typeof AuthenticatedReportsSalesRoute
@@ -444,6 +451,7 @@ export interface FileRoutesByTo {
   '/inventory/products': typeof AuthenticatedInventoryProductsRoute
   '/inventory/suppliers': typeof AuthenticatedInventorySuppliersRoute
   '/reports/agenda': typeof AuthenticatedReportsAgendaRoute
+  '/reports/crm': typeof AuthenticatedReportsCrmRoute
   '/reports/finance': typeof AuthenticatedReportsFinanceRoute
   '/reports/inventory': typeof AuthenticatedReportsInventoryRoute
   '/reports/sales': typeof AuthenticatedReportsSalesRoute
@@ -500,6 +508,7 @@ export interface FileRoutesById {
   '/_authenticated/inventory/products': typeof AuthenticatedInventoryProductsRoute
   '/_authenticated/inventory/suppliers': typeof AuthenticatedInventorySuppliersRoute
   '/_authenticated/reports/agenda': typeof AuthenticatedReportsAgendaRoute
+  '/_authenticated/reports/crm': typeof AuthenticatedReportsCrmRoute
   '/_authenticated/reports/finance': typeof AuthenticatedReportsFinanceRoute
   '/_authenticated/reports/inventory': typeof AuthenticatedReportsInventoryRoute
   '/_authenticated/reports/sales': typeof AuthenticatedReportsSalesRoute
@@ -556,6 +565,7 @@ export interface FileRouteTypes {
     | '/inventory/products'
     | '/inventory/suppliers'
     | '/reports/agenda'
+    | '/reports/crm'
     | '/reports/finance'
     | '/reports/inventory'
     | '/reports/sales'
@@ -604,6 +614,7 @@ export interface FileRouteTypes {
     | '/inventory/products'
     | '/inventory/suppliers'
     | '/reports/agenda'
+    | '/reports/crm'
     | '/reports/finance'
     | '/reports/inventory'
     | '/reports/sales'
@@ -659,6 +670,7 @@ export interface FileRouteTypes {
     | '/_authenticated/inventory/products'
     | '/_authenticated/inventory/suppliers'
     | '/_authenticated/reports/agenda'
+    | '/_authenticated/reports/crm'
     | '/_authenticated/reports/finance'
     | '/_authenticated/reports/inventory'
     | '/_authenticated/reports/sales'
@@ -913,6 +925,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReportsFinanceRouteImport
       parentRoute: typeof AuthenticatedReportsRoute
     }
+    '/_authenticated/reports/crm': {
+      id: '/_authenticated/reports/crm'
+      path: '/crm'
+      fullPath: '/reports/crm'
+      preLoaderRoute: typeof AuthenticatedReportsCrmRouteImport
+      parentRoute: typeof AuthenticatedReportsRoute
+    }
     '/_authenticated/reports/agenda': {
       id: '/_authenticated/reports/agenda'
       path: '/agenda'
@@ -1142,6 +1161,7 @@ const AuthenticatedInventoryRouteWithChildren =
 
 interface AuthenticatedReportsRouteChildren {
   AuthenticatedReportsAgendaRoute: typeof AuthenticatedReportsAgendaRoute
+  AuthenticatedReportsCrmRoute: typeof AuthenticatedReportsCrmRoute
   AuthenticatedReportsFinanceRoute: typeof AuthenticatedReportsFinanceRoute
   AuthenticatedReportsInventoryRoute: typeof AuthenticatedReportsInventoryRoute
   AuthenticatedReportsSalesRoute: typeof AuthenticatedReportsSalesRoute
@@ -1150,6 +1170,7 @@ interface AuthenticatedReportsRouteChildren {
 
 const AuthenticatedReportsRouteChildren: AuthenticatedReportsRouteChildren = {
   AuthenticatedReportsAgendaRoute: AuthenticatedReportsAgendaRoute,
+  AuthenticatedReportsCrmRoute: AuthenticatedReportsCrmRoute,
   AuthenticatedReportsFinanceRoute: AuthenticatedReportsFinanceRoute,
   AuthenticatedReportsInventoryRoute: AuthenticatedReportsInventoryRoute,
   AuthenticatedReportsSalesRoute: AuthenticatedReportsSalesRoute,
