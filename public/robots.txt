@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /auth
+Disallow: /reset-password
+Disallow: /reset-password-sent
+
+Sitemap: https://sistemas.impulsionando.com.br/sitemap.xml
