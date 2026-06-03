@@ -150,7 +150,7 @@ function AuthPage() {
                   {loading ? "Criando..." : "Criar conta"}
                 </Button>
                 <p className="text-xs text-muted-foreground">
-                  O primeiro usuário cadastrado é automaticamente promovido a Super Admin Impulsionando.
+                  Entre em contato com o administrador para obter acesso completo após o cadastro.
                 </p>
               </form>
             </TabsContent>
