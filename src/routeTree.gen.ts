@@ -29,6 +29,7 @@ import { Route as AuthenticatedAccessProfilesRouteImport } from './routes/_authe
 import { Route as AuthenticatedFinanceIndexRouteImport } from './routes/_authenticated/finance.index'
 import { Route as AuthenticatedCrmIndexRouteImport } from './routes/_authenticated/crm.index'
 import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenticated/agenda.index'
+import { Route as AuthenticatedFinanceCategoriesRouteImport } from './routes/_authenticated/finance.categories'
 import { Route as AuthenticatedFinanceAccountsRouteImport } from './routes/_authenticated/finance.accounts'
 import { Route as AuthenticatedCrmPipelinesRouteImport } from './routes/_authenticated/crm.pipelines'
 import { Route as AuthenticatedCrmLeadsRouteImport } from './routes/_authenticated/crm.leads'
@@ -143,6 +144,12 @@ const AuthenticatedAgendaIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedAgendaRoute,
   } as any)
+const AuthenticatedFinanceCategoriesRoute =
+  AuthenticatedFinanceCategoriesRouteImport.update({
+    id: '/categories',
+    path: '/categories',
+    getParentRoute: () => AuthenticatedFinanceRoute,
+  } as any)
 const AuthenticatedFinanceAccountsRoute =
   AuthenticatedFinanceAccountsRouteImport.update({
     id: '/accounts',
@@ -229,6 +236,7 @@ export interface FileRoutesByFullPath {
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
   '/crm/pipelines': typeof AuthenticatedCrmPipelinesRoute
   '/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
+  '/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
   '/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/crm/': typeof AuthenticatedCrmIndexRoute
   '/finance/': typeof AuthenticatedFinanceIndexRoute
@@ -257,6 +265,7 @@ export interface FileRoutesByTo {
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
   '/crm/pipelines': typeof AuthenticatedCrmPipelinesRoute
   '/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
+  '/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
   '/agenda': typeof AuthenticatedAgendaIndexRoute
   '/crm': typeof AuthenticatedCrmIndexRoute
   '/finance': typeof AuthenticatedFinanceIndexRoute
@@ -290,6 +299,7 @@ export interface FileRoutesById {
   '/_authenticated/crm/leads': typeof AuthenticatedCrmLeadsRoute
   '/_authenticated/crm/pipelines': typeof AuthenticatedCrmPipelinesRoute
   '/_authenticated/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
+  '/_authenticated/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
   '/_authenticated/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/_authenticated/crm/': typeof AuthenticatedCrmIndexRoute
   '/_authenticated/finance/': typeof AuthenticatedFinanceIndexRoute
@@ -323,6 +333,7 @@ export interface FileRouteTypes {
     | '/crm/leads'
     | '/crm/pipelines'
     | '/finance/accounts'
+    | '/finance/categories'
     | '/agenda/'
     | '/crm/'
     | '/finance/'
@@ -351,6 +362,7 @@ export interface FileRouteTypes {
     | '/crm/leads'
     | '/crm/pipelines'
     | '/finance/accounts'
+    | '/finance/categories'
     | '/agenda'
     | '/crm'
     | '/finance'
@@ -383,6 +395,7 @@ export interface FileRouteTypes {
     | '/_authenticated/crm/leads'
     | '/_authenticated/crm/pipelines'
     | '/_authenticated/finance/accounts'
+    | '/_authenticated/finance/categories'
     | '/_authenticated/agenda/'
     | '/_authenticated/crm/'
     | '/_authenticated/finance/'
@@ -536,6 +549,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgendaIndexRouteImport
       parentRoute: typeof AuthenticatedAgendaRoute
     }
+    '/_authenticated/finance/categories': {
+      id: '/_authenticated/finance/categories'
+      path: '/categories'
+      fullPath: '/finance/categories'
+      preLoaderRoute: typeof AuthenticatedFinanceCategoriesRouteImport
+      parentRoute: typeof AuthenticatedFinanceRoute
+    }
     '/_authenticated/finance/accounts': {
       id: '/_authenticated/finance/accounts'
       path: '/accounts'
@@ -651,11 +671,13 @@ const AuthenticatedCrmRouteWithChildren =
 
 interface AuthenticatedFinanceRouteChildren {
   AuthenticatedFinanceAccountsRoute: typeof AuthenticatedFinanceAccountsRoute
+  AuthenticatedFinanceCategoriesRoute: typeof AuthenticatedFinanceCategoriesRoute
   AuthenticatedFinanceIndexRoute: typeof AuthenticatedFinanceIndexRoute
 }
 
 const AuthenticatedFinanceRouteChildren: AuthenticatedFinanceRouteChildren = {
   AuthenticatedFinanceAccountsRoute: AuthenticatedFinanceAccountsRoute,
+  AuthenticatedFinanceCategoriesRoute: AuthenticatedFinanceCategoriesRoute,
   AuthenticatedFinanceIndexRoute: AuthenticatedFinanceIndexRoute,
 }
 
