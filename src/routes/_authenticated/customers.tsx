@@ -182,7 +182,9 @@ function Page() {
                 </div>
               </div>
               <Button size="sm" variant="ghost" onClick={() => openEdit(c)} disabled={!!c.anonymized_at}><Pencil className="w-4 h-4" /></Button>
-              <Button size="sm" variant="ghost" title="Anonimizar (LGPD)" onClick={() => setAnonTarget(c)} disabled={!!c.anonymized_at}><ShieldOff className="w-4 h-4" /></Button>
+              {(me?.isSuperAdmin || userPerms?.has("customer.anonymize")) && (
+                <Button size="sm" variant="ghost" title="Anonimizar (LGPD)" onClick={() => setAnonTarget(c)} disabled={!!c.anonymized_at}><ShieldOff className="w-4 h-4" /></Button>
+              )}
               <Button size="sm" variant="ghost" onClick={() => { if (confirm(`Excluir ${c.name}?`)) del.mutate(c.id); }}><Trash2 className="w-4 h-4" /></Button>
             </div>
           ))}
