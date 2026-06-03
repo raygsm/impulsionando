@@ -31,6 +31,7 @@ import { Route as AuthenticatedCrmIndexRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenticated/agenda.index'
 import { Route as AuthenticatedFinanceTransactionsRouteImport } from './routes/_authenticated/finance.transactions'
 import { Route as AuthenticatedFinanceMethodsRouteImport } from './routes/_authenticated/finance.methods'
+import { Route as AuthenticatedFinanceCommissionsRouteImport } from './routes/_authenticated/finance.commissions'
 import { Route as AuthenticatedFinanceCategoriesRouteImport } from './routes/_authenticated/finance.categories'
 import { Route as AuthenticatedFinanceAccountsRouteImport } from './routes/_authenticated/finance.accounts'
 import { Route as AuthenticatedCrmPipelinesRouteImport } from './routes/_authenticated/crm.pipelines'
@@ -158,6 +159,12 @@ const AuthenticatedFinanceMethodsRoute =
     path: '/methods',
     getParentRoute: () => AuthenticatedFinanceRoute,
   } as any)
+const AuthenticatedFinanceCommissionsRoute =
+  AuthenticatedFinanceCommissionsRouteImport.update({
+    id: '/commissions',
+    path: '/commissions',
+    getParentRoute: () => AuthenticatedFinanceRoute,
+  } as any)
 const AuthenticatedFinanceCategoriesRoute =
   AuthenticatedFinanceCategoriesRouteImport.update({
     id: '/categories',
@@ -251,6 +258,7 @@ export interface FileRoutesByFullPath {
   '/crm/pipelines': typeof AuthenticatedCrmPipelinesRoute
   '/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
   '/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
+  '/finance/commissions': typeof AuthenticatedFinanceCommissionsRoute
   '/finance/methods': typeof AuthenticatedFinanceMethodsRoute
   '/finance/transactions': typeof AuthenticatedFinanceTransactionsRoute
   '/agenda/': typeof AuthenticatedAgendaIndexRoute
@@ -282,6 +290,7 @@ export interface FileRoutesByTo {
   '/crm/pipelines': typeof AuthenticatedCrmPipelinesRoute
   '/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
   '/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
+  '/finance/commissions': typeof AuthenticatedFinanceCommissionsRoute
   '/finance/methods': typeof AuthenticatedFinanceMethodsRoute
   '/finance/transactions': typeof AuthenticatedFinanceTransactionsRoute
   '/agenda': typeof AuthenticatedAgendaIndexRoute
@@ -318,6 +327,7 @@ export interface FileRoutesById {
   '/_authenticated/crm/pipelines': typeof AuthenticatedCrmPipelinesRoute
   '/_authenticated/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
   '/_authenticated/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
+  '/_authenticated/finance/commissions': typeof AuthenticatedFinanceCommissionsRoute
   '/_authenticated/finance/methods': typeof AuthenticatedFinanceMethodsRoute
   '/_authenticated/finance/transactions': typeof AuthenticatedFinanceTransactionsRoute
   '/_authenticated/agenda/': typeof AuthenticatedAgendaIndexRoute
@@ -354,6 +364,7 @@ export interface FileRouteTypes {
     | '/crm/pipelines'
     | '/finance/accounts'
     | '/finance/categories'
+    | '/finance/commissions'
     | '/finance/methods'
     | '/finance/transactions'
     | '/agenda/'
@@ -385,6 +396,7 @@ export interface FileRouteTypes {
     | '/crm/pipelines'
     | '/finance/accounts'
     | '/finance/categories'
+    | '/finance/commissions'
     | '/finance/methods'
     | '/finance/transactions'
     | '/agenda'
@@ -420,6 +432,7 @@ export interface FileRouteTypes {
     | '/_authenticated/crm/pipelines'
     | '/_authenticated/finance/accounts'
     | '/_authenticated/finance/categories'
+    | '/_authenticated/finance/commissions'
     | '/_authenticated/finance/methods'
     | '/_authenticated/finance/transactions'
     | '/_authenticated/agenda/'
@@ -589,6 +602,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFinanceMethodsRouteImport
       parentRoute: typeof AuthenticatedFinanceRoute
     }
+    '/_authenticated/finance/commissions': {
+      id: '/_authenticated/finance/commissions'
+      path: '/commissions'
+      fullPath: '/finance/commissions'
+      preLoaderRoute: typeof AuthenticatedFinanceCommissionsRouteImport
+      parentRoute: typeof AuthenticatedFinanceRoute
+    }
     '/_authenticated/finance/categories': {
       id: '/_authenticated/finance/categories'
       path: '/categories'
@@ -712,6 +732,7 @@ const AuthenticatedCrmRouteWithChildren =
 interface AuthenticatedFinanceRouteChildren {
   AuthenticatedFinanceAccountsRoute: typeof AuthenticatedFinanceAccountsRoute
   AuthenticatedFinanceCategoriesRoute: typeof AuthenticatedFinanceCategoriesRoute
+  AuthenticatedFinanceCommissionsRoute: typeof AuthenticatedFinanceCommissionsRoute
   AuthenticatedFinanceMethodsRoute: typeof AuthenticatedFinanceMethodsRoute
   AuthenticatedFinanceTransactionsRoute: typeof AuthenticatedFinanceTransactionsRoute
   AuthenticatedFinanceIndexRoute: typeof AuthenticatedFinanceIndexRoute
@@ -720,6 +741,7 @@ interface AuthenticatedFinanceRouteChildren {
 const AuthenticatedFinanceRouteChildren: AuthenticatedFinanceRouteChildren = {
   AuthenticatedFinanceAccountsRoute: AuthenticatedFinanceAccountsRoute,
   AuthenticatedFinanceCategoriesRoute: AuthenticatedFinanceCategoriesRoute,
+  AuthenticatedFinanceCommissionsRoute: AuthenticatedFinanceCommissionsRoute,
   AuthenticatedFinanceMethodsRoute: AuthenticatedFinanceMethodsRoute,
   AuthenticatedFinanceTransactionsRoute: AuthenticatedFinanceTransactionsRoute,
   AuthenticatedFinanceIndexRoute: AuthenticatedFinanceIndexRoute,
