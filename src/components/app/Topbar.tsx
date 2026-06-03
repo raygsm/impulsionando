@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import type { CurrentUser } from "@/lib/auth";
 import { MobileSidebar } from "./MobileSidebar";
+import { NotificationsBell } from "./NotificationsBell";
 
 export function Topbar({ currentUser }: { currentUser: CurrentUser }) {
   const navigate = useNavigate();
@@ -25,7 +26,8 @@ export function Topbar({ currentUser }: { currentUser: CurrentUser }) {
         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
         <Input placeholder="Buscar..." className="pl-9 bg-background" />
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
+        <NotificationsBell userId={currentUser.user.id} />
         <div className="text-right hidden sm:block">
           <div className="text-sm font-medium leading-tight">{name}</div>
           <div className="text-xs text-muted-foreground leading-tight">{roleLabel}</div>

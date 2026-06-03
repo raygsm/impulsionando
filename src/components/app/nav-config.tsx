@@ -5,7 +5,7 @@ import {
   Wallet, ArrowLeftRight, FolderTree, CreditCard, Percent,
   Package, Truck, ArrowDownUp,
   ShoppingCart, Receipt, Plus, Wallet as WalletIcon,
-  Contact, BarChart3,
+  Contact, BarChart3, ShieldCheck,
 } from "lucide-react";
 
 export interface NavItem {
@@ -42,6 +42,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/modules", label: "Módulos", icon: Boxes, perm: "modules.read" },
       { to: "/settings", label: "Configurações", icon: SlidersHorizontal, perm: "settings.read" },
       { to: "/audit", label: "Auditoria", icon: FileSearch, perm: "audit.read" },
+      { to: "/privacy", label: "Privacidade & Notificações", icon: ShieldCheck },
     ],
   },
   {
