@@ -447,9 +447,47 @@ function ResultCard({
 }
 
 
+const VALID_DORES = new Set(DORES.map((d) => d.value));
+const VALID_SEGMENTOS = new Set(SEGMENTOS.map((s) => s.value));
+const VALID_PERFIS = new Set(PERFIL.map((p) => p.value));
+
+function buildPrefill(s: SearchParams): { answers: Answers; firstStep: number; hasPrefill: boolean } {
+  const a: Answers = { ...INITIAL };
+  let hasPrefill = false;
+
+  if (s.segmento && VALID_SEGMENTOS.has(s.segmento)) { a.segmento = s.segmento; hasPrefill = true; }
+  if (s.dores) {
+    const list = s.dores.split(",").map((d) => d.trim()).filter((d) => VALID_DORES.has(d));
+    if (list.length) { a.dores = list; hasPrefill = true; }
+  }
+  if (s.perfil && VALID_PERFIS.has(s.perfil)) { a.perfil = s.perfil; hasPrefill = true; }
+  if (s.plano === "Sob Medida") {
+    a.perfil = a.perfil || "white-label";
+    a.unidades = a.unidades || "4+";
+    a.tamanho = a.tamanho || "grande";
+    hasPrefill = true;
+  } else if (s.plano === "Avançado") {
+    a.unidades = a.unidades || "2-3";
+    hasPrefill = true;
+  }
+
+  // Find first unanswered step
+  const order: (keyof Answers)[] = ["perfil", "segmento", "tamanho", "unidades", "dores", "urgencia"];
+  let firstStep = 0;
+  for (let i = 0; i < order.length; i++) {
+    const k = order[i];
+    const filled = k === "dores" ? a.dores.length > 0 : !!a[k];
+    if (!filled) { firstStep = i; break; }
+    firstStep = i + 1;
+  }
+  return { answers: a, firstStep: Math.min(firstStep, STEPS.length - 1), hasPrefill };
+}
+
 function OrcamentoPage() {
-  const [a, setA] = useState<Answers>(INITIAL);
-  const [step, setStep] = useState(0);
+  const search = Route.useSearch();
+  const initial = useMemo(() => buildPrefill(search), [search]);
+  const [a, setA] = useState<Answers>(initial.answers);
+  const [step, setStep] = useState(initial.firstStep);
   const [done, setDone] = useState(false);
 
   const total = STEPS.length;
@@ -492,7 +530,14 @@ function OrcamentoPage() {
           <p className="text-muted-foreground max-w-xl mx-auto">
             Responda 6 perguntas e receba uma recomendação personalizada de módulos e plano — sem cadastro.
           </p>
+          {initial.hasPrefill && !done && (
+            <div className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-primary/5 text-primary border border-primary/20">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              Pré-preenchemos com sua escolha{search.plano ? ` (${search.plano})` : ""}. Confira e avance.
+            </div>
+          )}
         </div>
+
 
         {done ? (
           <ResultCard rec={recomendar(a)} answers={a} onRestart={reset} />
