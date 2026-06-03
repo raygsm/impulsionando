@@ -124,6 +124,24 @@ function Page() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const anonymize = useMutation({
+    mutationFn: async () => {
+      if (!anonTarget) throw new Error("Sem cliente");
+      const { error } = await supabase.rpc("customer_anonymize", {
+        _customer_id: anonTarget.id,
+        _reason: anonReason.trim() || null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["customers"] });
+      toast.success("Cliente anonimizado (LGPD)");
+      setAnonTarget(null);
+      setAnonReason("");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   if (!companyId) return <EmptyState title="Sem empresa ativa" description="Selecione uma empresa para gerenciar clientes." />;
 
   return (
