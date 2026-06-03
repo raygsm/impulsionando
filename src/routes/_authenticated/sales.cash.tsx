@@ -175,7 +175,8 @@ function CloseDialog({ sessionId, companyId, onClose }: { sessionId: string; com
         .gte("sales_orders.confirmed_at", session!.opened_at);
       if (error) throw error;
       const map: Record<string, number> = {};
-      (data ?? []).forEach((r: { amount: number; payment_method_id: string }) => {
+      (data ?? []).forEach((r) => {
+        if (!r.payment_method_id) return;
         map[r.payment_method_id] = (map[r.payment_method_id] ?? 0) + Number(r.amount);
       });
       return map;
