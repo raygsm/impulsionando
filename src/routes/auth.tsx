@@ -78,11 +78,9 @@ function AuthPage() {
         redirectTo: `${window.location.origin}/reset-password`,
       });
       if (error) {
-        // Mensagem genérica para não expor se o e-mail existe ou não
         return toast.error("Não foi possível processar a solicitação. Verifique o e-mail e tente novamente.");
       }
-      toast.success("Se o e-mail estiver cadastrado, enviaremos as instruções de redefinição.");
-      setResetOpen(false);
+      setResetSent(true);
     } catch {
       toast.error("Erro de conexão. Verifique sua internet e tente novamente.");
     } finally {
