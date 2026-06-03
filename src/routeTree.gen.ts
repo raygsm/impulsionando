@@ -35,6 +35,7 @@ import { Route as AuthenticatedCrmIndexRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenticated/agenda.index'
 import { Route as AuthenticatedSalesOrdersRouteImport } from './routes/_authenticated/sales.orders'
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
+import { Route as AuthenticatedSalesCashRouteImport } from './routes/_authenticated/sales.cash'
 import { Route as AuthenticatedInventorySuppliersRouteImport } from './routes/_authenticated/inventory.suppliers'
 import { Route as AuthenticatedInventoryProductsRouteImport } from './routes/_authenticated/inventory.products'
 import { Route as AuthenticatedInventoryMovementsRouteImport } from './routes/_authenticated/inventory.movements'
@@ -189,6 +190,11 @@ const AuthenticatedSalesNewRoute = AuthenticatedSalesNewRouteImport.update({
   path: '/new',
   getParentRoute: () => AuthenticatedSalesRoute,
 } as any)
+const AuthenticatedSalesCashRoute = AuthenticatedSalesCashRouteImport.update({
+  id: '/cash',
+  path: '/cash',
+  getParentRoute: () => AuthenticatedSalesRoute,
+} as any)
 const AuthenticatedInventorySuppliersRoute =
   AuthenticatedInventorySuppliersRouteImport.update({
     id: '/suppliers',
@@ -333,6 +339,7 @@ export interface FileRoutesByFullPath {
   '/inventory/movements': typeof AuthenticatedInventoryMovementsRoute
   '/inventory/products': typeof AuthenticatedInventoryProductsRoute
   '/inventory/suppliers': typeof AuthenticatedInventorySuppliersRoute
+  '/sales/cash': typeof AuthenticatedSalesCashRoute
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
   '/agenda/': typeof AuthenticatedAgendaIndexRoute
@@ -373,6 +380,7 @@ export interface FileRoutesByTo {
   '/inventory/movements': typeof AuthenticatedInventoryMovementsRoute
   '/inventory/products': typeof AuthenticatedInventoryProductsRoute
   '/inventory/suppliers': typeof AuthenticatedInventorySuppliersRoute
+  '/sales/cash': typeof AuthenticatedSalesCashRoute
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
   '/agenda': typeof AuthenticatedAgendaIndexRoute
@@ -420,6 +428,7 @@ export interface FileRoutesById {
   '/_authenticated/inventory/movements': typeof AuthenticatedInventoryMovementsRoute
   '/_authenticated/inventory/products': typeof AuthenticatedInventoryProductsRoute
   '/_authenticated/inventory/suppliers': typeof AuthenticatedInventorySuppliersRoute
+  '/_authenticated/sales/cash': typeof AuthenticatedSalesCashRoute
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
   '/_authenticated/sales/orders': typeof AuthenticatedSalesOrdersRoute
   '/_authenticated/agenda/': typeof AuthenticatedAgendaIndexRoute
@@ -467,6 +476,7 @@ export interface FileRouteTypes {
     | '/inventory/movements'
     | '/inventory/products'
     | '/inventory/suppliers'
+    | '/sales/cash'
     | '/sales/new'
     | '/sales/orders'
     | '/agenda/'
@@ -507,6 +517,7 @@ export interface FileRouteTypes {
     | '/inventory/movements'
     | '/inventory/products'
     | '/inventory/suppliers'
+    | '/sales/cash'
     | '/sales/new'
     | '/sales/orders'
     | '/agenda'
@@ -553,6 +564,7 @@ export interface FileRouteTypes {
     | '/_authenticated/inventory/movements'
     | '/_authenticated/inventory/products'
     | '/_authenticated/inventory/suppliers'
+    | '/_authenticated/sales/cash'
     | '/_authenticated/sales/new'
     | '/_authenticated/sales/orders'
     | '/_authenticated/agenda/'
@@ -750,6 +762,13 @@ declare module '@tanstack/react-router' {
       path: '/new'
       fullPath: '/sales/new'
       preLoaderRoute: typeof AuthenticatedSalesNewRouteImport
+      parentRoute: typeof AuthenticatedSalesRoute
+    }
+    '/_authenticated/sales/cash': {
+      id: '/_authenticated/sales/cash'
+      path: '/cash'
+      fullPath: '/sales/cash'
+      preLoaderRoute: typeof AuthenticatedSalesCashRouteImport
       parentRoute: typeof AuthenticatedSalesRoute
     }
     '/_authenticated/inventory/suppliers': {
@@ -966,12 +985,14 @@ const AuthenticatedInventoryRouteWithChildren =
   )
 
 interface AuthenticatedSalesRouteChildren {
+  AuthenticatedSalesCashRoute: typeof AuthenticatedSalesCashRoute
   AuthenticatedSalesNewRoute: typeof AuthenticatedSalesNewRoute
   AuthenticatedSalesOrdersRoute: typeof AuthenticatedSalesOrdersRoute
   AuthenticatedSalesIndexRoute: typeof AuthenticatedSalesIndexRoute
 }
 
 const AuthenticatedSalesRouteChildren: AuthenticatedSalesRouteChildren = {
+  AuthenticatedSalesCashRoute: AuthenticatedSalesCashRoute,
   AuthenticatedSalesNewRoute: AuthenticatedSalesNewRoute,
   AuthenticatedSalesOrdersRoute: AuthenticatedSalesOrdersRoute,
   AuthenticatedSalesIndexRoute: AuthenticatedSalesIndexRoute,
