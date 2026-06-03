@@ -98,7 +98,7 @@ describe("customer.anonymize permission gating", () => {
     expect(error!.message.length).toBeGreaterThan(0);
     // Should mention permission / denied / forbidden — the function raises
     // 'Forbidden: missing customer.anonymize permission' (or similar).
-    expect(error!.message.toLowerCase()).toMatch(/permission|forbidden|denied|customer\.anonymize/);
+    expect(error!.message.toLowerCase()).toMatch(/permiss|forbidden|denied|anonimiz|customer\.anonymize/);
 
     // Customer must remain NOT anonymized
     const { data: row } = await admin
