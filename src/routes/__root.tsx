@@ -114,11 +114,22 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+      <AuthSync />
+      <Toaster richColors position="top-right" />
       <Outlet />
     </QueryClientProvider>
   );
+}
+
+function AuthSync() {
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    const { data: sub } = supabaseAuth.onAuthStateChange(() => {
+      queryClient.invalidateQueries();
+    });
+    return () => sub.subscription.unsubscribe();
+  }, [queryClient]);
+  return null;
 }
