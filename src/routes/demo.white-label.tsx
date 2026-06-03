@@ -79,6 +79,32 @@ function WhiteLabelDemo() {
       activeId={active}
       onSelect={setActive}
     >
+      <DemoWelcome
+        storageKey={STORAGE}
+        trackLabel="White-label / Revenda"
+        intro="Esta é a visão do operador que revende o sistema com a própria marca. Você gerencia empresas-cliente, libera módulos, define perfis, acompanha MRR e NPS, audita ações e personaliza marca e domínio — tudo sob seu controle."
+        loginEmail="admin@suamarca.com.br"
+        loginPassword="senha master (MFA recomendado)"
+        accessNote="No sistema real, sua equipe acessa o painel master com MFA. Cada cliente final recebe seu próprio subdomínio (ou domínio próprio) com identidade visual da sua marca."
+        highlights={[
+          { icon: B2Icon, title: "Multi-tenant", text: "Empresas-cliente isoladas com dados, usuários e configurações próprias." },
+          { icon: KeyIcon, title: "Perfis reutilizáveis", text: "Modelos de permissão aplicáveis a qualquer cliente em segundos." },
+          { icon: BIIcon2, title: "BI consolidado", text: "Compare desempenho entre clientes, nichos e planos contratados." },
+          { icon: PalIcon, title: "Marca própria", text: "Logotipo, paleta de cores, domínio e e-mails transacionais customizados." },
+        ]}
+        flows={[
+          "Onboarding de cliente → escolha de nicho → template aplicado automaticamente",
+          "Ativação de módulos por plano → cobrança recorrente atualizada",
+          "Convite de usuários → perfil aplicado → permissões herdadas",
+          "Suspensão por inadimplência → acesso bloqueado → reativação 1-clique",
+        ]}
+        integrations={[
+          "Subdomínio próprio (clientes.suamarca.com.br) ou domínio personalizado",
+          "Cobrança recorrente via Stripe, Paddle ou gateway brasileiro",
+          "SSO/SAML para sua equipe interna (opcional)",
+          "Webhooks para CRM/ERP e API REST documentada",
+        ]}
+      />
       {active === "overview" && <OverviewSection />}
       {active === "clients" && <ClientsSection />}
       {active === "niches" && <NichesSection />}
