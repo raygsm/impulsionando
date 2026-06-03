@@ -171,14 +171,16 @@ function Page() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <div className="font-medium text-sm truncate">{c.name}</div>
-                  {!c.is_active && <Badge variant="outline" className="text-xs">Inativo</Badge>}
+                  {c.anonymized_at && <Badge variant="destructive" className="text-xs">Anonimizado</Badge>}
+                  {!c.is_active && !c.anonymized_at && <Badge variant="outline" className="text-xs">Inativo</Badge>}
                   {c.tags?.slice(0, 3).map((t) => <Badge key={t} variant="secondary" className="text-xs">{t}</Badge>)}
                 </div>
                 <div className="text-xs text-muted-foreground truncate">
                   {[c.document, c.phone, c.email].filter(Boolean).join(" · ") || "Sem contato"}
                 </div>
               </div>
-              <Button size="sm" variant="ghost" onClick={() => openEdit(c)}><Pencil className="w-4 h-4" /></Button>
+              <Button size="sm" variant="ghost" onClick={() => openEdit(c)} disabled={!!c.anonymized_at}><Pencil className="w-4 h-4" /></Button>
+              <Button size="sm" variant="ghost" title="Anonimizar (LGPD)" onClick={() => setAnonTarget(c)} disabled={!!c.anonymized_at}><ShieldOff className="w-4 h-4" /></Button>
               <Button size="sm" variant="ghost" onClick={() => { if (confirm(`Excluir ${c.name}?`)) del.mutate(c.id); }}><Trash2 className="w-4 h-4" /></Button>
             </div>
           ))}
