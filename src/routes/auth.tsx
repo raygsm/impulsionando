@@ -63,6 +63,20 @@ function AuthPage() {
     toast.success("Conta criada. Verifique seu e-mail se necessário e faça login.");
   }
 
+  async function handleResetPassword(e: React.FormEvent) {
+    e.preventDefault();
+    const target = (resetEmail || email).trim();
+    if (!target) return toast.error("Informe o e-mail para recuperação.");
+    setResetLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(target, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setResetLoading(false);
+    if (error) return toast.error(error.message);
+    toast.success("Se o e-mail estiver cadastrado, enviaremos as instruções de redefinição.");
+    setResetOpen(false);
+  }
+
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
       {/* Left — brand */}
