@@ -193,30 +193,47 @@ function SolucoesPage() {
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {SEGMENTS.map(({ icon: Icon, title, desc, modules, segmento, dores }) => (
-              <Card key={title} className="p-6 hover:shadow-elegant transition-shadow flex flex-col">
-                <div className="w-11 h-11 rounded-md bg-gradient-primary flex items-center justify-center text-primary-foreground mb-4">
-                  <Icon className="w-5 h-5" />
-                </div>
-                <div className="font-semibold tracking-tight text-lg">{title}</div>
-                <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed flex-1">{desc}</p>
-                <div className="flex flex-wrap gap-1.5 mt-4">
-                  {modules.map((m) => (
-                    <span key={m} className="px-2.5 py-0.5 rounded-full bg-secondary text-secondary-foreground text-[11px]">
-                      {m}
-                    </span>
-                  ))}
-                </div>
-                <Button asChild size="sm" variant="outline" className="mt-5 w-full gap-2">
-                  <Link
-                    to="/orcamento"
-                    search={{ segmento, dores: dores.join(","), origem: "solucoes" }}
-                  >
-                    Quero esta solução <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                </Button>
-              </Card>
-            ))}
+            {SEGMENTS.map(({ icon: Icon, title, desc, modules, segmento, dores }) => {
+              const NICHO_SLUG_MAP: Record<string, string> = {
+                fitness: "fitness",
+                saude: "clinicas",
+                alimentacao: "bares-restaurantes",
+                varejo: "ecommerce",
+                servicos: "servicos",
+              };
+              const nichoSlug = NICHO_SLUG_MAP[segmento];
+              return (
+                <Card key={title} className="p-6 hover:shadow-elegant transition-shadow flex flex-col">
+                  <div className="w-11 h-11 rounded-md bg-gradient-primary flex items-center justify-center text-primary-foreground mb-4">
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <div className="font-semibold tracking-tight text-lg">{title}</div>
+                  <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed flex-1">{desc}</p>
+                  <div className="flex flex-wrap gap-1.5 mt-4">
+                    {modules.map((m) => (
+                      <span key={m} className="px-2.5 py-0.5 rounded-full bg-secondary text-secondary-foreground text-[11px]">
+                        {m}
+                      </span>
+                    ))}
+                  </div>
+                  {nichoSlug && (
+                    <Button asChild size="sm" className="mt-5 w-full gap-2 bg-gradient-primary">
+                      <Link to="/nichos/$slug" params={{ slug: nichoSlug }}>
+                        Página completa do nicho <ArrowRight className="w-3.5 h-3.5" />
+                      </Link>
+                    </Button>
+                  )}
+                  <Button asChild size="sm" variant="outline" className="mt-2 w-full gap-2">
+                    <Link
+                      to="/orcamento"
+                      search={{ segmento, dores: dores.join(","), origem: "solucoes" }}
+                    >
+                      Quero esta solução <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </Button>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </section>
