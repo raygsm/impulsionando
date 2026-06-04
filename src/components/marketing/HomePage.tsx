@@ -144,6 +144,56 @@ export function HomePage() {
         </div>
       </section>
 
+      {/* NICHOS */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20">
+        <div className="max-w-3xl mb-10">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-3 py-1 text-xs mb-3">
+            <Target className="w-3.5 h-3.5" /> Soluções por nicho
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+            Cada nicho tem dor própria. Cada dor tem solução pronta.
+          </h2>
+          <p className="text-muted-foreground mt-3 leading-relaxed">
+            Clínicas, bares e restaurantes, microcervejarias, fornecedores, serviços, e-commerce, fitness e White Label —
+            com jornada prática, módulos recomendados e demonstração.
+          </p>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {NICHO_DETAILS.map((n) => {
+            const Icon = n.icon;
+            return (
+              <Card key={n.slug} className="p-6 hover:shadow-elegant transition-shadow flex flex-col">
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-md bg-gradient-primary flex items-center justify-center text-primary-foreground shrink-0">
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <div className="font-semibold tracking-tight leading-tight">{n.shortLabel}</div>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed flex-1">{n.cardDesc}</p>
+                <div className="mt-4">
+                  <Button asChild variant="outline" size="sm" className="w-full gap-1.5 group">
+                    <Link to="/nichos/$slug" params={{ slug: n.slug }}>
+                      Ver nicho
+                      <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
+                    </Link>
+                  </Button>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+        <div className="mt-10">
+          <Button asChild variant="outline" size="lg" className="gap-2">
+            <Link to="/nichos">Explorar todos os nichos <ArrowRight className="w-4 h-4" /></Link>
+          </Button>
+        </div>
+      </section>
+
+      {/* WHATSAPP */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-4">
+        <WhatsAppBlock />
+      </section>
+
       {/* PLANS */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20">
         <div className="max-w-3xl mb-10">
