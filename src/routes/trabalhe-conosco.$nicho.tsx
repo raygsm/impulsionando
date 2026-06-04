@@ -189,6 +189,7 @@ function TrabalheConoscoNicho() {
       const ins = await (supabase.from("talent_applications" as never) as any).insert({
         niche_slug: nicho,
         role: form.role,
+        subsector: form.subsector || null,
         full_name: form.full_name.trim(),
         email: form.email.trim().toLowerCase(),
         phone: form.phone.trim(),
