@@ -631,40 +631,51 @@ function ResultCard({
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="space-y-3">
         {!saved ? (
-          <>
+          <div className="grid sm:grid-cols-2 gap-3">
             <Button
               size="lg"
-              className="gap-2 bg-gradient-primary shadow-elegant"
+              className="gap-2 bg-gradient-primary shadow-elegant w-full justify-center"
               onClick={() => submit(true)}
               disabled={saving}
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageCircle className="w-4 h-4" />}
               Enviar e falar no WhatsApp
             </Button>
-            <Button size="lg" variant="outline" onClick={() => submit(false)} disabled={saving}>
+            <Button
+              size="lg"
+              variant="outline"
+              className="w-full justify-center"
+              onClick={() => submit(false)}
+              disabled={saving}
+            >
               Só enviar para receber depois
             </Button>
-          </>
+          </div>
         ) : (
-          <Button asChild size="lg" className="gap-2 bg-gradient-primary shadow-elegant">
+          <Button asChild size="lg" className="gap-2 bg-gradient-primary shadow-elegant w-full justify-center">
             <a href={whatsURL} target="_blank" rel="noopener noreferrer">
               <MessageCircle className="w-4 h-4" />
               Falar no WhatsApp agora
             </a>
           </Button>
         )}
-        <Button asChild variant="outline" size="lg">
-          <Link to="/demo">Ver o sistema funcionando</Link>
-        </Button>
-        <Button variant="ghost" size="lg" onClick={onRestart}>
-          Refazer briefing
-        </Button>
+
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1 border-t border-border">
+          <Button asChild variant="ghost" size="sm" className="sm:flex-1 justify-center">
+            <Link to="/demo">Ver o sistema funcionando</Link>
+          </Button>
+          <span className="hidden sm:inline text-muted-foreground/50">·</span>
+          <Button variant="ghost" size="sm" className="sm:flex-1 justify-center" onClick={onRestart}>
+            Refazer briefing
+          </Button>
+        </div>
       </div>
     </Card>
   );
 }
+
 
 
 
