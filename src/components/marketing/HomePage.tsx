@@ -45,13 +45,15 @@ export function HomePage() {
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
           <div className="max-w-3xl space-y-6">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur px-3 py-1 text-xs">
-              <Sparkles className="w-3.5 h-3.5" /> Impulsionando Tecnologia · Grupo Impulsionando
+              <Sparkles className="w-3.5 h-3.5" /> Grupo Impulsionando · Tecnologia + Marketing
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight">
-              Sistemas inteligentes para empresas que querem crescer com controle.
+              Estratégia que vende. Sistema que entrega. Um grupo, dois braços, uma operação completa.
             </h1>
             <p className="text-lg text-white/85 max-w-2xl leading-relaxed">
-              A Impulsionando Tecnologia cria plataformas, CRMs, agendas, automações, dashboards, áreas administrativas, integrações e sistemas modulares para transformar processos em operação real.
+              A <strong>Impulsionando Tecnologia</strong> cria sistemas, plataformas, CRMs, agendas, automações,
+              dashboards, checkouts, PDVs e integrações. A <strong>Impulsionando Brasil</strong> cuida do marketing,
+              tráfego, social media, funis e posicionamento. Juntas, transformam intenção em resultado real.
             </p>
             <p className="text-base font-semibold text-accent">
               O limite é onde você quiser chegar.
@@ -70,8 +72,8 @@ export function HomePage() {
               </Button>
             </div>
             <p className="text-xs text-white/70 pt-1">
-              Acesso livre às demos, sem cadastro. Se você busca marketing digital, conheça a{" "}
-              <a href="https://impulsionandobrasil.com.br" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">
+              Procura apenas marketing digital? Vá direto para a{" "}
+              <a href="https://impulsionandobrasil.com.br" target="_blank" rel="noopener noreferrer" className="underline hover:text-white font-medium">
                 Impulsionando Brasil
               </a>.
             </p>
@@ -79,12 +81,19 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* DIRECIONAMENTO MARKETING vs SISTEMAS */}
+      {/* PARCERIA GRUPO IMPULSIONANDO */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
         <div className="max-w-3xl mb-8">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-3 py-1 text-xs mb-3">
+            <Sparkles className="w-3.5 h-3.5" /> Parceria Grupo Impulsionando
+          </div>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            Você procura marketing digital ou um sistema completo para sua operação?
+            Você quer marketing, sistema — ou os dois trabalhando juntos?
           </h2>
+          <p className="text-muted-foreground mt-3 leading-relaxed">
+            Somos duas empresas do mesmo grupo, com times integrados. Você pode contratar cada uma separadamente
+            ou combinar marketing e tecnologia em uma operação única, sem retrabalho entre fornecedores.
+          </p>
         </div>
         <div className="grid md:grid-cols-2 gap-5">
           <Card className="p-7 flex flex-col">
@@ -114,11 +123,31 @@ export function HomePage() {
             </Button>
           </Card>
         </div>
-        <p className="text-sm text-muted-foreground mt-6 max-w-3xl leading-relaxed">
-          Estratégia sem sistema vira intenção. Sistema sem estratégia vira ferramenta solta.
-          Quando os dois caminham juntos, o negócio ganha controle, escala e previsibilidade.
-        </p>
+        <Card className="mt-5 p-6 bg-muted/40 border-dashed">
+          <div className="flex items-start gap-3">
+            <Sparkles className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+            <div>
+              <div className="font-semibold tracking-tight">Combo Marketing + Tecnologia</div>
+              <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                Estratégia sem sistema vira intenção. Sistema sem estratégia vira ferramenta solta.
+                Contratando o grupo, você tem um único ponto de contato cuidando da captação, do funil,
+                do atendimento, da venda e da operação — com dados conversando entre marketing e plataforma.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Button asChild size="sm" variant="outline">
+                  <Link to="/contato">Quero falar com o grupo</Link>
+                </Button>
+                <Button asChild size="sm" variant="ghost">
+                  <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+                    <MessageCircle className="w-4 h-4 mr-1" /> WhatsApp direto
+                  </a>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Card>
       </section>
+
 
       {/* PAINS */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20">
