@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import {
   MessageCircle, Calendar, Bot, Users, Share2, Globe, CreditCard,
   FileText, ShieldCheck, BarChart3, Cog, Plug, ArrowRight, CheckCircle2, Sparkles,
+  Building2, Store,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -65,14 +66,27 @@ export function HomePage() {
             </p>
             <div className="flex flex-wrap gap-3 pt-2">
               <Button asChild size="lg" className="gap-2 bg-white text-primary hover:bg-white/90">
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="w-4 h-4" /> Falar com o SAC no WhatsApp
-                </a>
+                <Link to="/demo/white-label">
+                  <Building2 className="w-4 h-4" /> Demo White Label <ArrowRight className="w-4 h-4" />
+                </Link>
+              </Button>
+              <Button asChild size="lg" className="gap-2 bg-accent text-accent-foreground hover:bg-accent/90">
+                <Link to="/demo/cliente-final">
+                  <Store className="w-4 h-4" /> Demo Cliente Final <ArrowRight className="w-4 h-4" />
+                </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="gap-2 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white">
-                <Link to="/orcamento">Montar meu orçamento automático <ArrowRight className="w-4 h-4" /></Link>
+                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+                  <MessageCircle className="w-4 h-4" /> Falar no WhatsApp
+                </a>
+              </Button>
+              <Button asChild size="lg" variant="ghost" className="gap-2 text-white hover:bg-white/10 hover:text-white">
+                <Link to="/orcamento">Montar orçamento <ArrowRight className="w-4 h-4" /></Link>
               </Button>
             </div>
+            <p className="text-xs text-white/70 pt-1">
+              Acesso livre, sem cadastro. Escolha a trilha que combina com o seu objetivo.
+            </p>
           </div>
         </div>
       </section>
