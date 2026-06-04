@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SolucoesRouteImport } from './routes/solucoes'
+import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as ResetPasswordSentRouteImport } from './routes/reset-password-sent'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
@@ -26,6 +27,7 @@ import { Route as NichosIndexRouteImport } from './routes/nichos.index'
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
 import { Route as TrabalheConoscoNichoRouteImport } from './routes/trabalhe-conosco.$nicho'
 import { Route as ShowroomFitnessRouteImport } from './routes/showroom.fitness'
+import { Route as ShowroomEventosRouteImport } from './routes/showroom.eventos'
 import { Route as NichosSlugRouteImport } from './routes/nichos.$slug'
 import { Route as ModulosSlugRouteImport } from './routes/modulos.$slug'
 import { Route as DemoWhiteLabelRouteImport } from './routes/demo.white-label'
@@ -102,6 +104,11 @@ const SolucoesRoute = SolucoesRouteImport.update({
   path: '/solucoes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SobreRoute = SobreRouteImport.update({
+  id: '/sobre',
+  path: '/sobre',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordSentRoute = ResetPasswordSentRouteImport.update({
   id: '/reset-password-sent',
   path: '/reset-password-sent',
@@ -174,6 +181,11 @@ const TrabalheConoscoNichoRoute = TrabalheConoscoNichoRouteImport.update({
 const ShowroomFitnessRoute = ShowroomFitnessRouteImport.update({
   id: '/showroom/fitness',
   path: '/showroom/fitness',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShowroomEventosRoute = ShowroomEventosRouteImport.update({
+  id: '/showroom/eventos',
+  path: '/showroom/eventos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NichosSlugRoute = NichosSlugRouteImport.update({
@@ -541,6 +553,7 @@ export interface FileRoutesByFullPath {
   '/privacidade': typeof PrivacidadeRoute
   '/reset-password': typeof ResetPasswordRoute
   '/reset-password-sent': typeof ResetPasswordSentRoute
+  '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
   '/termos': typeof TermosRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
@@ -570,6 +583,7 @@ export interface FileRoutesByFullPath {
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
+  '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/demo/': typeof DemoIndexRoute
@@ -624,6 +638,7 @@ export interface FileRoutesByTo {
   '/privacidade': typeof PrivacidadeRoute
   '/reset-password': typeof ResetPasswordRoute
   '/reset-password-sent': typeof ResetPasswordSentRoute
+  '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
   '/termos': typeof TermosRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
@@ -646,6 +661,7 @@ export interface FileRoutesByTo {
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
+  '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/demo': typeof DemoIndexRoute
@@ -702,6 +718,7 @@ export interface FileRoutesById {
   '/privacidade': typeof PrivacidadeRoute
   '/reset-password': typeof ResetPasswordRoute
   '/reset-password-sent': typeof ResetPasswordSentRoute
+  '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
   '/termos': typeof TermosRoute
   '/_authenticated/access-profiles': typeof AuthenticatedAccessProfilesRoute
@@ -731,6 +748,7 @@ export interface FileRoutesById {
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
+  '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/demo/': typeof DemoIndexRoute
@@ -787,6 +805,7 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/reset-password'
     | '/reset-password-sent'
+    | '/sobre'
     | '/solucoes'
     | '/termos'
     | '/access-profiles'
@@ -816,6 +835,7 @@ export interface FileRouteTypes {
     | '/demo/white-label'
     | '/modulos/$slug'
     | '/nichos/$slug'
+    | '/showroom/eventos'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
     | '/demo/'
@@ -870,6 +890,7 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/reset-password'
     | '/reset-password-sent'
+    | '/sobre'
     | '/solucoes'
     | '/termos'
     | '/access-profiles'
@@ -892,6 +913,7 @@ export interface FileRouteTypes {
     | '/demo/white-label'
     | '/modulos/$slug'
     | '/nichos/$slug'
+    | '/showroom/eventos'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
     | '/demo'
@@ -947,6 +969,7 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/reset-password'
     | '/reset-password-sent'
+    | '/sobre'
     | '/solucoes'
     | '/termos'
     | '/_authenticated/access-profiles'
@@ -976,6 +999,7 @@ export interface FileRouteTypes {
     | '/demo/white-label'
     | '/modulos/$slug'
     | '/nichos/$slug'
+    | '/showroom/eventos'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
     | '/demo/'
@@ -1032,6 +1056,7 @@ export interface RootRouteChildren {
   PrivacidadeRoute: typeof PrivacidadeRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ResetPasswordSentRoute: typeof ResetPasswordSentRoute
+  SobreRoute: typeof SobreRoute
   SolucoesRoute: typeof SolucoesRoute
   TermosRoute: typeof TermosRoute
   ComoFuncionaFitnessRoute: typeof ComoFuncionaFitnessRoute
@@ -1039,6 +1064,7 @@ export interface RootRouteChildren {
   DemoClienteFinalRoute: typeof DemoClienteFinalRoute
   DemoWhiteLabelRoute: typeof DemoWhiteLabelRoute
   NichosSlugRoute: typeof NichosSlugRoute
+  ShowroomEventosRoute: typeof ShowroomEventosRoute
   ShowroomFitnessRoute: typeof ShowroomFitnessRoute
   TrabalheConoscoNichoRoute: typeof TrabalheConoscoNichoRoute
   DemoIndexRoute: typeof DemoIndexRoute
@@ -1060,6 +1086,13 @@ declare module '@tanstack/react-router' {
       path: '/solucoes'
       fullPath: '/solucoes'
       preLoaderRoute: typeof SolucoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sobre': {
+      id: '/sobre'
+      path: '/sobre'
+      fullPath: '/sobre'
+      preLoaderRoute: typeof SobreRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password-sent': {
@@ -1165,6 +1198,13 @@ declare module '@tanstack/react-router' {
       path: '/showroom/fitness'
       fullPath: '/showroom/fitness'
       preLoaderRoute: typeof ShowroomFitnessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/showroom/eventos': {
+      id: '/showroom/eventos'
+      path: '/showroom/eventos'
+      fullPath: '/showroom/eventos'
+      preLoaderRoute: typeof ShowroomEventosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/nichos/$slug': {
@@ -1854,6 +1894,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacidadeRoute: PrivacidadeRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ResetPasswordSentRoute: ResetPasswordSentRoute,
+  SobreRoute: SobreRoute,
   SolucoesRoute: SolucoesRoute,
   TermosRoute: TermosRoute,
   ComoFuncionaFitnessRoute: ComoFuncionaFitnessRoute,
@@ -1861,6 +1902,7 @@ const rootRouteChildren: RootRouteChildren = {
   DemoClienteFinalRoute: DemoClienteFinalRoute,
   DemoWhiteLabelRoute: DemoWhiteLabelRoute,
   NichosSlugRoute: NichosSlugRoute,
+  ShowroomEventosRoute: ShowroomEventosRoute,
   ShowroomFitnessRoute: ShowroomFitnessRoute,
   TrabalheConoscoNichoRoute: TrabalheConoscoNichoRoute,
   DemoIndexRoute: DemoIndexRoute,

@@ -32,6 +32,7 @@ export function PublicFooter() {
             <li><Link to="/modulos" className="hover:text-foreground">Módulos</Link></li>
             <li><Link to="/planos" className="hover:text-foreground">Planos</Link></li>
             <li><Link to="/orcamento" className="hover:text-foreground">Orçamento automático</Link></li>
+            <li><Link to="/sobre" className="hover:text-foreground">Sobre</Link></li>
             <li><Link to="/contato" className="hover:text-foreground">Contato</Link></li>
           </ul>
         </div>
