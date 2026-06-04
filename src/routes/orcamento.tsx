@@ -98,13 +98,23 @@ export const Route = createFileRoute("/orcamento")({
 /* --------------------------- Briefing ---------------------------- */
 
 const SEGMENTOS = [
-  { value: "saude", label: "Clínica / Profissional da saúde" },
-  { value: "estetica", label: "Salão / Estética / Barbearia" },
-  { value: "alimentacao", label: "Bar / Restaurante / Delivery" },
-  { value: "varejo", label: "Loja / Varejo / E-commerce" },
-  { value: "servicos", label: "Prestador de serviços" },
-  { value: "educacao", label: "Educação / Cursos" },
-  { value: "outro", label: "Outro nicho" },
+  { value: "clinicas", label: "Clínicas médicas" },
+  { value: "consultorios", label: "Consultórios" },
+  { value: "saloes", label: "Salões de beleza" },
+  { value: "bares-restaurantes", label: "Bares e restaurantes" },
+  { value: "varejo", label: "Lojas de varejo" },
+  { value: "ecommerce", label: "E-commerce" },
+  { value: "servicos", label: "Prestadores de serviços" },
+  { value: "educacao", label: "Educação / cursos / escolas" },
+  { value: "academias", label: "Academias / Fitness" },
+  { value: "crossfit", label: "CrossFit / Box" },
+  { value: "personal", label: "Personal Trainer" },
+  { value: "pilates", label: "Estúdios de pilates" },
+  { value: "yoga", label: "Estúdios de yoga" },
+  { value: "microcervejarias", label: "Microcervejarias" },
+  { value: "fornecedores", label: "Fornecedores / Distribuidores" },
+  { value: "eventos", label: "Eventos" },
+  { value: "outro", label: "Outro segmento" },
 ] as const;
 
 const TAMANHO = [
