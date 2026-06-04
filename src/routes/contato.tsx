@@ -84,7 +84,7 @@ function ContatoPage() {
                   Recebemos sua solicitação. Nossa equipe vai responder no e-mail e/ou WhatsApp informado.
                 </p>
                 <div className="flex justify-center gap-2 pt-2">
-                  <Button asChild variant="outline">
+                  <Button asChild className="btn-whatsapp">
                     <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
                       <MessageCircle className="w-4 h-4 mr-2" /> Falar no WhatsApp agora
                     </a>

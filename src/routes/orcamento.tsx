@@ -97,25 +97,81 @@ export const Route = createFileRoute("/orcamento")({
 
 /* --------------------------- Briefing ---------------------------- */
 
-const SEGMENTOS = [
-  { value: "clinicas", label: "Clínicas médicas" },
-  { value: "consultorios", label: "Consultórios" },
-  { value: "saloes", label: "Salões de beleza" },
-  { value: "bares-restaurantes", label: "Bares e restaurantes" },
-  { value: "varejo", label: "Lojas de varejo" },
-  { value: "ecommerce", label: "E-commerce" },
-  { value: "servicos", label: "Prestadores de serviços" },
-  { value: "educacao", label: "Educação / cursos / escolas" },
-  { value: "academias", label: "Academias / Fitness" },
-  { value: "crossfit", label: "CrossFit / Box" },
-  { value: "personal", label: "Personal Trainer" },
-  { value: "pilates", label: "Estúdios de pilates" },
-  { value: "yoga", label: "Estúdios de yoga" },
-  { value: "microcervejarias", label: "Microcervejarias" },
-  { value: "fornecedores", label: "Fornecedores / Distribuidores" },
-  { value: "eventos", label: "Eventos" },
+/**
+ * Segmentos agrupados por categoria-mãe.
+ * O formulário pergunta primeiro a categoria e depois mostra apenas
+ * os segmentos correspondentes.
+ */
+const CATEGORIAS = [
+  { value: "saude", label: "Saúde, Bem-estar e Performance" },
+  { value: "alimentacao", label: "Alimentação, Bebidas e Experiências" },
+  { value: "servicos", label: "Serviços, Educação e Atendimento" },
+  { value: "varejo", label: "Varejo, E-commerce e Produtos" },
+  { value: "viagens", label: "Viagens, Turismo e Experiências" },
+  { value: "white-label", label: "White Label e Parceiros" },
   { value: "outro", label: "Outro segmento" },
 ] as const;
+
+const SEGMENTOS_POR_CATEGORIA: Record<string, readonly { value: string; label: string }[]> = {
+  saude: [
+    { value: "clinicas", label: "Clínicas médicas" },
+    { value: "consultorios", label: "Consultórios" },
+    { value: "dentistas", label: "Dentistas / Odontologia" },
+    { value: "fisioterapia", label: "Fisioterapia" },
+    { value: "psicologia", label: "Psicologia" },
+    { value: "nutricao", label: "Nutrição" },
+    { value: "saude-outros", label: "Outros profissionais de saúde" },
+    { value: "academias", label: "Academias / Fitness" },
+    { value: "crossfit", label: "CrossFit / Box" },
+    { value: "personal", label: "Personal Trainer" },
+    { value: "pilates", label: "Estúdios de pilates" },
+    { value: "yoga", label: "Estúdios de yoga" },
+  ],
+  alimentacao: [
+    { value: "bares-restaurantes", label: "Bares e restaurantes" },
+    { value: "pizzarias", label: "Pizzarias" },
+    { value: "hamburguerias", label: "Hamburguerias" },
+    { value: "delivery", label: "Delivery / Dark kitchen" },
+    { value: "cafeterias", label: "Cafeterias / Gastrobares" },
+    { value: "microcervejarias", label: "Microcervejarias" },
+    { value: "fornecedores", label: "Fornecedores / Distribuidores" },
+    { value: "eventos", label: "Casas e eventos gastronômicos" },
+  ],
+  servicos: [
+    { value: "servicos", label: "Prestadores de serviços" },
+    { value: "consultorias", label: "Consultorias" },
+    { value: "assistencias", label: "Assistências técnicas" },
+    { value: "educacao", label: "Escolas / Cursos / Educação" },
+    { value: "mentorias", label: "Mentorias / Aulas particulares" },
+    { value: "saloes", label: "Salões de beleza" },
+    { value: "barbearias", label: "Barbearias" },
+    { value: "esteticas", label: "Clínicas de estética" },
+  ],
+  varejo: [
+    { value: "varejo", label: "Lojas de varejo / físicas" },
+    { value: "ecommerce", label: "E-commerce" },
+    { value: "catalogos", label: "Catálogos digitais" },
+    { value: "atacado", label: "Atacado / B2B" },
+  ],
+  viagens: [
+    { value: "agencias-viagem", label: "Agências de viagens" },
+    { value: "consultores-viagem", label: "Consultores de viagem" },
+    { value: "operadoras", label: "Operadoras de turismo" },
+    { value: "guias", label: "Guias / Receptivo" },
+    { value: "experiencias", label: "Experiências / Roteiros personalizados" },
+    { value: "hospedagens", label: "Hospedagens / Aluguel por temporada" },
+  ],
+  "white-label": [
+    { value: "agencia", label: "Agência / Integrador" },
+    { value: "revendedor", label: "Revendedor / Parceiro comercial" },
+    { value: "consultoria-tech", label: "Consultoria de tecnologia" },
+  ],
+  outro: [
+    { value: "outro", label: "Outro segmento" },
+  ],
+};
+
+const SEGMENTOS = Object.values(SEGMENTOS_POR_CATEGORIA).flat();
 
 const TAMANHO = [
   { value: "solo", label: "Só eu (autônomo)" },
@@ -153,6 +209,7 @@ const PERFIL = [
 ] as const;
 
 interface Answers {
+  categoria: string;
   segmento: string;
   tamanho: string;
   unidades: string;
@@ -162,6 +219,7 @@ interface Answers {
 }
 
 const INITIAL: Answers = {
+  categoria: "",
   segmento: "",
   tamanho: "",
   unidades: "",
@@ -288,6 +346,7 @@ function recomendar(a: Answers): Recomendacao {
 
 const STEPS = [
   { key: "perfil", title: "Quem vai usar o sistema?", helper: "Isso muda completamente a recomendação." },
+  { key: "categoria", title: "Qual é a área principal do seu negócio?", helper: "Primeiro a categoria — depois mostramos os segmentos específicos." },
   { key: "segmento", title: "Qual é o seu segmento?", helper: "Usamos para escolher os módulos certos." },
   { key: "tamanho", title: "Tamanho da operação", helper: "Quantas pessoas vão usar o sistema?" },
   { key: "unidades", title: "Quantas unidades você tem?", helper: "1 unidade simplifica. Várias exigem multi-empresa." },
@@ -617,7 +676,14 @@ function buildPrefill(s: SearchParams): { answers: Answers; firstStep: number; h
   const a: Answers = { ...INITIAL };
   let hasPrefill = false;
 
-  if (s.segmento && VALID_SEGMENTOS.has(s.segmento)) { a.segmento = s.segmento; hasPrefill = true; }
+  if (s.segmento && VALID_SEGMENTOS.has(s.segmento)) {
+    a.segmento = s.segmento;
+    // Inferir categoria-mãe a partir do segmento informado
+    for (const [cat, list] of Object.entries(SEGMENTOS_POR_CATEGORIA)) {
+      if (list.some((seg) => seg.value === s.segmento)) { a.categoria = cat; break; }
+    }
+    hasPrefill = true;
+  }
   if (s.dores) {
     const list = s.dores.split(",").map((d) => d.trim()).filter((d) => VALID_DORES.has(d));
     if (list.length) { a.dores = list; hasPrefill = true; }
@@ -634,7 +700,7 @@ function buildPrefill(s: SearchParams): { answers: Answers; firstStep: number; h
   }
 
   // Find first unanswered step
-  const order: (keyof Answers)[] = ["perfil", "segmento", "tamanho", "unidades", "dores", "urgencia"];
+  const order: (keyof Answers)[] = ["perfil", "categoria", "segmento", "tamanho", "unidades", "dores", "urgencia"];
   let firstStep = 0;
   for (let i = 0; i < order.length; i++) {
     const k = order[i];
@@ -797,12 +863,20 @@ function OrcamentoPage() {
                   />
                 </>
               )}
+              {current.key === "categoria" && (
+                <SelectField
+                  value={a.categoria}
+                  onChange={(v) => setA({ ...a, categoria: v, segmento: "" })}
+                  options={CATEGORIAS}
+                  placeholder="Selecione a categoria principal"
+                />
+              )}
               {current.key === "segmento" && (
                 <SelectField
                   value={a.segmento}
                   onChange={(v) => setA({ ...a, segmento: v })}
-                  options={SEGMENTOS}
-                  placeholder="Selecione o segmento"
+                  options={a.categoria ? SEGMENTOS_POR_CATEGORIA[a.categoria] ?? SEGMENTOS : SEGMENTOS}
+                  placeholder={a.categoria ? "Selecione o segmento" : "Escolha primeiro a categoria"}
                 />
               )}
               {current.key === "tamanho" && (

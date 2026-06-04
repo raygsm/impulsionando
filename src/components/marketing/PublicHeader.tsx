@@ -67,7 +67,7 @@ export function PublicHeader() {
               </span>
             </Link>
           </Button>
-          <Button asChild size="sm" variant="outline" className="gap-2 hidden md:inline-flex">
+          <Button asChild size="sm" className="btn-whatsapp gap-2 hidden md:inline-flex">
             <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
               <MessageCircle className="w-4 h-4" />
               <span className="hidden sm:inline">WhatsApp</span>
