@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { MessageCircle, PlayCircle } from "lucide-react";
+import { MessageCircle, PlayCircle, Building2, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logoAsset from "@/assets/logo-impulsionando.png.asset.json";
 
@@ -39,6 +39,18 @@ export function PublicHeader() {
         <div className="flex items-center gap-2">
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
             <Link to="/auth">Entrar</Link>
+          </Button>
+          <Button asChild size="sm" variant="outline" className="gap-2 hidden xl:inline-flex">
+            <Link to="/demo/white-label">
+              <Building2 className="w-4 h-4" />
+              <span>White Label</span>
+            </Link>
+          </Button>
+          <Button asChild size="sm" variant="outline" className="gap-2 hidden xl:inline-flex">
+            <Link to="/demo/cliente-final">
+              <Store className="w-4 h-4" />
+              <span>Cliente Final</span>
+            </Link>
           </Button>
           <Button
             asChild
