@@ -25,6 +25,7 @@ import { Route as TrabalheConoscoIndexRouteImport } from './routes/trabalhe-cono
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
 import { Route as TrabalheConoscoNichoRouteImport } from './routes/trabalhe-conosco.$nicho'
 import { Route as ShowroomFitnessRouteImport } from './routes/showroom.fitness'
+import { Route as NichosSlugRouteImport } from './routes/nichos.$slug'
 import { Route as ModulosSlugRouteImport } from './routes/modulos.$slug'
 import { Route as DemoWhiteLabelRouteImport } from './routes/demo.white-label'
 import { Route as DemoClienteFinalRouteImport } from './routes/demo.cliente-final'
@@ -167,6 +168,11 @@ const TrabalheConoscoNichoRoute = TrabalheConoscoNichoRouteImport.update({
 const ShowroomFitnessRoute = ShowroomFitnessRouteImport.update({
   id: '/showroom/fitness',
   path: '/showroom/fitness',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NichosSlugRoute = NichosSlugRouteImport.update({
+  id: '/nichos/$slug',
+  path: '/nichos/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ModulosSlugRoute = ModulosSlugRouteImport.update({
@@ -557,6 +563,7 @@ export interface FileRoutesByFullPath {
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/modulos/$slug': typeof ModulosSlugRoute
+  '/nichos/$slug': typeof NichosSlugRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/demo/': typeof DemoIndexRoute
@@ -631,6 +638,7 @@ export interface FileRoutesByTo {
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/modulos/$slug': typeof ModulosSlugRoute
+  '/nichos/$slug': typeof NichosSlugRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/demo': typeof DemoIndexRoute
@@ -714,6 +722,7 @@ export interface FileRoutesById {
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/modulos/$slug': typeof ModulosSlugRoute
+  '/nichos/$slug': typeof NichosSlugRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/demo/': typeof DemoIndexRoute
@@ -797,6 +806,7 @@ export interface FileRouteTypes {
     | '/demo/cliente-final'
     | '/demo/white-label'
     | '/modulos/$slug'
+    | '/nichos/$slug'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
     | '/demo/'
@@ -871,6 +881,7 @@ export interface FileRouteTypes {
     | '/demo/cliente-final'
     | '/demo/white-label'
     | '/modulos/$slug'
+    | '/nichos/$slug'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
     | '/demo'
@@ -953,6 +964,7 @@ export interface FileRouteTypes {
     | '/demo/cliente-final'
     | '/demo/white-label'
     | '/modulos/$slug'
+    | '/nichos/$slug'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
     | '/demo/'
@@ -1014,6 +1026,7 @@ export interface RootRouteChildren {
   DemoChecklistRoute: typeof DemoChecklistRoute
   DemoClienteFinalRoute: typeof DemoClienteFinalRoute
   DemoWhiteLabelRoute: typeof DemoWhiteLabelRoute
+  NichosSlugRoute: typeof NichosSlugRoute
   ShowroomFitnessRoute: typeof ShowroomFitnessRoute
   TrabalheConoscoNichoRoute: typeof TrabalheConoscoNichoRoute
   DemoIndexRoute: typeof DemoIndexRoute
@@ -1132,6 +1145,13 @@ declare module '@tanstack/react-router' {
       path: '/showroom/fitness'
       fullPath: '/showroom/fitness'
       preLoaderRoute: typeof ShowroomFitnessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nichos/$slug': {
+      id: '/nichos/$slug'
+      path: '/nichos/$slug'
+      fullPath: '/nichos/$slug'
+      preLoaderRoute: typeof NichosSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/modulos/$slug': {
@@ -1820,6 +1840,7 @@ const rootRouteChildren: RootRouteChildren = {
   DemoChecklistRoute: DemoChecklistRoute,
   DemoClienteFinalRoute: DemoClienteFinalRoute,
   DemoWhiteLabelRoute: DemoWhiteLabelRoute,
+  NichosSlugRoute: NichosSlugRoute,
   ShowroomFitnessRoute: ShowroomFitnessRoute,
   TrabalheConoscoNichoRoute: TrabalheConoscoNichoRoute,
   DemoIndexRoute: DemoIndexRoute,
