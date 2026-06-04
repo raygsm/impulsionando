@@ -22,6 +22,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TrabalheConoscoIndexRouteImport } from './routes/trabalhe-conosco.index'
+import { Route as NichosIndexRouteImport } from './routes/nichos.index'
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
 import { Route as TrabalheConoscoNichoRouteImport } from './routes/trabalhe-conosco.$nicho'
 import { Route as ShowroomFitnessRouteImport } from './routes/showroom.fitness'
@@ -153,6 +154,11 @@ const IndexRoute = IndexRouteImport.update({
 const TrabalheConoscoIndexRoute = TrabalheConoscoIndexRouteImport.update({
   id: '/trabalhe-conosco/',
   path: '/trabalhe-conosco/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NichosIndexRoute = NichosIndexRouteImport.update({
+  id: '/nichos/',
+  path: '/nichos/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoIndexRoute = DemoIndexRouteImport.update({
@@ -567,6 +573,7 @@ export interface FileRoutesByFullPath {
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/demo/': typeof DemoIndexRoute
+  '/nichos/': typeof NichosIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
@@ -642,6 +649,7 @@ export interface FileRoutesByTo {
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/demo': typeof DemoIndexRoute
+  '/nichos': typeof NichosIndexRoute
   '/trabalhe-conosco': typeof TrabalheConoscoIndexRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
@@ -726,6 +734,7 @@ export interface FileRoutesById {
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/demo/': typeof DemoIndexRoute
+  '/nichos/': typeof NichosIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/_authenticated/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/_authenticated/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
@@ -810,6 +819,7 @@ export interface FileRouteTypes {
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
     | '/demo/'
+    | '/nichos/'
     | '/trabalhe-conosco/'
     | '/agenda/appointments'
     | '/agenda/professionals'
@@ -885,6 +895,7 @@ export interface FileRouteTypes {
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
     | '/demo'
+    | '/nichos'
     | '/trabalhe-conosco'
     | '/agenda/appointments'
     | '/agenda/professionals'
@@ -968,6 +979,7 @@ export interface FileRouteTypes {
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
     | '/demo/'
+    | '/nichos/'
     | '/trabalhe-conosco/'
     | '/_authenticated/agenda/appointments'
     | '/_authenticated/agenda/professionals'
@@ -1030,6 +1042,7 @@ export interface RootRouteChildren {
   ShowroomFitnessRoute: typeof ShowroomFitnessRoute
   TrabalheConoscoNichoRoute: typeof TrabalheConoscoNichoRoute
   DemoIndexRoute: typeof DemoIndexRoute
+  NichosIndexRoute: typeof NichosIndexRoute
   TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
 }
 
@@ -1124,6 +1137,13 @@ declare module '@tanstack/react-router' {
       path: '/trabalhe-conosco'
       fullPath: '/trabalhe-conosco/'
       preLoaderRoute: typeof TrabalheConoscoIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nichos/': {
+      id: '/nichos/'
+      path: '/nichos'
+      fullPath: '/nichos/'
+      preLoaderRoute: typeof NichosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo/': {
@@ -1844,6 +1864,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShowroomFitnessRoute: ShowroomFitnessRoute,
   TrabalheConoscoNichoRoute: TrabalheConoscoNichoRoute,
   DemoIndexRoute: DemoIndexRoute,
+  NichosIndexRoute: NichosIndexRoute,
   TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
 }
 export const routeTree = rootRouteImport

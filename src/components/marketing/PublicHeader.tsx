@@ -7,6 +7,7 @@ const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20fal
 
 const NAV = [
   { to: "/", label: "Início" },
+  { to: "/nichos", label: "Nichos" },
   { to: "/solucoes", label: "Soluções" },
   { to: "/modulos", label: "Módulos" },
   { to: "/showroom/fitness", label: "Showroom Fitness" },
