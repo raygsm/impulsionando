@@ -94,7 +94,25 @@ function TalentsAdmin() {
           <TableBody>
             {isLoading && <TableRow><TableCell colSpan={6}>Carregando…</TableCell></TableRow>}
             {!isLoading && (data?.length ?? 0) === 0 && (
-              <TableRow><TableCell colSpan={6} className="text-muted-foreground">Nenhuma candidatura ainda.</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={6}>
+                  <div className="py-10 text-center space-y-3">
+                    <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                      <FileText className="w-6 h-6 text-muted-foreground" />
+                    </div>
+                    <div className="font-medium">Nenhuma candidatura ainda</div>
+                    <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                      Divulgue as vagas em <code className="px-1 py-0.5 bg-muted rounded">/trabalhe-conosco</code> e no link de cada nicho.
+                      Assim que um candidato enviar o currículo pelo site, ele aparece aqui com filtros, status e download do arquivo.
+                    </p>
+                    <div className="flex items-center justify-center gap-2 pt-1">
+                      <Button asChild variant="outline" size="sm">
+                        <a href="/trabalhe-conosco" target="_blank" rel="noopener noreferrer">Abrir página pública</a>
+                      </Button>
+                    </div>
+                  </div>
+                </TableCell>
+              </TableRow>
             )}
             {data?.map((t) => (
               <TableRow key={t.id}>
