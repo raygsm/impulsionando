@@ -26,16 +26,90 @@ export const Route = createFileRoute("/trabalhe-conosco/$nicho")({
 });
 
 // Catálogos por nicho (estruturados, sem texto livre)
+const SUBSECTORS_BY_NICHE: Record<string, string[]> = {
+  academias: [
+    "Academia de musculação",
+    "Box de CrossFit",
+    "Estúdio de funcional / HIIT",
+    "Estúdio de Pilates",
+    "Estúdio de Yoga",
+    "Lutas e MMA (Jiu-Jitsu, Muay Thai, Boxe)",
+    "Dança e ritmos",
+    "Natação e hidroginástica",
+    "Studio Personal / Small Group",
+    "Performance esportiva / atletas",
+    "Reabilitação e treinamento clínico",
+  ],
+  supermercados: [
+    "Atacarejo / Atacado",
+    "Supermercado de bairro / Vizinhança",
+    "Hipermercado",
+    "Hortifruti / Sacolão",
+    "Mercearia / Empório",
+    "Loja de conveniência",
+    "Mini market autônomo (24h)",
+    "Açougue / Peixaria",
+    "Padaria / Confeitaria",
+    "Adega / Bebidas",
+    "Produtos naturais / Saudáveis",
+  ],
+};
+
 const ROLES_BY_NICHE: Record<string, string[]> = {
   fitness: ["Professor de musculação", "Coach CrossFit", "Personal trainer", "Instrutor de funcional", "Recepção", "Comercial", "Gerência", "Financeiro", "Avaliador físico", "Nutricionista parceiro"],
+  academias: [
+    "Professor de musculação", "Personal trainer", "Coach CrossFit", "Instrutor de funcional",
+    "Instrutor de Pilates", "Instrutor de Yoga", "Professor de lutas", "Professor de dança",
+    "Avaliador físico", "Fisioterapeuta esportivo", "Nutricionista parceiro",
+    "Recepção", "Consultor comercial", "Gerente de unidade", "Coordenador técnico", "Financeiro", "Limpeza e manutenção",
+  ],
+  supermercados: [
+    "Operador de caixa", "Repositor de mercadorias", "Empacotador", "Auxiliar de hortifruti",
+    "Açougueiro", "Peixeiro", "Padeiro", "Confeiteiro", "Atendente de padaria",
+    "Auxiliar de depósito / estoque", "Conferente de mercadorias", "Comprador",
+    "Encarregado de loja", "Fiscal de loja / Prevenção de perdas",
+    "Gerente de loja", "Subgerente", "Supervisor de frente de caixa",
+    "Promotor de vendas", "Atendente delivery", "Motorista entregador",
+    "Analista financeiro / fiscal", "RH / DP", "TI / Sistemas",
+  ],
   corporativo: ["Engenharia de software", "Produto", "Design", "Customer Success", "Vendas", "Marketing", "Operações", "Financeiro", "RH"],
 };
+
 const ESPEC_BY_NICHE: Record<string, string[]> = {
   fitness: ["CrossFit L1", "CrossFit L2", "Funcional", "HIIT", "Mobilidade", "Pilates", "Yoga", "Musculação", "Treinamento esportivo", "Reabilitação", "Emagrecimento", "Hipertrofia", "Idosos", "Crianças", "Gestantes"],
+  academias: [
+    "Musculação", "Hipertrofia", "Emagrecimento", "Condicionamento", "CrossFit", "Funcional", "HIIT",
+    "Pilates solo", "Pilates aparelhos", "Yoga", "Mobilidade", "Alongamento",
+    "Jiu-Jitsu", "Muay Thai", "Boxe", "MMA", "Karatê", "Taekwondo",
+    "Dança fitness", "Zumba", "Ritmos", "Spinning", "Natação", "Hidroginástica",
+    "Treinamento de atletas", "Reabilitação", "Idosos", "Crianças", "Gestantes",
+  ],
+  supermercados: [
+    "PDV / Frente de caixa", "Recebimento e conferência", "Controle de validade", "Inventário cíclico",
+    "Reposição e ruptura", "Precificação e etiquetagem", "Layout e exposição",
+    "Carnes e cortes", "Pescados", "Panificação", "Confeitaria", "Hortifruti",
+    "Compras e negociação", "Logística e abastecimento", "Prevenção de perdas",
+    "Atendimento ao cliente", "Delivery e e-commerce", "Cartão fidelidade / CRM",
+    "ERP supermercadista", "SNGPC / fiscal", "Gestão de FLV",
+  ],
   corporativo: ["React", "TypeScript", "Node.js", "Postgres", "DevOps", "UX/UI", "Growth", "Inbound", "Outbound", "Onboarding"],
 };
+
 const CERTS_BY_NICHE: Record<string, string[]> = {
   fitness: ["CREF ativo", "Bacharel Educação Física", "CrossFit Level 1", "CrossFit Level 2", "Functional Training", "Pilates", "Yoga RYT-200", "Primeiros Socorros"],
+  academias: [
+    "CREF ativo", "Bacharel Educação Física", "Licenciatura Educação Física",
+    "CrossFit Level 1", "CrossFit Level 2", "CrossFit Level 3",
+    "Functional Training", "Pilates (Polestar, Physio, Voll)", "Yoga RYT-200", "Yoga RYT-500",
+    "Faixa em Jiu-Jitsu", "Federação de Boxe / Muay Thai", "Personal Trainer certificado",
+    "Fisioterapia (CREFITO)", "Nutrição (CRN)", "Primeiros Socorros / SBV",
+  ],
+  supermercados: [
+    "Manipulação de alimentos", "Boas Práticas (ANVISA RDC 216)", "NR-35 (altura)", "NR-11 (empilhadeira)",
+    "NR-12 (máquinas)", "Operador de empilhadeira", "Curso de açougue / cortes",
+    "Padaria e confeitaria profissional", "Gestão de varejo", "Prevenção de perdas",
+    "ERP supermercadista (Linx, Consinco, VR, Bluesoft)", "Excel intermediário/avançado",
+  ],
   corporativo: ["AWS", "GCP", "PMP", "Scrum Master", "CSPO"],
 };
 
@@ -51,6 +125,7 @@ const schema = z.object({
   state: z.string().min(1, "Selecione o estado"),
   city: z.string().trim().min(2, "Informe a cidade").max(80),
   role: z.string().min(1, "Selecione um cargo"),
+  subsector: z.string().optional(),
   availability: z.string().min(1, "Selecione disponibilidade"),
   experience_years: z.string().min(1, "Selecione a experiência"),
   specializations: z.array(z.string()).min(1, "Selecione ao menos 1 especialização"),
@@ -67,10 +142,11 @@ function TrabalheConoscoNicho() {
   const roles = ROLES_BY_NICHE[nicho] ?? ROLES_BY_NICHE.corporativo;
   const especs = ESPEC_BY_NICHE[nicho] ?? ESPEC_BY_NICHE.corporativo;
   const certs = CERTS_BY_NICHE[nicho] ?? CERTS_BY_NICHE.corporativo;
+  const subsectors = SUBSECTORS_BY_NICHE[nicho];
 
   const [form, setForm] = useState({
     full_name: "", email: "", phone: "", state: "", city: "",
-    role: "", availability: "", experience_years: "",
+    role: "", subsector: "", availability: "", experience_years: "",
     specializations: [] as string[], certifications: [] as string[], languages: ["Português"] as string[],
     consent: false,
   });
@@ -94,6 +170,11 @@ function TrabalheConoscoNicho() {
       toast.error("Revise os campos destacados");
       return;
     }
+    if (subsectors && !form.subsector) {
+      setErrors((e) => ({ ...e, subsector: "Selecione o subsetor" }));
+      toast.error("Selecione o subsetor");
+      return;
+    }
     if (!resume) { setErrors((e) => ({ ...e, resume: "Currículo é obrigatório (PDF, DOC ou DOCX)" })); return; }
     if (!ALLOWED_MIME.includes(resume.type)) { setErrors((e) => ({ ...e, resume: "Formato inválido. Use PDF, DOC ou DOCX" })); return; }
     if (resume.size > 10 * 1024 * 1024) { setErrors((e) => ({ ...e, resume: "Máximo 10 MB" })); return; }
@@ -108,6 +189,7 @@ function TrabalheConoscoNicho() {
       const ins = await (supabase.from("talent_applications" as never) as any).insert({
         niche_slug: nicho,
         role: form.role,
+        subsector: form.subsector || null,
         full_name: form.full_name.trim(),
         email: form.email.trim().toLowerCase(),
         phone: form.phone.trim(),
@@ -195,6 +277,14 @@ function TrabalheConoscoNicho() {
                   <SelectContent>{roles.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
                 </Select>
               </Field>
+              {subsectors && (
+                <Field label="Subsetor / Segmento" error={errors.subsector}>
+                  <Select value={form.subsector} onValueChange={(v) => setForm({ ...form, subsector: v })}>
+                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                    <SelectContent>{subsectors.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                  </Select>
+                </Field>
+              )}
               <Field label="Disponibilidade" error={errors.availability}>
                 <Select value={form.availability} onValueChange={(v) => setForm({ ...form, availability: v })}>
                   <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
