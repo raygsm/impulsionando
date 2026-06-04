@@ -125,6 +125,7 @@ const schema = z.object({
   state: z.string().min(1, "Selecione o estado"),
   city: z.string().trim().min(2, "Informe a cidade").max(80),
   role: z.string().min(1, "Selecione um cargo"),
+  subsector: z.string().optional(),
   availability: z.string().min(1, "Selecione disponibilidade"),
   experience_years: z.string().min(1, "Selecione a experiência"),
   specializations: z.array(z.string()).min(1, "Selecione ao menos 1 especialização"),
@@ -141,10 +142,11 @@ function TrabalheConoscoNicho() {
   const roles = ROLES_BY_NICHE[nicho] ?? ROLES_BY_NICHE.corporativo;
   const especs = ESPEC_BY_NICHE[nicho] ?? ESPEC_BY_NICHE.corporativo;
   const certs = CERTS_BY_NICHE[nicho] ?? CERTS_BY_NICHE.corporativo;
+  const subsectors = SUBSECTORS_BY_NICHE[nicho];
 
   const [form, setForm] = useState({
     full_name: "", email: "", phone: "", state: "", city: "",
-    role: "", availability: "", experience_years: "",
+    role: "", subsector: "", availability: "", experience_years: "",
     specializations: [] as string[], certifications: [] as string[], languages: ["Português"] as string[],
     consent: false,
   });
