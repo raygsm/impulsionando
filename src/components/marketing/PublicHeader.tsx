@@ -135,23 +135,23 @@ export function PublicHeader() {
           <DesktopDropdown label="Empresa" items={EMPRESA} />
         </nav>
 
-        <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+        <div className="flex items-center gap-2 lg:gap-3">
+          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex lg:h-10 lg:px-4 lg:text-[15px]">
             <Link to="/auth">Entrar</Link>
           </Button>
           <Button
             asChild
             size="sm"
-            className="gap-2 bg-gradient-primary shadow-elegant hover:shadow-card-hover hidden md:inline-flex"
+            className="gap-2 bg-gradient-primary shadow-elegant hover:shadow-card-hover hidden md:inline-flex lg:h-10 lg:px-5 lg:text-[15px]"
           >
             <Link to="/demo">
-              <PlayCircle className="w-4 h-4" />
+              <PlayCircle className="w-4 h-4 lg:w-[18px] lg:h-[18px]" />
               <span>Demonstração</span>
             </Link>
           </Button>
-          <Button asChild size="sm" className="btn-whatsapp gap-2 hidden md:inline-flex">
+          <Button asChild size="sm" className="btn-whatsapp gap-2 hidden md:inline-flex lg:h-10 lg:px-5 lg:text-[15px]">
             <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-              <MessageCircle className="w-4 h-4" />
+              <MessageCircle className="w-4 h-4 lg:w-[18px] lg:h-[18px]" />
               <span className="hidden lg:inline">WhatsApp</span>
             </a>
           </Button>
