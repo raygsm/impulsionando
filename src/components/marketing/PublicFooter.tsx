@@ -46,6 +46,7 @@ export function PublicFooter() {
               </Link>
             </li>
             <li><Link to="/showroom/fitness" className="hover:text-foreground">Showroom Fitness</Link></li>
+            <li><Link to="/showroom/eventos" className="hover:text-foreground">Showroom Eventos</Link></li>
             <li><Link to="/como-funciona/fitness" className="hover:text-foreground">Como funciona (Fitness)</Link></li>
             <li><Link to="/trabalhe-conosco" className="hover:text-foreground">Trabalhe conosco</Link></li>
             <li><Link to="/termos" className="hover:text-foreground">Termos de Uso</Link></li>
