@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import {
   MessageCircle, ArrowRight, CheckCircle2, Sparkles,
-  Building2, Store, Info, Target,
+  Info, Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
