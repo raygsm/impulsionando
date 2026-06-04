@@ -220,9 +220,10 @@ export function DemoWelcome(props: WelcomeProps) {
               Reset disponível no menu lateral
             </Badge>
           </div>
-          <Button size="sm" variant="default" className="bg-gradient-primary" onClick={dismiss}>
-            Começar a explorar
+          <Button size="sm" variant="default" className="bg-gradient-primary gap-1" onClick={startExploring}>
+            Começar a explorar <ArrowRight className="w-3.5 h-3.5" />
           </Button>
+
         </div>
       </div>
     </Card>
