@@ -4,10 +4,12 @@ import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dumbbell, Stethoscope, UtensilsCrossed, Building2, Hotel, Scissors, Factory, GraduationCap, Briefcase, ArrowRight } from "lucide-react";
+import { Dumbbell, Stethoscope, UtensilsCrossed, Building2, Hotel, Scissors, Factory, GraduationCap, Briefcase, ArrowRight, ShoppingCart } from "lucide-react";
 
 export const NICHOS_TALENTOS = [
   { slug: "fitness", label: "Fitness — Academia, CrossFit, Funcional, Personal", icon: Dumbbell, ativo: true },
+  { slug: "academias", label: "Academias de Ginástica — Musculação, Cross, Funcional, Pilates, Lutas", icon: Dumbbell, ativo: true },
+  { slug: "supermercados", label: "Supermercados — Atacarejo, Vizinhança, Hortifruti, Conveniência", icon: ShoppingCart, ativo: true },
   { slug: "saude", label: "Saúde — Clínicas, Consultórios", icon: Stethoscope, ativo: false },
   { slug: "gastronomia", label: "Gastronomia — Restaurantes, Bares, Cervejarias", icon: UtensilsCrossed, ativo: false },
   { slug: "hospitalidade", label: "Hospitalidade — Hotéis, Airbnb, Eventos", icon: Hotel, ativo: false },
