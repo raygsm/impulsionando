@@ -183,9 +183,21 @@ function MarketingLeadsPage() {
             <Loader2 className="w-5 h-5 animate-spin mx-auto" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="p-10 text-center text-muted-foreground">
-            <Inbox className="w-8 h-8 mx-auto mb-2 opacity-50" />
-            Nenhum lead encontrado.
+          <div className="p-10 text-center space-y-3">
+            <Inbox className="w-10 h-10 mx-auto opacity-40" />
+            <div className="font-medium">Nenhum lead capturado ainda</div>
+            <p className="text-sm text-muted-foreground max-w-md mx-auto">
+              Os leads enviados pelos formulários públicos (Orçamento, Contato, Showroom Fitness e landings de soluções) aparecem aqui automaticamente,
+              com origem, plano de interesse e status para qualificação.
+            </p>
+            <div className="flex items-center justify-center gap-2 pt-1">
+              <Button asChild variant="outline" size="sm">
+                <a href="/orcamento" target="_blank" rel="noopener noreferrer">Abrir formulário público</a>
+              </Button>
+              <Button asChild variant="ghost" size="sm">
+                <a href="/contato" target="_blank" rel="noopener noreferrer">Página de contato</a>
+              </Button>
+            </div>
           </div>
         ) : (
           <div className="overflow-x-auto">
