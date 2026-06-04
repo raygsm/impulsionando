@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Building2, Store, ArrowRight, HelpCircle, Sparkles, ShieldCheck, Zap, LogIn, Workflow, Plug, KeyRound, Smartphone, Database, MessageCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-export const Route = createFileRoute("/demo")({
+export const Route = createFileRoute("/demo/")({
   head: () => ({
     meta: [
       { title: "Demonstração — Impulsionando Tecnologia" },
