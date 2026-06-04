@@ -121,16 +121,13 @@ export function HomePage() {
                   <div className="font-semibold tracking-tight">{mod.title}</div>
                   <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed flex-1">{mod.desc}</p>
                   <div className="mt-4">
-                    <ModuleDetailDialog
-                      module={mod}
-                      trigger={
-                        <Button variant="outline" size="sm" className="w-full gap-1.5 group">
-                          <Info className="w-3.5 h-3.5" />
-                          SAIBA MAIS
-                          <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
-                        </Button>
-                      }
-                    />
+                    <Button asChild variant="outline" size="sm" className="w-full gap-1.5 group">
+                      <Link to="/modulos/$slug" params={{ slug: mod.id }}>
+                        <Info className="w-3.5 h-3.5" />
+                        SAIBA MAIS
+                        <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
+                      </Link>
+                    </Button>
                   </div>
                 </Card>
               );
