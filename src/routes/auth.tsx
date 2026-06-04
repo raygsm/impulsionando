@@ -94,11 +94,8 @@ function AuthPage() {
       {/* Left — brand */}
       <div className="relative hidden lg:flex flex-col justify-between p-12 bg-gradient-hero text-primary-foreground overflow-hidden">
         <div className="relative z-10">
-          <div className="flex items-center gap-2 text-lg font-semibold tracking-tight">
-            <div className="w-9 h-9 rounded-lg bg-white/15 backdrop-blur flex items-center justify-center">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            Impulsionando Tecnologia
+          <div className="flex items-center gap-3 text-lg font-semibold tracking-tight">
+            <img src={logoAsset.url} alt="Impulsionando Tecnologia" className="h-14 w-auto object-contain drop-shadow-md" />
           </div>
         </div>
         <div className="relative z-10 max-w-md space-y-6">
