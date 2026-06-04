@@ -97,25 +97,81 @@ export const Route = createFileRoute("/orcamento")({
 
 /* --------------------------- Briefing ---------------------------- */
 
-const SEGMENTOS = [
-  { value: "clinicas", label: "Clínicas médicas" },
-  { value: "consultorios", label: "Consultórios" },
-  { value: "saloes", label: "Salões de beleza" },
-  { value: "bares-restaurantes", label: "Bares e restaurantes" },
-  { value: "varejo", label: "Lojas de varejo" },
-  { value: "ecommerce", label: "E-commerce" },
-  { value: "servicos", label: "Prestadores de serviços" },
-  { value: "educacao", label: "Educação / cursos / escolas" },
-  { value: "academias", label: "Academias / Fitness" },
-  { value: "crossfit", label: "CrossFit / Box" },
-  { value: "personal", label: "Personal Trainer" },
-  { value: "pilates", label: "Estúdios de pilates" },
-  { value: "yoga", label: "Estúdios de yoga" },
-  { value: "microcervejarias", label: "Microcervejarias" },
-  { value: "fornecedores", label: "Fornecedores / Distribuidores" },
-  { value: "eventos", label: "Eventos" },
+/**
+ * Segmentos agrupados por categoria-mãe.
+ * O formulário pergunta primeiro a categoria e depois mostra apenas
+ * os segmentos correspondentes.
+ */
+const CATEGORIAS = [
+  { value: "saude", label: "Saúde, Bem-estar e Performance" },
+  { value: "alimentacao", label: "Alimentação, Bebidas e Experiências" },
+  { value: "servicos", label: "Serviços, Educação e Atendimento" },
+  { value: "varejo", label: "Varejo, E-commerce e Produtos" },
+  { value: "viagens", label: "Viagens, Turismo e Experiências" },
+  { value: "white-label", label: "White Label e Parceiros" },
   { value: "outro", label: "Outro segmento" },
 ] as const;
+
+const SEGMENTOS_POR_CATEGORIA: Record<string, readonly { value: string; label: string }[]> = {
+  saude: [
+    { value: "clinicas", label: "Clínicas médicas" },
+    { value: "consultorios", label: "Consultórios" },
+    { value: "dentistas", label: "Dentistas / Odontologia" },
+    { value: "fisioterapia", label: "Fisioterapia" },
+    { value: "psicologia", label: "Psicologia" },
+    { value: "nutricao", label: "Nutrição" },
+    { value: "saude-outros", label: "Outros profissionais de saúde" },
+    { value: "academias", label: "Academias / Fitness" },
+    { value: "crossfit", label: "CrossFit / Box" },
+    { value: "personal", label: "Personal Trainer" },
+    { value: "pilates", label: "Estúdios de pilates" },
+    { value: "yoga", label: "Estúdios de yoga" },
+  ],
+  alimentacao: [
+    { value: "bares-restaurantes", label: "Bares e restaurantes" },
+    { value: "pizzarias", label: "Pizzarias" },
+    { value: "hamburguerias", label: "Hamburguerias" },
+    { value: "delivery", label: "Delivery / Dark kitchen" },
+    { value: "cafeterias", label: "Cafeterias / Gastrobares" },
+    { value: "microcervejarias", label: "Microcervejarias" },
+    { value: "fornecedores", label: "Fornecedores / Distribuidores" },
+    { value: "eventos", label: "Casas e eventos gastronômicos" },
+  ],
+  servicos: [
+    { value: "servicos", label: "Prestadores de serviços" },
+    { value: "consultorias", label: "Consultorias" },
+    { value: "assistencias", label: "Assistências técnicas" },
+    { value: "educacao", label: "Escolas / Cursos / Educação" },
+    { value: "mentorias", label: "Mentorias / Aulas particulares" },
+    { value: "saloes", label: "Salões de beleza" },
+    { value: "barbearias", label: "Barbearias" },
+    { value: "esteticas", label: "Clínicas de estética" },
+  ],
+  varejo: [
+    { value: "varejo", label: "Lojas de varejo / físicas" },
+    { value: "ecommerce", label: "E-commerce" },
+    { value: "catalogos", label: "Catálogos digitais" },
+    { value: "atacado", label: "Atacado / B2B" },
+  ],
+  viagens: [
+    { value: "agencias-viagem", label: "Agências de viagens" },
+    { value: "consultores-viagem", label: "Consultores de viagem" },
+    { value: "operadoras", label: "Operadoras de turismo" },
+    { value: "guias", label: "Guias / Receptivo" },
+    { value: "experiencias", label: "Experiências / Roteiros personalizados" },
+    { value: "hospedagens", label: "Hospedagens / Aluguel por temporada" },
+  ],
+  "white-label": [
+    { value: "agencia", label: "Agência / Integrador" },
+    { value: "revendedor", label: "Revendedor / Parceiro comercial" },
+    { value: "consultoria-tech", label: "Consultoria de tecnologia" },
+  ],
+  outro: [
+    { value: "outro", label: "Outro segmento" },
+  ],
+};
+
+const SEGMENTOS = Object.values(SEGMENTOS_POR_CATEGORIA).flat();
 
 const TAMANHO = [
   { value: "solo", label: "Só eu (autônomo)" },
