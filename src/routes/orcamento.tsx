@@ -856,12 +856,20 @@ function OrcamentoPage() {
                   />
                 </>
               )}
+              {current.key === "categoria" && (
+                <SelectField
+                  value={a.categoria}
+                  onChange={(v) => setA({ ...a, categoria: v, segmento: "" })}
+                  options={CATEGORIAS}
+                  placeholder="Selecione a categoria principal"
+                />
+              )}
               {current.key === "segmento" && (
                 <SelectField
                   value={a.segmento}
                   onChange={(v) => setA({ ...a, segmento: v })}
-                  options={SEGMENTOS}
-                  placeholder="Selecione o segmento"
+                  options={a.categoria ? SEGMENTOS_POR_CATEGORIA[a.categoria] ?? SEGMENTOS : SEGMENTOS}
+                  placeholder={a.categoria ? "Selecione o segmento" : "Escolha primeiro a categoria"}
                 />
               )}
               {current.key === "tamanho" && (
