@@ -169,19 +169,19 @@ const ShowroomFitnessRoute = ShowroomFitnessRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoWhiteLabelRoute = DemoWhiteLabelRouteImport.update({
-  id: '/white-label',
-  path: '/white-label',
-  getParentRoute: () => DemoRoute,
+  id: '/demo/white-label',
+  path: '/demo/white-label',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const DemoClienteFinalRoute = DemoClienteFinalRouteImport.update({
-  id: '/cliente-final',
-  path: '/cliente-final',
-  getParentRoute: () => DemoRoute,
+  id: '/demo/cliente-final',
+  path: '/demo/cliente-final',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const DemoChecklistRoute = DemoChecklistRouteImport.update({
-  id: '/checklist',
-  path: '/checklist',
-  getParentRoute: () => DemoRoute,
+  id: '/demo/checklist',
+  path: '/demo/checklist',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ComoFuncionaFitnessRoute = ComoFuncionaFitnessRouteImport.update({
   id: '/como-funciona/fitness',
@@ -999,6 +999,9 @@ export interface RootRouteChildren {
   SolucoesRoute: typeof SolucoesRoute
   TermosRoute: typeof TermosRoute
   ComoFuncionaFitnessRoute: typeof ComoFuncionaFitnessRoute
+  DemoChecklistRoute: typeof DemoChecklistRoute
+  DemoClienteFinalRoute: typeof DemoClienteFinalRoute
+  DemoWhiteLabelRoute: typeof DemoWhiteLabelRoute
   ShowroomFitnessRoute: typeof ShowroomFitnessRoute
   TrabalheConoscoNichoRoute: typeof TrabalheConoscoNichoRoute
   DemoIndexRoute: typeof DemoIndexRoute
@@ -1121,24 +1124,24 @@ declare module '@tanstack/react-router' {
     }
     '/demo/white-label': {
       id: '/demo/white-label'
-      path: '/white-label'
+      path: '/demo/white-label'
       fullPath: '/demo/white-label'
       preLoaderRoute: typeof DemoWhiteLabelRouteImport
-      parentRoute: typeof DemoRoute
+      parentRoute: typeof rootRouteImport
     }
     '/demo/cliente-final': {
       id: '/demo/cliente-final'
-      path: '/cliente-final'
+      path: '/demo/cliente-final'
       fullPath: '/demo/cliente-final'
       preLoaderRoute: typeof DemoClienteFinalRouteImport
-      parentRoute: typeof DemoRoute
+      parentRoute: typeof rootRouteImport
     }
     '/demo/checklist': {
       id: '/demo/checklist'
-      path: '/checklist'
+      path: '/demo/checklist'
       fullPath: '/demo/checklist'
       preLoaderRoute: typeof DemoChecklistRouteImport
-      parentRoute: typeof DemoRoute
+      parentRoute: typeof rootRouteImport
     }
     '/como-funciona/fitness': {
       id: '/como-funciona/fitness'
@@ -1784,6 +1787,9 @@ const rootRouteChildren: RootRouteChildren = {
   SolucoesRoute: SolucoesRoute,
   TermosRoute: TermosRoute,
   ComoFuncionaFitnessRoute: ComoFuncionaFitnessRoute,
+  DemoChecklistRoute: DemoChecklistRoute,
+  DemoClienteFinalRoute: DemoClienteFinalRoute,
+  DemoWhiteLabelRoute: DemoWhiteLabelRoute,
   ShowroomFitnessRoute: ShowroomFitnessRoute,
   TrabalheConoscoNichoRoute: TrabalheConoscoNichoRoute,
   DemoIndexRoute: DemoIndexRoute,
