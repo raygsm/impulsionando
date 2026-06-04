@@ -315,7 +315,7 @@ export function NichoPage({ nicho }: Props) {
           <Button asChild variant="outline" size="sm" className="hidden md:inline-flex">
             <Link to={nicho.ctaSecondary.href}>{nicho.demoRoute ? "Ver demo" : "Saiba mais"}</Link>
           </Button>
-          <Button asChild size="lg" className="gap-2 flex-1 sm:flex-initial bg-gradient-primary">
+          <Button asChild size="lg" className="gap-2 flex-1 sm:flex-initial btn-whatsapp">
             <a href={wa} target="_blank" rel="noopener noreferrer">
               <MessageCircle className="w-4 h-4" />
               <span className="truncate">{nicho.ctaPrimary.label}</span>
