@@ -107,10 +107,10 @@ export function PublicHeader() {
           />
         </Link>
 
-        <nav className="hidden lg:flex items-center gap-1">
+        <nav className="hidden lg:flex items-center gap-2">
           <Link
             to="/"
-            className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-md"
+            className="px-3 py-3 text-[15px] text-muted-foreground hover:text-foreground transition-colors rounded-md"
             activeProps={{ className: "text-foreground font-medium" }}
             activeOptions={{ exact: true }}
           >
@@ -120,14 +120,14 @@ export function PublicHeader() {
           <DesktopDropdown label="Demonstrações" items={DEMOS} />
           <Link
             to="/planos"
-            className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-md"
+            className="px-3 py-3 text-[15px] text-muted-foreground hover:text-foreground transition-colors rounded-md"
             activeProps={{ className: "text-foreground font-medium" }}
           >
             Planos
           </Link>
           <Link
             to="/orcamento"
-            className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-md"
+            className="px-3 py-3 text-[15px] text-muted-foreground hover:text-foreground transition-colors rounded-md"
             activeProps={{ className: "text-foreground font-medium" }}
           >
             Orçamento
