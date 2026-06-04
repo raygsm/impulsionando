@@ -128,11 +128,8 @@ function AuthPage() {
       {/* Right — form */}
       <div className="flex items-center justify-center p-6 sm:p-12 bg-background">
         <Card className="w-full max-w-md p-8 shadow-elegant">
-          <div className="flex items-center gap-2 mb-6 lg:hidden">
-            <div className="w-9 h-9 rounded-lg bg-gradient-primary flex items-center justify-center text-primary-foreground">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <span className="font-semibold tracking-tight">Impulsionando</span>
+          <div className="flex items-center justify-center mb-6 lg:hidden">
+            <img src={logoAsset.url} alt="Impulsionando Tecnologia" className="h-14 w-auto object-contain" />
           </div>
           <h2 className="text-2xl font-semibold tracking-tight">Acesse sua conta</h2>
           <p className="text-sm text-muted-foreground mt-1">Use seu e-mail corporativo para continuar.</p>
