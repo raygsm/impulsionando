@@ -23,19 +23,25 @@ const PAINS = [
   "Falta de integração entre ferramentas",
 ];
 
-const MODULES = [
-  { icon: Calendar, title: "Agenda Online", desc: "Horários, profissionais, unidades, confirmação e pagamento." },
-  { icon: Bot, title: "Agente Virtual no WhatsApp", desc: "Atendimento automatizado, triagem e qualificação." },
-  { icon: Users, title: "CRM e Automação", desc: "Jornada do lead, funil, follow-up e reativação." },
-  { icon: Share2, title: "Afiliados e Parceiros", desc: "Links, rastreamento, comissões e painéis." },
-  { icon: Globe, title: "Sites e Landing Pages", desc: "Páginas de conversão integradas a CRM e tráfego pago." },
-  { icon: CreditCard, title: "Pagamentos e Baixa Automática", desc: "Pix, cartão, link, confirmação e liberação automática." },
-  { icon: FileText, title: "Emissão Fiscal", desc: "Nota fiscal automática ou semi-automática conforme regras." },
-  { icon: ShieldCheck, title: "Usuários e Permissões", desc: "Perfis, setores, unidades e auditoria." },
-  { icon: BarChart3, title: "Relatórios e BI", desc: "Indicadores comerciais, financeiros e operacionais." },
-  { icon: Cog, title: "Sistemas Personalizados", desc: "Soluções sob medida com regras próprias do negócio." },
-  { icon: Plug, title: "Integrações", desc: "APIs, webhooks, gateways, WhatsApp, ERPs e mais." },
+type ModuleStatus = "ativo" | "em_ativacao" | "sob_consulta";
+const MODULES: { icon: typeof Calendar; title: string; desc: string; status: ModuleStatus }[] = [
+  { icon: Calendar, title: "Agenda Online", desc: "Horários, profissionais, unidades, confirmação e pagamento.", status: "ativo" },
+  { icon: Bot, title: "Agente Virtual no WhatsApp", desc: "Atendimento automatizado, triagem e qualificação.", status: "em_ativacao" },
+  { icon: Users, title: "CRM e Automação", desc: "Jornada do lead, funil, follow-up e reativação.", status: "ativo" },
+  { icon: Share2, title: "Afiliados e Parceiros", desc: "Links, rastreamento, comissões e painéis.", status: "em_ativacao" },
+  { icon: Globe, title: "Sites e Landing Pages", desc: "Páginas de conversão integradas a CRM e tráfego pago.", status: "sob_consulta" },
+  { icon: CreditCard, title: "Pagamentos e Baixa Automática", desc: "Pix, cartão, link, confirmação e liberação automática.", status: "em_ativacao" },
+  { icon: FileText, title: "Emissão Fiscal", desc: "Nota fiscal automática ou semi-automática conforme regras.", status: "em_ativacao" },
+  { icon: ShieldCheck, title: "Usuários e Permissões", desc: "Perfis, setores, unidades e auditoria.", status: "ativo" },
+  { icon: BarChart3, title: "Relatórios e BI", desc: "Indicadores comerciais, financeiros e operacionais.", status: "ativo" },
+  { icon: Cog, title: "Sistemas Personalizados", desc: "Soluções sob medida com regras próprias do negócio.", status: "sob_consulta" },
+  { icon: Plug, title: "Integrações", desc: "APIs, webhooks, gateways, WhatsApp, ERPs e mais.", status: "em_ativacao" },
 ];
+const STATUS_BADGE: Record<ModuleStatus, { label: string; className: string }> = {
+  ativo: { label: "Ativo", className: "bg-emerald-500/15 text-emerald-600 border-emerald-500/30" },
+  em_ativacao: { label: "Em ativação", className: "bg-amber-500/15 text-amber-600 border-amber-500/30" },
+  sob_consulta: { label: "Sob consulta", className: "bg-sky-500/15 text-sky-600 border-sky-500/30" },
+};
 
 const PLANS = [
   { name: "Essencial", modules: "1 módulo", price: "R$ 297", suffix: "/mês", desc: "Resolva a dor principal com rapidez." },
@@ -119,15 +125,23 @@ export function HomePage() {
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {MODULES.map(({ icon: Icon, title, desc }) => (
-              <Card key={title} className="p-6 hover:shadow-elegant transition-shadow">
-                <div className="w-10 h-10 rounded-md bg-gradient-primary flex items-center justify-center text-primary-foreground mb-4">
-                  <Icon className="w-5 h-5" />
-                </div>
-                <div className="font-semibold tracking-tight">{title}</div>
-                <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{desc}</p>
-              </Card>
-            ))}
+            {MODULES.map(({ icon: Icon, title, desc, status }) => {
+              const badge = STATUS_BADGE[status];
+              return (
+                <Card key={title} className="p-6 hover:shadow-elegant transition-shadow">
+                  <div className="flex items-start justify-between gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-md bg-gradient-primary flex items-center justify-center text-primary-foreground">
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${badge.className}`}>
+                      {badge.label}
+                    </span>
+                  </div>
+                  <div className="font-semibold tracking-tight">{title}</div>
+                  <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{desc}</p>
+                </Card>
+              );
+            })}
           </div>
           <div className="mt-10">
             <Button asChild variant="outline" size="lg" className="gap-2">
