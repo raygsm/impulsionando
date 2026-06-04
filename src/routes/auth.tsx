@@ -8,7 +8,8 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Sparkles, ShieldCheck, Layers, Zap } from "lucide-react";
+import { ShieldCheck, Layers, Zap } from "lucide-react";
+import logoAsset from "@/assets/logo-impulsionando.png.asset.json";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
