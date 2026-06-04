@@ -8,7 +8,8 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Sparkles, ShieldCheck, Layers, Zap } from "lucide-react";
+import { ShieldCheck, Layers, Zap } from "lucide-react";
+import logoAsset from "@/assets/logo-impulsionando.png.asset.json";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -93,11 +94,8 @@ function AuthPage() {
       {/* Left — brand */}
       <div className="relative hidden lg:flex flex-col justify-between p-12 bg-gradient-hero text-primary-foreground overflow-hidden">
         <div className="relative z-10">
-          <div className="flex items-center gap-2 text-lg font-semibold tracking-tight">
-            <div className="w-9 h-9 rounded-lg bg-white/15 backdrop-blur flex items-center justify-center">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            Impulsionando Tecnologia
+          <div className="flex items-center gap-3 text-lg font-semibold tracking-tight">
+            <img src={logoAsset.url} alt="Impulsionando Tecnologia" className="h-14 w-auto object-contain drop-shadow-md" />
           </div>
         </div>
         <div className="relative z-10 max-w-md space-y-6">
@@ -130,11 +128,8 @@ function AuthPage() {
       {/* Right — form */}
       <div className="flex items-center justify-center p-6 sm:p-12 bg-background">
         <Card className="w-full max-w-md p-8 shadow-elegant">
-          <div className="flex items-center gap-2 mb-6 lg:hidden">
-            <div className="w-9 h-9 rounded-lg bg-gradient-primary flex items-center justify-center text-primary-foreground">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <span className="font-semibold tracking-tight">Impulsionando</span>
+          <div className="flex items-center justify-center mb-6 lg:hidden">
+            <img src={logoAsset.url} alt="Impulsionando Tecnologia" className="h-14 w-auto object-contain" />
           </div>
           <h2 className="text-2xl font-semibold tracking-tight">Acesse sua conta</h2>
           <p className="text-sm text-muted-foreground mt-1">Use seu e-mail corporativo para continuar.</p>
