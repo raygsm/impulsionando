@@ -72,6 +72,18 @@ export function DemoWelcome(props: WelcomeProps) {
     setHidden(true);
   }
 
+  function startExploring() {
+    dismiss();
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    toast.success("Pronto! Use o menu lateral para navegar entre os módulos.", {
+      description: "Abra o menu (☰ no mobile) para abrir Agenda, Vendas, Estoque, CRM, Financeiro e BI.",
+      duration: 5000,
+    });
+  }
+
+
   return (
     <Card className="mb-6 overflow-hidden border-primary/30 shadow-elegant">
       <div className="bg-gradient-primary text-primary-foreground px-5 py-4 flex items-start justify-between gap-3">
