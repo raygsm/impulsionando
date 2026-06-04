@@ -16,12 +16,13 @@ import { Card } from "@/components/ui/card";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { MODULE_DETAILS } from "@/components/marketing/moduleDetails";
+import type { ModuleDetail } from "@/components/marketing/ModuleDetailDialog";
 
 const WHATSAPP_BASE =
   "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20contratar%20o%20m%C3%B3dulo%20";
 
 export const Route = createFileRoute("/modulos/$slug")({
-  loader: ({ params }) => {
+  loader: ({ params }): { mod: ModuleDetail } => {
     const mod = MODULE_DETAILS.find((m) => m.id === params.slug);
     if (!mod) throw notFound();
     return { mod };

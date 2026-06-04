@@ -25,6 +25,7 @@ import { Route as TrabalheConoscoIndexRouteImport } from './routes/trabalhe-cono
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
 import { Route as TrabalheConoscoNichoRouteImport } from './routes/trabalhe-conosco.$nicho'
 import { Route as ShowroomFitnessRouteImport } from './routes/showroom.fitness'
+import { Route as ModulosSlugRouteImport } from './routes/modulos.$slug'
 import { Route as DemoWhiteLabelRouteImport } from './routes/demo.white-label'
 import { Route as DemoClienteFinalRouteImport } from './routes/demo.cliente-final'
 import { Route as DemoChecklistRouteImport } from './routes/demo.checklist'
@@ -167,6 +168,11 @@ const ShowroomFitnessRoute = ShowroomFitnessRouteImport.update({
   id: '/showroom/fitness',
   path: '/showroom/fitness',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ModulosSlugRoute = ModulosSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ModulosRoute,
 } as any)
 const DemoWhiteLabelRoute = DemoWhiteLabelRouteImport.update({
   id: '/demo/white-label',
@@ -517,7 +523,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/contato': typeof ContatoRoute
-  '/modulos': typeof ModulosRoute
+  '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
   '/planos': typeof PlanosRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -550,6 +556,7 @@ export interface FileRoutesByFullPath {
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
+  '/modulos/$slug': typeof ModulosSlugRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/demo/': typeof DemoIndexRoute
@@ -597,7 +604,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/contato': typeof ContatoRoute
-  '/modulos': typeof ModulosRoute
+  '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
   '/planos': typeof PlanosRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -623,6 +630,7 @@ export interface FileRoutesByTo {
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
+  '/modulos/$slug': typeof ModulosSlugRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/demo': typeof DemoIndexRoute
@@ -672,7 +680,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/contato': typeof ContatoRoute
-  '/modulos': typeof ModulosRoute
+  '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
   '/planos': typeof PlanosRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -705,6 +713,7 @@ export interface FileRoutesById {
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
+  '/modulos/$slug': typeof ModulosSlugRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/demo/': typeof DemoIndexRoute
@@ -787,6 +796,7 @@ export interface FileRouteTypes {
     | '/demo/checklist'
     | '/demo/cliente-final'
     | '/demo/white-label'
+    | '/modulos/$slug'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
     | '/demo/'
@@ -860,6 +870,7 @@ export interface FileRouteTypes {
     | '/demo/checklist'
     | '/demo/cliente-final'
     | '/demo/white-label'
+    | '/modulos/$slug'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
     | '/demo'
@@ -941,6 +952,7 @@ export interface FileRouteTypes {
     | '/demo/checklist'
     | '/demo/cliente-final'
     | '/demo/white-label'
+    | '/modulos/$slug'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
     | '/demo/'
@@ -990,7 +1002,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ContatoRoute: typeof ContatoRoute
-  ModulosRoute: typeof ModulosRoute
+  ModulosRoute: typeof ModulosRouteWithChildren
   OrcamentoRoute: typeof OrcamentoRoute
   PlanosRoute: typeof PlanosRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
@@ -1121,6 +1133,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/showroom/fitness'
       preLoaderRoute: typeof ShowroomFitnessRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/modulos/$slug': {
+      id: '/modulos/$slug'
+      path: '/$slug'
+      fullPath: '/modulos/$slug'
+      preLoaderRoute: typeof ModulosSlugRouteImport
+      parentRoute: typeof ModulosRoute
     }
     '/demo/white-label': {
       id: '/demo/white-label'
@@ -1773,12 +1792,23 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface ModulosRouteChildren {
+  ModulosSlugRoute: typeof ModulosSlugRoute
+}
+
+const ModulosRouteChildren: ModulosRouteChildren = {
+  ModulosSlugRoute: ModulosSlugRoute,
+}
+
+const ModulosRouteWithChildren =
+  ModulosRoute._addFileChildren(ModulosRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ContatoRoute: ContatoRoute,
-  ModulosRoute: ModulosRoute,
+  ModulosRoute: ModulosRouteWithChildren,
   OrcamentoRoute: OrcamentoRoute,
   PlanosRoute: PlanosRoute,
   PrivacidadeRoute: PrivacidadeRoute,
