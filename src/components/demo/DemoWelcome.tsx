@@ -2,6 +2,7 @@ import { useEffect, useState, type ComponentType } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import {
   X,
   Sparkles,
@@ -13,7 +14,9 @@ import {
   Database,
   Eye,
   Smartphone,
+  ArrowRight,
 } from "lucide-react";
+
 
 interface WelcomeProps {
   storageKey: string;
