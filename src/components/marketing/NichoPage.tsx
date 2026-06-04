@@ -140,6 +140,43 @@ export function NichoPage({ nicho }: Props) {
           </div>
         </section>
 
+        {/* AGENDA ONLINE POR NICHO */}
+        {(() => {
+          const ab = NICHO_AGENDA[nicho.slug];
+          if (!ab) return null;
+          return (
+            <section className="rounded-xl border border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5 p-6">
+              <Badge variant="outline" className="mb-3 text-[10px] border-primary/40 text-primary">
+                Agenda online
+              </Badge>
+              <h2 className="text-xl font-bold tracking-tight mb-3">{ab.title}</h2>
+              <p className="text-sm leading-relaxed text-muted-foreground mb-4">{AGENDA_BASE}</p>
+              <p className="text-sm leading-relaxed mb-4">{ab.description}</p>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {ab.highlights.map((h) => (
+                  <span key={h} className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+                    {h}
+                  </span>
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button asChild size="sm" className="bg-gradient-primary gap-2">
+                  <a href={ctaWaUrl(ab.cta)} target="_blank" rel="noopener noreferrer">
+                    <MessageCircle className="w-4 h-4" />
+                    {ab.cta}
+                  </a>
+                </Button>
+                <Button asChild size="sm" variant="outline">
+                  <Link to="/modulos/$slug" params={{ slug: "agenda" }}>
+                    Ver módulo de agenda
+                  </Link>
+                </Button>
+              </div>
+            </section>
+          );
+        })()}
+
+
         {/* JORNADA PRÁTICA */}
         <section>
           <div className="flex items-center gap-2 mb-5">
