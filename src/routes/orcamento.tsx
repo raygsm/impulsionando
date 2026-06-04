@@ -346,6 +346,7 @@ function recomendar(a: Answers): Recomendacao {
 
 const STEPS = [
   { key: "perfil", title: "Quem vai usar o sistema?", helper: "Isso muda completamente a recomendação." },
+  { key: "categoria", title: "Qual é a área principal do seu negócio?", helper: "Primeiro a categoria — depois mostramos os segmentos específicos." },
   { key: "segmento", title: "Qual é o seu segmento?", helper: "Usamos para escolher os módulos certos." },
   { key: "tamanho", title: "Tamanho da operação", helper: "Quantas pessoas vão usar o sistema?" },
   { key: "unidades", title: "Quantas unidades você tem?", helper: "1 unidade simplifica. Várias exigem multi-empresa." },
