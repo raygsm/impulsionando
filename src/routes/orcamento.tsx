@@ -676,7 +676,14 @@ function buildPrefill(s: SearchParams): { answers: Answers; firstStep: number; h
   const a: Answers = { ...INITIAL };
   let hasPrefill = false;
 
-  if (s.segmento && VALID_SEGMENTOS.has(s.segmento)) { a.segmento = s.segmento; hasPrefill = true; }
+  if (s.segmento && VALID_SEGMENTOS.has(s.segmento)) {
+    a.segmento = s.segmento;
+    // Inferir categoria-mãe a partir do segmento informado
+    for (const [cat, list] of Object.entries(SEGMENTOS_POR_CATEGORIA)) {
+      if (list.some((seg) => seg.value === s.segmento)) { a.categoria = cat; break; }
+    }
+    hasPrefill = true;
+  }
   if (s.dores) {
     const list = s.dores.split(",").map((d) => d.trim()).filter((d) => VALID_DORES.has(d));
     if (list.length) { a.dores = list; hasPrefill = true; }
