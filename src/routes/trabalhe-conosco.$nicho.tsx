@@ -170,6 +170,11 @@ function TrabalheConoscoNicho() {
       toast.error("Revise os campos destacados");
       return;
     }
+    if (subsectors && !form.subsector) {
+      setErrors((e) => ({ ...e, subsector: "Selecione o subsetor" }));
+      toast.error("Selecione o subsetor");
+      return;
+    }
     if (!resume) { setErrors((e) => ({ ...e, resume: "Currículo é obrigatório (PDF, DOC ou DOCX)" })); return; }
     if (!ALLOWED_MIME.includes(resume.type)) { setErrors((e) => ({ ...e, resume: "Formato inválido. Use PDF, DOC ou DOCX" })); return; }
     if (resume.size > 10 * 1024 * 1024) { setErrors((e) => ({ ...e, resume: "Máximo 10 MB" })); return; }
