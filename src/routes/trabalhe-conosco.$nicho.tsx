@@ -277,6 +277,14 @@ function TrabalheConoscoNicho() {
                   <SelectContent>{roles.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
                 </Select>
               </Field>
+              {subsectors && (
+                <Field label="Subsetor / Segmento" error={errors.subsector}>
+                  <Select value={form.subsector} onValueChange={(v) => setForm({ ...form, subsector: v })}>
+                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                    <SelectContent>{subsectors.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                  </Select>
+                </Field>
+              )}
               <Field label="Disponibilidade" error={errors.availability}>
                 <Select value={form.availability} onValueChange={(v) => setForm({ ...form, availability: v })}>
                   <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
