@@ -2,6 +2,7 @@ import { useEffect, useState, type ComponentType } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import {
   X,
   Sparkles,
@@ -13,7 +14,9 @@ import {
   Database,
   Eye,
   Smartphone,
+  ArrowRight,
 } from "lucide-react";
+
 
 interface WelcomeProps {
   storageKey: string;
@@ -68,6 +71,18 @@ export function DemoWelcome(props: WelcomeProps) {
     }
     setHidden(true);
   }
+
+  function startExploring() {
+    dismiss();
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    toast.success("Pronto! Use o menu lateral para navegar entre os módulos.", {
+      description: "Abra o menu (☰ no mobile) para abrir Agenda, Vendas, Estoque, CRM, Financeiro e BI.",
+      duration: 5000,
+    });
+  }
+
 
   return (
     <Card className="mb-6 overflow-hidden border-primary/30 shadow-elegant">
@@ -205,9 +220,10 @@ export function DemoWelcome(props: WelcomeProps) {
               Reset disponível no menu lateral
             </Badge>
           </div>
-          <Button size="sm" variant="default" className="bg-gradient-primary" onClick={dismiss}>
-            Começar a explorar
+          <Button size="sm" variant="default" className="bg-gradient-primary gap-1" onClick={startExploring}>
+            Começar a explorar <ArrowRight className="w-3.5 h-3.5" />
           </Button>
+
         </div>
       </div>
     </Card>
