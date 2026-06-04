@@ -63,7 +63,7 @@ export function NichoPage({ nicho }: Props) {
           </div>
           <p className="text-lg text-white/85 max-w-3xl leading-relaxed">{nicho.subtitle}</p>
           <div className="flex flex-wrap gap-3 pt-6">
-            <Button asChild size="lg" className="gap-2 bg-white text-primary hover:bg-white/90">
+            <Button asChild size="lg" className="btn-whatsapp gap-2 shadow-lg">
               <a href={wa} target="_blank" rel="noopener noreferrer">
                 <MessageCircle className="w-4 h-4" />
                 {nicho.ctaPrimary.label}
