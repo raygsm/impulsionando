@@ -1,13 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import {
-  MessageCircle, Calendar, Bot, Users, Share2, Globe, CreditCard,
-  FileText, ShieldCheck, BarChart3, Cog, Plug, ArrowRight, CheckCircle2, Sparkles,
-  Building2, Store,
+  MessageCircle, ArrowRight, CheckCircle2, Sparkles,
+  Building2, Store, Info,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PublicHeader } from "./PublicHeader";
 import { PublicFooter } from "./PublicFooter";
+import { ModuleDetailDialog } from "./ModuleDetailDialog";
+import { MODULE_DETAILS } from "./moduleDetails";
 
 const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20falar%20com%20a%20Impulsionando%20Tecnologia%20sobre%20m%C3%B3dulos%2C%20automa%C3%A7%C3%A3o%2C%20agenda%20online%2C%20WhatsApp%2C%20CRM%20ou%20sistemas%20personalizados.";
 
@@ -23,25 +24,6 @@ const PAINS = [
   "Falta de integração entre ferramentas",
 ];
 
-type ModuleStatus = "ativo" | "em_ativacao" | "sob_consulta";
-const MODULES: { icon: typeof Calendar; title: string; desc: string; status: ModuleStatus }[] = [
-  { icon: Calendar, title: "Agenda Online", desc: "Horários, profissionais, unidades, confirmação e pagamento.", status: "ativo" },
-  { icon: Bot, title: "Agente Virtual no WhatsApp", desc: "Atendimento automatizado, triagem e qualificação.", status: "em_ativacao" },
-  { icon: Users, title: "CRM e Automação", desc: "Jornada do lead, funil, follow-up e reativação.", status: "ativo" },
-  { icon: Share2, title: "Afiliados e Parceiros", desc: "Links, rastreamento, comissões e painéis.", status: "em_ativacao" },
-  { icon: Globe, title: "Sites e Landing Pages", desc: "Páginas de conversão integradas a CRM e tráfego pago.", status: "sob_consulta" },
-  { icon: CreditCard, title: "Pagamentos e Baixa Automática", desc: "Pix, cartão, link, confirmação e liberação automática.", status: "em_ativacao" },
-  { icon: FileText, title: "Emissão Fiscal", desc: "Nota fiscal automática ou semi-automática conforme regras.", status: "em_ativacao" },
-  { icon: ShieldCheck, title: "Usuários e Permissões", desc: "Perfis, setores, unidades e auditoria.", status: "ativo" },
-  { icon: BarChart3, title: "Relatórios e BI", desc: "Indicadores comerciais, financeiros e operacionais.", status: "ativo" },
-  { icon: Cog, title: "Sistemas Personalizados", desc: "Soluções sob medida com regras próprias do negócio.", status: "sob_consulta" },
-  { icon: Plug, title: "Integrações", desc: "APIs, webhooks, gateways, WhatsApp, ERPs e mais.", status: "em_ativacao" },
-];
-const STATUS_BADGE: Record<ModuleStatus, { label: string; className: string }> = {
-  ativo: { label: "Ativo", className: "bg-emerald-500/15 text-emerald-600 border-emerald-500/30" },
-  em_ativacao: { label: "Em ativação", className: "bg-amber-500/15 text-amber-600 border-amber-500/30" },
-  sob_consulta: { label: "Sob consulta", className: "bg-sky-500/15 text-sky-600 border-sky-500/30" },
-};
 
 const PLANS = [
   { name: "Essencial", modules: "1 módulo", price: "R$ 297", suffix: "/mês", desc: "Resolva a dor principal com rapidez." },
