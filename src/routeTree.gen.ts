@@ -17,12 +17,12 @@ import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PlanosRouteImport } from './routes/planos'
 import { Route as OrcamentoRouteImport } from './routes/orcamento'
 import { Route as ModulosRouteImport } from './routes/modulos'
-import { Route as DemoRouteImport } from './routes/demo'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TrabalheConoscoIndexRouteImport } from './routes/trabalhe-conosco.index'
+import { Route as DemoIndexRouteImport } from './routes/demo.index'
 import { Route as TrabalheConoscoNichoRouteImport } from './routes/trabalhe-conosco.$nicho'
 import { Route as ShowroomFitnessRouteImport } from './routes/showroom.fitness'
 import { Route as DemoWhiteLabelRouteImport } from './routes/demo.white-label'
@@ -129,11 +129,6 @@ const ModulosRoute = ModulosRouteImport.update({
   path: '/modulos',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DemoRoute = DemoRouteImport.update({
-  id: '/demo',
-  path: '/demo',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ContatoRoute = ContatoRouteImport.update({
   id: '/contato',
   path: '/contato',
@@ -158,6 +153,11 @@ const TrabalheConoscoIndexRoute = TrabalheConoscoIndexRouteImport.update({
   path: '/trabalhe-conosco/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DemoIndexRoute = DemoIndexRouteImport.update({
+  id: '/demo/',
+  path: '/demo/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TrabalheConoscoNichoRoute = TrabalheConoscoNichoRouteImport.update({
   id: '/trabalhe-conosco/$nicho',
   path: '/trabalhe-conosco/$nicho',
@@ -169,19 +169,19 @@ const ShowroomFitnessRoute = ShowroomFitnessRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoWhiteLabelRoute = DemoWhiteLabelRouteImport.update({
-  id: '/white-label',
-  path: '/white-label',
-  getParentRoute: () => DemoRoute,
+  id: '/demo/white-label',
+  path: '/demo/white-label',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const DemoClienteFinalRoute = DemoClienteFinalRouteImport.update({
-  id: '/cliente-final',
-  path: '/cliente-final',
-  getParentRoute: () => DemoRoute,
+  id: '/demo/cliente-final',
+  path: '/demo/cliente-final',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const DemoChecklistRoute = DemoChecklistRouteImport.update({
-  id: '/checklist',
-  path: '/checklist',
-  getParentRoute: () => DemoRoute,
+  id: '/demo/checklist',
+  path: '/demo/checklist',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ComoFuncionaFitnessRoute = ComoFuncionaFitnessRouteImport.update({
   id: '/como-funciona/fitness',
@@ -517,7 +517,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/contato': typeof ContatoRoute
-  '/demo': typeof DemoRouteWithChildren
   '/modulos': typeof ModulosRoute
   '/orcamento': typeof OrcamentoRoute
   '/planos': typeof PlanosRoute
@@ -553,6 +552,7 @@ export interface FileRoutesByFullPath {
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
+  '/demo/': typeof DemoIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
@@ -597,7 +597,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/contato': typeof ContatoRoute
-  '/demo': typeof DemoRouteWithChildren
   '/modulos': typeof ModulosRoute
   '/orcamento': typeof OrcamentoRoute
   '/planos': typeof PlanosRoute
@@ -626,6 +625,7 @@ export interface FileRoutesByTo {
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
+  '/demo': typeof DemoIndexRoute
   '/trabalhe-conosco': typeof TrabalheConoscoIndexRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
@@ -672,7 +672,6 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/contato': typeof ContatoRoute
-  '/demo': typeof DemoRouteWithChildren
   '/modulos': typeof ModulosRoute
   '/orcamento': typeof OrcamentoRoute
   '/planos': typeof PlanosRoute
@@ -708,6 +707,7 @@ export interface FileRoutesById {
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
+  '/demo/': typeof DemoIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/_authenticated/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/_authenticated/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
@@ -754,7 +754,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/contato'
-    | '/demo'
     | '/modulos'
     | '/orcamento'
     | '/planos'
@@ -790,6 +789,7 @@ export interface FileRouteTypes {
     | '/demo/white-label'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
+    | '/demo/'
     | '/trabalhe-conosco/'
     | '/agenda/appointments'
     | '/agenda/professionals'
@@ -834,7 +834,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/contato'
-    | '/demo'
     | '/modulos'
     | '/orcamento'
     | '/planos'
@@ -863,6 +862,7 @@ export interface FileRouteTypes {
     | '/demo/white-label'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
+    | '/demo'
     | '/trabalhe-conosco'
     | '/agenda/appointments'
     | '/agenda/professionals'
@@ -908,7 +908,6 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/contato'
-    | '/demo'
     | '/modulos'
     | '/orcamento'
     | '/planos'
@@ -944,6 +943,7 @@ export interface FileRouteTypes {
     | '/demo/white-label'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
+    | '/demo/'
     | '/trabalhe-conosco/'
     | '/_authenticated/agenda/appointments'
     | '/_authenticated/agenda/professionals'
@@ -990,7 +990,6 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ContatoRoute: typeof ContatoRoute
-  DemoRoute: typeof DemoRouteWithChildren
   ModulosRoute: typeof ModulosRoute
   OrcamentoRoute: typeof OrcamentoRoute
   PlanosRoute: typeof PlanosRoute
@@ -1000,8 +999,12 @@ export interface RootRouteChildren {
   SolucoesRoute: typeof SolucoesRoute
   TermosRoute: typeof TermosRoute
   ComoFuncionaFitnessRoute: typeof ComoFuncionaFitnessRoute
+  DemoChecklistRoute: typeof DemoChecklistRoute
+  DemoClienteFinalRoute: typeof DemoClienteFinalRoute
+  DemoWhiteLabelRoute: typeof DemoWhiteLabelRoute
   ShowroomFitnessRoute: typeof ShowroomFitnessRoute
   TrabalheConoscoNichoRoute: typeof TrabalheConoscoNichoRoute
+  DemoIndexRoute: typeof DemoIndexRoute
   TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
 }
 
@@ -1063,13 +1066,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ModulosRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/demo': {
-      id: '/demo'
-      path: '/demo'
-      fullPath: '/demo'
-      preLoaderRoute: typeof DemoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/contato': {
       id: '/contato'
       path: '/contato'
@@ -1105,6 +1101,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrabalheConoscoIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/demo/': {
+      id: '/demo/'
+      path: '/demo'
+      fullPath: '/demo/'
+      preLoaderRoute: typeof DemoIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/trabalhe-conosco/$nicho': {
       id: '/trabalhe-conosco/$nicho'
       path: '/trabalhe-conosco/$nicho'
@@ -1121,24 +1124,24 @@ declare module '@tanstack/react-router' {
     }
     '/demo/white-label': {
       id: '/demo/white-label'
-      path: '/white-label'
+      path: '/demo/white-label'
       fullPath: '/demo/white-label'
       preLoaderRoute: typeof DemoWhiteLabelRouteImport
-      parentRoute: typeof DemoRoute
+      parentRoute: typeof rootRouteImport
     }
     '/demo/cliente-final': {
       id: '/demo/cliente-final'
-      path: '/cliente-final'
+      path: '/demo/cliente-final'
       fullPath: '/demo/cliente-final'
       preLoaderRoute: typeof DemoClienteFinalRouteImport
-      parentRoute: typeof DemoRoute
+      parentRoute: typeof rootRouteImport
     }
     '/demo/checklist': {
       id: '/demo/checklist'
-      path: '/checklist'
+      path: '/demo/checklist'
       fullPath: '/demo/checklist'
       preLoaderRoute: typeof DemoChecklistRouteImport
-      parentRoute: typeof DemoRoute
+      parentRoute: typeof rootRouteImport
     }
     '/como-funciona/fitness': {
       id: '/como-funciona/fitness'
@@ -1770,26 +1773,11 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
-interface DemoRouteChildren {
-  DemoChecklistRoute: typeof DemoChecklistRoute
-  DemoClienteFinalRoute: typeof DemoClienteFinalRoute
-  DemoWhiteLabelRoute: typeof DemoWhiteLabelRoute
-}
-
-const DemoRouteChildren: DemoRouteChildren = {
-  DemoChecklistRoute: DemoChecklistRoute,
-  DemoClienteFinalRoute: DemoClienteFinalRoute,
-  DemoWhiteLabelRoute: DemoWhiteLabelRoute,
-}
-
-const DemoRouteWithChildren = DemoRoute._addFileChildren(DemoRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ContatoRoute: ContatoRoute,
-  DemoRoute: DemoRouteWithChildren,
   ModulosRoute: ModulosRoute,
   OrcamentoRoute: OrcamentoRoute,
   PlanosRoute: PlanosRoute,
@@ -1799,10 +1787,24 @@ const rootRouteChildren: RootRouteChildren = {
   SolucoesRoute: SolucoesRoute,
   TermosRoute: TermosRoute,
   ComoFuncionaFitnessRoute: ComoFuncionaFitnessRoute,
+  DemoChecklistRoute: DemoChecklistRoute,
+  DemoClienteFinalRoute: DemoClienteFinalRoute,
+  DemoWhiteLabelRoute: DemoWhiteLabelRoute,
   ShowroomFitnessRoute: ShowroomFitnessRoute,
   TrabalheConoscoNichoRoute: TrabalheConoscoNichoRoute,
+  DemoIndexRoute: DemoIndexRoute,
   TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
