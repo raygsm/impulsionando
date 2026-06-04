@@ -125,15 +125,23 @@ export function HomePage() {
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {MODULES.map(({ icon: Icon, title, desc }) => (
-              <Card key={title} className="p-6 hover:shadow-elegant transition-shadow">
-                <div className="w-10 h-10 rounded-md bg-gradient-primary flex items-center justify-center text-primary-foreground mb-4">
-                  <Icon className="w-5 h-5" />
-                </div>
-                <div className="font-semibold tracking-tight">{title}</div>
-                <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{desc}</p>
-              </Card>
-            ))}
+            {MODULES.map(({ icon: Icon, title, desc, status }) => {
+              const badge = STATUS_BADGE[status];
+              return (
+                <Card key={title} className="p-6 hover:shadow-elegant transition-shadow">
+                  <div className="flex items-start justify-between gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-md bg-gradient-primary flex items-center justify-center text-primary-foreground">
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${badge.className}`}>
+                      {badge.label}
+                    </span>
+                  </div>
+                  <div className="font-semibold tracking-tight">{title}</div>
+                  <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{desc}</p>
+                </Card>
+              );
+            })}
           </div>
           <div className="mt-10">
             <Button asChild variant="outline" size="lg" className="gap-2">
