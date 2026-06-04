@@ -77,9 +77,9 @@ function ItemLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
 function DesktopDropdown({ label, items }: { label: string; items: NavItem[] }) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-md inline-flex items-center gap-1 outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      <DropdownMenuTrigger className="px-3 py-2.5 lg:px-4 lg:py-3 text-sm lg:text-[15px] text-muted-foreground hover:text-foreground transition-colors rounded-md inline-flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-ring">
         {label}
-        <ChevronDown className="w-3.5 h-3.5" />
+        <ChevronDown className="w-4 h-4" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-80">
         {items.map((it) => (
