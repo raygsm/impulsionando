@@ -77,9 +77,9 @@ function ItemLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
 function DesktopDropdown({ label, items }: { label: string; items: NavItem[] }) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-md inline-flex items-center gap-1 outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      <DropdownMenuTrigger className="px-3 py-2.5 lg:px-4 lg:py-3 text-sm lg:text-[15px] text-muted-foreground hover:text-foreground transition-colors rounded-md inline-flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-ring">
         {label}
-        <ChevronDown className="w-3.5 h-3.5" />
+        <ChevronDown className="w-4 h-4" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-80">
         {items.map((it) => (
@@ -107,10 +107,10 @@ export function PublicHeader() {
           />
         </Link>
 
-        <nav className="hidden lg:flex items-center gap-1">
+        <nav className="hidden lg:flex items-center gap-2">
           <Link
             to="/"
-            className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-md"
+            className="px-3 py-3 text-[15px] text-muted-foreground hover:text-foreground transition-colors rounded-md"
             activeProps={{ className: "text-foreground font-medium" }}
             activeOptions={{ exact: true }}
           >
@@ -120,14 +120,14 @@ export function PublicHeader() {
           <DesktopDropdown label="Demonstrações" items={DEMOS} />
           <Link
             to="/planos"
-            className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-md"
+            className="px-3 py-3 text-[15px] text-muted-foreground hover:text-foreground transition-colors rounded-md"
             activeProps={{ className: "text-foreground font-medium" }}
           >
             Planos
           </Link>
           <Link
             to="/orcamento"
-            className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-md"
+            className="px-3 py-3 text-[15px] text-muted-foreground hover:text-foreground transition-colors rounded-md"
             activeProps={{ className: "text-foreground font-medium" }}
           >
             Orçamento
@@ -135,23 +135,23 @@ export function PublicHeader() {
           <DesktopDropdown label="Empresa" items={EMPRESA} />
         </nav>
 
-        <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+        <div className="flex items-center gap-2 lg:gap-3">
+          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex lg:h-10 lg:px-4 lg:text-[15px]">
             <Link to="/auth">Entrar</Link>
           </Button>
           <Button
             asChild
             size="sm"
-            className="gap-2 bg-gradient-primary shadow-elegant hover:shadow-card-hover hidden md:inline-flex"
+            className="gap-2 bg-gradient-primary shadow-elegant hover:shadow-card-hover hidden md:inline-flex lg:h-10 lg:px-5 lg:text-[15px]"
           >
             <Link to="/demo">
-              <PlayCircle className="w-4 h-4" />
+              <PlayCircle className="w-4 h-4 lg:w-[18px] lg:h-[18px]" />
               <span>Demonstração</span>
             </Link>
           </Button>
-          <Button asChild size="sm" className="btn-whatsapp gap-2 hidden md:inline-flex">
+          <Button asChild size="sm" className="btn-whatsapp gap-2 hidden md:inline-flex lg:h-10 lg:px-5 lg:text-[15px]">
             <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-              <MessageCircle className="w-4 h-4" />
+              <MessageCircle className="w-4 h-4 lg:w-[18px] lg:h-[18px]" />
               <span className="hidden lg:inline">WhatsApp</span>
             </a>
           </Button>
