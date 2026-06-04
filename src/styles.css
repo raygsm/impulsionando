@@ -134,4 +134,13 @@
   .bg-gradient-primary { background: var(--gradient-primary); }
   .shadow-elegant { box-shadow: var(--shadow-elegant); }
   .shadow-card { box-shadow: var(--shadow-card); }
+
+  /* WhatsApp brand button — sempre verde com texto branco. */
+  .btn-whatsapp {
+    background-color: #25D366 !important;
+    color: #ffffff !important;
+    border-color: #25D366 !important;
+  }
+  .btn-whatsapp:hover { background-color: #1ebe5d !important; border-color: #1ebe5d !important; }
+  .btn-whatsapp svg { color: #ffffff !important; }
 }
