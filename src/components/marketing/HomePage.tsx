@@ -1,13 +1,15 @@
 import { Link } from "@tanstack/react-router";
 import {
   MessageCircle, ArrowRight, CheckCircle2, Sparkles,
-  Building2, Store, Info,
+  Building2, Store, Info, Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PublicHeader } from "./PublicHeader";
 import { PublicFooter } from "./PublicFooter";
 import { MODULE_DETAILS } from "./moduleDetails";
+import { NICHO_DETAILS } from "./nichoDetails";
+import { WhatsAppBlock } from "./WhatsAppBlock";
 
 const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20falar%20com%20a%20Impulsionando%20Tecnologia%20sobre%20m%C3%B3dulos%2C%20automa%C3%A7%C3%A3o%2C%20agenda%20online%2C%20WhatsApp%2C%20CRM%20ou%20sistemas%20personalizados.";
 
