@@ -63,7 +63,7 @@ export const Route = createFileRoute("/modulos/$slug")({
 });
 
 function ModulePage() {
-  const { mod } = Route.useLoaderData();
+  const { mod } = Route.useLoaderData() as { mod: ModuleDetail };
   const Icon = mod.icon;
   const waUrl =
     WHATSAPP_BASE + encodeURIComponent(mod.title) + "%20da%20Impulsionando.";
