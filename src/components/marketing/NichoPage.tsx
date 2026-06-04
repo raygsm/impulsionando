@@ -160,7 +160,7 @@ export function NichoPage({ nicho }: Props) {
                 ))}
               </div>
               <div className="flex flex-wrap gap-2">
-                <Button asChild size="sm" className="bg-gradient-primary gap-2">
+                <Button asChild size="sm" className="btn-whatsapp gap-2">
                   <a href={ctaWaUrl(ab.cta)} target="_blank" rel="noopener noreferrer">
                     <MessageCircle className="w-4 h-4" />
                     {ab.cta}
