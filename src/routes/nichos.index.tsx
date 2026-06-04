@@ -148,7 +148,7 @@ function NichosIndex() {
               modelo de negócio.
             </p>
             <div className="flex flex-wrap gap-2 pt-2">
-              <Button asChild size="lg" className="gap-2 bg-white text-primary hover:bg-white/90">
+              <Button asChild size="lg" className="btn-whatsapp gap-2 shadow-lg">
                 <a href={WA_HOME} target="_blank" rel="noopener noreferrer">
                   <MessageCircle className="w-4 h-4" /> Falar no WhatsApp
                 </a>
