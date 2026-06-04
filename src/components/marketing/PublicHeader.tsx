@@ -190,16 +190,12 @@ export function PublicHeader() {
                   </p>
                   <div className="flex flex-col gap-2">
                     {DEMOS.map((it) => (
-                      <Link
-                        key={it.to}
-                        to={it.to}
-                        onClick={() => setMobileOpen(false)}
-                        className="text-sm text-foreground/90 hover:text-foreground"
-                      >
-                        {it.label}
-                      </Link>
+                      <div key={it.to + it.label} className="text-sm text-foreground/90 hover:text-foreground">
+                        <ItemLink item={it} onClick={() => setMobileOpen(false)} />
+                      </div>
                     ))}
                   </div>
+
                 </div>
 
                 <Link
