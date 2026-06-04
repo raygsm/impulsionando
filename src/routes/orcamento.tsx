@@ -209,6 +209,7 @@ const PERFIL = [
 ] as const;
 
 interface Answers {
+  categoria: string;
   segmento: string;
   tamanho: string;
   unidades: string;
@@ -218,6 +219,7 @@ interface Answers {
 }
 
 const INITIAL: Answers = {
+  categoria: "",
   segmento: "",
   tamanho: "",
   unidades: "",
