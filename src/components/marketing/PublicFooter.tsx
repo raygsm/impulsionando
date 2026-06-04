@@ -56,7 +56,7 @@ export function PublicFooter() {
       <div className="border-t border-border">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 text-xs text-muted-foreground flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>© {new Date().getFullYear()} Impulsionando Tecnologia. Todos os direitos reservados.</span>
-          <span>Tecnologia aplicada a negócios reais.</span>
+          <span className="font-medium text-foreground">O limite é onde você quiser chegar.</span>
         </div>
       </div>
     </footer>

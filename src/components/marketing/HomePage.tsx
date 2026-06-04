@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import {
   MessageCircle, ArrowRight, CheckCircle2, Sparkles,
-  Building2, Store, Info, Target,
+  Info, Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -45,39 +45,79 @@ export function HomePage() {
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
           <div className="max-w-3xl space-y-6">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur px-3 py-1 text-xs">
-              <Sparkles className="w-3.5 h-3.5" /> Plataforma modular para negócios reais
+              <Sparkles className="w-3.5 h-3.5" /> Impulsionando Tecnologia · Grupo Impulsionando
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight">
-              Tecnologia, automação e sistemas inteligentes para empresas que precisam crescer com controle.
+              Sistemas inteligentes para empresas que querem crescer com controle.
             </h1>
-            <p className="text-lg text-white/80 max-w-2xl leading-relaxed">
-              A Impulsionando Tecnologia cria soluções digitais modulares para atendimento, agenda online, WhatsApp, CRM, afiliados, pagamentos, emissão fiscal, relatórios, integrações e gestão operacional.
+            <p className="text-lg text-white/85 max-w-2xl leading-relaxed">
+              A Impulsionando Tecnologia cria plataformas, CRMs, agendas, automações, dashboards, áreas administrativas, integrações e sistemas modulares para transformar processos em operação real.
+            </p>
+            <p className="text-base font-semibold text-accent">
+              O limite é onde você quiser chegar.
             </p>
             <div className="flex flex-wrap gap-3 pt-2">
               <Button asChild size="lg" className="gap-2 bg-white text-primary hover:bg-white/90">
-                <Link to="/demo/white-label">
-                  <Building2 className="w-4 h-4" /> Demo White Label <ArrowRight className="w-4 h-4" />
-                </Link>
+                <Link to="/orcamento">Quero criar meu sistema <ArrowRight className="w-4 h-4" /></Link>
               </Button>
               <Button asChild size="lg" className="gap-2 bg-accent text-accent-foreground hover:bg-accent/90">
-                <Link to="/demo/cliente-final">
-                  <Store className="w-4 h-4" /> Demo Cliente Final <ArrowRight className="w-4 h-4" />
-                </Link>
+                <Link to="/demo">Solicitar demonstração <ArrowRight className="w-4 h-4" /></Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="gap-2 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white">
+              <Button asChild size="lg" className="btn-whatsapp gap-2">
                 <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
                   <MessageCircle className="w-4 h-4" /> Falar no WhatsApp
                 </a>
               </Button>
-              <Button asChild size="lg" variant="ghost" className="gap-2 text-white hover:bg-white/10 hover:text-white">
-                <Link to="/orcamento">Montar orçamento <ArrowRight className="w-4 h-4" /></Link>
-              </Button>
             </div>
             <p className="text-xs text-white/70 pt-1">
-              Acesso livre, sem cadastro. Escolha a trilha que combina com o seu objetivo.
+              Acesso livre às demos, sem cadastro. Se você busca marketing digital, conheça a{" "}
+              <a href="https://impulsionandobrasil.com.br" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">
+                Impulsionando Brasil
+              </a>.
             </p>
           </div>
         </div>
+      </section>
+
+      {/* DIRECIONAMENTO MARKETING vs SISTEMAS */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-3xl mb-8">
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+            Você procura marketing digital ou um sistema completo para sua operação?
+          </h2>
+        </div>
+        <div className="grid md:grid-cols-2 gap-5">
+          <Card className="p-7 flex flex-col">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Impulsionando Brasil</div>
+            <div className="text-xl font-semibold tracking-tight">Marketing, estratégia e crescimento</div>
+            <p className="text-sm text-muted-foreground mt-3 leading-relaxed flex-1">
+              Social Media, Tráfego Pago, Google Ads, Assessoria de Marketing Digital e Empresarial, funis,
+              jornadas, lançamentos de produtos e marcas, CRM estratégico, automação no WhatsApp,
+              posicionamento e estruturação comercial.
+            </p>
+            <Button asChild variant="outline" className="mt-5 gap-2">
+              <a href="https://impulsionandobrasil.com.br" target="_blank" rel="noopener noreferrer">
+                Acessar Impulsionando Brasil <ArrowRight className="w-4 h-4" />
+              </a>
+            </Button>
+          </Card>
+          <Card className="p-7 flex flex-col border-primary shadow-elegant ring-1 ring-primary/20">
+            <div className="text-xs uppercase tracking-wider text-primary mb-2">Impulsionando Tecnologia · você está aqui</div>
+            <div className="text-xl font-semibold tracking-tight">Sistemas, plataformas e automação</div>
+            <p className="text-sm text-muted-foreground mt-3 leading-relaxed flex-1">
+              Criamos sistemas completos, modulares, inteligentes e adaptados à realidade da sua operação:
+              CRM, agenda online, WhatsApp automatizado, checkout, PDV, dashboards, áreas administrativas
+              e integrações sob medida.
+            </p>
+            <Button asChild className="mt-5 gap-2">
+              <Link to="/orcamento">Quero criar meu sistema <ArrowRight className="w-4 h-4" /></Link>
+            </Button>
+          </Card>
+        </div>
+        <p className="text-sm text-muted-foreground mt-6 max-w-3xl leading-relaxed">
+          Estratégia sem sistema vira intenção. Sistema sem estratégia vira ferramenta solta.
+          Quando os dois caminham juntos, o negócio ganha controle, escala e previsibilidade.
+        </p>
       </section>
 
       {/* PAINS */}
