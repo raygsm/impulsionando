@@ -107,24 +107,37 @@ export function HomePage() {
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {MODULES.map(({ icon: Icon, title, desc, status }) => {
-              const badge = STATUS_BADGE[status];
+            {MODULE_DETAILS.map((mod) => {
+              const Icon = mod.icon;
               return (
-                <Card key={title} className="p-6 hover:shadow-elegant transition-shadow">
+                <Card key={mod.id} className="p-6 hover:shadow-elegant transition-shadow flex flex-col">
                   <div className="flex items-start justify-between gap-3 mb-4">
                     <div className="w-10 h-10 rounded-md bg-gradient-primary flex items-center justify-center text-primary-foreground">
                       <Icon className="w-5 h-5" />
                     </div>
-                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${badge.className}`}>
-                      {badge.label}
+                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${mod.badge.className}`}>
+                      {mod.badge.label}
                     </span>
                   </div>
-                  <div className="font-semibold tracking-tight">{title}</div>
-                  <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{desc}</p>
+                  <div className="font-semibold tracking-tight">{mod.title}</div>
+                  <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed flex-1">{mod.desc}</p>
+                  <div className="mt-4">
+                    <ModuleDetailDialog
+                      module={mod}
+                      trigger={
+                        <Button variant="outline" size="sm" className="w-full gap-1.5 group">
+                          <Info className="w-3.5 h-3.5" />
+                          SAIBA MAIS
+                          <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
+                        </Button>
+                      }
+                    />
+                  </div>
                 </Card>
               );
             })}
           </div>
+
           <div className="mt-10">
             <Button asChild variant="outline" size="lg" className="gap-2">
               <Link to="/modulos">Ver todos os módulos <ArrowRight className="w-4 h-4" /></Link>
