@@ -693,7 +693,7 @@ function buildPrefill(s: SearchParams): { answers: Answers; firstStep: number; h
   }
 
   // Find first unanswered step
-  const order: (keyof Answers)[] = ["perfil", "segmento", "tamanho", "unidades", "dores", "urgencia"];
+  const order: (keyof Answers)[] = ["perfil", "categoria", "segmento", "tamanho", "unidades", "dores", "urgencia"];
   let firstStep = 0;
   for (let i = 0; i < order.length; i++) {
     const k = order[i];
