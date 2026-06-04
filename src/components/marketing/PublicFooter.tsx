@@ -32,6 +32,7 @@ export function PublicFooter() {
             <li><Link to="/modulos" className="hover:text-foreground">Módulos</Link></li>
             <li><Link to="/planos" className="hover:text-foreground">Planos</Link></li>
             <li><Link to="/orcamento" className="hover:text-foreground">Orçamento automático</Link></li>
+            <li><Link to="/sobre" className="hover:text-foreground">Sobre</Link></li>
             <li><Link to="/contato" className="hover:text-foreground">Contato</Link></li>
           </ul>
         </div>
@@ -45,6 +46,7 @@ export function PublicFooter() {
               </Link>
             </li>
             <li><Link to="/showroom/fitness" className="hover:text-foreground">Showroom Fitness</Link></li>
+            <li><Link to="/showroom/eventos" className="hover:text-foreground">Showroom Eventos</Link></li>
             <li><Link to="/como-funciona/fitness" className="hover:text-foreground">Como funciona (Fitness)</Link></li>
             <li><Link to="/trabalhe-conosco" className="hover:text-foreground">Trabalhe conosco</Link></li>
             <li><Link to="/termos" className="hover:text-foreground">Termos de Uso</Link></li>
