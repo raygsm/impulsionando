@@ -14,12 +14,18 @@ import logoAsset from "@/assets/logo-impulsionando.png.asset.json";
 const WHATSAPP_URL =
   "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20falar%20com%20a%20Impulsionando%20Tecnologia%20sobre%20m%C3%B3dulos%2C%20automa%C3%A7%C3%A3o%2C%20agenda%20online%2C%20WhatsApp%2C%20CRM%20ou%20sistemas%20personalizados.";
 
-type NavItem = { to: string; label: string; desc?: string };
+type NavItem = { to: string; label: string; desc?: string; external?: boolean };
 
 const SOLUCOES: NavItem[] = [
   { to: "/solucoes", label: "Visão geral de soluções", desc: "Como combinamos módulos para sua operação" },
   { to: "/modulos", label: "Módulos da plataforma", desc: "Agenda, CRM, PDV, checkout, automação e mais" },
   { to: "/nichos", label: "Soluções por nicho", desc: "Saúde, alimentação, serviços, e-commerce, fitness…" },
+  {
+    to: "https://impulsionandobrasil.com.br",
+    label: "Marketing (Impulsionando Brasil) ↗",
+    desc: "Tráfego, social media, funis e estratégia",
+    external: true,
+  },
 ];
 
 const DEMOS: NavItem[] = [
@@ -32,12 +38,41 @@ const DEMOS: NavItem[] = [
 ];
 
 const EMPRESA: NavItem[] = [
-  { to: "/sobre", label: "Sobre a Impulsionando" },
+  { to: "/sobre", label: "Sobre o Grupo Impulsionando" },
   { to: "/trabalhe-conosco", label: "Trabalhe conosco" },
   { to: "/contato", label: "Contato" },
+  {
+    to: "https://impulsionandobrasil.com.br",
+    label: "Impulsionando Brasil ↗",
+    desc: "Site de marketing do grupo",
+    external: true,
+  },
   { to: "/privacidade", label: "Privacidade (LGPD)" },
   { to: "/termos", label: "Termos de uso" },
 ];
+
+function ItemLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
+  if (item.external) {
+    return (
+      <a
+        href={item.to}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={onClick}
+        className="flex flex-col items-start gap-0.5 py-2 cursor-pointer w-full"
+      >
+        <span className="text-sm font-medium text-foreground">{item.label}</span>
+        {item.desc && <span className="text-xs text-muted-foreground">{item.desc}</span>}
+      </a>
+    );
+  }
+  return (
+    <Link to={item.to} onClick={onClick} className="flex flex-col items-start gap-0.5 py-2 cursor-pointer w-full">
+      <span className="text-sm font-medium text-foreground">{item.label}</span>
+      {item.desc && <span className="text-xs text-muted-foreground">{item.desc}</span>}
+    </Link>
+  );
+}
 
 function DesktopDropdown({ label, items }: { label: string; items: NavItem[] }) {
   return (
@@ -48,17 +83,15 @@ function DesktopDropdown({ label, items }: { label: string; items: NavItem[] }) 
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-80">
         {items.map((it) => (
-          <DropdownMenuItem key={it.to} asChild>
-            <Link to={it.to} className="flex flex-col items-start gap-0.5 py-2 cursor-pointer">
-              <span className="text-sm font-medium text-foreground">{it.label}</span>
-              {it.desc && <span className="text-xs text-muted-foreground">{it.desc}</span>}
-            </Link>
+          <DropdownMenuItem key={it.to + it.label} asChild>
+            <ItemLink item={it} />
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
+
 
 export function PublicHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
