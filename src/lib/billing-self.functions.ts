@@ -166,3 +166,37 @@ export const openMyPortal = createServerFn({ method: "POST" })
       subscriptionUrls: session?.urls?.subscriptions ?? [],
     };
   });
+
+// ============================================================================
+// POST — reativar assinatura (remove cancelamento agendado)
+// ============================================================================
+export const reactivateMySubscription = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const sub = await loadMySubscription(context.userId);
+    if (sub.user_id !== context.userId) throw new Error("Acesso negado");
+    if (!sub.cancel_at_period_end) return { ok: true, alreadyActive: true };
+    if (sub.status === "canceled") {
+      throw new Error("Assinatura já encerrada — assine novamente em /planos");
+    }
+
+    const env = sub.environment as "sandbox" | "live";
+    const { getPaddleClient } = await import("@/lib/paddle.server");
+    const paddle = getPaddleClient(env);
+    try {
+      // Remove o scheduledChange (cancelamento agendado)
+      await paddle.subscriptions.update(sub.paddle_subscription_id, {
+        scheduledChange: null as any,
+      });
+    } catch (e: any) {
+      throw new Error("Falha ao reativar: " + (e?.message ?? e));
+    }
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin
+      .from("subscriptions")
+      .update({ cancel_at_period_end: false, updated_at: new Date().toISOString() })
+      .eq("id", sub.id);
+
+    return { ok: true };
+  });
