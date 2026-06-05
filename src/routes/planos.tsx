@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowRight, MessageCircle, Sparkles, CheckCircle2, Minus, HelpCircle, Star,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
@@ -275,15 +276,21 @@ function PlanosPage() {
                       className={cn("w-full", plan.highlight && "bg-gradient-primary shadow-elegant")}
                       variant={plan.highlight ? "default" : "outline"}
                       disabled={checkoutLoading}
-                      onClick={() =>
-                        openCheckout({
-                          priceId: PRICE_IDS[plan.name][annual ? "annual" : "monthly"],
-                          customerEmail: user?.user?.email ?? undefined,
-                          customData: user?.user?.id
-                            ? { userId: user.user.id, plan: plan.name }
-                            : { plan: plan.name },
-                        })
-                      }
+                      onClick={async () => {
+                        try {
+                          await openCheckout({
+                            priceId: PRICE_IDS[plan.name][annual ? "annual" : "monthly"],
+                            customerEmail: user?.user?.email ?? undefined,
+                            customData: user?.user?.id
+                              ? { userId: user.user.id, plan: plan.name }
+                              : { plan: plan.name },
+                          });
+                        } catch {
+                          toast.error(
+                            "Não foi possível abrir o checkout no momento. Inicie um Trial de 7 dias ou fale com nosso time pelo WhatsApp."
+                          );
+                        }
+                      }}
                     >
                       {checkoutLoading ? "Abrindo checkout..." : `Assinar ${annual ? "anual" : "mensal"}`}
                     </Button>
