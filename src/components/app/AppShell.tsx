@@ -16,8 +16,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { data, isLoading, error } = useCurrentUser();
-  const { isSuspended: trialSuspended } = useMyTrial();
-  const { isSuspended: subSuspended } = useSubscription();
+  const { isSuspended: trialSuspended, isActive: trialActive } = useMyTrial();
+  const { isSuspended: subSuspended, isActive: subActive } = useSubscription();
   const { hasModule, bypass, isLoading: modulesLoading } = useCompanyModules();
 
   useEffect(() => {
@@ -38,18 +38,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     if (!allowed) navigate({ to: "/minha-assinatura" });
   }, [isSuspended, location.pathname, navigate]);
 
-  // Gate por módulo: bloqueia rotas cujo módulo não está habilitado
+  // Gate por módulo: aplicado APENAS para assinantes pagantes ativos.
+  // Durante trial ativo (sem assinatura), todos os módulos ficam acessíveis.
+  // Sem trial nem assinatura, o usuário cai no fluxo de /planos.
   useEffect(() => {
     if (bypass || modulesLoading || isSuspended) return;
+    if (!subActive) return; // não bloqueia trial ou sem-assinatura aqui
     const required = requiredModuleFor(location.pathname);
     if (!required) return;
     if (!hasModule(required)) {
-      navigate({
-        to: "/planos",
-        search: { locked: required } as never,
-      });
+      navigate({ to: "/planos", search: { locked: required } as never });
     }
-  }, [bypass, modulesLoading, isSuspended, location.pathname, hasModule, navigate]);
+  }, [bypass, modulesLoading, isSuspended, subActive, location.pathname, hasModule, navigate]);
+
 
   useEffect(() => {
     if (error) console.error("[AppShell] failed to load current user", error);
