@@ -153,9 +153,15 @@ async function resolveOrCreateUser(
   const name = cust?.name ?? null;
   if (!email) return { userId: null, isNew: false, email: null, name: null };
 
-  // Try to find existing user by email (list-based; ok at this scale)
-  const { data: existing } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
-  const found = existing?.users?.find((u: any) => u.email?.toLowerCase() === email);
+  // Try to find existing user by email — paginate to handle >1000 users.
+  let found: any = null;
+  for (let page = 1; page <= 20; page++) {
+    const { data: list } = await supabase.auth.admin.listUsers({ page, perPage: 1000 });
+    const users = list?.users ?? [];
+    found = users.find((u: any) => u.email?.toLowerCase() === email);
+    if (found) break;
+    if (users.length < 1000) break; // last page
+  }
   if (found) return { userId: found.id, isNew: false, email, name };
 
   // Create user; email confirmed automatically since the purchase verifies ownership.
