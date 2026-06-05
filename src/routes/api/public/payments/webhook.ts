@@ -129,8 +129,8 @@ async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
             modRows.map((m: any) => ({
               company_id: trial.company_id,
               module_id: m.id,
-              enabled: true,
-              activated_at: new Date().toISOString(),
+              is_enabled: true,
+              enabled_at: new Date().toISOString(),
             })),
             { onConflict: "company_id,module_id" }
           );
@@ -138,16 +138,11 @@ async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
       }
     }
 
-    await enqueueTemplate(supabase, "payment_approved_email", userId, { productId, priceId, subscriptionId: id });
-    await enqueueTemplate(supabase, "payment_approved_whatsapp", userId, { productId, priceId, subscriptionId: id });
+    const companyId = (trial as any)?.company_id ?? null;
+    await enqueueTemplate(supabase, "payment_approved", "email", userId, companyId, { productId, priceId, subscriptionId: id });
+    await enqueueTemplate(supabase, "payment_approved", "whatsapp", userId, companyId, { productId, priceId, subscriptionId: id });
 
-    await notifyStaff(supabase, "Nova assinatura ativada", `Plano ${productId} • ${priceId}`, {
-      userId,
-      subscriptionId: id,
-      productId,
-      priceId,
-      environment: env,
-    });
+    await notifyStaff(supabase, "Nova assinatura ativada", `Plano ${productId} • ${priceId} • user ${userId}`, companyId);
   } catch (e) {
     console.error("[paddle] post-subscription logic failed", e);
   }
