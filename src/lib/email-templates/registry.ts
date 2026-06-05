@@ -19,4 +19,5 @@ export interface TemplateEntry {
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'site-down': siteDownTemplate,
   'site-up': siteUpTemplate,
+  'marketing-lead-new': marketingLeadNewTemplate,
 }
