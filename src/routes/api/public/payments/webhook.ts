@@ -235,43 +235,31 @@ async function handleSubscriptionCanceled(data: any, env: PaddleEnv) {
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
-  const companyId = (trial as any)?.company_id;
+  const companyId = (trial as any)?.company_id ?? null;
   if (companyId) {
-    await supabase.from("company_modules").update({ enabled: false }).eq("company_id", companyId);
+    await supabase.from("company_modules").update({ is_enabled: false }).eq("company_id", companyId);
   }
 
-  await enqueueTemplate(supabase, "subscription_canceled_email", userId, { subscriptionId: data.id });
-  await notifyStaff(supabase, "Assinatura cancelada", `User ${userId} • ${(sub as any)?.product_id ?? ""}`, {
-    userId,
-    subscriptionId: data.id,
-    environment: env,
-  });
+  await enqueueTemplate(supabase, "subscription_canceled", "email", userId, companyId, { subscriptionId: data.id });
+  await enqueueTemplate(supabase, "subscription_canceled", "whatsapp", userId, companyId, { subscriptionId: data.id });
+  await notifyStaff(supabase, "Assinatura cancelada", `User ${userId} • ${(sub as any)?.product_id ?? ""}`, companyId);
 }
 
 async function handleTransactionCompleted(data: any, env: PaddleEnv) {
   const supabase = getSupabase();
   const total = data.details?.totals?.total ?? data.payments?.[0]?.amount ?? "0";
-  const currency = data.currencyCode ?? "BRL";
   const amount = Number(total) / 100;
-  await registerRevenue(supabase, amount, currency, `Paddle txn ${data.id}`, {
-    transactionId: data.id,
-    subscriptionId: data.subscriptionId,
-    customerId: data.customerId,
-    environment: env,
-  });
+  await registerRevenue(supabase, amount, `Paddle txn ${data.id} (${env})`, data.id);
 }
 
 async function handleTransactionPaymentFailed(data: any, env: PaddleEnv) {
   const supabase = getSupabase();
   const userId = data.customData?.userId;
   if (userId) {
-    await enqueueTemplate(supabase, "payment_failed_email", userId, { transactionId: data.id });
-    await enqueueTemplate(supabase, "payment_failed_whatsapp", userId, { transactionId: data.id });
+    await enqueueTemplate(supabase, "payment_failed", "email", userId, null, { transactionId: data.id });
+    await enqueueTemplate(supabase, "payment_failed", "whatsapp", userId, null, { transactionId: data.id });
   }
-  await notifyStaff(supabase, "Falha de pagamento", `Transação ${data.id}`, {
-    transactionId: data.id,
-    environment: env,
-  });
+  await notifyStaff(supabase, "Falha de pagamento", `Transação ${data.id} (${env})`, null);
 }
 
 async function handleWebhook(req: Request, env: PaddleEnv) {
