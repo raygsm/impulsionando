@@ -113,18 +113,25 @@ function EhrDetail() {
           <ArrowLeft className="w-3.5 h-3.5" /> Voltar
         </Link>
       </div>
-      <PageHeader
-        title={record?.customers?.name ?? "Prontuário"}
-        description={
-          record?.customers
-            ? [
-                record.customers.document,
-                record.customers.phone,
-                record.customers.email,
-              ].filter(Boolean).join(" • ")
-            : "Carregando…"
-        }
-      />
+      <div className="flex items-start justify-between gap-3 mb-2">
+        <PageHeader
+          title={record?.customers?.name ?? "Prontuário"}
+          description={
+            record?.customers
+              ? [
+                  record.customers.document,
+                  record.customers.phone,
+                  record.customers.email,
+                ].filter(Boolean).join(" • ")
+              : "Carregando…"
+          }
+        />
+        <PatientAccessButton
+          recordId={id}
+          customer={record?.customers}
+          onChange={() => qc.invalidateQueries({ queryKey: ["ehr-record", id] })}
+        />
+      </div>
 
       <Tabs defaultValue="timeline">
         <TabsList>
