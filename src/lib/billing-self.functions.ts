@@ -17,12 +17,21 @@ const PLAN_RANK: Record<string, number> = {
   avancado_plan: 3,
 };
 
+function resolveEnvFromRequest(): "sandbox" | "live" {
+  // Determina o env a partir do client token shipped no servidor (mesmo valor do bundle).
+  // Fallback: sandbox.
+  const token = process.env.VITE_PAYMENTS_CLIENT_TOKEN ?? "";
+  return token.startsWith("test_") ? "sandbox" : token.startsWith("live_") ? "live" : "sandbox";
+}
+
 async function loadMySubscription(userId: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const env = resolveEnvFromRequest();
   const { data, error } = await supabaseAdmin
     .from("subscriptions")
     .select("*")
     .eq("user_id", userId)
+    .eq("environment", env)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -47,10 +56,12 @@ export const getMySubscription = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const env = resolveEnvFromRequest();
     const { data, error } = await supabaseAdmin
       .from("subscriptions")
       .select("*")
       .eq("user_id", context.userId)
+      .eq("environment", env)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
