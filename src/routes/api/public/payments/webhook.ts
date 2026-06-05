@@ -69,17 +69,21 @@ async function notifyStaff(
   message: string,
   companyId: string | null
 ) {
-  // Notifica todos os usuários da empresa master (super admin + staff)
+  // Notifica apenas super-admins e staff da empresa master Impulsionando.
+  // Filtra por slug do profile + is_master=true na companhia para evitar
+  // over-match com clientes que tenham um profile is_master_profile próprio.
   const { data: staff } = await supabase
     .from("user_profiles")
-    .select("user_id, profiles!inner(slug, is_master_profile)")
-    .eq("is_active", true);
+    .select("user_id, profiles!inner(slug, is_master_profile), companies!inner(is_master)")
+    .eq("is_active", true)
+    .eq("profiles.is_master_profile", true)
+    .in("profiles.slug", ["super-admin-impulsionando", "staff-impulsionando"])
+    .eq("companies.is_master", true);
 
-  const masterUsers = (staff ?? []).filter((s: any) => s.profiles?.is_master_profile);
-  if (!masterUsers.length) return;
+  if (!staff?.length) return;
 
   const seen = new Set<string>();
-  const rows = masterUsers
+  const rows = staff
     .filter((s: any) => {
       if (seen.has(s.user_id)) return false;
       seen.add(s.user_id);
