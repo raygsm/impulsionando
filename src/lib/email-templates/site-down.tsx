@@ -12,7 +12,7 @@ interface Props {
 const Email = ({ url, error, status, detectedAt }: Props) => (
   <Html lang="pt-BR" dir="ltr">
     <Head />
-    <Preview>Alerta: {url} está fora do ar</Preview>
+    <Preview>{`Alerta: ${url ?? 'site'} está fora do ar`}</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>🚨 Site fora do ar</Heading>

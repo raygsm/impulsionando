@@ -12,7 +12,7 @@ interface Props {
 const Email = ({ url, downSince, recoveredAt, downtimeMinutes }: Props) => (
   <Html lang="pt-BR" dir="ltr">
     <Head />
-    <Preview>Resolvido: {url} voltou ao ar</Preview>
+    <Preview>{`Resolvido: ${url ?? 'site'} voltou ao ar`}</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>✅ Site voltou ao ar</Heading>
