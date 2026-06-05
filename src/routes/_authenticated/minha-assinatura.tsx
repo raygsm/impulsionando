@@ -169,9 +169,20 @@ function MinhaAssinaturaPage() {
             </div>
           </div>
           <div className="flex gap-2 flex-wrap">
-            <Button onClick={() => setChangeOpen(true)} disabled={!isActive || willCancel}>
-              Trocar de plano
-            </Button>
+            {willCancel ? (
+              <Button
+                onClick={() => mReactivate.mutate()}
+                disabled={mReactivate.isPending}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              >
+                {mReactivate.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
+                Reativar assinatura
+              </Button>
+            ) : (
+              <Button onClick={() => setChangeOpen(true)} disabled={!isActive}>
+                Trocar de plano
+              </Button>
+            )}
             <Button variant="outline" onClick={() => mPortal.mutate()} disabled={mPortal.isPending}>
               {mPortal.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <ExternalLink className="w-4 h-4 mr-2" />}
               Atualizar pagamento
