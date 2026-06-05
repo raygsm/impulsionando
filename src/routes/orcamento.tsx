@@ -505,23 +505,33 @@ function ResultCard({
       return;
     }
     setSaving(true);
-    const { error } = await supabase.from("marketing_leads").insert({
-      source: "orcamento",
-      name: data.name,
-      phone: phoneDigits(data.whatsapp),
-      email: data.email ? data.email : null,
-      message: `Plano ${rec.plano} · Módulos: ${rec.modulos.join(", ") || "—"}`,
-      answers: answers as never,
-      recommended_plan: rec.plano,
-      recommended_modules: rec.modulos,
-      page_url: typeof window !== "undefined" ? window.location.href : null,
-      user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
-    });
+    const { data: inserted, error } = await supabase
+      .from("marketing_leads")
+      .insert({
+        source: "orcamento",
+        name: data.name,
+        phone: phoneDigits(data.whatsapp),
+        email: data.email ? data.email : null,
+        message: `Plano ${rec.plano} · Módulos: ${rec.modulos.join(", ") || "—"}`,
+        answers: answers as never,
+        recommended_plan: rec.plano,
+        recommended_modules: rec.modulos,
+        page_url: typeof window !== "undefined" ? window.location.href : null,
+        user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
+      })
+      .select("id")
+      .single();
     setSaving(false);
-    if (error) {
+    if (error || !inserted) {
       toast.error("Não foi possível enviar agora. Tente novamente.");
       return;
     }
+    // Notify sales inbox (fire-and-forget; falha não bloqueia o usuário)
+    void fetch("/api/public/hooks/marketing-lead-notify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ leadId: inserted.id }),
+    }).catch((e) => console.warn("lead notify failed", e));
     setSaved(true);
     onClearDraft();
     toast.success("Recebemos seu briefing! Nosso time entrará em contato.");
