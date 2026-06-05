@@ -15,7 +15,6 @@ import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { requestTrial } from "@/lib/trial.functions";
 
 export const Route = createFileRoute("/trial_/cadastro")({
-  // Note: file is trial_.cadastro.tsx -> non-nested route at URL /trial/cadastro
   head: () => ({
     meta: [
       { title: "Iniciar Trial de 7 dias — Impulsionando Tecnologia" },
