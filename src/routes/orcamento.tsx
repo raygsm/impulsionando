@@ -265,7 +265,7 @@ function clearDraft() {
 
 /* --------------------- Lógica de recomendação --------------------- */
 
-import { getMotherModule } from "@/data/motherModules";
+
 
 interface MotherGroup {
   /** Slug do módulo-mãe (mesmo de motherModules.ts). */
