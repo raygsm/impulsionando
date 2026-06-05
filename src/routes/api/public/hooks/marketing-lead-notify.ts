@@ -4,14 +4,45 @@ import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
 import { TEMPLATES } from '@/lib/email-templates/registry'
+import { sendWhatsAppText } from '@/lib/zapi.server'
 
 const SITE_NAME = 'Impulsionando'
 const SENDER_DOMAIN = 'notify.www.impulsionando.com.br'
 const FROM_DOMAIN = 'www.impulsionando.com.br'
 
+// Equipe interna que recebe alertas de novo lead.
+const ALERT_WHATSAPPS = ['5521995077375', '5521993075000']
+
 const BodySchema = z.object({
   leadId: z.string().uuid(),
 })
+
+function generateToken(): string {
+  const bytes = new Uint8Array(32)
+  crypto.getRandomValues(bytes)
+  return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('')
+}
+
+async function ensureUnsubscribeToken(email: string): Promise<string> {
+  const normalized = email.toLowerCase()
+  const { data: existing } = await supabaseAdmin
+    .from('email_unsubscribe_tokens')
+    .select('token, used_at')
+    .eq('email', normalized)
+    .maybeSingle()
+  if (existing && !existing.used_at) return existing.token
+  const token = generateToken()
+  await supabaseAdmin
+    .from('email_unsubscribe_tokens')
+    .upsert({ token, email: normalized }, { onConflict: 'email', ignoreDuplicates: true })
+  // re-read in case insert was ignored due to existing row
+  const { data: final } = await supabaseAdmin
+    .from('email_unsubscribe_tokens')
+    .select('token')
+    .eq('email', normalized)
+    .maybeSingle()
+  return final?.token ?? token
+}
 
 export const Route = createFileRoute('/api/public/hooks/marketing-lead-notify')({
   server: {
@@ -62,46 +93,109 @@ export const Route = createFileRoute('/api/public/hooks/marketing-lead-notify')(
         const text = await renderAsync(element, { plainText: true })
         const subject = typeof tpl.subject === 'function' ? tpl.subject(data) : tpl.subject
 
-        const messageId = crypto.randomUUID()
-        const idempotencyKey = `marketing-lead-new-${lead.id}`
+        // -------- E-MAIL --------
+        let emailResult: { ok: boolean; status?: string; error?: string } = { ok: false }
+        try {
+          // Suppression check
+          const { data: suppressed } = await supabaseAdmin
+            .from('suppressed_emails')
+            .select('id')
+            .eq('email', recipient.toLowerCase())
+            .maybeSingle()
 
-        await supabaseAdmin.from('email_send_log').insert({
-          message_id: messageId,
-          template_name: 'marketing-lead-new',
-          recipient_email: recipient,
-          status: 'pending',
-        })
+          if (suppressed) {
+            await supabaseAdmin.from('email_send_log').insert({
+              message_id: crypto.randomUUID(),
+              template_name: 'marketing-lead-new',
+              recipient_email: recipient,
+              status: 'suppressed',
+            })
+            emailResult = { ok: false, status: 'suppressed' }
+          } else {
+            const unsubscribe_token = await ensureUnsubscribeToken(recipient)
+            const messageId = crypto.randomUUID()
+            const idempotencyKey = `marketing-lead-new-${lead.id}`
 
-        const { error: enqErr } = await supabaseAdmin.rpc('enqueue_email', {
-          queue_name: 'transactional_emails',
-          payload: {
-            message_id: messageId,
-            to: recipient,
-            from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
-            sender_domain: SENDER_DOMAIN,
-            subject,
-            html,
-            text,
-            purpose: 'transactional',
-            label: 'marketing-lead-new',
-            idempotency_key: idempotencyKey,
-            queued_at: new Date().toISOString(),
-          },
-        })
+            await supabaseAdmin.from('email_send_log').insert({
+              message_id: messageId,
+              template_name: 'marketing-lead-new',
+              recipient_email: recipient,
+              status: 'pending',
+            })
 
-        if (enqErr) {
-          console.error('marketing-lead-notify: enqueue failed', enqErr)
-          await supabaseAdmin.from('email_send_log').insert({
-            message_id: messageId,
-            template_name: 'marketing-lead-new',
-            recipient_email: recipient,
-            status: 'failed',
-            error_message: enqErr.message,
-          })
-          return Response.json({ ok: false, error: 'enqueue_failed' }, { status: 500 })
+            const { error: enqErr } = await supabaseAdmin.rpc('enqueue_email', {
+              queue_name: 'transactional_emails',
+              payload: {
+                message_id: messageId,
+                to: recipient,
+                from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+                sender_domain: SENDER_DOMAIN,
+                subject,
+                html,
+                text,
+                purpose: 'transactional',
+                label: 'marketing-lead-new',
+                idempotency_key: idempotencyKey,
+                unsubscribe_token,
+                queued_at: new Date().toISOString(),
+              },
+            })
+
+            if (enqErr) {
+              console.error('marketing-lead-notify: enqueue failed', enqErr)
+              await supabaseAdmin.from('email_send_log').insert({
+                message_id: messageId,
+                template_name: 'marketing-lead-new',
+                recipient_email: recipient,
+                status: 'failed',
+                error_message: enqErr.message,
+              })
+              emailResult = { ok: false, error: enqErr.message }
+            } else {
+              emailResult = { ok: true, status: 'queued' }
+            }
+          }
+        } catch (e: any) {
+          console.error('marketing-lead-notify: email path failed', e)
+          emailResult = { ok: false, error: e?.message ?? 'email_failed' }
         }
 
-        return Response.json({ ok: true, queued: true })
+        // -------- WHATSAPP --------
+        const waText =
+          `🟢 Novo lead Impulsionando (${(lead as any).source ?? 'site'})\n\n` +
+          `Nome: ${lead.name ?? '—'}\n` +
+          `WhatsApp: ${lead.phone ?? '—'}\n` +
+          `E-mail: ${lead.email ?? '—'}\n` +
+          ((lead as any).recommended_plan ? `Plano: ${(lead as any).recommended_plan}\n` : '') +
+          ((lead as any).recommended_modules?.length
+            ? `Módulos: ${(lead as any).recommended_modules.join(' | ')}\n`
+            : '') +
+          (lead.message ? `\nMensagem: ${lead.message}\n` : '') +
+          ((lead as any).page_url ? `\nOrigem: ${(lead as any).page_url}` : '')
+
+        const waResults: Array<{ phone: string; ok: boolean; status: number }> = []
+        for (const phone of ALERT_WHATSAPPS) {
+          try {
+            const r = await sendWhatsAppText({ phone, message: waText })
+            waResults.push({ phone, ok: r.ok, status: r.status })
+            if (!r.ok) {
+              console.error('marketing-lead-notify: whatsapp failed', {
+                phone,
+                status: r.status,
+                body: r.body,
+              })
+            }
+          } catch (e: any) {
+            console.error('marketing-lead-notify: whatsapp error', e)
+            waResults.push({ phone, ok: false, status: 0 })
+          }
+        }
+
+        return Response.json({
+          ok: emailResult.ok || waResults.some((r) => r.ok),
+          email: emailResult,
+          whatsapp: waResults,
+        })
       },
     },
   },
