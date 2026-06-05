@@ -155,6 +155,11 @@ export const Route = createFileRoute('/api/public/hooks/uptime-check')({
                 },
               })
             }
+            const waMsg = `🚨 *Site fora do ar*\n\n${t.url}\nStatus: ${r.status ?? 'sem resposta'}${r.error ? `\nErro: ${r.error}` : ''}\nDetectado em: ${now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`
+            for (const phone of t.alert_whatsapps ?? []) {
+              const wa = await sendWhatsAppText({ phone, message: waMsg })
+              if (!wa.ok) console.error('uptime: whatsapp down alert failed', { phone, ...wa })
+            }
             nextLastAlert = now.toISOString()
           } else if (!wasUp && isUp) {
             nextIsUp = true
@@ -172,6 +177,11 @@ export const Route = createFileRoute('/api/public/hooks/uptime-check')({
                   downtimeMinutes: downtimeMin,
                 },
               })
+            }
+            const waMsg = `✅ *Site voltou ao ar*\n\n${t.url}\nIndisponível por: ${downtimeMin} min\nRestabelecido em: ${now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`
+            for (const phone of t.alert_whatsapps ?? []) {
+              const wa = await sendWhatsAppText({ phone, message: waMsg })
+              if (!wa.ok) console.error('uptime: whatsapp up alert failed', { phone, ...wa })
             }
             nextSince = now.toISOString()
             nextLastAlert = now.toISOString()
@@ -191,9 +201,15 @@ export const Route = createFileRoute('/api/public/hooks/uptime-check')({
                   },
                 })
               }
+              const waMsg = `🚨 *Site ainda fora do ar*\n\n${t.url}\nStatus: ${r.status ?? 'sem resposta'}${r.error ? `\nErro: ${r.error}` : ''}\nDesde: ${new Date(t.since).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`
+              for (const phone of t.alert_whatsapps ?? []) {
+                const wa = await sendWhatsAppText({ phone, message: waMsg })
+                if (!wa.ok) console.error('uptime: whatsapp re-alert failed', { phone, ...wa })
+              }
               nextLastAlert = now.toISOString()
             }
           }
+
 
           await supabaseAdmin
             .from('uptime_state')
