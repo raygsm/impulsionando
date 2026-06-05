@@ -265,30 +265,79 @@ function clearDraft() {
 
 /* --------------------- Lógica de recomendação --------------------- */
 
+import { getMotherModule } from "@/data/motherModules";
+
+interface MotherGroup {
+  /** Slug do módulo-mãe (mesmo de motherModules.ts). */
+  motherSlug: string;
+  /** Nome curto do módulo-mãe. */
+  motherName: string;
+  /** Submódulos sugeridos dentro desse módulo-mãe. */
+  submodules: string[];
+}
+
 interface Recomendacao {
   plano: "Essencial" | "Integrado" | "Avançado" | "Sob Medida";
+  /** Agrupamento por módulo-mãe → submódulos. */
+  grupos: MotherGroup[];
+  /** Lista linear para mensagens/WhatsApp/registro do lead. */
   modulos: string[];
   resumo: string;
   motivo: string;
 }
 
-const MODULO_LABEL: Record<string, string> = {
-  agenda: "Agenda online",
-  vendas: "Vendas / PDV",
-  financeiro: "Financeiro",
-  estoque: "Estoque",
-  crm: "CRM",
-  whatsapp: "WhatsApp",
-  relatorios: "Relatórios / BI",
+/**
+ * Cada "dor" do briefing aponta para um módulo-mãe + um ou mais submódulos
+ * que existem em src/data/motherModules.ts. Mantemos a relação aqui para
+ * que /orcamento agrupe a recomendação por módulo-mãe.
+ */
+const DOR_TO_MOTHER: Record<string, { motherSlug: string; submodules: string[] }> = {
+  agenda:     { motherSlug: "agenda",    submodules: ["Agenda online", "Confirmação automática", "Lembretes"] },
+  vendas:     { motherSlug: "pdv",       submodules: ["PDV", "Caixa", "Comandas"] },
+  financeiro: { motherSlug: "erp",       submodules: ["Financeiro", "Contas a receber", "Contas a pagar", "Fluxo de caixa"] },
+  estoque:    { motherSlug: "estoque",   submodules: ["Produtos", "Estoque", "Estoque mínimo", "Fornecedores"] },
+  crm:        { motherSlug: "crm",       submodules: ["Leads", "Clientes", "Funil comercial", "Follow-ups"] },
+  whatsapp:   { motherSlug: "automacao", submodules: ["WhatsApp via Z-API", "Templates de mensagens", "Mensagens automáticas"] },
+  relatorios: { motherSlug: "bi",        submodules: ["Dashboard master", "Dashboard financeiro", "Dashboard comercial"] },
 };
 
+function buildGrupos(dores: string[]): MotherGroup[] {
+  const map = new Map<string, MotherGroup>();
+  for (const dor of dores) {
+    const ref = DOR_TO_MOTHER[dor];
+    if (!ref) continue;
+    const mm = getMotherModule(ref.motherSlug);
+    if (!mm) continue;
+    const existing = map.get(ref.motherSlug);
+    if (existing) {
+      for (const s of ref.submodules) {
+        if (!existing.submodules.includes(s)) existing.submodules.push(s);
+      }
+    } else {
+      map.set(ref.motherSlug, {
+        motherSlug: ref.motherSlug,
+        motherName: mm.shortName,
+        submodules: [...ref.submodules],
+      });
+    }
+  }
+  return Array.from(map.values());
+}
+
+function flattenModulos(grupos: MotherGroup[]): string[] {
+  return grupos.map((g) => `${g.motherName} (${g.submodules.join(", ")})`);
+}
+
 function recomendar(a: Answers): Recomendacao {
-  const modulos = a.dores.map((d) => MODULO_LABEL[d]).filter(Boolean);
+  const grupos = buildGrupos(a.dores);
+  const modulos = flattenModulos(grupos);
+  const nMother = grupos.length;
 
   // White label sempre vai pra Sob Medida
   if (a.perfil === "white-label") {
     return {
       plano: "Sob Medida",
+      grupos,
       modulos,
       resumo: "Solução white label personalizada com sua marca, multi-empresa e gestão master.",
       motivo:
@@ -298,46 +347,51 @@ function recomendar(a: Answers): Recomendacao {
 
   // Mais de 1 unidade ou empresa grande → Avançado/Sob Medida
   if (a.unidades !== "1" || a.tamanho === "grande") {
-    if (modulos.length >= 3) {
+    if (nMother >= 3) {
       return {
         plano: "Sob Medida",
+        grupos,
         modulos,
-        resumo: "Pacote completo com múltiplas unidades e operação consolidada.",
+        resumo: "Pacote completo com múltiplos módulos-mãe e operação consolidada.",
         motivo:
           "Você opera em mais de uma unidade ou tem equipe grande. Recomendamos um plano dimensionado por uso, com integração entre unidades.",
       };
     }
     return {
       plano: "Avançado",
+      grupos,
       modulos,
-      resumo: "3 módulos integrados + relatórios consolidados.",
+      resumo: "3 módulos-mãe integrados + relatórios consolidados.",
       motivo:
-        "Operação distribuída ou equipe grande pede mais módulos integrados e visão consolidada.",
+        "Operação distribuída ou equipe grande pede mais módulos-mãe integrados e visão consolidada.",
     };
   }
 
-  // 1 unidade, conta por dores
-  const n = Math.max(1, modulos.length);
+  // 1 unidade, conta por módulos-mãe distintos
+  const n = Math.max(1, nMother);
   if (n === 1) {
     return {
       plano: "Essencial",
+      grupos,
       modulos,
-      resumo: "1 módulo focado na sua principal dor.",
+      resumo: "1 módulo-mãe focado na sua principal dor.",
       motivo: "Você sinalizou uma dor principal — comece focado, com baixo custo e escale depois.",
     };
   }
   if (n === 2) {
     return {
       plano: "Integrado",
+      grupos,
       modulos,
-      resumo: "2 módulos integrados.",
-      motivo: "Suas necessidades se beneficiam de 2 módulos trabalhando juntos.",
+      resumo: "2 módulos-mãe integrados.",
+      motivo: "Suas necessidades se beneficiam de 2 módulos-mãe trabalhando juntos.",
     };
   }
   return {
     plano: "Avançado",
+    grupos,
     modulos,
-    resumo: "3 módulos integrados + relatórios.",
+    resumo: "3 módulos-mãe integrados + relatórios.",
     motivo: "Você tem 3 ou mais frentes a organizar — o Avançado entrega o melhor custo-benefício.",
   };
 }
