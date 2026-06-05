@@ -5,7 +5,7 @@ import {
   Wallet, ArrowLeftRight, FolderTree, CreditCard, Percent,
   Package, Truck, ArrowDownUp,
   ShoppingCart, Receipt, Plus, Wallet as WalletIcon,
-  Contact, BarChart3, ShieldCheck, Inbox, GraduationCap,
+  Contact, BarChart3, ShieldCheck, Inbox, GraduationCap, Stethoscope,
 } from "lucide-react";
 
 
@@ -59,6 +59,12 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
 
+  {
+    label: "Saúde",
+    items: [
+      { to: "/ehr", label: "Prontuário Eletrônico", icon: Stethoscope, perm: "ehr.record.read" },
+    ],
+  },
   {
     label: "Agenda",
     items: [

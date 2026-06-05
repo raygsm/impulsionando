@@ -59,6 +59,7 @@ import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedReportsIndexRouteImport } from './routes/_authenticated/reports.index'
 import { Route as AuthenticatedInventoryIndexRouteImport } from './routes/_authenticated/inventory.index'
 import { Route as AuthenticatedFinanceIndexRouteImport } from './routes/_authenticated/finance.index'
+import { Route as AuthenticatedEhrIndexRouteImport } from './routes/_authenticated/ehr.index'
 import { Route as AuthenticatedCrmIndexRouteImport } from './routes/_authenticated/crm.index'
 import { Route as AuthenticatedBiIndexRouteImport } from './routes/_authenticated/bi.index'
 import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenticated/agenda.index'
@@ -80,6 +81,7 @@ import { Route as AuthenticatedFinanceMethodsRouteImport } from './routes/_authe
 import { Route as AuthenticatedFinanceCommissionsRouteImport } from './routes/_authenticated/finance.commissions'
 import { Route as AuthenticatedFinanceCategoriesRouteImport } from './routes/_authenticated/finance.categories'
 import { Route as AuthenticatedFinanceAccountsRouteImport } from './routes/_authenticated/finance.accounts'
+import { Route as AuthenticatedEhrIdRouteImport } from './routes/_authenticated/ehr.$id'
 import { Route as AuthenticatedCrmPipelinesRouteImport } from './routes/_authenticated/crm.pipelines'
 import { Route as AuthenticatedCrmLeadsRouteImport } from './routes/_authenticated/crm.leads'
 import { Route as AuthenticatedCrmBoardRouteImport } from './routes/_authenticated/crm.board'
@@ -348,6 +350,11 @@ const AuthenticatedFinanceIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedFinanceRoute,
   } as any)
+const AuthenticatedEhrIndexRoute = AuthenticatedEhrIndexRouteImport.update({
+  id: '/ehr/',
+  path: '/ehr/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCrmIndexRoute = AuthenticatedCrmIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -469,6 +476,11 @@ const AuthenticatedFinanceAccountsRoute =
     path: '/accounts',
     getParentRoute: () => AuthenticatedFinanceRoute,
   } as any)
+const AuthenticatedEhrIdRoute = AuthenticatedEhrIdRouteImport.update({
+  id: '/ehr/$id',
+  path: '/ehr/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCrmPipelinesRoute =
   AuthenticatedCrmPipelinesRouteImport.update({
     id: '/pipelines',
@@ -601,6 +613,7 @@ export interface FileRoutesByFullPath {
   '/crm/board': typeof AuthenticatedCrmBoardRoute
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
   '/crm/pipelines': typeof AuthenticatedCrmPipelinesRoute
+  '/ehr/$id': typeof AuthenticatedEhrIdRoute
   '/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
   '/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
   '/finance/commissions': typeof AuthenticatedFinanceCommissionsRoute
@@ -622,6 +635,7 @@ export interface FileRoutesByFullPath {
   '/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/bi/': typeof AuthenticatedBiIndexRoute
   '/crm/': typeof AuthenticatedCrmIndexRoute
+  '/ehr/': typeof AuthenticatedEhrIndexRoute
   '/finance/': typeof AuthenticatedFinanceIndexRoute
   '/inventory/': typeof AuthenticatedInventoryIndexRoute
   '/reports/': typeof AuthenticatedReportsIndexRoute
@@ -679,6 +693,7 @@ export interface FileRoutesByTo {
   '/crm/board': typeof AuthenticatedCrmBoardRoute
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
   '/crm/pipelines': typeof AuthenticatedCrmPipelinesRoute
+  '/ehr/$id': typeof AuthenticatedEhrIdRoute
   '/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
   '/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
   '/finance/commissions': typeof AuthenticatedFinanceCommissionsRoute
@@ -700,6 +715,7 @@ export interface FileRoutesByTo {
   '/agenda': typeof AuthenticatedAgendaIndexRoute
   '/bi': typeof AuthenticatedBiIndexRoute
   '/crm': typeof AuthenticatedCrmIndexRoute
+  '/ehr': typeof AuthenticatedEhrIndexRoute
   '/finance': typeof AuthenticatedFinanceIndexRoute
   '/inventory': typeof AuthenticatedInventoryIndexRoute
   '/reports': typeof AuthenticatedReportsIndexRoute
@@ -766,6 +782,7 @@ export interface FileRoutesById {
   '/_authenticated/crm/board': typeof AuthenticatedCrmBoardRoute
   '/_authenticated/crm/leads': typeof AuthenticatedCrmLeadsRoute
   '/_authenticated/crm/pipelines': typeof AuthenticatedCrmPipelinesRoute
+  '/_authenticated/ehr/$id': typeof AuthenticatedEhrIdRoute
   '/_authenticated/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
   '/_authenticated/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
   '/_authenticated/finance/commissions': typeof AuthenticatedFinanceCommissionsRoute
@@ -787,6 +804,7 @@ export interface FileRoutesById {
   '/_authenticated/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/_authenticated/bi/': typeof AuthenticatedBiIndexRoute
   '/_authenticated/crm/': typeof AuthenticatedCrmIndexRoute
+  '/_authenticated/ehr/': typeof AuthenticatedEhrIndexRoute
   '/_authenticated/finance/': typeof AuthenticatedFinanceIndexRoute
   '/_authenticated/inventory/': typeof AuthenticatedInventoryIndexRoute
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
@@ -853,6 +871,7 @@ export interface FileRouteTypes {
     | '/crm/board'
     | '/crm/leads'
     | '/crm/pipelines'
+    | '/ehr/$id'
     | '/finance/accounts'
     | '/finance/categories'
     | '/finance/commissions'
@@ -874,6 +893,7 @@ export interface FileRouteTypes {
     | '/agenda/'
     | '/bi/'
     | '/crm/'
+    | '/ehr/'
     | '/finance/'
     | '/inventory/'
     | '/reports/'
@@ -931,6 +951,7 @@ export interface FileRouteTypes {
     | '/crm/board'
     | '/crm/leads'
     | '/crm/pipelines'
+    | '/ehr/$id'
     | '/finance/accounts'
     | '/finance/categories'
     | '/finance/commissions'
@@ -952,6 +973,7 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/bi'
     | '/crm'
+    | '/ehr'
     | '/finance'
     | '/inventory'
     | '/reports'
@@ -1017,6 +1039,7 @@ export interface FileRouteTypes {
     | '/_authenticated/crm/board'
     | '/_authenticated/crm/leads'
     | '/_authenticated/crm/pipelines'
+    | '/_authenticated/ehr/$id'
     | '/_authenticated/finance/accounts'
     | '/_authenticated/finance/categories'
     | '/_authenticated/finance/commissions'
@@ -1038,6 +1061,7 @@ export interface FileRouteTypes {
     | '/_authenticated/agenda/'
     | '/_authenticated/bi/'
     | '/_authenticated/crm/'
+    | '/_authenticated/ehr/'
     | '/_authenticated/finance/'
     | '/_authenticated/inventory/'
     | '/_authenticated/reports/'
@@ -1424,6 +1448,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFinanceIndexRouteImport
       parentRoute: typeof AuthenticatedFinanceRoute
     }
+    '/_authenticated/ehr/': {
+      id: '/_authenticated/ehr/'
+      path: '/ehr'
+      fullPath: '/ehr/'
+      preLoaderRoute: typeof AuthenticatedEhrIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/crm/': {
       id: '/_authenticated/crm/'
       path: '/'
@@ -1570,6 +1601,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/finance/accounts'
       preLoaderRoute: typeof AuthenticatedFinanceAccountsRouteImport
       parentRoute: typeof AuthenticatedFinanceRoute
+    }
+    '/_authenticated/ehr/$id': {
+      id: '/_authenticated/ehr/$id'
+      path: '/ehr/$id'
+      fullPath: '/ehr/$id'
+      preLoaderRoute: typeof AuthenticatedEhrIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/crm/pipelines': {
       id: '/_authenticated/crm/pipelines'
@@ -1841,7 +1879,9 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTalentsRoute: typeof AuthenticatedTalentsRoute
   AuthenticatedUnitsRoute: typeof AuthenticatedUnitsRoute
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
+  AuthenticatedEhrIdRoute: typeof AuthenticatedEhrIdRoute
   AuthenticatedMarketingLeadsRoute: typeof AuthenticatedMarketingLeadsRoute
+  AuthenticatedEhrIndexRoute: typeof AuthenticatedEhrIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -1866,7 +1906,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedTalentsRoute: AuthenticatedTalentsRoute,
   AuthenticatedUnitsRoute: AuthenticatedUnitsRoute,
   AuthenticatedUsersRoute: AuthenticatedUsersRoute,
+  AuthenticatedEhrIdRoute: AuthenticatedEhrIdRoute,
   AuthenticatedMarketingLeadsRoute: AuthenticatedMarketingLeadsRoute,
+  AuthenticatedEhrIndexRoute: AuthenticatedEhrIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -1912,13 +1954,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

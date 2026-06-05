@@ -10,6 +10,7 @@ import {
   BarChart3,
   Cog,
   Plug,
+  Stethoscope,
 } from "lucide-react";
 import type { ModuleDetail } from "./ModuleDetailDialog";
 
@@ -820,5 +821,83 @@ export const MODULE_DETAILS: ModuleDetail[] = [
       "Novas oportunidades de automação ficam óbvias",
     ],
     ctaLabel: "Quero integrar tudo",
+  },
+  {
+    id: "prontuario",
+    title: "Prontuário Eletrônico",
+    icon: Stethoscope,
+    desc: "Histórico clínico, exames, documentos, evoluções e pareceres em um único ambiente seguro.",
+    badge: BADGES.em_ativacao,
+    hook:
+      "Centralize a jornada clínica do paciente: consultas, exames, imagens, laudos, documentos e pareceres médicos com rastreabilidade total.",
+    forWho:
+      "Clínicas médicas, consultórios e profissionais de saúde que querem organizar histórico clínico, eliminar perda de exames em WhatsApp/papel e ganhar segurança no atendimento.",
+    benefits: [
+      "Prontuário individual por paciente",
+      "Linha do tempo clínica completa",
+      "Upload de exames pela clínica, médico e paciente",
+      "Imagens, laudos, PDFs e documentos centralizados",
+      "Evolução clínica e parecer médico estruturados",
+      "Confirmação eletrônica do médico",
+      "Área exclusiva do paciente (em ativação)",
+      "Resumo inteligente com IA para apoio à revisão médica (em ativação)",
+      "Permissões granulares por perfil e auditoria",
+    ],
+    howItWorks: [
+      {
+        step: "Cadastro do paciente e criação do prontuário",
+        detail: "A clínica registra dados clínicos estruturados: alergias, medicações, histórico.",
+      },
+      {
+        step: "Upload de exames e documentos",
+        detail: "Clínica, médico ou paciente enviam PDFs, imagens, laudos e resultados.",
+      },
+      {
+        step: "Resumo inteligente para apoio (em ativação)",
+        detail: "A IA gera um resumo preliminar apenas para revisão médica — não substitui diagnóstico.",
+      },
+      {
+        step: "Revisão e parecer médico",
+        detail: "O médico aceita, edita ou rejeita a sugestão e registra o parecer.",
+      },
+      {
+        step: "Confirmação eletrônica e liberação",
+        detail: "Parecer confirmado fica registrado no histórico e pode ser liberado ao paciente.",
+      },
+      {
+        step: "Histórico permanente e auditoria",
+        detail: "Tudo fica na linha do tempo: documentos, evoluções, pareceres, acessos.",
+      },
+    ],
+    examples: [
+      "Paciente envia exame laboratorial pela área exclusiva → médico revisa → libera parecer.",
+      "Clínica anexa ultrassom → médico interpreta → confirma parecer eletronicamente.",
+      "Médico registra evolução pós-consulta vinculada ao prontuário.",
+      "Solicitação de retorno notificada ao paciente automaticamente.",
+    ],
+    features: [
+      "Prontuário por paciente",
+      "Linha do tempo clínica",
+      "Upload com permissões (clínica/médico/paciente)",
+      "Categorias: exame laboratorial, imagem, laudo, receita, encaminhamento",
+      "Evolução clínica estruturada",
+      "Parecer médico com confirmação eletrônica",
+      "Storage privado com URL assinada",
+      "RLS por empresa e por permissão",
+      "Auditoria",
+    ],
+    integrations: [
+      "Agenda (consultas e retornos)",
+      "CRM de pacientes",
+      "WhatsApp (notificações — preparado)",
+      "Lovable AI (resumo de exames — em ativação)",
+    ],
+    impact: [
+      "Fim da perda de exames em WhatsApp, e-mail e papel",
+      "Rastreabilidade clínica total",
+      "Mais segurança jurídica e LGPD",
+      "Mais tempo do médico no que importa: o paciente",
+    ],
+    ctaLabel: "Quero o prontuário organizado",
   },
 ];
