@@ -441,6 +441,8 @@ function EvolutionsTab({
                   />
                 </div>
               ))}
+              <Toggle l="Liberar evolução para o paciente"
+                v={releaseToPatient} onChange={setReleaseToPatient} />
             </div>
             <DialogFooter><Button onClick={save}>Confirmar evolução</Button></DialogFooter>
           </DialogContent>
