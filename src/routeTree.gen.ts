@@ -30,7 +30,7 @@ import { Route as TrabalheConoscoIndexRouteImport } from './routes/trabalhe-cono
 import { Route as PacienteIndexRouteImport } from './routes/paciente.index'
 import { Route as NichosIndexRouteImport } from './routes/nichos.index'
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
-import { Route as TrialCadastroRouteImport } from './routes/trial.cadastro'
+import { Route as TrialCadastroRouteImport } from './routes/trial_.cadastro'
 import { Route as TrabalheConoscoNichoRouteImport } from './routes/trabalhe-conosco.$nicho'
 import { Route as ShowroomFitnessRouteImport } from './routes/showroom.fitness'
 import { Route as ShowroomEventosRouteImport } from './routes/showroom.eventos'
@@ -224,9 +224,9 @@ const DemoIndexRoute = DemoIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const TrialCadastroRoute = TrialCadastroRouteImport.update({
-  id: '/cadastro',
-  path: '/cadastro',
-  getParentRoute: () => TrialRoute,
+  id: '/trial_/cadastro',
+  path: '/trial/cadastro',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const TrabalheConoscoNichoRoute = TrabalheConoscoNichoRouteImport.update({
   id: '/trabalhe-conosco/$nicho',
@@ -718,7 +718,7 @@ export interface FileRoutesByFullPath {
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
   '/termos': typeof TermosRoute
-  '/trial': typeof TrialRouteWithChildren
+  '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
@@ -827,7 +827,7 @@ export interface FileRoutesByTo {
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
   '/termos': typeof TermosRoute
-  '/trial': typeof TrialRouteWithChildren
+  '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/audit': typeof AuthenticatedAuditRoute
@@ -932,7 +932,7 @@ export interface FileRoutesById {
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
   '/termos': typeof TermosRoute
-  '/trial': typeof TrialRouteWithChildren
+  '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/_authenticated/agenda': typeof AuthenticatedAgendaRouteWithChildren
@@ -969,7 +969,7 @@ export interface FileRoutesById {
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
-  '/trial/cadastro': typeof TrialCadastroRoute
+  '/trial_/cadastro': typeof TrialCadastroRoute
   '/demo/': typeof DemoIndexRoute
   '/nichos/': typeof NichosIndexRoute
   '/paciente/': typeof PacienteIndexRoute
@@ -1294,7 +1294,7 @@ export interface FileRouteTypes {
     | '/showroom/eventos'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
-    | '/trial/cadastro'
+    | '/trial_/cadastro'
     | '/demo/'
     | '/nichos/'
     | '/paciente/'
@@ -1369,7 +1369,7 @@ export interface RootRouteChildren {
   SobreRoute: typeof SobreRoute
   SolucoesRoute: typeof SolucoesRoute
   TermosRoute: typeof TermosRoute
-  TrialRoute: typeof TrialRouteWithChildren
+  TrialRoute: typeof TrialRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   ComoFuncionaFitnessRoute: typeof ComoFuncionaFitnessRoute
@@ -1382,6 +1382,7 @@ export interface RootRouteChildren {
   ShowroomEventosRoute: typeof ShowroomEventosRoute
   ShowroomFitnessRoute: typeof ShowroomFitnessRoute
   TrabalheConoscoNichoRoute: typeof TrabalheConoscoNichoRoute
+  TrialCadastroRoute: typeof TrialCadastroRoute
   DemoIndexRoute: typeof DemoIndexRoute
   NichosIndexRoute: typeof NichosIndexRoute
   TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
@@ -1545,12 +1546,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/trial/cadastro': {
-      id: '/trial/cadastro'
-      path: '/cadastro'
+    '/trial_/cadastro': {
+      id: '/trial_/cadastro'
+      path: '/trial/cadastro'
       fullPath: '/trial/cadastro'
       preLoaderRoute: typeof TrialCadastroRouteImport
-      parentRoute: typeof TrialRoute
+      parentRoute: typeof rootRouteImport
     }
     '/trabalhe-conosco/$nicho': {
       id: '/trabalhe-conosco/$nicho'
@@ -2408,16 +2409,6 @@ const PacienteRouteWithChildren = PacienteRoute._addFileChildren(
   PacienteRouteChildren,
 )
 
-interface TrialRouteChildren {
-  TrialCadastroRoute: typeof TrialCadastroRoute
-}
-
-const TrialRouteChildren: TrialRouteChildren = {
-  TrialCadastroRoute: TrialCadastroRoute,
-}
-
-const TrialRouteWithChildren = TrialRoute._addFileChildren(TrialRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -2434,7 +2425,7 @@ const rootRouteChildren: RootRouteChildren = {
   SobreRoute: SobreRoute,
   SolucoesRoute: SolucoesRoute,
   TermosRoute: TermosRoute,
-  TrialRoute: TrialRouteWithChildren,
+  TrialRoute: TrialRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
   ComoFuncionaFitnessRoute: ComoFuncionaFitnessRoute,
@@ -2447,6 +2438,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShowroomEventosRoute: ShowroomEventosRoute,
   ShowroomFitnessRoute: ShowroomFitnessRoute,
   TrabalheConoscoNichoRoute: TrabalheConoscoNichoRoute,
+  TrialCadastroRoute: TrialCadastroRoute,
   DemoIndexRoute: DemoIndexRoute,
   NichosIndexRoute: NichosIndexRoute,
   TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
@@ -2463,3 +2455,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
