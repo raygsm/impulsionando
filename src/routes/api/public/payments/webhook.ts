@@ -521,14 +521,15 @@ async function handleSubscriptionCanceled(data: any, env: PaddleEnv) {
     .eq("environment", env);
 
   const userId = (existing as any)?.user_id;
+  const canceledProductId = (existing as any)?.product_id;
   if (!userId) return;
 
   const companyId = await getCompanyForUser(supabase, userId);
-  if (companyId) {
-    await supabase
-      .from("company_modules")
-      .update({ is_enabled: false, updated_at: new Date().toISOString() })
-      .eq("company_id", companyId);
+  if (companyId && canceledProductId) {
+    // Desabilita apenas os módulos do plano cancelado.
+    // Módulos manualmente habilitados (ou de planos add-on) permanecem ativos.
+    const modulesToDisable = PLAN_MODULES[canceledProductId] ?? [];
+    await disableModules(supabase, companyId, modulesToDisable);
   }
 
   const prof = (
