@@ -10,6 +10,7 @@ import {
   BarChart3,
   Cog,
   Plug,
+  Stethoscope,
 } from "lucide-react";
 import type { ModuleDetail } from "./ModuleDetailDialog";
 
