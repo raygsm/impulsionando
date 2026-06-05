@@ -42,57 +42,53 @@ const PLANS: Plan[] = [
   {
     name: "Essencial",
     tagline: "Para começar pela maior dor.",
-    monthly: 297,
-    modulesLabel: "1 módulo à escolha",
+    monthly: 697,
+    modulesLabel: "1 módulo após Trial",
     features: [
-      "1 módulo ativo",
+      "1 módulo ativo após conversão",
       "Até 3 usuários",
-      "1 unidade",
       "Suporte por e-mail e WhatsApp",
-      "Atualizações contínuas",
+      "7 dias de Trial com tudo liberado",
     ],
-    cta: "Começar com Essencial",
+    cta: "Começar Trial de 7 dias",
   },
   {
     name: "Integrado",
     tagline: "Dois módulos trabalhando juntos.",
-    monthly: 697,
+    monthly: 997.9,
     modulesLabel: "2 módulos integrados",
     features: [
-      "2 módulos ativos",
-      "Até 10 usuários",
-      "1 unidade",
-      "Automações entre módulos",
-      "Suporte prioritário",
+      "2 módulos ativos após conversão",
+      "Até 5 usuários",
+      "Maior prioridade no suporte",
+      "Integração entre módulos",
     ],
     highlight: true,
-    cta: "Quero o Integrado",
+    cta: "Começar Trial de 7 dias",
   },
   {
     name: "Avançado",
     tagline: "Operação digital de ponta a ponta.",
-    monthly: 997,
-    modulesLabel: "3 módulos + Relatórios",
+    monthly: 1497.97,
+    modulesLabel: "3 módulos + BI",
     features: [
-      "3 módulos ativos",
-      "Usuários ilimitados",
-      "Até 3 unidades",
-      "BI e relatórios consolidados",
-      "Onboarding com especialista",
+      "3 módulos ativos após conversão",
+      "Até 10 usuários",
+      "Suporte prioritário",
+      "Acompanhamento técnico",
     ],
-    cta: "Escolher Avançado",
+    cta: "Começar Trial de 7 dias",
   },
   {
     name: "Sob Medida",
     tagline: "Projeto exclusivo com sua marca.",
     monthly: null,
-    modulesLabel: "Múltiplos módulos + customização",
+    modulesLabel: "Conforme briefing",
     features: [
-      "Módulos ilimitados",
-      "Multi-unidade e multi-empresa",
+      "Módulos conforme proposta",
+      "Usuários conforme proposta",
       "White label disponível",
-      "Integrações e regras próprias",
-      "SLA contratual",
+      "Configuração personalizada",
     ],
     cta: "Falar com consultor",
   },
@@ -149,7 +145,7 @@ const FAQ = [
 ];
 
 function formatBRL(v: number) {
-  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function PlanosPage() {
@@ -263,7 +259,11 @@ function PlanosPage() {
                   className={cn("mt-6 w-full", plan.highlight && "bg-gradient-primary shadow-elegant")}
                   variant={plan.highlight ? "default" : "outline"}
                 >
-                  <Link to="/orcamento" search={{ plano: plan.name, origem: "planos" }}>{plan.cta}</Link>
+                  {plan.monthly !== null ? (
+                    <Link to="/trial/cadastro">{plan.cta}</Link>
+                  ) : (
+                    <Link to="/orcamento" search={{ plano: plan.name, origem: "planos" }}>{plan.cta}</Link>
+                  )}
                 </Button>
               </Card>
             );
