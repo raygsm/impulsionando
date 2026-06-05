@@ -96,7 +96,7 @@ export const NICHO_DETAILS: NichoDetail[] = [
       { step: "Sistema envia pesquisa", detail: "Avaliação rápida + abertura para reativação." },
       { step: "Paciente entra em fluxo de retorno", detail: "Reativação automática no tempo certo de cada serviço." },
     ],
-    modules: ["agenda", "crm", "whatsapp", "pagamentos", "fiscal", "bi", "permissoes"],
+    modules: ["agenda", "prontuario", "crm", "whatsapp", "pagamentos", "fiscal", "bi", "permissoes"],
     benefits: [
       "Menos no-show",
       "Mais consultas confirmadas",
