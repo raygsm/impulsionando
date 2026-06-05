@@ -626,3 +626,88 @@ function Toggle({ l, v, onChange }: { l: string; v: boolean; onChange: (b: boole
 }
 function catLabel(v: string) { return CATEGORIES.find((c) => c.v === v)?.l ?? v; }
 function srcLabel(v: string) { return SOURCES.find((s) => s.v === v)?.l ?? v; }
+
+/* ---------- Patient Access Button ---------- */
+function PatientAccessButton({
+  recordId, customer, onChange,
+}: {
+  recordId: string;
+  customer: { id: string; name: string | null; email: string | null; patient_user_id: string | null; patient_invited_at: string | null } | null | undefined;
+  onChange: () => void;
+}) {
+  const invite = useServerFn(invitePatient);
+  const [open, setOpen] = useState(false);
+  const [email, setEmail] = useState(customer?.email ?? "");
+  const [name, setName] = useState(customer?.name ?? "");
+  const [loading, setLoading] = useState(false);
+
+  if (!customer) return null;
+
+  const isLinked = !!customer.patient_user_id;
+
+  async function submit() {
+    if (!email.trim()) return toast.error("Informe um e-mail");
+    setLoading(true);
+    try {
+      const r: any = await invite({ data: { recordId, email: email.trim(), name: name.trim() || undefined } });
+      if (r?.alreadyLinked) toast.success("Paciente já tinha acesso vinculado");
+      else toast.success("Convite enviado ao paciente");
+      setOpen(false);
+      onChange();
+    } catch (e: any) {
+      toast.error(e?.message || "Falha ao convidar paciente");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant={isLinked ? "outline" : "default"} size="sm">
+          <UserPlus className="w-4 h-4" />
+          {isLinked ? "Acesso liberado" : "Liberar acesso ao paciente"}
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            {isLinked ? "Acesso do paciente" : "Convidar paciente"}
+          </DialogTitle>
+        </DialogHeader>
+        {isLinked ? (
+          <div className="text-sm space-y-2">
+            <p>Este paciente já possui acesso à área exclusiva.</p>
+            {customer.patient_invited_at && (
+              <p className="text-xs text-muted-foreground">
+                Convidado em {new Date(customer.patient_invited_at).toLocaleString("pt-BR")}
+              </p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Ele(a) verá apenas documentos, evoluções e pareceres que você marcar como liberados.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm">Nome</label>
+              <Input value={name} onChange={(e) => setName(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm">E-mail</label>
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Enviaremos um e-mail com link de acesso. O paciente verá apenas conteúdos liberados.
+            </p>
+            <DialogFooter>
+              <Button onClick={submit} disabled={loading}>
+                {loading ? "Enviando…" : "Enviar convite"}
+              </Button>
+            </DialogFooter>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
