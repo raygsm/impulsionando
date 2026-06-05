@@ -112,8 +112,9 @@ async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
     if (trial) {
       await supabase
         .from("trial_subscriptions")
-        .update({ status: "converted", converted_at: new Date().toISOString(), converted_plan: productId })
+        .update({ status: "converted", converted_at: new Date().toISOString() })
         .eq("id", trial.id);
+
 
       const modules = PLAN_MODULES[productId] ?? [];
       if (trial.company_id && modules.length) {
