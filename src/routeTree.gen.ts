@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SolucoesRouteImport } from './routes/solucoes'
 import { Route as SobreRouteImport } from './routes/sobre'
@@ -33,6 +34,7 @@ import { Route as ShowroomEventosRouteImport } from './routes/showroom.eventos'
 import { Route as PacienteIdRouteImport } from './routes/paciente.$id'
 import { Route as NichosSlugRouteImport } from './routes/nichos.$slug'
 import { Route as ModulosSlugRouteImport } from './routes/modulos.$slug'
+import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as DemoWhiteLabelRouteImport } from './routes/demo.white-label'
 import { Route as DemoClienteFinalRouteImport } from './routes/demo.cliente-final'
 import { Route as DemoChecklistRouteImport } from './routes/demo.checklist'
@@ -66,6 +68,7 @@ import { Route as AuthenticatedEhrIndexRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedCrmIndexRouteImport } from './routes/_authenticated/crm.index'
 import { Route as AuthenticatedBiIndexRouteImport } from './routes/_authenticated/bi.index'
 import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenticated/agenda.index'
+import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as AuthenticatedSalesOrdersRouteImport } from './routes/_authenticated/sales.orders'
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
 import { Route as AuthenticatedSalesCashRouteImport } from './routes/_authenticated/sales.cash'
@@ -97,11 +100,18 @@ import { Route as AuthenticatedAgendaServicesRouteImport } from './routes/_authe
 import { Route as AuthenticatedAgendaSchedulesRouteImport } from './routes/_authenticated/agenda.schedules'
 import { Route as AuthenticatedAgendaProfessionalsRouteImport } from './routes/_authenticated/agenda.professionals'
 import { Route as AuthenticatedAgendaAppointmentsRouteImport } from './routes/_authenticated/agenda.appointments'
+import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
 
+const UnsubscribeRoute = UnsubscribeRouteImport.update({
+  id: '/unsubscribe',
+  path: '/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermosRoute = TermosRouteImport.update({
   id: '/termos',
   path: '/termos',
@@ -220,6 +230,11 @@ const ModulosSlugRoute = ModulosSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => ModulosRoute,
+} as any)
+const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
+  id: '/email/unsubscribe',
+  path: '/email/unsubscribe',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const DemoWhiteLabelRoute = DemoWhiteLabelRouteImport.update({
   id: '/demo/white-label',
@@ -392,6 +407,11 @@ const AuthenticatedAgendaIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedAgendaRoute,
   } as any)
+const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
+  id: '/lovable/email/suppression',
+  path: '/lovable/email/suppression',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedSalesOrdersRoute =
   AuthenticatedSalesOrdersRouteImport.update({
     id: '/orders',
@@ -569,6 +589,18 @@ const AuthenticatedAgendaAppointmentsRoute =
     path: '/appointments',
     getParentRoute: () => AuthenticatedAgendaRoute,
   } as any)
+const LovableEmailTransactionalSendRoute =
+  LovableEmailTransactionalSendRouteImport.update({
+    id: '/lovable/email/transactional/send',
+    path: '/lovable/email/transactional/send',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -606,6 +638,7 @@ export interface FileRoutesByFullPath {
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
   '/termos': typeof TermosRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/audit': typeof AuthenticatedAuditRoute
@@ -631,6 +664,7 @@ export interface FileRoutesByFullPath {
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
@@ -672,6 +706,7 @@ export interface FileRoutesByFullPath {
   '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/bi/': typeof AuthenticatedBiIndexRoute
   '/crm/': typeof AuthenticatedCrmIndexRoute
@@ -684,6 +719,8 @@ export interface FileRoutesByFullPath {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -698,6 +735,7 @@ export interface FileRoutesByTo {
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
   '/termos': typeof TermosRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/audit': typeof AuthenticatedAuditRoute
   '/companies': typeof AuthenticatedCompaniesRoute
@@ -716,6 +754,7 @@ export interface FileRoutesByTo {
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
@@ -757,6 +796,7 @@ export interface FileRoutesByTo {
   '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/agenda': typeof AuthenticatedAgendaIndexRoute
   '/bi': typeof AuthenticatedBiIndexRoute
   '/crm': typeof AuthenticatedCrmIndexRoute
@@ -769,6 +809,8 @@ export interface FileRoutesByTo {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -786,6 +828,7 @@ export interface FileRoutesById {
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
   '/termos': typeof TermosRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/_authenticated/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/_authenticated/audit': typeof AuthenticatedAuditRoute
@@ -811,6 +854,7 @@ export interface FileRoutesById {
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
@@ -852,6 +896,7 @@ export interface FileRoutesById {
   '/_authenticated/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
   '/_authenticated/sales/orders': typeof AuthenticatedSalesOrdersRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/_authenticated/bi/': typeof AuthenticatedBiIndexRoute
   '/_authenticated/crm/': typeof AuthenticatedCrmIndexRoute
@@ -864,6 +909,8 @@ export interface FileRoutesById {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -881,6 +928,7 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/solucoes'
     | '/termos'
+    | '/unsubscribe'
     | '/access-profiles'
     | '/agenda'
     | '/audit'
@@ -906,6 +954,7 @@ export interface FileRouteTypes {
     | '/demo/checklist'
     | '/demo/cliente-final'
     | '/demo/white-label'
+    | '/email/unsubscribe'
     | '/modulos/$slug'
     | '/nichos/$slug'
     | '/paciente/$id'
@@ -947,6 +996,7 @@ export interface FileRouteTypes {
     | '/sales/cash'
     | '/sales/new'
     | '/sales/orders'
+    | '/lovable/email/suppression'
     | '/agenda/'
     | '/bi/'
     | '/crm/'
@@ -959,6 +1009,8 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -973,6 +1025,7 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/solucoes'
     | '/termos'
+    | '/unsubscribe'
     | '/access-profiles'
     | '/audit'
     | '/companies'
@@ -991,6 +1044,7 @@ export interface FileRouteTypes {
     | '/demo/checklist'
     | '/demo/cliente-final'
     | '/demo/white-label'
+    | '/email/unsubscribe'
     | '/modulos/$slug'
     | '/nichos/$slug'
     | '/paciente/$id'
@@ -1032,6 +1086,7 @@ export interface FileRouteTypes {
     | '/sales/cash'
     | '/sales/new'
     | '/sales/orders'
+    | '/lovable/email/suppression'
     | '/agenda'
     | '/bi'
     | '/crm'
@@ -1044,6 +1099,8 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
   id:
     | '__root__'
     | '/'
@@ -1060,6 +1117,7 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/solucoes'
     | '/termos'
+    | '/unsubscribe'
     | '/_authenticated/access-profiles'
     | '/_authenticated/agenda'
     | '/_authenticated/audit'
@@ -1085,6 +1143,7 @@ export interface FileRouteTypes {
     | '/demo/checklist'
     | '/demo/cliente-final'
     | '/demo/white-label'
+    | '/email/unsubscribe'
     | '/modulos/$slug'
     | '/nichos/$slug'
     | '/paciente/$id'
@@ -1126,6 +1185,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sales/cash'
     | '/_authenticated/sales/new'
     | '/_authenticated/sales/orders'
+    | '/lovable/email/suppression'
     | '/_authenticated/agenda/'
     | '/_authenticated/bi/'
     | '/_authenticated/crm/'
@@ -1138,6 +1198,8 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1155,10 +1217,12 @@ export interface RootRouteChildren {
   SobreRoute: typeof SobreRoute
   SolucoesRoute: typeof SolucoesRoute
   TermosRoute: typeof TermosRoute
+  UnsubscribeRoute: typeof UnsubscribeRoute
   ComoFuncionaFitnessRoute: typeof ComoFuncionaFitnessRoute
   DemoChecklistRoute: typeof DemoChecklistRoute
   DemoClienteFinalRoute: typeof DemoClienteFinalRoute
   DemoWhiteLabelRoute: typeof DemoWhiteLabelRoute
+  EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   NichosSlugRoute: typeof NichosSlugRoute
   ShowroomEventosRoute: typeof ShowroomEventosRoute
   ShowroomFitnessRoute: typeof ShowroomFitnessRoute
@@ -1166,13 +1230,23 @@ export interface RootRouteChildren {
   DemoIndexRoute: typeof DemoIndexRoute
   NichosIndexRoute: typeof NichosIndexRoute
   TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
+  LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
+  LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
+  LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/unsubscribe': {
+      id: '/unsubscribe'
+      path: '/unsubscribe'
+      fullPath: '/unsubscribe'
+      preLoaderRoute: typeof UnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/termos': {
       id: '/termos'
       path: '/termos'
@@ -1340,6 +1414,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/modulos/$slug'
       preLoaderRoute: typeof ModulosSlugRouteImport
       parentRoute: typeof ModulosRoute
+    }
+    '/email/unsubscribe': {
+      id: '/email/unsubscribe'
+      path: '/email/unsubscribe'
+      fullPath: '/email/unsubscribe'
+      preLoaderRoute: typeof EmailUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/demo/white-label': {
       id: '/demo/white-label'
@@ -1572,6 +1653,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgendaIndexRouteImport
       parentRoute: typeof AuthenticatedAgendaRoute
     }
+    '/lovable/email/suppression': {
+      id: '/lovable/email/suppression'
+      path: '/lovable/email/suppression'
+      fullPath: '/lovable/email/suppression'
+      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/sales/orders': {
       id: '/_authenticated/sales/orders'
       path: '/orders'
@@ -1788,6 +1876,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/agenda/appointments'
       preLoaderRoute: typeof AuthenticatedAgendaAppointmentsRouteImport
       parentRoute: typeof AuthenticatedAgendaRoute
+    }
+    '/lovable/email/transactional/send': {
+      id: '/lovable/email/transactional/send'
+      path: '/lovable/email/transactional/send'
+      fullPath: '/lovable/email/transactional/send'
+      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
@@ -2071,10 +2173,12 @@ const rootRouteChildren: RootRouteChildren = {
   SobreRoute: SobreRoute,
   SolucoesRoute: SolucoesRoute,
   TermosRoute: TermosRoute,
+  UnsubscribeRoute: UnsubscribeRoute,
   ComoFuncionaFitnessRoute: ComoFuncionaFitnessRoute,
   DemoChecklistRoute: DemoChecklistRoute,
   DemoClienteFinalRoute: DemoClienteFinalRoute,
   DemoWhiteLabelRoute: DemoWhiteLabelRoute,
+  EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   NichosSlugRoute: NichosSlugRoute,
   ShowroomEventosRoute: ShowroomEventosRoute,
   ShowroomFitnessRoute: ShowroomFitnessRoute,
@@ -2082,20 +2186,13 @@ const rootRouteChildren: RootRouteChildren = {
   DemoIndexRoute: DemoIndexRoute,
   NichosIndexRoute: NichosIndexRoute,
   TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
+  LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
+  LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
+  LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
