@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useSubscription } from "@/hooks/useSubscription";
 import {
-  changeMyPlan, cancelMySubscription, openMyPortal,
+  changeMyPlan, cancelMySubscription, openMyPortal, reactivateMySubscription,
 } from "@/lib/billing-self.functions";
 import { cn } from "@/lib/utils";
 
