@@ -102,6 +102,15 @@ function MinhaAssinaturaPage() {
     onError: (e: any) => toast.error(e.message || "Falha ao abrir portal"),
   });
 
+  const mReactivate = useMutation({
+    mutationFn: () => reactivateFn(),
+    onSuccess: () => {
+      toast.success("Assinatura reativada — renovação automática voltou a valer");
+      qc.invalidateQueries({ queryKey: ["my-subscription"] });
+    },
+    onError: (e: any) => toast.error(e.message || "Falha ao reativar"),
+  });
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
