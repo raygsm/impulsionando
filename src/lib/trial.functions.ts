@@ -28,11 +28,10 @@ export const requestTrial = createServerFn({ method: "POST" })
       _contact_company: data.contact_company,
       _contact_email: data.contact_email,
       _contact_whatsapp: data.contact_whatsapp,
-      _contact_doc: data.contact_doc ?? null,
+      _contact_doc: data.contact_doc ?? "",
       _chosen_plan: data.chosen_plan,
       _source: data.source ?? "site",
-      _terms_ip: null,
-    });
+    } as never);
     if (error) throw new Error(error.message);
     return { trialId };
   });
