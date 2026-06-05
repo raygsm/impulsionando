@@ -1024,6 +1024,348 @@ export type Database = {
         }
         Relationships: []
       }
+      ehr_documents: {
+        Row: {
+          ai_status: string
+          ai_summary: string | null
+          category: string
+          company_id: string
+          created_at: string
+          id: string
+          mime_type: string | null
+          notes: string | null
+          occurred_at: string | null
+          record_id: string
+          requires_review: boolean
+          review_status: string
+          size_bytes: number | null
+          source: string
+          storage_path: string
+          title: string
+          updated_at: string
+          uploaded_by: string | null
+          visible_to_patient: boolean
+        }
+        Insert: {
+          ai_status?: string
+          ai_summary?: string | null
+          category?: string
+          company_id: string
+          created_at?: string
+          id?: string
+          mime_type?: string | null
+          notes?: string | null
+          occurred_at?: string | null
+          record_id: string
+          requires_review?: boolean
+          review_status?: string
+          size_bytes?: number | null
+          source?: string
+          storage_path: string
+          title: string
+          updated_at?: string
+          uploaded_by?: string | null
+          visible_to_patient?: boolean
+        }
+        Update: {
+          ai_status?: string
+          ai_summary?: string | null
+          category?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          mime_type?: string | null
+          notes?: string | null
+          occurred_at?: string | null
+          record_id?: string
+          requires_review?: boolean
+          review_status?: string
+          size_bytes?: number | null
+          source?: string
+          storage_path?: string
+          title?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          visible_to_patient?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ehr_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ehr_documents_record_id_fkey"
+            columns: ["record_id"]
+            isOneToOne: false
+            referencedRelation: "ehr_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ehr_evolutions: {
+        Row: {
+          chief_complaint: string | null
+          clinical_history: string | null
+          company_id: string
+          conduct: string | null
+          created_at: string
+          created_by: string | null
+          doctor_name: string | null
+          doctor_user_id: string | null
+          exams_requested: string | null
+          follow_up: string | null
+          hypothesis: string | null
+          id: string
+          notes: string | null
+          occurred_at: string
+          physical_exam: string | null
+          prescription: string | null
+          record_id: string
+          signed_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          chief_complaint?: string | null
+          clinical_history?: string | null
+          company_id: string
+          conduct?: string | null
+          created_at?: string
+          created_by?: string | null
+          doctor_name?: string | null
+          doctor_user_id?: string | null
+          exams_requested?: string | null
+          follow_up?: string | null
+          hypothesis?: string | null
+          id?: string
+          notes?: string | null
+          occurred_at?: string
+          physical_exam?: string | null
+          prescription?: string | null
+          record_id: string
+          signed_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          chief_complaint?: string | null
+          clinical_history?: string | null
+          company_id?: string
+          conduct?: string | null
+          created_at?: string
+          created_by?: string | null
+          doctor_name?: string | null
+          doctor_user_id?: string | null
+          exams_requested?: string | null
+          follow_up?: string | null
+          hypothesis?: string | null
+          id?: string
+          notes?: string | null
+          occurred_at?: string
+          physical_exam?: string | null
+          prescription?: string | null
+          record_id?: string
+          signed_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ehr_evolutions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ehr_evolutions_record_id_fkey"
+            columns: ["record_id"]
+            isOneToOne: false
+            referencedRelation: "ehr_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ehr_opinions: {
+        Row: {
+          company_id: string
+          conduct: string | null
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string
+          doctor_name: string | null
+          doctor_user_id: string | null
+          document_id: string | null
+          evolution_id: string | null
+          id: string
+          internal_notes: string | null
+          interpretation: string | null
+          record_id: string
+          released_to_patient: boolean
+          request_followup: boolean
+          request_new_exam: boolean
+          summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          conduct?: string | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          doctor_name?: string | null
+          doctor_user_id?: string | null
+          document_id?: string | null
+          evolution_id?: string | null
+          id?: string
+          internal_notes?: string | null
+          interpretation?: string | null
+          record_id: string
+          released_to_patient?: boolean
+          request_followup?: boolean
+          request_new_exam?: boolean
+          summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          conduct?: string | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          doctor_name?: string | null
+          doctor_user_id?: string | null
+          document_id?: string | null
+          evolution_id?: string | null
+          id?: string
+          internal_notes?: string | null
+          interpretation?: string | null
+          record_id?: string
+          released_to_patient?: boolean
+          request_followup?: boolean
+          request_new_exam?: boolean
+          summary?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ehr_opinions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ehr_opinions_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "ehr_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ehr_opinions_evolution_id_fkey"
+            columns: ["evolution_id"]
+            isOneToOne: false
+            referencedRelation: "ehr_evolutions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ehr_opinions_record_id_fkey"
+            columns: ["record_id"]
+            isOneToOne: false
+            referencedRelation: "ehr_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ehr_records: {
+        Row: {
+          alerts: string | null
+          allergies: string | null
+          chief_complaint: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          current_medications: string | null
+          customer_id: string
+          family_history: string | null
+          id: string
+          medical_history: string | null
+          notes: string | null
+          previous_diagnoses: string | null
+          record_number: string | null
+          responsible_user_id: string | null
+          status: string
+          surgeries: string | null
+          unit_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          alerts?: string | null
+          allergies?: string | null
+          chief_complaint?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          current_medications?: string | null
+          customer_id: string
+          family_history?: string | null
+          id?: string
+          medical_history?: string | null
+          notes?: string | null
+          previous_diagnoses?: string | null
+          record_number?: string | null
+          responsible_user_id?: string | null
+          status?: string
+          surgeries?: string | null
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          alerts?: string | null
+          allergies?: string | null
+          chief_complaint?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          current_medications?: string | null
+          customer_id?: string
+          family_history?: string | null
+          id?: string
+          medical_history?: string | null
+          notes?: string | null
+          previous_diagnoses?: string | null
+          record_number?: string | null
+          responsible_user_id?: string | null
+          status?: string
+          surgeries?: string | null
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ehr_records_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ehr_records_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ehr_records_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "company_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fin_accounts: {
         Row: {
           company_id: string
