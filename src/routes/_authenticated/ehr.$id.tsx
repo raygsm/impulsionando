@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/app/PageElements";
@@ -19,8 +20,9 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import {
-  ArrowLeft, Upload, FileText, FileImage, Activity, Stethoscope, Download, ShieldCheck,
+  ArrowLeft, Upload, FileText, FileImage, Activity, Stethoscope, Download, ShieldCheck, UserPlus,
 } from "lucide-react";
+import { invitePatient } from "@/lib/ehr-patient.functions";
 
 export const Route = createFileRoute("/_authenticated/ehr/$id")({
   head: () => ({ meta: [{ title: "Prontuário — Impulsionando" }] }),
