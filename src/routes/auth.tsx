@@ -49,6 +49,28 @@ function AuthPage() {
     navigate({ to: "/dashboard" });
   }
 
+  async function handleGoogleSignIn() {
+    setLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        toast.error("Falha no login com Google. Tente novamente.");
+        setLoading(false);
+        return;
+      }
+      if (result.redirected) return; // browser redireciona para Google
+      // Token recebido e sessão setada
+      toast.success("Bem-vindo!");
+      navigate({ to: "/dashboard" });
+    } catch {
+      toast.error("Erro de conexão. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
