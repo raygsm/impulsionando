@@ -277,8 +277,10 @@ function PlanosPage() {
                       onClick={() =>
                         openCheckout({
                           priceId: PRICE_IDS[plan.name][annual ? "annual" : "monthly"],
-                          customerEmail: user?.email,
-                          customData: user?.id ? { userId: user.id, plan: plan.name } : { plan: plan.name },
+                          customerEmail: user?.user?.email ?? undefined,
+                          customData: user?.user?.id
+                            ? { userId: user.user.id, plan: plan.name }
+                            : { plan: plan.name },
                         })
                       }
                     >
