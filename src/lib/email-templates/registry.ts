@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react'
 import { template as siteDownTemplate } from './site-down'
 import { template as siteUpTemplate } from './site-up'
+import { template as marketingLeadNewTemplate } from './marketing-lead-new'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -18,4 +19,5 @@ export interface TemplateEntry {
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'site-down': siteDownTemplate,
   'site-up': siteUpTemplate,
+  'marketing-lead-new': marketingLeadNewTemplate,
 }

@@ -42,21 +42,30 @@ function ContatoPage() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.from("marketing_leads").insert({
-      source: "contato",
-      name: name.trim(),
-      email: email.trim() || null,
-      phone: phone.trim() || null,
-      company: company.trim() || null,
-      message: message.trim(),
-      page_url: typeof window !== "undefined" ? window.location.href : null,
-      user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
-    });
+    const { data: inserted, error } = await supabase
+      .from("marketing_leads")
+      .insert({
+        source: "contato",
+        name: name.trim(),
+        email: email.trim() || null,
+        phone: phone.trim() || null,
+        company: company.trim() || null,
+        message: message.trim(),
+        page_url: typeof window !== "undefined" ? window.location.href : null,
+        user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
+      })
+      .select("id")
+      .single();
     setLoading(false);
-    if (error) {
+    if (error || !inserted) {
       toast.error("Não foi possível enviar agora. Tente novamente.");
       return;
     }
+    void fetch("/api/public/hooks/marketing-lead-notify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ leadId: inserted.id }),
+    }).catch((e) => console.warn("lead notify failed", e));
     setSent(true);
     toast.success("Mensagem recebida! Vamos responder em breve.");
   }
