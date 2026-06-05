@@ -101,6 +101,39 @@ function TrialCadastro() {
 
   const allAccepted = accept.terms && accept.billing && accept.suspension && accept.comm;
 
+  if (sentTo) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background">
+        <PublicHeader />
+        <main className="flex-1 mx-auto max-w-2xl px-4 py-16 w-full">
+          <Card className="p-10 text-center space-y-5">
+            <div className="mx-auto w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+              <CheckCircle2 className="w-7 h-7 text-primary" />
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight">Trial ativado!</h1>
+            <p className="text-muted-foreground leading-relaxed">
+              Enviamos um <strong>link de acesso direto ao painel</strong> para
+              <br />
+              <span className="font-medium text-foreground">{sentTo}</span>
+            </p>
+            <div className="rounded-lg border bg-muted/30 p-4 text-sm text-left flex gap-3">
+              <Mail className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
+              <div>
+                Abra o e-mail e clique em <strong>"Entrar agora"</strong> — não é preciso criar senha.
+                Você também recebeu o link no WhatsApp informado. O link expira em 1 hora; se preciso,
+                volte aqui e repita o cadastro com o mesmo e-mail para receber um novo.
+              </div>
+            </div>
+            <Button asChild variant="outline" className="w-full">
+              <a href="https://impulsionando.com.br/auth">Já tenho conta — fazer login</a>
+            </Button>
+          </Card>
+        </main>
+        <PublicFooter />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
@@ -111,6 +144,7 @@ function TrialCadastro() {
             Preencha os dados e aceite os termos para liberar todos os recursos da Impulsionando Tecnologia por 7 dias.
           </p>
         </div>
+
 
         <Card className="p-6 space-y-4">
           <div className="grid sm:grid-cols-2 gap-4">
