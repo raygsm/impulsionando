@@ -26,7 +26,7 @@ function SuccessPage() {
         </p>
         <div className="flex gap-3 justify-center">
           <Button asChild>
-            <Link to="/dashboard">Ir para o painel</Link>
+            <Link to="/dashboard" search={{}}>Ir para o painel</Link>
           </Button>
           <Button asChild variant="outline">
             <Link to="/">Voltar ao site</Link>
