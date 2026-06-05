@@ -106,6 +106,7 @@ import { Route as AuthenticatedAgendaServicesRouteImport } from './routes/_authe
 import { Route as AuthenticatedAgendaSchedulesRouteImport } from './routes/_authenticated/agenda.schedules'
 import { Route as AuthenticatedAgendaProfessionalsRouteImport } from './routes/_authenticated/agenda.professionals'
 import { Route as AuthenticatedAgendaAppointmentsRouteImport } from './routes/_authenticated/agenda.appointments'
+import { Route as AuthenticatedAdminUptimeRouteImport } from './routes/_authenticated/admin.uptime'
 import { Route as AuthenticatedAdminTrialsRouteImport } from './routes/_authenticated/admin.trials'
 import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authenticated/admin.billing'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
@@ -114,6 +115,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicHooksUptimeCheckRouteImport } from './routes/api/public/hooks/uptime-check'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
@@ -629,6 +631,12 @@ const AuthenticatedAgendaAppointmentsRoute =
     path: '/appointments',
     getParentRoute: () => AuthenticatedAgendaRoute,
   } as any)
+const AuthenticatedAdminUptimeRoute =
+  AuthenticatedAdminUptimeRouteImport.update({
+    id: '/admin/uptime',
+    path: '/admin/uptime',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminTrialsRoute =
   AuthenticatedAdminTrialsRouteImport.update({
     id: '/admin/trials',
@@ -673,6 +681,12 @@ const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
     path: '/api/public/payments/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksUptimeCheckRoute =
+  ApiPublicHooksUptimeCheckRouteImport.update({
+    id: '/api/public/hooks/uptime-check',
+    path: '/api/public/hooks/uptime-check',
     getParentRoute: () => rootRouteImport,
   } as any)
 const AuthenticatedSalesCashIdRoute =
@@ -741,6 +755,7 @@ export interface FileRoutesByFullPath {
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
+  '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
@@ -782,6 +797,7 @@ export interface FileRoutesByFullPath {
   '/reports/': typeof AuthenticatedReportsIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
+  '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -840,6 +856,7 @@ export interface FileRoutesByTo {
   '/trabalhe-conosco': typeof TrabalheConoscoIndexRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
+  '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
@@ -881,6 +898,7 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedReportsIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
+  '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -949,6 +967,7 @@ export interface FileRoutesById {
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/_authenticated/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/_authenticated/admin/trials': typeof AuthenticatedAdminTrialsRoute
+  '/_authenticated/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/_authenticated/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/_authenticated/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/_authenticated/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
@@ -990,6 +1009,7 @@ export interface FileRoutesById {
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
+  '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1058,6 +1078,7 @@ export interface FileRouteTypes {
     | '/trabalhe-conosco/'
     | '/admin/billing'
     | '/admin/trials'
+    | '/admin/uptime'
     | '/agenda/appointments'
     | '/agenda/professionals'
     | '/agenda/schedules'
@@ -1099,6 +1120,7 @@ export interface FileRouteTypes {
     | '/reports/'
     | '/sales/'
     | '/sales/cash/$id'
+    | '/api/public/hooks/uptime-check'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1157,6 +1179,7 @@ export interface FileRouteTypes {
     | '/trabalhe-conosco'
     | '/admin/billing'
     | '/admin/trials'
+    | '/admin/uptime'
     | '/agenda/appointments'
     | '/agenda/professionals'
     | '/agenda/schedules'
@@ -1198,6 +1221,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/sales'
     | '/sales/cash/$id'
+    | '/api/public/hooks/uptime-check'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1265,6 +1289,7 @@ export interface FileRouteTypes {
     | '/trabalhe-conosco/'
     | '/_authenticated/admin/billing'
     | '/_authenticated/admin/trials'
+    | '/_authenticated/admin/uptime'
     | '/_authenticated/agenda/appointments'
     | '/_authenticated/agenda/professionals'
     | '/_authenticated/agenda/schedules'
@@ -1306,6 +1331,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reports/'
     | '/_authenticated/sales/'
     | '/_authenticated/sales/cash/$id'
+    | '/api/public/hooks/uptime-check'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1347,6 +1373,7 @@ export interface RootRouteChildren {
   NichosIndexRoute: typeof NichosIndexRoute
   TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicHooksUptimeCheckRoute: typeof ApiPublicHooksUptimeCheckRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -2036,6 +2063,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgendaAppointmentsRouteImport
       parentRoute: typeof AuthenticatedAgendaRoute
     }
+    '/_authenticated/admin/uptime': {
+      id: '/_authenticated/admin/uptime'
+      path: '/admin/uptime'
+      fullPath: '/admin/uptime'
+      preLoaderRoute: typeof AuthenticatedAdminUptimeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/trials': {
       id: '/_authenticated/admin/trials'
       path: '/admin/trials'
@@ -2090,6 +2124,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/payments/webhook'
       fullPath: '/api/public/payments/webhook'
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/uptime-check': {
+      id: '/api/public/hooks/uptime-check'
+      path: '/api/public/hooks/uptime-check'
+      fullPath: '/api/public/hooks/uptime-check'
+      preLoaderRoute: typeof ApiPublicHooksUptimeCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/sales/cash/$id': {
@@ -2281,6 +2322,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
   AuthenticatedAdminBillingRoute: typeof AuthenticatedAdminBillingRoute
   AuthenticatedAdminTrialsRoute: typeof AuthenticatedAdminTrialsRoute
+  AuthenticatedAdminUptimeRoute: typeof AuthenticatedAdminUptimeRoute
   AuthenticatedEhrIdRoute: typeof AuthenticatedEhrIdRoute
   AuthenticatedMarketingLeadsRoute: typeof AuthenticatedMarketingLeadsRoute
   AuthenticatedEhrIndexRoute: typeof AuthenticatedEhrIndexRoute
@@ -2311,6 +2353,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedUsersRoute: AuthenticatedUsersRoute,
   AuthenticatedAdminBillingRoute: AuthenticatedAdminBillingRoute,
   AuthenticatedAdminTrialsRoute: AuthenticatedAdminTrialsRoute,
+  AuthenticatedAdminUptimeRoute: AuthenticatedAdminUptimeRoute,
   AuthenticatedEhrIdRoute: AuthenticatedEhrIdRoute,
   AuthenticatedMarketingLeadsRoute: AuthenticatedMarketingLeadsRoute,
   AuthenticatedEhrIndexRoute: AuthenticatedEhrIndexRoute,
@@ -2387,6 +2430,7 @@ const rootRouteChildren: RootRouteChildren = {
   NichosIndexRoute: NichosIndexRoute,
   TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicHooksUptimeCheckRoute: ApiPublicHooksUptimeCheckRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
