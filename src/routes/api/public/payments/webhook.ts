@@ -244,7 +244,14 @@ async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
     console.warn("[paddle] missing importMeta.externalId — skipping", {
       rawPriceId: item?.price?.id,
       rawProductId: item?.product?.id,
+      subscriptionId: id,
     });
+    await notifyStaff(
+      getSupabase(),
+      "Assinatura ignorada — externalId faltando",
+      `Sub ${id} (${env}) — price=${item?.price?.id} product=${item?.product?.id}. Recrie no Paddle com create_product/create_price.`,
+      null
+    );
     return;
   }
 
