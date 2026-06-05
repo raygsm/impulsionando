@@ -499,6 +499,45 @@ async function handleSubscriptionUpdated(data: any, env: PaddleEnv) {
       companyId
     );
   }
+
+  // Reativação: cliente removeu o cancelamento agendado
+  if (isReactivation) {
+    const prof = (
+      await supabase
+        .from("user_profiles")
+        .select("email, display_name")
+        .eq("user_id", userId)
+        .maybeSingle()
+    ).data;
+    await enqueueTemplate(
+      supabase,
+      "subscription_reactivated",
+      "email",
+      userId,
+      companyId,
+      prof?.email ?? null,
+      null,
+      prof?.display_name ?? null,
+      { recipient_name: prof?.display_name ?? "cliente", subscription_id: id }
+    );
+    await enqueueTemplate(
+      supabase,
+      "subscription_reactivated",
+      "in_app",
+      userId,
+      companyId,
+      null,
+      null,
+      prof?.display_name ?? null,
+      { recipient_name: prof?.display_name ?? "cliente" }
+    );
+    await notifyStaff(
+      supabase,
+      "Assinatura reativada",
+      `User ${userId} • ${id}`,
+      companyId
+    );
+  }
 }
 
 async function handleSubscriptionCanceled(data: any, env: PaddleEnv) {
