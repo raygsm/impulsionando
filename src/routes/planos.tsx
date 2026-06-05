@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { cn } from "@/lib/utils";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
@@ -144,16 +147,27 @@ const FAQ = [
   },
 ];
 
+const PRICE_IDS: Record<string, { monthly: string; annual: string }> = {
+  Essencial: { monthly: "essencial_monthly", annual: "essencial_annual" },
+  Integrado: { monthly: "integrado_monthly", annual: "integrado_annual" },
+  Avançado: { monthly: "avancado_monthly", annual: "avancado_annual" },
+};
+
 function formatBRL(v: number) {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function PlanosPage() {
   const [annual, setAnnual] = useState(false);
+  const { openCheckout, loading: checkoutLoading } = usePaddleCheckout();
+  const { data: user } = useCurrentUser();
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <PaymentTestModeBanner />
       <PublicHeader />
+
+
 
       {/* HERO */}
       <section className="relative overflow-hidden bg-gradient-hero text-primary-foreground">
@@ -254,17 +268,37 @@ function PlanosPage() {
                   ))}
                 </ul>
 
-                <Button
-                  asChild
-                  className={cn("mt-6 w-full", plan.highlight && "bg-gradient-primary shadow-elegant")}
-                  variant={plan.highlight ? "default" : "outline"}
-                >
-                  {plan.monthly !== null ? (
-                    <Link to="/trial/cadastro">{plan.cta}</Link>
-                  ) : (
+                {plan.monthly !== null && PRICE_IDS[plan.name] ? (
+                  <div className="mt-6 space-y-2">
+                    <Button
+                      className={cn("w-full", plan.highlight && "bg-gradient-primary shadow-elegant")}
+                      variant={plan.highlight ? "default" : "outline"}
+                      disabled={checkoutLoading}
+                      onClick={() =>
+                        openCheckout({
+                          priceId: PRICE_IDS[plan.name][annual ? "annual" : "monthly"],
+                          customerEmail: user?.user?.email ?? undefined,
+                          customData: user?.user?.id
+                            ? { userId: user.user.id, plan: plan.name }
+                            : { plan: plan.name },
+                        })
+                      }
+                    >
+                      {checkoutLoading ? "Abrindo checkout..." : `Assinar ${annual ? "anual" : "mensal"}`}
+                    </Button>
+                    <Button asChild variant="ghost" size="sm" className="w-full text-xs">
+                      <Link to="/trial/cadastro">ou começar Trial de 7 dias</Link>
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    asChild
+                    className={cn("mt-6 w-full", plan.highlight && "bg-gradient-primary shadow-elegant")}
+                    variant={plan.highlight ? "default" : "outline"}
+                  >
                     <Link to="/orcamento" search={{ plano: plan.name, origem: "planos" }}>{plan.cta}</Link>
-                  )}
-                </Button>
+                  </Button>
+                )}
               </Card>
             );
           })}
