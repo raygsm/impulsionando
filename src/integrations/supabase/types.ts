@@ -3027,6 +3027,7 @@ export type Database = {
           id: string
           paddle_customer_id: string
           paddle_subscription_id: string
+          past_due_since: string | null
           price_id: string
           product_id: string
           status: string
@@ -3042,6 +3043,7 @@ export type Database = {
           id?: string
           paddle_customer_id: string
           paddle_subscription_id: string
+          past_due_since?: string | null
           price_id: string
           product_id: string
           status?: string
@@ -3057,6 +3059,7 @@ export type Database = {
           id?: string
           paddle_customer_id?: string
           paddle_subscription_id?: string
+          past_due_since?: string | null
           price_id?: string
           product_id?: string
           status?: string
@@ -3542,6 +3545,7 @@ export type Database = {
         Args: { _counts: Json; _notes?: string; _session_id: string }
         Returns: string
       }
+      subscription_suspend_overdue: { Args: never; Returns: number }
       trial_advance_status: { Args: never; Returns: number }
       trial_cancel: {
         Args: { _reason?: string; _trial_id: string }
