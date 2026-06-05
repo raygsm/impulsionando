@@ -118,6 +118,7 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 import { Route as ApiPublicHooksUptimeWhatsappTestRouteImport } from './routes/api/public/hooks/uptime-whatsapp-test'
 import { Route as ApiPublicHooksUptimeCheckRouteImport } from './routes/api/public/hooks/uptime-check'
 import { Route as ApiPublicHooksMarketingLeadNotifyRouteImport } from './routes/api/public/hooks/marketing-lead-notify'
+import { Route as ApiPublicHooksCommsSelfTestRouteImport } from './routes/api/public/hooks/comms-self-test'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
@@ -703,6 +704,12 @@ const ApiPublicHooksMarketingLeadNotifyRoute =
     path: '/api/public/hooks/marketing-lead-notify',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksCommsSelfTestRoute =
+  ApiPublicHooksCommsSelfTestRouteImport.update({
+    id: '/api/public/hooks/comms-self-test',
+    path: '/api/public/hooks/comms-self-test',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedSalesCashIdRoute =
   AuthenticatedSalesCashIdRouteImport.update({
     id: '/$id',
@@ -811,6 +818,7 @@ export interface FileRoutesByFullPath {
   '/reports/': typeof AuthenticatedReportsIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
+  '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
@@ -914,6 +922,7 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedReportsIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
+  '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
@@ -1027,6 +1036,7 @@ export interface FileRoutesById {
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
+  '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
@@ -1140,6 +1150,7 @@ export interface FileRouteTypes {
     | '/reports/'
     | '/sales/'
     | '/sales/cash/$id'
+    | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
@@ -1243,6 +1254,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/sales'
     | '/sales/cash/$id'
+    | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
@@ -1355,6 +1367,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reports/'
     | '/_authenticated/sales/'
     | '/_authenticated/sales/cash/$id'
+    | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
@@ -1400,6 +1413,7 @@ export interface RootRouteChildren {
   NichosIndexRoute: typeof NichosIndexRoute
   TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicHooksCommsSelfTestRoute: typeof ApiPublicHooksCommsSelfTestRoute
   ApiPublicHooksMarketingLeadNotifyRoute: typeof ApiPublicHooksMarketingLeadNotifyRoute
   ApiPublicHooksUptimeCheckRoute: typeof ApiPublicHooksUptimeCheckRoute
   ApiPublicHooksUptimeWhatsappTestRoute: typeof ApiPublicHooksUptimeWhatsappTestRoute
@@ -2176,6 +2190,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksMarketingLeadNotifyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/comms-self-test': {
+      id: '/api/public/hooks/comms-self-test'
+      path: '/api/public/hooks/comms-self-test'
+      fullPath: '/api/public/hooks/comms-self-test'
+      preLoaderRoute: typeof ApiPublicHooksCommsSelfTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/sales/cash/$id': {
       id: '/_authenticated/sales/cash/$id'
       path: '/$id'
@@ -2464,6 +2485,7 @@ const rootRouteChildren: RootRouteChildren = {
   NichosIndexRoute: NichosIndexRoute,
   TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicHooksCommsSelfTestRoute: ApiPublicHooksCommsSelfTestRoute,
   ApiPublicHooksMarketingLeadNotifyRoute:
     ApiPublicHooksMarketingLeadNotifyRoute,
   ApiPublicHooksUptimeCheckRoute: ApiPublicHooksUptimeCheckRoute,
