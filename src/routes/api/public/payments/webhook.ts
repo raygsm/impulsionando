@@ -624,31 +624,50 @@ async function handleTransactionCompleted(data: any, env: PaddleEnv) {
 
 async function handleTransactionPaymentFailed(data: any, env: PaddleEnv) {
   const supabase = getSupabase();
-  const userId = data.customData?.userId;
-  if (!userId) {
-    await notifyStaff(supabase, "Falha de pagamento (sem userId)", `Txn ${data.id} (${env})`, null);
-    return;
+  const userId = data.customData?.userId as string | undefined;
+
+  // Resolve destinatário: tenta perfil do app; fallback no email do Paddle (checkout anônimo).
+  let recipientEmail: string | null = null;
+  let recipientName: string | null = null;
+  let companyId: string | null = null;
+
+  if (userId) {
+    companyId = await getCompanyForUser(supabase, userId);
+    const prof = (
+      await supabase
+        .from("user_profiles")
+        .select("email, display_name")
+        .eq("user_id", userId)
+        .maybeSingle()
+    ).data;
+    recipientEmail = prof?.email ?? null;
+    recipientName = prof?.display_name ?? null;
   }
-  const companyId = await getCompanyForUser(supabase, userId);
-  const prof = (
-    await supabase
-      .from("user_profiles")
-      .select("email, display_name")
-      .eq("user_id", userId)
-      .maybeSingle()
-  ).data;
-  await enqueueTemplate(
+  if (!recipientEmail && data.customerId) {
+    const cust = await fetchPaddleCustomer(env, data.customerId);
+    recipientEmail = cust?.email?.toLowerCase() ?? null;
+    recipientName = recipientName ?? cust?.name ?? null;
+  }
+
+  if (recipientEmail) {
+    await enqueueTemplate(
+      supabase,
+      "payment_failed",
+      "email",
+      userId ?? null,
+      companyId,
+      recipientEmail,
+      null,
+      recipientName,
+      { recipient_name: recipientName ?? "cliente", transactionId: data.id }
+    );
+  }
+  await notifyStaff(
     supabase,
-    "payment_failed",
-    "email",
-    userId,
-    companyId,
-    prof?.email ?? null,
-    null,
-    prof?.display_name ?? null,
-    { recipient_name: prof?.display_name ?? "cliente", transactionId: data.id }
+    userId ? "Falha de pagamento" : "Falha de pagamento (sem userId)",
+    `Txn ${data.id} (${env})${recipientEmail ? ` • ${recipientEmail}` : ""}`,
+    companyId
   );
-  await notifyStaff(supabase, "Falha de pagamento", `Txn ${data.id} (${env})`, companyId);
 }
 
 async function handleWebhook(req: Request, env: PaddleEnv) {
