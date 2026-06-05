@@ -3041,6 +3041,277 @@ export type Database = {
         }
         Relationships: []
       }
+      trial_abuse_index: {
+        Row: {
+          company_hash: string | null
+          created_at: string
+          doc_hash: string | null
+          email_hash: string | null
+          id: string
+          trial_id: string
+          whatsapp_hash: string | null
+        }
+        Insert: {
+          company_hash?: string | null
+          created_at?: string
+          doc_hash?: string | null
+          email_hash?: string | null
+          id?: string
+          trial_id: string
+          whatsapp_hash?: string | null
+        }
+        Update: {
+          company_hash?: string | null
+          created_at?: string
+          doc_hash?: string | null
+          email_hash?: string | null
+          id?: string
+          trial_id?: string
+          whatsapp_hash?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trial_abuse_index_trial_id_fkey"
+            columns: ["trial_id"]
+            isOneToOne: false
+            referencedRelation: "trial_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trial_events: {
+        Row: {
+          actor_user_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          payload: Json
+          trial_id: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          payload?: Json
+          trial_id: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+          trial_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trial_events_trial_id_fkey"
+            columns: ["trial_id"]
+            isOneToOne: false
+            referencedRelation: "trial_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trial_settings: {
+        Row: {
+          allow_custom_domain: boolean
+          allow_export: boolean
+          allow_extension: boolean
+          allow_real_credentials: boolean
+          allow_real_integrations: boolean
+          allow_real_publish: boolean
+          apply_setup_on_convert: boolean
+          block_repeat_company: boolean
+          block_repeat_doc: boolean
+          block_repeat_email: boolean
+          block_repeat_whatsapp: boolean
+          charge_setup_after: boolean
+          charge_setup_before: boolean
+          created_at: string
+          duration_days: number
+          extension_requires_reason: boolean
+          id: string
+          max_customers: number
+          max_events: number
+          max_extension_days: number
+          max_products: number
+          max_simulated_messages: number
+          max_simulated_payments: number
+          max_tickets: number
+          max_users: number
+          updated_at: string
+          waive_setup_on_trial: boolean
+        }
+        Insert: {
+          allow_custom_domain?: boolean
+          allow_export?: boolean
+          allow_extension?: boolean
+          allow_real_credentials?: boolean
+          allow_real_integrations?: boolean
+          allow_real_publish?: boolean
+          apply_setup_on_convert?: boolean
+          block_repeat_company?: boolean
+          block_repeat_doc?: boolean
+          block_repeat_email?: boolean
+          block_repeat_whatsapp?: boolean
+          charge_setup_after?: boolean
+          charge_setup_before?: boolean
+          created_at?: string
+          duration_days?: number
+          extension_requires_reason?: boolean
+          id?: string
+          max_customers?: number
+          max_events?: number
+          max_extension_days?: number
+          max_products?: number
+          max_simulated_messages?: number
+          max_simulated_payments?: number
+          max_tickets?: number
+          max_users?: number
+          updated_at?: string
+          waive_setup_on_trial?: boolean
+        }
+        Update: {
+          allow_custom_domain?: boolean
+          allow_export?: boolean
+          allow_extension?: boolean
+          allow_real_credentials?: boolean
+          allow_real_integrations?: boolean
+          allow_real_publish?: boolean
+          apply_setup_on_convert?: boolean
+          block_repeat_company?: boolean
+          block_repeat_doc?: boolean
+          block_repeat_email?: boolean
+          block_repeat_whatsapp?: boolean
+          charge_setup_after?: boolean
+          charge_setup_before?: boolean
+          created_at?: string
+          duration_days?: number
+          extension_requires_reason?: boolean
+          id?: string
+          max_customers?: number
+          max_events?: number
+          max_extension_days?: number
+          max_products?: number
+          max_simulated_messages?: number
+          max_simulated_payments?: number
+          max_tickets?: number
+          max_users?: number
+          updated_at?: string
+          waive_setup_on_trial?: boolean
+        }
+        Relationships: []
+      }
+      trial_subscriptions: {
+        Row: {
+          cancelled_at: string | null
+          chosen_plan: Database["public"]["Enums"]["trial_plan_choice"]
+          company_id: string | null
+          contact_company: string
+          contact_doc: string | null
+          contact_email: string
+          contact_name: string
+          contact_whatsapp: string
+          converted_at: string | null
+          created_at: string
+          ends_at: string | null
+          extended_by: string | null
+          extended_days: number
+          extension_reason: string | null
+          id: string
+          lead_id: string | null
+          paddle_subscription_id: string | null
+          paddle_transaction_id: string | null
+          regularized_at: string | null
+          setup_charged: boolean
+          source: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["trial_status"]
+          suspended_at: string | null
+          terms_accepted_at: string
+          terms_ip: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          cancelled_at?: string | null
+          chosen_plan?: Database["public"]["Enums"]["trial_plan_choice"]
+          company_id?: string | null
+          contact_company: string
+          contact_doc?: string | null
+          contact_email: string
+          contact_name: string
+          contact_whatsapp: string
+          converted_at?: string | null
+          created_at?: string
+          ends_at?: string | null
+          extended_by?: string | null
+          extended_days?: number
+          extension_reason?: string | null
+          id?: string
+          lead_id?: string | null
+          paddle_subscription_id?: string | null
+          paddle_transaction_id?: string | null
+          regularized_at?: string | null
+          setup_charged?: boolean
+          source?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["trial_status"]
+          suspended_at?: string | null
+          terms_accepted_at?: string
+          terms_ip?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          cancelled_at?: string | null
+          chosen_plan?: Database["public"]["Enums"]["trial_plan_choice"]
+          company_id?: string | null
+          contact_company?: string
+          contact_doc?: string | null
+          contact_email?: string
+          contact_name?: string
+          contact_whatsapp?: string
+          converted_at?: string | null
+          created_at?: string
+          ends_at?: string | null
+          extended_by?: string | null
+          extended_days?: number
+          extension_reason?: string | null
+          id?: string
+          lead_id?: string | null
+          paddle_subscription_id?: string | null
+          paddle_transaction_id?: string | null
+          regularized_at?: string | null
+          setup_charged?: boolean
+          source?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["trial_status"]
+          suspended_at?: string | null
+          terms_accepted_at?: string
+          terms_ip?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trial_subscriptions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trial_subscriptions_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_permission_overrides: {
         Row: {
           company_id: string
@@ -3145,6 +3416,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _trial_norm: { Args: { _v: string }; Returns: string }
       current_user_company_ids: { Args: never; Returns: string[] }
       customer_anonymize: {
         Args: { _customer_id: string; _reason?: string }
@@ -3217,6 +3489,42 @@ export type Database = {
         Args: { _counts: Json; _notes?: string; _session_id: string }
         Returns: string
       }
+      trial_advance_status: { Args: never; Returns: number }
+      trial_cancel: {
+        Args: { _reason?: string; _trial_id: string }
+        Returns: string
+      }
+      trial_check_abuse: {
+        Args: {
+          _company: string
+          _doc: string
+          _email: string
+          _whatsapp: string
+        }
+        Returns: Json
+      }
+      trial_convert: {
+        Args: { _paddle_sub?: string; _trial_id: string }
+        Returns: string
+      }
+      trial_create: {
+        Args: {
+          _chosen_plan: Database["public"]["Enums"]["trial_plan_choice"]
+          _contact_company: string
+          _contact_doc: string
+          _contact_email: string
+          _contact_name: string
+          _contact_whatsapp: string
+          _source?: string
+          _terms_ip?: string
+        }
+        Returns: string
+      }
+      trial_extend: {
+        Args: { _days: number; _reason: string; _trial_id: string }
+        Returns: string
+      }
+      trial_regularize: { Args: { _trial_id: string }; Returns: string }
       user_belongs_to_company: {
         Args: { _company: string; _user: string }
         Returns: boolean
@@ -3227,7 +3535,21 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      trial_plan_choice: "essencial" | "integrado" | "avancado" | "sob_medida"
+      trial_status:
+        | "solicitado"
+        | "ativo"
+        | "vence_3d"
+        | "vence_1d"
+        | "vence_hoje"
+        | "encerrado"
+        | "cobranca_gerada"
+        | "pagamento_pendente"
+        | "convertido"
+        | "suspenso"
+        | "regularizado"
+        | "cancelado"
+        | "expirado_sem_conversao"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3354,6 +3676,23 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      trial_plan_choice: ["essencial", "integrado", "avancado", "sob_medida"],
+      trial_status: [
+        "solicitado",
+        "ativo",
+        "vence_3d",
+        "vence_1d",
+        "vence_hoje",
+        "encerrado",
+        "cobranca_gerada",
+        "pagamento_pendente",
+        "convertido",
+        "suspenso",
+        "regularizado",
+        "cancelado",
+        "expirado_sem_conversao",
+      ],
+    },
   },
 } as const
