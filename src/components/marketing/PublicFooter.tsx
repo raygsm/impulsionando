@@ -3,7 +3,7 @@ import { MessageCircle, Mail } from "lucide-react";
 import logoAsset from "@/assets/logo-impulsionando.png.asset.json";
 
 const WHATSAPP_URL = "https://wa.me/5521993075000";
-const EMAIL = "sac@impulsionandobrasil.com.br";
+const EMAIL = "sac@impulsionando.com.br";
 
 export function PublicFooter() {
   return (

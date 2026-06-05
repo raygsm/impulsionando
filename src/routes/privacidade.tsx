@@ -17,7 +17,7 @@ export const Route = createFileRoute("/privacidade")({
   component: PrivacidadePage,
 });
 
-const EMAIL_DPO = "sac@impulsionandobrasil.com.br";
+const EMAIL_DPO = "sac@impulsionando.com.br";
 const WHATSAPP_URL = "https://wa.me/5521993075000";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {

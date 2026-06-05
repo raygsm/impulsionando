@@ -15,7 +15,7 @@ export const Route = createFileRoute("/contato")({
   head: () => ({
     meta: [
       { title: "Contato — Impulsionando Tecnologia" },
-      { name: "description", content: "Fale com a Impulsionando Tecnologia pelo WhatsApp +55 21 99307-5000, e-mail sac@impulsionandobrasil.com.br ou pelo formulário." },
+      { name: "description", content: "Fale com a Impulsionando Tecnologia pelo WhatsApp +55 21 99307-5000, e-mail sac@impulsionando.com.br ou pelo formulário." },
       { property: "og:title", content: "Contato — Impulsionando Tecnologia" },
       { property: "og:description", content: "WhatsApp, e-mail e orçamento personalizado. Fale com nosso time." },
     ],
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/contato")({
 });
 
 const WHATSAPP_URL = "https://wa.me/5521993075000";
-const EMAIL = "sac@impulsionandobrasil.com.br";
+const EMAIL = "sac@impulsionando.com.br";
 
 function ContatoPage() {
   const [name, setName] = useState("");
