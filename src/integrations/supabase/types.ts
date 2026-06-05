@@ -873,6 +873,9 @@ export type Database = {
           lead_id: string | null
           name: string
           notes: string | null
+          patient_activated_at: string | null
+          patient_invited_at: string | null
+          patient_user_id: string | null
           phone: string | null
           tags: string[]
           unit_id: string | null
@@ -898,6 +901,9 @@ export type Database = {
           lead_id?: string | null
           name: string
           notes?: string | null
+          patient_activated_at?: string | null
+          patient_invited_at?: string | null
+          patient_user_id?: string | null
           phone?: string | null
           tags?: string[]
           unit_id?: string | null
@@ -923,6 +929,9 @@ export type Database = {
           lead_id?: string | null
           name?: string
           notes?: string | null
+          patient_activated_at?: string | null
+          patient_invited_at?: string | null
+          patient_user_id?: string | null
           phone?: string | null
           tags?: string[]
           unit_id?: string | null
@@ -1124,6 +1133,7 @@ export type Database = {
           physical_exam: string | null
           prescription: string | null
           record_id: string
+          released_to_patient: boolean
           signed_at: string | null
           updated_at: string
         }
@@ -1145,6 +1155,7 @@ export type Database = {
           physical_exam?: string | null
           prescription?: string | null
           record_id: string
+          released_to_patient?: boolean
           signed_at?: string | null
           updated_at?: string
         }
@@ -1166,6 +1177,7 @@ export type Database = {
           physical_exam?: string | null
           prescription?: string | null
           record_id?: string
+          released_to_patient?: boolean
           signed_at?: string | null
           updated_at?: string
         }
@@ -2885,6 +2897,10 @@ export type Database = {
         Returns: string
       }
       is_impulsionando_staff: { Args: { _user: string }; Returns: boolean }
+      is_patient_of_record: {
+        Args: { _record: string; _user: string }
+        Returns: boolean
+      }
       is_super_admin: { Args: { _user: string }; Returns: boolean }
       notify_user: {
         Args: {
