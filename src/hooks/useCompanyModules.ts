@@ -29,28 +29,61 @@ export function useCompanyModules() {
     },
   });
 
+  // Alias de retrocompatibilidade: "financeiro" foi unificado em "erp".
+  const SLUG_EQUIV: Record<string, string[]> = {
+    erp: ["erp", "financeiro"],
+    financeiro: ["erp", "financeiro"],
+  };
+
   return {
     ...query,
     bypass,
     enabledSlugs: bypass ? null : query.data ?? new Set<string>(),
-    hasModule: (slug: string) => bypass || query.data?.has(slug) === true,
+    hasModule: (slug: string) => {
+      if (bypass) return true;
+      const candidates = SLUG_EQUIV[slug] ?? [slug];
+      return candidates.some((s) => query.data?.has(s) === true);
+    },
   };
 }
 
 /**
- * URL prefix → required module slug. Used by AppShell to gate navigation.
- * Keep in sync with PLAN_MODULES in the payments webhook.
+ * URL prefix → required módulo-mãe slug. Used by AppShell to gate navigation.
+ * Keep in sync with PLAN_MODULES no webhook do Paddle e com src/data/motherModules.ts.
+ *
+ * Para retrocompat, "financeiro" também é aceito como alias de "erp" via hasModule().
  */
 export const MODULE_URL_PREFIXES: { prefix: string; slug: string }[] = [
+  // CRM
   { prefix: "/crm", slug: "crm" },
   { prefix: "/customers", slug: "crm" },
+  // Agenda & Reservas
   { prefix: "/agenda", slug: "agenda" },
-  { prefix: "/ehr", slug: "agenda" }, // prontuário pertence ao módulo de atendimento
-  { prefix: "/finance", slug: "financeiro" },
-  { prefix: "/sales", slug: "financeiro" },
-  { prefix: "/inventory", slug: "financeiro" },
+  // Saúde & Prontuário
+  { prefix: "/ehr", slug: "saude" },
+  // ERP (financeiro, usuários, fiscal, contratos)
+  { prefix: "/finance", slug: "erp" },
+  { prefix: "/users", slug: "erp" },
+  // Commerce & Pagamentos
+  { prefix: "/sales", slug: "commerce" },
+  { prefix: "/checkout", slug: "commerce" },
+  // PDV & Operação Presencial
+  { prefix: "/pdv", slug: "pdv" },
+  // Estoque & Fornecedores
+  { prefix: "/inventory", slug: "estoque" },
+  // BI & Dashboards
   { prefix: "/bi", slug: "bi" },
   { prefix: "/reports", slug: "bi" },
+  // Eventos & Ingressos
+  { prefix: "/eventos", slug: "eventos" },
+  // Delivery & Logística
+  { prefix: "/delivery", slug: "delivery" },
+  // Automação & Comunicação
+  { prefix: "/automacao", slug: "automacao" },
+  // Fidelização & Afiliados
+  { prefix: "/fidelizacao", slug: "fidelizacao" },
+  // Área do Cliente
+  { prefix: "/portal-cliente", slug: "area_cliente" },
 ];
 
 export function requiredModuleFor(pathname: string): string | null {

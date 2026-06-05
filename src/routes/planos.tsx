@@ -46,11 +46,11 @@ type Plan = {
 const PLANS: Plan[] = [
   {
     name: "Essencial",
-    tagline: "Para começar pela maior dor.",
+    tagline: "Comece pelo módulo-mãe que mais dói.",
     monthly: 697,
-    modulesLabel: "1 módulo após Trial",
+    modulesLabel: "1 módulo-mãe ativo",
     features: [
-      "1 módulo ativo após conversão",
+      "1 módulo-mãe ativo após conversão (CRM, Agenda, Eventos, Área do Cliente etc.)",
       "Até 3 usuários",
       "Suporte por e-mail e WhatsApp",
       "7 dias de Trial com tudo liberado",
@@ -59,14 +59,14 @@ const PLANS: Plan[] = [
   },
   {
     name: "Integrado",
-    tagline: "Dois módulos trabalhando juntos.",
+    tagline: "Dois módulos-mãe trabalhando juntos.",
     monthly: 997.9,
-    modulesLabel: "2 módulos integrados",
+    modulesLabel: "2 módulos-mãe ativos",
     features: [
-      "2 módulos ativos após conversão",
+      "2 módulos-mãe integrados (ex.: CRM + Agenda, Commerce + Delivery)",
       "Até 5 usuários",
       "Maior prioridade no suporte",
-      "Integração entre módulos",
+      "Automações entre módulos",
     ],
     highlight: true,
     cta: "Começar Trial de 7 dias",
@@ -75,9 +75,9 @@ const PLANS: Plan[] = [
     name: "Avançado",
     tagline: "Operação digital de ponta a ponta.",
     monthly: 1497.97,
-    modulesLabel: "3 módulos + BI",
+    modulesLabel: "3 módulos-mãe + BI",
     features: [
-      "3 módulos ativos após conversão",
+      "3 módulos-mãe ativos + BI & Dashboards (ex.: ERP + CRM + Agenda + BI)",
       "Até 10 usuários",
       "Suporte prioritário",
       "Acompanhamento técnico",
@@ -86,14 +86,14 @@ const PLANS: Plan[] = [
   },
   {
     name: "Sob Medida",
-    tagline: "Projeto exclusivo com sua marca.",
+    tagline: "Múltiplos módulos-mãe com sua marca.",
     monthly: null,
-    modulesLabel: "Conforme briefing",
+    modulesLabel: "Múltiplos módulos-mãe",
     features: [
-      "Módulos conforme proposta",
-      "Usuários conforme proposta",
-      "White label disponível",
-      "Configuração personalizada",
+      "Múltiplos módulos-mãe conforme briefing",
+      "Usuários sob demanda",
+      "White Label disponível",
+      "Integrações, dashboards e regras específicas",
     ],
     cta: "Falar com consultor",
   },
@@ -102,15 +102,15 @@ const PLANS: Plan[] = [
 type Row = { feature: string; values: (boolean | string)[] };
 
 const COMPARE: Row[] = [
-  { feature: "Módulos ativos", values: ["1", "2", "3", "Ilimitado"] },
-  { feature: "Usuários", values: ["Até 3", "Até 10", "Ilimitado", "Ilimitado"] },
-  { feature: "Unidades / filiais", values: ["1", "1", "Até 3", "Multi-empresa"] },
-  { feature: "Automações entre módulos", values: [false, true, true, true] },
-  { feature: "Relatórios e BI consolidados", values: [false, false, true, true] },
+  { feature: "Módulos-mãe ativos", values: ["1", "2", "3 + BI", "Múltiplos"] },
+  { feature: "Usuários", values: ["Até 3", "Até 5", "Até 10", "Sob demanda"] },
+  { feature: "Unidades / filiais", values: ["1", "1", "Até 3", "Multiempresa"] },
+  { feature: "Automações entre módulos-mãe", values: [false, true, true, true] },
+  { feature: "BI & Dashboards consolidados", values: [false, false, true, true] },
   { feature: "API e webhooks", values: [false, true, true, true] },
   { feature: "Onboarding guiado", values: ["Self-service", "1h", "4h", "Customizado"] },
   { feature: "Suporte", values: ["E-mail/WhatsApp", "Prioritário", "Prioritário", "SLA dedicado"] },
-  { feature: "White label / marca própria", values: [false, false, false, true] },
+  { feature: "White Label / marca própria", values: [false, false, false, true] },
   { feature: "Sistemas personalizados", values: [false, false, false, true] },
 ];
 

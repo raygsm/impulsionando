@@ -24,23 +24,23 @@ export const Route = createFileRoute("/trial")({
   component: TrialLanding,
 });
 
+// Os 14 módulos-mãe ficam liberados durante o Trial.
+// Fonte: src/data/motherModules.ts
 const RESOURCES = [
-  "WhatsApp Inteligente",
-  "CRM e Relacionamento",
-  "Agenda Online",
-  "Pagamentos e Baixa Automática",
-  "PDV, Comandas e Reservas",
-  "Delivery",
-  "Eventos e Ingressos",
-  "Prontuário Eletrônico",
-  "Produtos e Estoque",
-  "Fornecedores e B2B",
-  "Afiliados e Clube de Indicação",
-  "Dashboards e Relatórios",
-  "Comunicação e Templates",
-  "Automações e Follow-ups",
-  "Área do Cliente/Paciente/Aluno",
-  "White Label",
+  "ERP — Gestão Operacional e Financeira",
+  "CRM — Relacionamento, Vendas e Atendimento",
+  "Automação & Comunicação (WhatsApp, e-mail, IA)",
+  "Agenda & Reservas",
+  "Commerce & Pagamentos",
+  "PDV & Operação Presencial",
+  "Estoque & Fornecedores",
+  "Saúde & Prontuário",
+  "Eventos & Ingressos",
+  "Delivery & Logística",
+  "BI & Dashboards",
+  "White Label & Franquias Digitais",
+  "Fidelização & Afiliados",
+  "Área do Cliente",
 ];
 
 function TrialLanding() {
