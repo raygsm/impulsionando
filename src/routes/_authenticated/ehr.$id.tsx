@@ -59,7 +59,7 @@ function EhrDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("ehr_records")
-        .select("*, customers(name, document, phone, email, birthdate)")
+        .select("*, customers(id, name, document, phone, email, birthdate, patient_user_id, patient_invited_at)")
         .eq("id", id)
         .single();
       if (error) throw error;
