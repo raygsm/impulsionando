@@ -65,8 +65,39 @@ function TrialCadastro() {
       toast.success("Trial ativado! Enviamos seus dados de acesso por WhatsApp e e-mail.");
       navigate({ to: "/auth" });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: unknown) => {
+      const msg = e instanceof Error ? e.message : "Não foi possível iniciar o Trial. Tente novamente.";
+      // Traduz mensagens comuns vindas do Zod/Postgres para português.
+      const pt = msg.includes("Já existe um Trial")
+        ? msg
+        : msg.toLowerCase().includes("invalid")
+          ? "Verifique os campos preenchidos e tente novamente."
+          : msg;
+      toast.error(pt);
+    },
   });
+
+  const handleStart = () => {
+    const missing: string[] = [];
+    if (!form.contact_name.trim()) missing.push("Nome completo");
+    if (!form.contact_company.trim()) missing.push("Empresa");
+    if (!form.contact_email.trim()) missing.push("E-mail");
+    if (!form.contact_whatsapp.trim()) missing.push("WhatsApp");
+    if (missing.length) {
+      toast.error(`Preencha: ${missing.join(", ")}`);
+      return;
+    }
+    const missingTerms: string[] = [];
+    if (!accept.terms) missingTerms.push("termos do Trial");
+    if (!accept.billing) missingTerms.push("política de cobrança");
+    if (!accept.suspension) missingTerms.push("regras de suspensão");
+    if (!accept.comm) missingTerms.push("autorização de comunicação");
+    if (missingTerms.length) {
+      toast.error(`Aceite obrigatório: ${missingTerms.join(", ")}.`);
+      return;
+    }
+    m.mutate();
+  };
 
   const allAccepted = accept.terms && accept.billing && accept.suspension && accept.comm;
 
@@ -144,11 +175,16 @@ function TrialCadastro() {
           <Button
             className="w-full"
             size="lg"
-            disabled={!allAccepted || m.isPending}
-            onClick={() => m.mutate()}
+            disabled={m.isPending}
+            onClick={handleStart}
           >
             {m.isPending ? "Ativando..." : "Ativar Trial de 7 dias"}
           </Button>
+          {!allAccepted && (
+            <p className="text-[11px] text-muted-foreground text-center">
+              Aceite todos os itens acima para ativar o Trial.
+            </p>
+          )}
           <p className="text-[11px] text-muted-foreground text-center">
             Já existe um Trial registrado para estes dados? Fale com a equipe da Impulsionando Tecnologia.
           </p>
