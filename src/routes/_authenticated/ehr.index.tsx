@@ -80,7 +80,6 @@ function EhrList() {
     mutationFn: async () => {
       if (!companyId || !selectedCustomer) throw new Error("Selecione um paciente");
       const { error } = await supabase
-        // @ts-expect-error — typings refresh after deploy
         .from("ehr_records")
         .insert({ company_id: companyId, customer_id: selectedCustomer });
       if (error) throw error;
