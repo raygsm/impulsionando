@@ -16,6 +16,7 @@ import { Route as ResetPasswordSentRouteImport } from './routes/reset-password-s
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PlanosRouteImport } from './routes/planos'
+import { Route as PacienteRouteImport } from './routes/paciente'
 import { Route as OrcamentoRouteImport } from './routes/orcamento'
 import { Route as ModulosRouteImport } from './routes/modulos'
 import { Route as ContatoRouteImport } from './routes/contato'
@@ -23,11 +24,13 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TrabalheConoscoIndexRouteImport } from './routes/trabalhe-conosco.index'
+import { Route as PacienteIndexRouteImport } from './routes/paciente.index'
 import { Route as NichosIndexRouteImport } from './routes/nichos.index'
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
 import { Route as TrabalheConoscoNichoRouteImport } from './routes/trabalhe-conosco.$nicho'
 import { Route as ShowroomFitnessRouteImport } from './routes/showroom.fitness'
 import { Route as ShowroomEventosRouteImport } from './routes/showroom.eventos'
+import { Route as PacienteIdRouteImport } from './routes/paciente.$id'
 import { Route as NichosSlugRouteImport } from './routes/nichos.$slug'
 import { Route as ModulosSlugRouteImport } from './routes/modulos.$slug'
 import { Route as DemoWhiteLabelRouteImport } from './routes/demo.white-label'
@@ -131,6 +134,11 @@ const PlanosRoute = PlanosRouteImport.update({
   path: '/planos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PacienteRoute = PacienteRouteImport.update({
+  id: '/paciente',
+  path: '/paciente',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OrcamentoRoute = OrcamentoRouteImport.update({
   id: '/orcamento',
   path: '/orcamento',
@@ -165,6 +173,11 @@ const TrabalheConoscoIndexRoute = TrabalheConoscoIndexRouteImport.update({
   path: '/trabalhe-conosco/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PacienteIndexRoute = PacienteIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PacienteRoute,
+} as any)
 const NichosIndexRoute = NichosIndexRouteImport.update({
   id: '/nichos/',
   path: '/nichos/',
@@ -189,6 +202,11 @@ const ShowroomEventosRoute = ShowroomEventosRouteImport.update({
   id: '/showroom/eventos',
   path: '/showroom/eventos',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PacienteIdRoute = PacienteIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => PacienteRoute,
 } as any)
 const NichosSlugRoute = NichosSlugRouteImport.update({
   id: '/nichos/$slug',
@@ -561,6 +579,7 @@ export interface FileRoutesByFullPath {
   '/contato': typeof ContatoRoute
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
+  '/paciente': typeof PacienteRouteWithChildren
   '/planos': typeof PlanosRoute
   '/privacidade': typeof PrivacidadeRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -595,11 +614,13 @@ export interface FileRoutesByFullPath {
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
+  '/paciente/$id': typeof PacienteIdRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/demo/': typeof DemoIndexRoute
   '/nichos/': typeof NichosIndexRoute
+  '/paciente/': typeof PacienteIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
@@ -675,11 +696,13 @@ export interface FileRoutesByTo {
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
+  '/paciente/$id': typeof PacienteIdRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/demo': typeof DemoIndexRoute
   '/nichos': typeof NichosIndexRoute
+  '/paciente': typeof PacienteIndexRoute
   '/trabalhe-conosco': typeof TrabalheConoscoIndexRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
@@ -730,6 +753,7 @@ export interface FileRoutesById {
   '/contato': typeof ContatoRoute
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
+  '/paciente': typeof PacienteRouteWithChildren
   '/planos': typeof PlanosRoute
   '/privacidade': typeof PrivacidadeRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -764,11 +788,13 @@ export interface FileRoutesById {
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
+  '/paciente/$id': typeof PacienteIdRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/demo/': typeof DemoIndexRoute
   '/nichos/': typeof NichosIndexRoute
+  '/paciente/': typeof PacienteIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/_authenticated/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/_authenticated/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
@@ -819,6 +845,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/modulos'
     | '/orcamento'
+    | '/paciente'
     | '/planos'
     | '/privacidade'
     | '/reset-password'
@@ -853,11 +880,13 @@ export interface FileRouteTypes {
     | '/demo/white-label'
     | '/modulos/$slug'
     | '/nichos/$slug'
+    | '/paciente/$id'
     | '/showroom/eventos'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
     | '/demo/'
     | '/nichos/'
+    | '/paciente/'
     | '/trabalhe-conosco/'
     | '/agenda/appointments'
     | '/agenda/professionals'
@@ -933,11 +962,13 @@ export interface FileRouteTypes {
     | '/demo/white-label'
     | '/modulos/$slug'
     | '/nichos/$slug'
+    | '/paciente/$id'
     | '/showroom/eventos'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
     | '/demo'
     | '/nichos'
+    | '/paciente'
     | '/trabalhe-conosco'
     | '/agenda/appointments'
     | '/agenda/professionals'
@@ -987,6 +1018,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/modulos'
     | '/orcamento'
+    | '/paciente'
     | '/planos'
     | '/privacidade'
     | '/reset-password'
@@ -1021,11 +1053,13 @@ export interface FileRouteTypes {
     | '/demo/white-label'
     | '/modulos/$slug'
     | '/nichos/$slug'
+    | '/paciente/$id'
     | '/showroom/eventos'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
     | '/demo/'
     | '/nichos/'
+    | '/paciente/'
     | '/trabalhe-conosco/'
     | '/_authenticated/agenda/appointments'
     | '/_authenticated/agenda/professionals'
@@ -1076,6 +1110,7 @@ export interface RootRouteChildren {
   ContatoRoute: typeof ContatoRoute
   ModulosRoute: typeof ModulosRouteWithChildren
   OrcamentoRoute: typeof OrcamentoRoute
+  PacienteRoute: typeof PacienteRouteWithChildren
   PlanosRoute: typeof PlanosRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -1147,6 +1182,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlanosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/paciente': {
+      id: '/paciente'
+      path: '/paciente'
+      fullPath: '/paciente'
+      preLoaderRoute: typeof PacienteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/orcamento': {
       id: '/orcamento'
       path: '/orcamento'
@@ -1196,6 +1238,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrabalheConoscoIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/paciente/': {
+      id: '/paciente/'
+      path: '/'
+      fullPath: '/paciente/'
+      preLoaderRoute: typeof PacienteIndexRouteImport
+      parentRoute: typeof PacienteRoute
+    }
     '/nichos/': {
       id: '/nichos/'
       path: '/nichos'
@@ -1230,6 +1279,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/showroom/eventos'
       preLoaderRoute: typeof ShowroomEventosRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/paciente/$id': {
+      id: '/paciente/$id'
+      path: '/$id'
+      fullPath: '/paciente/$id'
+      preLoaderRoute: typeof PacienteIdRouteImport
+      parentRoute: typeof PacienteRoute
     }
     '/nichos/$slug': {
       id: '/nichos/$slug'
@@ -1925,6 +1981,20 @@ const ModulosRouteChildren: ModulosRouteChildren = {
 const ModulosRouteWithChildren =
   ModulosRoute._addFileChildren(ModulosRouteChildren)
 
+interface PacienteRouteChildren {
+  PacienteIdRoute: typeof PacienteIdRoute
+  PacienteIndexRoute: typeof PacienteIndexRoute
+}
+
+const PacienteRouteChildren: PacienteRouteChildren = {
+  PacienteIdRoute: PacienteIdRoute,
+  PacienteIndexRoute: PacienteIndexRoute,
+}
+
+const PacienteRouteWithChildren = PacienteRoute._addFileChildren(
+  PacienteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -1932,6 +2002,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContatoRoute: ContatoRoute,
   ModulosRoute: ModulosRouteWithChildren,
   OrcamentoRoute: OrcamentoRoute,
+  PacienteRoute: PacienteRouteWithChildren,
   PlanosRoute: PlanosRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   ResetPasswordRoute: ResetPasswordRoute,
