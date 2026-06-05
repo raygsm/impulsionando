@@ -164,7 +164,10 @@ function PlanosPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <PaymentTestModeBanner />
       <PublicHeader />
+
+
 
       {/* HERO */}
       <section className="relative overflow-hidden bg-gradient-hero text-primary-foreground">
