@@ -147,12 +147,20 @@ const FAQ = [
   },
 ];
 
+const PRICE_IDS: Record<string, { monthly: string; annual: string }> = {
+  Essencial: { monthly: "essencial_monthly", annual: "essencial_annual" },
+  Integrado: { monthly: "integrado_monthly", annual: "integrado_annual" },
+  Avançado: { monthly: "avancado_monthly", annual: "avancado_annual" },
+};
+
 function formatBRL(v: number) {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function PlanosPage() {
   const [annual, setAnnual] = useState(false);
+  const { openCheckout, loading: checkoutLoading } = usePaddleCheckout();
+  const { data: user } = useCurrentUser();
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
