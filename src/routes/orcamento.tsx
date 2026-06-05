@@ -269,17 +269,17 @@ function clearDraft() {
 
 
 interface MotherGroup {
-  /** Slug do módulo-mãe (mesmo de motherModules.ts). */
+  /** Slug do módulo principal (mesmo de motherModules.ts). */
   motherSlug: string;
-  /** Nome curto do módulo-mãe. */
+  /** Nome curto do módulo principal. */
   motherName: string;
-  /** Submódulos sugeridos dentro desse módulo-mãe. */
+  /** Submódulos sugeridos dentro desse módulo principal. */
   submodules: string[];
 }
 
 interface Recomendacao {
   plano: "Essencial" | "Integrado" | "Avançado" | "Sob Medida";
-  /** Agrupamento por módulo-mãe → submódulos. */
+  /** Agrupamento por módulo principal → submódulos. */
   grupos: MotherGroup[];
   /** Lista linear para mensagens/WhatsApp/registro do lead. */
   modulos: string[];
@@ -288,9 +288,9 @@ interface Recomendacao {
 }
 
 /**
- * Cada "dor" do briefing aponta para um módulo-mãe + um ou mais submódulos
+ * Cada "dor" do briefing aponta para um módulo principal + um ou mais submódulos
  * que existem em src/data/motherModules.ts. Mantemos a relação aqui para
- * que /orcamento agrupe a recomendação por módulo-mãe.
+ * que /orcamento agrupe a recomendação por módulo principal.
  */
 const DOR_TO_MOTHER: Record<string, { motherSlug: string; submodules: string[] }> = {
   agenda:     { motherSlug: "agenda",    submodules: ["Agenda online", "Confirmação automática", "Lembretes"] },
@@ -353,7 +353,7 @@ function recomendar(a: Answers): Recomendacao {
         plano: "Sob Medida",
         grupos,
         modulos,
-        resumo: "Pacote completo com múltiplos módulos-mãe e operação consolidada.",
+        resumo: "Pacote completo com múltiplos módulos e operação consolidada e operação consolidada.",
         motivo:
           "Você opera em mais de uma unidade ou tem equipe grande. Recomendamos um plano dimensionado por uso, com integração entre unidades.",
       };
@@ -362,20 +362,20 @@ function recomendar(a: Answers): Recomendacao {
       plano: "Avançado",
       grupos,
       modulos,
-      resumo: "3 módulos-mãe integrados + relatórios consolidados.",
+      resumo: "3 módulos principais integrados + relatórios consolidados.",
       motivo:
-        "Operação distribuída ou equipe grande pede mais módulos-mãe integrados e visão consolidada.",
+        "Operação distribuída ou equipe grande pede mais módulos principais integrados e visão consolidada.",
     };
   }
 
-  // 1 unidade, conta por módulos-mãe distintos
+  // 1 unidade, conta por módulos principais distintos
   const n = Math.max(1, nMother);
   if (n === 1) {
     return {
       plano: "Essencial",
       grupos,
       modulos,
-      resumo: "1 módulo-mãe focado na sua principal dor.",
+      resumo: "1 módulo principal focado na sua principal dor.",
       motivo: "Você sinalizou uma dor principal — comece focado, com baixo custo e escale depois.",
     };
   }
@@ -384,15 +384,15 @@ function recomendar(a: Answers): Recomendacao {
       plano: "Integrado",
       grupos,
       modulos,
-      resumo: "2 módulos-mãe integrados.",
-      motivo: "Suas necessidades se beneficiam de 2 módulos-mãe trabalhando juntos.",
+      resumo: "2 módulos principais integrados.",
+      motivo: "Suas necessidades se beneficiam de 2 módulos principais trabalhando juntos.",
     };
   }
   return {
     plano: "Avançado",
     grupos,
     modulos,
-    resumo: "3 módulos-mãe integrados + relatórios.",
+    resumo: "3 módulos principais integrados + relatórios.",
     motivo: "Você tem 3 ou mais frentes a organizar — o Avançado entrega o melhor custo-benefício.",
   };
 }
@@ -610,7 +610,7 @@ function ResultCard({
       </div>
 
       <div>
-        <div className="text-sm font-semibold mb-3">Módulos-mãe sugeridos</div>
+        <div className="text-sm font-semibold mb-3">Módulos Principais sugeridos</div>
         {rec.grupos.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             Nenhum módulo marcado. Volte e escolha pelo menos uma dor para receber sugestões.
@@ -624,7 +624,7 @@ function ResultCard({
               >
                 <div className="flex items-center gap-2">
                   <span className="inline-flex h-6 px-2 items-center rounded-full bg-primary/10 text-primary text-[11px] font-semibold uppercase tracking-wider">
-                    Módulo-mãe
+                    Módulo principal
                   </span>
                   <span className="text-sm font-semibold">{g.motherName}</span>
                 </div>
@@ -718,26 +718,15 @@ function ResultCard({
 
       <div className="space-y-3">
         {!saved ? (
-          <div className="grid sm:grid-cols-2 gap-3">
-            <Button
-              size="lg"
-              className="gap-2 bg-gradient-primary shadow-elegant w-full justify-center font-semibold tracking-wide"
-              onClick={() => submit(true)}
-              disabled={saving}
-            >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-              ENVIAR ORÇAMENTO
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="w-full justify-center"
-              onClick={() => submit(false)}
-              disabled={saving}
-            >
-              Só enviar para receber depois
-            </Button>
-          </div>
+          <Button
+            size="lg"
+            className="gap-2 bg-gradient-primary shadow-elegant w-full justify-center font-semibold tracking-wide"
+            onClick={() => submit(false)}
+            disabled={saving}
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            ENVIAR ORÇAMENTO
+          </Button>
         ) : (
           <Button
             asChild
