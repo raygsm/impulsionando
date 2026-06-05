@@ -173,10 +173,10 @@ function TrialCadastro() {
               <Select value={form.chosen_plan} onValueChange={(v) => setForm({ ...form, chosen_plan: v as typeof form.chosen_plan })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="essencial">Essencial — R$ 697,00/mês</SelectItem>
-                  <SelectItem value="integrado">Integrado — R$ 997,90/mês</SelectItem>
-                  <SelectItem value="avancado">Avançado — R$ 1.497,97/mês</SelectItem>
-                  <SelectItem value="sob_medida">Sob Medida — sob análise</SelectItem>
+                  <SelectItem value="essencial">Essencial — 1 módulo-mãe — R$ 697,00/mês</SelectItem>
+                  <SelectItem value="integrado">Integrado — 2 módulos-mãe — R$ 997,90/mês</SelectItem>
+                  <SelectItem value="avancado">Avançado — 3 módulos-mãe + BI — R$ 1.497,97/mês</SelectItem>
+                  <SelectItem value="sob_medida">Sob Medida — múltiplos módulos-mãe — sob análise</SelectItem>
                 </SelectContent>
               </Select>
             </div>
