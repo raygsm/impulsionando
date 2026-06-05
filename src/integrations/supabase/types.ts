@@ -2092,6 +2092,149 @@ export type Database = {
         }
         Relationships: []
       }
+      message_outbox: {
+        Row: {
+          attempts: number
+          body: string
+          channel: string
+          company_id: string | null
+          created_at: string
+          event_code: string
+          external_message_id: string | null
+          id: string
+          last_error: string | null
+          max_attempts: number
+          payload: Json
+          recipient_email: string | null
+          recipient_name: string | null
+          recipient_phone: string | null
+          recipient_user_id: string | null
+          reference_id: string | null
+          reference_type: string | null
+          scheduled_at: string
+          sent_at: string | null
+          status: string
+          subject: string | null
+          template_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          body: string
+          channel: string
+          company_id?: string | null
+          created_at?: string
+          event_code: string
+          external_message_id?: string | null
+          id?: string
+          last_error?: string | null
+          max_attempts?: number
+          payload?: Json
+          recipient_email?: string | null
+          recipient_name?: string | null
+          recipient_phone?: string | null
+          recipient_user_id?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          scheduled_at?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          template_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          body?: string
+          channel?: string
+          company_id?: string | null
+          created_at?: string
+          event_code?: string
+          external_message_id?: string | null
+          id?: string
+          last_error?: string | null
+          max_attempts?: number
+          payload?: Json
+          recipient_email?: string | null
+          recipient_name?: string | null
+          recipient_phone?: string | null
+          recipient_user_id?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          scheduled_at?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          template_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_outbox_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_outbox_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "message_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_templates: {
+        Row: {
+          body: string
+          channel: string
+          company_id: string | null
+          created_at: string
+          event_code: string
+          id: string
+          is_active: boolean
+          locale: string
+          subject: string | null
+          updated_at: string
+          variables: Json
+        }
+        Insert: {
+          body: string
+          channel: string
+          company_id?: string | null
+          created_at?: string
+          event_code: string
+          id?: string
+          is_active?: boolean
+          locale?: string
+          subject?: string | null
+          updated_at?: string
+          variables?: Json
+        }
+        Update: {
+          body?: string
+          channel?: string
+          company_id?: string | null
+          created_at?: string
+          event_code?: string
+          id?: string
+          is_active?: boolean
+          locale?: string
+          subject?: string | null
+          updated_at?: string
+          variables?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       modules: {
         Row: {
           category: string | null
@@ -2896,6 +3039,21 @@ export type Database = {
         Args: { _customer_id: string; _reason?: string }
         Returns: string
       }
+      enqueue_message: {
+        Args: {
+          _channels?: string[]
+          _company_id: string
+          _event_code: string
+          _payload?: Json
+          _recipient_email: string
+          _recipient_name: string
+          _recipient_phone: string
+          _recipient_user_id: string
+          _reference_id?: string
+          _reference_type?: string
+        }
+        Returns: number
+      }
       is_impulsionando_staff: { Args: { _user: string }; Returns: boolean }
       is_patient_of_record: {
         Args: { _record: string; _user: string }
@@ -2913,6 +3071,10 @@ export type Database = {
           _title: string
           _user_id: string
         }
+        Returns: string
+      }
+      render_template: {
+        Args: { _payload: Json; _template: string }
         Returns: string
       }
       sales_cash_session_close: {
