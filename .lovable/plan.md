@@ -1,135 +1,123 @@
-# Plano: Pagamentos, Entitlement e Portal do Usuário
 
-## Objetivos
-Corrigir os 3 bugs críticos, fechar os gaps de arquitetura (gating, downgrade, past_due, portal do usuário, anuais) e deixar o fluxo testável de ponta a ponta no preview.
+## Observação importante antes de começar
+
+Você respondeu que **`trial_create` já cria o auth user e envia magic link**. Auditei o RPC no banco e ele **não faz isso** — apenas insere uma linha em `trial_subscriptions` e enfileira uma mensagem com o link `https://impulsionando.com.br/auth`. O usuário recebe um e-mail mandando "entrar", mas não tem conta nem senha.
+
+Como você marcou **"P0: Trial signup + criação de usuário"** no escopo, vou tratar isso como o item correto a corrigir.
+
+Itens **não marcados** (ficam para depois, mas registrados):
+- Anonymous checkout sem `userId` (webhook não habilita módulos)
+- Banner test-mode no AppShell + polling em `/checkout/success`
+- Centralizar PRICE_IDS em arquivo único
+- Corrigir "Impulsionando Sistemas" nos títulos de reset-password
 
 ---
 
-## Parte 1 — Bugs críticos do webhook (`webhook.ts`)
+## Escopo desta rodada
 
-1. **Status enum**: trocar `status: "converted"` → `"convertido"` no `UPDATE trial_subscriptions`. Mesma correção em qualquer outro lugar que escreva enum em inglês.
-2. **Checkout anônimo (sem userId)**: se `customData.userId` ausente, usar `customer.email` do payload + `supabaseAdmin.auth.admin.createUser({ email, email_confirm: true, password: random })` e disparar `resetPasswordForEmail` para o cliente definir senha. Linkar o novo `user.id` ao `subscriptions.user_id`. Enfileirar template `welcome_post_checkout` com link de definir senha.
-3. **Race em `handleSubscriptionCanceled`**: ler a row ANTES de fazer o update; usar dados lidos para resolver `company_id` e disparar gating/notificações.
-4. **Downgrade**: ao processar `subscription.updated` com troca de `productId`, calcular `modulesToDisable = (modulosDoProdutoAntigo) - (modulosDoNovoProduto)` e fazer upsert de `is_enabled=false` para esses.
-5. **past_due**: novo handler que (a) marca `subscriptions.status='past_due'`, (b) grava `past_due_since=now()` (coluna nova), (c) NÃO desativa módulos imediatamente, (d) enfileira `payment_failed_dunning`. Cron diário verifica `past_due_since < now()-3 days` e desativa módulos + enfileira `subscription_suspended`.
+### Bloco 1 — Trial → login funcional (P0)
 
-## Parte 2 — Catálogo Paddle (anuais separados)
+**Problema:** `/trial/cadastro` chama `requestTrial` → `trial_create` RPC. RPC só insere `trial_subscriptions`. Não cria `auth.users`. Usuário recebe e-mail e cai em `/auth` sem conta.
 
-6. Expandir `PLAN_MODULES` com chaves `essencial_plan_annual`, `integrado_plan_annual`, `avancado_plan_annual` (mesmos módulos do mensal correspondente).
-7. Criar via tools `payments--batch_create_product` os 3 produtos anuais novos com seus respectivos prices (`essencial_annual`, `integrado_annual`, `avancado_annual`). Verificar com `payments--api_read` se já existem para evitar duplicar; reuso por `external_id`.
-8. Atualizar `planos.tsx` com price IDs já validados.
+**Solução:** novo server function `requestTrialAndProvisionUser` que:
+1. Chama `trial_create` (mantém validações anti-abuso existentes).
+2. Verifica se já existe usuário em `auth.users` com aquele e-mail via `supabaseAdmin.auth.admin.listUsers`. Se existir, reusa.
+3. Se não existir, cria via `supabaseAdmin.auth.admin.createUser({ email, email_confirm: true, user_metadata: { display_name, phone, trial_id } })`.
+4. Atualiza `trial_subscriptions.user_id` com o id do usuário criado.
+5. Dispara magic link via `supabaseAdmin.auth.admin.generateLink({ type: 'magiclink', email, options: { redirectTo: `${origin}/dashboard` } })` e retorna o link.
+6. Enfileira mensagem `trial_started_v2` (novo template) com `{{link_acesso_magico}}` apontando para o magic link em vez do `/auth` genérico. Fallback: se `enqueue_message` não tiver o template novo, mantém o existente e o link genérico (não bloqueia).
 
-## Parte 3 — Templates de mensagem faltantes
+**Arquivos:**
+- `src/lib/trial.functions.ts` — novo `requestTrialAndProvisionUser`; manter `requestTrial` antigo por compat até remoção.
+- `src/routes/trial_.cadastro.tsx` — trocar `requestTrial` por `requestTrialAndProvisionUser`. Tela de sucesso mostra "Enviamos um link de acesso para `{email}`. Clique no link para entrar — sem senha." em vez de redirecionar para `/auth`.
+- Migration: novo template `trial_started_v2` na tabela `message_templates` (e-mail + whatsapp) com `{{link_acesso_magico}}`.
 
-9. Migração que insere em `message_templates` os event_codes: `trial_payment_approved`, `payment_failed_dunning`, `subscription_suspended`, `welcome_post_checkout` (email + whatsapp + in_app onde aplicável). Conteúdo PT-BR com variáveis `{{nome_cliente}}`, `{{nome_plano}}`, `{{link_acesso}}`, `{{link_definir_senha}}`.
+**RLS / segurança:** server-only via `supabaseAdmin`. Sem mudança em policies.
 
-## Parte 4 — Hook & gating de módulos
+---
 
-10. Novo `src/hooks/useSubscription.ts`: query do `subscriptions` filtrando por `environment` (via `getPaddleEnvironment()`), retorna `{ subscription, status, isActive, isPastDue, daysUntilSuspension, plan }`.
-11. Novo `src/hooks/useCompanyModules.ts`: retorna `Set<moduleSlug>` de módulos ativos da company atual.
-12. Novo `<RequireModule slug="agenda">` (ou layout route `_authenticated/_module.$slug/route.tsx`): se módulo não ativo → `redirect({ to: '/planos', search: { reason: 'module_locked', module: slug } })`. Envolver rotas existentes de crm/agenda/financeiro/bi.
-13. Em `AppShell`, banner amarelo se `isPastDue` com contador de dias restantes até suspensão.
+### Bloco 2 — Entitlement server-side em todas server fns de negócio (P1, você marcou "bloqueio total")
 
-## Parte 5 — Portal "Minha Assinatura"
+**Problema:** server fns leem/escrevem dados de CRM, financeiro, agenda, vendas etc. sem checar se a empresa tem o módulo ativo nem se a assinatura está em dia. Qualquer usuário autenticado pode invocar qualquer fn diretamente.
 
-14. Nova rota `src/routes/_authenticated/minha-assinatura.tsx` com:
-   - Card: plano atual, status (badge), próxima cobrança, valor, ciclo (mensal/anual).
-   - Botão **Trocar de plano** → abre Dialog com cards dos 3 planos; ao confirmar chama server fn `changePlan` (Paddle SDK `subscriptions.update` com `prorationBillingMode: 'prorated_immediately'` para upgrade, `'prorated_next_billing_period'` para downgrade — webhook depois reflete módulos).
-   - Botão **Cancelar assinatura** → confirma e chama `cancelOwnSubscription` (Paddle SDK com `effectiveFrom: 'next_billing_period'`).
-   - Botão **Portal Paddle** (atualizar cartão, faturas) → server fn `openMyPortal` retorna URL e abre em nova aba.
-15. Novas server fns em `src/lib/billing-self.functions.ts` com `requireSupabaseAuth` middleware, validando que `subscription.user_id === context.userId`.
-16. Link no menu do usuário (avatar dropdown) → "Minha Assinatura".
+**Solução:** três middlewares compostáveis encadeados após `requireSupabaseAuth`.
 
-## Parte 6 — Higiene
+1. **`requireActiveSubscription`** — busca a assinatura corrente (filtro por `environment` derivado do header `x-paddle-env` enviado pelo client, fallback live) e bloqueia se status não estiver em `active|trialing|past_due` (com grace `past_due_since < 3 dias`) ou `canceled` com `current_period_end > now()`. Considera também `trial_subscriptions` ativo para o user. Lança 402 (`Payment Required`).
+2. **`requireCompanyAccess`** — input contém `companyId`; verifica `user_belongs_to_company(uid, companyId)` (RPC existente). Lança 403.
+3. **`requireModule('crm'|'finance'|'agenda'|'sales'|'inventory'|'ehr'|'marketing')`** — verifica `company_modules.is_enabled = true` para a empresa. Lança 403.
 
-17. `planos.tsx`: adicionar `ssr: false` para evitar render server-side sem sessão.
-18. Garantir `attachSupabaseAuth` em `src/start.ts` (verificar — pode já estar).
-19. Migração para coluna `subscriptions.past_due_since timestamptz` + índice.
+**Padrão:**
+```ts
+export const listCrmLeads = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth, requireActiveSubscription, requireCompanyAccess, requireModule('crm')])
+  .inputValidator(z.object({ companyId: z.string().uuid() }).parse)
+  .handler(...)
+```
+
+**Arquivos:**
+- `src/lib/middleware/billing.middleware.ts` (novo) — os 3 middlewares.
+- Aplicar nas server fns existentes (varredura por `createServerFn` em `src/lib/**`). Estimativa: ~15-25 funções em finance, CRM, agenda, sales, inventory, EHR, marketing.
+- **NÃO aplicar** em: trial.functions, billing-self.functions, billing-admin.functions, uptime.functions, ehr-patient (já é paciente, não usuário operador), example.functions.
+- Frontend: adicionar header `x-paddle-env` em `attachSupabaseAuth` (ou middleware separado) lendo `getPaddleEnvironment()`, para que o servidor saiba qual ambiente filtrar.
+
+**Tratamento de erro no cliente:** `useSubscription` já expõe `isSuspended`. Adicionar interceptor no React Query que, ao receber 402, dispara toast "Assinatura inativa — regularize em /minha-assinatura" e roteia para lá.
+
+**Risco e mitigação:** se um cliente ativo cair em `past_due` na hora de uma operação crítica, a regra "grace 3 dias" + UI de banner evita corte abrupto. Super admin (`is_super_admin`) bypassa todos os middlewares — adicionar essa exceção dentro de `requireActiveSubscription` e `requireModule`.
+
+---
+
+## Como testar no preview
+
+Após implementação, no preview (modo test):
+
+### Teste 1 — Trial signup
+1. Abra `/trial/cadastro` em janela anônima.
+2. Preencha o formulário com e-mail real (que você consegue acessar).
+3. Veja tela de sucesso: "Enviamos um link de acesso para {email}".
+4. Em Cloud → Emails (ou na caixa de entrada), abra o link mágico → deve cair direto em `/dashboard` autenticado.
+5. Em Cloud → Database → `trial_subscriptions` confirme que `user_id` está preenchido.
+
+### Teste 2 — Entitlement server-side
+1. Em `/auth` crie uma conta nova (ou use uma sem trial nem assinatura).
+2. Vá para `/_authenticated/crm/leads` — UI mostra dados vazios; abra DevTools → Network e confirme que a serverFn `listCrmLeads` retornou **402**.
+3. Faça checkout no `/planos` com cartão de teste **`4242 4242 4242 4242`**, CVC `123`, qualquer data futura, qualquer nome.
+4. Após webhook processar (5-10s), recarregue `/crm/leads` — deve carregar normalmente.
+5. Em Cloud → Database → `subscriptions` confirme nova linha com `status=active`, `environment=sandbox`.
+
+### Teste 3 — Past due / dunning
+1. Repita checkout com cartão **`4000 0027 6000 3184`** (sucede inicialmente, falha na renovação).
+2. Para forçar renovação rápida, no painel Paddle (sandbox) avance `next_billed_at` 31min adiante.
+3. Aguarde renovação falhar → `subscriptions.status` vira `past_due`, `past_due_since` populado.
+4. Por 3 dias, app continua funcionando (banner amarelo no AppShell). Após 3 dias, cron `subscription_suspend_overdue` desativa módulos → server fns retornam 402.
+
+### Cartões de teste
+- `4242 4242 4242 4242` → sucesso
+- `4000 0000 0000 0002` → recusado
+- `4000 0000 0000 3220` → exige 3D Secure
+- `4000 0027 6000 3184` → falha em renovação (dunning)
+- CVC `123`, qualquer data futura, qualquer nome
 
 ---
 
 ## Detalhes técnicos
 
-### Estrutura de arquivos novos/alterados
-```
-src/
-├── routes/
-│   ├── planos.tsx                                    (edit: ssr:false, anuais)
-│   ├── _authenticated/
-│   │   ├── minha-assinatura.tsx                      (new)
-│   │   └── _module.$slug/route.tsx                   (new — gate)
-│   └── api/public/payments/webhook.ts                (edit: bugs + past_due + downgrade)
-├── hooks/
-│   ├── useSubscription.ts                            (new)
-│   └── useCompanyModules.ts                          (new)
-├── lib/
-│   └── billing-self.functions.ts                     (new)
-└── components/
-    └── PastDueBanner.tsx                             (new)
-supabase/migrations/
-└── <ts>_billing_v2.sql                               (templates + past_due_since)
-```
+**Migration nova (1 só):**
+- Insert do template `trial_started_v2` em `message_templates` (e-mail + whatsapp + in_app).
 
-### Pseudocódigo do gate de módulo
-```ts
-// _authenticated/_module.$slug/route.tsx
-beforeLoad: async ({ params }) => {
-  const modules = await getActiveModules();        // server fn
-  if (!modules.has(params.slug)) {
-    throw redirect({ to: '/planos', search: { locked: params.slug }});
-  }
-}
-```
+**Sem mudança em:** schema de `subscriptions`, RLS de tabelas existentes, integração Paddle/webhook, fluxo de checkout, customer portal.
 
-### Pseudocódigo `changePlan`
-```ts
-export const changePlan = createServerFn({ method: 'POST' })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: { newPriceId: string; isUpgrade: boolean }) => d)
-  .handler(async ({ data, context }) => {
-    const sub = await loadMySub(context.userId);
-    const paddle = getPaddleClient(sub.environment);
-    const newPaddleId = await resolveExternal(data.newPriceId, sub.environment);
-    await paddle.subscriptions.update(sub.paddle_subscription_id, {
-      items: [{ priceId: newPaddleId, quantity: 1 }],
-      prorationBillingMode: data.isUpgrade
-        ? 'prorated_immediately'
-        : 'prorated_next_billing_period',
-    });
-    return { ok: true };
-  });
-```
+**Bypass para staff:** `requireActiveSubscription` e `requireModule` checam `is_impulsionando_staff(uid)` primeiro e liberam.
+
+**Header `x-paddle-env`:** anexado em `attachSupabaseAuth` (mesmo middleware do bearer) lendo `localStorage` do token Paddle. Servidor faz `getRequestHeader('x-paddle-env') === 'sandbox' ? 'sandbox' : 'live'`.
 
 ---
 
-## Como testar no preview (modo TEST)
+## Fora do escopo (registrado para próxima rodada)
+- Webhook criar `companies` + `user_profiles` quando checkout vem sem `userId`
+- Banner test-mode dentro de `AppShell`
+- Polling de subscription em `/checkout/success`
+- Centralização de PRICE_IDS em arquivo único
+- Brand fix `Impulsionando Sistemas` → `Impulsionando Tecnologia` em reset-password
+- Sync programático de preços entre frontend e Paddle
 
-1. **Catálogo**: abra `?view=payments`, confirme que aparecem 6 prices (3 mensais + 3 anuais) e 6 produtos com `external_id` correto.
-2. **Checkout logado**: faça login em `/auth`, vá em `/planos`, escolha **Essencial mensal**, abra checkout, use cartão `4242 4242 4242 4242` CVC `123`, validade futura. Após pagar deve redirecionar para `/checkout/success`. Em `/minha-assinatura` deve ver "Essencial — ativo". Em `/admin/billing` (super-admin) também.
-3. **Checkout anônimo** (gap #4): faça logout, volte em `/planos`, assine **Integrado**. Use email novo no checkout do Paddle. Após pagar, conta nova deve ser criada e email de "definir senha" enviado (verifique `message_outbox` no DB).
-4. **Upgrade**: como usuário Essencial, em `/minha-assinatura` clique "Trocar plano" → Avançado. Cobrança prorata imediata. Webhook deve liberar `agenda`, `financeiro`, `bi`.
-5. **Downgrade**: troque de Avançado para Essencial → mudança só no próximo ciclo. Para acelerar, no `/admin/billing` use a função de fast-forward (ou via Paddle Simulator) e veja módulos extras serem desativados.
-6. **Cancelamento**: em `/minha-assinatura` clique "Cancelar" → status muda para `canceled` mas acesso permanece até `current_period_end`.
-7. **Past_due** (dunning): assine com cartão `4000 0027 6000 3184` (sucesso inicial, falha no recurring). Use fast-forward no admin para forçar renovação → status vai para `past_due`, banner aparece com "3 dias para suspensão". Após 3 dias simulados (ou rodar manualmente o cron `subscription_dunning_check`), módulos são desativados.
-8. **Gating**: como usuário com plano Essencial, tente acessar `/agenda` direto pela URL → deve redirecionar para `/planos?locked=agenda`.
-9. **Portal Paddle**: em `/minha-assinatura`, clique "Gerenciar pagamento" → abre nova aba com portal Paddle (atualizar cartão / ver faturas).
-
-### Cartões de teste
-- `4242 4242 4242 4242` — sucesso sempre
-- `4000 0000 0000 0002` — recusa sempre
-- `4000 0027 6000 3184` — sucesso inicial, recusa na renovação (testar dunning)
-- `4000 0000 0000 3220` — força fluxo 3DS
-
-Validade: qualquer data futura. CVC: `123`. Nome: qualquer.
-
----
-
-## Ordem de execução
-1. Migração (templates + `past_due_since`)
-2. Catálogo Paddle (anuais)
-3. Webhook (bugs + downgrade + past_due + anônimo)
-4. Hooks + gate de módulo
-5. Página `/minha-assinatura` + server fns
-6. Banner past_due + ajustes finais
-
-Estimativa: ~10 arquivos novos, ~5 editados, 1 migração.
+Aprova para implementar?
