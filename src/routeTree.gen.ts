@@ -16,6 +16,7 @@ import { Route as SolucoesRouteImport } from './routes/solucoes'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as ResetPasswordSentRouteImport } from './routes/reset-password-sent'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ReembolsoRouteImport } from './routes/reembolso'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PlanosRouteImport } from './routes/planos'
 import { Route as PacienteRouteImport } from './routes/paciente'
@@ -148,6 +149,11 @@ const ResetPasswordSentRoute = ResetPasswordSentRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReembolsoRoute = ReembolsoRouteImport.update({
+  id: '/reembolso',
+  path: '/reembolso',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
@@ -685,6 +691,7 @@ export interface FileRoutesByFullPath {
   '/paciente': typeof PacienteRouteWithChildren
   '/planos': typeof PlanosRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/reembolso': typeof ReembolsoRoute
   '/reset-password': typeof ResetPasswordRoute
   '/reset-password-sent': typeof ResetPasswordSentRoute
   '/sobre': typeof SobreRoute
@@ -790,6 +797,7 @@ export interface FileRoutesByTo {
   '/orcamento': typeof OrcamentoRoute
   '/planos': typeof PlanosRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/reembolso': typeof ReembolsoRoute
   '/reset-password': typeof ResetPasswordRoute
   '/reset-password-sent': typeof ResetPasswordSentRoute
   '/sobre': typeof SobreRoute
@@ -891,6 +899,7 @@ export interface FileRoutesById {
   '/paciente': typeof PacienteRouteWithChildren
   '/planos': typeof PlanosRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/reembolso': typeof ReembolsoRoute
   '/reset-password': typeof ResetPasswordRoute
   '/reset-password-sent': typeof ResetPasswordSentRoute
   '/sobre': typeof SobreRoute
@@ -999,6 +1008,7 @@ export interface FileRouteTypes {
     | '/paciente'
     | '/planos'
     | '/privacidade'
+    | '/reembolso'
     | '/reset-password'
     | '/reset-password-sent'
     | '/sobre'
@@ -1104,6 +1114,7 @@ export interface FileRouteTypes {
     | '/orcamento'
     | '/planos'
     | '/privacidade'
+    | '/reembolso'
     | '/reset-password'
     | '/reset-password-sent'
     | '/sobre'
@@ -1204,6 +1215,7 @@ export interface FileRouteTypes {
     | '/paciente'
     | '/planos'
     | '/privacidade'
+    | '/reembolso'
     | '/reset-password'
     | '/reset-password-sent'
     | '/sobre'
@@ -1312,6 +1324,7 @@ export interface RootRouteChildren {
   PacienteRoute: typeof PacienteRouteWithChildren
   PlanosRoute: typeof PlanosRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
+  ReembolsoRoute: typeof ReembolsoRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ResetPasswordSentRoute: typeof ResetPasswordSentRoute
   SobreRoute: typeof SobreRoute
@@ -1391,6 +1404,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reembolso': {
+      id: '/reembolso'
+      path: '/reembolso'
+      fullPath: '/reembolso'
+      preLoaderRoute: typeof ReembolsoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacidade': {
@@ -2344,6 +2364,7 @@ const rootRouteChildren: RootRouteChildren = {
   PacienteRoute: PacienteRouteWithChildren,
   PlanosRoute: PlanosRoute,
   PrivacidadeRoute: PrivacidadeRoute,
+  ReembolsoRoute: ReembolsoRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ResetPasswordSentRoute: ResetPasswordSentRoute,
   SobreRoute: SobreRoute,

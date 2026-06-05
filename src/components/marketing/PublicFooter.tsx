@@ -67,6 +67,7 @@ export function PublicFooter() {
               </a>
             </li>
             <li><Link to="/termos" className="hover:text-foreground">Termos de Uso</Link></li>
+            <li><Link to="/reembolso" className="hover:text-foreground">Política de Reembolso</Link></li>
             <li><Link to="/privacidade" className="hover:text-foreground">Política de Privacidade (LGPD)</Link></li>
           </ul>
         </div>
