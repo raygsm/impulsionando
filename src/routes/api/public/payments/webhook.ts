@@ -19,23 +19,25 @@ const PLAN_MODULES: Record<string, string[]> = {
   avancado_plan: ["crm", "agenda", "financeiro", "bi"],
 };
 
-async function enqueueTemplate(supabase: any, templateKey: string, userId: string, vars: Record<string, any>) {
+async function enqueueTemplate(supabase: any, eventCode: string, channel: "email" | "whatsapp", userId: string, companyId: string | null, payload: Record<string, any>) {
   const { data: tpl } = await supabase
     .from("message_templates")
-    .select("id, channel")
-    .eq("template_key", templateKey)
+    .select("id")
+    .eq("event_code", eventCode)
+    .eq("channel", channel)
     .maybeSingle();
-  if (!tpl) return;
   await supabase.from("message_outbox").insert({
-    template_id: tpl.id,
-    channel: tpl.channel,
-    user_id: userId,
-    payload: vars,
+    company_id: companyId,
+    event_code: eventCode,
+    channel,
+    template_id: tpl?.id ?? null,
+    recipient_user_id: userId,
+    payload,
     status: "pending",
   });
 }
 
-async function notifyStaff(supabase: any, title: string, body: string, meta: Record<string, any>) {
+async function notifyStaff(supabase: any, title: string, message: string, companyId: string | null) {
   const { data: staff } = await supabase
     .from("user_roles")
     .select("user_id")
@@ -44,28 +46,31 @@ async function notifyStaff(supabase: any, title: string, body: string, meta: Rec
   await supabase.from("notifications").insert(
     staff.map((s: any) => ({
       user_id: s.user_id,
+      company_id: companyId,
+      category: "billing",
+      severity: "info",
       title,
-      body,
-      type: "billing",
-      metadata: meta,
+      message,
     }))
   );
 }
 
-async function registerRevenue(supabase: any, amount: number, currency: string, description: string, meta: Record<string, any>) {
-  const { data: company } = await supabase.rpc("master_company_id");
-  if (!company) return;
+async function registerRevenue(supabase: any, amount: number, description: string, refId: string) {
+  const { data: companyId } = await supabase.rpc("master_company_id");
+  if (!companyId) return;
   await supabase.from("fin_transactions").insert({
-    company_id: company,
-    type: "income",
+    company_id: companyId,
+    kind: "income",
     status: "paid",
     amount,
-    currency,
     description,
     paid_at: new Date().toISOString(),
-    metadata: meta,
+    due_date: new Date().toISOString().slice(0, 10),
+    reference_type: "paddle_transaction",
+    reference_id: refId,
   });
 }
+
 
 async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
   const supabase = getSupabase();
