@@ -415,7 +415,10 @@ async function handleSubscriptionUpdated(data: any, env: PaddleEnv) {
 
   const prevProductId = (existing as any)?.product_id;
   const prevStatus = (existing as any)?.status;
+  const prevCancelAtPeriodEnd = !!(existing as any)?.cancel_at_period_end;
   const userId = (existing as any)?.user_id;
+  const willCancelNow = scheduledChange?.action === "cancel";
+  const isReactivation = prevCancelAtPeriodEnd && !willCancelNow && status === "active";
 
   const update: Record<string, any> = {
     status,
