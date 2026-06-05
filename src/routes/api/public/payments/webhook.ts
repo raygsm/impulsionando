@@ -405,10 +405,10 @@ async function handleSubscriptionUpdated(data: any, env: PaddleEnv) {
   const newPriceId = item?.price?.importMeta?.externalId;
   const newProductId = item?.product?.importMeta?.externalId;
 
-  // Read existing row first (before update) to detect plan changes and past_due transitions
+  // Read existing row first (before update) to detect plan changes, past_due transitions and re-activation
   const { data: existing } = await supabase
     .from("subscriptions")
-    .select("user_id, product_id, price_id, status, past_due_since")
+    .select("user_id, product_id, price_id, status, past_due_since, cancel_at_period_end")
     .eq("paddle_subscription_id", id)
     .eq("environment", env)
     .maybeSingle();
