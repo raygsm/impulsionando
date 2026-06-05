@@ -609,22 +609,42 @@ function ResultCard({
       </div>
 
       <div>
-        <div className="text-sm font-semibold mb-2">Módulos sugeridos</div>
-        {rec.modulos.length === 0 ? (
+        <div className="text-sm font-semibold mb-3">Módulos-mãe sugeridos</div>
+        {rec.grupos.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             Nenhum módulo marcado. Volte e escolha pelo menos uma dor para receber sugestões.
           </p>
         ) : (
-          <div className="flex flex-wrap gap-2">
-            {rec.modulos.map((m) => (
-              <span
-                key={m}
-                className="px-3 py-1 rounded-full bg-secondary text-secondary-foreground text-xs"
+          <ul className="space-y-3">
+            {rec.grupos.map((g) => (
+              <li
+                key={g.motherSlug}
+                className="rounded-lg border border-border bg-card/60 p-3 sm:p-4"
               >
-                {m}
-              </span>
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex h-6 px-2 items-center rounded-full bg-primary/10 text-primary text-[11px] font-semibold uppercase tracking-wider">
+                    Módulo-mãe
+                  </span>
+                  <span className="text-sm font-semibold">{g.motherName}</span>
+                </div>
+                <div className="mt-2 pl-1 border-l-2 border-primary/30">
+                  <div className="pl-3 text-[11px] uppercase tracking-wider text-muted-foreground mb-1">
+                    Submódulos
+                  </div>
+                  <div className="pl-3 flex flex-wrap gap-1.5">
+                    {g.submodules.map((s) => (
+                      <span
+                        key={s}
+                        className="px-2.5 py-0.5 rounded-full bg-secondary text-secondary-foreground text-xs"
+                      >
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
       </div>
 
