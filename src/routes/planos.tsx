@@ -268,17 +268,35 @@ function PlanosPage() {
                   ))}
                 </ul>
 
-                <Button
-                  asChild
-                  className={cn("mt-6 w-full", plan.highlight && "bg-gradient-primary shadow-elegant")}
-                  variant={plan.highlight ? "default" : "outline"}
-                >
-                  {plan.monthly !== null ? (
-                    <Link to="/trial/cadastro">{plan.cta}</Link>
-                  ) : (
+                {plan.monthly !== null && PRICE_IDS[plan.name] ? (
+                  <div className="mt-6 space-y-2">
+                    <Button
+                      className={cn("w-full", plan.highlight && "bg-gradient-primary shadow-elegant")}
+                      variant={plan.highlight ? "default" : "outline"}
+                      disabled={checkoutLoading}
+                      onClick={() =>
+                        openCheckout({
+                          priceId: PRICE_IDS[plan.name][annual ? "annual" : "monthly"],
+                          customerEmail: user?.email,
+                          customData: user?.id ? { userId: user.id, plan: plan.name } : { plan: plan.name },
+                        })
+                      }
+                    >
+                      {checkoutLoading ? "Abrindo checkout..." : `Assinar ${annual ? "anual" : "mensal"}`}
+                    </Button>
+                    <Button asChild variant="ghost" size="sm" className="w-full text-xs">
+                      <Link to="/trial/cadastro">ou começar Trial de 7 dias</Link>
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    asChild
+                    className={cn("mt-6 w-full", plan.highlight && "bg-gradient-primary shadow-elegant")}
+                    variant={plan.highlight ? "default" : "outline"}
+                  >
                     <Link to="/orcamento" search={{ plano: plan.name, origem: "planos" }}>{plan.cta}</Link>
-                  )}
-                </Button>
+                  </Button>
+                )}
               </Card>
             );
           })}
