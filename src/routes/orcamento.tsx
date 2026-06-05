@@ -646,12 +646,12 @@ function ResultCard({
           <div className="grid sm:grid-cols-2 gap-3">
             <Button
               size="lg"
-              className="gap-2 bg-gradient-primary shadow-elegant w-full justify-center"
+              className="gap-2 bg-gradient-primary shadow-elegant w-full justify-center font-semibold tracking-wide"
               onClick={() => submit(true)}
               disabled={saving}
             >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageCircle className="w-4 h-4" />}
-              Enviar e falar no WhatsApp
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              ENVIAR ORÇAMENTO
             </Button>
             <Button
               size="lg"
@@ -664,7 +664,11 @@ function ResultCard({
             </Button>
           </div>
         ) : (
-          <Button asChild size="lg" className="gap-2 bg-gradient-primary shadow-elegant w-full justify-center">
+          <Button
+            asChild
+            size="lg"
+            className="gap-2 w-full justify-center bg-[#25D366] hover:bg-[#1ebe5d] text-white shadow-elegant"
+          >
             <a href={whatsURL} target="_blank" rel="noopener noreferrer">
               <MessageCircle className="w-4 h-4" />
               Falar no WhatsApp agora
