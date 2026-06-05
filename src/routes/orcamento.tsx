@@ -624,7 +624,7 @@ function ResultCard({
               >
                 <div className="flex items-center gap-2">
                   <span className="inline-flex h-6 px-2 items-center rounded-full bg-primary/10 text-primary text-[11px] font-semibold uppercase tracking-wider">
-                    Módulo-mãe
+                    Módulo principal
                   </span>
                   <span className="text-sm font-semibold">{g.motherName}</span>
                 </div>
