@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useSubscription } from "@/hooks/useSubscription";
 import {
-  changeMyPlan, cancelMySubscription, openMyPortal,
+  changeMyPlan, cancelMySubscription, openMyPortal, reactivateMySubscription,
 } from "@/lib/billing-self.functions";
 import { cn } from "@/lib/utils";
 
@@ -70,6 +70,7 @@ function MinhaAssinaturaPage() {
   const changeFn = useServerFn(changeMyPlan);
   const cancelFn = useServerFn(cancelMySubscription);
   const portalFn = useServerFn(openMyPortal);
+  const reactivateFn = useServerFn(reactivateMySubscription);
 
   const mChange = useMutation({
     mutationFn: (newPriceId: string) => changeFn({ data: { newPriceId } as any }),
@@ -99,6 +100,15 @@ function MinhaAssinaturaPage() {
       else toast.error("Portal indisponível no momento");
     },
     onError: (e: any) => toast.error(e.message || "Falha ao abrir portal"),
+  });
+
+  const mReactivate = useMutation({
+    mutationFn: () => reactivateFn(),
+    onSuccess: () => {
+      toast.success("Assinatura reativada — renovação automática voltou a valer");
+      qc.invalidateQueries({ queryKey: ["my-subscription"] });
+    },
+    onError: (e: any) => toast.error(e.message || "Falha ao reativar"),
   });
 
   if (isLoading) {
@@ -159,9 +169,20 @@ function MinhaAssinaturaPage() {
             </div>
           </div>
           <div className="flex gap-2 flex-wrap">
-            <Button onClick={() => setChangeOpen(true)} disabled={!isActive || willCancel}>
-              Trocar de plano
-            </Button>
+            {willCancel ? (
+              <Button
+                onClick={() => mReactivate.mutate()}
+                disabled={mReactivate.isPending}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              >
+                {mReactivate.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
+                Reativar assinatura
+              </Button>
+            ) : (
+              <Button onClick={() => setChangeOpen(true)} disabled={!isActive}>
+                Trocar de plano
+              </Button>
+            )}
             <Button variant="outline" onClick={() => mPortal.mutate()} disabled={mPortal.isPending}>
               {mPortal.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <ExternalLink className="w-4 h-4 mr-2" />}
               Atualizar pagamento

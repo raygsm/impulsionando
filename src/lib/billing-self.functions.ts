@@ -17,12 +17,21 @@ const PLAN_RANK: Record<string, number> = {
   avancado_plan: 3,
 };
 
+function resolveEnvFromRequest(): "sandbox" | "live" {
+  // Determina o env a partir do client token shipped no servidor (mesmo valor do bundle).
+  // Fallback: sandbox.
+  const token = process.env.VITE_PAYMENTS_CLIENT_TOKEN ?? "";
+  return token.startsWith("test_") ? "sandbox" : token.startsWith("live_") ? "live" : "sandbox";
+}
+
 async function loadMySubscription(userId: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const env = resolveEnvFromRequest();
   const { data, error } = await supabaseAdmin
     .from("subscriptions")
     .select("*")
     .eq("user_id", userId)
+    .eq("environment", env)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -47,10 +56,12 @@ export const getMySubscription = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const env = resolveEnvFromRequest();
     const { data, error } = await supabaseAdmin
       .from("subscriptions")
       .select("*")
       .eq("user_id", context.userId)
+      .eq("environment", env)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -154,4 +165,38 @@ export const openMyPortal = createServerFn({ method: "POST" })
       overviewUrl: session?.urls?.general?.overview ?? null,
       subscriptionUrls: session?.urls?.subscriptions ?? [],
     };
+  });
+
+// ============================================================================
+// POST — reativar assinatura (remove cancelamento agendado)
+// ============================================================================
+export const reactivateMySubscription = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const sub = await loadMySubscription(context.userId);
+    if (sub.user_id !== context.userId) throw new Error("Acesso negado");
+    if (!sub.cancel_at_period_end) return { ok: true, alreadyActive: true };
+    if (sub.status === "canceled") {
+      throw new Error("Assinatura já encerrada — assine novamente em /planos");
+    }
+
+    const env = sub.environment as "sandbox" | "live";
+    const { getPaddleClient } = await import("@/lib/paddle.server");
+    const paddle = getPaddleClient(env);
+    try {
+      // Remove o scheduledChange (cancelamento agendado)
+      await paddle.subscriptions.update(sub.paddle_subscription_id, {
+        scheduledChange: null as any,
+      });
+    } catch (e: any) {
+      throw new Error("Falha ao reativar: " + (e?.message ?? e));
+    }
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin
+      .from("subscriptions")
+      .update({ cancel_at_period_end: false, updated_at: new Date().toISOString() })
+      .eq("id", sub.id);
+
+    return { ok: true };
   });

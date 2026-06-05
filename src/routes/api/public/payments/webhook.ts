@@ -69,17 +69,21 @@ async function notifyStaff(
   message: string,
   companyId: string | null
 ) {
-  // Notifica todos os usuários da empresa master (super admin + staff)
+  // Notifica apenas super-admins e staff da empresa master Impulsionando.
+  // Filtra por slug do profile + is_master=true na companhia para evitar
+  // over-match com clientes que tenham um profile is_master_profile próprio.
   const { data: staff } = await supabase
     .from("user_profiles")
-    .select("user_id, profiles!inner(slug, is_master_profile)")
-    .eq("is_active", true);
+    .select("user_id, profiles!inner(slug, is_master_profile), companies!inner(is_master)")
+    .eq("is_active", true)
+    .eq("profiles.is_master_profile", true)
+    .in("profiles.slug", ["super-admin-impulsionando", "staff-impulsionando"])
+    .eq("companies.is_master", true);
 
-  const masterUsers = (staff ?? []).filter((s: any) => s.profiles?.is_master_profile);
-  if (!masterUsers.length) return;
+  if (!staff?.length) return;
 
   const seen = new Set<string>();
-  const rows = masterUsers
+  const rows = staff
     .filter((s: any) => {
       if (seen.has(s.user_id)) return false;
       seen.add(s.user_id);
@@ -149,9 +153,15 @@ async function resolveOrCreateUser(
   const name = cust?.name ?? null;
   if (!email) return { userId: null, isNew: false, email: null, name: null };
 
-  // Try to find existing user by email (list-based; ok at this scale)
-  const { data: existing } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
-  const found = existing?.users?.find((u: any) => u.email?.toLowerCase() === email);
+  // Try to find existing user by email — paginate to handle >1000 users.
+  let found: any = null;
+  for (let page = 1; page <= 20; page++) {
+    const { data: list } = await supabase.auth.admin.listUsers({ page, perPage: 1000 });
+    const users = list?.users ?? [];
+    found = users.find((u: any) => u.email?.toLowerCase() === email);
+    if (found) break;
+    if (users.length < 1000) break; // last page
+  }
   if (found) return { userId: found.id, isNew: false, email, name };
 
   // Create user; email confirmed automatically since the purchase verifies ownership.
@@ -234,7 +244,14 @@ async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
     console.warn("[paddle] missing importMeta.externalId — skipping", {
       rawPriceId: item?.price?.id,
       rawProductId: item?.product?.id,
+      subscriptionId: id,
     });
+    await notifyStaff(
+      getSupabase(),
+      "Assinatura ignorada — externalId faltando",
+      `Sub ${id} (${env}) — price=${item?.price?.id} product=${item?.product?.id}. Recrie no Paddle com create_product/create_price.`,
+      null
+    );
     return;
   }
 
@@ -388,17 +405,20 @@ async function handleSubscriptionUpdated(data: any, env: PaddleEnv) {
   const newPriceId = item?.price?.importMeta?.externalId;
   const newProductId = item?.product?.importMeta?.externalId;
 
-  // Read existing row first (before update) to detect plan changes and past_due transitions
+  // Read existing row first (before update) to detect plan changes, past_due transitions and re-activation
   const { data: existing } = await supabase
     .from("subscriptions")
-    .select("user_id, product_id, price_id, status, past_due_since")
+    .select("user_id, product_id, price_id, status, past_due_since, cancel_at_period_end")
     .eq("paddle_subscription_id", id)
     .eq("environment", env)
     .maybeSingle();
 
   const prevProductId = (existing as any)?.product_id;
   const prevStatus = (existing as any)?.status;
+  const prevCancelAtPeriodEnd = !!(existing as any)?.cancel_at_period_end;
   const userId = (existing as any)?.user_id;
+  const willCancelNow = scheduledChange?.action === "cancel";
+  const isReactivation = prevCancelAtPeriodEnd && !willCancelNow && status === "active";
 
   const update: Record<string, any> = {
     status,
@@ -479,6 +499,45 @@ async function handleSubscriptionUpdated(data: any, env: PaddleEnv) {
       companyId
     );
   }
+
+  // Reativação: cliente removeu o cancelamento agendado
+  if (isReactivation) {
+    const prof = (
+      await supabase
+        .from("user_profiles")
+        .select("email, display_name")
+        .eq("user_id", userId)
+        .maybeSingle()
+    ).data;
+    await enqueueTemplate(
+      supabase,
+      "subscription_reactivated",
+      "email",
+      userId,
+      companyId,
+      prof?.email ?? null,
+      null,
+      prof?.display_name ?? null,
+      { recipient_name: prof?.display_name ?? "cliente", subscription_id: id }
+    );
+    await enqueueTemplate(
+      supabase,
+      "subscription_reactivated",
+      "in_app",
+      userId,
+      companyId,
+      null,
+      null,
+      prof?.display_name ?? null,
+      { recipient_name: prof?.display_name ?? "cliente" }
+    );
+    await notifyStaff(
+      supabase,
+      "Assinatura reativada",
+      `User ${userId} • ${id}`,
+      companyId
+    );
+  }
 }
 
 async function handleSubscriptionCanceled(data: any, env: PaddleEnv) {
@@ -504,14 +563,15 @@ async function handleSubscriptionCanceled(data: any, env: PaddleEnv) {
     .eq("environment", env);
 
   const userId = (existing as any)?.user_id;
+  const canceledProductId = (existing as any)?.product_id;
   if (!userId) return;
 
   const companyId = await getCompanyForUser(supabase, userId);
-  if (companyId) {
-    await supabase
-      .from("company_modules")
-      .update({ is_enabled: false, updated_at: new Date().toISOString() })
-      .eq("company_id", companyId);
+  if (companyId && canceledProductId) {
+    // Desabilita apenas os módulos do plano cancelado.
+    // Módulos manualmente habilitados (ou de planos add-on) permanecem ativos.
+    const modulesToDisable = PLAN_MODULES[canceledProductId] ?? [];
+    await disableModules(supabase, companyId, modulesToDisable);
   }
 
   const prof = (
@@ -564,31 +624,50 @@ async function handleTransactionCompleted(data: any, env: PaddleEnv) {
 
 async function handleTransactionPaymentFailed(data: any, env: PaddleEnv) {
   const supabase = getSupabase();
-  const userId = data.customData?.userId;
-  if (!userId) {
-    await notifyStaff(supabase, "Falha de pagamento (sem userId)", `Txn ${data.id} (${env})`, null);
-    return;
+  const userId = data.customData?.userId as string | undefined;
+
+  // Resolve destinatário: tenta perfil do app; fallback no email do Paddle (checkout anônimo).
+  let recipientEmail: string | null = null;
+  let recipientName: string | null = null;
+  let companyId: string | null = null;
+
+  if (userId) {
+    companyId = await getCompanyForUser(supabase, userId);
+    const prof = (
+      await supabase
+        .from("user_profiles")
+        .select("email, display_name")
+        .eq("user_id", userId)
+        .maybeSingle()
+    ).data;
+    recipientEmail = prof?.email ?? null;
+    recipientName = prof?.display_name ?? null;
   }
-  const companyId = await getCompanyForUser(supabase, userId);
-  const prof = (
-    await supabase
-      .from("user_profiles")
-      .select("email, display_name")
-      .eq("user_id", userId)
-      .maybeSingle()
-  ).data;
-  await enqueueTemplate(
+  if (!recipientEmail && data.customerId) {
+    const cust = await fetchPaddleCustomer(env, data.customerId);
+    recipientEmail = cust?.email?.toLowerCase() ?? null;
+    recipientName = recipientName ?? cust?.name ?? null;
+  }
+
+  if (recipientEmail) {
+    await enqueueTemplate(
+      supabase,
+      "payment_failed",
+      "email",
+      userId ?? null,
+      companyId,
+      recipientEmail,
+      null,
+      recipientName,
+      { recipient_name: recipientName ?? "cliente", transactionId: data.id }
+    );
+  }
+  await notifyStaff(
     supabase,
-    "payment_failed",
-    "email",
-    userId,
-    companyId,
-    prof?.email ?? null,
-    null,
-    prof?.display_name ?? null,
-    { recipient_name: prof?.display_name ?? "cliente", transactionId: data.id }
+    userId ? "Falha de pagamento" : "Falha de pagamento (sem userId)",
+    `Txn ${data.id} (${env})${recipientEmail ? ` • ${recipientEmail}` : ""}`,
+    companyId
   );
-  await notifyStaff(supabase, "Falha de pagamento", `Txn ${data.id} (${env})`, companyId);
 }
 
 async function handleWebhook(req: Request, env: PaddleEnv) {
