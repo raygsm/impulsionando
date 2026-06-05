@@ -70,6 +70,7 @@ function MinhaAssinaturaPage() {
   const changeFn = useServerFn(changeMyPlan);
   const cancelFn = useServerFn(cancelMySubscription);
   const portalFn = useServerFn(openMyPortal);
+  const reactivateFn = useServerFn(reactivateMySubscription);
 
   const mChange = useMutation({
     mutationFn: (newPriceId: string) => changeFn({ data: { newPriceId } as any }),
