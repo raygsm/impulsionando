@@ -102,8 +102,8 @@ export const convertTrial = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.rpc("trial_convert", {
       _trial_id: data.trialId,
-      _paddle_sub: data.paddle_sub ?? null,
-    });
+      _paddle_sub: data.paddle_sub ?? undefined,
+    } as never);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -143,8 +143,8 @@ export const cancelTrial = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.rpc("trial_cancel", {
       _trial_id: data.trialId,
-      _reason: data.reason ?? null,
-    });
+      _reason: data.reason ?? undefined,
+    } as never);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
