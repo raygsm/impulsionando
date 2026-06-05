@@ -18,6 +18,7 @@ import {
 const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20entender%20melhor%20os%20planos%20da%20Impulsionando.";
 
 export const Route = createFileRoute("/planos")({
+  ssr: false,
   head: () => ({
     meta: [
       { title: "Planos e Preços — Essencial, Integrado, Avançado e Sob Medida | Impulsionando Tecnologia" },
