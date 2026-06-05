@@ -81,6 +81,7 @@ import { Route as AuthenticatedFinanceMethodsRouteImport } from './routes/_authe
 import { Route as AuthenticatedFinanceCommissionsRouteImport } from './routes/_authenticated/finance.commissions'
 import { Route as AuthenticatedFinanceCategoriesRouteImport } from './routes/_authenticated/finance.categories'
 import { Route as AuthenticatedFinanceAccountsRouteImport } from './routes/_authenticated/finance.accounts'
+import { Route as AuthenticatedEhrIdRouteImport } from './routes/_authenticated/ehr.$id'
 import { Route as AuthenticatedCrmPipelinesRouteImport } from './routes/_authenticated/crm.pipelines'
 import { Route as AuthenticatedCrmLeadsRouteImport } from './routes/_authenticated/crm.leads'
 import { Route as AuthenticatedCrmBoardRouteImport } from './routes/_authenticated/crm.board'
@@ -475,6 +476,11 @@ const AuthenticatedFinanceAccountsRoute =
     path: '/accounts',
     getParentRoute: () => AuthenticatedFinanceRoute,
   } as any)
+const AuthenticatedEhrIdRoute = AuthenticatedEhrIdRouteImport.update({
+  id: '/ehr/$id',
+  path: '/ehr/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCrmPipelinesRoute =
   AuthenticatedCrmPipelinesRouteImport.update({
     id: '/pipelines',
@@ -607,6 +613,7 @@ export interface FileRoutesByFullPath {
   '/crm/board': typeof AuthenticatedCrmBoardRoute
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
   '/crm/pipelines': typeof AuthenticatedCrmPipelinesRoute
+  '/ehr/$id': typeof AuthenticatedEhrIdRoute
   '/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
   '/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
   '/finance/commissions': typeof AuthenticatedFinanceCommissionsRoute
@@ -686,6 +693,7 @@ export interface FileRoutesByTo {
   '/crm/board': typeof AuthenticatedCrmBoardRoute
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
   '/crm/pipelines': typeof AuthenticatedCrmPipelinesRoute
+  '/ehr/$id': typeof AuthenticatedEhrIdRoute
   '/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
   '/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
   '/finance/commissions': typeof AuthenticatedFinanceCommissionsRoute
@@ -774,6 +782,7 @@ export interface FileRoutesById {
   '/_authenticated/crm/board': typeof AuthenticatedCrmBoardRoute
   '/_authenticated/crm/leads': typeof AuthenticatedCrmLeadsRoute
   '/_authenticated/crm/pipelines': typeof AuthenticatedCrmPipelinesRoute
+  '/_authenticated/ehr/$id': typeof AuthenticatedEhrIdRoute
   '/_authenticated/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
   '/_authenticated/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
   '/_authenticated/finance/commissions': typeof AuthenticatedFinanceCommissionsRoute
@@ -862,6 +871,7 @@ export interface FileRouteTypes {
     | '/crm/board'
     | '/crm/leads'
     | '/crm/pipelines'
+    | '/ehr/$id'
     | '/finance/accounts'
     | '/finance/categories'
     | '/finance/commissions'
@@ -941,6 +951,7 @@ export interface FileRouteTypes {
     | '/crm/board'
     | '/crm/leads'
     | '/crm/pipelines'
+    | '/ehr/$id'
     | '/finance/accounts'
     | '/finance/categories'
     | '/finance/commissions'
@@ -1028,6 +1039,7 @@ export interface FileRouteTypes {
     | '/_authenticated/crm/board'
     | '/_authenticated/crm/leads'
     | '/_authenticated/crm/pipelines'
+    | '/_authenticated/ehr/$id'
     | '/_authenticated/finance/accounts'
     | '/_authenticated/finance/categories'
     | '/_authenticated/finance/commissions'
@@ -1590,6 +1602,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFinanceAccountsRouteImport
       parentRoute: typeof AuthenticatedFinanceRoute
     }
+    '/_authenticated/ehr/$id': {
+      id: '/_authenticated/ehr/$id'
+      path: '/ehr/$id'
+      fullPath: '/ehr/$id'
+      preLoaderRoute: typeof AuthenticatedEhrIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/crm/pipelines': {
       id: '/_authenticated/crm/pipelines'
       path: '/pipelines'
@@ -1860,6 +1879,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTalentsRoute: typeof AuthenticatedTalentsRoute
   AuthenticatedUnitsRoute: typeof AuthenticatedUnitsRoute
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
+  AuthenticatedEhrIdRoute: typeof AuthenticatedEhrIdRoute
   AuthenticatedMarketingLeadsRoute: typeof AuthenticatedMarketingLeadsRoute
   AuthenticatedEhrIndexRoute: typeof AuthenticatedEhrIndexRoute
 }
@@ -1886,6 +1906,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedTalentsRoute: AuthenticatedTalentsRoute,
   AuthenticatedUnitsRoute: AuthenticatedUnitsRoute,
   AuthenticatedUsersRoute: AuthenticatedUsersRoute,
+  AuthenticatedEhrIdRoute: AuthenticatedEhrIdRoute,
   AuthenticatedMarketingLeadsRoute: AuthenticatedMarketingLeadsRoute,
   AuthenticatedEhrIndexRoute: AuthenticatedEhrIndexRoute,
 }
