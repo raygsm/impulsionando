@@ -3,6 +3,8 @@ import { render as renderAsync } from '@react-email/components'
 import { createFileRoute } from '@tanstack/react-router'
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
 import { TEMPLATES } from '@/lib/email-templates/registry'
+import { sendWhatsAppText } from '@/lib/zapi.server'
+
 
 // Same sender constants as the transactional send route
 const SITE_NAME = 'Impulsionando'
@@ -21,7 +23,9 @@ type UptimeStateRow = {
   last_alert_at: string | null
   consecutive_failures: number
   alert_emails: string[]
+  alert_whatsapps: string[]
 }
+
 
 async function pingUrl(url: string): Promise<{ ok: boolean; status: number | null; ms: number; error: string | null }> {
   const start = Date.now()
@@ -101,7 +105,8 @@ export const Route = createFileRoute('/api/public/hooks/uptime-check')({
       POST: async () => {
         const { data: targets, error: stateErr } = await supabaseAdmin
           .from('uptime_state')
-          .select('url, is_up, since, last_alert_at, consecutive_failures, alert_emails')
+          .select('url, is_up, since, last_alert_at, consecutive_failures, alert_emails, alert_whatsapps')
+
 
         if (stateErr || !targets) {
           console.error('uptime: failed to load state', stateErr)
