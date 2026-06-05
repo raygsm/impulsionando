@@ -60,6 +60,12 @@ export const NAV_GROUPS: NavGroup[] = [
   },
 
   {
+    label: "Saúde",
+    items: [
+      { to: "/ehr", label: "Prontuário Eletrônico", icon: Stethoscope, perm: "ehr.record.read" },
+    ],
+  },
+  {
     label: "Agenda",
     items: [
       { to: "/agenda", label: "Hoje", icon: Calendar, perm: "agenda.appointment.read" },
