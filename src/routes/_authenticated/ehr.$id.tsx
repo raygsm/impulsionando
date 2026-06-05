@@ -389,6 +389,7 @@ function EvolutionsTab({
   recordId, companyId, evolutions, onChange,
 }: { recordId: string; companyId: string | undefined; evolutions: any[]; onChange: () => void }) {
   const [open, setOpen] = useState(false);
+  const [releaseToPatient, setReleaseToPatient] = useState(false);
   const [form, setForm] = useState({
     chief_complaint: "", clinical_history: "", physical_exam: "",
     hypothesis: "", conduct: "", exams_requested: "", prescription: "", follow_up: "", notes: "",
@@ -397,11 +398,14 @@ function EvolutionsTab({
   async function save() {
     if (!companyId) return toast.error("Selecione uma empresa");
     const { error } = await supabase.from("ehr_evolutions").insert({
-      company_id: companyId, record_id: recordId, ...form, signed_at: new Date().toISOString(),
+      company_id: companyId, record_id: recordId, ...form,
+      released_to_patient: releaseToPatient,
+      signed_at: new Date().toISOString(),
     });
     if (error) return toast.error(error.message);
     toast.success("Evolução registrada");
     setOpen(false);
+    setReleaseToPatient(false);
     setForm({
       chief_complaint: "", clinical_history: "", physical_exam: "",
       hypothesis: "", conduct: "", exams_requested: "", prescription: "", follow_up: "", notes: "",
