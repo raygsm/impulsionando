@@ -42,14 +42,12 @@ function EhrList() {
     queryKey: ["ehr-records", companyId, q],
     enabled: !!companyId,
     queryFn: async () => {
-      let query = supabase
-        // @ts-expect-error — typings refresh after deploy
+      const { data, error } = await supabase
         .from("ehr_records")
         .select("id, customer_id, record_number, status, updated_at, customers(name)")
         .eq("company_id", companyId!)
         .order("updated_at", { ascending: false })
         .limit(100);
-      const { data, error } = await query;
       if (error) throw error;
       const list = (data ?? []) as unknown as EhrRecord[];
       if (!q.trim()) return list;
