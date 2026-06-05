@@ -16,7 +16,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { data, isLoading, error } = useCurrentUser();
-  const { isSuspended: trialSuspended, isActive: trialActive } = useMyTrial();
+  const { isSuspended: trialSuspended } = useMyTrial();
   const { isSuspended: subSuspended, isActive: subActive } = useSubscription();
   const { hasModule, bypass, isLoading: modulesLoading } = useCompanyModules();
 
