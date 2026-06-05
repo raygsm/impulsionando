@@ -3363,6 +3363,69 @@ export type Database = {
           },
         ]
       }
+      uptime_checks: {
+        Row: {
+          checked_at: string
+          error_message: string | null
+          http_status: number | null
+          id: string
+          is_up: boolean
+          response_ms: number | null
+          url: string
+        }
+        Insert: {
+          checked_at?: string
+          error_message?: string | null
+          http_status?: number | null
+          id?: string
+          is_up: boolean
+          response_ms?: number | null
+          url: string
+        }
+        Update: {
+          checked_at?: string
+          error_message?: string | null
+          http_status?: number | null
+          id?: string
+          is_up?: boolean
+          response_ms?: number | null
+          url?: string
+        }
+        Relationships: []
+      }
+      uptime_state: {
+        Row: {
+          alert_emails: string[]
+          consecutive_failures: number
+          is_up: boolean
+          last_alert_at: string | null
+          last_check_at: string
+          last_error: string | null
+          since: string
+          url: string
+        }
+        Insert: {
+          alert_emails?: string[]
+          consecutive_failures?: number
+          is_up: boolean
+          last_alert_at?: string | null
+          last_check_at?: string
+          last_error?: string | null
+          since?: string
+          url: string
+        }
+        Update: {
+          alert_emails?: string[]
+          consecutive_failures?: number
+          is_up?: boolean
+          last_alert_at?: string | null
+          last_check_at?: string
+          last_error?: string | null
+          since?: string
+          url?: string
+        }
+        Relationships: []
+      }
       user_permission_overrides: {
         Row: {
           company_id: string
