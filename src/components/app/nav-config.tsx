@@ -42,6 +42,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/permissions", label: "Permissões", icon: KeyRound, superOnly: true },
       { to: "/modules", label: "Módulos", icon: Boxes, perm: "modules.read" },
       { to: "/admin/trials", label: "Trials (7 dias)", icon: Sparkles, superOnly: true },
+      { to: "/admin/billing", label: "Billing", icon: CreditCard, superOnly: true },
       { to: "/settings", label: "Configurações", icon: SlidersHorizontal, perm: "settings.read" },
       { to: "/audit", label: "Auditoria", icon: FileSearch, perm: "audit.read" },
       { to: "/privacy", label: "Privacidade & Notificações", icon: ShieldCheck },

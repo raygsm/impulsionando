@@ -105,6 +105,7 @@ import { Route as AuthenticatedAgendaSchedulesRouteImport } from './routes/_auth
 import { Route as AuthenticatedAgendaProfessionalsRouteImport } from './routes/_authenticated/agenda.professionals'
 import { Route as AuthenticatedAgendaAppointmentsRouteImport } from './routes/_authenticated/agenda.appointments'
 import { Route as AuthenticatedAdminTrialsRouteImport } from './routes/_authenticated/admin.trials'
+import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authenticated/admin.billing'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -621,6 +622,12 @@ const AuthenticatedAdminTrialsRoute =
     path: '/admin/trials',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminBillingRoute =
+  AuthenticatedAdminBillingRouteImport.update({
+    id: '/admin/billing',
+    path: '/admin/billing',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -717,6 +724,7 @@ export interface FileRoutesByFullPath {
   '/nichos/': typeof NichosIndexRoute
   '/paciente/': typeof PacienteIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
+  '/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
@@ -813,6 +821,7 @@ export interface FileRoutesByTo {
   '/nichos': typeof NichosIndexRoute
   '/paciente': typeof PacienteIndexRoute
   '/trabalhe-conosco': typeof TrabalheConoscoIndexRoute
+  '/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
@@ -919,6 +928,7 @@ export interface FileRoutesById {
   '/nichos/': typeof NichosIndexRoute
   '/paciente/': typeof PacienteIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
+  '/_authenticated/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/_authenticated/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/_authenticated/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/_authenticated/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
@@ -1025,6 +1035,7 @@ export interface FileRouteTypes {
     | '/nichos/'
     | '/paciente/'
     | '/trabalhe-conosco/'
+    | '/admin/billing'
     | '/admin/trials'
     | '/agenda/appointments'
     | '/agenda/professionals'
@@ -1121,6 +1132,7 @@ export interface FileRouteTypes {
     | '/nichos'
     | '/paciente'
     | '/trabalhe-conosco'
+    | '/admin/billing'
     | '/admin/trials'
     | '/agenda/appointments'
     | '/agenda/professionals'
@@ -1226,6 +1238,7 @@ export interface FileRouteTypes {
     | '/nichos/'
     | '/paciente/'
     | '/trabalhe-conosco/'
+    | '/_authenticated/admin/billing'
     | '/_authenticated/admin/trials'
     | '/_authenticated/agenda/appointments'
     | '/_authenticated/agenda/professionals'
@@ -1990,6 +2003,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTrialsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/billing': {
+      id: '/_authenticated/admin/billing'
+      path: '/admin/billing'
+      fullPath: '/admin/billing'
+      preLoaderRoute: typeof AuthenticatedAdminBillingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -2218,6 +2238,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTalentsRoute: typeof AuthenticatedTalentsRoute
   AuthenticatedUnitsRoute: typeof AuthenticatedUnitsRoute
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
+  AuthenticatedAdminBillingRoute: typeof AuthenticatedAdminBillingRoute
   AuthenticatedAdminTrialsRoute: typeof AuthenticatedAdminTrialsRoute
   AuthenticatedEhrIdRoute: typeof AuthenticatedEhrIdRoute
   AuthenticatedMarketingLeadsRoute: typeof AuthenticatedMarketingLeadsRoute
@@ -2246,6 +2267,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedTalentsRoute: AuthenticatedTalentsRoute,
   AuthenticatedUnitsRoute: AuthenticatedUnitsRoute,
   AuthenticatedUsersRoute: AuthenticatedUsersRoute,
+  AuthenticatedAdminBillingRoute: AuthenticatedAdminBillingRoute,
   AuthenticatedAdminTrialsRoute: AuthenticatedAdminTrialsRoute,
   AuthenticatedEhrIdRoute: AuthenticatedEhrIdRoute,
   AuthenticatedMarketingLeadsRoute: AuthenticatedMarketingLeadsRoute,
