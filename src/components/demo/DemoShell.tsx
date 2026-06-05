@@ -157,10 +157,14 @@ export function DemoShell({
             </div>
             {NavList}
             <div className="p-3 border-t border-sidebar-border">
-              <Button onClick={resetData} variant="outline" size="sm" className="w-full gap-2">
+              <Button
+                onClick={resetData}
+                size="sm"
+                className="w-full gap-2 bg-destructive text-destructive-foreground hover:bg-destructive/90 border border-destructive shadow-sm"
+              >
                 <RotateCcw className="w-3.5 h-3.5" /> Zerar dados do DEMO
               </Button>
-              <p className="mt-2 text-[10px] text-sidebar-foreground/50 leading-relaxed">
+              <p className="mt-2 text-[10px] text-sidebar-foreground/70 leading-relaxed">
                 Reinicia todos os cadastros desta demonstração. Não afeta o sistema real.
               </p>
             </div>
@@ -183,7 +187,11 @@ export function DemoShell({
                   </div>
                   {NavList}
                   <div className="p-3 border-t border-sidebar-border">
-                    <Button onClick={resetData} variant="outline" size="sm" className="w-full gap-2">
+                    <Button
+                      onClick={resetData}
+                      size="sm"
+                      className="w-full gap-2 bg-destructive text-destructive-foreground hover:bg-destructive/90 border border-destructive shadow-sm"
+                    >
                       <RotateCcw className="w-3.5 h-3.5" /> Zerar dados
                     </Button>
                   </div>
