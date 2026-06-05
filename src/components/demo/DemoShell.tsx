@@ -148,8 +148,8 @@ export function DemoShell({
         <div className="flex flex-1 min-h-0">
           {/* Sidebar desktop */}
           <aside className="hidden lg:flex flex-col w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border shrink-0">
-            <div className="h-16 px-5 flex items-center gap-2 border-b border-sidebar-border">
-              <img src={logoAsset.url} alt="Impulsionando" className="h-8 w-auto" />
+            <div className="h-20 px-5 flex items-center gap-2 border-b border-sidebar-border">
+              <img src={logoAsset.url} alt="Impulsionando" className="h-10 w-auto" />
               <div className="leading-tight">
                 <div className="text-sm font-semibold tracking-tight">Impulsionando</div>
                 <div className="text-[10px] uppercase text-sidebar-foreground/60 tracking-wider">DEMO</div>
@@ -177,8 +177,8 @@ export function DemoShell({
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="p-0 w-72 bg-sidebar text-sidebar-foreground">
-                  <div className="h-16 px-5 flex items-center gap-2 border-b border-sidebar-border">
-                    <img src={logoAsset.url} alt="Impulsionando" className="h-8 w-auto" />
+                  <div className="h-20 px-5 flex items-center gap-2 border-b border-sidebar-border">
+                    <img src={logoAsset.url} alt="Impulsionando" className="h-10 w-auto" />
                     <div className="text-sm font-semibold">Impulsionando DEMO</div>
                   </div>
                   {NavList}
