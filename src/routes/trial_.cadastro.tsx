@@ -14,7 +14,7 @@ import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { requestTrial } from "@/lib/trial.functions";
 
-export const Route = createFileRoute("/trial/cadastro")({
+export const Route = createFileRoute("/trial_/cadastro")({
   head: () => ({
     meta: [
       { title: "Iniciar Trial de 7 dias — Impulsionando Tecnologia" },
