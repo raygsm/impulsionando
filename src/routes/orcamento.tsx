@@ -718,26 +718,15 @@ function ResultCard({
 
       <div className="space-y-3">
         {!saved ? (
-          <div className="grid sm:grid-cols-2 gap-3">
-            <Button
-              size="lg"
-              className="gap-2 bg-gradient-primary shadow-elegant w-full justify-center font-semibold tracking-wide"
-              onClick={() => submit(true)}
-              disabled={saving}
-            >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-              ENVIAR ORÇAMENTO
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="w-full justify-center"
-              onClick={() => submit(false)}
-              disabled={saving}
-            >
-              Só enviar para receber depois
-            </Button>
-          </div>
+          <Button
+            size="lg"
+            className="gap-2 bg-gradient-primary shadow-elegant w-full justify-center font-semibold tracking-wide"
+            onClick={() => submit(false)}
+            disabled={saving}
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            ENVIAR ORÇAMENTO
+          </Button>
         ) : (
           <Button
             asChild
