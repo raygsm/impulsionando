@@ -106,6 +106,7 @@ import { Route as AuthenticatedAgendaServicesRouteImport } from './routes/_authe
 import { Route as AuthenticatedAgendaSchedulesRouteImport } from './routes/_authenticated/agenda.schedules'
 import { Route as AuthenticatedAgendaProfessionalsRouteImport } from './routes/_authenticated/agenda.professionals'
 import { Route as AuthenticatedAgendaAppointmentsRouteImport } from './routes/_authenticated/agenda.appointments'
+import { Route as AuthenticatedAdminUptimeRouteImport } from './routes/_authenticated/admin.uptime'
 import { Route as AuthenticatedAdminTrialsRouteImport } from './routes/_authenticated/admin.trials'
 import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authenticated/admin.billing'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
@@ -630,6 +631,12 @@ const AuthenticatedAgendaAppointmentsRoute =
     path: '/appointments',
     getParentRoute: () => AuthenticatedAgendaRoute,
   } as any)
+const AuthenticatedAdminUptimeRoute =
+  AuthenticatedAdminUptimeRouteImport.update({
+    id: '/admin/uptime',
+    path: '/admin/uptime',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminTrialsRoute =
   AuthenticatedAdminTrialsRouteImport.update({
     id: '/admin/trials',
@@ -748,6 +755,7 @@ export interface FileRoutesByFullPath {
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
+  '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
@@ -848,6 +856,7 @@ export interface FileRoutesByTo {
   '/trabalhe-conosco': typeof TrabalheConoscoIndexRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
+  '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
@@ -958,6 +967,7 @@ export interface FileRoutesById {
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/_authenticated/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/_authenticated/admin/trials': typeof AuthenticatedAdminTrialsRoute
+  '/_authenticated/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/_authenticated/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/_authenticated/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/_authenticated/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
@@ -1068,6 +1078,7 @@ export interface FileRouteTypes {
     | '/trabalhe-conosco/'
     | '/admin/billing'
     | '/admin/trials'
+    | '/admin/uptime'
     | '/agenda/appointments'
     | '/agenda/professionals'
     | '/agenda/schedules'
@@ -1168,6 +1179,7 @@ export interface FileRouteTypes {
     | '/trabalhe-conosco'
     | '/admin/billing'
     | '/admin/trials'
+    | '/admin/uptime'
     | '/agenda/appointments'
     | '/agenda/professionals'
     | '/agenda/schedules'
@@ -1277,6 +1289,7 @@ export interface FileRouteTypes {
     | '/trabalhe-conosco/'
     | '/_authenticated/admin/billing'
     | '/_authenticated/admin/trials'
+    | '/_authenticated/admin/uptime'
     | '/_authenticated/agenda/appointments'
     | '/_authenticated/agenda/professionals'
     | '/_authenticated/agenda/schedules'
@@ -2050,6 +2063,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgendaAppointmentsRouteImport
       parentRoute: typeof AuthenticatedAgendaRoute
     }
+    '/_authenticated/admin/uptime': {
+      id: '/_authenticated/admin/uptime'
+      path: '/admin/uptime'
+      fullPath: '/admin/uptime'
+      preLoaderRoute: typeof AuthenticatedAdminUptimeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/trials': {
       id: '/_authenticated/admin/trials'
       path: '/admin/trials'
@@ -2302,6 +2322,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
   AuthenticatedAdminBillingRoute: typeof AuthenticatedAdminBillingRoute
   AuthenticatedAdminTrialsRoute: typeof AuthenticatedAdminTrialsRoute
+  AuthenticatedAdminUptimeRoute: typeof AuthenticatedAdminUptimeRoute
   AuthenticatedEhrIdRoute: typeof AuthenticatedEhrIdRoute
   AuthenticatedMarketingLeadsRoute: typeof AuthenticatedMarketingLeadsRoute
   AuthenticatedEhrIndexRoute: typeof AuthenticatedEhrIndexRoute
@@ -2332,6 +2353,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedUsersRoute: AuthenticatedUsersRoute,
   AuthenticatedAdminBillingRoute: AuthenticatedAdminBillingRoute,
   AuthenticatedAdminTrialsRoute: AuthenticatedAdminTrialsRoute,
+  AuthenticatedAdminUptimeRoute: AuthenticatedAdminUptimeRoute,
   AuthenticatedEhrIdRoute: AuthenticatedEhrIdRoute,
   AuthenticatedMarketingLeadsRoute: AuthenticatedMarketingLeadsRoute,
   AuthenticatedEhrIndexRoute: AuthenticatedEhrIndexRoute,

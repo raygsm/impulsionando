@@ -7,7 +7,7 @@ export const getUptimeOverview = createServerFn({ method: 'GET' })
   .handler(async ({ context }) => {
     const { userId } = context
 
-    const { data: staff } = await supabaseAdmin.rpc('is_impulsionando_staff', { _user_id: userId })
+    const { data: staff } = await supabaseAdmin.rpc('is_impulsionando_staff', { _user: userId })
     if (!staff) {
       throw new Error('Forbidden: staff only')
     }

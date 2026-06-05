@@ -37,7 +37,6 @@ function AdminUptimePage() {
   return (
     <div className="space-y-6 p-6">
       <PageHeader
-        icon={Activity}
         title="Monitoramento de Uptime"
         description="Verificação automática a cada 5 minutos. Alertas por e-mail quando o site cai e quando volta."
       />
