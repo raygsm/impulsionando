@@ -196,8 +196,8 @@ async function handleSubscriptionUpdated(data: any, env: PaddleEnv) {
             modRows.map((m: any) => ({
               company_id: companyId,
               module_id: m.id,
-              enabled: true,
-              activated_at: new Date().toISOString(),
+              is_enabled: true,
+              enabled_at: new Date().toISOString(),
             })),
             { onConflict: "company_id,module_id" }
           );
