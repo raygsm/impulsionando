@@ -19,21 +19,62 @@ const RequestTrialSchema = z.object({
 });
 
 // Público — qualquer visitante do site pode iniciar um Trial.
+// Cria (ou reusa) um usuário Supabase, gera magic link de acesso e
+// passa o link para o RPC trial_create, que enfileira o e-mail/WhatsApp.
 export const requestTrial = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => RequestTrialSchema.parse(data))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const email = data.contact_email.trim().toLowerCase();
+
+    // 1) Reusa user existente OU cria novo (auto-confirmado p/ permitir magic link)
+    let userId: string | null = null;
+    const { data: existing } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 200 });
+    const found = existing?.users?.find((u) => u.email?.toLowerCase() === email);
+    if (found) {
+      userId = found.id;
+    } else {
+      const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        email_confirm: true,
+        user_metadata: {
+          display_name: data.contact_name,
+          phone: data.contact_whatsapp,
+          source: "trial",
+        },
+      });
+      if (createErr) throw new Error(createErr.message);
+      userId = created.user?.id ?? null;
+    }
+
+    // 2) Gera magic link de acesso direto ao painel
+    let magicLink = "https://impulsionando.com.br/auth";
+    if (userId) {
+      const { data: linkData, error: linkErr } = await supabaseAdmin.auth.admin.generateLink({
+        type: "magiclink",
+        email,
+        options: { redirectTo: "https://impulsionando.com.br/dashboard" },
+      });
+      if (!linkErr && linkData?.properties?.action_link) {
+        magicLink = linkData.properties.action_link;
+      }
+    }
+
+    // 3) Cria a linha de trial com user_id já vinculado e link de acesso no e-mail
     const { data: trialId, error } = await supabaseAdmin.rpc("trial_create", {
       _contact_name: data.contact_name,
       _contact_company: data.contact_company,
-      _contact_email: data.contact_email,
+      _contact_email: email,
       _contact_whatsapp: data.contact_whatsapp,
       _contact_doc: data.contact_doc ?? "",
       _chosen_plan: data.chosen_plan,
       _source: data.source ?? "site",
+      _user_id: userId,
+      _link_acesso: magicLink,
     } as never);
     if (error) throw new Error(error.message);
-    return { trialId };
+    return { trialId, email, userCreated: !found };
   });
 
 // Autenticado — busca trial do usuário atual (por user_id ou por email).
