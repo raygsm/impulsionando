@@ -1,19 +1,31 @@
 import { useEffect } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useLocation } from "@tanstack/react-router";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
+import { TrialBanner } from "./TrialBanner";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useMyTrial } from "@/hooks/use-trial";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { data, isLoading, error } = useCurrentUser();
+  const { isSuspended } = useMyTrial();
 
   useEffect(() => {
     if (!isLoading && !data && !error) navigate({ to: "/auth" });
   }, [data, isLoading, error, navigate]);
+
+  // Gate de inadimplência: trial suspenso só permite área financeira
+  useEffect(() => {
+    if (!isSuspended) return;
+    const path = location.pathname;
+    const allowed = path.startsWith("/finance") || path.startsWith("/auth") || path === "/";
+    if (!allowed) navigate({ to: "/finance" });
+  }, [isSuspended, location.pathname, navigate]);
 
   useEffect(() => {
     if (error) console.error("[AppShell] failed to load current user", error);
@@ -53,6 +65,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <Sidebar currentUser={data} />
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar currentUser={data} />
+        <TrialBanner />
         <main className="flex-1 p-6 lg:p-8 overflow-x-hidden">{children}</main>
       </div>
     </div>

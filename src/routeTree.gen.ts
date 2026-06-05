@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
+import { Route as TrialRouteImport } from './routes/trial'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SolucoesRouteImport } from './routes/solucoes'
 import { Route as SobreRouteImport } from './routes/sobre'
@@ -28,6 +29,7 @@ import { Route as TrabalheConoscoIndexRouteImport } from './routes/trabalhe-cono
 import { Route as PacienteIndexRouteImport } from './routes/paciente.index'
 import { Route as NichosIndexRouteImport } from './routes/nichos.index'
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
+import { Route as TrialCadastroRouteImport } from './routes/trial.cadastro'
 import { Route as TrabalheConoscoNichoRouteImport } from './routes/trabalhe-conosco.$nicho'
 import { Route as ShowroomFitnessRouteImport } from './routes/showroom.fitness'
 import { Route as ShowroomEventosRouteImport } from './routes/showroom.eventos'
@@ -36,6 +38,7 @@ import { Route as NichosSlugRouteImport } from './routes/nichos.$slug'
 import { Route as ModulosSlugRouteImport } from './routes/modulos.$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as DemoWhiteLabelRouteImport } from './routes/demo.white-label'
+import { Route as DemoTrialRouteImport } from './routes/demo.trial'
 import { Route as DemoClienteFinalRouteImport } from './routes/demo.cliente-final'
 import { Route as DemoChecklistRouteImport } from './routes/demo.checklist'
 import { Route as ComoFuncionaFitnessRouteImport } from './routes/como-funciona.fitness'
@@ -100,6 +103,7 @@ import { Route as AuthenticatedAgendaServicesRouteImport } from './routes/_authe
 import { Route as AuthenticatedAgendaSchedulesRouteImport } from './routes/_authenticated/agenda.schedules'
 import { Route as AuthenticatedAgendaProfessionalsRouteImport } from './routes/_authenticated/agenda.professionals'
 import { Route as AuthenticatedAgendaAppointmentsRouteImport } from './routes/_authenticated/agenda.appointments'
+import { Route as AuthenticatedAdminTrialsRouteImport } from './routes/_authenticated/admin.trials'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -110,6 +114,11 @@ import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenti
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
   path: '/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrialRoute = TrialRouteImport.update({
+  id: '/trial',
+  path: '/trial',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermosRoute = TermosRouteImport.update({
@@ -201,6 +210,11 @@ const DemoIndexRoute = DemoIndexRouteImport.update({
   path: '/demo/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrialCadastroRoute = TrialCadastroRouteImport.update({
+  id: '/cadastro',
+  path: '/cadastro',
+  getParentRoute: () => TrialRoute,
+} as any)
 const TrabalheConoscoNichoRoute = TrabalheConoscoNichoRouteImport.update({
   id: '/trabalhe-conosco/$nicho',
   path: '/trabalhe-conosco/$nicho',
@@ -239,6 +253,11 @@ const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
 const DemoWhiteLabelRoute = DemoWhiteLabelRouteImport.update({
   id: '/demo/white-label',
   path: '/demo/white-label',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoTrialRoute = DemoTrialRouteImport.update({
+  id: '/demo/trial',
+  path: '/demo/trial',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoClienteFinalRoute = DemoClienteFinalRouteImport.update({
@@ -589,6 +608,12 @@ const AuthenticatedAgendaAppointmentsRoute =
     path: '/appointments',
     getParentRoute: () => AuthenticatedAgendaRoute,
   } as any)
+const AuthenticatedAdminTrialsRoute =
+  AuthenticatedAdminTrialsRouteImport.update({
+    id: '/admin/trials',
+    path: '/admin/trials',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -638,6 +663,7 @@ export interface FileRoutesByFullPath {
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
   '/termos': typeof TermosRoute
+  '/trial': typeof TrialRouteWithChildren
   '/unsubscribe': typeof UnsubscribeRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
@@ -663,6 +689,7 @@ export interface FileRoutesByFullPath {
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
+  '/demo/trial': typeof DemoTrialRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/modulos/$slug': typeof ModulosSlugRoute
@@ -671,10 +698,12 @@ export interface FileRoutesByFullPath {
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
+  '/trial/cadastro': typeof TrialCadastroRoute
   '/demo/': typeof DemoIndexRoute
   '/nichos/': typeof NichosIndexRoute
   '/paciente/': typeof PacienteIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
+  '/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
@@ -735,6 +764,7 @@ export interface FileRoutesByTo {
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
   '/termos': typeof TermosRoute
+  '/trial': typeof TrialRouteWithChildren
   '/unsubscribe': typeof UnsubscribeRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/audit': typeof AuthenticatedAuditRoute
@@ -753,6 +783,7 @@ export interface FileRoutesByTo {
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
+  '/demo/trial': typeof DemoTrialRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/modulos/$slug': typeof ModulosSlugRoute
@@ -761,10 +792,12 @@ export interface FileRoutesByTo {
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
+  '/trial/cadastro': typeof TrialCadastroRoute
   '/demo': typeof DemoIndexRoute
   '/nichos': typeof NichosIndexRoute
   '/paciente': typeof PacienteIndexRoute
   '/trabalhe-conosco': typeof TrabalheConoscoIndexRoute
+  '/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
@@ -828,6 +861,7 @@ export interface FileRoutesById {
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
   '/termos': typeof TermosRoute
+  '/trial': typeof TrialRouteWithChildren
   '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/_authenticated/agenda': typeof AuthenticatedAgendaRouteWithChildren
@@ -853,6 +887,7 @@ export interface FileRoutesById {
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
+  '/demo/trial': typeof DemoTrialRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/modulos/$slug': typeof ModulosSlugRoute
@@ -861,10 +896,12 @@ export interface FileRoutesById {
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
+  '/trial/cadastro': typeof TrialCadastroRoute
   '/demo/': typeof DemoIndexRoute
   '/nichos/': typeof NichosIndexRoute
   '/paciente/': typeof PacienteIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
+  '/_authenticated/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/_authenticated/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/_authenticated/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/_authenticated/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
@@ -928,6 +965,7 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/solucoes'
     | '/termos'
+    | '/trial'
     | '/unsubscribe'
     | '/access-profiles'
     | '/agenda'
@@ -953,6 +991,7 @@ export interface FileRouteTypes {
     | '/como-funciona/fitness'
     | '/demo/checklist'
     | '/demo/cliente-final'
+    | '/demo/trial'
     | '/demo/white-label'
     | '/email/unsubscribe'
     | '/modulos/$slug'
@@ -961,10 +1000,12 @@ export interface FileRouteTypes {
     | '/showroom/eventos'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
+    | '/trial/cadastro'
     | '/demo/'
     | '/nichos/'
     | '/paciente/'
     | '/trabalhe-conosco/'
+    | '/admin/trials'
     | '/agenda/appointments'
     | '/agenda/professionals'
     | '/agenda/schedules'
@@ -1025,6 +1066,7 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/solucoes'
     | '/termos'
+    | '/trial'
     | '/unsubscribe'
     | '/access-profiles'
     | '/audit'
@@ -1043,6 +1085,7 @@ export interface FileRouteTypes {
     | '/como-funciona/fitness'
     | '/demo/checklist'
     | '/demo/cliente-final'
+    | '/demo/trial'
     | '/demo/white-label'
     | '/email/unsubscribe'
     | '/modulos/$slug'
@@ -1051,10 +1094,12 @@ export interface FileRouteTypes {
     | '/showroom/eventos'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
+    | '/trial/cadastro'
     | '/demo'
     | '/nichos'
     | '/paciente'
     | '/trabalhe-conosco'
+    | '/admin/trials'
     | '/agenda/appointments'
     | '/agenda/professionals'
     | '/agenda/schedules'
@@ -1117,6 +1162,7 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/solucoes'
     | '/termos'
+    | '/trial'
     | '/unsubscribe'
     | '/_authenticated/access-profiles'
     | '/_authenticated/agenda'
@@ -1142,6 +1188,7 @@ export interface FileRouteTypes {
     | '/como-funciona/fitness'
     | '/demo/checklist'
     | '/demo/cliente-final'
+    | '/demo/trial'
     | '/demo/white-label'
     | '/email/unsubscribe'
     | '/modulos/$slug'
@@ -1150,10 +1197,12 @@ export interface FileRouteTypes {
     | '/showroom/eventos'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
+    | '/trial/cadastro'
     | '/demo/'
     | '/nichos/'
     | '/paciente/'
     | '/trabalhe-conosco/'
+    | '/_authenticated/admin/trials'
     | '/_authenticated/agenda/appointments'
     | '/_authenticated/agenda/professionals'
     | '/_authenticated/agenda/schedules'
@@ -1217,10 +1266,12 @@ export interface RootRouteChildren {
   SobreRoute: typeof SobreRoute
   SolucoesRoute: typeof SolucoesRoute
   TermosRoute: typeof TermosRoute
+  TrialRoute: typeof TrialRouteWithChildren
   UnsubscribeRoute: typeof UnsubscribeRoute
   ComoFuncionaFitnessRoute: typeof ComoFuncionaFitnessRoute
   DemoChecklistRoute: typeof DemoChecklistRoute
   DemoClienteFinalRoute: typeof DemoClienteFinalRoute
+  DemoTrialRoute: typeof DemoTrialRoute
   DemoWhiteLabelRoute: typeof DemoWhiteLabelRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   NichosSlugRoute: typeof NichosSlugRoute
@@ -1245,6 +1296,13 @@ declare module '@tanstack/react-router' {
       path: '/unsubscribe'
       fullPath: '/unsubscribe'
       preLoaderRoute: typeof UnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trial': {
+      id: '/trial'
+      path: '/trial'
+      fullPath: '/trial'
+      preLoaderRoute: typeof TrialRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/termos': {
@@ -1373,6 +1431,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/trial/cadastro': {
+      id: '/trial/cadastro'
+      path: '/cadastro'
+      fullPath: '/trial/cadastro'
+      preLoaderRoute: typeof TrialCadastroRouteImport
+      parentRoute: typeof TrialRoute
+    }
     '/trabalhe-conosco/$nicho': {
       id: '/trabalhe-conosco/$nicho'
       path: '/trabalhe-conosco/$nicho'
@@ -1427,6 +1492,13 @@ declare module '@tanstack/react-router' {
       path: '/demo/white-label'
       fullPath: '/demo/white-label'
       preLoaderRoute: typeof DemoWhiteLabelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo/trial': {
+      id: '/demo/trial'
+      path: '/demo/trial'
+      fullPath: '/demo/trial'
+      preLoaderRoute: typeof DemoTrialRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo/cliente-final': {
@@ -1877,6 +1949,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgendaAppointmentsRouteImport
       parentRoute: typeof AuthenticatedAgendaRoute
     }
+    '/_authenticated/admin/trials': {
+      id: '/_authenticated/admin/trials'
+      path: '/admin/trials'
+      fullPath: '/admin/trials'
+      preLoaderRoute: typeof AuthenticatedAdminTrialsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -2098,6 +2177,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTalentsRoute: typeof AuthenticatedTalentsRoute
   AuthenticatedUnitsRoute: typeof AuthenticatedUnitsRoute
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
+  AuthenticatedAdminTrialsRoute: typeof AuthenticatedAdminTrialsRoute
   AuthenticatedEhrIdRoute: typeof AuthenticatedEhrIdRoute
   AuthenticatedMarketingLeadsRoute: typeof AuthenticatedMarketingLeadsRoute
   AuthenticatedEhrIndexRoute: typeof AuthenticatedEhrIndexRoute
@@ -2125,6 +2205,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedTalentsRoute: AuthenticatedTalentsRoute,
   AuthenticatedUnitsRoute: AuthenticatedUnitsRoute,
   AuthenticatedUsersRoute: AuthenticatedUsersRoute,
+  AuthenticatedAdminTrialsRoute: AuthenticatedAdminTrialsRoute,
   AuthenticatedEhrIdRoute: AuthenticatedEhrIdRoute,
   AuthenticatedMarketingLeadsRoute: AuthenticatedMarketingLeadsRoute,
   AuthenticatedEhrIndexRoute: AuthenticatedEhrIndexRoute,
@@ -2158,6 +2239,16 @@ const PacienteRouteWithChildren = PacienteRoute._addFileChildren(
   PacienteRouteChildren,
 )
 
+interface TrialRouteChildren {
+  TrialCadastroRoute: typeof TrialCadastroRoute
+}
+
+const TrialRouteChildren: TrialRouteChildren = {
+  TrialCadastroRoute: TrialCadastroRoute,
+}
+
+const TrialRouteWithChildren = TrialRoute._addFileChildren(TrialRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -2173,10 +2264,12 @@ const rootRouteChildren: RootRouteChildren = {
   SobreRoute: SobreRoute,
   SolucoesRoute: SolucoesRoute,
   TermosRoute: TermosRoute,
+  TrialRoute: TrialRouteWithChildren,
   UnsubscribeRoute: UnsubscribeRoute,
   ComoFuncionaFitnessRoute: ComoFuncionaFitnessRoute,
   DemoChecklistRoute: DemoChecklistRoute,
   DemoClienteFinalRoute: DemoClienteFinalRoute,
+  DemoTrialRoute: DemoTrialRoute,
   DemoWhiteLabelRoute: DemoWhiteLabelRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   NichosSlugRoute: NichosSlugRoute,
@@ -2196,13 +2289,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
