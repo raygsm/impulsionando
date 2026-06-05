@@ -115,6 +115,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicHooksUptimeWhatsappTestRouteImport } from './routes/api/public/hooks/uptime-whatsapp-test'
 import { Route as ApiPublicHooksUptimeCheckRouteImport } from './routes/api/public/hooks/uptime-check'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
 
@@ -683,6 +684,12 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksUptimeWhatsappTestRoute =
+  ApiPublicHooksUptimeWhatsappTestRouteImport.update({
+    id: '/api/public/hooks/uptime-whatsapp-test',
+    path: '/api/public/hooks/uptime-whatsapp-test',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksUptimeCheckRoute =
   ApiPublicHooksUptimeCheckRouteImport.update({
     id: '/api/public/hooks/uptime-check',
@@ -798,6 +805,7 @@ export interface FileRoutesByFullPath {
   '/sales/': typeof AuthenticatedSalesIndexRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
+  '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -899,6 +907,7 @@ export interface FileRoutesByTo {
   '/sales': typeof AuthenticatedSalesIndexRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
+  '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1010,6 +1019,7 @@ export interface FileRoutesById {
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
+  '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1121,6 +1131,7 @@ export interface FileRouteTypes {
     | '/sales/'
     | '/sales/cash/$id'
     | '/api/public/hooks/uptime-check'
+    | '/api/public/hooks/uptime-whatsapp-test'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1222,6 +1233,7 @@ export interface FileRouteTypes {
     | '/sales'
     | '/sales/cash/$id'
     | '/api/public/hooks/uptime-check'
+    | '/api/public/hooks/uptime-whatsapp-test'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1332,6 +1344,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sales/'
     | '/_authenticated/sales/cash/$id'
     | '/api/public/hooks/uptime-check'
+    | '/api/public/hooks/uptime-whatsapp-test'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1374,6 +1387,7 @@ export interface RootRouteChildren {
   TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksUptimeCheckRoute: typeof ApiPublicHooksUptimeCheckRoute
+  ApiPublicHooksUptimeWhatsappTestRoute: typeof ApiPublicHooksUptimeWhatsappTestRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -2126,6 +2140,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/uptime-whatsapp-test': {
+      id: '/api/public/hooks/uptime-whatsapp-test'
+      path: '/api/public/hooks/uptime-whatsapp-test'
+      fullPath: '/api/public/hooks/uptime-whatsapp-test'
+      preLoaderRoute: typeof ApiPublicHooksUptimeWhatsappTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/uptime-check': {
       id: '/api/public/hooks/uptime-check'
       path: '/api/public/hooks/uptime-check'
@@ -2431,6 +2452,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksUptimeCheckRoute: ApiPublicHooksUptimeCheckRoute,
+  ApiPublicHooksUptimeWhatsappTestRoute: ApiPublicHooksUptimeWhatsappTestRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
