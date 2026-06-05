@@ -3,6 +3,8 @@ import { render as renderAsync } from '@react-email/components'
 import { createFileRoute } from '@tanstack/react-router'
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
 import { TEMPLATES } from '@/lib/email-templates/registry'
+import { sendWhatsAppText } from '@/lib/zapi.server'
+
 
 // Same sender constants as the transactional send route
 const SITE_NAME = 'Impulsionando'
@@ -21,7 +23,9 @@ type UptimeStateRow = {
   last_alert_at: string | null
   consecutive_failures: number
   alert_emails: string[]
+  alert_whatsapps: string[]
 }
+
 
 async function pingUrl(url: string): Promise<{ ok: boolean; status: number | null; ms: number; error: string | null }> {
   const start = Date.now()
@@ -101,7 +105,8 @@ export const Route = createFileRoute('/api/public/hooks/uptime-check')({
       POST: async () => {
         const { data: targets, error: stateErr } = await supabaseAdmin
           .from('uptime_state')
-          .select('url, is_up, since, last_alert_at, consecutive_failures, alert_emails')
+          .select('url, is_up, since, last_alert_at, consecutive_failures, alert_emails, alert_whatsapps')
+
 
         if (stateErr || !targets) {
           console.error('uptime: failed to load state', stateErr)
@@ -150,6 +155,11 @@ export const Route = createFileRoute('/api/public/hooks/uptime-check')({
                 },
               })
             }
+            const waMsg = `🚨 *Site fora do ar*\n\n${t.url}\nStatus: ${r.status ?? 'sem resposta'}${r.error ? `\nErro: ${r.error}` : ''}\nDetectado em: ${now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`
+            for (const phone of t.alert_whatsapps ?? []) {
+              const wa = await sendWhatsAppText({ phone, message: waMsg })
+              if (!wa.ok) console.error('uptime: whatsapp down alert failed', { phone, ...wa })
+            }
             nextLastAlert = now.toISOString()
           } else if (!wasUp && isUp) {
             nextIsUp = true
@@ -167,6 +177,11 @@ export const Route = createFileRoute('/api/public/hooks/uptime-check')({
                   downtimeMinutes: downtimeMin,
                 },
               })
+            }
+            const waMsg = `✅ *Site voltou ao ar*\n\n${t.url}\nIndisponível por: ${downtimeMin} min\nRestabelecido em: ${now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`
+            for (const phone of t.alert_whatsapps ?? []) {
+              const wa = await sendWhatsAppText({ phone, message: waMsg })
+              if (!wa.ok) console.error('uptime: whatsapp up alert failed', { phone, ...wa })
             }
             nextSince = now.toISOString()
             nextLastAlert = now.toISOString()
@@ -186,9 +201,15 @@ export const Route = createFileRoute('/api/public/hooks/uptime-check')({
                   },
                 })
               }
+              const waMsg = `🚨 *Site ainda fora do ar*\n\n${t.url}\nStatus: ${r.status ?? 'sem resposta'}${r.error ? `\nErro: ${r.error}` : ''}\nDesde: ${new Date(t.since).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`
+              for (const phone of t.alert_whatsapps ?? []) {
+                const wa = await sendWhatsAppText({ phone, message: waMsg })
+                if (!wa.ok) console.error('uptime: whatsapp re-alert failed', { phone, ...wa })
+              }
               nextLastAlert = now.toISOString()
             }
           }
+
 
           await supabaseAdmin
             .from('uptime_state')

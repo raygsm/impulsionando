@@ -3396,6 +3396,7 @@ export type Database = {
       uptime_state: {
         Row: {
           alert_emails: string[]
+          alert_whatsapps: string[]
           consecutive_failures: number
           is_up: boolean
           last_alert_at: string | null
@@ -3406,6 +3407,7 @@ export type Database = {
         }
         Insert: {
           alert_emails?: string[]
+          alert_whatsapps?: string[]
           consecutive_failures?: number
           is_up: boolean
           last_alert_at?: string | null
@@ -3416,6 +3418,7 @@ export type Database = {
         }
         Update: {
           alert_emails?: string[]
+          alert_whatsapps?: string[]
           consecutive_failures?: number
           is_up?: boolean
           last_alert_at?: string | null
