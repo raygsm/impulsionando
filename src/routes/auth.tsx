@@ -95,7 +95,7 @@ function AuthPage() {
       <div className="relative hidden lg:flex flex-col justify-between p-12 bg-gradient-hero text-primary-foreground overflow-hidden">
         <div className="relative z-10">
           <div className="flex items-center gap-3 text-lg font-semibold tracking-tight">
-            <img src={logoAsset.url} alt="Impulsionando Tecnologia" className="h-14 w-auto object-contain drop-shadow-md" />
+            <img src={logoAsset.url} alt="Impulsionando Tecnologia" className="h-20 md:h-24 lg:h-32 w-auto object-contain drop-shadow-md" />
           </div>
         </div>
         <div className="relative z-10 max-w-md space-y-6">
@@ -129,7 +129,7 @@ function AuthPage() {
       <div className="flex items-center justify-center p-6 sm:p-12 bg-background">
         <Card className="w-full max-w-md p-8 shadow-elegant">
           <div className="flex items-center justify-center mb-6 lg:hidden">
-            <img src={logoAsset.url} alt="Impulsionando Tecnologia" className="h-14 w-auto object-contain" />
+            <img src={logoAsset.url} alt="Impulsionando Tecnologia" className="h-16 sm:h-20 w-auto object-contain" />
           </div>
           <h2 className="text-2xl font-semibold tracking-tight">Acesse sua conta</h2>
           <p className="text-sm text-muted-foreground mt-1">Use seu e-mail corporativo para continuar.</p>
