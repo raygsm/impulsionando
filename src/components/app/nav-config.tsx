@@ -5,7 +5,7 @@ import {
   Wallet, ArrowLeftRight, FolderTree, CreditCard, Percent,
   Package, Truck, ArrowDownUp,
   ShoppingCart, Receipt, Plus, Wallet as WalletIcon,
-  Contact, BarChart3, ShieldCheck, Inbox, GraduationCap, Stethoscope,
+  Contact, BarChart3, ShieldCheck, Inbox, GraduationCap, Stethoscope, Sparkles,
 } from "lucide-react";
 
 
@@ -41,6 +41,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/access-profiles", label: "Perfis", icon: KeyRound, perm: "profiles.read" },
       { to: "/permissions", label: "Permissões", icon: KeyRound, superOnly: true },
       { to: "/modules", label: "Módulos", icon: Boxes, perm: "modules.read" },
+      { to: "/admin/trials", label: "Trials (7 dias)", icon: Sparkles, superOnly: true },
       { to: "/settings", label: "Configurações", icon: SlidersHorizontal, perm: "settings.read" },
       { to: "/audit", label: "Auditoria", icon: FileSearch, perm: "audit.read" },
       { to: "/privacy", label: "Privacidade & Notificações", icon: ShieldCheck },
