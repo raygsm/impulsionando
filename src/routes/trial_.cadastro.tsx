@@ -35,8 +35,8 @@ const Schema = z.object({
 });
 
 function TrialCadastro() {
-  const navigate = useNavigate();
   const fetcher = useServerFn(requestTrial);
+  const [sentTo, setSentTo] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     contact_name: "",
@@ -62,13 +62,12 @@ function TrialCadastro() {
         },
       });
     },
-    onSuccess: () => {
-      toast.success("Trial ativado! Enviamos seus dados de acesso por WhatsApp e e-mail.");
-      navigate({ to: "/auth" });
+    onSuccess: (res) => {
+      toast.success("Trial ativado! Enviamos seu link de acesso por e-mail e WhatsApp.");
+      setSentTo(res?.email ?? form.contact_email.trim().toLowerCase());
     },
     onError: (e: unknown) => {
       const msg = e instanceof Error ? e.message : "Não foi possível iniciar o Trial. Tente novamente.";
-      // Traduz mensagens comuns vindas do Zod/Postgres para português.
       const pt = msg.includes("Já existe um Trial")
         ? msg
         : msg.toLowerCase().includes("invalid")
