@@ -459,7 +459,6 @@ function DemoCRM() {
             <TabsContent value="simular" className="mt-4 space-y-3">
               <SimularPerfilPanel permissoes={permissoes} onLog={pushLog} />
             </TabsContent>
-            </TabsContent>
 
             {/* PARAMETRIZAÇÕES (16 toggles) */}
             <TabsContent value="params" className="mt-4 space-y-3">
