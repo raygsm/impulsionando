@@ -141,6 +141,11 @@ export const registerAffiliateSale = createServerFn({ method: "POST" })
         approved_at: data.status === "aprovado" || data.status === "aguardando_gateway" ? soldAt : null,
         sold_at: soldAt,
         status: data.status,
+        kind: data.kind,
+        coupon_id: data.coupon_id ?? null,
+        parent_sale_id: data.parent_sale_id ?? null,
+        installment_interest: data.installment_interest,
+        interest_paid_by: data.interest_paid_by,
       }).select("id").single();
     if (sErr || !sale) throw new Error(`Falha ao registrar venda: ${sErr?.message}`);
 
