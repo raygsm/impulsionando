@@ -401,7 +401,7 @@ export function ProdutosPanel({
             <Input value={(form.campanhas ?? []).join(", ")} onChange={(e) => setForm({ ...form, campanhas: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} />
           </FormField>
         </div>
-        <Button className="bg-gradient-primary" onClick={persist}>
+        <Button className="bg-gradient-primary" onClick={persist} disabled={!podeEditar}>
           <Plus className="w-4 h-4 mr-1" />{editing ? "Salvar alterações" : "Novo produto"}
         </Button>
       </Card>
