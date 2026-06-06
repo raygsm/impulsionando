@@ -37,6 +37,11 @@ const DEMOS: NavItem[] = [
   { to: "/como-funciona/fitness", label: "Como funciona — Fitness", desc: "Passo a passo de implantação" },
 ];
 
+const PLANOS: NavItem[] = [
+  { to: "/planos", label: "Planos e preços", desc: "Compare módulos, recursos e limites" },
+  { to: "/orcamento", label: "Orçamento personalizado", desc: "Monte um plano sob medida para seu negócio" },
+];
+
 const EMPRESA: NavItem[] = [
   { to: "/sobre", label: "Sobre o Grupo Impulsionando" },
   { to: "/trabalhe-conosco", label: "Trabalhe conosco" },
@@ -50,6 +55,7 @@ const EMPRESA: NavItem[] = [
   { to: "/privacidade", label: "Privacidade (LGPD)" },
   { to: "/termos", label: "Termos de uso" },
 ];
+
 
 function ItemLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
   if (item.external) {
