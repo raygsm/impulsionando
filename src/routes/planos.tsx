@@ -16,6 +16,14 @@ import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
 import { PixFallbackDialog } from "@/components/payments/PixFallbackDialog";
+import { ModulePicker } from "@/components/marketing/ModulePicker";
+
+const PLAN_QUOTA: Record<string, number> = {
+  Essencial: 1,
+  Integrado: 2,
+  Avançado: 3,
+  "Sob Medida": Number.POSITIVE_INFINITY,
+};
 
 const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20entender%20melhor%20os%20planos%20da%20Impulsionando.";
 
