@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { useDemoState, uid, brl } from "@/lib/demoSandbox";
 import { GuidedTour } from "@/components/demo/GuidedTour";
 import { RoiSimulator } from "@/components/demo/RoiSimulator";
+import { DemoContractCTA } from "@/components/demo/DemoContractCTA";
 
 export const Route = createFileRoute("/demo/eventos")({
   head: () => ({
