@@ -339,6 +339,7 @@ export const MOTHER_MODULES: MotherModule[] = [
     category: "Plataforma",
     exampleNiches: ["Saúde", "Educação", "Eventos", "Serviços"],
     planTier: ["integrado", "avancado", "sob_medida"],
+  },
   {
     slug: "parceiros",
     shortName: "Parceiros",
