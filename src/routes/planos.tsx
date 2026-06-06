@@ -178,6 +178,37 @@ function PlanosPage() {
     txid: string;
     label: string;
   }>({ open: false, amountCents: 0, txid: "", label: "" });
+  const [picker, setPicker] = useState<{ open: boolean; plan: Plan | null }>({
+    open: false,
+    plan: null,
+  });
+  const [pickedModules, setPickedModules] = useState<Record<string, string[]>>({});
+
+  async function runCheckout(plan: Plan, modules: string[]) {
+    try {
+      await openCheckout({
+        priceId: PRICE_IDS[plan.name][annual ? "annual" : "monthly"],
+        customerEmail: user?.user?.email ?? undefined,
+        customData: {
+          ...(user?.user?.id ? { userId: user.user.id } : {}),
+          plan: plan.name,
+          modules,
+        },
+      });
+    } catch {
+      const monthly = plan.monthly ?? 0;
+      const finalValue = annual ? monthly * 10 : monthly;
+      toast.message(
+        "Instabilidade no checkout. Liberei o pagamento via Pix para você seguir agora.",
+      );
+      setPixState({
+        open: true,
+        amountCents: Math.round(finalValue * 100),
+        txid: `PLANO-${plan.name.toUpperCase()}-${annual ? "ANUAL" : "MENSAL"}`,
+        label: `Plano ${plan.name}${modules.length ? ` (${modules.length} mód.)` : ""} — ${annual ? "anual" : "mensal"}`,
+      });
+    }
+  }
 
 
   return (
