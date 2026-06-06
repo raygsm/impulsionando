@@ -705,11 +705,11 @@ const SERVICO_INIT: Partial<ServicoRecord> = {
 };
 
 export function ServicosPanel({
-  servicos, setServicos, produtos, planos, onLog, exigirResponsavel,
+  servicos, setServicos, produtos, planos, onLog, exigirResponsavel, podeEditar = true,
 }: {
   servicos: ServicoRecord[]; setServicos: React.Dispatch<React.SetStateAction<ServicoRecord[]>>;
   produtos: { id: string; nome: string }[]; planos: { id: string; nome: string }[];
-  onLog: LogFn; exigirResponsavel?: boolean;
+  onLog: LogFn; exigirResponsavel?: boolean; podeEditar?: boolean;
 }) {
   const [form, setForm] = useState<Partial<ServicoRecord>>(SERVICO_INIT);
   const [editing, setEditing] = useState<string | null>(null);
@@ -718,6 +718,8 @@ export function ServicosPanel({
   function reset() { setForm(SERVICO_INIT); setEditing(null); setErrors({}); }
 
   function persist() {
+    if (!podeEditar) { toast.error("Sem permissão para editar Serviços."); return; }
+
     const r = validateServico(
       { nome: form.nome, valor: form.preco, prazoEntregaDias: form.prazoEntregaDias, responsavel: form.responsavel ?? "" },
       { exigirResponsavel },
