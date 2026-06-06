@@ -419,6 +419,9 @@ function DemoAdvogados() {
             <TabsTrigger value="contratos"><FileText className="w-4 h-4 mr-1" />Contratos</TabsTrigger>
             <TabsTrigger value="honorarios"><Wallet className="w-4 h-4 mr-1" />Honorários</TabsTrigger>
             <TabsTrigger value="documentos"><ShieldCheck className="w-4 h-4 mr-1" />Documentos</TabsTrigger>
+            <TabsTrigger value="integracoes"><Plug className="w-4 h-4 mr-1" />Integrações</TabsTrigger>
+            <TabsTrigger value="movimentacoes"><Activity className="w-4 h-4 mr-1" />Movimentações</TabsTrigger>
+            <TabsTrigger value="alertas"><Bell className="w-4 h-4 mr-1" />Alertas{alertas.filter((a) => !a.lido).length > 0 && <Badge variant="destructive" className="ml-1 h-4 px-1 text-[9px]">{alertas.filter((a) => !a.lido).length}</Badge>}</TabsTrigger>
             <TabsTrigger value="params"><Bell className="w-4 h-4 mr-1" />Parametrização</TabsTrigger>
           </TabsList>
 
