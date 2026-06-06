@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { DemoModeBanner } from "@/components/demo/DemoModeBanner";
@@ -12,11 +12,12 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Clock, Users, Plus, Trash2, RotateCcw, Sparkles, ListChecks, Bell, Briefcase } from "lucide-react";
+import { Calendar, Clock, Users, Plus, Trash2, RotateCcw, Sparkles, ListChecks, Bell, Briefcase, MessageSquare, User } from "lucide-react";
 import { toast } from "sonner";
 import { useDemoState, uid, brl } from "@/lib/demoSandbox";
 import { DemoContractCTA } from "@/components/demo/DemoContractCTA";
 import { RoiSimulator } from "@/components/demo/RoiSimulator";
+import { gotoCrm, gotoWhatsapp } from "@/lib/demoCrossLink";
 
 export const Route = createFileRoute("/demo/agenda")({
   head: () => ({
