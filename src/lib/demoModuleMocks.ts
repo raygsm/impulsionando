@@ -1,5 +1,142 @@
 import { uid } from "@/lib/demoSandbox";
 
+/**
+ * Fallback seguro para criação de mocks por módulo.
+ * Se a factory falhar ou retornar vazio, emite warning no console
+ * e devolve o fallback informado, evitando que a DEMO quebre silenciosamente.
+ */
+export function safeMock<T>(factory: () => T, fallback: T, label: string): T {
+  try {
+    const out = factory();
+    if (out == null) {
+      console.warn(`[demo:${label}] mock factory retornou vazio — usando fallback.`);
+      return fallback;
+    }
+    return out;
+  } catch (e) {
+    console.warn(`[demo:${label}] falha ao carregar mock — usando fallback.`, e);
+    return fallback;
+  }
+}
+
+export type AdvogadosProcessoStatus = "ativo" | "arquivado" | "ganho" | "perdido" | "acordo";
+export type AdvogadosAudienciaTipo = "conciliacao" | "instrucao" | "julgamento" | "virtual";
+export type AdvogadosTarefaPrioridade = "baixa" | "media" | "alta" | "urgente";
+
+export function createAdvogadosMock() {
+  const now = new Date();
+  const iso = (days: number) => {
+    const d = new Date(now);
+    d.setDate(d.getDate() + days);
+    return d.toISOString();
+  };
+  const dateOnly = (days: number) => iso(days).slice(0, 10);
+
+  const advogados = [
+    { id: uid("ad"), nome: "Dra. Helena Prado", oab: "OAB/SP 123.456", area: "Cível e Empresarial", taxaHora: 480 },
+    { id: uid("ad"), nome: "Dr. Renato Vasconcelos", oab: "OAB/SP 234.567", area: "Trabalhista", taxaHora: 420 },
+    { id: uid("ad"), nome: "Dra. Beatriz Antunes", oab: "OAB/RJ 345.678", area: "Tributário", taxaHora: 560 },
+  ];
+
+  const clientes = [
+    { id: uid("cl"), tipo: "PJ" as const, nome: "Construtora Aurora Ltda.", documento: "12.345.678/0001-90", email: "juridico@aurora.demo", telefone: "(11) 90000-1001", segmento: "Construção civil" },
+    { id: uid("cl"), tipo: "PF" as const, nome: "Mariana Lopes", documento: "111.222.333-44", email: "mariana@demo.com", telefone: "(11) 90000-1002", segmento: "Trabalhista" },
+    { id: uid("cl"), tipo: "PJ" as const, nome: "Sabor & Cia Restaurantes", documento: "98.765.432/0001-10", email: "contato@saborcia.demo", telefone: "(21) 90000-1003", segmento: "Alimentação" },
+  ];
+
+  const processos = [
+    {
+      id: uid("pr"),
+      numero: "0001234-56.2024.8.26.0100",
+      clienteId: clientes[0].id,
+      advogadoId: advogados[0].id,
+      area: "Cível",
+      vara: "3ª Vara Cível — Foro Central SP",
+      objeto: "Ação de cobrança contratual",
+      valorCausa: 285000,
+      status: "ativo" as AdvogadosProcessoStatus,
+      faseAtual: "Instrução probatória",
+      proximoPrazo: dateOnly(3),
+      sigiloso: false,
+      criadoEm: iso(-90),
+    },
+    {
+      id: uid("pr"),
+      numero: "0009876-12.2025.5.02.0011",
+      clienteId: clientes[1].id,
+      advogadoId: advogados[1].id,
+      area: "Trabalhista",
+      vara: "11ª Vara do Trabalho de São Paulo",
+      objeto: "Reclamatória — horas extras e adicional noturno",
+      valorCausa: 64500,
+      status: "ativo" as AdvogadosProcessoStatus,
+      faseAtual: "Audiência una marcada",
+      proximoPrazo: dateOnly(7),
+      sigiloso: false,
+      criadoEm: iso(-45),
+    },
+    {
+      id: uid("pr"),
+      numero: "5009999-33.2025.4.03.6100",
+      clienteId: clientes[2].id,
+      advogadoId: advogados[2].id,
+      area: "Tributário",
+      vara: "6ª Vara Federal Cível SP",
+      objeto: "Mandado de segurança — exclusão ICMS do PIS/COFINS",
+      valorCausa: 1240000,
+      status: "ativo" as AdvogadosProcessoStatus,
+      faseAtual: "Sentença pendente",
+      proximoPrazo: dateOnly(14),
+      sigiloso: true,
+      criadoEm: iso(-180),
+    },
+  ];
+
+  const audiencias = [
+    { id: uid("au"), processoId: processos[1].id, tipo: "instrucao" as AdvogadosAudienciaTipo, data: iso(7).slice(0, 16).replace("T", " "), local: "11ª VT — Sala 4", responsavelId: advogados[1].id, confirmado: true },
+    { id: uid("au"), processoId: processos[0].id, tipo: "conciliacao" as AdvogadosAudienciaTipo, data: iso(12).slice(0, 16).replace("T", " "), local: "CEJUSC Central — virtual", responsavelId: advogados[0].id, confirmado: false },
+  ];
+
+  const prazos = [
+    { id: uid("pz"), processoId: processos[0].id, descricao: "Réplica à contestação", vencimento: dateOnly(3), prioridade: "alta" as AdvogadosTarefaPrioridade, concluido: false, responsavelId: advogados[0].id },
+    { id: uid("pz"), processoId: processos[1].id, descricao: "Juntada de rol de testemunhas", vencimento: dateOnly(5), prioridade: "urgente" as AdvogadosTarefaPrioridade, concluido: false, responsavelId: advogados[1].id },
+    { id: uid("pz"), processoId: processos[2].id, descricao: "Memorial pós-audiência", vencimento: dateOnly(14), prioridade: "media" as AdvogadosTarefaPrioridade, concluido: false, responsavelId: advogados[2].id },
+    { id: uid("pz"), processoId: processos[0].id, descricao: "Protocolo de cálculo de liquidação", vencimento: dateOnly(-2), prioridade: "alta" as AdvogadosTarefaPrioridade, concluido: true, responsavelId: advogados[0].id },
+  ];
+
+  const contratos = [
+    { id: uid("co"), clienteId: clientes[0].id, tipo: "Honorários êxito + fixo" as const, valorFixo: 8500, percentualExito: 15, status: "Ativo" as const, assinadoEm: iso(-85) },
+    { id: uid("co"), clienteId: clientes[1].id, tipo: "Êxito puro" as const, valorFixo: 0, percentualExito: 30, status: "Ativo" as const, assinadoEm: iso(-44) },
+    { id: uid("co"), clienteId: clientes[2].id, tipo: "Mensal + êxito" as const, valorFixo: 6500, percentualExito: 10, status: "Ativo" as const, assinadoEm: iso(-170) },
+  ];
+
+  const honorarios = [
+    { id: uid("hn"), processoId: processos[0].id, descricao: "Honorários contratuais — parcela 03/12", valor: 8500, vencimento: dateOnly(2), status: "pendente" as const },
+    { id: uid("hn"), processoId: processos[2].id, descricao: "Honorários êxito — sentença favorável", valor: 124000, vencimento: dateOnly(30), status: "previsto" as const },
+    { id: uid("hn"), processoId: processos[1].id, descricao: "Adiantamento — custas e despesas", valor: 1800, vencimento: dateOnly(-10), status: "pago" as const },
+  ];
+
+  const documentos = [
+    { id: uid("dc"), processoId: processos[0].id, nome: "Contrato social — Construtora Aurora.pdf", tipo: "Contrato", tamanhoKb: 320 },
+    { id: uid("dc"), processoId: processos[1].id, nome: "Holerites 2023-2024.zip", tipo: "Prova", tamanhoKb: 1840 },
+    { id: uid("dc"), processoId: processos[2].id, nome: "Petição inicial — MS ICMS.docx", tipo: "Petição", tamanhoKb: 96 },
+  ];
+
+  const params = {
+    lembretePrazo48h: true,
+    lembretePrazo24h: true,
+    bloqueioPrazoVencido: true,
+    sigiloPorPapel: true,
+    timesheetObrigatorio: true,
+    integraTribunais: true,
+    lgpd: true,
+    portalCliente: true,
+  };
+
+  return { advogados, clientes, processos, audiencias, prazos, contratos, honorarios, documentos, params };
+}
+
+
 type AgendaStatus = "confirmado" | "pendente" | "cancelado" | "concluido";
 type CrmActivityType = "ligacao" | "email" | "whatsapp" | "tarefa";
 type CrmTemplateChannel = "email" | "whatsapp";
