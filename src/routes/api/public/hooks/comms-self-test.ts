@@ -6,7 +6,7 @@ import { sendWhatsAppText } from '@/lib/zapi.server'
 // informados como destinos oficiais de SAC da Impulsionando. Use uma única vez
 // para confirmar que ambos os canais estão operacionais.
 const TEST_EMAIL = 'sac@impulsionando.com.br'
-const TEST_PHONE = '5521993075000'
+const TEST_PHONE = '5521995077375'
 const SITE_NAME = 'Impulsionando'
 const SENDER_DOMAIN = 'notify.www.impulsionando.com.br'
 const FROM_DOMAIN = 'www.impulsionando.com.br'
