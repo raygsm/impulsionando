@@ -50,6 +50,11 @@ function DemoLanding() {
                 <Link to="/demo/modulos">Vitrine de Módulos & Contratação demo</Link>
               </Button>
               <Button asChild size="sm" variant="outline">
+                <Link to="/demo/simulador">
+                  <Sparkles className="w-3.5 h-3.5 mr-1" /> Simulador de ROI
+                </Link>
+              </Button>
+              <Button asChild size="sm" variant="outline">
                 <Link to="/demo/checklist">Ver checklist de prontidão</Link>
               </Button>
             </div>
