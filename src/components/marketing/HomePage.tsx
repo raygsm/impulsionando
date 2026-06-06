@@ -320,6 +320,7 @@ export function HomePage() {
           </div>
         </Card>
       </section>
+      </main>
 
       <PublicFooter />
     </div>
