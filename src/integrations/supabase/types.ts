@@ -5036,10 +5036,12 @@ export type Database = {
         Returns: boolean
       }
       is_impulsionando_staff: { Args: { _user: string }; Returns: boolean }
-      is_patient_of_record: {
-        Args: { _record: string; _user: string }
-        Returns: boolean
-      }
+      is_patient_of_record:
+        | { Args: { _record: string; _user: string }; Returns: boolean }
+        | {
+            Args: { _company?: string; _record: string; _user: string }
+            Returns: boolean
+          }
       is_super_admin: { Args: { _user: string }; Returns: boolean }
       master_company_id: { Args: never; Returns: string }
       move_to_dlq: {
