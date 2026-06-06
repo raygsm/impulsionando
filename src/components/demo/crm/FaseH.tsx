@@ -935,16 +935,10 @@ export function CrmCtaBar({ onIniciarJornada }: { onIniciarJornada: () => void }
           <Button size="sm" variant="outline" onClick={onIniciarJornada}>
             <Compass className="w-4 h-4 mr-1" />Iniciar jornada guiada
           </Button>
-          <Button size="sm" variant="outline" asChild>
-            <Link to="/planos" search={{ modulo: "crm" } as never}>Ver planos</Link>
-          </Button>
-          <Button size="sm" variant="outline" asChild>
-            <Link to="/orcamento" search={{ add: "crm" } as never}>Adicionar CRM ao orçamento</Link>
-          </Button>
+          <Button size="sm" variant="outline" asChild><Link to="/planos">Ver planos</Link></Button>
+          <Button size="sm" variant="outline" asChild><Link to="/orcamento">Adicionar CRM ao orçamento</Link></Button>
           <Button size="sm" variant="outline" asChild><Link to="/contato">Falar com consultor</Link></Button>
-          <Button size="sm" className="bg-gradient-primary" asChild>
-            <Link to="/planos" search={{ modulo: "crm" } as never}>Contratar CRM real</Link>
-          </Button>
+          <Button size="sm" className="bg-gradient-primary" asChild><Link to="/planos">Contratar CRM real</Link></Button>
         </div>
       </div>
     </Card>
