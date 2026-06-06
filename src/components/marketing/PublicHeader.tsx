@@ -278,23 +278,18 @@ export function PublicHeader() {
                   </div>
                 ))}
 
-                {[
-                  { title: "Planos", items: PLANOS },
-                  { title: "Demonstração", items: DEMOS },
-                ].map((section) => (
-                  <div key={section.title}>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                      {section.title}
-                    </p>
-                    <div className="flex flex-col gap-2">
-                      {section.items.map((it) => (
-                        <div key={it.to + it.label} className="text-sm text-foreground/90 hover:text-foreground">
-                          <ItemLink item={it} onClick={() => setMobileOpen(false)} />
-                        </div>
-                      ))}
-                    </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                    Planos
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    {PLANOS.map((it) => (
+                      <div key={it.to + it.label} className="text-sm text-foreground/90 hover:text-foreground">
+                        <ItemLink item={it} onClick={() => setMobileOpen(false)} />
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
 
                 <Link
                   to="/contato"
