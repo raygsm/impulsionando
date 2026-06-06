@@ -675,6 +675,10 @@ const PARAM_DEFS: { key: keyof CrmParams; label: string; hint: string }[] = [
   { key: "permitirSemEmail", label: "Permitir lead sem e-mail?", hint: "Quando NÃO, exige e-mail no cadastro." },
   { key: "registrarLogsComunicacao", label: "Registrar logs de comunicação?", hint: "Salva no histórico cada envio simulado." },
   { key: "registrarHistoricoCliente", label: "Registrar histórico completo do cliente?", hint: "Mantém todo o histórico de interações no cliente." },
+  { key: "podeGerirEmpresas", label: "Permitir gerir Empresas?", hint: "Quando desativado, a área Empresas fica somente leitura nesta demonstração." },
+  { key: "podeGerirProdutos", label: "Permitir gerir Produtos?", hint: "Quando desativado, a área Produtos fica somente leitura nesta demonstração." },
+  { key: "podeGerirPlanos", label: "Permitir gerir Planos?", hint: "Quando desativado, a área Planos fica somente leitura nesta demonstração." },
+  { key: "podeGerirServicos", label: "Permitir gerir Serviços?", hint: "Quando desativado, a área Serviços fica somente leitura nesta demonstração." },
 ];
 
 function KPI({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
