@@ -186,7 +186,7 @@ function DemoAdvogados() {
   const [aba, setAba] = useState("dashboard");
 
   useEffect(() => {
-    const marker = "advogados:v1";
+    const marker = "advogados:v2";
     const current = typeof window === "undefined" ? marker : window.localStorage.getItem("imp.demo.mock.advogados");
     if (current === marker) return;
     const mock = safeMock(() => createAdvogadosMock(), FALLBACK, "advogados");
@@ -198,6 +198,9 @@ function DemoAdvogados() {
     setContratos(mock.contratos);
     setHonorarios(mock.honorarios);
     setDocumentos(mock.documentos);
+    setIntegracoes(mock.integracoes ?? []);
+    setMovimentacoes(mock.movimentacoes ?? []);
+    setAlertas(mock.alertas ?? []);
     setParams(mock.params);
     if (typeof window !== "undefined") window.localStorage.setItem("imp.demo.mock.advogados", marker);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -214,8 +217,19 @@ function DemoAdvogados() {
     });
     const audProx = audiencias.filter((a) => new Date(a.data).getTime() >= Date.now() - 36e5).length;
     const honorariosAReceber = honorarios.filter((h) => h.status === "pendente" || h.status === "previsto").reduce((s, h) => s + h.valor, 0);
-    return { ativos, ganhos, valorCarteira, prazos48h, audProx, honorariosAReceber, totalProcessos: processos.length };
-  }, [processos, prazos, audiencias, honorarios]);
+    const movPendRev = movimentacoes.filter((m) => m.statusRevisao === "aguardando_revisao" || m.statusRevisao === "nova").length;
+    const movEnviadas = movimentacoes.filter((m) => m.clienteNotificado).length;
+    const movOcultas = movimentacoes.filter((m) => m.statusRevisao === "ocultada_cliente").length;
+    const movPrazo = movimentacoes.filter((m) => m.possivelPrazo).length;
+    const intErros = integracoes.filter((i) => i.status === "erro_auth" || i.status === "erro_sync").length;
+    const ultimaSync = integracoes.map((i) => i.ultimaSync).filter(Boolean).sort().slice(-1)[0] ?? null;
+    return {
+      ativos, ganhos, valorCarteira, prazos48h, audProx, honorariosAReceber,
+      totalProcessos: processos.length,
+      movTotal: movimentacoes.length, movPendRev, movEnviadas, movOcultas, movPrazo,
+      intErros, ultimaSync,
+    };
+  }, [processos, prazos, audiencias, honorarios, movimentacoes, integracoes]);
 
   function seed() {
     const mock = safeMock(() => createAdvogadosMock(), FALLBACK, "advogados");
@@ -227,14 +241,89 @@ function DemoAdvogados() {
     setContratos(mock.contratos);
     setHonorarios(mock.honorarios);
     setDocumentos(mock.documentos);
+    setIntegracoes(mock.integracoes ?? []);
+    setMovimentacoes(mock.movimentacoes ?? []);
+    setAlertas(mock.alertas ?? []);
     setParams(mock.params);
     toast.success("Dados fictícios do escritório carregados.");
   }
 
   function resetAll() {
-    resetAdv(); resetCli(); resetProc(); resetAud(); resetPraz(); resetCon(); resetHon(); resetDoc(); resetParams();
+    resetAdv(); resetCli(); resetProc(); resetAud(); resetPraz(); resetCon();
+    resetHon(); resetDoc(); resetInt(); resetMov(); resetAlt(); resetParams();
     toast.message("Demonstração zerada.");
   }
+
+  // ===== Ações de Integrações Jurídicas =====
+  function testarIntegracao(i: Integracao) {
+    if (i.status === "aguardando_credenciais" || i.status === "aguardando_autorizacao") {
+      toast.message("Integração preparada — aguardando credenciais externas ou autorização da plataforma jurídica contratada pelo escritório.");
+      return;
+    }
+    toast.success(`Conexão OK com "${i.nome}" (DEMO).`);
+  }
+  function sincronizarAgora(i: Integracao) {
+    if (i.status !== "ativa") {
+      toast.message("Integração não está ativa — configure credenciais antes de sincronizar.");
+      return;
+    }
+    const now = new Date().toISOString();
+    setIntegracoes((arr) => arr.map((x) => x.id === i.id ? { ...x, ultimaSync: now } : x));
+    toast.success(`Sincronização DEMO concluída em "${i.nome}".`);
+  }
+
+  // ===== Ações de Movimentações =====
+  function gerarResumoIA(m: Movimentacao) {
+    if (!params.resumoIA) { toast.error("Resumo por IA está desativado nas parametrizações."); return; }
+    const resumo = `Resumo gerado por IA (DEMO) — ${m.textoOriginal.slice(0, 120)}${m.textoOriginal.length > 120 ? "…" : ""}`;
+    setMovimentacoes((arr) => arr.map((x) => x.id === m.id ? { ...x, resumoCliente: x.resumoCliente || resumo } : x));
+    toast.message("Resumo gerado por IA apenas para apoio interno. O advogado responsável deve revisar antes de liberar ao cliente.");
+  }
+  function revisarMov(m: Movimentacao) {
+    setMovimentacoes((arr) => arr.map((x) => x.id === m.id ? { ...x, statusRevisao: "revisada" } : x));
+    toast.success("Movimentação marcada como revisada.");
+  }
+  function aprovarEnvio(m: Movimentacao) {
+    if (params.exigirRevisaoAdvogado && m.statusRevisao === "aguardando_revisao") {
+      toast.error("Revisão obrigatória — marque como revisada antes de aprovar o envio.");
+      return;
+    }
+    setMovimentacoes((arr) => arr.map((x) => x.id === m.id ? { ...x, statusRevisao: "aprovada_envio", notificarCliente: true } : x));
+    toast.success("Aprovada para envio ao cliente.");
+  }
+  function ocultarDoCliente(m: Movimentacao) {
+    setMovimentacoes((arr) => arr.map((x) => x.id === m.id ? { ...x, statusRevisao: "ocultada_cliente", notificarCliente: false } : x));
+    toast.message("Movimentação ocultada do cliente.");
+  }
+  function enviarAvisoTeste(m: Movimentacao) {
+    if (!params.avisarClienteAuto && m.statusRevisao !== "aprovada_envio") {
+      toast.message("Envio automático desativado — aprove o envio antes de notificar o cliente.");
+      return;
+    }
+    const canal: "whatsapp" | "email" = params.avisoWhatsapp ? "whatsapp" : params.avisoEmail ? "email" : "whatsapp";
+    setMovimentacoes((arr) => arr.map((x) => x.id === m.id ? {
+      ...x, clienteNotificado: true, canalNotificacao: canal, dataEnvio: new Date().toISOString(), statusRevisao: "enviada_cliente",
+    } : x));
+    toast.success("TESTE — DEMONSTRAÇÃO — VERSÃO TESTE. Simulação de aviso processual enviada por " + canal + ".");
+  }
+  function criarPrazoDaMov(m: Movimentacao) {
+    const novo: Prazo = {
+      id: uid("pz"),
+      processoId: m.processoId,
+      descricao: `Prazo gerado a partir de movimentação (${m.tipo})`,
+      vencimento: new Date(Date.now() + 14 * 864e5).toISOString().slice(0, 10),
+      prioridade: "alta",
+      concluido: false,
+      responsavelId: m.advogadoId,
+    };
+    setPrazos((arr) => [novo, ...arr]);
+    setMovimentacoes((arr) => arr.map((x) => x.id === m.id ? { ...x, statusRevisao: "prazo_criado" } : x));
+    toast.success("Prazo criado a partir da movimentação.");
+  }
+  function marcarAlertaLido(id: string) {
+    setAlertas((arr) => arr.map((a) => a.id === id ? { ...a, lido: true } : a));
+  }
+
 
   function togglePrazo(id: string) {
     setPrazos((p) => p.map((x) => x.id === id ? { ...x, concluido: !x.concluido } : x));
