@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowLeft, ArrowRight, CheckCircle2, FileText, Loader2,
   Printer, Sparkles, ShieldCheck, MessageCircle, AlertTriangle, Copy, RotateCcw,
+  Upload, FileCheck2,
 } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
