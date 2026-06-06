@@ -783,15 +783,6 @@ function SimpleListPanel<T extends { id: string }>({
     </Card>
   );
 }
-                <TableCell className="text-right"><Button size="sm" variant="ghost" onClick={() => onRemove(it.id)}><Trash2 className="w-4 h-4" /></Button></TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      )}
-    </Card>
-  );
-}
 
 function NovoLead({ onCreate }: { onCreate: (l: Lead) => void }) {
   const [f, setF] = useState({ nome: "", email: "", telefone: "", origem: "Site", valor: 0 });
