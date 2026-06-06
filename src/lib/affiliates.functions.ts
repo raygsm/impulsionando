@@ -106,7 +106,7 @@ export const registerAffiliateSale = createServerFn({ method: "POST" })
       .eq("product_id", data.product_id)
       .eq("status", "aprovado");
 
-    const releaseAt = computeReleaseAt(soldAtDate, data.gateway_release_days, 3);
+    const releaseAt = computeReleaseAt(soldAtDate, gatewayDays, 3);
     const targetCommissionStatus =
       data.status === "aprovado" || data.status === "aguardando_gateway"
         ? "aguardando_gateway"
@@ -135,7 +135,7 @@ export const registerAffiliateSale = createServerFn({ method: "POST" })
         campaign: data.campaign ?? null,
         gateway_provider: data.gateway_provider ?? null,
         external_id: data.external_id ?? null,
-        gateway_release_at: new Date(soldAtDate.getTime() + data.gateway_release_days * 86400000).toISOString(),
+        gateway_release_at: new Date(soldAtDate.getTime() + gatewayDays * 86400000).toISOString(),
         internal_release_at: releaseAt,
         available_at: data.status === "disponivel" ? releaseAt : null,
         approved_at: data.status === "aprovado" || data.status === "aguardando_gateway" ? soldAt : null,
