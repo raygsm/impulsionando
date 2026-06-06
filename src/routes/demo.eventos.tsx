@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useDemoState, uid, brl } from "@/lib/demoSandbox";
+import { GuidedTour } from "@/components/demo/GuidedTour";
+import { RoiSimulator } from "@/components/demo/RoiSimulator";
 
 export const Route = createFileRoute("/demo/eventos")({
   head: () => ({
@@ -154,7 +156,18 @@ function DemoEventos() {
                 bloqueie reutilização e acompanhe presença em tempo real.
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
+              <GuidedTour
+                moduleKey="eventos"
+                title="Eventos & Ingressos"
+                steps={[
+                  { title: "Crie um evento", body: "Clique em 'Criar evento exemplo' para popular lotes e cortesias.", hint: "Você pode editar lotes e preços." },
+                  { title: "Venda ingressos", body: "Emita ingressos pagos ou cortesias. Cada um gera um QR Code único." },
+                  { title: "Faça check-in", body: "Use a aba Check-in: cole o código do QR ou simule um scan. O sistema bloqueia reutilização." },
+                  { title: "Veja o painel", body: "Vendidos, presentes, ausentes, receita e tentativas inválidas em tempo real." },
+                  { title: "Parametrize", body: "Ative confirmação por e-mail/WhatsApp, política de reentrada e cortesia." },
+                ]}
+              />
               {!eventoAtivo && <Button onClick={criarEventoExemplo}><Sparkles className="w-4 h-4 mr-1" />Criar evento exemplo</Button>}
               <Button variant="ghost" onClick={() => { resetEventos(); resetIngressos(); resetParams(); toast.message("Zerado."); }}>
                 <RotateCcw className="w-4 h-4 mr-1" /> Zerar
@@ -194,6 +207,8 @@ function DemoEventos() {
                   <KPI label="Receita" value={brl(dash.receita)} hint="Soma dos ingressos pagos" />
                   <KPI label="Tentativas inválidas" value={String(dash.invalidas)} hint="QR Code já usado" />
                 </div>
+
+                <RoiSimulator presetKey="eventos" />
               </TabsContent>
 
               <TabsContent value="vendas" className="mt-4 space-y-3">
