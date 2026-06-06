@@ -479,32 +479,17 @@ function DemoCRM() {
               </Card>
             </TabsContent>
 
-            {/* LOGS */}
+            {/* LOGS (Bloco 42) */}
             <TabsContent value="logs" className="mt-4 space-y-3">
-              <Card className="p-5">
-                <div className="text-sm font-semibold mb-2 flex items-center gap-2">Logs da DEMO <HelpTip>Histórico das ações realizadas dentro da demonstração.</HelpTip></div>
-                <Table>
-                  <TableHeader><TableRow><TableHead>Quando</TableHead><TableHead>Usuário</TableHead><TableHead>Ação</TableHead></TableRow></TableHeader>
-                  <TableBody>{logs.map((lg) => (
-                    <TableRow key={lg.id}><TableCell className="text-xs">{new Date(lg.quando).toLocaleString("pt-BR")}</TableCell><TableCell className="text-xs">{lg.usuario}</TableCell><TableCell className="text-xs">{lg.acao}</TableCell></TableRow>
-                  ))}</TableBody>
-                </Table>
-              </Card>
+              <LogsPanel logs={logs} />
             </TabsContent>
 
-            {/* JORNADA GUIADA */}
+            {/* JORNADA GUIADA (resumo + atalho — diálogo no botão do topo) */}
             <TabsContent value="jornada" className="mt-4 space-y-3">
               <Card className="p-5 space-y-3">
                 <h3 className="font-semibold text-sm">Jornada guiada — CRM</h3>
-                <ol className="text-sm space-y-2 list-decimal pl-5">
-                  <li>Confirme suas parametrizações em <strong>Parametrizações</strong> (SIM/NÃO dos 16 itens).</li>
-                  <li>Revise <strong>Origens</strong> e <strong>Campanhas</strong> e ajuste tags.</li>
-                  <li>Cadastre 1 ou 2 <strong>Leads</strong> e mova-os pelo <strong>Pipeline</strong>.</li>
-                  <li>Crie um <strong>Template</strong> em Comunicação e clique em <em>Simular envio</em>.</li>
-                  <li>Ative uma <strong>Automação</strong> e configure uma <strong>Regra</strong>.</li>
-                  <li>Veja o resultado no <strong>Dashboard</strong> e nos <strong>Logs</strong>.</li>
-                  <li>Quando estiver convencido, clique em <strong>Contratar CRM real</strong>.</li>
-                </ol>
+                <p className="text-sm text-muted-foreground">14 etapas guiadas conduzem do primeiro lead à conversão e ao dashboard atualizado.</p>
+                <Button onClick={() => setJornadaOpen(true)}><Compass className="w-4 h-4 mr-1" />Iniciar jornada guiada</Button>
               </Card>
             </TabsContent>
           </Tabs>
