@@ -195,20 +195,26 @@ function DemoAdvogados() {
       <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 w-full">
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
-            <Badge className="bg-gradient-primary mb-2">Demo interativa • dados fictícios</Badge>
+            <div className="flex items-center gap-2 flex-wrap mb-2">
+              <Badge className="bg-gradient-primary">Demo interativa • dados fictícios</Badge>
+              <Badge variant="outline" className="border-amber-500/60 text-amber-700 dark:text-amber-400">
+                DEMONSTRAÇÃO — VERSÃO TESTE
+              </Badge>
+            </div>
             <h1 className="text-3xl sm:text-4xl font-bold flex items-center gap-3">
               <Scale className="w-8 h-8 text-primary" /> Advogados & Escritórios Jurídicos
             </h1>
             <p className="text-muted-foreground mt-2 max-w-2xl">
-              Carteira de processos, prazos com bloqueio automático, audiências, contratos com êxito,
-              honorários, documentos sigilosos e portal do cliente — tudo em conformidade com a LGPD.
+              Transforme prazos, clientes e honorários em gestão real. Carteira de processos, prazos com
+              lembrete e bloqueio automático, audiências, contratos fixo + êxito, honorários, documentos
+              sigilosos e portal do cliente — tudo em conformidade com a LGPD.
             </p>
           </div>
           <div className="flex gap-2 flex-wrap items-center">
             <DemoContractCTA
               slug="advogados"
               moduleName="Advogados & Escritórios Jurídicos"
-              moduleDescription="Gestão completa de processos, prazos, audiências, contratos, honorários e portal do cliente para escritórios jurídicos."
+              moduleDescription="Organize seu escritório jurídico agora: gestão completa de processos, prazos, audiências, contratos, honorários e portal do cliente."
               amountReference={297}
               features={[
                 "Processos por área e vara",
@@ -223,7 +229,7 @@ function DemoAdvogados() {
               variant="default"
             />
             <Button variant="outline" onClick={seed}><Sparkles className="w-4 h-4 mr-1" />Popular demo</Button>
-            <Button variant="ghost" onClick={resetAll}><RotateCcw className="w-4 h-4 mr-1" />Zerar</Button>
+            <Button variant="ghost" onClick={resetAll}><RotateCcw className="w-4 h-4 mr-1" />Zerar dados da DEMO</Button>
           </div>
         </div>
 
