@@ -214,7 +214,7 @@ function DemoCRM() {
             </div>
           </div>
 
-          <Tabs defaultValue="visao" className="mt-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
             <TabsList className="flex-wrap h-auto justify-start">
               <TabsTrigger value="visao"><Compass className="w-4 h-4 mr-1" />Visão Geral</TabsTrigger>
               <TabsTrigger value="dashboard"><Activity className="w-4 h-4 mr-1" />Dashboard</TabsTrigger>
