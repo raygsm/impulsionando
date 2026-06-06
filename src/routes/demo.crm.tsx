@@ -433,24 +433,14 @@ function DemoCRM() {
               <CampanhasPanel campanhas={campanhas} setCampanhas={setCampanhas} origens={origens} onLog={pushLog} />
             </TabsContent>
 
-            {/* COMUNICAÇÃO (templates) */}
+            {/* COMUNICAÇÃO (Bloco 40) */}
             <TabsContent value="comunicacao" className="mt-4 space-y-4">
-              <Card className="p-5"><NovoTemplate onCreate={(t) => setTpls((p) => [t, ...p])} /></Card>
-              <div className="grid md:grid-cols-2 gap-3">
-                {tpls.map((t) => (
-                  <Card key={t.id} className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="font-medium text-sm">{t.nome}</div>
-                      <Badge variant="outline">{t.canal}</Badge>
-                    </div>
-                    <pre className="text-xs whitespace-pre-wrap text-muted-foreground bg-muted/40 p-2 rounded">{t.corpo}</pre>
-                    <div className="flex justify-end mt-2 gap-2">
-                      <Button size="sm" variant="outline" onClick={() => { toast.success(`Mensagem simulada (Enviado — DEMO) — ${t.canal}`); setLogs((p) => [{ id: uid("lg"), quando: new Date().toISOString(), usuario: "Atendimento Demo", acao: `Simulou envio do template ${t.nome}` }, ...p]); }}><Send className="w-3.5 h-3.5 mr-1" />Simular envio</Button>
-                      <Button size="sm" variant="ghost" onClick={() => setTpls((p) => p.filter((x) => x.id !== t.id))}><Trash2 className="w-4 h-4" /></Button>
-                    </div>
-                  </Card>
-                ))}
-              </div>
+              <ComunicacaoPanel onLog={pushLog} onEnviado={() => { /* refresh handled by state */ }} />
+            </TabsContent>
+
+            {/* MODELOS DE MENSAGEM (Bloco 41) */}
+            <TabsContent value="modelos" className="mt-4 space-y-4">
+              <ModelosPanel modelos={modelos} setModelos={setModelos} onLog={pushLog} onEnviado={() => { /* noop */ }} />
             </TabsContent>
 
             {/* AUTOMAÇÕES */}
