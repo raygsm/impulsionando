@@ -163,6 +163,13 @@ function PlanosPage() {
   const [annual, setAnnual] = useState(false);
   const { openCheckout, loading: checkoutLoading } = usePaddleCheckout();
   const { data: user } = useCurrentUser();
+  const [pixState, setPixState] = useState<{
+    open: boolean;
+    amountCents: number;
+    txid: string;
+    label: string;
+  }>({ open: false, amountCents: 0, txid: "", label: "" });
+
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
