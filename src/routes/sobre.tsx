@@ -12,7 +12,10 @@ export const Route = createFileRoute("/sobre")({
       { name: "description", content: "Quem somos, missão, visão e valores da Impulsionando Tecnologia. Sistemas inteligentes para empresas que querem crescer com controle." },
       { property: "og:title", content: "Sobre — Impulsionando Tecnologia" },
       { property: "og:description", content: "A Impulsionando Tecnologia transforma estratégia em operação real através de sistemas, automação e integrações." },
+      { property: "og:url", content: "https://impulsionando.com.br/sobre" },
+    
     ],
+    links: [{ rel: "canonical", href: "https://impulsionando.com.br/sobre" }],
   }),
   component: SobrePage,
 });

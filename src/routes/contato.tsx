@@ -18,7 +18,10 @@ export const Route = createFileRoute("/contato")({
       { name: "description", content: "Fale com a Impulsionando Tecnologia pelo WhatsApp +55 21 99307-5000, e-mail sac@impulsionando.com.br ou pelo formulário." },
       { property: "og:title", content: "Contato — Impulsionando Tecnologia" },
       { property: "og:description", content: "WhatsApp, e-mail e orçamento personalizado. Fale com nosso time." },
+      { property: "og:url", content: "https://impulsionando.com.br/contato" },
+    
     ],
+    links: [{ rel: "canonical", href: "https://impulsionando.com.br/contato" }],
   }),
   component: ContatoPage,
 });

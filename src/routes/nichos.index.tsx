@@ -25,7 +25,10 @@ export const Route = createFileRoute("/nichos/")({
         content:
           "Cada nicho com suas dores, jornada prática, módulos recomendados e demonstração pronta.",
       },
+      { property: "og:url", content: "https://impulsionando.com.br/nichos" },
+    
     ],
+    links: [{ rel: "canonical", href: "https://impulsionando.com.br/nichos" }],
   }),
   component: NichosIndex,
 });

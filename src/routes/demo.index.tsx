@@ -14,7 +14,10 @@ export const Route = createFileRoute("/demo/")({
       { name: "description", content: "Teste agora a plataforma Impulsionando. Escolha entre o ambiente white-label (revenda) ou o sistema para cliente final e explore módulos, permissões, agenda, CRM, financeiro e BI." },
       { property: "og:title", content: "Demonstração — Impulsionando Tecnologia" },
       { property: "og:description", content: "Ambiente de demonstração interativo, sem cadastro. Explore o sistema antes de contratar." },
+      { property: "og:url", content: "https://impulsionando.com.br/demo" },
+    
     ],
+    links: [{ rel: "canonical", href: "https://impulsionando.com.br/demo" }],
   }),
   component: DemoLanding,
 });

@@ -91,7 +91,10 @@ export const Route = createFileRoute("/orcamento")({
         content:
           "Briefing inteligente: responda 6 perguntas e receba a recomendação de módulos e plano ideal para sua operação.",
       },
+      { property: "og:url", content: "https://impulsionando.com.br/orcamento" },
+    
     ],
+    links: [{ rel: "canonical", href: "https://impulsionando.com.br/orcamento" }],
   }),
   component: OrcamentoPage,
 });
