@@ -275,54 +275,32 @@ function DemoCRM() {
 
             {/* LEADS */}
             <TabsContent value="leads" className="mt-4 space-y-4">
-              <Card className="p-5"><NovoLead onCreate={(l) => { setLeads((p) => [l, ...p]); setLogs((p) => [{ id: uid("lg"), quando: new Date().toISOString(), usuario: "Vendedor Demo", acao: `Criou lead ${l.nome}` }, ...p]); }} /></Card>
-              <Card className="p-5">
-                {leads.length === 0 ? <p className="text-sm text-muted-foreground">Sem leads.</p> : (
-                  <Table>
-                    <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Contato</TableHead><TableHead>Origem</TableHead><TableHead>Etapa</TableHead><TableHead className="text-right">Valor</TableHead><TableHead className="text-right">Ações</TableHead></TableRow></TableHeader>
-                    <TableBody>
-                      {leads.map((l) => (
-                        <TableRow key={l.id}>
-                          <TableCell><div className="font-medium">{l.nome}</div><div className="text-xs text-muted-foreground">Score {l.score}</div></TableCell>
-                          <TableCell className="text-xs"><div>{l.email}</div><div className="text-muted-foreground">{l.telefone}</div></TableCell>
-                          <TableCell><Badge variant="outline">{l.origem}</Badge></TableCell>
-                          <TableCell><Badge>{l.estagio}</Badge></TableCell>
-                          <TableCell className="text-right">{l.valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-1">
-                              <Button size="sm" variant="outline" title="WhatsApp simulado" onClick={() => { gotoWhatsapp({ nome: l.nome, telefone: l.telefone, email: l.email }, `TESTE — DEMONSTRAÇÃO — VERSÃO TESTE\n\nOlá ${l.nome}, tudo bem?`); toast.success("Conversa simulada — Enviado — DEMO"); }}>
-                                <MessageSquare className="w-3.5 h-3.5" />
-                              </Button>
-                              <Button size="sm" variant="outline" title="Agendar" onClick={() => gotoAgenda({ nome: l.nome, telefone: l.telefone })}><Calendar className="w-3.5 h-3.5" /></Button>
-                              <Button size="sm" variant="ghost" title="Excluir" onClick={() => setLeads((p) => p.filter((x) => x.id !== l.id))}><Trash2 className="w-3.5 h-3.5" /></Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </Card>
+              <LeadsPanel
+                leads={leads}
+                setLeads={setLeads}
+                origens={origens}
+                clientes={clientes}
+                setClientes={setClientes}
+                onLog={pushLog}
+                exigirOrigem={params.exigirOrigem}
+                exigirResponsavel={params.exigirResponsavel}
+              />
             </TabsContent>
 
             {/* CLIENTES */}
             <TabsContent value="clientes" className="mt-4 space-y-4">
-              <SimpleListPanel
-                title="Clientes"
-                items={clientes}
-                empty="Sem clientes cadastrados."
-                columns={[
-                  { k: "nome", h: "Nome" },
-                  { k: "documento", h: "Documento" },
-                  { k: "produto", h: "Produto" },
-                  { k: "plano", h: "Plano" },
-                  { k: "status", h: "Status", render: (v) => <Badge variant="outline">{v}</Badge> },
-                ]}
-                onAdd={(nome) => { setClientes((p) => [{ id: uid("cl"), nome, documento: "—", email: "—", telefone: "—", produto: "—", plano: "—", status: "Ativo" }, ...p]); }}
-                onRemove={(id) => setClientes((p) => p.filter((x) => x.id !== id))}
-                placeholder="Razão social ou nome do cliente"
+              <ClientesPanel
+                clientes={clientes}
+                setClientes={setClientes}
+                produtos={produtos}
+                planos={planos}
+                servicos={servicos}
+                origens={origens}
+                onLog={pushLog}
+                exigirResponsavel={params.exigirResponsavel}
               />
             </TabsContent>
+
 
             {/* EMPRESAS */}
             <TabsContent value="empresas" className="mt-4 space-y-4">
