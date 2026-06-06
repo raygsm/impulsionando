@@ -102,6 +102,14 @@ export const DEMO_MODULE_OPTIONS: DemoModuleOption[] = [
     badge: "Serviços",
   },
   {
+    key: "advogados",
+    label: "Advogados & Escritórios Jurídicos",
+    description: "Processos, prazos, audiências, contratos, honorários e portal do cliente.",
+    route: "/demo/advogados",
+    icon: Scale,
+    badge: "Jurídico",
+
+  {
     key: "checkout",
     label: "Checkout & Pagamentos",
     description: "Checkout, Pix, cartão, status de pagamento e comprovantes.",
