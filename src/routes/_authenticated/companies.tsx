@@ -132,7 +132,7 @@ function CompaniesPage() {
                 </TableCell>
                 <TableCell>
                   {me?.isSuperAdmin && !c.is_master && (
-                    <Button size="icon" variant="ghost" onClick={() => confirm(`Remover ${c.name}?`) && remove.mutate(c.id)}>
+                    <Button size="icon" variant="ghost" aria-label={`Remover empresa ${c.name}`} onClick={() => confirm(`Remover ${c.name}?`) && remove.mutate(c.id)}>
                       <Trash2 className="w-4 h-4 text-destructive" />
                     </Button>
                   )}
