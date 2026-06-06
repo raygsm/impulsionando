@@ -200,7 +200,7 @@ export const checkInfinitePayStatus = createServerFn({ method: "POST" })
           transaction_nsu: body.transaction_nsu || row.transaction_nsu,
           invoice_slug: body.slug || row.invoice_slug,
           receipt_url: json.receipt_url ?? row.receipt_url,
-          webhook_payload: { ...(row.webhook_payload ?? {}), manual_check: json },
+          webhook_payload: { ...((row.webhook_payload as Record<string, unknown>) ?? {}), manual_check: json },
         })
         .eq("order_nsu", row.order_nsu);
       return { ok: true as const, status: "paid", payment: { ...row, status: "paid" } };
@@ -210,7 +210,7 @@ export const checkInfinitePayStatus = createServerFn({ method: "POST" })
       .from("infinitepay_payments")
       .update({
         status: row.status === "paid" ? "paid" : "manual_checked",
-        webhook_payload: { ...(row.webhook_payload ?? {}), manual_check: json },
+        webhook_payload: { ...((row.webhook_payload as Record<string, unknown>) ?? {}), manual_check: json },
       })
       .eq("order_nsu", row.order_nsu);
 
