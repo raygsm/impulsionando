@@ -208,7 +208,6 @@ export function PublicHeader() {
           <DesktopDropdownGrouped label="Soluções" groups={SOLUCOES_GROUPS} />
           <DesktopDropdownGrouped label="Nichos" groups={NICHOS_GROUPS} />
           <DesktopDropdownFlat label="Planos" items={PLANOS} />
-          <DesktopDropdownFlat label="Demonstração" items={DEMOS} />
           <Link
             to="/contato"
             className="px-3 py-3 text-[15px] text-muted-foreground hover:text-foreground transition-colors rounded-md"
