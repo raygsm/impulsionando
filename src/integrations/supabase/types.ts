@@ -4994,35 +4994,21 @@ export type Database = {
         Args: { _paddle_sub?: string; _trial_id: string }
         Returns: string
       }
-      trial_create:
-        | {
-            Args: {
-              _chosen_plan: Database["public"]["Enums"]["trial_plan_choice"]
-              _contact_company: string
-              _contact_doc: string
-              _contact_email: string
-              _contact_name: string
-              _contact_whatsapp: string
-              _source?: string
-              _terms_ip?: string
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              _chosen_plan: Database["public"]["Enums"]["trial_plan_choice"]
-              _contact_company: string
-              _contact_doc: string
-              _contact_email: string
-              _contact_name: string
-              _contact_whatsapp: string
-              _link_acesso?: string
-              _source?: string
-              _terms_ip?: string
-              _user_id?: string
-            }
-            Returns: string
-          }
+      trial_create: {
+        Args: {
+          _chosen_plan: Database["public"]["Enums"]["trial_plan_choice"]
+          _contact_company: string
+          _contact_doc: string
+          _contact_email: string
+          _contact_name: string
+          _contact_whatsapp: string
+          _link_acesso?: string
+          _source?: string
+          _terms_ip?: string
+          _user_id?: string
+        }
+        Returns: string
+      }
       trial_extend: {
         Args: { _days: number; _reason: string; _trial_id: string }
         Returns: string
