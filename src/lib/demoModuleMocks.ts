@@ -381,6 +381,10 @@ export const CRM_DEFAULT_PARAMS = {
   permitirSemEmail: true,
   registrarLogsComunicacao: true,
   registrarHistoricoCliente: true,
+  podeGerirEmpresas: true,
+  podeGerirProdutos: true,
+  podeGerirPlanos: true,
+  podeGerirServicos: true,
 };
 export type CrmParams = typeof CRM_DEFAULT_PARAMS;
 

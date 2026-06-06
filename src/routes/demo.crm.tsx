@@ -49,9 +49,9 @@ type Atividade = { id: string; leadId: string; tipo: "ligacao" | "email" | "what
 type Template = { id: string; nome: string; canal: "email" | "whatsapp"; corpo: string };
 type Automacao = { id: string; nome: string; gatilho: string; acao: string; ativa: boolean };
 type Cliente = { id: string; nome: string; documento: string; email: string; telefone: string; produto: string; plano: string; status: string; tipo?: "PF" | "PJ"; cidade?: string; estado?: string; origem?: string; campanha?: string; interesse?: string; produtoInteresse?: string; planoInteresse?: string; servicoInteresse?: string; responsavel?: string; tags?: string[]; observacoes?: string; emailTeste?: string; whatsappTeste?: string };
-type Empresa = { id: string; razaoSocial: string; cnpj: string; segmento: string; nomeFantasia?: string; porte?: string; responsavel?: string; whatsapp?: string; email?: string; cidade?: string; estado?: string; modulosInteresse?: string[]; status?: string; observacoes?: string };
+type Empresa = { id: string; razaoSocial: string; cnpj: string; segmento: string; nomeFantasia?: string; porte?: string; responsavel?: string; whatsapp?: string; email?: string; cidade?: string; estado?: string; modulosInteresse?: string[]; produtosVinculados?: string[]; status?: string; observacoes?: string };
 type Produto = { id: string; nome: string; preco: number; descricao: string; categoria?: string; status?: string; prazoConsumoDias?: number; recompraAuto?: boolean; diasAviso1?: number; diasAviso2?: number; mensagemRecompra?: string; tags?: string[]; campanhas?: string[] };
-type Plano = { id: string; nome: string; preco: number; ciclo: string; itens: string[]; descricao?: string; valorSetup?: number; recorrencia?: string; contratoMinDias?: number; mensalidadesMinimas?: number; permiteAdicionais?: boolean; valorPorAdicional?: number; status?: string; observacoes?: string };
+type Plano = { id: string; nome: string; preco: number; ciclo: string; itens: string[]; descricao?: string; valorSetup?: number; recorrencia?: string; contratoMinDias?: number; mensalidadesMinimas?: number; permiteAdicionais?: boolean; valorPorAdicional?: number; produtosIncluidos?: string[]; status?: string; observacoes?: string };
 type Servico = { id: string; nome: string; preco: number; duracao: string; descricao?: string; prazoEntregaDias?: number; produtoRelacionado?: string; planoRelacionado?: string; responsavel?: string; ativo?: boolean; observacoes?: string };
 type Prazo = { id: string; nome: string; dias: number };
 type Funil = { id: string; nome: string; ativo: boolean };
@@ -308,8 +308,10 @@ function DemoCRM() {
               <EmpresasPanel
                 empresas={empresas}
                 setEmpresas={setEmpresas}
+                produtos={produtos}
                 onLog={pushLog}
                 exigirResponsavel={params.exigirResponsavel}
+                podeEditar={params.podeGerirEmpresas}
               />
             </TabsContent>
 
@@ -383,12 +385,12 @@ function DemoCRM() {
 
             {/* PRODUTOS */}
             <TabsContent value="produtos" className="mt-4 space-y-4">
-              <ProdutosPanel produtos={produtos} setProdutos={setProdutos} onLog={pushLog} />
+              <ProdutosPanel produtos={produtos} setProdutos={setProdutos} onLog={pushLog} podeEditar={params.podeGerirProdutos} />
             </TabsContent>
 
             {/* PLANOS */}
             <TabsContent value="planos" className="mt-4 space-y-4">
-              <PlanosPanel planos={planos} setPlanos={setPlanos} clientes={clientes} onLog={pushLog} />
+              <PlanosPanel planos={planos} setPlanos={setPlanos} clientes={clientes} produtos={produtos} onLog={pushLog} podeEditar={params.podeGerirPlanos} />
             </TabsContent>
 
             {/* SERVIÇOS */}
@@ -400,6 +402,7 @@ function DemoCRM() {
                 planos={planos}
                 onLog={pushLog}
                 exigirResponsavel={params.exigirResponsavel}
+                podeEditar={params.podeGerirServicos}
               />
             </TabsContent>
 
@@ -672,6 +675,10 @@ const PARAM_DEFS: { key: keyof CrmParams; label: string; hint: string }[] = [
   { key: "permitirSemEmail", label: "Permitir lead sem e-mail?", hint: "Quando NÃO, exige e-mail no cadastro." },
   { key: "registrarLogsComunicacao", label: "Registrar logs de comunicação?", hint: "Salva no histórico cada envio simulado." },
   { key: "registrarHistoricoCliente", label: "Registrar histórico completo do cliente?", hint: "Mantém todo o histórico de interações no cliente." },
+  { key: "podeGerirEmpresas", label: "Permitir gerir Empresas?", hint: "Quando desativado, a área Empresas fica somente leitura nesta demonstração." },
+  { key: "podeGerirProdutos", label: "Permitir gerir Produtos?", hint: "Quando desativado, a área Produtos fica somente leitura nesta demonstração." },
+  { key: "podeGerirPlanos", label: "Permitir gerir Planos?", hint: "Quando desativado, a área Planos fica somente leitura nesta demonstração." },
+  { key: "podeGerirServicos", label: "Permitir gerir Serviços?", hint: "Quando desativado, a área Serviços fica somente leitura nesta demonstração." },
 ];
 
 function KPI({ label, value, accent }: { label: string; value: string; accent?: boolean }) {

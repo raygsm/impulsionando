@@ -6,9 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Edit3, Trash2, X, Power } from "lucide-react";
+import { Plus, Edit3, Trash2, X, Power, Lock, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { uid } from "@/lib/demoSandbox";
 import {
@@ -31,6 +32,51 @@ function FormField({ label, error, children, className }: { label: string; error
   );
 }
 
+function LockedBanner({ area }: { area: string }) {
+  return (
+    <Card className="p-4 border-warning/40 bg-warning/5">
+      <div className="flex items-start gap-2 text-xs">
+        <Lock className="w-4 h-4 mt-0.5 text-warning" />
+        <div>
+          <strong>{area} em modo somente leitura.</strong> Seu perfil DEMO não possui permissão para criar, editar ou remover registros nesta área. Ative a permissão em Parametrizações para liberar a edição. {MSG_DEMO_TAG}
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function ProdutosMultiSelect({
+  produtos, selecionados, onChange, disabled,
+}: {
+  produtos: { id: string; nome: string; status?: string }[];
+  selecionados: string[]; onChange: (next: string[]) => void; disabled?: boolean;
+}) {
+  if (produtos.length === 0) {
+    return <p className="text-[11px] text-muted-foreground">Nenhum produto cadastrado para vincular. Crie um produto antes.</p>;
+  }
+  return (
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 p-2 border rounded-md max-h-44 overflow-y-auto">
+      {produtos.map((p) => {
+        const checked = selecionados.includes(p.nome);
+        return (
+          <label key={p.id} className="flex items-center gap-2 text-xs cursor-pointer">
+            <Checkbox
+              checked={checked}
+              disabled={disabled}
+              onCheckedChange={(v) => {
+                const next = v ? [...selecionados, p.nome] : selecionados.filter((n) => n !== p.nome);
+                onChange(next);
+              }}
+            />
+            <span>{p.nome}</span>
+            {p.status && p.status !== "Ativo" && <Badge variant="outline" className="text-[10px]">{p.status}</Badge>}
+          </label>
+        );
+      })}
+    </div>
+  );
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // EMPRESAS
 // ────────────────────────────────────────────────────────────────────────────
@@ -39,19 +85,21 @@ export interface EmpresaRecord {
   id: string; razaoSocial: string; cnpj: string; segmento: string;
   nomeFantasia?: string; porte?: string; responsavel?: string;
   whatsapp?: string; email?: string; cidade?: string; estado?: string;
-  modulosInteresse?: string[]; status?: string; observacoes?: string;
+  modulosInteresse?: string[]; produtosVinculados?: string[];
+  status?: string; observacoes?: string;
 }
 
 const EMPRESA_INIT: Partial<EmpresaRecord> = {
   razaoSocial: "", cnpj: "", segmento: "Outro", porte: "Pequena empresa",
-  responsavel: "Comercial Demo", status: "Prospect", modulosInteresse: [],
+  responsavel: "Comercial Demo", status: "Prospect", modulosInteresse: [], produtosVinculados: [],
 };
 
 export function EmpresasPanel({
-  empresas, setEmpresas, onLog, exigirResponsavel,
+  empresas, setEmpresas, produtos = [], onLog, exigirResponsavel, podeEditar = true,
 }: {
   empresas: EmpresaRecord[]; setEmpresas: React.Dispatch<React.SetStateAction<EmpresaRecord[]>>;
-  onLog: LogFn; exigirResponsavel?: boolean;
+  produtos?: { id: string; nome: string; status?: string }[];
+  onLog: LogFn; exigirResponsavel?: boolean; podeEditar?: boolean;
 }) {
   const [form, setForm] = useState<Partial<EmpresaRecord>>(EMPRESA_INIT);
   const [editing, setEditing] = useState<string | null>(null);
@@ -60,16 +108,30 @@ export function EmpresasPanel({
   function reset() { setForm(EMPRESA_INIT); setEditing(null); setErrors({}); }
 
   function persist() {
+    if (!podeEditar) { toast.error("Sem permissão para editar Empresas."); return; }
     const r = validateEmpresa(
       { razaoSocial: form.razaoSocial, email: form.email, whatsapp: form.whatsapp,
         status: form.status as never, porte: form.porte as never, responsavel: form.responsavel ?? "" },
       { exigirResponsavel },
     );
+    const novosProdutos = (form.produtosVinculados ?? []).filter(Boolean);
+    const invalidos = novosProdutos.filter((n) => !produtos.some((p) => p.nome === n));
+    if (invalidos.length > 0) {
+      r.errors.produtosVinculados = `Produtos não encontrados: ${invalidos.join(", ")}`;
+      r.ok = false;
+    }
     setErrors(r.errors);
     if (!r.ok) { toast.error(MSG_OBRIGATORIO); return; }
     if (editing) {
+      const antes = empresas.find((e) => e.id === editing);
       setEmpresas((prev) => prev.map((e) => e.id === editing ? { ...e, ...form, id: editing } as EmpresaRecord : e));
       onLog({ area: "Empresas", acao: "Editou empresa", registro: form.razaoSocial });
+      if (antes) {
+        const add = novosProdutos.filter((p) => !(antes.produtosVinculados ?? []).includes(p));
+        const rem = (antes.produtosVinculados ?? []).filter((p) => !novosProdutos.includes(p));
+        if (add.length) onLog({ area: "Empresas", acao: `Vinculou produto(s): ${add.join(", ")}`, registro: form.razaoSocial });
+        if (rem.length) onLog({ area: "Empresas", acao: `Removeu vínculo de produto(s): ${rem.join(", ")}`, registro: form.razaoSocial });
+      }
       toast.success(MSG_SUCESSO);
     } else {
       const nova: EmpresaRecord = {
@@ -78,15 +140,18 @@ export function EmpresasPanel({
         cnpj: form.cnpj ?? "—",
         segmento: form.segmento ?? "Outro",
         ...form,
+        produtosVinculados: novosProdutos,
       } as EmpresaRecord;
       setEmpresas((prev) => [nova, ...prev]);
       onLog({ area: "Empresas", acao: "Criou empresa", registro: nova.razaoSocial });
+      if (novosProdutos.length) onLog({ area: "Empresas", acao: `Vinculou produto(s): ${novosProdutos.join(", ")}`, registro: nova.razaoSocial });
       toast.success(`Empresa cadastrada. ${MSG_DEMO_TAG}`);
     }
     reset();
   }
 
   function remove(id: string) {
+    if (!podeEditar) { toast.error("Sem permissão para remover Empresas."); return; }
     const e = empresas.find((x) => x.id === id);
     setEmpresas((prev) => prev.filter((x) => x.id !== id));
     onLog({ area: "Empresas", acao: "Removeu empresa demo", registro: e?.razaoSocial });
@@ -94,6 +159,7 @@ export function EmpresasPanel({
 
   return (
     <div className="space-y-4">
+      {!podeEditar && <LockedBanner area="Empresas" />}
       <Card className="p-5 space-y-3">
         <div className="flex items-start justify-between gap-2 flex-wrap">
           <div>
@@ -153,11 +219,20 @@ export function EmpresasPanel({
               onChange={(e) => setForm({ ...form, modulosInteresse: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })}
             />
           </FormField>
+          <FormField label="Produtos vinculados à empresa" error={errors.produtosVinculados} className="sm:col-span-2 lg:col-span-4">
+            <ProdutosMultiSelect
+              produtos={produtos}
+              selecionados={form.produtosVinculados ?? []}
+              onChange={(next) => setForm({ ...form, produtosVinculados: next })}
+              disabled={!podeEditar}
+            />
+            <p className="text-[11px] text-muted-foreground mt-1">Selecione os produtos contratados ou em negociação por esta empresa. Cada alteração gera log DEMO.</p>
+          </FormField>
           <FormField label="Observações" className="sm:col-span-2 lg:col-span-4">
             <Textarea value={form.observacoes ?? ""} onChange={(e) => setForm({ ...form, observacoes: e.target.value })} />
           </FormField>
         </div>
-        <Button className="bg-gradient-primary" onClick={persist}>
+        <Button className="bg-gradient-primary" onClick={persist} disabled={!podeEditar}>
           <Plus className="w-4 h-4 mr-1" />{editing ? "Salvar alterações" : "Nova empresa"}
         </Button>
       </Card>
@@ -207,9 +282,9 @@ const PRODUTO_INIT: Partial<ProdutoRecord> = {
 };
 
 export function ProdutosPanel({
-  produtos, setProdutos, onLog,
+  produtos, setProdutos, onLog, podeEditar = true,
 }: {
-  produtos: ProdutoRecord[]; setProdutos: React.Dispatch<React.SetStateAction<ProdutoRecord[]>>; onLog: LogFn;
+  produtos: ProdutoRecord[]; setProdutos: React.Dispatch<React.SetStateAction<ProdutoRecord[]>>; onLog: LogFn; podeEditar?: boolean;
 }) {
   const [form, setForm] = useState<Partial<ProdutoRecord>>(PRODUTO_INIT);
   const [editing, setEditing] = useState<string | null>(null);
@@ -218,6 +293,7 @@ export function ProdutosPanel({
   function reset() { setForm(PRODUTO_INIT); setEditing(null); setErrors({}); }
 
   function persist() {
+    if (!podeEditar) { toast.error("Sem permissão para editar Produtos."); return; }
     const r = validateProduto({
       nome: form.nome, categoria: form.categoria as never, status: form.status as never,
       valor: form.preco, prazoConsumoDias: form.prazoConsumoDias,
@@ -257,6 +333,7 @@ export function ProdutosPanel({
   }
 
   function remove(id: string) {
+    if (!podeEditar) { toast.error("Sem permissão para remover Produtos."); return; }
     const p = produtos.find((x) => x.id === id);
     setProdutos((prev) => prev.filter((x) => x.id !== id));
     onLog({ area: "Produtos", acao: "Removeu produto demo", registro: p?.nome });
@@ -264,6 +341,7 @@ export function ProdutosPanel({
 
   return (
     <div className="space-y-4">
+      {!podeEditar && <LockedBanner area="Produtos" />}
       <Card className="p-5 space-y-3">
         <div className="flex items-start justify-between gap-2 flex-wrap">
           <div>
@@ -323,7 +401,7 @@ export function ProdutosPanel({
             <Input value={(form.campanhas ?? []).join(", ")} onChange={(e) => setForm({ ...form, campanhas: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} />
           </FormField>
         </div>
-        <Button className="bg-gradient-primary" onClick={persist}>
+        <Button className="bg-gradient-primary" onClick={persist} disabled={!podeEditar}>
           <Plus className="w-4 h-4 mr-1" />{editing ? "Salvar alterações" : "Novo produto"}
         </Button>
       </Card>
@@ -367,20 +445,27 @@ export interface PlanoRecord {
   descricao?: string; valorSetup?: number; recorrencia?: string;
   contratoMinDias?: number; mensalidadesMinimas?: number;
   permiteAdicionais?: boolean; valorPorAdicional?: number;
+  produtosIncluidos?: string[];
   status?: string; observacoes?: string;
 }
 
 const PLANO_INIT: Partial<PlanoRecord> = {
   nome: "", preco: 0, ciclo: "mensal", itens: [], descricao: "",
   valorSetup: 0, recorrencia: "Mensal", contratoMinDias: 90, mensalidadesMinimas: 3,
-  permiteAdicionais: false, status: "Ativo",
+  permiteAdicionais: false, status: "Ativo", produtosIncluidos: [],
+};
+
+const RECORRENCIA_MULTIPLIER: Record<string, number> = {
+  Mensal: 1, Trimestral: 3, Semestral: 6, Anual: 12,
 };
 
 export function PlanosPanel({
-  planos, setPlanos, clientes, onLog,
+  planos, setPlanos, clientes, produtos = [], onLog, podeEditar = true,
 }: {
   planos: PlanoRecord[]; setPlanos: React.Dispatch<React.SetStateAction<PlanoRecord[]>>;
-  clientes: { id: string; planoInteresse?: string; plano?: string }[]; onLog: LogFn;
+  clientes: { id: string; planoInteresse?: string; plano?: string }[];
+  produtos?: { id: string; nome: string; status?: string }[];
+  onLog: LogFn; podeEditar?: boolean;
 }) {
   const [form, setForm] = useState<Partial<PlanoRecord>>(PLANO_INIT);
   const [editing, setEditing] = useState<string | null>(null);
@@ -389,17 +474,31 @@ export function PlanosPanel({
   function reset() { setForm(PLANO_INIT); setEditing(null); setErrors({}); }
 
   function persist() {
+    if (!podeEditar) { toast.error("Sem permissão para editar Planos."); return; }
     const r = validatePlano({
       nome: form.nome, recorrencia: form.recorrencia as never, status: form.status as never,
       valorMensal: form.preco, valorSetup: form.valorSetup,
       contratoMinDias: form.contratoMinDias, mensalidadesMinimas: form.mensalidadesMinimas,
       permiteAdicionais: form.permiteAdicionais ?? false, valorPorAdicional: form.valorPorAdicional,
     });
+    const novosProdutos = (form.produtosIncluidos ?? []).filter(Boolean);
+    const invalidos = novosProdutos.filter((n) => !produtos.some((p) => p.nome === n));
+    if (invalidos.length > 0) {
+      r.errors.produtosIncluidos = `Produtos não encontrados: ${invalidos.join(", ")}`;
+      r.ok = false;
+    }
     setErrors(r.errors);
     if (!r.ok) { toast.error(MSG_OBRIGATORIO); return; }
     if (editing) {
+      const antes = planos.find((p) => p.id === editing);
       setPlanos((prev) => prev.map((p) => p.id === editing ? { ...p, ...form, id: editing } as PlanoRecord : p));
       onLog({ area: "Planos", acao: "Editou plano", registro: form.nome });
+      if (antes) {
+        const add = novosProdutos.filter((n) => !(antes.produtosIncluidos ?? []).includes(n));
+        const rem = (antes.produtosIncluidos ?? []).filter((n) => !novosProdutos.includes(n));
+        if (add.length) onLog({ area: "Planos", acao: `Incluiu produto(s) como módulo(s): ${add.join(", ")}`, registro: form.nome });
+        if (rem.length) onLog({ area: "Planos", acao: `Removeu produto(s) do plano: ${rem.join(", ")}`, registro: form.nome });
+      }
       toast.success(MSG_SUCESSO);
     } else {
       const novo: PlanoRecord = {
@@ -415,22 +514,26 @@ export function PlanosPanel({
         mensalidadesMinimas: form.mensalidadesMinimas ?? 3,
         permiteAdicionais: form.permiteAdicionais ?? false,
         valorPorAdicional: form.valorPorAdicional,
+        produtosIncluidos: novosProdutos,
         status: form.status, observacoes: form.observacoes,
       };
       setPlanos((prev) => [novo, ...prev]);
       onLog({ area: "Planos", acao: "Criou plano", registro: novo.nome });
+      if (novosProdutos.length) onLog({ area: "Planos", acao: `Incluiu produto(s) como módulo(s): ${novosProdutos.join(", ")}`, registro: novo.nome });
       toast.success(`Plano criado. ${MSG_DEMO_TAG}`);
     }
     reset();
   }
 
   function toggleStatus(id: string) {
+    if (!podeEditar) { toast.error("Sem permissão para alterar Planos."); return; }
     setPlanos((prev) => prev.map((p) => p.id === id ? { ...p, status: p.status === "Ativo" ? "Inativo" : "Ativo" } : p));
     const p = planos.find((x) => x.id === id);
     onLog({ area: "Planos", acao: "Alternou status do plano", registro: p?.nome });
   }
 
   function remove(id: string) {
+    if (!podeEditar) { toast.error("Sem permissão para remover Planos."); return; }
     const p = planos.find((x) => x.id === id);
     setPlanos((prev) => prev.filter((x) => x.id !== id));
     onLog({ area: "Planos", acao: "Removeu plano demo", registro: p?.nome });
@@ -439,12 +542,18 @@ export function PlanosPanel({
   function clientesVinculados(planoNome: string) {
     return clientes.filter((c) => c.planoInteresse === planoNome || c.plano === planoNome).length;
   }
-  function receitaPrevista(p: PlanoRecord) {
-    return clientesVinculados(p.nome) * (p.preco ?? 0);
+  function receitaPorPeriodo(p: PlanoRecord, meses: number) {
+    return clientesVinculados(p.nome) * (p.preco ?? 0) * meses;
   }
+  function valorMinimoContrato(p: PlanoRecord) {
+    return (p.valorSetup ?? 0) + (p.preco ?? 0) * (p.mensalidadesMinimas ?? 0);
+  }
+
+  const fmt = (n: number) => Number(n).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   return (
     <div className="space-y-4">
+      {!podeEditar && <LockedBanner area="Planos" />}
       <Card className="p-5 space-y-3">
         <div className="flex items-start justify-between gap-2 flex-wrap">
           <div>
@@ -495,49 +604,85 @@ export function PlanosPanel({
               <Input type="number" min={0} value={form.valorPorAdicional ?? 0} onChange={(e) => setForm({ ...form, valorPorAdicional: Number(e.target.value) })} />
             </FormField>
           )}
-          <FormField label="Módulos incluídos (vírgula)" className="sm:col-span-2 lg:col-span-4">
+          <FormField label="Produtos incluídos no plano (módulos)" error={errors.produtosIncluidos} className="sm:col-span-2 lg:col-span-4">
+            <ProdutosMultiSelect
+              produtos={produtos}
+              selecionados={form.produtosIncluidos ?? []}
+              onChange={(next) => setForm({ ...form, produtosIncluidos: next })}
+              disabled={!podeEditar}
+            />
+            <p className="text-[11px] text-muted-foreground mt-1">Vincule produtos como módulos deste plano. Cada inclusão ou remoção gera log DEMO.</p>
+          </FormField>
+          <FormField label="Outros itens incluídos (texto livre, vírgula)" className="sm:col-span-2 lg:col-span-4">
             <Input value={(form.itens ?? []).join(", ")} onChange={(e) => setForm({ ...form, itens: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} />
           </FormField>
           <FormField label="Descrição" className="sm:col-span-2 lg:col-span-4">
             <Textarea value={form.descricao ?? ""} onChange={(e) => setForm({ ...form, descricao: e.target.value })} />
           </FormField>
         </div>
-        <Button className="bg-gradient-primary" onClick={persist}>
+        <Button className="bg-gradient-primary" onClick={persist} disabled={!podeEditar}>
           <Plus className="w-4 h-4 mr-1" />{editing ? "Salvar alterações" : "Novo plano"}
         </Button>
       </Card>
 
       <div className="grid md:grid-cols-3 gap-3">
-        {planos.map((p) => (
-          <Card key={p.id} className="p-5">
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="font-semibold">{p.nome}</div>
-                <div className="text-xs text-muted-foreground">{p.recorrencia ?? p.ciclo}</div>
+        {planos.map((p) => {
+          const vinc = clientesVinculados(p.nome);
+          const mult = RECORRENCIA_MULTIPLIER[p.recorrencia ?? "Mensal"] ?? 1;
+          const alertaContrato = (p.contratoMinDias ?? 0) < 90;
+          const alertaMensalidades = (p.mensalidadesMinimas ?? 0) < 3;
+          return (
+            <Card key={p.id} className="p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="font-semibold">{p.nome}</div>
+                  <div className="text-xs text-muted-foreground">{p.recorrencia ?? p.ciclo}</div>
+                </div>
+                <Badge variant="outline">{p.status ?? "Ativo"}</Badge>
               </div>
-              <Badge variant="outline">{p.status ?? "Ativo"}</Badge>
-            </div>
-            <div className="text-2xl font-bold mt-2">
-              {Number(p.preco).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-              <span className="text-xs text-muted-foreground font-normal">/{p.ciclo}</span>
-            </div>
-            <div className="text-xs text-muted-foreground mt-1">
-              Setup {Number(p.valorSetup ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} • Contrato mín. {p.contratoMinDias ?? 90} dias • {p.mensalidadesMinimas ?? 3} mensalidades obrigatórias
-            </div>
-            {p.itens.length > 0 && (
-              <ul className="text-xs text-muted-foreground mt-3 space-y-1">{p.itens.map((it, i) => <li key={i}>• {it}</li>)}</ul>
-            )}
-            <div className="text-xs text-muted-foreground mt-3">
-              <strong>{clientesVinculados(p.nome)}</strong> cliente(s) vinculado(s) • Receita prevista{" "}
-              <strong>{receitaPrevista(p).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</strong>
-            </div>
-            <div className="flex gap-1 mt-3">
-              <Button size="sm" variant="outline" onClick={() => toggleStatus(p.id)}><Power className="w-3.5 h-3.5 mr-1" />Ativar/Inativar</Button>
-              <Button size="sm" variant="outline" onClick={() => { setEditing(p.id); setForm(p); }}><Edit3 className="w-3.5 h-3.5" /></Button>
-              <Button size="sm" variant="ghost" onClick={() => remove(p.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
-            </div>
-          </Card>
-        ))}
+              <div className="text-2xl font-bold mt-2">
+                {fmt(p.preco)}
+                <span className="text-xs text-muted-foreground font-normal">/{p.ciclo}</span>
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                Setup {fmt(p.valorSetup ?? 0)} • Contrato mín. {p.contratoMinDias ?? 90} dias • {p.mensalidadesMinimas ?? 3} mensalidades obrigatórias
+              </div>
+              {(alertaContrato || alertaMensalidades) && (
+                <div className="mt-2 text-[11px] text-warning flex items-start gap-1">
+                  <AlertTriangle className="w-3.5 h-3.5 mt-0.5" />
+                  <span>
+                    {alertaContrato && "Contrato mínimo abaixo de 90 dias. "}
+                    {alertaMensalidades && "Menos de 3 mensalidades obrigatórias. "}
+                    Verifique a regra comercial do plano.
+                  </span>
+                </div>
+              )}
+              {(p.produtosIncluidos ?? []).length > 0 && (
+                <div className="mt-3">
+                  <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Produtos/módulos</div>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {(p.produtosIncluidos ?? []).map((n) => <Badge key={n} variant="secondary" className="text-[10px]">{n}</Badge>)}
+                  </div>
+                </div>
+              )}
+              {p.itens.length > 0 && (
+                <ul className="text-xs text-muted-foreground mt-3 space-y-1">{p.itens.map((it, i) => <li key={i}>• {it}</li>)}</ul>
+              )}
+              <div className="mt-3 p-2 rounded border bg-muted/30 text-[11px] space-y-0.5">
+                <div><strong>{vinc}</strong> cliente(s) vinculado(s)</div>
+                <div>Valor mínimo de contrato: <strong>{fmt(valorMinimoContrato(p))}</strong></div>
+                <div>Receita prevista/mês: <strong>{fmt(receitaPorPeriodo(p, 1))}</strong></div>
+                <div>Receita por ciclo ({mult}m): <strong>{fmt(receitaPorPeriodo(p, mult))}</strong></div>
+                <div>Receita prevista 12 meses: <strong>{fmt(receitaPorPeriodo(p, 12))}</strong></div>
+              </div>
+              <div className="flex gap-1 mt-3">
+                <Button size="sm" variant="outline" onClick={() => toggleStatus(p.id)} disabled={!podeEditar}><Power className="w-3.5 h-3.5 mr-1" />Ativar/Inativar</Button>
+                <Button size="sm" variant="outline" onClick={() => { setEditing(p.id); setForm(p); }} disabled={!podeEditar}><Edit3 className="w-3.5 h-3.5" /></Button>
+                <Button size="sm" variant="ghost" onClick={() => remove(p.id)} disabled={!podeEditar}><Trash2 className="w-3.5 h-3.5" /></Button>
+              </div>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );
@@ -560,11 +705,11 @@ const SERVICO_INIT: Partial<ServicoRecord> = {
 };
 
 export function ServicosPanel({
-  servicos, setServicos, produtos, planos, onLog, exigirResponsavel,
+  servicos, setServicos, produtos, planos, onLog, exigirResponsavel, podeEditar = true,
 }: {
   servicos: ServicoRecord[]; setServicos: React.Dispatch<React.SetStateAction<ServicoRecord[]>>;
   produtos: { id: string; nome: string }[]; planos: { id: string; nome: string }[];
-  onLog: LogFn; exigirResponsavel?: boolean;
+  onLog: LogFn; exigirResponsavel?: boolean; podeEditar?: boolean;
 }) {
   const [form, setForm] = useState<Partial<ServicoRecord>>(SERVICO_INIT);
   const [editing, setEditing] = useState<string | null>(null);
@@ -573,6 +718,8 @@ export function ServicosPanel({
   function reset() { setForm(SERVICO_INIT); setEditing(null); setErrors({}); }
 
   function persist() {
+    if (!podeEditar) { toast.error("Sem permissão para editar Serviços."); return; }
+
     const r = validateServico(
       { nome: form.nome, valor: form.preco, prazoEntregaDias: form.prazoEntregaDias, responsavel: form.responsavel ?? "" },
       { exigirResponsavel },
@@ -605,12 +752,14 @@ export function ServicosPanel({
   }
 
   function toggleStatus(id: string) {
+    if (!podeEditar) { toast.error("Sem permissão para alterar Serviços."); return; }
     setServicos((prev) => prev.map((s) => s.id === id ? { ...s, ativo: !(s.ativo ?? true) } : s));
     const s = servicos.find((x) => x.id === id);
     onLog({ area: "Serviços", acao: "Alternou status do serviço", registro: s?.nome });
   }
 
   function remove(id: string) {
+    if (!podeEditar) { toast.error("Sem permissão para remover Serviços."); return; }
     const s = servicos.find((x) => x.id === id);
     setServicos((prev) => prev.filter((x) => x.id !== id));
     onLog({ area: "Serviços", acao: "Removeu serviço demo", registro: s?.nome });
@@ -618,6 +767,7 @@ export function ServicosPanel({
 
   return (
     <div className="space-y-4">
+      {!podeEditar && <LockedBanner area="Serviços" />}
       <Card className="p-5 space-y-3">
         <div className="flex items-start justify-between gap-2 flex-wrap">
           <div>
@@ -670,7 +820,7 @@ export function ServicosPanel({
             <Textarea value={form.descricao ?? ""} onChange={(e) => setForm({ ...form, descricao: e.target.value })} />
           </FormField>
         </div>
-        <Button className="bg-gradient-primary" onClick={persist}>
+        <Button className="bg-gradient-primary" onClick={persist} disabled={!podeEditar}>
           <Plus className="w-4 h-4 mr-1" />{editing ? "Salvar alterações" : "Novo serviço"}
         </Button>
       </Card>
