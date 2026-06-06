@@ -25,6 +25,7 @@ import { useDemoState, uid, brl } from "@/lib/demoSandbox";
 import { PLATFORM_FEE_PCT } from "@/lib/affiliates.constants";
 import { GuidedTour } from "@/components/demo/GuidedTour";
 import { RoiSimulator } from "@/components/demo/RoiSimulator";
+import { DemoContractCTA } from "@/components/demo/DemoContractCTA";
 
 export const Route = createFileRoute("/demo/afiliados")({
   head: () => ({
@@ -353,6 +354,14 @@ function Header({ onSeed, onReset }: { onSeed: () => void; onReset: () => void }
         </p>
       </div>
       <div className="flex gap-2 flex-wrap">
+        <DemoContractCTA
+          slug="fidelizacao"
+          moduleName="Afiliados"
+          moduleDescription="Crie produtos, ofertas, afiliados e cupons com split automático, order bump e recuperação."
+          amountReference={297}
+          features={["Produtos e ofertas", "Afiliados e cupons", "Split automático", "Order bump", "Recuperação de carrinho", "Ranking de afiliados"]}
+          testRoute="/demo/afiliados"
+        />
         <GuidedTour
           moduleKey="afiliados"
           title="Afiliados & Produtos"

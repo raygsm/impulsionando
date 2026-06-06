@@ -20,6 +20,7 @@ import {
   type MotherModule,
 } from "@/data/motherModules";
 import { useDemoContracted } from "@/lib/demoContracting";
+import { DemoContractFlow } from "@/components/demo/DemoContractFlow";
 
 export const Route = createFileRoute("/demo/modulos")({
   head: () => ({
@@ -43,7 +44,7 @@ export const Route = createFileRoute("/demo/modulos")({
 });
 
 function DemoModulesPage() {
-  const { contracted, isContracted, contract, uncontract, reset } = useDemoContracted();
+  const { contracted, isContracted, uncontract, reset } = useDemoContracted();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string>("Todas");
 
@@ -159,10 +160,6 @@ function DemoModulesPage() {
                 key={m.slug}
                 module={m}
                 contracted={isContracted(m.slug)}
-                onContract={() => {
-                  contract(m.slug);
-                  toast.success(`Módulo "${m.shortName}" contratado na demonstração.`);
-                }}
                 onUncontract={() => {
                   uncontract(m.slug);
                   toast.message(`Módulo "${m.shortName}" voltou para a vitrine.`);
@@ -208,14 +205,16 @@ function SummaryCard({
 }
 
 function ModuleCard({
-  module: m, contracted, onContract, onUncontract,
+  module: m, contracted, onUncontract,
 }: {
   module: MotherModule;
   contracted: boolean;
-  onContract: () => void;
   onUncontract: () => void;
 }) {
   const Icon = m.icon;
+  const [flowOpen, setFlowOpen] = useState(false);
+  const testRoute = INTERACTIVE_DEMO[m.slug] ?? "/demo/cliente-final";
+
   return (
     <Card className={`p-5 flex flex-col ${contracted ? "border-primary/50 shadow-elegant" : ""}`}>
       <div className="flex items-start gap-3">
@@ -233,7 +232,7 @@ function ModuleCard({
             <h3 className="font-semibold truncate">{m.shortName}</h3>
             {contracted ? (
               <Badge className="bg-primary/15 text-primary border-primary/30">
-                <CheckCircle2 className="w-3 h-3 mr-1" /> Ativo na demonstração
+                <CheckCircle2 className="w-3 h-3 mr-1" /> PAGO — DEMO
               </Badge>
             ) : (
               <Badge variant="outline" className="text-muted-foreground">
@@ -275,13 +274,13 @@ function ModuleCard({
                   Cancelar
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Volta o módulo para a vitrine na simulação.</TooltipContent>
+              <TooltipContent>Cancelamento fictício — volta o módulo para a vitrine.</TooltipContent>
             </Tooltip>
           </>
         ) : (
           <>
-            <Button size="sm" className="bg-gradient-primary flex-1" onClick={onContract}>
-              Contratar Módulo {m.shortName}
+            <Button size="sm" className="bg-gradient-primary flex-1" onClick={() => setFlowOpen(true)}>
+              Contratar na Demonstração
             </Button>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -301,6 +300,17 @@ function ModuleCard({
           </>
         )}
       </div>
+
+      <DemoContractFlow
+        open={flowOpen}
+        onOpenChange={setFlowOpen}
+        slug={m.slug}
+        moduleName={m.shortName}
+        moduleDescription={m.pitch}
+        amountReference={referenceAmountFor(m.slug)}
+        features={m.submodules}
+        testRoute={testRoute}
+      />
     </Card>
   );
 }
@@ -321,5 +331,26 @@ function TestarRecursosButton({ slug }: { slug: string }) {
       </Link>
     </Button>
   );
+}
+
+/** Valor fictício de referência por módulo (R$/mês) — só para a tela de pagamento demo. */
+const REFERENCE_AMOUNTS: Record<string, number> = {
+  fidelizacao: 297,
+  commerce: 247,
+  eventos: 197,
+  atendimento: 397,
+  agenda: 147,
+  crm: 247,
+  bi: 197,
+  prontuario: 297,
+  paciente: 97,
+  permissoes: 0,
+  whitelabel: 997,
+  viagens: 247,
+  delivery: 197,
+  followups: 147,
+};
+function referenceAmountFor(slug: string): number {
+  return REFERENCE_AMOUNTS[slug] ?? 197;
 }
 

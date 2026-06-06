@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { useDemoState, uid, brl } from "@/lib/demoSandbox";
 import { GuidedTour } from "@/components/demo/GuidedTour";
 import { RoiSimulator } from "@/components/demo/RoiSimulator";
+import { DemoContractCTA } from "@/components/demo/DemoContractCTA";
 
 export const Route = createFileRoute("/demo/checkout")({
   head: () => ({
@@ -116,6 +117,14 @@ function DemoCheckout() {
               </p>
             </div>
             <div className="flex gap-2 flex-wrap">
+              <DemoContractCTA
+                slug="commerce"
+                moduleName="Checkout & Pagamentos"
+                moduleDescription="Pix, cartão, boleto, link de pagamento, baixa automática, reembolso e recuperação."
+                amountReference={247}
+                features={["Pix", "Cartão até 12x", "Boleto", "Baixa automática", "Reembolso simulado", "Comparativo de gateways"]}
+                testRoute="/demo/checkout"
+              />
               <GuidedTour
                 moduleKey="checkout"
                 title="Checkout & Pagamentos"

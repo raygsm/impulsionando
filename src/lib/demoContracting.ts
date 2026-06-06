@@ -2,94 +2,170 @@
  * Contratação simulada de módulos no ambiente DEMO.
  *
  * Persiste apenas no localStorage do navegador do lead — nunca toca banco.
- * Permite que a demonstração se comporte como o ambiente real:
- *  - antes de "contratar", o módulo aparece como vitrine (não-contratado)
- *  - depois de "Contratar Módulo X", o módulo libera os recursos demo
+ * Estende a estrutura antiga (Set<slug>) com um registro por módulo contendo
+ * contrato fictício, pagamento PAGO — DEMO e timestamps.
  *
- * Toda a operação é client-side e reversível pelo botão "Zerar dados" do DEMO.
+ * Mantém a API original (`isDemoContracted`, `contractDemoModule`, etc.)
+ * para não quebrar páginas que já usam o módulo.
  */
+import { useEffect, useState } from "react";
 
-const STORAGE_KEY = "imp.demo.contracted.modules";
+const STORAGE_KEY = "imp.demo.contracted.modules.v2";
+const LEGACY_KEY = "imp.demo.contracted.modules";
+const EVT = "imp:demo-contracts-changed";
 
-function read(): Set<string> {
+export type DemoPaymentMethod = "pix" | "cartao" | "boleto";
+
+export type DemoModuleRecord = {
+  slug: string;
+  status: "paid_demo"; // único status final na demo
+  is_demo: true;
+  demo_paid: true;
+  payment_status: "paid_demo";
+  contract_status: "demo_active";
+  module_status: "demo_enabled";
+  payment_method: DemoPaymentMethod;
+  amount_reference: number; // valor de referência fictício R$
+  paid_at: string; // ISO
+  contract_accepted_at: string; // ISO
+};
+
+type Store = Record<string, DemoModuleRecord>;
+
+function read(): Store {
   try {
-    if (typeof window === "undefined") return new Set();
+    if (typeof window === "undefined") return {};
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return new Set();
-    const arr = JSON.parse(raw);
-    return new Set(Array.isArray(arr) ? arr.filter((x) => typeof x === "string") : []);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") return parsed as Store;
+    }
+    // Migração leve do formato antigo (Set<slug>) — converte para registros simples PAGO — DEMO.
+    const legacy = localStorage.getItem(LEGACY_KEY);
+    if (legacy) {
+      const arr = JSON.parse(legacy);
+      if (Array.isArray(arr)) {
+        const now = new Date().toISOString();
+        const store: Store = {};
+        for (const slug of arr) {
+          if (typeof slug !== "string") continue;
+          store[slug] = {
+            slug,
+            status: "paid_demo",
+            is_demo: true,
+            demo_paid: true,
+            payment_status: "paid_demo",
+            contract_status: "demo_active",
+            module_status: "demo_enabled",
+            payment_method: "pix",
+            amount_reference: 0,
+            paid_at: now,
+            contract_accepted_at: now,
+          };
+        }
+        write(store);
+        return store;
+      }
+    }
+    return {};
   } catch {
-    return new Set();
+    return {};
   }
 }
 
-function write(set: Set<string>) {
+function write(store: Store) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(set)));
-    // Dispara um evento próprio para que componentes na mesma aba reajam.
-    window.dispatchEvent(new CustomEvent("imp:demo-contracts-changed"));
-  } catch {
-    /* ignore quota / privacy mode */
-  }
-}
-
-export function getDemoContracted(): string[] {
-  return Array.from(read());
-}
-
-export function isDemoContracted(slug: string): boolean {
-  return read().has(slug);
-}
-
-export function contractDemoModule(slug: string) {
-  const s = read();
-  if (s.has(slug)) return;
-  s.add(slug);
-  write(s);
-}
-
-export function uncontractDemoModule(slug: string) {
-  const s = read();
-  if (!s.has(slug)) return;
-  s.delete(slug);
-  write(s);
-}
-
-export function resetDemoContracts() {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-    window.dispatchEvent(new CustomEvent("imp:demo-contracts-changed"));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+    window.dispatchEvent(new CustomEvent(EVT));
   } catch {
     /* ignore */
   }
 }
 
-/** Hook React mínimo, sem dependências, para reagir a mudanças. */
-import { useEffect, useState } from "react";
+export function getDemoContracted(): string[] {
+  return Object.keys(read());
+}
 
+export function getDemoRecord(slug: string): DemoModuleRecord | undefined {
+  return read()[slug];
+}
+
+export function isDemoContracted(slug: string): boolean {
+  return Boolean(read()[slug]);
+}
+
+/**
+ * Compatibilidade com o fluxo antigo: marca módulo como PAGO — DEMO via Pix
+ * sem passar pelo fluxo de contrato. Mantém o comportamento das telas legadas.
+ */
+export function contractDemoModule(
+  slug: string,
+  opts?: { paymentMethod?: DemoPaymentMethod; amountReference?: number }
+) {
+  const store = read();
+  if (store[slug]) return;
+  const now = new Date().toISOString();
+  store[slug] = {
+    slug,
+    status: "paid_demo",
+    is_demo: true,
+    demo_paid: true,
+    payment_status: "paid_demo",
+    contract_status: "demo_active",
+    module_status: "demo_enabled",
+    payment_method: opts?.paymentMethod ?? "pix",
+    amount_reference: opts?.amountReference ?? 0,
+    paid_at: now,
+    contract_accepted_at: now,
+  };
+  write(store);
+}
+
+export function uncontractDemoModule(slug: string) {
+  const store = read();
+  if (!store[slug]) return;
+  delete store[slug];
+  write(store);
+}
+
+export function resetDemoContracts() {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(LEGACY_KEY);
+    window.dispatchEvent(new CustomEvent(EVT));
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Hook React: contratos + registros + helpers. */
 export function useDemoContracted(): {
   contracted: Set<string>;
+  records: Store;
   isContracted: (slug: string) => boolean;
-  contract: (slug: string) => void;
+  getRecord: (slug: string) => DemoModuleRecord | undefined;
+  contract: (slug: string, opts?: { paymentMethod?: DemoPaymentMethod; amountReference?: number }) => void;
   uncontract: (slug: string) => void;
   reset: () => void;
 } {
-  const [contracted, setContracted] = useState<Set<string>>(() => read());
+  const [store, setStore] = useState<Store>(() => read());
 
   useEffect(() => {
-    const sync = () => setContracted(read());
-    window.addEventListener("imp:demo-contracts-changed", sync);
+    const sync = () => setStore(read());
+    window.addEventListener(EVT, sync);
     window.addEventListener("storage", sync);
     return () => {
-      window.removeEventListener("imp:demo-contracts-changed", sync);
+      window.removeEventListener(EVT, sync);
       window.removeEventListener("storage", sync);
     };
   }, []);
 
   return {
-    contracted,
-    isContracted: (slug) => contracted.has(slug),
-    contract: contractDemoModule,
+    contracted: new Set(Object.keys(store)),
+    records: store,
+    isContracted: (slug) => Boolean(store[slug]),
+    getRecord: (slug) => store[slug],
+    contract: (slug, opts) => contractDemoModule(slug, opts),
     uncontract: uncontractDemoModule,
     reset: resetDemoContracts,
   };
