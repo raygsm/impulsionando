@@ -241,6 +241,12 @@ function OrcamentoPage() {
       const raw = window.sessionStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw) as Partial<WizardState>;
+        // Se o último orçamento já foi aceito, começa um novo do zero
+        // a cada nova visita à página (não mantém "Contrato aceito" travado).
+        if (parsed.acceptedAt) {
+          try { window.sessionStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+          return init;
+        }
         return { ...init, ...parsed };
       }
     } catch { /* ignore */ }
@@ -252,6 +258,12 @@ function OrcamentoPage() {
     if (typeof window === "undefined") return;
     try { window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch { /* ignore */ }
   }, [state]);
+
+  // Reset completo do wizard (novo pedido de orçamento)
+  function resetWizard() {
+    try { window.sessionStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+    dispatch({ type: "RESET" });
+  }
 
   // Aplicar bundle vindo da URL (uma vez)
   const appliedRef = useRef(false);
