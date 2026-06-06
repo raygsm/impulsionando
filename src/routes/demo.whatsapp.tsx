@@ -116,6 +116,16 @@ function DemoWhats() {
   }
 
   const conv = conversas.find((c) => c.id === convAtiva);
+  const contatoConv = conv ? contatos.find((c) => c.id === conv.contatoId) : null;
+
+  // Deep-link via ?conv=<id> vindo de outros módulos (CRM/Agenda)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("conv");
+    if (id && conversas.some((c) => c.id === id)) setConvAtiva(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversas.length]);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -177,6 +187,20 @@ function DemoWhats() {
                   <div className="flex-1 grid place-items-center text-sm text-muted-foreground">Selecione uma conversa.</div>
                 ) : (
                   <>
+                    <div className="flex items-center justify-between pb-2 border-b mb-2">
+                      <div>
+                        <div className="font-medium text-sm">{contatoConv?.nome ?? "Contato"}</div>
+                        <div className="text-xs text-muted-foreground">{contatoConv?.telefone}</div>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button size="sm" variant="outline" title="Ver lead no CRM" onClick={() => contatoConv && gotoCrm({ nome: contatoConv.nome, telefone: contatoConv.telefone })}>
+                          <User className="w-3.5 h-3.5 mr-1" />CRM
+                        </Button>
+                        <Button size="sm" variant="outline" title="Agendar" onClick={() => contatoConv && gotoAgenda({ nome: contatoConv.nome, telefone: contatoConv.telefone })}>
+                          <Calendar className="w-3.5 h-3.5 mr-1" />Agendar
+                        </Button>
+                      </div>
+                    </div>
                     <div className="flex-1 overflow-auto space-y-2">
                       {conv.mensagens.map((m, i) => (
                         <div key={i} className={`max-w-[80%] p-2 rounded text-sm ${m.de === "cliente" ? "bg-muted" : m.de === "bot" ? "bg-primary/10 ml-auto" : "bg-gradient-primary text-primary-foreground ml-auto"}`}>
