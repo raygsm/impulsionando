@@ -182,12 +182,12 @@ function DemoAgenda() {
               <h3 className="font-semibold mb-3">Agendamentos do dia</h3>
               {agds.filter((a) => a.data === dataAtual).length === 0 ? <p className="text-sm text-muted-foreground">Sem agendamentos.</p> : (
                 <Table>
-                  <TableHeader><TableRow><TableHead>Hora</TableHead><TableHead>Cliente</TableHead><TableHead>Profissional</TableHead><TableHead>Serviço</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
+                  <TableHeader><TableRow><TableHead>Hora</TableHead><TableHead>Cliente</TableHead><TableHead>Profissional</TableHead><TableHead>Serviço</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Ações</TableHead></TableRow></TableHeader>
                   <TableBody>
                     {agds.filter((a) => a.data === dataAtual).map((a) => (
                       <TableRow key={a.id}>
                         <TableCell>{a.hora}</TableCell>
-                        <TableCell>{a.cliente}</TableCell>
+                        <TableCell>{a.cliente}<div className="text-xs text-muted-foreground">{a.telefone}</div></TableCell>
                         <TableCell>{profs.find((p) => p.id === a.profId)?.nome}</TableCell>
                         <TableCell>{servs.find((s) => s.id === a.servicoId)?.nome}</TableCell>
                         <TableCell>
@@ -200,6 +200,16 @@ function DemoAgenda() {
                               <SelectItem value="cancelado">Cancelado</SelectItem>
                             </SelectContent>
                           </Select>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button size="sm" variant="outline" title="Confirmar via WhatsApp" onClick={() => gotoWhatsapp({ nome: a.cliente, telefone: a.telefone }, `Olá ${a.cliente}, confirmando seu agendamento ${a.hora} de ${servs.find((s) => s.id === a.servicoId)?.nome ?? ""}.`)}>
+                              <MessageSquare className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button size="sm" variant="outline" title="Ver no CRM" onClick={() => gotoCrm({ nome: a.cliente, telefone: a.telefone })}>
+                              <User className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
