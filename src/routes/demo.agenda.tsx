@@ -166,20 +166,37 @@ function DemoAgenda() {
                       <tr key={h} className="border-t">
                         <td className="p-2 font-medium">{h}</td>
                         {profs.map((p) => {
-                          const a = agds.find((x) => x.profId === p.id && x.data === dataAtual && x.hora === h);
-                          if (!a) return <td key={p.id} className="p-2 text-muted-foreground">livre</td>;
+                          const matches = agds.filter((x) => x.profId === p.id && x.data === dataAtual && x.hora === h);
+                          if (matches.length === 0) return <td key={p.id} className="p-2 text-muted-foreground">livre</td>;
+                          const conflito = matches.length > 1;
                           return (
-                            <td key={p.id} className="p-2">
-                              <div className="rounded p-1.5" style={{ background: `${p.cor}22`, borderLeft: `3px solid ${p.cor}` }}>
-                                <div className="font-medium">{a.cliente}</div>
-                                <div className="text-[10px] text-muted-foreground">{servs.find((s) => s.id === a.servicoId)?.nome}</div>
-                                <Badge variant="outline" className="text-[9px] mt-1">{a.status}</Badge>
-                              </div>
+                            <td key={p.id} className="p-2 space-y-1">
+                              {conflito && (
+                                <div className="text-[10px] font-semibold text-amber-700 dark:text-amber-300 flex items-center gap-1">
+                                  ⚠ Conflito ({matches.length} agendamentos)
+                                </div>
+                              )}
+                              {matches.map((a) => (
+                                <div
+                                  key={a.id}
+                                  className="rounded p-1.5"
+                                  style={{
+                                    background: `${p.cor}22`,
+                                    borderLeft: `3px solid ${conflito ? "#d97706" : p.cor}`,
+                                    outline: conflito ? "1px dashed #d97706" : undefined,
+                                  }}
+                                >
+                                  <div className="font-medium">{a.cliente}</div>
+                                  <div className="text-[10px] text-muted-foreground">{servs.find((s) => s.id === a.servicoId)?.nome}</div>
+                                  <Badge variant="outline" className="text-[9px] mt-1">{a.status}</Badge>
+                                </div>
+                              ))}
                             </td>
                           );
                         })}
                       </tr>
                     ))}
+
                   </tbody>
                 </table>
               </Card>
