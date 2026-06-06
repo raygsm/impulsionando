@@ -4,7 +4,6 @@ type AgendaStatus = "confirmado" | "pendente" | "cancelado" | "concluido";
 type CrmActivityType = "ligacao" | "email" | "whatsapp" | "tarefa";
 type CrmTemplateChannel = "email" | "whatsapp";
 type WhatsMessageAuthor = "cliente" | "atendente" | "bot";
-type TicketStatus = "pago" | "pendente" | "cortesia" | "transferido" | "cancelado";
 type SaleSource = "checkout" | "recuperacao" | "recompra";
 type SaleStatus = "aprovado" | "recusado" | "pendente" | "estornado";
 
@@ -166,7 +165,7 @@ export function createParceirosMock() {
     { id: uid("ev"), nome: "Residência Bar Mar Azul", cliente: "Bar Mar Azul", tipo: "recorrente" as const, data: iso(5, "21:00"), horaChegada: "20:00", horaInicio: "21:00", horaFim: "01:00", cidade: "Rio de Janeiro", bairro: "Botafogo", publico: 120, estilo: "House", equipamentos: ["CDJs", "Mixer"], valorTotal: 3800, percentualWMP: 25, status: "Aberto" as const, contratoAceito: false },
   ];
   const contratos = [{ id: uid("co"), eventoId: eventos[0].id, parceiroId: parceiros[0].id, tipo: "Evento pontual" as const, status: "Aceito" as const, geradoEm: now.toISOString(), aceiteEm: now.toISOString() }];
-  const multas = [];
+  const multas: never[] = [];
   const avisos = [{ id: uid("av"), canal: "WhatsApp" as const, para: parceiros[0].whatsapp, assunto: "TESTE — Agenda confirmada", corpo: "Agenda bloqueada para Casamento Marina & Caio.", quando: now.toISOString() }];
   const logs = [{ id: uid("lg"), quando: now.toISOString(), usuario: "Gestão WMP", regra: "Seed DEMO", de: "vazio", para: "dados WMP separados" }];
   return { parceiros, eventos, contratos, multas, avisos, logs };
