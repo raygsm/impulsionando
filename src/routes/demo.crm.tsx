@@ -769,7 +769,7 @@ function SimpleListPanel<T extends { id: string }>({
           <TableBody>
             {items.map((it) => (
               <TableRow key={it.id}>
-                {columns.map((c) => <TableCell key={String(c.k)}>{c.render ? c.render(it[c.k]) : String(it[c.k] ?? "—")}</TableCell>)}
+                {columns.map((c) => <TableCell key={String(c.k)}>{c.render ? c.render(it[c.k]) : String((it[c.k] as unknown) ?? "—")}</TableCell>)}
                 <TableCell className="text-right"><Button size="sm" variant="ghost" onClick={() => onRemove(it.id)}><Trash2 className="w-4 h-4" /></Button></TableCell>
               </TableRow>
             ))}
