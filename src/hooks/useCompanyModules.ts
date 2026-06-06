@@ -48,7 +48,7 @@ export function useCompanyModules() {
 }
 
 /**
- * URL prefix → required módulo-mãe slug. Used by AppShell to gate navigation.
+ * URL prefix → required módulo principal slug. Used by AppShell to gate navigation.
  * Keep in sync with PLAN_MODULES no webhook do Paddle e com src/data/motherModules.ts.
  *
  * Para retrocompat, "financeiro" também é aceito como alias de "erp" via hasModule().

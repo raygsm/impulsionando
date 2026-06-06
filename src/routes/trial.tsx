@@ -24,7 +24,7 @@ export const Route = createFileRoute("/trial")({
   component: TrialLanding,
 });
 
-// Os 14 módulos-mãe ficam liberados durante o Trial.
+// Os 14 módulos principais ficam liberados durante o Trial.
 // Fonte: src/data/motherModules.ts
 const RESOURCES = [
   "ERP — Gestão Operacional e Financeira",

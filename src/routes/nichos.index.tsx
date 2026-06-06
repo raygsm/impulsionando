@@ -55,7 +55,7 @@ function NichosIndex() {
         </div>
       </section>
 
-      {/* GRID DE NICHOS — agrupado por categoria-mãe (Saúde primeiro) */}
+      {/* GRID DE NICHOS — agrupado por categoria principal (Saúde primeiro) */}
       <section className="mx-auto max-w-6xl w-full px-4 sm:px-6 lg:px-8 py-12 lg:py-16 space-y-12">
         {(() => {
           const CATEGORIAS_NICHO: { label: string; description: string; slugs: string[] }[] = [

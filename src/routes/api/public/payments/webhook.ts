@@ -13,13 +13,13 @@ function getSupabase(): any {
   return _supabase;
 }
 
-// Maps Paddle product external_id → list of module-mãe slugs to enable.
+// Maps Paddle product external_id → list of module principal slugs to enable.
 // Same product is used for monthly+annual; cycle is encoded in the price external_id.
 // Slugs ficam em sincronia com src/data/motherModules.ts e public.modules.
 const PLAN_MODULES: Record<string, string[]> = {
-  essencial_plan: ["crm"],                          // 1 módulo-mãe
-  integrado_plan: ["crm", "agenda"],                // 2 módulos-mãe
-  avancado_plan: ["crm", "agenda", "erp", "bi"],    // 3 módulos-mãe + BI
+  essencial_plan: ["crm"],                          // 1 módulo principal
+  integrado_plan: ["crm", "agenda"],                // 2 módulos principais
+  avancado_plan: ["crm", "agenda", "erp", "bi"],    // 3 módulos principais + BI
   // Sob Medida: módulos ativados manualmente pela equipe
 };
 

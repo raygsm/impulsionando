@@ -15,16 +15,16 @@ const WHATSAPP_URL =
 export const Route = createFileRoute("/modulos")({
   head: () => ({
     meta: [
-      { title: "Módulos-Mãe — ERP, CRM, Saúde, Eventos, Delivery e mais | Impulsionando Tecnologia" },
+      { title: "Módulos Principais — ERP, CRM, Saúde, Eventos, Delivery e mais | Impulsionando Tecnologia" },
       {
         name: "description",
         content:
-          "Catálogo de 14 módulos-mãe: ERP, CRM, Automação, Agenda, Commerce, PDV, Estoque, Saúde, Eventos, Delivery, BI, White Label, Fidelização e Área do Cliente.",
+          "Catálogo de 14 módulos principais: ERP, CRM, Automação, Agenda, Commerce, PDV, Estoque, Saúde, Eventos, Delivery, BI, White Label, Fidelização e Área do Cliente.",
       },
-      { property: "og:title", content: "Módulos-Mãe — Impulsionando Tecnologia" },
+      { property: "og:title", content: "Módulos Principais — Impulsionando Tecnologia" },
       {
         property: "og:description",
-        content: "14 módulos-mãe que reúnem todos os submódulos, recursos e funcionalidades da plataforma.",
+        content: "14 módulos principais que reúnem todos os submódulos, recursos e funcionalidades da plataforma.",
       },
       { property: "og:url", content: "https://sistemas.impulsionando.com.br/modulos" },
     ],
@@ -54,14 +54,14 @@ function ModulosPage() {
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 lg:py-24">
           <div className="max-w-3xl space-y-6">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur px-3 py-1 text-xs">
-              <Sparkles className="w-3.5 h-3.5" /> 14 módulos-mãe
+              <Sparkles className="w-3.5 h-3.5" /> 14 módulos principais
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight">
               Não vendemos recursos soltos.<br />
-              Vendemos módulos-mãe que conversam.
+              Vendemos módulos principais que conversam.
             </h1>
             <p className="text-lg text-white/85 max-w-2xl leading-relaxed">
-              Cada módulo-mãe reúne dezenas de submódulos, recursos e funcionalidades.
+              Cada módulo principal reúne dezenas de submódulos, recursos e funcionalidades.
               Você contrata por bloco, escala quando precisar e tudo permanece integrado.
             </p>
             <div className="flex flex-wrap gap-3 pt-2">
@@ -110,7 +110,7 @@ function ModulosPage() {
                 {cat}
               </div>
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mt-1">
-                Módulos-mãe — {cat}
+                Módulos principais — {cat}
               </h2>
             </div>
             <div className="grid md:grid-cols-2 gap-5">
@@ -176,7 +176,7 @@ function ModulosPage() {
                         to="/orcamento"
                         search={{ origem: `modulos:${m.slug}` }}
                       >
-                        Quero este módulo-mãe <ArrowRight className="w-3.5 h-3.5" />
+                        Quero este módulo principal <ArrowRight className="w-3.5 h-3.5" />
                       </Link>
                     </Button>
                   </Card>
@@ -192,7 +192,7 @@ function ModulosPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
           <div className="max-w-3xl mb-8">
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              Como os módulos-mãe entram nos planos
+              Como os módulos principais entram nos planos
             </h2>
             <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
               Você não compra recursos soltos. Compra blocos comerciais inteiros.
@@ -200,10 +200,10 @@ function ModulosPage() {
           </div>
           <div className="grid md:grid-cols-4 gap-4">
             {[
-              { t: "Essencial", q: "1 módulo-mãe ativo", d: "Até 3 usuários. Comece pelo bloco que mais dói." },
-              { t: "Integrado", q: "2 módulos-mãe ativos", d: "Até 5 usuários. Dois blocos trabalhando juntos." },
-              { t: "Avançado", q: "3 módulos-mãe ativos", d: "Até 10 usuários. Operação digital de ponta a ponta." },
-              { t: "Sob Medida", q: "Múltiplos módulos-mãe", d: "Usuários sob demanda + White Label." },
+              { t: "Essencial", q: "1 módulo principal ativo", d: "Até 3 usuários. Comece pelo bloco que mais dói." },
+              { t: "Integrado", q: "2 módulos principais ativos", d: "Até 5 usuários. Dois blocos trabalhando juntos." },
+              { t: "Avançado", q: "3 módulos principais ativos", d: "Até 10 usuários. Operação digital de ponta a ponta." },
+              { t: "Sob Medida", q: "Múltiplos módulos principais", d: "Usuários sob demanda + White Label." },
             ].map((p) => (
               <Card key={p.t} className="p-6">
                 <div className="text-xs uppercase tracking-wider text-primary font-semibold">
@@ -351,10 +351,10 @@ function ModulosPage() {
           <div className="pointer-events-none absolute -bottom-24 -right-24 w-[400px] h-[400px] rounded-full bg-accent/20 blur-3xl" />
           <div className="relative max-w-3xl space-y-5">
             <h2 className="text-3xl sm:text-4xl font-bold leading-tight tracking-tight">
-              Não sabe quais módulos-mãe contratar? Nosso briefing decide por você.
+              Não sabe quais módulos principais contratar? Nosso briefing decide por você.
             </h2>
             <p className="text-white/85 leading-relaxed">
-              Em menos de 1 minuto recomendamos os módulos-mãe certos e o plano ideal para a sua operação.
+              Em menos de 1 minuto recomendamos os módulos principais certos e o plano ideal para a sua operação.
             </p>
             <div className="flex flex-wrap gap-3 pt-2">
               <Button asChild size="lg" className="gap-2 bg-white text-primary hover:bg-white/90">
