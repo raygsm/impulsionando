@@ -20,8 +20,8 @@ import {
 export interface LeadDemoRecord {
   id: string;
   nome: string;
-  email?: string;
-  telefone?: string;
+  email: string;
+  telefone: string;
   whatsapp?: string;
   origem: string;
   estagio: string;
@@ -29,9 +29,8 @@ export interface LeadDemoRecord {
   score: number;
   tags: string[];
   criadoEm: string;
-  // novos opcionais (Bloco 2/4)
-  status?: LeadStatus;
-  nivelInteresse?: LeadInteresseNivel;
+  status?: string;
+  nivelInteresse?: string;
   campanha?: string;
   canal?: string;
   interesse?: string;
