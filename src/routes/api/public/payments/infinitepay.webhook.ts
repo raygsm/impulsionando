@@ -36,7 +36,7 @@ export const Route = createFileRoute("/api/public/payments/infinitepay/webhook")
           await supabaseAdmin
             .from("infinitepay_payments")
             .update({
-              webhook_payload: { ...(row.webhook_payload ?? {}), last: payload, duplicates: ((row.webhook_payload as any)?.duplicates ?? 0) + 1 },
+              webhook_payload: { ...((row.webhook_payload as Record<string, unknown>) ?? {}), last: payload, duplicates: ((row.webhook_payload as Record<string, unknown>)?.duplicates as number ?? 0) + 1 },
             })
             .eq("order_nsu", order_nsu);
           return jsonResp(200, { success: true, message: null });
