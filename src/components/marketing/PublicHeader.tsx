@@ -273,7 +273,6 @@ export function PublicHeader() {
           >
             Início
           </Link>
-          <DesktopDropdownGrouped label="Soluções" groups={SOLUCOES_GROUPS} />
           <DesktopDropdownGrouped label="Nichos" groups={NICHOS_GROUPS} />
           <DesktopDropdownFlat label="Planos" items={PLANOS} />
           <Link
