@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
+import { PixFallbackDialog } from "@/components/payments/PixFallbackDialog";
 
 const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20entender%20melhor%20os%20planos%20da%20Impulsionando.";
 
@@ -163,6 +164,13 @@ function PlanosPage() {
   const [annual, setAnnual] = useState(false);
   const { openCheckout, loading: checkoutLoading } = usePaddleCheckout();
   const { data: user } = useCurrentUser();
+  const [pixState, setPixState] = useState<{
+    open: boolean;
+    amountCents: number;
+    txid: string;
+    label: string;
+  }>({ open: false, amountCents: 0, txid: "", label: "" });
+
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -286,14 +294,24 @@ function PlanosPage() {
                               : { plan: plan.name },
                           });
                         } catch {
-                          toast.error(
-                            "Não foi possível abrir o checkout no momento. Inicie um Trial de 7 dias ou fale com nosso time pelo WhatsApp."
+                          // Fallback Pix com QR Code + valor + comprovante.
+                          const monthly = plan.monthly ?? 0;
+                          const finalValue = annual ? monthly * 10 : monthly; // anual = 10 meses
+                          toast.message(
+                            "Instabilidade no checkout. Liberei o pagamento via Pix para você seguir agora.",
                           );
+                          setPixState({
+                            open: true,
+                            amountCents: Math.round(finalValue * 100),
+                            txid: `PLANO-${plan.name.toUpperCase()}-${annual ? "ANUAL" : "MENSAL"}`,
+                            label: `Plano ${plan.name} — ${annual ? "anual" : "mensal"}`,
+                          });
                         }
                       }}
                     >
                       {checkoutLoading ? "Abrindo checkout..." : `Assinar ${annual ? "anual" : "mensal"}`}
                     </Button>
+
                     <Button asChild variant="ghost" size="sm" className="w-full text-xs">
                       <Link to="/trial/cadastro">ou começar Trial de 7 dias</Link>
                     </Button>
@@ -426,6 +444,13 @@ function PlanosPage() {
       </section>
 
       <PublicFooter />
+      <PixFallbackDialog
+        open={pixState.open}
+        onOpenChange={(v) => setPixState((s) => ({ ...s, open: v }))}
+        amountCents={pixState.amountCents}
+        txid={pixState.txid}
+        label={pixState.label}
+      />
     </div>
   );
 }
