@@ -53,13 +53,15 @@ function DemoCRM() {
   });
 
   useEffect(() => {
-    if (leads.length || atvs.length || tpls.length || autos.length) return;
+    const marker = typeof window === "undefined" ? "crm:v2" : window.localStorage.getItem("imp.demo.mock.crm");
+    if (marker === "crm:v2" && (leads.length || atvs.length || tpls.length || autos.length)) return;
     const mock = createCrmMock();
     setLeads(mock.leads);
     setAtvs(mock.atvs);
     setTpls(mock.tpls);
     setAutos(mock.autos);
     setParams(mock.params);
+    if (typeof window !== "undefined") window.localStorage.setItem("imp.demo.mock.crm", "crm:v2");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

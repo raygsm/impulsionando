@@ -72,7 +72,9 @@ function DemoAgenda() {
   }, []);
 
   useEffect(() => {
-    if (profs.length || servs.length || agds.length || espera.length) return;
+    const marker = `agenda:${nichoDemo}:v2`;
+    const current = typeof window === "undefined" ? marker : window.localStorage.getItem("imp.demo.mock.agenda");
+    if (current === marker && (profs.length || servs.length || agds.length || espera.length)) return;
     const mock = createAgendaMock(nichoDemo);
     setProfs(mock.profs);
     setServs(mock.servs);
@@ -80,6 +82,7 @@ function DemoAgenda() {
     setEspera(mock.espera);
     setParams(mock.params);
     setDataAtual(mock.agds[0]?.data ?? new Date().toISOString().slice(0, 10));
+    if (typeof window !== "undefined") window.localStorage.setItem("imp.demo.mock.agenda", marker);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nichoDemo]);
 

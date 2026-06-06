@@ -52,7 +52,8 @@ function DemoWhats() {
   const [mensagem, setMensagem] = useState("");
 
   useEffect(() => {
-    if (contatos.length || conversas.length || tpls.length || camps.length || fluxos.length) return;
+    const marker = typeof window === "undefined" ? "whatsapp:v2" : window.localStorage.getItem("imp.demo.mock.whatsapp");
+    if (marker === "whatsapp:v2" && (contatos.length || conversas.length || tpls.length || camps.length || fluxos.length)) return;
     const mock = createWhatsAppMock();
     setContatos(mock.contatos);
     setConversas(mock.conversas);
@@ -61,6 +62,7 @@ function DemoWhats() {
     setFluxos(mock.fluxos);
     setParams(mock.params);
     setConvAtiva(mock.conversas[0]?.id ?? null);
+    if (typeof window !== "undefined") window.localStorage.setItem("imp.demo.mock.whatsapp", "whatsapp:v2");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
