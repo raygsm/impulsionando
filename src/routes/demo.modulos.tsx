@@ -44,7 +44,7 @@ export const Route = createFileRoute("/demo/modulos")({
 });
 
 function DemoModulesPage() {
-  const { contracted, isContracted, contract, uncontract, reset } = useDemoContracted();
+  const { contracted, isContracted, uncontract, reset } = useDemoContracted();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string>("Todas");
 
