@@ -12,7 +12,7 @@
  * auditoria, avisos automáticos (WhatsApp/e-mail) e painéis WMP + parceiro.
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { DemoModeBanner } from "@/components/demo/DemoModeBanner";
@@ -210,6 +210,19 @@ function DemoParceiros() {
   });
   const [view, setView] = useState<"wmp" | "parceiro">("wmp");
   const [parceiroAtivoId, setParceiroAtivoId] = useState<string>("");
+
+  useEffect(() => {
+    if (parceiros.length || eventos.length || contratos.length || avisos.length || logs.length) return;
+    const mock = createParceirosMock();
+    setParceiros(mock.parceiros);
+    setParceiroAtivoId(mock.parceiros[0]?.id ?? "");
+    setEventos(mock.eventos);
+    setContratos(mock.contratos);
+    setMultas(mock.multas);
+    setAvisos(mock.avisos);
+    setLogs(mock.logs);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const parceiroAtivo = useMemo(
     () => parceiros.find((p) => p.id === parceiroAtivoId),

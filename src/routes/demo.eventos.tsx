@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { DemoModeBanner } from "@/components/demo/DemoModeBanner";
@@ -69,6 +69,14 @@ function DemoEventos() {
   const [scanCode, setScanCode] = useState("");
 
   const eventoAtivo = eventos[0];
+
+  useEffect(() => {
+    if (eventos.length) return;
+    const mock = createEventosMock();
+    setEventos([mock.evento]);
+    setParams(mock.params);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const dash = useMemo(() => {
     if (!eventoAtivo) return { vendidos: 0, presentes: 0, ausentes: 0, receita: 0, invalidas: 0 };

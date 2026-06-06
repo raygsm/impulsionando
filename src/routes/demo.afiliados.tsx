@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { DemoModeBanner } from "@/components/demo/DemoModeBanner";
@@ -69,6 +69,18 @@ function DemoAfiliados() {
     recompraAutomatica: false,
     rankingPublico: true,
   });
+
+  useEffect(() => {
+    if (produtos.length || ofertas.length || afiliados.length || cupons.length || vendas.length) return;
+    const mock = createAfiliadosMock();
+    setProdutos(mock.produtos);
+    setOfertas(mock.ofertas);
+    setAfiliados(mock.afiliados);
+    setCupons(mock.cupons);
+    setVendas(mock.vendas);
+    setParams(mock.params);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const dash = useMemo(() => {
     const aprovadas = vendas.filter((v) => v.status === "aprovado");
