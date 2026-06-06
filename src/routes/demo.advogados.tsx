@@ -80,6 +80,64 @@ type Prazo = { id: string; processoId: string; descricao: string; vencimento: st
 type Contrato = { id: string; clienteId: string; tipo: string; valorFixo: number; percentualExito: number; status: string; assinadoEm: string };
 type Honorario = { id: string; processoId: string; descricao: string; valor: number; vencimento: string; status: "pago" | "pendente" | "previsto" | "atrasado" };
 type Documento = { id: string; processoId: string; nome: string; tipo: string; tamanhoKb: number };
+type IntegracaoStatus =
+  | "nao_configurada"
+  | "aguardando_credenciais"
+  | "em_analise"
+  | "ativa"
+  | "pausada"
+  | "erro_auth"
+  | "erro_sync"
+  | "aguardando_autorizacao"
+  | "desativada";
+type Integracao = {
+  id: string;
+  nome: string;
+  tipo: string;
+  status: IntegracaoStatus;
+  escritorioVinculado: string;
+  responsavel: string;
+  ultimaSync: string | null;
+  proximaSync: string | null;
+  processosMonitorados: number;
+  errosSync: number;
+  observacao: string;
+};
+type MovimentacaoTipo =
+  | "publicacao" | "intimacao" | "despacho" | "decisao" | "sentenca" | "acordao"
+  | "certidao" | "peticao_juntada" | "prazo_aberto" | "audiencia_designada"
+  | "audiencia_remarcada" | "audiencia_cancelada" | "pericia_designada"
+  | "expedicao_documento" | "arquivamento" | "baixa" | "acordo" | "execucao" | "outro";
+type MovimentacaoStatusRevisao =
+  | "nova" | "aguardando_revisao" | "revisada" | "aprovada_envio"
+  | "enviada_cliente" | "ocultada_cliente" | "requer_acao" | "prazo_criado" | "arquivada";
+type Movimentacao = {
+  id: string;
+  processoId: string;
+  clienteId: string;
+  advogadoId: string;
+  dataMovimentacao: string;
+  dataCaptura: string;
+  fonte: string;
+  tipo: MovimentacaoTipo;
+  textoOriginal: string;
+  resumoInterno: string;
+  resumoCliente: string;
+  statusRevisao: MovimentacaoStatusRevisao;
+  notificarCliente: boolean;
+  clienteNotificado: boolean;
+  canalNotificacao: null | "whatsapp" | "email";
+  dataEnvio: string | null;
+  possivelPrazo: boolean;
+};
+type Alerta = {
+  id: string;
+  advogadoId: string;
+  tipo: "nova_movimentacao" | "sentenca" | "audiencia" | "intimacao" | "revisar";
+  mensagem: string;
+  criadoEm: string;
+  lido: boolean;
+};
 type Params = {
   lembretePrazo48h: boolean;
   lembretePrazo24h: boolean;
@@ -89,6 +147,21 @@ type Params = {
   integraTribunais: boolean;
   lgpd: boolean;
   portalCliente: boolean;
+  integracoesAtivas: boolean;
+  integracaoJusbrasil: boolean;
+  integracaoPublicacoes: boolean;
+  integracaoTribunais: boolean;
+  importacaoManual: boolean;
+  alertaAdvogado: boolean;
+  avisarClienteAuto: boolean;
+  exigirRevisaoAdvogado: boolean;
+  avisoWhatsapp: boolean;
+  avisoEmail: boolean;
+  resumoIA: boolean;
+  aprovacaoHumanaIA: boolean;
+  logComunicacao: boolean;
+  exibirMovNaAreaCliente: boolean;
+  ocultarMovSensiveis: boolean;
 };
 
 const FALLBACK = createAdvogadosMock();
