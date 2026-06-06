@@ -179,6 +179,9 @@ function DemoAdvogados() {
   const [contratos, setContratos, resetCon] = useDemoState<Contrato[]>("adv.contratos", []);
   const [honorarios, setHonorarios, resetHon] = useDemoState<Honorario[]>("adv.honorarios", []);
   const [documentos, setDocumentos, resetDoc] = useDemoState<Documento[]>("adv.documentos", []);
+  const [integracoes, setIntegracoes, resetInt] = useDemoState<Integracao[]>("adv.integracoes", []);
+  const [movimentacoes, setMovimentacoes, resetMov] = useDemoState<Movimentacao[]>("adv.movimentacoes", []);
+  const [alertas, setAlertas, resetAlt] = useDemoState<Alerta[]>("adv.alertas", []);
   const [params, setParams, resetParams] = useDemoState<Params>("adv.params", FALLBACK.params);
   const [aba, setAba] = useState("dashboard");
 
