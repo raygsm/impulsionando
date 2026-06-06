@@ -11,19 +11,22 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CheckCircle2, Info, Sparkles } from "lucide-react";
+import { CheckCircle2, Info, Plus, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MOTHER_MODULES, type MotherModule } from "@/data/motherModules";
+import { formatBRL } from "@/lib/pricing";
 
 interface ModulePickerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Quota máxima de módulos para o plano. Use Infinity para sob medida. */
+  /** Quota máxima de módulos INCLUÍDOS no plano. Acima disso entram como adicionais. */
   quota: number;
   planName: string;
   planSubtitle?: string;
   /** Pré-seleção opcional */
   initialSelected?: string[];
+  /** Preço por módulo adicional, em centavos. */
+  extraPriceCents?: number;
   /** Texto do botão final */
   confirmLabel?: string;
   /** Callback ao confirmar — recebe slugs selecionados */
@@ -32,9 +35,10 @@ interface ModulePickerProps {
 
 /**
  * Diálogo de seleção de módulos antes do checkout.
- * - Limita o número de módulos ao `quota` do plano
+ * - Mostra a quota de módulos INCLUÍDOS no plano
+ * - Permite adicionar módulos extras acima da quota (cobrados como adicionais)
  * - Cada item tem botão "Saiba mais" que abre janela sobreposta com detalhes
- * - O lead pode clicar em Assinar a qualquer momento (com seleção parcial ou vazia)
+ * - O lead pode clicar em Assinar a qualquer momento
  */
 export function ModulePicker({
   open,
@@ -43,14 +47,16 @@ export function ModulePicker({
   planName,
   planSubtitle,
   initialSelected = [],
-  confirmLabel = "Assinar e ir para o pagamento",
+  extraPriceCents = 0,
+  confirmLabel = "Continuar para o resumo da contratação",
   onConfirm,
 }: ModulePickerProps) {
   const [selected, setSelected] = useState<string[]>(initialSelected);
   const [detail, setDetail] = useState<MotherModule | null>(null);
 
-  const quotaLabel = Number.isFinite(quota) ? `${selected.length} / ${quota}` : `${selected.length} (ilimitado)`;
-  const reachedLimit = Number.isFinite(quota) && selected.length >= quota;
+  const quotaIsFinite = Number.isFinite(quota);
+  const includedCount = quotaIsFinite ? Math.min(selected.length, quota) : selected.length;
+  const extraCount = quotaIsFinite ? Math.max(0, selected.length - quota) : 0;
 
   const grouped = useMemo(() => {
     const byCat = new Map<string, MotherModule[]>();
@@ -62,15 +68,21 @@ export function ModulePicker({
     return Array.from(byCat.entries());
   }, []);
 
+  function indexOf(slug: string) {
+    return selected.indexOf(slug);
+  }
+
   function toggle(slug: string) {
-    setSelected((prev) => {
-      if (prev.includes(slug)) return prev.filter((s) => s !== slug);
-      if (Number.isFinite(quota) && prev.length >= quota) {
-        // troca o último pelo novo respeitando a quota
-        return [...prev.slice(0, quota - 1), slug];
-      }
-      return [...prev, slug];
-    });
+    setSelected((prev) =>
+      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]
+    );
+  }
+
+  function statusFor(slug: string): "incluído" | "adicional" | null {
+    const i = indexOf(slug);
+    if (i < 0) return null;
+    if (!quotaIsFinite) return "incluído";
+    return i < quota ? "incluído" : "adicional";
   }
 
   return (
@@ -85,18 +97,26 @@ export function ModulePicker({
             <DialogDescription>
               {planSubtitle ??
                 "Selecione os módulos principais que farão parte da sua assinatura."}{" "}
-              Você pode clicar em <strong>Saiba mais</strong> para ver os detalhes
-              completos de cada módulo.
+              Clique em <strong>Saiba mais</strong> para ver detalhes completos
+              de cada módulo. Módulos acima do limite do plano entram como{" "}
+              <strong>adicionais</strong>.
             </DialogDescription>
-            <div className="flex items-center gap-2 pt-2">
-              <Badge variant={reachedLimit ? "default" : "secondary"}>
-                Selecionados: {quotaLabel}
+            <div className="flex flex-wrap items-center gap-2 pt-2">
+              <Badge variant="secondary">
+                Incluídos: {includedCount}
+                {quotaIsFinite ? ` / ${quota}` : ""}
               </Badge>
-              {reachedLimit && (
-                <span className="text-xs text-muted-foreground">
-                  Limite do plano atingido — desmarque um para escolher outro.
-                </span>
+              {extraCount > 0 && (
+                <Badge className="bg-amber-100 text-amber-900 hover:bg-amber-100 border-amber-300">
+                  {extraCount} adicional(is)
+                  {extraPriceCents
+                    ? ` · +${formatBRL(extraPriceCents * extraCount)}/mês`
+                    : ""}
+                </Badge>
               )}
+              <span className="text-xs text-muted-foreground">
+                Você pode adicionar quantos módulos quiser.
+              </span>
             </div>
           </DialogHeader>
 
@@ -109,17 +129,18 @@ export function ModulePicker({
                   </div>
                   <div className="grid sm:grid-cols-2 gap-3">
                     {modules.map((mod) => {
-                      const isSelected = selected.includes(mod.slug);
-                      const disabled =
-                        !isSelected && Number.isFinite(quota) && selected.length >= quota;
+                      const status = statusFor(mod.slug);
+                      const isSelected = !!status;
                       const Icon = mod.icon;
                       return (
                         <Card
                           key={mod.slug}
                           className={cn(
                             "p-4 flex flex-col gap-2 transition-colors",
-                            isSelected && "border-primary ring-1 ring-primary/30 bg-primary/5",
-                            disabled && "opacity-60"
+                            status === "incluído" &&
+                              "border-primary ring-1 ring-primary/30 bg-primary/5",
+                            status === "adicional" &&
+                              "border-amber-400 ring-1 ring-amber-300/50 bg-amber-50/40 dark:bg-amber-950/20"
                           )}
                         >
                           <div className="flex items-start gap-3">
@@ -127,7 +148,6 @@ export function ModulePicker({
                               id={`mod-${mod.slug}`}
                               checked={isSelected}
                               onCheckedChange={() => toggle(mod.slug)}
-                              disabled={disabled}
                               aria-label={`Selecionar ${mod.shortName}`}
                             />
                             <div className="flex-1 min-w-0">
@@ -151,9 +171,17 @@ export function ModulePicker({
                             >
                               <Info className="w-3.5 h-3.5" /> Saiba mais
                             </button>
-                            {isSelected && (
+                            {status === "incluído" && (
                               <span className="inline-flex items-center gap-1 text-xs text-emerald-600">
-                                <CheckCircle2 className="w-3.5 h-3.5" /> Selecionado
+                                <CheckCircle2 className="w-3.5 h-3.5" /> Incluído
+                              </span>
+                            )}
+                            {status === "adicional" && (
+                              <span className="inline-flex items-center gap-1 text-xs text-amber-700">
+                                <Plus className="w-3.5 h-3.5" /> Adicional
+                                {extraPriceCents
+                                  ? ` · +${formatBRL(extraPriceCents)}/mês`
+                                  : ""}
                               </span>
                             )}
                           </div>
@@ -168,21 +196,15 @@ export function ModulePicker({
 
           <div className="px-6 py-4 border-t bg-muted/30 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 justify-between">
             <div className="text-xs text-muted-foreground">
-              Você pode clicar em <strong>Assinar</strong> a qualquer momento — mesmo
-              com seleção parcial. Os módulos escolhidos serão liberados após a
-              confirmação do pagamento.
+              Você pode clicar em <strong>Assinar</strong> a qualquer momento. Os
+              módulos selecionados acima do limite serão adicionados como
+              adicionais.
             </div>
             <div className="flex gap-2 justify-end shrink-0">
               <Button variant="ghost" onClick={() => onOpenChange(false)}>
                 Cancelar
               </Button>
-              <Button
-                onClick={() => {
-                  onConfirm(selected);
-                }}
-              >
-                {confirmLabel}
-              </Button>
+              <Button onClick={() => onConfirm(selected)}>{confirmLabel}</Button>
             </div>
           </div>
         </DialogContent>
@@ -200,33 +222,42 @@ export function ModulePicker({
                 </DialogTitle>
                 <DialogDescription>{detail.tagline}</DialogDescription>
               </DialogHeader>
-              <div className="space-y-4 text-sm">
-                <p className="leading-relaxed text-foreground/90">{detail.pitch}</p>
-
-                <div>
-                  <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
-                    O que está incluído
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {detail.submodules.map((s) => (
-                      <Badge key={s} variant="secondary" className="font-normal">
-                        {s}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                {detail.exampleNiches.length > 0 && (
+              <ScrollArea className="max-h-[60vh] pr-4">
+                <div className="space-y-4 text-sm">
                   <div>
                     <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
-                      Nichos onde brilha
+                      Para que serve
                     </div>
-                    <p className="text-muted-foreground">
-                      {detail.exampleNiches.join(" · ")}
+                    <p className="leading-relaxed text-foreground/90">
+                      {detail.pitch}
                     </p>
                   </div>
-                )}
-              </div>
+
+                  <div>
+                    <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+                      Principais recursos
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {detail.submodules.map((s) => (
+                        <Badge key={s} variant="secondary" className="font-normal">
+                          {s}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  {detail.exampleNiches.length > 0 && (
+                    <div>
+                      <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                        Para quem serve
+                      </div>
+                      <p className="text-muted-foreground">
+                        {detail.exampleNiches.join(" · ")}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
               <div className="flex justify-end gap-2 pt-2">
                 <Button variant="ghost" onClick={() => setDetail(null)}>
                   Fechar
@@ -237,7 +268,9 @@ export function ModulePicker({
                     setDetail(null);
                   }}
                 >
-                  {selected.includes(detail.slug) ? "Já selecionado" : "Selecionar este módulo"}
+                  {selected.includes(detail.slug)
+                    ? "Já selecionado"
+                    : "Selecionar este módulo"}
                 </Button>
               </div>
             </>

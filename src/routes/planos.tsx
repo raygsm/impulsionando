@@ -17,13 +17,23 @@ import {
 } from "@/components/ui/accordion";
 import { PixFallbackDialog } from "@/components/payments/PixFallbackDialog";
 import { ModulePicker } from "@/components/marketing/ModulePicker";
+import { ContractingSummaryDialog } from "@/components/marketing/ContractingSummaryDialog";
 
 const PLAN_QUOTA: Record<string, number> = {
   Essencial: 1,
   Integrado: 2,
   Avançado: 3,
-  "Sob Medida": Number.POSITIVE_INFINITY,
 };
+
+/** Setup de implantação (1ª parcela) em reais — usado no resumo de contratação. */
+const PLAN_SETUP_BRL: Record<string, number> = {
+  Essencial: 297,
+  Integrado: 497,
+  Avançado: 997,
+};
+
+/** Preço por módulo adicional além da quota do plano. */
+const EXTRA_MODULE_BRL = 497;
 
 const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20entender%20melhor%20os%20planos%20da%20Impulsionando.";
 
@@ -93,34 +103,22 @@ const PLANS: Plan[] = [
     ],
     cta: "Começar Trial de 7 dias",
   },
-  {
-    name: "Sob Medida",
-    tagline: "Múltiplos módulos principais com sua marca.",
-    monthly: null,
-    modulesLabel: "Múltiplos módulos principais",
-    features: [
-      "Múltiplos módulos principais conforme briefing",
-      "Usuários sob demanda",
-      "White Label disponível",
-      "Integrações, dashboards e regras específicas",
-    ],
-    cta: "Falar com consultor",
-  },
 ];
+
 
 type Row = { feature: string; values: (boolean | string)[] };
 
 const COMPARE: Row[] = [
-  { feature: "Módulos principais ativos", values: ["1", "2", "3 + BI", "Múltiplos"] },
-  { feature: "Usuários", values: ["Até 3", "Até 5", "Até 10", "Sob demanda"] },
-  { feature: "Unidades / filiais", values: ["1", "1", "Até 3", "Multiempresa"] },
-  { feature: "Automações entre módulos principais", values: [false, true, true, true] },
-  { feature: "BI & Dashboards consolidados", values: [false, false, true, true] },
-  { feature: "API e webhooks", values: [false, true, true, true] },
-  { feature: "Onboarding guiado", values: ["Self-service", "1h", "4h", "Customizado"] },
-  { feature: "Suporte", values: ["E-mail/WhatsApp", "Prioritário", "Prioritário", "SLA dedicado"] },
-  { feature: "White Label / marca própria", values: [false, false, false, true] },
-  { feature: "Sistemas personalizados", values: [false, false, false, true] },
+  { feature: "Módulos principais incluídos", values: ["1", "2", "3 + BI"] },
+  { feature: "Módulos adicionais", values: ["Sim", "Sim", "Sim"] },
+  { feature: "Usuários", values: ["Até 3", "Até 5", "Até 10"] },
+  { feature: "Unidades / filiais", values: ["1", "1", "Até 3"] },
+  { feature: "Automações entre módulos", values: [false, true, true] },
+  { feature: "BI & Dashboards consolidados", values: [false, false, true] },
+  { feature: "API e webhooks", values: [false, true, true] },
+  { feature: "Onboarding guiado", values: ["Self-service", "1h", "4h"] },
+  { feature: "Suporte", values: ["E-mail/WhatsApp", "Prioritário", "Prioritário"] },
+  { feature: "Contrato mínimo", values: ["90 dias", "90 dias", "90 dias"] },
 ];
 
 const FAQ = [
@@ -182,9 +180,23 @@ function PlanosPage() {
     open: false,
     plan: null,
   });
+  const [summary, setSummary] = useState<{ open: boolean; plan: Plan | null }>({
+    open: false,
+    plan: null,
+  });
   const [pickedModules, setPickedModules] = useState<Record<string, string[]>>({});
 
   async function runCheckout(plan: Plan, modules: string[]) {
+    const quota = PLAN_QUOTA[plan.name] ?? 1;
+    const included = modules.slice(0, quota);
+    const extras = modules.slice(quota);
+    const extrasMonthly = extras.length * EXTRA_MODULE_BRL;
+    const baseMonthly = annual
+      ? Math.round((plan.monthly ?? 0) * 10 / 12)
+      : (plan.monthly ?? 0);
+    const totalMonthly = baseMonthly + extrasMonthly;
+    const setup = PLAN_SETUP_BRL[plan.name] ?? 0;
+
     try {
       await openCheckout({
         priceId: PRICE_IDS[plan.name][annual ? "annual" : "monthly"],
@@ -192,20 +204,23 @@ function PlanosPage() {
         customData: {
           ...(user?.user?.id ? { userId: user.user.id } : {}),
           plan: plan.name,
-          modules: modules.join(","),
+          modules_included: included.join(","),
+          modules_extra: extras.join(","),
+          extras_monthly_brl: String(extrasMonthly),
+          setup_brl: String(setup),
+          minimum_term_days: "90",
         },
       });
     } catch {
-      const monthly = plan.monthly ?? 0;
-      const finalValue = annual ? monthly * 10 : monthly;
+      const finalValue = annual ? totalMonthly * 10 : totalMonthly;
       toast.message(
         "Instabilidade no checkout. Liberei o pagamento via Pix para você seguir agora.",
       );
       setPixState({
         open: true,
-        amountCents: Math.round(finalValue * 100),
+        amountCents: Math.round((setup + finalValue) * 100),
         txid: `PLANO-${plan.name.toUpperCase()}-${annual ? "ANUAL" : "MENSAL"}`,
-        label: `Plano ${plan.name}${modules.length ? ` (${modules.length} mód.)` : ""} — ${annual ? "anual" : "mensal"}`,
+        label: `Plano ${plan.name}${modules.length ? ` (${modules.length} mód.)` : ""} — ${annual ? "anual" : "mensal"} — inclui setup`,
       });
     }
   }
@@ -260,7 +275,7 @@ function PlanosPage() {
 
       {/* PLAN CARDS */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-12 relative z-10">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {PLANS.map((plan) => {
             const monthlyEffective = plan.monthly !== null
               ? (annual ? Math.round(plan.monthly * 10 / 12) : plan.monthly)
@@ -319,6 +334,12 @@ function PlanosPage() {
 
                 {plan.monthly !== null && PRICE_IDS[plan.name] ? (
                   <div className="mt-6 space-y-2">
+                    <div className="rounded-md border border-amber-300/70 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800/60 p-2.5 text-[11px] leading-snug text-amber-900 dark:text-amber-100">
+                      <strong>Contrato mínimo 90 dias.</strong> Setup{" "}
+                      {formatBRL(PLAN_SETUP_BRL[plan.name] ?? 0)} (1ª parcela) + 3
+                      mensalidades = <strong>4 pagamentos obrigatórios</strong> no
+                      ciclo inicial. Módulos extras: {formatBRL(EXTRA_MODULE_BRL)}/mês.
+                    </div>
                     {pickedModules[plan.name]?.length ? (
                       <div className="text-[11px] text-muted-foreground">
                         {pickedModules[plan.name].length} módulo(s) selecionado(s)
@@ -353,8 +374,31 @@ function PlanosPage() {
           })}
         </div>
         <p className="text-center text-xs text-muted-foreground mt-6">
-          Valores de referência. Tributos podem ser aplicados conforme nota fiscal. Validação no orçamento.
+          Valores de referência. Tributos podem ser aplicados conforme nota fiscal.
+          Cobrança recorrente após o ciclo inicial obrigatório de 90 dias.
         </p>
+
+        {/* Sob Medida — secundário */}
+        <div className="mt-10 rounded-xl border border-dashed border-border bg-card/50 p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="flex-1">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">
+              Operação maior ou white label?
+            </div>
+            <div className="text-lg font-semibold mt-1">
+              Projeto Sob Medida
+            </div>
+            <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+              Múltiplos módulos, marca própria, integrações específicas e SLA
+              dedicado. Conversamos sobre escopo e orçamento direto com você —
+              sem entrar no fluxo de assinatura padrão.
+            </p>
+          </div>
+          <Button asChild variant="outline">
+            <Link to="/orcamento" search={{ plano: "Sob Medida", origem: "planos" }}>
+              Falar com consultor
+            </Link>
+          </Button>
+        </div>
       </section>
 
       {/* COMPARE TABLE */}
@@ -482,11 +526,40 @@ function PlanosPage() {
           planName={picker.plan.name}
           planSubtitle={picker.plan.tagline}
           initialSelected={pickedModules[picker.plan.name] ?? []}
-          confirmLabel={`Assinar ${annual ? "anual" : "mensal"} e ir para o pagamento`}
-          onConfirm={async (slugs) => {
+          extraPriceCents={EXTRA_MODULE_BRL * 100}
+          confirmLabel="Continuar para o resumo da contratação"
+          onConfirm={(slugs) => {
             const plan = picker.plan!;
             setPickedModules((prev) => ({ ...prev, [plan.name]: slugs }));
             setPicker({ open: false, plan: null });
+            setSummary({ open: true, plan });
+          }}
+        />
+      )}
+      {summary.plan && (
+        <ContractingSummaryDialog
+          open={summary.open}
+          onOpenChange={(o) => setSummary((s) => ({ ...s, open: o }))}
+          planName={summary.plan.name}
+          quota={PLAN_QUOTA[summary.plan.name] ?? 1}
+          selectedSlugs={pickedModules[summary.plan.name] ?? []}
+          baseMonthlyCents={Math.round(
+            (annual
+              ? Math.round((summary.plan.monthly ?? 0) * 10 / 12)
+              : (summary.plan.monthly ?? 0)) * 100,
+          )}
+          setupCents={(PLAN_SETUP_BRL[summary.plan.name] ?? 0) * 100}
+          extraPriceCents={EXTRA_MODULE_BRL * 100}
+          confirmLabel={`Confirmar e ir para o pagamento ${annual ? "anual" : "mensal"}`}
+          onEditModules={() => {
+            const plan = summary.plan!;
+            setSummary({ open: false, plan: null });
+            setPicker({ open: true, plan });
+          }}
+          onConfirm={async () => {
+            const plan = summary.plan!;
+            const slugs = pickedModules[plan.name] ?? [];
+            setSummary({ open: false, plan: null });
             await runCheckout(plan, slugs);
           }}
         />
