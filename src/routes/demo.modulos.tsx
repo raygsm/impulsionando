@@ -304,3 +304,22 @@ function ModuleCard({
     </Card>
   );
 }
+
+/** Mapeia slug do catálogo → rota demo interativa específica (quando existir). */
+const INTERACTIVE_DEMO: Record<string, "/demo/afiliados" | "/demo/checkout" | "/demo/eventos" | "/demo/cliente-final"> = {
+  fidelizacao: "/demo/afiliados",
+  commerce: "/demo/checkout",
+  eventos: "/demo/eventos",
+};
+
+function TestarRecursosButton({ slug }: { slug: string }) {
+  const target = INTERACTIVE_DEMO[slug] ?? "/demo/cliente-final";
+  return (
+    <Button asChild size="sm" className="bg-gradient-primary flex-1">
+      <Link to={target}>
+        <Sparkles className="w-4 h-4 mr-1" /> Testar recursos
+      </Link>
+    </Button>
+  );
+}
+
