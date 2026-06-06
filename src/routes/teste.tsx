@@ -94,7 +94,7 @@ function TestePage() {
               Gerar Pix de teste <ArrowRight className="ml-1 w-4 h-4" />
             </Button>
             <Button asChild size="lg" variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white/20">
-              <Link to="/planos">Ver planos completos</Link>
+              <Link to="/planos/teste">Pagar R$1,00 (checkout real)</Link>
             </Button>
           </div>
         </div>
