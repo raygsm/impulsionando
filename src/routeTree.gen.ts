@@ -114,6 +114,7 @@ import { Route as AuthenticatedAffiliatesOffersRouteImport } from './routes/_aut
 import { Route as AuthenticatedAffiliatesManagersRouteImport } from './routes/_authenticated/affiliates.managers'
 import { Route as AuthenticatedAffiliatesLinksRouteImport } from './routes/_authenticated/affiliates.links'
 import { Route as AuthenticatedAffiliatesCoproducersRouteImport } from './routes/_authenticated/affiliates.coproducers'
+import { Route as AuthenticatedAffiliatesCommissionsRouteImport } from './routes/_authenticated/affiliates.commissions'
 import { Route as AuthenticatedAffiliatesAffiliatesRouteImport } from './routes/_authenticated/affiliates.affiliates'
 import { Route as AuthenticatedAdminUptimeRouteImport } from './routes/_authenticated/admin.uptime'
 import { Route as AuthenticatedAdminTrialsRouteImport } from './routes/_authenticated/admin.trials'
@@ -691,6 +692,12 @@ const AuthenticatedAffiliatesCoproducersRoute =
     path: '/coproducers',
     getParentRoute: () => AuthenticatedAffiliatesRoute,
   } as any)
+const AuthenticatedAffiliatesCommissionsRoute =
+  AuthenticatedAffiliatesCommissionsRouteImport.update({
+    id: '/commissions',
+    path: '/commissions',
+    getParentRoute: () => AuthenticatedAffiliatesRoute,
+  } as any)
 const AuthenticatedAffiliatesAffiliatesRoute =
   AuthenticatedAffiliatesAffiliatesRouteImport.update({
     id: '/affiliates',
@@ -848,6 +855,7 @@ export interface FileRoutesByFullPath {
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/affiliates/affiliates': typeof AuthenticatedAffiliatesAffiliatesRoute
+  '/affiliates/commissions': typeof AuthenticatedAffiliatesCommissionsRoute
   '/affiliates/coproducers': typeof AuthenticatedAffiliatesCoproducersRoute
   '/affiliates/links': typeof AuthenticatedAffiliatesLinksRoute
   '/affiliates/managers': typeof AuthenticatedAffiliatesManagersRoute
@@ -961,6 +969,7 @@ export interface FileRoutesByTo {
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/affiliates/affiliates': typeof AuthenticatedAffiliatesAffiliatesRoute
+  '/affiliates/commissions': typeof AuthenticatedAffiliatesCommissionsRoute
   '/affiliates/coproducers': typeof AuthenticatedAffiliatesCoproducersRoute
   '/affiliates/links': typeof AuthenticatedAffiliatesLinksRoute
   '/affiliates/managers': typeof AuthenticatedAffiliatesManagersRoute
@@ -1085,6 +1094,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/_authenticated/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/_authenticated/affiliates/affiliates': typeof AuthenticatedAffiliatesAffiliatesRoute
+  '/_authenticated/affiliates/commissions': typeof AuthenticatedAffiliatesCommissionsRoute
   '/_authenticated/affiliates/coproducers': typeof AuthenticatedAffiliatesCoproducersRoute
   '/_authenticated/affiliates/links': typeof AuthenticatedAffiliatesLinksRoute
   '/_authenticated/affiliates/managers': typeof AuthenticatedAffiliatesManagersRoute
@@ -1209,6 +1219,7 @@ export interface FileRouteTypes {
     | '/admin/trials'
     | '/admin/uptime'
     | '/affiliates/affiliates'
+    | '/affiliates/commissions'
     | '/affiliates/coproducers'
     | '/affiliates/links'
     | '/affiliates/managers'
@@ -1322,6 +1333,7 @@ export interface FileRouteTypes {
     | '/admin/trials'
     | '/admin/uptime'
     | '/affiliates/affiliates'
+    | '/affiliates/commissions'
     | '/affiliates/coproducers'
     | '/affiliates/links'
     | '/affiliates/managers'
@@ -1445,6 +1457,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/trials'
     | '/_authenticated/admin/uptime'
     | '/_authenticated/affiliates/affiliates'
+    | '/_authenticated/affiliates/commissions'
     | '/_authenticated/affiliates/coproducers'
     | '/_authenticated/affiliates/links'
     | '/_authenticated/affiliates/managers'
@@ -2290,6 +2303,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAffiliatesCoproducersRouteImport
       parentRoute: typeof AuthenticatedAffiliatesRoute
     }
+    '/_authenticated/affiliates/commissions': {
+      id: '/_authenticated/affiliates/commissions'
+      path: '/commissions'
+      fullPath: '/affiliates/commissions'
+      preLoaderRoute: typeof AuthenticatedAffiliatesCommissionsRouteImport
+      parentRoute: typeof AuthenticatedAffiliatesRoute
+    }
     '/_authenticated/affiliates/affiliates': {
       id: '/_authenticated/affiliates/affiliates'
       path: '/affiliates'
@@ -2407,6 +2427,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAffiliatesRouteChildren {
   AuthenticatedAffiliatesAffiliatesRoute: typeof AuthenticatedAffiliatesAffiliatesRoute
+  AuthenticatedAffiliatesCommissionsRoute: typeof AuthenticatedAffiliatesCommissionsRoute
   AuthenticatedAffiliatesCoproducersRoute: typeof AuthenticatedAffiliatesCoproducersRoute
   AuthenticatedAffiliatesLinksRoute: typeof AuthenticatedAffiliatesLinksRoute
   AuthenticatedAffiliatesManagersRoute: typeof AuthenticatedAffiliatesManagersRoute
@@ -2420,6 +2441,8 @@ const AuthenticatedAffiliatesRouteChildren: AuthenticatedAffiliatesRouteChildren
   {
     AuthenticatedAffiliatesAffiliatesRoute:
       AuthenticatedAffiliatesAffiliatesRoute,
+    AuthenticatedAffiliatesCommissionsRoute:
+      AuthenticatedAffiliatesCommissionsRoute,
     AuthenticatedAffiliatesCoproducersRoute:
       AuthenticatedAffiliatesCoproducersRoute,
     AuthenticatedAffiliatesLinksRoute: AuthenticatedAffiliatesLinksRoute,
