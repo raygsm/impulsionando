@@ -120,17 +120,23 @@ function ModulosPage() {
                 const remaining = m.submodules.length - visibleSubs.length;
                 return (
                   <Card key={m.slug} className="p-6 hover:shadow-elegant transition-shadow flex flex-col">
-                    <div className="flex items-start gap-4">
+                    <Link
+                      to="/modulos/$slug"
+                      params={{ slug: m.slug }}
+                      className="flex items-start gap-4 group"
+                    >
                       <div className="w-12 h-12 rounded-md bg-gradient-primary flex items-center justify-center text-primary-foreground shrink-0">
                         <Icon className="w-5 h-5" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-semibold tracking-tight text-lg">{m.fullName}</div>
+                        <div className="font-semibold tracking-tight text-lg group-hover:text-primary transition-colors">
+                          {m.fullName}
+                        </div>
                         <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
                           {m.tagline}
                         </p>
                       </div>
-                    </div>
+                    </Link>
 
                     <p className="text-sm text-muted-foreground mt-5 leading-relaxed">
                       {m.pitch}
@@ -171,14 +177,21 @@ function ModulosPage() {
                       ))}
                     </div>
 
-                    <Button asChild size="sm" variant="outline" className="mt-5 w-full gap-2">
-                      <Link
-                        to="/orcamento"
-                        search={{ origem: `modulos:${m.slug}` }}
-                      >
-                        Quero este módulo principal <ArrowRight className="w-3.5 h-3.5" />
-                      </Link>
-                    </Button>
+                    <div className="mt-5 grid grid-cols-2 gap-2">
+                      <Button asChild size="sm" className="gap-2 bg-gradient-primary">
+                        <Link to="/modulos/$slug" params={{ slug: m.slug }}>
+                          Ver detalhes <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
+                      </Button>
+                      <Button asChild size="sm" variant="outline" className="gap-2">
+                        <Link
+                          to="/orcamento"
+                          search={{ origem: `modulos:${m.slug}` }}
+                        >
+                          Adicionar ao orçamento
+                        </Link>
+                      </Button>
+                    </div>
                   </Card>
                 );
               })}
