@@ -90,34 +90,37 @@ export const createQuote = createServerFn({ method: "POST" })
     const supabase = await getAdmin();
     const totals = computeQuote(data.modules);
 
+    const insertRow = {
+      lead_name: data.lead.name,
+      lead_whatsapp: data.lead.whatsapp,
+      lead_email: data.lead.email,
+      lead_role: data.lead.role,
+      lead_city: data.lead.city,
+      lead_state: data.lead.state,
+      company_name: data.company?.companyName ?? null,
+      company_tax_id: data.company?.companyTaxId ?? null,
+      company_legal_name: data.company?.companyLegalName ?? null,
+      category: data.category,
+      segment: data.segment,
+      modules: data.modules,
+      subtotal_cents: totals.subtotalCents,
+      discount_pct: totals.discountPct,
+      discount_cents: totals.discountCents,
+      setup_cents: totals.setupCents,
+      total_cents: totals.totalCents,
+      utm_source: data.tracking?.utm_source ?? null,
+      utm_medium: data.tracking?.utm_medium ?? null,
+      utm_campaign: data.tracking?.utm_campaign ?? null,
+      utm_content: data.tracking?.utm_content ?? null,
+      utm_term: data.tracking?.utm_term ?? null,
+      origin: data.tracking?.origin ?? null,
+      status: "draft",
+      // quote_number gerado automaticamente pelo trigger tg_quotes_set_number
+    } as never;
+
     const { data: row, error } = await supabase
       .from("quotes")
-      .insert({
-        lead_name: data.lead.name,
-        lead_whatsapp: data.lead.whatsapp,
-        lead_email: data.lead.email,
-        lead_role: data.lead.role,
-        lead_city: data.lead.city,
-        lead_state: data.lead.state,
-        company_name: data.company?.companyName ?? null,
-        company_tax_id: data.company?.companyTaxId ?? null,
-        company_legal_name: data.company?.companyLegalName ?? null,
-        category: data.category,
-        segment: data.segment,
-        modules: data.modules,
-        subtotal_cents: totals.subtotalCents,
-        discount_pct: totals.discountPct,
-        discount_cents: totals.discountCents,
-        setup_cents: totals.setupCents,
-        total_cents: totals.totalCents,
-        utm_source: data.tracking?.utm_source ?? null,
-        utm_medium: data.tracking?.utm_medium ?? null,
-        utm_campaign: data.tracking?.utm_campaign ?? null,
-        utm_content: data.tracking?.utm_content ?? null,
-        utm_term: data.tracking?.utm_term ?? null,
-        origin: data.tracking?.origin ?? null,
-        status: "draft",
-      })
+      .insert(insertRow)
       .select("id, quote_number")
       .single();
 
