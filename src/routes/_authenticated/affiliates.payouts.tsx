@@ -32,7 +32,7 @@ function PayoutsPage() {
       const patch: Record<string, unknown> = { status };
       if (status === "aprovado") patch.approved_at = new Date().toISOString();
       if (status === "pago") patch.paid_at = new Date().toISOString();
-      const { error } = await supabase.from("aff_payouts").update(patch).eq("id", id);
+      const { error } = await supabase.from("aff_payouts").update(patch as never).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Atualizado"); qc.invalidateQueries({ queryKey: ["aff_payouts", companyId] }); },
