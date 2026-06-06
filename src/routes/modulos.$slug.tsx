@@ -396,6 +396,18 @@ function ModulePage() {
             <Button asChild variant="outline" size="sm" className="hidden md:inline-flex">
               <Link to="/demo/modulos">Testar na demo</Link>
             </Button>
+            <div className="hidden md:inline-flex">
+              <DemoContractCTA
+                slug={slugParam}
+                moduleName={title}
+                moduleDescription={hook || pitch}
+                amountReference={DEMO_REFERENCE_AMOUNT[slugParam] ?? 197}
+                features={features.slice(0, 8)}
+                testRoute={DEMO_TEST_ROUTE[slugParam] ?? "/demo/cliente-final"}
+                size="sm"
+                variant="outline"
+              />
+            </div>
             <Button asChild size="lg" className="gap-2 flex-1 sm:flex-initial bg-gradient-primary">
               <Link to="/orcamento" search={{ origem: orcamentoOrigin }}>
                 <ArrowRight className="w-4 h-4" />
