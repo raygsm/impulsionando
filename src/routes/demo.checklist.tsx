@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
+import { DemoModeBanner } from "@/components/demo/DemoModeBanner";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -218,6 +219,7 @@ function ChecklistPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
+      <DemoModeBanner />
       <main className="flex-1 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12 w-full">
         <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
           <div>
