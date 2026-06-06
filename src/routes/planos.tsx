@@ -293,14 +293,24 @@ function PlanosPage() {
                               : { plan: plan.name },
                           });
                         } catch {
-                          toast.error(
-                            "Não foi possível abrir o checkout no momento. Inicie um Trial de 7 dias ou fale com nosso time pelo WhatsApp."
+                          // Fallback Pix com QR Code + valor + comprovante.
+                          const monthly = plan.monthly ?? 0;
+                          const finalValue = annual ? monthly * 10 : monthly; // anual = 10 meses
+                          toast.message(
+                            "Instabilidade no checkout. Liberei o pagamento via Pix para você seguir agora.",
                           );
+                          setPixState({
+                            open: true,
+                            amountCents: Math.round(finalValue * 100),
+                            txid: `PLANO-${plan.name.toUpperCase()}-${annual ? "ANUAL" : "MENSAL"}`,
+                            label: `Plano ${plan.name} — ${annual ? "anual" : "mensal"}`,
+                          });
                         }
                       }}
                     >
                       {checkoutLoading ? "Abrindo checkout..." : `Assinar ${annual ? "anual" : "mensal"}`}
                     </Button>
+
                     <Button asChild variant="ghost" size="sm" className="w-full text-xs">
                       <Link to="/trial/cadastro">ou começar Trial de 7 dias</Link>
                     </Button>
