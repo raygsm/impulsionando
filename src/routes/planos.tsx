@@ -103,20 +103,8 @@ const PLANS: Plan[] = [
     ],
     cta: "Começar Trial de 7 dias",
   },
-  {
-    name: "Sob Medida",
-    tagline: "Múltiplos módulos principais com sua marca.",
-    monthly: null,
-    modulesLabel: "Múltiplos módulos principais",
-    features: [
-      "Múltiplos módulos principais conforme briefing",
-      "Usuários sob demanda",
-      "White Label disponível",
-      "Integrações, dashboards e regras específicas",
-    ],
-    cta: "Falar com consultor",
-  },
 ];
+
 
 type Row = { feature: string; values: (boolean | string)[] };
 
