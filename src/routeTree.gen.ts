@@ -37,6 +37,7 @@ import { Route as TrabalheConoscoNichoRouteImport } from './routes/trabalhe-cono
 import { Route as ShowroomFitnessRouteImport } from './routes/showroom.fitness'
 import { Route as ShowroomEventosRouteImport } from './routes/showroom.eventos'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
+import { Route as PlanosTesteRouteImport } from './routes/planos.teste'
 import { Route as PacienteIdRouteImport } from './routes/paciente.$id'
 import { Route as NichosSlugRouteImport } from './routes/nichos.$slug'
 import { Route as ModulosSlugRouteImport } from './routes/modulos.$slug'
@@ -297,6 +298,11 @@ const RSlugRoute = RSlugRouteImport.update({
   id: '/r/$slug',
   path: '/r/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PlanosTesteRoute = PlanosTesteRouteImport.update({
+  id: '/teste',
+  path: '/teste',
+  getParentRoute: () => PlanosRoute,
 } as any)
 const PacienteIdRoute = PacienteIdRouteImport.update({
   id: '/$id',
@@ -974,7 +980,7 @@ export interface FileRoutesByFullPath {
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
   '/paciente': typeof PacienteRouteWithChildren
-  '/planos': typeof PlanosRoute
+  '/planos': typeof PlanosRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/reembolso': typeof ReembolsoRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -1028,6 +1034,7 @@ export interface FileRoutesByFullPath {
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
+  '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
@@ -1122,7 +1129,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/contato': typeof ContatoRoute
   '/orcamento': typeof OrcamentoRoute
-  '/planos': typeof PlanosRoute
+  '/planos': typeof PlanosRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/reembolso': typeof ReembolsoRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -1168,6 +1175,7 @@ export interface FileRoutesByTo {
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
+  '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
@@ -1266,7 +1274,7 @@ export interface FileRoutesById {
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
   '/paciente': typeof PacienteRouteWithChildren
-  '/planos': typeof PlanosRoute
+  '/planos': typeof PlanosRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/reembolso': typeof ReembolsoRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -1320,6 +1328,7 @@ export interface FileRoutesById {
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
+  '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
@@ -1472,6 +1481,7 @@ export interface FileRouteTypes {
     | '/modulos/$slug'
     | '/nichos/$slug'
     | '/paciente/$id'
+    | '/planos/teste'
     | '/r/$slug'
     | '/showroom/eventos'
     | '/showroom/fitness'
@@ -1612,6 +1622,7 @@ export interface FileRouteTypes {
     | '/modulos/$slug'
     | '/nichos/$slug'
     | '/paciente/$id'
+    | '/planos/teste'
     | '/r/$slug'
     | '/showroom/eventos'
     | '/showroom/fitness'
@@ -1763,6 +1774,7 @@ export interface FileRouteTypes {
     | '/modulos/$slug'
     | '/nichos/$slug'
     | '/paciente/$id'
+    | '/planos/teste'
     | '/r/$slug'
     | '/showroom/eventos'
     | '/showroom/fitness'
@@ -1861,7 +1873,7 @@ export interface RootRouteChildren {
   ModulosRoute: typeof ModulosRouteWithChildren
   OrcamentoRoute: typeof OrcamentoRoute
   PacienteRoute: typeof PacienteRouteWithChildren
-  PlanosRoute: typeof PlanosRoute
+  PlanosRoute: typeof PlanosRouteWithChildren
   PrivacidadeRoute: typeof PrivacidadeRoute
   ReembolsoRoute: typeof ReembolsoRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -2115,6 +2127,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/r/$slug'
       preLoaderRoute: typeof RSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/planos/teste': {
+      id: '/planos/teste'
+      path: '/teste'
+      fullPath: '/planos/teste'
+      preLoaderRoute: typeof PlanosTesteRouteImport
+      parentRoute: typeof PlanosRoute
     }
     '/paciente/$id': {
       id: '/paciente/$id'
@@ -3264,6 +3283,17 @@ const PacienteRouteWithChildren = PacienteRoute._addFileChildren(
   PacienteRouteChildren,
 )
 
+interface PlanosRouteChildren {
+  PlanosTesteRoute: typeof PlanosTesteRoute
+}
+
+const PlanosRouteChildren: PlanosRouteChildren = {
+  PlanosTesteRoute: PlanosTesteRoute,
+}
+
+const PlanosRouteWithChildren =
+  PlanosRoute._addFileChildren(PlanosRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -3272,7 +3302,7 @@ const rootRouteChildren: RootRouteChildren = {
   ModulosRoute: ModulosRouteWithChildren,
   OrcamentoRoute: OrcamentoRoute,
   PacienteRoute: PacienteRouteWithChildren,
-  PlanosRoute: PlanosRoute,
+  PlanosRoute: PlanosRouteWithChildren,
   PrivacidadeRoute: PrivacidadeRoute,
   ReembolsoRoute: ReembolsoRoute,
   ResetPasswordRoute: ResetPasswordRoute,
