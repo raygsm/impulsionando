@@ -474,6 +474,23 @@ function PlanosPage() {
         txid={pixState.txid}
         label={pixState.label}
       />
+      {picker.plan && (
+        <ModulePicker
+          open={picker.open}
+          onOpenChange={(o) => setPicker((s) => ({ ...s, open: o }))}
+          quota={PLAN_QUOTA[picker.plan.name] ?? 1}
+          planName={picker.plan.name}
+          planSubtitle={picker.plan.tagline}
+          initialSelected={pickedModules[picker.plan.name] ?? []}
+          confirmLabel={`Assinar ${annual ? "anual" : "mensal"} e ir para o pagamento`}
+          onConfirm={async (slugs) => {
+            const plan = picker.plan!;
+            setPickedModules((prev) => ({ ...prev, [plan.name]: slugs }));
+            setPicker({ open: false, plan: null });
+            await runCheckout(plan, slugs);
+          }}
+        />
+      )}
     </div>
   );
 }
