@@ -6,7 +6,7 @@ import {
   Package, Truck, ArrowDownUp,
   ShoppingCart, Receipt, Plus, Wallet as WalletIcon,
   Contact, BarChart3, ShieldCheck, Inbox, GraduationCap, Stethoscope, Sparkles,
-  Handshake, Link2, Ticket, Briefcase, BadgeDollarSign, TrendingUp, Banknote,
+  Handshake, Link2, Ticket, Briefcase, BadgeDollarSign, TrendingUp, Banknote, Copy,
 } from "lucide-react";
 
 
