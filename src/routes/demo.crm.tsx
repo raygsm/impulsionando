@@ -33,6 +33,7 @@ import { ClientesPanel } from "@/components/demo/crm/ClientesPanel";
 import { EmpresasPanel, ProdutosPanel, PlanosPanel, ServicosPanel } from "@/components/demo/crm/CrudPanels";
 import { PrazosPanel, RegrasPanel, FunisPanel, EtapasPanel, TagsPanel, OrigensPanel, CampanhasPanel, FollowupsPanel, AutomacoesPanel, UsuariosPanel, PermissoesPanel, SimularPerfilPanel } from "@/components/demo/crm/ConfigPanels";
 import { makeDemoLog, type DemoLogInput } from "@/lib/demoCrmCrud";
+import { DashboardPanel, ComunicacaoPanel, ModelosPanel, LogsPanel, JornadaGuiadaDialog, CrmCtaBar, seedModelosCrm, type ModeloMsg, type LogRich } from "@/components/demo/crm/FaseH";
 
 export const Route = createFileRoute("/demo/crm")({
   head: () => ({
@@ -64,7 +65,7 @@ type Campanha = { id: string; nome: string; canal: string; status: string; leads
 type Followup = { id: string; nome?: string; evento?: string; canal?: string; envios?: number; intervaloDias?: number; mensagem1?: string; mensagem2?: string; mensagem3?: string; criarTarefa?: boolean; encerrarSeResponder?: boolean; ativo?: boolean; leadId?: string; descricao?: string; quando?: string; status?: "Pendente" | "Concluído" };
 type Usuario = { id: string; nome: string; email: string; papel: string; status: string; whatsapp?: string; cargo?: string; setor?: string; observacoes?: string };
 type Permissao = { papel: string; permitido: boolean; acao?: "ver" | "criar" | "editar" | "excluir"; permissao?: string };
-type Log = { id: string; quando: string; usuario: string; acao: string };
+type Log = LogRich;
 
 const STAGES = ["Novo lead", "Primeiro contato", "Qualificação", "Proposta enviada", "Aguardando pagamento", "Contratado", "Onboarding", "Reativação"];
 const MOCK_MARKER = "crm:v3";
@@ -91,6 +92,9 @@ function DemoCRM() {
   const [usuarios, setUsuarios] = useDemoState<Usuario[]>("crm.usuarios", []);
   const [permissoes, setPermissoes] = useDemoState<Permissao[]>("crm.permissoes", []);
   const [logs, setLogs] = useDemoState<Log[]>("crm.logs", []);
+  const [modelos, setModelos] = useDemoState<ModeloMsg[]>("crm.modelos", []);
+  const [jornadaOpen, setJornadaOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   const { isContracted } = useDemoContracted();
   const pagoDemo = isContracted("crm");
@@ -114,6 +118,7 @@ function DemoCRM() {
     setTags(m.tags); setOrigens(m.origens); setCampanhas(m.campanhas);
     setFollowups(m.followups); setUsuarios(m.usuarios);
     setPermissoes(m.permissoes); setLogs(m.logs);
+    setModelos(seedModelosCrm());
     if (!silent) toast.success("Dados fictícios do CRM (DEMO) populados.");
   }
 
@@ -124,13 +129,29 @@ function DemoCRM() {
       .filter((k) => k.startsWith("imp.demo.crm."))
       .forEach((k) => window.localStorage.removeItem(k));
     window.localStorage.removeItem("imp.demo.mock.crm");
+    // registra log de reset antes do reload
+    const resetEntry = makeDemoLog({ area: "Sistema", acao: "Reset local executado", status: "ok", usuario: "sessao-demo" });
+    try { window.localStorage.setItem("imp.demo.crm.logs", JSON.stringify([{ ...resetEntry, modulo: "CRM", ambiente: "DEMO" }])); } catch { /* noop */ }
     toast.success("Dados demonstrativos do CRM restaurados para o padrão inicial.");
     setTimeout(() => window.location.reload(), 400);
   }
 
   function pushLog(input: DemoLogInput) {
     const entry = makeDemoLog({ usuario: "sessao-demo", ...input });
-    setLogs((prev) => [{ id: entry.id, quando: entry.quando, usuario: entry.usuario, acao: `[${entry.area}] ${entry.acao}${entry.registro ? ` — ${entry.registro}` : ""}${entry.canal ? ` (${entry.canal})` : ""}` }, ...prev].slice(0, 200));
+    const rich: Log = {
+      id: entry.id,
+      quando: entry.quando,
+      usuario: entry.usuario,
+      acao: `${entry.acao}${entry.registro ? ` — ${entry.registro}` : ""}`,
+      area: entry.area,
+      modulo: entry.modulo,
+      registro: entry.registro,
+      status: entry.status,
+      ambiente: entry.ambiente,
+      canal: entry.canal,
+      destinatario: entry.destinatario,
+    };
+    setLogs((prev) => [rich, ...prev].slice(0, 200));
   }
 
   function moverEstagio(id: string, dir: 1 | -1) {
@@ -188,11 +209,12 @@ function DemoCRM() {
                 size="default"
                 variant="default"
               />
+              <Button variant="outline" onClick={() => setJornadaOpen(true)}><Compass className="w-4 h-4 mr-1" />Iniciar jornada guiada do CRM</Button>
               <Button variant="outline" onClick={() => seed(false)}><Sparkles className="w-4 h-4 mr-1" />Popular demo</Button>
             </div>
           </div>
 
-          <Tabs defaultValue="visao" className="mt-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
             <TabsList className="flex-wrap h-auto justify-start">
               <TabsTrigger value="visao"><Compass className="w-4 h-4 mr-1" />Visão Geral</TabsTrigger>
               <TabsTrigger value="dashboard"><Activity className="w-4 h-4 mr-1" />Dashboard</TabsTrigger>
@@ -213,6 +235,7 @@ function DemoCRM() {
               <TabsTrigger value="origens"><Tag className="w-4 h-4 mr-1" />Origens</TabsTrigger>
               <TabsTrigger value="campanhas"><Megaphone className="w-4 h-4 mr-1" />Campanhas</TabsTrigger>
               <TabsTrigger value="comunicacao"><Send className="w-4 h-4 mr-1" />Comunicação</TabsTrigger>
+              <TabsTrigger value="modelos"><FileText className="w-4 h-4 mr-1" />Modelos</TabsTrigger>
               <TabsTrigger value="automacoes"><Workflow className="w-4 h-4 mr-1" />Automações</TabsTrigger>
               <TabsTrigger value="usuarios"><Users className="w-4 h-4 mr-1" />Usuários</TabsTrigger>
               <TabsTrigger value="permissoes"><ShieldCheck className="w-4 h-4 mr-1" />Permissões</TabsTrigger>
@@ -254,26 +277,16 @@ function DemoCRM() {
 
             {/* DASHBOARD */}
             <TabsContent value="dashboard" className="mt-4 space-y-4">
-              <div className="grid sm:grid-cols-4 gap-3">
-                <KPI label="Leads totais" value={String(dash.total)} />
-                <KPI label="Contratados" value={String(dash.ganho)} accent />
-                <KPI label="Conversão" value={`${dash.conversao}%`} />
-                <KPI label="Receita demo" value={dash.receita.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} />
-              </div>
-              <Card className="p-5">
-                <h3 className="font-semibold mb-3 text-sm">Funil por etapa</h3>
-                <div className="space-y-2">
-                  {dash.porEstagio.map((e) => (
-                    <div key={e.s} className="flex items-center gap-3">
-                      <span className="w-40 text-xs">{e.s}</span>
-                      <div className="flex-1 h-3 bg-muted rounded">
-                        <div className="h-3 bg-gradient-primary rounded" style={{ width: `${dash.total ? (e.n / dash.total) * 100 : 0}%` }} />
-                      </div>
-                      <span className="text-xs text-muted-foreground w-16 text-right">{e.n} leads</span>
-                    </div>
-                  ))}
-                </div>
-              </Card>
+              <DashboardPanel
+                leads={leads}
+                clientes={clientes}
+                produtos={produtos}
+                followups={followups}
+                campanhas={campanhas as never}
+                automacoes={autos}
+                mensagensEnviadas={logs.filter((l) => l.area === "Comunicação" && (l.canal === "email" || l.canal === "whatsapp")).length}
+                onGoto={setActiveTab}
+              />
               <RoiSimulator presetKey="crm" />
             </TabsContent>
 
@@ -420,24 +433,14 @@ function DemoCRM() {
               <CampanhasPanel campanhas={campanhas} setCampanhas={setCampanhas} origens={origens} onLog={pushLog} />
             </TabsContent>
 
-            {/* COMUNICAÇÃO (templates) */}
+            {/* COMUNICAÇÃO (Bloco 40) */}
             <TabsContent value="comunicacao" className="mt-4 space-y-4">
-              <Card className="p-5"><NovoTemplate onCreate={(t) => setTpls((p) => [t, ...p])} /></Card>
-              <div className="grid md:grid-cols-2 gap-3">
-                {tpls.map((t) => (
-                  <Card key={t.id} className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="font-medium text-sm">{t.nome}</div>
-                      <Badge variant="outline">{t.canal}</Badge>
-                    </div>
-                    <pre className="text-xs whitespace-pre-wrap text-muted-foreground bg-muted/40 p-2 rounded">{t.corpo}</pre>
-                    <div className="flex justify-end mt-2 gap-2">
-                      <Button size="sm" variant="outline" onClick={() => { toast.success(`Mensagem simulada (Enviado — DEMO) — ${t.canal}`); setLogs((p) => [{ id: uid("lg"), quando: new Date().toISOString(), usuario: "Atendimento Demo", acao: `Simulou envio do template ${t.nome}` }, ...p]); }}><Send className="w-3.5 h-3.5 mr-1" />Simular envio</Button>
-                      <Button size="sm" variant="ghost" onClick={() => setTpls((p) => p.filter((x) => x.id !== t.id))}><Trash2 className="w-4 h-4" /></Button>
-                    </div>
-                  </Card>
-                ))}
-              </div>
+              <ComunicacaoPanel onLog={pushLog} onEnviado={() => { /* refresh handled by state */ }} />
+            </TabsContent>
+
+            {/* MODELOS DE MENSAGEM (Bloco 41) */}
+            <TabsContent value="modelos" className="mt-4 space-y-4">
+              <ModelosPanel modelos={modelos} setModelos={setModelos} onLog={pushLog} onEnviado={() => { /* noop */ }} />
             </TabsContent>
 
             {/* AUTOMAÇÕES */}
@@ -476,57 +479,56 @@ function DemoCRM() {
               </Card>
             </TabsContent>
 
-            {/* LOGS */}
+            {/* LOGS (Bloco 42) */}
             <TabsContent value="logs" className="mt-4 space-y-3">
-              <Card className="p-5">
-                <div className="text-sm font-semibold mb-2 flex items-center gap-2">Logs da DEMO <HelpTip>Histórico das ações realizadas dentro da demonstração.</HelpTip></div>
-                <Table>
-                  <TableHeader><TableRow><TableHead>Quando</TableHead><TableHead>Usuário</TableHead><TableHead>Ação</TableHead></TableRow></TableHeader>
-                  <TableBody>{logs.map((lg) => (
-                    <TableRow key={lg.id}><TableCell className="text-xs">{new Date(lg.quando).toLocaleString("pt-BR")}</TableCell><TableCell className="text-xs">{lg.usuario}</TableCell><TableCell className="text-xs">{lg.acao}</TableCell></TableRow>
-                  ))}</TableBody>
-                </Table>
-              </Card>
+              <LogsPanel logs={logs} />
             </TabsContent>
 
-            {/* JORNADA GUIADA */}
+            {/* JORNADA GUIADA (resumo + atalho — diálogo no botão do topo) */}
             <TabsContent value="jornada" className="mt-4 space-y-3">
               <Card className="p-5 space-y-3">
                 <h3 className="font-semibold text-sm">Jornada guiada — CRM</h3>
-                <ol className="text-sm space-y-2 list-decimal pl-5">
-                  <li>Confirme suas parametrizações em <strong>Parametrizações</strong> (SIM/NÃO dos 16 itens).</li>
-                  <li>Revise <strong>Origens</strong> e <strong>Campanhas</strong> e ajuste tags.</li>
-                  <li>Cadastre 1 ou 2 <strong>Leads</strong> e mova-os pelo <strong>Pipeline</strong>.</li>
-                  <li>Crie um <strong>Template</strong> em Comunicação e clique em <em>Simular envio</em>.</li>
-                  <li>Ative uma <strong>Automação</strong> e configure uma <strong>Regra</strong>.</li>
-                  <li>Veja o resultado no <strong>Dashboard</strong> e nos <strong>Logs</strong>.</li>
-                  <li>Quando estiver convencido, clique em <strong>Contratar CRM real</strong>.</li>
-                </ol>
+                <p className="text-sm text-muted-foreground">14 etapas guiadas conduzem do primeiro lead à conversão e ao dashboard atualizado.</p>
+                <Button onClick={() => setJornadaOpen(true)}><Compass className="w-4 h-4 mr-1" />Iniciar jornada guiada</Button>
               </Card>
             </TabsContent>
           </Tabs>
 
+          {/* Barra de CTAs persistente (Bloco 45) */}
+          <CrmCtaBar onIniciarJornada={() => setJornadaOpen(true)} />
+
           {/* Rodapé: Outros Módulos / Zerar / CTA contratação real */}
-          <div className="mt-10 grid lg:grid-cols-2 gap-4">
+          <div className="mt-6 grid lg:grid-cols-2 gap-4">
             <Card className="p-5">
               <div className="font-semibold mb-2 text-sm flex items-center gap-2"><Layers className="w-4 h-4" /> Contratar o CRM real</div>
               <p className="text-xs text-muted-foreground mb-3">Pronto para sair da demonstração? Adicione o CRM ao orçamento ou veja os planos completos.</p>
               <div className="flex gap-2 flex-wrap">
                 <Button className="bg-gradient-primary" asChild><Link to="/planos">Contratar CRM real</Link></Button>
-                <Button variant="outline" asChild><Link to="/planos">Adicionar CRM ao orçamento</Link></Button>
+                <Button variant="outline" asChild><Link to="/orcamento">Adicionar CRM ao orçamento</Link></Button>
                 <Button variant="outline" asChild><Link to="/planos">Ver planos</Link></Button>
                 <Button variant="outline" asChild><Link to="/contato">Falar com consultor</Link></Button>
               </div>
             </Card>
             <Card className="p-5">
               <div className="font-semibold mb-2 text-sm">Controles da demonstração</div>
-              <p className="text-xs text-muted-foreground mb-3">Trocar para outro módulo demonstrativo ou zerar apenas os dados desta DEMO do CRM neste navegador.</p>
+              <p className="text-xs text-muted-foreground mb-3">
+                Escolha outro módulo para testar uma nova demonstração específica. Em seguida, se quiser, zere apenas os dados deste CRM neste navegador.
+              </p>
               <div className="flex gap-2 flex-wrap">
                 <DemoModuleSwitcher current="crm" size="default" variant="outline" />
                 <Button variant="destructive" onClick={resetCrm}><RotateCcw className="w-4 h-4 mr-1" />Zerar dados da DEMO</Button>
               </div>
             </Card>
           </div>
+
+          {/* Diálogo da jornada guiada */}
+          <JornadaGuiadaDialog
+            open={jornadaOpen}
+            onOpenChange={setJornadaOpen}
+            onLog={pushLog}
+            onGoto={setActiveTab}
+          />
+
         </main>
         <PublicFooter />
       </div>
