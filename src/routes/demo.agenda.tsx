@@ -262,7 +262,7 @@ function DemoAgenda() {
 
           <TabsContent value="agendar" className="mt-4">
             <Card className="p-5">
-              <NovoAgendamento profs={profs} servs={servs} onCreate={(a) => setAgds((p) => [a, ...p])} />
+              <NovoAgendamento profs={profs} servs={servs} prefill={prefill} onCreate={(a) => setAgds((p) => [a, ...p])} />
             </Card>
           </TabsContent>
 
