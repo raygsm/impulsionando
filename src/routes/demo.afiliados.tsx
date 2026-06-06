@@ -220,6 +220,8 @@ function DemoAfiliados() {
               </Card>
 
               <RoiSimulator presetKey="afiliados" />
+            </TabsContent>
+
 
 
             <TabsContent value="catalogo" className="mt-4 space-y-4">
