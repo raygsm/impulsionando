@@ -490,25 +490,62 @@ function DemoAdvogados() {
 
           <TabsContent value="params" className="mt-4 grid sm:grid-cols-2 gap-3">
             {([
-              ["lembretePrazo48h", "Lembrete automático 48h antes do prazo"],
-              ["lembretePrazo24h", "Lembrete automático 24h antes do prazo"],
-              ["bloqueioPrazoVencido", "Bloquear edição após prazo vencido"],
-              ["sigiloPorPapel", "Sigilo por papel (perfil/grupo)"],
-              ["timesheetObrigatorio", "Timesheet obrigatório por atividade"],
-              ["integraTribunais", "Integração com tribunais (consulta processual)"],
-              ["lgpd", "Conformidade LGPD nas comunicações"],
-              ["portalCliente", "Portal do cliente com acompanhamento"],
-            ] as const).map(([k, label]) => (
+              ["lembretePrazo48h", "Lembrete automático 48h antes do prazo", "Dispara aviso ao responsável 48 horas antes do vencimento — evita perda de prazo processual."],
+              ["lembretePrazo24h", "Lembrete automático 24h antes do prazo", "Segundo aviso 24 horas antes do vencimento, com escalonamento ao sócio responsável."],
+              ["bloqueioPrazoVencido", "Bloquear edição após prazo vencido", "Após o vencimento, o processo é congelado e exige justificativa registrada para nova alteração."],
+              ["sigiloPorPapel", "Sigilo por papel (perfil/grupo)", "Apenas advogados com o papel autorizado visualizam processos sigilosos e documentos restritos."],
+              ["timesheetObrigatorio", "Timesheet obrigatório por atividade", "Cada movimentação exige apontamento de horas para cobrança correta de honorários por hora."],
+              ["integraTribunais", "Integração com tribunais (consulta processual)", "Sincroniza movimentações e publicações oficiais dos tribunais diretamente no processo."],
+              ["lgpd", "Conformidade LGPD nas comunicações", "Comunicações com clientes registram base legal, consentimento e log de acesso a dados pessoais."],
+              ["portalCliente", "Portal do cliente com acompanhamento", "Cliente acessa andamento do processo, audiências e honorários com sigilo por papel."],
+            ] as const).map(([k, label, help]) => (
               <Card key={k} className="p-4 flex items-center justify-between gap-3">
-                <div>
-                  <div className="text-sm font-medium">{label}</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">{params[k] ? "Ativo" : "Inativo"}</div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-medium flex items-center gap-1.5">
+                    {label}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button type="button" aria-label="Ajuda">
+                          <HelpCircle className="w-3.5 h-3.5 text-muted-foreground" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">{help}</TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">{params[k] ? "SIM — ativo" : "NÃO — inativo"}</div>
                 </div>
                 <Switch checked={params[k]} onCheckedChange={(v) => setParams((p) => ({ ...p, [k]: v }))} />
               </Card>
             ))}
           </TabsContent>
         </Tabs>
+
+        <div className="mt-10 rounded-xl border bg-gradient-to-br from-primary/5 to-accent/5 p-6 sm:p-8 text-center">
+          <h2 className="text-2xl font-bold">Organize seu escritório jurídico agora</h2>
+          <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">
+            Teste a gestão completa do seu escritório: processos, prazos, audiências, contratos e honorários
+            em um só lugar, com sigilo por papel e conformidade LGPD.
+          </p>
+          <div className="mt-5 flex justify-center flex-wrap gap-2">
+            <DemoContractCTA
+              slug="advogados"
+              moduleName="Advogados & Escritórios Jurídicos"
+              moduleDescription="Contratar módulo jurídico — gestão completa para escritórios de advocacia."
+              amountReference={297}
+              features={[
+                "Processos por área e vara",
+                "Prazos com lembrete e bloqueio",
+                "Audiências e calendário forense",
+                "Contratos fixo + êxito",
+                "Honorários e timesheet",
+                "Portal do cliente com sigilo por papel",
+              ]}
+              testRoute="/demo/advogados"
+              size="lg"
+              variant="default"
+            />
+          </div>
+        </div>
 
         <div className="mt-10">
           <RoiSimulator />
@@ -517,5 +554,6 @@ function DemoAdvogados() {
       </main>
       <PublicFooter />
     </div>
+    </TooltipProvider>
   );
 }
