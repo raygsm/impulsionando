@@ -68,6 +68,9 @@ function PlanoTestePage() {
     phone: string;
   } | null>(null);
   const [lead, setLead] = useState({ name: "", email: "", phone: "" });
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickedModules, setPickedModules] = useState<string[]>([]);
+  const [confirmed, setConfirmed] = useState(false);
 
   useEffect(() => {
     let active = true;
