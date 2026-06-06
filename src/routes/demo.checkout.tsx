@@ -115,9 +115,22 @@ function DemoCheckout() {
                 baixa automática e reembolso. Webhooks e dashboards atualizam em tempo real.
               </p>
             </div>
-            <Button variant="ghost" onClick={() => { resetPagtos(); resetParams(); toast.message("Zerado."); }}>
-              <RotateCcw className="w-4 h-4 mr-1" /> Zerar
-            </Button>
+            <div className="flex gap-2 flex-wrap">
+              <GuidedTour
+                moduleKey="checkout"
+                title="Checkout & Pagamentos"
+                steps={[
+                  { title: "Escolha o método", body: "Na aba Simular pagamentos, teste Pix, Cartão (até 12x) e Boleto." },
+                  { title: "Observe o status", body: "Pix é aprovado em segundos; boleto fica pendente até a baixa simulada; cartão pode recusar." },
+                  { title: "Acompanhe o painel", body: "Cards de Aprovado/Pendente/Reembolsado e distribuição por método em tempo real." },
+                  { title: "Compare gateways", body: "Veja taxas, prazos e cobertura na aba Comparativo." },
+                  { title: "Parametrize", body: "Ative/desative recuperação automática, baixa automática e parcelamento.", hint: "Tudo client-side — nada toca o banco real." },
+                ]}
+              />
+              <Button variant="ghost" onClick={() => { resetPagtos(); resetParams(); toast.message("Zerado."); }}>
+                <RotateCcw className="w-4 h-4 mr-1" /> Zerar
+              </Button>
+            </div>
           </div>
 
           <Tabs defaultValue="painel" className="mt-6">
