@@ -163,21 +163,16 @@ export const updateQuote = createServerFn({ method: "POST" })
 export const acceptQuote = createServerFn({ method: "POST" })
   .inputValidator((data) => acceptQuoteSchema.parse(data))
   .handler(async ({ data }) => {
-    const { getRequest } = await import("@tanstack/react-start/server");
-    const req = getRequest();
     const supabase = await getAdmin();
-    const ip = req ? clientIp(req) : null;
-    const ua = req?.headers.get("user-agent") ?? null;
 
     const { error } = await supabase
       .from("quotes")
       .update({
         accepted_at: new Date().toISOString(),
-        accepted_ip: ip,
-        accepted_user_agent: ua,
+        accepted_user_agent: data.userAgent,
         accepted_terms: data.terms,
         status: "accepted",
-      })
+      } as never)
       .eq("id", data.id);
 
     if (error) throw new Error(`Não foi possível registrar o aceite: ${error.message}`);
