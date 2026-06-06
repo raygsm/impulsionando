@@ -14,6 +14,27 @@ import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { MODULE_DETAILS } from "@/components/marketing/moduleDetails";
 import type { ModuleDetail } from "@/components/marketing/ModuleDetailDialog";
 import { MOTHER_MODULES, type MotherModule } from "@/data/motherModules";
+import { DemoContractCTA } from "@/components/demo/DemoContractCTA";
+
+/** Valor fictício de referência por slug (R$/mês) — usado apenas na tela demo. */
+const DEMO_REFERENCE_AMOUNT: Record<string, number> = {
+  crm: 247, whatsapp: 197, atendimento: 397, agenda: 147, reservas: 147,
+  eventos: 197, checkout: 247, commerce: 247, pagamentos: 247,
+  produtos: 147, afiliados: 297, fidelizacao: 297, estoque: 147,
+  pdv: 197, delivery: 197, prontuario: 297, saude: 297,
+  area_paciente: 97, area_cliente: 97, bi: 197, permissoes: 0,
+  white_label: 997, custom: 997, viagens: 247, followups: 147,
+  automacao: 247, erp: 397, sites: 197, fiscal: 247, integracoes: 197,
+};
+/** Rota demo interativa por slug, quando disponível. */
+const DEMO_TEST_ROUTE: Record<string, "/demo/afiliados" | "/demo/checkout" | "/demo/eventos"> = {
+  fidelizacao: "/demo/afiliados",
+  afiliados: "/demo/afiliados",
+  commerce: "/demo/checkout",
+  checkout: "/demo/checkout",
+  pagamentos: "/demo/checkout",
+  eventos: "/demo/eventos",
+};
 
 const WHATSAPP_BASE =
   "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20contratar%20o%20m%C3%B3dulo%20";
