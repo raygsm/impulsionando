@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TrialRouteImport } from './routes/trial'
+import { Route as TesteRouteImport } from './routes/teste'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SolucoesRouteImport } from './routes/solucoes'
 import { Route as SobreRouteImport } from './routes/sobre'
@@ -166,6 +167,11 @@ const UnsubscribeRoute = UnsubscribeRouteImport.update({
 const TrialRoute = TrialRouteImport.update({
   id: '/trial',
   path: '/trial',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TesteRoute = TesteRouteImport.update({
+  id: '/teste',
+  path: '/teste',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermosRoute = TermosRouteImport.update({
@@ -976,6 +982,7 @@ export interface FileRoutesByFullPath {
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
   '/termos': typeof TermosRoute
+  '/teste': typeof TesteRoute
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
@@ -1123,6 +1130,7 @@ export interface FileRoutesByTo {
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
   '/termos': typeof TermosRoute
+  '/teste': typeof TesteRoute
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
@@ -1266,6 +1274,7 @@ export interface FileRoutesById {
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
   '/termos': typeof TermosRoute
+  '/teste': typeof TesteRoute
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/access-profiles': typeof AuthenticatedAccessProfilesRoute
@@ -1417,6 +1426,7 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/solucoes'
     | '/termos'
+    | '/teste'
     | '/trial'
     | '/unsubscribe'
     | '/access-profiles'
@@ -1564,6 +1574,7 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/solucoes'
     | '/termos'
+    | '/teste'
     | '/trial'
     | '/unsubscribe'
     | '/access-profiles'
@@ -1706,6 +1717,7 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/solucoes'
     | '/termos'
+    | '/teste'
     | '/trial'
     | '/unsubscribe'
     | '/_authenticated/access-profiles'
@@ -1857,6 +1869,7 @@ export interface RootRouteChildren {
   SobreRoute: typeof SobreRoute
   SolucoesRoute: typeof SolucoesRoute
   TermosRoute: typeof TermosRoute
+  TesteRoute: typeof TesteRoute
   TrialRoute: typeof TrialRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
@@ -1919,6 +1932,13 @@ declare module '@tanstack/react-router' {
       path: '/trial'
       fullPath: '/trial'
       preLoaderRoute: typeof TrialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teste': {
+      id: '/teste'
+      path: '/teste'
+      fullPath: '/teste'
+      preLoaderRoute: typeof TesteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/termos': {
@@ -3260,6 +3280,7 @@ const rootRouteChildren: RootRouteChildren = {
   SobreRoute: SobreRoute,
   SolucoesRoute: SolucoesRoute,
   TermosRoute: TermosRoute,
+  TesteRoute: TesteRoute,
   TrialRoute: TrialRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
