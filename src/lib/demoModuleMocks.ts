@@ -362,28 +362,124 @@ export function createAgendaMock(nicho = "servicos") {
   return { config, profs, servs, agds, espera, params };
 }
 
+export const CRM_DEFAULT_PARAMS = {
+  lgpd: true,
+  followupAuto: true,
+  leadScoring: true,
+  roundRobin: false,
+  ativarFunis: true,
+  ativarTags: true,
+  exigirOrigem: true,
+  ativarReativacao: true,
+  boasVindasLead: true,
+  boasVindasCliente: true,
+  pesquisaPosConversao: false,
+  tarefaAutoNovoLead: true,
+  distribuirAuto: false,
+  exigirResponsavel: true,
+  permitirSemWhats: false,
+  permitirSemEmail: true,
+  registrarLogsComunicacao: true,
+  registrarHistoricoCliente: true,
+};
+export type CrmParams = typeof CRM_DEFAULT_PARAMS;
+
 export function createCrmMock() {
   const now = new Date().toISOString();
   const leads = [
-    { id: uid("ld"), nome: "Clínica Vitalis", email: "contato@vitalis.demo", telefone: "(11) 90000-0101", origem: "Google Ads", estagio: "Novo", valor: 6800, score: 78, tags: ["saúde"], criadoEm: now },
-    { id: uid("ld"), nome: "Wagner Miller Produções", email: "wmp@demo.com", telefone: "(21) 99000-0202", origem: "Indicação", estagio: "Qualificado", valor: 12400, score: 92, tags: ["eventos", "quente"], criadoEm: now },
-    { id: uid("ld"), nome: "Studio Beleza Pura", email: "studio@demo.com", telefone: "(11) 90000-0303", origem: "Instagram", estagio: "Proposta", valor: 3900, score: 70, tags: ["agenda"], criadoEm: now },
-    { id: uid("ld"), nome: "Bar Mar Azul", email: "bar@demo.com", telefone: "(21) 99000-0404", origem: "Site", estagio: "Ganho", valor: 8200, score: 96, tags: ["pdv", "eventos"], criadoEm: now },
+    { id: uid("ld"), nome: "Ana Souza", email: "ana@demo.com", telefone: "(11) 90000-0001", origem: "Google Ads", estagio: "Novo lead", valor: 4900, score: 72, tags: ["crm"], criadoEm: now },
+    { id: uid("ld"), nome: "Marcelo Lima", email: "marcelo@demo.com", telefone: "(11) 90000-0002", origem: "Instagram", estagio: "Qualificação", valor: 8200, score: 84, tags: ["whatsapp", "crm"], criadoEm: now },
+    { id: uid("ld"), nome: "Patrícia Gomes", email: "patricia@demo.com", telefone: "(21) 99000-0003", origem: "Indicação", estagio: "Proposta enviada", valor: 12400, score: 91, tags: ["plano-completo"], criadoEm: now },
+    { id: uid("ld"), nome: "Clínica Vitalis", email: "contato@vitalis.demo", telefone: "(11) 90000-0101", origem: "Google Ads", estagio: "Primeiro contato", valor: 6800, score: 78, tags: ["saúde"], criadoEm: now },
+    { id: uid("ld"), nome: "Bar Mar Azul", email: "bar@demo.com", telefone: "(21) 99000-0404", origem: "Site", estagio: "Contratado", valor: 8200, score: 96, tags: ["eventos"], criadoEm: now },
   ];
   const atvs = [
-    { id: uid("at"), leadId: leads[1].id, tipo: "whatsapp" as CrmActivityType, titulo: "Enviar proposta WMP com módulos Agenda + Parceiros", data: now, concluida: false },
-    { id: uid("at"), leadId: leads[2].id, tipo: "tarefa" as CrmActivityType, titulo: "Validar regras de agenda e no-show", data: now, concluida: true },
+    { id: uid("at"), leadId: leads[1].id, tipo: "whatsapp" as CrmActivityType, titulo: "TESTE — DEMONSTRAÇÃO — Enviar proposta CRM + WhatsApp", data: now, concluida: false },
+    { id: uid("at"), leadId: leads[2].id, tipo: "tarefa" as CrmActivityType, titulo: "Validar regras de funil e responsável", data: now, concluida: true },
   ];
   const tpls = [
-    { id: uid("tp"), nome: "Proposta modular", canal: "email" as CrmTemplateChannel, corpo: "Olá {nome}, segue proposta com módulos específicos para sua operação." },
-    { id: uid("tp"), nome: "Follow-up orçamento", canal: "whatsapp" as CrmTemplateChannel, corpo: "Oi {nome}! Posso te mostrar a demo do módulo que resolve seu gargalo?" },
+    { id: uid("tp"), nome: "Boas-vindas — novo lead", canal: "email" as CrmTemplateChannel, corpo: "TESTE — DEMONSTRAÇÃO — VERSÃO TESTE\n\nOlá {nome}, recebemos seu interesse. Em breve um consultor entra em contato." },
+    { id: uid("tp"), nome: "Follow-up proposta", canal: "whatsapp" as CrmTemplateChannel, corpo: "TESTE — DEMONSTRAÇÃO — VERSÃO TESTE\n\nOi {nome}! Posso esclarecer dúvidas sobre a proposta enviada?" },
+    { id: uid("tp"), nome: "Reativação", canal: "whatsapp" as CrmTemplateChannel, corpo: "TESTE — DEMONSTRAÇÃO — VERSÃO TESTE\n\n{nome}, faz um tempo que não conversamos. Posso te mostrar novidades?" },
   ];
   const autos = [
     { id: uid("au"), nome: "Lead quente → WhatsApp consultivo", gatilho: "score_maior_80", acao: "abrir_conversa:consultor", ativa: true },
-    { id: uid("au"), nome: "Proposta sem resposta → lembrete", gatilho: "proposta_48h", acao: "enviar_template:Follow-up", ativa: true },
+    { id: uid("au"), nome: "Proposta sem resposta 48h → lembrete", gatilho: "proposta_48h", acao: "enviar_template:Follow-up proposta", ativa: true },
+    { id: uid("au"), nome: "Novo lead → boas-vindas", gatilho: "lead_criado", acao: "enviar_template:Boas-vindas — novo lead", ativa: true },
   ];
-  const params = { lgpd: true, followupAuto: true, leadScoring: true, roundRobin: true };
-  return { leads, atvs, tpls, autos, params };
+
+  const clientes = [
+    { id: uid("cl"), nome: "Clínica Saúde Mais", documento: "12.345.678/0001-90", email: "contato@saudemais.demo", telefone: "(11) 3000-1000", produto: "CRM Profissional", plano: "Plano Profissional", status: "Ativo" as const },
+    { id: uid("cl"), nome: "Restaurante Villa Rio", documento: "23.456.789/0001-01", email: "comercial@villario.demo", telefone: "(21) 3000-2000", produto: "WhatsApp Inteligente", plano: "Plano Inicial", status: "Ativo" as const },
+    { id: uid("cl"), nome: "Andrade & Costa Advocacia", documento: "34.567.890/0001-12", email: "juridico@andradecosta.demo", telefone: "(11) 3000-3000", produto: "Plano Completo", plano: "Plano Completo", status: "Ativo" as const },
+  ];
+  const empresas = clientes.map((c) => ({ id: uid("emp"), razaoSocial: c.nome, cnpj: c.documento, segmento: c.nome.includes("Clínica") ? "Saúde" : c.nome.includes("Restaurante") ? "Alimentação" : "Jurídico" }));
+  const produtos = [
+    { id: uid("pr"), nome: "CRM Profissional", preco: 247, descricao: "Leads, funis, automações e dashboards." },
+    { id: uid("pr"), nome: "WhatsApp Inteligente", preco: 197, descricao: "Inbox, templates e fluxos automatizados." },
+    { id: uid("pr"), nome: "Agenda Online", preco: 147, descricao: "Reservas, profissionais e lembretes." },
+  ];
+  const planos = [
+    { id: uid("pl"), nome: "Plano Inicial", preco: 197, ciclo: "mensal", itens: ["CRM básico", "1 usuário"] },
+    { id: uid("pl"), nome: "Plano Profissional", preco: 397, ciclo: "mensal", itens: ["CRM completo", "3 usuários", "Automações"] },
+    { id: uid("pl"), nome: "Plano Completo", preco: 697, ciclo: "mensal", itens: ["Todos os módulos", "Usuários ilimitados"] },
+  ];
+  const servicos = [
+    { id: uid("sv"), nome: "Onboarding assistido", preco: 480, duracao: "5 dias" },
+    { id: uid("sv"), nome: "Consultoria comercial", preco: 980, duracao: "10 dias" },
+    { id: uid("sv"), nome: "Treinamento da equipe", preco: 580, duracao: "3 dias" },
+  ];
+  const prazosDias = [
+    { id: uid("pz"), nome: "Retorno ao novo lead", dias: 3 },
+    { id: uid("pz"), nome: "Validade de proposta", dias: 5 },
+    { id: uid("pz"), nome: "Reativação de cliente inativo", dias: 30 },
+    { id: uid("pz"), nome: "Janela de recompra", dias: 90 },
+    { id: uid("pz"), nome: "Cobrança em atraso", dias: 7 },
+  ];
+  const funis = [{ id: uid("fn"), nome: "Funil Comercial Padrão", ativo: true }];
+  const etapas = ["Novo lead", "Primeiro contato", "Qualificação", "Proposta enviada", "Aguardando pagamento", "Contratado", "Onboarding", "Reativação"].map((nome, i) => ({ id: uid("et"), funilId: funis[0].id, nome, ordem: i + 1 }));
+  const regras = [
+    { id: uid("rg"), nome: "Sem resposta 3 dias → Reativação", quando: "lead sem interação por 3 dias", entao: "mover para etapa Reativação", ativa: true },
+    { id: uid("rg"), nome: "Proposta enviada → tarefa de follow-up", quando: "etapa = Proposta enviada", entao: "criar tarefa de follow-up em 2 dias", ativa: true },
+    { id: uid("rg"), nome: "Score > 80 → distribuir vendedor sênior", quando: "score do lead > 80", entao: "atribuir ao vendedor sênior", ativa: false },
+  ];
+  const tags = ["quente", "frio", "vip", "indicação", "saúde", "eventos", "jurídico", "alimentação"].map((t) => ({ id: uid("tg"), nome: t }));
+  const origens = ["Google Ads", "Instagram", "WhatsApp", "Site", "Indicação", "Tráfego orgânico"].map((o) => ({ id: uid("og"), nome: o }));
+  const campanhas = [
+    { id: uid("cp"), nome: "Campanha Google CRM", canal: "Google Ads", status: "Ativo" as const, leads: 24 },
+    { id: uid("cp"), nome: "Campanha WhatsApp Inteligente", canal: "WhatsApp", status: "Ativo" as const, leads: 18 },
+    { id: uid("cp"), nome: "Campanha Plano Teste", canal: "Site", status: "Configurado" as const, leads: 9 },
+    { id: uid("cp"), nome: "Campanha Reativação", canal: "E-mail", status: "Pendente" as const, leads: 6 },
+  ];
+  const followups = [
+    { id: uid("fu"), leadId: leads[2].id, descricao: "Confirmar envio do contrato", quando: now, status: "Pendente" as const },
+    { id: uid("fu"), leadId: leads[1].id, descricao: "Enviar vídeo demonstrativo", quando: now, status: "Concluído" as const },
+  ];
+  const usuarios = [
+    { id: uid("us"), nome: "Administrador Demo", email: "admin@demo.com", papel: "Administrador", status: "Ativo" as const },
+    { id: uid("us"), nome: "Vendedor Demo", email: "vendas@demo.com", papel: "Vendedor", status: "Ativo" as const },
+    { id: uid("us"), nome: "Atendimento Demo", email: "atendimento@demo.com", papel: "Atendimento", status: "Ativo" as const },
+    { id: uid("us"), nome: "Financeiro Demo", email: "financeiro@demo.com", papel: "Financeiro", status: "Ativo" as const },
+  ];
+  type PermAcao = "ver" | "criar" | "editar" | "excluir";
+  const permissoes: { papel: string; acao: PermAcao; permitido: boolean }[] = [];
+  for (const u of ["Administrador", "Vendedor", "Atendimento", "Financeiro"]) {
+    for (const a of ["ver", "criar", "editar", "excluir"] as PermAcao[]) {
+      permissoes.push({ papel: u, acao: a, permitido: u === "Administrador" || (u === "Vendedor" && a !== "excluir") || (u === "Atendimento" && (a === "ver" || a === "criar")) || (u === "Financeiro" && a === "ver") });
+    }
+  }
+  const logs = [
+    { id: uid("lg"), quando: now, usuario: "Administrador Demo", acao: "Seed inicial dos dados do CRM (DEMO)" },
+    { id: uid("lg"), quando: now, usuario: "Vendedor Demo", acao: "Criou lead Marcelo Lima" },
+    { id: uid("lg"), quando: now, usuario: "Atendimento Demo", acao: "Enviou template Boas-vindas (Simulado — DEMO)" },
+  ];
+
+  return {
+    leads, atvs, tpls, autos, params: CRM_DEFAULT_PARAMS,
+    clientes, empresas, produtos, planos, servicos, prazosDias,
+    funis, etapas, regras, tags, origens, campanhas, followups,
+    usuarios, permissoes, logs,
+  };
 }
 
 export function createWhatsAppMock() {

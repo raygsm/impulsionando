@@ -1,70 +1,99 @@
-# Demos por nicho — começando por Eventos / WMP
 
-Hoje as demos (`/demo/crm`, `/demo/agenda`, `/demo/checkout`, `/demo/whatsapp`, etc.) usam o mesmo mock genérico, independente do nicho. O objetivo é fazer cada demo refletir o nicho escolhido **e** criar uma página agregadora por nicho — começando por **Eventos / WMP** (DJs, artistas, contratantes).
+# MÓDULO 1 — CRM (Bloco 1/4) — Plano de execução
 
-## 1. Filtro `?nicho=...` nas demos existentes
+Vou expandir a DEMO já existente em `/demo/crm` (não recriar). O CRM hoje tem 7 abas (Painel, Leads, Pipeline, Atividades, Templates, Automações, Parametrização) e usa `createCrmMock()` + `useDemoState` para persistência local. Vou aproveitar 100% disso e acrescentar o que falta para atender o briefing, sem tocar em rotas, auth, banco, checkout real ou outros módulos.
 
-Criar um helper único `src/lib/demoNicho.ts`:
+## Escopo (apenas /demo/crm)
 
-- `useNichoParam()` lê `?nicho=eventos` da URL (TanStack search param) com fallback `"generico"`.
-- `getNichoMock(nicho, modulo)` devolve dataset específico (clientes, serviços, produtos, mensagens, KPIs) por par `(nicho, modulo)`.
-- Catálogo inicial cobre `eventos` em: `crm`, `agenda`, `checkout`, `whatsapp`, `parceiros`, `afiliados`, `cliente-final`, `simulador`. Demais nichos caem no mock atual.
+### 1. Rota e contratação-DEMO
+- Manter rota `/demo/crm` (já existe, com `DemoModeBanner` e `DemoContractCTA`).
+- Garantir que `DemoContractCTA(slug="crm")` registre contratação fictícia em `localStorage` com status `PAGO — DEMO` e redirecione/permaneça em `/demo/crm`. Se o helper já marca isso (em `src/lib/demoContracting.ts`), apenas exibir badge "PAGO — DEMO" no topo quando o flag estiver presente; caso contrário, gravar `imp.demo.crm.contracted = true` ao clicar no CTA.
+- Adicionar chancela permanente no topo da página: `DEMONSTRAÇÃO — VERSÃO TESTE` (badge fixa, separada do `DemoModeBanner` existente).
 
-Em cada `demo.<modulo>.tsx`:
-- Trocar arrays mockados embutidos por `getNichoMock(nicho, "<modulo>")`.
-- Substituir rótulos genéricos (“Cliente”, “Serviço”, “Venda”) pelos termos do nicho (“Contratante”, “Cachê”, “Evento”, “Casa noturna”) via mapa de labels.
-- Mostrar uma badge no topo: “Demonstração — nicho: Eventos (WMP)”.
+### 2. Mock próprio do CRM (expandir `createCrmMock`)
+Em `src/lib/demoModuleMocks.ts`, manter os dados atuais e adicionar:
+- `clientes` (Clínica Saúde Mais, Restaurante Villa Rio, Andrade & Costa)
+- `empresas` (PJ vinculadas aos clientes)
+- `produtos` (CRM Profissional, WhatsApp Inteligente, Agenda Online)
+- `planos` (Inicial, Profissional, Completo) com preço e ciclo
+- `servicos` (consultoria, onboarding, suporte)
+- `prazosDias` (retorno 3d, proposta 5d, reativação 30d, recompra 90d, cobrança 7d)
+- `funis` + `etapas` (Funil Comercial Padrão com as 8 etapas do briefing)
+- `regras` (ex.: lead sem resposta 3d → mover para Reativação)
+- `tags`, `origens`, `campanhas` (listas do briefing)
+- `followups`, `usuarios` (Admin/Vendedor/Atendimento/Financeiro Demo), `permissoes`, `logs`
+- Bump da chave de marker para `crm:v3` para que visitantes existentes recebam o mock atualizado uma vez.
 
-Para Eventos / WMP, os datasets passam a usar:
-- CRM: leads = contratantes (casas, prefeituras, formaturas) com pipeline “Briefing → Proposta → Contrato → Sinal pago → Evento → Pós-evento”.
-- Agenda: bloqueios por DJ/artista, sets, passagem de som, turnês.
-- Checkout: sinal + saldo, cachê fechado, taxa WMP, repasse ao parceiro.
-- WhatsApp: templates “Confirmação de evento”, “Lembrete 72h”, “Aviso de cancelamento com multa”.
-- Parceiros: já é WMP, só ajustar o link de retorno para o agregador.
-- Afiliados: produtores/agentes que indicam contratos.
-- Cliente-final: visão do contratante (status do contrato, sinal, rider técnico).
-- Simulador ROI: presets de cachê médio, nº eventos/mês, comissão WMP.
+### 3. Novas áreas / abas no `/demo/crm`
+Reorganizar o `Tabs` atual em **grupos** para caber as 24 áreas sem poluir mobile (usar `Tabs` aninhadas ou agrupar em seções rolante por grupo + sub-abas). Áreas a entregar:
 
-## 2. Página agregadora `/demo/nicho/$slug`
+1. Visão Geral (7 cards comerciais do briefing + 3 CTAs)
+2. Dashboard (KPIs já existentes + porEstagio + receita)
+3. Leads (já existe — manter)
+4. Clientes (nova) — tabela CRUD local
+5. Empresas (nova)
+6. Produtos (nova)
+7. Planos (nova)
+8. Serviços (nova)
+9. Prazos em Dias (nova — lista de prazos configuráveis)
+10. Funis (nova)
+11. Etapas (nova, dentro de Funis)
+12. Regras (nova — quando X → ação Y)
+13. Tags (nova)
+14. Origens (nova)
+15. Campanhas (nova)
+16. Follow-ups (nova)
+17. Atividades (já existe — manter)
+18. Templates (já existe — manter, sob "Comunicação")
+19. Automações (já existe — manter)
+20. Usuários (nova — lista mock)
+21. Permissões (nova — matriz por papel × ação, toggle local)
+22. Comunicação (engloba Templates + simulação de envio com prefixo `TESTE — DEMONSTRAÇÃO — VERSÃO TESTE`)
+23. Logs (nova — registro local de ações)
+24. Jornada Guiada (nova — passo-a-passo com setas)
+25. Parametrizações (expandir a aba atual com os 16 toggles SIM/NÃO do briefing + tooltips)
 
-Novo arquivo `src/routes/demo.nicho.$slug.tsx`:
+Rodapé da página com:
+- Botão **OUTROS MÓDULOS** (reaproveitar `DemoModuleSwitcher`)
+- Botão **ZERAR DADOS DA DEMO** (já existe, ajustar mensagem para a do briefing e zerar apenas chaves `imp.demo.crm.*`)
+- Bloco **CTA de contratação real**: "Contratar CRM real", "Adicionar CRM ao orçamento", "Ver planos", "Falar com consultor" linkando para `/planos`, `/orcamento?modulo=crm`, `/contato`.
 
-- Carrega o mesmo `getNichoMock(slug, ...)` para todos os módulos relevantes do nicho.
-- Layout em abas (Tabs do shadcn) com a jornada WMP:
-  1. **Briefing & Contratante** (CRM)
-  2. **Disponibilidade & Agenda** (Agenda)
-  3. **Parceiros / Artistas** (Parceiros — regras 72h, multa, bônus)
-  4. **Contrato & Sinal** (Checkout)
-  5. **Comunicação** (WhatsApp + Email)
-  6. **Resultado** (ROI / financeiro do evento)
-- Cada aba reusa os componentes-chave das demos atuais (cards/listas), não duplica lógica — importa de `demo.<modulo>.tsx` quando viável; caso o componente esteja inline, extrai para `src/components/demo/<modulo>/...` em uma única passagem mínima.
-- Botão “Abrir demo completa do módulo” em cada aba leva para `/demo/<modulo>?nicho=eventos`.
+### 4. Parametrizações SIM/NÃO (16 toggles)
+Substituir o `Params` atual por todos os 16 itens do briefing com tooltips. Persistência: mesma chave `crm.params` (com merge para chaves novas mantendo defaults). Tooltips usando `Tooltip` do shadcn já no projeto.
 
-`demo.nicho.$slug.tsx` só suporta `slug = "eventos"` no primeiro passo; outros slugs mostram um estado “Em breve” com link para `/demo/modulos`.
+### 5. Estados visuais e feedback
+- Padronizar badges: Ativo / Inativo / Configurado / Aguardando configuração / Simulado — DEMO / Enviado — DEMO / Pendente / Concluído / Falhou / Aguardando credenciais externas / PAGO — DEMO.
+- Toda ação (criar, editar, excluir, simular envio) dispara `toast` com mensagem clara.
+- Toda comunicação simulada exibe prefixo `TESTE — DEMONSTRAÇÃO — VERSÃO TESTE` no corpo da mensagem renderizada.
 
-## 3. Pontos de entrada
+### 6. Ajuda contextual
+Pequenos componentes `<HelpTip>` (já existe em `src/components/demo/HelpTip.tsx`) ao lado de parâmetros, status e botões críticos com os textos do briefing.
 
-- `src/components/marketing/NichoPage.tsx` (rota `/nichos/$slug`): se `slug === "eventos"`, CTA principal vira “Abrir demo do nicho” → `/demo/nicho/eventos`. Mantém CTA secundário para `/demo/modulos`.
-- `src/routes/showroom.eventos.tsx`: adicionar bloco final “Veja em ação” → `/demo/nicho/eventos`.
-- `src/routes/demo.index.tsx`: nova seção “Demos por nicho” com card “Eventos / WMP”.
-- `src/routes/modulos.$slug.tsx` (módulos de WMP — parceiros, etc.): botão “Testar no contexto Eventos” → `/demo/nicho/eventos`.
+### 7. Responsividade
+Tabs em `flex-wrap`; em mobile, agrupar por accordions quando a lista de abas ficar > 8 itens. Botões grandes nas áreas de cadastro. Modais usam `Dialog` shadcn padrão.
 
-## 4. Detalhes técnicos
+### 8. Reset local — escopo restrito ao CRM
+Atualizar o `resetAll` da página para limpar somente as chaves `imp.demo.crm.*` e o marker `imp.demo.mock.crm`. Mensagens exatamente como o briefing pede.
 
-- Search params validados com `zodValidator` + `fallback`: `z.object({ nicho: fallback(z.enum(["eventos","fitness","saude","estetica","generico"]), "generico").default("generico") })` num arquivo compartilhado, reaproveitado por cada demo.
-- Persistência local (`useDemoState` já existente) recebe sufixo do nicho na chave, para não misturar dados entre nichos.
-- Nenhuma rota existente é apagada; URLs sem `?nicho` continuam funcionando exatamente como hoje (fallback `"generico"`).
-- Nenhuma alteração de backend / schema; tudo frontend + mock.
+## Arquivos afetados
 
-## 5. Fora de escopo desta rodada
+```text
+edit  src/lib/demoModuleMocks.ts        # createCrmMock expandido (clientes, produtos, planos, funis, etapas, etc.)
+edit  src/routes/demo.crm.tsx            # nova estrutura de abas, parametrizações ampliadas, CTAs reais, badge VERSÃO TESTE, reset local restrito
+new   src/components/demo/crm/           # subcomponentes por aba (Clientes, Empresas, Produtos, Planos, Funis, Regras, Permissoes, Logs, JornadaGuiada, etc.)
+edit  src/lib/demoContracting.ts         # se necessário, marcar PAGO — DEMO para slug "crm"
+```
 
-- Demos específicas para Fitness / Saúde / Estética (mantêm o mock atual; ficam para próximas rodadas usando o mesmo helper).
-- Mexer em rotas autenticadas (`/_authenticated/*`).
-- Alterar conteúdo dos e-mails/WhatsApp reais — só os templates de demonstração.
+Nenhuma outra rota, módulo, componente compartilhado, autenticação, banco, edge function ou checkout real será tocado. Outros módulos da DEMO permanecem intactos.
 
-## Entregáveis
+## Critérios de aceite do Bloco 1/4
+1. `/demo/crm` carrega com banner permanente `DEMONSTRAÇÃO — VERSÃO TESTE`.
+2. CTA de contratação marca `PAGO — DEMO` e libera o conteúdo do CRM.
+3. Mock do CRM tem leads, clientes, empresas, produtos, planos, funis, etapas, origens, campanhas, usuários — separado de outros módulos.
+4. Visão Geral com os 7 cards e 3 CTAs do briefing.
+5. Parametrizações com os 16 toggles SIM/NÃO + tooltips.
+6. Botões "OUTROS MÓDULOS", "ZERAR DADOS DA DEMO" e CTAs de contratação real presentes no rodapé.
+7. Reset local zera só dados do CRM e exibe as mensagens exatas do briefing.
+8. Nenhum outro módulo é alterado.
 
-- `src/lib/demoNicho.ts` (helper + datasets WMP)
-- `src/routes/demo.nicho.$slug.tsx` (nova rota agregadora)
-- Edição pontual de cada `demo.<modulo>.tsx` listado para consumir o helper
-- Ajustes de CTA em `NichoPage.tsx`, `showroom.eventos.tsx`, `demo.index.tsx`, `modulos.$slug.tsx`
+Blocos 2/4, 3/4 e 4/4 do briefing serão tratados em prompts seguintes.
