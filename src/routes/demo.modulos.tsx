@@ -268,11 +268,7 @@ function ModuleCard({
       <div className="mt-auto pt-4 flex items-center gap-2">
         {contracted ? (
           <>
-            <Button asChild size="sm" className="bg-gradient-primary flex-1">
-              <Link to="/demo/cliente-final">
-                <Sparkles className="w-4 h-4 mr-1" /> Testar recursos
-              </Link>
-            </Button>
+            <TestarRecursosButton slug={m.slug} />
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button size="sm" variant="outline" onClick={onUncontract}>
@@ -308,3 +304,22 @@ function ModuleCard({
     </Card>
   );
 }
+
+/** Mapeia slug do catálogo → rota demo interativa específica (quando existir). */
+const INTERACTIVE_DEMO: Record<string, "/demo/afiliados" | "/demo/checkout" | "/demo/eventos" | "/demo/cliente-final"> = {
+  fidelizacao: "/demo/afiliados",
+  commerce: "/demo/checkout",
+  eventos: "/demo/eventos",
+};
+
+function TestarRecursosButton({ slug }: { slug: string }) {
+  const target = INTERACTIVE_DEMO[slug] ?? "/demo/cliente-final";
+  return (
+    <Button asChild size="sm" className="bg-gradient-primary flex-1">
+      <Link to={target}>
+        <Sparkles className="w-4 h-4 mr-1" /> Testar recursos
+      </Link>
+    </Button>
+  );
+}
+
