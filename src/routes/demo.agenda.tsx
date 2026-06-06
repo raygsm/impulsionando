@@ -396,31 +396,51 @@ function NovoServ({ onCreate }: { onCreate: (s: Servico) => void }) {
 }
 function NovoAgendamento({ profs, servs, onCreate, prefill, agds }: { profs: Profissional[]; servs: Servico[]; onCreate: (a: Agendamento) => void; prefill?: { cliente: string; telefone: string } | null; agds: Agendamento[] }) {
   const [f, setF] = useState({ profId: "", servicoId: "", cliente: "", telefone: "", data: new Date().toISOString().slice(0, 10), hora: "09:00" });
+  const validate = useServerFn(validateAgendamento);
   useEffect(() => {
     if (prefill?.cliente) setF((prev) => ({ ...prev, cliente: prefill.cliente, telefone: prefill.telefone ?? "" }));
   }, [prefill?.cliente, prefill?.telefone]);
 
-  const conflito = useMemo(
-    () => agds.find((a) => a.profId === f.profId && a.data === f.data && a.hora === f.hora && a.status !== "cancelado"),
-    [agds, f.profId, f.data, f.hora],
-  );
+  const conflitos: ConflictAgd[] = useMemo(() => {
+    if (!f.profId) return [];
+    return findConflicts(
+      agds.map((a) => ({ ...a, servicoNome: servs.find((s) => s.id === a.servicoId)?.nome })),
+      f.profId,
+      f.data,
+      f.hora,
+    );
+  }, [agds, servs, f.profId, f.data, f.hora]);
 
-  function handleAgendar() {
-    if (conflito) {
-      const profNome = profs.find((p) => p.id === f.profId)?.nome ?? "este profissional";
-      const ok = window.confirm(
-        `Conflito de horário: ${profNome} já tem "${conflito.cliente}" às ${f.hora} em ${f.data}.\n\nDeseja agendar mesmo assim (gera double-booking)?`,
-      );
+  async function handleAgendar() {
+    const profNome = profs.find((p) => p.id === f.profId)?.nome ?? "este profissional";
+    const payloadAgds: ConflictAgd[] = agds.map((a) => ({ ...a, servicoNome: servs.find((s) => s.id === a.servicoId)?.nome }));
+
+    // 1ª chamada: server function valida e BLOQUEIA double-booking sem confirmação explícita.
+    try {
+      await validate({ data: { agds: payloadAgds, profId: f.profId, profNome, data: f.data, hora: f.hora } });
+    } catch (err: any) {
+      const msg: string = err?.message ?? "Conflito de horário.";
+      const ok = window.confirm(`${msg}\n\nDeseja agendar mesmo assim (gera double-booking)?`);
       if (!ok) {
         toast.error("Agendamento cancelado por conflito.");
         return;
       }
-      toast.warning("Atenção: agendamento duplicado criado no mesmo horário.");
+      // 2ª chamada: confirmação explícita server-side.
+      try {
+        await validate({ data: { agds: payloadAgds, profId: f.profId, profNome, data: f.data, hora: f.hora, allowDoubleBooking: true } });
+        toast.warning("Atenção: double-booking criado e validado pelo servidor.");
+      } catch {
+        toast.error("Falha na validação do servidor.");
+        return;
+      }
     }
+
     onCreate({ id: uid("ag"), ...f, status: "confirmado" });
     setF({ ...f, cliente: "", telefone: "" });
-    if (!conflito) toast.success("Agendamento criado");
+    if (conflitos.length === 0) toast.success("Agendamento criado");
   }
+
+  const profNomeAtual = profs.find((p) => p.id === f.profId)?.nome;
 
   return (
     <div className="grid sm:grid-cols-3 gap-2 items-end">
@@ -443,9 +463,22 @@ function NovoAgendamento({ profs, servs, onCreate, prefill, agds }: { profs: Pro
         <Label className="text-xs">Hora (qualquer horário)</Label>
         <Input type="time" value={f.hora} onChange={(e) => setF({ ...f, hora: e.target.value })} />
       </div>
-      {conflito && f.profId && (
-        <div className="sm:col-span-3 rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800/60 p-2 text-xs text-amber-900 dark:text-amber-200">
-          ⚠ Conflito: {profs.find((p) => p.id === f.profId)?.nome} já tem <strong>{conflito.cliente}</strong> às {f.hora} em {f.data}.
+      {conflitos.length > 0 && f.profId && (
+        <div className="sm:col-span-3 rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800/60 p-3 text-xs text-amber-900 dark:text-amber-200 space-y-1">
+          <div className="font-semibold">⚠ Conflito de horário detectado</div>
+          <div><strong>Profissional:</strong> {profNomeAtual}</div>
+          <div><strong>Data:</strong> {f.data} • <strong>Horário:</strong> {f.hora}</div>
+          <div><strong>Já agendados ({conflitos.length}):</strong></div>
+          <ul className="list-disc pl-5 space-y-0.5">
+            {conflitos.map((c) => (
+              <li key={c.id}>
+                {c.cliente}
+                {c.servicoNome ? ` — ${c.servicoNome}` : ""}{" "}
+                <span className="opacity-70">({c.status})</span>
+              </li>
+            ))}
+          </ul>
+          <div className="opacity-80 pt-1">O servidor bloqueará o agendamento; será necessário confirmar explicitamente para gerar double-booking.</div>
         </div>
       )}
       <Button className="sm:col-span-3 bg-gradient-primary" disabled={!f.cliente || !f.profId || !f.servicoId} onClick={handleAgendar}>
