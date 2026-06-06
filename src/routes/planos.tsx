@@ -109,16 +109,16 @@ const PLANS: Plan[] = [
 type Row = { feature: string; values: (boolean | string)[] };
 
 const COMPARE: Row[] = [
-  { feature: "Módulos principais ativos", values: ["1", "2", "3 + BI", "Múltiplos"] },
-  { feature: "Usuários", values: ["Até 3", "Até 5", "Até 10", "Sob demanda"] },
-  { feature: "Unidades / filiais", values: ["1", "1", "Até 3", "Multiempresa"] },
-  { feature: "Automações entre módulos principais", values: [false, true, true, true] },
-  { feature: "BI & Dashboards consolidados", values: [false, false, true, true] },
-  { feature: "API e webhooks", values: [false, true, true, true] },
-  { feature: "Onboarding guiado", values: ["Self-service", "1h", "4h", "Customizado"] },
-  { feature: "Suporte", values: ["E-mail/WhatsApp", "Prioritário", "Prioritário", "SLA dedicado"] },
-  { feature: "White Label / marca própria", values: [false, false, false, true] },
-  { feature: "Sistemas personalizados", values: [false, false, false, true] },
+  { feature: "Módulos principais incluídos", values: ["1", "2", "3 + BI"] },
+  { feature: "Módulos adicionais", values: ["Sim", "Sim", "Sim"] },
+  { feature: "Usuários", values: ["Até 3", "Até 5", "Até 10"] },
+  { feature: "Unidades / filiais", values: ["1", "1", "Até 3"] },
+  { feature: "Automações entre módulos", values: [false, true, true] },
+  { feature: "BI & Dashboards consolidados", values: [false, false, true] },
+  { feature: "API e webhooks", values: [false, true, true] },
+  { feature: "Onboarding guiado", values: ["Self-service", "1h", "4h"] },
+  { feature: "Suporte", values: ["E-mail/WhatsApp", "Prioritário", "Prioritário"] },
+  { feature: "Contrato mínimo", values: ["90 dias", "90 dias", "90 dias"] },
 ];
 
 const FAQ = [
