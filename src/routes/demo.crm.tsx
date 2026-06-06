@@ -54,7 +54,7 @@ function DemoCRM() {
 
   useEffect(() => {
     const marker = typeof window === "undefined" ? "crm:v2" : window.localStorage.getItem("imp.demo.mock.crm");
-    if (marker === "crm:v2" && (leads.length || atvs.length || tpls.length || autos.length)) return;
+    if (marker === "crm:v2") return;
     const mock = createCrmMock();
     setLeads(mock.leads);
     setAtvs(mock.atvs);

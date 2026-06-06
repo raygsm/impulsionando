@@ -213,7 +213,7 @@ function DemoParceiros() {
 
   useEffect(() => {
     const marker = typeof window === "undefined" ? "parceiros:v2" : window.localStorage.getItem("imp.demo.mock.parceiros");
-    if (marker === "parceiros:v2" && (parceiros.length || eventos.length || contratos.length || avisos.length || logs.length)) return;
+    if (marker === "parceiros:v2") return;
     const mock = createParceirosMock();
     setParceiros(mock.parceiros);
     setParceiroAtivoId(mock.parceiros[0]?.id ?? "");

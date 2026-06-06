@@ -53,7 +53,7 @@ function DemoWhats() {
 
   useEffect(() => {
     const marker = typeof window === "undefined" ? "whatsapp:v2" : window.localStorage.getItem("imp.demo.mock.whatsapp");
-    if (marker === "whatsapp:v2" && (contatos.length || conversas.length || tpls.length || camps.length || fluxos.length)) return;
+    if (marker === "whatsapp:v2") return;
     const mock = createWhatsAppMock();
     setContatos(mock.contatos);
     setConversas(mock.conversas);

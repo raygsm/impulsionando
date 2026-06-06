@@ -72,7 +72,7 @@ function DemoEventos() {
 
   useEffect(() => {
     const marker = typeof window === "undefined" ? "eventos:v2" : window.localStorage.getItem("imp.demo.mock.eventos");
-    if (marker === "eventos:v2" && eventos.length) return;
+    if (marker === "eventos:v2") return;
     const mock = createEventosMock();
     setEventos([mock.evento]);
     setParams(mock.params);

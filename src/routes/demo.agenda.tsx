@@ -74,7 +74,7 @@ function DemoAgenda() {
   useEffect(() => {
     const marker = `agenda:${nichoDemo}:v2`;
     const current = typeof window === "undefined" ? marker : window.localStorage.getItem("imp.demo.mock.agenda");
-    if (current === marker && (profs.length || servs.length || agds.length || espera.length)) return;
+    if (current === marker) return;
     const mock = createAgendaMock(nichoDemo);
     setProfs(mock.profs);
     setServs(mock.servs);

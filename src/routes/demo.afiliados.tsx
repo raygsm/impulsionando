@@ -72,7 +72,7 @@ function DemoAfiliados() {
 
   useEffect(() => {
     const marker = typeof window === "undefined" ? "afiliados:v2" : window.localStorage.getItem("imp.demo.mock.afiliados");
-    if (marker === "afiliados:v2" && (produtos.length || ofertas.length || afiliados.length || cupons.length || vendas.length)) return;
+    if (marker === "afiliados:v2") return;
     const mock = createAfiliadosMock();
     setProdutos(mock.produtos);
     setOfertas(mock.ofertas);
