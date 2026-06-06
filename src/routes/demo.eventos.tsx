@@ -71,10 +71,12 @@ function DemoEventos() {
   const eventoAtivo = eventos[0];
 
   useEffect(() => {
-    if (eventos.length) return;
+    const marker = typeof window === "undefined" ? "eventos:v2" : window.localStorage.getItem("imp.demo.mock.eventos");
+    if (marker === "eventos:v2" && eventos.length) return;
     const mock = createEventosMock();
     setEventos([mock.evento]);
     setParams(mock.params);
+    if (typeof window !== "undefined") window.localStorage.setItem("imp.demo.mock.eventos", "eventos:v2");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

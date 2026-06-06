@@ -71,7 +71,8 @@ function DemoAfiliados() {
   });
 
   useEffect(() => {
-    if (produtos.length || ofertas.length || afiliados.length || cupons.length || vendas.length) return;
+    const marker = typeof window === "undefined" ? "afiliados:v2" : window.localStorage.getItem("imp.demo.mock.afiliados");
+    if (marker === "afiliados:v2" && (produtos.length || ofertas.length || afiliados.length || cupons.length || vendas.length)) return;
     const mock = createAfiliadosMock();
     setProdutos(mock.produtos);
     setOfertas(mock.ofertas);
@@ -79,6 +80,7 @@ function DemoAfiliados() {
     setCupons(mock.cupons);
     setVendas(mock.vendas);
     setParams(mock.params);
+    if (typeof window !== "undefined") window.localStorage.setItem("imp.demo.mock.afiliados", "afiliados:v2");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -212,7 +212,8 @@ function DemoParceiros() {
   const [parceiroAtivoId, setParceiroAtivoId] = useState<string>("");
 
   useEffect(() => {
-    if (parceiros.length || eventos.length || contratos.length || avisos.length || logs.length) return;
+    const marker = typeof window === "undefined" ? "parceiros:v2" : window.localStorage.getItem("imp.demo.mock.parceiros");
+    if (marker === "parceiros:v2" && (parceiros.length || eventos.length || contratos.length || avisos.length || logs.length)) return;
     const mock = createParceirosMock();
     setParceiros(mock.parceiros);
     setParceiroAtivoId(mock.parceiros[0]?.id ?? "");
@@ -221,6 +222,7 @@ function DemoParceiros() {
     setMultas(mock.multas);
     setAvisos(mock.avisos);
     setLogs(mock.logs);
+    if (typeof window !== "undefined") window.localStorage.setItem("imp.demo.mock.parceiros", "parceiros:v2");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
