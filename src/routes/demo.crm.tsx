@@ -494,27 +494,41 @@ function DemoCRM() {
             </TabsContent>
           </Tabs>
 
+          {/* Barra de CTAs persistente (Bloco 45) */}
+          <CrmCtaBar onIniciarJornada={() => setJornadaOpen(true)} />
+
           {/* Rodapé: Outros Módulos / Zerar / CTA contratação real */}
-          <div className="mt-10 grid lg:grid-cols-2 gap-4">
+          <div className="mt-6 grid lg:grid-cols-2 gap-4">
             <Card className="p-5">
               <div className="font-semibold mb-2 text-sm flex items-center gap-2"><Layers className="w-4 h-4" /> Contratar o CRM real</div>
               <p className="text-xs text-muted-foreground mb-3">Pronto para sair da demonstração? Adicione o CRM ao orçamento ou veja os planos completos.</p>
               <div className="flex gap-2 flex-wrap">
                 <Button className="bg-gradient-primary" asChild><Link to="/planos">Contratar CRM real</Link></Button>
-                <Button variant="outline" asChild><Link to="/planos">Adicionar CRM ao orçamento</Link></Button>
+                <Button variant="outline" asChild><Link to="/orcamento">Adicionar CRM ao orçamento</Link></Button>
                 <Button variant="outline" asChild><Link to="/planos">Ver planos</Link></Button>
                 <Button variant="outline" asChild><Link to="/contato">Falar com consultor</Link></Button>
               </div>
             </Card>
             <Card className="p-5">
               <div className="font-semibold mb-2 text-sm">Controles da demonstração</div>
-              <p className="text-xs text-muted-foreground mb-3">Trocar para outro módulo demonstrativo ou zerar apenas os dados desta DEMO do CRM neste navegador.</p>
+              <p className="text-xs text-muted-foreground mb-3">
+                Escolha outro módulo para testar uma nova demonstração específica. Em seguida, se quiser, zere apenas os dados deste CRM neste navegador.
+              </p>
               <div className="flex gap-2 flex-wrap">
                 <DemoModuleSwitcher current="crm" size="default" variant="outline" />
                 <Button variant="destructive" onClick={resetCrm}><RotateCcw className="w-4 h-4 mr-1" />Zerar dados da DEMO</Button>
               </div>
             </Card>
           </div>
+
+          {/* Diálogo da jornada guiada */}
+          <JornadaGuiadaDialog
+            open={jornadaOpen}
+            onOpenChange={setJornadaOpen}
+            onLog={pushLog}
+            onGoto={setActiveTab}
+          />
+
         </main>
         <PublicFooter />
       </div>
