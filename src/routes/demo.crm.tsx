@@ -31,6 +31,7 @@ import { HelpTip } from "@/components/demo/HelpTip";
 import { LeadsPanel } from "@/components/demo/crm/LeadsPanel";
 import { ClientesPanel } from "@/components/demo/crm/ClientesPanel";
 import { EmpresasPanel, ProdutosPanel, PlanosPanel, ServicosPanel } from "@/components/demo/crm/CrudPanels";
+import { PrazosPanel, RegrasPanel, FunisPanel, EtapasPanel, TagsPanel, OrigensPanel, CampanhasPanel, FollowupsPanel, AutomacoesPanel, UsuariosPanel, PermissoesPanel, SimularPerfilPanel } from "@/components/demo/crm/ConfigPanels";
 import { makeDemoLog, type DemoLogInput } from "@/lib/demoCrmCrud";
 
 export const Route = createFileRoute("/demo/crm")({
@@ -53,16 +54,16 @@ type Empresa = { id: string; razaoSocial: string; cnpj: string; segmento: string
 type Produto = { id: string; nome: string; preco: number; descricao: string; categoria?: string; status?: string; prazoConsumoDias?: number; recompraAuto?: boolean; diasAviso1?: number; diasAviso2?: number; mensagemRecompra?: string; tags?: string[]; campanhas?: string[] };
 type Plano = { id: string; nome: string; preco: number; ciclo: string; itens: string[]; descricao?: string; valorSetup?: number; recorrencia?: string; contratoMinDias?: number; mensalidadesMinimas?: number; permiteAdicionais?: boolean; valorPorAdicional?: number; produtosIncluidos?: string[]; status?: string; observacoes?: string };
 type Servico = { id: string; nome: string; preco: number; duracao: string; descricao?: string; prazoEntregaDias?: number; produtoRelacionado?: string; planoRelacionado?: string; responsavel?: string; ativo?: boolean; observacoes?: string };
-type Prazo = { id: string; nome: string; dias: number };
-type Funil = { id: string; nome: string; ativo: boolean };
-type Etapa = { id: string; funilId: string; nome: string; ordem: number };
-type Regra = { id: string; nome: string; quando: string; entao: string; ativa: boolean };
-type TagItem = { id: string; nome: string };
-type Origem = { id: string; nome: string };
-type Campanha = { id: string; nome: string; canal: string; status: string; leads: number };
-type Followup = { id: string; leadId: string; descricao: string; quando: string; status: "Pendente" | "Concluído" };
-type Usuario = { id: string; nome: string; email: string; papel: string; status: "Ativo" | "Inativo" };
-type Permissao = { papel: string; acao: "ver" | "criar" | "editar" | "excluir"; permitido: boolean };
+type Prazo = { id: string; nome: string; dias: number; tipo?: string; quando?: string; evento?: string; acao?: string; canal?: string; responsavel?: string; status?: string; ativo?: boolean };
+type Funil = { id: string; nome: string; ativo: boolean; descricao?: string; produto?: string; campanha?: string; responsavel?: string; padrao?: boolean };
+type Etapa = { id: string; funilId: string; nome: string; ordem: number; cor?: string; prazoMaxDias?: number; aoEntrar?: string; aoSair?: string; descricao?: string; responsavel?: string; ativa?: boolean };
+type Regra = { id: string; nome: string; ativa: boolean; quando?: string; entao?: string; descricao?: string; impacto?: string; tooltip?: string; dependencia?: string; status?: string };
+type TagItem = { id: string; nome: string; cor?: string; categoria?: string; descricao?: string; ativa?: boolean };
+type Origem = { id: string; nome: string; tipo?: string; descricao?: string; ativa?: boolean };
+type Campanha = { id: string; nome: string; canal: string; status: string; leads: number; origem?: string; produto?: string; funil?: string; dataInicial?: string; dataFinal?: string; investimento?: number; conversoes?: number; receitaPrevista?: number };
+type Followup = { id: string; nome?: string; evento?: string; canal?: string; envios?: number; intervaloDias?: number; mensagem1?: string; mensagem2?: string; mensagem3?: string; criarTarefa?: boolean; encerrarSeResponder?: boolean; ativo?: boolean; leadId?: string; descricao?: string; quando?: string; status?: "Pendente" | "Concluído" };
+type Usuario = { id: string; nome: string; email: string; papel: string; status: string; whatsapp?: string; cargo?: string; setor?: string; observacoes?: string };
+type Permissao = { papel: string; permitido: boolean; acao?: "ver" | "criar" | "editar" | "excluir"; permissao?: string };
 type Log = { id: string; quando: string; usuario: string; acao: string };
 
 const STAGES = ["Novo lead", "Primeiro contato", "Qualificação", "Proposta enviada", "Aguardando pagamento", "Contratado", "Onboarding", "Reativação"];
@@ -206,6 +207,7 @@ function DemoCRM() {
               <TabsTrigger value="servicos"><Briefcase className="w-4 h-4 mr-1" />Serviços</TabsTrigger>
               <TabsTrigger value="prazos"><Clock className="w-4 h-4 mr-1" />Prazos</TabsTrigger>
               <TabsTrigger value="funis"><GitBranch className="w-4 h-4 mr-1" />Funis</TabsTrigger>
+              <TabsTrigger value="etapas"><GitBranch className="w-4 h-4 mr-1" />Etapas</TabsTrigger>
               <TabsTrigger value="regras"><Workflow className="w-4 h-4 mr-1" />Regras</TabsTrigger>
               <TabsTrigger value="tags"><Tag className="w-4 h-4 mr-1" />Tags</TabsTrigger>
               <TabsTrigger value="origens"><Tag className="w-4 h-4 mr-1" />Origens</TabsTrigger>
@@ -214,6 +216,7 @@ function DemoCRM() {
               <TabsTrigger value="automacoes"><Workflow className="w-4 h-4 mr-1" />Automações</TabsTrigger>
               <TabsTrigger value="usuarios"><Users className="w-4 h-4 mr-1" />Usuários</TabsTrigger>
               <TabsTrigger value="permissoes"><ShieldCheck className="w-4 h-4 mr-1" />Permissões</TabsTrigger>
+              <TabsTrigger value="simular"><ShieldCheck className="w-4 h-4 mr-1" />Simular Perfil</TabsTrigger>
               <TabsTrigger value="params"><Sparkles className="w-4 h-4 mr-1" />Parametrizações</TabsTrigger>
               <TabsTrigger value="logs"><ScrollText className="w-4 h-4 mr-1" />Logs</TabsTrigger>
               <TabsTrigger value="jornada"><BookOpen className="w-4 h-4 mr-1" />Jornada Guiada</TabsTrigger>
@@ -364,23 +367,7 @@ function DemoCRM() {
 
             {/* FOLLOW-UPS */}
             <TabsContent value="followups" className="mt-4 space-y-4">
-              <Card className="p-5">
-                <Table>
-                  <TableHeader><TableRow><TableHead>Lead</TableHead><TableHead>Descrição</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Ações</TableHead></TableRow></TableHeader>
-                  <TableBody>
-                    {followups.map((f) => (
-                      <TableRow key={f.id}>
-                        <TableCell>{leads.find((l) => l.id === f.leadId)?.nome ?? "—"}</TableCell>
-                        <TableCell>{f.descricao}</TableCell>
-                        <TableCell><Badge variant={f.status === "Concluído" ? "default" : "outline"}>{f.status}</Badge></TableCell>
-                        <TableCell className="text-right">
-                          <Button size="sm" variant="outline" onClick={() => setFollowups((p) => p.map((x) => x.id === f.id ? { ...x, status: x.status === "Pendente" ? "Concluído" : "Pendente" } : x))}>Alternar</Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </Card>
+              <FollowupsPanel followups={followups} setFollowups={setFollowups} onLog={pushLog} />
             </TabsContent>
 
             {/* PRODUTOS */}
@@ -395,114 +382,42 @@ function DemoCRM() {
 
             {/* SERVIÇOS */}
             <TabsContent value="servicos" className="mt-4 space-y-4">
-              <ServicosPanel
-                servicos={servicos}
-                setServicos={setServicos}
-                produtos={produtos}
-                planos={planos}
-                onLog={pushLog}
-                exigirResponsavel={params.exigirResponsavel}
-                podeEditar={params.podeGerirServicos}
-              />
+              <ServicosPanel servicos={servicos} setServicos={setServicos} produtos={produtos} planos={planos} onLog={pushLog} exigirResponsavel={params.exigirResponsavel} podeEditar={params.podeGerirServicos} />
             </TabsContent>
-
 
             {/* PRAZOS EM DIAS */}
             <TabsContent value="prazos" className="mt-4 space-y-4">
-              <Card className="p-5">
-                <Table>
-                  <TableHeader><TableRow><TableHead>Prazo</TableHead><TableHead>Dias</TableHead><TableHead className="text-right">Ações</TableHead></TableRow></TableHeader>
-                  <TableBody>
-                    {prazos.map((pz) => (
-                      <TableRow key={pz.id}>
-                        <TableCell>{pz.nome}</TableCell>
-                        <TableCell>
-                          <Input type="number" value={pz.dias} className="w-24" onChange={(e) => setPrazos((p) => p.map((x) => x.id === pz.id ? { ...x, dias: Number(e.target.value) } : x))} />
-                        </TableCell>
-                        <TableCell className="text-right"><Button size="sm" variant="ghost" onClick={() => setPrazos((p) => p.filter((x) => x.id !== pz.id))}><Trash2 className="w-4 h-4" /></Button></TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </Card>
+              <PrazosPanel prazos={prazos} setPrazos={setPrazos} onLog={pushLog} />
             </TabsContent>
 
-            {/* FUNIS + ETAPAS */}
+            {/* FUNIS */}
             <TabsContent value="funis" className="mt-4 space-y-4">
-              <Card className="p-5">
-                <div className="font-semibold mb-2 text-sm flex items-center gap-2">Funis <HelpTip>Pipelines de vendas. Cada funil tem etapas próprias.</HelpTip></div>
-                <div className="flex gap-2 flex-wrap">
-                  {funis.map((f) => <Badge key={f.id} variant={f.ativo ? "default" : "outline"}>{f.nome}{f.ativo ? "" : " (Inativo)"}</Badge>)}
-                </div>
-              </Card>
-              <Card className="p-5">
-                <div className="font-semibold mb-2 text-sm">Etapas — Funil Comercial Padrão</div>
-                <div className="space-y-2">
-                  {etapas.map((e) => (
-                    <div key={e.id} className="flex items-center justify-between text-sm border rounded px-3 py-2">
-                      <span><Badge variant="outline" className="mr-2">{e.ordem}</Badge>{e.nome}</span>
-                      <Badge>Configurado</Badge>
-                    </div>
-                  ))}
-                </div>
-              </Card>
+              <FunisPanel funis={funis} setFunis={setFunis} onLog={pushLog} />
+            </TabsContent>
+
+            {/* ETAPAS */}
+            <TabsContent value="etapas" className="mt-4 space-y-4">
+              <EtapasPanel etapas={etapas} setEtapas={setEtapas} funis={funis} onLog={pushLog} />
             </TabsContent>
 
             {/* REGRAS */}
             <TabsContent value="regras" className="mt-4 space-y-3">
-              {regras.map((r) => (
-                <Card key={r.id} className="p-4 flex items-center justify-between gap-3">
-                  <div>
-                    <div className="font-medium text-sm">{r.nome}</div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1 flex-wrap">
-                      <Badge variant="outline">QUANDO: {r.quando}</Badge>
-                      <ArrowRight className="w-3 h-3" />
-                      <Badge>ENTÃO: {r.entao}</Badge>
-                    </div>
-                  </div>
-                  <Switch checked={r.ativa} onCheckedChange={(v) => setRegras((p) => p.map((x) => x.id === r.id ? { ...x, ativa: v } : x))} />
-                </Card>
-              ))}
+              <RegrasPanel regras={regras} setRegras={setRegras} onLog={pushLog} />
             </TabsContent>
 
             {/* TAGS */}
             <TabsContent value="tags" className="mt-4 space-y-3">
-              <Card className="p-5">
-                <div className="flex gap-2 flex-wrap">
-                  {tags.map((t) => (
-                    <Badge key={t.id} variant="outline" className="gap-1">{t.nome}
-                      <button onClick={() => setTags((p) => p.filter((x) => x.id !== t.id))} className="ml-1 opacity-60 hover:opacity-100"><Trash2 className="w-3 h-3" /></button>
-                    </Badge>
-                  ))}
-                </div>
-                <AddByName placeholder="Nova tag" onAdd={(nome) => setTags((p) => [{ id: uid("tg"), nome }, ...p])} />
-              </Card>
+              <TagsPanel tags={tags} setTags={setTags} onLog={pushLog} />
             </TabsContent>
 
             {/* ORIGENS */}
             <TabsContent value="origens" className="mt-4 space-y-3">
-              <Card className="p-5">
-                <div className="flex gap-2 flex-wrap">
-                  {origens.map((t) => (
-                    <Badge key={t.id} variant="outline" className="gap-1">{t.nome}
-                      <button onClick={() => setOrigens((p) => p.filter((x) => x.id !== t.id))} className="ml-1 opacity-60 hover:opacity-100"><Trash2 className="w-3 h-3" /></button>
-                    </Badge>
-                  ))}
-                </div>
-                <AddByName placeholder="Nova origem" onAdd={(nome) => setOrigens((p) => [{ id: uid("og"), nome }, ...p])} />
-              </Card>
+              <OrigensPanel origens={origens} setOrigens={setOrigens} leads={leads} onLog={pushLog} />
             </TabsContent>
 
             {/* CAMPANHAS */}
             <TabsContent value="campanhas" className="mt-4 space-y-3">
-              <Card className="p-5">
-                <Table>
-                  <TableHeader><TableRow><TableHead>Campanha</TableHead><TableHead>Canal</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Leads</TableHead></TableRow></TableHeader>
-                  <TableBody>{campanhas.map((c) => (
-                    <TableRow key={c.id}><TableCell>{c.nome}</TableCell><TableCell><Badge variant="outline">{c.canal}</Badge></TableCell><TableCell><Badge>{c.status}</Badge></TableCell><TableCell className="text-right">{c.leads}</TableCell></TableRow>
-                  ))}</TableBody>
-                </Table>
-              </Card>
+              <CampanhasPanel campanhas={campanhas} setCampanhas={setCampanhas} origens={origens} onLog={pushLog} />
             </TabsContent>
 
             {/* COMUNICAÇÃO (templates) */}
@@ -527,59 +442,22 @@ function DemoCRM() {
 
             {/* AUTOMAÇÕES */}
             <TabsContent value="automacoes" className="mt-4 space-y-3">
-              <Card className="p-5"><NovaAutomacao onCreate={(a) => setAutos((p) => [a, ...p])} /></Card>
-              {autos.map((a) => (
-                <Card key={a.id} className="p-4 flex items-center justify-between">
-                  <div>
-                    <div className="font-medium text-sm">{a.nome}</div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1 flex-wrap">
-                      <Badge variant="outline">{a.gatilho}</Badge>
-                      <ArrowRight className="w-3 h-3" />
-                      <Badge>{a.acao}</Badge>
-                    </div>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <Switch checked={a.ativa} onCheckedChange={(v) => setAutos((p) => p.map((x) => x.id === a.id ? { ...x, ativa: v } : x))} />
-                    <Button size="sm" variant="ghost" onClick={() => setAutos((p) => p.filter((x) => x.id !== a.id))}><Trash2 className="w-4 h-4" /></Button>
-                  </div>
-                </Card>
-              ))}
+              <AutomacoesPanel autos={autos} setAutos={setAutos} onLog={pushLog} />
             </TabsContent>
 
             {/* USUÁRIOS */}
             <TabsContent value="usuarios" className="mt-4 space-y-3">
-              <Card className="p-5">
-                <Table>
-                  <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>E-mail</TableHead><TableHead>Papel</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
-                  <TableBody>{usuarios.map((u) => (
-                    <TableRow key={u.id}><TableCell>{u.nome}</TableCell><TableCell className="text-xs">{u.email}</TableCell><TableCell><Badge variant="outline">{u.papel}</Badge></TableCell><TableCell><Badge>{u.status}</Badge></TableCell></TableRow>
-                  ))}</TableBody>
-                </Table>
-              </Card>
+              <UsuariosPanel usuarios={usuarios} setUsuarios={setUsuarios} onLog={pushLog} />
             </TabsContent>
 
             {/* PERMISSÕES */}
             <TabsContent value="permissoes" className="mt-4 space-y-3">
-              <Card className="p-5">
-                <div className="text-sm font-semibold mb-2 flex items-center gap-2">Matriz de permissões <HelpTip k="permissoes" /></div>
-                <Table>
-                  <TableHeader><TableRow><TableHead>Papel</TableHead><TableHead>Ver</TableHead><TableHead>Criar</TableHead><TableHead>Editar</TableHead><TableHead>Excluir</TableHead></TableRow></TableHeader>
-                  <TableBody>
-                    {["Administrador", "Vendedor", "Atendimento", "Financeiro"].map((papel) => (
-                      <TableRow key={papel}>
-                        <TableCell className="font-medium">{papel}</TableCell>
-                        {(["ver", "criar", "editar", "excluir"] as const).map((acao) => {
-                          const idx = permissoes.findIndex((p) => p.papel === papel && p.acao === acao);
-                          const v = idx >= 0 ? permissoes[idx].permitido : false;
-                          return <TableCell key={acao}>
-                            <Switch checked={v} onCheckedChange={(nv) => setPermissoes((prev) => prev.map((p, i) => i === idx ? { ...p, permitido: nv } : p))} />
-                          </TableCell>;
-                        })}
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </Card>
+              <PermissoesPanel permissoes={permissoes} setPermissoes={setPermissoes} onLog={pushLog} />
+            </TabsContent>
+
+            {/* SIMULAR VISÃO POR PERFIL */}
+            <TabsContent value="simular" className="mt-4 space-y-3">
+              <SimularPerfilPanel permissoes={permissoes} onLog={pushLog} />
             </TabsContent>
 
             {/* PARAMETRIZAÇÕES (16 toggles) */}
