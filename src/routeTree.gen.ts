@@ -40,10 +40,12 @@ import { Route as NichosSlugRouteImport } from './routes/nichos.$slug'
 import { Route as ModulosSlugRouteImport } from './routes/modulos.$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as DemoWhiteLabelRouteImport } from './routes/demo.white-label'
+import { Route as DemoWhatsappRouteImport } from './routes/demo.whatsapp'
 import { Route as DemoTrialRouteImport } from './routes/demo.trial'
 import { Route as DemoSimuladorRouteImport } from './routes/demo.simulador'
 import { Route as DemoModulosRouteImport } from './routes/demo.modulos'
 import { Route as DemoEventosRouteImport } from './routes/demo.eventos'
+import { Route as DemoCrmRouteImport } from './routes/demo.crm'
 import { Route as DemoClienteFinalRouteImport } from './routes/demo.cliente-final'
 import { Route as DemoCheckoutRouteImport } from './routes/demo.checkout'
 import { Route as DemoChecklistRouteImport } from './routes/demo.checklist'
@@ -302,6 +304,11 @@ const DemoWhiteLabelRoute = DemoWhiteLabelRouteImport.update({
   path: '/demo/white-label',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DemoWhatsappRoute = DemoWhatsappRouteImport.update({
+  id: '/demo/whatsapp',
+  path: '/demo/whatsapp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DemoTrialRoute = DemoTrialRouteImport.update({
   id: '/demo/trial',
   path: '/demo/trial',
@@ -320,6 +327,11 @@ const DemoModulosRoute = DemoModulosRouteImport.update({
 const DemoEventosRoute = DemoEventosRouteImport.update({
   id: '/demo/eventos',
   path: '/demo/eventos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoCrmRoute = DemoCrmRouteImport.update({
+  id: '/demo/crm',
+  path: '/demo/crm',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoClienteFinalRoute = DemoClienteFinalRouteImport.update({
@@ -944,10 +956,12 @@ export interface FileRoutesByFullPath {
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/checkout': typeof DemoCheckoutRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
+  '/demo/crm': typeof DemoCrmRoute
   '/demo/eventos': typeof DemoEventosRoute
   '/demo/modulos': typeof DemoModulosRoute
   '/demo/simulador': typeof DemoSimuladorRoute
   '/demo/trial': typeof DemoTrialRoute
+  '/demo/whatsapp': typeof DemoWhatsappRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/modulos/$slug': typeof ModulosSlugRoute
@@ -1074,10 +1088,12 @@ export interface FileRoutesByTo {
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/checkout': typeof DemoCheckoutRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
+  '/demo/crm': typeof DemoCrmRoute
   '/demo/eventos': typeof DemoEventosRoute
   '/demo/modulos': typeof DemoModulosRoute
   '/demo/simulador': typeof DemoSimuladorRoute
   '/demo/trial': typeof DemoTrialRoute
+  '/demo/whatsapp': typeof DemoWhatsappRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/modulos/$slug': typeof ModulosSlugRoute
@@ -1215,10 +1231,12 @@ export interface FileRoutesById {
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/checkout': typeof DemoCheckoutRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
+  '/demo/crm': typeof DemoCrmRoute
   '/demo/eventos': typeof DemoEventosRoute
   '/demo/modulos': typeof DemoModulosRoute
   '/demo/simulador': typeof DemoSimuladorRoute
   '/demo/trial': typeof DemoTrialRoute
+  '/demo/whatsapp': typeof DemoWhatsappRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/modulos/$slug': typeof ModulosSlugRoute
@@ -1356,10 +1374,12 @@ export interface FileRouteTypes {
     | '/demo/checklist'
     | '/demo/checkout'
     | '/demo/cliente-final'
+    | '/demo/crm'
     | '/demo/eventos'
     | '/demo/modulos'
     | '/demo/simulador'
     | '/demo/trial'
+    | '/demo/whatsapp'
     | '/demo/white-label'
     | '/email/unsubscribe'
     | '/modulos/$slug'
@@ -1486,10 +1506,12 @@ export interface FileRouteTypes {
     | '/demo/checklist'
     | '/demo/checkout'
     | '/demo/cliente-final'
+    | '/demo/crm'
     | '/demo/eventos'
     | '/demo/modulos'
     | '/demo/simulador'
     | '/demo/trial'
+    | '/demo/whatsapp'
     | '/demo/white-label'
     | '/email/unsubscribe'
     | '/modulos/$slug'
@@ -1626,10 +1648,12 @@ export interface FileRouteTypes {
     | '/demo/checklist'
     | '/demo/checkout'
     | '/demo/cliente-final'
+    | '/demo/crm'
     | '/demo/eventos'
     | '/demo/modulos'
     | '/demo/simulador'
     | '/demo/trial'
+    | '/demo/whatsapp'
     | '/demo/white-label'
     | '/email/unsubscribe'
     | '/modulos/$slug'
@@ -1744,10 +1768,12 @@ export interface RootRouteChildren {
   DemoChecklistRoute: typeof DemoChecklistRoute
   DemoCheckoutRoute: typeof DemoCheckoutRoute
   DemoClienteFinalRoute: typeof DemoClienteFinalRoute
+  DemoCrmRoute: typeof DemoCrmRoute
   DemoEventosRoute: typeof DemoEventosRoute
   DemoModulosRoute: typeof DemoModulosRoute
   DemoSimuladorRoute: typeof DemoSimuladorRoute
   DemoTrialRoute: typeof DemoTrialRoute
+  DemoWhatsappRoute: typeof DemoWhatsappRoute
   DemoWhiteLabelRoute: typeof DemoWhiteLabelRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   NichosSlugRoute: typeof NichosSlugRoute
@@ -1994,6 +2020,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoWhiteLabelRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/demo/whatsapp': {
+      id: '/demo/whatsapp'
+      path: '/demo/whatsapp'
+      fullPath: '/demo/whatsapp'
+      preLoaderRoute: typeof DemoWhatsappRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/demo/trial': {
       id: '/demo/trial'
       path: '/demo/trial'
@@ -2020,6 +2053,13 @@ declare module '@tanstack/react-router' {
       path: '/demo/eventos'
       fullPath: '/demo/eventos'
       preLoaderRoute: typeof DemoEventosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo/crm': {
+      id: '/demo/crm'
+      path: '/demo/crm'
+      fullPath: '/demo/crm'
+      preLoaderRoute: typeof DemoCrmRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo/cliente-final': {
@@ -3066,10 +3106,12 @@ const rootRouteChildren: RootRouteChildren = {
   DemoChecklistRoute: DemoChecklistRoute,
   DemoCheckoutRoute: DemoCheckoutRoute,
   DemoClienteFinalRoute: DemoClienteFinalRoute,
+  DemoCrmRoute: DemoCrmRoute,
   DemoEventosRoute: DemoEventosRoute,
   DemoModulosRoute: DemoModulosRoute,
   DemoSimuladorRoute: DemoSimuladorRoute,
   DemoTrialRoute: DemoTrialRoute,
+  DemoWhatsappRoute: DemoWhatsappRoute,
   DemoWhiteLabelRoute: DemoWhiteLabelRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   NichosSlugRoute: NichosSlugRoute,
