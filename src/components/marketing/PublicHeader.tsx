@@ -55,9 +55,15 @@ const SOLUCOES_GROUPS: NavGroup[] = [
       { to: "/modulos/saude", label: "Prontuário & Saúde", desc: "Evoluções, exames, área do paciente" },
       { to: "/modulos/area_cliente", label: "Área do Cliente", desc: "Histórico, documentos, autoatendimento" },
       { to: "/modulos/white_label", label: "White Label & Multi-empresa", desc: "Operação para agências e revendas" },
-      { to: "/modulos", label: "Ver todos os módulos →", desc: "Catálogo completo" },
     ],
   },
+  {
+    heading: "Catálogo completo",
+    items: [
+      { to: "/modulos", label: "Todos os Módulos Disponíveis →", desc: "Ver a vitrine completa de módulos" },
+    ],
+  },
+
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
