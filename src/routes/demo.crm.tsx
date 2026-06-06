@@ -129,13 +129,29 @@ function DemoCRM() {
       .filter((k) => k.startsWith("imp.demo.crm."))
       .forEach((k) => window.localStorage.removeItem(k));
     window.localStorage.removeItem("imp.demo.mock.crm");
+    // registra log de reset antes do reload
+    const resetEntry = makeDemoLog({ area: "Sistema", acao: "Reset local executado", status: "ok", usuario: "sessao-demo" });
+    try { window.localStorage.setItem("imp.demo.crm.logs", JSON.stringify([{ ...resetEntry, modulo: "CRM", ambiente: "DEMO" }])); } catch { /* noop */ }
     toast.success("Dados demonstrativos do CRM restaurados para o padrão inicial.");
     setTimeout(() => window.location.reload(), 400);
   }
 
   function pushLog(input: DemoLogInput) {
     const entry = makeDemoLog({ usuario: "sessao-demo", ...input });
-    setLogs((prev) => [{ id: entry.id, quando: entry.quando, usuario: entry.usuario, acao: `[${entry.area}] ${entry.acao}${entry.registro ? ` — ${entry.registro}` : ""}${entry.canal ? ` (${entry.canal})` : ""}` }, ...prev].slice(0, 200));
+    const rich: Log = {
+      id: entry.id,
+      quando: entry.quando,
+      usuario: entry.usuario,
+      acao: `${entry.acao}${entry.registro ? ` — ${entry.registro}` : ""}`,
+      area: entry.area,
+      modulo: entry.modulo,
+      registro: entry.registro,
+      status: entry.status,
+      ambiente: entry.ambiente,
+      canal: entry.canal,
+      destinatario: entry.destinatario,
+    };
+    setLogs((prev) => [rich, ...prev].slice(0, 200));
   }
 
   function moverEstagio(id: string, dir: 1 | -1) {
