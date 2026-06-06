@@ -19,7 +19,9 @@ import { PublicFooter } from "./PublicFooter";
 import { WhatsAppBlock } from "./WhatsAppBlock";
 import { MODULE_DETAILS } from "./moduleDetails";
 import { ctaWaUrl, type NichoDetail } from "./nichoDetails";
+import { NICHO_EXTRAS } from "./nichoExtras";
 import { AGENDA_BASE, NICHO_AGENDA } from "./nichoAgenda";
+
 
 interface Props {
   nicho: NichoDetail;
