@@ -350,8 +350,11 @@ function NovoServ({ onCreate }: { onCreate: (s: Servico) => void }) {
     </div>
   );
 }
-function NovoAgendamento({ profs, servs, onCreate }: { profs: Profissional[]; servs: Servico[]; onCreate: (a: Agendamento) => void }) {
+function NovoAgendamento({ profs, servs, onCreate, prefill }: { profs: Profissional[]; servs: Servico[]; onCreate: (a: Agendamento) => void; prefill?: { cliente: string; telefone: string } | null }) {
   const [f, setF] = useState({ profId: "", servicoId: "", cliente: "", telefone: "", data: new Date().toISOString().slice(0, 10), hora: "09:00" });
+  useEffect(() => {
+    if (prefill?.cliente) setF((prev) => ({ ...prev, cliente: prefill.cliente, telefone: prefill.telefone ?? "" }));
+  }, [prefill?.cliente, prefill?.telefone]);
   return (
     <div className="grid sm:grid-cols-3 gap-2 items-end">
       <div><Label className="text-xs">Cliente</Label><Input value={f.cliente} onChange={(e) => setF({ ...f, cliente: e.target.value })} /></div>
