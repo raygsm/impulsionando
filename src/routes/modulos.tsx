@@ -222,8 +222,131 @@ function ModulosPage() {
         </div>
       </section>
 
+      {/* AFILIADOS, SPLITS E PRAZOS DE LIBERAÇÃO */}
+      <section id="afiliados" className="bg-muted/30 py-20 scroll-mt-32">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-10">
+          <div className="max-w-3xl">
+            <div className="text-xs uppercase tracking-wider text-primary font-semibold mb-2">
+              Crescimento — Módulo Afiliados
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+              Afiliados, indicações e splits com regras claras de liberação
+            </h2>
+            <p className="mt-3 text-muted-foreground leading-relaxed">
+              Cada afiliado tem link único, cupom único e QR Code. Toda venda registrada gera comissão automática
+              com split — mas o valor só vira saque depois de cumprir o prazo do gateway somado ao prazo interno
+              da empresa.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <Card className="p-6">
+              <h3 className="font-semibold mb-3">Painel do Afiliado</h3>
+              <ul className="grid grid-cols-2 gap-2 text-sm">
+                {[
+                  "Total de indicações",
+                  "Vendas pendentes",
+                  "Vendas aprovadas",
+                  "Comissões pendentes",
+                  "Em processamento",
+                  "Disponíveis",
+                  "Comissões pagas",
+                  "Próxima liberação",
+                  "Histórico de saques",
+                  "Links e cupons",
+                  "Ranking (se ativo)",
+                  "Regras do programa",
+                ].map((c) => (
+                  <li key={c} className="rounded-md border bg-card px-3 py-2 text-xs font-medium">{c}</li>
+                ))}
+              </ul>
+            </Card>
+
+            <Card className="p-6">
+              <h3 className="font-semibold mb-3">Painel de Gestão de Afiliados</h3>
+              <ul className="grid grid-cols-2 gap-2 text-sm">
+                {[
+                  "Afiliados ativos",
+                  "Pendentes",
+                  "Suspensos",
+                  "Vendas por afiliado",
+                  "Conversão por afiliado",
+                  "Receita gerada",
+                  "Comissão devida",
+                  "Comissão bloqueada",
+                  "Comissão disponível",
+                  "Saques pendentes",
+                  "Saques aprovados",
+                  "Regras e prazos",
+                ].map((c) => (
+                  <li key={c} className="rounded-md border bg-card px-3 py-2 text-xs font-medium">{c}</li>
+                ))}
+              </ul>
+            </Card>
+          </div>
+
+          <Card className="p-6 lg:p-8">
+            <h3 className="font-semibold mb-2">Splits automáticos e prazos de liberação</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed mb-5">
+              Valor aprovado <strong>não é</strong> valor disponível. A liberação considera o prazo do gateway
+              conforme a forma de pagamento <strong>+ prazo interno padrão de 3 dias úteis</strong>.
+            </p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b">
+                  <tr>
+                    <th className="py-2 pr-4">Forma de pagamento</th>
+                    <th className="py-2 pr-4">Prazo do gateway</th>
+                    <th className="py-2 pr-4">Prazo interno</th>
+                    <th className="py-2">Disponível para saque</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  <tr><td className="py-2 pr-4 font-medium">Pix</td><td className="py-2 pr-4">Imediato</td><td className="py-2 pr-4">+ 3 dias úteis</td><td className="py-2">~ 3 dias úteis</td></tr>
+                  <tr><td className="py-2 pr-4 font-medium">Cartão de crédito</td><td className="py-2 pr-4">Liquidação da operadora (D+2 a D+30)</td><td className="py-2 pr-4">+ 3 dias úteis</td><td className="py-2">Liquidação + 3 dias úteis</td></tr>
+                  <tr><td className="py-2 pr-4 font-medium">Cartão de débito</td><td className="py-2 pr-4">D+1 a D+2</td><td className="py-2 pr-4">+ 3 dias úteis</td><td className="py-2">~ 4 a 5 dias úteis</td></tr>
+                  <tr><td className="py-2 pr-4 font-medium">Boleto</td><td className="py-2 pr-4">Após compensação (D+1 a D+3)</td><td className="py-2 pr-4">+ 3 dias úteis</td><td className="py-2">Compensação + 3 dias úteis</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mt-6">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+                Status financeiros da comissão
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  "Venda registrada",
+                  "Pagamento pendente",
+                  "Pagamento aprovado",
+                  "Em processamento",
+                  "Aguardando gateway",
+                  "Aguardando prazo interno",
+                  "Disponível para saque",
+                  "Saque solicitado",
+                  "Saque aprovado",
+                  "Pago",
+                  "Cancelado",
+                  "Estornado",
+                  "Bloqueado",
+                ].map((s) => (
+                  <span key={s} className="text-xs rounded-full border bg-background px-2.5 py-1">{s}</span>
+                ))}
+              </div>
+            </div>
+          </Card>
+
+          <div className="text-center">
+            <Button asChild size="lg" variant="outline">
+              <Link to="/modulos/fidelizacao">Ver módulo completo de Fidelização & Afiliados</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20">
+
         <Card className="p-10 lg:p-14 bg-gradient-primary text-primary-foreground border-0 shadow-elegant overflow-hidden relative">
           <div className="pointer-events-none absolute -bottom-24 -right-24 w-[400px] h-[400px] rounded-full bg-accent/20 blur-3xl" />
           <div className="relative max-w-3xl space-y-5">
