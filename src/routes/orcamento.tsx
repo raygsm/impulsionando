@@ -312,7 +312,7 @@ function OrcamentoPage() {
             {/* Layout: conteúdo + sidebar */}
             <div className="grid lg:grid-cols-[1fr_320px] gap-6">
               <div>
-                <StepContent state={state} dispatch={dispatch} search={search} totals={totals} />
+                <StepContent state={state} dispatch={dispatch} search={search} totals={totals} onReset={resetWizard} />
               </div>
 
               {/* Sidebar desktop */}
