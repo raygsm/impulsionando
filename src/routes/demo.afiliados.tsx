@@ -346,7 +346,18 @@ function Header({ onSeed, onReset }: { onSeed: () => void; onReset: () => void }
           Tudo client-side — nada é cobrado e nenhuma mensagem real é disparada.
         </p>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
+        <GuidedTour
+          moduleKey="afiliados"
+          title="Afiliados & Produtos"
+          steps={[
+            { title: "Comece pelo catálogo", body: "Cadastre 1 produto e 1 oferta. Defina comissão e order bump.", hint: "Use 'Popular com dados' para acelerar." },
+            { title: "Monte a rede", body: "Cadastre afiliados e gerentes. Cupons podem ser vinculados a um afiliado." },
+            { title: "Simule vendas", body: "Na aba Simular vendas, gere transações com diferentes fontes: checkout, recuperação e recompra." },
+            { title: "Veja o painel", body: "Acompanhe receita, taxa Impulsionando, comissões e ranking em tempo real." },
+            { title: "Parametrize SIM/NÃO", body: "Ative ou desative split, recorrência, recuperação e ranking público.", hint: "Tudo reversível — não toca banco real." },
+          ]}
+        />
         <Button variant="outline" onClick={onSeed}><Sparkles className="w-4 h-4 mr-1" />Popular com dados</Button>
         <Button variant="ghost" onClick={onReset}><RotateCcw className="w-4 h-4 mr-1" />Zerar tudo</Button>
       </div>
