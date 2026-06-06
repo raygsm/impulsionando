@@ -158,6 +158,14 @@ function DemoEventos() {
               </p>
             </div>
             <div className="flex gap-2 flex-wrap">
+              <DemoContractCTA
+                slug="eventos"
+                moduleName="Eventos & Ingressos"
+                moduleDescription="Crie evento, lotes, emita ingressos com QR Code único e faça check-in mobile."
+                amountReference={197}
+                features={["Evento e lotes", "Ingresso nominal com QR Code", "Check-in mobile", "Bloqueio de reutilização", "Painel de presença", "Boas-vindas e pesquisa"]}
+                testRoute="/demo/eventos"
+              />
               <GuidedTour
                 moduleKey="eventos"
                 title="Eventos & Ingressos"
