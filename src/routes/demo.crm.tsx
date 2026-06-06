@@ -13,11 +13,12 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Trash2, RotateCcw, Sparkles, Users, KanbanSquare, Activity, FileText, Workflow, ArrowRight } from "lucide-react";
+import { Plus, Trash2, RotateCcw, Sparkles, Users, KanbanSquare, Activity, FileText, Workflow, ArrowRight, MessageSquare, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import { useDemoState, uid } from "@/lib/demoSandbox";
 import { DemoContractCTA } from "@/components/demo/DemoContractCTA";
 import { RoiSimulator } from "@/components/demo/RoiSimulator";
+import { gotoWhatsapp, gotoAgenda } from "@/lib/demoCrossLink";
 
 export const Route = createFileRoute("/demo/crm")({
   head: () => ({
