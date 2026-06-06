@@ -333,3 +333,24 @@ function TestarRecursosButton({ slug }: { slug: string }) {
   );
 }
 
+/** Valor fictício de referência por módulo (R$/mês) — só para a tela de pagamento demo. */
+const REFERENCE_AMOUNTS: Record<string, number> = {
+  fidelizacao: 297,
+  commerce: 247,
+  eventos: 197,
+  atendimento: 397,
+  agenda: 147,
+  crm: 247,
+  bi: 197,
+  prontuario: 297,
+  paciente: 97,
+  permissoes: 0,
+  whitelabel: 997,
+  viagens: 247,
+  delivery: 197,
+  followups: 147,
+};
+function referenceAmountFor(slug: string): number {
+  return REFERENCE_AMOUNTS[slug] ?? 197;
+}
+
