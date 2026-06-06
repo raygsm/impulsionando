@@ -102,7 +102,7 @@ export const Route = createFileRoute("/orcamento")({
 /* --------------------------- Briefing ---------------------------- */
 
 /**
- * Segmentos agrupados por categoria-mãe.
+ * Segmentos agrupados por categoria principal.
  * O formulário pergunta primeiro a categoria e depois mostra apenas
  * os segmentos correspondentes.
  */
@@ -777,7 +777,7 @@ function buildPrefill(s: SearchParams): { answers: Answers; firstStep: number; h
 
   if (s.segmento && VALID_SEGMENTOS.has(s.segmento)) {
     a.segmento = s.segmento;
-    // Inferir categoria-mãe a partir do segmento informado
+    // Inferir categoria principal a partir do segmento informado
     for (const [cat, list] of Object.entries(SEGMENTOS_POR_CATEGORIA)) {
       if (list.some((seg) => seg.value === s.segmento)) { a.categoria = cat; break; }
     }

@@ -1,7 +1,7 @@
 /**
- * Fonte única de verdade dos 14 módulos-mãe da Impulsionando Tecnologia.
+ * Fonte única de verdade dos 14 módulos principais da Impulsionando Tecnologia.
  *
- * Cada módulo-mãe representa uma grande área comercial e técnica que reúne
+ * Cada módulo principal representa uma grande área comercial e técnica que reúne
  * submódulos, recursos e funcionalidades. As páginas /modulos, /planos,
  * /solucoes, /trial e /orcamento devem consumir este arquivo.
  *

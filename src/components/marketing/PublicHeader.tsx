@@ -61,7 +61,7 @@ const SOLUCOES_GROUPS: NavGroup[] = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
-// NICHOS — 7 categorias-mãe, cada uma apontando para páginas de nicho existentes.
+// NICHOS — 7 categorias principais, cada uma apontando para páginas de nicho existentes.
 // ─────────────────────────────────────────────────────────────────────────────
 const NICHOS_GROUPS: NavGroup[] = [
   {

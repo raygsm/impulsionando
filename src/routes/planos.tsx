@@ -46,11 +46,11 @@ type Plan = {
 const PLANS: Plan[] = [
   {
     name: "Essencial",
-    tagline: "Comece pelo módulo-mãe que mais dói.",
+    tagline: "Comece pelo módulo principal que mais dói.",
     monthly: 697,
-    modulesLabel: "1 módulo-mãe ativo",
+    modulesLabel: "1 módulo principal ativo",
     features: [
-      "1 módulo-mãe ativo após conversão (CRM, Agenda, Eventos, Área do Cliente etc.)",
+      "1 módulo principal ativo após conversão (CRM, Agenda, Eventos, Área do Cliente etc.)",
       "Até 3 usuários",
       "Suporte por e-mail e WhatsApp",
       "7 dias de Trial com tudo liberado",
@@ -59,11 +59,11 @@ const PLANS: Plan[] = [
   },
   {
     name: "Integrado",
-    tagline: "Dois módulos-mãe trabalhando juntos.",
+    tagline: "Dois módulos principais trabalhando juntos.",
     monthly: 997.9,
-    modulesLabel: "2 módulos-mãe ativos",
+    modulesLabel: "2 módulos principais ativos",
     features: [
-      "2 módulos-mãe integrados (ex.: CRM + Agenda, Commerce + Delivery)",
+      "2 módulos principais integrados (ex.: CRM + Agenda, Commerce + Delivery)",
       "Até 5 usuários",
       "Maior prioridade no suporte",
       "Automações entre módulos",
@@ -75,9 +75,9 @@ const PLANS: Plan[] = [
     name: "Avançado",
     tagline: "Operação digital de ponta a ponta.",
     monthly: 1497.97,
-    modulesLabel: "3 módulos-mãe + BI",
+    modulesLabel: "3 módulos principais + BI",
     features: [
-      "3 módulos-mãe ativos + BI & Dashboards (ex.: ERP + CRM + Agenda + BI)",
+      "3 módulos principais ativos + BI & Dashboards (ex.: ERP + CRM + Agenda + BI)",
       "Até 10 usuários",
       "Suporte prioritário",
       "Acompanhamento técnico",
@@ -86,11 +86,11 @@ const PLANS: Plan[] = [
   },
   {
     name: "Sob Medida",
-    tagline: "Múltiplos módulos-mãe com sua marca.",
+    tagline: "Múltiplos módulos principais com sua marca.",
     monthly: null,
-    modulesLabel: "Múltiplos módulos-mãe",
+    modulesLabel: "Múltiplos módulos principais",
     features: [
-      "Múltiplos módulos-mãe conforme briefing",
+      "Múltiplos módulos principais conforme briefing",
       "Usuários sob demanda",
       "White Label disponível",
       "Integrações, dashboards e regras específicas",
@@ -102,10 +102,10 @@ const PLANS: Plan[] = [
 type Row = { feature: string; values: (boolean | string)[] };
 
 const COMPARE: Row[] = [
-  { feature: "Módulos-mãe ativos", values: ["1", "2", "3 + BI", "Múltiplos"] },
+  { feature: "Módulos principais ativos", values: ["1", "2", "3 + BI", "Múltiplos"] },
   { feature: "Usuários", values: ["Até 3", "Até 5", "Até 10", "Sob demanda"] },
   { feature: "Unidades / filiais", values: ["1", "1", "Até 3", "Multiempresa"] },
-  { feature: "Automações entre módulos-mãe", values: [false, true, true, true] },
+  { feature: "Automações entre módulos principais", values: [false, true, true, true] },
   { feature: "BI & Dashboards consolidados", values: [false, false, true, true] },
   { feature: "API e webhooks", values: [false, true, true, true] },
   { feature: "Onboarding guiado", values: ["Self-service", "1h", "4h", "Customizado"] },
