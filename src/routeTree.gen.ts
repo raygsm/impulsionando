@@ -43,6 +43,7 @@ import { Route as DemoWhiteLabelRouteImport } from './routes/demo.white-label'
 import { Route as DemoWhatsappRouteImport } from './routes/demo.whatsapp'
 import { Route as DemoTrialRouteImport } from './routes/demo.trial'
 import { Route as DemoSimuladorRouteImport } from './routes/demo.simulador'
+import { Route as DemoParceirosRouteImport } from './routes/demo.parceiros'
 import { Route as DemoModulosRouteImport } from './routes/demo.modulos'
 import { Route as DemoEventosRouteImport } from './routes/demo.eventos'
 import { Route as DemoCrmRouteImport } from './routes/demo.crm'
@@ -318,6 +319,11 @@ const DemoTrialRoute = DemoTrialRouteImport.update({
 const DemoSimuladorRoute = DemoSimuladorRouteImport.update({
   id: '/demo/simulador',
   path: '/demo/simulador',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoParceirosRoute = DemoParceirosRouteImport.update({
+  id: '/demo/parceiros',
+  path: '/demo/parceiros',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoModulosRoute = DemoModulosRouteImport.update({
@@ -966,6 +972,7 @@ export interface FileRoutesByFullPath {
   '/demo/crm': typeof DemoCrmRoute
   '/demo/eventos': typeof DemoEventosRoute
   '/demo/modulos': typeof DemoModulosRoute
+  '/demo/parceiros': typeof DemoParceirosRoute
   '/demo/simulador': typeof DemoSimuladorRoute
   '/demo/trial': typeof DemoTrialRoute
   '/demo/whatsapp': typeof DemoWhatsappRoute
@@ -1099,6 +1106,7 @@ export interface FileRoutesByTo {
   '/demo/crm': typeof DemoCrmRoute
   '/demo/eventos': typeof DemoEventosRoute
   '/demo/modulos': typeof DemoModulosRoute
+  '/demo/parceiros': typeof DemoParceirosRoute
   '/demo/simulador': typeof DemoSimuladorRoute
   '/demo/trial': typeof DemoTrialRoute
   '/demo/whatsapp': typeof DemoWhatsappRoute
@@ -1243,6 +1251,7 @@ export interface FileRoutesById {
   '/demo/crm': typeof DemoCrmRoute
   '/demo/eventos': typeof DemoEventosRoute
   '/demo/modulos': typeof DemoModulosRoute
+  '/demo/parceiros': typeof DemoParceirosRoute
   '/demo/simulador': typeof DemoSimuladorRoute
   '/demo/trial': typeof DemoTrialRoute
   '/demo/whatsapp': typeof DemoWhatsappRoute
@@ -1387,6 +1396,7 @@ export interface FileRouteTypes {
     | '/demo/crm'
     | '/demo/eventos'
     | '/demo/modulos'
+    | '/demo/parceiros'
     | '/demo/simulador'
     | '/demo/trial'
     | '/demo/whatsapp'
@@ -1520,6 +1530,7 @@ export interface FileRouteTypes {
     | '/demo/crm'
     | '/demo/eventos'
     | '/demo/modulos'
+    | '/demo/parceiros'
     | '/demo/simulador'
     | '/demo/trial'
     | '/demo/whatsapp'
@@ -1663,6 +1674,7 @@ export interface FileRouteTypes {
     | '/demo/crm'
     | '/demo/eventos'
     | '/demo/modulos'
+    | '/demo/parceiros'
     | '/demo/simulador'
     | '/demo/trial'
     | '/demo/whatsapp'
@@ -1784,6 +1796,7 @@ export interface RootRouteChildren {
   DemoCrmRoute: typeof DemoCrmRoute
   DemoEventosRoute: typeof DemoEventosRoute
   DemoModulosRoute: typeof DemoModulosRoute
+  DemoParceirosRoute: typeof DemoParceirosRoute
   DemoSimuladorRoute: typeof DemoSimuladorRoute
   DemoTrialRoute: typeof DemoTrialRoute
   DemoWhatsappRoute: typeof DemoWhatsappRoute
@@ -2052,6 +2065,13 @@ declare module '@tanstack/react-router' {
       path: '/demo/simulador'
       fullPath: '/demo/simulador'
       preLoaderRoute: typeof DemoSimuladorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo/parceiros': {
+      id: '/demo/parceiros'
+      path: '/demo/parceiros'
+      fullPath: '/demo/parceiros'
+      preLoaderRoute: typeof DemoParceirosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo/modulos': {
@@ -3130,6 +3150,7 @@ const rootRouteChildren: RootRouteChildren = {
   DemoCrmRoute: DemoCrmRoute,
   DemoEventosRoute: DemoEventosRoute,
   DemoModulosRoute: DemoModulosRoute,
+  DemoParceirosRoute: DemoParceirosRoute,
   DemoSimuladorRoute: DemoSimuladorRoute,
   DemoTrialRoute: DemoTrialRoute,
   DemoWhatsappRoute: DemoWhatsappRoute,
@@ -3164,13 +3185,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

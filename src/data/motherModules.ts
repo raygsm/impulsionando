@@ -11,6 +11,7 @@
 import {
   Briefcase, Users, Bot, Calendar, CreditCard, Store, Boxes,
   Stethoscope, Ticket, Truck, BarChart3, Layers, Award, UserCircle,
+  Handshake,
   type LucideIcon,
 } from "lucide-react";
 
