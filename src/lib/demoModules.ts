@@ -108,6 +108,8 @@ export const DEMO_MODULE_OPTIONS: DemoModuleOption[] = [
     route: "/demo/advogados",
     icon: Scale,
     badge: "Jurídico",
+  },
+
 
   {
     key: "checkout",
