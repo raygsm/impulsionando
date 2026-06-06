@@ -205,14 +205,16 @@ function SummaryCard({
 }
 
 function ModuleCard({
-  module: m, contracted, onContract, onUncontract,
+  module: m, contracted, onUncontract,
 }: {
   module: MotherModule;
   contracted: boolean;
-  onContract: () => void;
   onUncontract: () => void;
 }) {
   const Icon = m.icon;
+  const [flowOpen, setFlowOpen] = useState(false);
+  const testRoute = INTERACTIVE_DEMO[m.slug] ?? "/demo/cliente-final";
+
   return (
     <Card className={`p-5 flex flex-col ${contracted ? "border-primary/50 shadow-elegant" : ""}`}>
       <div className="flex items-start gap-3">
@@ -230,7 +232,7 @@ function ModuleCard({
             <h3 className="font-semibold truncate">{m.shortName}</h3>
             {contracted ? (
               <Badge className="bg-primary/15 text-primary border-primary/30">
-                <CheckCircle2 className="w-3 h-3 mr-1" /> Ativo na demonstração
+                <CheckCircle2 className="w-3 h-3 mr-1" /> PAGO — DEMO
               </Badge>
             ) : (
               <Badge variant="outline" className="text-muted-foreground">
@@ -272,13 +274,13 @@ function ModuleCard({
                   Cancelar
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Volta o módulo para a vitrine na simulação.</TooltipContent>
+              <TooltipContent>Cancelamento fictício — volta o módulo para a vitrine.</TooltipContent>
             </Tooltip>
           </>
         ) : (
           <>
-            <Button size="sm" className="bg-gradient-primary flex-1" onClick={onContract}>
-              Contratar Módulo {m.shortName}
+            <Button size="sm" className="bg-gradient-primary flex-1" onClick={() => setFlowOpen(true)}>
+              Contratar na Demonstração
             </Button>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -298,6 +300,17 @@ function ModuleCard({
           </>
         )}
       </div>
+
+      <DemoContractFlow
+        open={flowOpen}
+        onOpenChange={setFlowOpen}
+        slug={m.slug}
+        moduleName={m.shortName}
+        moduleDescription={m.pitch}
+        amountReference={m.priceReference ?? 0}
+        features={m.submodules}
+        testRoute={testRoute}
+      />
     </Card>
   );
 }
