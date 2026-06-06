@@ -23,6 +23,7 @@ export type DemoModuleRoute =
   | "/demo/eventos"
   | "/demo/afiliados"
   | "/demo/parceiros"
+  | "/demo/advogados"
   | "/demo/checkout";
 
 export type DemoModuleKey =
@@ -35,7 +36,12 @@ export type DemoModuleKey =
   | "eventos"
   | "afiliados"
   | "parceiros"
+  | "advogados"
   | "checkout";
+
+/** Módulo seguro para fallback quando o pedido não existe ou falha. */
+export const SAFE_DEMO_MODULE: DemoModuleKey = "agenda";
+
 
 export interface DemoModuleOption {
   key: DemoModuleKey;
