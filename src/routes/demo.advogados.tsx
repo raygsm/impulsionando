@@ -12,6 +12,8 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { HelpCircle } from "lucide-react";
 import {
   Scale,
   Gavel,
@@ -187,26 +189,33 @@ function DemoAdvogados() {
   }
 
   return (
+    <TooltipProvider delayDuration={150}>
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
       <DemoModeBanner current="advogados" />
       <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 w-full">
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
-            <Badge className="bg-gradient-primary mb-2">Demo interativa • dados fictícios</Badge>
+            <div className="flex items-center gap-2 flex-wrap mb-2">
+              <Badge className="bg-gradient-primary">Demo interativa • dados fictícios</Badge>
+              <Badge variant="outline" className="border-amber-500/60 text-amber-700 dark:text-amber-400">
+                DEMONSTRAÇÃO — VERSÃO TESTE
+              </Badge>
+            </div>
             <h1 className="text-3xl sm:text-4xl font-bold flex items-center gap-3">
               <Scale className="w-8 h-8 text-primary" /> Advogados & Escritórios Jurídicos
             </h1>
             <p className="text-muted-foreground mt-2 max-w-2xl">
-              Carteira de processos, prazos com bloqueio automático, audiências, contratos com êxito,
-              honorários, documentos sigilosos e portal do cliente — tudo em conformidade com a LGPD.
+              Transforme prazos, clientes e honorários em gestão real. Carteira de processos, prazos com
+              lembrete e bloqueio automático, audiências, contratos fixo + êxito, honorários, documentos
+              sigilosos e portal do cliente — tudo em conformidade com a LGPD.
             </p>
           </div>
           <div className="flex gap-2 flex-wrap items-center">
             <DemoContractCTA
               slug="advogados"
               moduleName="Advogados & Escritórios Jurídicos"
-              moduleDescription="Gestão completa de processos, prazos, audiências, contratos, honorários e portal do cliente para escritórios jurídicos."
+              moduleDescription="Organize seu escritório jurídico agora: gestão completa de processos, prazos, audiências, contratos, honorários e portal do cliente."
               amountReference={297}
               features={[
                 "Processos por área e vara",
@@ -221,7 +230,7 @@ function DemoAdvogados() {
               variant="default"
             />
             <Button variant="outline" onClick={seed}><Sparkles className="w-4 h-4 mr-1" />Popular demo</Button>
-            <Button variant="ghost" onClick={resetAll}><RotateCcw className="w-4 h-4 mr-1" />Zerar</Button>
+            <Button variant="ghost" onClick={resetAll}><RotateCcw className="w-4 h-4 mr-1" />Zerar dados da DEMO</Button>
           </div>
         </div>
 
@@ -322,18 +331,30 @@ function DemoAdvogados() {
                   {prazos.map((p) => {
                     const proc = processos.find((x) => x.id === p.processoId);
                     const advr = advogados.find((a) => a.id === p.responsavelId);
-                    const vencido = new Date(p.vencimento).getTime() < Date.now() && !p.concluido;
+                    const horas = (new Date(p.vencimento).getTime() - Date.now()) / 36e5;
+                    const vencido = horas < 0 && !p.concluido;
+                    const critico48 = !vencido && !p.concluido && horas <= 48;
                     return (
-                      <li key={p.id} className="flex items-center gap-3 py-3">
+                      <li
+                        key={p.id}
+                        className={`flex items-center gap-3 py-3 px-2 -mx-2 rounded-md ${
+                          vencido ? "bg-destructive/10 border-l-4 border-destructive" :
+                          critico48 ? "bg-amber-500/10 border-l-4 border-amber-500" : ""
+                        }`}
+                      >
                         <Switch checked={p.concluido} onCheckedChange={() => togglePrazo(p.id)} />
                         <div className="flex-1 min-w-0">
                           <div className={`text-sm ${p.concluido ? "line-through text-muted-foreground" : ""}`}>{p.descricao}</div>
                           <div className="text-xs text-muted-foreground">
                             {proc?.numero ?? "—"} • {advr?.nome ?? "—"} • vence {p.vencimento}
+                            {critico48 && <span className="ml-1 text-amber-600 dark:text-amber-400 font-medium">• {Math.max(0, Math.round(horas))}h restantes</span>}
                           </div>
                         </div>
-                        <Badge variant={vencido ? "destructive" : p.prioridade === "urgente" ? "default" : "outline"} className="text-[10px]">
-                          {vencido ? "VENCIDO" : p.prioridade.toUpperCase()}
+                        <Badge
+                          variant={vencido ? "destructive" : p.prioridade === "urgente" ? "default" : "outline"}
+                          className={`text-[10px] ${critico48 && !vencido ? "border-amber-500 text-amber-700 dark:text-amber-400" : ""}`}
+                        >
+                          {vencido ? "VENCIDO" : critico48 ? "CRÍTICO 48H" : p.prioridade.toUpperCase()}
                         </Badge>
                       </li>
                     );
@@ -481,25 +502,62 @@ function DemoAdvogados() {
 
           <TabsContent value="params" className="mt-4 grid sm:grid-cols-2 gap-3">
             {([
-              ["lembretePrazo48h", "Lembrete automático 48h antes do prazo"],
-              ["lembretePrazo24h", "Lembrete automático 24h antes do prazo"],
-              ["bloqueioPrazoVencido", "Bloquear edição após prazo vencido"],
-              ["sigiloPorPapel", "Sigilo por papel (perfil/grupo)"],
-              ["timesheetObrigatorio", "Timesheet obrigatório por atividade"],
-              ["integraTribunais", "Integração com tribunais (consulta processual)"],
-              ["lgpd", "Conformidade LGPD nas comunicações"],
-              ["portalCliente", "Portal do cliente com acompanhamento"],
-            ] as const).map(([k, label]) => (
+              ["lembretePrazo48h", "Lembrete automático 48h antes do prazo", "Dispara aviso ao responsável 48 horas antes do vencimento — evita perda de prazo processual."],
+              ["lembretePrazo24h", "Lembrete automático 24h antes do prazo", "Segundo aviso 24 horas antes do vencimento, com escalonamento ao sócio responsável."],
+              ["bloqueioPrazoVencido", "Bloquear edição após prazo vencido", "Após o vencimento, o processo é congelado e exige justificativa registrada para nova alteração."],
+              ["sigiloPorPapel", "Sigilo por papel (perfil/grupo)", "Apenas advogados com o papel autorizado visualizam processos sigilosos e documentos restritos."],
+              ["timesheetObrigatorio", "Timesheet obrigatório por atividade", "Cada movimentação exige apontamento de horas para cobrança correta de honorários por hora."],
+              ["integraTribunais", "Integração com tribunais (consulta processual)", "Sincroniza movimentações e publicações oficiais dos tribunais diretamente no processo."],
+              ["lgpd", "Conformidade LGPD nas comunicações", "Comunicações com clientes registram base legal, consentimento e log de acesso a dados pessoais."],
+              ["portalCliente", "Portal do cliente com acompanhamento", "Cliente acessa andamento do processo, audiências e honorários com sigilo por papel."],
+            ] as const).map(([k, label, help]) => (
               <Card key={k} className="p-4 flex items-center justify-between gap-3">
-                <div>
-                  <div className="text-sm font-medium">{label}</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">{params[k] ? "Ativo" : "Inativo"}</div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-medium flex items-center gap-1.5">
+                    {label}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button type="button" aria-label="Ajuda">
+                          <HelpCircle className="w-3.5 h-3.5 text-muted-foreground" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">{help}</TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">{params[k] ? "SIM — ativo" : "NÃO — inativo"}</div>
                 </div>
                 <Switch checked={params[k]} onCheckedChange={(v) => setParams((p) => ({ ...p, [k]: v }))} />
               </Card>
             ))}
           </TabsContent>
         </Tabs>
+
+        <div className="mt-10 rounded-xl border bg-gradient-to-br from-primary/5 to-accent/5 p-6 sm:p-8 text-center">
+          <h2 className="text-2xl font-bold">Organize seu escritório jurídico agora</h2>
+          <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">
+            Teste a gestão completa do seu escritório: processos, prazos, audiências, contratos e honorários
+            em um só lugar, com sigilo por papel e conformidade LGPD.
+          </p>
+          <div className="mt-5 flex justify-center flex-wrap gap-2">
+            <DemoContractCTA
+              slug="advogados"
+              moduleName="Advogados & Escritórios Jurídicos"
+              moduleDescription="Contratar módulo jurídico — gestão completa para escritórios de advocacia."
+              amountReference={297}
+              features={[
+                "Processos por área e vara",
+                "Prazos com lembrete e bloqueio",
+                "Audiências e calendário forense",
+                "Contratos fixo + êxito",
+                "Honorários e timesheet",
+                "Portal do cliente com sigilo por papel",
+              ]}
+              testRoute="/demo/advogados"
+              size="default"
+              variant="default"
+            />
+          </div>
+        </div>
 
         <div className="mt-10">
           <RoiSimulator />
@@ -508,5 +566,6 @@ function DemoAdvogados() {
       </main>
       <PublicFooter />
     </div>
+    </TooltipProvider>
   );
 }
