@@ -168,14 +168,20 @@ function DemoAgenda() {
                       <tr key={h} className="border-t">
                         <td className="p-2 font-medium">{h}</td>
                         {profs.map((p) => {
-                          const matches = agds.filter((x) => x.profId === p.id && x.data === dataAtual && x.hora === h);
+                          const matches = agds.filter((x) => x.profId === p.id && x.data === dataAtual && x.hora === h && x.status !== "cancelado");
                           if (matches.length === 0) return <td key={p.id} className="p-2 text-muted-foreground">livre</td>;
                           const conflito = matches.length > 1;
                           return (
                             <td key={p.id} className="p-2 space-y-1">
                               {conflito && (
-                                <div className="text-[10px] font-semibold text-amber-700 dark:text-amber-300 flex items-center gap-1">
-                                  ⚠ Conflito ({matches.length} agendamentos)
+                                <div
+                                  className="text-[10px] font-semibold text-amber-700 dark:text-amber-300 rounded border border-amber-300 dark:border-amber-800/60 bg-amber-50/60 dark:bg-amber-950/30 p-1"
+                                  title={`Conflito em ${p.nome} • ${dataAtual} ${h}\nClientes: ${matches.map((m) => m.cliente).join(", ")}`}
+                                >
+                                  <div className="flex items-center gap-1">⚠ Conflito • {p.nome} • {h}</div>
+                                  <div className="font-normal text-amber-800 dark:text-amber-200 mt-0.5">
+                                    {matches.length} clientes: {matches.map((m) => m.cliente).join(", ")}
+                                  </div>
                                 </div>
                               )}
                               {matches.map((a) => (
