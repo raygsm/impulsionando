@@ -359,6 +359,7 @@ interface StepProps {
   dispatch: React.Dispatch<Action>;
   search: SearchParams;
   totals: ReturnType<typeof computeQuote>;
+  onReset?: () => void;
 }
 
 function StepContent(props: StepProps) {
