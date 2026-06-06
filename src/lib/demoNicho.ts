@@ -1,23 +1,15 @@
-import { useSearch } from "@tanstack/react-router";
-import { z } from "zod";
-import { fallback, zodValidator } from "@tanstack/zod-adapter";
-
 export const NICHOS = ["eventos", "fitness", "saude", "estetica", "generico"] as const;
 export type Nicho = (typeof NICHOS)[number];
 
-export const nichoSearchSchema = z.object({
-  nicho: fallback(z.enum(NICHOS), "generico").default("generico"),
-});
+function isNicho(v: string | null | undefined): v is Nicho {
+  return !!v && (NICHOS as readonly string[]).includes(v);
+}
 
-export const nichoSearchValidator = zodValidator(nichoSearchSchema);
-
-/** Hook leve para ler ?nicho=... em rotas que não declaram validateSearch.
- *  Faz um parse defensivo via URLSearchParams para não exigir refactor das demos. */
+/** Lê ?nicho=... da URL sem exigir validateSearch nas rotas existentes. */
 export function useNichoParam(): Nicho {
   if (typeof window === "undefined") return "generico";
   const raw = new URLSearchParams(window.location.search).get("nicho");
-  const parsed = nichoSearchSchema.safeParse({ nicho: raw ?? undefined });
-  return parsed.success ? parsed.data.nicho : "generico";
+  return isNicho(raw) ? raw : "generico";
 }
 
 /** Rótulos por nicho — para trocar termos genéricos em UI compartilhada. */
