@@ -16,6 +16,14 @@ import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
 import { PixFallbackDialog } from "@/components/payments/PixFallbackDialog";
+import { ModulePicker } from "@/components/marketing/ModulePicker";
+
+const PLAN_QUOTA: Record<string, number> = {
+  Essencial: 1,
+  Integrado: 2,
+  Avançado: 3,
+  "Sob Medida": Number.POSITIVE_INFINITY,
+};
 
 const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20entender%20melhor%20os%20planos%20da%20Impulsionando.";
 
@@ -170,6 +178,37 @@ function PlanosPage() {
     txid: string;
     label: string;
   }>({ open: false, amountCents: 0, txid: "", label: "" });
+  const [picker, setPicker] = useState<{ open: boolean; plan: Plan | null }>({
+    open: false,
+    plan: null,
+  });
+  const [pickedModules, setPickedModules] = useState<Record<string, string[]>>({});
+
+  async function runCheckout(plan: Plan, modules: string[]) {
+    try {
+      await openCheckout({
+        priceId: PRICE_IDS[plan.name][annual ? "annual" : "monthly"],
+        customerEmail: user?.user?.email ?? undefined,
+        customData: {
+          ...(user?.user?.id ? { userId: user.user.id } : {}),
+          plan: plan.name,
+          modules: modules.join(","),
+        },
+      });
+    } catch {
+      const monthly = plan.monthly ?? 0;
+      const finalValue = annual ? monthly * 10 : monthly;
+      toast.message(
+        "Instabilidade no checkout. Liberei o pagamento via Pix para você seguir agora.",
+      );
+      setPixState({
+        open: true,
+        amountCents: Math.round(finalValue * 100),
+        txid: `PLANO-${plan.name.toUpperCase()}-${annual ? "ANUAL" : "MENSAL"}`,
+        label: `Plano ${plan.name}${modules.length ? ` (${modules.length} mód.)` : ""} — ${annual ? "anual" : "mensal"}`,
+      });
+    }
+  }
 
 
   return (
@@ -280,36 +319,20 @@ function PlanosPage() {
 
                 {plan.monthly !== null && PRICE_IDS[plan.name] ? (
                   <div className="mt-6 space-y-2">
+                    {pickedModules[plan.name]?.length ? (
+                      <div className="text-[11px] text-muted-foreground">
+                        {pickedModules[plan.name].length} módulo(s) selecionado(s)
+                      </div>
+                    ) : null}
                     <Button
                       className={cn("w-full", plan.highlight && "bg-gradient-primary shadow-elegant")}
                       variant={plan.highlight ? "default" : "outline"}
                       disabled={checkoutLoading}
-                      onClick={async () => {
-                        try {
-                          await openCheckout({
-                            priceId: PRICE_IDS[plan.name][annual ? "annual" : "monthly"],
-                            customerEmail: user?.user?.email ?? undefined,
-                            customData: user?.user?.id
-                              ? { userId: user.user.id, plan: plan.name }
-                              : { plan: plan.name },
-                          });
-                        } catch {
-                          // Fallback Pix com QR Code + valor + comprovante.
-                          const monthly = plan.monthly ?? 0;
-                          const finalValue = annual ? monthly * 10 : monthly; // anual = 10 meses
-                          toast.message(
-                            "Instabilidade no checkout. Liberei o pagamento via Pix para você seguir agora.",
-                          );
-                          setPixState({
-                            open: true,
-                            amountCents: Math.round(finalValue * 100),
-                            txid: `PLANO-${plan.name.toUpperCase()}-${annual ? "ANUAL" : "MENSAL"}`,
-                            label: `Plano ${plan.name} — ${annual ? "anual" : "mensal"}`,
-                          });
-                        }
-                      }}
+                      onClick={() => setPicker({ open: true, plan })}
                     >
-                      {checkoutLoading ? "Abrindo checkout..." : `Assinar ${annual ? "anual" : "mensal"}`}
+                      {checkoutLoading
+                        ? "Abrindo checkout..."
+                        : `Escolher módulos e assinar ${annual ? "anual" : "mensal"}`}
                     </Button>
 
                     <Button asChild variant="ghost" size="sm" className="w-full text-xs">
@@ -451,6 +474,23 @@ function PlanosPage() {
         txid={pixState.txid}
         label={pixState.label}
       />
+      {picker.plan && (
+        <ModulePicker
+          open={picker.open}
+          onOpenChange={(o) => setPicker((s) => ({ ...s, open: o }))}
+          quota={PLAN_QUOTA[picker.plan.name] ?? 1}
+          planName={picker.plan.name}
+          planSubtitle={picker.plan.tagline}
+          initialSelected={pickedModules[picker.plan.name] ?? []}
+          confirmLabel={`Assinar ${annual ? "anual" : "mensal"} e ir para o pagamento`}
+          onConfirm={async (slugs) => {
+            const plan = picker.plan!;
+            setPickedModules((prev) => ({ ...prev, [plan.name]: slugs }));
+            setPicker({ open: false, plan: null });
+            await runCheckout(plan, slugs);
+          }}
+        />
+      )}
     </div>
   );
 }
