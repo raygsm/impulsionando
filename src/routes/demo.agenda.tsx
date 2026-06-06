@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { DemoModeBanner } from "@/components/demo/DemoModeBanner";
@@ -12,11 +12,12 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Clock, Users, Plus, Trash2, RotateCcw, Sparkles, ListChecks, Bell, Briefcase } from "lucide-react";
+import { Calendar, Clock, Users, Plus, Trash2, RotateCcw, Sparkles, ListChecks, Bell, Briefcase, MessageSquare, User } from "lucide-react";
 import { toast } from "sonner";
 import { useDemoState, uid, brl } from "@/lib/demoSandbox";
 import { DemoContractCTA } from "@/components/demo/DemoContractCTA";
 import { RoiSimulator } from "@/components/demo/RoiSimulator";
+import { gotoCrm, gotoWhatsapp } from "@/lib/demoCrossLink";
 
 export const Route = createFileRoute("/demo/agenda")({
   head: () => ({
@@ -46,6 +47,20 @@ function DemoAgenda() {
     lembrete24h: true, lembrete1h: true, confirmaWhats: true, bloqueioFeriado: false, reagendamentoAuto: true,
   });
   const [dataAtual, setDataAtual] = useState(() => new Date().toISOString().slice(0, 10));
+  const [aba, setAba] = useState<string>("grade");
+  const [prefill, setPrefill] = useState<{ cliente: string; telefone: string } | null>(null);
+
+  // Deep-link via ?cliente=&telefone= vindo de outros módulos (CRM/WhatsApp)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const cliente = params.get("cliente");
+    const telefone = params.get("telefone") ?? "";
+    if (cliente) {
+      setPrefill({ cliente, telefone });
+      setAba("agendar");
+    }
+  }, []);
 
   const dash = useMemo(() => {
     const confirmados = agds.filter((a) => a.status === "confirmado").length;
@@ -113,7 +128,7 @@ function DemoAgenda() {
           </div>
         </div>
 
-        <Tabs defaultValue="grade" className="mt-6">
+        <Tabs value={aba} onValueChange={setAba} className="mt-6">
           <TabsList className="flex-wrap h-auto">
             <TabsTrigger value="grade"><Calendar className="w-4 h-4 mr-1" />Grade</TabsTrigger>
             <TabsTrigger value="profs"><Briefcase className="w-4 h-4 mr-1" />Profissionais</TabsTrigger>
@@ -167,12 +182,12 @@ function DemoAgenda() {
               <h3 className="font-semibold mb-3">Agendamentos do dia</h3>
               {agds.filter((a) => a.data === dataAtual).length === 0 ? <p className="text-sm text-muted-foreground">Sem agendamentos.</p> : (
                 <Table>
-                  <TableHeader><TableRow><TableHead>Hora</TableHead><TableHead>Cliente</TableHead><TableHead>Profissional</TableHead><TableHead>Serviço</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
+                  <TableHeader><TableRow><TableHead>Hora</TableHead><TableHead>Cliente</TableHead><TableHead>Profissional</TableHead><TableHead>Serviço</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Ações</TableHead></TableRow></TableHeader>
                   <TableBody>
                     {agds.filter((a) => a.data === dataAtual).map((a) => (
                       <TableRow key={a.id}>
                         <TableCell>{a.hora}</TableCell>
-                        <TableCell>{a.cliente}</TableCell>
+                        <TableCell>{a.cliente}<div className="text-xs text-muted-foreground">{a.telefone}</div></TableCell>
                         <TableCell>{profs.find((p) => p.id === a.profId)?.nome}</TableCell>
                         <TableCell>{servs.find((s) => s.id === a.servicoId)?.nome}</TableCell>
                         <TableCell>
@@ -185,6 +200,16 @@ function DemoAgenda() {
                               <SelectItem value="cancelado">Cancelado</SelectItem>
                             </SelectContent>
                           </Select>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button size="sm" variant="outline" title="Confirmar via WhatsApp" onClick={() => gotoWhatsapp({ nome: a.cliente, telefone: a.telefone }, `Olá ${a.cliente}, confirmando seu agendamento ${a.hora} de ${servs.find((s) => s.id === a.servicoId)?.nome ?? ""}.`)}>
+                              <MessageSquare className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button size="sm" variant="outline" title="Ver no CRM" onClick={() => gotoCrm({ nome: a.cliente, telefone: a.telefone })}>
+                              <User className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -237,7 +262,7 @@ function DemoAgenda() {
 
           <TabsContent value="agendar" className="mt-4">
             <Card className="p-5">
-              <NovoAgendamento profs={profs} servs={servs} onCreate={(a) => setAgds((p) => [a, ...p])} />
+              <NovoAgendamento profs={profs} servs={servs} prefill={prefill} onCreate={(a) => setAgds((p) => [a, ...p])} />
             </Card>
           </TabsContent>
 
@@ -325,8 +350,11 @@ function NovoServ({ onCreate }: { onCreate: (s: Servico) => void }) {
     </div>
   );
 }
-function NovoAgendamento({ profs, servs, onCreate }: { profs: Profissional[]; servs: Servico[]; onCreate: (a: Agendamento) => void }) {
+function NovoAgendamento({ profs, servs, onCreate, prefill }: { profs: Profissional[]; servs: Servico[]; onCreate: (a: Agendamento) => void; prefill?: { cliente: string; telefone: string } | null }) {
   const [f, setF] = useState({ profId: "", servicoId: "", cliente: "", telefone: "", data: new Date().toISOString().slice(0, 10), hora: "09:00" });
+  useEffect(() => {
+    if (prefill?.cliente) setF((prev) => ({ ...prev, cliente: prefill.cliente, telefone: prefill.telefone ?? "" }));
+  }, [prefill?.cliente, prefill?.telefone]);
   return (
     <div className="grid sm:grid-cols-3 gap-2 items-end">
       <div><Label className="text-xs">Cliente</Label><Input value={f.cliente} onChange={(e) => setF({ ...f, cliente: e.target.value })} /></div>
