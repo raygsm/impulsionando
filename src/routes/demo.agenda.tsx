@@ -273,6 +273,7 @@ function DemoAgenda() {
                 profs={profs}
                 servs={servs}
                 prefill={prefill}
+                agds={agds}
                 onCreate={(a) => {
                   setAgds((p) => [a, ...p]);
                   setDataAtual(a.data);
@@ -281,6 +282,7 @@ function DemoAgenda() {
               />
             </Card>
           </TabsContent>
+
 
 
           <TabsContent value="espera" className="mt-4 space-y-4">
