@@ -541,7 +541,7 @@ function DemoAdvogados() {
                 "Portal do cliente com sigilo por papel",
               ]}
               testRoute="/demo/advogados"
-              size="lg"
+              size="default"
               variant="default"
             />
           </div>
