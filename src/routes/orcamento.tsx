@@ -1,38 +1,130 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import {
-  ArrowLeft,
-  ArrowRight,
-  CheckCircle2,
-  HelpCircle,
-  Loader2,
-  MessageCircle,
-  Save,
-  Sparkles,
-  Trash2,
+  ArrowLeft, ArrowRight, CheckCircle2, FileText, Loader2,
+  Printer, Sparkles, ShieldCheck, MessageCircle,
 } from "lucide-react";
+import { z } from "zod";
+import { toast } from "sonner";
+
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { toast } from "sonner";
-import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
+import { Progress } from "@/components/ui/progress";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { getMotherModule } from "@/data/motherModules";
 
-/* --------------------- Validation helpers --------------------- */
+import {
+  CATALOG_MODULES, getModule, modulesByCategory,
+  type CatalogModule,
+} from "@/data/moduleCatalog";
+import { RECOMMENDED_BUNDLES, bundlesForCategory } from "@/data/recommendedBundles";
+import { computeQuote, formatBRL } from "@/lib/pricing";
+import {
+  createQuote, updateQuote, acceptQuote, requestPayment,
+} from "@/lib/quote.functions";
 
-// Aceita 10 ou 11 dígitos (fixo / celular BR) após remover máscara
+import { ModuleCard } from "@/components/orcamento/ModuleCard";
+import { QuoteSidebar } from "@/components/orcamento/QuoteSidebar";
+import { ContractView, type ContractData } from "@/components/orcamento/ContractView";
+
+/* ============================== Route ============================== */
+
+type SearchParams = {
+  segmento?: string;
+  bundle?: string;
+  origem?: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_content?: string;
+  utm_term?: string;
+};
+
+export const Route = createFileRoute("/orcamento")({
+  validateSearch: (s: Record<string, unknown>): SearchParams => ({
+    segmento: typeof s.segmento === "string" ? s.segmento : undefined,
+    bundle: typeof s.bundle === "string" ? s.bundle : undefined,
+    origem: typeof s.origem === "string" ? s.origem : undefined,
+    utm_source: typeof s.utm_source === "string" ? s.utm_source : undefined,
+    utm_medium: typeof s.utm_medium === "string" ? s.utm_medium : undefined,
+    utm_campaign: typeof s.utm_campaign === "string" ? s.utm_campaign : undefined,
+    utm_content: typeof s.utm_content === "string" ? s.utm_content : undefined,
+    utm_term: typeof s.utm_term === "string" ? s.utm_term : undefined,
+  }),
+  head: () => ({
+    meta: [
+      { title: "Monte seu Orçamento — Impulsionando Tecnologia" },
+      {
+        name: "description",
+        content:
+          "Escolha módulos, veja valores atualizados em tempo real, leia o contrato objetivo e avance para o pagamento. Em 12 etapas guiadas.",
+      },
+      { property: "og:title", content: "Monte seu Orçamento — Impulsionando Tecnologia" },
+      {
+        property: "og:description",
+        content: "Jornada guiada para contratar a Impulsionando Tecnologia com transparência total.",
+      },
+      { property: "og:url", content: "https://impulsionando.com.br/orcamento" },
+    ],
+    links: [{ rel: "canonical", href: "https://impulsionando.com.br/orcamento" }],
+  }),
+  component: OrcamentoPage,
+});
+
+/* ============================ Constants ============================ */
+
+const TOTAL_STEPS = 12;
+const STORAGE_KEY = "orcamento_wizard_v1";
+
+const STEP_LABELS = [
+  "Identificação",
+  "Categoria",
+  "Segmento",
+  "Módulos",
+  "Resumo dos módulos",
+  "Valores",
+  "Prazos e regras",
+  "Dados da empresa",
+  "Revisão final",
+  "Contrato",
+  "Aceite",
+  "Pagamento",
+] as const;
+
+const CATEGORIAS: { value: string; label: string }[] = [
+  { value: "saude", label: "Saúde, Bem-estar e Performance" },
+  { value: "alimentacao", label: "Alimentação, Bebidas e Experiências" },
+  { value: "servicos", label: "Serviços, Educação e Atendimento" },
+  { value: "varejo", label: "Varejo, E-commerce e Produtos" },
+  { value: "viagens", label: "Viagens, Turismo e Experiências" },
+  { value: "eventos", label: "Eventos e Ingressos" },
+  { value: "afiliados", label: "Afiliados e Produtos" },
+  { value: "white-label", label: "White Label e Parceiros" },
+  { value: "outro", label: "Outro segmento" },
+];
+
+const SEGMENTOS: Record<string, string[]> = {
+  saude: ["Clínica médica", "Consultório", "Médico", "Dentista", "Fisioterapeuta", "Psicólogo", "Nutricionista", "Farmácia", "Academia", "CrossFit / Box", "Personal Trainer", "Outro"],
+  alimentacao: ["Bar", "Restaurante", "Delivery", "Pizzaria", "Hamburgueria", "Cafeteria", "Casa de eventos", "Microcervejaria", "Fornecedor", "Outro"],
+  servicos: ["Consultoria", "Educação", "Cursos", "Atendimento", "Coworking", "Serviços técnicos", "Outro"],
+  varejo: ["Loja física", "E-commerce", "Marketplace", "Distribuidor", "Outro"],
+  viagens: ["Agência", "Hotel", "Pousada", "Turismo", "Experiências", "Outro"],
+  eventos: ["Evento pago", "Workshop", "Curso presencial", "Degustação", "Jantar harmonizado", "Evento corporativo", "Evento gastronômico", "Evento cervejeiro", "Outro"],
+  afiliados: ["Produto físico", "Produto digital", "Serviço", "Assinatura", "Suplemento", "Curso", "Evento", "Coprodução", "Afiliados", "Outro"],
+  "white-label": ["Agência", "Consultor", "Revenda", "Parceiro estratégico", "Outro"],
+  outro: ["Descreva no contato"],
+};
+
+/* ============================ Validation ============================ */
+
 const phoneDigits = (v: string) => v.replace(/\D/g, "");
 function formatPhoneBR(v: string): string {
   const d = phoneDigits(v).slice(0, 11);
@@ -41,1004 +133,960 @@ function formatPhoneBR(v: string): string {
   if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
   return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
 }
+function formatCnpjBR(v: string): string {
+  const d = v.replace(/\D/g, "").slice(0, 14);
+  if (d.length <= 2) return d;
+  if (d.length <= 5) return `${d.slice(0, 2)}.${d.slice(2)}`;
+  if (d.length <= 8) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5)}`;
+  if (d.length <= 12) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8)}`;
+  return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8, 12)}-${d.slice(12)}`;
+}
 
 const leadSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(2, "Informe seu nome (mínimo 2 caracteres).")
-    .max(120, "Nome muito longo (máx. 120).")
-    .regex(/^[\p{L}\p{M}'.\- ]+$/u, "Use apenas letras e espaços."),
-  whatsapp: z
-    .string()
-    .trim()
-    .min(1, "Informe um WhatsApp para contato.")
-    .refine((v) => {
-      const d = phoneDigits(v);
-      return d.length === 10 || d.length === 11;
-    }, "WhatsApp inválido. Use DDD + número (ex.: (21) 99999-9999)."),
-  email: z
-    .string()
-    .trim()
-    .max(200, "E-mail muito longo (máx. 200).")
-    .email("E-mail inválido.")
-    .optional()
-    .or(z.literal("")),
-});
-type LeadErrors = Partial<Record<"name" | "whatsapp" | "email", string>>;
-
-type SearchParams = {
-  segmento?: string;
-  dores?: string; // comma-separated
-  plano?: string; // Essencial | Integrado | Avançado | Sob Medida
-  perfil?: string; // final | white-label
-  origem?: string; // page slug for tracking
-};
-
-export const Route = createFileRoute("/orcamento")({
-  validateSearch: (search: Record<string, unknown>): SearchParams => ({
-    segmento: typeof search.segmento === "string" ? search.segmento : undefined,
-    dores: typeof search.dores === "string" ? search.dores : undefined,
-    plano: typeof search.plano === "string" ? search.plano : undefined,
-    perfil: typeof search.perfil === "string" ? search.perfil : undefined,
-    origem: typeof search.origem === "string" ? search.origem : undefined,
-  }),
-  head: () => ({
-    meta: [
-      { title: "Orçamento automático — Impulsionando Tecnologia" },
-      {
-        name: "description",
-        content:
-          "Briefing inteligente: responda 6 perguntas e receba a recomendação de módulos e plano ideal para sua operação.",
-      },
-      { property: "og:url", content: "https://impulsionando.com.br/orcamento" },
-    
-    ],
-    links: [{ rel: "canonical", href: "https://impulsionando.com.br/orcamento" }],
-  }),
-  component: OrcamentoPage,
+  name: z.string().trim().min(2, "Informe seu nome.").max(120),
+  whatsapp: z.string().trim().refine((v) => {
+    const d = phoneDigits(v);
+    return d.length === 10 || d.length === 11;
+  }, "WhatsApp inválido."),
+  email: z.string().trim().email("E-mail inválido.").max(200).optional().or(z.literal("")),
+  role: z.string().trim().max(80).optional().or(z.literal("")),
+  city: z.string().trim().max(80).optional().or(z.literal("")),
+  state: z.string().trim().max(2, "UF").optional().or(z.literal("")),
 });
 
-/* --------------------------- Briefing ---------------------------- */
+/* =============================== State =============================== */
 
-/**
- * Segmentos agrupados por categoria principal.
- * O formulário pergunta primeiro a categoria e depois mostra apenas
- * os segmentos correspondentes.
- */
-const CATEGORIAS = [
-  { value: "saude", label: "Saúde, Bem-estar e Performance" },
-  { value: "alimentacao", label: "Alimentação, Bebidas e Experiências" },
-  { value: "servicos", label: "Serviços, Educação e Atendimento" },
-  { value: "varejo", label: "Varejo, E-commerce e Produtos" },
-  { value: "viagens", label: "Viagens, Turismo e Experiências" },
-  { value: "white-label", label: "White Label e Parceiros" },
-  { value: "outro", label: "Outro segmento" },
-] as const;
-
-const SEGMENTOS_POR_CATEGORIA: Record<string, readonly { value: string; label: string }[]> = {
-  saude: [
-    { value: "clinicas", label: "Clínicas médicas" },
-    { value: "consultorios", label: "Consultórios" },
-    { value: "dentistas", label: "Dentistas / Odontologia" },
-    { value: "fisioterapia", label: "Fisioterapia" },
-    { value: "psicologia", label: "Psicologia" },
-    { value: "nutricao", label: "Nutrição" },
-    { value: "saude-outros", label: "Outros profissionais de saúde" },
-    { value: "academias", label: "Academias / Fitness" },
-    { value: "crossfit", label: "CrossFit / Box" },
-    { value: "personal", label: "Personal Trainer" },
-    { value: "pilates", label: "Estúdios de pilates" },
-    { value: "yoga", label: "Estúdios de yoga" },
-  ],
-  alimentacao: [
-    { value: "bares-restaurantes", label: "Bares e restaurantes" },
-    { value: "pizzarias", label: "Pizzarias" },
-    { value: "hamburguerias", label: "Hamburguerias" },
-    { value: "delivery", label: "Delivery / Dark kitchen" },
-    { value: "cafeterias", label: "Cafeterias / Gastrobares" },
-    { value: "microcervejarias", label: "Microcervejarias" },
-    { value: "fornecedores", label: "Fornecedores / Distribuidores" },
-    { value: "eventos", label: "Casas e eventos gastronômicos" },
-  ],
-  servicos: [
-    { value: "servicos", label: "Prestadores de serviços" },
-    { value: "consultorias", label: "Consultorias" },
-    { value: "assistencias", label: "Assistências técnicas" },
-    { value: "educacao", label: "Escolas / Cursos / Educação" },
-    { value: "mentorias", label: "Mentorias / Aulas particulares" },
-    { value: "saloes", label: "Salões de beleza" },
-    { value: "barbearias", label: "Barbearias" },
-    { value: "esteticas", label: "Clínicas de estética" },
-  ],
-  varejo: [
-    { value: "varejo", label: "Lojas de varejo / físicas" },
-    { value: "ecommerce", label: "E-commerce" },
-    { value: "catalogos", label: "Catálogos digitais" },
-    { value: "atacado", label: "Atacado / B2B" },
-  ],
-  viagens: [
-    { value: "agencias-viagem", label: "Agências de viagens" },
-    { value: "consultores-viagem", label: "Consultores de viagem" },
-    { value: "operadoras", label: "Operadoras de turismo" },
-    { value: "guias", label: "Guias / Receptivo" },
-    { value: "experiencias", label: "Experiências / Roteiros personalizados" },
-    { value: "hospedagens", label: "Hospedagens / Aluguel por temporada" },
-  ],
-  "white-label": [
-    { value: "agencia", label: "Agência / Integrador" },
-    { value: "revendedor", label: "Revendedor / Parceiro comercial" },
-    { value: "consultoria-tech", label: "Consultoria de tecnologia" },
-  ],
-  outro: [
-    { value: "outro", label: "Outro segmento" },
-  ],
-};
-
-const SEGMENTOS = Object.values(SEGMENTOS_POR_CATEGORIA).flat();
-
-const TAMANHO = [
-  { value: "solo", label: "Só eu (autônomo)" },
-  { value: "pequena", label: "2 a 5 pessoas" },
-  { value: "media", label: "6 a 20 pessoas" },
-  { value: "grande", label: "Mais de 20 pessoas" },
-] as const;
-
-const UNIDADES = [
-  { value: "1", label: "1 unidade" },
-  { value: "2-3", label: "2 a 3 unidades" },
-  { value: "4+", label: "4 ou mais unidades" },
-] as const;
-
-const DORES = [
-  { value: "agenda", label: "Agendamento e controle de horários" },
-  { value: "vendas", label: "Vendas no balcão / PDV" },
-  { value: "financeiro", label: "Controle financeiro e caixa" },
-  { value: "estoque", label: "Controle de estoque" },
-  { value: "crm", label: "Captação e acompanhamento de clientes (CRM)" },
-  { value: "whatsapp", label: "Atendimento por WhatsApp" },
-  { value: "relatorios", label: "Relatórios e indicadores (BI)" },
-] as const;
-
-const URGENCIA = [
-  { value: "imediato", label: "Quero começar imediatamente" },
-  { value: "30d", label: "Nos próximos 30 dias" },
-  { value: "60d", label: "Em 1 a 2 meses" },
-  { value: "pesquisa", label: "Só pesquisando" },
-] as const;
-
-const PERFIL = [
-  { value: "final", label: "Sou o cliente final (vou usar no meu negócio)" },
-  { value: "white-label", label: "Quero revender / White label" },
-] as const;
-
-interface Answers {
-  categoria: string;
-  segmento: string;
-  tamanho: string;
-  unidades: string;
-  dores: string[]; // múltiplas dores
-  urgencia: string;
-  perfil: string;
-}
-
-const INITIAL: Answers = {
-  categoria: "",
-  segmento: "",
-  tamanho: "",
-  unidades: "",
-  dores: [],
-  urgencia: "",
-  perfil: "",
-};
-
-/* --------------------- Draft persistence --------------------- */
-
-const DRAFT_KEY = "impulsionando:orcamento:draft";
-const DRAFT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 dias
-
-function saveDraft(answers: Answers, step: number) {
-  try {
-    localStorage.setItem(
-      DRAFT_KEY,
-      JSON.stringify({ answers, step, savedAt: Date.now() })
-    );
-  } catch {}
-}
-
-function loadDraft(): { answers: Answers; step: number } | null {
-  try {
-    const raw = localStorage.getItem(DRAFT_KEY);
-    if (!raw) return null;
-    const data = JSON.parse(raw);
-    if (!data.savedAt || Date.now() - data.savedAt > DRAFT_MAX_AGE_MS) {
-      localStorage.removeItem(DRAFT_KEY);
-      return null;
-    }
-    return { answers: data.answers as Answers, step: data.step as number };
-  } catch {
-    return null;
-  }
-}
-
-function clearDraft() {
-  try {
-    localStorage.removeItem(DRAFT_KEY);
-  } catch {}
-}
-
-/* --------------------- Lógica de recomendação --------------------- */
-
-
-
-interface MotherGroup {
-  /** Slug do módulo principal (mesmo de motherModules.ts). */
-  motherSlug: string;
-  /** Nome curto do módulo principal. */
-  motherName: string;
-  /** Submódulos sugeridos dentro desse módulo principal. */
-  submodules: string[];
-}
-
-interface Recomendacao {
-  plano: "Essencial" | "Integrado" | "Avançado" | "Sob Medida";
-  /** Agrupamento por módulo principal → submódulos. */
-  grupos: MotherGroup[];
-  /** Lista linear para mensagens/WhatsApp/registro do lead. */
-  modulos: string[];
-  resumo: string;
-  motivo: string;
-}
-
-/**
- * Cada "dor" do briefing aponta para um módulo principal + um ou mais submódulos
- * que existem em src/data/motherModules.ts. Mantemos a relação aqui para
- * que /orcamento agrupe a recomendação por módulo principal.
- */
-const DOR_TO_MOTHER: Record<string, { motherSlug: string; submodules: string[] }> = {
-  agenda:     { motherSlug: "agenda",    submodules: ["Agenda online", "Confirmação automática", "Lembretes"] },
-  vendas:     { motherSlug: "pdv",       submodules: ["PDV", "Caixa", "Comandas"] },
-  financeiro: { motherSlug: "erp",       submodules: ["Financeiro", "Contas a receber", "Contas a pagar", "Fluxo de caixa"] },
-  estoque:    { motherSlug: "estoque",   submodules: ["Produtos", "Estoque", "Estoque mínimo", "Fornecedores"] },
-  crm:        { motherSlug: "crm",       submodules: ["Leads", "Clientes", "Funil comercial", "Follow-ups"] },
-  whatsapp:   { motherSlug: "automacao", submodules: ["WhatsApp via Z-API", "Templates de mensagens", "Mensagens automáticas"] },
-  relatorios: { motherSlug: "bi",        submodules: ["Dashboard master", "Dashboard financeiro", "Dashboard comercial"] },
-};
-
-function buildGrupos(dores: string[]): MotherGroup[] {
-  const map = new Map<string, MotherGroup>();
-  for (const dor of dores) {
-    const ref = DOR_TO_MOTHER[dor];
-    if (!ref) continue;
-    const mm = getMotherModule(ref.motherSlug);
-    if (!mm) continue;
-    const existing = map.get(ref.motherSlug);
-    if (existing) {
-      for (const s of ref.submodules) {
-        if (!existing.submodules.includes(s)) existing.submodules.push(s);
-      }
-    } else {
-      map.set(ref.motherSlug, {
-        motherSlug: ref.motherSlug,
-        motherName: mm.shortName,
-        submodules: [...ref.submodules],
-      });
-    }
-  }
-  return Array.from(map.values());
-}
-
-function flattenModulos(grupos: MotherGroup[]): string[] {
-  return grupos.map((g) => `${g.motherName} (${g.submodules.join(", ")})`);
-}
-
-function recomendar(a: Answers): Recomendacao {
-  const grupos = buildGrupos(a.dores);
-  const modulos = flattenModulos(grupos);
-  const nMother = grupos.length;
-
-  // White label sempre vai pra Sob Medida
-  if (a.perfil === "white-label") {
-    return {
-      plano: "Sob Medida",
-      grupos,
-      modulos,
-      resumo: "Solução white label personalizada com sua marca, multi-empresa e gestão master.",
-      motivo:
-        "Como você quer revender / operar como white label, montamos um pacote sob medida com sua identidade, hierarquia master/cliente e contratos por uso.",
-    };
-  }
-
-  // Mais de 1 unidade ou empresa grande → Avançado/Sob Medida
-  if (a.unidades !== "1" || a.tamanho === "grande") {
-    if (nMother >= 3) {
-      return {
-        plano: "Sob Medida",
-        grupos,
-        modulos,
-        resumo: "Pacote completo com múltiplos módulos e operação consolidada e operação consolidada.",
-        motivo:
-          "Você opera em mais de uma unidade ou tem equipe grande. Recomendamos um plano dimensionado por uso, com integração entre unidades.",
-      };
-    }
-    return {
-      plano: "Avançado",
-      grupos,
-      modulos,
-      resumo: "3 módulos principais integrados + relatórios consolidados.",
-      motivo:
-        "Operação distribuída ou equipe grande pede mais módulos principais integrados e visão consolidada.",
-    };
-  }
-
-  // 1 unidade, conta por módulos principais distintos
-  const n = Math.max(1, nMother);
-  if (n === 1) {
-    return {
-      plano: "Essencial",
-      grupos,
-      modulos,
-      resumo: "1 módulo principal focado na sua principal dor.",
-      motivo: "Você sinalizou uma dor principal — comece focado, com baixo custo e escale depois.",
-    };
-  }
-  if (n === 2) {
-    return {
-      plano: "Integrado",
-      grupos,
-      modulos,
-      resumo: "2 módulos principais integrados.",
-      motivo: "Suas necessidades se beneficiam de 2 módulos principais trabalhando juntos.",
-    };
-  }
-  return {
-    plano: "Avançado",
-    grupos,
-    modulos,
-    resumo: "3 módulos principais integrados + relatórios.",
-    motivo: "Você tem 3 ou mais frentes a organizar — o Avançado entrega o melhor custo-benefício.",
+type WizardState = {
+  step: number;
+  // lead
+  name: string;
+  whatsapp: string;
+  email: string;
+  role: string;
+  city: string;
+  state: string;
+  // segmentação
+  category: string;
+  segment: string;
+  // módulos
+  selected: string[];
+  // empresa
+  companyName: string;
+  companyTaxId: string;
+  companyLegalName: string;
+  // aceite
+  accepted: {
+    terms: boolean;
+    modules: boolean;
+    deadlines: boolean;
+    integrations: boolean;
+    refund: boolean;
   };
+  // estado do servidor
+  quoteId: string | null;
+  quoteNumber: string | null;
+  acceptedAt: string | null;
+  paymentRequested: boolean;
+};
+
+const initialState: WizardState = {
+  step: 1,
+  name: "", whatsapp: "", email: "", role: "", city: "", state: "",
+  category: "", segment: "",
+  selected: [],
+  companyName: "", companyTaxId: "", companyLegalName: "",
+  accepted: { terms: false, modules: false, deadlines: false, integrations: false, refund: false },
+  quoteId: null, quoteNumber: null, acceptedAt: null, paymentRequested: false,
+};
+
+type Action =
+  | { type: "SET"; patch: Partial<WizardState> }
+  | { type: "TOGGLE_MODULE"; slug: string }
+  | { type: "SET_BUNDLE"; slugs: string[] }
+  | { type: "STEP"; delta: number }
+  | { type: "GOTO"; step: number }
+  | { type: "RESET" };
+
+function reducer(state: WizardState, action: Action): WizardState {
+  switch (action.type) {
+    case "SET": return { ...state, ...action.patch };
+    case "TOGGLE_MODULE": {
+      const has = state.selected.includes(action.slug);
+      return { ...state, selected: has ? state.selected.filter((s) => s !== action.slug) : [...state.selected, action.slug] };
+    }
+    case "SET_BUNDLE": {
+      // merge: marca todos do bundle preservando seleções extras
+      const merged = Array.from(new Set([...state.selected, ...action.slugs]));
+      return { ...state, selected: merged };
+    }
+    case "STEP": {
+      const next = Math.max(1, Math.min(TOTAL_STEPS, state.step + action.delta));
+      return { ...state, step: next };
+    }
+    case "GOTO":
+      return { ...state, step: Math.max(1, Math.min(TOTAL_STEPS, action.step)) };
+    case "RESET":
+      return initialState;
+    default: return state;
+  }
 }
 
-/* ------------------------------ UI ------------------------------- */
+/* =============================== Page =============================== */
 
-const STEPS = [
-  { key: "perfil", title: "Quem vai usar o sistema?", helper: "Isso muda completamente a recomendação." },
-  { key: "categoria", title: "Qual é a área principal do seu negócio?", helper: "Primeiro a categoria — depois mostramos os segmentos específicos." },
-  { key: "segmento", title: "Qual é o seu segmento?", helper: "Usamos para escolher os módulos certos." },
-  { key: "tamanho", title: "Tamanho da operação", helper: "Quantas pessoas vão usar o sistema?" },
-  { key: "unidades", title: "Quantas unidades você tem?", helper: "1 unidade simplifica. Várias exigem multi-empresa." },
-  { key: "dores", title: "O que precisa resolver agora?", helper: "Pode marcar mais de uma — vamos sugerir os módulos." },
-  { key: "urgencia", title: "Para quando você precisa?", helper: "Ajuda nosso time a priorizar o atendimento." },
-] as const;
-
-function StepHeader({ title, helper, step, total }: { title: string; helper: string; step: number; total: number }) {
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <span>Passo {step} de {total}</span>
-        <span>{Math.round((step / total) * 100)}%</span>
-      </div>
-      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-        <div
-          className="h-full bg-gradient-primary transition-all"
-          style={{ width: `${(step / total) * 100}%` }}
-        />
-      </div>
-      <h2 className="text-2xl font-semibold tracking-tight pt-2 flex items-center gap-2">
-        {title}
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button type="button" aria-label="Ajuda">
-                <HelpCircle className="w-4 h-4 text-muted-foreground hover:text-foreground" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p className="max-w-xs text-xs">{helper}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </h2>
-    </div>
-  );
-}
-
-function SelectField({
-  value,
-  onChange,
-  options,
-  placeholder,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  options: readonly { value: string; label: string }[];
-  placeholder: string;
-}) {
-  return (
-    <Select value={value || undefined} onValueChange={onChange}>
-      <SelectTrigger className="h-12">
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent>
-        {options.map((o) => (
-          <SelectItem key={o.value} value={o.value}>
-            {o.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-}
-
-function MultiChips({
-  values,
-  onToggle,
-  options,
-}: {
-  values: string[];
-  onToggle: (v: string) => void;
-  options: readonly { value: string; label: string }[];
-}) {
-  return (
-    <div className="grid sm:grid-cols-2 gap-2">
-      {options.map((o) => {
-        const active = values.includes(o.value);
-        return (
-          <button
-            key={o.value}
-            type="button"
-            onClick={() => onToggle(o.value)}
-            className={cn(
-              "text-left px-4 py-3 rounded-md border text-sm transition-all flex items-center gap-2",
-              active
-                ? "border-primary bg-primary/5 text-foreground shadow-elegant"
-                : "border-border hover:border-primary/40 text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <span
-              className={cn(
-                "w-4 h-4 rounded border flex items-center justify-center shrink-0",
-                active ? "bg-primary border-primary text-primary-foreground" : "border-border"
-              )}
-            >
-              {active && <CheckCircle2 className="w-3 h-3" />}
-            </span>
-            {o.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function ResultCard({
-  rec,
-  answers,
-  onRestart,
-  onClearDraft,
-}: {
-  rec: Recomendacao;
-  answers: Answers;
-  onRestart: () => void;
-  onClearDraft: () => void;
-}) {
-  const [name, setName] = useState("");
-  const [whatsapp, setWhatsapp] = useState("");
-  const [email, setEmail] = useState("");
-  const [errors, setErrors] = useState<LeadErrors>({});
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-
-  const whatsText = encodeURIComponent(
-    `Olá! Fiz o briefing no site. Recomendação: Plano ${rec.plano} com módulos: ${rec.modulos.join(", ") || "—"}. Quero falar com um especialista.`
-  );
-  const whatsURL = `https://wa.me/5521993075000?text=${whatsText}`;
-
-  function validate(): { ok: boolean; data?: z.infer<typeof leadSchema> } {
-    const parsed = leadSchema.safeParse({ name, whatsapp, email });
-    if (!parsed.success) {
-      const errs: LeadErrors = {};
-      parsed.error.issues.forEach((i) => {
-        const k = i.path[0] as keyof LeadErrors;
-        if (k && !errs[k]) errs[k] = i.message;
-      });
-      setErrors(errs);
-      // foca o primeiro campo inválido
-      const order: (keyof LeadErrors)[] = ["name", "whatsapp", "email"];
-      const first = order.find((k) => errs[k]);
-      if (first && typeof document !== "undefined") {
-        document.getElementById(`lead-${first}`)?.focus();
+function OrcamentoPage() {
+  const search = Route.useSearch();
+  const [state, dispatch] = useReducer(reducer, initialState, (init) => {
+    if (typeof window === "undefined") return init;
+    try {
+      const raw = window.sessionStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as Partial<WizardState>;
+        return { ...init, ...parsed };
       }
-      return { ok: false };
-    }
-    setErrors({});
-    return { ok: true, data: parsed.data };
-  }
+    } catch { /* ignore */ }
+    return init;
+  });
 
-  async function submit(openWhats: boolean) {
-    const { ok, data } = validate();
-    if (!ok || !data) {
-      toast.error("Revise os campos destacados antes de enviar.");
-      return;
-    }
-    setSaving(true);
-    const leadId =
-      typeof crypto !== "undefined" && "randomUUID" in crypto
-        ? crypto.randomUUID()
-        : undefined;
-    const { error } = await supabase
-      .from("marketing_leads")
-      .insert({
-        ...(leadId ? { id: leadId } : {}),
-        source: "orcamento",
-        name: data.name,
-        phone: phoneDigits(data.whatsapp),
-        email: data.email ? data.email : null,
-        message: `Plano ${rec.plano} · Módulos: ${rec.modulos.join(", ") || "—"}`,
-        answers: answers as never,
-        recommended_plan: rec.plano,
-        recommended_modules: rec.modulos,
-        page_url: typeof window !== "undefined" ? window.location.href : null,
-        user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
-      });
-    setSaving(false);
-    if (error) {
-      console.error("marketing_leads insert failed", error);
-      toast.error("Não foi possível enviar agora. Tente novamente.");
-      return;
-    }
-    // Notify sales inbox (fire-and-forget; falha não bloqueia o usuário)
-    if (leadId) {
-      void fetch("/api/public/hooks/marketing-lead-notify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ leadId }),
-      }).catch((e) => console.warn("lead notify failed", e));
-    }
+  // Persistir
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try { window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch { /* ignore */ }
+  }, [state]);
 
-    setSaved(true);
-    onClearDraft();
-    toast.success("Recebemos seu briefing! Nosso time entrará em contato.");
-    if (openWhats) window.open(whatsURL, "_blank", "noopener,noreferrer");
-  }
+  // Aplicar bundle vindo da URL (uma vez)
+  const appliedRef = useRef(false);
+  useEffect(() => {
+    if (appliedRef.current) return;
+    appliedRef.current = true;
+    if (search.bundle) {
+      const b = RECOMMENDED_BUNDLES.find((x) => x.slug === search.bundle);
+      if (b) dispatch({ type: "SET_BUNDLE", slugs: b.moduleSlugs });
+    }
+  }, [search.bundle]);
 
-  const fieldError = (msg?: string) =>
-    msg ? <p className="text-[11px] text-destructive mt-1">{msg}</p> : null;
+  const totals = useMemo(() => computeQuote(state.selected), [state.selected]);
 
   return (
-    <Card className="p-6 sm:p-8 space-y-6 shadow-elegant">
-      <div className="flex items-start gap-3">
-        <div className="w-12 h-12 rounded-lg bg-gradient-primary flex items-center justify-center shrink-0">
-          <Sparkles className="w-6 h-6 text-primary-foreground" />
-        </div>
-        <div>
-          <div className="text-xs uppercase tracking-wider text-muted-foreground">Recomendação</div>
-          <h2 className="text-3xl font-bold tracking-tight">Plano {rec.plano}</h2>
-          <p className="text-muted-foreground mt-1">{rec.resumo}</p>
-        </div>
-      </div>
-
-      <div>
-        <div className="text-sm font-semibold mb-3">Módulos Principais sugeridos</div>
-        {rec.grupos.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            Nenhum módulo marcado. Volte e escolha pelo menos uma dor para receber sugestões.
-          </p>
-        ) : (
-          <ul className="space-y-3">
-            {rec.grupos.map((g) => (
-              <li
-                key={g.motherSlug}
-                className="rounded-lg border border-border bg-card/60 p-3 sm:p-4"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex h-6 px-2 items-center rounded-full bg-primary/10 text-primary text-[11px] font-semibold uppercase tracking-wider">
-                    Módulo principal
-                  </span>
-                  <span className="text-sm font-semibold">{g.motherName}</span>
-                </div>
-                <div className="mt-2 pl-1 border-l-2 border-primary/30">
-                  <div className="pl-3 text-[11px] uppercase tracking-wider text-muted-foreground mb-1">
-                    Submódulos
-                  </div>
-                  <div className="pl-3 flex flex-wrap gap-1.5">
-                    {g.submodules.map((s) => (
-                      <span
-                        key={s}
-                        className="px-2.5 py-0.5 rounded-full bg-secondary text-secondary-foreground text-xs"
-                      >
-                        {s}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <div className="rounded-md border border-border bg-muted/30 p-4 text-sm leading-relaxed">
-        <span className="font-medium">Por que esse plano?</span> {rec.motivo}
-      </div>
-
-      {!saved && (
-        <div className="rounded-lg border border-border p-4 sm:p-5 space-y-3 bg-card">
-          <div className="text-sm font-semibold">Receba sua proposta personalizada</div>
-          <div className="grid sm:grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <Label htmlFor="lead-name" className="text-xs">Seu nome *</Label>
-              <Input
-                id="lead-name"
-                value={name}
-                onChange={(e) => { setName(e.target.value); if (errors.name) setErrors({ ...errors, name: undefined }); }}
-                onBlur={() => { if (name) validate(); }}
-                placeholder="Como podemos te chamar?"
-                aria-invalid={!!errors.name}
-                maxLength={120}
-                className={cn(errors.name && "border-destructive focus-visible:ring-destructive")}
-              />
-              {fieldError(errors.name)}
+    <TooltipProvider delayDuration={150}>
+      <div className="min-h-screen flex flex-col bg-background">
+        <PublicHeader />
+        <main className="flex-1">
+          <div className="container max-w-6xl mx-auto px-4 py-8">
+            {/* Hero */}
+            <div className="mb-6 text-center">
+              <Badge variant="secondary" className="mb-2">
+                <Sparkles className="h-3 w-3 mr-1" />
+                Plano em 1 minuto
+              </Badge>
+              <h1 className="text-3xl md:text-4xl font-bold mb-2">Monte seu Orçamento</h1>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Escolha os módulos, veja valores em tempo real, leia o contrato objetivo e avance para o pagamento — em 12 etapas guiadas.
+              </p>
             </div>
-            <div className="space-y-1">
-              <Label htmlFor="lead-whatsapp" className="text-xs">WhatsApp *</Label>
-              <Input
-                id="lead-whatsapp"
-                value={whatsapp}
-                onChange={(e) => {
-                  setWhatsapp(formatPhoneBR(e.target.value));
-                  if (errors.whatsapp) setErrors({ ...errors, whatsapp: undefined });
-                }}
-                onBlur={() => { if (whatsapp) validate(); }}
-                placeholder="(21) 99999-9999"
-                inputMode="tel"
-                autoComplete="tel-national"
-                aria-invalid={!!errors.whatsapp}
-                maxLength={16}
-                className={cn(errors.whatsapp && "border-destructive focus-visible:ring-destructive")}
-              />
-              {fieldError(errors.whatsapp) ?? (
-                <p className="text-[11px] text-muted-foreground mt-1">DDD + número, com 10 ou 11 dígitos.</p>
+
+            {/* Progress */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-2 text-sm">
+                <span className="text-muted-foreground">
+                  Etapa <strong className="text-foreground">{state.step}</strong> de {TOTAL_STEPS} — {STEP_LABELS[state.step - 1]}
+                </span>
+                <span className="text-muted-foreground tabular-nums">
+                  {Math.round((state.step / TOTAL_STEPS) * 100)}%
+                </span>
+              </div>
+              <Progress value={(state.step / TOTAL_STEPS) * 100} />
+            </div>
+
+            {/* Layout: conteúdo + sidebar */}
+            <div className="grid lg:grid-cols-[1fr_320px] gap-6">
+              <div>
+                <StepContent state={state} dispatch={dispatch} search={search} totals={totals} />
+              </div>
+
+              {/* Sidebar desktop */}
+              <aside className="hidden lg:block">
+                <QuoteSidebar
+                  selectedSlugs={state.selected}
+                  onRemove={(slug) => dispatch({ type: "TOGGLE_MODULE", slug })}
+                />
+              </aside>
+
+              {/* Sidebar mobile (drawer) */}
+              {state.selected.length > 0 && (
+                <div className="lg:hidden fixed bottom-4 right-4 z-40">
+                  <Sheet>
+                    <SheetTrigger asChild>
+                      <Button size="lg" className="shadow-lg">
+                        <Sparkles className="h-4 w-4 mr-1" />
+                        {formatBRL(totals.totalCents)}/mês
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent side="bottom" className="h-[80vh] overflow-auto">
+                      <QuoteSidebar
+                        selectedSlugs={state.selected}
+                        onRemove={(slug) => dispatch({ type: "TOGGLE_MODULE", slug })}
+                        compact
+                      />
+                    </SheetContent>
+                  </Sheet>
+                </div>
               )}
-            </div>
-            <div className="sm:col-span-2 space-y-1">
-              <Label htmlFor="lead-email" className="text-xs">E-mail (opcional)</Label>
-              <Input
-                id="lead-email"
-                value={email}
-                onChange={(e) => { setEmail(e.target.value); if (errors.email) setErrors({ ...errors, email: undefined }); }}
-                onBlur={() => { if (email) validate(); }}
-                type="email"
-                placeholder="voce@empresa.com"
-                aria-invalid={!!errors.email}
-                maxLength={200}
-                autoComplete="email"
-                className={cn(errors.email && "border-destructive focus-visible:ring-destructive")}
-              />
-              {fieldError(errors.email)}
             </div>
           </div>
-          <p className="text-[11px] text-muted-foreground">
-            Ao enviar você concorda com nossa{" "}
-            <Link to="/privacidade" className="underline">Política de Privacidade</Link>.
-          </p>
+        </main>
+        <PublicFooter />
+      </div>
+    </TooltipProvider>
+  );
+}
+
+/* ========================== Step content ========================== */
+
+interface StepProps {
+  state: WizardState;
+  dispatch: React.Dispatch<Action>;
+  search: SearchParams;
+  totals: ReturnType<typeof computeQuote>;
+}
+
+function StepContent(props: StepProps) {
+  switch (props.state.step) {
+    case 1: return <StepLead {...props} />;
+    case 2: return <StepCategoria {...props} />;
+    case 3: return <StepSegmento {...props} />;
+    case 4: return <StepModulos {...props} />;
+    case 5: return <StepResumoModulos {...props} />;
+    case 6: return <StepValores {...props} />;
+    case 7: return <StepPrazos {...props} />;
+    case 8: return <StepEmpresa {...props} />;
+    case 9: return <StepRevisao {...props} />;
+    case 10: return <StepContrato {...props} />;
+    case 11: return <StepAceite {...props} />;
+    case 12: return <StepPagamento {...props} />;
+    default: return null;
+  }
+}
+
+function NavRow({
+  onBack, onNext, nextLabel = "Continuar", nextDisabled, loading,
+}: { onBack?: () => void; onNext?: () => void; nextLabel?: string; nextDisabled?: boolean; loading?: boolean }) {
+  return (
+    <div className="flex items-center justify-between gap-3 mt-6">
+      {onBack ? (
+        <Button type="button" variant="outline" onClick={onBack}>
+          <ArrowLeft className="h-4 w-4 mr-1" /> Voltar
+        </Button>
+      ) : <span />}
+      {onNext && (
+        <Button type="button" onClick={onNext} disabled={nextDisabled || loading}>
+          {loading && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
+          {nextLabel}
+          {!loading && <ArrowRight className="h-4 w-4 ml-1" />}
+        </Button>
+      )}
+    </div>
+  );
+}
+
+/* ----------------------- Step 1 — Lead ----------------------- */
+
+function StepLead({ state, dispatch, search }: StepProps) {
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const createFn = useServerFn(createQuote);
+  const [loading, setLoading] = useState(false);
+
+  async function handleNext() {
+    const parsed = leadSchema.safeParse({
+      name: state.name, whatsapp: state.whatsapp, email: state.email,
+      role: state.role, city: state.city, state: state.state,
+    });
+    if (!parsed.success) {
+      const errs: Record<string, string> = {};
+      for (const issue of parsed.error.issues) errs[issue.path.join(".")] = issue.message;
+      setErrors(errs);
+      return;
+    }
+    setErrors({});
+    setLoading(true);
+    try {
+      const result = await createFn({
+        data: {
+          lead: {
+            name: state.name, whatsapp: state.whatsapp,
+            email: state.email || undefined, role: state.role || undefined,
+            city: state.city || undefined, state: state.state || undefined,
+          },
+          modules: state.selected,
+          tracking: {
+            utm_source: search.utm_source, utm_medium: search.utm_medium,
+            utm_campaign: search.utm_campaign, utm_content: search.utm_content,
+            utm_term: search.utm_term, origin: search.origem ?? "/orcamento",
+          },
+        },
+      });
+      dispatch({ type: "SET", patch: { quoteId: result.id, quoteNumber: result.quoteNumber, step: 2 } });
+    } catch (e) {
+      toast.error((e as Error).message || "Não foi possível salvar agora. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Card className="p-6">
+      <h2 className="text-2xl font-bold mb-1">Vamos começar pelo básico</h2>
+      <p className="text-muted-foreground mb-6 text-sm">
+        Essas informações ajudam a montar uma proposta compatível com sua operação e manter o histórico da sua solicitação.
+      </p>
+      <div className="grid md:grid-cols-2 gap-4">
+        <FieldText label="Nome completo *" value={state.name} onChange={(v) => dispatch({ type: "SET", patch: { name: v } })} error={errors.name} />
+        <FieldText
+          label="WhatsApp *" value={state.whatsapp}
+          onChange={(v) => dispatch({ type: "SET", patch: { whatsapp: formatPhoneBR(v) } })}
+          placeholder="(00) 00000-0000" error={errors.whatsapp}
+        />
+        <FieldText label="E-mail" type="email" value={state.email} onChange={(v) => dispatch({ type: "SET", patch: { email: v } })} error={errors.email} />
+        <FieldText label="Cargo / função" value={state.role} onChange={(v) => dispatch({ type: "SET", patch: { role: v } })} />
+        <FieldText label="Cidade" value={state.city} onChange={(v) => dispatch({ type: "SET", patch: { city: v } })} />
+        <FieldText label="UF" maxLength={2} value={state.state} onChange={(v) => dispatch({ type: "SET", patch: { state: v.toUpperCase() } })} error={errors.state} />
+      </div>
+      <NavRow onNext={handleNext} loading={loading} />
+    </Card>
+  );
+}
+
+/* ---------------------- Step 2 — Categoria ---------------------- */
+
+function StepCategoria({ state, dispatch }: StepProps) {
+  return (
+    <Card className="p-6">
+      <h2 className="text-2xl font-bold mb-1">Qual é a área principal do seu negócio?</h2>
+      <p className="text-muted-foreground mb-6 text-sm">
+        A categoria escolhida ajuda a recomendar os módulos certos para seu segmento.
+      </p>
+      <div className="grid sm:grid-cols-2 gap-3">
+        {CATEGORIAS.map((cat) => (
+          <Card
+            key={cat.value}
+            role="button" tabIndex={0}
+            onClick={() => dispatch({ type: "SET", patch: { category: cat.value, segment: "" } })}
+            onKeyDown={(e) => { if (e.key === "Enter") dispatch({ type: "SET", patch: { category: cat.value, segment: "" } }); }}
+            className={cn(
+              "p-4 cursor-pointer transition-all hover:shadow-md",
+              state.category === cat.value ? "border-primary bg-primary/5" : "hover:border-primary/40",
+            )}
+          >
+            <div className="flex items-center justify-between">
+              <span className="font-medium">{cat.label}</span>
+              {state.category === cat.value && <CheckCircle2 className="h-5 w-5 text-primary" />}
+            </div>
+          </Card>
+        ))}
+      </div>
+      <NavRow
+        onBack={() => dispatch({ type: "STEP", delta: -1 })}
+        onNext={() => dispatch({ type: "STEP", delta: 1 })}
+        nextDisabled={!state.category}
+      />
+    </Card>
+  );
+}
+
+/* ---------------------- Step 3 — Segmento ---------------------- */
+
+function StepSegmento({ state, dispatch }: StepProps) {
+  const segs = SEGMENTOS[state.category] ?? [];
+  const bundles = bundlesForCategory(state.category);
+
+  return (
+    <Card className="p-6">
+      <h2 className="text-2xl font-bold mb-1">Qual segmento descreve melhor sua operação?</h2>
+      <p className="text-muted-foreground mb-6 text-sm">
+        Vamos sugerir uma combinação de módulos baseada no seu segmento — você pode ajustar depois.
+      </p>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-6">
+        {segs.map((seg) => (
+          <button
+            type="button" key={seg}
+            onClick={() => dispatch({ type: "SET", patch: { segment: seg } })}
+            className={cn(
+              "p-3 text-left rounded-md border transition-all text-sm",
+              state.segment === seg
+                ? "border-primary bg-primary/10 font-medium"
+                : "border-border hover:border-primary/40",
+            )}
+          >
+            {seg}
+          </button>
+        ))}
+      </div>
+
+      {bundles.length > 0 && (
+        <div className="mb-6">
+          <h3 className="font-semibold text-sm mb-2 flex items-center gap-1">
+            <Sparkles className="h-4 w-4 text-primary" /> Combinações recomendadas para você
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {bundles.map((b) => (
+              <Button
+                key={b.slug} size="sm" variant="outline"
+                onClick={() => {
+                  dispatch({ type: "SET_BUNDLE", slugs: b.moduleSlugs });
+                  toast.success(`Bundle "${b.name}" aplicado. ${b.moduleSlugs.length} módulos adicionados.`);
+                }}
+              >
+                + {b.name}
+              </Button>
+            ))}
+          </div>
         </div>
       )}
 
-      <div className="space-y-3">
-        {!saved ? (
-          <Button
-            size="lg"
-            className="gap-2 bg-gradient-primary shadow-elegant w-full justify-center font-semibold tracking-wide"
-            onClick={() => submit(false)}
-            disabled={saving}
-          >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-            ENVIAR ORÇAMENTO
-          </Button>
-        ) : (
-          <Button
-            asChild
-            size="lg"
-            className="gap-2 w-full justify-center bg-[#25D366] hover:bg-[#1ebe5d] text-white shadow-elegant"
-          >
-            <a href={whatsURL} target="_blank" rel="noopener noreferrer">
-              <MessageCircle className="w-4 h-4" />
-              Falar no WhatsApp agora
-            </a>
-          </Button>
+      <NavRow
+        onBack={() => dispatch({ type: "STEP", delta: -1 })}
+        onNext={() => dispatch({ type: "STEP", delta: 1 })}
+        nextDisabled={!state.segment}
+      />
+    </Card>
+  );
+}
+
+/* ---------------------- Step 4 — Módulos ---------------------- */
+
+function StepModulos({ state, dispatch }: StepProps) {
+  const grouped = useMemo(() => modulesByCategory(), []);
+  const updateFn = useServerFn(updateQuote);
+
+  // Sincroniza módulos com banco em background
+  const lastSyncedRef = useRef<string>("");
+  useEffect(() => {
+    if (!state.quoteId) return;
+    const key = state.selected.slice().sort().join(",");
+    if (key === lastSyncedRef.current) return;
+    lastSyncedRef.current = key;
+    const t = setTimeout(() => {
+      updateFn({ data: { id: state.quoteId!, modules: state.selected, category: state.category, segment: state.segment } })
+        .catch(() => { /* silent */ });
+    }, 800);
+    return () => clearTimeout(t);
+  }, [state.quoteId, state.selected, state.category, state.segment, updateFn]);
+
+  return (
+    <Card className="p-6">
+      <h2 className="text-2xl font-bold mb-1">Escolha os módulos</h2>
+      <p className="text-muted-foreground mb-6 text-sm">
+        Cada módulo custa <strong className="text-foreground">{formatBRL(49700)}/mês</strong>. Marque e desmarque para ver o valor atualizado em tempo real.
+      </p>
+
+      {(Object.keys(grouped) as Array<keyof typeof grouped>).map((cat) => (
+        <section key={cat} className="mb-8">
+          <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-3">{cat}</h3>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {grouped[cat].map((mod: CatalogModule) => (
+              <ModuleCard
+                key={mod.slug} module={mod}
+                selected={state.selected.includes(mod.slug)}
+                onToggle={() => {
+                  dispatch({ type: "TOGGLE_MODULE", slug: mod.slug });
+                  const wasSelected = state.selected.includes(mod.slug);
+                  toast.success(wasSelected
+                    ? "Módulo removido. O orçamento foi recalculado."
+                    : "Módulo adicionado ao seu orçamento. O valor foi atualizado automaticamente.",
+                    { duration: 1500 });
+                }}
+              />
+            ))}
+          </div>
+        </section>
+      ))}
+
+      <NavRow
+        onBack={() => dispatch({ type: "STEP", delta: -1 })}
+        onNext={() => dispatch({ type: "STEP", delta: 1 })}
+        nextDisabled={state.selected.length === 0}
+        nextLabel={state.selected.length === 0 ? "Selecione ao menos 1 módulo" : "Ver resumo"}
+      />
+    </Card>
+  );
+}
+
+/* ---------------- Step 5 — Resumo dos módulos ---------------- */
+
+function StepResumoModulos({ state, dispatch, totals }: StepProps) {
+  return (
+    <Card className="p-6">
+      <h2 className="text-2xl font-bold mb-1">Confirme os módulos escolhidos</h2>
+      <p className="text-muted-foreground mb-6 text-sm">
+        Você pode remover qualquer módulo abaixo ou voltar para adicionar mais.
+      </p>
+      <ul className="space-y-2 mb-6">
+        {totals.lineItems.map((it) => {
+          const mod = getModule(it.slug);
+          return (
+            <li key={it.slug} className="flex items-center justify-between p-3 rounded-md border border-border">
+              <div className="flex-1">
+                <p className="font-medium">{mod?.name}</p>
+                <p className="text-xs text-muted-foreground">{mod?.description}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm tabular-nums">{formatBRL(it.priceCents)}</span>
+                <Button size="sm" variant="ghost" onClick={() => dispatch({ type: "TOGGLE_MODULE", slug: it.slug })}>
+                  Remover
+                </Button>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+      <NavRow
+        onBack={() => dispatch({ type: "STEP", delta: -1 })}
+        onNext={() => dispatch({ type: "STEP", delta: 1 })}
+        nextDisabled={totals.lineItems.length === 0}
+      />
+    </Card>
+  );
+}
+
+/* -------------------- Step 6 — Valores -------------------- */
+
+function StepValores({ dispatch, totals }: StepProps) {
+  return (
+    <Card className="p-6">
+      <h2 className="text-2xl font-bold mb-1">Valores do seu orçamento</h2>
+      <p className="text-muted-foreground mb-6 text-sm">
+        Quebra detalhada do que você vai pagar. Cobrança mensal, sem fidelidade.
+      </p>
+      <dl className="space-y-2 text-sm mb-6">
+        <Row label={`Subtotal (${totals.selectedCount} módulos × ${formatBRL(49700)})`} value={formatBRL(totals.subtotalCents)} />
+        <Row
+          label={`Desconto progressivo (${totals.discountPct}%)`}
+          value={`- ${formatBRL(totals.discountCents)}`}
+          accent={totals.discountCents > 0 ? "emerald" : undefined}
+        />
+        <Row label="Setup / implantação" value={formatBRL(totals.setupCents)} muted />
+        <div className="border-t border-border pt-2 mt-2">
+          <Row label="Total mensal" value={formatBRL(totals.totalCents)} bold />
+        </div>
+      </dl>
+      <div className="bg-muted/50 rounded-md p-3 text-xs text-muted-foreground space-y-1">
+        <p>• Próximo vencimento: na mesma data da contratação, a cada mês.</p>
+        <p>• Forma de pagamento: cartão de crédito recorrente.</p>
+        <p>• Sem multa por cancelamento.</p>
+        <p>• Reembolso integral em até 7 dias após a primeira cobrança.</p>
+      </div>
+      <NavRow
+        onBack={() => dispatch({ type: "STEP", delta: -1 })}
+        onNext={() => dispatch({ type: "STEP", delta: 1 })}
+      />
+    </Card>
+  );
+}
+
+function Row({ label, value, bold, muted, accent }: { label: string; value: string; bold?: boolean; muted?: boolean; accent?: "emerald" }) {
+  return (
+    <div className={cn(
+      "flex justify-between",
+      bold && "font-semibold text-base",
+      muted && "text-muted-foreground",
+      accent === "emerald" && "text-emerald-600 dark:text-emerald-500",
+    )}>
+      <span>{label}</span>
+      <span className="tabular-nums">{value}</span>
+    </div>
+  );
+}
+
+/* -------------------- Step 7 — Prazos e regras -------------------- */
+
+function StepPrazos({ state, dispatch }: StepProps) {
+  const selectedMods = state.selected.map(getModule).filter(Boolean) as CatalogModule[];
+  const needsCredentials = selectedMods.filter((m) => m.requiresExternalCredentials);
+
+  return (
+    <Card className="p-6">
+      <h2 className="text-2xl font-bold mb-1">Prazos, regras e dependências</h2>
+      <p className="text-muted-foreground mb-6 text-sm">
+        Leia com calma. Tudo aqui faz parte do contrato que você vai assinar.
+      </p>
+      <div className="space-y-4 text-sm">
+        <Section title="Prazo de ativação">
+          Até 5 dias úteis após a confirmação do pagamento. Onboarding guiado pela equipe da Impulsionando.
+        </Section>
+        <Section title="Forma de pagamento e vencimento">
+          Cobrança mensal recorrente no cartão de crédito, no mesmo dia da contratação a cada mês.
+        </Section>
+        <Section title="Cancelamento">
+          Sem multa, a qualquer momento, com efeito ao final do ciclo já pago.
+        </Section>
+        <Section title="Reembolso">
+          Direito de arrependimento de 7 dias corridos após a primeira cobrança (CDC art. 49).
+        </Section>
+        <Section title="Suporte">
+          WhatsApp e e-mail em horário comercial. Plantão para incidentes críticos.
+        </Section>
+        {needsCredentials.length > 0 && (
+          <Section title="Dependências externas dos módulos escolhidos">
+            <p>Os módulos abaixo dependem de credenciais externas. Eles ficarão "prontos para ativar" assim que as credenciais forem configuradas:</p>
+            <ul className="list-disc list-inside mt-1 space-y-0.5">
+              {needsCredentials.map((m) => <li key={m.slug}><strong>{m.name}</strong></li>)}
+            </ul>
+          </Section>
+        )}
+      </div>
+      <NavRow
+        onBack={() => dispatch({ type: "STEP", delta: -1 })}
+        onNext={() => dispatch({ type: "STEP", delta: 1 })}
+      />
+    </Card>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="border border-border rounded-md p-3">
+      <h3 className="font-semibold text-sm mb-1">{title}</h3>
+      <div className="text-sm text-muted-foreground">{children}</div>
+    </div>
+  );
+}
+
+/* -------------------- Step 8 — Dados da empresa -------------------- */
+
+function StepEmpresa({ state, dispatch }: StepProps) {
+  const updateFn = useServerFn(updateQuote);
+  const [saving, setSaving] = useState(false);
+
+  async function handleNext() {
+    if (state.quoteId) {
+      setSaving(true);
+      try {
+        await updateFn({
+          data: {
+            id: state.quoteId,
+            company: {
+              companyName: state.companyName || undefined,
+              companyTaxId: state.companyTaxId || undefined,
+              companyLegalName: state.companyLegalName || undefined,
+            },
+          },
+        });
+      } catch (e) {
+        toast.error("Não foi possível salvar agora. Vamos continuar mesmo assim.");
+      } finally {
+        setSaving(false);
+      }
+    }
+    dispatch({ type: "STEP", delta: 1 });
+  }
+
+  return (
+    <Card className="p-6">
+      <h2 className="text-2xl font-bold mb-1">Dados da empresa para o contrato</h2>
+      <p className="text-muted-foreground mb-6 text-sm">
+        Opcional, mas recomendado para emissão de nota fiscal e identificação no contrato.
+      </p>
+      <div className="grid md:grid-cols-2 gap-4">
+        <FieldText label="Nome fantasia" value={state.companyName} onChange={(v) => dispatch({ type: "SET", patch: { companyName: v } })} />
+        <FieldText label="Razão social" value={state.companyLegalName} onChange={(v) => dispatch({ type: "SET", patch: { companyLegalName: v } })} />
+        <FieldText
+          label="CNPJ" value={state.companyTaxId}
+          onChange={(v) => dispatch({ type: "SET", patch: { companyTaxId: formatCnpjBR(v) } })}
+          placeholder="00.000.000/0000-00"
+        />
+      </div>
+      <NavRow
+        onBack={() => dispatch({ type: "STEP", delta: -1 })}
+        onNext={handleNext}
+        loading={saving}
+      />
+    </Card>
+  );
+}
+
+/* -------------------- Step 9 — Revisão final -------------------- */
+
+function StepRevisao({ state, dispatch, totals }: StepProps) {
+  return (
+    <Card className="p-6">
+      <h2 className="text-2xl font-bold mb-1">Revisão final</h2>
+      <p className="text-muted-foreground mb-6 text-sm">
+        Revise com calma. A contratação só avança após sua confirmação e aceite dos termos.
+      </p>
+
+      <div className="space-y-4 text-sm">
+        <Section title="Contratante">
+          <p><strong>{state.name}</strong>{state.role && <> • {state.role}</>}</p>
+          <p>{state.whatsapp}{state.email && <> • {state.email}</>}</p>
+          {(state.city || state.state) && <p>{state.city}{state.state && ` / ${state.state}`}</p>}
+        </Section>
+
+        {(state.companyName || state.companyTaxId) && (
+          <Section title="Empresa">
+            <p>{state.companyName}{state.companyLegalName && ` (${state.companyLegalName})`}</p>
+            {state.companyTaxId && <p>CNPJ {state.companyTaxId}</p>}
+          </Section>
         )}
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1 border-t border-border">
-          <Button asChild variant="ghost" size="sm" className="sm:flex-1 justify-center">
-            <Link to="/demo">Ver o sistema funcionando</Link>
-          </Button>
-          <span className="hidden sm:inline text-muted-foreground/50">·</span>
-          <Button variant="ghost" size="sm" className="sm:flex-1 justify-center" onClick={onRestart}>
-            Refazer briefing
-          </Button>
-        </div>
+        <Section title="Segmentação">
+          <p>
+            {CATEGORIAS.find((c) => c.value === state.category)?.label ?? "—"}
+            {state.segment && <> • {state.segment}</>}
+          </p>
+        </Section>
+
+        <Section title={`Módulos contratados (${totals.lineItems.length})`}>
+          <ul className="space-y-0.5">
+            {totals.lineItems.map((it) => (
+              <li key={it.slug} className="flex justify-between">
+                <span>{getModule(it.slug)?.name}</span>
+                <span className="tabular-nums">{formatBRL(it.priceCents)}</span>
+              </li>
+            ))}
+          </ul>
+        </Section>
+
+        <Section title="Valores">
+          <Row label="Subtotal" value={formatBRL(totals.subtotalCents)} />
+          {totals.discountCents > 0 && (
+            <Row label={`Desconto (${totals.discountPct}%)`} value={`- ${formatBRL(totals.discountCents)}`} accent="emerald" />
+          )}
+          <Row label="Total mensal" value={formatBRL(totals.totalCents)} bold />
+        </Section>
+      </div>
+
+      <div className="flex flex-wrap gap-3 mt-6">
+        <Button variant="outline" onClick={() => dispatch({ type: "GOTO", step: 4 })}>
+          Editar módulos
+        </Button>
+        <Button onClick={() => dispatch({ type: "STEP", delta: 1 })}>
+          Ver contrato <ArrowRight className="h-4 w-4 ml-1" />
+        </Button>
+      </div>
+      <Button variant="ghost" className="mt-3" onClick={() => dispatch({ type: "STEP", delta: -1 })}>
+        <ArrowLeft className="h-4 w-4 mr-1" /> Voltar
+      </Button>
+    </Card>
+  );
+}
+
+/* -------------------- Step 10 — Contrato -------------------- */
+
+function StepContrato({ state, dispatch }: StepProps) {
+  const contractData: ContractData = {
+    quoteNumber: state.quoteNumber ?? "ORC-RASCUNHO",
+    leadName: state.name,
+    leadEmail: state.email || null,
+    leadWhatsapp: state.whatsapp,
+    companyName: state.companyName || null,
+    companyTaxId: state.companyTaxId || null,
+    companyLegalName: state.companyLegalName || null,
+    category: state.category || null,
+    segment: state.segment || null,
+    modules: state.selected,
+  };
+  return (
+    <Card className="p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl font-bold flex items-center gap-2">
+          <FileText className="h-6 w-6 text-primary" /> Contrato
+        </h2>
+        <Button variant="outline" size="sm" onClick={() => window.print()}>
+          <Printer className="h-4 w-4 mr-1" /> Imprimir
+        </Button>
+      </div>
+      <ContractView data={contractData} />
+      <NavRow
+        onBack={() => dispatch({ type: "STEP", delta: -1 })}
+        onNext={() => dispatch({ type: "STEP", delta: 1 })}
+        nextLabel="Avançar para aceite"
+      />
+    </Card>
+  );
+}
+
+/* -------------------- Step 11 — Aceite -------------------- */
+
+function StepAceite({ state, dispatch }: StepProps) {
+  const acceptFn = useServerFn(acceptQuote);
+  const [loading, setLoading] = useState(false);
+  const allChecked = Object.values(state.accepted).every(Boolean);
+
+  function setAccept(key: keyof WizardState["accepted"], value: boolean) {
+    dispatch({ type: "SET", patch: { accepted: { ...state.accepted, [key]: value } } });
+  }
+
+  async function handleAccept() {
+    if (!state.quoteId) {
+      toast.error("Orçamento não foi salvo. Volte ao início e tente novamente.");
+      return;
+    }
+    if (!allChecked) return;
+    setLoading(true);
+    try {
+      const result = await acceptFn({
+        data: {
+          id: state.quoteId,
+          userAgent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 500) : undefined,
+          terms: {
+            terms: true, modules: true, deadlines: true, integrations: true, refund: true,
+          },
+        },
+      });
+      dispatch({ type: "SET", patch: { acceptedAt: result.acceptedAt, step: 12 } });
+      toast.success("Aceite registrado. Vamos para o pagamento.");
+    } catch (e) {
+      toast.error((e as Error).message || "Não foi possível registrar o aceite.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const items: Array<[keyof WizardState["accepted"], string]> = [
+    ["terms", "Li e aceito os termos de contratação."],
+    ["modules", "Declaro estar ciente dos módulos escolhidos e valores."],
+    ["deadlines", "Declaro estar ciente dos prazos e regras de implantação."],
+    ["integrations", "Declaro estar ciente de que integrações externas dependem de credenciais e aprovações de terceiros."],
+    ["refund", "Aceito a política de cancelamento e reembolso."],
+  ];
+
+  return (
+    <Card className="p-6">
+      <h2 className="text-2xl font-bold mb-1 flex items-center gap-2">
+        <ShieldCheck className="h-6 w-6 text-primary" /> Aceite eletrônico
+      </h2>
+      <p className="text-muted-foreground mb-6 text-sm">
+        Marque os itens abaixo para confirmar que leu e aceita o contrato.
+      </p>
+      <div className="space-y-3 mb-6">
+        {items.map(([key, label]) => (
+          <label key={key} className="flex items-start gap-3 p-3 rounded-md border border-border cursor-pointer hover:bg-muted/30">
+            <Checkbox
+              checked={state.accepted[key]}
+              onCheckedChange={(c) => setAccept(key, c === true)}
+              className="mt-0.5"
+            />
+            <span className="text-sm">{label}</span>
+          </label>
+        ))}
+      </div>
+      <div className="flex items-center justify-between gap-3">
+        <Button variant="outline" onClick={() => dispatch({ type: "STEP", delta: -1 })}>
+          <ArrowLeft className="h-4 w-4 mr-1" /> Voltar
+        </Button>
+        <Button onClick={handleAccept} disabled={!allChecked || loading}>
+          {loading && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
+          Aceitar contrato e ir para pagamento
+        </Button>
       </div>
     </Card>
   );
 }
 
+/* -------------------- Step 12 — Pagamento -------------------- */
 
+function StepPagamento({ state, dispatch, totals }: StepProps) {
+  const reqPaymentFn = useServerFn(requestPayment);
+  const [requested, setRequested] = useState(state.paymentRequested);
+  const [loading, setLoading] = useState(false);
 
-
-const VALID_DORES = new Set<string>(DORES.map((d) => d.value));
-const VALID_SEGMENTOS = new Set<string>(SEGMENTOS.map((s) => s.value));
-const VALID_PERFIS = new Set<string>(PERFIL.map((p) => p.value));
-
-function buildPrefill(s: SearchParams): { answers: Answers; firstStep: number; hasPrefill: boolean } {
-  const a: Answers = { ...INITIAL };
-  let hasPrefill = false;
-
-  if (s.segmento && VALID_SEGMENTOS.has(s.segmento)) {
-    a.segmento = s.segmento;
-    // Inferir categoria principal a partir do segmento informado
-    for (const [cat, list] of Object.entries(SEGMENTOS_POR_CATEGORIA)) {
-      if (list.some((seg) => seg.value === s.segmento)) { a.categoria = cat; break; }
+  async function handleRequest() {
+    if (!state.quoteId) return;
+    setLoading(true);
+    try {
+      await reqPaymentFn({ data: { id: state.quoteId } });
+      dispatch({ type: "SET", patch: { paymentRequested: true } });
+      setRequested(true);
+      toast.success("Solicitação registrada! Nossa equipe entra em contato em até 1 dia útil com o link de pagamento.");
+    } catch (e) {
+      toast.error((e as Error).message || "Não foi possível registrar agora.");
+    } finally {
+      setLoading(false);
     }
-    hasPrefill = true;
-  }
-  if (s.dores) {
-    const list = s.dores.split(",").map((d) => d.trim()).filter((d) => VALID_DORES.has(d));
-    if (list.length) { a.dores = list; hasPrefill = true; }
-  }
-  if (s.perfil && VALID_PERFIS.has(s.perfil)) { a.perfil = s.perfil; hasPrefill = true; }
-  if (s.plano === "Sob Medida") {
-    a.perfil = a.perfil || "white-label";
-    a.unidades = a.unidades || "4+";
-    a.tamanho = a.tamanho || "grande";
-    hasPrefill = true;
-  } else if (s.plano === "Avançado") {
-    a.unidades = a.unidades || "2-3";
-    hasPrefill = true;
   }
 
-  // Find first unanswered step
-  const order: (keyof Answers)[] = ["perfil", "categoria", "segmento", "tamanho", "unidades", "dores", "urgencia"];
-  let firstStep = 0;
-  for (let i = 0; i < order.length; i++) {
-    const k = order[i];
-    const filled = k === "dores" ? a.dores.length > 0 : !!a[k];
-    if (!filled) { firstStep = i; break; }
-    firstStep = i + 1;
-  }
-  return { answers: a, firstStep: Math.min(firstStep, STEPS.length - 1), hasPrefill };
-}
-
-function mergeDraftWithPrefill(
-  draft: { answers: Answers; step: number } | null,
-  prefill: { answers: Answers; firstStep: number; hasPrefill: boolean }
-): { answers: Answers; step: number; source: "draft" | "prefill" | "fresh" } {
-  // URL prefill sempre tem prioridade sobre draft (ação deliberada do usuário)
-  if (prefill.hasPrefill) {
-    return { answers: prefill.answers, step: prefill.firstStep, source: "prefill" };
-  }
-  if (draft) {
-    return { answers: draft.answers, step: draft.step, source: "draft" };
-  }
-  return { answers: prefill.answers, step: prefill.firstStep, source: "fresh" };
-}
-
-function OrcamentoPage() {
-  const search = Route.useSearch();
-  const prefill = useMemo(() => buildPrefill(search), [search]);
-
-  const [mounted, setMounted] = useState(false);
-  const [a, setA] = useState<Answers>(prefill.answers);
-  const [step, setStep] = useState(prefill.firstStep);
-  const [done, setDone] = useState(false);
-  const [draftToastShown, setDraftToastShown] = useState(false);
-  const draftSavedRef = useRef(false);
-
-  // Hydration-safe: only read localStorage after mount
-  useEffect(() => {
-    setMounted(true);
-    const draft = loadDraft();
-    const merged = mergeDraftWithPrefill(draft, prefill);
-    setA(merged.answers);
-    setStep(merged.step);
-    if (merged.source === "draft" && !draftToastShown) {
-      setDraftToastShown(true);
-      toast.info("Continuando de onde você parou. O rascunho foi restaurado.", {
-        duration: 5000,
-        action: {
-          label: "Recomeçar",
-          onClick: () => {
-            clearDraft();
-            setA(INITIAL);
-            setStep(0);
-            toast.success("Rascunho removido. Comece do início.");
-          },
-        },
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Auto-save draft whenever answers or step change (throttle via ref to avoid first render save)
-  useEffect(() => {
-    if (!mounted) return;
-    // Debounce: só salva 800ms após a última mudança para não floodar
-    const t = setTimeout(() => {
-      saveDraft(a, step);
-      draftSavedRef.current = true;
-    }, 800);
-    return () => clearTimeout(t);
-  }, [a, step, mounted]);
-
-  const total = STEPS.length;
-  const current = STEPS[step];
-
-  const canNext = useMemo(() => {
-    const key = current.key as keyof Answers;
-    if (key === "dores") return a.dores.length > 0;
-    return !!a[key];
-  }, [a, current]);
-
-  function next() {
-    if (step < total - 1) setStep((s) => s + 1);
-    else setDone(true);
-  }
-  function back() {
-    if (step > 0) setStep((s) => s - 1);
-  }
-  function reset() {
-    clearDraft();
-    setA(INITIAL);
-    setStep(0);
-    setDone(false);
-    draftSavedRef.current = false;
-  }
-  function toggleDor(v: string) {
-    setA((prev) => ({
-      ...prev,
-      dores: prev.dores.includes(v) ? prev.dores.filter((x) => x !== v) : [...prev.dores, v],
-    }));
-  }
-
-  const hasAnyAnswer =
-    !!a.perfil || !!a.segmento || !!a.tamanho || !!a.unidades || a.dores.length > 0 || !!a.urgencia;
+  const whatsappMsg = encodeURIComponent(
+    `Olá! Acabei de fechar o orçamento ${state.quoteNumber} no site (${totals.lineItems.length} módulos, ${formatBRL(totals.totalCents)}/mês). Quero receber o link de pagamento.`,
+  );
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <PublicHeader />
-      <main className="flex-1 mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
-        <div className="text-center space-y-3 mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
-            <Sparkles className="w-3.5 h-3.5" /> Briefing inteligente
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Descubra o plano ideal em 1 minuto</h1>
-          <p className="text-muted-foreground max-w-xl mx-auto">
-            Responda 6 perguntas e receba uma recomendação personalizada de módulos e plano — sem cadastro.
+    <Card className="p-6">
+      <div className="text-center mb-6">
+        <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 mb-4">
+          <CheckCircle2 className="h-8 w-8" />
+        </div>
+        <h2 className="text-2xl font-bold mb-1">Contrato aceito!</h2>
+        <p className="text-muted-foreground text-sm">
+          Orçamento <strong className="text-foreground">{state.quoteNumber}</strong>
+          {state.acceptedAt && <> • aceite registrado em {new Date(state.acceptedAt).toLocaleString("pt-BR")}</>}
+        </p>
+      </div>
+
+      <div className="bg-muted/40 rounded-md p-4 mb-6">
+        <div className="flex items-baseline justify-between">
+          <span className="text-sm text-muted-foreground">Total mensal</span>
+          <span className="text-2xl font-bold tabular-nums">{formatBRL(totals.totalCents)}</span>
+        </div>
+        <p className="text-xs text-muted-foreground mt-1">
+          {totals.lineItems.length} módulos • cobrança mensal recorrente
+        </p>
+      </div>
+
+      <div className="space-y-3">
+        <div className="border border-dashed border-border rounded-md p-4 text-center">
+          <p className="text-sm font-medium mb-1">Checkout preparado — aguardando credenciais do gateway</p>
+          <p className="text-xs text-muted-foreground mb-3">
+            Para combinações personalizadas usamos checkout assistido: nossa equipe envia o link de pagamento
+            (cartão recorrente) por WhatsApp ou e-mail em até 1 dia útil.
           </p>
-          {prefill.hasPrefill && !done && (
-            <div className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-primary/5 text-primary border border-primary/20">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              Pré-preenchemos com sua escolha{search.plano ? ` (${search.plano})` : ""}. Confira e avance.
+          {requested ? (
+            <div className="text-sm text-emerald-700 dark:text-emerald-500 font-medium">
+              ✓ Solicitação registrada. Você receberá o link em breve.
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2 justify-center">
+              <Button onClick={handleRequest} disabled={loading}>
+                {loading && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
+                Solicitar link de pagamento
+              </Button>
+              <Button asChild variant="outline">
+                <a
+                  href={`https://wa.me/5521972554500?text=${whatsappMsg}`}
+                  target="_blank" rel="noopener noreferrer"
+                >
+                  <MessageCircle className="h-4 w-4 mr-1" />
+                  Falar no WhatsApp
+                </a>
+              </Button>
             </div>
           )}
         </div>
 
-        {done ? (
-          <ResultCard rec={recomendar(a)} answers={a} onRestart={reset} onClearDraft={clearDraft} />
-        ) : (
-          <Card className="p-6 sm:p-8 space-y-6">
-            <div className="flex items-center justify-between">
-              <StepHeader title={current.title} helper={current.helper} step={step + 1} total={total} />
-              {hasAnyAnswer && (
-                <button
-                  type="button"
-                  onClick={reset}
-                  className="shrink-0 ml-3 flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-destructive transition-colors"
-                  title="Limpar rascunho e recomeçar"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Limpar</span>
-                </button>
-              )}
-            </div>
+        <p className="text-xs text-muted-foreground text-center">
+          Já é cliente ou prefere ver os planos fechados?{" "}
+          <Link to="/planos" className="underline">Ver Essencial / Integrado / Avançado</Link>
+        </p>
+      </div>
+    </Card>
+  );
+}
 
-            {draftSavedRef.current && (
-              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground -mt-2">
-                <Save className="w-3 h-3" />
-                <span>Rascunho salvo automaticamente</span>
-              </div>
-            )}
+/* ============================== Inputs ============================== */
 
-            <div className="space-y-3">
-              {current.key === "perfil" && (
-                <>
-                  <Label className="sr-only">Perfil</Label>
-                  <SelectField
-                    value={a.perfil}
-                    onChange={(v) => setA({ ...a, perfil: v })}
-                    options={PERFIL}
-                    placeholder="Selecione uma opção"
-                  />
-                </>
-              )}
-              {current.key === "categoria" && (
-                <SelectField
-                  value={a.categoria}
-                  onChange={(v) => setA({ ...a, categoria: v, segmento: "" })}
-                  options={CATEGORIAS}
-                  placeholder="Selecione a categoria principal"
-                />
-              )}
-              {current.key === "segmento" && (
-                <SelectField
-                  value={a.segmento}
-                  onChange={(v) => setA({ ...a, segmento: v })}
-                  options={a.categoria ? SEGMENTOS_POR_CATEGORIA[a.categoria] ?? SEGMENTOS : SEGMENTOS}
-                  placeholder={a.categoria ? "Selecione o segmento" : "Escolha primeiro a categoria"}
-                />
-              )}
-              {current.key === "tamanho" && (
-                <SelectField
-                  value={a.tamanho}
-                  onChange={(v) => setA({ ...a, tamanho: v })}
-                  options={TAMANHO}
-                  placeholder="Selecione o tamanho da equipe"
-                />
-              )}
-              {current.key === "unidades" && (
-                <SelectField
-                  value={a.unidades}
-                  onChange={(v) => setA({ ...a, unidades: v })}
-                  options={UNIDADES}
-                  placeholder="Selecione o número de unidades"
-                />
-              )}
-              {current.key === "dores" && (
-                <MultiChips values={a.dores} onToggle={toggleDor} options={DORES} />
-              )}
-              {current.key === "urgencia" && (
-                <SelectField
-                  value={a.urgencia}
-                  onChange={(v) => setA({ ...a, urgencia: v })}
-                  options={URGENCIA}
-                  placeholder="Selecione a urgência"
-                />
-              )}
-            </div>
-
-            {!canNext && (
-              <p className="text-xs text-muted-foreground -mt-2">
-                {current.key === "dores"
-                  ? "Selecione pelo menos uma opção para receber sugestões de módulos."
-                  : "Faça uma seleção para avançar."}
-              </p>
-            )}
-
-            <div className="flex items-center justify-between pt-2">
-              <Button variant="ghost" onClick={back} disabled={step === 0} className="gap-1">
-                <ArrowLeft className="w-4 h-4" /> Voltar
-              </Button>
-              <div className="flex flex-col items-end gap-1">
-                <Button
-                  onClick={next}
-                  disabled={!canNext}
-                  className="gap-1 bg-gradient-primary shadow-elegant"
-                >
-                  {step === total - 1 ? "Ver recomendação" : "Avançar"}
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-                {step < total - 1 && (
-                  <span className="text-[11px] text-muted-foreground">
-                    Próximo: {STEPS[step + 1].title}
-                  </span>
-                )}
-              </div>
-            </div>
-          </Card>
-        )}
-      </main>
-      <PublicFooter />
+function FieldText({
+  label, value, onChange, type = "text", error, placeholder, maxLength,
+}: {
+  label: string; value: string; onChange: (v: string) => void;
+  type?: string; error?: string; placeholder?: string; maxLength?: number;
+}) {
+  return (
+    <div>
+      <Label className="text-sm">{label}</Label>
+      <Input
+        type={type} value={value} onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder} maxLength={maxLength}
+        className={cn("mt-1", error && "border-destructive")}
+      />
+      {error && <p className="text-xs text-destructive mt-1">{error}</p>}
     </div>
   );
 }

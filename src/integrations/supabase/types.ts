@@ -3892,6 +3892,111 @@ export type Database = {
         }
         Relationships: []
       }
+      quotes: {
+        Row: {
+          accepted_at: string | null
+          accepted_ip: string | null
+          accepted_terms: Json | null
+          accepted_user_agent: string | null
+          category: string | null
+          company_legal_name: string | null
+          company_name: string | null
+          company_tax_id: string | null
+          created_at: string
+          discount_cents: number
+          discount_pct: number
+          id: string
+          lead_city: string | null
+          lead_email: string | null
+          lead_name: string
+          lead_role: string | null
+          lead_state: string | null
+          lead_whatsapp: string
+          modules: string[]
+          origin: string | null
+          quote_number: string
+          segment: string | null
+          setup_cents: number
+          status: string
+          subtotal_cents: number
+          total_cents: number
+          updated_at: string
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_ip?: string | null
+          accepted_terms?: Json | null
+          accepted_user_agent?: string | null
+          category?: string | null
+          company_legal_name?: string | null
+          company_name?: string | null
+          company_tax_id?: string | null
+          created_at?: string
+          discount_cents?: number
+          discount_pct?: number
+          id?: string
+          lead_city?: string | null
+          lead_email?: string | null
+          lead_name: string
+          lead_role?: string | null
+          lead_state?: string | null
+          lead_whatsapp: string
+          modules?: string[]
+          origin?: string | null
+          quote_number: string
+          segment?: string | null
+          setup_cents?: number
+          status?: string
+          subtotal_cents?: number
+          total_cents?: number
+          updated_at?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_ip?: string | null
+          accepted_terms?: Json | null
+          accepted_user_agent?: string | null
+          category?: string | null
+          company_legal_name?: string | null
+          company_name?: string | null
+          company_tax_id?: string | null
+          created_at?: string
+          discount_cents?: number
+          discount_pct?: number
+          id?: string
+          lead_city?: string | null
+          lead_email?: string | null
+          lead_name?: string
+          lead_role?: string | null
+          lead_state?: string | null
+          lead_whatsapp?: string
+          modules?: string[]
+          origin?: string | null
+          quote_number?: string
+          segment?: string | null
+          setup_cents?: number
+          status?: string
+          subtotal_cents?: number
+          total_cents?: number
+          updated_at?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Relationships: []
+      }
       sales_cash_session_counts: {
         Row: {
           counted_amount: number
