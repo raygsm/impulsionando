@@ -47,6 +47,20 @@ function DemoAgenda() {
     lembrete24h: true, lembrete1h: true, confirmaWhats: true, bloqueioFeriado: false, reagendamentoAuto: true,
   });
   const [dataAtual, setDataAtual] = useState(() => new Date().toISOString().slice(0, 10));
+  const [aba, setAba] = useState<string>("grade");
+  const [prefill, setPrefill] = useState<{ cliente: string; telefone: string } | null>(null);
+
+  // Deep-link via ?cliente=&telefone= vindo de outros módulos (CRM/WhatsApp)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const cliente = params.get("cliente");
+    const telefone = params.get("telefone") ?? "";
+    if (cliente) {
+      setPrefill({ cliente, telefone });
+      setAba("agendar");
+    }
+  }, []);
 
   const dash = useMemo(() => {
     const confirmados = agds.filter((a) => a.status === "confirmado").length;
@@ -114,7 +128,7 @@ function DemoAgenda() {
           </div>
         </div>
 
-        <Tabs defaultValue="grade" className="mt-6">
+        <Tabs value={aba} onValueChange={setAba} className="mt-6">
           <TabsList className="flex-wrap h-auto">
             <TabsTrigger value="grade"><Calendar className="w-4 h-4 mr-1" />Grade</TabsTrigger>
             <TabsTrigger value="profs"><Briefcase className="w-4 h-4 mr-1" />Profissionais</TabsTrigger>
