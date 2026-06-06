@@ -20,6 +20,7 @@ import {
   type MotherModule,
 } from "@/data/motherModules";
 import { useDemoContracted } from "@/lib/demoContracting";
+import { DemoContractFlow } from "@/components/demo/DemoContractFlow";
 
 export const Route = createFileRoute("/demo/modulos")({
   head: () => ({
