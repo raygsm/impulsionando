@@ -100,7 +100,7 @@ export function LeadsPanel({ leads, setLeads, origens, clientes, setClientes, on
   }
 
   function persist() {
-    const result = validateLead(form as LeadDemoRecord, { exigirOrigem, exigirResponsavel });
+    const result = validateLead(form as Partial<import("@/lib/demoCrmCrud").LeadFull>, { exigirOrigem, exigirResponsavel });
     setErrors(result.errors);
     if (!result.ok) {
       toast.error(MSG_OBRIGATORIO);
