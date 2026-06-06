@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { DemoModeBanner } from "@/components/demo/DemoModeBanner";
@@ -19,6 +19,7 @@ import { useDemoState, uid } from "@/lib/demoSandbox";
 import { DemoContractCTA } from "@/components/demo/DemoContractCTA";
 import { RoiSimulator } from "@/components/demo/RoiSimulator";
 import { gotoWhatsapp, gotoAgenda } from "@/lib/demoCrossLink";
+import { createCrmMock } from "@/lib/demoModuleMocks";
 
 export const Route = createFileRoute("/demo/crm")({
   head: () => ({
@@ -51,6 +52,19 @@ function DemoCRM() {
     lgpd: true, followupAuto: true, leadScoring: true, roundRobin: false,
   });
 
+  useEffect(() => {
+    const marker = typeof window === "undefined" ? "crm:v2" : window.localStorage.getItem("imp.demo.mock.crm");
+    if (marker === "crm:v2") return;
+    const mock = createCrmMock();
+    setLeads(mock.leads);
+    setAtvs(mock.atvs);
+    setTpls(mock.tpls);
+    setAutos(mock.autos);
+    setParams(mock.params);
+    if (typeof window !== "undefined") window.localStorage.setItem("imp.demo.mock.crm", "crm:v2");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const dash = useMemo(() => {
     const porEstagio = STAGES.map((s) => ({ s, n: leads.filter((l) => l.estagio === s).length, v: leads.filter((l) => l.estagio === s).reduce((a, b) => a + b.valor, 0) }));
     const ganho = leads.filter((l) => l.estagio === "Ganho");
@@ -61,23 +75,13 @@ function DemoCRM() {
   }, [leads]);
 
   function seed() {
-    const now = new Date();
-    const novos: Lead[] = [
-      { id: uid("ld"), nome: "Marina Souza", email: "marina@demo.com", telefone: "(11) 90000-0001", origem: "Instagram", estagio: "Novo", valor: 2400, score: 70, tags: ["quente"], criadoEm: now.toISOString() },
-      { id: uid("ld"), nome: "Rafael Dias", email: "rafa@demo.com", telefone: "(11) 90000-0002", origem: "Indicação", estagio: "Qualificado", valor: 4800, score: 85, tags: ["enterprise"], criadoEm: now.toISOString() },
-      { id: uid("ld"), nome: "Bia Camargo", email: "bia@demo.com", telefone: "(11) 90000-0003", origem: "Site", estagio: "Proposta", valor: 1200, score: 60, tags: [], criadoEm: now.toISOString() },
-      { id: uid("ld"), nome: "Pedro Alves", email: "pedro@demo.com", telefone: "(11) 90000-0004", origem: "Anúncio", estagio: "Ganho", valor: 3600, score: 95, tags: ["VIP"], criadoEm: now.toISOString() },
-    ];
-    setLeads(novos);
-    setTpls([
-      { id: uid("tp"), nome: "Boas-vindas", canal: "email", corpo: "Olá {nome}, obrigado pelo contato. Em breve retornamos." },
-      { id: uid("tp"), nome: "Follow-up 3 dias", canal: "whatsapp", corpo: "Oi {nome}! Tudo certo? Ainda posso te ajudar com a proposta?" },
-    ]);
-    setAutos([
-      { id: uid("au"), nome: "Lead novo → boas-vindas", gatilho: "lead_criado", acao: "enviar_template:Boas-vindas", ativa: true },
-      { id: uid("au"), nome: "Sem resposta 3d → follow-up", gatilho: "inativo_3d", acao: "enviar_template:Follow-up", ativa: true },
-    ]);
-    toast.success("Dados fictícios criados.");
+    const mock = createCrmMock();
+    setLeads(mock.leads);
+    setAtvs(mock.atvs);
+    setTpls(mock.tpls);
+    setAutos(mock.autos);
+    setParams(mock.params);
+    toast.success("Dados fictícios específicos do CRM criados.");
   }
 
   function resetAll() {
@@ -97,7 +101,7 @@ function DemoCRM() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
-      <DemoModeBanner />
+      <DemoModeBanner current="crm" />
       <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 w-full">
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>

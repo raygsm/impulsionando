@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { DemoModeBanner } from "@/components/demo/DemoModeBanner";
@@ -24,6 +24,7 @@ import { useDemoState, uid, brl } from "@/lib/demoSandbox";
 import { GuidedTour } from "@/components/demo/GuidedTour";
 import { RoiSimulator } from "@/components/demo/RoiSimulator";
 import { DemoContractCTA } from "@/components/demo/DemoContractCTA";
+import { createEventosMock } from "@/lib/demoModuleMocks";
 
 export const Route = createFileRoute("/demo/eventos")({
   head: () => ({
@@ -69,6 +70,16 @@ function DemoEventos() {
 
   const eventoAtivo = eventos[0];
 
+  useEffect(() => {
+    const marker = typeof window === "undefined" ? "eventos:v2" : window.localStorage.getItem("imp.demo.mock.eventos");
+    if (marker === "eventos:v2") return;
+    const mock = createEventosMock();
+    setEventos([mock.evento]);
+    setParams(mock.params);
+    if (typeof window !== "undefined") window.localStorage.setItem("imp.demo.mock.eventos", "eventos:v2");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const dash = useMemo(() => {
     if (!eventoAtivo) return { vendidos: 0, presentes: 0, ausentes: 0, receita: 0, invalidas: 0 };
     const meus = ingressos.filter((i) => i.eventoId === eventoAtivo.id);
@@ -82,19 +93,11 @@ function DemoEventos() {
   }, [ingressos, eventoAtivo]);
 
   function criarEventoExemplo() {
-    const e: Evento = {
-      id: uid("evt"),
-      nome: "Workshop Demo Impulsionando",
-      data: new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
-      local: "Centro de Convenções (demo)",
-      lotes: [
-        { id: uid("lt"), nome: "Lote 1 (early bird)", preco: 97, quantidade: 50 },
-        { id: uid("lt"), nome: "Lote 2", preco: 147, quantidade: 100 },
-        { id: uid("lt"), nome: "VIP", preco: 297, quantidade: 20 },
-      ],
-    };
-    setEventos([e]);
-    toast.success("Evento de exemplo criado.");
+    const mock = createEventosMock();
+    setEventos([mock.evento]);
+    setIngressos([]);
+    setParams(mock.params);
+    toast.success("Evento fictício específico do módulo Eventos criado.");
   }
 
   function venderIngresso(loteId?: string) {
@@ -146,7 +149,7 @@ function DemoEventos() {
     <TooltipProvider delayDuration={150}>
       <div className="min-h-screen flex flex-col bg-background">
         <PublicHeader />
-        <DemoModeBanner />
+        <DemoModeBanner current="eventos" />
         <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 w-full">
           <div className="flex items-start justify-between gap-3 flex-wrap">
             <div>

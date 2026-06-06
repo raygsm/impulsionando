@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { DemoModeBanner } from "@/components/demo/DemoModeBanner";
@@ -26,6 +26,7 @@ import { PLATFORM_FEE_PCT } from "@/lib/affiliates.constants";
 import { GuidedTour } from "@/components/demo/GuidedTour";
 import { RoiSimulator } from "@/components/demo/RoiSimulator";
 import { DemoContractCTA } from "@/components/demo/DemoContractCTA";
+import { createAfiliadosMock } from "@/lib/demoModuleMocks";
 
 export const Route = createFileRoute("/demo/afiliados")({
   head: () => ({
@@ -69,6 +70,20 @@ function DemoAfiliados() {
     rankingPublico: true,
   });
 
+  useEffect(() => {
+    const marker = typeof window === "undefined" ? "afiliados:v2" : window.localStorage.getItem("imp.demo.mock.afiliados");
+    if (marker === "afiliados:v2") return;
+    const mock = createAfiliadosMock();
+    setProdutos(mock.produtos);
+    setOfertas(mock.ofertas);
+    setAfiliados(mock.afiliados);
+    setCupons(mock.cupons);
+    setVendas(mock.vendas);
+    setParams(mock.params);
+    if (typeof window !== "undefined") window.localStorage.setItem("imp.demo.mock.afiliados", "afiliados:v2");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const dash = useMemo(() => {
     const aprovadas = vendas.filter((v) => v.status === "aprovado");
     const receita = aprovadas.reduce((s, v) => s + v.bruto, 0);
@@ -91,18 +106,14 @@ function DemoAfiliados() {
   }, [vendas, ofertas, afiliados]);
 
   function seed() {
-    const p1: Produto = { id: uid("prd"), nome: "Curso Mentoria 360", preco: 997, recorrencia: "unico" };
-    const p2: Produto = { id: uid("prd"), nome: "Assinatura Premium", preco: 197, recorrencia: "mensal" };
-    setProdutos([p1, p2]);
-    setOfertas([
-      { id: uid("of"), produtoId: p1.id, nome: "Lançamento", comissaoPct: 40, bumpPct: 20 },
-      { id: uid("of"), produtoId: p2.id, nome: "Assinatura Anual", comissaoPct: 30, bumpPct: 10 },
-    ]);
-    const a1: Afiliado = { id: uid("af"), nome: "Carla Reis", email: "carla@demo.com" };
-    const a2: Afiliado = { id: uid("af"), nome: "João Lima", email: "joao@demo.com" };
-    setAfiliados([a1, a2]);
-    setCupons([{ id: uid("cp"), code: "CARLA10", descontoPct: 10, afiliadoId: a1.id }]);
-    toast.success("Dados fictícios criados.");
+    const mock = createAfiliadosMock();
+    setProdutos(mock.produtos);
+    setOfertas(mock.ofertas);
+    setAfiliados(mock.afiliados);
+    setCupons(mock.cupons);
+    setVendas(mock.vendas);
+    setParams(mock.params);
+    toast.success("Dados fictícios específicos de Afiliados criados.");
   }
 
   function resetAll() {
@@ -135,7 +146,7 @@ function DemoAfiliados() {
     <TooltipProvider delayDuration={150}>
       <div className="min-h-screen flex flex-col bg-background">
         <PublicHeader />
-        <DemoModeBanner />
+        <DemoModeBanner current="afiliados" />
         <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 w-full">
           <Header onSeed={seed} onReset={resetAll} />
 

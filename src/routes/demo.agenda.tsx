@@ -20,6 +20,7 @@ import { RoiSimulator } from "@/components/demo/RoiSimulator";
 import { gotoCrm, gotoWhatsapp } from "@/lib/demoCrossLink";
 import { validateAgendamento, findConflicts, formatConflictMessage, type ConflictAgd } from "@/lib/agendaConflict.functions";
 import { useServerFn } from "@tanstack/react-start";
+import { createAgendaMock, getAgendaMockConfig } from "@/lib/demoModuleMocks";
 
 export const Route = createFileRoute("/demo/agenda")({
   head: () => ({
@@ -51,6 +52,10 @@ function DemoAgenda() {
   const [dataAtual, setDataAtual] = useState(() => new Date().toISOString().slice(0, 10));
   const [aba, setAba] = useState<string>("grade");
   const [prefill, setPrefill] = useState<{ cliente: string; telefone: string } | null>(null);
+  const [nichoDemo, setNichoDemo] = useState(() => {
+    if (typeof window === "undefined") return "servicos";
+    return new URLSearchParams(window.location.search).get("nicho") ?? "servicos";
+  });
 
   // Deep-link via ?cliente=&telefone= vindo de outros módulos (CRM/WhatsApp)
   useEffect(() => {
@@ -58,11 +63,28 @@ function DemoAgenda() {
     const params = new URLSearchParams(window.location.search);
     const cliente = params.get("cliente");
     const telefone = params.get("telefone") ?? "";
+    const nicho = params.get("nicho");
+    if (nicho) setNichoDemo(nicho);
     if (cliente) {
       setPrefill({ cliente, telefone });
       setAba("agendar");
     }
   }, []);
+
+  useEffect(() => {
+    const marker = `agenda:${nichoDemo}:v2`;
+    const current = typeof window === "undefined" ? marker : window.localStorage.getItem("imp.demo.mock.agenda");
+    if (current === marker) return;
+    const mock = createAgendaMock(nichoDemo);
+    setProfs(mock.profs);
+    setServs(mock.servs);
+    setAgds(mock.agds);
+    setEspera(mock.espera);
+    setParams(mock.params);
+    setDataAtual(mock.agds[0]?.data ?? new Date().toISOString().slice(0, 10));
+    if (typeof window !== "undefined") window.localStorage.setItem("imp.demo.mock.agenda", marker);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nichoDemo]);
 
   const dash = useMemo(() => {
     const confirmados = agds.filter((a) => a.status === "confirmado").length;
@@ -74,21 +96,14 @@ function DemoAgenda() {
   }, [agds, servs, profs, dataAtual]);
 
   function seed() {
-    const p1: Profissional = { id: uid("pr"), nome: "Dra. Aline", especialidade: "Estética facial", cor: "#22c55e" };
-    const p2: Profissional = { id: uid("pr"), nome: "Dr. Bruno", especialidade: "Massoterapia", cor: "#3b82f6" };
-    setProfs([p1, p2]);
-    const s1: Servico = { id: uid("sv"), nome: "Limpeza de pele", duracao: 60, preco: 180 };
-    const s2: Servico = { id: uid("sv"), nome: "Massagem relaxante", duracao: 90, preco: 240 };
-    const s3: Servico = { id: uid("sv"), nome: "Drenagem", duracao: 60, preco: 200 };
-    setServs([s1, s2, s3]);
-    const hoje = new Date().toISOString().slice(0, 10);
-    setAgds([
-      { id: uid("ag"), profId: p1.id, servicoId: s1.id, cliente: "Marina Souza", telefone: "(11) 90000-0001", data: hoje, hora: "09:00", status: "confirmado" },
-      { id: uid("ag"), profId: p2.id, servicoId: s2.id, cliente: "Rafael Dias", telefone: "(11) 90000-0002", data: hoje, hora: "10:00", status: "pendente" },
-      { id: uid("ag"), profId: p1.id, servicoId: s3.id, cliente: "Bia Camargo", telefone: "(11) 90000-0003", data: hoje, hora: "15:00", status: "concluido" },
-    ]);
-    setEspera([{ id: uid("es"), cliente: "Pedro Alves", telefone: "(11) 90000-0004", servicoId: s2.id, preferencia: "Quarta à tarde" }]);
-    toast.success("Dados fictícios criados.");
+    const mock = createAgendaMock(nichoDemo);
+    setProfs(mock.profs);
+    setServs(mock.servs);
+    setAgds(mock.agds);
+    setEspera(mock.espera);
+    setParams(mock.params);
+    setDataAtual(mock.agds[0]?.data ?? new Date().toISOString().slice(0, 10));
+    toast.success(`Dados fictícios criados para ${mock.config.title}.`);
   }
 
   function resetAll() {
@@ -104,14 +119,14 @@ function DemoAgenda() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
-      <DemoModeBanner />
+      <DemoModeBanner current="agenda" />
       <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 w-full">
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
             <Badge className="bg-gradient-primary mb-2">Demo interativa • dados fictícios</Badge>
             <h1 className="text-3xl sm:text-4xl font-bold">Agenda & Reservas</h1>
             <p className="text-muted-foreground mt-2 max-w-2xl">
-              Profissionais, serviços, grade de horários, fila de espera e lembretes automáticos — testáveis nesta demo.
+              {getAgendaMockConfig(nichoDemo).description}
             </p>
           </div>
           <div className="flex gap-2 flex-wrap items-center">

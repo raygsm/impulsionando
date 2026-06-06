@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Sparkles, X } from "lucide-react";
+import { DemoModuleSwitcher } from "@/components/demo/DemoModuleSwitcher";
+import type { DemoModuleKey } from "@/lib/demoModules";
 
 const DISMISS_KEY = "demo-mode-banner-dismissed";
 
@@ -9,7 +11,7 @@ const DISMISS_KEY = "demo-mode-banner-dismissed";
  * Reforça que se trata de ambiente fictício e oferece um atalho ao checklist.
  * Pode ser dispensada (persistido em localStorage).
  */
-export function DemoModeBanner() {
+export function DemoModeBanner({ current }: { current?: DemoModuleKey } = {}) {
   const [hidden, setHidden] = useState(true);
 
   useEffect(() => {
@@ -17,7 +19,15 @@ export function DemoModeBanner() {
     setHidden(window.localStorage.getItem(DISMISS_KEY) === "1");
   }, []);
 
-  if (hidden) return null;
+  if (hidden) {
+    return (
+      <div className="border-b bg-card text-xs">
+        <div className="mx-auto max-w-6xl px-4 py-2 flex items-center justify-end">
+          <DemoModuleSwitcher current={current} size="sm" variant="outline" className="h-7" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gradient-primary text-primary-foreground text-xs sm:text-sm">
@@ -30,6 +40,7 @@ export function DemoModeBanner() {
           </Link>
           .
         </span>
+        <DemoModuleSwitcher current={current} size="sm" variant="secondary" className="h-7" />
         <button
           type="button"
           onClick={() => {

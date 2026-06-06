@@ -113,6 +113,7 @@ function ClienteFinalDemo() {
       nav={NAV}
       activeId={active}
       onSelect={setActive}
+      currentModule="cliente-final"
     >
       <DemoWelcome
         storageKey={STORAGE}

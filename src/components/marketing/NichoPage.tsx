@@ -180,7 +180,7 @@ export function NichoPage({ nicho }: Props) {
                   </a>
                 </Button>
                 <Button asChild size="sm" variant="outline">
-                  <Link to="/modulos/$slug" params={{ slug: "agenda" }}>
+                  <Link to="/demo/agenda" search={{ nicho: nicho.slug }}>
                     Ver módulo de agenda
                   </Link>
                 </Button>

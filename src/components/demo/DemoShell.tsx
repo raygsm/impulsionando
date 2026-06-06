@@ -10,6 +10,8 @@ import { HelpCircle, RotateCcw, LogOut, Info, Menu } from "lucide-react";
 import { toast } from "sonner";
 import logoAsset from "@/assets/logo-impulsionando.png.asset.json";
 import { DemoTestContactPanel } from "@/components/demo/DemoTestContactPanel";
+import { DemoModuleSwitcher } from "@/components/demo/DemoModuleSwitcher";
+import type { DemoModuleKey } from "@/lib/demoModules";
 
 export interface DemoNavItem {
   id: string;
@@ -26,6 +28,7 @@ interface DemoShellProps {
   nav: DemoNavItem[];
   activeId: string;
   onSelect: (id: string) => void;
+  currentModule?: DemoModuleKey;
   children: ReactNode;
 }
 
@@ -36,6 +39,7 @@ export function DemoShell({
   nav,
   activeId,
   onSelect,
+  currentModule,
   children,
 }: DemoShellProps) {
   const [, setTick] = useState(0);
@@ -134,6 +138,7 @@ export function DemoShell({
               <span className="opacity-90 hidden sm:inline">{trackTagline}</span>
             </div>
             <div className="flex items-center gap-2">
+              <DemoModuleSwitcher current={currentModule} size="sm" variant="secondary" className="h-7" />
               <Button asChild size="sm" variant="secondary" className="h-7">
                 <Link to="/demo">Trocar trilha</Link>
               </Button>
