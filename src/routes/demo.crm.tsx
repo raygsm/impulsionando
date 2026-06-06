@@ -277,26 +277,16 @@ function DemoCRM() {
 
             {/* DASHBOARD */}
             <TabsContent value="dashboard" className="mt-4 space-y-4">
-              <div className="grid sm:grid-cols-4 gap-3">
-                <KPI label="Leads totais" value={String(dash.total)} />
-                <KPI label="Contratados" value={String(dash.ganho)} accent />
-                <KPI label="Conversão" value={`${dash.conversao}%`} />
-                <KPI label="Receita demo" value={dash.receita.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} />
-              </div>
-              <Card className="p-5">
-                <h3 className="font-semibold mb-3 text-sm">Funil por etapa</h3>
-                <div className="space-y-2">
-                  {dash.porEstagio.map((e) => (
-                    <div key={e.s} className="flex items-center gap-3">
-                      <span className="w-40 text-xs">{e.s}</span>
-                      <div className="flex-1 h-3 bg-muted rounded">
-                        <div className="h-3 bg-gradient-primary rounded" style={{ width: `${dash.total ? (e.n / dash.total) * 100 : 0}%` }} />
-                      </div>
-                      <span className="text-xs text-muted-foreground w-16 text-right">{e.n} leads</span>
-                    </div>
-                  ))}
-                </div>
-              </Card>
+              <DashboardPanel
+                leads={leads}
+                clientes={clientes}
+                produtos={produtos}
+                followups={followups}
+                campanhas={campanhas as never}
+                automacoes={autos}
+                mensagensEnviadas={logs.filter((l) => l.area === "Comunicação" && (l.canal === "email" || l.canal === "whatsapp")).length}
+                onGoto={setActiveTab}
+              />
               <RoiSimulator presetKey="crm" />
             </TabsContent>
 
