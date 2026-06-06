@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { HelpCircle, RotateCcw, LogOut, Info, Menu } from "lucide-react";
 import { toast } from "sonner";
 import logoAsset from "@/assets/logo-impulsionando.png.asset.json";
+import { DemoTestContactPanel } from "@/components/demo/DemoTestContactPanel";
 
 export interface DemoNavItem {
   id: string;
@@ -222,6 +223,7 @@ export function DemoShell({
             </div>
           </main>
         </div>
+        <DemoTestContactPanel />
       </div>
     </TooltipProvider>
   );
