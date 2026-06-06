@@ -445,20 +445,27 @@ export interface PlanoRecord {
   descricao?: string; valorSetup?: number; recorrencia?: string;
   contratoMinDias?: number; mensalidadesMinimas?: number;
   permiteAdicionais?: boolean; valorPorAdicional?: number;
+  produtosIncluidos?: string[];
   status?: string; observacoes?: string;
 }
 
 const PLANO_INIT: Partial<PlanoRecord> = {
   nome: "", preco: 0, ciclo: "mensal", itens: [], descricao: "",
   valorSetup: 0, recorrencia: "Mensal", contratoMinDias: 90, mensalidadesMinimas: 3,
-  permiteAdicionais: false, status: "Ativo",
+  permiteAdicionais: false, status: "Ativo", produtosIncluidos: [],
+};
+
+const RECORRENCIA_MULTIPLIER: Record<string, number> = {
+  Mensal: 1, Trimestral: 3, Semestral: 6, Anual: 12,
 };
 
 export function PlanosPanel({
-  planos, setPlanos, clientes, onLog,
+  planos, setPlanos, clientes, produtos = [], onLog, podeEditar = true,
 }: {
   planos: PlanoRecord[]; setPlanos: React.Dispatch<React.SetStateAction<PlanoRecord[]>>;
-  clientes: { id: string; planoInteresse?: string; plano?: string }[]; onLog: LogFn;
+  clientes: { id: string; planoInteresse?: string; plano?: string }[];
+  produtos?: { id: string; nome: string; status?: string }[];
+  onLog: LogFn; podeEditar?: boolean;
 }) {
   const [form, setForm] = useState<Partial<PlanoRecord>>(PLANO_INIT);
   const [editing, setEditing] = useState<string | null>(null);
@@ -467,17 +474,31 @@ export function PlanosPanel({
   function reset() { setForm(PLANO_INIT); setEditing(null); setErrors({}); }
 
   function persist() {
+    if (!podeEditar) { toast.error("Sem permissão para editar Planos."); return; }
     const r = validatePlano({
       nome: form.nome, recorrencia: form.recorrencia as never, status: form.status as never,
       valorMensal: form.preco, valorSetup: form.valorSetup,
       contratoMinDias: form.contratoMinDias, mensalidadesMinimas: form.mensalidadesMinimas,
       permiteAdicionais: form.permiteAdicionais ?? false, valorPorAdicional: form.valorPorAdicional,
     });
+    const novosProdutos = (form.produtosIncluidos ?? []).filter(Boolean);
+    const invalidos = novosProdutos.filter((n) => !produtos.some((p) => p.nome === n));
+    if (invalidos.length > 0) {
+      r.errors.produtosIncluidos = `Produtos não encontrados: ${invalidos.join(", ")}`;
+      r.ok = false;
+    }
     setErrors(r.errors);
     if (!r.ok) { toast.error(MSG_OBRIGATORIO); return; }
     if (editing) {
+      const antes = planos.find((p) => p.id === editing);
       setPlanos((prev) => prev.map((p) => p.id === editing ? { ...p, ...form, id: editing } as PlanoRecord : p));
       onLog({ area: "Planos", acao: "Editou plano", registro: form.nome });
+      if (antes) {
+        const add = novosProdutos.filter((n) => !(antes.produtosIncluidos ?? []).includes(n));
+        const rem = (antes.produtosIncluidos ?? []).filter((n) => !novosProdutos.includes(n));
+        if (add.length) onLog({ area: "Planos", acao: `Incluiu produto(s) como módulo(s): ${add.join(", ")}`, registro: form.nome });
+        if (rem.length) onLog({ area: "Planos", acao: `Removeu produto(s) do plano: ${rem.join(", ")}`, registro: form.nome });
+      }
       toast.success(MSG_SUCESSO);
     } else {
       const novo: PlanoRecord = {
@@ -493,22 +514,26 @@ export function PlanosPanel({
         mensalidadesMinimas: form.mensalidadesMinimas ?? 3,
         permiteAdicionais: form.permiteAdicionais ?? false,
         valorPorAdicional: form.valorPorAdicional,
+        produtosIncluidos: novosProdutos,
         status: form.status, observacoes: form.observacoes,
       };
       setPlanos((prev) => [novo, ...prev]);
       onLog({ area: "Planos", acao: "Criou plano", registro: novo.nome });
+      if (novosProdutos.length) onLog({ area: "Planos", acao: `Incluiu produto(s) como módulo(s): ${novosProdutos.join(", ")}`, registro: novo.nome });
       toast.success(`Plano criado. ${MSG_DEMO_TAG}`);
     }
     reset();
   }
 
   function toggleStatus(id: string) {
+    if (!podeEditar) { toast.error("Sem permissão para alterar Planos."); return; }
     setPlanos((prev) => prev.map((p) => p.id === id ? { ...p, status: p.status === "Ativo" ? "Inativo" : "Ativo" } : p));
     const p = planos.find((x) => x.id === id);
     onLog({ area: "Planos", acao: "Alternou status do plano", registro: p?.nome });
   }
 
   function remove(id: string) {
+    if (!podeEditar) { toast.error("Sem permissão para remover Planos."); return; }
     const p = planos.find((x) => x.id === id);
     setPlanos((prev) => prev.filter((x) => x.id !== id));
     onLog({ area: "Planos", acao: "Removeu plano demo", registro: p?.nome });
@@ -517,12 +542,18 @@ export function PlanosPanel({
   function clientesVinculados(planoNome: string) {
     return clientes.filter((c) => c.planoInteresse === planoNome || c.plano === planoNome).length;
   }
-  function receitaPrevista(p: PlanoRecord) {
-    return clientesVinculados(p.nome) * (p.preco ?? 0);
+  function receitaPorPeriodo(p: PlanoRecord, meses: number) {
+    return clientesVinculados(p.nome) * (p.preco ?? 0) * meses;
   }
+  function valorMinimoContrato(p: PlanoRecord) {
+    return (p.valorSetup ?? 0) + (p.preco ?? 0) * (p.mensalidadesMinimas ?? 0);
+  }
+
+  const fmt = (n: number) => Number(n).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   return (
     <div className="space-y-4">
+      {!podeEditar && <LockedBanner area="Planos" />}
       <Card className="p-5 space-y-3">
         <div className="flex items-start justify-between gap-2 flex-wrap">
           <div>
@@ -573,49 +604,85 @@ export function PlanosPanel({
               <Input type="number" min={0} value={form.valorPorAdicional ?? 0} onChange={(e) => setForm({ ...form, valorPorAdicional: Number(e.target.value) })} />
             </FormField>
           )}
-          <FormField label="Módulos incluídos (vírgula)" className="sm:col-span-2 lg:col-span-4">
+          <FormField label="Produtos incluídos no plano (módulos)" error={errors.produtosIncluidos} className="sm:col-span-2 lg:col-span-4">
+            <ProdutosMultiSelect
+              produtos={produtos}
+              selecionados={form.produtosIncluidos ?? []}
+              onChange={(next) => setForm({ ...form, produtosIncluidos: next })}
+              disabled={!podeEditar}
+            />
+            <p className="text-[11px] text-muted-foreground mt-1">Vincule produtos como módulos deste plano. Cada inclusão ou remoção gera log DEMO.</p>
+          </FormField>
+          <FormField label="Outros itens incluídos (texto livre, vírgula)" className="sm:col-span-2 lg:col-span-4">
             <Input value={(form.itens ?? []).join(", ")} onChange={(e) => setForm({ ...form, itens: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} />
           </FormField>
           <FormField label="Descrição" className="sm:col-span-2 lg:col-span-4">
             <Textarea value={form.descricao ?? ""} onChange={(e) => setForm({ ...form, descricao: e.target.value })} />
           </FormField>
         </div>
-        <Button className="bg-gradient-primary" onClick={persist}>
+        <Button className="bg-gradient-primary" onClick={persist} disabled={!podeEditar}>
           <Plus className="w-4 h-4 mr-1" />{editing ? "Salvar alterações" : "Novo plano"}
         </Button>
       </Card>
 
       <div className="grid md:grid-cols-3 gap-3">
-        {planos.map((p) => (
-          <Card key={p.id} className="p-5">
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="font-semibold">{p.nome}</div>
-                <div className="text-xs text-muted-foreground">{p.recorrencia ?? p.ciclo}</div>
+        {planos.map((p) => {
+          const vinc = clientesVinculados(p.nome);
+          const mult = RECORRENCIA_MULTIPLIER[p.recorrencia ?? "Mensal"] ?? 1;
+          const alertaContrato = (p.contratoMinDias ?? 0) < 90;
+          const alertaMensalidades = (p.mensalidadesMinimas ?? 0) < 3;
+          return (
+            <Card key={p.id} className="p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="font-semibold">{p.nome}</div>
+                  <div className="text-xs text-muted-foreground">{p.recorrencia ?? p.ciclo}</div>
+                </div>
+                <Badge variant="outline">{p.status ?? "Ativo"}</Badge>
               </div>
-              <Badge variant="outline">{p.status ?? "Ativo"}</Badge>
-            </div>
-            <div className="text-2xl font-bold mt-2">
-              {Number(p.preco).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-              <span className="text-xs text-muted-foreground font-normal">/{p.ciclo}</span>
-            </div>
-            <div className="text-xs text-muted-foreground mt-1">
-              Setup {Number(p.valorSetup ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} • Contrato mín. {p.contratoMinDias ?? 90} dias • {p.mensalidadesMinimas ?? 3} mensalidades obrigatórias
-            </div>
-            {p.itens.length > 0 && (
-              <ul className="text-xs text-muted-foreground mt-3 space-y-1">{p.itens.map((it, i) => <li key={i}>• {it}</li>)}</ul>
-            )}
-            <div className="text-xs text-muted-foreground mt-3">
-              <strong>{clientesVinculados(p.nome)}</strong> cliente(s) vinculado(s) • Receita prevista{" "}
-              <strong>{receitaPrevista(p).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</strong>
-            </div>
-            <div className="flex gap-1 mt-3">
-              <Button size="sm" variant="outline" onClick={() => toggleStatus(p.id)}><Power className="w-3.5 h-3.5 mr-1" />Ativar/Inativar</Button>
-              <Button size="sm" variant="outline" onClick={() => { setEditing(p.id); setForm(p); }}><Edit3 className="w-3.5 h-3.5" /></Button>
-              <Button size="sm" variant="ghost" onClick={() => remove(p.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
-            </div>
-          </Card>
-        ))}
+              <div className="text-2xl font-bold mt-2">
+                {fmt(p.preco)}
+                <span className="text-xs text-muted-foreground font-normal">/{p.ciclo}</span>
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                Setup {fmt(p.valorSetup ?? 0)} • Contrato mín. {p.contratoMinDias ?? 90} dias • {p.mensalidadesMinimas ?? 3} mensalidades obrigatórias
+              </div>
+              {(alertaContrato || alertaMensalidades) && (
+                <div className="mt-2 text-[11px] text-warning flex items-start gap-1">
+                  <AlertTriangle className="w-3.5 h-3.5 mt-0.5" />
+                  <span>
+                    {alertaContrato && "Contrato mínimo abaixo de 90 dias. "}
+                    {alertaMensalidades && "Menos de 3 mensalidades obrigatórias. "}
+                    Verifique a regra comercial do plano.
+                  </span>
+                </div>
+              )}
+              {(p.produtosIncluidos ?? []).length > 0 && (
+                <div className="mt-3">
+                  <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Produtos/módulos</div>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {(p.produtosIncluidos ?? []).map((n) => <Badge key={n} variant="secondary" className="text-[10px]">{n}</Badge>)}
+                  </div>
+                </div>
+              )}
+              {p.itens.length > 0 && (
+                <ul className="text-xs text-muted-foreground mt-3 space-y-1">{p.itens.map((it, i) => <li key={i}>• {it}</li>)}</ul>
+              )}
+              <div className="mt-3 p-2 rounded border bg-muted/30 text-[11px] space-y-0.5">
+                <div><strong>{vinc}</strong> cliente(s) vinculado(s)</div>
+                <div>Valor mínimo de contrato: <strong>{fmt(valorMinimoContrato(p))}</strong></div>
+                <div>Receita prevista/mês: <strong>{fmt(receitaPorPeriodo(p, 1))}</strong></div>
+                <div>Receita por ciclo ({mult}m): <strong>{fmt(receitaPorPeriodo(p, mult))}</strong></div>
+                <div>Receita prevista 12 meses: <strong>{fmt(receitaPorPeriodo(p, 12))}</strong></div>
+              </div>
+              <div className="flex gap-1 mt-3">
+                <Button size="sm" variant="outline" onClick={() => toggleStatus(p.id)} disabled={!podeEditar}><Power className="w-3.5 h-3.5 mr-1" />Ativar/Inativar</Button>
+                <Button size="sm" variant="outline" onClick={() => { setEditing(p.id); setForm(p); }} disabled={!podeEditar}><Edit3 className="w-3.5 h-3.5" /></Button>
+                <Button size="sm" variant="ghost" onClick={() => remove(p.id)} disabled={!podeEditar}><Trash2 className="w-3.5 h-3.5" /></Button>
+              </div>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );
