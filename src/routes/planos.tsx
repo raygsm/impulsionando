@@ -180,6 +180,10 @@ function PlanosPage() {
     open: false,
     plan: null,
   });
+  const [summary, setSummary] = useState<{ open: boolean; plan: Plan | null }>({
+    open: false,
+    plan: null,
+  });
   const [pickedModules, setPickedModules] = useState<Record<string, string[]>>({});
 
   async function runCheckout(plan: Plan, modules: string[]) {
