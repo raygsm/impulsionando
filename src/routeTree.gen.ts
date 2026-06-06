@@ -108,6 +108,7 @@ import { Route as AuthenticatedAgendaServicesRouteImport } from './routes/_authe
 import { Route as AuthenticatedAgendaSchedulesRouteImport } from './routes/_authenticated/agenda.schedules'
 import { Route as AuthenticatedAgendaProfessionalsRouteImport } from './routes/_authenticated/agenda.professionals'
 import { Route as AuthenticatedAgendaAppointmentsRouteImport } from './routes/_authenticated/agenda.appointments'
+import { Route as AuthenticatedAffiliatesProductsRouteImport } from './routes/_authenticated/affiliates.products'
 import { Route as AuthenticatedAdminUptimeRouteImport } from './routes/_authenticated/admin.uptime'
 import { Route as AuthenticatedAdminTrialsRouteImport } from './routes/_authenticated/admin.trials'
 import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authenticated/admin.billing'
@@ -648,6 +649,12 @@ const AuthenticatedAgendaAppointmentsRoute =
     path: '/appointments',
     getParentRoute: () => AuthenticatedAgendaRoute,
   } as any)
+const AuthenticatedAffiliatesProductsRoute =
+  AuthenticatedAffiliatesProductsRouteImport.update({
+    id: '/products',
+    path: '/products',
+    getParentRoute: () => AuthenticatedAffiliatesRoute,
+  } as any)
 const AuthenticatedAdminUptimeRoute =
   AuthenticatedAdminUptimeRouteImport.update({
     id: '/admin/uptime',
@@ -798,6 +805,7 @@ export interface FileRoutesByFullPath {
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
+  '/affiliates/products': typeof AuthenticatedAffiliatesProductsRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
@@ -904,6 +912,7 @@ export interface FileRoutesByTo {
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
+  '/affiliates/products': typeof AuthenticatedAffiliatesProductsRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
@@ -1021,6 +1030,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/_authenticated/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/_authenticated/admin/uptime': typeof AuthenticatedAdminUptimeRoute
+  '/_authenticated/affiliates/products': typeof AuthenticatedAffiliatesProductsRoute
   '/_authenticated/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/_authenticated/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/_authenticated/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
@@ -1138,6 +1148,7 @@ export interface FileRouteTypes {
     | '/admin/billing'
     | '/admin/trials'
     | '/admin/uptime'
+    | '/affiliates/products'
     | '/agenda/appointments'
     | '/agenda/professionals'
     | '/agenda/schedules'
@@ -1244,6 +1255,7 @@ export interface FileRouteTypes {
     | '/admin/billing'
     | '/admin/trials'
     | '/admin/uptime'
+    | '/affiliates/products'
     | '/agenda/appointments'
     | '/agenda/professionals'
     | '/agenda/schedules'
@@ -1360,6 +1372,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/billing'
     | '/_authenticated/admin/trials'
     | '/_authenticated/admin/uptime'
+    | '/_authenticated/affiliates/products'
     | '/_authenticated/agenda/appointments'
     | '/_authenticated/agenda/professionals'
     | '/_authenticated/agenda/schedules'
@@ -2157,6 +2170,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgendaAppointmentsRouteImport
       parentRoute: typeof AuthenticatedAgendaRoute
     }
+    '/_authenticated/affiliates/products': {
+      id: '/_authenticated/affiliates/products'
+      path: '/products'
+      fullPath: '/affiliates/products'
+      preLoaderRoute: typeof AuthenticatedAffiliatesProductsRouteImport
+      parentRoute: typeof AuthenticatedAffiliatesRoute
+    }
     '/_authenticated/admin/uptime': {
       id: '/_authenticated/admin/uptime'
       path: '/admin/uptime'
@@ -2266,11 +2286,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAffiliatesRouteChildren {
+  AuthenticatedAffiliatesProductsRoute: typeof AuthenticatedAffiliatesProductsRoute
   AuthenticatedAffiliatesIndexRoute: typeof AuthenticatedAffiliatesIndexRoute
 }
 
 const AuthenticatedAffiliatesRouteChildren: AuthenticatedAffiliatesRouteChildren =
   {
+    AuthenticatedAffiliatesProductsRoute: AuthenticatedAffiliatesProductsRoute,
     AuthenticatedAffiliatesIndexRoute: AuthenticatedAffiliatesIndexRoute,
   }
 
