@@ -308,8 +308,10 @@ function DemoCRM() {
               <EmpresasPanel
                 empresas={empresas}
                 setEmpresas={setEmpresas}
+                produtos={produtos}
                 onLog={pushLog}
                 exigirResponsavel={params.exigirResponsavel}
+                podeEditar={params.podeGerirEmpresas}
               />
             </TabsContent>
 
