@@ -282,9 +282,9 @@ const PRODUTO_INIT: Partial<ProdutoRecord> = {
 };
 
 export function ProdutosPanel({
-  produtos, setProdutos, onLog,
+  produtos, setProdutos, onLog, podeEditar = true,
 }: {
-  produtos: ProdutoRecord[]; setProdutos: React.Dispatch<React.SetStateAction<ProdutoRecord[]>>; onLog: LogFn;
+  produtos: ProdutoRecord[]; setProdutos: React.Dispatch<React.SetStateAction<ProdutoRecord[]>>; onLog: LogFn; podeEditar?: boolean;
 }) {
   const [form, setForm] = useState<Partial<ProdutoRecord>>(PRODUTO_INIT);
   const [editing, setEditing] = useState<string | null>(null);
@@ -293,6 +293,7 @@ export function ProdutosPanel({
   function reset() { setForm(PRODUTO_INIT); setEditing(null); setErrors({}); }
 
   function persist() {
+    if (!podeEditar) { toast.error("Sem permissão para editar Produtos."); return; }
     const r = validateProduto({
       nome: form.nome, categoria: form.categoria as never, status: form.status as never,
       valor: form.preco, prazoConsumoDias: form.prazoConsumoDias,
