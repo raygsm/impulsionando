@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowLeft, ArrowRight, CheckCircle2, FileText, Loader2,
-  Printer, Sparkles, ShieldCheck, MessageCircle,
+  Printer, Sparkles, ShieldCheck, MessageCircle, AlertTriangle, Copy, RotateCcw,
 } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
