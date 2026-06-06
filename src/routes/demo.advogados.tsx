@@ -331,18 +331,30 @@ function DemoAdvogados() {
                   {prazos.map((p) => {
                     const proc = processos.find((x) => x.id === p.processoId);
                     const advr = advogados.find((a) => a.id === p.responsavelId);
-                    const vencido = new Date(p.vencimento).getTime() < Date.now() && !p.concluido;
+                    const horas = (new Date(p.vencimento).getTime() - Date.now()) / 36e5;
+                    const vencido = horas < 0 && !p.concluido;
+                    const critico48 = !vencido && !p.concluido && horas <= 48;
                     return (
-                      <li key={p.id} className="flex items-center gap-3 py-3">
+                      <li
+                        key={p.id}
+                        className={`flex items-center gap-3 py-3 px-2 -mx-2 rounded-md ${
+                          vencido ? "bg-destructive/10 border-l-4 border-destructive" :
+                          critico48 ? "bg-amber-500/10 border-l-4 border-amber-500" : ""
+                        }`}
+                      >
                         <Switch checked={p.concluido} onCheckedChange={() => togglePrazo(p.id)} />
                         <div className="flex-1 min-w-0">
                           <div className={`text-sm ${p.concluido ? "line-through text-muted-foreground" : ""}`}>{p.descricao}</div>
                           <div className="text-xs text-muted-foreground">
                             {proc?.numero ?? "—"} • {advr?.nome ?? "—"} • vence {p.vencimento}
+                            {critico48 && <span className="ml-1 text-amber-600 dark:text-amber-400 font-medium">• {Math.max(0, Math.round(horas))}h restantes</span>}
                           </div>
                         </div>
-                        <Badge variant={vencido ? "destructive" : p.prioridade === "urgente" ? "default" : "outline"} className="text-[10px]">
-                          {vencido ? "VENCIDO" : p.prioridade.toUpperCase()}
+                        <Badge
+                          variant={vencido ? "destructive" : p.prioridade === "urgente" ? "default" : "outline"}
+                          className={`text-[10px] ${critico48 && !vencido ? "border-amber-500 text-amber-700 dark:text-amber-400" : ""}`}
+                        >
+                          {vencido ? "VENCIDO" : critico48 ? "CRÍTICO 48H" : p.prioridade.toUpperCase()}
                         </Badge>
                       </li>
                     );
