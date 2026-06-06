@@ -3146,6 +3146,99 @@ export type Database = {
           },
         ]
       }
+      infinitepay_payments: {
+        Row: {
+          amount: number
+          capture_method: string | null
+          checkout_url: string | null
+          cliente_id: string | null
+          created_at: string
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          description: string | null
+          empresa_id: string | null
+          environment: string
+          id: string
+          installments: number | null
+          invoice_slug: string | null
+          modulo_id: string | null
+          order_nsu: string
+          paid_amount: number | null
+          paid_at: string | null
+          plano_id: string | null
+          provider: string
+          raw_request: Json | null
+          raw_response: Json | null
+          receipt_url: string | null
+          status: string
+          transaction_nsu: string | null
+          updated_at: string
+          user_id: string | null
+          webhook_payload: Json | null
+        }
+        Insert: {
+          amount: number
+          capture_method?: string | null
+          checkout_url?: string | null
+          cliente_id?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          description?: string | null
+          empresa_id?: string | null
+          environment?: string
+          id?: string
+          installments?: number | null
+          invoice_slug?: string | null
+          modulo_id?: string | null
+          order_nsu: string
+          paid_amount?: number | null
+          paid_at?: string | null
+          plano_id?: string | null
+          provider?: string
+          raw_request?: Json | null
+          raw_response?: Json | null
+          receipt_url?: string | null
+          status?: string
+          transaction_nsu?: string | null
+          updated_at?: string
+          user_id?: string | null
+          webhook_payload?: Json | null
+        }
+        Update: {
+          amount?: number
+          capture_method?: string | null
+          checkout_url?: string | null
+          cliente_id?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          description?: string | null
+          empresa_id?: string | null
+          environment?: string
+          id?: string
+          installments?: number | null
+          invoice_slug?: string | null
+          modulo_id?: string | null
+          order_nsu?: string
+          paid_amount?: number | null
+          paid_at?: string | null
+          plano_id?: string | null
+          provider?: string
+          raw_request?: Json | null
+          raw_response?: Json | null
+          receipt_url?: string | null
+          status?: string
+          transaction_nsu?: string | null
+          updated_at?: string
+          user_id?: string | null
+          webhook_payload?: Json | null
+        }
+        Relationships: []
+      }
       inv_categories: {
         Row: {
           company_id: string
