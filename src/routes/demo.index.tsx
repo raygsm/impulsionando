@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Building2, Store, ArrowRight, HelpCircle, Sparkles, ShieldCheck, Zap, LogIn, Workflow, Plug, KeyRound, Smartphone, Database, MessageCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { DemoModeBanner } from "@/components/demo/DemoModeBanner";
 
 export const Route = createFileRoute("/demo/")({
   head: () => ({
@@ -27,6 +28,7 @@ function DemoLanding() {
     <TooltipProvider delayDuration={200}>
       <div className="min-h-screen flex flex-col bg-background">
         <PublicHeader />
+        <DemoModeBanner />
 
         <main className="flex-1 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-16 w-full">
           <div className="text-center max-w-3xl mx-auto mb-12">
