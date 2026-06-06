@@ -197,6 +197,8 @@ function DemoCheckout() {
                   </Table>
                 )}
               </Card>
+
+              <RoiSimulator presetKey="checkout" />
             </TabsContent>
 
             <TabsContent value="simular" className="mt-4 space-y-4">
