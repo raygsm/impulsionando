@@ -89,12 +89,12 @@ function ModulePage() {
   const title = mother?.fullName ?? detail?.title ?? "Módulo";
   const hook = detail?.hook ?? mother?.tagline ?? "";
   const pitch = detail?.forWho ?? mother?.pitch ?? "";
-  const benefits = detail?.benefits ?? mother?.submodules.slice(0, 8) ?? [];
-  const features = detail?.features ?? mother?.submodules ?? [];
-  const examples = detail?.examples ?? [];
-  const howItWorks = detail?.howItWorks ?? [];
-  const integrations = detail?.integrations ?? [];
-  const impact = detail?.impact ?? [];
+  const benefits: string[] = detail?.benefits ?? mother?.submodules.slice(0, 8) ?? [];
+  const features: string[] = detail?.features ?? mother?.submodules ?? [];
+  const examples: string[] = detail?.examples ?? [];
+  const howItWorks: { step: string; detail: string }[] = detail?.howItWorks ?? [];
+  const integrations: string[] = detail?.integrations ?? [];
+  const impact: string[] = detail?.impact ?? [];
 
   const waUrl =
     WHATSAPP_BASE + encodeURIComponent(title) + "%20da%20Impulsionando.";
