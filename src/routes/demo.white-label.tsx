@@ -78,6 +78,7 @@ function WhiteLabelDemo() {
       nav={NAV}
       activeId={active}
       onSelect={setActive}
+      currentModule="white-label"
     >
       <DemoWelcome
         storageKey={STORAGE}
