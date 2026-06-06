@@ -354,6 +354,14 @@ function Header({ onSeed, onReset }: { onSeed: () => void; onReset: () => void }
         </p>
       </div>
       <div className="flex gap-2 flex-wrap">
+        <DemoContractCTA
+          slug="fidelizacao"
+          moduleName="Afiliados"
+          moduleDescription="Crie produtos, ofertas, afiliados e cupons com split automático, order bump e recuperação."
+          amountReference={297}
+          features={["Produtos e ofertas", "Afiliados e cupons", "Split automático", "Order bump", "Recuperação de carrinho", "Ranking de afiliados"]}
+          testRoute="/demo/afiliados"
+        />
         <GuidedTour
           moduleKey="afiliados"
           title="Afiliados & Produtos"
