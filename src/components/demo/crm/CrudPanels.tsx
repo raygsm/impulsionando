@@ -32,6 +32,51 @@ function FormField({ label, error, children, className }: { label: string; error
   );
 }
 
+function LockedBanner({ area }: { area: string }) {
+  return (
+    <Card className="p-4 border-warning/40 bg-warning/5">
+      <div className="flex items-start gap-2 text-xs">
+        <Lock className="w-4 h-4 mt-0.5 text-warning" />
+        <div>
+          <strong>{area} em modo somente leitura.</strong> Seu perfil DEMO não possui permissão para criar, editar ou remover registros nesta área. Ative a permissão em Parametrizações para liberar a edição. {MSG_DEMO_TAG}
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function ProdutosMultiSelect({
+  produtos, selecionados, onChange, disabled,
+}: {
+  produtos: { id: string; nome: string; status?: string }[];
+  selecionados: string[]; onChange: (next: string[]) => void; disabled?: boolean;
+}) {
+  if (produtos.length === 0) {
+    return <p className="text-[11px] text-muted-foreground">Nenhum produto cadastrado para vincular. Crie um produto antes.</p>;
+  }
+  return (
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 p-2 border rounded-md max-h-44 overflow-y-auto">
+      {produtos.map((p) => {
+        const checked = selecionados.includes(p.nome);
+        return (
+          <label key={p.id} className="flex items-center gap-2 text-xs cursor-pointer">
+            <Checkbox
+              checked={checked}
+              disabled={disabled}
+              onCheckedChange={(v) => {
+                const next = v ? [...selecionados, p.nome] : selecionados.filter((n) => n !== p.nome);
+                onChange(next);
+              }}
+            />
+            <span>{p.nome}</span>
+            {p.status && p.status !== "Ativo" && <Badge variant="outline" className="text-[10px]">{p.status}</Badge>}
+          </label>
+        );
+      })}
+    </div>
+  );
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // EMPRESAS
 // ────────────────────────────────────────────────────────────────────────────
