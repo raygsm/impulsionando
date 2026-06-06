@@ -85,19 +85,21 @@ export interface EmpresaRecord {
   id: string; razaoSocial: string; cnpj: string; segmento: string;
   nomeFantasia?: string; porte?: string; responsavel?: string;
   whatsapp?: string; email?: string; cidade?: string; estado?: string;
-  modulosInteresse?: string[]; status?: string; observacoes?: string;
+  modulosInteresse?: string[]; produtosVinculados?: string[];
+  status?: string; observacoes?: string;
 }
 
 const EMPRESA_INIT: Partial<EmpresaRecord> = {
   razaoSocial: "", cnpj: "", segmento: "Outro", porte: "Pequena empresa",
-  responsavel: "Comercial Demo", status: "Prospect", modulosInteresse: [],
+  responsavel: "Comercial Demo", status: "Prospect", modulosInteresse: [], produtosVinculados: [],
 };
 
 export function EmpresasPanel({
-  empresas, setEmpresas, onLog, exigirResponsavel,
+  empresas, setEmpresas, produtos = [], onLog, exigirResponsavel, podeEditar = true,
 }: {
   empresas: EmpresaRecord[]; setEmpresas: React.Dispatch<React.SetStateAction<EmpresaRecord[]>>;
-  onLog: LogFn; exigirResponsavel?: boolean;
+  produtos?: { id: string; nome: string; status?: string }[];
+  onLog: LogFn; exigirResponsavel?: boolean; podeEditar?: boolean;
 }) {
   const [form, setForm] = useState<Partial<EmpresaRecord>>(EMPRESA_INIT);
   const [editing, setEditing] = useState<string | null>(null);
@@ -106,16 +108,30 @@ export function EmpresasPanel({
   function reset() { setForm(EMPRESA_INIT); setEditing(null); setErrors({}); }
 
   function persist() {
+    if (!podeEditar) { toast.error("Sem permissão para editar Empresas."); return; }
     const r = validateEmpresa(
       { razaoSocial: form.razaoSocial, email: form.email, whatsapp: form.whatsapp,
         status: form.status as never, porte: form.porte as never, responsavel: form.responsavel ?? "" },
       { exigirResponsavel },
     );
+    const novosProdutos = (form.produtosVinculados ?? []).filter(Boolean);
+    const invalidos = novosProdutos.filter((n) => !produtos.some((p) => p.nome === n));
+    if (invalidos.length > 0) {
+      r.errors.produtosVinculados = `Produtos não encontrados: ${invalidos.join(", ")}`;
+      r.ok = false;
+    }
     setErrors(r.errors);
     if (!r.ok) { toast.error(MSG_OBRIGATORIO); return; }
     if (editing) {
+      const antes = empresas.find((e) => e.id === editing);
       setEmpresas((prev) => prev.map((e) => e.id === editing ? { ...e, ...form, id: editing } as EmpresaRecord : e));
       onLog({ area: "Empresas", acao: "Editou empresa", registro: form.razaoSocial });
+      if (antes) {
+        const add = novosProdutos.filter((p) => !(antes.produtosVinculados ?? []).includes(p));
+        const rem = (antes.produtosVinculados ?? []).filter((p) => !novosProdutos.includes(p));
+        if (add.length) onLog({ area: "Empresas", acao: `Vinculou produto(s): ${add.join(", ")}`, registro: form.razaoSocial });
+        if (rem.length) onLog({ area: "Empresas", acao: `Removeu vínculo de produto(s): ${rem.join(", ")}`, registro: form.razaoSocial });
+      }
       toast.success(MSG_SUCESSO);
     } else {
       const nova: EmpresaRecord = {
@@ -124,15 +140,18 @@ export function EmpresasPanel({
         cnpj: form.cnpj ?? "—",
         segmento: form.segmento ?? "Outro",
         ...form,
+        produtosVinculados: novosProdutos,
       } as EmpresaRecord;
       setEmpresas((prev) => [nova, ...prev]);
       onLog({ area: "Empresas", acao: "Criou empresa", registro: nova.razaoSocial });
+      if (novosProdutos.length) onLog({ area: "Empresas", acao: `Vinculou produto(s): ${novosProdutos.join(", ")}`, registro: nova.razaoSocial });
       toast.success(`Empresa cadastrada. ${MSG_DEMO_TAG}`);
     }
     reset();
   }
 
   function remove(id: string) {
+    if (!podeEditar) { toast.error("Sem permissão para remover Empresas."); return; }
     const e = empresas.find((x) => x.id === id);
     setEmpresas((prev) => prev.filter((x) => x.id !== id));
     onLog({ area: "Empresas", acao: "Removeu empresa demo", registro: e?.razaoSocial });
@@ -140,6 +159,7 @@ export function EmpresasPanel({
 
   return (
     <div className="space-y-4">
+      {!podeEditar && <LockedBanner area="Empresas" />}
       <Card className="p-5 space-y-3">
         <div className="flex items-start justify-between gap-2 flex-wrap">
           <div>
