@@ -33,6 +33,7 @@ import { ClientesPanel } from "@/components/demo/crm/ClientesPanel";
 import { EmpresasPanel, ProdutosPanel, PlanosPanel, ServicosPanel } from "@/components/demo/crm/CrudPanels";
 import { PrazosPanel, RegrasPanel, FunisPanel, EtapasPanel, TagsPanel, OrigensPanel, CampanhasPanel, FollowupsPanel, AutomacoesPanel, UsuariosPanel, PermissoesPanel, SimularPerfilPanel } from "@/components/demo/crm/ConfigPanels";
 import { makeDemoLog, type DemoLogInput } from "@/lib/demoCrmCrud";
+import { DashboardPanel, ComunicacaoPanel, ModelosPanel, LogsPanel, JornadaGuiadaDialog, CrmCtaBar, seedModelosCrm, type ModeloMsg, type LogRich } from "@/components/demo/crm/FaseH";
 
 export const Route = createFileRoute("/demo/crm")({
   head: () => ({
