@@ -333,6 +333,7 @@ export function ProdutosPanel({
   }
 
   function remove(id: string) {
+    if (!podeEditar) { toast.error("Sem permissão para remover Produtos."); return; }
     const p = produtos.find((x) => x.id === id);
     setProdutos((prev) => prev.filter((x) => x.id !== id));
     onLog({ area: "Produtos", acao: "Removeu produto demo", registro: p?.nome });
@@ -340,6 +341,7 @@ export function ProdutosPanel({
 
   return (
     <div className="space-y-4">
+      {!podeEditar && <LockedBanner area="Produtos" />}
       <Card className="p-5 space-y-3">
         <div className="flex items-start justify-between gap-2 flex-wrap">
           <div>
