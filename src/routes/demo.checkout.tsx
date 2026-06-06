@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useDemoState, uid, brl } from "@/lib/demoSandbox";
+import { GuidedTour } from "@/components/demo/GuidedTour";
+import { RoiSimulator } from "@/components/demo/RoiSimulator";
 
 export const Route = createFileRoute("/demo/checkout")({
   head: () => ({
