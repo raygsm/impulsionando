@@ -30,6 +30,16 @@ import {
   Wallet,
   ShieldCheck,
   Bell,
+  Zap,
+  RefreshCw,
+  Eye,
+  EyeOff,
+  Send,
+  MessageSquare,
+  Mail,
+  Bot,
+  Activity,
+  Plug,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useDemoState, uid } from "@/lib/demoSandbox";
@@ -80,6 +90,64 @@ type Prazo = { id: string; processoId: string; descricao: string; vencimento: st
 type Contrato = { id: string; clienteId: string; tipo: string; valorFixo: number; percentualExito: number; status: string; assinadoEm: string };
 type Honorario = { id: string; processoId: string; descricao: string; valor: number; vencimento: string; status: "pago" | "pendente" | "previsto" | "atrasado" };
 type Documento = { id: string; processoId: string; nome: string; tipo: string; tamanhoKb: number };
+type IntegracaoStatus =
+  | "nao_configurada"
+  | "aguardando_credenciais"
+  | "em_analise"
+  | "ativa"
+  | "pausada"
+  | "erro_auth"
+  | "erro_sync"
+  | "aguardando_autorizacao"
+  | "desativada";
+type Integracao = {
+  id: string;
+  nome: string;
+  tipo: string;
+  status: IntegracaoStatus;
+  escritorioVinculado: string;
+  responsavel: string;
+  ultimaSync: string | null;
+  proximaSync: string | null;
+  processosMonitorados: number;
+  errosSync: number;
+  observacao: string;
+};
+type MovimentacaoTipo =
+  | "publicacao" | "intimacao" | "despacho" | "decisao" | "sentenca" | "acordao"
+  | "certidao" | "peticao_juntada" | "prazo_aberto" | "audiencia_designada"
+  | "audiencia_remarcada" | "audiencia_cancelada" | "pericia_designada"
+  | "expedicao_documento" | "arquivamento" | "baixa" | "acordo" | "execucao" | "outro";
+type MovimentacaoStatusRevisao =
+  | "nova" | "aguardando_revisao" | "revisada" | "aprovada_envio"
+  | "enviada_cliente" | "ocultada_cliente" | "requer_acao" | "prazo_criado" | "arquivada";
+type Movimentacao = {
+  id: string;
+  processoId: string;
+  clienteId: string;
+  advogadoId: string;
+  dataMovimentacao: string;
+  dataCaptura: string;
+  fonte: string;
+  tipo: MovimentacaoTipo;
+  textoOriginal: string;
+  resumoInterno: string;
+  resumoCliente: string;
+  statusRevisao: MovimentacaoStatusRevisao;
+  notificarCliente: boolean;
+  clienteNotificado: boolean;
+  canalNotificacao: null | "whatsapp" | "email";
+  dataEnvio: string | null;
+  possivelPrazo: boolean;
+};
+type Alerta = {
+  id: string;
+  advogadoId: string;
+  tipo: "nova_movimentacao" | "sentenca" | "audiencia" | "intimacao" | "revisar";
+  mensagem: string;
+  criadoEm: string;
+  lido: boolean;
+};
 type Params = {
   lembretePrazo48h: boolean;
   lembretePrazo24h: boolean;
@@ -89,6 +157,21 @@ type Params = {
   integraTribunais: boolean;
   lgpd: boolean;
   portalCliente: boolean;
+  integracoesAtivas: boolean;
+  integracaoJusbrasil: boolean;
+  integracaoPublicacoes: boolean;
+  integracaoTribunais: boolean;
+  importacaoManual: boolean;
+  alertaAdvogado: boolean;
+  avisarClienteAuto: boolean;
+  exigirRevisaoAdvogado: boolean;
+  avisoWhatsapp: boolean;
+  avisoEmail: boolean;
+  resumoIA: boolean;
+  aprovacaoHumanaIA: boolean;
+  logComunicacao: boolean;
+  exibirMovNaAreaCliente: boolean;
+  ocultarMovSensiveis: boolean;
 };
 
 const FALLBACK = createAdvogadosMock();
@@ -106,11 +189,14 @@ function DemoAdvogados() {
   const [contratos, setContratos, resetCon] = useDemoState<Contrato[]>("adv.contratos", []);
   const [honorarios, setHonorarios, resetHon] = useDemoState<Honorario[]>("adv.honorarios", []);
   const [documentos, setDocumentos, resetDoc] = useDemoState<Documento[]>("adv.documentos", []);
+  const [integracoes, setIntegracoes, resetInt] = useDemoState<Integracao[]>("adv.integracoes", []);
+  const [movimentacoes, setMovimentacoes, resetMov] = useDemoState<Movimentacao[]>("adv.movimentacoes", []);
+  const [alertas, setAlertas, resetAlt] = useDemoState<Alerta[]>("adv.alertas", []);
   const [params, setParams, resetParams] = useDemoState<Params>("adv.params", FALLBACK.params);
   const [aba, setAba] = useState("dashboard");
 
   useEffect(() => {
-    const marker = "advogados:v1";
+    const marker = "advogados:v2";
     const current = typeof window === "undefined" ? marker : window.localStorage.getItem("imp.demo.mock.advogados");
     if (current === marker) return;
     const mock = safeMock(() => createAdvogadosMock(), FALLBACK, "advogados");
@@ -122,6 +208,9 @@ function DemoAdvogados() {
     setContratos(mock.contratos);
     setHonorarios(mock.honorarios);
     setDocumentos(mock.documentos);
+    setIntegracoes(mock.integracoes ?? []);
+    setMovimentacoes(mock.movimentacoes ?? []);
+    setAlertas(mock.alertas ?? []);
     setParams(mock.params);
     if (typeof window !== "undefined") window.localStorage.setItem("imp.demo.mock.advogados", marker);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -138,8 +227,19 @@ function DemoAdvogados() {
     });
     const audProx = audiencias.filter((a) => new Date(a.data).getTime() >= Date.now() - 36e5).length;
     const honorariosAReceber = honorarios.filter((h) => h.status === "pendente" || h.status === "previsto").reduce((s, h) => s + h.valor, 0);
-    return { ativos, ganhos, valorCarteira, prazos48h, audProx, honorariosAReceber, totalProcessos: processos.length };
-  }, [processos, prazos, audiencias, honorarios]);
+    const movPendRev = movimentacoes.filter((m) => m.statusRevisao === "aguardando_revisao" || m.statusRevisao === "nova").length;
+    const movEnviadas = movimentacoes.filter((m) => m.clienteNotificado).length;
+    const movOcultas = movimentacoes.filter((m) => m.statusRevisao === "ocultada_cliente").length;
+    const movPrazo = movimentacoes.filter((m) => m.possivelPrazo).length;
+    const intErros = integracoes.filter((i) => i.status === "erro_auth" || i.status === "erro_sync").length;
+    const ultimaSync = integracoes.map((i) => i.ultimaSync).filter(Boolean).sort().slice(-1)[0] ?? null;
+    return {
+      ativos, ganhos, valorCarteira, prazos48h, audProx, honorariosAReceber,
+      totalProcessos: processos.length,
+      movTotal: movimentacoes.length, movPendRev, movEnviadas, movOcultas, movPrazo,
+      intErros, ultimaSync,
+    };
+  }, [processos, prazos, audiencias, honorarios, movimentacoes, integracoes]);
 
   function seed() {
     const mock = safeMock(() => createAdvogadosMock(), FALLBACK, "advogados");
@@ -151,14 +251,89 @@ function DemoAdvogados() {
     setContratos(mock.contratos);
     setHonorarios(mock.honorarios);
     setDocumentos(mock.documentos);
+    setIntegracoes(mock.integracoes ?? []);
+    setMovimentacoes(mock.movimentacoes ?? []);
+    setAlertas(mock.alertas ?? []);
     setParams(mock.params);
     toast.success("Dados fictícios do escritório carregados.");
   }
 
   function resetAll() {
-    resetAdv(); resetCli(); resetProc(); resetAud(); resetPraz(); resetCon(); resetHon(); resetDoc(); resetParams();
+    resetAdv(); resetCli(); resetProc(); resetAud(); resetPraz(); resetCon();
+    resetHon(); resetDoc(); resetInt(); resetMov(); resetAlt(); resetParams();
     toast.message("Demonstração zerada.");
   }
+
+  // ===== Ações de Integrações Jurídicas =====
+  function testarIntegracao(i: Integracao) {
+    if (i.status === "aguardando_credenciais" || i.status === "aguardando_autorizacao") {
+      toast.message("Integração preparada — aguardando credenciais externas ou autorização da plataforma jurídica contratada pelo escritório.");
+      return;
+    }
+    toast.success(`Conexão OK com "${i.nome}" (DEMO).`);
+  }
+  function sincronizarAgora(i: Integracao) {
+    if (i.status !== "ativa") {
+      toast.message("Integração não está ativa — configure credenciais antes de sincronizar.");
+      return;
+    }
+    const now = new Date().toISOString();
+    setIntegracoes((arr) => arr.map((x) => x.id === i.id ? { ...x, ultimaSync: now } : x));
+    toast.success(`Sincronização DEMO concluída em "${i.nome}".`);
+  }
+
+  // ===== Ações de Movimentações =====
+  function gerarResumoIA(m: Movimentacao) {
+    if (!params.resumoIA) { toast.error("Resumo por IA está desativado nas parametrizações."); return; }
+    const resumo = `Resumo gerado por IA (DEMO) — ${m.textoOriginal.slice(0, 120)}${m.textoOriginal.length > 120 ? "…" : ""}`;
+    setMovimentacoes((arr) => arr.map((x) => x.id === m.id ? { ...x, resumoCliente: x.resumoCliente || resumo } : x));
+    toast.message("Resumo gerado por IA apenas para apoio interno. O advogado responsável deve revisar antes de liberar ao cliente.");
+  }
+  function revisarMov(m: Movimentacao) {
+    setMovimentacoes((arr) => arr.map((x) => x.id === m.id ? { ...x, statusRevisao: "revisada" } : x));
+    toast.success("Movimentação marcada como revisada.");
+  }
+  function aprovarEnvio(m: Movimentacao) {
+    if (params.exigirRevisaoAdvogado && m.statusRevisao === "aguardando_revisao") {
+      toast.error("Revisão obrigatória — marque como revisada antes de aprovar o envio.");
+      return;
+    }
+    setMovimentacoes((arr) => arr.map((x) => x.id === m.id ? { ...x, statusRevisao: "aprovada_envio", notificarCliente: true } : x));
+    toast.success("Aprovada para envio ao cliente.");
+  }
+  function ocultarDoCliente(m: Movimentacao) {
+    setMovimentacoes((arr) => arr.map((x) => x.id === m.id ? { ...x, statusRevisao: "ocultada_cliente", notificarCliente: false } : x));
+    toast.message("Movimentação ocultada do cliente.");
+  }
+  function enviarAvisoTeste(m: Movimentacao) {
+    if (!params.avisarClienteAuto && m.statusRevisao !== "aprovada_envio") {
+      toast.message("Envio automático desativado — aprove o envio antes de notificar o cliente.");
+      return;
+    }
+    const canal: "whatsapp" | "email" = params.avisoWhatsapp ? "whatsapp" : params.avisoEmail ? "email" : "whatsapp";
+    setMovimentacoes((arr) => arr.map((x) => x.id === m.id ? {
+      ...x, clienteNotificado: true, canalNotificacao: canal, dataEnvio: new Date().toISOString(), statusRevisao: "enviada_cliente",
+    } : x));
+    toast.success("TESTE — DEMONSTRAÇÃO — VERSÃO TESTE. Simulação de aviso processual enviada por " + canal + ".");
+  }
+  function criarPrazoDaMov(m: Movimentacao) {
+    const novo: Prazo = {
+      id: uid("pz"),
+      processoId: m.processoId,
+      descricao: `Prazo gerado a partir de movimentação (${m.tipo})`,
+      vencimento: new Date(Date.now() + 14 * 864e5).toISOString().slice(0, 10),
+      prioridade: "alta",
+      concluido: false,
+      responsavelId: m.advogadoId,
+    };
+    setPrazos((arr) => [novo, ...arr]);
+    setMovimentacoes((arr) => arr.map((x) => x.id === m.id ? { ...x, statusRevisao: "prazo_criado" } : x));
+    toast.success("Prazo criado a partir da movimentação.");
+  }
+  function marcarAlertaLido(id: string) {
+    setAlertas((arr) => arr.map((a) => a.id === id ? { ...a, lido: true } : a));
+  }
+
 
   function togglePrazo(id: string) {
     setPrazos((p) => p.map((x) => x.id === id ? { ...x, concluido: !x.concluido } : x));
@@ -244,6 +419,9 @@ function DemoAdvogados() {
             <TabsTrigger value="contratos"><FileText className="w-4 h-4 mr-1" />Contratos</TabsTrigger>
             <TabsTrigger value="honorarios"><Wallet className="w-4 h-4 mr-1" />Honorários</TabsTrigger>
             <TabsTrigger value="documentos"><ShieldCheck className="w-4 h-4 mr-1" />Documentos</TabsTrigger>
+            <TabsTrigger value="integracoes"><Plug className="w-4 h-4 mr-1" />Integrações</TabsTrigger>
+            <TabsTrigger value="movimentacoes"><Activity className="w-4 h-4 mr-1" />Movimentações</TabsTrigger>
+            <TabsTrigger value="alertas"><Bell className="w-4 h-4 mr-1" />Alertas{alertas.filter((a) => !a.lido).length > 0 && <Badge variant="destructive" className="ml-1 h-4 px-1 text-[9px]">{alertas.filter((a) => !a.lido).length}</Badge>}</TabsTrigger>
             <TabsTrigger value="params"><Bell className="w-4 h-4 mr-1" />Parametrização</TabsTrigger>
           </TabsList>
 
@@ -268,6 +446,29 @@ function DemoAdvogados() {
               <div className="text-xs text-muted-foreground">Honorários a receber</div>
               <div className="text-3xl font-bold mt-1">{brl(dash.honorariosAReceber)}</div>
               <div className="text-xs text-muted-foreground mt-1">{dash.audProx} audiências marcadas</div>
+            </Card>
+            <Card className="p-4 border-primary/30 bg-primary/5">
+              <div className="text-xs text-primary flex items-center gap-1"><Activity className="w-3 h-3" /> Movimentações novas</div>
+              <div className="text-3xl font-bold mt-1">{dash.movTotal}</div>
+              <div className="text-xs text-muted-foreground mt-1">{dash.movPrazo} com possível prazo</div>
+            </Card>
+            <Card className="p-4 border-amber-500/40 bg-amber-500/5">
+              <div className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Aguardando revisão</div>
+              <div className="text-3xl font-bold mt-1">{dash.movPendRev}</div>
+              <div className="text-xs text-muted-foreground mt-1">{dash.movOcultas} ocultadas do cliente</div>
+            </Card>
+            <Card className="p-4">
+              <div className="text-xs text-muted-foreground flex items-center gap-1"><Send className="w-3 h-3" /> Clientes avisados</div>
+              <div className="text-3xl font-bold mt-1">{dash.movEnviadas}</div>
+              <div className="text-xs text-muted-foreground mt-1">por WhatsApp / e-mail (TESTE)</div>
+            </Card>
+            <Card className="p-4">
+              <div className="text-xs text-muted-foreground flex items-center gap-1"><Plug className="w-3 h-3" /> Integrações</div>
+              <div className="text-3xl font-bold mt-1">{integracoes.filter((i) => i.status === "ativa").length}</div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {dash.intErros > 0 ? `${dash.intErros} com erro` : "sem erros"}
+                {dash.ultimaSync ? ` • última sync ${dash.ultimaSync.slice(0, 10)}` : " • aguardando sync"}
+              </div>
             </Card>
           </TabsContent>
 
@@ -500,6 +701,200 @@ function DemoAdvogados() {
             })}
           </TabsContent>
 
+          {/* ===== INTEGRAÇÕES JURÍDICAS ===== */}
+          <TabsContent value="integracoes" className="mt-4 space-y-3">
+            <Card className="p-4 border-amber-500/40 bg-amber-500/5 text-sm">
+              <div className="flex items-start gap-2">
+                <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                <div>
+                  <div className="font-medium">Integrações Jurídicas e Andamentos Processuais</div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Movimentações processuais podem conter informações sensíveis. O escritório define o que será
+                    comunicado ao cliente e quem pode revisar ou liberar cada atualização. Integrações reais
+                    dependem de credenciais externas ou autorização da plataforma jurídica contratada.
+                  </p>
+                </div>
+              </div>
+            </Card>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {integracoes.map((i) => {
+                const aguarda = i.status === "aguardando_credenciais" || i.status === "aguardando_autorizacao";
+                const erro = i.status === "erro_auth" || i.status === "erro_sync";
+                return (
+                  <Card key={i.id} className={`p-4 ${aguarda ? "border-amber-500/40" : erro ? "border-destructive/40" : ""}`}>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="font-semibold flex items-center gap-2"><Plug className="w-4 h-4 text-primary" /> {i.nome}</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">{i.tipo} • Resp.: {i.responsavel}</div>
+                      </div>
+                      <Badge variant={i.status === "ativa" ? "default" : erro ? "destructive" : "outline"} className="text-[10px] whitespace-nowrap">
+                        {i.status.replaceAll("_", " ")}
+                      </Badge>
+                    </div>
+                    <div className="text-xs mt-2 grid grid-cols-2 gap-x-2 gap-y-1">
+                      <div><span className="text-muted-foreground">Escritório:</span> {i.escritorioVinculado}</div>
+                      <div><span className="text-muted-foreground">Processos:</span> {i.processosMonitorados}</div>
+                      <div><span className="text-muted-foreground">Última sync:</span> {i.ultimaSync ? i.ultimaSync.slice(0, 16).replace("T", " ") : "—"}</div>
+                      <div><span className="text-muted-foreground">Próxima:</span> {i.proximaSync ? i.proximaSync.slice(0, 10) : "—"}</div>
+                      <div><span className="text-muted-foreground">Erros:</span> {i.errosSync}</div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">{i.observacao}</p>
+                    <div className="flex gap-2 mt-3 flex-wrap">
+                      <Button size="sm" variant="outline" onClick={() => testarIntegracao(i)}><Zap className="w-3 h-3 mr-1" />Testar</Button>
+                      <Button size="sm" variant="outline" onClick={() => sincronizarAgora(i)} disabled={i.status !== "ativa"}><RefreshCw className="w-3 h-3 mr-1" />Sincronizar agora</Button>
+                      {aguarda && <Badge variant="outline" className="text-[10px] border-amber-500/60 text-amber-700 dark:text-amber-400">Aguardando credenciais externas</Badge>}
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </TabsContent>
+
+          {/* ===== MOVIMENTAÇÕES PROCESSUAIS ===== */}
+          <TabsContent value="movimentacoes" className="mt-4 space-y-3">
+            <Card className="p-3 text-xs text-muted-foreground border-primary/30 bg-primary/5">
+              <strong className="text-foreground">TESTE — DEMONSTRAÇÃO — VERSÃO TESTE.</strong> Esta é uma simulação
+              de aviso processual. Nenhuma movimentação real foi consultada ou enviada. Algumas movimentações podem
+              exigir interpretação jurídica — por segurança, o escritório pode exigir revisão do advogado antes de
+              avisar o cliente.
+            </Card>
+            {movimentacoes.length === 0 ? (
+              <Card className="p-6 text-sm text-muted-foreground text-center">Sem movimentações registradas.</Card>
+            ) : (
+              <div className="space-y-3">
+                {movimentacoes.map((m) => {
+                  const proc = processos.find((p) => p.id === m.processoId);
+                  const cli = clientes.find((c) => c.id === m.clienteId);
+                  const adv = advogados.find((a) => a.id === m.advogadoId);
+                  const oculta = m.statusRevisao === "ocultada_cliente";
+                  const enviada = m.statusRevisao === "enviada_cliente" || m.clienteNotificado;
+                  return (
+                    <Card key={m.id} className={`p-4 ${oculta ? "opacity-70" : ""} ${m.possivelPrazo ? "border-amber-500/40" : ""}`}>
+                      <div className="flex items-start justify-between gap-3 flex-wrap">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant="outline" className="text-[10px] capitalize">{m.tipo.replaceAll("_", " ")}</Badge>
+                            <Badge className="text-[10px] capitalize" variant={enviada ? "default" : "outline"}>
+                              {m.statusRevisao.replaceAll("_", " ")}
+                            </Badge>
+                            {m.possivelPrazo && (
+                              <Badge variant="outline" className="text-[10px] border-amber-500/60 text-amber-700 dark:text-amber-400">
+                                possível prazo
+                              </Badge>
+                            )}
+                            <span className="text-xs text-muted-foreground">{m.fonte}</span>
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1 font-mono">{proc?.numero ?? "—"} • {cli?.nome ?? "—"} • {adv?.nome ?? "—"}</div>
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            Movimentação: {m.dataMovimentacao.slice(0, 10)} • Capturada: {m.dataCaptura.slice(0, 10)}
+                            {m.dataEnvio && <> • Enviada em {m.dataEnvio.slice(0, 10)} ({m.canalNotificacao})</>}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 grid md:grid-cols-2 gap-3 text-xs">
+                        <div>
+                          <div className="font-medium text-foreground mb-1">Texto original</div>
+                          <p className="text-muted-foreground whitespace-pre-line">{m.textoOriginal}</p>
+                        </div>
+                        <div className="space-y-2">
+                          <div>
+                            <div className="font-medium text-foreground mb-1 flex items-center gap-1"><Bot className="w-3 h-3" /> Resumo interno (IA — apoio)</div>
+                            <p className="text-muted-foreground">{m.resumoInterno || <em>Use “Gerar resumo IA”.</em>}</p>
+                          </div>
+                          <div>
+                            <div className="font-medium text-foreground mb-1">Mensagem ao cliente</div>
+                            <p className="text-muted-foreground">{m.resumoCliente || <em>Ainda não preparada.</em>}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 flex gap-2 flex-wrap">
+                        <Button size="sm" variant="outline" onClick={() => gerarResumoIA(m)}><Bot className="w-3 h-3 mr-1" />Gerar resumo IA</Button>
+                        <Button size="sm" variant="outline" onClick={() => revisarMov(m)}><CheckCircle2 className="w-3 h-3 mr-1" />Revisar</Button>
+                        <Button size="sm" variant="outline" onClick={() => aprovarEnvio(m)}><Send className="w-3 h-3 mr-1" />Aprovar envio</Button>
+                        <Button size="sm" variant="outline" onClick={() => ocultarDoCliente(m)}><EyeOff className="w-3 h-3 mr-1" />Ocultar do cliente</Button>
+                        <Button size="sm" onClick={() => enviarAvisoTeste(m)}>
+                          {params.avisoWhatsapp ? <MessageSquare className="w-3 h-3 mr-1" /> : <Mail className="w-3 h-3 mr-1" />}
+                          Enviar aviso TESTE
+                        </Button>
+                        {m.possivelPrazo && (
+                          <Button size="sm" variant="outline" onClick={() => criarPrazoDaMov(m)}>
+                            <AlertTriangle className="w-3 h-3 mr-1" />Criar prazo
+                          </Button>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-muted-foreground mt-2 italic">
+                        Resumo gerado por IA apenas para apoio interno. O advogado responsável deve revisar antes de liberar ao cliente.
+                      </p>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Pré-visualização da área do cliente */}
+            <Card className="p-4 mt-4 border-primary/30">
+              <div className="flex items-center gap-2 mb-2">
+                <Eye className="w-4 h-4 text-primary" />
+                <span className="font-medium text-sm">Atualizações do Processo — Pré-visualização da área do cliente</span>
+              </div>
+              {!params.exibirMovNaAreaCliente ? (
+                <p className="text-xs text-muted-foreground">Exibição de movimentações na área do cliente está desativada nas parametrizações.</p>
+              ) : (
+                <ul className="text-xs space-y-2">
+                  {movimentacoes.filter((m) => m.statusRevisao !== "ocultada_cliente" && m.notificarCliente).map((m) => {
+                    const proc = processos.find((p) => p.id === m.processoId);
+                    return (
+                      <li key={m.id} className="border-l-2 border-primary/40 pl-3">
+                        <div className="font-medium capitalize">{m.tipo.replaceAll("_", " ")} — {m.dataMovimentacao.slice(0, 10)}</div>
+                        <div className="text-muted-foreground font-mono">{proc?.numero}</div>
+                        <div className="text-muted-foreground mt-0.5">{m.resumoCliente || "(resumo não preparado)"}</div>
+                      </li>
+                    );
+                  })}
+                  {movimentacoes.filter((m) => m.statusRevisao !== "ocultada_cliente" && m.notificarCliente).length === 0 && (
+                    <li className="text-muted-foreground">Nenhuma atualização liberada para o cliente ainda.</li>
+                  )}
+                </ul>
+              )}
+            </Card>
+          </TabsContent>
+
+          {/* ===== ALERTAS AO ADVOGADO ===== */}
+          <TabsContent value="alertas" className="mt-4 space-y-3">
+            <Card className="p-3 text-xs text-muted-foreground">
+              Nova movimentação identificada no processo. Revise o conteúdo antes de liberar comunicação ao cliente,
+              se necessário.
+            </Card>
+            <Card className="p-3">
+              {alertas.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Sem alertas no momento.</p>
+              ) : (
+                <ul className="divide-y">
+                  {alertas.map((a) => {
+                    const adv = advogados.find((x) => x.id === a.advogadoId);
+                    return (
+                      <li key={a.id} className={`flex items-start gap-3 py-3 ${a.lido ? "opacity-60" : ""}`}>
+                        <Bell className={`w-4 h-4 mt-0.5 ${a.lido ? "text-muted-foreground" : "text-primary"}`} />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm">{a.mensagem}</div>
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            {adv?.nome ?? "—"} • {a.criadoEm.slice(0, 10)} • <span className="capitalize">{a.tipo.replaceAll("_", " ")}</span>
+                          </div>
+                        </div>
+                        {!a.lido && (
+                          <Button size="sm" variant="ghost" onClick={() => marcarAlertaLido(a.id)}>Marcar como lido</Button>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </Card>
+          </TabsContent>
+
+
           <TabsContent value="params" className="mt-4 grid sm:grid-cols-2 gap-3">
             {([
               ["lembretePrazo48h", "Lembrete automático 48h antes do prazo", "Dispara aviso ao responsável 48 horas antes do vencimento — evita perda de prazo processual."],
@@ -510,6 +905,21 @@ function DemoAdvogados() {
               ["integraTribunais", "Integração com tribunais (consulta processual)", "Sincroniza movimentações e publicações oficiais dos tribunais diretamente no processo."],
               ["lgpd", "Conformidade LGPD nas comunicações", "Comunicações com clientes registram base legal, consentimento e log de acesso a dados pessoais."],
               ["portalCliente", "Portal do cliente com acompanhamento", "Cliente acessa andamento do processo, audiências e honorários com sigilo por papel."],
+              ["integracoesAtivas", "Ativar integrações jurídicas externas", "Liga a camada de integração com fontes externas (Jusbrasil, publicações, tribunais, importação manual)."],
+              ["integracaoJusbrasil", "Integrar com Jusbrasil", "Prepara a integração com Jusbrasil — requer credenciais externas ou autorização da plataforma contratada pelo escritório."],
+              ["integracaoPublicacoes", "Integrar com plataformas de publicações", "Recebe publicações e intimações de plataformas jurídicas vinculadas ao escritório."],
+              ["integracaoTribunais", "Integrar com tribunais (consulta externa)", "Habilita consulta processual nos tribunais quando houver autorização e credenciais."],
+              ["importacaoManual", "Permitir importação manual de movimentações", "Permite carregar movimentações via CSV ou anexo enquanto não há integração automatizada."],
+              ["alertaAdvogado", "Criar alerta interno ao advogado", "Toda nova movimentação gera alerta interno para o advogado responsável."],
+              ["avisarClienteAuto", "Avisar cliente automaticamente", "Quando ativo, o cliente é avisado automaticamente conforme as demais regras (revisão, canal, sigilo)."],
+              ["exigirRevisaoAdvogado", "Exigir revisão do advogado antes de avisar o cliente", "Algumas movimentações podem exigir interpretação jurídica. Por segurança, o escritório pode exigir revisão do advogado antes de avisar o cliente."],
+              ["avisoWhatsapp", "Enviar aviso por WhatsApp", "Habilita o canal WhatsApp para comunicar atualizações ao cliente."],
+              ["avisoEmail", "Enviar aviso por e-mail", "Habilita o canal de e-mail para comunicar atualizações ao cliente."],
+              ["resumoIA", "Permitir mensagem resumida por IA", "A IA pode resumir o texto e sugerir mensagem ao cliente — apenas como apoio, nunca substitui o advogado."],
+              ["aprovacaoHumanaIA", "Exigir aprovação humana para resumo IA", "Nenhum resumo gerado por IA é enviado sem revisão e aprovação humana."],
+              ["logComunicacao", "Registrar log da comunicação", "Cada envio ao cliente registra canal, autor, data, hora e conteúdo."],
+              ["exibirMovNaAreaCliente", "Exibir movimentação na área do cliente", "Movimentações liberadas aparecem em ‘Atualizações do Processo’ na área do cliente."],
+              ["ocultarMovSensiveis", "Ocultar movimentações sensíveis do cliente", "Movimentações marcadas como sensíveis não são exibidas nem enviadas, independente das demais regras."],
             ] as const).map(([k, label, help]) => (
               <Card key={k} className="p-4 flex items-center justify-between gap-3">
                 <div className="min-w-0 flex-1">
