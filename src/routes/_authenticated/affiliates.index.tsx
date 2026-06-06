@@ -88,12 +88,26 @@ function AffiliatesDashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Afiliados e Produtos</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Visão consolidada do módulo. Cadastre produtos e ofertas, aprove afiliados, configure splits e acompanhe comissões e saques.
-        </p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-semibold">Afiliados e Produtos</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Visão consolidada do módulo. Cadastre produtos e ofertas, aprove afiliados, configure splits e acompanhe comissões e saques.
+          </p>
+        </div>
+        <Button onClick={() => seed.mutate()} disabled={seed.isPending || !companyId} variant="outline">
+          <Sparkles className="w-4 h-4 mr-2" />
+          Criar produto demo (Emagrecedor)
+        </Button>
       </div>
+
+      <Card className="p-4 bg-primary/5 border-primary/20">
+        <h2 className="font-medium mb-1">Taxa Impulsionando — {PLATFORM_FEE_PCT}%</h2>
+        <p className="text-sm text-muted-foreground">
+          A Impulsionando aplica taxa operacional fixa de <strong>{PLATFORM_FEE_PCT}%</strong> sobre o valor bruto de toda transação processada na plataforma —
+          Pix, boleto, cartão (à vista e parcelado), order bump, upsell, cross-sell, produtos físicos e digitais, assinaturas e eventos.
+        </p>
+      </Card>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Stat icon={Boxes} label="Produtos ativos" value={data?.products ?? 0} />
