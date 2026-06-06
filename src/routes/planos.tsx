@@ -187,6 +187,16 @@ function PlanosPage() {
   const [pickedModules, setPickedModules] = useState<Record<string, string[]>>({});
 
   async function runCheckout(plan: Plan, modules: string[]) {
+    const quota = PLAN_QUOTA[plan.name] ?? 1;
+    const included = modules.slice(0, quota);
+    const extras = modules.slice(quota);
+    const extrasMonthly = extras.length * EXTRA_MODULE_BRL;
+    const baseMonthly = annual
+      ? Math.round((plan.monthly ?? 0) * 10 / 12)
+      : (plan.monthly ?? 0);
+    const totalMonthly = baseMonthly + extrasMonthly;
+    const setup = PLAN_SETUP_BRL[plan.name] ?? 0;
+
     try {
       await openCheckout({
         priceId: PRICE_IDS[plan.name][annual ? "annual" : "monthly"],
@@ -194,20 +204,23 @@ function PlanosPage() {
         customData: {
           ...(user?.user?.id ? { userId: user.user.id } : {}),
           plan: plan.name,
-          modules: modules.join(","),
+          modules_included: included.join(","),
+          modules_extra: extras.join(","),
+          extras_monthly_brl: String(extrasMonthly),
+          setup_brl: String(setup),
+          minimum_term_days: "90",
         },
       });
     } catch {
-      const monthly = plan.monthly ?? 0;
-      const finalValue = annual ? monthly * 10 : monthly;
+      const finalValue = annual ? totalMonthly * 10 : totalMonthly;
       toast.message(
         "Instabilidade no checkout. Liberei o pagamento via Pix para você seguir agora.",
       );
       setPixState({
         open: true,
-        amountCents: Math.round(finalValue * 100),
+        amountCents: Math.round((setup + finalValue) * 100),
         txid: `PLANO-${plan.name.toUpperCase()}-${annual ? "ANUAL" : "MENSAL"}`,
-        label: `Plano ${plan.name}${modules.length ? ` (${modules.length} mód.)` : ""} — ${annual ? "anual" : "mensal"}`,
+        label: `Plano ${plan.name}${modules.length ? ` (${modules.length} mód.)` : ""} — ${annual ? "anual" : "mensal"} — inclui setup`,
       });
     }
   }
