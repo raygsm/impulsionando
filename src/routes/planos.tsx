@@ -361,8 +361,31 @@ function PlanosPage() {
           })}
         </div>
         <p className="text-center text-xs text-muted-foreground mt-6">
-          Valores de referência. Tributos podem ser aplicados conforme nota fiscal. Validação no orçamento.
+          Valores de referência. Tributos podem ser aplicados conforme nota fiscal.
+          Cobrança recorrente após o ciclo inicial obrigatório de 90 dias.
         </p>
+
+        {/* Sob Medida — secundário */}
+        <div className="mt-10 rounded-xl border border-dashed border-border bg-card/50 p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="flex-1">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">
+              Operação maior ou white label?
+            </div>
+            <div className="text-lg font-semibold mt-1">
+              Projeto Sob Medida
+            </div>
+            <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+              Múltiplos módulos, marca própria, integrações específicas e SLA
+              dedicado. Conversamos sobre escopo e orçamento direto com você —
+              sem entrar no fluxo de assinatura padrão.
+            </p>
+          </div>
+          <Button asChild variant="outline">
+            <Link to="/orcamento" search={{ plano: "Sob Medida", origem: "planos" }}>
+              Falar com consultor
+            </Link>
+          </Button>
+        </div>
       </section>
 
       {/* COMPARE TABLE */}
