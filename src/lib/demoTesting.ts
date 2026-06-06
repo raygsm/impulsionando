@@ -243,11 +243,18 @@ export interface SimulateOptions {
  * entry that the user can inspect. Real dispatch would require connecting
  * SMTP / WhatsApp API credentials in production.
  */
-export function simulateSend(opts: SimulateOptions): DemoTestLogEntry {
+/**
+ * Sends a real TEST message via the public demo endpoint, which reuses the
+ * production email queue and the Z-API WhatsApp helper. Every message is
+ * forced server-side to contain TESTE in subject and body. The result is
+ * appended to the local demo log so the lead can audit each dispatch.
+ */
+export async function simulateSend(opts: SimulateOptions): Promise<DemoTestLogEntry> {
   const { scenario, contact, channel } = opts;
   const recipient =
     channel === "email" ? contact.demo_test_email : contact.demo_test_whatsapp;
-  const entry: DemoTestLogEntry = {
+
+  const baseEntry: DemoTestLogEntry = {
     id:
       typeof crypto !== "undefined" && "randomUUID" in crypto
         ? crypto.randomUUID()
@@ -260,9 +267,39 @@ export function simulateSend(opts: SimulateOptions): DemoTestLogEntry {
     recipient,
     subject: channel === "email" ? buildSubject(scenario) : undefined,
     body: buildBody(scenario),
-    status: "aguardando_integracao",
+    status: "preparado",
     created_at: new Date().toISOString(),
   };
-  pushDemoLog(entry);
-  return entry;
+
+  try {
+    const res = await fetch("/api/public/demo/send-test", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        channel,
+        recipient,
+        scenario_id: scenario.id,
+        scenario_label: scenario.label,
+        scenario_module: scenario.module,
+        subject: channel === "email" ? buildSubject(scenario) : undefined,
+        body: buildBody(scenario),
+      }),
+    });
+    const json = (await res.json().catch(() => ({}))) as {
+      ok?: boolean;
+      status?: string;
+      error?: string;
+    };
+    if (res.ok && json.ok) {
+      baseEntry.status = json.status === "sent" ? "enviado" : "enviado";
+    } else {
+      baseEntry.status = "falhou";
+    }
+  } catch {
+    baseEntry.status = "falhou";
+  }
+
+  pushDemoLog(baseEntry);
+  return baseEntry;
 }
+
