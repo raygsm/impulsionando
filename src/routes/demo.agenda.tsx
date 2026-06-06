@@ -18,6 +18,8 @@ import { useDemoState, uid, brl } from "@/lib/demoSandbox";
 import { DemoContractCTA } from "@/components/demo/DemoContractCTA";
 import { RoiSimulator } from "@/components/demo/RoiSimulator";
 import { gotoCrm, gotoWhatsapp } from "@/lib/demoCrossLink";
+import { validateAgendamento, findConflicts, formatConflictMessage, type ConflictAgd } from "@/lib/agendaConflict.functions";
+import { useServerFn } from "@tanstack/react-start";
 
 export const Route = createFileRoute("/demo/agenda")({
   head: () => ({
