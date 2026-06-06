@@ -110,6 +110,8 @@ import { Route as AuthenticatedAgendaProfessionalsRouteImport } from './routes/_
 import { Route as AuthenticatedAgendaAppointmentsRouteImport } from './routes/_authenticated/agenda.appointments'
 import { Route as AuthenticatedAffiliatesProductsRouteImport } from './routes/_authenticated/affiliates.products'
 import { Route as AuthenticatedAffiliatesOffersRouteImport } from './routes/_authenticated/affiliates.offers'
+import { Route as AuthenticatedAffiliatesManagersRouteImport } from './routes/_authenticated/affiliates.managers'
+import { Route as AuthenticatedAffiliatesCoproducersRouteImport } from './routes/_authenticated/affiliates.coproducers'
 import { Route as AuthenticatedAffiliatesAffiliatesRouteImport } from './routes/_authenticated/affiliates.affiliates'
 import { Route as AuthenticatedAdminUptimeRouteImport } from './routes/_authenticated/admin.uptime'
 import { Route as AuthenticatedAdminTrialsRouteImport } from './routes/_authenticated/admin.trials'
@@ -663,6 +665,18 @@ const AuthenticatedAffiliatesOffersRoute =
     path: '/offers',
     getParentRoute: () => AuthenticatedAffiliatesRoute,
   } as any)
+const AuthenticatedAffiliatesManagersRoute =
+  AuthenticatedAffiliatesManagersRouteImport.update({
+    id: '/managers',
+    path: '/managers',
+    getParentRoute: () => AuthenticatedAffiliatesRoute,
+  } as any)
+const AuthenticatedAffiliatesCoproducersRoute =
+  AuthenticatedAffiliatesCoproducersRouteImport.update({
+    id: '/coproducers',
+    path: '/coproducers',
+    getParentRoute: () => AuthenticatedAffiliatesRoute,
+  } as any)
 const AuthenticatedAffiliatesAffiliatesRoute =
   AuthenticatedAffiliatesAffiliatesRouteImport.update({
     id: '/affiliates',
@@ -820,6 +834,8 @@ export interface FileRoutesByFullPath {
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/affiliates/affiliates': typeof AuthenticatedAffiliatesAffiliatesRoute
+  '/affiliates/coproducers': typeof AuthenticatedAffiliatesCoproducersRoute
+  '/affiliates/managers': typeof AuthenticatedAffiliatesManagersRoute
   '/affiliates/offers': typeof AuthenticatedAffiliatesOffersRoute
   '/affiliates/products': typeof AuthenticatedAffiliatesProductsRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
@@ -929,6 +945,8 @@ export interface FileRoutesByTo {
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/affiliates/affiliates': typeof AuthenticatedAffiliatesAffiliatesRoute
+  '/affiliates/coproducers': typeof AuthenticatedAffiliatesCoproducersRoute
+  '/affiliates/managers': typeof AuthenticatedAffiliatesManagersRoute
   '/affiliates/offers': typeof AuthenticatedAffiliatesOffersRoute
   '/affiliates/products': typeof AuthenticatedAffiliatesProductsRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
@@ -1049,6 +1067,8 @@ export interface FileRoutesById {
   '/_authenticated/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/_authenticated/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/_authenticated/affiliates/affiliates': typeof AuthenticatedAffiliatesAffiliatesRoute
+  '/_authenticated/affiliates/coproducers': typeof AuthenticatedAffiliatesCoproducersRoute
+  '/_authenticated/affiliates/managers': typeof AuthenticatedAffiliatesManagersRoute
   '/_authenticated/affiliates/offers': typeof AuthenticatedAffiliatesOffersRoute
   '/_authenticated/affiliates/products': typeof AuthenticatedAffiliatesProductsRoute
   '/_authenticated/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
@@ -1169,6 +1189,8 @@ export interface FileRouteTypes {
     | '/admin/trials'
     | '/admin/uptime'
     | '/affiliates/affiliates'
+    | '/affiliates/coproducers'
+    | '/affiliates/managers'
     | '/affiliates/offers'
     | '/affiliates/products'
     | '/agenda/appointments'
@@ -1278,6 +1300,8 @@ export interface FileRouteTypes {
     | '/admin/trials'
     | '/admin/uptime'
     | '/affiliates/affiliates'
+    | '/affiliates/coproducers'
+    | '/affiliates/managers'
     | '/affiliates/offers'
     | '/affiliates/products'
     | '/agenda/appointments'
@@ -1397,6 +1421,8 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/trials'
     | '/_authenticated/admin/uptime'
     | '/_authenticated/affiliates/affiliates'
+    | '/_authenticated/affiliates/coproducers'
+    | '/_authenticated/affiliates/managers'
     | '/_authenticated/affiliates/offers'
     | '/_authenticated/affiliates/products'
     | '/_authenticated/agenda/appointments'
@@ -2210,6 +2236,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAffiliatesOffersRouteImport
       parentRoute: typeof AuthenticatedAffiliatesRoute
     }
+    '/_authenticated/affiliates/managers': {
+      id: '/_authenticated/affiliates/managers'
+      path: '/managers'
+      fullPath: '/affiliates/managers'
+      preLoaderRoute: typeof AuthenticatedAffiliatesManagersRouteImport
+      parentRoute: typeof AuthenticatedAffiliatesRoute
+    }
+    '/_authenticated/affiliates/coproducers': {
+      id: '/_authenticated/affiliates/coproducers'
+      path: '/coproducers'
+      fullPath: '/affiliates/coproducers'
+      preLoaderRoute: typeof AuthenticatedAffiliatesCoproducersRouteImport
+      parentRoute: typeof AuthenticatedAffiliatesRoute
+    }
     '/_authenticated/affiliates/affiliates': {
       id: '/_authenticated/affiliates/affiliates'
       path: '/affiliates'
@@ -2327,6 +2367,8 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAffiliatesRouteChildren {
   AuthenticatedAffiliatesAffiliatesRoute: typeof AuthenticatedAffiliatesAffiliatesRoute
+  AuthenticatedAffiliatesCoproducersRoute: typeof AuthenticatedAffiliatesCoproducersRoute
+  AuthenticatedAffiliatesManagersRoute: typeof AuthenticatedAffiliatesManagersRoute
   AuthenticatedAffiliatesOffersRoute: typeof AuthenticatedAffiliatesOffersRoute
   AuthenticatedAffiliatesProductsRoute: typeof AuthenticatedAffiliatesProductsRoute
   AuthenticatedAffiliatesIndexRoute: typeof AuthenticatedAffiliatesIndexRoute
@@ -2336,6 +2378,9 @@ const AuthenticatedAffiliatesRouteChildren: AuthenticatedAffiliatesRouteChildren
   {
     AuthenticatedAffiliatesAffiliatesRoute:
       AuthenticatedAffiliatesAffiliatesRoute,
+    AuthenticatedAffiliatesCoproducersRoute:
+      AuthenticatedAffiliatesCoproducersRoute,
+    AuthenticatedAffiliatesManagersRoute: AuthenticatedAffiliatesManagersRoute,
     AuthenticatedAffiliatesOffersRoute: AuthenticatedAffiliatesOffersRoute,
     AuthenticatedAffiliatesProductsRoute: AuthenticatedAffiliatesProductsRoute,
     AuthenticatedAffiliatesIndexRoute: AuthenticatedAffiliatesIndexRoute,
@@ -2642,3 +2687,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
