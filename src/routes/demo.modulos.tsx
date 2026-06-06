@@ -316,13 +316,14 @@ function ModuleCard({
 }
 
 /** Mapeia slug do catálogo → rota demo interativa específica (quando existir). */
-const INTERACTIVE_DEMO: Record<string, "/demo/afiliados" | "/demo/checkout" | "/demo/eventos" | "/demo/crm" | "/demo/whatsapp" | "/demo/agenda" | "/demo/cliente-final"> = {
+const INTERACTIVE_DEMO: Record<string, "/demo/afiliados" | "/demo/checkout" | "/demo/eventos" | "/demo/crm" | "/demo/whatsapp" | "/demo/agenda" | "/demo/cliente-final" | "/demo/parceiros"> = {
   fidelizacao: "/demo/afiliados",
   commerce: "/demo/checkout",
   eventos: "/demo/eventos",
   crm: "/demo/crm",
   automacao: "/demo/whatsapp",
   agenda: "/demo/agenda",
+  parceiros: "/demo/parceiros",
 };
 
 function TestarRecursosButton({ slug }: { slug: string }) {

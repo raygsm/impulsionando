@@ -25,15 +25,17 @@ const DEMO_REFERENCE_AMOUNT: Record<string, number> = {
   area_paciente: 97, area_cliente: 97, bi: 197, permissoes: 0,
   white_label: 997, custom: 997, viagens: 247, followups: 147,
   automacao: 247, erp: 397, sites: 197, fiscal: 247, integracoes: 197,
+  parceiros: 397,
 };
 /** Rota demo interativa por slug, quando disponível. */
-const DEMO_TEST_ROUTE: Record<string, "/demo/afiliados" | "/demo/checkout" | "/demo/eventos"> = {
+const DEMO_TEST_ROUTE: Record<string, "/demo/afiliados" | "/demo/checkout" | "/demo/eventos" | "/demo/parceiros"> = {
   fidelizacao: "/demo/afiliados",
   afiliados: "/demo/afiliados",
   commerce: "/demo/checkout",
   checkout: "/demo/checkout",
   pagamentos: "/demo/checkout",
   eventos: "/demo/eventos",
+  parceiros: "/demo/parceiros",
 };
 
 const WHATSAPP_BASE =

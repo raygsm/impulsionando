@@ -11,6 +11,7 @@
 import {
   Briefcase, Users, Bot, Calendar, CreditCard, Store, Boxes,
   Stethoscope, Ticket, Truck, BarChart3, Layers, Award, UserCircle,
+  Handshake,
   type LucideIcon,
 } from "lucide-react";
 
@@ -337,6 +338,30 @@ export const MOTHER_MODULES: MotherModule[] = [
     ],
     category: "Plataforma",
     exampleNiches: ["Saúde", "Educação", "Eventos", "Serviços"],
+    planTier: ["integrado", "avancado", "sob_medida"],
+  },
+  {
+    slug: "parceiros",
+    shortName: "Parceiros",
+    fullName: "Prestação de Serviços com Parceiros",
+    tagline: "Venda, fature e entregue com uma rede parceira qualificada.",
+    pitch:
+      "Para empresas como produtoras, agências e operadores que vendem o serviço ao cliente final, faturam, emitem nota e repassam a execução para uma rede de parceiros aprovados — DJs, técnicos, iluminadores, produtores, fornecedores, motoristas, entregadores ou freelancers — com contratos, agenda integrada, repasses, reputação, multas, bonificações e comunicação automática.",
+    icon: Handshake,
+    submodules: [
+      "Cadastro de parceiros", "Aprovação WMP", "Níveis e curadoria",
+      "Eventos pontuais", "Eventos recorrentes", "Filtros por região e perfil",
+      "Agenda integrada", "Bloqueio e liberação automática",
+      "Regra dos 72h", "Multa automática de 10%", "Saldo negativo",
+      "Dedução em repasse", "Cobrança em 30 dias",
+      "Reputação", "Pontos positivos e negativos",
+      "Bonificação após N eventos", "Contagem regressiva",
+      "Contrato por evento", "Contrato recorrente", "Aceite eletrônico",
+      "Avisos por WhatsApp", "Avisos por e-mail",
+      "Painel da gestão", "Painel do parceiro", "Auditoria de regras",
+    ],
+    category: "Operação",
+    exampleNiches: ["Produção de eventos", "DJs", "Agências", "Serviços terceirizados", "Logística"],
     planTier: ["integrado", "avancado", "sob_medida"],
   },
 ];
