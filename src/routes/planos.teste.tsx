@@ -227,23 +227,48 @@ function PlanoTestePage() {
                 />
               </div>
 
-              <InfinitePayCheckoutButton
-                customer={{
-                  name: lead.name.trim(),
-                  email: lead.email.trim(),
-                  phone_number: phoneDigits,
-                }}
-                items={[
-                  {
-                    quantity: 1,
-                    price: TEST_PLAN.amountCents,
-                    description: TEST_PLAN.description,
-                  },
-                ]}
-                plano_id={TEST_PLAN.id}
-                label="Pagar R$1,00 com InfinitePay"
-                className="w-full"
-              />
+              {pickedModules.length > 0 && (
+                <div className="rounded-md border bg-muted/30 p-3 text-xs">
+                  <div className="font-medium mb-1">Módulo selecionado:</div>
+                  <div className="text-muted-foreground">
+                    {pickedModules.join(", ")}
+                  </div>
+                </div>
+              )}
+
+              {!confirmed ? (
+                <Button
+                  type="button"
+                  className="w-full"
+                  disabled={!canPay}
+                  onClick={() => setPickerOpen(true)}
+                >
+                  Escolher módulo e continuar
+                  <ArrowRight className="w-4 h-4 ml-1" />
+                </Button>
+              ) : (
+                <InfinitePayCheckoutButton
+                  customer={{
+                    name: lead.name.trim(),
+                    email: lead.email.trim(),
+                    phone_number: phoneDigits,
+                  }}
+                  items={[
+                    {
+                      quantity: 1,
+                      price: TEST_PLAN.amountCents,
+                      description:
+                        TEST_PLAN.description +
+                        (pickedModules.length
+                          ? ` — módulo: ${pickedModules.join(",")}`
+                          : ""),
+                    },
+                  ]}
+                  plano_id={TEST_PLAN.id}
+                  label="Pagar R$1,00 com InfinitePay"
+                  className="w-full"
+                />
+              )}
               {!canPay && (
                 <p className="text-xs text-muted-foreground">
                   Preencha nome, e-mail e telefone (mín. 10 dígitos) para liberar
