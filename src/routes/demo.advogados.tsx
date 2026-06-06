@@ -502,12 +502,9 @@ function DemoAdvogados() {
         </Tabs>
 
         <div className="mt-10">
-          <RoiSimulator
-            moduleName="Advogados & Escritórios Jurídicos"
-            defaultRevenue={45000}
-            defaultMargin={28}
-          />
+          <RoiSimulator />
         </div>
+
       </main>
       <PublicFooter />
     </div>
