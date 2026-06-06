@@ -219,11 +219,20 @@ export function EmpresasPanel({
               onChange={(e) => setForm({ ...form, modulosInteresse: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })}
             />
           </FormField>
+          <FormField label="Produtos vinculados à empresa" error={errors.produtosVinculados} className="sm:col-span-2 lg:col-span-4">
+            <ProdutosMultiSelect
+              produtos={produtos}
+              selecionados={form.produtosVinculados ?? []}
+              onChange={(next) => setForm({ ...form, produtosVinculados: next })}
+              disabled={!podeEditar}
+            />
+            <p className="text-[11px] text-muted-foreground mt-1">Selecione os produtos contratados ou em negociação por esta empresa. Cada alteração gera log DEMO.</p>
+          </FormField>
           <FormField label="Observações" className="sm:col-span-2 lg:col-span-4">
             <Textarea value={form.observacoes ?? ""} onChange={(e) => setForm({ ...form, observacoes: e.target.value })} />
           </FormField>
         </div>
-        <Button className="bg-gradient-primary" onClick={persist}>
+        <Button className="bg-gradient-primary" onClick={persist} disabled={!podeEditar}>
           <Plus className="w-4 h-4 mr-1" />{editing ? "Salvar alterações" : "Nova empresa"}
         </Button>
       </Card>
