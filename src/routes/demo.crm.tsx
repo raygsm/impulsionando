@@ -65,7 +65,7 @@ type Campanha = { id: string; nome: string; canal: string; status: string; leads
 type Followup = { id: string; nome?: string; evento?: string; canal?: string; envios?: number; intervaloDias?: number; mensagem1?: string; mensagem2?: string; mensagem3?: string; criarTarefa?: boolean; encerrarSeResponder?: boolean; ativo?: boolean; leadId?: string; descricao?: string; quando?: string; status?: "Pendente" | "Concluído" };
 type Usuario = { id: string; nome: string; email: string; papel: string; status: string; whatsapp?: string; cargo?: string; setor?: string; observacoes?: string };
 type Permissao = { papel: string; permitido: boolean; acao?: "ver" | "criar" | "editar" | "excluir"; permissao?: string };
-type Log = { id: string; quando: string; usuario: string; acao: string };
+type Log = LogRich;
 
 const STAGES = ["Novo lead", "Primeiro contato", "Qualificação", "Proposta enviada", "Aguardando pagamento", "Contratado", "Onboarding", "Reativação"];
 const MOCK_MARKER = "crm:v3";
