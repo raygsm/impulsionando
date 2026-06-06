@@ -75,6 +75,7 @@ import { Route as AuthenticatedEhrIndexRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedCrmIndexRouteImport } from './routes/_authenticated/crm.index'
 import { Route as AuthenticatedBiIndexRouteImport } from './routes/_authenticated/bi.index'
 import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenticated/agenda.index'
+import { Route as AuthenticatedAffiliatesIndexRouteImport } from './routes/_authenticated/affiliates.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as AuthenticatedSalesOrdersRouteImport } from './routes/_authenticated/sales.orders'
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
@@ -459,6 +460,12 @@ const AuthenticatedAgendaIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedAgendaRoute,
   } as any)
+const AuthenticatedAffiliatesIndexRoute =
+  AuthenticatedAffiliatesIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAffiliatesRoute,
+  } as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
@@ -748,7 +755,7 @@ export interface FileRoutesByFullPath {
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
-  '/affiliates': typeof AuthenticatedAffiliatesRoute
+  '/affiliates': typeof AuthenticatedAffiliatesRouteWithChildren
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/audit': typeof AuthenticatedAuditRoute
   '/bi': typeof AuthenticatedBiRouteWithChildren
@@ -823,6 +830,7 @@ export interface FileRoutesByFullPath {
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/bi/': typeof AuthenticatedBiIndexRoute
   '/crm/': typeof AuthenticatedCrmIndexRoute
@@ -861,7 +869,6 @@ export interface FileRoutesByTo {
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
-  '/affiliates': typeof AuthenticatedAffiliatesRoute
   '/audit': typeof AuthenticatedAuditRoute
   '/companies': typeof AuthenticatedCompaniesRoute
   '/customers': typeof AuthenticatedCustomersRoute
@@ -929,6 +936,7 @@ export interface FileRoutesByTo {
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/affiliates': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda': typeof AuthenticatedAgendaIndexRoute
   '/bi': typeof AuthenticatedBiIndexRoute
   '/crm': typeof AuthenticatedCrmIndexRoute
@@ -970,7 +978,7 @@ export interface FileRoutesById {
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/access-profiles': typeof AuthenticatedAccessProfilesRoute
-  '/_authenticated/affiliates': typeof AuthenticatedAffiliatesRoute
+  '/_authenticated/affiliates': typeof AuthenticatedAffiliatesRouteWithChildren
   '/_authenticated/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/_authenticated/audit': typeof AuthenticatedAuditRoute
   '/_authenticated/bi': typeof AuthenticatedBiRouteWithChildren
@@ -1045,6 +1053,7 @@ export interface FileRoutesById {
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
   '/_authenticated/sales/orders': typeof AuthenticatedSalesOrdersRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/_authenticated/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/_authenticated/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/_authenticated/bi/': typeof AuthenticatedBiIndexRoute
   '/_authenticated/crm/': typeof AuthenticatedCrmIndexRoute
@@ -1161,6 +1170,7 @@ export interface FileRouteTypes {
     | '/sales/new'
     | '/sales/orders'
     | '/lovable/email/suppression'
+    | '/affiliates/'
     | '/agenda/'
     | '/bi/'
     | '/crm/'
@@ -1199,7 +1209,6 @@ export interface FileRouteTypes {
     | '/trial'
     | '/unsubscribe'
     | '/access-profiles'
-    | '/affiliates'
     | '/audit'
     | '/companies'
     | '/customers'
@@ -1267,6 +1276,7 @@ export interface FileRouteTypes {
     | '/sales/new'
     | '/sales/orders'
     | '/lovable/email/suppression'
+    | '/affiliates'
     | '/agenda'
     | '/bi'
     | '/crm'
@@ -1382,6 +1392,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sales/new'
     | '/_authenticated/sales/orders'
     | '/lovable/email/suppression'
+    | '/_authenticated/affiliates/'
     | '/_authenticated/agenda/'
     | '/_authenticated/bi/'
     | '/_authenticated/crm/'
@@ -1915,6 +1926,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgendaIndexRouteImport
       parentRoute: typeof AuthenticatedAgendaRoute
     }
+    '/_authenticated/affiliates/': {
+      id: '/_authenticated/affiliates/'
+      path: '/'
+      fullPath: '/affiliates/'
+      preLoaderRoute: typeof AuthenticatedAffiliatesIndexRouteImport
+      parentRoute: typeof AuthenticatedAffiliatesRoute
+    }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
       path: '/lovable/email/suppression'
@@ -2247,6 +2265,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAffiliatesRouteChildren {
+  AuthenticatedAffiliatesIndexRoute: typeof AuthenticatedAffiliatesIndexRoute
+}
+
+const AuthenticatedAffiliatesRouteChildren: AuthenticatedAffiliatesRouteChildren =
+  {
+    AuthenticatedAffiliatesIndexRoute: AuthenticatedAffiliatesIndexRoute,
+  }
+
+const AuthenticatedAffiliatesRouteWithChildren =
+  AuthenticatedAffiliatesRoute._addFileChildren(
+    AuthenticatedAffiliatesRouteChildren,
+  )
+
 interface AuthenticatedAgendaRouteChildren {
   AuthenticatedAgendaAppointmentsRoute: typeof AuthenticatedAgendaAppointmentsRoute
   AuthenticatedAgendaProfessionalsRoute: typeof AuthenticatedAgendaProfessionalsRoute
@@ -2403,7 +2435,7 @@ const AuthenticatedSalesRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccessProfilesRoute: typeof AuthenticatedAccessProfilesRoute
-  AuthenticatedAffiliatesRoute: typeof AuthenticatedAffiliatesRoute
+  AuthenticatedAffiliatesRoute: typeof AuthenticatedAffiliatesRouteWithChildren
   AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRouteWithChildren
   AuthenticatedAuditRoute: typeof AuthenticatedAuditRoute
   AuthenticatedBiRoute: typeof AuthenticatedBiRouteWithChildren
@@ -2435,7 +2467,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccessProfilesRoute: AuthenticatedAccessProfilesRoute,
-  AuthenticatedAffiliatesRoute: AuthenticatedAffiliatesRoute,
+  AuthenticatedAffiliatesRoute: AuthenticatedAffiliatesRouteWithChildren,
   AuthenticatedAgendaRoute: AuthenticatedAgendaRouteWithChildren,
   AuthenticatedAuditRoute: AuthenticatedAuditRoute,
   AuthenticatedBiRoute: AuthenticatedBiRouteWithChildren,
