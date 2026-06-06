@@ -447,6 +447,29 @@ function DemoAdvogados() {
               <div className="text-3xl font-bold mt-1">{brl(dash.honorariosAReceber)}</div>
               <div className="text-xs text-muted-foreground mt-1">{dash.audProx} audiências marcadas</div>
             </Card>
+            <Card className="p-4 border-primary/30 bg-primary/5">
+              <div className="text-xs text-primary flex items-center gap-1"><Activity className="w-3 h-3" /> Movimentações novas</div>
+              <div className="text-3xl font-bold mt-1">{dash.movTotal}</div>
+              <div className="text-xs text-muted-foreground mt-1">{dash.movPrazo} com possível prazo</div>
+            </Card>
+            <Card className="p-4 border-amber-500/40 bg-amber-500/5">
+              <div className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Aguardando revisão</div>
+              <div className="text-3xl font-bold mt-1">{dash.movPendRev}</div>
+              <div className="text-xs text-muted-foreground mt-1">{dash.movOcultas} ocultadas do cliente</div>
+            </Card>
+            <Card className="p-4">
+              <div className="text-xs text-muted-foreground flex items-center gap-1"><Send className="w-3 h-3" /> Clientes avisados</div>
+              <div className="text-3xl font-bold mt-1">{dash.movEnviadas}</div>
+              <div className="text-xs text-muted-foreground mt-1">por WhatsApp / e-mail (TESTE)</div>
+            </Card>
+            <Card className="p-4">
+              <div className="text-xs text-muted-foreground flex items-center gap-1"><Plug className="w-3 h-3" /> Integrações</div>
+              <div className="text-3xl font-bold mt-1">{integracoes.filter((i) => i.status === "ativa").length}</div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {dash.intErros > 0 ? `${dash.intErros} com erro` : "sem erros"}
+                {dash.ultimaSync ? ` • última sync ${dash.ultimaSync.slice(0, 10)}` : " • aguardando sync"}
+              </div>
+            </Card>
           </TabsContent>
 
           <TabsContent value="processos" className="mt-4 space-y-3">
