@@ -434,42 +434,111 @@ export function createCrmMock() {
     { id: uid("sv"), nome: "Treinamento da equipe", preco: 580, duracao: "3 dias" },
   ];
   const prazosDias = [
-    { id: uid("pz"), nome: "Retorno ao novo lead", dias: 3 },
-    { id: uid("pz"), nome: "Validade de proposta", dias: 5 },
-    { id: uid("pz"), nome: "Reativação de cliente inativo", dias: 30 },
-    { id: uid("pz"), nome: "Janela de recompra", dias: 90 },
-    { id: uid("pz"), nome: "Cobrança em atraso", dias: 7 },
+    { id: uid("pz"), nome: "Follow-up de proposta", tipo: "Follow-up comercial", dias: 2, quando: "depois", evento: "Proposta enviada", acao: "Enviar WhatsApp e criar tarefa", canal: "whatsapp", responsavel: "Vendedor Demo", status: "Ativo", ativo: true },
+    { id: uid("pz"), nome: "Retorno ao novo lead", tipo: "Primeiro contato", dias: 1, quando: "depois", evento: "Lead criado", acao: "Criar tarefa", canal: "interno", responsavel: "Vendedor Demo", status: "Ativo", ativo: true },
+    { id: uid("pz"), nome: "Validade de proposta", tipo: "Contrato", dias: 5, quando: "depois", evento: "Proposta enviada", acao: "Enviar e-mail", canal: "email", responsavel: "Comercial", status: "Ativo", ativo: true },
+    { id: uid("pz"), nome: "Reativação de cliente inativo", tipo: "Reativação", dias: 30, quando: "depois", evento: "Cliente inativo", acao: "Enviar WhatsApp", canal: "whatsapp", responsavel: "Atendimento", status: "Ativo", ativo: true },
+    { id: uid("pz"), nome: "Janela de recompra", tipo: "Recompra", dias: 7, quando: "antes", evento: "Produto próximo do fim", acao: "Enviar aviso", canal: "email", responsavel: "Comercial", status: "Ativo", ativo: true },
+    { id: uid("pz"), nome: "Cobrança em atraso", tipo: "Cobrança", dias: 7, quando: "depois", evento: "Pagamento pendente", acao: "Enviar link de pagamento", canal: "whatsapp", responsavel: "Financeiro", status: "Ativo", ativo: true },
   ];
-  const funis = [{ id: uid("fn"), nome: "Funil Comercial Padrão", ativo: true }];
-  const etapas = ["Novo lead", "Primeiro contato", "Qualificação", "Proposta enviada", "Aguardando pagamento", "Contratado", "Onboarding", "Reativação"].map((nome, i) => ({ id: uid("et"), funilId: funis[0].id, nome, ordem: i + 1 }));
+  const funis = [
+    { id: uid("fn"), nome: "Funil Comercial Padrão", descricao: "Jornada comercial completa", produto: "CRM Profissional", campanha: "Campanha Google CRM", responsavel: "Vendedor Demo", padrao: true, ativo: true },
+    { id: uid("fn"), nome: "Funil de Reativação", descricao: "Recuperar clientes inativos", produto: "", campanha: "Campanha Reativação", responsavel: "Atendimento", padrao: false, ativo: true },
+    { id: uid("fn"), nome: "Funil de Vendas por WhatsApp", descricao: "Atendimento via WhatsApp", produto: "WhatsApp Inteligente", campanha: "Campanha WhatsApp Inteligente", responsavel: "Vendedor Demo", padrao: false, ativo: true },
+    { id: uid("fn"), nome: "Funil de Contratação de Módulos", descricao: "Cross-sell de módulos", produto: "", campanha: "", responsavel: "Vendedor Demo", padrao: false, ativo: false },
+  ];
+  const etapas = [
+    { nome: "Novo lead", cor: "#3B82F6", prazoMaxDias: 1, aoEntrar: "Criar tarefa", aoSair: "Adicionar tag" },
+    { nome: "Primeiro contato", cor: "#06B6D4", prazoMaxDias: 2, aoEntrar: "Enviar WhatsApp", aoSair: "Notificar responsável" },
+    { nome: "Qualificação", cor: "#8B5CF6", prazoMaxDias: 3, aoEntrar: "Criar tarefa", aoSair: "" },
+    { nome: "Proposta enviada", cor: "#F59E0B", prazoMaxDias: 5, aoEntrar: "Enviar proposta", aoSair: "Criar follow-up" },
+    { nome: "Aguardando pagamento", cor: "#F97316", prazoMaxDias: 7, aoEntrar: "Enviar link de pagamento", aoSair: "" },
+    { nome: "Contratado", cor: "#10B981", prazoMaxDias: 0, aoEntrar: "Enviar e-mail", aoSair: "" },
+    { nome: "Onboarding", cor: "#22C55E", prazoMaxDias: 15, aoEntrar: "Criar tarefa", aoSair: "" },
+    { nome: "Reativação", cor: "#EF4444", prazoMaxDias: 30, aoEntrar: "Enviar WhatsApp", aoSair: "" },
+  ].map((e, i) => ({ id: uid("et"), funilId: funis[0].id, ordem: i + 1, descricao: "", responsavel: "Vendedor Demo", ativa: true, ...e }));
   const regras = [
-    { id: uid("rg"), nome: "Sem resposta 3 dias → Reativação", quando: "lead sem interação por 3 dias", entao: "mover para etapa Reativação", ativa: true },
-    { id: uid("rg"), nome: "Proposta enviada → tarefa de follow-up", quando: "etapa = Proposta enviada", entao: "criar tarefa de follow-up em 2 dias", ativa: true },
-    { id: uid("rg"), nome: "Score > 80 → distribuir vendedor sênior", quando: "score do lead > 80", entao: "atribuir ao vendedor sênior", ativa: false },
+    { id: uid("rg"), nome: "Criar tarefa automática para novo lead", descricao: "Cria tarefa para o responsável quando lead é cadastrado.", impacto: "Reduz esquecimento de retorno comercial.", tooltip: "Quando ativado, todo novo lead gera tarefa para o responsável.", dependencia: "", status: "Operacional", ativa: true },
+    { id: uid("rg"), nome: "Enviar boas-vindas para novo lead", descricao: "Dispara template de boas-vindas no cadastro.", impacto: "Resposta inicial mais rápida.", tooltip: "Requer módulo WhatsApp/E-mail configurado.", dependencia: "WhatsApp ou E-mail", status: "Comunicação", ativa: true },
+    { id: uid("rg"), nome: "Enviar boas-vindas para novo cliente", descricao: "Boas-vindas ao virar cliente.", impacto: "Onboarding consistente.", tooltip: "Modelo configurável em Comunicação.", dependencia: "", status: "Comunicação", ativa: true },
+    { id: uid("rg"), nome: "Criar follow-up após proposta", descricao: "Gera follow-up automático depois da proposta.", impacto: "Maior taxa de fechamento.", tooltip: "Use Prazos para definir a janela.", dependencia: "", status: "Comercial", ativa: true },
+    { id: uid("rg"), nome: "Marcar lead como parado após X dias", descricao: "Move lead sem interação para Reativação.", impacto: "Higieniza pipeline.", tooltip: "X é configurado em Prazos.", dependencia: "Prazos", status: "Comercial", ativa: true },
+    { id: uid("rg"), nome: "Reativar cliente inativo após X dias", descricao: "Inicia fluxo de reativação.", impacto: "Recupera receita.", tooltip: "X é configurado em Prazos.", dependencia: "Prazos", status: "Comercial", ativa: true },
+    { id: uid("rg"), nome: "Enviar pesquisa após compra", descricao: "NPS pós-venda.", impacto: "Mede satisfação.", tooltip: "Aciona follow-up se sem resposta.", dependencia: "", status: "Comunicação", ativa: false },
+    { id: uid("rg"), nome: "Enviar aviso de recompra", descricao: "Avisa cliente sobre próximo ciclo.", impacto: "Aumenta LTV.", tooltip: "Defina prazos no produto.", dependencia: "Produtos", status: "Comercial", ativa: true },
+    { id: uid("rg"), nome: "Distribuir leads automaticamente", descricao: "Round-robin entre vendedores ativos.", impacto: "Balanceia carga.", tooltip: "Requer perfil Vendedor.", dependencia: "Usuários", status: "Operacional", ativa: false },
+    { id: uid("rg"), nome: "Exigir responsável para cada lead", descricao: "Impede cadastro sem responsável.", impacto: "Garante atendimento.", tooltip: "Bloqueio na validação.", dependencia: "", status: "Operacional", ativa: true },
+    { id: uid("rg"), nome: "Exigir origem do lead", descricao: "Bloqueia cadastro sem origem.", impacto: "Melhora atribuição.", tooltip: "Cadastre origens em Origens.", dependencia: "Origens", status: "Operacional", ativa: true },
+    { id: uid("rg"), nome: "Permitir lead sem WhatsApp", descricao: "Aceita lead sem telefone.", impacto: "Flexibiliza captação.", tooltip: "Desligue para exigir WhatsApp.", dependencia: "", status: "Operacional", ativa: true },
+    { id: uid("rg"), nome: "Permitir lead sem e-mail", descricao: "Aceita lead sem e-mail.", impacto: "Flexibiliza captação.", tooltip: "Desligue para exigir e-mail.", dependencia: "", status: "Operacional", ativa: true },
+    { id: uid("rg"), nome: "Ativar lead scoring", descricao: "Cada interação soma pontos.", impacto: "Prioriza leads quentes.", tooltip: "Configure regras de pontos.", dependencia: "", status: "Comercial", ativa: true },
+    { id: uid("rg"), nome: "Registrar histórico completo", descricao: "Salva todas as interações.", impacto: "Auditoria completa.", tooltip: "Recomendado.", dependencia: "", status: "Operacional", ativa: true },
+    { id: uid("rg"), nome: "Registrar logs de comunicação", descricao: "Grava cada envio.", impacto: "Rastreabilidade.", tooltip: "Visível em Logs.", dependencia: "", status: "Operacional", ativa: true },
+    { id: uid("rg"), nome: "Criar alerta de tarefa atrasada", descricao: "Notifica quando tarefa estoura prazo.", impacto: "Reduz atrasos.", tooltip: "", dependencia: "", status: "Operacional", ativa: true },
+    { id: uid("rg"), nome: "Permitir exclusão de clientes", descricao: "Habilita exclusão de cliente.", impacto: "Irreversível em produção.", tooltip: "Apenas Admin.", dependencia: "Permissões", status: "Crítica", ativa: false },
+    { id: uid("rg"), nome: "Exigir motivo ao marcar lead como perdido", descricao: "Obriga motivo de perda.", impacto: "Diagnóstico comercial.", tooltip: "Recomendado.", dependencia: "", status: "Operacional", ativa: true },
   ];
-  const tags = ["quente", "frio", "vip", "indicação", "saúde", "eventos", "jurídico", "alimentação"].map((t) => ({ id: uid("tg"), nome: t }));
-  const origens = ["Google Ads", "Instagram", "WhatsApp", "Site", "Indicação", "Tráfego orgânico"].map((o) => ({ id: uid("og"), nome: o }));
+  const tags = [
+    { id: uid("tg"), nome: "Quente", cor: "#EF4444", categoria: "Prioridade", descricao: "Lead pronto para fechar.", ativa: true },
+    { id: uid("tg"), nome: "Frio", cor: "#3B82F6", categoria: "Prioridade", descricao: "Sem urgência.", ativa: true },
+    { id: uid("tg"), nome: "Urgente", cor: "#F97316", categoria: "Prioridade", descricao: "Retorno imediato.", ativa: true },
+    { id: uid("tg"), nome: "VIP", cor: "#A855F7", categoria: "Cliente", descricao: "Cliente prioritário.", ativa: true },
+    { id: uid("tg"), nome: "Reativação", cor: "#06B6D4", categoria: "Comercial", descricao: "Em fluxo de reativação.", ativa: true },
+    { id: uid("tg"), nome: "Pagamento pendente", cor: "#F59E0B", categoria: "Financeiro", descricao: "Cobrança em aberto.", ativa: true },
+    { id: uid("tg"), nome: "Proposta enviada", cor: "#10B981", categoria: "Comercial", descricao: "Proposta ativa.", ativa: true },
+    { id: uid("tg"), nome: "Cliente recorrente", cor: "#22C55E", categoria: "Cliente", descricao: "Compra recorrente.", ativa: true },
+    { id: uid("tg"), nome: "Alto potencial", cor: "#8B5CF6", categoria: "Comercial", descricao: "Alto ticket previsto.", ativa: true },
+    { id: uid("tg"), nome: "Precisa de retorno", cor: "#EAB308", categoria: "Operacional", descricao: "Aguardando retorno.", ativa: true },
+  ];
+  const origens = [
+    { id: uid("og"), nome: "Google Ads", tipo: "Pago", descricao: "Campanhas Google", ativa: true },
+    { id: uid("og"), nome: "Instagram", tipo: "Pago", descricao: "Ads e orgânico", ativa: true },
+    { id: uid("og"), nome: "Facebook", tipo: "Pago", descricao: "Ads Meta", ativa: true },
+    { id: uid("og"), nome: "WhatsApp", tipo: "Manual", descricao: "Contato direto", ativa: true },
+    { id: uid("og"), nome: "Site", tipo: "Orgânico", descricao: "Formulário do site", ativa: true },
+    { id: uid("og"), nome: "Indicação", tipo: "Indicação", descricao: "Member-get-member", ativa: true },
+    { id: uid("og"), nome: "Tráfego orgânico", tipo: "Orgânico", descricao: "SEO", ativa: true },
+    { id: uid("og"), nome: "Afiliado", tipo: "Afiliado", descricao: "Programa de afiliados", ativa: true },
+    { id: uid("og"), nome: "Evento", tipo: "Evento", descricao: "Feiras e eventos", ativa: true },
+    { id: uid("og"), nome: "Lista importada", tipo: "Manual", descricao: "CSV/Importação", ativa: false },
+  ];
   const campanhas = [
-    { id: uid("cp"), nome: "Campanha Google CRM", canal: "Google Ads", status: "Ativo" as const, leads: 24 },
-    { id: uid("cp"), nome: "Campanha WhatsApp Inteligente", canal: "WhatsApp", status: "Ativo" as const, leads: 18 },
-    { id: uid("cp"), nome: "Campanha Plano Teste", canal: "Site", status: "Configurado" as const, leads: 9 },
-    { id: uid("cp"), nome: "Campanha Reativação", canal: "E-mail", status: "Pendente" as const, leads: 6 },
+    { id: uid("cp"), nome: "Campanha Google CRM", origem: "Google Ads", produto: "CRM Profissional", funil: "Funil Comercial Padrão", canal: "Google Ads", dataInicial: now.slice(0,10), dataFinal: "", investimento: 5000, leads: 24, conversoes: 6, receitaPrevista: 14820, status: "Ativo" as const },
+    { id: uid("cp"), nome: "Campanha WhatsApp Inteligente", origem: "WhatsApp", produto: "WhatsApp Inteligente", funil: "Funil de Vendas por WhatsApp", canal: "WhatsApp", dataInicial: now.slice(0,10), dataFinal: "", investimento: 2000, leads: 18, conversoes: 4, receitaPrevista: 7880, status: "Ativo" as const },
+    { id: uid("cp"), nome: "Campanha Plano Teste", origem: "Site", produto: "Plano Inicial", funil: "Funil Comercial Padrão", canal: "Site", dataInicial: now.slice(0,10), dataFinal: "", investimento: 800, leads: 9, conversoes: 1, receitaPrevista: 197, status: "Configurado" as const },
+    { id: uid("cp"), nome: "Campanha Reativação", origem: "WhatsApp", produto: "", funil: "Funil de Reativação", canal: "E-mail", dataInicial: now.slice(0,10), dataFinal: "", investimento: 300, leads: 6, conversoes: 2, receitaPrevista: 794, status: "Pendente" as const },
+    { id: uid("cp"), nome: "Campanha Restaurante Demo", origem: "Instagram", produto: "WhatsApp Inteligente", funil: "Funil Comercial Padrão", canal: "Instagram", dataInicial: now.slice(0,10), dataFinal: "", investimento: 1500, leads: 14, conversoes: 3, receitaPrevista: 591, status: "Ativo" as const },
+    { id: uid("cp"), nome: "Campanha Clínica Demo", origem: "Google Ads", produto: "CRM Profissional", funil: "Funil Comercial Padrão", canal: "Google Ads", dataInicial: now.slice(0,10), dataFinal: "", investimento: 3000, leads: 11, conversoes: 2, receitaPrevista: 494, status: "Ativo" as const },
   ];
   const followups = [
-    { id: uid("fu"), leadId: leads[2].id, descricao: "Confirmar envio do contrato", quando: now, status: "Pendente" as const },
-    { id: uid("fu"), leadId: leads[1].id, descricao: "Enviar vídeo demonstrativo", quando: now, status: "Concluído" as const },
+    { id: uid("fu"), nome: "Follow-up de proposta", evento: "Proposta enviada", canal: "whatsapp", envios: 3, intervaloDias: 2, mensagem1: "Olá {nome}, alguma dúvida sobre a proposta?", mensagem2: "Oi {nome}, posso ajudar com a decisão?", mensagem3: "{nome}, vamos fechar essa parceria?", criarTarefa: true, encerrarSeResponder: true, ativo: true },
+    { id: uid("fu"), nome: "Follow-up de carrinho", evento: "Pagamento pendente", canal: "email", envios: 2, intervaloDias: 1, mensagem1: "Você esqueceu seu carrinho.", mensagem2: "Última chance!", mensagem3: "", criarTarefa: false, encerrarSeResponder: true, ativo: true },
+    { id: uid("fu"), nome: "Follow-up de pagamento pendente", evento: "Pagamento pendente", canal: "whatsapp", envios: 3, intervaloDias: 3, mensagem1: "Seu pagamento está pendente.", mensagem2: "Conseguiu regularizar?", mensagem3: "Vamos te ajudar.", criarTarefa: true, encerrarSeResponder: true, ativo: true },
+    { id: uid("fu"), nome: "Follow-up de cliente inativo", evento: "Cliente inativo", canal: "email", envios: 3, intervaloDias: 7, mensagem1: "Sentimos sua falta.", mensagem2: "Novidades para você.", mensagem3: "Oferta de retorno.", criarTarefa: true, encerrarSeResponder: false, ativo: true },
+    { id: uid("fu"), nome: "Follow-up de recompra", evento: "Produto próximo do fim", canal: "whatsapp", envios: 2, intervaloDias: 5, mensagem1: "Seu ciclo está próximo do fim.", mensagem2: "Deseja renovar?", mensagem3: "", criarTarefa: false, encerrarSeResponder: true, ativo: true },
+    { id: uid("fu"), nome: "Follow-up pós-serviço", evento: "Serviço concluído", canal: "ambos", envios: 2, intervaloDias: 3, mensagem1: "Como foi sua experiência?", mensagem2: "Avalie nosso serviço.", mensagem3: "", criarTarefa: false, encerrarSeResponder: true, ativo: false },
   ];
   const usuarios = [
-    { id: uid("us"), nome: "Administrador Demo", email: "admin@demo.com", papel: "Administrador", status: "Ativo" as const },
-    { id: uid("us"), nome: "Vendedor Demo", email: "vendas@demo.com", papel: "Vendedor", status: "Ativo" as const },
-    { id: uid("us"), nome: "Atendimento Demo", email: "atendimento@demo.com", papel: "Atendimento", status: "Ativo" as const },
-    { id: uid("us"), nome: "Financeiro Demo", email: "financeiro@demo.com", papel: "Financeiro", status: "Ativo" as const },
+    { id: uid("us"), nome: "Administrador Demo", email: "admin@demo.com", whatsapp: "(11) 90000-1000", cargo: "CEO", setor: "Gestão", papel: "Administrador", status: "Ativo" as const, observacoes: "" },
+    { id: uid("us"), nome: "Vendedor Demo", email: "vendas@demo.com", whatsapp: "(11) 90000-1001", cargo: "Vendedor sênior", setor: "Comercial", papel: "Vendedor", status: "Ativo" as const, observacoes: "" },
+    { id: uid("us"), nome: "Atendimento Demo", email: "atendimento@demo.com", whatsapp: "(11) 90000-1002", cargo: "Atendente", setor: "Atendimento", papel: "Atendimento", status: "Ativo" as const, observacoes: "" },
+    { id: uid("us"), nome: "Financeiro Demo", email: "financeiro@demo.com", whatsapp: "(11) 90000-1003", cargo: "Analista", setor: "Financeiro", papel: "Financeiro", status: "Ativo" as const, observacoes: "" },
+    { id: uid("us"), nome: "Gestor Demo", email: "gestor@demo.com", whatsapp: "(11) 90000-1004", cargo: "Gerente", setor: "Gestão", papel: "Gestor", status: "Convite enviado — DEMO" as const, observacoes: "" },
   ];
-  type PermAcao = "ver" | "criar" | "editar" | "excluir";
-  const permissoes: { papel: string; acao: PermAcao; permitido: boolean }[] = [];
-  for (const u of ["Administrador", "Vendedor", "Atendimento", "Financeiro"]) {
-    for (const a of ["ver", "criar", "editar", "excluir"] as PermAcao[]) {
-      permissoes.push({ papel: u, acao: a, permitido: u === "Administrador" || (u === "Vendedor" && a !== "excluir") || (u === "Atendimento" && (a === "ver" || a === "criar")) || (u === "Financeiro" && a === "ver") });
+  const PERMISSOES_LISTA = ["Ver clientes","Criar clientes","Editar clientes","Excluir clientes","Ver leads","Criar leads","Editar leads","Converter leads","Editar funis","Editar etapas","Criar produtos","Editar produtos","Criar planos","Editar planos","Ver financeiro","Enviar WhatsApp","Enviar e-mail","Configurar automações","Configurar follow-ups","Acessar dashboards","Exportar dados","Ver logs","Zerar dados da DEMO"];
+  const PERFIS = ["Administrador","Gestor","Vendedor","Atendimento","Financeiro","Operação","Auditor"];
+  const permissoes: { papel: string; permissao: string; permitido: boolean }[] = [];
+  for (const papel of PERFIS) {
+    for (const perm of PERMISSOES_LISTA) {
+      let p = false;
+      if (papel === "Administrador") p = true;
+      else if (papel === "Gestor") p = !perm.startsWith("Excluir") && perm !== "Zerar dados da DEMO";
+      else if (papel === "Vendedor") p = ["Ver clientes","Criar clientes","Editar clientes","Ver leads","Criar leads","Editar leads","Converter leads","Enviar WhatsApp","Enviar e-mail","Acessar dashboards","Configurar follow-ups"].includes(perm);
+      else if (papel === "Atendimento") p = ["Ver clientes","Editar clientes","Ver leads","Editar leads","Enviar WhatsApp","Enviar e-mail","Acessar dashboards"].includes(perm);
+      else if (papel === "Financeiro") p = ["Ver clientes","Criar planos","Editar planos","Ver financeiro","Acessar dashboards","Ver logs"].includes(perm);
+      else if (papel === "Operação") p = ["Ver clientes","Ver leads","Acessar dashboards","Ver logs"].includes(perm);
+      else if (papel === "Auditor") p = ["Acessar dashboards","Ver logs"].includes(perm);
+      permissoes.push({ papel, permissao: perm, permitido: p });
     }
   }
   const logs = [
