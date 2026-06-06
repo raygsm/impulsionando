@@ -174,7 +174,7 @@ function DemoCRM() {
                       <TableHead>Origem</TableHead>
                       <TableHead>Estágio</TableHead>
                       <TableHead className="text-right">Valor</TableHead>
-                      <TableHead className="w-[60px]" />
+                      <TableHead className="w-[200px] text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -188,10 +188,18 @@ function DemoCRM() {
                         <TableCell><Badge variant="outline">{l.origem}</Badge></TableCell>
                         <TableCell><Badge>{l.estagio}</Badge></TableCell>
                         <TableCell className="text-right">{l.valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</TableCell>
-                        <TableCell>
-                          <Button size="sm" variant="ghost" onClick={() => setLeads((p) => p.filter((x) => x.id !== l.id))}>
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button size="sm" variant="outline" title="Abrir chat no WhatsApp" onClick={() => gotoWhatsapp({ nome: l.nome, telefone: l.telefone, email: l.email }, `Olá ${l.nome}, tudo bem?`)}>
+                              <MessageSquare className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button size="sm" variant="outline" title="Agendar" onClick={() => gotoAgenda({ nome: l.nome, telefone: l.telefone })}>
+                              <Calendar className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button size="sm" variant="ghost" title="Excluir" onClick={() => setLeads((p) => p.filter((x) => x.id !== l.id))}>
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
