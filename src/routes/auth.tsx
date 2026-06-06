@@ -18,7 +18,10 @@ export const Route = createFileRoute("/auth")({
     meta: [
       { title: "Acessar — Impulsionando Tecnologia" },
       { name: "description", content: "Plataforma SaaS multiempresa, multinicho e modular." },
+      { property: "og:url", content: "https://impulsionando.com.br/auth" },
+    
     ],
+    links: [{ rel: "canonical", href: "https://impulsionando.com.br/auth" }],
   }),
   component: AuthPage,
 });

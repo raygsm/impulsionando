@@ -12,7 +12,10 @@ export const Route = createFileRoute("/privacidade")({
       { name: "robots", content: "index,follow" },
       { property: "og:title", content: "Política de Privacidade — Impulsionando Tecnologia" },
       { property: "og:description", content: "Como tratamos seus dados pessoais conforme a LGPD." },
+      { property: "og:url", content: "https://impulsionando.com.br/privacidade" },
+    
     ],
+    links: [{ rel: "canonical", href: "https://impulsionando.com.br/privacidade" }],
   }),
   component: PrivacidadePage,
 });

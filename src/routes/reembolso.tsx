@@ -12,7 +12,10 @@ export const Route = createFileRoute("/reembolso")({
       { name: "robots", content: "index,follow" },
       { property: "og:title", content: "Política de Reembolso — Impulsionando Tecnologia" },
       { property: "og:description", content: "Garantia de 30 dias e instruções para solicitar reembolso." },
+      { property: "og:url", content: "https://impulsionando.com.br/reembolso" },
+    
     ],
+    links: [{ rel: "canonical", href: "https://impulsionando.com.br/reembolso" }],
   }),
   component: ReembolsoPage,
 });

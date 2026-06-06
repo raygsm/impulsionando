@@ -3,5 +3,7 @@ Allow: /
 Disallow: /auth
 Disallow: /reset-password
 Disallow: /reset-password-sent
+Disallow: /dashboard
+Disallow: /admin
 
-Sitemap: https://sistemas.impulsionando.com.br/sitemap.xml
+Sitemap: https://impulsionando.com.br/sitemap.xml

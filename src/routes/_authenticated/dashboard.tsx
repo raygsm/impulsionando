@@ -69,7 +69,7 @@ function DashboardPage() {
       <Card className="p-6 shadow-card">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="font-semibold">Auditoria recente</h3>
+            <h2 className="font-semibold">Auditoria recente</h2>
             <p className="text-xs text-muted-foreground">Últimas ações registradas no sistema.</p>
           </div>
         </div>

@@ -38,6 +38,7 @@ export function HomePage() {
     <div className="min-h-screen bg-background flex flex-col">
       <PublicHeader />
 
+      <main className="flex-1">
       {/* HERO */}
       <section className="relative overflow-hidden bg-gradient-hero text-primary-foreground">
         <div className="pointer-events-none absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full bg-accent/30 blur-3xl" />
@@ -319,6 +320,7 @@ export function HomePage() {
           </div>
         </Card>
       </section>
+      </main>
 
       <PublicFooter />
     </div>

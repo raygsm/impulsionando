@@ -86,7 +86,7 @@ function SectorsPage() {
               <TableRow key={s.id}>
                 <TableCell><div className="font-medium">{s.name}</div><div className="text-xs text-muted-foreground">{s.description}</div></TableCell>
                 <TableCell className="text-sm">{(s.companies as { name: string } | null)?.name ?? "—"}</TableCell>
-                <TableCell><Button size="icon" variant="ghost" onClick={() => confirm("Remover?") && remove.mutate(s.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button></TableCell>
+                <TableCell><Button size="icon" variant="ghost" aria-label={`Remover setor ${s.name}`} onClick={() => confirm("Remover?") && remove.mutate(s.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button></TableCell>
               </TableRow>
             ))}
           </TableBody>

@@ -27,7 +27,10 @@ export const Route = createFileRoute("/trabalhe-conosco/")({
     meta: [
       { title: "Trabalhe conosco — Banco de Talentos | Impulsionando Tecnologia" },
       { name: "description", content: "Banco de talentos universal: candidate-se para vagas em Fitness, Saúde, Gastronomia, Hospitalidade, Beleza, Indústria, Educação, Serviços ou no time Impulsionando." },
+      { property: "og:url", content: "https://impulsionando.com.br/trabalhe-conosco" },
+    
     ],
+    links: [{ rel: "canonical", href: "https://impulsionando.com.br/trabalhe-conosco" }],
   }),
   component: TrabalheConosco,
 });

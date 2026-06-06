@@ -12,7 +12,10 @@ export const Route = createFileRoute("/termos")({
       { name: "robots", content: "index,follow" },
       { property: "og:title", content: "Termos de Uso — Impulsionando Tecnologia" },
       { property: "og:description", content: "Condições gerais de uso da plataforma Impulsionando Tecnologia." },
+      { property: "og:url", content: "https://impulsionando.com.br/termos" },
+    
     ],
+    links: [{ rel: "canonical", href: "https://impulsionando.com.br/termos" }],
   }),
   component: TermosPage,
 });

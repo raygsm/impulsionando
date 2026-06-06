@@ -107,7 +107,7 @@ function UnitsPage() {
                 <TableCell className="text-sm">{[u.city, u.state].filter(Boolean).join(" / ") || "—"}</TableCell>
                 <TableCell>{u.is_active ? <Badge className="bg-success text-success-foreground">Ativa</Badge> : <Badge variant="outline">Inativa</Badge>}</TableCell>
                 <TableCell>{(me?.isSuperAdmin) && (
-                  <Button size="icon" variant="ghost" onClick={() => confirm("Remover unidade?") && remove.mutate(u.id)}>
+                  <Button size="icon" variant="ghost" aria-label={`Remover unidade ${u.name}`} onClick={() => confirm("Remover unidade?") && remove.mutate(u.id)}>
                     <Trash2 className="w-4 h-4 text-destructive" />
                   </Button>
                 )}</TableCell>

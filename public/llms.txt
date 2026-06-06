@@ -1,0 +1,24 @@
+# Impulsionando Tecnologia
+
+> Plataforma SaaS multiempresa modular para gestão, atendimento e automação: CRM, agenda online, WhatsApp, pagamentos, emissão fiscal, estoque, BI e mais.
+
+A Impulsionando Tecnologia oferece um sistema multi-tenant (multiempresa) com módulos independentes, dados isolados por organização e implantações por nicho (clínicas, salões, academias, escolas, eventos, varejo, serviços e mais).
+
+## Pages
+
+- [Página inicial](/): Visão geral da plataforma e principais módulos.
+- [Soluções](/solucoes): Como a plataforma resolve operações reais.
+- [Módulos](/modulos): Catálogo de módulos disponíveis (CRM, Agenda, Vendas, Estoque, Financeiro, BI etc.).
+- [Planos](/planos): Planos, preços e o que cada plano inclui.
+- [Nichos](/nichos): Implantações por nicho de negócio.
+- [Orçamento](/orcamento): Solicitar um orçamento personalizado.
+- [Demonstração](/demo): Agendar uma demonstração guiada.
+- [Contato](/contato): Canais oficiais de atendimento.
+- [Sobre](/sobre): Quem é a Impulsionando Tecnologia.
+- [Trabalhe conosco](/trabalhe-conosco): Vagas e parcerias.
+
+## Optional
+
+- [Termos de uso](/termos)
+- [Política de privacidade](/privacidade)
+- [Política de reembolso](/reembolso)

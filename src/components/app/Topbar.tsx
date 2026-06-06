@@ -173,7 +173,7 @@ export function Topbar({ currentUser }: { currentUser: CurrentUser }) {
         <Avatar className="w-9 h-9">
           <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xs">{initials}</AvatarFallback>
         </Avatar>
-        <Button variant="ghost" size="icon" onClick={logout} title="Sair">
+        <Button variant="ghost" size="icon" onClick={logout} title="Sair" aria-label="Sair da conta">
           <LogOut className="w-4 h-4" />
         </Button>
       </div>
