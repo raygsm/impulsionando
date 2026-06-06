@@ -17,13 +17,23 @@ import {
 } from "@/components/ui/accordion";
 import { PixFallbackDialog } from "@/components/payments/PixFallbackDialog";
 import { ModulePicker } from "@/components/marketing/ModulePicker";
+import { ContractingSummaryDialog } from "@/components/marketing/ContractingSummaryDialog";
 
 const PLAN_QUOTA: Record<string, number> = {
   Essencial: 1,
   Integrado: 2,
   Avançado: 3,
-  "Sob Medida": Number.POSITIVE_INFINITY,
 };
+
+/** Setup de implantação (1ª parcela) em reais — usado no resumo de contratação. */
+const PLAN_SETUP_BRL: Record<string, number> = {
+  Essencial: 297,
+  Integrado: 497,
+  Avançado: 997,
+};
+
+/** Preço por módulo adicional além da quota do plano. */
+const EXTRA_MODULE_BRL = 497;
 
 const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20entender%20melhor%20os%20planos%20da%20Impulsionando.";
 
