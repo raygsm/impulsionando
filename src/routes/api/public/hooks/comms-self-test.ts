@@ -6,7 +6,7 @@ import { sendWhatsAppText } from '@/lib/zapi.server'
 // informados como destinos oficiais de SAC da Impulsionando. Use uma única vez
 // para confirmar que ambos os canais estão operacionais.
 const TEST_EMAIL = 'sac@impulsionando.com.br'
-const TEST_PHONE = '5521993075000'
+const TEST_PHONE = '5521995077375'
 const SITE_NAME = 'Impulsionando'
 const SENDER_DOMAIN = 'notify.www.impulsionando.com.br'
 const FROM_DOMAIN = 'www.impulsionando.com.br'
@@ -40,7 +40,11 @@ async function ensureUnsubscribeToken(email: string): Promise<string> {
 export const Route = createFileRoute('/api/public/hooks/comms-self-test')({
   server: {
     handlers: {
-      POST: async () => {
+      POST: async ({ request }) => {
+        let override: { email?: string; phone?: string } = {}
+        try { override = await request.json() } catch {}
+        const recipientEmail = (override.email || TEST_EMAIL).trim()
+        const recipientPhone = (override.phone || TEST_PHONE).replace(/\D/g, '')
         const now = new Date()
         const stamp = now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
         const subject = `✅ Teste de canal — Impulsionando (${stamp})`
@@ -68,20 +72,20 @@ export const Route = createFileRoute('/api/public/hooks/comms-self-test')({
           const { data: suppressed } = await supabaseAdmin
             .from('suppressed_emails')
             .select('id')
-            .eq('email', TEST_EMAIL.toLowerCase())
+            .eq('email', recipientEmail.toLowerCase())
             .maybeSingle()
 
           if (suppressed) {
             emailResult = { ok: false, status: 'suppressed', error: 'recipient_suppressed' }
           } else {
-            const unsubscribe_token = await ensureUnsubscribeToken(TEST_EMAIL)
+            const unsubscribe_token = await ensureUnsubscribeToken(recipientEmail)
             const messageId = crypto.randomUUID()
             const idempotencyKey = `comms-self-test-${messageId}`
 
             await supabaseAdmin.from('email_send_log').insert({
               message_id: messageId,
               template_name: 'comms-self-test',
-              recipient_email: TEST_EMAIL,
+              recipient_email: recipientEmail,
               status: 'pending',
             })
 
@@ -89,7 +93,7 @@ export const Route = createFileRoute('/api/public/hooks/comms-self-test')({
               queue_name: 'transactional_emails',
               payload: {
                 message_id: messageId,
-                to: TEST_EMAIL,
+                to: recipientEmail,
                 from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
                 sender_domain: SENDER_DOMAIN,
                 subject,
@@ -107,7 +111,7 @@ export const Route = createFileRoute('/api/public/hooks/comms-self-test')({
               await supabaseAdmin.from('email_send_log').insert({
                 message_id: messageId,
                 template_name: 'comms-self-test',
-                recipient_email: TEST_EMAIL,
+                recipient_email: recipientEmail,
                 status: 'failed',
                 error_message: enqErr.message,
               })
@@ -127,15 +131,15 @@ export const Route = createFileRoute('/api/public/hooks/comms-self-test')({
           `Disparado em: ${stamp} (horário de Brasília).`
         let whatsapp: { phone: string; ok: boolean; status: number; body: string }
         try {
-          const r = await sendWhatsAppText({ phone: TEST_PHONE, message: waMessage })
-          whatsapp = { phone: TEST_PHONE, ok: r.ok, status: r.status, body: r.body }
+          const r = await sendWhatsAppText({ phone: recipientPhone, message: waMessage })
+          whatsapp = { phone: recipientPhone, ok: r.ok, status: r.status, body: r.body }
         } catch (e: any) {
-          whatsapp = { phone: TEST_PHONE, ok: false, status: 0, body: e?.message ?? 'error' }
+          whatsapp = { phone: recipientPhone, ok: false, status: 0, body: e?.message ?? 'error' }
         }
 
         return Response.json({
           ok: emailResult.ok && whatsapp.ok,
-          email: { recipient: TEST_EMAIL, ...emailResult },
+          email: { recipient: recipientEmail, ...emailResult },
           whatsapp,
           at: now.toISOString(),
         })
