@@ -14,6 +14,893 @@ export type Database = {
   }
   public: {
     Tables: {
+      aff_affiliate_products: {
+        Row: {
+          affiliate_id: string
+          approved_at: string | null
+          approved_by: string | null
+          company_id: string
+          created_at: string
+          custom_commission_pct: number | null
+          id: string
+          product_id: string
+          status: Database["public"]["Enums"]["aff_affiliate_status"]
+          updated_at: string
+        }
+        Insert: {
+          affiliate_id: string
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id: string
+          created_at?: string
+          custom_commission_pct?: number | null
+          id?: string
+          product_id: string
+          status?: Database["public"]["Enums"]["aff_affiliate_status"]
+          updated_at?: string
+        }
+        Update: {
+          affiliate_id?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string
+          created_at?: string
+          custom_commission_pct?: number | null
+          id?: string
+          product_id?: string
+          status?: Database["public"]["Enums"]["aff_affiliate_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aff_affiliate_products_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "aff_affiliates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aff_affiliate_products_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aff_affiliate_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "aff_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      aff_affiliates: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          bank_data: Json | null
+          city: string | null
+          company_id: string
+          country: string | null
+          created_at: string
+          document: string | null
+          email: string | null
+          id: string
+          instagram: string | null
+          main_channel: string | null
+          manager_id: string | null
+          name: string
+          notes: string | null
+          pix_key: string | null
+          site: string | null
+          state: string | null
+          status: Database["public"]["Enums"]["aff_affiliate_status"]
+          updated_at: string
+          user_id: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          bank_data?: Json | null
+          city?: string | null
+          company_id: string
+          country?: string | null
+          created_at?: string
+          document?: string | null
+          email?: string | null
+          id?: string
+          instagram?: string | null
+          main_channel?: string | null
+          manager_id?: string | null
+          name: string
+          notes?: string | null
+          pix_key?: string | null
+          site?: string | null
+          state?: string | null
+          status?: Database["public"]["Enums"]["aff_affiliate_status"]
+          updated_at?: string
+          user_id?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          bank_data?: Json | null
+          city?: string | null
+          company_id?: string
+          country?: string | null
+          created_at?: string
+          document?: string | null
+          email?: string | null
+          id?: string
+          instagram?: string | null
+          main_channel?: string | null
+          manager_id?: string | null
+          name?: string
+          notes?: string | null
+          pix_key?: string | null
+          site?: string | null
+          state?: string | null
+          status?: Database["public"]["Enums"]["aff_affiliate_status"]
+          updated_at?: string
+          user_id?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aff_affiliates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aff_affiliates_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "aff_managers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      aff_commissions: {
+        Row: {
+          affiliate_id: string | null
+          amount: number
+          company_id: string
+          coproducer_id: string | null
+          created_at: string
+          id: string
+          manager_id: string | null
+          notes: string | null
+          paid_at: string | null
+          payout_id: string | null
+          pct: number | null
+          recipient_kind: Database["public"]["Enums"]["aff_commission_kind"]
+          recipient_user_id: string | null
+          release_at: string | null
+          released_at: string | null
+          sale_id: string
+          status: Database["public"]["Enums"]["aff_sale_status"]
+          updated_at: string
+        }
+        Insert: {
+          affiliate_id?: string | null
+          amount: number
+          company_id: string
+          coproducer_id?: string | null
+          created_at?: string
+          id?: string
+          manager_id?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          payout_id?: string | null
+          pct?: number | null
+          recipient_kind: Database["public"]["Enums"]["aff_commission_kind"]
+          recipient_user_id?: string | null
+          release_at?: string | null
+          released_at?: string | null
+          sale_id: string
+          status?: Database["public"]["Enums"]["aff_sale_status"]
+          updated_at?: string
+        }
+        Update: {
+          affiliate_id?: string | null
+          amount?: number
+          company_id?: string
+          coproducer_id?: string | null
+          created_at?: string
+          id?: string
+          manager_id?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          payout_id?: string | null
+          pct?: number | null
+          recipient_kind?: Database["public"]["Enums"]["aff_commission_kind"]
+          recipient_user_id?: string | null
+          release_at?: string | null
+          released_at?: string | null
+          sale_id?: string
+          status?: Database["public"]["Enums"]["aff_sale_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aff_commissions_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "aff_affiliates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aff_commissions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aff_commissions_coproducer_id_fkey"
+            columns: ["coproducer_id"]
+            isOneToOne: false
+            referencedRelation: "aff_coproducers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aff_commissions_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "aff_managers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aff_commissions_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "aff_sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      aff_coproducers: {
+        Row: {
+          applies_to_affiliate_sales: boolean
+          applies_to_upsell: boolean
+          company_id: string
+          created_at: string
+          document: string | null
+          email: string | null
+          ends_at: string | null
+          fixed_amount: number | null
+          id: string
+          name: string
+          offer_id: string | null
+          participation_pct: number | null
+          product_id: string
+          rules: Json
+          scope: string
+          starts_at: string
+          status: Database["public"]["Enums"]["aff_affiliate_status"]
+          updated_at: string
+          user_id: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          applies_to_affiliate_sales?: boolean
+          applies_to_upsell?: boolean
+          company_id: string
+          created_at?: string
+          document?: string | null
+          email?: string | null
+          ends_at?: string | null
+          fixed_amount?: number | null
+          id?: string
+          name: string
+          offer_id?: string | null
+          participation_pct?: number | null
+          product_id: string
+          rules?: Json
+          scope?: string
+          starts_at?: string
+          status?: Database["public"]["Enums"]["aff_affiliate_status"]
+          updated_at?: string
+          user_id?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          applies_to_affiliate_sales?: boolean
+          applies_to_upsell?: boolean
+          company_id?: string
+          created_at?: string
+          document?: string | null
+          email?: string | null
+          ends_at?: string | null
+          fixed_amount?: number | null
+          id?: string
+          name?: string
+          offer_id?: string | null
+          participation_pct?: number | null
+          product_id?: string
+          rules?: Json
+          scope?: string
+          starts_at?: string
+          status?: Database["public"]["Enums"]["aff_affiliate_status"]
+          updated_at?: string
+          user_id?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aff_coproducers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aff_coproducers_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "aff_offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aff_coproducers_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "aff_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      aff_links: {
+        Row: {
+          affiliate_id: string | null
+          campaign: string | null
+          clicks: number
+          commission_total: number
+          company_id: string
+          created_at: string
+          destination_url: string | null
+          id: string
+          is_active: boolean
+          kind: Database["public"]["Enums"]["aff_link_kind"]
+          leads: number
+          offer_id: string | null
+          product_id: string | null
+          revenue: number
+          sales: number
+          slug: string
+          updated_at: string
+          utm: Json
+        }
+        Insert: {
+          affiliate_id?: string | null
+          campaign?: string | null
+          clicks?: number
+          commission_total?: number
+          company_id: string
+          created_at?: string
+          destination_url?: string | null
+          id?: string
+          is_active?: boolean
+          kind?: Database["public"]["Enums"]["aff_link_kind"]
+          leads?: number
+          offer_id?: string | null
+          product_id?: string | null
+          revenue?: number
+          sales?: number
+          slug: string
+          updated_at?: string
+          utm?: Json
+        }
+        Update: {
+          affiliate_id?: string | null
+          campaign?: string | null
+          clicks?: number
+          commission_total?: number
+          company_id?: string
+          created_at?: string
+          destination_url?: string | null
+          id?: string
+          is_active?: boolean
+          kind?: Database["public"]["Enums"]["aff_link_kind"]
+          leads?: number
+          offer_id?: string | null
+          product_id?: string | null
+          revenue?: number
+          sales?: number
+          slug?: string
+          updated_at?: string
+          utm?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aff_links_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "aff_affiliates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aff_links_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aff_links_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "aff_offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aff_links_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "aff_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      aff_managers: {
+        Row: {
+          commission_fixed: number | null
+          commission_pct: number
+          company_id: string
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          status: Database["public"]["Enums"]["aff_affiliate_status"]
+          updated_at: string
+          user_id: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          commission_fixed?: number | null
+          commission_pct?: number
+          company_id: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["aff_affiliate_status"]
+          updated_at?: string
+          user_id?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          commission_fixed?: number | null
+          commission_pct?: number
+          company_id?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["aff_affiliate_status"]
+          updated_at?: string
+          user_id?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aff_managers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      aff_offers: {
+        Row: {
+          allow_affiliate: boolean
+          allow_coupon: boolean
+          billing: Database["public"]["Enums"]["aff_offer_billing"]
+          checkout_url: string | null
+          commission_pct: number | null
+          company_id: string
+          created_at: string
+          id: string
+          installments: number
+          landing_url: string | null
+          metadata: Json
+          name: string
+          price: number
+          product_id: string
+          recurring_interval: string | null
+          status: Database["public"]["Enums"]["aff_product_status"]
+          trial_days: number
+          updated_at: string
+        }
+        Insert: {
+          allow_affiliate?: boolean
+          allow_coupon?: boolean
+          billing?: Database["public"]["Enums"]["aff_offer_billing"]
+          checkout_url?: string | null
+          commission_pct?: number | null
+          company_id: string
+          created_at?: string
+          id?: string
+          installments?: number
+          landing_url?: string | null
+          metadata?: Json
+          name: string
+          price?: number
+          product_id: string
+          recurring_interval?: string | null
+          status?: Database["public"]["Enums"]["aff_product_status"]
+          trial_days?: number
+          updated_at?: string
+        }
+        Update: {
+          allow_affiliate?: boolean
+          allow_coupon?: boolean
+          billing?: Database["public"]["Enums"]["aff_offer_billing"]
+          checkout_url?: string | null
+          commission_pct?: number | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          installments?: number
+          landing_url?: string | null
+          metadata?: Json
+          name?: string
+          price?: number
+          product_id?: string
+          recurring_interval?: string | null
+          status?: Database["public"]["Enums"]["aff_product_status"]
+          trial_days?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aff_offers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aff_offers_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "aff_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      aff_payouts: {
+        Row: {
+          affiliate_id: string | null
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          bank_data: Json | null
+          company_id: string
+          coproducer_id: string | null
+          created_at: string
+          external_payment_id: string | null
+          id: string
+          manager_id: string | null
+          notes: string | null
+          paid_at: string | null
+          paid_by: string | null
+          pix_key: string | null
+          recipient_kind: Database["public"]["Enums"]["aff_commission_kind"]
+          recipient_user_id: string | null
+          requested_at: string
+          status: Database["public"]["Enums"]["aff_payout_status"]
+          updated_at: string
+        }
+        Insert: {
+          affiliate_id?: string | null
+          amount: number
+          approved_at?: string | null
+          approved_by?: string | null
+          bank_data?: Json | null
+          company_id: string
+          coproducer_id?: string | null
+          created_at?: string
+          external_payment_id?: string | null
+          id?: string
+          manager_id?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          paid_by?: string | null
+          pix_key?: string | null
+          recipient_kind: Database["public"]["Enums"]["aff_commission_kind"]
+          recipient_user_id?: string | null
+          requested_at?: string
+          status?: Database["public"]["Enums"]["aff_payout_status"]
+          updated_at?: string
+        }
+        Update: {
+          affiliate_id?: string | null
+          amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          bank_data?: Json | null
+          company_id?: string
+          coproducer_id?: string | null
+          created_at?: string
+          external_payment_id?: string | null
+          id?: string
+          manager_id?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          paid_by?: string | null
+          pix_key?: string | null
+          recipient_kind?: Database["public"]["Enums"]["aff_commission_kind"]
+          recipient_user_id?: string | null
+          requested_at?: string
+          status?: Database["public"]["Enums"]["aff_payout_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aff_payouts_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "aff_affiliates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aff_payouts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aff_payouts_coproducer_id_fkey"
+            columns: ["coproducer_id"]
+            isOneToOne: false
+            referencedRelation: "aff_coproducers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aff_payouts_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "aff_managers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      aff_products: {
+        Row: {
+          allow_affiliate: boolean
+          allow_coupon: boolean
+          allow_qrcode: boolean
+          allow_unique_link: boolean
+          base_price: number
+          category: string | null
+          checkout_url: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          default_commission_pct: number
+          description: string | null
+          id: string
+          image_url: string | null
+          kind: Database["public"]["Enums"]["aff_product_kind"]
+          metadata: Json
+          name: string
+          niche_slug: string | null
+          producer_user_id: string | null
+          require_affiliate_approval: boolean
+          sales_page_url: string | null
+          status: Database["public"]["Enums"]["aff_product_status"]
+          updated_at: string
+        }
+        Insert: {
+          allow_affiliate?: boolean
+          allow_coupon?: boolean
+          allow_qrcode?: boolean
+          allow_unique_link?: boolean
+          base_price?: number
+          category?: string | null
+          checkout_url?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          default_commission_pct?: number
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          kind?: Database["public"]["Enums"]["aff_product_kind"]
+          metadata?: Json
+          name: string
+          niche_slug?: string | null
+          producer_user_id?: string | null
+          require_affiliate_approval?: boolean
+          sales_page_url?: string | null
+          status?: Database["public"]["Enums"]["aff_product_status"]
+          updated_at?: string
+        }
+        Update: {
+          allow_affiliate?: boolean
+          allow_coupon?: boolean
+          allow_qrcode?: boolean
+          allow_unique_link?: boolean
+          base_price?: number
+          category?: string | null
+          checkout_url?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          default_commission_pct?: number
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          kind?: Database["public"]["Enums"]["aff_product_kind"]
+          metadata?: Json
+          name?: string
+          niche_slug?: string | null
+          producer_user_id?: string | null
+          require_affiliate_approval?: boolean
+          sales_page_url?: string | null
+          status?: Database["public"]["Enums"]["aff_product_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aff_products_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      aff_sales: {
+        Row: {
+          affiliate_id: string | null
+          approved_at: string | null
+          available_at: string | null
+          campaign: string | null
+          chargeback_at: string | null
+          company_id: string
+          created_at: string
+          customer_doc: string | null
+          customer_email: string | null
+          customer_name: string | null
+          external_id: string | null
+          gateway_fee: number
+          gateway_id: string | null
+          gateway_provider: string | null
+          gateway_release_at: string | null
+          gross_amount: number
+          id: string
+          internal_release_at: string | null
+          link_id: string | null
+          manager_id: string | null
+          metadata: Json
+          net_amount: number
+          offer_id: string | null
+          payment_method: string | null
+          product_id: string
+          refunded_at: string | null
+          sold_at: string
+          status: Database["public"]["Enums"]["aff_sale_status"]
+          updated_at: string
+        }
+        Insert: {
+          affiliate_id?: string | null
+          approved_at?: string | null
+          available_at?: string | null
+          campaign?: string | null
+          chargeback_at?: string | null
+          company_id: string
+          created_at?: string
+          customer_doc?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          external_id?: string | null
+          gateway_fee?: number
+          gateway_id?: string | null
+          gateway_provider?: string | null
+          gateway_release_at?: string | null
+          gross_amount: number
+          id?: string
+          internal_release_at?: string | null
+          link_id?: string | null
+          manager_id?: string | null
+          metadata?: Json
+          net_amount: number
+          offer_id?: string | null
+          payment_method?: string | null
+          product_id: string
+          refunded_at?: string | null
+          sold_at?: string
+          status?: Database["public"]["Enums"]["aff_sale_status"]
+          updated_at?: string
+        }
+        Update: {
+          affiliate_id?: string | null
+          approved_at?: string | null
+          available_at?: string | null
+          campaign?: string | null
+          chargeback_at?: string | null
+          company_id?: string
+          created_at?: string
+          customer_doc?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          external_id?: string | null
+          gateway_fee?: number
+          gateway_id?: string | null
+          gateway_provider?: string | null
+          gateway_release_at?: string | null
+          gross_amount?: number
+          id?: string
+          internal_release_at?: string | null
+          link_id?: string | null
+          manager_id?: string | null
+          metadata?: Json
+          net_amount?: number
+          offer_id?: string | null
+          payment_method?: string | null
+          product_id?: string
+          refunded_at?: string | null
+          sold_at?: string
+          status?: Database["public"]["Enums"]["aff_sale_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aff_sales_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "aff_affiliates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aff_sales_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aff_sales_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "aff_links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aff_sales_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "aff_managers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aff_sales_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "aff_offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aff_sales_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "aff_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agenda_appointments: {
         Row: {
           cancel_reason: string | null
@@ -3724,6 +4611,53 @@ export type Database = {
       }
     }
     Enums: {
+      aff_affiliate_status:
+        | "pendente"
+        | "aprovado"
+        | "reprovado"
+        | "suspenso"
+        | "bloqueado"
+        | "inativo"
+      aff_commission_kind:
+        | "produtor"
+        | "coprodutor"
+        | "afiliado"
+        | "gerente"
+        | "plataforma"
+      aff_link_kind: "link" | "cupom" | "qrcode"
+      aff_offer_billing: "a_vista" | "parcelado" | "recorrente" | "assinatura"
+      aff_payout_status:
+        | "solicitado"
+        | "aprovado"
+        | "pago"
+        | "rejeitado"
+        | "cancelado"
+      aff_product_kind:
+        | "fisico"
+        | "digital"
+        | "servico"
+        | "evento"
+        | "assinatura"
+        | "plano"
+        | "consulta"
+        | "agenda"
+        | "curso"
+        | "experiencia"
+      aff_product_status: "draft" | "active" | "paused" | "blocked" | "closed"
+      aff_sale_status:
+        | "venda_registrada"
+        | "pagto_pendente"
+        | "aprovado"
+        | "aguardando_gateway"
+        | "aguardando_prazo_interno"
+        | "disponivel"
+        | "saque_solicitado"
+        | "saque_aprovado"
+        | "pago"
+        | "cancelado"
+        | "estornado"
+        | "chargeback"
+        | "bloqueado"
       trial_plan_choice: "essencial" | "integrado" | "avancado" | "sob_medida"
       trial_status:
         | "solicitado"
@@ -3866,6 +4800,58 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      aff_affiliate_status: [
+        "pendente",
+        "aprovado",
+        "reprovado",
+        "suspenso",
+        "bloqueado",
+        "inativo",
+      ],
+      aff_commission_kind: [
+        "produtor",
+        "coprodutor",
+        "afiliado",
+        "gerente",
+        "plataforma",
+      ],
+      aff_link_kind: ["link", "cupom", "qrcode"],
+      aff_offer_billing: ["a_vista", "parcelado", "recorrente", "assinatura"],
+      aff_payout_status: [
+        "solicitado",
+        "aprovado",
+        "pago",
+        "rejeitado",
+        "cancelado",
+      ],
+      aff_product_kind: [
+        "fisico",
+        "digital",
+        "servico",
+        "evento",
+        "assinatura",
+        "plano",
+        "consulta",
+        "agenda",
+        "curso",
+        "experiencia",
+      ],
+      aff_product_status: ["draft", "active", "paused", "blocked", "closed"],
+      aff_sale_status: [
+        "venda_registrada",
+        "pagto_pendente",
+        "aprovado",
+        "aguardando_gateway",
+        "aguardando_prazo_interno",
+        "disponivel",
+        "saque_solicitado",
+        "saque_aprovado",
+        "pago",
+        "cancelado",
+        "estornado",
+        "chargeback",
+        "bloqueado",
+      ],
       trial_plan_choice: ["essencial", "integrado", "avancado", "sob_medida"],
       trial_status: [
         "solicitado",
