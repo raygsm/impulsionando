@@ -6,9 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Edit3, Trash2, X, Power } from "lucide-react";
+import { Plus, Edit3, Trash2, X, Power, Lock, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { uid } from "@/lib/demoSandbox";
 import {
