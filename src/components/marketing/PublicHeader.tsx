@@ -313,21 +313,17 @@ export function PublicHeader() {
             </SheetTrigger>
             <SheetContent side="right" className="w-[88vw] sm:w-96 overflow-y-auto">
               <SheetTitle className="text-left">Menu</SheetTitle>
-              <div className="mt-6 flex flex-col gap-6">
-                <Link to="/" onClick={() => setMobileOpen(false)} className="text-base font-medium">
-                  Início
-                </Link>
+                <div className="mt-6 flex flex-col gap-6">
+                  <Link to="/" onClick={() => setMobileOpen(false)} className="text-base font-medium">
+                    Início
+                  </Link>
 
-                {[
-                  { title: "Soluções", groups: SOLUCOES_GROUPS },
-                  { title: "Nichos", groups: NICHOS_GROUPS },
-                ].map((section) => (
-                  <div key={section.title}>
+                  <div>
                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                      {section.title}
+                      Nichos
                     </p>
                     <div className="flex flex-col gap-3">
-                      {section.groups.map((g) => (
+                      {NICHOS_GROUPS.map((g) => (
                         <div key={g.heading}>
                           <p className="text-[11px] uppercase tracking-wider text-muted-foreground/70 mt-2 mb-1">
                             {g.heading}
@@ -343,20 +339,19 @@ export function PublicHeader() {
                       ))}
                     </div>
                   </div>
-                ))}
 
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                    Planos
-                  </p>
-                  <div className="flex flex-col gap-2">
-                    {PLANOS.map((it) => (
-                      <div key={it.to + it.label} className="text-sm text-foreground/90 hover:text-foreground">
-                        <ItemLink item={it} onClick={() => setMobileOpen(false)} />
-                      </div>
-                    ))}
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                      Planos
+                    </p>
+                    <div className="flex flex-col gap-2">
+                      {PLANOS.map((it) => (
+                        <div key={it.to + it.label} className="text-sm text-foreground/90 hover:text-foreground">
+                          <ItemLink item={it} onClick={() => setMobileOpen(false)} />
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
 
                 <Link
                   to="/contato"
