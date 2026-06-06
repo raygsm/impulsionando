@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { MessageCircle, PlayCircle, Menu, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -121,7 +121,41 @@ const PLANOS: NavItem[] = [
 ];
 
 
+function useIsActivePath(path: string) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  if (path === "/modulos") {
+    return pathname === "/modulos";
+  }
+  if (path.startsWith("/modulos/")) {
+    return pathname === path;
+  }
+  if (path.startsWith("/nichos/")) {
+    return pathname === path;
+  }
+  return pathname === path;
+}
+
+function useHasActiveChild(groups: NavGroup[]) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  return groups.some((g) =>
+    g.items.some((it) => {
+      if (it.to === "/modulos") return pathname === "/modulos";
+      if (it.to.startsWith("/modulos/")) return pathname === it.to;
+      if (it.to.startsWith("/nichos/")) return pathname === it.to;
+      return pathname === it.to;
+    })
+  );
+}
+
+function useHasActiveFlat(items: NavItem[]) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  return items.some((it) => pathname === it.to);
+}
+
 function ItemLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
+  const isActive = useIsActivePath(item.to);
+  const activeClass = isActive ? "bg-accent text-accent-foreground" : "";
+
   if (item.external) {
     return (
       <a
@@ -129,7 +163,7 @@ function ItemLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
         target="_blank"
         rel="noopener noreferrer"
         onClick={onClick}
-        className="flex flex-col items-start gap-0.5 py-2 cursor-pointer w-full"
+        className={`flex flex-col items-start gap-0.5 py-2 cursor-pointer w-full rounded-sm px-2 ${activeClass}`}
       >
         <span className="text-sm font-medium text-foreground">{item.label}</span>
         {item.desc && <span className="text-xs text-muted-foreground">{item.desc}</span>}
@@ -146,7 +180,7 @@ function ItemLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
       {item.desc && <span className="text-xs text-muted-foreground">{item.desc}</span>}
     </>
   );
-  const className = "flex flex-col items-start gap-0.5 py-2 cursor-pointer w-full";
+  const className = `flex flex-col items-start gap-0.5 py-2 cursor-pointer w-full rounded-sm px-2 ${activeClass}`;
 
   if (moduleSlugMatch) {
     return (
@@ -171,9 +205,10 @@ function ItemLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
 
 
 function DesktopDropdownFlat({ label, items }: { label: string; items: NavItem[] }) {
+  const hasActive = useHasActiveFlat(items);
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="px-3 py-2.5 lg:px-4 lg:py-3 text-sm lg:text-[15px] text-muted-foreground hover:text-foreground transition-colors rounded-md inline-flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      <DropdownMenuTrigger className={`px-3 py-2.5 lg:px-4 lg:py-3 text-sm lg:text-[15px] hover:text-foreground transition-colors rounded-md inline-flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-ring ${hasActive ? "text-foreground font-medium bg-accent" : "text-muted-foreground"}`}>
         {label}
         <ChevronDown className="w-4 h-4" />
       </DropdownMenuTrigger>
@@ -189,9 +224,10 @@ function DesktopDropdownFlat({ label, items }: { label: string; items: NavItem[]
 }
 
 function DesktopDropdownGrouped({ label, groups }: { label: string; groups: NavGroup[] }) {
+  const hasActive = useHasActiveChild(groups);
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="px-3 py-2.5 lg:px-4 lg:py-3 text-sm lg:text-[15px] text-muted-foreground hover:text-foreground transition-colors rounded-md inline-flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      <DropdownMenuTrigger className={`px-3 py-2.5 lg:px-4 lg:py-3 text-sm lg:text-[15px] hover:text-foreground transition-colors rounded-md inline-flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-ring ${hasActive ? "text-foreground font-medium bg-accent" : "text-muted-foreground"}`}>
         {label}
         <ChevronDown className="w-4 h-4" />
       </DropdownMenuTrigger>
