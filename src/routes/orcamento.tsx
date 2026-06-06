@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowLeft, ArrowRight, CheckCircle2, FileText, Loader2,
   Printer, Sparkles, ShieldCheck, MessageCircle, AlertTriangle, Copy, RotateCcw,
+  Upload, FileCheck2,
 } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -1000,13 +1001,55 @@ function StepAceite({ state, dispatch }: StepProps) {
 const PIX_KEY = "54.295.500/0001-27";
 const PIX_KEY_PLAIN = "54295500000127";
 const PIX_RECEBEDOR = "Impulsionando Tecnologia LTDA";
-const PIX_QR_URL = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(PIX_KEY_PLAIN)}`;
+const PIX_RECEBEDOR_SHORT = "IMPULSIONANDO TEC"; // <= 25 chars, ASCII, sem acento
+const PIX_CIDADE = "RIO DE JANEIRO"; // <= 15 chars
+
+function pixTLV(id: string, value: string) {
+  const len = value.length.toString().padStart(2, "0");
+  return `${id}${len}${value}`;
+}
+function pixCRC16(str: string) {
+  let crc = 0xffff;
+  for (let i = 0; i < str.length; i++) {
+    crc ^= str.charCodeAt(i) << 8;
+    for (let j = 0; j < 8; j++) {
+      crc = crc & 0x8000 ? ((crc << 1) ^ 0x1021) & 0xffff : (crc << 1) & 0xffff;
+    }
+  }
+  return crc.toString(16).toUpperCase().padStart(4, "0");
+}
+function buildPixPayload(amountCents: number, txid: string) {
+  const amount = (Math.max(0, amountCents) / 100).toFixed(2);
+  const safeTxid = (txid || "ORC").replace(/[^A-Za-z0-9]/g, "").slice(0, 25) || "ORC";
+  const merchant = pixTLV("00", "BR.GOV.BCB.PIX") + pixTLV("01", PIX_KEY_PLAIN);
+  const payload =
+    pixTLV("00", "01") +
+    pixTLV("26", merchant) +
+    pixTLV("52", "0000") +
+    pixTLV("53", "986") +
+    pixTLV("54", amount) +
+    pixTLV("58", "BR") +
+    pixTLV("59", PIX_RECEBEDOR_SHORT) +
+    pixTLV("60", PIX_CIDADE) +
+    pixTLV("62", pixTLV("05", safeTxid));
+  const toCrc = payload + "6304";
+  return toCrc + pixCRC16(toCrc);
+}
 
 function StepPagamento({ state, dispatch, totals, onReset }: StepProps) {
   const reqPaymentFn = useServerFn(requestPayment);
   const [requested, setRequested] = useState(state.paymentRequested);
   const [loading, setLoading] = useState(false);
   const [pixOpen, setPixOpen] = useState(false);
+  const [comprovante, setComprovante] = useState<{ name: string; size: number } | null>(null);
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+
+  const pixPayload = useMemo(
+    () => buildPixPayload(totals.totalCents, state.quoteNumber || "ORC"),
+    [totals.totalCents, state.quoteNumber],
+  );
+  const pixQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(pixPayload)}`;
+
 
   async function handleRequest() {
     if (!state.quoteId) return;
@@ -1119,7 +1162,7 @@ function StepPagamento({ state, dispatch, totals, onReset }: StepProps) {
             <div className="grid md:grid-cols-[240px_1fr] gap-4 items-start mt-2 rounded-md bg-background p-3 border border-border">
               <div className="flex flex-col items-center">
                 <img
-                  src={PIX_QR_URL}
+                  src={pixQrUrl}
                   alt="QR Code Pix — chave CNPJ Impulsionando"
                   width={240}
                   height={240}
@@ -1153,20 +1196,23 @@ function StepPagamento({ state, dispatch, totals, onReset }: StepProps) {
                   </div>
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground">Código Pix (somente números)</Label>
+                  <Label className="text-xs text-muted-foreground">Pix copia e cola (com valor)</Label>
                   <div className="flex items-center gap-2 mt-1">
-                    <code className="flex-1 px-2 py-1.5 rounded-md bg-muted text-sm font-mono select-all break-all">
-                      {PIX_KEY_PLAIN}
+                    <code className="flex-1 px-2 py-1.5 rounded-md bg-muted text-[11px] font-mono select-all break-all max-h-20 overflow-auto">
+                      {pixPayload}
                     </code>
                     <Button
                       type="button"
                       size="sm"
                       variant="outline"
-                      onClick={() => copyPix(PIX_KEY_PLAIN, "Código Pix")}
+                      onClick={() => copyPix(pixPayload, "Código Pix")}
                     >
                       <Copy className="h-3.5 w-3.5 mr-1" /> Copiar
                     </Button>
                   </div>
+                  <p className="text-[11px] text-muted-foreground mt-1">
+                    Já inclui o valor de <strong className="text-foreground">{formatBRL(totals.totalCents)}</strong> e o identificador do orçamento.
+                  </p>
                 </div>
                 <div>
                   <Label className="text-xs text-muted-foreground">Recebedor</Label>
@@ -1177,6 +1223,66 @@ function StepPagamento({ state, dispatch, totals, onReset }: StepProps) {
                   (1ª mensalidade). Inclua o orçamento{" "}
                   <strong className="text-foreground">{state.quoteNumber}</strong> na descrição do Pix.
                 </div>
+
+                {/* Comprovante + Confirmar pagamento */}
+                {paymentConfirmed ? (
+                  <div className="rounded-md border border-emerald-300 bg-emerald-50 dark:bg-emerald-950/30 dark:border-emerald-800/60 p-3 flex items-start gap-2">
+                    <FileCheck2 className="h-4 w-4 text-emerald-700 mt-0.5 shrink-0" />
+                    <div className="text-xs text-emerald-900 dark:text-emerald-200">
+                      <p className="font-medium">Pagamento confirmado pelo cliente</p>
+                      <p className="opacity-80">
+                        Comprovante: <strong>{comprovante?.name ?? "enviado"}</strong>. Nossa equipe valida em até 1 dia útil e libera o acesso.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2 rounded-md border border-border bg-card p-3">
+                    <Label className="text-xs text-muted-foreground">Anexar comprovante do Pix</Label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        id="comprovante-input"
+                        type="file"
+                        accept="image/*,application/pdf"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (!f) return;
+                          if (f.size > 8 * 1024 * 1024) {
+                            toast.error("Arquivo muito grande (máx. 8MB).");
+                            return;
+                          }
+                          setComprovante({ name: f.name, size: f.size });
+                          toast.success("Comprovante anexado. Confirme o pagamento abaixo.");
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => document.getElementById("comprovante-input")?.click()}
+                      >
+                        <Upload className="h-3.5 w-3.5 mr-1" />
+                        {comprovante ? "Trocar arquivo" : "Selecionar arquivo"}
+                      </Button>
+                      <span className="text-xs text-muted-foreground truncate">
+                        {comprovante ? comprovante.name : "PNG, JPG ou PDF até 8MB"}
+                      </span>
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                      disabled={!comprovante}
+                      onClick={() => {
+                        setPaymentConfirmed(true);
+                        toast.success("Pagamento confirmado! Equipe notificada para liberação.");
+                      }}
+                    >
+                      <CheckCircle2 className="h-4 w-4 mr-1" /> Confirmar pagamento
+                    </Button>
+                  </div>
+                )}
+
                 <Button asChild variant="outline" size="sm" className="w-full">
                   <a
                     href={`https://wa.me/5521972554500?text=${encodeURIComponent(
@@ -1192,6 +1298,7 @@ function StepPagamento({ state, dispatch, totals, onReset }: StepProps) {
             </div>
           )}
         </div>
+
 
         <p className="text-xs text-muted-foreground text-center">
           Já é cliente ou prefere ver os planos fechados?{" "}

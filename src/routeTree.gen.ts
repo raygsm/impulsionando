@@ -29,6 +29,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as TrabalheConoscoIndexRouteImport } from './routes/trabalhe-conosco.index'
 import { Route as PacienteIndexRouteImport } from './routes/paciente.index'
 import { Route as NichosIndexRouteImport } from './routes/nichos.index'
+import { Route as ModulosIndexRouteImport } from './routes/modulos.index'
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
 import { Route as TrialCadastroRouteImport } from './routes/trial_.cadastro'
 import { Route as TrabalheConoscoNichoRouteImport } from './routes/trabalhe-conosco.$nicho'
@@ -251,6 +252,11 @@ const NichosIndexRoute = NichosIndexRouteImport.update({
   id: '/nichos/',
   path: '/nichos/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ModulosIndexRoute = ModulosIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ModulosRoute,
 } as any)
 const DemoIndexRoute = DemoIndexRouteImport.update({
   id: '/demo/',
@@ -993,6 +999,7 @@ export interface FileRoutesByFullPath {
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial/cadastro': typeof TrialCadastroRoute
   '/demo/': typeof DemoIndexRoute
+  '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
   '/paciente/': typeof PacienteIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
@@ -1076,7 +1083,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/contato': typeof ContatoRoute
-  '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
   '/planos': typeof PlanosRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -1128,6 +1134,7 @@ export interface FileRoutesByTo {
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial/cadastro': typeof TrialCadastroRoute
   '/demo': typeof DemoIndexRoute
+  '/modulos': typeof ModulosIndexRoute
   '/nichos': typeof NichosIndexRoute
   '/paciente': typeof PacienteIndexRoute
   '/trabalhe-conosco': typeof TrabalheConoscoIndexRoute
@@ -1274,6 +1281,7 @@ export interface FileRoutesById {
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial_/cadastro': typeof TrialCadastroRoute
   '/demo/': typeof DemoIndexRoute
+  '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
   '/paciente/': typeof PacienteIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
@@ -1420,6 +1428,7 @@ export interface FileRouteTypes {
     | '/trabalhe-conosco/$nicho'
     | '/trial/cadastro'
     | '/demo/'
+    | '/modulos/'
     | '/nichos/'
     | '/paciente/'
     | '/trabalhe-conosco/'
@@ -1503,7 +1512,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/contato'
-    | '/modulos'
     | '/orcamento'
     | '/planos'
     | '/privacidade'
@@ -1555,6 +1563,7 @@ export interface FileRouteTypes {
     | '/trabalhe-conosco/$nicho'
     | '/trial/cadastro'
     | '/demo'
+    | '/modulos'
     | '/nichos'
     | '/paciente'
     | '/trabalhe-conosco'
@@ -1700,6 +1709,7 @@ export interface FileRouteTypes {
     | '/trabalhe-conosco/$nicho'
     | '/trial_/cadastro'
     | '/demo/'
+    | '/modulos/'
     | '/nichos/'
     | '/paciente/'
     | '/trabalhe-conosco/'
@@ -1981,6 +1991,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/nichos/'
       preLoaderRoute: typeof NichosIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/modulos/': {
+      id: '/modulos/'
+      path: '/'
+      fullPath: '/modulos/'
+      preLoaderRoute: typeof ModulosIndexRouteImport
+      parentRoute: typeof ModulosRoute
     }
     '/demo/': {
       id: '/demo/'
@@ -3119,10 +3136,12 @@ const AuthenticatedRouteRouteWithChildren =
 
 interface ModulosRouteChildren {
   ModulosSlugRoute: typeof ModulosSlugRoute
+  ModulosIndexRoute: typeof ModulosIndexRoute
 }
 
 const ModulosRouteChildren: ModulosRouteChildren = {
   ModulosSlugRoute: ModulosSlugRoute,
+  ModulosIndexRoute: ModulosIndexRoute,
 }
 
 const ModulosRouteWithChildren =
@@ -3206,3 +3225,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
