@@ -42,8 +42,11 @@ import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe
 import { Route as DemoWhiteLabelRouteImport } from './routes/demo.white-label'
 import { Route as DemoTrialRouteImport } from './routes/demo.trial'
 import { Route as DemoModulosRouteImport } from './routes/demo.modulos'
+import { Route as DemoEventosRouteImport } from './routes/demo.eventos'
 import { Route as DemoClienteFinalRouteImport } from './routes/demo.cliente-final'
+import { Route as DemoCheckoutRouteImport } from './routes/demo.checkout'
 import { Route as DemoChecklistRouteImport } from './routes/demo.checklist'
+import { Route as DemoAfiliadosRouteImport } from './routes/demo.afiliados'
 import { Route as ComoFuncionaFitnessRouteImport } from './routes/como-funciona.fitness'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
@@ -308,14 +311,29 @@ const DemoModulosRoute = DemoModulosRouteImport.update({
   path: '/demo/modulos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DemoEventosRoute = DemoEventosRouteImport.update({
+  id: '/demo/eventos',
+  path: '/demo/eventos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DemoClienteFinalRoute = DemoClienteFinalRouteImport.update({
   id: '/demo/cliente-final',
   path: '/demo/cliente-final',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DemoCheckoutRoute = DemoCheckoutRouteImport.update({
+  id: '/demo/checkout',
+  path: '/demo/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DemoChecklistRoute = DemoChecklistRouteImport.update({
   id: '/demo/checklist',
   path: '/demo/checklist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoAfiliadosRoute = DemoAfiliadosRouteImport.update({
+  id: '/demo/afiliados',
+  path: '/demo/afiliados',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComoFuncionaFitnessRoute = ComoFuncionaFitnessRouteImport.update({
@@ -916,8 +934,11 @@ export interface FileRoutesByFullPath {
   '/users': typeof AuthenticatedUsersRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
+  '/demo/afiliados': typeof DemoAfiliadosRoute
   '/demo/checklist': typeof DemoChecklistRoute
+  '/demo/checkout': typeof DemoCheckoutRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
+  '/demo/eventos': typeof DemoEventosRoute
   '/demo/modulos': typeof DemoModulosRoute
   '/demo/trial': typeof DemoTrialRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
@@ -1042,8 +1063,11 @@ export interface FileRoutesByTo {
   '/users': typeof AuthenticatedUsersRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
+  '/demo/afiliados': typeof DemoAfiliadosRoute
   '/demo/checklist': typeof DemoChecklistRoute
+  '/demo/checkout': typeof DemoCheckoutRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
+  '/demo/eventos': typeof DemoEventosRoute
   '/demo/modulos': typeof DemoModulosRoute
   '/demo/trial': typeof DemoTrialRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
@@ -1179,8 +1203,11 @@ export interface FileRoutesById {
   '/_authenticated/users': typeof AuthenticatedUsersRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
+  '/demo/afiliados': typeof DemoAfiliadosRoute
   '/demo/checklist': typeof DemoChecklistRoute
+  '/demo/checkout': typeof DemoCheckoutRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
+  '/demo/eventos': typeof DemoEventosRoute
   '/demo/modulos': typeof DemoModulosRoute
   '/demo/trial': typeof DemoTrialRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
@@ -1316,8 +1343,11 @@ export interface FileRouteTypes {
     | '/users'
     | '/checkout/success'
     | '/como-funciona/fitness'
+    | '/demo/afiliados'
     | '/demo/checklist'
+    | '/demo/checkout'
     | '/demo/cliente-final'
+    | '/demo/eventos'
     | '/demo/modulos'
     | '/demo/trial'
     | '/demo/white-label'
@@ -1442,8 +1472,11 @@ export interface FileRouteTypes {
     | '/users'
     | '/checkout/success'
     | '/como-funciona/fitness'
+    | '/demo/afiliados'
     | '/demo/checklist'
+    | '/demo/checkout'
     | '/demo/cliente-final'
+    | '/demo/eventos'
     | '/demo/modulos'
     | '/demo/trial'
     | '/demo/white-label'
@@ -1578,8 +1611,11 @@ export interface FileRouteTypes {
     | '/_authenticated/users'
     | '/checkout/success'
     | '/como-funciona/fitness'
+    | '/demo/afiliados'
     | '/demo/checklist'
+    | '/demo/checkout'
     | '/demo/cliente-final'
+    | '/demo/eventos'
     | '/demo/modulos'
     | '/demo/trial'
     | '/demo/white-label'
@@ -1692,8 +1728,11 @@ export interface RootRouteChildren {
   UnsubscribeRoute: typeof UnsubscribeRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   ComoFuncionaFitnessRoute: typeof ComoFuncionaFitnessRoute
+  DemoAfiliadosRoute: typeof DemoAfiliadosRoute
   DemoChecklistRoute: typeof DemoChecklistRoute
+  DemoCheckoutRoute: typeof DemoCheckoutRoute
   DemoClienteFinalRoute: typeof DemoClienteFinalRoute
+  DemoEventosRoute: typeof DemoEventosRoute
   DemoModulosRoute: typeof DemoModulosRoute
   DemoTrialRoute: typeof DemoTrialRoute
   DemoWhiteLabelRoute: typeof DemoWhiteLabelRoute
@@ -1956,6 +1995,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoModulosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/demo/eventos': {
+      id: '/demo/eventos'
+      path: '/demo/eventos'
+      fullPath: '/demo/eventos'
+      preLoaderRoute: typeof DemoEventosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/demo/cliente-final': {
       id: '/demo/cliente-final'
       path: '/demo/cliente-final'
@@ -1963,11 +2009,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoClienteFinalRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/demo/checkout': {
+      id: '/demo/checkout'
+      path: '/demo/checkout'
+      fullPath: '/demo/checkout'
+      preLoaderRoute: typeof DemoCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/demo/checklist': {
       id: '/demo/checklist'
       path: '/demo/checklist'
       fullPath: '/demo/checklist'
       preLoaderRoute: typeof DemoChecklistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo/afiliados': {
+      id: '/demo/afiliados'
+      path: '/demo/afiliados'
+      fullPath: '/demo/afiliados'
+      preLoaderRoute: typeof DemoAfiliadosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/como-funciona/fitness': {
@@ -2982,8 +3042,11 @@ const rootRouteChildren: RootRouteChildren = {
   UnsubscribeRoute: UnsubscribeRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
   ComoFuncionaFitnessRoute: ComoFuncionaFitnessRoute,
+  DemoAfiliadosRoute: DemoAfiliadosRoute,
   DemoChecklistRoute: DemoChecklistRoute,
+  DemoCheckoutRoute: DemoCheckoutRoute,
   DemoClienteFinalRoute: DemoClienteFinalRoute,
+  DemoEventosRoute: DemoEventosRoute,
   DemoModulosRoute: DemoModulosRoute,
   DemoTrialRoute: DemoTrialRoute,
   DemoWhiteLabelRoute: DemoWhiteLabelRoute,
@@ -3017,13 +3080,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
