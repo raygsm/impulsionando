@@ -1162,7 +1162,7 @@ function StepPagamento({ state, dispatch, totals, onReset }: StepProps) {
             <div className="grid md:grid-cols-[240px_1fr] gap-4 items-start mt-2 rounded-md bg-background p-3 border border-border">
               <div className="flex flex-col items-center">
                 <img
-                  src={PIX_QR_URL}
+                  src={pixQrUrl}
                   alt="QR Code Pix — chave CNPJ Impulsionando"
                   width={240}
                   height={240}
