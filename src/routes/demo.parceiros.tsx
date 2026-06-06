@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useDemoState, uid, brl } from "@/lib/demoSandbox";
+import { createParceirosMock } from "@/lib/demoModuleMocks";
 
 export const Route = createFileRoute("/demo/parceiros")({
   head: () => ({
@@ -241,132 +242,15 @@ function DemoParceiros() {
 
   // ---------- seed ----------
   function seedTudo() {
-    const now = new Date();
-    const pParceiros: Parceiro[] = [
-      {
-        id: uid("pa"),
-        nomeArtistico: "DJ Lumen",
-        nomeCompleto: "Lucas Mendes",
-        cpf: "111.222.333-44",
-        mei: true,
-        emiteNF: true,
-        whatsapp: "(21) 99000-0001",
-        email: "lumen@demo.com",
-        estado: "RJ",
-        cidade: "Rio de Janeiro",
-        bairro: "Barra da Tijuca",
-        raioKm: 40,
-        aceitaDeslocamento: true,
-        aceitaViagem: true,
-        cacheMinimo: 1500,
-        estilos: ["House", "Open Format"],
-        equipamentos: ["CDJs", "Mixer", "Notebook backup"],
-        status: "Aprovado",
-        nivel: "Preferencial",
-        pontosPos: 6,
-        pontosNeg: 0,
-        eventosRealizados: 6,
-        eventosSemCancelamento: 6,
-        saldoNegativo: 0,
-      },
-      {
-        id: uid("pa"),
-        nomeArtistico: "DJ Rita Bass",
-        nomeCompleto: "Rita Bastos",
-        cpf: "222.333.444-55",
-        mei: false,
-        emiteNF: false,
-        whatsapp: "(21) 99000-0002",
-        email: "rita@demo.com",
-        estado: "RJ",
-        cidade: "Niterói",
-        bairro: "Icaraí",
-        raioKm: 25,
-        aceitaDeslocamento: true,
-        aceitaViagem: false,
-        cacheMinimo: 1200,
-        estilos: ["Eletrônica", "Pop"],
-        equipamentos: ["CDJs", "Mixer"],
-        status: "Aguardando aprovação",
-        nivel: "Iniciante",
-        pontosPos: 0,
-        pontosNeg: 0,
-        eventosRealizados: 0,
-        eventosSemCancelamento: 0,
-        saldoNegativo: 0,
-      },
-      {
-        id: uid("pa"),
-        nomeArtistico: "DJ Sertão",
-        nomeCompleto: "Bruno Carvalho",
-        cpf: "333.444.555-66",
-        mei: true,
-        emiteNF: true,
-        whatsapp: "(21) 99000-0003",
-        email: "sertao@demo.com",
-        estado: "RJ",
-        cidade: "Rio de Janeiro",
-        bairro: "Copacabana",
-        raioKm: 30,
-        aceitaDeslocamento: true,
-        aceitaViagem: true,
-        cacheMinimo: 1800,
-        estilos: ["Sertanejo", "Open Format"],
-        equipamentos: ["CDJs", "Mixer", "PA pequeno"],
-        status: "Aprovado",
-        nivel: "Aprovado",
-        pontosPos: 3,
-        pontosNeg: 1,
-        eventosRealizados: 4,
-        eventosSemCancelamento: 3,
-        saldoNegativo: 0,
-      },
-    ];
-    setParceiros(pParceiros);
-    setParceiroAtivoId(pParceiros[0].id);
-
-    const pEventos: Evento[] = [
-      {
-        id: uid("ev"),
-        nome: "Casamento Marina & Caio",
-        cliente: "Família Souza",
-        tipo: "pontual",
-        data: addDays(now, 10).toISOString(),
-        horaChegada: "18:00",
-        horaInicio: "20:00",
-        horaFim: "02:00",
-        cidade: "Rio de Janeiro",
-        bairro: "Barra da Tijuca",
-        publico: 180,
-        estilo: "Open Format",
-        equipamentos: ["CDJs", "Mixer"],
-        valorTotal: 6000,
-        percentualWMP: 30,
-        status: "Aberto",
-        contratoAceito: false,
-      },
-      {
-        id: uid("ev"),
-        nome: "Residência Bar Mar Azul",
-        cliente: "Bar Mar Azul",
-        tipo: "recorrente",
-        data: addDays(now, 5).toISOString(),
-        horaChegada: "20:00",
-        horaInicio: "21:00",
-        horaFim: "01:00",
-        cidade: "Rio de Janeiro",
-        bairro: "Copacabana",
-        publico: 90,
-        estilo: "House",
-        equipamentos: ["CDJs"],
-        valorTotal: 1800,
-        percentualWMP: 25,
-        status: "Aberto",
-        contratoAceito: false,
-      },
-    ];
-    setEventos(pEventos);
-    toast.success("Cenário WMP criado.");
+    const mock = createParceirosMock();
+    setParceiros(mock.parceiros);
+    setParceiroAtivoId(mock.parceiros[0]?.id ?? "");
+    setEventos(mock.eventos);
+    setContratos(mock.contratos);
+    setMultas(mock.multas);
+    setAvisos(mock.avisos);
+    setLogs(mock.logs);
+    toast.success("Dados fictícios específicos do WMP/Parceiros criados.");
   }
 
   function resetarTudo() {
@@ -632,7 +516,7 @@ function DemoParceiros() {
       <main className="flex-1">
         {/* HERO */}
         <section className="container max-w-6xl mx-auto px-4 pt-10">
-          <DemoModeBanner />
+          <DemoModeBanner current="parceiros" />
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
             <div>
               <Badge variant="outline" className="mb-2">Módulo demonstrativo — WMP</Badge>
