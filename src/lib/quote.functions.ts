@@ -161,10 +161,12 @@ export const updateQuote = createServerFn({ method: "POST" })
 /** Registra o aceite eletrônico do contrato (etapa 11). */
 export const acceptQuote = createServerFn({ method: "POST" })
   .inputValidator((data) => acceptQuoteSchema.parse(data))
-  .handler(async ({ data, request }) => {
+  .handler(async ({ data }) => {
+    const { getRequest } = await import("@tanstack/react-start/server");
+    const req = getRequest();
     const supabase = await getAdmin();
-    const ip = request ? clientIp(request) : null;
-    const ua = request?.headers.get("user-agent") ?? null;
+    const ip = req ? clientIp(req) : null;
+    const ua = req?.headers.get("user-agent") ?? null;
 
     const { error } = await supabase
       .from("quotes")
