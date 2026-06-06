@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
+import { PixFallbackDialog } from "@/components/payments/PixFallbackDialog";
 
 const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20entender%20melhor%20os%20planos%20da%20Impulsionando.";
 
