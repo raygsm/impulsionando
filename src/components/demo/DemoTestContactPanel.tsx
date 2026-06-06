@@ -73,7 +73,7 @@ export function DemoTestContactPanel() {
     setPreviewChannel(channel);
   }
 
-  function doSimulate(scenario: DemoScenario, channel: "email" | "whatsapp") {
+  async function doSimulate(scenario: DemoScenario, channel: "email" | "whatsapp") {
     if (!contact) {
       toast.error("Salve primeiro um e-mail ou WhatsApp de teste.");
       return;
