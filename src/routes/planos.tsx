@@ -319,36 +319,20 @@ function PlanosPage() {
 
                 {plan.monthly !== null && PRICE_IDS[plan.name] ? (
                   <div className="mt-6 space-y-2">
+                    {pickedModules[plan.name]?.length ? (
+                      <div className="text-[11px] text-muted-foreground">
+                        {pickedModules[plan.name].length} módulo(s) selecionado(s)
+                      </div>
+                    ) : null}
                     <Button
                       className={cn("w-full", plan.highlight && "bg-gradient-primary shadow-elegant")}
                       variant={plan.highlight ? "default" : "outline"}
                       disabled={checkoutLoading}
-                      onClick={async () => {
-                        try {
-                          await openCheckout({
-                            priceId: PRICE_IDS[plan.name][annual ? "annual" : "monthly"],
-                            customerEmail: user?.user?.email ?? undefined,
-                            customData: user?.user?.id
-                              ? { userId: user.user.id, plan: plan.name }
-                              : { plan: plan.name },
-                          });
-                        } catch {
-                          // Fallback Pix com QR Code + valor + comprovante.
-                          const monthly = plan.monthly ?? 0;
-                          const finalValue = annual ? monthly * 10 : monthly; // anual = 10 meses
-                          toast.message(
-                            "Instabilidade no checkout. Liberei o pagamento via Pix para você seguir agora.",
-                          );
-                          setPixState({
-                            open: true,
-                            amountCents: Math.round(finalValue * 100),
-                            txid: `PLANO-${plan.name.toUpperCase()}-${annual ? "ANUAL" : "MENSAL"}`,
-                            label: `Plano ${plan.name} — ${annual ? "anual" : "mensal"}`,
-                          });
-                        }
-                      }}
+                      onClick={() => setPicker({ open: true, plan })}
                     >
-                      {checkoutLoading ? "Abrindo checkout..." : `Assinar ${annual ? "anual" : "mensal"}`}
+                      {checkoutLoading
+                        ? "Abrindo checkout..."
+                        : `Escolher módulos e assinar ${annual ? "anual" : "mensal"}`}
                     </Button>
 
                     <Button asChild variant="ghost" size="sm" className="w-full text-xs">
