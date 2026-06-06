@@ -41,6 +41,7 @@ import { Route as ModulosSlugRouteImport } from './routes/modulos.$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as DemoWhiteLabelRouteImport } from './routes/demo.white-label'
 import { Route as DemoTrialRouteImport } from './routes/demo.trial'
+import { Route as DemoModulosRouteImport } from './routes/demo.modulos'
 import { Route as DemoClienteFinalRouteImport } from './routes/demo.cliente-final'
 import { Route as DemoChecklistRouteImport } from './routes/demo.checklist'
 import { Route as ComoFuncionaFitnessRouteImport } from './routes/como-funciona.fitness'
@@ -300,6 +301,11 @@ const DemoWhiteLabelRoute = DemoWhiteLabelRouteImport.update({
 const DemoTrialRoute = DemoTrialRouteImport.update({
   id: '/demo/trial',
   path: '/demo/trial',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoModulosRoute = DemoModulosRouteImport.update({
+  id: '/demo/modulos',
+  path: '/demo/modulos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoClienteFinalRoute = DemoClienteFinalRouteImport.update({
@@ -912,6 +918,7 @@ export interface FileRoutesByFullPath {
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
+  '/demo/modulos': typeof DemoModulosRoute
   '/demo/trial': typeof DemoTrialRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -1037,6 +1044,7 @@ export interface FileRoutesByTo {
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
+  '/demo/modulos': typeof DemoModulosRoute
   '/demo/trial': typeof DemoTrialRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -1173,6 +1181,7 @@ export interface FileRoutesById {
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
+  '/demo/modulos': typeof DemoModulosRoute
   '/demo/trial': typeof DemoTrialRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -1309,6 +1318,7 @@ export interface FileRouteTypes {
     | '/como-funciona/fitness'
     | '/demo/checklist'
     | '/demo/cliente-final'
+    | '/demo/modulos'
     | '/demo/trial'
     | '/demo/white-label'
     | '/email/unsubscribe'
@@ -1434,6 +1444,7 @@ export interface FileRouteTypes {
     | '/como-funciona/fitness'
     | '/demo/checklist'
     | '/demo/cliente-final'
+    | '/demo/modulos'
     | '/demo/trial'
     | '/demo/white-label'
     | '/email/unsubscribe'
@@ -1569,6 +1580,7 @@ export interface FileRouteTypes {
     | '/como-funciona/fitness'
     | '/demo/checklist'
     | '/demo/cliente-final'
+    | '/demo/modulos'
     | '/demo/trial'
     | '/demo/white-label'
     | '/email/unsubscribe'
@@ -1682,6 +1694,7 @@ export interface RootRouteChildren {
   ComoFuncionaFitnessRoute: typeof ComoFuncionaFitnessRoute
   DemoChecklistRoute: typeof DemoChecklistRoute
   DemoClienteFinalRoute: typeof DemoClienteFinalRoute
+  DemoModulosRoute: typeof DemoModulosRoute
   DemoTrialRoute: typeof DemoTrialRoute
   DemoWhiteLabelRoute: typeof DemoWhiteLabelRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
@@ -1934,6 +1947,13 @@ declare module '@tanstack/react-router' {
       path: '/demo/trial'
       fullPath: '/demo/trial'
       preLoaderRoute: typeof DemoTrialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo/modulos': {
+      id: '/demo/modulos'
+      path: '/demo/modulos'
+      fullPath: '/demo/modulos'
+      preLoaderRoute: typeof DemoModulosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo/cliente-final': {
@@ -2964,6 +2984,7 @@ const rootRouteChildren: RootRouteChildren = {
   ComoFuncionaFitnessRoute: ComoFuncionaFitnessRoute,
   DemoChecklistRoute: DemoChecklistRoute,
   DemoClienteFinalRoute: DemoClienteFinalRoute,
+  DemoModulosRoute: DemoModulosRoute,
   DemoTrialRoute: DemoTrialRoute,
   DemoWhiteLabelRoute: DemoWhiteLabelRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
