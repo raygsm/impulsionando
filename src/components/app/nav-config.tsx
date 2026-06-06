@@ -6,7 +6,7 @@ import {
   Package, Truck, ArrowDownUp,
   ShoppingCart, Receipt, Plus, Wallet as WalletIcon,
   Contact, BarChart3, ShieldCheck, Inbox, GraduationCap, Stethoscope, Sparkles,
-  Handshake, Link2, Ticket, Briefcase, BadgeDollarSign, TrendingUp, Banknote,
+  Handshake, Link2, Ticket, Briefcase, BadgeDollarSign, TrendingUp, Banknote, Copy,
 } from "lucide-react";
 
 
@@ -44,6 +44,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/modules", label: "Módulos", icon: Boxes, perm: "modules.read" },
       { to: "/admin/trials", label: "Trials (7 dias)", icon: Sparkles, superOnly: true },
       { to: "/admin/billing", label: "Billing", icon: CreditCard, superOnly: true },
+      { to: "/admin/modulos/clonagem", label: "Clonagem de Módulos", icon: Copy, superOnly: true },
       { to: "/minha-assinatura", label: "Minha Assinatura", icon: CreditCard },
       { to: "/settings", label: "Configurações", icon: SlidersHorizontal, perm: "settings.read" },
       { to: "/audit", label: "Auditoria", icon: FileSearch, perm: "audit.read" },

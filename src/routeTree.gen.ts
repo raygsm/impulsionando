@@ -158,6 +158,7 @@ import { Route as ApiPublicDemoSendTestRouteImport } from './routes/api/public/d
 import { Route as ApiPaymentsInfinitepayCreateRouteImport } from './routes/api/payments/infinitepay.create'
 import { Route as ApiPaymentsInfinitepayCheckStatusRouteImport } from './routes/api/payments/infinitepay.check-status'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
+import { Route as AuthenticatedAdminModulosClonagemRouteImport } from './routes/_authenticated/admin.modulos.clonagem'
 import { Route as ApiPublicPaymentsInfinitepayWebhookRouteImport } from './routes/api/public/payments/infinitepay.webhook'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
@@ -966,6 +967,12 @@ const AuthenticatedSalesCashIdRoute =
     path: '/$id',
     getParentRoute: () => AuthenticatedSalesCashRoute,
   } as any)
+const AuthenticatedAdminModulosClonagemRoute =
+  AuthenticatedAdminModulosClonagemRouteImport.update({
+    id: '/admin/modulos/clonagem',
+    path: '/admin/modulos/clonagem',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicPaymentsInfinitepayWebhookRoute =
   ApiPublicPaymentsInfinitepayWebhookRouteImport.update({
     id: '/api/public/payments/infinitepay/webhook',
@@ -1106,6 +1113,7 @@ export interface FileRoutesByFullPath {
   '/inventory/': typeof AuthenticatedInventoryIndexRoute
   '/reports/': typeof AuthenticatedReportsIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
+  '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
@@ -1247,6 +1255,7 @@ export interface FileRoutesByTo {
   '/inventory': typeof AuthenticatedInventoryIndexRoute
   '/reports': typeof AuthenticatedReportsIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
+  '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
@@ -1400,6 +1409,7 @@ export interface FileRoutesById {
   '/_authenticated/inventory/': typeof AuthenticatedInventoryIndexRoute
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
+  '/_authenticated/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
@@ -1553,6 +1563,7 @@ export interface FileRouteTypes {
     | '/inventory/'
     | '/reports/'
     | '/sales/'
+    | '/admin/modulos/clonagem'
     | '/sales/cash/$id'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
@@ -1694,6 +1705,7 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/reports'
     | '/sales'
+    | '/admin/modulos/clonagem'
     | '/sales/cash/$id'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
@@ -1846,6 +1858,7 @@ export interface FileRouteTypes {
     | '/_authenticated/inventory/'
     | '/_authenticated/reports/'
     | '/_authenticated/sales/'
+    | '/_authenticated/admin/modulos/clonagem'
     | '/_authenticated/sales/cash/$id'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
@@ -2975,6 +2988,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSalesCashIdRouteImport
       parentRoute: typeof AuthenticatedSalesCashRoute
     }
+    '/_authenticated/admin/modulos/clonagem': {
+      id: '/_authenticated/admin/modulos/clonagem'
+      path: '/admin/modulos/clonagem'
+      fullPath: '/admin/modulos/clonagem'
+      preLoaderRoute: typeof AuthenticatedAdminModulosClonagemRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/payments/infinitepay/webhook': {
       id: '/api/public/payments/infinitepay/webhook'
       path: '/api/public/payments/infinitepay/webhook'
@@ -3219,6 +3239,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEhrIdRoute: typeof AuthenticatedEhrIdRoute
   AuthenticatedMarketingLeadsRoute: typeof AuthenticatedMarketingLeadsRoute
   AuthenticatedEhrIndexRoute: typeof AuthenticatedEhrIndexRoute
+  AuthenticatedAdminModulosClonagemRoute: typeof AuthenticatedAdminModulosClonagemRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -3251,6 +3272,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEhrIdRoute: AuthenticatedEhrIdRoute,
   AuthenticatedMarketingLeadsRoute: AuthenticatedMarketingLeadsRoute,
   AuthenticatedEhrIndexRoute: AuthenticatedEhrIndexRoute,
+  AuthenticatedAdminModulosClonagemRoute:
+    AuthenticatedAdminModulosClonagemRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
