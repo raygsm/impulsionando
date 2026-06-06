@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.trial_create(text,text,text,text,text,trial_plan_choice,text,text);
