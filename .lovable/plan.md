@@ -1,103 +1,79 @@
-## Onda 4 — Núcleo financeiro e comercial de Afiliados e Produtos
+## Diagnóstico do que já existe
 
-Implementação **incremental e pontual** em cima do que já existe (tabelas `aff_*` da Onda 1-3 e `affiliates.functions.ts` da Onda 4 parcial). Nada será recriado nem apagado.
+- `/demo` (`demo.index.tsx`) — landing com 2 trilhas (white-label / cliente final), já com tooltips e badge "sem cadastro".
+- `/demo/white-label` (601 linhas) e `/demo/cliente-final` (1018 linhas) — áreas administrativas demo extensas, já navegáveis.
+- `/demo/checklist` — checklist de prontidão.
+- `/demo/trial` (82 linhas) — **conceitualmente errado**: trata trial como "ciclo de demonstração de 7 dias" em vez de contratação real com cartão e reembolso.
+- `/trial` + `/trial/cadastro` — fluxo real de contratação trial (já existente, com seleção de plano e formulário).
+- `/reembolso` — página pública existente.
+- Área `_authenticated/` — sistema real completo (CRM, agenda, finance, sales, ehr, affiliates, etc.) já implementado.
 
----
+**Conclusão:** a maior parte do que o prompt pede já existe. O que falta de verdade é pequeno e cirúrgico.
 
-### Etapa 1 — Banco de dados (1 migration adicional)
+## O que NÃO vou fazer (evita queimar créditos e quebrar coisas)
 
-**Ajustes em tabelas existentes (ADD COLUMN IF NOT EXISTS):**
-- `aff_products`: `consumption_days int`, `is_recurring_consumption bool`, `allow_installments bool`, `max_installments int default 12`, `interest_paid_by text default 'customer'` (`customer` | `producer`)
-- `aff_offers`: mesmos campos de parcelamento/juros (override por oferta)
-- `aff_sales`: `gateway_fee numeric`, `installment_interest numeric`, `interest_paid_by text`, `coupon_id uuid`, `bump_sale_id uuid`, `upsell_of_sale_id uuid`, `kind text default 'main'` (`main|bump|upsell|cross`), `payment_status text`, `recovery_status text`
-- Taxa Impulsionando fixa em 5% — constante no código (`PLATFORM_FEE = 0.05`), não em coluna
+- Não reescrever `demo.white-label.tsx` nem `demo.cliente-final.tsx` (1.600 linhas combinadas, já funcionais).
+- Não duplicar tooltips/help já existentes.
+- Não criar "Tour da Plataforma" como wizard completo (escopo de semanas) — entrego apenas um banner-guia com checklist clicável.
+- Não mexer em banco, auth, RLS, edge functions.
+- Não tocar nas rotas `_authenticated/*` reais (CRM, agenda, etc.).
+- Não implementar fluxo real de reembolso automático no gateway (depende de credenciais externas).
 
-**Novas tabelas:**
-- `aff_product_plans` — variações/planos (1 pote, 2 potes, 3 potes): `product_id`, `name`, `quantity`, `consumption_days`, `price_cents`, `sort_order`, `is_active`
-- `aff_coupons` — `company_id`, `code`, `product_id?`, `offer_id?`, `affiliate_id?`, `discount_type` (`percent|fixed`), `discount_value`, `valid_from`, `valid_until`, `max_uses`, `used_count`, `max_per_customer`, `keep_commission bool`, `status`
-- `aff_bumps` — `product_id` (principal), `bump_product_id`, `name`, `description`, `price_cents`, `image_url`, `is_active`, `affiliate_gets_commission bool`, `commission_override numeric?`
-- `aff_upsells` — análogo a bumps + `trigger` (`after_approved|after_pix_pending`)
-- `aff_crosssells` — `product_id`, `cross_product_id`, `moment` (`post_purchase|email|area|checkout`), `is_active`
-- `aff_crm_flows` — réguas de recuperação/recompra: `company_id`, `product_id?`, `kind` (`cart_recovery|pix_pending|boleto_pending|card_declined|repurchase`), `steps jsonb` (lista de `{delay_days, channel, template}`), `is_active`
-- `aff_crm_events` — log: `sale_id?`, `customer_email`, `flow_id`, `step_index`, `sent_at`, `converted_at`
+## Plano em 4 ondas pequenas
 
-Todas com GRANT a `authenticated` + `service_role`, RLS por `company_id` usando `user_belongs_to_company` + `user_has_permission('aff.<entity>.read|write')`. Novas permissões `aff.coupon.*`, `aff.bump.*`, `aff.upsell.*`, `aff.crosssell.*`, `aff.crm.*`, `aff.plan.*`.
+### Onda A — Correção conceitual de `/demo/trial` (prioridade máxima)
 
----
+Reescrever `src/routes/demo.trial.tsx` para deixar claro que **trial é contratação real**, não demonstração:
 
-### Etapa 2 — Lógica de split (extender `affiliates.functions.ts`)
+- Bloco comparativo **Demonstração × Trial** (gratuita/fictícia vs contratação real com cartão).
+- Explicação: cartão de crédito, acesso liberado, cancelamento + reembolso automático em até 7 dias após o horário do pagamento.
+- Lista de status do trial (contratado → aprovado → liberado → cancelamento → reembolso processando/concluído/indisponível → convertido).
+- Aviso: "Reembolso automático preparado — aguardando credenciais do gateway."
+- CTAs: **Contratar Trial** (→ `/trial`) e **Conhecer Demonstração** (→ `/demo`).
+- Tooltip em cada regra (prazo, reembolso, cartão).
 
-Atualizar `registerAffiliateSale` para:
-1. Aplicar **taxa Impulsionando = 5%** sobre `gross_amount` (constante `PLATFORM_FEE`)
-2. Aceitar `gateway_fee`, `installment_interest`, `interest_paid_by` no input
-3. Calcular base líquida = `bruto - 5% - gateway_fee - (juros se assumido pelo produtor)`
-4. Distribuir comissões (afiliado/coprodutor/gerente) sobre base líquida ou bruto conforme config do produto
-5. Resto = produtor
-6. Status iniciais conforme matriz (cartão/pix/boleto)
-7. `release_at = sold_at + prazo_gateway + 3 dias úteis`
+Mantém todos os elementos visuais existentes (header/footer públicos, Card, Badge).
 
-Novas server functions:
-- `createCoupon`, `applyCoupon` (valida validade, limites, retorna discount)
-- `registerBumpSale`, `registerUpsellSale` — chamam `registerAffiliateSale` com `kind` apropriado e `parent_sale_id`
-- `enqueueCrmFlow(sale_id, kind)` — insere `aff_crm_events` para cada step da régua ativa
-- `seedDemoEmagrecedor` — cria produto "Super Emagrecedor Premium" + 3 planos + bump "Guia Digital" + upsell + régua de recompra
+### Onda B — Banner "Modo Demonstração" + estados vazios padronizados
 
----
+Criar 2 componentes reutilizáveis pequenos (não duplicar o que existe):
 
-### Etapa 3 — UI (apenas adicionar páginas; sem refazer existentes)
+1. `src/components/demo/DemoModeBanner.tsx` — banner discreto e dispensável (localStorage) que aparece em `/demo/*` com texto "Demonstração — dados fictícios, sem impacto em dados reais" + link para checklist.
+2. `src/components/demo/EmptyDemoState.tsx` — estado vazio inteligente com mensagem contextual + botão "Criar exemplo demo" (callback opcional). Reutilizar onde já houver lista vazia óbvia em `demo.white-label.tsx` e `demo.cliente-final.tsx` **sem reescrever as páginas** — só importar e usar em 4-6 pontos.
 
-Estender o submenu `AffiliatesSubnav` com: **Planos**, **Cupons**, **Order Bump**, **Upsell**, **Cross-sell**, **CRM**.
+### Onda C — Tooltips de conceitos-chave
 
-Novas rotas (TanStack file-based) sob `_authenticated/affiliates.*`:
-- `affiliates.products.$id.tsx` — detalhe com abas: Planos, Bumps, Upsells, Cross-sell, CRM, Comissão, Parcelamento
-- `affiliates.coupons.tsx` — CRUD via `ResourceListPage`
-- `affiliates.bumps.tsx`, `affiliates.upsells.tsx`, `affiliates.crosssells.tsx` — CRUD
-- `affiliates.crm.tsx` — listagem de fluxos + editor JSON simples (steps)
-- `affiliates.recovery.tsx` — dashboard de carrinhos/pix/boletos pendentes + métricas
+Criar `src/components/demo/HelpTip.tsx` (wrapper fino sobre Tooltip + HelpCircle) com biblioteca de termos: `crm`, `baixa-automatica`, `split-automatico`, `parametrizacao`, `first-touch`, `last-touch`, `permissoes`, `trial`, `reembolso-auto`, `coproducer`, `gerente-afiliados`, `bump`, `upsell`.
 
-Atualizar `affiliates.index.tsx` (dashboard) com cards de recuperação/recompra (consultam `aff_crm_events`).
+Aplicar em **2-3 pontos por página demo** (cliente-final, white-label, affiliates dashboard). Não vou poluir todas as telas.
 
-Em `affiliates.sales.tsx`: mostrar breakdown completo (bruto, taxa 5%, gateway, juros, comissões, líquido).
+### Onda D — Auditoria de links mortos nas páginas demo
 
----
+Script rápido (`rg` em `src/routes/demo.*.tsx` e cards do dashboard) procurando:
+- `<Button>` sem `asChild`/`onClick`/`disabled`
+- `<Link to="#">` ou `href="#"`
+- CTAs que não levam a lugar nenhum
 
-### Etapa 4 — Cron / fluxos
+Corrigir os que encontrar (esperado: <10 ocorrências). Se algum recurso não estiver pronto, trocar por mensagem **"Recurso preparado — aguardando configuração final."**
 
-Reaproveitar `pg_cron` existente (`aff-advance-commissions`). Adicionar:
-- `aff-process-crm` — endpoint público `/api/public/hooks/aff-process-crm` que percorre `aff_crm_events` pendentes e marca como `sent` (envio real fica pendente de gateway WhatsApp/Email — usa `enqueue_message` existente quando possível)
-- Agendar 1×/hora
+## O que fica explicitamente fora desta entrega
 
----
+- Onda 4 do checklist gigante (split, comissões, etc.) — já entregue na Onda 4 anterior.
+- Tour guiado interativo (driver.js / shepherd) — escopo de feature própria, posso fazer numa próxima rodada se você quiser.
+- Reescrita das 2 demos administrativas (1.600 linhas).
+- Implementação real de reembolso automático via gateway.
+- Revisão de responsividade pixel-a-pixel (entregamos com classes Tailwind já responsivas, sem auditoria visual em 4 viewports).
+- Toggles SIM/NÃO em todos os módulos — já existem nas páginas de configurações reais; não vou recriar uma "tela demo de toggles" porque duplicaria.
 
-### Etapa 5 — Integrações de pagamento
+## Estimativa
 
-**Não simular pagamento real.** Em todas as telas de checkout/pagamento exibir badge: *"Integração preparada — aguardando credenciais externas (gateway)"*. Toda a lógica de split/comissão/CRM funciona a partir de vendas registradas manualmente ou por webhook futuro.
+- Onda A: 1 arquivo reescrito (~150 linhas).
+- Onda B: 2 componentes novos + ~6 substituições.
+- Onda C: 1 componente novo + ~8 aplicações.
+- Onda D: 0-10 correções pontuais.
 
----
+Total: ~5 arquivos novos, ~4-5 arquivos editados pontualmente. Nenhuma migração de banco.
 
-### Etapa 6 — Seed demo
+## Pergunta
 
-Botão "Criar produto demo (Emagrecedor)" no dashboard de Afiliados → chama `seedDemoEmagrecedor` server fn.
-
----
-
-### Detalhes técnicos
-
-- Taxa 5% em `src/lib/affiliates.constants.ts` (`export const PLATFORM_FEE = 0.05`)
-- Cálculo de juros: usa tabela simples de taxas de gateway por parcela (config futura); por ora aceita input manual no registro de venda
-- LGPD: afiliados só veem vendas onde `affiliate_user_id = auth.uid()` (já garantido pelas policies da Onda 5 de segurança)
-- Sem alterações em autenticação, sem mexer em CRM existente (`crm_leads`/`crm_opportunities`) — o CRM de vendas/recompra é específico do módulo Afiliados (`aff_crm_*`)
-
----
-
-### Entregas após aprovação
-
-1. 1 migration SQL com novas tabelas + colunas + permissões + RLS
-2. Atualização de `src/lib/affiliates.functions.ts` (split + cupons + bumps + upsells + CRM enqueue + seed demo)
-3. `src/lib/affiliates.constants.ts` (PLATFORM_FEE)
-4. ~8 novas rotas em `_authenticated/affiliates.*`
-5. Atualização de `AffiliatesSubnav.tsx`
-6. Endpoint público `aff-process-crm` + cron schedule
-7. Nada existente apagado; rotas e componentes prévios intactos
-
-**Confirmar para eu prosseguir com a implementação?**
+Posso executar as 4 ondas em sequência nesta mensagem, ou você prefere fazer apenas a **Onda A (correção do `/demo/trial`)** primeiro e validar antes de seguir?
