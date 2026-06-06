@@ -331,6 +331,26 @@ function PlanoTestePage() {
       </section>
 
       <PublicFooter />
+
+      <ModulePicker
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        quota={1}
+        planName={TEST_PLAN.name}
+        planSubtitle="No Plano TESTE você pode escolher 1 módulo para conhecer."
+        initialSelected={pickedModules}
+        confirmLabel="Confirmar e ir para o pagamento de R$1,00"
+        onConfirm={(slugs) => {
+          setPickedModules(slugs);
+          setPickerOpen(false);
+          setConfirmed(true);
+          toast.success(
+            slugs.length
+              ? `Módulo selecionado: ${slugs.join(", ")}. Clique em Pagar R$1,00 para continuar.`
+              : "Você pode pagar sem selecionar módulos. Clique em Pagar R$1,00.",
+          );
+        }}
+      />
     </div>
   );
 }
