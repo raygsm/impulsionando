@@ -177,8 +177,11 @@ export const Route = createFileRoute('/api/public/hooks/zapi-status')({
           }
         }
 
-        const { error } = await supabaseAdmin.from('whatsapp_message_events').insert(records)
+        const { error } = await supabaseAdmin
+          .from('whatsapp_message_events')
+          .insert(records as never)
         if (error) {
+
           return new Response(JSON.stringify({ ok: false, error: error.message }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' },
