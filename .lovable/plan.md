@@ -1,86 +1,103 @@
+## Onda 4 — Núcleo financeiro e comercial de Afiliados e Produtos
 
-# Módulo "Afiliados e Produtos" — Plano incremental
+Implementação **incremental e pontual** em cima do que já existe (tabelas `aff_*` da Onda 1-3 e `affiliates.functions.ts` da Onda 4 parcial). Nada será recriado nem apagado.
 
-Hoje "Afiliados" só existe como conteúdo de marketing (`/modulos#afiliados`). Não há rotas internas nem tabelas de afiliados/coprodutores/gerentes/comissões dedicadas. Vou promover o módulo no app autenticado **sem mexer em nada funcional** (CRM, Finance, Sales, Inventory, Agenda, EHR, Auth permanecem intactos).
+---
 
-Execução em 5 ondas curtas. Aprovo onda por onda — só sigo para a seguinte com seu "ok".
+### Etapa 1 — Banco de dados (1 migration adicional)
 
-## Onda 1 — Banco de dados (migration única)
+**Ajustes em tabelas existentes (ADD COLUMN IF NOT EXISTS):**
+- `aff_products`: `consumption_days int`, `is_recurring_consumption bool`, `allow_installments bool`, `max_installments int default 12`, `interest_paid_by text default 'customer'` (`customer` | `producer`)
+- `aff_offers`: mesmos campos de parcelamento/juros (override por oferta)
+- `aff_sales`: `gateway_fee numeric`, `installment_interest numeric`, `interest_paid_by text`, `coupon_id uuid`, `bump_sale_id uuid`, `upsell_of_sale_id uuid`, `kind text default 'main'` (`main|bump|upsell|cross`), `payment_status text`, `recovery_status text`
+- Taxa Impulsionando fixa em 5% — constante no código (`PLATFORM_FEE = 0.05`), não em coluna
 
-Tabelas novas no schema `public`, todas com RLS + GRANTs:
+**Novas tabelas:**
+- `aff_product_plans` — variações/planos (1 pote, 2 potes, 3 potes): `product_id`, `name`, `quantity`, `consumption_days`, `price_cents`, `sort_order`, `is_active`
+- `aff_coupons` — `company_id`, `code`, `product_id?`, `offer_id?`, `affiliate_id?`, `discount_type` (`percent|fixed`), `discount_value`, `valid_from`, `valid_until`, `max_uses`, `used_count`, `max_per_customer`, `keep_commission bool`, `status`
+- `aff_bumps` — `product_id` (principal), `bump_product_id`, `name`, `description`, `price_cents`, `image_url`, `is_active`, `affiliate_gets_commission bool`, `commission_override numeric?`
+- `aff_upsells` — análogo a bumps + `trigger` (`after_approved|after_pix_pending`)
+- `aff_crosssells` — `product_id`, `cross_product_id`, `moment` (`post_purchase|email|area|checkout`), `is_active`
+- `aff_crm_flows` — réguas de recuperação/recompra: `company_id`, `product_id?`, `kind` (`cart_recovery|pix_pending|boleto_pending|card_declined|repurchase`), `steps jsonb` (lista de `{delay_days, channel, template}`), `is_active`
+- `aff_crm_events` — log: `sale_id?`, `customer_email`, `flow_id`, `step_index`, `sent_at`, `converted_at`
 
-- `aff_products` — produto comissionável (nome, descrição, categoria, nicho, tipo, valor base, status, permite_afiliado, exige_aprovacao, comissao_padrao_pct).
-- `aff_offers` — ofertas por produto (nome, valor, tipo_cobranca, recorrencia, trial, comissao_pct, status).
-- `aff_affiliates` — afiliado (user_id?, nome, doc, contatos, canal, pix, status, gerente_id).
-- `aff_coproducers` — coprodutor por produto/oferta (percentual, valor_fixo, escopo, status).
-- `aff_managers` — gerente de afiliados (comissao_pct, tipo).
-- `aff_affiliate_products` — autorização afiliado×produto + comissão custom.
-- `aff_links` — link/cupom/QR único (slug, tipo, utm, contadores cliques/leads/vendas/receita).
-- `aff_sales` — venda registrada (link_id, produto, oferta, afiliado, gerente, coprodutor, valor_bruto, taxa_gateway, valor_liquido, forma_pagto, status_financeiro, datas).
-- `aff_commissions` — linha de comissão por participante (tipo: produtor/copro/afiliado/gerente, valor, status, prazo_liberacao, data_liberacao, data_pagto).
-- `aff_payouts` — solicitação e pagamento de saque.
+Todas com GRANT a `authenticated` + `service_role`, RLS por `company_id` usando `user_belongs_to_company` + `user_has_permission('aff.<entity>.read|write')`. Novas permissões `aff.coupon.*`, `aff.bump.*`, `aff.upsell.*`, `aff.crosssell.*`, `aff.crm.*`, `aff.plan.*`.
 
-RLS: leitura/escrita por `user_belongs_to_company` + `user_has_permission` (novas permissões `aff.*`). Afiliado/coprodutor/gerente veem apenas o que é seu via `user_id`.
+---
 
-Status financeiros enum: `venda_registrada`, `pagto_pendente`, `aprovado`, `aguardando_gateway`, `aguardando_prazo_interno`, `disponivel`, `saque_solicitado`, `saque_aprovado`, `pago`, `cancelado`, `estornado`, `chargeback`, `bloqueado`.
+### Etapa 2 — Lógica de split (extender `affiliates.functions.ts`)
 
-Regra de prazo: trigger que calcula `data_liberacao = data_aprovacao + prazo_gateway_dias + 3 dias úteis`.
+Atualizar `registerAffiliateSale` para:
+1. Aplicar **taxa Impulsionando = 5%** sobre `gross_amount` (constante `PLATFORM_FEE`)
+2. Aceitar `gateway_fee`, `installment_interest`, `interest_paid_by` no input
+3. Calcular base líquida = `bruto - 5% - gateway_fee - (juros se assumido pelo produtor)`
+4. Distribuir comissões (afiliado/coprodutor/gerente) sobre base líquida ou bruto conforme config do produto
+5. Resto = produtor
+6. Status iniciais conforme matriz (cartão/pix/boleto)
+7. `release_at = sold_at + prazo_gateway + 3 dias úteis`
 
-## Onda 2 — Rotas e menu interno
+Novas server functions:
+- `createCoupon`, `applyCoupon` (valida validade, limites, retorna discount)
+- `registerBumpSale`, `registerUpsellSale` — chamam `registerAffiliateSale` com `kind` apropriado e `parent_sale_id`
+- `enqueueCrmFlow(sale_id, kind)` — insere `aff_crm_events` para cada step da régua ativa
+- `seedDemoEmagrecedor` — cria produto "Super Emagrecedor Premium" + 3 planos + bump "Guia Digital" + upsell + régua de recompra
 
-Layout `src/routes/_authenticated/affiliates.tsx` (com `<Outlet/>`) + leaves:
+---
 
-- `affiliates.index.tsx` — Dashboard
-- `affiliates.products.tsx` + `.new.tsx` + `.$id.tsx`
-- `affiliates.offers.tsx`
-- `affiliates.affiliates.tsx` (lista + aprovação)
-- `affiliates.coproducers.tsx`
-- `affiliates.managers.tsx`
-- `affiliates.links.tsx` (links / cupons / QR)
-- `affiliates.commissions.tsx`
-- `affiliates.splits.tsx` (regras)
-- `affiliates.sales.tsx`
-- `affiliates.payouts.tsx`
-- `affiliates.campaigns.tsx`
-- `affiliates.reports.tsx`
-- `affiliates.settings.tsx`
+### Etapa 3 — UI (apenas adicionar páginas; sem refazer existentes)
 
-Adicionar entrada **"Afiliados e Produtos"** no `AppSidebar` como módulo principal, com os submenus acima. Nada removido do menu atual.
+Estender o submenu `AffiliatesSubnav` com: **Planos**, **Cupons**, **Order Bump**, **Upsell**, **Cross-sell**, **CRM**.
 
-## Onda 3 — Painéis por perfil
+Novas rotas (TanStack file-based) sob `_authenticated/affiliates.*`:
+- `affiliates.products.$id.tsx` — detalhe com abas: Planos, Bumps, Upsells, Cross-sell, CRM, Comissão, Parcelamento
+- `affiliates.coupons.tsx` — CRUD via `ResourceListPage`
+- `affiliates.bumps.tsx`, `affiliates.upsells.tsx`, `affiliates.crosssells.tsx` — CRUD
+- `affiliates.crm.tsx` — listagem de fluxos + editor JSON simples (steps)
+- `affiliates.recovery.tsx` — dashboard de carrinhos/pix/boletos pendentes + métricas
 
-Componentes compartilhados em `src/components/affiliates/`:
+Atualizar `affiliates.index.tsx` (dashboard) com cards de recuperação/recompra (consultam `aff_crm_events`).
 
-- `ProducerDashboard` — produtos, ofertas, afiliados, vendas, receitas, ROI.
-- `AffiliateDashboard` — produtos disponíveis, links, cliques→vendas, comissão pendente/liberada/paga, próxima liberação.
-- `CoproducerDashboard` — produtos vinculados, % participação, receita líquida estimada.
-- `ManagerDashboard` — afiliados sob gestão, ranking, conversão, comissão gerada.
+Em `affiliates.sales.tsx`: mostrar breakdown completo (bruto, taxa 5%, gateway, juros, comissões, líquido).
 
-Roteamento por perfil: `affiliates.index.tsx` decide qual dashboard renderiza com base em `user_profiles`/permissões.
+---
 
-## Onda 4 — Server functions + lógica de split
+### Etapa 4 — Cron / fluxos
 
-`src/lib/affiliates.functions.ts`:
+Reaproveitar `pg_cron` existente (`aff-advance-commissions`). Adicionar:
+- `aff-process-crm` — endpoint público `/api/public/hooks/aff-process-crm` que percorre `aff_crm_events` pendentes e marca como `sent` (envio real fica pendente de gateway WhatsApp/Email — usa `enqueue_message` existente quando possível)
+- Agendar 1×/hora
 
-- CRUD de produtos, ofertas, afiliados, coprodutores, gerentes, links.
-- `registerAffiliateSale` — recebe venda, calcula split (produtor/copro/afiliado/gerente/plataforma/gateway), grava `aff_sales` + linhas em `aff_commissions` com `data_liberacao`.
-- `advanceCommissionStatus` (cron) — promove `aguardando_*` → `disponivel` quando passa o prazo.
-- `requestPayout` / `approvePayout` — fluxo de saque.
-- Tracking: endpoint público `/api/public/aff/r/$slug` registra clique e redireciona; cookie de atribuição 30d.
+---
 
-Nada toca em `sales_orders`/`fin_*` — split usa as tabelas `aff_*` próprias e só **lê** `fin_payment_methods` para listar formas.
+### Etapa 5 — Integrações de pagamento
 
-## Onda 5 — Marketing + integrações
+**Não simular pagamento real.** Em todas as telas de checkout/pagamento exibir badge: *"Integração preparada — aguardando credenciais externas (gateway)"*. Toda a lógica de split/comissão/CRM funciona a partir de vendas registradas manualmente ou por webhook futuro.
 
-- Atualizar `src/routes/modulos.tsx` seção `#afiliados` apontando para o módulo interno.
-- Garantir item "Afiliados e Produtos" no `PublicHeader` (Soluções → Crescimento).
-- Documentar no painel: o que depende de credencial externa (gateway de pagamento para `valor_liquido` real, webhook de aprovação/chargeback).
+---
 
-## Pendências explícitas (fora do escopo desta entrega)
+### Etapa 6 — Seed demo
 
-- Integração ao vivo com gateway (Stripe/Paddle/Asaas) para receber webhooks de `aprovado/estornado/chargeback` → a lógica fica pronta, só precisa do conector e segredo quando você quiser ativar.
-- Geração de PDF de contrato de afiliado (futuro).
+Botão "Criar produto demo (Emagrecedor)" no dashboard de Afiliados → chama `seedDemoEmagrecedor` server fn.
 
-## Confirmação
+---
 
-Posso começar pela **Onda 1 (migration)** agora? Você revisa, aprova a migration, e seguimos para a Onda 2.
+### Detalhes técnicos
+
+- Taxa 5% em `src/lib/affiliates.constants.ts` (`export const PLATFORM_FEE = 0.05`)
+- Cálculo de juros: usa tabela simples de taxas de gateway por parcela (config futura); por ora aceita input manual no registro de venda
+- LGPD: afiliados só veem vendas onde `affiliate_user_id = auth.uid()` (já garantido pelas policies da Onda 5 de segurança)
+- Sem alterações em autenticação, sem mexer em CRM existente (`crm_leads`/`crm_opportunities`) — o CRM de vendas/recompra é específico do módulo Afiliados (`aff_crm_*`)
+
+---
+
+### Entregas após aprovação
+
+1. 1 migration SQL com novas tabelas + colunas + permissões + RLS
+2. Atualização de `src/lib/affiliates.functions.ts` (split + cupons + bumps + upsells + CRM enqueue + seed demo)
+3. `src/lib/affiliates.constants.ts` (PLATFORM_FEE)
+4. ~8 novas rotas em `_authenticated/affiliates.*`
+5. Atualização de `AffiliatesSubnav.tsx`
+6. Endpoint público `aff-process-crm` + cron schedule
+7. Nada existente apagado; rotas e componentes prévios intactos
+
+**Confirmar para eu prosseguir com a implementação?**

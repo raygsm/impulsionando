@@ -4,7 +4,12 @@ import { cn } from "@/lib/utils";
 const TABS = [
   { to: "/affiliates", label: "Dashboard", exact: true },
   { to: "/affiliates/products", label: "Produtos" },
+  { to: "/affiliates/plans", label: "Planos" },
   { to: "/affiliates/offers", label: "Ofertas" },
+  { to: "/affiliates/coupons", label: "Cupons" },
+  { to: "/affiliates/bumps", label: "Order Bump" },
+  { to: "/affiliates/upsells", label: "Upsell" },
+  { to: "/affiliates/crosssells", label: "Cross-sell" },
   { to: "/affiliates/affiliates", label: "Afiliados" },
   { to: "/affiliates/coproducers", label: "Coprodutores" },
   { to: "/affiliates/managers", label: "Gerentes" },
@@ -12,6 +17,7 @@ const TABS = [
   { to: "/affiliates/sales", label: "Vendas" },
   { to: "/affiliates/commissions", label: "Comissões" },
   { to: "/affiliates/payouts", label: "Saques" },
+  { to: "/affiliates/crm", label: "CRM" },
   { to: "/affiliates/reports", label: "Relatórios" },
 ];
 

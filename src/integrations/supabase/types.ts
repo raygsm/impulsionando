@@ -165,6 +165,65 @@ export type Database = {
           },
         ]
       }
+      aff_bumps: {
+        Row: {
+          affiliate_gets_commission: boolean
+          bump_product_id: string | null
+          commission_override: number | null
+          company_id: string
+          coproducer_participates: boolean
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          price_cents: number
+          product_id: string
+          updated_at: string
+        }
+        Insert: {
+          affiliate_gets_commission?: boolean
+          bump_product_id?: string | null
+          commission_override?: number | null
+          company_id: string
+          coproducer_participates?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          price_cents?: number
+          product_id: string
+          updated_at?: string
+        }
+        Update: {
+          affiliate_gets_commission?: boolean
+          bump_product_id?: string | null
+          commission_override?: number | null
+          company_id?: string
+          coproducer_participates?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          price_cents?: number
+          product_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aff_bumps_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "aff_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       aff_commissions: {
         Row: {
           affiliate_id: string | null
@@ -355,6 +414,211 @@ export type Database = {
           },
         ]
       }
+      aff_coupons: {
+        Row: {
+          affiliate_id: string | null
+          code: string
+          company_id: string
+          created_at: string
+          discount_type: string
+          discount_value: number
+          id: string
+          keep_commission: boolean
+          max_per_customer: number | null
+          max_uses: number | null
+          offer_id: string | null
+          product_id: string | null
+          status: string
+          updated_at: string
+          used_count: number
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          affiliate_id?: string | null
+          code: string
+          company_id: string
+          created_at?: string
+          discount_type: string
+          discount_value: number
+          id?: string
+          keep_commission?: boolean
+          max_per_customer?: number | null
+          max_uses?: number | null
+          offer_id?: string | null
+          product_id?: string | null
+          status?: string
+          updated_at?: string
+          used_count?: number
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          affiliate_id?: string | null
+          code?: string
+          company_id?: string
+          created_at?: string
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          keep_commission?: boolean
+          max_per_customer?: number | null
+          max_uses?: number | null
+          offer_id?: string | null
+          product_id?: string | null
+          status?: string
+          updated_at?: string
+          used_count?: number
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
+      aff_crm_events: {
+        Row: {
+          channel: string | null
+          company_id: string
+          converted_at: string | null
+          created_at: string
+          customer_email: string | null
+          customer_phone: string | null
+          flow_id: string
+          id: string
+          payload: Json | null
+          sale_id: string | null
+          scheduled_at: string
+          sent_at: string | null
+          status: string
+          step_index: number
+        }
+        Insert: {
+          channel?: string | null
+          company_id: string
+          converted_at?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_phone?: string | null
+          flow_id: string
+          id?: string
+          payload?: Json | null
+          sale_id?: string | null
+          scheduled_at?: string
+          sent_at?: string | null
+          status?: string
+          step_index?: number
+        }
+        Update: {
+          channel?: string | null
+          company_id?: string
+          converted_at?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_phone?: string | null
+          flow_id?: string
+          id?: string
+          payload?: Json | null
+          sale_id?: string | null
+          scheduled_at?: string
+          sent_at?: string | null
+          status?: string
+          step_index?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aff_crm_events_flow_id_fkey"
+            columns: ["flow_id"]
+            isOneToOne: false
+            referencedRelation: "aff_crm_flows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      aff_crm_flows: {
+        Row: {
+          affiliate_id: string | null
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          kind: string
+          name: string
+          product_id: string | null
+          steps: Json
+          stop_on_paid: boolean
+          updated_at: string
+        }
+        Insert: {
+          affiliate_id?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind: string
+          name: string
+          product_id?: string | null
+          steps?: Json
+          stop_on_paid?: boolean
+          updated_at?: string
+        }
+        Update: {
+          affiliate_id?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind?: string
+          name?: string
+          product_id?: string | null
+          steps?: Json
+          stop_on_paid?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      aff_crosssells: {
+        Row: {
+          company_id: string
+          created_at: string
+          cross_product_id: string | null
+          id: string
+          is_active: boolean
+          moment: string
+          name: string
+          product_id: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          cross_product_id?: string | null
+          id?: string
+          is_active?: boolean
+          moment?: string
+          name: string
+          product_id: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          cross_product_id?: string | null
+          id?: string
+          is_active?: boolean
+          moment?: string
+          name?: string
+          product_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aff_crosssells_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "aff_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       aff_links: {
         Row: {
           affiliate_id: string | null
@@ -504,6 +768,7 @@ export type Database = {
         Row: {
           allow_affiliate: boolean
           allow_coupon: boolean
+          allow_installments: boolean | null
           billing: Database["public"]["Enums"]["aff_offer_billing"]
           checkout_url: string | null
           commission_pct: number | null
@@ -511,7 +776,9 @@ export type Database = {
           created_at: string
           id: string
           installments: number
+          interest_paid_by: string | null
           landing_url: string | null
+          max_installments: number | null
           metadata: Json
           name: string
           price: number
@@ -524,6 +791,7 @@ export type Database = {
         Insert: {
           allow_affiliate?: boolean
           allow_coupon?: boolean
+          allow_installments?: boolean | null
           billing?: Database["public"]["Enums"]["aff_offer_billing"]
           checkout_url?: string | null
           commission_pct?: number | null
@@ -531,7 +799,9 @@ export type Database = {
           created_at?: string
           id?: string
           installments?: number
+          interest_paid_by?: string | null
           landing_url?: string | null
+          max_installments?: number | null
           metadata?: Json
           name: string
           price?: number
@@ -544,6 +814,7 @@ export type Database = {
         Update: {
           allow_affiliate?: boolean
           allow_coupon?: boolean
+          allow_installments?: boolean | null
           billing?: Database["public"]["Enums"]["aff_offer_billing"]
           checkout_url?: string | null
           commission_pct?: number | null
@@ -551,7 +822,9 @@ export type Database = {
           created_at?: string
           id?: string
           installments?: number
+          interest_paid_by?: string | null
           landing_url?: string | null
+          max_installments?: number | null
           metadata?: Json
           name?: string
           price?: number
@@ -676,23 +949,87 @@ export type Database = {
           },
         ]
       }
+      aff_product_plans: {
+        Row: {
+          company_id: string
+          consumption_days: number | null
+          created_at: string
+          followup_after_end_days: number | null
+          followup_before_end_days: number | null
+          followup_second_days_before: number | null
+          id: string
+          is_active: boolean
+          name: string
+          price_cents: number
+          product_id: string
+          quantity: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          consumption_days?: number | null
+          created_at?: string
+          followup_after_end_days?: number | null
+          followup_before_end_days?: number | null
+          followup_second_days_before?: number | null
+          id?: string
+          is_active?: boolean
+          name: string
+          price_cents?: number
+          product_id: string
+          quantity?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          consumption_days?: number | null
+          created_at?: string
+          followup_after_end_days?: number | null
+          followup_before_end_days?: number | null
+          followup_second_days_before?: number | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          price_cents?: number
+          product_id?: string
+          quantity?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aff_product_plans_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "aff_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       aff_products: {
         Row: {
           allow_affiliate: boolean
           allow_coupon: boolean
+          allow_installments: boolean | null
           allow_qrcode: boolean
           allow_unique_link: boolean
           base_price: number
           category: string | null
           checkout_url: string | null
           company_id: string
+          consumption_days: number | null
           created_at: string
           created_by: string | null
           default_commission_pct: number
           description: string | null
           id: string
           image_url: string | null
+          interest_paid_by: string | null
+          is_recurring_consumption: boolean | null
           kind: Database["public"]["Enums"]["aff_product_kind"]
+          max_installments: number | null
           metadata: Json
           name: string
           niche_slug: string | null
@@ -705,19 +1042,24 @@ export type Database = {
         Insert: {
           allow_affiliate?: boolean
           allow_coupon?: boolean
+          allow_installments?: boolean | null
           allow_qrcode?: boolean
           allow_unique_link?: boolean
           base_price?: number
           category?: string | null
           checkout_url?: string | null
           company_id: string
+          consumption_days?: number | null
           created_at?: string
           created_by?: string | null
           default_commission_pct?: number
           description?: string | null
           id?: string
           image_url?: string | null
+          interest_paid_by?: string | null
+          is_recurring_consumption?: boolean | null
           kind?: Database["public"]["Enums"]["aff_product_kind"]
+          max_installments?: number | null
           metadata?: Json
           name: string
           niche_slug?: string | null
@@ -730,19 +1072,24 @@ export type Database = {
         Update: {
           allow_affiliate?: boolean
           allow_coupon?: boolean
+          allow_installments?: boolean | null
           allow_qrcode?: boolean
           allow_unique_link?: boolean
           base_price?: number
           category?: string | null
           checkout_url?: string | null
           company_id?: string
+          consumption_days?: number | null
           created_at?: string
           created_by?: string | null
           default_commission_pct?: number
           description?: string | null
           id?: string
           image_url?: string | null
+          interest_paid_by?: string | null
+          is_recurring_consumption?: boolean | null
           kind?: Database["public"]["Enums"]["aff_product_kind"]
+          max_installments?: number | null
           metadata?: Json
           name?: string
           niche_slug?: string | null
@@ -770,6 +1117,7 @@ export type Database = {
           campaign: string | null
           chargeback_at: string | null
           company_id: string
+          coupon_id: string | null
           created_at: string
           customer_doc: string | null
           customer_email: string | null
@@ -781,14 +1129,20 @@ export type Database = {
           gateway_release_at: string | null
           gross_amount: number
           id: string
+          installment_interest: number | null
+          interest_paid_by: string | null
           internal_release_at: string | null
+          kind: string | null
           link_id: string | null
           manager_id: string | null
           metadata: Json
           net_amount: number
           offer_id: string | null
+          parent_sale_id: string | null
           payment_method: string | null
+          payment_status: string | null
           product_id: string
+          recovery_status: string | null
           refunded_at: string | null
           sold_at: string
           status: Database["public"]["Enums"]["aff_sale_status"]
@@ -801,6 +1155,7 @@ export type Database = {
           campaign?: string | null
           chargeback_at?: string | null
           company_id: string
+          coupon_id?: string | null
           created_at?: string
           customer_doc?: string | null
           customer_email?: string | null
@@ -812,14 +1167,20 @@ export type Database = {
           gateway_release_at?: string | null
           gross_amount: number
           id?: string
+          installment_interest?: number | null
+          interest_paid_by?: string | null
           internal_release_at?: string | null
+          kind?: string | null
           link_id?: string | null
           manager_id?: string | null
           metadata?: Json
           net_amount: number
           offer_id?: string | null
+          parent_sale_id?: string | null
           payment_method?: string | null
+          payment_status?: string | null
           product_id: string
+          recovery_status?: string | null
           refunded_at?: string | null
           sold_at?: string
           status?: Database["public"]["Enums"]["aff_sale_status"]
@@ -832,6 +1193,7 @@ export type Database = {
           campaign?: string | null
           chargeback_at?: string | null
           company_id?: string
+          coupon_id?: string | null
           created_at?: string
           customer_doc?: string | null
           customer_email?: string | null
@@ -843,14 +1205,20 @@ export type Database = {
           gateway_release_at?: string | null
           gross_amount?: number
           id?: string
+          installment_interest?: number | null
+          interest_paid_by?: string | null
           internal_release_at?: string | null
+          kind?: string | null
           link_id?: string | null
           manager_id?: string | null
           metadata?: Json
           net_amount?: number
           offer_id?: string | null
+          parent_sale_id?: string | null
           payment_method?: string | null
+          payment_status?: string | null
           product_id?: string
+          recovery_status?: string | null
           refunded_at?: string | null
           sold_at?: string
           status?: Database["public"]["Enums"]["aff_sale_status"]
@@ -894,6 +1262,65 @@ export type Database = {
           },
           {
             foreignKeyName: "aff_sales_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "aff_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      aff_upsells: {
+        Row: {
+          affiliate_gets_commission: boolean
+          commission_override: number | null
+          company_id: string
+          coproducer_participates: boolean
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          price_cents: number
+          product_id: string
+          trigger: string
+          updated_at: string
+          upsell_product_id: string | null
+        }
+        Insert: {
+          affiliate_gets_commission?: boolean
+          commission_override?: number | null
+          company_id: string
+          coproducer_participates?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          price_cents?: number
+          product_id: string
+          trigger?: string
+          updated_at?: string
+          upsell_product_id?: string | null
+        }
+        Update: {
+          affiliate_gets_commission?: boolean
+          commission_override?: number | null
+          company_id?: string
+          coproducer_participates?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          price_cents?: number
+          product_id?: string
+          trigger?: string
+          updated_at?: string
+          upsell_product_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aff_upsells_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "aff_products"

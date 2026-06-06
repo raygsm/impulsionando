@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { PLATFORM_FEE_PCT, gatewayDaysFor } from "./affiliates.constants";
 
 // ---------- helpers ----------
 
@@ -39,8 +40,8 @@ const RegisterSaleInput = z.object({
   customer_email: z.string().email().max(200).optional().nullable(),
   customer_doc: z.string().max(40).optional().nullable(),
   campaign: z.string().max(120).optional().nullable(),
-  gateway_release_days: z.number().int().min(0).max(180).default(30),
-  platform_pct: z.number().min(0).max(100).default(0),
+  gateway_release_days: z.number().int().min(0).max(180).optional(),
+  platform_pct: z.number().min(0).max(100).default(PLATFORM_FEE_PCT),
   status: z.enum([
     "venda_registrada", "pagto_pendente", "aprovado",
     "aguardando_gateway", "aguardando_prazo_interno", "disponivel",
@@ -48,6 +49,11 @@ const RegisterSaleInput = z.object({
   sold_at: z.string().datetime().optional(),
   gateway_provider: z.string().max(60).optional().nullable(),
   external_id: z.string().max(200).optional().nullable(),
+  installment_interest: z.number().min(0).default(0),
+  interest_paid_by: z.enum(["customer", "producer"]).default("customer"),
+  coupon_id: z.string().uuid().optional().nullable(),
+  parent_sale_id: z.string().uuid().optional().nullable(),
+  kind: z.enum(["main", "bump", "upsell", "cross"]).default("main"),
 });
 
 export const registerAffiliateSale = createServerFn({ method: "POST" })
@@ -57,7 +63,9 @@ export const registerAffiliateSale = createServerFn({ method: "POST" })
     const { supabase } = context;
     const soldAtDate = data.sold_at ? new Date(data.sold_at) : new Date();
     const soldAt = soldAtDate.toISOString();
-    const net = Math.max(0, data.gross_amount - data.gateway_fee);
+    const interestProducer = data.interest_paid_by === "producer" ? data.installment_interest : 0;
+    const net = Math.max(0, data.gross_amount - data.gateway_fee - interestProducer);
+    const gatewayDays = data.gateway_release_days ?? gatewayDaysFor(data.payment_method);
 
     // 1) Load product (default commission, producer)
     const { data: product, error: pErr } = await supabase
@@ -98,7 +106,7 @@ export const registerAffiliateSale = createServerFn({ method: "POST" })
       .eq("product_id", data.product_id)
       .eq("status", "aprovado");
 
-    const releaseAt = computeReleaseAt(soldAtDate, data.gateway_release_days, 3);
+    const releaseAt = computeReleaseAt(soldAtDate, gatewayDays, 3);
     const targetCommissionStatus =
       data.status === "aprovado" || data.status === "aguardando_gateway"
         ? "aguardando_gateway"
@@ -127,12 +135,17 @@ export const registerAffiliateSale = createServerFn({ method: "POST" })
         campaign: data.campaign ?? null,
         gateway_provider: data.gateway_provider ?? null,
         external_id: data.external_id ?? null,
-        gateway_release_at: new Date(soldAtDate.getTime() + data.gateway_release_days * 86400000).toISOString(),
+        gateway_release_at: new Date(soldAtDate.getTime() + gatewayDays * 86400000).toISOString(),
         internal_release_at: releaseAt,
         available_at: data.status === "disponivel" ? releaseAt : null,
         approved_at: data.status === "aprovado" || data.status === "aguardando_gateway" ? soldAt : null,
         sold_at: soldAt,
         status: data.status,
+        kind: data.kind,
+        coupon_id: data.coupon_id ?? null,
+        parent_sale_id: data.parent_sale_id ?? null,
+        installment_interest: data.installment_interest,
+        interest_paid_by: data.interest_paid_by,
       }).select("id").single();
     if (sErr || !sale) throw new Error(`Falha ao registrar venda: ${sErr?.message}`);
 
@@ -340,3 +353,162 @@ export const markPayoutPaid = createServerFn({ method: "POST" })
       .eq("payout_id", data.payout_id);
     return { ok: true };
   });
+
+// ---------- applyCoupon ----------
+
+export const applyCoupon = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({
+    company_id: z.string().uuid(),
+    code: z.string().min(1).max(60),
+    gross_amount: z.number().min(0),
+    product_id: z.string().uuid().optional().nullable(),
+  }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: coupon, error } = await supabase
+      .from("aff_coupons")
+      .select("id, discount_type, discount_value, valid_from, valid_until, max_uses, used_count, status, product_id, keep_commission")
+      .eq("company_id", data.company_id)
+      .eq("code", data.code.toUpperCase())
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!coupon) throw new Error("Cupom não encontrado");
+    if (coupon.status !== "ativo") throw new Error(`Cupom ${coupon.status}`);
+    const now = new Date();
+    if (coupon.valid_from && new Date(coupon.valid_from) > now) throw new Error("Cupom ainda não está válido");
+    if (coupon.valid_until && new Date(coupon.valid_until) < now) throw new Error("Cupom expirado");
+    if (coupon.max_uses && (coupon.used_count ?? 0) >= coupon.max_uses) throw new Error("Cupom esgotado");
+    if (coupon.product_id && data.product_id && coupon.product_id !== data.product_id) {
+      throw new Error("Cupom não se aplica a este produto");
+    }
+    const discount = coupon.discount_type === "percent"
+      ? +(data.gross_amount * (Number(coupon.discount_value) / 100)).toFixed(2)
+      : +Number(coupon.discount_value).toFixed(2);
+    return {
+      coupon_id: coupon.id,
+      discount: Math.min(discount, data.gross_amount),
+      final_amount: +Math.max(0, data.gross_amount - discount).toFixed(2),
+      keep_commission: coupon.keep_commission,
+    };
+  });
+
+// ---------- enqueueCrmFlow ----------
+
+export const enqueueCrmFlow = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({
+    company_id: z.string().uuid(),
+    flow_kind: z.enum(["cart_recovery","pix_pending","boleto_pending","card_declined","repurchase","post_purchase"]),
+    product_id: z.string().uuid().optional().nullable(),
+    sale_id: z.string().uuid().optional().nullable(),
+    customer_email: z.string().email().max(200).optional().nullable(),
+    customer_phone: z.string().max(40).optional().nullable(),
+  }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    let q = supabase.from("aff_crm_flows")
+      .select("id, steps")
+      .eq("company_id", data.company_id)
+      .eq("kind", data.flow_kind)
+      .eq("is_active", true);
+    if (data.product_id) q = q.or(`product_id.eq.${data.product_id},product_id.is.null`);
+    const { data: flows, error } = await q;
+    if (error) throw new Error(error.message);
+    if (!flows?.length) return { events: 0 };
+
+    let count = 0;
+    for (const flow of flows) {
+      const steps = (flow.steps as Array<{ delay_days?: number; channel?: string; template?: string }>) ?? [];
+      const rows = steps.map((s, idx) => ({
+        company_id: data.company_id,
+        flow_id: flow.id,
+        sale_id: data.sale_id ?? null,
+        customer_email: data.customer_email ?? null,
+        customer_phone: data.customer_phone ?? null,
+        step_index: idx,
+        scheduled_at: new Date(Date.now() + (s.delay_days ?? 0) * 86400000).toISOString(),
+        channel: s.channel ?? "email",
+        payload: { template: s.template ?? "" },
+        status: "pending" as const,
+      }));
+      if (rows.length) {
+        const { error: insErr } = await supabase.from("aff_crm_events").insert(rows as never);
+        if (!insErr) count += rows.length;
+      }
+    }
+    return { events: count };
+  });
+
+// ---------- seedDemoEmagrecedor ----------
+
+export const seedDemoEmagrecedor = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ company_id: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+
+    // 1) Product
+    const { data: prod, error: prodErr } = await supabase.from("aff_products").insert({
+      company_id: data.company_id,
+      name: "Super Emagrecedor Premium",
+      description: "Suplemento natural para emagrecimento — demo",
+      sku: `DEMO-EMAG-${Date.now()}`,
+      default_commission_pct: 40,
+      producer_user_id: userId,
+      is_recurring_consumption: true,
+      allow_installments: true,
+      max_installments: 12,
+      interest_paid_by: "customer",
+      is_active: true,
+    } as never).select("id").single();
+    if (prodErr || !prod) throw new Error(`Erro ao criar produto demo: ${prodErr?.message}`);
+
+    // 2) Plans
+    const plans = [
+      { name: "1 Pote — Tratamento Inicial", quantity: 1, consumption_days: 30, price_cents: 19700, sort_order: 1 },
+      { name: "2 Potes — Tratamento Completo", quantity: 2, consumption_days: 60, price_cents: 34700, sort_order: 2 },
+      { name: "3 Potes — Melhor Resultado", quantity: 3, consumption_days: 90, price_cents: 49700, sort_order: 3 },
+    ];
+    await supabase.from("aff_product_plans").insert(
+      plans.map((p) => ({ ...p, company_id: data.company_id, product_id: prod.id })) as never
+    );
+
+    // 3) Order bump
+    await supabase.from("aff_bumps").insert({
+      company_id: data.company_id,
+      product_id: prod.id,
+      name: "Guia Digital de Alimentação Inteligente",
+      description: "Adicione um guia prático para potencializar seu tratamento por apenas R$ 29,90.",
+      price_cents: 2990,
+      is_active: true,
+    } as never);
+
+    // 4) Upsell
+    await supabase.from("aff_upsells").insert({
+      company_id: data.company_id,
+      product_id: prod.id,
+      name: "Upgrade para 3 Potes com Desconto Especial",
+      description: "Você acabou de comprar 1 pote. Garanta o tratamento completo de 90 dias.",
+      price_cents: 39700,
+      trigger: "after_approved",
+      is_active: true,
+    } as never);
+
+    // 5) CRM repurchase flow
+    await supabase.from("aff_crm_flows").insert({
+      company_id: data.company_id,
+      product_id: prod.id,
+      name: "Recompra — Emagrecedor",
+      kind: "repurchase",
+      is_active: true,
+      steps: [
+        { delay_days: 23, channel: "whatsapp", template: "Seu tratamento está chegando à reta final..." },
+        { delay_days: 29, channel: "whatsapp", template: "Seu produto deve estar acabando. Renovar agora?" },
+        { delay_days: 33, channel: "email", template: "Percebemos que seu ciclo terminou. Link de recompra:" },
+      ],
+    } as never);
+
+    return { product_id: prod.id, ok: true };
+  });
+
