@@ -153,6 +153,8 @@ import { Route as ApiPublicHooksMarketingLeadNotifyRouteImport } from './routes/
 import { Route as ApiPublicHooksCommsSelfTestRouteImport } from './routes/api/public/hooks/comms-self-test'
 import { Route as ApiPublicHooksAffAdvanceCommissionsRouteImport } from './routes/api/public/hooks/aff-advance-commissions'
 import { Route as ApiPublicDemoSendTestRouteImport } from './routes/api/public/demo/send-test'
+import { Route as ApiPaymentsInfinitepayCreateRouteImport } from './routes/api/payments/infinitepay.create'
+import { Route as ApiPaymentsInfinitepayCheckStatusRouteImport } from './routes/api/payments/infinitepay.check-status'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
 import { Route as ApiPublicPaymentsInfinitepayWebhookRouteImport } from './routes/api/public/payments/infinitepay.webhook'
 
@@ -934,6 +936,18 @@ const ApiPublicDemoSendTestRoute = ApiPublicDemoSendTestRouteImport.update({
   path: '/api/public/demo/send-test',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPaymentsInfinitepayCreateRoute =
+  ApiPaymentsInfinitepayCreateRouteImport.update({
+    id: '/api/payments/infinitepay/create',
+    path: '/api/payments/infinitepay/create',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPaymentsInfinitepayCheckStatusRoute =
+  ApiPaymentsInfinitepayCheckStatusRouteImport.update({
+    id: '/api/payments/infinitepay/check-status',
+    path: '/api/payments/infinitepay/check-status',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedSalesCashIdRoute =
   AuthenticatedSalesCashIdRouteImport.update({
     id: '/$id',
@@ -1079,6 +1093,8 @@ export interface FileRoutesByFullPath {
   '/reports/': typeof AuthenticatedReportsIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
+  '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
+  '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
@@ -1216,6 +1232,8 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedReportsIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
+  '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
+  '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
@@ -1365,6 +1383,8 @@ export interface FileRoutesById {
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
+  '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
+  '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
@@ -1514,6 +1534,8 @@ export interface FileRouteTypes {
     | '/reports/'
     | '/sales/'
     | '/sales/cash/$id'
+    | '/api/payments/infinitepay/check-status'
+    | '/api/payments/infinitepay/create'
     | '/api/public/demo/send-test'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/comms-self-test'
@@ -1651,6 +1673,8 @@ export interface FileRouteTypes {
     | '/reports'
     | '/sales'
     | '/sales/cash/$id'
+    | '/api/payments/infinitepay/check-status'
+    | '/api/payments/infinitepay/create'
     | '/api/public/demo/send-test'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/comms-self-test'
@@ -1799,6 +1823,8 @@ export interface FileRouteTypes {
     | '/_authenticated/reports/'
     | '/_authenticated/sales/'
     | '/_authenticated/sales/cash/$id'
+    | '/api/payments/infinitepay/check-status'
+    | '/api/payments/infinitepay/create'
     | '/api/public/demo/send-test'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/comms-self-test'
@@ -1861,6 +1887,8 @@ export interface RootRouteChildren {
   TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
   DemoNichoSlugRoute: typeof DemoNichoSlugRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPaymentsInfinitepayCheckStatusRoute: typeof ApiPaymentsInfinitepayCheckStatusRoute
+  ApiPaymentsInfinitepayCreateRoute: typeof ApiPaymentsInfinitepayCreateRoute
   ApiPublicDemoSendTestRoute: typeof ApiPublicDemoSendTestRoute
   ApiPublicHooksAffAdvanceCommissionsRoute: typeof ApiPublicHooksAffAdvanceCommissionsRoute
   ApiPublicHooksCommsSelfTestRoute: typeof ApiPublicHooksCommsSelfTestRoute
@@ -2887,6 +2915,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDemoSendTestRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/payments/infinitepay/create': {
+      id: '/api/payments/infinitepay/create'
+      path: '/api/payments/infinitepay/create'
+      fullPath: '/api/payments/infinitepay/create'
+      preLoaderRoute: typeof ApiPaymentsInfinitepayCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/payments/infinitepay/check-status': {
+      id: '/api/payments/infinitepay/check-status'
+      path: '/api/payments/infinitepay/check-status'
+      fullPath: '/api/payments/infinitepay/check-status'
+      preLoaderRoute: typeof ApiPaymentsInfinitepayCheckStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/sales/cash/$id': {
       id: '/_authenticated/sales/cash/$id'
       path: '/$id'
@@ -3248,6 +3290,9 @@ const rootRouteChildren: RootRouteChildren = {
   TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
   DemoNichoSlugRoute: DemoNichoSlugRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPaymentsInfinitepayCheckStatusRoute:
+    ApiPaymentsInfinitepayCheckStatusRoute,
+  ApiPaymentsInfinitepayCreateRoute: ApiPaymentsInfinitepayCreateRoute,
   ApiPublicDemoSendTestRoute: ApiPublicDemoSendTestRoute,
   ApiPublicHooksAffAdvanceCommissionsRoute:
     ApiPublicHooksAffAdvanceCommissionsRoute,
