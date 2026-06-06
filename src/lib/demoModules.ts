@@ -4,12 +4,14 @@ import {
   Calendar,
   CreditCard,
   Handshake,
+  Scale,
   Store,
   Ticket,
   Trophy,
   Users,
   type LucideIcon,
 } from "lucide-react";
+
 
 export type DemoModuleRoute =
   | "/demo"
