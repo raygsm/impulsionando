@@ -223,6 +223,7 @@ export function DemoShell({
             </div>
           </main>
         </div>
+        <DemoTestContactPanel />
       </div>
     </TooltipProvider>
   );
