@@ -752,12 +752,14 @@ export function ServicosPanel({
   }
 
   function toggleStatus(id: string) {
+    if (!podeEditar) { toast.error("Sem permissão para alterar Serviços."); return; }
     setServicos((prev) => prev.map((s) => s.id === id ? { ...s, ativo: !(s.ativo ?? true) } : s));
     const s = servicos.find((x) => x.id === id);
     onLog({ area: "Serviços", acao: "Alternou status do serviço", registro: s?.nome });
   }
 
   function remove(id: string) {
+    if (!podeEditar) { toast.error("Sem permissão para remover Serviços."); return; }
     const s = servicos.find((x) => x.id === id);
     setServicos((prev) => prev.filter((x) => x.id !== id));
     onLog({ area: "Serviços", acao: "Removeu serviço demo", registro: s?.nome });
@@ -765,6 +767,7 @@ export function ServicosPanel({
 
   return (
     <div className="space-y-4">
+      {!podeEditar && <LockedBanner area="Serviços" />}
       <Card className="p-5 space-y-3">
         <div className="flex items-start justify-between gap-2 flex-wrap">
           <div>
