@@ -96,7 +96,7 @@ export const registerAffiliateSale = createServerFn({ method: "POST" })
       .from("aff_coproducers")
       .select("id, user_id, participation_pct, fixed_amount, applies_to_affiliate_sales, scope, offer_id")
       .eq("product_id", data.product_id)
-      .eq("status", "active");
+      .eq("status", "aprovado");
 
     const releaseAt = computeReleaseAt(soldAtDate, data.gateway_release_days, 3);
     const targetCommissionStatus =
