@@ -321,6 +321,12 @@ function PlanosPage() {
 
                 {plan.monthly !== null && PRICE_IDS[plan.name] ? (
                   <div className="mt-6 space-y-2">
+                    <div className="rounded-md border border-amber-300/70 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800/60 p-2.5 text-[11px] leading-snug text-amber-900 dark:text-amber-100">
+                      <strong>Contrato mínimo 90 dias.</strong> Setup{" "}
+                      {formatBRL(PLAN_SETUP_BRL[plan.name] ?? 0)} (1ª parcela) + 3
+                      mensalidades = <strong>4 pagamentos obrigatórios</strong> no
+                      ciclo inicial. Módulos extras: {formatBRL(EXTRA_MODULE_BRL)}/mês.
+                    </div>
                     {pickedModules[plan.name]?.length ? (
                       <div className="text-[11px] text-muted-foreground">
                         {pickedModules[plan.name].length} módulo(s) selecionado(s)
