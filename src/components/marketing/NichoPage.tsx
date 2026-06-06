@@ -215,10 +215,81 @@ export function NichoPage({ nicho }: Props) {
           </section>
         )}
 
+        {/* EXEMPLOS LOGÍSTICOS / FORMULÁRIO / DASHBOARD POR NICHO */}
+        {(() => {
+          const extra = NICHO_EXTRAS[nicho.slug];
+          if (!extra) return null;
+          return (
+            <>
+              {extra.logisticsExamples && extra.logisticsExamples.length > 0 && (
+                <section>
+                  <div className="flex items-center gap-2 mb-5">
+                    <Zap className="w-5 h-5 text-primary" />
+                    <h2 className="text-2xl font-bold tracking-tight">Como a operação funciona, na prática</h2>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {extra.logisticsExamples.map((g) => (
+                      <Card key={g.title} className="p-6">
+                        <h3 className="font-semibold mb-3">{g.title}</h3>
+                        <ul className="space-y-2 text-sm leading-relaxed">
+                          {g.items.map((it) => (
+                            <li key={it} className="flex gap-2">
+                              <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                              <span>{it}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </Card>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {(extra.formExample || extra.dashboardExample) && (
+                <section className="grid md:grid-cols-2 gap-4">
+                  {extra.formExample && (
+                    <Card className="p-6">
+                      <h3 className="font-semibold mb-3 flex items-center gap-2">
+                        <Lightbulb className="w-4 h-4 text-primary" /> {extra.formExample.title}
+                      </h3>
+                      <ul className="space-y-1.5 text-sm">
+                        {extra.formExample.fields.map((f) => (
+                          <li key={f} className="text-muted-foreground">• {f}</li>
+                        ))}
+                      </ul>
+                    </Card>
+                  )}
+                  {extra.dashboardExample && (
+                    <Card className="p-6">
+                      <h3 className="font-semibold mb-3 flex items-center gap-2">
+                        <Target className="w-4 h-4 text-primary" /> {extra.dashboardExample.title}
+                      </h3>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        {extra.dashboardExample.cards.map((c) => (
+                          <div key={c} className="rounded-md border bg-muted/30 px-3 py-2 text-xs font-medium">
+                            {c}
+                          </div>
+                        ))}
+                      </div>
+                    </Card>
+                  )}
+                </section>
+              )}
+
+              {extra.closingPitch && (
+                <section className="rounded-xl border bg-gradient-to-br from-primary/5 to-accent/5 p-6">
+                  <p className="text-base leading-relaxed text-foreground/90">{extra.closingPitch}</p>
+                </section>
+              )}
+            </>
+          );
+        })()}
+
         {/* WHATSAPP */}
         <section>
           <WhatsAppBlock />
         </section>
+
 
         {/* MÓDULOS RECOMENDADOS */}
         <section>
