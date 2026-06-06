@@ -28,6 +28,9 @@ import { RoiSimulator } from "@/components/demo/RoiSimulator";
 import { gotoWhatsapp, gotoAgenda } from "@/lib/demoCrossLink";
 import { createCrmMock, CRM_DEFAULT_PARAMS, type CrmParams } from "@/lib/demoModuleMocks";
 import { HelpTip } from "@/components/demo/HelpTip";
+import { LeadsPanel } from "@/components/demo/crm/LeadsPanel";
+import { ClientesPanel } from "@/components/demo/crm/ClientesPanel";
+import { makeDemoLog, type DemoLogInput } from "@/lib/demoCrmCrud";
 
 export const Route = createFileRoute("/demo/crm")({
   head: () => ({
@@ -40,11 +43,11 @@ export const Route = createFileRoute("/demo/crm")({
   component: DemoCRM,
 });
 
-type Lead = { id: string; nome: string; email: string; telefone: string; origem: string; estagio: string; valor: number; score: number; tags: string[]; criadoEm: string };
+type Lead = { id: string; nome: string; email: string; telefone: string; origem: string; estagio: string; valor: number; score: number; tags: string[]; criadoEm: string; whatsapp?: string; status?: string; nivelInteresse?: string; campanha?: string; canal?: string; interesse?: string; produtoInteresse?: string; proximaAcao?: string; responsavel?: string; proximoContato?: string; observacoes?: string; motivoPerda?: string };
 type Atividade = { id: string; leadId: string; tipo: "ligacao" | "email" | "whatsapp" | "tarefa"; titulo: string; data: string; concluida: boolean };
 type Template = { id: string; nome: string; canal: "email" | "whatsapp"; corpo: string };
 type Automacao = { id: string; nome: string; gatilho: string; acao: string; ativa: boolean };
-type Cliente = { id: string; nome: string; documento: string; email: string; telefone: string; produto: string; plano: string; status: "Ativo" | "Inativo" };
+type Cliente = { id: string; nome: string; documento: string; email: string; telefone: string; produto: string; plano: string; status: string; tipo?: "PF" | "PJ"; cidade?: string; estado?: string; origem?: string; campanha?: string; interesse?: string; produtoInteresse?: string; planoInteresse?: string; servicoInteresse?: string; responsavel?: string; tags?: string[]; observacoes?: string; emailTeste?: string; whatsappTeste?: string };
 type Empresa = { id: string; razaoSocial: string; cnpj: string; segmento: string };
 type Produto = { id: string; nome: string; preco: number; descricao: string };
 type Plano = { id: string; nome: string; preco: number; ciclo: string; itens: string[] };
@@ -121,6 +124,11 @@ function DemoCRM() {
     window.localStorage.removeItem("imp.demo.mock.crm");
     toast.success("Dados demonstrativos do CRM restaurados para o padrão inicial.");
     setTimeout(() => window.location.reload(), 400);
+  }
+
+  function pushLog(input: DemoLogInput) {
+    const entry = makeDemoLog({ usuario: "sessao-demo", ...input });
+    setLogs((prev) => [{ id: entry.id, quando: entry.quando, usuario: entry.usuario, acao: `[${entry.area}] ${entry.acao}${entry.registro ? ` — ${entry.registro}` : ""}${entry.canal ? ` (${entry.canal})` : ""}` }, ...prev].slice(0, 200));
   }
 
   function moverEstagio(id: string, dir: 1 | -1) {
@@ -267,54 +275,32 @@ function DemoCRM() {
 
             {/* LEADS */}
             <TabsContent value="leads" className="mt-4 space-y-4">
-              <Card className="p-5"><NovoLead onCreate={(l) => { setLeads((p) => [l, ...p]); setLogs((p) => [{ id: uid("lg"), quando: new Date().toISOString(), usuario: "Vendedor Demo", acao: `Criou lead ${l.nome}` }, ...p]); }} /></Card>
-              <Card className="p-5">
-                {leads.length === 0 ? <p className="text-sm text-muted-foreground">Sem leads.</p> : (
-                  <Table>
-                    <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Contato</TableHead><TableHead>Origem</TableHead><TableHead>Etapa</TableHead><TableHead className="text-right">Valor</TableHead><TableHead className="text-right">Ações</TableHead></TableRow></TableHeader>
-                    <TableBody>
-                      {leads.map((l) => (
-                        <TableRow key={l.id}>
-                          <TableCell><div className="font-medium">{l.nome}</div><div className="text-xs text-muted-foreground">Score {l.score}</div></TableCell>
-                          <TableCell className="text-xs"><div>{l.email}</div><div className="text-muted-foreground">{l.telefone}</div></TableCell>
-                          <TableCell><Badge variant="outline">{l.origem}</Badge></TableCell>
-                          <TableCell><Badge>{l.estagio}</Badge></TableCell>
-                          <TableCell className="text-right">{l.valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-1">
-                              <Button size="sm" variant="outline" title="WhatsApp simulado" onClick={() => { gotoWhatsapp({ nome: l.nome, telefone: l.telefone, email: l.email }, `TESTE — DEMONSTRAÇÃO — VERSÃO TESTE\n\nOlá ${l.nome}, tudo bem?`); toast.success("Conversa simulada — Enviado — DEMO"); }}>
-                                <MessageSquare className="w-3.5 h-3.5" />
-                              </Button>
-                              <Button size="sm" variant="outline" title="Agendar" onClick={() => gotoAgenda({ nome: l.nome, telefone: l.telefone })}><Calendar className="w-3.5 h-3.5" /></Button>
-                              <Button size="sm" variant="ghost" title="Excluir" onClick={() => setLeads((p) => p.filter((x) => x.id !== l.id))}><Trash2 className="w-3.5 h-3.5" /></Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </Card>
+              <LeadsPanel
+                leads={leads}
+                setLeads={setLeads}
+                origens={origens}
+                clientes={clientes}
+                setClientes={setClientes}
+                onLog={pushLog}
+                exigirOrigem={params.exigirOrigem}
+                exigirResponsavel={params.exigirResponsavel}
+              />
             </TabsContent>
 
             {/* CLIENTES */}
             <TabsContent value="clientes" className="mt-4 space-y-4">
-              <SimpleListPanel
-                title="Clientes"
-                items={clientes}
-                empty="Sem clientes cadastrados."
-                columns={[
-                  { k: "nome", h: "Nome" },
-                  { k: "documento", h: "Documento" },
-                  { k: "produto", h: "Produto" },
-                  { k: "plano", h: "Plano" },
-                  { k: "status", h: "Status", render: (v) => <Badge variant="outline">{v}</Badge> },
-                ]}
-                onAdd={(nome) => { setClientes((p) => [{ id: uid("cl"), nome, documento: "—", email: "—", telefone: "—", produto: "—", plano: "—", status: "Ativo" }, ...p]); }}
-                onRemove={(id) => setClientes((p) => p.filter((x) => x.id !== id))}
-                placeholder="Razão social ou nome do cliente"
+              <ClientesPanel
+                clientes={clientes}
+                setClientes={setClientes}
+                produtos={produtos}
+                planos={planos}
+                servicos={servicos}
+                origens={origens}
+                onLog={pushLog}
+                exigirResponsavel={params.exigirResponsavel}
               />
             </TabsContent>
+
 
             {/* EMPRESAS */}
             <TabsContent value="empresas" className="mt-4 space-y-4">
