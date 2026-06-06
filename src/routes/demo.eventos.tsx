@@ -24,6 +24,7 @@ import { useDemoState, uid, brl } from "@/lib/demoSandbox";
 import { GuidedTour } from "@/components/demo/GuidedTour";
 import { RoiSimulator } from "@/components/demo/RoiSimulator";
 import { DemoContractCTA } from "@/components/demo/DemoContractCTA";
+import { createEventosMock } from "@/lib/demoModuleMocks";
 
 export const Route = createFileRoute("/demo/eventos")({
   head: () => ({
@@ -82,19 +83,11 @@ function DemoEventos() {
   }, [ingressos, eventoAtivo]);
 
   function criarEventoExemplo() {
-    const e: Evento = {
-      id: uid("evt"),
-      nome: "Workshop Demo Impulsionando",
-      data: new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
-      local: "Centro de Convenções (demo)",
-      lotes: [
-        { id: uid("lt"), nome: "Lote 1 (early bird)", preco: 97, quantidade: 50 },
-        { id: uid("lt"), nome: "Lote 2", preco: 147, quantidade: 100 },
-        { id: uid("lt"), nome: "VIP", preco: 297, quantidade: 20 },
-      ],
-    };
-    setEventos([e]);
-    toast.success("Evento de exemplo criado.");
+    const mock = createEventosMock();
+    setEventos([mock.evento]);
+    setIngressos([]);
+    setParams(mock.params);
+    toast.success("Evento fictício específico do módulo Eventos criado.");
   }
 
   function venderIngresso(loteId?: string) {
@@ -146,7 +139,7 @@ function DemoEventos() {
     <TooltipProvider delayDuration={150}>
       <div className="min-h-screen flex flex-col bg-background">
         <PublicHeader />
-        <DemoModeBanner />
+        <DemoModeBanner current="eventos" />
         <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 w-full">
           <div className="flex items-start justify-between gap-3 flex-wrap">
             <div>
