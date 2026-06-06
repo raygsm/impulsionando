@@ -754,7 +754,7 @@ function SimpleListPanel<T extends { id: string }>({
   title: string;
   items: T[];
   empty: string;
-  columns: { k: keyof T; h: string; render?: (v: unknown) => React.ReactNode }[];
+  columns: { k: keyof T; h: string; render?: (v: T[keyof T]) => React.ReactNode }[];
   onAdd: (nome: string) => void;
   onRemove: (id: string) => void;
   placeholder: string;
@@ -769,7 +769,20 @@ function SimpleListPanel<T extends { id: string }>({
           <TableBody>
             {items.map((it) => (
               <TableRow key={it.id}>
-                {columns.map((c) => <TableCell key={String(c.k)}>{c.render ? c.render(it[c.k]) : String((it[c.k] as unknown) ?? "—")}</TableCell>)}
+                {columns.map((c) => {
+                  const raw = it[c.k];
+                  const node: React.ReactNode = c.render ? c.render(raw) : String(raw ?? "—");
+                  return <TableCell key={String(c.k)}>{node}</TableCell>;
+                })}
+                <TableCell className="text-right"><Button size="sm" variant="ghost" onClick={() => onRemove(it.id)}><Trash2 className="w-4 h-4" /></Button></TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+    </Card>
+  );
+}
                 <TableCell className="text-right"><Button size="sm" variant="ghost" onClick={() => onRemove(it.id)}><Trash2 className="w-4 h-4" /></Button></TableCell>
               </TableRow>
             ))}
