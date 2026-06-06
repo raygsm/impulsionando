@@ -30,6 +30,7 @@ import { createCrmMock, CRM_DEFAULT_PARAMS, type CrmParams } from "@/lib/demoMod
 import { HelpTip } from "@/components/demo/HelpTip";
 import { LeadsPanel } from "@/components/demo/crm/LeadsPanel";
 import { ClientesPanel } from "@/components/demo/crm/ClientesPanel";
+import { EmpresasPanel, ProdutosPanel, PlanosPanel, ServicosPanel } from "@/components/demo/crm/CrudPanels";
 import { makeDemoLog, type DemoLogInput } from "@/lib/demoCrmCrud";
 
 export const Route = createFileRoute("/demo/crm")({
