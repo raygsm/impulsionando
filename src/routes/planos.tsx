@@ -192,7 +192,7 @@ function PlanosPage() {
         customData: {
           ...(user?.user?.id ? { userId: user.user.id } : {}),
           plan: plan.name,
-          modules,
+          modules: modules.join(","),
         },
       });
     } catch {
