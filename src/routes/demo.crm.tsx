@@ -383,50 +383,26 @@ function DemoCRM() {
 
             {/* PRODUTOS */}
             <TabsContent value="produtos" className="mt-4 space-y-4">
-              <SimpleListPanel
-                title="Produtos"
-                items={produtos}
-                empty="Sem produtos."
-                columns={[
-                  { k: "nome", h: "Nome" },
-                  { k: "preco", h: "Preço", render: (v) => Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) },
-                  { k: "descricao", h: "Descrição" },
-                ]}
-                onAdd={(nome) => setProdutos((p) => [{ id: uid("pr"), nome, preco: 0, descricao: "—" }, ...p])}
-                onRemove={(id) => setProdutos((p) => p.filter((x) => x.id !== id))}
-                placeholder="Nome do produto"
-              />
+              <ProdutosPanel produtos={produtos} setProdutos={setProdutos} onLog={pushLog} />
             </TabsContent>
 
             {/* PLANOS */}
             <TabsContent value="planos" className="mt-4 space-y-4">
-              <div className="grid md:grid-cols-3 gap-3">
-                {planos.map((p) => (
-                  <Card key={p.id} className="p-5">
-                    <div className="font-semibold">{p.nome}</div>
-                    <div className="text-2xl font-bold mt-1">{p.preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}<span className="text-xs text-muted-foreground">/{p.ciclo}</span></div>
-                    <ul className="text-xs text-muted-foreground mt-3 space-y-1">{p.itens.map((it, i) => <li key={i}>• {it}</li>)}</ul>
-                  </Card>
-                ))}
-              </div>
+              <PlanosPanel planos={planos} setPlanos={setPlanos} clientes={clientes} onLog={pushLog} />
             </TabsContent>
 
             {/* SERVIÇOS */}
             <TabsContent value="servicos" className="mt-4 space-y-4">
-              <SimpleListPanel
-                title="Serviços"
-                items={servicos}
-                empty="Sem serviços."
-                columns={[
-                  { k: "nome", h: "Nome" },
-                  { k: "preco", h: "Preço", render: (v) => Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) },
-                  { k: "duracao", h: "Duração" },
-                ]}
-                onAdd={(nome) => setServicos((p) => [{ id: uid("sv"), nome, preco: 0, duracao: "—" }, ...p])}
-                onRemove={(id) => setServicos((p) => p.filter((x) => x.id !== id))}
-                placeholder="Nome do serviço"
+              <ServicosPanel
+                servicos={servicos}
+                setServicos={setServicos}
+                produtos={produtos}
+                planos={planos}
+                onLog={pushLog}
+                exigirResponsavel={params.exigirResponsavel}
               />
             </TabsContent>
+
 
             {/* PRAZOS EM DIAS */}
             <TabsContent value="prazos" className="mt-4 space-y-4">
