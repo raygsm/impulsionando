@@ -109,6 +109,7 @@ import { Route as AuthenticatedAgendaSchedulesRouteImport } from './routes/_auth
 import { Route as AuthenticatedAgendaProfessionalsRouteImport } from './routes/_authenticated/agenda.professionals'
 import { Route as AuthenticatedAgendaAppointmentsRouteImport } from './routes/_authenticated/agenda.appointments'
 import { Route as AuthenticatedAffiliatesSalesRouteImport } from './routes/_authenticated/affiliates.sales'
+import { Route as AuthenticatedAffiliatesReportsRouteImport } from './routes/_authenticated/affiliates.reports'
 import { Route as AuthenticatedAffiliatesProductsRouteImport } from './routes/_authenticated/affiliates.products'
 import { Route as AuthenticatedAffiliatesPayoutsRouteImport } from './routes/_authenticated/affiliates.payouts'
 import { Route as AuthenticatedAffiliatesOffersRouteImport } from './routes/_authenticated/affiliates.offers'
@@ -663,6 +664,12 @@ const AuthenticatedAffiliatesSalesRoute =
     path: '/sales',
     getParentRoute: () => AuthenticatedAffiliatesRoute,
   } as any)
+const AuthenticatedAffiliatesReportsRoute =
+  AuthenticatedAffiliatesReportsRouteImport.update({
+    id: '/reports',
+    path: '/reports',
+    getParentRoute: () => AuthenticatedAffiliatesRoute,
+  } as any)
 const AuthenticatedAffiliatesProductsRoute =
   AuthenticatedAffiliatesProductsRouteImport.update({
     id: '/products',
@@ -869,6 +876,7 @@ export interface FileRoutesByFullPath {
   '/affiliates/offers': typeof AuthenticatedAffiliatesOffersRoute
   '/affiliates/payouts': typeof AuthenticatedAffiliatesPayoutsRoute
   '/affiliates/products': typeof AuthenticatedAffiliatesProductsRoute
+  '/affiliates/reports': typeof AuthenticatedAffiliatesReportsRoute
   '/affiliates/sales': typeof AuthenticatedAffiliatesSalesRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
@@ -984,6 +992,7 @@ export interface FileRoutesByTo {
   '/affiliates/offers': typeof AuthenticatedAffiliatesOffersRoute
   '/affiliates/payouts': typeof AuthenticatedAffiliatesPayoutsRoute
   '/affiliates/products': typeof AuthenticatedAffiliatesProductsRoute
+  '/affiliates/reports': typeof AuthenticatedAffiliatesReportsRoute
   '/affiliates/sales': typeof AuthenticatedAffiliatesSalesRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
@@ -1110,6 +1119,7 @@ export interface FileRoutesById {
   '/_authenticated/affiliates/offers': typeof AuthenticatedAffiliatesOffersRoute
   '/_authenticated/affiliates/payouts': typeof AuthenticatedAffiliatesPayoutsRoute
   '/_authenticated/affiliates/products': typeof AuthenticatedAffiliatesProductsRoute
+  '/_authenticated/affiliates/reports': typeof AuthenticatedAffiliatesReportsRoute
   '/_authenticated/affiliates/sales': typeof AuthenticatedAffiliatesSalesRoute
   '/_authenticated/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/_authenticated/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
@@ -1236,6 +1246,7 @@ export interface FileRouteTypes {
     | '/affiliates/offers'
     | '/affiliates/payouts'
     | '/affiliates/products'
+    | '/affiliates/reports'
     | '/affiliates/sales'
     | '/agenda/appointments'
     | '/agenda/professionals'
@@ -1351,6 +1362,7 @@ export interface FileRouteTypes {
     | '/affiliates/offers'
     | '/affiliates/payouts'
     | '/affiliates/products'
+    | '/affiliates/reports'
     | '/affiliates/sales'
     | '/agenda/appointments'
     | '/agenda/professionals'
@@ -1476,6 +1488,7 @@ export interface FileRouteTypes {
     | '/_authenticated/affiliates/offers'
     | '/_authenticated/affiliates/payouts'
     | '/_authenticated/affiliates/products'
+    | '/_authenticated/affiliates/reports'
     | '/_authenticated/affiliates/sales'
     | '/_authenticated/agenda/appointments'
     | '/_authenticated/agenda/professionals'
@@ -2281,6 +2294,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAffiliatesSalesRouteImport
       parentRoute: typeof AuthenticatedAffiliatesRoute
     }
+    '/_authenticated/affiliates/reports': {
+      id: '/_authenticated/affiliates/reports'
+      path: '/reports'
+      fullPath: '/affiliates/reports'
+      preLoaderRoute: typeof AuthenticatedAffiliatesReportsRouteImport
+      parentRoute: typeof AuthenticatedAffiliatesRoute
+    }
     '/_authenticated/affiliates/products': {
       id: '/_authenticated/affiliates/products'
       path: '/products'
@@ -2454,6 +2474,7 @@ interface AuthenticatedAffiliatesRouteChildren {
   AuthenticatedAffiliatesOffersRoute: typeof AuthenticatedAffiliatesOffersRoute
   AuthenticatedAffiliatesPayoutsRoute: typeof AuthenticatedAffiliatesPayoutsRoute
   AuthenticatedAffiliatesProductsRoute: typeof AuthenticatedAffiliatesProductsRoute
+  AuthenticatedAffiliatesReportsRoute: typeof AuthenticatedAffiliatesReportsRoute
   AuthenticatedAffiliatesSalesRoute: typeof AuthenticatedAffiliatesSalesRoute
   AuthenticatedAffiliatesIndexRoute: typeof AuthenticatedAffiliatesIndexRoute
 }
@@ -2471,6 +2492,7 @@ const AuthenticatedAffiliatesRouteChildren: AuthenticatedAffiliatesRouteChildren
     AuthenticatedAffiliatesOffersRoute: AuthenticatedAffiliatesOffersRoute,
     AuthenticatedAffiliatesPayoutsRoute: AuthenticatedAffiliatesPayoutsRoute,
     AuthenticatedAffiliatesProductsRoute: AuthenticatedAffiliatesProductsRoute,
+    AuthenticatedAffiliatesReportsRoute: AuthenticatedAffiliatesReportsRoute,
     AuthenticatedAffiliatesSalesRoute: AuthenticatedAffiliatesSalesRoute,
     AuthenticatedAffiliatesIndexRoute: AuthenticatedAffiliatesIndexRoute,
   }
