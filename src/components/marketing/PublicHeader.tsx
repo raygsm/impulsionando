@@ -124,21 +124,9 @@ export function PublicHeader() {
           </Link>
           <DesktopDropdown label="Soluções" items={SOLUCOES} />
           <DesktopDropdown label="Demonstrações" items={DEMOS} />
-          <Link
-            to="/planos"
-            className="px-3 py-3 text-[15px] text-muted-foreground hover:text-foreground transition-colors rounded-md"
-            activeProps={{ className: "text-foreground font-medium" }}
-          >
-            Planos
-          </Link>
-          <Link
-            to="/orcamento"
-            className="px-3 py-3 text-[15px] text-muted-foreground hover:text-foreground transition-colors rounded-md"
-            activeProps={{ className: "text-foreground font-medium" }}
-          >
-            Orçamento
-          </Link>
+          <DesktopDropdown label="Planos" items={PLANOS} />
           <DesktopDropdown label="Empresa" items={EMPRESA} />
+
         </nav>
 
         <div className="flex items-center gap-2 lg:gap-3">
