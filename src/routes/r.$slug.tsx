@@ -5,23 +5,22 @@ export const Route = createFileRoute("/r/$slug")({
     handlers: {
       GET: async ({ params }) => {
         const slug = params.slug;
-        const url = new URL(process.env.SUPABASE_URL!);
-        const apikey = process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY ?? "";
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        // Busca slug ativo
-        const lookup = await fetch(`${url.origin}/rest/v1/aff_links?slug=eq.${encodeURIComponent(slug)}&is_active=eq.true&select=id,destination_url`, {
-          headers: { apikey, Authorization: `Bearer ${apikey}` },
-        });
-        const rows = lookup.ok ? (await lookup.json()) as { id: string; destination_url: string | null }[] : [];
-        const row = rows[0];
+        // Resolve slug ativo no servidor (admin client — só lê id+destino, nunca expõe métricas)
+        const { data: row } = await supabaseAdmin
+          .from("aff_links")
+          .select("id, destination_url")
+          .eq("slug", slug)
+          .eq("is_active", true)
+          .maybeSingle();
 
         if (!row) {
           return new Response("Link not found", { status: 404 });
         }
 
-        // Incrementa cliques (best-effort, via service role só se necessário; aqui usamos rpc-like update)
+        // Incrementa cliques (best-effort)
         try {
-          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const current = await supabaseAdmin.from("aff_links").select("clicks").eq("id", row.id).single();
           await supabaseAdmin.from("aff_links").update({ clicks: (current.data?.clicks ?? 0) + 1 } as never).eq("id", row.id);
         } catch {
