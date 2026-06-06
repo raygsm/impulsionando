@@ -262,9 +262,19 @@ function DemoAgenda() {
 
           <TabsContent value="agendar" className="mt-4">
             <Card className="p-5">
-              <NovoAgendamento profs={profs} servs={servs} prefill={prefill} onCreate={(a) => setAgds((p) => [a, ...p])} />
+              <NovoAgendamento
+                profs={profs}
+                servs={servs}
+                prefill={prefill}
+                onCreate={(a) => {
+                  setAgds((p) => [a, ...p]);
+                  setDataAtual(a.data);
+                  setAba("grade");
+                }}
+              />
             </Card>
           </TabsContent>
+
 
           <TabsContent value="espera" className="mt-4 space-y-4">
             <Card className="p-5"><NovaEspera servs={servs} onCreate={(e) => setEspera((p) => [e, ...p])} /></Card>
