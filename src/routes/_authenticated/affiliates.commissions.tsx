@@ -1,10 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { advanceCommissionStatus } from "@/lib/affiliates.functions";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/affiliates/commissions")({
   component: CommissionsPage,
@@ -17,6 +21,7 @@ const LABEL: Record<string, string> = {
 };
 
 function CommissionsPage() {
+  const qc = useQueryClient();
   const { companyId } = useActiveCompany();
   const { data, isLoading } = useQuery({
     queryKey: ["aff_commissions", companyId],
@@ -28,16 +33,31 @@ function CommissionsPage() {
     },
   });
 
+  const advanceFn = useServerFn(advanceCommissionStatus);
+  const advance = useMutation({
+    mutationFn: () => advanceFn(),
+    onSuccess: (r: { promoted_to_internal: number; promoted_to_available: number }) => {
+      toast.success(`Atualizado: ${r.promoted_to_internal} → prazo interno · ${r.promoted_to_available} → disponível`);
+      qc.invalidateQueries({ queryKey: ["aff_commissions", companyId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const brl = (n: number) => Number(n).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   const dt = (s: string | null) => s ? new Date(s).toLocaleString("pt-BR") : "—";
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold">Comissões e Splits</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Cada venda gera linhas de comissão para produtor, coprodutor, afiliado, gerente e plataforma. Status muda automaticamente após o prazo do gateway + 3 dias úteis internos.
-        </p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-semibold">Comissões e Splits</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Cada venda gera linhas de comissão para produtor, coprodutor, afiliado, gerente e plataforma. Status muda automaticamente após o prazo do gateway + 3 dias úteis internos.
+          </p>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => advance.mutate()} disabled={advance.isPending}>
+          Avançar status agora
+        </Button>
       </div>
 
       <Card className="p-4">
