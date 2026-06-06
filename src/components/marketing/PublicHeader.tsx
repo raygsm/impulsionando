@@ -114,17 +114,6 @@ const PLANOS: NavItem[] = [
   { to: "/orcamento", label: "Orçamento personalizado", desc: "Monte um plano sob medida para seu negócio" },
 ];
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DEMONSTRAÇÃO — agora absorve Cliente Final, White Label e Showrooms
-// ─────────────────────────────────────────────────────────────────────────────
-const DEMOS: NavItem[] = [
-  { to: "/demo", label: "Demonstração interativa", desc: "Tour guiado pela plataforma" },
-  { to: "/demo/cliente-final", label: "Visão Cliente Final", desc: "Como o operador vê o sistema" },
-  { to: "/demo/white-label", label: "Demo White Label", desc: "Para agências e revendas" },
-  { to: "/showroom/fitness", label: "Showroom Fitness", desc: "Academia, personal e estúdio" },
-  { to: "/showroom/eventos", label: "Showroom Eventos", desc: "Ingressos, transferência, NPS" },
-  { to: "/demo/trial", label: "Iniciar Trial gratuito", desc: "7 dias com acesso real" },
-];
 
 function ItemLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
   if (item.external) {
