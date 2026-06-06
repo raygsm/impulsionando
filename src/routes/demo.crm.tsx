@@ -235,6 +235,7 @@ function DemoCRM() {
               <TabsTrigger value="origens"><Tag className="w-4 h-4 mr-1" />Origens</TabsTrigger>
               <TabsTrigger value="campanhas"><Megaphone className="w-4 h-4 mr-1" />Campanhas</TabsTrigger>
               <TabsTrigger value="comunicacao"><Send className="w-4 h-4 mr-1" />Comunicação</TabsTrigger>
+              <TabsTrigger value="modelos"><FileText className="w-4 h-4 mr-1" />Modelos</TabsTrigger>
               <TabsTrigger value="automacoes"><Workflow className="w-4 h-4 mr-1" />Automações</TabsTrigger>
               <TabsTrigger value="usuarios"><Users className="w-4 h-4 mr-1" />Usuários</TabsTrigger>
               <TabsTrigger value="permissoes"><ShieldCheck className="w-4 h-4 mr-1" />Permissões</TabsTrigger>
