@@ -1,8 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { DemoModeBanner } from "@/components/demo/DemoModeBanner";
+import { DemoModuleSwitcher } from "@/components/demo/DemoModuleSwitcher";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,80 +14,113 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Trash2, RotateCcw, Sparkles, Users, KanbanSquare, Activity, FileText, Workflow, ArrowRight, MessageSquare, Calendar } from "lucide-react";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import {
+  Plus, Trash2, RotateCcw, Sparkles, Users, KanbanSquare, Activity, FileText, Workflow, ArrowRight,
+  MessageSquare, Calendar, Building2, Tag, Megaphone, BookOpen, Send, ScrollText, ShieldCheck, Layers,
+  Briefcase, Clock, GitBranch, ListChecks, Compass, Package,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useDemoState, uid } from "@/lib/demoSandbox";
 import { DemoContractCTA } from "@/components/demo/DemoContractCTA";
+import { useDemoContracted } from "@/lib/demoContracting";
 import { RoiSimulator } from "@/components/demo/RoiSimulator";
 import { gotoWhatsapp, gotoAgenda } from "@/lib/demoCrossLink";
-import { createCrmMock } from "@/lib/demoModuleMocks";
+import { createCrmMock, CRM_DEFAULT_PARAMS, type CrmParams } from "@/lib/demoModuleMocks";
+import { HelpTip } from "@/components/demo/HelpTip";
 
 export const Route = createFileRoute("/demo/crm")({
   head: () => ({
     meta: [
       { title: "Demo — CRM completo — Impulsionando" },
-      { name: "description", content: "Teste leads, pipeline kanban, atividades, templates e automações com dados fictícios." },
+      { name: "description", content: "DEMONSTRAÇÃO — VERSÃO TESTE do CRM: leads, clientes, funis, regras, templates, automações, usuários e permissões." },
     ],
     links: [{ rel: "canonical", href: "https://impulsionando.com.br/demo/crm" }],
   }),
   component: DemoCRM,
 });
 
-type Lead = {
-  id: string; nome: string; email: string; telefone: string;
-  origem: string; estagio: string; valor: number; score: number; tags: string[]; criadoEm: string;
-};
+type Lead = { id: string; nome: string; email: string; telefone: string; origem: string; estagio: string; valor: number; score: number; tags: string[]; criadoEm: string };
 type Atividade = { id: string; leadId: string; tipo: "ligacao" | "email" | "whatsapp" | "tarefa"; titulo: string; data: string; concluida: boolean };
 type Template = { id: string; nome: string; canal: "email" | "whatsapp"; corpo: string };
 type Automacao = { id: string; nome: string; gatilho: string; acao: string; ativa: boolean };
-type Params = { lgpd: boolean; followupAuto: boolean; leadScoring: boolean; roundRobin: boolean };
+type Cliente = { id: string; nome: string; documento: string; email: string; telefone: string; produto: string; plano: string; status: "Ativo" | "Inativo" };
+type Empresa = { id: string; razaoSocial: string; cnpj: string; segmento: string };
+type Produto = { id: string; nome: string; preco: number; descricao: string };
+type Plano = { id: string; nome: string; preco: number; ciclo: string; itens: string[] };
+type Servico = { id: string; nome: string; preco: number; duracao: string };
+type Prazo = { id: string; nome: string; dias: number };
+type Funil = { id: string; nome: string; ativo: boolean };
+type Etapa = { id: string; funilId: string; nome: string; ordem: number };
+type Regra = { id: string; nome: string; quando: string; entao: string; ativa: boolean };
+type TagItem = { id: string; nome: string };
+type Origem = { id: string; nome: string };
+type Campanha = { id: string; nome: string; canal: string; status: string; leads: number };
+type Followup = { id: string; leadId: string; descricao: string; quando: string; status: "Pendente" | "Concluído" };
+type Usuario = { id: string; nome: string; email: string; papel: string; status: "Ativo" | "Inativo" };
+type Permissao = { papel: string; acao: "ver" | "criar" | "editar" | "excluir"; permitido: boolean };
+type Log = { id: string; quando: string; usuario: string; acao: string };
 
-const STAGES = ["Novo", "Contato feito", "Qualificado", "Proposta", "Negociação", "Ganho", "Perdido"];
+const STAGES = ["Novo lead", "Primeiro contato", "Qualificação", "Proposta enviada", "Aguardando pagamento", "Contratado", "Onboarding", "Reativação"];
+const MOCK_MARKER = "crm:v3";
 
 function DemoCRM() {
-  const [leads, setLeads, resetLeads] = useDemoState<Lead[]>("crm.leads", []);
-  const [atvs, setAtvs, resetAtvs] = useDemoState<Atividade[]>("crm.atvs", []);
-  const [tpls, setTpls, resetTpls] = useDemoState<Template[]>("crm.tpls", []);
-  const [autos, setAutos, resetAutos] = useDemoState<Automacao[]>("crm.autos", []);
-  const [params, setParams, resetParams] = useDemoState<Params>("crm.params", {
-    lgpd: true, followupAuto: true, leadScoring: true, roundRobin: false,
-  });
+  const [leads, setLeads] = useDemoState<Lead[]>("crm.leads", []);
+  const [atvs, setAtvs] = useDemoState<Atividade[]>("crm.atvs", []);
+  const [tpls, setTpls] = useDemoState<Template[]>("crm.tpls", []);
+  const [autos, setAutos] = useDemoState<Automacao[]>("crm.autos", []);
+  const [params, setParams] = useDemoState<CrmParams>("crm.params", CRM_DEFAULT_PARAMS);
+  const [clientes, setClientes] = useDemoState<Cliente[]>("crm.clientes", []);
+  const [empresas, setEmpresas] = useDemoState<Empresa[]>("crm.empresas", []);
+  const [produtos, setProdutos] = useDemoState<Produto[]>("crm.produtos", []);
+  const [planos, setPlanos] = useDemoState<Plano[]>("crm.planos", []);
+  const [servicos, setServicos] = useDemoState<Servico[]>("crm.servicos", []);
+  const [prazos, setPrazos] = useDemoState<Prazo[]>("crm.prazos", []);
+  const [funis, setFunis] = useDemoState<Funil[]>("crm.funis", []);
+  const [etapas, setEtapas] = useDemoState<Etapa[]>("crm.etapas", []);
+  const [regras, setRegras] = useDemoState<Regra[]>("crm.regras", []);
+  const [tags, setTags] = useDemoState<TagItem[]>("crm.tags", []);
+  const [origens, setOrigens] = useDemoState<Origem[]>("crm.origens", []);
+  const [campanhas, setCampanhas] = useDemoState<Campanha[]>("crm.campanhas", []);
+  const [followups, setFollowups] = useDemoState<Followup[]>("crm.followups", []);
+  const [usuarios, setUsuarios] = useDemoState<Usuario[]>("crm.usuarios", []);
+  const [permissoes, setPermissoes] = useDemoState<Permissao[]>("crm.permissoes", []);
+  const [logs, setLogs] = useDemoState<Log[]>("crm.logs", []);
+
+  const { isContracted } = useDemoContracted();
+  const pagoDemo = isContracted("crm");
 
   useEffect(() => {
-    const marker = typeof window === "undefined" ? "crm:v2" : window.localStorage.getItem("imp.demo.mock.crm");
-    if (marker === "crm:v2") return;
-    const mock = createCrmMock();
-    setLeads(mock.leads);
-    setAtvs(mock.atvs);
-    setTpls(mock.tpls);
-    setAutos(mock.autos);
-    setParams(mock.params);
-    if (typeof window !== "undefined") window.localStorage.setItem("imp.demo.mock.crm", "crm:v2");
+    if (typeof window === "undefined") return;
+    const marker = window.localStorage.getItem("imp.demo.mock.crm");
+    if (marker === MOCK_MARKER) return;
+    seed(true);
+    window.localStorage.setItem("imp.demo.mock.crm", MOCK_MARKER);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const dash = useMemo(() => {
-    const porEstagio = STAGES.map((s) => ({ s, n: leads.filter((l) => l.estagio === s).length, v: leads.filter((l) => l.estagio === s).reduce((a, b) => a + b.valor, 0) }));
-    const ganho = leads.filter((l) => l.estagio === "Ganho");
-    const perdido = leads.filter((l) => l.estagio === "Perdido");
-    const conversao = leads.length ? Math.round((ganho.length / leads.length) * 100) : 0;
-    const receita = ganho.reduce((a, b) => a + b.valor, 0);
-    return { porEstagio, ganho: ganho.length, perdido: perdido.length, conversao, receita, total: leads.length };
-  }, [leads]);
-
-  function seed() {
-    const mock = createCrmMock();
-    setLeads(mock.leads);
-    setAtvs(mock.atvs);
-    setTpls(mock.tpls);
-    setAutos(mock.autos);
-    setParams(mock.params);
-    toast.success("Dados fictícios específicos do CRM criados.");
+  function seed(silent = false) {
+    const m = createCrmMock();
+    setLeads(m.leads); setAtvs(m.atvs); setTpls(m.tpls); setAutos(m.autos);
+    setParams({ ...CRM_DEFAULT_PARAMS, ...m.params });
+    setClientes(m.clientes); setEmpresas(m.empresas); setProdutos(m.produtos);
+    setPlanos(m.planos); setServicos(m.servicos); setPrazos(m.prazosDias);
+    setFunis(m.funis); setEtapas(m.etapas); setRegras(m.regras);
+    setTags(m.tags); setOrigens(m.origens); setCampanhas(m.campanhas);
+    setFollowups(m.followups); setUsuarios(m.usuarios);
+    setPermissoes(m.permissoes); setLogs(m.logs);
+    if (!silent) toast.success("Dados fictícios do CRM (DEMO) populados.");
   }
 
-  function resetAll() {
-    resetLeads(); resetAtvs(); resetTpls(); resetAutos(); resetParams();
-    toast.message("Demonstração zerada.");
+  function resetCrm() {
+    if (typeof window === "undefined") return;
+    if (!confirm("Tem certeza que deseja zerar os dados desta demonstração? Apenas os dados fictícios do CRM, neste navegador, serão apagados. Outros usuários não serão afetados.")) return;
+    Object.keys(window.localStorage)
+      .filter((k) => k.startsWith("imp.demo.crm."))
+      .forEach((k) => window.localStorage.removeItem(k));
+    window.localStorage.removeItem("imp.demo.mock.crm");
+    toast.success("Dados demonstrativos do CRM restaurados para o padrão inicial.");
+    setTimeout(() => window.location.reload(), 400);
   }
 
   function moverEstagio(id: string, dir: 1 | -1) {
@@ -98,228 +132,590 @@ function DemoCRM() {
     }));
   }
 
+  const dash = useMemo(() => {
+    const porEstagio = STAGES.map((s) => ({ s, n: leads.filter((l) => l.estagio === s).length, v: leads.filter((l) => l.estagio === s).reduce((a, b) => a + b.valor, 0) }));
+    const ganho = leads.filter((l) => l.estagio === "Contratado");
+    const conversao = leads.length ? Math.round((ganho.length / leads.length) * 100) : 0;
+    const receita = ganho.reduce((a, b) => a + b.valor, 0);
+    return { porEstagio, ganho: ganho.length, conversao, receita, total: leads.length };
+  }, [leads]);
+
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <PublicHeader />
-      <DemoModeBanner current="crm" />
-      <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 w-full">
-        <div className="flex items-start justify-between gap-3 flex-wrap">
-          <div>
-            <Badge className="bg-gradient-primary mb-2">Demo interativa • dados fictícios</Badge>
-            <h1 className="text-3xl sm:text-4xl font-bold">CRM completo</h1>
-            <p className="text-muted-foreground mt-2 max-w-2xl">
-              Leads, pipeline kanban, atividades, templates de e-mail/WhatsApp e automações de jornada — tudo em demonstração.
-            </p>
-          </div>
-          <div className="flex gap-2 flex-wrap items-center">
-            <DemoContractCTA
-              slug="crm"
-              moduleName="CRM completo"
-              moduleDescription="Gestão de leads, pipeline visual, atividades, templates e jornada automatizada."
-              amountReference={247}
-              features={["Leads ilimitados", "Pipeline kanban", "Templates e-mail/WhatsApp", "Automações de jornada", "Lead scoring"]}
-              testRoute="/demo/crm"
-              size="default"
-              variant="default"
-            />
-            <Button variant="outline" onClick={seed}><Sparkles className="w-4 h-4 mr-1" />Popular demo</Button>
-            <Button variant="ghost" onClick={resetAll}><RotateCcw className="w-4 h-4 mr-1" />Zerar</Button>
+    <TooltipProvider delayDuration={150}>
+      <div className="min-h-screen flex flex-col bg-background">
+        <PublicHeader />
+        <DemoModeBanner current="crm" />
+
+        {/* Chancela permanente VERSÃO TESTE */}
+        <div className="bg-warning/15 border-y border-warning/30 text-warning-foreground">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2 text-xs flex items-center justify-between gap-2 flex-wrap">
+            <span className="font-semibold tracking-wide">DEMONSTRAÇÃO — VERSÃO TESTE</span>
+            <span className="text-muted-foreground">Toda comunicação simulada exibe o prefixo <strong>TESTE — DEMONSTRAÇÃO — VERSÃO TESTE</strong>.</span>
           </div>
         </div>
 
-        <Tabs defaultValue="painel" className="mt-6">
-          <TabsList className="flex-wrap h-auto">
-            <TabsTrigger value="painel"><Activity className="w-4 h-4 mr-1" />Painel</TabsTrigger>
-            <TabsTrigger value="leads"><Users className="w-4 h-4 mr-1" />Leads</TabsTrigger>
-            <TabsTrigger value="pipeline"><KanbanSquare className="w-4 h-4 mr-1" />Pipeline</TabsTrigger>
-            <TabsTrigger value="atividades"><Activity className="w-4 h-4 mr-1" />Atividades</TabsTrigger>
-            <TabsTrigger value="templates"><FileText className="w-4 h-4 mr-1" />Templates</TabsTrigger>
-            <TabsTrigger value="automacoes"><Workflow className="w-4 h-4 mr-1" />Automações</TabsTrigger>
-            <TabsTrigger value="params"><Sparkles className="w-4 h-4 mr-1" />Parametrização</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="painel" className="mt-4 space-y-4">
-            <div className="grid sm:grid-cols-4 gap-3">
-              <KPI label="Leads totais" value={String(dash.total)} />
-              <KPI label="Ganhos" value={String(dash.ganho)} accent />
-              <KPI label="Conversão" value={`${dash.conversao}%`} />
-              <KPI label="Receita demo" value={dash.receita.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} />
+        <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 w-full">
+          <div className="flex items-start justify-between gap-3 flex-wrap">
+            <div>
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <Badge className="bg-gradient-primary">CRM • Demo contratada</Badge>
+                {pagoDemo && <Badge className="bg-emerald-600/15 text-emerald-700 border-emerald-600/30">PAGO — DEMO</Badge>}
+                <Badge variant="outline">DEMONSTRAÇÃO — VERSÃO TESTE</Badge>
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-bold">CRM completo</h1>
+              <p className="text-muted-foreground mt-2 max-w-2xl text-sm">
+                Você acabou de contratar (na demonstração) o CRM da Impulsionando Tecnologia. Configure leads, clientes, produtos, planos, prazos, regras, automações, usuários e permissões, e teste a comunicação por e-mail e WhatsApp.
+              </p>
             </div>
-            <Card className="p-5">
-              <h3 className="font-semibold mb-3">Funil por estágio</h3>
-              <div className="space-y-2">
-                {dash.porEstagio.map((e) => (
-                  <div key={e.s} className="flex items-center gap-3">
-                    <span className="w-32 text-sm">{e.s}</span>
-                    <div className="flex-1 h-3 bg-muted rounded">
-                      <div className="h-3 bg-gradient-primary rounded" style={{ width: `${dash.total ? (e.n / dash.total) * 100 : 0}%` }} />
-                    </div>
-                    <span className="text-xs text-muted-foreground w-16 text-right">{e.n} leads</span>
-                  </div>
+            <div className="flex gap-2 flex-wrap items-center">
+              <DemoContractCTA
+                slug="crm"
+                moduleName="CRM completo"
+                moduleDescription="Gestão de leads, clientes, funis, automações, usuários, permissões e comunicação."
+                amountReference={247}
+                features={["Leads ilimitados", "Funis e etapas", "Automações", "Templates e-mail/WhatsApp", "Permissões por papel"]}
+                testRoute="/demo/crm"
+                size="default"
+                variant="default"
+              />
+              <Button variant="outline" onClick={() => seed(false)}><Sparkles className="w-4 h-4 mr-1" />Popular demo</Button>
+            </div>
+          </div>
+
+          <Tabs defaultValue="visao" className="mt-6">
+            <TabsList className="flex-wrap h-auto justify-start">
+              <TabsTrigger value="visao"><Compass className="w-4 h-4 mr-1" />Visão Geral</TabsTrigger>
+              <TabsTrigger value="dashboard"><Activity className="w-4 h-4 mr-1" />Dashboard</TabsTrigger>
+              <TabsTrigger value="leads"><Users className="w-4 h-4 mr-1" />Leads</TabsTrigger>
+              <TabsTrigger value="clientes"><Users className="w-4 h-4 mr-1" />Clientes</TabsTrigger>
+              <TabsTrigger value="empresas"><Building2 className="w-4 h-4 mr-1" />Empresas</TabsTrigger>
+              <TabsTrigger value="pipeline"><KanbanSquare className="w-4 h-4 mr-1" />Pipeline</TabsTrigger>
+              <TabsTrigger value="atividades"><Activity className="w-4 h-4 mr-1" />Atividades</TabsTrigger>
+              <TabsTrigger value="followups"><ListChecks className="w-4 h-4 mr-1" />Follow-ups</TabsTrigger>
+              <TabsTrigger value="produtos"><Package className="w-4 h-4 mr-1" />Produtos</TabsTrigger>
+              <TabsTrigger value="planos"><Briefcase className="w-4 h-4 mr-1" />Planos</TabsTrigger>
+              <TabsTrigger value="servicos"><Briefcase className="w-4 h-4 mr-1" />Serviços</TabsTrigger>
+              <TabsTrigger value="prazos"><Clock className="w-4 h-4 mr-1" />Prazos</TabsTrigger>
+              <TabsTrigger value="funis"><GitBranch className="w-4 h-4 mr-1" />Funis</TabsTrigger>
+              <TabsTrigger value="regras"><Workflow className="w-4 h-4 mr-1" />Regras</TabsTrigger>
+              <TabsTrigger value="tags"><Tag className="w-4 h-4 mr-1" />Tags</TabsTrigger>
+              <TabsTrigger value="origens"><Tag className="w-4 h-4 mr-1" />Origens</TabsTrigger>
+              <TabsTrigger value="campanhas"><Megaphone className="w-4 h-4 mr-1" />Campanhas</TabsTrigger>
+              <TabsTrigger value="comunicacao"><Send className="w-4 h-4 mr-1" />Comunicação</TabsTrigger>
+              <TabsTrigger value="automacoes"><Workflow className="w-4 h-4 mr-1" />Automações</TabsTrigger>
+              <TabsTrigger value="usuarios"><Users className="w-4 h-4 mr-1" />Usuários</TabsTrigger>
+              <TabsTrigger value="permissoes"><ShieldCheck className="w-4 h-4 mr-1" />Permissões</TabsTrigger>
+              <TabsTrigger value="params"><Sparkles className="w-4 h-4 mr-1" />Parametrizações</TabsTrigger>
+              <TabsTrigger value="logs"><ScrollText className="w-4 h-4 mr-1" />Logs</TabsTrigger>
+              <TabsTrigger value="jornada"><BookOpen className="w-4 h-4 mr-1" />Jornada Guiada</TabsTrigger>
+            </TabsList>
+
+            {/* VISÃO GERAL */}
+            <TabsContent value="visao" className="mt-4 space-y-4">
+              <Card className="p-6">
+                <p className="text-sm text-muted-foreground">
+                  O CRM organiza leads, clientes, histórico, funis, tarefas, produtos, planos, prazos, automações e comunicações comerciais em uma única jornada.
+                </p>
+              </Card>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {[
+                  { t: "Leads e oportunidades", d: "Cadastre, qualifique e acompanhe leads desde o primeiro contato até a conversão." },
+                  { t: "Clientes e histórico", d: "Centralize dados, interações, interesses, produtos contratados, planos e comunicações." },
+                  { t: "Produtos e planos", d: "Vincule produtos, serviços e planos aos clientes para organizar vendas, recompra e relacionamento." },
+                  { t: "Prazos e follow-ups", d: "Configure prazos em dias para retornos, propostas, reativação, recompra e cobranças." },
+                  { t: "Automações", d: "Crie regras simples: quando algo acontecer, o sistema executa uma ação." },
+                  { t: "WhatsApp e e-mail", d: "Teste mensagens automáticas, boas-vindas, follow-ups, propostas, cobranças e pesquisas." },
+                  { t: "Dashboard comercial", d: "Acompanhe leads, conversões, origem, propostas, tarefas, clientes e automações." },
+                ].map((c) => (
+                  <Card key={c.t} className="p-4">
+                    <div className="font-semibold text-sm mb-1">{c.t}</div>
+                    <div className="text-xs text-muted-foreground">{c.d}</div>
+                  </Card>
                 ))}
               </div>
-            </Card>
-            <RoiSimulator presetKey="crm" />
-          </TabsContent>
+              <Card className="p-5 flex gap-3 flex-wrap">
+                <Button className="bg-gradient-primary" asChild><Link to="/planos">Configure o CRM agora</Link></Button>
+                <Button variant="outline" onClick={() => { const t = document.querySelector('[data-state="inactive"][value="jornada"]') as HTMLElement | null; t?.click(); toast.message("Abrindo jornada guiada"); }}>Testar jornada guiada</Button>
+                <Button variant="outline" asChild><Link to="/planos">Contratar CRM real</Link></Button>
+              </Card>
+            </TabsContent>
 
-          <TabsContent value="leads" className="mt-4 space-y-4">
-            <Card className="p-5">
-              <NovoLead onCreate={(l) => setLeads((prev) => [l, ...prev])} />
-            </Card>
-            <Card className="p-5">
-              {leads.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Sem leads. Use "Popular demo" ou cadastre manualmente.</p>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nome</TableHead>
-                      <TableHead>Contato</TableHead>
-                      <TableHead>Origem</TableHead>
-                      <TableHead>Estágio</TableHead>
-                      <TableHead className="text-right">Valor</TableHead>
-                      <TableHead className="w-[200px] text-right">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {leads.map((l) => (
-                      <TableRow key={l.id}>
-                        <TableCell>
-                          <div className="font-medium">{l.nome}</div>
-                          <div className="text-xs text-muted-foreground">Score {l.score}</div>
-                        </TableCell>
-                        <TableCell className="text-xs"><div>{l.email}</div><div className="text-muted-foreground">{l.telefone}</div></TableCell>
-                        <TableCell><Badge variant="outline">{l.origem}</Badge></TableCell>
-                        <TableCell><Badge>{l.estagio}</Badge></TableCell>
-                        <TableCell className="text-right">{l.valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-1">
-                            <Button size="sm" variant="outline" title="Abrir chat no WhatsApp" onClick={() => gotoWhatsapp({ nome: l.nome, telefone: l.telefone, email: l.email }, `Olá ${l.nome}, tudo bem?`)}>
-                              <MessageSquare className="w-3.5 h-3.5" />
-                            </Button>
-                            <Button size="sm" variant="outline" title="Agendar" onClick={() => gotoAgenda({ nome: l.nome, telefone: l.telefone })}>
-                              <Calendar className="w-3.5 h-3.5" />
-                            </Button>
-                            <Button size="sm" variant="ghost" title="Excluir" onClick={() => setLeads((p) => p.filter((x) => x.id !== l.id))}>
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="pipeline" className="mt-4">
-            <div className="grid md:grid-cols-4 lg:grid-cols-7 gap-3">
-              {STAGES.map((s) => (
-                <Card key={s} className="p-3">
-                  <div className="text-xs font-semibold mb-2">{s}</div>
-                  <div className="space-y-2">
-                    {leads.filter((l) => l.estagio === s).map((l) => (
-                      <div key={l.id} className="p-2 rounded border bg-muted/30 text-xs">
-                        <div className="font-medium">{l.nome}</div>
-                        <div className="text-muted-foreground">{l.valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</div>
-                        <div className="flex gap-1 mt-1">
-                          <Button size="sm" variant="ghost" className="h-6 px-1" onClick={() => moverEstagio(l.id, -1)}>←</Button>
-                          <Button size="sm" variant="ghost" className="h-6 px-1" onClick={() => moverEstagio(l.id, 1)}>→</Button>
-                        </div>
+            {/* DASHBOARD */}
+            <TabsContent value="dashboard" className="mt-4 space-y-4">
+              <div className="grid sm:grid-cols-4 gap-3">
+                <KPI label="Leads totais" value={String(dash.total)} />
+                <KPI label="Contratados" value={String(dash.ganho)} accent />
+                <KPI label="Conversão" value={`${dash.conversao}%`} />
+                <KPI label="Receita demo" value={dash.receita.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} />
+              </div>
+              <Card className="p-5">
+                <h3 className="font-semibold mb-3 text-sm">Funil por etapa</h3>
+                <div className="space-y-2">
+                  {dash.porEstagio.map((e) => (
+                    <div key={e.s} className="flex items-center gap-3">
+                      <span className="w-40 text-xs">{e.s}</span>
+                      <div className="flex-1 h-3 bg-muted rounded">
+                        <div className="h-3 bg-gradient-primary rounded" style={{ width: `${dash.total ? (e.n / dash.total) * 100 : 0}%` }} />
                       </div>
-                    ))}
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="atividades" className="mt-4 space-y-4">
-            <Card className="p-5">
-              <NovaAtividade leads={leads} onCreate={(a) => setAtvs((p) => [a, ...p])} />
-            </Card>
-            <Card className="p-5">
-              {atvs.length === 0 ? <p className="text-sm text-muted-foreground">Sem atividades.</p> : (
-                <Table>
-                  <TableHeader><TableRow><TableHead>Lead</TableHead><TableHead>Tipo</TableHead><TableHead>Título</TableHead><TableHead>Data</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
-                  <TableBody>
-                    {atvs.map((a) => (
-                      <TableRow key={a.id}>
-                        <TableCell>{leads.find((l) => l.id === a.leadId)?.nome ?? "—"}</TableCell>
-                        <TableCell><Badge variant="outline">{a.tipo}</Badge></TableCell>
-                        <TableCell>{a.titulo}</TableCell>
-                        <TableCell className="text-xs">{new Date(a.data).toLocaleString("pt-BR")}</TableCell>
-                        <TableCell>
-                          <Switch checked={a.concluida} onCheckedChange={(v) => setAtvs((p) => p.map((x) => x.id === a.id ? { ...x, concluida: v } : x))} />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="templates" className="mt-4 space-y-4">
-            <Card className="p-5">
-              <NovoTemplate onCreate={(t) => setTpls((p) => [t, ...p])} />
-            </Card>
-            <div className="grid md:grid-cols-2 gap-3">
-              {tpls.map((t) => (
-                <Card key={t.id} className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="font-medium">{t.nome}</div>
-                    <Badge variant="outline">{t.canal}</Badge>
-                  </div>
-                  <pre className="text-xs whitespace-pre-wrap text-muted-foreground bg-muted/40 p-2 rounded">{t.corpo}</pre>
-                  <div className="flex justify-end mt-2">
-                    <Button size="sm" variant="ghost" onClick={() => setTpls((p) => p.filter((x) => x.id !== t.id))}>
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="automacoes" className="mt-4 space-y-4">
-            <Card className="p-5">
-              <NovaAutomacao onCreate={(a) => setAutos((p) => [a, ...p])} />
-            </Card>
-            {autos.map((a) => (
-              <Card key={a.id} className="p-4 flex items-center justify-between">
-                <div>
-                  <div className="font-medium">{a.nome}</div>
-                  <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                    <Badge variant="outline">{a.gatilho}</Badge>
-                    <ArrowRight className="w-3 h-3" />
-                    <Badge>{a.acao}</Badge>
-                  </div>
-                </div>
-                <div className="flex gap-2 items-center">
-                  <Switch checked={a.ativa} onCheckedChange={(v) => setAutos((p) => p.map((x) => x.id === a.id ? { ...x, ativa: v } : x))} />
-                  <Button size="sm" variant="ghost" onClick={() => setAutos((p) => p.filter((x) => x.id !== a.id))}><Trash2 className="w-4 h-4" /></Button>
+                      <span className="text-xs text-muted-foreground w-16 text-right">{e.n} leads</span>
+                    </div>
+                  ))}
                 </div>
               </Card>
-            ))}
-          </TabsContent>
+              <RoiSimulator presetKey="crm" />
+            </TabsContent>
 
-          <TabsContent value="params" className="mt-4 space-y-3">
-            <Card className="p-5 space-y-4">
-              <h3 className="font-semibold">Parametrização SIM / NÃO</h3>
-              <ParamToggle label="Conformidade LGPD" hint="Aceite explícito de contato e opt-out registrado." value={params.lgpd} onChange={(v) => setParams({ ...params, lgpd: v })} />
-              <ParamToggle label="Follow-up automático" hint="Dispara mensagem se lead não responder em 3 dias." value={params.followupAuto} onChange={(v) => setParams({ ...params, followupAuto: v })} />
-              <ParamToggle label="Lead scoring" hint="Cada interação soma pontos no score do lead." value={params.leadScoring} onChange={(v) => setParams({ ...params, leadScoring: v })} />
-              <ParamToggle label="Round-robin de distribuição" hint="Distribui leads automaticamente entre vendedores." value={params.roundRobin} onChange={(v) => setParams({ ...params, roundRobin: v })} />
+            {/* LEADS */}
+            <TabsContent value="leads" className="mt-4 space-y-4">
+              <Card className="p-5"><NovoLead onCreate={(l) => { setLeads((p) => [l, ...p]); setLogs((p) => [{ id: uid("lg"), quando: new Date().toISOString(), usuario: "Vendedor Demo", acao: `Criou lead ${l.nome}` }, ...p]); }} /></Card>
+              <Card className="p-5">
+                {leads.length === 0 ? <p className="text-sm text-muted-foreground">Sem leads.</p> : (
+                  <Table>
+                    <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Contato</TableHead><TableHead>Origem</TableHead><TableHead>Etapa</TableHead><TableHead className="text-right">Valor</TableHead><TableHead className="text-right">Ações</TableHead></TableRow></TableHeader>
+                    <TableBody>
+                      {leads.map((l) => (
+                        <TableRow key={l.id}>
+                          <TableCell><div className="font-medium">{l.nome}</div><div className="text-xs text-muted-foreground">Score {l.score}</div></TableCell>
+                          <TableCell className="text-xs"><div>{l.email}</div><div className="text-muted-foreground">{l.telefone}</div></TableCell>
+                          <TableCell><Badge variant="outline">{l.origem}</Badge></TableCell>
+                          <TableCell><Badge>{l.estagio}</Badge></TableCell>
+                          <TableCell className="text-right">{l.valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-1">
+                              <Button size="sm" variant="outline" title="WhatsApp simulado" onClick={() => { gotoWhatsapp({ nome: l.nome, telefone: l.telefone, email: l.email }, `TESTE — DEMONSTRAÇÃO — VERSÃO TESTE\n\nOlá ${l.nome}, tudo bem?`); toast.success("Conversa simulada — Enviado — DEMO"); }}>
+                                <MessageSquare className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button size="sm" variant="outline" title="Agendar" onClick={() => gotoAgenda({ nome: l.nome, telefone: l.telefone })}><Calendar className="w-3.5 h-3.5" /></Button>
+                              <Button size="sm" variant="ghost" title="Excluir" onClick={() => setLeads((p) => p.filter((x) => x.id !== l.id))}><Trash2 className="w-3.5 h-3.5" /></Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </Card>
+            </TabsContent>
+
+            {/* CLIENTES */}
+            <TabsContent value="clientes" className="mt-4 space-y-4">
+              <SimpleListPanel
+                title="Clientes"
+                items={clientes}
+                empty="Sem clientes cadastrados."
+                columns={[
+                  { k: "nome", h: "Nome" },
+                  { k: "documento", h: "Documento" },
+                  { k: "produto", h: "Produto" },
+                  { k: "plano", h: "Plano" },
+                  { k: "status", h: "Status", render: (v) => <Badge variant="outline">{v}</Badge> },
+                ]}
+                onAdd={(nome) => { setClientes((p) => [{ id: uid("cl"), nome, documento: "—", email: "—", telefone: "—", produto: "—", plano: "—", status: "Ativo" }, ...p]); }}
+                onRemove={(id) => setClientes((p) => p.filter((x) => x.id !== id))}
+                placeholder="Razão social ou nome do cliente"
+              />
+            </TabsContent>
+
+            {/* EMPRESAS */}
+            <TabsContent value="empresas" className="mt-4 space-y-4">
+              <SimpleListPanel
+                title="Empresas"
+                items={empresas}
+                empty="Sem empresas."
+                columns={[
+                  { k: "razaoSocial", h: "Razão Social" },
+                  { k: "cnpj", h: "CNPJ" },
+                  { k: "segmento", h: "Segmento" },
+                ]}
+                onAdd={(razaoSocial) => setEmpresas((p) => [{ id: uid("emp"), razaoSocial, cnpj: "—", segmento: "—" }, ...p])}
+                onRemove={(id) => setEmpresas((p) => p.filter((x) => x.id !== id))}
+                placeholder="Razão social"
+              />
+            </TabsContent>
+
+            {/* PIPELINE */}
+            <TabsContent value="pipeline" className="mt-4">
+              <div className="grid md:grid-cols-4 lg:grid-cols-8 gap-3">
+                {STAGES.map((s) => (
+                  <Card key={s} className="p-3">
+                    <div className="text-xs font-semibold mb-2">{s}</div>
+                    <div className="space-y-2">
+                      {leads.filter((l) => l.estagio === s).map((l) => (
+                        <div key={l.id} className="p-2 rounded border bg-muted/30 text-xs">
+                          <div className="font-medium">{l.nome}</div>
+                          <div className="text-muted-foreground">{l.valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</div>
+                          <div className="flex gap-1 mt-1">
+                            <Button size="sm" variant="ghost" className="h-6 px-1" onClick={() => moverEstagio(l.id, -1)}>←</Button>
+                            <Button size="sm" variant="ghost" className="h-6 px-1" onClick={() => moverEstagio(l.id, 1)}>→</Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            {/* ATIVIDADES */}
+            <TabsContent value="atividades" className="mt-4 space-y-4">
+              <Card className="p-5"><NovaAtividade leads={leads} onCreate={(a) => setAtvs((p) => [a, ...p])} /></Card>
+              <Card className="p-5">
+                {atvs.length === 0 ? <p className="text-sm text-muted-foreground">Sem atividades.</p> : (
+                  <Table>
+                    <TableHeader><TableRow><TableHead>Lead</TableHead><TableHead>Tipo</TableHead><TableHead>Título</TableHead><TableHead>Data</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
+                    <TableBody>
+                      {atvs.map((a) => (
+                        <TableRow key={a.id}>
+                          <TableCell>{leads.find((l) => l.id === a.leadId)?.nome ?? "—"}</TableCell>
+                          <TableCell><Badge variant="outline">{a.tipo}</Badge></TableCell>
+                          <TableCell>{a.titulo}</TableCell>
+                          <TableCell className="text-xs">{new Date(a.data).toLocaleString("pt-BR")}</TableCell>
+                          <TableCell><Switch checked={a.concluida} onCheckedChange={(v) => setAtvs((p) => p.map((x) => x.id === a.id ? { ...x, concluida: v } : x))} /></TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </Card>
+            </TabsContent>
+
+            {/* FOLLOW-UPS */}
+            <TabsContent value="followups" className="mt-4 space-y-4">
+              <Card className="p-5">
+                <Table>
+                  <TableHeader><TableRow><TableHead>Lead</TableHead><TableHead>Descrição</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Ações</TableHead></TableRow></TableHeader>
+                  <TableBody>
+                    {followups.map((f) => (
+                      <TableRow key={f.id}>
+                        <TableCell>{leads.find((l) => l.id === f.leadId)?.nome ?? "—"}</TableCell>
+                        <TableCell>{f.descricao}</TableCell>
+                        <TableCell><Badge variant={f.status === "Concluído" ? "default" : "outline"}>{f.status}</Badge></TableCell>
+                        <TableCell className="text-right">
+                          <Button size="sm" variant="outline" onClick={() => setFollowups((p) => p.map((x) => x.id === f.id ? { ...x, status: x.status === "Pendente" ? "Concluído" : "Pendente" } : x))}>Alternar</Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Card>
+            </TabsContent>
+
+            {/* PRODUTOS */}
+            <TabsContent value="produtos" className="mt-4 space-y-4">
+              <SimpleListPanel
+                title="Produtos"
+                items={produtos}
+                empty="Sem produtos."
+                columns={[
+                  { k: "nome", h: "Nome" },
+                  { k: "preco", h: "Preço", render: (v) => Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) },
+                  { k: "descricao", h: "Descrição" },
+                ]}
+                onAdd={(nome) => setProdutos((p) => [{ id: uid("pr"), nome, preco: 0, descricao: "—" }, ...p])}
+                onRemove={(id) => setProdutos((p) => p.filter((x) => x.id !== id))}
+                placeholder="Nome do produto"
+              />
+            </TabsContent>
+
+            {/* PLANOS */}
+            <TabsContent value="planos" className="mt-4 space-y-4">
+              <div className="grid md:grid-cols-3 gap-3">
+                {planos.map((p) => (
+                  <Card key={p.id} className="p-5">
+                    <div className="font-semibold">{p.nome}</div>
+                    <div className="text-2xl font-bold mt-1">{p.preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}<span className="text-xs text-muted-foreground">/{p.ciclo}</span></div>
+                    <ul className="text-xs text-muted-foreground mt-3 space-y-1">{p.itens.map((it, i) => <li key={i}>• {it}</li>)}</ul>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            {/* SERVIÇOS */}
+            <TabsContent value="servicos" className="mt-4 space-y-4">
+              <SimpleListPanel
+                title="Serviços"
+                items={servicos}
+                empty="Sem serviços."
+                columns={[
+                  { k: "nome", h: "Nome" },
+                  { k: "preco", h: "Preço", render: (v) => Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) },
+                  { k: "duracao", h: "Duração" },
+                ]}
+                onAdd={(nome) => setServicos((p) => [{ id: uid("sv"), nome, preco: 0, duracao: "—" }, ...p])}
+                onRemove={(id) => setServicos((p) => p.filter((x) => x.id !== id))}
+                placeholder="Nome do serviço"
+              />
+            </TabsContent>
+
+            {/* PRAZOS EM DIAS */}
+            <TabsContent value="prazos" className="mt-4 space-y-4">
+              <Card className="p-5">
+                <Table>
+                  <TableHeader><TableRow><TableHead>Prazo</TableHead><TableHead>Dias</TableHead><TableHead className="text-right">Ações</TableHead></TableRow></TableHeader>
+                  <TableBody>
+                    {prazos.map((pz) => (
+                      <TableRow key={pz.id}>
+                        <TableCell>{pz.nome}</TableCell>
+                        <TableCell>
+                          <Input type="number" value={pz.dias} className="w-24" onChange={(e) => setPrazos((p) => p.map((x) => x.id === pz.id ? { ...x, dias: Number(e.target.value) } : x))} />
+                        </TableCell>
+                        <TableCell className="text-right"><Button size="sm" variant="ghost" onClick={() => setPrazos((p) => p.filter((x) => x.id !== pz.id))}><Trash2 className="w-4 h-4" /></Button></TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Card>
+            </TabsContent>
+
+            {/* FUNIS + ETAPAS */}
+            <TabsContent value="funis" className="mt-4 space-y-4">
+              <Card className="p-5">
+                <div className="font-semibold mb-2 text-sm flex items-center gap-2">Funis <HelpTip>Pipelines de vendas. Cada funil tem etapas próprias.</HelpTip></div>
+                <div className="flex gap-2 flex-wrap">
+                  {funis.map((f) => <Badge key={f.id} variant={f.ativo ? "default" : "outline"}>{f.nome}{f.ativo ? "" : " (Inativo)"}</Badge>)}
+                </div>
+              </Card>
+              <Card className="p-5">
+                <div className="font-semibold mb-2 text-sm">Etapas — Funil Comercial Padrão</div>
+                <div className="space-y-2">
+                  {etapas.map((e) => (
+                    <div key={e.id} className="flex items-center justify-between text-sm border rounded px-3 py-2">
+                      <span><Badge variant="outline" className="mr-2">{e.ordem}</Badge>{e.nome}</span>
+                      <Badge>Configurado</Badge>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </TabsContent>
+
+            {/* REGRAS */}
+            <TabsContent value="regras" className="mt-4 space-y-3">
+              {regras.map((r) => (
+                <Card key={r.id} className="p-4 flex items-center justify-between gap-3">
+                  <div>
+                    <div className="font-medium text-sm">{r.nome}</div>
+                    <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1 flex-wrap">
+                      <Badge variant="outline">QUANDO: {r.quando}</Badge>
+                      <ArrowRight className="w-3 h-3" />
+                      <Badge>ENTÃO: {r.entao}</Badge>
+                    </div>
+                  </div>
+                  <Switch checked={r.ativa} onCheckedChange={(v) => setRegras((p) => p.map((x) => x.id === r.id ? { ...x, ativa: v } : x))} />
+                </Card>
+              ))}
+            </TabsContent>
+
+            {/* TAGS */}
+            <TabsContent value="tags" className="mt-4 space-y-3">
+              <Card className="p-5">
+                <div className="flex gap-2 flex-wrap">
+                  {tags.map((t) => (
+                    <Badge key={t.id} variant="outline" className="gap-1">{t.nome}
+                      <button onClick={() => setTags((p) => p.filter((x) => x.id !== t.id))} className="ml-1 opacity-60 hover:opacity-100"><Trash2 className="w-3 h-3" /></button>
+                    </Badge>
+                  ))}
+                </div>
+                <AddByName placeholder="Nova tag" onAdd={(nome) => setTags((p) => [{ id: uid("tg"), nome }, ...p])} />
+              </Card>
+            </TabsContent>
+
+            {/* ORIGENS */}
+            <TabsContent value="origens" className="mt-4 space-y-3">
+              <Card className="p-5">
+                <div className="flex gap-2 flex-wrap">
+                  {origens.map((t) => (
+                    <Badge key={t.id} variant="outline" className="gap-1">{t.nome}
+                      <button onClick={() => setOrigens((p) => p.filter((x) => x.id !== t.id))} className="ml-1 opacity-60 hover:opacity-100"><Trash2 className="w-3 h-3" /></button>
+                    </Badge>
+                  ))}
+                </div>
+                <AddByName placeholder="Nova origem" onAdd={(nome) => setOrigens((p) => [{ id: uid("og"), nome }, ...p])} />
+              </Card>
+            </TabsContent>
+
+            {/* CAMPANHAS */}
+            <TabsContent value="campanhas" className="mt-4 space-y-3">
+              <Card className="p-5">
+                <Table>
+                  <TableHeader><TableRow><TableHead>Campanha</TableHead><TableHead>Canal</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Leads</TableHead></TableRow></TableHeader>
+                  <TableBody>{campanhas.map((c) => (
+                    <TableRow key={c.id}><TableCell>{c.nome}</TableCell><TableCell><Badge variant="outline">{c.canal}</Badge></TableCell><TableCell><Badge>{c.status}</Badge></TableCell><TableCell className="text-right">{c.leads}</TableCell></TableRow>
+                  ))}</TableBody>
+                </Table>
+              </Card>
+            </TabsContent>
+
+            {/* COMUNICAÇÃO (templates) */}
+            <TabsContent value="comunicacao" className="mt-4 space-y-4">
+              <Card className="p-5"><NovoTemplate onCreate={(t) => setTpls((p) => [t, ...p])} /></Card>
+              <div className="grid md:grid-cols-2 gap-3">
+                {tpls.map((t) => (
+                  <Card key={t.id} className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="font-medium text-sm">{t.nome}</div>
+                      <Badge variant="outline">{t.canal}</Badge>
+                    </div>
+                    <pre className="text-xs whitespace-pre-wrap text-muted-foreground bg-muted/40 p-2 rounded">{t.corpo}</pre>
+                    <div className="flex justify-end mt-2 gap-2">
+                      <Button size="sm" variant="outline" onClick={() => { toast.success(`Mensagem simulada (Enviado — DEMO) — ${t.canal}`); setLogs((p) => [{ id: uid("lg"), quando: new Date().toISOString(), usuario: "Atendimento Demo", acao: `Simulou envio do template ${t.nome}` }, ...p]); }}><Send className="w-3.5 h-3.5 mr-1" />Simular envio</Button>
+                      <Button size="sm" variant="ghost" onClick={() => setTpls((p) => p.filter((x) => x.id !== t.id))}><Trash2 className="w-4 h-4" /></Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            {/* AUTOMAÇÕES */}
+            <TabsContent value="automacoes" className="mt-4 space-y-3">
+              <Card className="p-5"><NovaAutomacao onCreate={(a) => setAutos((p) => [a, ...p])} /></Card>
+              {autos.map((a) => (
+                <Card key={a.id} className="p-4 flex items-center justify-between">
+                  <div>
+                    <div className="font-medium text-sm">{a.nome}</div>
+                    <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1 flex-wrap">
+                      <Badge variant="outline">{a.gatilho}</Badge>
+                      <ArrowRight className="w-3 h-3" />
+                      <Badge>{a.acao}</Badge>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 items-center">
+                    <Switch checked={a.ativa} onCheckedChange={(v) => setAutos((p) => p.map((x) => x.id === a.id ? { ...x, ativa: v } : x))} />
+                    <Button size="sm" variant="ghost" onClick={() => setAutos((p) => p.filter((x) => x.id !== a.id))}><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                </Card>
+              ))}
+            </TabsContent>
+
+            {/* USUÁRIOS */}
+            <TabsContent value="usuarios" className="mt-4 space-y-3">
+              <Card className="p-5">
+                <Table>
+                  <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>E-mail</TableHead><TableHead>Papel</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
+                  <TableBody>{usuarios.map((u) => (
+                    <TableRow key={u.id}><TableCell>{u.nome}</TableCell><TableCell className="text-xs">{u.email}</TableCell><TableCell><Badge variant="outline">{u.papel}</Badge></TableCell><TableCell><Badge>{u.status}</Badge></TableCell></TableRow>
+                  ))}</TableBody>
+                </Table>
+              </Card>
+            </TabsContent>
+
+            {/* PERMISSÕES */}
+            <TabsContent value="permissoes" className="mt-4 space-y-3">
+              <Card className="p-5">
+                <div className="text-sm font-semibold mb-2 flex items-center gap-2">Matriz de permissões <HelpTip k="permissoes" /></div>
+                <Table>
+                  <TableHeader><TableRow><TableHead>Papel</TableHead><TableHead>Ver</TableHead><TableHead>Criar</TableHead><TableHead>Editar</TableHead><TableHead>Excluir</TableHead></TableRow></TableHeader>
+                  <TableBody>
+                    {["Administrador", "Vendedor", "Atendimento", "Financeiro"].map((papel) => (
+                      <TableRow key={papel}>
+                        <TableCell className="font-medium">{papel}</TableCell>
+                        {(["ver", "criar", "editar", "excluir"] as const).map((acao) => {
+                          const idx = permissoes.findIndex((p) => p.papel === papel && p.acao === acao);
+                          const v = idx >= 0 ? permissoes[idx].permitido : false;
+                          return <TableCell key={acao}>
+                            <Switch checked={v} onCheckedChange={(nv) => setPermissoes((prev) => prev.map((p, i) => i === idx ? { ...p, permitido: nv } : p))} />
+                          </TableCell>;
+                        })}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Card>
+            </TabsContent>
+
+            {/* PARAMETRIZAÇÕES (16 toggles) */}
+            <TabsContent value="params" className="mt-4 space-y-3">
+              <Card className="p-5 space-y-3">
+                <h3 className="font-semibold text-sm flex items-center gap-2">Parametrizações SIM / NÃO <HelpTip k="parametrizacao" /></h3>
+                {PARAM_DEFS.map((d) => (
+                  <ParamToggle
+                    key={d.key}
+                    label={d.label}
+                    hint={d.hint}
+                    value={Boolean((params as Record<string, boolean>)[d.key])}
+                    onChange={(v) => setParams({ ...params, [d.key]: v })}
+                  />
+                ))}
+              </Card>
+            </TabsContent>
+
+            {/* LOGS */}
+            <TabsContent value="logs" className="mt-4 space-y-3">
+              <Card className="p-5">
+                <div className="text-sm font-semibold mb-2 flex items-center gap-2">Logs da DEMO <HelpTip>Histórico das ações realizadas dentro da demonstração.</HelpTip></div>
+                <Table>
+                  <TableHeader><TableRow><TableHead>Quando</TableHead><TableHead>Usuário</TableHead><TableHead>Ação</TableHead></TableRow></TableHeader>
+                  <TableBody>{logs.map((lg) => (
+                    <TableRow key={lg.id}><TableCell className="text-xs">{new Date(lg.quando).toLocaleString("pt-BR")}</TableCell><TableCell className="text-xs">{lg.usuario}</TableCell><TableCell className="text-xs">{lg.acao}</TableCell></TableRow>
+                  ))}</TableBody>
+                </Table>
+              </Card>
+            </TabsContent>
+
+            {/* JORNADA GUIADA */}
+            <TabsContent value="jornada" className="mt-4 space-y-3">
+              <Card className="p-5 space-y-3">
+                <h3 className="font-semibold text-sm">Jornada guiada — CRM</h3>
+                <ol className="text-sm space-y-2 list-decimal pl-5">
+                  <li>Confirme suas parametrizações em <strong>Parametrizações</strong> (SIM/NÃO dos 16 itens).</li>
+                  <li>Revise <strong>Origens</strong> e <strong>Campanhas</strong> e ajuste tags.</li>
+                  <li>Cadastre 1 ou 2 <strong>Leads</strong> e mova-os pelo <strong>Pipeline</strong>.</li>
+                  <li>Crie um <strong>Template</strong> em Comunicação e clique em <em>Simular envio</em>.</li>
+                  <li>Ative uma <strong>Automação</strong> e configure uma <strong>Regra</strong>.</li>
+                  <li>Veja o resultado no <strong>Dashboard</strong> e nos <strong>Logs</strong>.</li>
+                  <li>Quando estiver convencido, clique em <strong>Contratar CRM real</strong>.</li>
+                </ol>
+              </Card>
+            </TabsContent>
+          </Tabs>
+
+          {/* Rodapé: Outros Módulos / Zerar / CTA contratação real */}
+          <div className="mt-10 grid lg:grid-cols-2 gap-4">
+            <Card className="p-5">
+              <div className="font-semibold mb-2 text-sm flex items-center gap-2"><Layers className="w-4 h-4" /> Contratar o CRM real</div>
+              <p className="text-xs text-muted-foreground mb-3">Pronto para sair da demonstração? Adicione o CRM ao orçamento ou veja os planos completos.</p>
+              <div className="flex gap-2 flex-wrap">
+                <Button className="bg-gradient-primary" asChild><Link to="/planos">Contratar CRM real</Link></Button>
+                <Button variant="outline" asChild><Link to="/planos">Adicionar CRM ao orçamento</Link></Button>
+                <Button variant="outline" asChild><Link to="/planos">Ver planos</Link></Button>
+                <Button variant="outline" asChild><Link to="/contato">Falar com consultor</Link></Button>
+              </div>
             </Card>
-          </TabsContent>
-        </Tabs>
-      </main>
-      <PublicFooter />
-    </div>
+            <Card className="p-5">
+              <div className="font-semibold mb-2 text-sm">Controles da demonstração</div>
+              <p className="text-xs text-muted-foreground mb-3">Trocar para outro módulo demonstrativo ou zerar apenas os dados desta DEMO do CRM neste navegador.</p>
+              <div className="flex gap-2 flex-wrap">
+                <DemoModuleSwitcher current="crm" size="default" variant="outline" />
+                <Button variant="destructive" onClick={resetCrm}><RotateCcw className="w-4 h-4 mr-1" />Zerar dados da DEMO</Button>
+              </div>
+            </Card>
+          </div>
+        </main>
+        <PublicFooter />
+      </div>
+    </TooltipProvider>
   );
 }
+
+// ───────────────────────── helpers ─────────────────────────
+
+const PARAM_DEFS: { key: keyof CrmParams; label: string; hint: string }[] = [
+  { key: "ativarFunis", label: "Ativar funis comerciais?", hint: "Quando ativado, os leads passam por etapas definidas em um funil." },
+  { key: "ativarTags", label: "Ativar tags?", hint: "Permite categorizar leads e clientes com tags personalizadas." },
+  { key: "exigirOrigem", label: "Exigir origem do lead?", hint: "Obriga o cadastro a informar de onde o lead veio." },
+  { key: "leadScoring", label: "Ativar lead scoring?", hint: "Cada interação soma pontos no score do lead." },
+  { key: "followupAuto", label: "Ativar follow-ups automáticos?", hint: "Dispara mensagem se o lead não responder em X dias." },
+  { key: "ativarReativacao", label: "Ativar reativação automática?", hint: "Move leads e clientes inativos para a etapa de Reativação." },
+  { key: "boasVindasLead", label: "Enviar boas-vindas para novo lead?", hint: "Dispara template de boas-vindas no cadastro de leads." },
+  { key: "boasVindasCliente", label: "Enviar boas-vindas para novo cliente?", hint: "Dispara template de boas-vindas ao virar cliente." },
+  { key: "pesquisaPosConversao", label: "Enviar pesquisa após conversão?", hint: "Envia uma pesquisa de satisfação após a conversão." },
+  { key: "tarefaAutoNovoLead", label: "Criar tarefa automática para novo lead?", hint: "Cria automaticamente uma tarefa para o responsável." },
+  { key: "distribuirAuto", label: "Distribuir leads automaticamente?", hint: "Round-robin entre vendedores ativos." },
+  { key: "exigirResponsavel", label: "Exigir responsável para cada lead?", hint: "Impede cadastrar lead sem responsável atribuído." },
+  { key: "permitirSemWhats", label: "Permitir lead sem WhatsApp?", hint: "Quando NÃO, exige WhatsApp no cadastro." },
+  { key: "permitirSemEmail", label: "Permitir lead sem e-mail?", hint: "Quando NÃO, exige e-mail no cadastro." },
+  { key: "registrarLogsComunicacao", label: "Registrar logs de comunicação?", hint: "Salva no histórico cada envio simulado." },
+  { key: "registrarHistoricoCliente", label: "Registrar histórico completo do cliente?", hint: "Mantém todo o histórico de interações no cliente." },
+];
 
 function KPI({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
@@ -332,13 +728,55 @@ function KPI({ label, value, accent }: { label: string; value: string; accent?: 
 
 function ParamToggle({ label, hint, value, onChange }: { label: string; hint: string; value: boolean; onChange: (v: boolean) => void }) {
   return (
-    <div className="flex items-start justify-between gap-3">
-      <div>
-        <div className="font-medium text-sm">{label}</div>
+    <div className="flex items-start justify-between gap-3 border-b last:border-0 pb-3 last:pb-0">
+      <div className="flex-1">
+        <div className="font-medium text-sm flex items-center gap-1">{label} <HelpTip>{hint}</HelpTip></div>
         <div className="text-xs text-muted-foreground">{hint}</div>
       </div>
       <Switch checked={value} onCheckedChange={onChange} />
     </div>
+  );
+}
+
+function AddByName({ placeholder, onAdd }: { placeholder: string; onAdd: (nome: string) => void }) {
+  const [v, setV] = useState("");
+  return (
+    <div className="flex gap-2 mt-3">
+      <Input placeholder={placeholder} value={v} onChange={(e) => setV(e.target.value)} />
+      <Button onClick={() => { if (!v.trim()) return; onAdd(v.trim()); setV(""); toast.success("Adicionado"); }}><Plus className="w-4 h-4" /></Button>
+    </div>
+  );
+}
+
+function SimpleListPanel<T extends { id: string }>({
+  title, items, empty, columns, onAdd, onRemove, placeholder,
+}: {
+  title: string;
+  items: T[];
+  empty: string;
+  columns: { k: keyof T; h: string; render?: (v: unknown) => React.ReactNode }[];
+  onAdd: (nome: string) => void;
+  onRemove: (id: string) => void;
+  placeholder: string;
+}) {
+  return (
+    <Card className="p-5 space-y-3">
+      <div className="font-semibold text-sm">{title}</div>
+      <AddByName placeholder={placeholder} onAdd={onAdd} />
+      {items.length === 0 ? <p className="text-sm text-muted-foreground">{empty}</p> : (
+        <Table>
+          <TableHeader><TableRow>{columns.map((c) => <TableHead key={String(c.k)}>{c.h}</TableHead>)}<TableHead className="text-right">Ações</TableHead></TableRow></TableHeader>
+          <TableBody>
+            {items.map((it) => (
+              <TableRow key={it.id}>
+                {columns.map((c) => <TableCell key={String(c.k)}>{c.render ? c.render(it[c.k]) : String(it[c.k] ?? "—")}</TableCell>)}
+                <TableCell className="text-right"><Button size="sm" variant="ghost" onClick={() => onRemove(it.id)}><Trash2 className="w-4 h-4" /></Button></TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+    </Card>
   );
 }
 
@@ -351,7 +789,7 @@ function NovoLead({ onCreate }: { onCreate: (l: Lead) => void }) {
       <div><Label className="text-xs">Telefone</Label><Input value={f.telefone} onChange={(e) => setF({ ...f, telefone: e.target.value })} /></div>
       <div><Label className="text-xs">Origem</Label><Input value={f.origem} onChange={(e) => setF({ ...f, origem: e.target.value })} /></div>
       <div><Label className="text-xs">Valor</Label><Input type="number" value={f.valor} onChange={(e) => setF({ ...f, valor: Number(e.target.value) })} /></div>
-      <Button className="sm:col-span-6 bg-gradient-primary" disabled={!f.nome} onClick={() => { onCreate({ id: uid("ld"), ...f, estagio: "Novo", score: 50, tags: [], criadoEm: new Date().toISOString() }); setF({ nome: "", email: "", telefone: "", origem: "Site", valor: 0 }); toast.success("Lead criado"); }}>
+      <Button className="sm:col-span-6 bg-gradient-primary" disabled={!f.nome} onClick={() => { onCreate({ id: uid("ld"), ...f, estagio: "Novo lead", score: 50, tags: [], criadoEm: new Date().toISOString() }); setF({ nome: "", email: "", telefone: "", origem: "Site", valor: 0 }); toast.success("Lead criado"); }}>
         <Plus className="w-4 h-4 mr-1" />Adicionar lead
       </Button>
     </div>
@@ -401,8 +839,8 @@ function NovoTemplate({ onCreate }: { onCreate: (t: Template) => void }) {
           <SelectContent><SelectItem value="email">E-mail</SelectItem><SelectItem value="whatsapp">WhatsApp</SelectItem></SelectContent>
         </Select>
       </div>
-      <div /><div className="sm:col-span-3"><Label className="text-xs">Corpo (use {"{nome}"} para personalizar)</Label><Textarea rows={3} value={f.corpo} onChange={(e) => setF({ ...f, corpo: e.target.value })} /></div>
-      <Button className="sm:col-span-3 bg-gradient-primary" disabled={!f.nome || !f.corpo} onClick={() => { onCreate({ id: uid("tp"), ...f }); setF({ nome: "", canal: "email", corpo: "" }); toast.success("Template criado"); }}>
+      <div /><div className="sm:col-span-3"><Label className="text-xs">Corpo (use {"{nome}"} para personalizar — o prefixo TESTE — DEMONSTRAÇÃO — VERSÃO TESTE é adicionado automaticamente)</Label><Textarea rows={3} value={f.corpo} onChange={(e) => setF({ ...f, corpo: e.target.value })} /></div>
+      <Button className="sm:col-span-3 bg-gradient-primary" disabled={!f.nome || !f.corpo} onClick={() => { const corpo = f.corpo.startsWith("TESTE —") ? f.corpo : `TESTE — DEMONSTRAÇÃO — VERSÃO TESTE\n\n${f.corpo}`; onCreate({ id: uid("tp"), nome: f.nome, canal: f.canal, corpo }); setF({ nome: "", canal: "email", corpo: "" }); toast.success("Template criado"); }}>
         <Plus className="w-4 h-4 mr-1" />Salvar template
       </Button>
     </div>
@@ -410,13 +848,13 @@ function NovoTemplate({ onCreate }: { onCreate: (t: Template) => void }) {
 }
 
 function NovaAutomacao({ onCreate }: { onCreate: (a: Automacao) => void }) {
-  const [f, setF] = useState({ nome: "", gatilho: "lead_criado", acao: "enviar_template:Boas-vindas" });
+  const [f, setF] = useState({ nome: "", gatilho: "lead_criado", acao: "enviar_template:Boas-vindas — novo lead" });
   return (
     <div className="grid sm:grid-cols-4 gap-2 items-end">
       <div><Label className="text-xs">Nome</Label><Input value={f.nome} onChange={(e) => setF({ ...f, nome: e.target.value })} /></div>
       <div><Label className="text-xs">Gatilho</Label><Input value={f.gatilho} onChange={(e) => setF({ ...f, gatilho: e.target.value })} /></div>
       <div><Label className="text-xs">Ação</Label><Input value={f.acao} onChange={(e) => setF({ ...f, acao: e.target.value })} /></div>
-      <Button className="bg-gradient-primary" disabled={!f.nome} onClick={() => { onCreate({ id: uid("au"), ...f, ativa: true }); setF({ nome: "", gatilho: "lead_criado", acao: "enviar_template:Boas-vindas" }); }}>
+      <Button className="bg-gradient-primary" disabled={!f.nome} onClick={() => { onCreate({ id: uid("au"), ...f, ativa: true }); setF({ nome: "", gatilho: "lead_criado", acao: "enviar_template:Boas-vindas — novo lead" }); }}>
         <Plus className="w-4 h-4 mr-1" />Criar automação
       </Button>
     </div>
