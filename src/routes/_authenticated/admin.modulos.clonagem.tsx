@@ -1,19 +1,40 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { fetchCurrentUser } from "@/lib/auth";
 import { PageHeader, StatCard } from "@/components/app/PageElements";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ShieldAlert, Boxes, Layers3, Building2, FileSearch, Copy } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  ShieldAlert,
+  Boxes,
+  Layers3,
+  Building2,
+  FileSearch,
+  Copy,
+  Eye,
+  Plus,
+  History,
+} from "lucide-react";
 import {
   cloneStore,
+  ensureSeedBases,
   PLANNED_MODULES,
   type ModuleBase,
   type CloneInstance,
+  type CloneLog,
 } from "@/lib/cloneCentral";
+import { CloneWizard } from "@/components/admin/CloneWizard";
 
 export const Route = createFileRoute("/_authenticated/admin/modulos/clonagem")({
   head: () => ({ meta: [{ title: "Clonagem de Módulos — Impulsionando" }] }),
@@ -26,13 +47,29 @@ function CloneCenterPage() {
     queryFn: fetchCurrentUser,
   });
 
-  const [bases, setBases] = useState<ModuleBase[]>(() => cloneStore.listBases());
-  const [instances, setInstances] = useState<CloneInstance[]>(() => cloneStore.listInstances());
-  const [logs, setLogs] = useState(() => cloneStore.listLogs());
+  const [bases, setBases] = useState<ModuleBase[]>([]);
+  const [instances, setInstances] = useState<CloneInstance[]>([]);
+  const [logs, setLogs] = useState<CloneLog[]>([]);
+  const [wizardBase, setWizardBase] = useState<ModuleBase | null>(null);
+  const [detailBase, setDetailBase] = useState<ModuleBase | null>(null);
+  const [logsBase, setLogsBase] = useState<ModuleBase | null>(null);
 
   const isAllowed = !!me?.isSuperAdmin;
 
-  // Log tentativa de acesso negado (apenas uma vez, no carregamento)
+  function refresh() {
+    setBases(cloneStore.listBases());
+    setInstances(cloneStore.listInstances());
+    setLogs(cloneStore.listLogs());
+  }
+
+  useEffect(() => {
+    if (isAllowed) {
+      ensureSeedBases();
+      refresh();
+    }
+  }, [isAllowed]);
+
+  // Log tentativa negada (uma vez)
   useMemo(() => {
     if (!isLoading && me && !isAllowed) {
       cloneStore.pushLog({
@@ -64,6 +101,16 @@ function CloneCenterPage() {
 
   const demoCount = instances.filter((i) => i.layer === "demo").length;
   const realCount = instances.filter((i) => i.layer === "real").length;
+  const actor = me?.user.email ?? "interno";
+
+  function countClonesOf(baseId: string) {
+    return instances.filter((i) => i.baseId === baseId).length;
+  }
+  function logsOf(baseId: string) {
+    const base = bases.find((b) => b.id === baseId);
+    if (!base) return [];
+    return logs.filter((l) => l.detail.includes(base.name));
+  }
 
   return (
     <div className="space-y-6 p-6">
@@ -95,55 +142,94 @@ function CloneCenterPage() {
       <Tabs defaultValue="base" className="w-full">
         <TabsList>
           <TabsTrigger value="base">Módulos-Base</TabsTrigger>
-          <TabsTrigger value="instances">Instâncias (DEMO / Real)</TabsTrigger>
+          <TabsTrigger value="instances">Instâncias</TabsTrigger>
           <TabsTrigger value="planned">Próximos módulos</TabsTrigger>
           <TabsTrigger value="logs">Logs internos</TabsTrigger>
-          <TabsTrigger value="layers">Camadas do sistema</TabsTrigger>
+          <TabsTrigger value="layers">Camadas</TabsTrigger>
         </TabsList>
 
         <TabsContent value="base" className="space-y-3 pt-4">
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              onClick={() =>
+                toast.info("Recurso preparado para próxima fase técnica.")
+              }
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Criar novo módulo-base
+            </Button>
+          </div>
+
           {bases.length === 0 ? (
             <Card className="p-8 text-center text-sm text-muted-foreground">
-              Nenhum módulo-base cadastrado ainda. O primeiro módulo-base —{" "}
-              <strong>Agenda Online</strong> — será criado no Bloco 2/4.
+              Nenhum módulo-base cadastrado ainda.
             </Card>
           ) : (
-            bases.map((b) => (
-              <Card key={b.id} className="p-4 flex items-center justify-between gap-4">
-                <div>
-                  <div className="font-medium">{b.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {b.slug} · v{b.version} · {b.status}
+            <div className="grid md:grid-cols-2 gap-4">
+              {bases.map((b) => (
+                <Card key={b.id} className="p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="font-semibold">{b.name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        Código: {b.slug} · Versão-base: v{b.version}
+                      </div>
+                    </div>
+                    <Badge variant="secondary">Base inicial</Badge>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary">{b.status}</Badge>
-                  <Button size="sm" variant="outline" disabled>
-                    <Copy className="w-4 h-4 mr-2" />
-                    Clonar (Bloco 2)
-                  </Button>
-                </div>
-              </Card>
-            ))
+                  <p className="text-sm text-muted-foreground">{b.description}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    <Badge variant="outline">DEMO</Badge>
+                    <Badge variant="outline">TESTE</Badge>
+                    <Badge variant="outline">REAL</Badge>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Presets: {b.structure.nichePresets.join(", ")}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Última atualização: {new Date(b.updatedAt).toLocaleString("pt-BR")} ·
+                    Clones criados: {countClonesOf(b.id)}
+                  </div>
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    <Button size="sm" variant="outline" onClick={() => setDetailBase(b)}>
+                      <Eye className="w-4 h-4 mr-1" />
+                      Ver módulo-base
+                    </Button>
+                    <Button size="sm" onClick={() => setWizardBase(b)}>
+                      <Copy className="w-4 h-4 mr-1" />
+                      Clonar módulo
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => setLogsBase(b)}>
+                      <History className="w-4 h-4 mr-1" />
+                      Ver logs
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
           )}
         </TabsContent>
 
         <TabsContent value="instances" className="space-y-3 pt-4">
           {instances.length === 0 ? (
             <Card className="p-8 text-center text-sm text-muted-foreground">
-              Nenhuma instância clonada ainda. Clonagens aparecerão aqui após criar o primeiro
-              módulo-base.
+              Nenhuma instância clonada ainda.
             </Card>
           ) : (
             instances.map((i) => {
               const base = bases.find((b) => b.id === i.baseId);
               return (
-                <Card key={i.id} className="p-4 flex items-center justify-between">
+                <Card key={i.id} className="p-4 flex items-center justify-between gap-3">
                   <div>
                     <div className="font-medium">{i.targetName}</div>
                     <div className="text-xs text-muted-foreground">
-                      Base: {base?.name ?? i.baseId} · {i.niche ?? "—"}
+                      Base: {base?.name ?? i.baseId} · {i.niche ?? "—"} ·{" "}
+                      {new Date(i.createdAt).toLocaleString("pt-BR")}
                     </div>
+                    {i.notes && (
+                      <div className="text-xs text-muted-foreground mt-1">{i.notes}</div>
+                    )}
                   </div>
                   <Badge variant={i.layer === "real" ? "default" : "secondary"}>
                     {i.layer === "real" ? "Cliente Real" : "DEMO"}
@@ -161,7 +247,7 @@ function CloneCenterPage() {
             </p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
               {PLANNED_MODULES.map((m) => {
-                const has = bases.some((b) => b.slug === m.slug);
+                const has = bases.some((b) => b.slug === m.slug || b.slug === m.slug.replace(/-/g, "_"));
                 return (
                   <div
                     key={m.slug}
@@ -180,19 +266,15 @@ function CloneCenterPage() {
 
         <TabsContent value="logs" className="space-y-2 pt-4">
           {logs.length === 0 ? (
-            <Card className="p-8 text-center text-sm text-muted-foreground">
-              Sem logs ainda.
-            </Card>
+            <Card className="p-8 text-center text-sm text-muted-foreground">Sem logs ainda.</Card>
           ) : (
             logs.map((l) => (
-              <Card key={l.id} className="p-3 text-sm flex items-center justify-between gap-3">
-                <div>
-                  <div className="font-medium">{l.action}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {l.actor} · {new Date(l.at).toLocaleString("pt-BR")}
-                  </div>
-                  <div className="text-xs">{l.detail}</div>
+              <Card key={l.id} className="p-3 text-sm">
+                <div className="font-medium">{l.action}</div>
+                <div className="text-xs text-muted-foreground">
+                  {l.actor} · {new Date(l.at).toLocaleString("pt-BR")}
                 </div>
+                <div className="text-xs">{l.detail}</div>
               </Card>
             ))
           )}
@@ -216,8 +298,7 @@ function CloneCenterPage() {
                 <h3 className="font-medium">B) Instância DEMO</h3>
               </div>
               <p className="text-sm text-muted-foreground">
-                Versão demonstrativa clonada da base. Dados fictícios, PAGO — DEMO, mensagens TESTE,
-                LeadDemoCapture, sandbox, logs demo, reset local.
+                Dados fictícios, PAGO — DEMO, mensagens TESTE, LeadDemoCapture, sandbox, logs demo, reset local.
               </p>
             </Card>
             <Card className="p-4 space-y-2">
@@ -226,19 +307,76 @@ function CloneCenterPage() {
                 <h3 className="font-medium">C) Instância Real do Cliente</h3>
               </div>
               <p className="text-sm text-muted-foreground">
-                Versão real criada para cliente/projeto. Dados, usuários, configurações, integrações,
-                histórico, pagamentos e logs reais.
+                Dados, usuários, configurações, integrações, histórico, pagamentos e logs reais.
               </p>
             </Card>
           </div>
           <Card className="p-4 mt-4 border-destructive/40 bg-destructive/5">
             <p className="text-sm">
-              <strong>Regra obrigatória:</strong> nunca misturar dados entre Módulo-Base, DEMO e
-              Cliente Real.
+              <strong>Regra obrigatória:</strong> nunca misturar dados entre Módulo-Base, DEMO e Cliente Real.
             </p>
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Wizard */}
+      {wizardBase && (
+        <CloneWizard
+          open={!!wizardBase}
+          onOpenChange={(v) => !v && setWizardBase(null)}
+          base={wizardBase}
+          actor={actor}
+          canClone={isAllowed}
+          onCreated={refresh}
+        />
+      )}
+
+      {/* Detalhe do módulo-base */}
+      <Dialog open={!!detailBase} onOpenChange={(v) => !v && setDetailBase(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{detailBase?.name} — v{detailBase?.version}</DialogTitle>
+            <DialogDescription>{detailBase?.description}</DialogDescription>
+          </DialogHeader>
+          {detailBase && (
+            <div className="space-y-3 text-sm">
+              {Object.entries(detailBase.structure).map(([k, v]) => (
+                <div key={k}>
+                  <div className="font-medium capitalize">{k}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {(v as string[]).join(", ") || "—"}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Logs por módulo-base */}
+      <Dialog open={!!logsBase} onOpenChange={(v) => !v && setLogsBase(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Logs — {logsBase?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            {logsBase && logsOf(logsBase.id).length === 0 ? (
+              <p className="text-sm text-muted-foreground">Sem logs para este módulo-base.</p>
+            ) : (
+              logsBase &&
+              logsOf(logsBase.id).map((l) => (
+                <Card key={l.id} className="p-2 text-sm">
+                  <div className="font-medium">{l.action}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {l.actor} · {new Date(l.at).toLocaleString("pt-BR")}
+                  </div>
+                  <div className="text-xs">{l.detail}</div>
+                </Card>
+              ))
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
