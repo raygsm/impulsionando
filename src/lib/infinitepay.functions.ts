@@ -280,3 +280,54 @@ export const getInfinitePayPayment = createServerFn({ method: "POST" })
     if (row.user_id && row.user_id !== context.userId) return { ok: false as const, payment: null };
     return { ok: true as const, payment: row };
   });
+
+// ====================== Server-side access guard ======================
+
+export const RequirePaidInput = z.object({
+  modulo_id: z.string().max(80).optional().nullable(),
+  plano_id: z.string().max(80).optional().nullable(),
+  empresa_id: z.string().uuid().optional().nullable(),
+});
+export type RequirePaidInputType = z.infer<typeof RequirePaidInput>;
+
+/**
+ * Server-side guard: returns true ONLY if there is a `paid` InfinitePay
+ * payment in the `production` environment matching the given criteria for
+ * the current user.
+ *
+ * This is the single source of truth for unlocking real modules. Redirect
+ * params, success-page query strings, or client state are never used —
+ * status='paid' is only ever set by the verified webhook or the
+ * checkInfinitePayStatusCore() flow (which requires paid=true from the
+ * InfinitePay API).
+ *
+ * DEMO payments are intentionally NOT accepted here.
+ */
+export async function requireInfinitePayPaidCore(
+  userId: string,
+  criteria: RequirePaidInputType,
+): Promise<{ paid: boolean; payment: any | null }> {
+  let q = supabaseAdmin
+    .from("infinitepay_payments")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("environment", "production")
+    .eq("status", "paid")
+    .order("paid_at", { ascending: false })
+    .limit(1);
+
+  if (criteria.modulo_id) q = q.eq("modulo_id", criteria.modulo_id);
+  if (criteria.plano_id) q = q.eq("plano_id", criteria.plano_id);
+  if (criteria.empresa_id) q = q.eq("empresa_id", criteria.empresa_id);
+
+  const { data, error } = await q.maybeSingle();
+  if (error) throw new Error(error.message);
+  return { paid: !!data, payment: data ?? null };
+}
+
+export const requireInfinitePayPaid = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => RequirePaidInput.parse(data))
+  .handler(async ({ data, context }) => {
+    return requireInfinitePayPaidCore(context.userId, data);
+  });
