@@ -30,6 +30,16 @@ import {
   Wallet,
   ShieldCheck,
   Bell,
+  Zap,
+  RefreshCw,
+  Eye,
+  EyeOff,
+  Send,
+  MessageSquare,
+  Mail,
+  Bot,
+  Activity,
+  Plug,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useDemoState, uid } from "@/lib/demoSandbox";
