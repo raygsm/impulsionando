@@ -72,20 +72,20 @@ export const Route = createFileRoute('/api/public/hooks/comms-self-test')({
           const { data: suppressed } = await supabaseAdmin
             .from('suppressed_emails')
             .select('id')
-            .eq('email', TEST_EMAIL.toLowerCase())
+            .eq('email', recipientEmail.toLowerCase())
             .maybeSingle()
 
           if (suppressed) {
             emailResult = { ok: false, status: 'suppressed', error: 'recipient_suppressed' }
           } else {
-            const unsubscribe_token = await ensureUnsubscribeToken(TEST_EMAIL)
+            const unsubscribe_token = await ensureUnsubscribeToken(recipientEmail)
             const messageId = crypto.randomUUID()
             const idempotencyKey = `comms-self-test-${messageId}`
 
             await supabaseAdmin.from('email_send_log').insert({
               message_id: messageId,
               template_name: 'comms-self-test',
-              recipient_email: TEST_EMAIL,
+              recipient_email: recipientEmail,
               status: 'pending',
             })
 
@@ -93,7 +93,7 @@ export const Route = createFileRoute('/api/public/hooks/comms-self-test')({
               queue_name: 'transactional_emails',
               payload: {
                 message_id: messageId,
-                to: TEST_EMAIL,
+                to: recipientEmail,
                 from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
                 sender_domain: SENDER_DOMAIN,
                 subject,
@@ -111,7 +111,7 @@ export const Route = createFileRoute('/api/public/hooks/comms-self-test')({
               await supabaseAdmin.from('email_send_log').insert({
                 message_id: messageId,
                 template_name: 'comms-self-test',
-                recipient_email: TEST_EMAIL,
+                recipient_email: recipientEmail,
                 status: 'failed',
                 error_message: enqErr.message,
               })
@@ -131,15 +131,15 @@ export const Route = createFileRoute('/api/public/hooks/comms-self-test')({
           `Disparado em: ${stamp} (horário de Brasília).`
         let whatsapp: { phone: string; ok: boolean; status: number; body: string }
         try {
-          const r = await sendWhatsAppText({ phone: TEST_PHONE, message: waMessage })
-          whatsapp = { phone: TEST_PHONE, ok: r.ok, status: r.status, body: r.body }
+          const r = await sendWhatsAppText({ phone: recipientPhone, message: waMessage })
+          whatsapp = { phone: recipientPhone, ok: r.ok, status: r.status, body: r.body }
         } catch (e: any) {
-          whatsapp = { phone: TEST_PHONE, ok: false, status: 0, body: e?.message ?? 'error' }
+          whatsapp = { phone: recipientPhone, ok: false, status: 0, body: e?.message ?? 'error' }
         }
 
         return Response.json({
           ok: emailResult.ok && whatsapp.ok,
-          email: { recipient: TEST_EMAIL, ...emailResult },
+          email: { recipient: recipientEmail, ...emailResult },
           whatsapp,
           at: now.toISOString(),
         })
