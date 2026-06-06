@@ -701,6 +701,200 @@ function DemoAdvogados() {
             })}
           </TabsContent>
 
+          {/* ===== INTEGRAÇÕES JURÍDICAS ===== */}
+          <TabsContent value="integracoes" className="mt-4 space-y-3">
+            <Card className="p-4 border-amber-500/40 bg-amber-500/5 text-sm">
+              <div className="flex items-start gap-2">
+                <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                <div>
+                  <div className="font-medium">Integrações Jurídicas e Andamentos Processuais</div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Movimentações processuais podem conter informações sensíveis. O escritório define o que será
+                    comunicado ao cliente e quem pode revisar ou liberar cada atualização. Integrações reais
+                    dependem de credenciais externas ou autorização da plataforma jurídica contratada.
+                  </p>
+                </div>
+              </div>
+            </Card>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {integracoes.map((i) => {
+                const aguarda = i.status === "aguardando_credenciais" || i.status === "aguardando_autorizacao";
+                const erro = i.status === "erro_auth" || i.status === "erro_sync";
+                return (
+                  <Card key={i.id} className={`p-4 ${aguarda ? "border-amber-500/40" : erro ? "border-destructive/40" : ""}`}>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="font-semibold flex items-center gap-2"><Plug className="w-4 h-4 text-primary" /> {i.nome}</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">{i.tipo} • Resp.: {i.responsavel}</div>
+                      </div>
+                      <Badge variant={i.status === "ativa" ? "default" : erro ? "destructive" : "outline"} className="text-[10px] whitespace-nowrap">
+                        {i.status.replaceAll("_", " ")}
+                      </Badge>
+                    </div>
+                    <div className="text-xs mt-2 grid grid-cols-2 gap-x-2 gap-y-1">
+                      <div><span className="text-muted-foreground">Escritório:</span> {i.escritorioVinculado}</div>
+                      <div><span className="text-muted-foreground">Processos:</span> {i.processosMonitorados}</div>
+                      <div><span className="text-muted-foreground">Última sync:</span> {i.ultimaSync ? i.ultimaSync.slice(0, 16).replace("T", " ") : "—"}</div>
+                      <div><span className="text-muted-foreground">Próxima:</span> {i.proximaSync ? i.proximaSync.slice(0, 10) : "—"}</div>
+                      <div><span className="text-muted-foreground">Erros:</span> {i.errosSync}</div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">{i.observacao}</p>
+                    <div className="flex gap-2 mt-3 flex-wrap">
+                      <Button size="sm" variant="outline" onClick={() => testarIntegracao(i)}><Zap className="w-3 h-3 mr-1" />Testar</Button>
+                      <Button size="sm" variant="outline" onClick={() => sincronizarAgora(i)} disabled={i.status !== "ativa"}><RefreshCw className="w-3 h-3 mr-1" />Sincronizar agora</Button>
+                      {aguarda && <Badge variant="outline" className="text-[10px] border-amber-500/60 text-amber-700 dark:text-amber-400">Aguardando credenciais externas</Badge>}
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </TabsContent>
+
+          {/* ===== MOVIMENTAÇÕES PROCESSUAIS ===== */}
+          <TabsContent value="movimentacoes" className="mt-4 space-y-3">
+            <Card className="p-3 text-xs text-muted-foreground border-primary/30 bg-primary/5">
+              <strong className="text-foreground">TESTE — DEMONSTRAÇÃO — VERSÃO TESTE.</strong> Esta é uma simulação
+              de aviso processual. Nenhuma movimentação real foi consultada ou enviada. Algumas movimentações podem
+              exigir interpretação jurídica — por segurança, o escritório pode exigir revisão do advogado antes de
+              avisar o cliente.
+            </Card>
+            {movimentacoes.length === 0 ? (
+              <Card className="p-6 text-sm text-muted-foreground text-center">Sem movimentações registradas.</Card>
+            ) : (
+              <div className="space-y-3">
+                {movimentacoes.map((m) => {
+                  const proc = processos.find((p) => p.id === m.processoId);
+                  const cli = clientes.find((c) => c.id === m.clienteId);
+                  const adv = advogados.find((a) => a.id === m.advogadoId);
+                  const oculta = m.statusRevisao === "ocultada_cliente";
+                  const enviada = m.statusRevisao === "enviada_cliente" || m.clienteNotificado;
+                  return (
+                    <Card key={m.id} className={`p-4 ${oculta ? "opacity-70" : ""} ${m.possivelPrazo ? "border-amber-500/40" : ""}`}>
+                      <div className="flex items-start justify-between gap-3 flex-wrap">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant="outline" className="text-[10px] capitalize">{m.tipo.replaceAll("_", " ")}</Badge>
+                            <Badge className="text-[10px] capitalize" variant={enviada ? "default" : "outline"}>
+                              {m.statusRevisao.replaceAll("_", " ")}
+                            </Badge>
+                            {m.possivelPrazo && (
+                              <Badge variant="outline" className="text-[10px] border-amber-500/60 text-amber-700 dark:text-amber-400">
+                                possível prazo
+                              </Badge>
+                            )}
+                            <span className="text-xs text-muted-foreground">{m.fonte}</span>
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1 font-mono">{proc?.numero ?? "—"} • {cli?.nome ?? "—"} • {adv?.nome ?? "—"}</div>
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            Movimentação: {m.dataMovimentacao.slice(0, 10)} • Capturada: {m.dataCaptura.slice(0, 10)}
+                            {m.dataEnvio && <> • Enviada em {m.dataEnvio.slice(0, 10)} ({m.canalNotificacao})</>}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 grid md:grid-cols-2 gap-3 text-xs">
+                        <div>
+                          <div className="font-medium text-foreground mb-1">Texto original</div>
+                          <p className="text-muted-foreground whitespace-pre-line">{m.textoOriginal}</p>
+                        </div>
+                        <div className="space-y-2">
+                          <div>
+                            <div className="font-medium text-foreground mb-1 flex items-center gap-1"><Bot className="w-3 h-3" /> Resumo interno (IA — apoio)</div>
+                            <p className="text-muted-foreground">{m.resumoInterno || <em>Use “Gerar resumo IA”.</em>}</p>
+                          </div>
+                          <div>
+                            <div className="font-medium text-foreground mb-1">Mensagem ao cliente</div>
+                            <p className="text-muted-foreground">{m.resumoCliente || <em>Ainda não preparada.</em>}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 flex gap-2 flex-wrap">
+                        <Button size="sm" variant="outline" onClick={() => gerarResumoIA(m)}><Bot className="w-3 h-3 mr-1" />Gerar resumo IA</Button>
+                        <Button size="sm" variant="outline" onClick={() => revisarMov(m)}><CheckCircle2 className="w-3 h-3 mr-1" />Revisar</Button>
+                        <Button size="sm" variant="outline" onClick={() => aprovarEnvio(m)}><Send className="w-3 h-3 mr-1" />Aprovar envio</Button>
+                        <Button size="sm" variant="outline" onClick={() => ocultarDoCliente(m)}><EyeOff className="w-3 h-3 mr-1" />Ocultar do cliente</Button>
+                        <Button size="sm" onClick={() => enviarAvisoTeste(m)}>
+                          {params.avisoWhatsapp ? <MessageSquare className="w-3 h-3 mr-1" /> : <Mail className="w-3 h-3 mr-1" />}
+                          Enviar aviso TESTE
+                        </Button>
+                        {m.possivelPrazo && (
+                          <Button size="sm" variant="outline" onClick={() => criarPrazoDaMov(m)}>
+                            <AlertTriangle className="w-3 h-3 mr-1" />Criar prazo
+                          </Button>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-muted-foreground mt-2 italic">
+                        Resumo gerado por IA apenas para apoio interno. O advogado responsável deve revisar antes de liberar ao cliente.
+                      </p>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Pré-visualização da área do cliente */}
+            <Card className="p-4 mt-4 border-primary/30">
+              <div className="flex items-center gap-2 mb-2">
+                <Eye className="w-4 h-4 text-primary" />
+                <span className="font-medium text-sm">Atualizações do Processo — Pré-visualização da área do cliente</span>
+              </div>
+              {!params.exibirMovNaAreaCliente ? (
+                <p className="text-xs text-muted-foreground">Exibição de movimentações na área do cliente está desativada nas parametrizações.</p>
+              ) : (
+                <ul className="text-xs space-y-2">
+                  {movimentacoes.filter((m) => m.statusRevisao !== "ocultada_cliente" && m.notificarCliente).map((m) => {
+                    const proc = processos.find((p) => p.id === m.processoId);
+                    return (
+                      <li key={m.id} className="border-l-2 border-primary/40 pl-3">
+                        <div className="font-medium capitalize">{m.tipo.replaceAll("_", " ")} — {m.dataMovimentacao.slice(0, 10)}</div>
+                        <div className="text-muted-foreground font-mono">{proc?.numero}</div>
+                        <div className="text-muted-foreground mt-0.5">{m.resumoCliente || "(resumo não preparado)"}</div>
+                      </li>
+                    );
+                  })}
+                  {movimentacoes.filter((m) => m.statusRevisao !== "ocultada_cliente" && m.notificarCliente).length === 0 && (
+                    <li className="text-muted-foreground">Nenhuma atualização liberada para o cliente ainda.</li>
+                  )}
+                </ul>
+              )}
+            </Card>
+          </TabsContent>
+
+          {/* ===== ALERTAS AO ADVOGADO ===== */}
+          <TabsContent value="alertas" className="mt-4 space-y-3">
+            <Card className="p-3 text-xs text-muted-foreground">
+              Nova movimentação identificada no processo. Revise o conteúdo antes de liberar comunicação ao cliente,
+              se necessário.
+            </Card>
+            <Card className="p-3">
+              {alertas.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Sem alertas no momento.</p>
+              ) : (
+                <ul className="divide-y">
+                  {alertas.map((a) => {
+                    const adv = advogados.find((x) => x.id === a.advogadoId);
+                    return (
+                      <li key={a.id} className={`flex items-start gap-3 py-3 ${a.lido ? "opacity-60" : ""}`}>
+                        <Bell className={`w-4 h-4 mt-0.5 ${a.lido ? "text-muted-foreground" : "text-primary"}`} />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm">{a.mensagem}</div>
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            {adv?.nome ?? "—"} • {a.criadoEm.slice(0, 10)} • <span className="capitalize">{a.tipo.replaceAll("_", " ")}</span>
+                          </div>
+                        </div>
+                        {!a.lido && (
+                          <Button size="sm" variant="ghost" onClick={() => marcarAlertaLido(a.id)}>Marcar como lido</Button>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </Card>
+          </TabsContent>
+
+
           <TabsContent value="params" className="mt-4 grid sm:grid-cols-2 gap-3">
             {([
               ["lembretePrazo48h", "Lembrete automático 48h antes do prazo", "Dispara aviso ao responsável 48 horas antes do vencimento — evita perda de prazo processual."],
