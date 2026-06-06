@@ -189,6 +189,7 @@ function DemoAdvogados() {
   }
 
   return (
+    <TooltipProvider delayDuration={150}>
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
       <DemoModeBanner current="advogados" />
