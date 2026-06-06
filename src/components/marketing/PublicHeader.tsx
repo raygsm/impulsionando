@@ -205,9 +205,10 @@ function ItemLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
 
 
 function DesktopDropdownFlat({ label, items }: { label: string; items: NavItem[] }) {
+  const hasActive = useHasActiveFlat(items);
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="px-3 py-2.5 lg:px-4 lg:py-3 text-sm lg:text-[15px] text-muted-foreground hover:text-foreground transition-colors rounded-md inline-flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      <DropdownMenuTrigger className={`px-3 py-2.5 lg:px-4 lg:py-3 text-sm lg:text-[15px] hover:text-foreground transition-colors rounded-md inline-flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-ring ${hasActive ? "text-foreground font-medium bg-accent" : "text-muted-foreground"}`}>
         {label}
         <ChevronDown className="w-4 h-4" />
       </DropdownMenuTrigger>
@@ -223,9 +224,10 @@ function DesktopDropdownFlat({ label, items }: { label: string; items: NavItem[]
 }
 
 function DesktopDropdownGrouped({ label, groups }: { label: string; groups: NavGroup[] }) {
+  const hasActive = useHasActiveChild(groups);
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="px-3 py-2.5 lg:px-4 lg:py-3 text-sm lg:text-[15px] text-muted-foreground hover:text-foreground transition-colors rounded-md inline-flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      <DropdownMenuTrigger className={`px-3 py-2.5 lg:px-4 lg:py-3 text-sm lg:text-[15px] hover:text-foreground transition-colors rounded-md inline-flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-ring ${hasActive ? "text-foreground font-medium bg-accent" : "text-muted-foreground"}`}>
         {label}
         <ChevronDown className="w-4 h-4" />
       </DropdownMenuTrigger>
