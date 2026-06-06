@@ -209,6 +209,7 @@ function DemoCRM() {
                 size="default"
                 variant="default"
               />
+              <Button variant="outline" onClick={() => setJornadaOpen(true)}><Compass className="w-4 h-4 mr-1" />Iniciar jornada guiada do CRM</Button>
               <Button variant="outline" onClick={() => seed(false)}><Sparkles className="w-4 h-4 mr-1" />Popular demo</Button>
             </div>
           </div>
