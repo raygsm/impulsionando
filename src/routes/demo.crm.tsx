@@ -30,6 +30,7 @@ import { createCrmMock, CRM_DEFAULT_PARAMS, type CrmParams } from "@/lib/demoMod
 import { HelpTip } from "@/components/demo/HelpTip";
 import { LeadsPanel } from "@/components/demo/crm/LeadsPanel";
 import { ClientesPanel } from "@/components/demo/crm/ClientesPanel";
+import { EmpresasPanel, ProdutosPanel, PlanosPanel, ServicosPanel } from "@/components/demo/crm/CrudPanels";
 import { makeDemoLog, type DemoLogInput } from "@/lib/demoCrmCrud";
 
 export const Route = createFileRoute("/demo/crm")({
@@ -48,10 +49,10 @@ type Atividade = { id: string; leadId: string; tipo: "ligacao" | "email" | "what
 type Template = { id: string; nome: string; canal: "email" | "whatsapp"; corpo: string };
 type Automacao = { id: string; nome: string; gatilho: string; acao: string; ativa: boolean };
 type Cliente = { id: string; nome: string; documento: string; email: string; telefone: string; produto: string; plano: string; status: string; tipo?: "PF" | "PJ"; cidade?: string; estado?: string; origem?: string; campanha?: string; interesse?: string; produtoInteresse?: string; planoInteresse?: string; servicoInteresse?: string; responsavel?: string; tags?: string[]; observacoes?: string; emailTeste?: string; whatsappTeste?: string };
-type Empresa = { id: string; razaoSocial: string; cnpj: string; segmento: string };
-type Produto = { id: string; nome: string; preco: number; descricao: string };
-type Plano = { id: string; nome: string; preco: number; ciclo: string; itens: string[] };
-type Servico = { id: string; nome: string; preco: number; duracao: string };
+type Empresa = { id: string; razaoSocial: string; cnpj: string; segmento: string; nomeFantasia?: string; porte?: string; responsavel?: string; whatsapp?: string; email?: string; cidade?: string; estado?: string; modulosInteresse?: string[]; status?: string; observacoes?: string };
+type Produto = { id: string; nome: string; preco: number; descricao: string; categoria?: string; status?: string; prazoConsumoDias?: number; recompraAuto?: boolean; diasAviso1?: number; diasAviso2?: number; mensagemRecompra?: string; tags?: string[]; campanhas?: string[] };
+type Plano = { id: string; nome: string; preco: number; ciclo: string; itens: string[]; descricao?: string; valorSetup?: number; recorrencia?: string; contratoMinDias?: number; mensalidadesMinimas?: number; permiteAdicionais?: boolean; valorPorAdicional?: number; status?: string; observacoes?: string };
+type Servico = { id: string; nome: string; preco: number; duracao: string; descricao?: string; prazoEntregaDias?: number; produtoRelacionado?: string; planoRelacionado?: string; responsavel?: string; ativo?: boolean; observacoes?: string };
 type Prazo = { id: string; nome: string; dias: number };
 type Funil = { id: string; nome: string; ativo: boolean };
 type Etapa = { id: string; funilId: string; nome: string; ordem: number };
@@ -304,20 +305,14 @@ function DemoCRM() {
 
             {/* EMPRESAS */}
             <TabsContent value="empresas" className="mt-4 space-y-4">
-              <SimpleListPanel
-                title="Empresas"
-                items={empresas}
-                empty="Sem empresas."
-                columns={[
-                  { k: "razaoSocial", h: "Razão Social" },
-                  { k: "cnpj", h: "CNPJ" },
-                  { k: "segmento", h: "Segmento" },
-                ]}
-                onAdd={(razaoSocial) => setEmpresas((p) => [{ id: uid("emp"), razaoSocial, cnpj: "—", segmento: "—" }, ...p])}
-                onRemove={(id) => setEmpresas((p) => p.filter((x) => x.id !== id))}
-                placeholder="Razão social"
+              <EmpresasPanel
+                empresas={empresas}
+                setEmpresas={setEmpresas}
+                onLog={pushLog}
+                exigirResponsavel={params.exigirResponsavel}
               />
             </TabsContent>
+
 
             {/* PIPELINE */}
             <TabsContent value="pipeline" className="mt-4">
@@ -388,50 +383,26 @@ function DemoCRM() {
 
             {/* PRODUTOS */}
             <TabsContent value="produtos" className="mt-4 space-y-4">
-              <SimpleListPanel
-                title="Produtos"
-                items={produtos}
-                empty="Sem produtos."
-                columns={[
-                  { k: "nome", h: "Nome" },
-                  { k: "preco", h: "Preço", render: (v) => Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) },
-                  { k: "descricao", h: "Descrição" },
-                ]}
-                onAdd={(nome) => setProdutos((p) => [{ id: uid("pr"), nome, preco: 0, descricao: "—" }, ...p])}
-                onRemove={(id) => setProdutos((p) => p.filter((x) => x.id !== id))}
-                placeholder="Nome do produto"
-              />
+              <ProdutosPanel produtos={produtos} setProdutos={setProdutos} onLog={pushLog} />
             </TabsContent>
 
             {/* PLANOS */}
             <TabsContent value="planos" className="mt-4 space-y-4">
-              <div className="grid md:grid-cols-3 gap-3">
-                {planos.map((p) => (
-                  <Card key={p.id} className="p-5">
-                    <div className="font-semibold">{p.nome}</div>
-                    <div className="text-2xl font-bold mt-1">{p.preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}<span className="text-xs text-muted-foreground">/{p.ciclo}</span></div>
-                    <ul className="text-xs text-muted-foreground mt-3 space-y-1">{p.itens.map((it, i) => <li key={i}>• {it}</li>)}</ul>
-                  </Card>
-                ))}
-              </div>
+              <PlanosPanel planos={planos} setPlanos={setPlanos} clientes={clientes} onLog={pushLog} />
             </TabsContent>
 
             {/* SERVIÇOS */}
             <TabsContent value="servicos" className="mt-4 space-y-4">
-              <SimpleListPanel
-                title="Serviços"
-                items={servicos}
-                empty="Sem serviços."
-                columns={[
-                  { k: "nome", h: "Nome" },
-                  { k: "preco", h: "Preço", render: (v) => Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) },
-                  { k: "duracao", h: "Duração" },
-                ]}
-                onAdd={(nome) => setServicos((p) => [{ id: uid("sv"), nome, preco: 0, duracao: "—" }, ...p])}
-                onRemove={(id) => setServicos((p) => p.filter((x) => x.id !== id))}
-                placeholder="Nome do serviço"
+              <ServicosPanel
+                servicos={servicos}
+                setServicos={setServicos}
+                produtos={produtos}
+                planos={planos}
+                onLog={pushLog}
+                exigirResponsavel={params.exigirResponsavel}
               />
             </TabsContent>
+
 
             {/* PRAZOS EM DIAS */}
             <TabsContent value="prazos" className="mt-4 space-y-4">
