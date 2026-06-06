@@ -22,16 +22,16 @@ export function normalizePhone(raw: string): string {
 export async function sendWhatsAppText(args: {
   phone: string
   message: string
-}): Promise<{ ok: boolean; status: number; body: string }> {
+}): Promise<{ ok: boolean; status: number; body: string; messageId: string | null }> {
   const instanceId = process.env.ZAPI_INSTANCE_ID
   const instanceToken = process.env.ZAPI_INSTANCE_TOKEN
   const clientToken = process.env.ZAPI_CLIENT_TOKEN
   if (!instanceId || !instanceToken || !clientToken) {
-    return { ok: false, status: 0, body: 'zapi credentials missing' }
+    return { ok: false, status: 0, body: 'zapi credentials missing', messageId: null }
   }
 
   const phone = normalizePhone(args.phone)
-  if (!phone) return { ok: false, status: 0, body: 'invalid phone' }
+  if (!phone) return { ok: false, status: 0, body: 'invalid phone', messageId: null }
 
   const url = `${BASE}/instances/${instanceId}/token/${instanceToken}/send-text`
   const res = await fetch(url, {
@@ -43,5 +43,13 @@ export async function sendWhatsAppText(args: {
     body: JSON.stringify({ phone, message: args.message }),
   })
   const body = await res.text()
-  return { ok: res.ok, status: res.status, body }
+  let messageId: string | null = null
+  try {
+    const json = JSON.parse(body) as { messageId?: string; id?: string; zaapId?: string }
+    messageId = json.messageId ?? json.id ?? json.zaapId ?? null
+  } catch {
+    // body não é JSON — segue sem messageId
+  }
+  return { ok: res.ok, status: res.status, body, messageId }
 }
+
