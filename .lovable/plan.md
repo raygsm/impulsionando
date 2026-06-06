@@ -1,79 +1,110 @@
-## Diagnóstico do que já existe
+## Objetivo
 
-- `/demo` (`demo.index.tsx`) — landing com 2 trilhas (white-label / cliente final), já com tooltips e badge "sem cadastro".
-- `/demo/white-label` (601 linhas) e `/demo/cliente-final` (1018 linhas) — áreas administrativas demo extensas, já navegáveis.
-- `/demo/checklist` — checklist de prontidão.
-- `/demo/trial` (82 linhas) — **conceitualmente errado**: trata trial como "ciclo de demonstração de 7 dias" em vez de contratação real com cartão e reembolso.
-- `/trial` + `/trial/cadastro` — fluxo real de contratação trial (já existente, com seleção de plano e formulário).
-- `/reembolso` — página pública existente.
-- Área `_authenticated/` — sistema real completo (CRM, agenda, finance, sales, ehr, affiliates, etc.) já implementado.
+Evoluir o fluxo já existente em `/orcamento` (atualmente um briefing de ~1.044 linhas) para a jornada completa **"Monte seu Orçamento"** em 12 etapas, com seleção de módulos, cálculo em tempo real, descontos progressivos, combinações recomendadas, revisão, contrato objetivo, aceite e pagamento — sem refazer páginas existentes e sem duplicar componentes.
 
-**Conclusão:** a maior parte do que o prompt pede já existe. O que falta de verdade é pequeno e cirúrgico.
+## Antes de implementar — 3 decisões que preciso confirmar
 
-## O que NÃO vou fazer (evita queimar créditos e quebrar coisas)
+Existem **conflitos importantes** entre o que você pediu e o que já está em produção. Preciso da sua confirmação antes de codar, senão vamos quebrar coisa que já funciona.
 
-- Não reescrever `demo.white-label.tsx` nem `demo.cliente-final.tsx` (1.600 linhas combinadas, já funcionais).
-- Não duplicar tooltips/help já existentes.
-- Não criar "Tour da Plataforma" como wizard completo (escopo de semanas) — entrego apenas um banner-guia com checklist clicável.
-- Não mexer em banco, auth, RLS, edge functions.
-- Não tocar nas rotas `_authenticated/*` reais (CRM, agenda, etc.).
-- Não implementar fluxo real de reembolso automático no gateway (depende de credenciais externas).
+### 1. Preço dos módulos (CONFLITO REAL)
 
-## Plano em 4 ondas pequenas
+- **Hoje no sistema:** 14 "módulos principais" (ERP, CRM, WhatsApp, Agenda, Checkout, Produtos, Estoque, PDV, Delivery, Prontuário, Área do Paciente, Eventos, Afiliados, BI, etc.) organizados em planos `Essencial`, `Integrado`, `Avançado`, `Sob Medida` (arquivo `src/data/motherModules.ts` + página `/planos` + webhook de pagamento que mapeia `PLAN_MODULES`).
+- **Pedido novo:** cada módulo custa **R$ 497/mês fixo** com desconto progressivo (1=0%, 2=5%, 3=10%, 4+=15%).
 
-### Onda A — Correção conceitual de `/demo/trial` (prioridade máxima)
+Esses dois modelos **não convivem**: ou o lead compra por plano (Essencial/Integrado/Avançado) ou compra módulo a módulo a R$497. Qual mantemos?
 
-Reescrever `src/routes/demo.trial.tsx` para deixar claro que **trial é contratação real**, não demonstração:
+- **Opção A — Substituir:** /orcamento passa a vender módulo a R$497 com desconto progressivo. /planos continua existindo só como vitrine. Webhook de pagamento precisa de novo mapeamento "módulos selecionados → entitlements".
+- **Opção B — Coexistir:** /orcamento oferece **as duas portas** — "Quero um plano fechado" (vai pra /planos atual) ou "Quero montar módulo a módulo" (novo fluxo R$497).
+- **Opção C — Só evoluir o que existe:** manter pricing por plano e só adicionar as etapas que faltam (contrato objetivo, revisão final, aceite, integração de pagamento mais clara).
 
-- Bloco comparativo **Demonstração × Trial** (gratuita/fictícia vs contratação real com cartão).
-- Explicação: cartão de crédito, acesso liberado, cancelamento + reembolso automático em até 7 dias após o horário do pagamento.
-- Lista de status do trial (contratado → aprovado → liberado → cancelamento → reembolso processando/concluído/indisponível → convertido).
-- Aviso: "Reembolso automático preparado — aguardando credenciais do gateway."
-- CTAs: **Contratar Trial** (→ `/trial`) e **Conhecer Demonstração** (→ `/demo`).
-- Tooltip em cada regra (prazo, reembolso, cartão).
+### 2. Setup, trial e gateway
 
-Mantém todos os elementos visuais existentes (header/footer públicos, Card, Badge).
+- Você cita "setup, se houver" — **existe setup?** Se sim, qual valor / em que casos?
+- Já existe `/trial` com fluxo de 7 dias. O novo wizard deve **embutir** o trial como opção de pagamento, ou trial e contratação direta são fluxos separados?
+- O gateway está integrado via Paddle (webhook em `src/routes/api/public/payments/webhook.ts`). Posso assumir Paddle Checkout? Ou queremos preparar Pix/Boleto também (que exige outro PSP)?
 
-### Onda B — Banner "Modo Demonstração" + estados vazios padronizados
+### 3. Onde mora o wizard
 
-Criar 2 componentes reutilizáveis pequenos (não duplicar o que existe):
+`/orcamento` hoje já é um briefing de 1.044 linhas com captura de lead, categoria, segmento, dores e sugestão de plano. Duas formas de "não refazer":
 
-1. `src/components/demo/DemoModeBanner.tsx` — banner discreto e dispensável (localStorage) que aparece em `/demo/*` com texto "Demonstração — dados fictícios, sem impacto em dados reais" + link para checklist.
-2. `src/components/demo/EmptyDemoState.tsx` — estado vazio inteligente com mensagem contextual + botão "Criar exemplo demo" (callback opcional). Reutilizar onde já houver lista vazia óbvia em `demo.white-label.tsx` e `demo.cliente-final.tsx` **sem reescrever as páginas** — só importar e usar em 4-6 pontos.
+- **Opção A — Substituir o conteúdo de /orcamento** pelo novo wizard de 12 etapas (mantendo a rota, SEO e links existentes). O conteúdo atual vira parte das etapas 1–3.
+- **Opção B — Manter /orcamento como está** e criar uma nova rota `/montar` ou `/contratar` para o wizard completo. Risco: o usuário disse explicitamente "não duplicar" e "evoluir o que já existe".
 
-### Onda C — Tooltips de conceitos-chave
+Recomendo **A**.
 
-Criar `src/components/demo/HelpTip.tsx` (wrapper fino sobre Tooltip + HelpCircle) com biblioteca de termos: `crm`, `baixa-automatica`, `split-automatico`, `parametrizacao`, `first-touch`, `last-touch`, `permissoes`, `trial`, `reembolso-auto`, `coproducer`, `gerente-afiliados`, `bump`, `upsell`.
+---
 
-Aplicar em **2-3 pontos por página demo** (cliente-final, white-label, affiliates dashboard). Não vou poluir todas as telas.
+## Plano de implementação (assumindo respostas: 1-A, 2-Paddle sem setup, trial separado, 3-A)
 
-### Onda D — Auditoria de links mortos nas páginas demo
+### Etapa 0 — Fundação de dados
 
-Script rápido (`rg` em `src/routes/demo.*.tsx` e cards do dashboard) procurando:
-- `<Button>` sem `asChild`/`onClick`/`disabled`
-- `<Link to="#">` ou `href="#"`
-- CTAs que não levam a lugar nenhum
+Criar `src/data/moduleCatalog.ts` (novo, não conflita com `motherModules.ts`):
+- Lista de **17 módulos comerciais** exatamente como você descreveu (CRM, WhatsApp, Follow-ups, Agenda, Reservas, Eventos, Checkout, Produtos, Afiliados, Estoque, PDV, Delivery, Prontuário, Área do Paciente, BI, Permissões, White Label).
+- Cada item: `slug`, `name`, `category` (Atendimento/Agenda/Vendas/Operação/Saúde/Gestão), `description`, `priceMonthly: 497`, `combinesWith: string[]`, `recommendedFor: string[]`, `requiresExternalCredentials?: boolean`.
+- Mapeamento `slug → motherModuleSlug` para o webhook reaproveitar `PLAN_MODULES` existente.
 
-Corrigir os que encontrar (esperado: <10 ocorrências). Se algum recurso não estiver pronto, trocar por mensagem **"Recurso preparado — aguardando configuração final."**
+Criar `src/lib/pricing.ts`:
+- `computeQuote(selectedSlugs): { subtotal, discountPct, discountAmount, total, lineItems }`
+- Regras: 1=0%, 2=5%, 3=10%, 4+=15%. Pure function, testável.
 
-## O que fica explicitamente fora desta entrega
+Criar `src/data/recommendedBundles.ts`:
+- 6 bundles (Clínica, Restaurante, Delivery, Eventos, Afiliados, White Label) com array de slugs.
 
-- Onda 4 do checklist gigante (split, comissões, etc.) — já entregue na Onda 4 anterior.
-- Tour guiado interativo (driver.js / shepherd) — escopo de feature própria, posso fazer numa próxima rodada se você quiser.
-- Reescrita das 2 demos administrativas (1.600 linhas).
-- Implementação real de reembolso automático via gateway.
-- Revisão de responsividade pixel-a-pixel (entregamos com classes Tailwind já responsivas, sem auditoria visual em 4 viewports).
-- Toggles SIM/NÃO em todos os módulos — já existem nas páginas de configurações reais; não vou recriar uma "tela demo de toggles" porque duplicaria.
+### Etapa 1 — Reescrever `/orcamento` como wizard
 
-## Estimativa
+Refatorar `src/routes/orcamento.tsx` para um wizard com componente `QuoteWizard` e 12 sub-componentes de etapa em `src/components/orcamento/steps/` (cada um <150 linhas):
 
-- Onda A: 1 arquivo reescrito (~150 linhas).
-- Onda B: 2 componentes novos + ~6 substituições.
-- Onda C: 1 componente novo + ~8 aplicações.
-- Onda D: 0-10 correções pontuais.
+1. `StepLead` — nome, WhatsApp, email, empresa, cargo, cidade, UF + captura UTM via `validateSearch` (já existe parcialmente).
+2. `StepCategoria` — 9 categorias (incluindo Eventos, Afiliados, White Label que faltam hoje).
+3. `StepSegmento` — segmentos por categoria, com sugestão automática de bundle.
+4. `StepModulos` — grid de cards de módulo com toggle, tooltip, "combina com", chip de bundle recomendado. **Resumo lateral fixo** com valores em tempo real.
+5. `StepResumoModulos` — recap dos módulos escolhidos com possibilidade de remover.
+6. `StepValores` — quebra detalhada de subtotal/desconto/total/setup.
+7. `StepPrazos` — prazos de implantação e dependências externas.
+8. `StepEmpresa` — CNPJ, razão social, endereço fiscal (campos novos).
+9. `StepRevisao` — recap completo.
+10. `StepContrato` — contrato objetivo renderizado a partir dos dados.
+11. `StepAceite` — 5 checkboxes obrigatórios.
+12. `StepPagamento` — integração com Paddle (já existe).
 
-Total: ~5 arquivos novos, ~4-5 arquivos editados pontualmente. Nenhuma migração de banco.
+Barra de progresso `<Progress value={(step/12)*100} />` + label "Etapa X de 12".
 
-## Pergunta
+Estado mantido em `useReducer` + persistido em `sessionStorage` (chave `orcamento_wizard_v1`) para sobreviver a refresh sem banco.
 
-Posso executar as 4 ondas em sequência nesta mensagem, ou você prefere fazer apenas a **Onda A (correção do `/demo/trial`)** primeiro e validar antes de seguir?
+### Etapa 2 — Componentes reusáveis
+
+- `src/components/orcamento/ModuleCard.tsx` — card de módulo com toggle.
+- `src/components/orcamento/QuoteSidebar.tsx` — resumo fixo desktop / drawer mobile.
+- `src/components/orcamento/ContractView.tsx` — render do contrato objetivo (HTML imprimível, sem PDF nesta entrega).
+- `src/components/orcamento/BundleChip.tsx` — botão de bundle recomendado.
+
+### Etapa 3 — Backend mínimo
+
+Criar `src/lib/quote.functions.ts` com `createServerFn`:
+- `saveQuote` (público, usa `supabaseAdmin` via `await import`): grava lead + módulos selecionados na tabela `quotes` (nova) para o time comercial recuperar.
+- Migração nova: `public.quotes` (id, lead_data jsonb, modules text[], subtotal_cents, discount_pct, total_cents, status, created_at) com RLS aberto só pro service_role + GRANTs corretos.
+
+### Etapa 4 — Integração de pagamento
+
+Reutilizar Paddle existente. Estender `PLAN_MODULES` no webhook para também aceitar o caminho "monte seu plano" — `passthrough` com array de slugs vira entitlements. Se você ainda não criou um Paddle Price para "módulo avulso R$497", uso `payments--create_product`.
+
+### Etapa 5 — SEO + segurança
+
+- `head()` específico do wizard.
+- Validação Zod em todos os passos (não só etapa 1).
+- Limites de tamanho em todos os campos texto.
+- Sem `dangerouslySetInnerHTML`.
+
+### Fora de escopo desta entrega
+
+- Geração de PDF do contrato (só HTML imprimível via `window.print()`).
+- Assinatura digital com certificado (apenas aceite eletrônico com timestamp + IP).
+- Pix/Boleto (depende de PSP brasileiro não conectado).
+
+---
+
+## Tamanho realista
+
+~15 arquivos novos, 1 arquivo grande refatorado, 1 migração, ~1.500–2.000 linhas no total. É uma entrega substancial mas viável em uma rodada se as decisões acima estiverem fechadas.
+
+**Posso seguir com Opção A (substituir pricing), Paddle, trial separado, /orcamento como rota do wizard? Ou prefere ajustar alguma dessas escolhas?**
