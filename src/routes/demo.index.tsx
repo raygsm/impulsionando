@@ -91,6 +91,44 @@ function DemoLanding() {
             />
           </div>
 
+          {/* Demos por nicho */}
+          <section className="mt-12">
+            <div className="text-center max-w-2xl mx-auto mb-6">
+              <Badge variant="outline" className="mb-3">Demos por nicho</Badge>
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                Veja a operação completa do seu nicho
+              </h2>
+              <p className="mt-3 text-sm text-muted-foreground">
+                Cada nicho tem fluxos, termos e indicadores próprios. Abra a demo do nicho para ver
+                briefing, agenda, parceiros, contrato e comunicação em uma jornada só.
+              </p>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <Link to="/demo/nicho/$slug" params={{ slug: "eventos" }} className="group">
+                <Card className="p-5 h-full hover:shadow-card-hover transition-shadow border-primary/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <Badge className="bg-gradient-primary">Disponível</Badge>
+                    <ArrowRight className="w-4 h-4 text-primary group-hover:translate-x-0.5 transition-transform" />
+                  </div>
+                  <div className="font-semibold">Eventos / WMP</div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    DJs, artistas e contratantes — sinal 50%, taxa WMP 20%, regra das 72h.
+                  </p>
+                </Card>
+              </Link>
+              <Card className="p-5 opacity-60">
+                <Badge variant="outline" className="mb-2">Em breve</Badge>
+                <div className="font-semibold">Fitness / Academias</div>
+                <p className="text-xs text-muted-foreground mt-1">Alunos, treinos, planos e check-in.</p>
+              </Card>
+              <Card className="p-5 opacity-60">
+                <Badge variant="outline" className="mb-2">Em breve</Badge>
+                <div className="font-semibold">Saúde / Clínicas</div>
+                <p className="text-xs text-muted-foreground mt-1">Pacientes, prontuário e agenda médica.</p>
+              </Card>
+            </div>
+          </section>
+
           <div className="mt-12 grid sm:grid-cols-3 gap-4">
             <FeatureChip icon={Sparkles} title="Dados de exemplo" text="Tudo já vem preenchido para você navegar sem configurar nada." />
             <FeatureChip icon={ShieldCheck} title="Listas suspensas" text="Cadastros usam opções padronizadas — sem texto livre que polua o histórico." />
