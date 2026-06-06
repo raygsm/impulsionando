@@ -444,6 +444,13 @@ function PlanosPage() {
       </section>
 
       <PublicFooter />
+      <PixFallbackDialog
+        open={pixState.open}
+        onOpenChange={(v) => setPixState((s) => ({ ...s, open: v }))}
+        amountCents={pixState.amountCents}
+        txid={pixState.txid}
+        label={pixState.label}
+      />
     </div>
   );
 }
