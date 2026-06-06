@@ -140,6 +140,7 @@ import { Route as ApiPublicHooksUptimeCheckRouteImport } from './routes/api/publ
 import { Route as ApiPublicHooksMarketingLeadNotifyRouteImport } from './routes/api/public/hooks/marketing-lead-notify'
 import { Route as ApiPublicHooksCommsSelfTestRouteImport } from './routes/api/public/hooks/comms-self-test'
 import { Route as ApiPublicHooksAffAdvanceCommissionsRouteImport } from './routes/api/public/hooks/aff-advance-commissions'
+import { Route as ApiPublicDemoSendTestRouteImport } from './routes/api/public/demo/send-test'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
@@ -855,6 +856,11 @@ const ApiPublicHooksAffAdvanceCommissionsRoute =
     path: '/api/public/hooks/aff-advance-commissions',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicDemoSendTestRoute = ApiPublicDemoSendTestRouteImport.update({
+  id: '/api/public/demo/send-test',
+  path: '/api/public/demo/send-test',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedSalesCashIdRoute =
   AuthenticatedSalesCashIdRouteImport.update({
     id: '/$id',
@@ -982,6 +988,7 @@ export interface FileRoutesByFullPath {
   '/reports/': typeof AuthenticatedReportsIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
+  '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
@@ -1106,6 +1113,7 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedReportsIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
+  '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
@@ -1241,6 +1249,7 @@ export interface FileRoutesById {
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
+  '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
@@ -1376,6 +1385,7 @@ export interface FileRouteTypes {
     | '/reports/'
     | '/sales/'
     | '/sales/cash/$id'
+    | '/api/public/demo/send-test'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/marketing-lead-notify'
@@ -1500,6 +1510,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/sales'
     | '/sales/cash/$id'
+    | '/api/public/demo/send-test'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/marketing-lead-notify'
@@ -1634,6 +1645,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reports/'
     | '/_authenticated/sales/'
     | '/_authenticated/sales/cash/$id'
+    | '/api/public/demo/send-test'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/marketing-lead-notify'
@@ -1683,6 +1695,7 @@ export interface RootRouteChildren {
   NichosIndexRoute: typeof NichosIndexRoute
   TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicDemoSendTestRoute: typeof ApiPublicDemoSendTestRoute
   ApiPublicHooksAffAdvanceCommissionsRoute: typeof ApiPublicHooksAffAdvanceCommissionsRoute
   ApiPublicHooksCommsSelfTestRoute: typeof ApiPublicHooksCommsSelfTestRoute
   ApiPublicHooksMarketingLeadNotifyRoute: typeof ApiPublicHooksMarketingLeadNotifyRoute
@@ -2616,6 +2629,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksAffAdvanceCommissionsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/demo/send-test': {
+      id: '/api/public/demo/send-test'
+      path: '/api/public/demo/send-test'
+      fullPath: '/api/public/demo/send-test'
+      preLoaderRoute: typeof ApiPublicDemoSendTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/sales/cash/$id': {
       id: '/_authenticated/sales/cash/$id'
       path: '/$id'
@@ -2957,6 +2977,7 @@ const rootRouteChildren: RootRouteChildren = {
   NichosIndexRoute: NichosIndexRoute,
   TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicDemoSendTestRoute: ApiPublicDemoSendTestRoute,
   ApiPublicHooksAffAdvanceCommissionsRoute:
     ApiPublicHooksAffAdvanceCommissionsRoute,
   ApiPublicHooksCommsSelfTestRoute: ApiPublicHooksCommsSelfTestRoute,
