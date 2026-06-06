@@ -48,11 +48,16 @@ function CommissionsPage() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold">Comissões e Splits</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Cada venda gera linhas de comissão para produtor, coprodutor, afiliado, gerente e plataforma. Status muda automaticamente após o prazo do gateway + 3 dias úteis internos.
-        </p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-semibold">Comissões e Splits</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Cada venda gera linhas de comissão para produtor, coprodutor, afiliado, gerente e plataforma. Status muda automaticamente após o prazo do gateway + 3 dias úteis internos.
+          </p>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => advance.mutate()} disabled={advance.isPending}>
+          Avançar status agora
+        </Button>
       </div>
 
       <Card className="p-4">
