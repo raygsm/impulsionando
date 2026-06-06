@@ -118,6 +118,7 @@ function DemoCRM() {
     setTags(m.tags); setOrigens(m.origens); setCampanhas(m.campanhas);
     setFollowups(m.followups); setUsuarios(m.usuarios);
     setPermissoes(m.permissoes); setLogs(m.logs);
+    setModelos(seedModelosCrm());
     if (!silent) toast.success("Dados fictícios do CRM (DEMO) populados.");
   }
 
