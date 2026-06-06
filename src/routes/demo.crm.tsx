@@ -126,6 +126,11 @@ function DemoCRM() {
     setTimeout(() => window.location.reload(), 400);
   }
 
+  function pushLog(input: DemoLogInput) {
+    const entry = makeDemoLog({ usuario: "sessao-demo", ...input });
+    setLogs((prev) => [{ id: entry.id, quando: entry.quando, usuario: entry.usuario, acao: `[${entry.area}] ${entry.acao}${entry.registro ? ` — ${entry.registro}` : ""}${entry.canal ? ` (${entry.canal})` : ""}` }, ...prev].slice(0, 200));
+  }
+
   function moverEstagio(id: string, dir: 1 | -1) {
     setLeads((prev) => prev.map((l) => {
       if (l.id !== id) return l;
