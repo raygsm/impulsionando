@@ -369,11 +369,34 @@ function NovoServ({ onCreate }: { onCreate: (s: Servico) => void }) {
     </div>
   );
 }
-function NovoAgendamento({ profs, servs, onCreate, prefill }: { profs: Profissional[]; servs: Servico[]; onCreate: (a: Agendamento) => void; prefill?: { cliente: string; telefone: string } | null }) {
+function NovoAgendamento({ profs, servs, onCreate, prefill, agds }: { profs: Profissional[]; servs: Servico[]; onCreate: (a: Agendamento) => void; prefill?: { cliente: string; telefone: string } | null; agds: Agendamento[] }) {
   const [f, setF] = useState({ profId: "", servicoId: "", cliente: "", telefone: "", data: new Date().toISOString().slice(0, 10), hora: "09:00" });
   useEffect(() => {
     if (prefill?.cliente) setF((prev) => ({ ...prev, cliente: prefill.cliente, telefone: prefill.telefone ?? "" }));
   }, [prefill?.cliente, prefill?.telefone]);
+
+  const conflito = useMemo(
+    () => agds.find((a) => a.profId === f.profId && a.data === f.data && a.hora === f.hora && a.status !== "cancelado"),
+    [agds, f.profId, f.data, f.hora],
+  );
+
+  function handleAgendar() {
+    if (conflito) {
+      const profNome = profs.find((p) => p.id === f.profId)?.nome ?? "este profissional";
+      const ok = window.confirm(
+        `Conflito de horário: ${profNome} já tem "${conflito.cliente}" às ${f.hora} em ${f.data}.\n\nDeseja agendar mesmo assim (gera double-booking)?`,
+      );
+      if (!ok) {
+        toast.error("Agendamento cancelado por conflito.");
+        return;
+      }
+      toast.warning("Atenção: agendamento duplicado criado no mesmo horário.");
+    }
+    onCreate({ id: uid("ag"), ...f, status: "confirmado" });
+    setF({ ...f, cliente: "", telefone: "" });
+    if (!conflito) toast.success("Agendamento criado");
+  }
+
   return (
     <div className="grid sm:grid-cols-3 gap-2 items-end">
       <div><Label className="text-xs">Cliente</Label><Input value={f.cliente} onChange={(e) => setF({ ...f, cliente: e.target.value })} /></div>
@@ -391,18 +414,22 @@ function NovoAgendamento({ profs, servs, onCreate, prefill }: { profs: Profissio
         </Select>
       </div>
       <div><Label className="text-xs">Data</Label><Input type="date" value={f.data} onChange={(e) => setF({ ...f, data: e.target.value })} /></div>
-      <div><Label className="text-xs">Hora</Label>
-        <Select value={f.hora} onValueChange={(v) => setF({ ...f, hora: v })}>
-          <SelectTrigger><SelectValue /></SelectTrigger>
-          <SelectContent>{HORAS.map((h) => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
-        </Select>
+      <div>
+        <Label className="text-xs">Hora (qualquer horário)</Label>
+        <Input type="time" value={f.hora} onChange={(e) => setF({ ...f, hora: e.target.value })} />
       </div>
-      <Button className="sm:col-span-3 bg-gradient-primary" disabled={!f.cliente || !f.profId || !f.servicoId} onClick={() => { onCreate({ id: uid("ag"), ...f, status: "confirmado" }); setF({ ...f, cliente: "", telefone: "" }); toast.success("Agendamento criado"); }}>
+      {conflito && f.profId && (
+        <div className="sm:col-span-3 rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800/60 p-2 text-xs text-amber-900 dark:text-amber-200">
+          ⚠ Conflito: {profs.find((p) => p.id === f.profId)?.nome} já tem <strong>{conflito.cliente}</strong> às {f.hora} em {f.data}.
+        </div>
+      )}
+      <Button className="sm:col-span-3 bg-gradient-primary" disabled={!f.cliente || !f.profId || !f.servicoId} onClick={handleAgendar}>
         <Plus className="w-4 h-4 mr-1" />Agendar
       </Button>
     </div>
   );
 }
+
 function NovaEspera({ servs, onCreate }: { servs: Servico[]; onCreate: (e: Espera) => void }) {
   const [f, setF] = useState({ cliente: "", telefone: "", servicoId: "", preferencia: "" });
   return (
