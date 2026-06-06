@@ -40,11 +40,11 @@ export const Route = createFileRoute("/demo/crm")({
   component: DemoCRM,
 });
 
-type Lead = { id: string; nome: string; email: string; telefone: string; origem: string; estagio: string; valor: number; score: number; tags: string[]; criadoEm: string };
+type Lead = { id: string; nome: string; email: string; telefone: string; origem: string; estagio: string; valor: number; score: number; tags: string[]; criadoEm: string; whatsapp?: string; status?: string; nivelInteresse?: string; campanha?: string; canal?: string; interesse?: string; produtoInteresse?: string; proximaAcao?: string; responsavel?: string; proximoContato?: string; observacoes?: string; motivoPerda?: string };
 type Atividade = { id: string; leadId: string; tipo: "ligacao" | "email" | "whatsapp" | "tarefa"; titulo: string; data: string; concluida: boolean };
 type Template = { id: string; nome: string; canal: "email" | "whatsapp"; corpo: string };
 type Automacao = { id: string; nome: string; gatilho: string; acao: string; ativa: boolean };
-type Cliente = { id: string; nome: string; documento: string; email: string; telefone: string; produto: string; plano: string; status: "Ativo" | "Inativo" };
+type Cliente = { id: string; nome: string; documento: string; email: string; telefone: string; produto: string; plano: string; status: string; tipo?: "PF" | "PJ"; cidade?: string; estado?: string; origem?: string; campanha?: string; interesse?: string; produtoInteresse?: string; planoInteresse?: string; servicoInteresse?: string; responsavel?: string; tags?: string[]; observacoes?: string; emailTeste?: string; whatsappTeste?: string };
 type Empresa = { id: string; razaoSocial: string; cnpj: string; segmento: string };
 type Produto = { id: string; nome: string; preco: number; descricao: string };
 type Plano = { id: string; nome: string; preco: number; ciclo: string; itens: string[] };
