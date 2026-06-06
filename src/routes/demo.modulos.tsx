@@ -160,10 +160,6 @@ function DemoModulesPage() {
                 key={m.slug}
                 module={m}
                 contracted={isContracted(m.slug)}
-                onContract={() => {
-                  contract(m.slug);
-                  toast.success(`Módulo "${m.shortName}" contratado na demonstração.`);
-                }}
                 onUncontract={() => {
                   uncontract(m.slug);
                   toast.message(`Módulo "${m.shortName}" voltou para a vitrine.`);
