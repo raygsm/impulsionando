@@ -51,6 +51,19 @@ function DemoWhats() {
   const [convAtiva, setConvAtiva] = useState<string | null>(null);
   const [mensagem, setMensagem] = useState("");
 
+  useEffect(() => {
+    if (contatos.length || conversas.length || tpls.length || camps.length || fluxos.length) return;
+    const mock = createWhatsAppMock();
+    setContatos(mock.contatos);
+    setConversas(mock.conversas);
+    setTpls(mock.tpls);
+    setCamps(mock.camps);
+    setFluxos(mock.fluxos);
+    setParams(mock.params);
+    setConvAtiva(mock.conversas[0]?.id ?? null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const dash = useMemo(() => {
     const totalMsgs = conversas.reduce((s, c) => s + c.mensagens.length, 0);
     const enviadas = camps.reduce((s, c) => s + c.enviadas, 0);

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { DemoModeBanner } from "@/components/demo/DemoModeBanner";
@@ -51,6 +51,17 @@ function DemoCRM() {
   const [params, setParams, resetParams] = useDemoState<Params>("crm.params", {
     lgpd: true, followupAuto: true, leadScoring: true, roundRobin: false,
   });
+
+  useEffect(() => {
+    if (leads.length || atvs.length || tpls.length || autos.length) return;
+    const mock = createCrmMock();
+    setLeads(mock.leads);
+    setAtvs(mock.atvs);
+    setTpls(mock.tpls);
+    setAutos(mock.autos);
+    setParams(mock.params);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const dash = useMemo(() => {
     const porEstagio = STAGES.map((s) => ({ s, n: leads.filter((l) => l.estagio === s).length, v: leads.filter((l) => l.estagio === s).reduce((a, b) => a + b.valor, 0) }));

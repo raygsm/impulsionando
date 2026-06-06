@@ -52,7 +52,10 @@ function DemoAgenda() {
   const [dataAtual, setDataAtual] = useState(() => new Date().toISOString().slice(0, 10));
   const [aba, setAba] = useState<string>("grade");
   const [prefill, setPrefill] = useState<{ cliente: string; telefone: string } | null>(null);
-  const [nichoDemo, setNichoDemo] = useState("servicos");
+  const [nichoDemo, setNichoDemo] = useState(() => {
+    if (typeof window === "undefined") return "servicos";
+    return new URLSearchParams(window.location.search).get("nicho") ?? "servicos";
+  });
 
   // Deep-link via ?cliente=&telefone= vindo de outros módulos (CRM/WhatsApp)
   useEffect(() => {
@@ -67,6 +70,18 @@ function DemoAgenda() {
       setAba("agendar");
     }
   }, []);
+
+  useEffect(() => {
+    if (profs.length || servs.length || agds.length || espera.length) return;
+    const mock = createAgendaMock(nichoDemo);
+    setProfs(mock.profs);
+    setServs(mock.servs);
+    setAgds(mock.agds);
+    setEspera(mock.espera);
+    setParams(mock.params);
+    setDataAtual(mock.agds[0]?.data ?? new Date().toISOString().slice(0, 10));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nichoDemo]);
 
   const dash = useMemo(() => {
     const confirmados = agds.filter((a) => a.status === "confirmado").length;
