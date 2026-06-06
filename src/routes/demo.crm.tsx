@@ -385,12 +385,12 @@ function DemoCRM() {
 
             {/* PRODUTOS */}
             <TabsContent value="produtos" className="mt-4 space-y-4">
-              <ProdutosPanel produtos={produtos} setProdutos={setProdutos} onLog={pushLog} />
+              <ProdutosPanel produtos={produtos} setProdutos={setProdutos} onLog={pushLog} podeEditar={params.podeGerirProdutos} />
             </TabsContent>
 
             {/* PLANOS */}
             <TabsContent value="planos" className="mt-4 space-y-4">
-              <PlanosPanel planos={planos} setPlanos={setPlanos} clientes={clientes} onLog={pushLog} />
+              <PlanosPanel planos={planos} setPlanos={setPlanos} clientes={clientes} produtos={produtos} onLog={pushLog} podeEditar={params.podeGerirPlanos} />
             </TabsContent>
 
             {/* SERVIÇOS */}
@@ -402,6 +402,7 @@ function DemoCRM() {
                 planos={planos}
                 onLog={pushLog}
                 exigirResponsavel={params.exigirResponsavel}
+                podeEditar={params.podeGerirServicos}
               />
             </TabsContent>
 
