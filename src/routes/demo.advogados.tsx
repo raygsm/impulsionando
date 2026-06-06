@@ -905,6 +905,21 @@ function DemoAdvogados() {
               ["integraTribunais", "Integração com tribunais (consulta processual)", "Sincroniza movimentações e publicações oficiais dos tribunais diretamente no processo."],
               ["lgpd", "Conformidade LGPD nas comunicações", "Comunicações com clientes registram base legal, consentimento e log de acesso a dados pessoais."],
               ["portalCliente", "Portal do cliente com acompanhamento", "Cliente acessa andamento do processo, audiências e honorários com sigilo por papel."],
+              ["integracoesAtivas", "Ativar integrações jurídicas externas", "Liga a camada de integração com fontes externas (Jusbrasil, publicações, tribunais, importação manual)."],
+              ["integracaoJusbrasil", "Integrar com Jusbrasil", "Prepara a integração com Jusbrasil — requer credenciais externas ou autorização da plataforma contratada pelo escritório."],
+              ["integracaoPublicacoes", "Integrar com plataformas de publicações", "Recebe publicações e intimações de plataformas jurídicas vinculadas ao escritório."],
+              ["integracaoTribunais", "Integrar com tribunais (consulta externa)", "Habilita consulta processual nos tribunais quando houver autorização e credenciais."],
+              ["importacaoManual", "Permitir importação manual de movimentações", "Permite carregar movimentações via CSV ou anexo enquanto não há integração automatizada."],
+              ["alertaAdvogado", "Criar alerta interno ao advogado", "Toda nova movimentação gera alerta interno para o advogado responsável."],
+              ["avisarClienteAuto", "Avisar cliente automaticamente", "Quando ativo, o cliente é avisado automaticamente conforme as demais regras (revisão, canal, sigilo)."],
+              ["exigirRevisaoAdvogado", "Exigir revisão do advogado antes de avisar o cliente", "Algumas movimentações podem exigir interpretação jurídica. Por segurança, o escritório pode exigir revisão do advogado antes de avisar o cliente."],
+              ["avisoWhatsapp", "Enviar aviso por WhatsApp", "Habilita o canal WhatsApp para comunicar atualizações ao cliente."],
+              ["avisoEmail", "Enviar aviso por e-mail", "Habilita o canal de e-mail para comunicar atualizações ao cliente."],
+              ["resumoIA", "Permitir mensagem resumida por IA", "A IA pode resumir o texto e sugerir mensagem ao cliente — apenas como apoio, nunca substitui o advogado."],
+              ["aprovacaoHumanaIA", "Exigir aprovação humana para resumo IA", "Nenhum resumo gerado por IA é enviado sem revisão e aprovação humana."],
+              ["logComunicacao", "Registrar log da comunicação", "Cada envio ao cliente registra canal, autor, data, hora e conteúdo."],
+              ["exibirMovNaAreaCliente", "Exibir movimentação na área do cliente", "Movimentações liberadas aparecem em ‘Atualizações do Processo’ na área do cliente."],
+              ["ocultarMovSensiveis", "Ocultar movimentações sensíveis do cliente", "Movimentações marcadas como sensíveis não são exibidas nem enviadas, independente das demais regras."],
             ] as const).map(([k, label, help]) => (
               <Card key={k} className="p-4 flex items-center justify-between gap-3">
                 <div className="min-w-0 flex-1">
