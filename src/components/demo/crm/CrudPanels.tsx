@@ -820,7 +820,7 @@ export function ServicosPanel({
             <Textarea value={form.descricao ?? ""} onChange={(e) => setForm({ ...form, descricao: e.target.value })} />
           </FormField>
         </div>
-        <Button className="bg-gradient-primary" onClick={persist}>
+        <Button className="bg-gradient-primary" onClick={persist} disabled={!podeEditar}>
           <Plus className="w-4 h-4 mr-1" />{editing ? "Salvar alterações" : "Novo serviço"}
         </Button>
       </Card>
