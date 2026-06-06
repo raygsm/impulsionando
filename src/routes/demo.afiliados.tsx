@@ -23,6 +23,8 @@ import {
 import { toast } from "sonner";
 import { useDemoState, uid, brl } from "@/lib/demoSandbox";
 import { PLATFORM_FEE_PCT } from "@/lib/affiliates.constants";
+import { GuidedTour } from "@/components/demo/GuidedTour";
+import { RoiSimulator } from "@/components/demo/RoiSimulator";
 
 export const Route = createFileRoute("/demo/afiliados")({
   head: () => ({
