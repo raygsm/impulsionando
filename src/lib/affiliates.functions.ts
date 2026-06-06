@@ -63,7 +63,9 @@ export const registerAffiliateSale = createServerFn({ method: "POST" })
     const { supabase } = context;
     const soldAtDate = data.sold_at ? new Date(data.sold_at) : new Date();
     const soldAt = soldAtDate.toISOString();
-    const net = Math.max(0, data.gross_amount - data.gateway_fee);
+    const interestProducer = data.interest_paid_by === "producer" ? data.installment_interest : 0;
+    const net = Math.max(0, data.gross_amount - data.gateway_fee - interestProducer);
+    const gatewayDays = data.gateway_release_days ?? gatewayDaysFor(data.payment_method);
 
     // 1) Load product (default commission, producer)
     const { data: product, error: pErr } = await supabase
