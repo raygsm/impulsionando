@@ -81,6 +81,17 @@ export function NichoPage({ nicho }: Props) {
                 {nicho.ctaSecondary.label} <ArrowRight className="w-4 h-4" />
               </Link>
             </Button>
+            {nicho.slug === "eventos" && (
+              <Button
+                asChild
+                size="lg"
+                className="gap-2 bg-white text-primary hover:bg-white/90"
+              >
+                <Link to="/demo/nicho/$slug" params={{ slug: "eventos" }}>
+                  Abrir demo deste nicho <ArrowRight className="w-4 h-4" />
+                </Link>
+              </Button>
+            )}
             <Button
               asChild
               size="lg"

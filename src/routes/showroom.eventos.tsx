@@ -108,6 +108,11 @@ function ShowroomEventos() {
                 <Link to="/orcamento">Quero esse módulo no meu sistema <ArrowRight className="w-4 h-4 ml-1" /></Link>
               </Button>
               <Button asChild variant="outline"><Link to="/modulos">Ver todos os módulos</Link></Button>
+              <Button asChild className="bg-gradient-primary">
+                <Link to="/demo/nicho/$slug" params={{ slug: "eventos" }}>
+                  Abrir demo do nicho Eventos / WMP <ArrowRight className="w-4 h-4 ml-1" />
+                </Link>
+              </Button>
             </div>
           </div>
         </section>
