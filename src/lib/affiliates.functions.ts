@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { PLATFORM_FEE_PCT, gatewayDaysFor } from "./affiliates.constants";
 
 // ---------- helpers ----------
 
@@ -39,8 +40,8 @@ const RegisterSaleInput = z.object({
   customer_email: z.string().email().max(200).optional().nullable(),
   customer_doc: z.string().max(40).optional().nullable(),
   campaign: z.string().max(120).optional().nullable(),
-  gateway_release_days: z.number().int().min(0).max(180).default(30),
-  platform_pct: z.number().min(0).max(100).default(0),
+  gateway_release_days: z.number().int().min(0).max(180).optional(),
+  platform_pct: z.number().min(0).max(100).default(PLATFORM_FEE_PCT),
   status: z.enum([
     "venda_registrada", "pagto_pendente", "aprovado",
     "aguardando_gateway", "aguardando_prazo_interno", "disponivel",
@@ -48,6 +49,11 @@ const RegisterSaleInput = z.object({
   sold_at: z.string().datetime().optional(),
   gateway_provider: z.string().max(60).optional().nullable(),
   external_id: z.string().max(200).optional().nullable(),
+  installment_interest: z.number().min(0).default(0),
+  interest_paid_by: z.enum(["customer", "producer"]).default("customer"),
+  coupon_id: z.string().uuid().optional().nullable(),
+  parent_sale_id: z.string().uuid().optional().nullable(),
+  kind: z.enum(["main", "bump", "upsell", "cross"]).default("main"),
 });
 
 export const registerAffiliateSale = createServerFn({ method: "POST" })
