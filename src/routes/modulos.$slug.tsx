@@ -171,6 +171,17 @@ function ModulePage() {
                   Contratar este módulo <ArrowRight className="w-4 h-4" />
                 </Link>
               </Button>
+              <div className="inline-flex items-center">
+                <DemoContractCTA
+                  slug={slugParam}
+                  moduleName={title}
+                  moduleDescription={hook || pitch}
+                  amountReference={DEMO_REFERENCE_AMOUNT[slugParam] ?? 197}
+                  features={features.slice(0, 8)}
+                  testRoute={DEMO_TEST_ROUTE[slugParam] ?? "/demo/cliente-final"}
+                  size="default"
+                />
+              </div>
               <Button
                 asChild
                 size="lg"
