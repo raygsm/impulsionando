@@ -21,6 +21,7 @@ import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PlanosRouteImport } from './routes/planos'
 import { Route as PacienteRouteImport } from './routes/paciente'
 import { Route as OrcamentoRouteImport } from './routes/orcamento'
+import { Route as ModulosRouteImport } from './routes/modulos'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -213,6 +214,11 @@ const OrcamentoRoute = OrcamentoRouteImport.update({
   path: '/orcamento',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ModulosRoute = ModulosRouteImport.update({
+  id: '/modulos',
+  path: '/modulos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContatoRoute = ContatoRouteImport.update({
   id: '/contato',
   path: '/contato',
@@ -248,9 +254,9 @@ const NichosIndexRoute = NichosIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const ModulosIndexRoute = ModulosIndexRouteImport.update({
-  id: '/modulos/',
-  path: '/modulos/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => ModulosRoute,
 } as any)
 const DemoIndexRoute = DemoIndexRouteImport.update({
   id: '/demo/',
@@ -932,6 +938,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/contato': typeof ContatoRoute
+  '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
   '/paciente': typeof PacienteRouteWithChildren
   '/planos': typeof PlanosRoute
@@ -1213,6 +1220,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/contato': typeof ContatoRoute
+  '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
   '/paciente': typeof PacienteRouteWithChildren
   '/planos': typeof PlanosRoute
@@ -1359,6 +1367,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/contato'
+    | '/modulos'
     | '/orcamento'
     | '/paciente'
     | '/planos'
@@ -1639,6 +1648,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/contato'
+    | '/modulos'
     | '/orcamento'
     | '/paciente'
     | '/planos'
@@ -1785,6 +1795,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ContatoRoute: typeof ContatoRoute
+  ModulosRoute: typeof ModulosRouteWithChildren
   OrcamentoRoute: typeof OrcamentoRoute
   PacienteRoute: typeof PacienteRouteWithChildren
   PlanosRoute: typeof PlanosRoute
@@ -1820,7 +1831,6 @@ export interface RootRouteChildren {
   TrabalheConoscoNichoRoute: typeof TrabalheConoscoNichoRoute
   TrialCadastroRoute: typeof TrialCadastroRoute
   DemoIndexRoute: typeof DemoIndexRoute
-  ModulosIndexRoute: typeof ModulosIndexRoute
   NichosIndexRoute: typeof NichosIndexRoute
   TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
   DemoNichoSlugRoute: typeof DemoNichoSlugRoute
@@ -1926,6 +1936,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrcamentoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/modulos': {
+      id: '/modulos'
+      path: '/modulos'
+      fullPath: '/modulos'
+      preLoaderRoute: typeof ModulosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contato': {
       id: '/contato'
       path: '/contato'
@@ -1977,10 +1994,10 @@ declare module '@tanstack/react-router' {
     }
     '/modulos/': {
       id: '/modulos/'
-      path: '/modulos'
+      path: '/'
       fullPath: '/modulos/'
       preLoaderRoute: typeof ModulosIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ModulosRoute
     }
     '/demo/': {
       id: '/demo/'
@@ -3117,6 +3134,19 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface ModulosRouteChildren {
+  ModulosSlugRoute: typeof ModulosSlugRoute
+  ModulosIndexRoute: typeof ModulosIndexRoute
+}
+
+const ModulosRouteChildren: ModulosRouteChildren = {
+  ModulosSlugRoute: ModulosSlugRoute,
+  ModulosIndexRoute: ModulosIndexRoute,
+}
+
+const ModulosRouteWithChildren =
+  ModulosRoute._addFileChildren(ModulosRouteChildren)
+
 interface PacienteRouteChildren {
   PacienteIdRoute: typeof PacienteIdRoute
   PacienteIndexRoute: typeof PacienteIndexRoute
@@ -3136,6 +3166,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ContatoRoute: ContatoRoute,
+  ModulosRoute: ModulosRouteWithChildren,
   OrcamentoRoute: OrcamentoRoute,
   PacienteRoute: PacienteRouteWithChildren,
   PlanosRoute: PlanosRoute,
@@ -3171,7 +3202,6 @@ const rootRouteChildren: RootRouteChildren = {
   TrabalheConoscoNichoRoute: TrabalheConoscoNichoRoute,
   TrialCadastroRoute: TrialCadastroRoute,
   DemoIndexRoute: DemoIndexRoute,
-  ModulosIndexRoute: ModulosIndexRoute,
   NichosIndexRoute: NichosIndexRoute,
   TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
   DemoNichoSlugRoute: DemoNichoSlugRoute,
@@ -3195,13 +3225,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
