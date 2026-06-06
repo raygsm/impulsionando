@@ -147,3 +147,111 @@ export const PLANNED_MODULES: { slug: string; name: string }[] = [
   { slug: "bi", name: "BI / Dashboards" },
   { slug: "tags-origem-roi", name: "Tags, Origem e ROI" },
 ];
+
+export const NICHE_PRESETS = [
+  "Clínica",
+  "Consultório",
+  "Estética",
+  "Academia/Fitness",
+  "Jurídico",
+  "Bar/Restaurante",
+  "Eventos/WMP",
+  "Serviços profissionais",
+  "Genérico",
+] as const;
+export type NichePreset = (typeof NICHE_PRESETS)[number];
+
+export const PURPOSES = [
+  { value: "cliente-real", label: "Novo cliente real", desc: "Cria estrutura vazia para implantação real de um novo cliente." },
+  { value: "demo", label: "Nova demonstração", desc: "Cria ambiente demonstrativo com dados fictícios, mensagens TESTE e PAGO — DEMO." },
+  { value: "interno", label: "Novo projeto interno", desc: "Cria estrutura para testes, validações ou desenvolvimento interno da Impulsionando." },
+  { value: "teste", label: "Ambiente de teste", desc: "Cria ambiente técnico para homologação e validações." },
+  { value: "white-label", label: "Cliente White Label autorizado", desc: "Cria estrutura para cliente vinculado a operação White Label autorizada pela Impulsionando." },
+] as const;
+export type PurposeValue = (typeof PURPOSES)[number]["value"];
+
+export const ENVIRONMENTS = [
+  { value: "DEMO", desc: "Cria ambiente demonstrativo com dados fictícios, PAGO — DEMO, mensagens TESTE, mocks e simulações." },
+  { value: "TESTE", desc: "Cria ambiente técnico para validações internas, integrações e homologações." },
+  { value: "REAL", desc: "Cria estrutura limpa para cliente real, sem dados fictícios obrigatórios e sem dados de outros clientes." },
+] as const;
+export type Environment = (typeof ENVIRONMENTS)[number]["value"];
+
+export const INTEGRATIONS = [
+  "CRM",
+  "WhatsApp Inteligente",
+  "Pagamentos",
+  "VoIP",
+  "BI / Dashboards",
+  "White Label",
+  "E-mail",
+  "Logs avançados",
+] as const;
+export type Integration = (typeof INTEGRATIONS)[number];
+
+export const PRESET_LABELS: Record<string, Record<string, string>> = {
+  "Clínica": { cliente: "Paciente", profissional: "Médico", servico: "Consulta", retorno: "Retorno", sala: "Sala", especialidade: "Especialidade" },
+  "Consultório": { cliente: "Paciente", profissional: "Profissional", servico: "Consulta", sala: "Sala" },
+  "Estética": { cliente: "Cliente", profissional: "Esteticista", servico: "Procedimento", sala: "Cabine" },
+  "Academia/Fitness": { cliente: "Aluno", profissional: "Personal", servico: "Aula/Treino", sala: "Sala" },
+  "Jurídico": { cliente: "Cliente", profissional: "Advogado", servico: "Atendimento", sala: "Sala" },
+  "Bar/Restaurante": { cliente: "Cliente", reserva: "Reserva", mesa: "Mesa", evento: "Evento", fila: "Lista de espera" },
+  "Eventos/WMP": { cliente: "Participante", profissional: "Parceiro", servico: "Atendimento", evento: "Evento" },
+  "Serviços profissionais": { cliente: "Cliente", profissional: "Profissional", servico: "Serviço" },
+  "Genérico": { cliente: "Cliente", profissional: "Profissional", servico: "Serviço" },
+};
+
+export interface CloneWizardInput {
+  baseId: string;
+  purpose: PurposeValue;
+  projectName: string;
+  fantasy?: string;
+  niche: NichePreset | "Outro";
+  responsibleName: string;
+  responsibleEmail?: string;
+  responsibleWhatsapp?: string;
+  notes?: string;
+  environment: Environment;
+  preset: NichePreset;
+  integrations: Integration[];
+  securityAck: boolean;
+}
+
+// Seed do primeiro módulo-base: Agenda Online v1.0.0
+export const AGENDA_ONLINE_BASE: ModuleBase = {
+  id: "base-agenda-online-v1",
+  slug: "agenda_online",
+  name: "Agenda Online",
+  version: "1.0.0",
+  description:
+    "Módulo-base de Agenda Online com estrutura para profissionais, serviços, unidades, salas, horários, agendamentos, reagendamentos, pagamentos simulados, fila de espera, lembretes, comunicação, logs, permissões e dashboards.",
+  status: "estavel",
+  structure: {
+    screens: ["Agenda Hoje", "Agendamentos", "Profissionais", "Serviços", "Horários", "Fila de espera", "Dashboard"],
+    fields: ["cliente", "profissional", "serviço", "data", "hora", "duração", "sala", "unidade", "status", "valor", "origem"],
+    components: ["Calendário", "Modal de agendamento", "Drawer profissional", "Tabela serviços", "Card fila"],
+    flows: ["agendar", "reagendar", "cancelar", "confirmar", "encaixar fila"],
+    rules: ["sem sobreposição", "buffer entre atendimentos", "limite por profissional", "bloqueios e folgas"],
+    parameters: ["fuso horário", "duração padrão", "antecedência mínima", "janela de cancelamento"],
+    defaultPermissions: ["agenda.appointment.read", "agenda.appointment.write", "agenda.professional.read", "agenda.service.read"],
+    defaultDashboards: ["Ocupação", "No-show", "Receita simulada", "Top serviços", "Top profissionais"],
+    messageTemplates: ["Confirmação", "Lembrete 24h", "Lembrete 1h", "Reagendamento", "Cancelamento", "Pesquisa pós-atendimento"],
+    automations: ["Lembrete automático", "Confirmação automática", "Reativação de cliente inativo"],
+    integrations: ["CRM", "WhatsApp Inteligente", "Pagamentos", "BI / Dashboards", "E-mail"],
+    demoMocks: ["clientes fictícios", "profissionais fictícios", "agenda do dia", "fila exemplo"],
+    nichePresets: [...NICHE_PRESETS],
+    logsStructure: ["criação", "edição", "cancelamento", "envio de comunicação", "alteração de permissão"],
+    initialConfig: ["unidade padrão", "profissional admin", "serviço exemplo", "horário comercial padrão"],
+  },
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+};
+
+export function ensureSeedBases() {
+  if (typeof window === "undefined") return;
+  const all = cloneStore.listBases();
+  if (!all.some((b) => b.id === AGENDA_ONLINE_BASE.id)) {
+    cloneStore.saveBase(AGENDA_ONLINE_BASE);
+  }
+}
+
