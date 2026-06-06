@@ -563,9 +563,14 @@ function ResultCard({
       return;
     }
     setSaving(true);
-    const { data: inserted, error } = await supabase
+    const leadId =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : undefined;
+    const { error } = await supabase
       .from("marketing_leads")
       .insert({
+        ...(leadId ? { id: leadId } : {}),
         source: "orcamento",
         name: data.name,
         phone: phoneDigits(data.whatsapp),
@@ -576,20 +581,22 @@ function ResultCard({
         recommended_modules: rec.modulos,
         page_url: typeof window !== "undefined" ? window.location.href : null,
         user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
-      })
-      .select("id")
-      .single();
+      });
     setSaving(false);
-    if (error || !inserted) {
+    if (error) {
+      console.error("marketing_leads insert failed", error);
       toast.error("Não foi possível enviar agora. Tente novamente.");
       return;
     }
     // Notify sales inbox (fire-and-forget; falha não bloqueia o usuário)
-    void fetch("/api/public/hooks/marketing-lead-notify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ leadId: inserted.id }),
-    }).catch((e) => console.warn("lead notify failed", e));
+    if (leadId) {
+      void fetch("/api/public/hooks/marketing-lead-notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ leadId }),
+      }).catch((e) => console.warn("lead notify failed", e));
+    }
+
     setSaved(true);
     onClearDraft();
     toast.success("Recebemos seu briefing! Nosso time entrará em contato.");
