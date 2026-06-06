@@ -56,6 +56,7 @@ const updateQuoteSchema = z.object({
 
 const acceptQuoteSchema = z.object({
   id: z.string().uuid(),
+  userAgent: z.string().trim().max(500).optional().or(z.literal("")).transform((v) => v || null),
   terms: z.object({
     terms: z.literal(true),
     modules: z.literal(true),
