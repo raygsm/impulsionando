@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { InfinitePayCheckoutButton } from "@/components/payments/InfinitePayCheckoutButton";
+import { ModulePicker } from "@/components/marketing/ModulePicker";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
