@@ -1,10 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useActiveCompany } from "@/hooks/use-active-company";
+import { toast } from "sonner";
+import { seedDemoEmagrecedor } from "@/lib/affiliates.functions";
+import { PLATFORM_FEE_PCT } from "@/lib/affiliates.constants";
 import {
-  Boxes, Handshake, Users2, Briefcase, ShoppingCart, Banknote, Percent, BadgeDollarSign,
+  Boxes, Handshake, Users2, Briefcase, ShoppingCart, Banknote, Percent, BadgeDollarSign, Sparkles,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/affiliates/")({
@@ -26,6 +31,16 @@ function Stat({ icon: Icon, label, value, hint }: { icon: typeof Boxes; label: s
 
 function AffiliatesDashboard() {
   const { companyId } = useActiveCompany();
+  const qc = useQueryClient();
+  const seedFn = useServerFn(seedDemoEmagrecedor);
+  const seed = useMutation({
+    mutationFn: () => seedFn({ data: { company_id: companyId! } }),
+    onSuccess: () => {
+      toast.success("Produto demo 'Super Emagrecedor Premium' criado com 3 planos, bump, upsell e régua de CRM");
+      qc.invalidateQueries();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
   const { data } = useQuery({
     queryKey: ["aff-dashboard", companyId],
     enabled: !!companyId,
