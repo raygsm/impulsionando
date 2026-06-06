@@ -121,7 +121,41 @@ const PLANOS: NavItem[] = [
 ];
 
 
+function useIsActivePath(path: string) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  if (path === "/modulos") {
+    return pathname === "/modulos";
+  }
+  if (path.startsWith("/modulos/")) {
+    return pathname === path;
+  }
+  if (path.startsWith("/nichos/")) {
+    return pathname === path;
+  }
+  return pathname === path;
+}
+
+function useHasActiveChild(groups: NavGroup[]) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  return groups.some((g) =>
+    g.items.some((it) => {
+      if (it.to === "/modulos") return pathname === "/modulos";
+      if (it.to.startsWith("/modulos/")) return pathname === it.to;
+      if (it.to.startsWith("/nichos/")) return pathname === it.to;
+      return pathname === it.to;
+    })
+  );
+}
+
+function useHasActiveFlat(items: NavItem[]) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  return items.some((it) => pathname === it.to);
+}
+
 function ItemLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
+  const isActive = useIsActivePath(item.to);
+  const activeClass = isActive ? "bg-accent text-accent-foreground" : "";
+
   if (item.external) {
     return (
       <a
@@ -129,7 +163,7 @@ function ItemLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
         target="_blank"
         rel="noopener noreferrer"
         onClick={onClick}
-        className="flex flex-col items-start gap-0.5 py-2 cursor-pointer w-full"
+        className={`flex flex-col items-start gap-0.5 py-2 cursor-pointer w-full rounded-sm px-2 ${activeClass}`}
       >
         <span className="text-sm font-medium text-foreground">{item.label}</span>
         {item.desc && <span className="text-xs text-muted-foreground">{item.desc}</span>}
@@ -146,7 +180,7 @@ function ItemLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
       {item.desc && <span className="text-xs text-muted-foreground">{item.desc}</span>}
     </>
   );
-  const className = "flex flex-col items-start gap-0.5 py-2 cursor-pointer w-full";
+  const className = `flex flex-col items-start gap-0.5 py-2 cursor-pointer w-full rounded-sm px-2 ${activeClass}`;
 
   if (moduleSlugMatch) {
     return (
