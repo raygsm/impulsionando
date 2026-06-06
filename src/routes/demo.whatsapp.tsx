@@ -131,10 +131,10 @@ function DemoWhats() {
           </div>
           <div className="flex gap-2 flex-wrap items-center">
             <DemoContractCTA
-              slug="whatsapp"
+              slug="automacao"
               moduleName="WhatsApp & Comunicação"
               moduleDescription="Inbox unificada, chatbot, templates, disparos em massa e fluxos automatizados."
-              amountReference={297}
+              amountReference={397}
               features={["Inbox multi-atendente", "Chatbot com IA", "Templates aprovados", "Campanhas com métricas", "Jornadas automatizadas"]}
               testRoute="/demo/whatsapp"
               size="default"
