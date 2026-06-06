@@ -4,12 +4,14 @@ import {
   Calendar,
   CreditCard,
   Handshake,
+  Scale,
   Store,
   Ticket,
   Trophy,
   Users,
   type LucideIcon,
 } from "lucide-react";
+
 
 export type DemoModuleRoute =
   | "/demo"
@@ -21,6 +23,7 @@ export type DemoModuleRoute =
   | "/demo/eventos"
   | "/demo/afiliados"
   | "/demo/parceiros"
+  | "/demo/advogados"
   | "/demo/checkout";
 
 export type DemoModuleKey =
@@ -33,7 +36,12 @@ export type DemoModuleKey =
   | "eventos"
   | "afiliados"
   | "parceiros"
+  | "advogados"
   | "checkout";
+
+/** Módulo seguro para fallback quando o pedido não existe ou falha. */
+export const SAFE_DEMO_MODULE: DemoModuleKey = "agenda";
+
 
 export interface DemoModuleOption {
   key: DemoModuleKey;
@@ -94,6 +102,16 @@ export const DEMO_MODULE_OPTIONS: DemoModuleOption[] = [
     badge: "Serviços",
   },
   {
+    key: "advogados",
+    label: "Advogados & Escritórios Jurídicos",
+    description: "Processos, prazos, audiências, contratos, honorários e portal do cliente.",
+    route: "/demo/advogados",
+    icon: Scale,
+    badge: "Jurídico",
+  },
+
+
+  {
     key: "checkout",
     label: "Checkout & Pagamentos",
     description: "Checkout, Pix, cartão, status de pagamento e comprovantes.",
@@ -118,3 +136,21 @@ export const DEMO_MODULE_OPTIONS: DemoModuleOption[] = [
     badge: "Revenda",
   },
 ];
+
+/**
+ * Resolve com fallback: se a chave for desconhecida ou não houver mock,
+ * retorna a opção segura (agenda) e expõe uma flag `fallback` para a UI
+ * mostrar um aviso ao usuário.
+ */
+export function resolveDemoModule(key: string | null | undefined): {
+  option: DemoModuleOption;
+  fallback: boolean;
+  requested: string | null;
+} {
+  const requested = key ?? null;
+  const found = requested ? DEMO_MODULE_OPTIONS.find((m) => m.key === requested) : undefined;
+  if (found) return { option: found, fallback: false, requested };
+  const safe = DEMO_MODULE_OPTIONS.find((m) => m.key === SAFE_DEMO_MODULE)!;
+  return { option: safe, fallback: requested !== null, requested };
+}
+

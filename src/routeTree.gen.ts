@@ -53,6 +53,7 @@ import { Route as DemoCheckoutRouteImport } from './routes/demo.checkout'
 import { Route as DemoChecklistRouteImport } from './routes/demo.checklist'
 import { Route as DemoAgendaRouteImport } from './routes/demo.agenda'
 import { Route as DemoAfiliadosRouteImport } from './routes/demo.afiliados'
+import { Route as DemoAdvogadosRouteImport } from './routes/demo.advogados'
 import { Route as ComoFuncionaFitnessRouteImport } from './routes/como-funciona.fitness'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
@@ -371,6 +372,11 @@ const DemoAgendaRoute = DemoAgendaRouteImport.update({
 const DemoAfiliadosRoute = DemoAfiliadosRouteImport.update({
   id: '/demo/afiliados',
   path: '/demo/afiliados',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoAdvogadosRoute = DemoAdvogadosRouteImport.update({
+  id: '/demo/advogados',
+  path: '/demo/advogados',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComoFuncionaFitnessRoute = ComoFuncionaFitnessRouteImport.update({
@@ -976,6 +982,7 @@ export interface FileRoutesByFullPath {
   '/users': typeof AuthenticatedUsersRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
+  '/demo/advogados': typeof DemoAdvogadosRoute
   '/demo/afiliados': typeof DemoAfiliadosRoute
   '/demo/agenda': typeof DemoAgendaRoute
   '/demo/checklist': typeof DemoChecklistRoute
@@ -1111,6 +1118,7 @@ export interface FileRoutesByTo {
   '/users': typeof AuthenticatedUsersRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
+  '/demo/advogados': typeof DemoAdvogadosRoute
   '/demo/afiliados': typeof DemoAfiliadosRoute
   '/demo/agenda': typeof DemoAgendaRoute
   '/demo/checklist': typeof DemoChecklistRoute
@@ -1258,6 +1266,7 @@ export interface FileRoutesById {
   '/_authenticated/users': typeof AuthenticatedUsersRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
+  '/demo/advogados': typeof DemoAdvogadosRoute
   '/demo/afiliados': typeof DemoAfiliadosRoute
   '/demo/agenda': typeof DemoAgendaRoute
   '/demo/checklist': typeof DemoChecklistRoute
@@ -1405,6 +1414,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/checkout/success'
     | '/como-funciona/fitness'
+    | '/demo/advogados'
     | '/demo/afiliados'
     | '/demo/agenda'
     | '/demo/checklist'
@@ -1540,6 +1550,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/checkout/success'
     | '/como-funciona/fitness'
+    | '/demo/advogados'
     | '/demo/afiliados'
     | '/demo/agenda'
     | '/demo/checklist'
@@ -1686,6 +1697,7 @@ export interface FileRouteTypes {
     | '/_authenticated/users'
     | '/checkout/success'
     | '/como-funciona/fitness'
+    | '/demo/advogados'
     | '/demo/afiliados'
     | '/demo/agenda'
     | '/demo/checklist'
@@ -1810,6 +1822,7 @@ export interface RootRouteChildren {
   UnsubscribeRoute: typeof UnsubscribeRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   ComoFuncionaFitnessRoute: typeof ComoFuncionaFitnessRoute
+  DemoAdvogadosRoute: typeof DemoAdvogadosRoute
   DemoAfiliadosRoute: typeof DemoAfiliadosRoute
   DemoAgendaRoute: typeof DemoAgendaRoute
   DemoChecklistRoute: typeof DemoChecklistRoute
@@ -2158,6 +2171,13 @@ declare module '@tanstack/react-router' {
       path: '/demo/afiliados'
       fullPath: '/demo/afiliados'
       preLoaderRoute: typeof DemoAfiliadosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo/advogados': {
+      id: '/demo/advogados'
+      path: '/demo/advogados'
+      fullPath: '/demo/advogados'
+      preLoaderRoute: typeof DemoAdvogadosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/como-funciona/fitness': {
@@ -3181,6 +3201,7 @@ const rootRouteChildren: RootRouteChildren = {
   UnsubscribeRoute: UnsubscribeRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
   ComoFuncionaFitnessRoute: ComoFuncionaFitnessRoute,
+  DemoAdvogadosRoute: DemoAdvogadosRoute,
   DemoAfiliadosRoute: DemoAfiliadosRoute,
   DemoAgendaRoute: DemoAgendaRoute,
   DemoChecklistRoute: DemoChecklistRoute,

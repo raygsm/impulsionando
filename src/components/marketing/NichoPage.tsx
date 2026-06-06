@@ -180,11 +180,21 @@ export function NichoPage({ nicho }: Props) {
                   </a>
                 </Button>
                 <Button asChild size="sm" variant="outline">
-                  <Link to="/demo/agenda" search={{ nicho: nicho.slug }}>
+                  <Link
+                    to="/demo/agenda"
+                    search={{ nicho: nicho.slug }}
+                    onClick={() => {
+                      if (typeof window !== "undefined") {
+                        // garante reseed da DEMO para o nicho atual
+                        window.localStorage.removeItem("imp.demo.mock.agenda");
+                      }
+                    }}
+                  >
                     Ver módulo de agenda
                   </Link>
                 </Button>
               </div>
+
             </section>
           );
         })()}
