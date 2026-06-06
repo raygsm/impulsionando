@@ -6,6 +6,7 @@ import {
   Package, Truck, ArrowDownUp,
   ShoppingCart, Receipt, Plus, Wallet as WalletIcon,
   Contact, BarChart3, ShieldCheck, Inbox, GraduationCap, Stethoscope, Sparkles,
+  Handshake, Link2, Ticket, Briefcase, BadgeDollarSign, TrendingUp, Banknote,
 } from "lucide-react";
 
 
@@ -107,6 +108,22 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/sales/new", label: "Nova venda (PDV)", icon: Plus, perm: "sales.order.write" },
       { to: "/sales/orders", label: "Pedidos", icon: Receipt, perm: "sales.order.read" },
       { to: "/sales/cash", label: "Fechamento de caixa", icon: WalletIcon, perm: "sales.cashsession.read" },
+    ],
+  },
+  {
+    label: "Afiliados e Produtos",
+    items: [
+      { to: "/affiliates", label: "Dashboard", icon: LayoutDashboard, perm: "aff.module.read" },
+      { to: "/affiliates/products", label: "Produtos", icon: Boxes, perm: "aff.module.read" },
+      { to: "/affiliates/offers", label: "Ofertas", icon: BadgeDollarSign, perm: "aff.module.read" },
+      { to: "/affiliates/affiliates", label: "Afiliados", icon: Handshake, perm: "aff.module.read" },
+      { to: "/affiliates/coproducers", label: "Coprodutores", icon: Users2, perm: "aff.module.read" },
+      { to: "/affiliates/managers", label: "Gerentes", icon: Briefcase, perm: "aff.module.read" },
+      { to: "/affiliates/links", label: "Links / Cupons / QR", icon: Link2, perm: "aff.module.read" },
+      { to: "/affiliates/sales", label: "Vendas", icon: ShoppingCart, perm: "aff.module.read" },
+      { to: "/affiliates/commissions", label: "Comissões", icon: Percent, perm: "aff.module.read" },
+      { to: "/affiliates/payouts", label: "Saques e Repasses", icon: Banknote, perm: "aff.module.read" },
+      { to: "/affiliates/reports", label: "Relatórios", icon: TrendingUp, perm: "aff.module.read" },
     ],
   },
   {
