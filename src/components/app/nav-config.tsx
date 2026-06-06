@@ -111,6 +111,22 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    label: "Afiliados e Produtos",
+    items: [
+      { to: "/affiliates", label: "Dashboard", icon: LayoutDashboard, perm: "aff.module.read" },
+      { to: "/affiliates/products", label: "Produtos", icon: Boxes, perm: "aff.module.read" },
+      { to: "/affiliates/offers", label: "Ofertas", icon: BadgeDollarSign, perm: "aff.module.read" },
+      { to: "/affiliates/affiliates", label: "Afiliados", icon: Handshake, perm: "aff.module.read" },
+      { to: "/affiliates/coproducers", label: "Coprodutores", icon: Users2, perm: "aff.module.read" },
+      { to: "/affiliates/managers", label: "Gerentes", icon: Briefcase, perm: "aff.module.read" },
+      { to: "/affiliates/links", label: "Links / Cupons / QR", icon: Link2, perm: "aff.module.read" },
+      { to: "/affiliates/sales", label: "Vendas", icon: ShoppingCart, perm: "aff.module.read" },
+      { to: "/affiliates/commissions", label: "Comissões", icon: Percent, perm: "aff.module.read" },
+      { to: "/affiliates/payouts", label: "Saques e Repasses", icon: Banknote, perm: "aff.module.read" },
+      { to: "/affiliates/reports", label: "Relatórios", icon: TrendingUp, perm: "aff.module.read" },
+    ],
+  },
+  {
     label: "Relatórios",
     items: [
       { to: "/reports", label: "Visão geral", icon: BarChart3, perm: "report.read" },
