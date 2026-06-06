@@ -305,20 +305,14 @@ function DemoCRM() {
 
             {/* EMPRESAS */}
             <TabsContent value="empresas" className="mt-4 space-y-4">
-              <SimpleListPanel
-                title="Empresas"
-                items={empresas}
-                empty="Sem empresas."
-                columns={[
-                  { k: "razaoSocial", h: "Razão Social" },
-                  { k: "cnpj", h: "CNPJ" },
-                  { k: "segmento", h: "Segmento" },
-                ]}
-                onAdd={(razaoSocial) => setEmpresas((p) => [{ id: uid("emp"), razaoSocial, cnpj: "—", segmento: "—" }, ...p])}
-                onRemove={(id) => setEmpresas((p) => p.filter((x) => x.id !== id))}
-                placeholder="Razão social"
+              <EmpresasPanel
+                empresas={empresas}
+                setEmpresas={setEmpresas}
+                onLog={pushLog}
+                exigirResponsavel={params.exigirResponsavel}
               />
             </TabsContent>
+
 
             {/* PIPELINE */}
             <TabsContent value="pipeline" className="mt-4">
