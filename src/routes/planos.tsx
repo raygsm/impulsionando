@@ -513,11 +513,40 @@ function PlanosPage() {
           planName={picker.plan.name}
           planSubtitle={picker.plan.tagline}
           initialSelected={pickedModules[picker.plan.name] ?? []}
-          confirmLabel={`Assinar ${annual ? "anual" : "mensal"} e ir para o pagamento`}
-          onConfirm={async (slugs) => {
+          extraPriceCents={EXTRA_MODULE_BRL * 100}
+          confirmLabel="Continuar para o resumo da contratação"
+          onConfirm={(slugs) => {
             const plan = picker.plan!;
             setPickedModules((prev) => ({ ...prev, [plan.name]: slugs }));
             setPicker({ open: false, plan: null });
+            setSummary({ open: true, plan });
+          }}
+        />
+      )}
+      {summary.plan && (
+        <ContractingSummaryDialog
+          open={summary.open}
+          onOpenChange={(o) => setSummary((s) => ({ ...s, open: o }))}
+          planName={summary.plan.name}
+          quota={PLAN_QUOTA[summary.plan.name] ?? 1}
+          selectedSlugs={pickedModules[summary.plan.name] ?? []}
+          baseMonthlyCents={Math.round(
+            (annual
+              ? Math.round((summary.plan.monthly ?? 0) * 10 / 12)
+              : (summary.plan.monthly ?? 0)) * 100,
+          )}
+          setupCents={(PLAN_SETUP_BRL[summary.plan.name] ?? 0) * 100}
+          extraPriceCents={EXTRA_MODULE_BRL * 100}
+          confirmLabel={`Confirmar e ir para o pagamento ${annual ? "anual" : "mensal"}`}
+          onEditModules={() => {
+            const plan = summary.plan!;
+            setSummary({ open: false, plan: null });
+            setPicker({ open: true, plan });
+          }}
+          onConfirm={async () => {
+            const plan = summary.plan!;
+            const slugs = pickedModules[plan.name] ?? [];
+            setSummary({ open: false, plan: null });
             await runCheckout(plan, slugs);
           }}
         />
