@@ -268,11 +268,7 @@ function ModuleCard({
       <div className="mt-auto pt-4 flex items-center gap-2">
         {contracted ? (
           <>
-            <Button asChild size="sm" className="bg-gradient-primary flex-1">
-              <Link to="/demo/cliente-final">
-                <Sparkles className="w-4 h-4 mr-1" /> Testar recursos
-              </Link>
-            </Button>
+            <TestarRecursosButton slug={m.slug} />
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button size="sm" variant="outline" onClick={onUncontract}>
