@@ -1001,13 +1001,55 @@ function StepAceite({ state, dispatch }: StepProps) {
 const PIX_KEY = "54.295.500/0001-27";
 const PIX_KEY_PLAIN = "54295500000127";
 const PIX_RECEBEDOR = "Impulsionando Tecnologia LTDA";
-const PIX_QR_URL = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(PIX_KEY_PLAIN)}`;
+const PIX_RECEBEDOR_SHORT = "IMPULSIONANDO TEC"; // <= 25 chars, ASCII, sem acento
+const PIX_CIDADE = "RIO DE JANEIRO"; // <= 15 chars
+
+function pixTLV(id: string, value: string) {
+  const len = value.length.toString().padStart(2, "0");
+  return `${id}${len}${value}`;
+}
+function pixCRC16(str: string) {
+  let crc = 0xffff;
+  for (let i = 0; i < str.length; i++) {
+    crc ^= str.charCodeAt(i) << 8;
+    for (let j = 0; j < 8; j++) {
+      crc = crc & 0x8000 ? ((crc << 1) ^ 0x1021) & 0xffff : (crc << 1) & 0xffff;
+    }
+  }
+  return crc.toString(16).toUpperCase().padStart(4, "0");
+}
+function buildPixPayload(amountCents: number, txid: string) {
+  const amount = (Math.max(0, amountCents) / 100).toFixed(2);
+  const safeTxid = (txid || "ORC").replace(/[^A-Za-z0-9]/g, "").slice(0, 25) || "ORC";
+  const merchant = pixTLV("00", "BR.GOV.BCB.PIX") + pixTLV("01", PIX_KEY_PLAIN);
+  const payload =
+    pixTLV("00", "01") +
+    pixTLV("26", merchant) +
+    pixTLV("52", "0000") +
+    pixTLV("53", "986") +
+    pixTLV("54", amount) +
+    pixTLV("58", "BR") +
+    pixTLV("59", PIX_RECEBEDOR_SHORT) +
+    pixTLV("60", PIX_CIDADE) +
+    pixTLV("62", pixTLV("05", safeTxid));
+  const toCrc = payload + "6304";
+  return toCrc + pixCRC16(toCrc);
+}
 
 function StepPagamento({ state, dispatch, totals, onReset }: StepProps) {
   const reqPaymentFn = useServerFn(requestPayment);
   const [requested, setRequested] = useState(state.paymentRequested);
   const [loading, setLoading] = useState(false);
   const [pixOpen, setPixOpen] = useState(false);
+  const [comprovante, setComprovante] = useState<{ name: string; size: number } | null>(null);
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+
+  const pixPayload = useMemo(
+    () => buildPixPayload(totals.totalCents, state.quoteNumber || "ORC"),
+    [totals.totalCents, state.quoteNumber],
+  );
+  const pixQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(pixPayload)}`;
+
 
   async function handleRequest() {
     if (!state.quoteId) return;
