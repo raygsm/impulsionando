@@ -149,11 +149,18 @@ function CalendarDayButton({
     if (modifiers.focused) ref.current?.focus();
   }, [modifiers.focused]);
 
+  const label = day.date.toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
   return (
     <Button
       ref={ref}
       variant="ghost"
       size="icon"
+      aria-label={label}
       data-day={day.date.toLocaleDateString()}
       data-selected-single={
         modifiers.selected &&
