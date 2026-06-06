@@ -3528,6 +3528,56 @@ export type Database = {
           },
         ]
       }
+      whatsapp_message_events: {
+        Row: {
+          error_code: string | null
+          error_message: string | null
+          external_id: string
+          id: string
+          instance_id: string | null
+          momment: string | null
+          outbox_id: string | null
+          phone: string | null
+          raw: Json
+          received_at: string
+          status: string
+        }
+        Insert: {
+          error_code?: string | null
+          error_message?: string | null
+          external_id: string
+          id?: string
+          instance_id?: string | null
+          momment?: string | null
+          outbox_id?: string | null
+          phone?: string | null
+          raw?: Json
+          received_at?: string
+          status: string
+        }
+        Update: {
+          error_code?: string | null
+          error_message?: string | null
+          external_id?: string
+          id?: string
+          instance_id?: string | null
+          momment?: string | null
+          outbox_id?: string | null
+          phone?: string | null
+          raw?: Json
+          received_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_message_events_outbox_id_fkey"
+            columns: ["outbox_id"]
+            isOneToOne: false
+            referencedRelation: "message_outbox"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

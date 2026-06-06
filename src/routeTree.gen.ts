@@ -115,6 +115,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicHooksZapiStatusRouteImport } from './routes/api/public/hooks/zapi-status'
 import { Route as ApiPublicHooksUptimeWhatsappTestRouteImport } from './routes/api/public/hooks/uptime-whatsapp-test'
 import { Route as ApiPublicHooksUptimeCheckRouteImport } from './routes/api/public/hooks/uptime-check'
 import { Route as ApiPublicHooksMarketingLeadNotifyRouteImport } from './routes/api/public/hooks/marketing-lead-notify'
@@ -686,6 +687,12 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksZapiStatusRoute =
+  ApiPublicHooksZapiStatusRouteImport.update({
+    id: '/api/public/hooks/zapi-status',
+    path: '/api/public/hooks/zapi-status',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksUptimeWhatsappTestRoute =
   ApiPublicHooksUptimeWhatsappTestRouteImport.update({
     id: '/api/public/hooks/uptime-whatsapp-test',
@@ -822,6 +829,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
+  '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -926,6 +934,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
+  '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1040,6 +1049,7 @@ export interface FileRoutesById {
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
+  '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1154,6 +1164,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
+    | '/api/public/hooks/zapi-status'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1258,6 +1269,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
+    | '/api/public/hooks/zapi-status'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1371,6 +1383,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
+    | '/api/public/hooks/zapi-status'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1417,6 +1430,7 @@ export interface RootRouteChildren {
   ApiPublicHooksMarketingLeadNotifyRoute: typeof ApiPublicHooksMarketingLeadNotifyRoute
   ApiPublicHooksUptimeCheckRoute: typeof ApiPublicHooksUptimeCheckRoute
   ApiPublicHooksUptimeWhatsappTestRoute: typeof ApiPublicHooksUptimeWhatsappTestRoute
+  ApiPublicHooksZapiStatusRoute: typeof ApiPublicHooksZapiStatusRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -2169,6 +2183,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/zapi-status': {
+      id: '/api/public/hooks/zapi-status'
+      path: '/api/public/hooks/zapi-status'
+      fullPath: '/api/public/hooks/zapi-status'
+      preLoaderRoute: typeof ApiPublicHooksZapiStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/uptime-whatsapp-test': {
       id: '/api/public/hooks/uptime-whatsapp-test'
       path: '/api/public/hooks/uptime-whatsapp-test'
@@ -2490,6 +2511,7 @@ const rootRouteChildren: RootRouteChildren = {
     ApiPublicHooksMarketingLeadNotifyRoute,
   ApiPublicHooksUptimeCheckRoute: ApiPublicHooksUptimeCheckRoute,
   ApiPublicHooksUptimeWhatsappTestRoute: ApiPublicHooksUptimeWhatsappTestRoute,
+  ApiPublicHooksZapiStatusRoute: ApiPublicHooksZapiStatusRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
