@@ -22,13 +22,8 @@ export const Route = createFileRoute("/r/$slug")({
         // Incrementa cliques (best-effort, via service role só se necessário; aqui usamos rpc-like update)
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-          await supabaseAdmin.rpc("aff_link_increment_clicks", { _slug: slug }).then(
-            () => null,
-            async () => {
-              // fallback: update direto
-              await supabaseAdmin.from("aff_links").update({ clicks: (await supabaseAdmin.from("aff_links").select("clicks").eq("id", row.id).single()).data?.clicks ?? 0 + 1 } as never).eq("id", row.id);
-            }
-          );
+          const current = await supabaseAdmin.from("aff_links").select("clicks").eq("id", row.id).single();
+          await supabaseAdmin.from("aff_links").update({ clicks: (current.data?.clicks ?? 0) + 1 } as never).eq("id", row.id);
         } catch {
           // silencioso — redireciona mesmo assim
         }

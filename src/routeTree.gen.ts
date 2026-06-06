@@ -34,6 +34,7 @@ import { Route as TrialCadastroRouteImport } from './routes/trial_.cadastro'
 import { Route as TrabalheConoscoNichoRouteImport } from './routes/trabalhe-conosco.$nicho'
 import { Route as ShowroomFitnessRouteImport } from './routes/showroom.fitness'
 import { Route as ShowroomEventosRouteImport } from './routes/showroom.eventos'
+import { Route as RSlugRouteImport } from './routes/r.$slug'
 import { Route as PacienteIdRouteImport } from './routes/paciente.$id'
 import { Route as NichosSlugRouteImport } from './routes/nichos.$slug'
 import { Route as ModulosSlugRouteImport } from './routes/modulos.$slug'
@@ -256,6 +257,11 @@ const ShowroomFitnessRoute = ShowroomFitnessRouteImport.update({
 const ShowroomEventosRoute = ShowroomEventosRouteImport.update({
   id: '/showroom/eventos',
   path: '/showroom/eventos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RSlugRoute = RSlugRouteImport.update({
+  id: '/r/$slug',
+  path: '/r/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PacienteIdRoute = PacienteIdRouteImport.update({
@@ -857,6 +863,7 @@ export interface FileRoutesByFullPath {
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
+  '/r/$slug': typeof RSlugRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
@@ -973,6 +980,7 @@ export interface FileRoutesByTo {
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
+  '/r/$slug': typeof RSlugRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
@@ -1100,6 +1108,7 @@ export interface FileRoutesById {
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
+  '/r/$slug': typeof RSlugRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
@@ -1227,6 +1236,7 @@ export interface FileRouteTypes {
     | '/modulos/$slug'
     | '/nichos/$slug'
     | '/paciente/$id'
+    | '/r/$slug'
     | '/showroom/eventos'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
@@ -1343,6 +1353,7 @@ export interface FileRouteTypes {
     | '/modulos/$slug'
     | '/nichos/$slug'
     | '/paciente/$id'
+    | '/r/$slug'
     | '/showroom/eventos'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
@@ -1469,6 +1480,7 @@ export interface FileRouteTypes {
     | '/modulos/$slug'
     | '/nichos/$slug'
     | '/paciente/$id'
+    | '/r/$slug'
     | '/showroom/eventos'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
@@ -1571,6 +1583,7 @@ export interface RootRouteChildren {
   DemoWhiteLabelRoute: typeof DemoWhiteLabelRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   NichosSlugRoute: typeof NichosSlugRoute
+  RSlugRoute: typeof RSlugRoute
   ShowroomEventosRoute: typeof ShowroomEventosRoute
   ShowroomFitnessRoute: typeof ShowroomFitnessRoute
   TrabalheConoscoNichoRoute: typeof TrabalheConoscoNichoRoute
@@ -1767,6 +1780,13 @@ declare module '@tanstack/react-router' {
       path: '/showroom/eventos'
       fullPath: '/showroom/eventos'
       preLoaderRoute: typeof ShowroomEventosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/r/$slug': {
+      id: '/r/$slug'
+      path: '/r/$slug'
+      fullPath: '/r/$slug'
+      preLoaderRoute: typeof RSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/paciente/$id': {
@@ -2774,6 +2794,7 @@ const rootRouteChildren: RootRouteChildren = {
   DemoWhiteLabelRoute: DemoWhiteLabelRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   NichosSlugRoute: NichosSlugRoute,
+  RSlugRoute: RSlugRoute,
   ShowroomEventosRoute: ShowroomEventosRoute,
   ShowroomFitnessRoute: ShowroomFitnessRoute,
   TrabalheConoscoNichoRoute: TrabalheConoscoNichoRoute,
