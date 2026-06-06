@@ -37,6 +37,11 @@ const DEMOS: NavItem[] = [
   { to: "/como-funciona/fitness", label: "Como funciona — Fitness", desc: "Passo a passo de implantação" },
 ];
 
+const PLANOS: NavItem[] = [
+  { to: "/planos", label: "Planos e preços", desc: "Compare módulos, recursos e limites" },
+  { to: "/orcamento", label: "Orçamento personalizado", desc: "Monte um plano sob medida para seu negócio" },
+];
+
 const EMPRESA: NavItem[] = [
   { to: "/sobre", label: "Sobre o Grupo Impulsionando" },
   { to: "/trabalhe-conosco", label: "Trabalhe conosco" },
@@ -50,6 +55,7 @@ const EMPRESA: NavItem[] = [
   { to: "/privacidade", label: "Privacidade (LGPD)" },
   { to: "/termos", label: "Termos de uso" },
 ];
+
 
 function ItemLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
   if (item.external) {
@@ -118,21 +124,9 @@ export function PublicHeader() {
           </Link>
           <DesktopDropdown label="Soluções" items={SOLUCOES} />
           <DesktopDropdown label="Demonstrações" items={DEMOS} />
-          <Link
-            to="/planos"
-            className="px-3 py-3 text-[15px] text-muted-foreground hover:text-foreground transition-colors rounded-md"
-            activeProps={{ className: "text-foreground font-medium" }}
-          >
-            Planos
-          </Link>
-          <Link
-            to="/orcamento"
-            className="px-3 py-3 text-[15px] text-muted-foreground hover:text-foreground transition-colors rounded-md"
-            activeProps={{ className: "text-foreground font-medium" }}
-          >
-            Orçamento
-          </Link>
+          <DesktopDropdown label="Planos" items={PLANOS} />
           <DesktopDropdown label="Empresa" items={EMPRESA} />
+
         </nav>
 
         <div className="flex items-center gap-2 lg:gap-3">
@@ -198,20 +192,19 @@ export function PublicHeader() {
 
                 </div>
 
-                <Link
-                  to="/planos"
-                  onClick={() => setMobileOpen(false)}
-                  className="text-base font-medium"
-                >
-                  Planos
-                </Link>
-                <Link
-                  to="/orcamento"
-                  onClick={() => setMobileOpen(false)}
-                  className="text-base font-medium"
-                >
-                  Orçamento
-                </Link>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                    Planos
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    {PLANOS.map((it) => (
+                      <div key={it.to + it.label} className="text-sm text-foreground/90 hover:text-foreground">
+                        <ItemLink item={it} onClick={() => setMobileOpen(false)} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
 
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
