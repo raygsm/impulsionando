@@ -143,6 +143,9 @@ function DemoAgenda() {
             <Card className="p-3 flex items-center gap-3">
               <Label className="text-xs">Data</Label>
               <Input type="date" value={dataAtual} onChange={(e) => setDataAtual(e.target.value)} className="w-48" />
+              <span className="text-xs text-muted-foreground">
+                {agds.filter((a) => a.data === dataAtual).length} agendamento(s) neste dia
+              </span>
             </Card>
             {profs.length === 0 ? (
               <p className="text-sm text-muted-foreground">Cadastre profissionais para visualizar a grade.</p>
@@ -156,7 +159,10 @@ function DemoAgenda() {
                     </tr>
                   </thead>
                   <tbody>
-                    {HORAS.map((h) => (
+                    {Array.from(new Set([
+                      ...HORAS,
+                      ...agds.filter((a) => a.data === dataAtual).map((a) => a.hora),
+                    ])).sort().map((h) => (
                       <tr key={h} className="border-t">
                         <td className="p-2 font-medium">{h}</td>
                         {profs.map((p) => {
@@ -178,6 +184,7 @@ function DemoAgenda() {
                 </table>
               </Card>
             )}
+
             <Card className="p-5">
               <h3 className="font-semibold mb-3">Agendamentos do dia</h3>
               {agds.filter((a) => a.data === dataAtual).length === 0 ? <p className="text-sm text-muted-foreground">Sem agendamentos.</p> : (
