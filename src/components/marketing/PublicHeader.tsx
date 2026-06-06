@@ -136,13 +136,39 @@ function ItemLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
       </a>
     );
   }
-  return (
-    <Link to={item.to} onClick={onClick} className="flex flex-col items-start gap-0.5 py-2 cursor-pointer w-full">
+
+  const moduleSlugMatch = item.to.match(/^\/modulos\/([^/]+)$/);
+  const nichoSlugMatch = item.to.match(/^\/nichos\/([^/]+)$/);
+
+  const content = (
+    <>
       <span className="text-sm font-medium text-foreground">{item.label}</span>
       {item.desc && <span className="text-xs text-muted-foreground">{item.desc}</span>}
+    </>
+  );
+  const className = "flex flex-col items-start gap-0.5 py-2 cursor-pointer w-full";
+
+  if (moduleSlugMatch) {
+    return (
+      <Link to="/modulos/$slug" params={{ slug: moduleSlugMatch[1] }} onClick={onClick} className={className}>
+        {content}
+      </Link>
+    );
+  }
+  if (nichoSlugMatch) {
+    return (
+      <Link to="/nichos/$slug" params={{ slug: nichoSlugMatch[1] }} onClick={onClick} className={className}>
+        {content}
+      </Link>
+    );
+  }
+  return (
+    <Link to={item.to} onClick={onClick} className={className}>
+      {content}
     </Link>
   );
 }
+
 
 function DesktopDropdownFlat({ label, items }: { label: string; items: NavItem[] }) {
   return (
