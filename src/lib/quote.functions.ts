@@ -153,7 +153,7 @@ export const updateQuote = createServerFn({ method: "POST" })
     if (data.segment !== undefined) update.segment = data.segment;
     if (data.status) update.status = data.status;
 
-    const { error } = await supabase.from("quotes").update(update).eq("id", data.id);
+    const { error } = await supabase.from("quotes").update(update as never).eq("id", data.id);
     if (error) throw new Error(`Não foi possível atualizar o orçamento: ${error.message}`);
     return { ok: true };
   });
