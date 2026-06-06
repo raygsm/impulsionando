@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
+import { DemoModeBanner } from "@/components/demo/DemoModeBanner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   HelpCircle,
@@ -78,6 +79,7 @@ function TrialExplained() {
     <TooltipProvider delayDuration={150}>
       <div className="min-h-screen flex flex-col bg-background">
         <PublicHeader />
+        <DemoModeBanner />
 
         <main className="flex-1 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12 w-full">
           {/* Hero */}
