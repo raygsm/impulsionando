@@ -136,3 +136,21 @@ export const DEMO_MODULE_OPTIONS: DemoModuleOption[] = [
     badge: "Revenda",
   },
 ];
+
+/**
+ * Resolve com fallback: se a chave for desconhecida ou não houver mock,
+ * retorna a opção segura (agenda) e expõe uma flag `fallback` para a UI
+ * mostrar um aviso ao usuário.
+ */
+export function resolveDemoModule(key: string | null | undefined): {
+  option: DemoModuleOption;
+  fallback: boolean;
+  requested: string | null;
+} {
+  const requested = key ?? null;
+  const found = requested ? DEMO_MODULE_OPTIONS.find((m) => m.key === requested) : undefined;
+  if (found) return { option: found, fallback: false, requested };
+  const safe = DEMO_MODULE_OPTIONS.find((m) => m.key === SAFE_DEMO_MODULE)!;
+  return { option: safe, fallback: requested !== null, requested };
+}
+
