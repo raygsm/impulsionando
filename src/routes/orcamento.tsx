@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowLeft, ArrowRight, CheckCircle2, FileText, Loader2,
-  Printer, Sparkles, ShieldCheck, MessageCircle,
+  Printer, Sparkles, ShieldCheck, MessageCircle, AlertTriangle, Copy, RotateCcw,
 } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -241,6 +241,12 @@ function OrcamentoPage() {
       const raw = window.sessionStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw) as Partial<WizardState>;
+        // Se o último orçamento já foi aceito, começa um novo do zero
+        // a cada nova visita à página (não mantém "Contrato aceito" travado).
+        if (parsed.acceptedAt) {
+          try { window.sessionStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+          return init;
+        }
         return { ...init, ...parsed };
       }
     } catch { /* ignore */ }
@@ -252,6 +258,12 @@ function OrcamentoPage() {
     if (typeof window === "undefined") return;
     try { window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch { /* ignore */ }
   }, [state]);
+
+  // Reset completo do wizard (novo pedido de orçamento)
+  function resetWizard() {
+    try { window.sessionStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+    dispatch({ type: "RESET" });
+  }
 
   // Aplicar bundle vindo da URL (uma vez)
   const appliedRef = useRef(false);
@@ -300,7 +312,7 @@ function OrcamentoPage() {
             {/* Layout: conteúdo + sidebar */}
             <div className="grid lg:grid-cols-[1fr_320px] gap-6">
               <div>
-                <StepContent state={state} dispatch={dispatch} search={search} totals={totals} />
+                <StepContent state={state} dispatch={dispatch} search={search} totals={totals} onReset={resetWizard} />
               </div>
 
               {/* Sidebar desktop */}
@@ -347,6 +359,7 @@ interface StepProps {
   dispatch: React.Dispatch<Action>;
   search: SearchParams;
   totals: ReturnType<typeof computeQuote>;
+  onReset?: () => void;
 }
 
 function StepContent(props: StepProps) {
@@ -984,10 +997,16 @@ function StepAceite({ state, dispatch }: StepProps) {
 
 /* -------------------- Step 12 — Pagamento -------------------- */
 
-function StepPagamento({ state, dispatch, totals }: StepProps) {
+const PIX_KEY = "54.295.500/0001-27";
+const PIX_KEY_PLAIN = "54295500000127";
+const PIX_RECEBEDOR = "Impulsionando Tecnologia LTDA";
+const PIX_QR_URL = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(PIX_KEY_PLAIN)}`;
+
+function StepPagamento({ state, dispatch, totals, onReset }: StepProps) {
   const reqPaymentFn = useServerFn(requestPayment);
   const [requested, setRequested] = useState(state.paymentRequested);
   const [loading, setLoading] = useState(false);
+  const [pixOpen, setPixOpen] = useState(false);
 
   async function handleRequest() {
     if (!state.quoteId) return;
@@ -999,8 +1018,19 @@ function StepPagamento({ state, dispatch, totals }: StepProps) {
       toast.success("Solicitação registrada! Nossa equipe entra em contato em até 1 dia útil com o link de pagamento.");
     } catch (e) {
       toast.error((e as Error).message || "Não foi possível registrar agora.");
+      // Em caso de falha no método de pagamento, mostra o fallback Pix automaticamente.
+      setPixOpen(true);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function copyPix(value: string, label: string) {
+    try {
+      await navigator.clipboard.writeText(value);
+      toast.success(`${label} copiado!`);
+    } catch {
+      toast.error("Não foi possível copiar. Selecione e copie manualmente.");
     }
   }
 
@@ -1061,14 +1091,135 @@ function StepPagamento({ state, dispatch, totals }: StepProps) {
           )}
         </div>
 
+        {/* Fallback Pix — instabilidade no método de pagamento */}
+        <div className="rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800/60 p-4">
+          <div className="flex items-start gap-2 mb-2">
+            <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+            <div className="text-sm">
+              <p className="font-medium text-amber-900 dark:text-amber-200">
+                Houve instabilidade no método de pagamento?
+              </p>
+              <p className="text-xs text-amber-800/90 dark:text-amber-200/80 mt-0.5">
+                Você pode pagar diretamente via <strong>Pix</strong> usando o CNPJ da Impulsionando como chave.
+                Após o pagamento, envie o comprovante pelo WhatsApp para liberação imediata.
+              </p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setPixOpen((v) => !v)}
+            className="mb-2"
+          >
+            {pixOpen ? "Ocultar dados do Pix" : "Pagar via Pix (chave CNPJ)"}
+          </Button>
+
+          {pixOpen && (
+            <div className="grid md:grid-cols-[240px_1fr] gap-4 items-start mt-2 rounded-md bg-background p-3 border border-border">
+              <div className="flex flex-col items-center">
+                <img
+                  src={PIX_QR_URL}
+                  alt="QR Code Pix — chave CNPJ Impulsionando"
+                  width={240}
+                  height={240}
+                  className="rounded-md border border-border bg-white"
+                  loading="lazy"
+                />
+                <p className="text-[11px] text-muted-foreground mt-1 text-center">
+                  Aponte a câmera do seu app bancário
+                </p>
+              </div>
+
+              <div className="space-y-3 text-sm">
+                <div>
+                  <Label className="text-xs text-muted-foreground">Tipo de chave</Label>
+                  <p className="font-medium">CNPJ</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Chave Pix (CNPJ)</Label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <code className="flex-1 px-2 py-1.5 rounded-md bg-muted text-sm font-mono select-all break-all">
+                      {PIX_KEY}
+                    </code>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => copyPix(PIX_KEY, "CNPJ")}
+                    >
+                      <Copy className="h-3.5 w-3.5 mr-1" /> Copiar
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Código Pix (somente números)</Label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <code className="flex-1 px-2 py-1.5 rounded-md bg-muted text-sm font-mono select-all break-all">
+                      {PIX_KEY_PLAIN}
+                    </code>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => copyPix(PIX_KEY_PLAIN, "Código Pix")}
+                    >
+                      <Copy className="h-3.5 w-3.5 mr-1" /> Copiar
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Recebedor</Label>
+                  <p className="font-medium">{PIX_RECEBEDOR}</p>
+                </div>
+                <div className="rounded-md bg-muted/50 p-2 text-xs text-muted-foreground">
+                  Valor sugerido: <strong className="text-foreground">{formatBRL(totals.totalCents)}</strong>{" "}
+                  (1ª mensalidade). Inclua o orçamento{" "}
+                  <strong className="text-foreground">{state.quoteNumber}</strong> na descrição do Pix.
+                </div>
+                <Button asChild variant="outline" size="sm" className="w-full">
+                  <a
+                    href={`https://wa.me/5521972554500?text=${encodeURIComponent(
+                      `Olá! Paguei via Pix o orçamento ${state.quoteNumber} (${formatBRL(totals.totalCents)}). Segue o comprovante.`,
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <MessageCircle className="h-4 w-4 mr-1" /> Enviar comprovante por WhatsApp
+                  </a>
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
         <p className="text-xs text-muted-foreground text-center">
           Já é cliente ou prefere ver os planos fechados?{" "}
           <Link to="/planos" className="underline">Ver Essencial / Integrado / Avançado</Link>
         </p>
+
+        {/* Iniciar novo orçamento */}
+        <div className="pt-4 mt-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-xs text-muted-foreground">
+            Quer simular outra combinação de módulos? Inicie um novo orçamento do zero.
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              if (onReset) onReset();
+              toast.success("Novo orçamento iniciado.");
+            }}
+          >
+            <RotateCcw className="h-4 w-4 mr-1" /> Iniciar novo orçamento
+          </Button>
+        </div>
       </div>
     </Card>
   );
 }
+
 
 /* ============================== Inputs ============================== */
 
