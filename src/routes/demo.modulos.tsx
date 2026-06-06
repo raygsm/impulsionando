@@ -307,7 +307,7 @@ function ModuleCard({
         slug={m.slug}
         moduleName={m.shortName}
         moduleDescription={m.pitch}
-        amountReference={m.priceReference ?? 0}
+        amountReference={referenceAmountFor(m.slug)}
         features={m.submodules}
         testRoute={testRoute}
       />
