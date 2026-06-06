@@ -40,7 +40,11 @@ async function ensureUnsubscribeToken(email: string): Promise<string> {
 export const Route = createFileRoute('/api/public/hooks/comms-self-test')({
   server: {
     handlers: {
-      POST: async () => {
+      POST: async ({ request }) => {
+        let override: { email?: string; phone?: string } = {}
+        try { override = await request.json() } catch {}
+        const recipientEmail = (override.email || TEST_EMAIL).trim()
+        const recipientPhone = (override.phone || TEST_PHONE).replace(/\D/g, '')
         const now = new Date()
         const stamp = now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
         const subject = `✅ Teste de canal — Impulsionando (${stamp})`
