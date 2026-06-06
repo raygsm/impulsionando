@@ -92,6 +92,9 @@ function DemoCRM() {
   const [usuarios, setUsuarios] = useDemoState<Usuario[]>("crm.usuarios", []);
   const [permissoes, setPermissoes] = useDemoState<Permissao[]>("crm.permissoes", []);
   const [logs, setLogs] = useDemoState<Log[]>("crm.logs", []);
+  const [modelos, setModelos] = useDemoState<ModeloMsg[]>("crm.modelos", []);
+  const [jornadaOpen, setJornadaOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   const { isContracted } = useDemoContracted();
   const pagoDemo = isContracted("crm");
