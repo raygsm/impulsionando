@@ -21,6 +21,7 @@ const LABEL: Record<string, string> = {
 };
 
 function CommissionsPage() {
+  const qc = useQueryClient();
   const { companyId } = useActiveCompany();
   const { data, isLoading } = useQuery({
     queryKey: ["aff_commissions", companyId],
@@ -30,6 +31,16 @@ function CommissionsPage() {
       if (error) throw error;
       return (data ?? []) as Row[];
     },
+  });
+
+  const advanceFn = useServerFn(advanceCommissionStatus);
+  const advance = useMutation({
+    mutationFn: () => advanceFn(),
+    onSuccess: (r: { promoted_to_internal: number; promoted_to_available: number }) => {
+      toast.success(`Atualizado: ${r.promoted_to_internal} → prazo interno · ${r.promoted_to_available} → disponível`);
+      qc.invalidateQueries({ queryKey: ["aff_commissions", companyId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const brl = (n: number) => Number(n).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
