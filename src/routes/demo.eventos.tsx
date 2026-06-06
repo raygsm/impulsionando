@@ -207,6 +207,8 @@ function DemoEventos() {
                   <KPI label="Receita" value={brl(dash.receita)} hint="Soma dos ingressos pagos" />
                   <KPI label="Tentativas inválidas" value={String(dash.invalidas)} hint="QR Code já usado" />
                 </div>
+
+                <RoiSimulator presetKey="eventos" />
               </TabsContent>
 
               <TabsContent value="vendas" className="mt-4 space-y-3">
