@@ -19,6 +19,7 @@ import { useDemoState, uid } from "@/lib/demoSandbox";
 import { DemoContractCTA } from "@/components/demo/DemoContractCTA";
 import { RoiSimulator } from "@/components/demo/RoiSimulator";
 import { gotoCrm, gotoAgenda } from "@/lib/demoCrossLink";
+import { createWhatsAppMock } from "@/lib/demoModuleMocks";
 
 export const Route = createFileRoute("/demo/whatsapp")({
   head: () => ({
@@ -60,27 +61,15 @@ function DemoWhats() {
   }, [conversas, camps, contatos]);
 
   function seed() {
-    const c1: Contato = { id: uid("ct"), nome: "Marina Souza", telefone: "(11) 90000-0001", tags: ["VIP"], optIn: true };
-    const c2: Contato = { id: uid("ct"), nome: "Rafael Dias", telefone: "(11) 90000-0002", tags: ["frio"], optIn: true };
-    const c3: Contato = { id: uid("ct"), nome: "Bia Camargo", telefone: "(11) 90000-0003", tags: [], optIn: false };
-    setContatos([c1, c2, c3]);
-    setTpls([
-      { id: uid("tp"), nome: "Confirmação de compra", corpo: "Olá {nome}! Recebemos seu pedido #{pedido}. Obrigado!", aprovado: true },
-      { id: uid("tp"), nome: "Lembrete agendamento", corpo: "Oi {nome}, lembrando seu compromisso em {data}.", aprovado: true },
-      { id: uid("tp"), nome: "Promoção relâmpago", corpo: "{nome}, oferta exclusiva por 24h: {link}", aprovado: false },
-    ]);
-    setConversas([
-      { id: uid("cv"), contatoId: c1.id, status: "aberto", mensagens: [
-        { de: "cliente", texto: "Oi, gostaria de mais informações", quando: new Date().toISOString() },
-        { de: "bot", texto: "Olá Marina! Posso te ajudar com qual serviço?", quando: new Date().toISOString() },
-      ] },
-    ]);
-    setFluxos([
-      { id: uid("fl"), nome: "Atendimento inicial", passos: ["Saudação", "Coletar nome", "Encaminhar para humano"], ativo: true },
-      { id: uid("fl"), nome: "Pós-venda NPS", passos: ["Aguardar 7 dias", "Enviar NPS", "Coletar resposta"], ativo: false },
-    ]);
-    setCamps([{ id: uid("cp"), nome: "Black Friday teste", templateId: "x", enviadas: 240, entregues: 230, lidas: 180, respondidas: 42 }]);
-    toast.success("Dados fictícios criados.");
+    const mock = createWhatsAppMock();
+    setContatos(mock.contatos);
+    setTpls(mock.tpls);
+    setConversas(mock.conversas);
+    setFluxos(mock.fluxos);
+    setCamps(mock.camps);
+    setParams(mock.params);
+    setConvAtiva(mock.conversas[0]?.id ?? null);
+    toast.success("Dados fictícios específicos de WhatsApp criados.");
   }
 
   function resetAll() {
@@ -130,7 +119,7 @@ function DemoWhats() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
-      <DemoModeBanner />
+      <DemoModeBanner current="automacao" />
       <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 w-full">
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
