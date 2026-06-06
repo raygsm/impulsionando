@@ -207,6 +207,7 @@ function DemoCRM() {
               <TabsTrigger value="servicos"><Briefcase className="w-4 h-4 mr-1" />Serviços</TabsTrigger>
               <TabsTrigger value="prazos"><Clock className="w-4 h-4 mr-1" />Prazos</TabsTrigger>
               <TabsTrigger value="funis"><GitBranch className="w-4 h-4 mr-1" />Funis</TabsTrigger>
+              <TabsTrigger value="etapas"><GitBranch className="w-4 h-4 mr-1" />Etapas</TabsTrigger>
               <TabsTrigger value="regras"><Workflow className="w-4 h-4 mr-1" />Regras</TabsTrigger>
               <TabsTrigger value="tags"><Tag className="w-4 h-4 mr-1" />Tags</TabsTrigger>
               <TabsTrigger value="origens"><Tag className="w-4 h-4 mr-1" />Origens</TabsTrigger>
@@ -215,6 +216,7 @@ function DemoCRM() {
               <TabsTrigger value="automacoes"><Workflow className="w-4 h-4 mr-1" />Automações</TabsTrigger>
               <TabsTrigger value="usuarios"><Users className="w-4 h-4 mr-1" />Usuários</TabsTrigger>
               <TabsTrigger value="permissoes"><ShieldCheck className="w-4 h-4 mr-1" />Permissões</TabsTrigger>
+              <TabsTrigger value="simular"><ShieldCheck className="w-4 h-4 mr-1" />Simular Perfil</TabsTrigger>
               <TabsTrigger value="params"><Sparkles className="w-4 h-4 mr-1" />Parametrizações</TabsTrigger>
               <TabsTrigger value="logs"><ScrollText className="w-4 h-4 mr-1" />Logs</TabsTrigger>
               <TabsTrigger value="jornada"><BookOpen className="w-4 h-4 mr-1" />Jornada Guiada</TabsTrigger>
