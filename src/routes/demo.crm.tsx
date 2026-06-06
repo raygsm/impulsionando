@@ -367,23 +367,7 @@ function DemoCRM() {
 
             {/* FOLLOW-UPS */}
             <TabsContent value="followups" className="mt-4 space-y-4">
-              <Card className="p-5">
-                <Table>
-                  <TableHeader><TableRow><TableHead>Lead</TableHead><TableHead>Descrição</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Ações</TableHead></TableRow></TableHeader>
-                  <TableBody>
-                    {followups.map((f) => (
-                      <TableRow key={f.id}>
-                        <TableCell>{leads.find((l) => l.id === f.leadId)?.nome ?? "—"}</TableCell>
-                        <TableCell>{f.descricao}</TableCell>
-                        <TableCell><Badge variant={f.status === "Concluído" ? "default" : "outline"}>{f.status}</Badge></TableCell>
-                        <TableCell className="text-right">
-                          <Button size="sm" variant="outline" onClick={() => setFollowups((p) => p.map((x) => x.id === f.id ? { ...x, status: x.status === "Pendente" ? "Concluído" : "Pendente" } : x))}>Alternar</Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </Card>
+              <FollowupsPanel followups={followups} setFollowups={setFollowups} onLog={pushLog} />
             </TabsContent>
 
             {/* PRODUTOS */}
@@ -398,114 +382,42 @@ function DemoCRM() {
 
             {/* SERVIÇOS */}
             <TabsContent value="servicos" className="mt-4 space-y-4">
-              <ServicosPanel
-                servicos={servicos}
-                setServicos={setServicos}
-                produtos={produtos}
-                planos={planos}
-                onLog={pushLog}
-                exigirResponsavel={params.exigirResponsavel}
-                podeEditar={params.podeGerirServicos}
-              />
+              <ServicosPanel servicos={servicos} setServicos={setServicos} produtos={produtos} planos={planos} onLog={pushLog} exigirResponsavel={params.exigirResponsavel} podeEditar={params.podeGerirServicos} />
             </TabsContent>
-
 
             {/* PRAZOS EM DIAS */}
             <TabsContent value="prazos" className="mt-4 space-y-4">
-              <Card className="p-5">
-                <Table>
-                  <TableHeader><TableRow><TableHead>Prazo</TableHead><TableHead>Dias</TableHead><TableHead className="text-right">Ações</TableHead></TableRow></TableHeader>
-                  <TableBody>
-                    {prazos.map((pz) => (
-                      <TableRow key={pz.id}>
-                        <TableCell>{pz.nome}</TableCell>
-                        <TableCell>
-                          <Input type="number" value={pz.dias} className="w-24" onChange={(e) => setPrazos((p) => p.map((x) => x.id === pz.id ? { ...x, dias: Number(e.target.value) } : x))} />
-                        </TableCell>
-                        <TableCell className="text-right"><Button size="sm" variant="ghost" onClick={() => setPrazos((p) => p.filter((x) => x.id !== pz.id))}><Trash2 className="w-4 h-4" /></Button></TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </Card>
+              <PrazosPanel prazos={prazos} setPrazos={setPrazos} onLog={pushLog} />
             </TabsContent>
 
-            {/* FUNIS + ETAPAS */}
+            {/* FUNIS */}
             <TabsContent value="funis" className="mt-4 space-y-4">
-              <Card className="p-5">
-                <div className="font-semibold mb-2 text-sm flex items-center gap-2">Funis <HelpTip>Pipelines de vendas. Cada funil tem etapas próprias.</HelpTip></div>
-                <div className="flex gap-2 flex-wrap">
-                  {funis.map((f) => <Badge key={f.id} variant={f.ativo ? "default" : "outline"}>{f.nome}{f.ativo ? "" : " (Inativo)"}</Badge>)}
-                </div>
-              </Card>
-              <Card className="p-5">
-                <div className="font-semibold mb-2 text-sm">Etapas — Funil Comercial Padrão</div>
-                <div className="space-y-2">
-                  {etapas.map((e) => (
-                    <div key={e.id} className="flex items-center justify-between text-sm border rounded px-3 py-2">
-                      <span><Badge variant="outline" className="mr-2">{e.ordem}</Badge>{e.nome}</span>
-                      <Badge>Configurado</Badge>
-                    </div>
-                  ))}
-                </div>
-              </Card>
+              <FunisPanel funis={funis} setFunis={setFunis} onLog={pushLog} />
+            </TabsContent>
+
+            {/* ETAPAS */}
+            <TabsContent value="etapas" className="mt-4 space-y-4">
+              <EtapasPanel etapas={etapas} setEtapas={setEtapas} funis={funis} onLog={pushLog} />
             </TabsContent>
 
             {/* REGRAS */}
             <TabsContent value="regras" className="mt-4 space-y-3">
-              {regras.map((r) => (
-                <Card key={r.id} className="p-4 flex items-center justify-between gap-3">
-                  <div>
-                    <div className="font-medium text-sm">{r.nome}</div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1 flex-wrap">
-                      <Badge variant="outline">QUANDO: {r.quando}</Badge>
-                      <ArrowRight className="w-3 h-3" />
-                      <Badge>ENTÃO: {r.entao}</Badge>
-                    </div>
-                  </div>
-                  <Switch checked={r.ativa} onCheckedChange={(v) => setRegras((p) => p.map((x) => x.id === r.id ? { ...x, ativa: v } : x))} />
-                </Card>
-              ))}
+              <RegrasPanel regras={regras} setRegras={setRegras} onLog={pushLog} />
             </TabsContent>
 
             {/* TAGS */}
             <TabsContent value="tags" className="mt-4 space-y-3">
-              <Card className="p-5">
-                <div className="flex gap-2 flex-wrap">
-                  {tags.map((t) => (
-                    <Badge key={t.id} variant="outline" className="gap-1">{t.nome}
-                      <button onClick={() => setTags((p) => p.filter((x) => x.id !== t.id))} className="ml-1 opacity-60 hover:opacity-100"><Trash2 className="w-3 h-3" /></button>
-                    </Badge>
-                  ))}
-                </div>
-                <AddByName placeholder="Nova tag" onAdd={(nome) => setTags((p) => [{ id: uid("tg"), nome }, ...p])} />
-              </Card>
+              <TagsPanel tags={tags} setTags={setTags} onLog={pushLog} />
             </TabsContent>
 
             {/* ORIGENS */}
             <TabsContent value="origens" className="mt-4 space-y-3">
-              <Card className="p-5">
-                <div className="flex gap-2 flex-wrap">
-                  {origens.map((t) => (
-                    <Badge key={t.id} variant="outline" className="gap-1">{t.nome}
-                      <button onClick={() => setOrigens((p) => p.filter((x) => x.id !== t.id))} className="ml-1 opacity-60 hover:opacity-100"><Trash2 className="w-3 h-3" /></button>
-                    </Badge>
-                  ))}
-                </div>
-                <AddByName placeholder="Nova origem" onAdd={(nome) => setOrigens((p) => [{ id: uid("og"), nome }, ...p])} />
-              </Card>
+              <OrigensPanel origens={origens} setOrigens={setOrigens} leads={leads} onLog={pushLog} />
             </TabsContent>
 
             {/* CAMPANHAS */}
             <TabsContent value="campanhas" className="mt-4 space-y-3">
-              <Card className="p-5">
-                <Table>
-                  <TableHeader><TableRow><TableHead>Campanha</TableHead><TableHead>Canal</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Leads</TableHead></TableRow></TableHeader>
-                  <TableBody>{campanhas.map((c) => (
-                    <TableRow key={c.id}><TableCell>{c.nome}</TableCell><TableCell><Badge variant="outline">{c.canal}</Badge></TableCell><TableCell><Badge>{c.status}</Badge></TableCell><TableCell className="text-right">{c.leads}</TableCell></TableRow>
-                  ))}</TableBody>
-                </Table>
-              </Card>
+              <CampanhasPanel campanhas={campanhas} setCampanhas={setCampanhas} origens={origens} onLog={pushLog} />
             </TabsContent>
 
             {/* COMUNICAÇÃO (templates) */}
@@ -530,59 +442,23 @@ function DemoCRM() {
 
             {/* AUTOMAÇÕES */}
             <TabsContent value="automacoes" className="mt-4 space-y-3">
-              <Card className="p-5"><NovaAutomacao onCreate={(a) => setAutos((p) => [a, ...p])} /></Card>
-              {autos.map((a) => (
-                <Card key={a.id} className="p-4 flex items-center justify-between">
-                  <div>
-                    <div className="font-medium text-sm">{a.nome}</div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1 flex-wrap">
-                      <Badge variant="outline">{a.gatilho}</Badge>
-                      <ArrowRight className="w-3 h-3" />
-                      <Badge>{a.acao}</Badge>
-                    </div>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <Switch checked={a.ativa} onCheckedChange={(v) => setAutos((p) => p.map((x) => x.id === a.id ? { ...x, ativa: v } : x))} />
-                    <Button size="sm" variant="ghost" onClick={() => setAutos((p) => p.filter((x) => x.id !== a.id))}><Trash2 className="w-4 h-4" /></Button>
-                  </div>
-                </Card>
-              ))}
+              <AutomacoesPanel autos={autos} setAutos={setAutos} onLog={pushLog} />
             </TabsContent>
 
             {/* USUÁRIOS */}
             <TabsContent value="usuarios" className="mt-4 space-y-3">
-              <Card className="p-5">
-                <Table>
-                  <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>E-mail</TableHead><TableHead>Papel</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
-                  <TableBody>{usuarios.map((u) => (
-                    <TableRow key={u.id}><TableCell>{u.nome}</TableCell><TableCell className="text-xs">{u.email}</TableCell><TableCell><Badge variant="outline">{u.papel}</Badge></TableCell><TableCell><Badge>{u.status}</Badge></TableCell></TableRow>
-                  ))}</TableBody>
-                </Table>
-              </Card>
+              <UsuariosPanel usuarios={usuarios} setUsuarios={setUsuarios} onLog={pushLog} />
             </TabsContent>
 
             {/* PERMISSÕES */}
             <TabsContent value="permissoes" className="mt-4 space-y-3">
-              <Card className="p-5">
-                <div className="text-sm font-semibold mb-2 flex items-center gap-2">Matriz de permissões <HelpTip k="permissoes" /></div>
-                <Table>
-                  <TableHeader><TableRow><TableHead>Papel</TableHead><TableHead>Ver</TableHead><TableHead>Criar</TableHead><TableHead>Editar</TableHead><TableHead>Excluir</TableHead></TableRow></TableHeader>
-                  <TableBody>
-                    {["Administrador", "Vendedor", "Atendimento", "Financeiro"].map((papel) => (
-                      <TableRow key={papel}>
-                        <TableCell className="font-medium">{papel}</TableCell>
-                        {(["ver", "criar", "editar", "excluir"] as const).map((acao) => {
-                          const idx = permissoes.findIndex((p) => p.papel === papel && p.acao === acao);
-                          const v = idx >= 0 ? permissoes[idx].permitido : false;
-                          return <TableCell key={acao}>
-                            <Switch checked={v} onCheckedChange={(nv) => setPermissoes((prev) => prev.map((p, i) => i === idx ? { ...p, permitido: nv } : p))} />
-                          </TableCell>;
-                        })}
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </Card>
+              <PermissoesPanel permissoes={permissoes} setPermissoes={setPermissoes} onLog={pushLog} />
+            </TabsContent>
+
+            {/* SIMULAR VISÃO POR PERFIL */}
+            <TabsContent value="simular" className="mt-4 space-y-3">
+              <SimularPerfilPanel permissoes={permissoes} onLog={pushLog} />
+            </TabsContent>
             </TabsContent>
 
             {/* PARAMETRIZAÇÕES (16 toggles) */}
