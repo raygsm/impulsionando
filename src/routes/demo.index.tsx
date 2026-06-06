@@ -46,6 +46,9 @@ function DemoLanding() {
                 <HelpCircle className="w-3.5 h-3.5" />
                 Durante toda a navegação, ícones de interrogação explicam cada recurso.
               </div>
+              <Button asChild size="sm" className="bg-gradient-primary">
+                <Link to="/demo/modulos">Vitrine de Módulos & Contratação demo</Link>
+              </Button>
               <Button asChild size="sm" variant="outline">
                 <Link to="/demo/checklist">Ver checklist de prontidão</Link>
               </Button>
