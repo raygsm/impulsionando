@@ -86,15 +86,25 @@ export function DemoTestContactPanel() {
       toast.error("Cadastre um WhatsApp de teste para simular este envio.");
       return;
     }
-    const entry = simulateSend({ scenario, contact, channel });
+    const entry = await simulateSend({ scenario, contact, channel });
     setLog(loadDemoLog());
     setConfirmSend(null);
     setPreviewScenario(null);
-    toast.success(
-      channel === "email"
-        ? `Envio demonstrativo preparado para ${entry.recipient}.`
-        : `Envio demonstrativo preparado para ${entry.recipient}.`,
-    );
+    if (entry.status === "enviado") {
+      toast.success(
+        channel === "email"
+          ? `E-mail de TESTE enviado para ${entry.recipient}.`
+          : `WhatsApp de TESTE enviado para ${entry.recipient}.`,
+      );
+    } else if (entry.status === "falhou") {
+      toast.error(
+        `Não foi possível enviar a mensagem de TESTE. Confira o log para detalhes.`,
+      );
+    } else {
+      toast.message(
+        `Envio demonstrativo preparado para ${entry.recipient} — aguardando integração externa.`,
+      );
+    }
   }
 
   return (
