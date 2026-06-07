@@ -38,6 +38,10 @@ import {
   Archive,
   CheckCircle2,
   ExternalLink,
+  Download,
+  Upload,
+  FileJson,
+  FileArchive,
 } from "lucide-react";
 import {
   cloneStore,
@@ -49,6 +53,17 @@ import {
   type CloneInstance,
   type CloneLog,
 } from "@/lib/cloneCentral";
+import {
+  exportCloneAsJSON,
+  exportCloneAsZIP,
+  importCloneFromFile,
+} from "@/lib/cloneExport";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { CloneWizard } from "@/components/admin/CloneWizard";
 import { AgendaConfigWizard } from "@/components/admin/AgendaConfigWizard";
 
