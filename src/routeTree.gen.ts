@@ -156,6 +156,7 @@ import { Route as ApiPublicHooksUptimeWhatsappTestRouteImport } from './routes/a
 import { Route as ApiPublicHooksUptimeCheckRouteImport } from './routes/api/public/hooks/uptime-check'
 import { Route as ApiPublicHooksMarketingLeadNotifyRouteImport } from './routes/api/public/hooks/marketing-lead-notify'
 import { Route as ApiPublicHooksCommsSelfTestRouteImport } from './routes/api/public/hooks/comms-self-test'
+import { Route as ApiPublicHooksBillingTickRouteImport } from './routes/api/public/hooks/billing-tick'
 import { Route as ApiPublicHooksAffAdvanceCommissionsRouteImport } from './routes/api/public/hooks/aff-advance-commissions'
 import { Route as ApiPublicDemoSendTestRouteImport } from './routes/api/public/demo/send-test'
 import { Route as ApiPaymentsInfinitepayCreateRouteImport } from './routes/api/payments/infinitepay.create'
@@ -958,6 +959,12 @@ const ApiPublicHooksCommsSelfTestRoute =
     path: '/api/public/hooks/comms-self-test',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksBillingTickRoute =
+  ApiPublicHooksBillingTickRouteImport.update({
+    id: '/api/public/hooks/billing-tick',
+    path: '/api/public/hooks/billing-tick',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksAffAdvanceCommissionsRoute =
   ApiPublicHooksAffAdvanceCommissionsRouteImport.update({
     id: '/api/public/hooks/aff-advance-commissions',
@@ -1142,6 +1149,7 @@ export interface FileRoutesByFullPath {
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
+  '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
@@ -1287,6 +1295,7 @@ export interface FileRoutesByTo {
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
+  '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
@@ -1444,6 +1453,7 @@ export interface FileRoutesById {
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
+  '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
@@ -1601,6 +1611,7 @@ export interface FileRouteTypes {
     | '/api/payments/infinitepay/create'
     | '/api/public/demo/send-test'
     | '/api/public/hooks/aff-advance-commissions'
+    | '/api/public/hooks/billing-tick'
     | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/uptime-check'
@@ -1746,6 +1757,7 @@ export interface FileRouteTypes {
     | '/api/payments/infinitepay/create'
     | '/api/public/demo/send-test'
     | '/api/public/hooks/aff-advance-commissions'
+    | '/api/public/hooks/billing-tick'
     | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/uptime-check'
@@ -1902,6 +1914,7 @@ export interface FileRouteTypes {
     | '/api/payments/infinitepay/create'
     | '/api/public/demo/send-test'
     | '/api/public/hooks/aff-advance-commissions'
+    | '/api/public/hooks/billing-tick'
     | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/uptime-check'
@@ -1968,6 +1981,7 @@ export interface RootRouteChildren {
   ApiPaymentsInfinitepayCreateRoute: typeof ApiPaymentsInfinitepayCreateRoute
   ApiPublicDemoSendTestRoute: typeof ApiPublicDemoSendTestRoute
   ApiPublicHooksAffAdvanceCommissionsRoute: typeof ApiPublicHooksAffAdvanceCommissionsRoute
+  ApiPublicHooksBillingTickRoute: typeof ApiPublicHooksBillingTickRoute
   ApiPublicHooksCommsSelfTestRoute: typeof ApiPublicHooksCommsSelfTestRoute
   ApiPublicHooksMarketingLeadNotifyRoute: typeof ApiPublicHooksMarketingLeadNotifyRoute
   ApiPublicHooksUptimeCheckRoute: typeof ApiPublicHooksUptimeCheckRoute
@@ -3013,6 +3027,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksCommsSelfTestRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/billing-tick': {
+      id: '/api/public/hooks/billing-tick'
+      path: '/api/public/hooks/billing-tick'
+      fullPath: '/api/public/hooks/billing-tick'
+      preLoaderRoute: typeof ApiPublicHooksBillingTickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/aff-advance-commissions': {
       id: '/api/public/hooks/aff-advance-commissions'
       path: '/api/public/hooks/aff-advance-commissions'
@@ -3436,6 +3457,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicDemoSendTestRoute: ApiPublicDemoSendTestRoute,
   ApiPublicHooksAffAdvanceCommissionsRoute:
     ApiPublicHooksAffAdvanceCommissionsRoute,
+  ApiPublicHooksBillingTickRoute: ApiPublicHooksBillingTickRoute,
   ApiPublicHooksCommsSelfTestRoute: ApiPublicHooksCommsSelfTestRoute,
   ApiPublicHooksMarketingLeadNotifyRoute:
     ApiPublicHooksMarketingLeadNotifyRoute,
