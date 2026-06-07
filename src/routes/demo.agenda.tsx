@@ -147,7 +147,18 @@ function DemoAgenda() {
 
   function resetAll() {
     resetProfs(); resetServs(); resetAgds(); resetEspera(); resetParams();
-    toast.message("Demonstração zerada.");
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem("agenda.demo.resources.v1");
+        localStorage.removeItem("agenda.demo.fluxos.v1");
+        localStorage.removeItem("agenda.demo.comunicacao.v1");
+        localStorage.removeItem("imp.demo.mock.agenda");
+      } catch { /* ignore */ }
+    }
+    clearAgendaLogs();
+    AgendaLog.resetLocal();
+    refreshLogs();
+    toast.success("Dados demonstrativos da Agenda restaurados para o padrão inicial.");
   }
 
   function alterarStatus(id: string, status: Agendamento["status"]) {
