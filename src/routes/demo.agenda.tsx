@@ -190,8 +190,16 @@ function DemoAgenda() {
               size="default"
               variant="default"
             />
+            <Select value={nichoDemo} onValueChange={(v) => { setNichoDemo(v); AgendaLog.nichoAplicado(v); toast.success(`Preset de nicho aplicado: ${v}.`); }}>
+              <SelectTrigger className="h-9 w-44"><SelectValue placeholder="Nicho" /></SelectTrigger>
+              <SelectContent>
+                {NICHO_OPTIONS.map((n) => <SelectItem key={n.value} value={n.value}>{n.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Button variant="outline" onClick={() => setJornadaOpen(true)}><Map className="w-4 h-4 mr-1" />Iniciar jornada guiada</Button>
             <Button variant="outline" onClick={seed}><Sparkles className="w-4 h-4 mr-1" />Popular demo</Button>
-            <Button variant="ghost" onClick={resetAll}><RotateCcw className="w-4 h-4 mr-1" />Zerar</Button>
+            <Button variant="outline" onClick={() => setOutrosOpen(true)}><Layers className="w-4 h-4 mr-1" />Outros módulos</Button>
+            <Button variant="ghost" onClick={() => setZerarOpen(true)}><RotateCcw className="w-4 h-4 mr-1" />Zerar dados da DEMO</Button>
           </div>
         </div>
 
