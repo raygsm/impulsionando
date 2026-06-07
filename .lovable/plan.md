@@ -1,87 +1,82 @@
-## Objetivo
+## Diagnóstico — o que JÁ existe (não recriar)
 
-Implementar a política padrão de **faturamento recorrente, régua de cobrança automática (D-7 / D-1 / D0 / D+1) e suspensão/reativação automáticas** no ERP da Impulsionando, e aplicar essa política ao primeiro cliente real: **Patrícia Lenine Psicologia**.
+Já implementado no projeto, será 100% reaproveitado:
 
-A regra precisa virar **modelo padrão**: toda nova contratação herda a mesma régua sem intervenção manual.
+- **Multi-tenant**: tabela `companies`, `company_modules`, `modules`, `company_units`, `is_master` flag, `CompanyPicker`, `useActiveCompany`.
+- **Catálogo de módulos**: `src/data/motherModules.ts` + página `/modules` (já permite ativar/desativar módulo por empresa para super admin).
+- **Billing/Contratos**: `billing_contracts`, `billing_invoices`, `billing_plans`, `billing_dunning_policy`, `BillingGate`, páginas `admin.billing-*`.
+- **Onboarding/contratação**: `quotes`, `checkout.success.tsx`, `DemoContractFlow`, `payments/infinitepay.*`, `fin_transactions`.
+- **Comunicação**: `message_outbox`, `message_templates`, `agendaComunicacao`, e-mails, WhatsApp via z-api.
+- **CRM/Timeline**: `crm_leads`, `crm_activities`, `audit_logs`.
+- **Permissões**: `permissions`, `profile_permissions`, `user_permission_overrides`.
+- **Clone/instalação**: `CloneWizard`, `cloneCentral`, `admin.modulos.clonagem`.
 
-## O que JÁ existe (vamos reutilizar, não recriar)
+## O que falta de verdade (única coisa a criar)
 
-- `fin_transactions` (receitas/despesas, status, vencimento) → usado para setup e mensalidades
-- `fin_accounts`, `fin_categories`, `fin_payment_methods` → contas, categorias, métodos
-- `subscriptions` (cliente, plano, ciclo, status, período) → contrato recorrente Paddle/Stripe
-- `message_outbox` + `message_templates` → envio WhatsApp/e-mail
-- `companies`, `company_modules`, `customers` → cadastro do cliente Patrícia Lenine
-- `notifications`, `audit_logs` → trilha de auditoria
-- Rotas: `finance.*`, `admin.billing`, `minha-assinatura`
+Exclusivamente uma **camada administrativa superior** ("Core Manager") + **fluxo pós-pagamento** de onboarding com **domínio/subdomínio/e-mails**. Nenhum módulo novo, nenhuma duplicação.
 
-## O que falta (novo)
+### 1. Hub Core Manager (super admin)
+Rota nova `/_authenticated/core/` agregando o que já existe (sem duplicar telas):
+- `core.index.tsx` — dashboard com KPIs (clientes ativos, MRR, módulos instalados, onboardings pendentes) lendo de tabelas existentes.
+- `core.clientes.tsx` — lista de `companies` (não master) com status de implantação.
+- `core.cliente.$id.tsx` — **Cliente 360°**: aba Dados (companies), Contratos (billing_contracts), Pagamentos (fin_transactions), Módulos (company_modules), Comunicações (message_outbox), Domínio (novo), Usuários (user_profiles), Logs (audit_logs), Checklist (novo).
 
-### 1. Schema (1 migração)
+Tudo são **views agregadoras** sobre tabelas existentes — sem novas tabelas para dados já armazenados.
 
-Novas tabelas em `public`:
+### 2. Instalador de módulos por cliente
+Reaproveitar `/modules` existente; adicionar botão **"Instalar"** que, além do toggle atual em `company_modules`:
+- escreve linha em `audit_logs` ("module_installed")
+- dispara `message_outbox` (e-mail de boas-vindas do módulo via template existente)
+- marca item no checklist de implantação
 
-- `billing_plans` — catálogo de planos (Mensal R$ 99,90, Trimestral, Anual etc.) com `setup_fee`, `recurring_amount`, `cycle`, `due_day`.
-- `billing_contracts` — contrato ativo de cada cliente (company_id, plan_id, start_date, due_day, status: `active|suspended|cancelled`, next_due_date, last_paid_at).
-- `billing_invoices` — fatura mensal gerada (contract_id, period_start, period_end, due_date, amount, status: `open|paid|overdue|cancelled`, pix_payload, paid_at).
-- `billing_dunning_policy` — régua padrão configurável (steps: dias relativos, canais, template_key, ação).
-- `billing_dunning_runs` — log de cada disparo (invoice_id, step, channel, sent_at, status).
-- `billing_suspensions` — histórico de suspensão/reativação (contract_id, suspended_at, reason, reactivated_at).
+Nenhum código de módulo é clonado — apenas a flag `is_enabled=true` já existente.
 
-Tudo com RLS por `company_id` + GRANTs (admin/superuser veem global).
+### 3. Onboarding pós-pagamento (novo, mínimo)
+Disparado em `checkout.success.tsx` (já existe). Novo wizard `OnboardingWizard.tsx` com 4 passos:
+1. **Domínio**: rádio (já possuo / não possuo / quero registrar) + campos condicionais → grava em nova tabela `onboarding_domain_requests`.
+2. **Subdomínio** (se "não possuo"): valida disponibilidade em `companies.slug` (já existe) + confirmação dupla → reserva.
+3. **E-mails corporativos**: se subdomínio → 3 campos fixos; se domínio próprio → multiselect de prefixos (contato/sac/financeiro/…) → grava em `onboarding_email_requests`.
+4. **Resumo + Checklist**: marca itens em `onboarding_checklist`.
 
-### 2. Lógica automática (cron + server functions)
+Cada passo registra em `message_outbox` (e-mail + WhatsApp) e em `crm_activities` (timeline).
 
-- Server fn `runBillingCycle` (já fica registrada como cron pg_cron diário às 00:05):
-  - gera próxima fatura quando faltar 7 dias para `next_due_date`
-  - dispara passo D-7 / D-1 / D0 conforme `billing_dunning_policy`
-  - às 00:01 do dia seguinte ao vencimento: marca `overdue`, suspende contrato, grava em `billing_suspensions`
-- Server fn `markInvoicePaid` → libera contrato, dispara reativação automática, registra `paid_at` no `fin_transactions` + recibo NFe (flag).
-- Reativação consulta `billing_suspensions` em aberto e atualiza `contracts.status = active`.
+### 4. Schema novo (apenas o estritamente necessário)
 
-Templates de mensagem (`message_templates`) com PIX (chave, copia-e-cola, QR placeholder). Renderização final via `message_outbox`.
+Uma migration com 3 tabelas pequenas + RLS + GRANTs:
 
-### 3. Efeito de suspensão no app
+- `onboarding_domain_requests` (company_id, mode `subdomain|own|register`, requested_value, contact_*, status)
+- `onboarding_email_requests` (company_id, address_prefix, full_address, status)
+- `onboarding_checklist` (company_id, item_key, status, completed_at) — 8 itens fixos da spec
 
-- Hook `useContractStatus()` consulta o contrato ativo da empresa.
-- Em `_authenticated/route.tsx`: se `status = suspended` → redireciona para `/conta-suspensa` (página nova com instruções e botão "Já paguei").
-- Páginas públicas do tenant (agenda pública / site) mostram banner "Serviço temporariamente indisponível por pendência financeira" (componente `<SuspendedBanner />` consumido pelas rotas de paciente/agenda pública).
-- Bloqueio de novos agendamentos: `agenda_appointments` policy adicional via trigger checando contrato ativo.
+Tudo escopado por `company_id` com RLS via `has_role` existente.
 
-### 4. UI nova
+### 5. Nav + acesso
+Adicionar grupo "Core Manager" em `nav-config.tsx` visível apenas para `isImpulsionandoStaff` — não toca em nada que cliente final vê.
 
-- `/_authenticated/admin/billing-policy.tsx` — editar a régua padrão (D-7/D-1/D0/D+1), templates, e ativar para todas as empresas.
-- `/_authenticated/admin/billing-contracts.tsx` — lista de contratos recorrentes, status, próximo vencimento, ações (forçar suspensão / reativar / marcar pago / gerar fatura agora).
-- `/_authenticated/admin/billing-contracts.$id.tsx` — detalhe do contrato com timeline de faturas + log de cobranças + suspensões.
-- Card no `admin.billing` existente: "Receita recorrente do mês", "Inadimplentes", "Suspensos".
-- `/conta-suspensa.tsx` — página da cliente quando suspensa.
+## O que NÃO será feito
 
-### 5. Seed do cliente Patrícia Lenine (via `supabase--insert`)
+- Não criar tabelas para dados que já existem (clientes, módulos, billing, contratos, comunicações, logs).
+- Não duplicar páginas de Agenda, CRM, PDV, Financeiro, etc.
+- Não criar "Core Manager > Billing" — vai apontar para `/admin/billing-contracts` que já existe.
+- Não criar verificação real de DNS / registro real de domínio: apenas **registrar solicitação** (a spec pede isso explicitamente: "Nossa equipe entrará em contato").
+- Não criar provisionamento real de e-mail: apenas registrar solicitação + criar tarefa interna (a spec pede isso).
 
-- Cria `company` "Patrícia Lenine Psicologia" (subdomínio `patricialenine`).
-- Cria `customer` Patrícia.
-- Cria `fin_transaction` receita R$ 307,00 categoria "Setup / Implantação", pago em 08/06/2026 via Pix.
-- Cria `billing_plan` "Mensal — Licença de Uso" (R$ 99,90, due_day=5).
-- Cria `billing_contract` ativo, start 05/07/2026, next_due_date 05/07/2026.
-- Marca registro de Nota Fiscal (flag `nfe_issued_at=08/06/2026`).
+## Resumo de arquivos
 
-### 6. Política como padrão
+**Migration**: 1 migration nova (3 tabelas + RLS + GRANTs).
 
-- Linha única em `billing_dunning_policy` com `is_default=true` e os 4 passos.
-- Trigger ao inserir novo `billing_contract`: se a empresa não tem política própria, herda a default.
+**Criar (poucos arquivos)**:
+- `src/routes/_authenticated/core.tsx` (layout com Outlet)
+- `src/routes/_authenticated/core.index.tsx` (dashboard agregador)
+- `src/routes/_authenticated/core.clientes.tsx` (lista)
+- `src/routes/_authenticated/core.cliente.$id.tsx` (360°)
+- `src/components/core/OnboardingWizard.tsx`
+- `src/components/core/DomainStep.tsx`, `EmailStep.tsx`, `ChecklistView.tsx`
+- `src/lib/onboarding.functions.ts` (server fns)
 
-## Detalhes técnicos resumidos
+**Editar (cirurgicamente)**:
+- `src/components/app/nav-config.tsx` — adicionar grupo "Core Manager" (staff only)
+- `src/routes/checkout.success.tsx` — disparar `OnboardingWizard` quando pagamento for de novo cliente
+- `src/routes/_authenticated/modules.tsx` — adicionar botão "Instalar" que log+notifica (sem alterar lógica do toggle)
 
-- Cron via pg_cron chamando `/api/public/hooks/billing-tick` (apikey anon).
-- Envio: o `runBillingCycle` apenas insere em `message_outbox`; o flusher existente entrega.
-- PIX: campos `pix_key`, `pix_copy_paste`, `pix_qr_url` no `billing_invoices` (gerados no momento da fatura — placeholder estático no MVP, integração InfinitePay já existe no projeto).
-- Tudo idempotente via `unique(invoice_id, step)` em `billing_dunning_runs`.
-
-## Fora do escopo desta etapa
-
-- Geração real de NFe (apenas marcamos a flag; integração fiscal fica para depois).
-- Geração dinâmica de QR Pix por fatura (usa o copia-e-cola configurado no plano por enquanto).
-- Despublicação real do site do tenant (banner cobre o caso; "despublicar" de fato exige integração com publishing — fica como TODO marcado).
-
-## Confirmação
-
-Topa que eu siga exatamente esse escopo, incluindo seed da Patrícia Lenine e cron diário? Se sim, executo: migração → server fns → UI admin → página `/conta-suspensa` → seed de dados → cron.
+Confirmação esperada antes de implementar.
