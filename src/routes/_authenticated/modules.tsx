@@ -121,7 +121,7 @@ function ModulesPage() {
         action: enabled ? "module_installed" : "module_uninstalled",
         entity: "module",
         entity_id: moduleId,
-        details: { slug },
+        metadata: { slug },
       } as never);
       if (enabled) {
         await supabase.from("onboarding_checklist").upsert(
