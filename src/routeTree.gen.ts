@@ -83,6 +83,7 @@ import { Route as AuthenticatedBiRouteImport } from './routes/_authenticated/bi'
 import { Route as AuthenticatedAuditRouteImport } from './routes/_authenticated/audit'
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
 import { Route as AuthenticatedAffiliatesRouteImport } from './routes/_authenticated/affiliates'
+import { Route as AuthenticatedAdmRouteImport } from './routes/_authenticated/adm'
 import { Route as AuthenticatedAccessProfilesRouteImport } from './routes/_authenticated/access-profiles'
 import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
 import { Route as AuthenticatedReportsIndexRouteImport } from './routes/_authenticated/reports.index'
@@ -542,6 +543,11 @@ const AuthenticatedAgendaRoute = AuthenticatedAgendaRouteImport.update({
 const AuthenticatedAffiliatesRoute = AuthenticatedAffiliatesRouteImport.update({
   id: '/affiliates',
   path: '/affiliates',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAdmRoute = AuthenticatedAdmRouteImport.update({
+  id: '/adm',
+  path: '/adm',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAccessProfilesRoute =
@@ -1080,6 +1086,7 @@ export interface FileRoutesByFullPath {
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
+  '/adm': typeof AuthenticatedAdmRoute
   '/affiliates': typeof AuthenticatedAffiliatesRouteWithChildren
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/audit': typeof AuthenticatedAuditRoute
@@ -1242,6 +1249,7 @@ export interface FileRoutesByTo {
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
+  '/adm': typeof AuthenticatedAdmRoute
   '/audit': typeof AuthenticatedAuditRoute
   '/companies': typeof AuthenticatedCompaniesRoute
   '/customers': typeof AuthenticatedCustomersRoute
@@ -1399,6 +1407,7 @@ export interface FileRoutesById {
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/access-profiles': typeof AuthenticatedAccessProfilesRoute
+  '/_authenticated/adm': typeof AuthenticatedAdmRoute
   '/_authenticated/affiliates': typeof AuthenticatedAffiliatesRouteWithChildren
   '/_authenticated/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/_authenticated/audit': typeof AuthenticatedAuditRoute
@@ -1565,6 +1574,7 @@ export interface FileRouteTypes {
     | '/trial'
     | '/unsubscribe'
     | '/access-profiles'
+    | '/adm'
     | '/affiliates'
     | '/agenda'
     | '/audit'
@@ -1727,6 +1737,7 @@ export interface FileRouteTypes {
     | '/trial'
     | '/unsubscribe'
     | '/access-profiles'
+    | '/adm'
     | '/audit'
     | '/companies'
     | '/customers'
@@ -1883,6 +1894,7 @@ export interface FileRouteTypes {
     | '/trial'
     | '/unsubscribe'
     | '/_authenticated/access-profiles'
+    | '/_authenticated/adm'
     | '/_authenticated/affiliates'
     | '/_authenticated/agenda'
     | '/_authenticated/audit'
@@ -2613,6 +2625,13 @@ declare module '@tanstack/react-router' {
       path: '/affiliates'
       fullPath: '/affiliates'
       preLoaderRoute: typeof AuthenticatedAffiliatesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/adm': {
+      id: '/_authenticated/adm'
+      path: '/adm'
+      fullPath: '/adm'
+      preLoaderRoute: typeof AuthenticatedAdmRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/access-profiles': {
@@ -3480,6 +3499,7 @@ const AuthenticatedSalesRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccessProfilesRoute: typeof AuthenticatedAccessProfilesRoute
+  AuthenticatedAdmRoute: typeof AuthenticatedAdmRoute
   AuthenticatedAffiliatesRoute: typeof AuthenticatedAffiliatesRouteWithChildren
   AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRouteWithChildren
   AuthenticatedAuditRoute: typeof AuthenticatedAuditRoute
@@ -3517,6 +3537,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccessProfilesRoute: AuthenticatedAccessProfilesRoute,
+  AuthenticatedAdmRoute: AuthenticatedAdmRoute,
   AuthenticatedAffiliatesRoute: AuthenticatedAffiliatesRouteWithChildren,
   AuthenticatedAgendaRoute: AuthenticatedAgendaRouteWithChildren,
   AuthenticatedAuditRoute: AuthenticatedAuditRoute,
