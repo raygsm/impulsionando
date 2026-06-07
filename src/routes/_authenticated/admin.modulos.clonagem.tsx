@@ -306,6 +306,43 @@ function CloneCenterPage() {
         </TabsContent>
 
         <TabsContent value="instances" className="space-y-3 pt-4">
+          <div className="flex justify-end">
+            <input
+              id="clone-import-file"
+              type="file"
+              accept=".json,.zip,application/json,application/zip"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                e.target.value = "";
+                if (!file) return;
+                try {
+                  const res = await importCloneFromFile(file, actor);
+                  toast.success(
+                    res.renamedTo
+                      ? `Importado como "${res.renamedTo}" para evitar conflito.`
+                      : "Módulo importado com sucesso.",
+                  );
+                  if (res.baseImported) {
+                    toast.info("Módulo-base também foi importado.");
+                  }
+                  refresh();
+                } catch (err) {
+                  toast.error(
+                    err instanceof Error ? err.message : "Falha ao importar arquivo.",
+                  );
+                }
+              }}
+            />
+            <Button
+              variant="outline"
+              onClick={() => document.getElementById("clone-import-file")?.click()}
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              Importar módulo (JSON/ZIP)
+            </Button>
+          </div>
+
           <Card className="p-3 grid md:grid-cols-5 gap-2">
             <Input
               placeholder="Buscar projeto/cliente"
