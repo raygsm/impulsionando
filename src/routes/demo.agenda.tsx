@@ -63,6 +63,7 @@ function DemoAgenda() {
   const [dataAtual, setDataAtual] = useState(() => new Date().toISOString().slice(0, 10));
   const [aba, setAba] = useState<string>("visao");
   const [prefill, setPrefill] = useState<{ cliente: string; telefone: string } | null>(null);
+  const [reagendar, setReagendar] = useState<Agendamento | null>(null);
   const [nichoDemo, setNichoDemo] = useState(() => {
     if (typeof window === "undefined") return "servicos";
     return new URLSearchParams(window.location.search).get("nicho") ?? "servicos";
