@@ -665,6 +665,134 @@ function CloneCenterPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Arquivar clone — confirmação com motivo */}
+      <Dialog open={!!archiveTarget} onOpenChange={(v) => !v && setArchiveTarget(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Arquivar clone</DialogTitle>
+            <DialogDescription>
+              Deseja arquivar este clone? Ele deixará de aparecer como ativo, mas seus registros
+              internos serão preservados.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 text-sm">
+            <div className="text-xs text-muted-foreground">
+              Projeto: <strong>{archiveTarget?.targetName}</strong>
+            </div>
+            <label className="text-xs font-medium">Motivo do arquivamento</label>
+            <Input
+              placeholder="Ex.: cliente cancelou, projeto encerrado, etc."
+              value={archiveReason}
+              onChange={(e) => setArchiveReason(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setArchiveTarget(null)}>Cancelar</Button>
+            <Button
+              onClick={() => {
+                if (archiveTarget) archiveInstance(archiveTarget, archiveReason.trim());
+                setArchiveTarget(null);
+              }}
+            >
+              <Archive className="w-4 h-4 mr-1" /> Confirmar arquivamento
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Detalhes do clone */}
+      <Dialog open={!!detailInstance} onOpenChange={(v) => !v && setDetailInstance(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Detalhes do clone</DialogTitle>
+            <DialogDescription>
+              Visão interna da instância. Estrutura preparada para versionamento, atualização,
+              rollback e promoção de melhoria — recursos serão habilitados em próxima fase técnica.
+            </DialogDescription>
+          </DialogHeader>
+          {detailInstance && (() => {
+            const i = detailInstance;
+            const base = bases.find((b) => b.id === i.baseId);
+            return (
+              <div className="space-y-3 text-sm">
+                <div className="grid md:grid-cols-2 gap-2">
+                  <Card className="p-3">
+                    <div className="text-xs text-muted-foreground">Projeto / cliente</div>
+                    <div className="font-medium">{i.targetName}</div>
+                    {i.fantasy && <div className="text-xs">{i.fantasy}</div>}
+                  </Card>
+                  <Card className="p-3">
+                    <div className="text-xs text-muted-foreground">Módulo-base</div>
+                    <div className="font-medium">{base?.name ?? i.baseId}</div>
+                    <div className="text-xs">Versão-base: v{i.versionBase ?? base?.version ?? "?"} · Versão do clone: v{i.versionClone ?? "?"}</div>
+                  </Card>
+                  <Card className="p-3">
+                    <div className="text-xs text-muted-foreground">Ambiente / preset</div>
+                    <div className="text-xs">Ambiente: <Badge variant="outline">{i.environment}</Badge></div>
+                    <div className="text-xs">Preset: {i.preset ?? "—"} · Nicho: {i.niche ?? "—"}</div>
+                  </Card>
+                  <Card className="p-3">
+                    <div className="text-xs text-muted-foreground">Responsável</div>
+                    <div className="text-xs">Interno: {i.responsibleName ?? "—"}</div>
+                    <div className="text-xs">Criado por: {i.createdBy ?? "—"} em {new Date(i.createdAt).toLocaleString("pt-BR")}</div>
+                  </Card>
+                </div>
+
+                <Card className="p-3 space-y-1">
+                  <div className="font-medium text-xs">Versionamento (preparado)</div>
+                  <div className="text-xs">Status da versão: {i.versionStatus ?? "atual"} · Compatibilidade: {i.compatibility ?? "compativel"}</div>
+                  <div className="text-xs">Atualização disponível: {i.updateAvailable ? "SIM" : "NÃO"} · Última sincronização: {i.lastSyncAt ? new Date(i.lastSyncAt).toLocaleString("pt-BR") : "—"}</div>
+                  <div className="text-xs">Pode receber atualização do módulo-base: {i.canReceiveBaseUpdate ? "SIM" : "NÃO"} · Customização local: {i.hasLocalCustomization ? "SIM" : "NÃO"}</div>
+                  <div className="text-xs">Atualização automática: {i.allowAutoUpdate ? "SIM" : "NÃO"} · Exige revisão manual: {i.requiresManualReview ? "SIM" : "NÃO"}</div>
+                  {i.changelog && i.changelog.length > 0 && (
+                    <div className="text-xs text-muted-foreground">Changelog: {i.changelog.join(" · ")}</div>
+                  )}
+                </Card>
+
+                <Card className="p-3 space-y-1">
+                  <div className="font-medium text-xs">Integrações selecionadas</div>
+                  <div className="text-xs text-muted-foreground">
+                    {i.integrations && i.integrations.length > 0 ? i.integrations.join(", ") : "—"}
+                  </div>
+                </Card>
+
+                {i.archived && (
+                  <Card className="p-3 border-destructive/40 bg-destructive/5">
+                    <div className="font-medium text-xs">Arquivado</div>
+                    <div className="text-xs">Motivo: {i.archiveReason || "—"}</div>
+                    <div className="text-xs">Por: {i.archivedBy ?? "—"} em {i.archivedAt ? new Date(i.archivedAt).toLocaleString("pt-BR") : "—"}</div>
+                  </Card>
+                )}
+
+                <div className="flex flex-wrap gap-2 pt-2">
+                  <Button size="sm" variant="outline" onClick={() => { setDetailInstance(null); setConfigInstance(i); }}>
+                    <Settings className="w-4 h-4 mr-1" /> Configurar clone
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => { setLogsInstanceId(i.id); setDetailInstance(null); }}>
+                    <History className="w-4 h-4 mr-1" /> Ver logs
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => futurePhase("Verificar atualização disponível", i.id, "verificou-atualizacao")}>
+                    Verificar atualização disponível
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => futurePhase("Reverter versão", i.id, "reverteu-versao")}>
+                    Reverter versão
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => futurePhase("Promover melhoria para módulo-base", i.id, "promoveu-melhoria")}>
+                    Promover melhoria para módulo-base
+                  </Button>
+                  {!i.archived && (
+                    <Button size="sm" variant="ghost" onClick={() => { setArchiveReason(""); setArchiveTarget(i); setDetailInstance(null); }}>
+                      <Archive className="w-4 h-4 mr-1" /> Arquivar
+                    </Button>
+                  )}
+                  <Button size="sm" variant="ghost" onClick={() => setDetailInstance(null)}>Voltar</Button>
+                </div>
+              </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
