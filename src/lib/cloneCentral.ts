@@ -240,6 +240,105 @@ export function uid() {
   return crypto.randomUUID();
 }
 
+// ============================================================
+// Exportação / Importação de instâncias clonadas (JSON / ZIP)
+// ============================================================
+
+export const CLONE_EXPORT_VERSION = "1.0.0";
+
+export interface CloneExportPayload {
+  kind: "impulsionando-clone-export";
+  exportVersion: string;
+  exportedAt: string;
+  exportedBy?: string;
+  base: ModuleBase | null;
+  instance: CloneInstance;
+}
+
+export function buildCloneExportPayload(
+  instance: CloneInstance,
+  exportedBy?: string,
+): CloneExportPayload {
+  const base = cloneStore.listBases().find((b) => b.id === instance.baseId) ?? null;
+  return {
+    kind: "impulsionando-clone-export",
+    exportVersion: CLONE_EXPORT_VERSION,
+    exportedAt: new Date().toISOString(),
+    exportedBy,
+    base,
+    instance,
+  };
+}
+
+export function safeFileName(s: string) {
+  return (s || "modulo-clonado")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9-_]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .toLowerCase()
+    .slice(0, 80);
+}
+
+export interface CloneImportResult {
+  instanceId: string;
+  baseImported: boolean;
+  renamedTo?: string;
+}
+
+export function importCloneExportPayload(
+  payload: CloneExportPayload,
+  opts: { actor: string },
+): CloneImportResult {
+  if (!payload || payload.kind !== "impulsionando-clone-export" || !payload.instance) {
+    throw new Error("Arquivo invalido: nao e um export de clone Impulsionando.");
+  }
+
+  let baseImported = false;
+  if (payload.base) {
+    const existing = cloneStore.listBases().find((b) => b.id === payload.base!.id);
+    if (!existing) {
+      cloneStore.saveBase(payload.base);
+      baseImported = true;
+    }
+  }
+
+  const newId = uid();
+  const existingNames = new Set(cloneStore.listInstances().map((i) => i.targetName));
+  let targetName = payload.instance.targetName;
+  let renamedTo: string | undefined;
+  if (existingNames.has(targetName)) {
+    targetName = `${targetName} (importado ${new Date().toLocaleDateString("pt-BR")})`;
+    renamedTo = targetName;
+  }
+
+  const imported: CloneInstance = {
+    ...payload.instance,
+    id: newId,
+    targetName,
+    createdAt: new Date().toISOString(),
+    createdBy: opts.actor,
+    internalUrl: `/admin/modulos/clonagem/instancia/${newId}`,
+    changelog: [
+      ...(payload.instance.changelog ?? []),
+      `Importado em ${new Date().toLocaleString("pt-BR")} por ${opts.actor}.`,
+    ],
+  };
+  cloneStore.saveInstance(imported);
+  cloneStore.pushLog({
+    actor: opts.actor,
+    action: "duplicou",
+    detail: `Instancia importada de arquivo externo: ${imported.targetName}${
+      baseImported ? " (modulo-base tambem importado)" : ""
+    }.`,
+    instanceId: newId,
+    status: "concluido",
+  });
+
+  return { instanceId: newId, baseImported, renamedTo };
+}
+
 // Módulos preparados para receber base nos próximos blocos
 export const PLANNED_MODULES: { slug: string; name: string }[] = [
   { slug: "agenda-online", name: "Agenda Online" },
