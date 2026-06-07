@@ -92,15 +92,17 @@ export function SidebarNav({
   onNavigate?: () => void;
 }) {
   const location = useLocation();
-  const isSuper = currentUser.isSuperAdmin;
+  const { isImpersonating } = useImpersonation();
+  const isSuper = currentUser.isSuperAdmin && !isImpersonating;
   const { companyId } = useActiveCompany();
   const { data: perms, isLoading: permsLoading } = useUserPermissions(companyId);
 
-  // Super admin enxerga tudo. Enquanto as permissões carregam, mostra apenas
-  // itens sem `perm` (não-restritos) e os marcados como superOnly se aplicáveis.
+  // Super admin enxerga tudo. Em modo impersonação, comporta-se como o cliente:
+  // esconde itens superOnly e libera os demais (o master tem acesso global).
   const filterItem = (i: NavItem): boolean => {
     if (i.superOnly) return isSuper;
-    if (isSuper) return true;
+    if (isImpersonating) return true; // visão do cliente sem filtro de permissão granular
+    if (currentUser.isSuperAdmin) return true;
     if (!i.perm) return true;
     if (permsLoading || !perms) return false;
     return perms.has(i.perm);
