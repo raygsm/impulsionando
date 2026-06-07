@@ -36,12 +36,6 @@ function AuthPage() {
   const [resetEmail, setResetEmail] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/dashboard" });
-    });
-  }, [navigate]);
-
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
