@@ -76,6 +76,7 @@ import { Route as AuthenticatedFinanceRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCustomersRouteImport } from './routes/_authenticated/customers'
 import { Route as AuthenticatedCrmRouteImport } from './routes/_authenticated/crm'
+import { Route as AuthenticatedCoreRouteImport } from './routes/_authenticated/core'
 import { Route as AuthenticatedCompaniesRouteImport } from './routes/_authenticated/companies'
 import { Route as AuthenticatedBiRouteImport } from './routes/_authenticated/bi'
 import { Route as AuthenticatedAuditRouteImport } from './routes/_authenticated/audit'
@@ -499,6 +500,11 @@ const AuthenticatedCustomersRoute = AuthenticatedCustomersRouteImport.update({
 const AuthenticatedCrmRoute = AuthenticatedCrmRouteImport.update({
   id: '/crm',
   path: '/crm',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCoreRoute = AuthenticatedCoreRouteImport.update({
+  id: '/core',
+  path: '/core',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedCompaniesRoute = AuthenticatedCompaniesRouteImport.update({
@@ -1032,6 +1038,7 @@ export interface FileRoutesByFullPath {
   '/audit': typeof AuthenticatedAuditRoute
   '/bi': typeof AuthenticatedBiRouteWithChildren
   '/companies': typeof AuthenticatedCompaniesRoute
+  '/core': typeof AuthenticatedCoreRoute
   '/crm': typeof AuthenticatedCrmRouteWithChildren
   '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -1183,6 +1190,7 @@ export interface FileRoutesByTo {
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/audit': typeof AuthenticatedAuditRoute
   '/companies': typeof AuthenticatedCompaniesRoute
+  '/core': typeof AuthenticatedCoreRoute
   '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/minha-assinatura': typeof AuthenticatedMinhaAssinaturaRoute
@@ -1336,6 +1344,7 @@ export interface FileRoutesById {
   '/_authenticated/audit': typeof AuthenticatedAuditRoute
   '/_authenticated/bi': typeof AuthenticatedBiRouteWithChildren
   '/_authenticated/companies': typeof AuthenticatedCompaniesRoute
+  '/_authenticated/core': typeof AuthenticatedCoreRoute
   '/_authenticated/crm': typeof AuthenticatedCrmRouteWithChildren
   '/_authenticated/customers': typeof AuthenticatedCustomersRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -1494,6 +1503,7 @@ export interface FileRouteTypes {
     | '/audit'
     | '/bi'
     | '/companies'
+    | '/core'
     | '/crm'
     | '/customers'
     | '/dashboard'
@@ -1645,6 +1655,7 @@ export interface FileRouteTypes {
     | '/access-profiles'
     | '/audit'
     | '/companies'
+    | '/core'
     | '/customers'
     | '/dashboard'
     | '/minha-assinatura'
@@ -1797,6 +1808,7 @@ export interface FileRouteTypes {
     | '/_authenticated/audit'
     | '/_authenticated/bi'
     | '/_authenticated/companies'
+    | '/_authenticated/core'
     | '/_authenticated/crm'
     | '/_authenticated/customers'
     | '/_authenticated/dashboard'
@@ -2465,6 +2477,13 @@ declare module '@tanstack/react-router' {
       path: '/crm'
       fullPath: '/crm'
       preLoaderRoute: typeof AuthenticatedCrmRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/core': {
+      id: '/_authenticated/core'
+      path: '/core'
+      fullPath: '/core'
+      preLoaderRoute: typeof AuthenticatedCoreRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/companies': {
@@ -3297,6 +3316,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAuditRoute: typeof AuthenticatedAuditRoute
   AuthenticatedBiRoute: typeof AuthenticatedBiRouteWithChildren
   AuthenticatedCompaniesRoute: typeof AuthenticatedCompaniesRoute
+  AuthenticatedCoreRoute: typeof AuthenticatedCoreRoute
   AuthenticatedCrmRoute: typeof AuthenticatedCrmRouteWithChildren
   AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
@@ -3332,6 +3352,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAuditRoute: AuthenticatedAuditRoute,
   AuthenticatedBiRoute: AuthenticatedBiRouteWithChildren,
   AuthenticatedCompaniesRoute: AuthenticatedCompaniesRoute,
+  AuthenticatedCoreRoute: AuthenticatedCoreRoute,
   AuthenticatedCrmRoute: AuthenticatedCrmRouteWithChildren,
   AuthenticatedCustomersRoute: AuthenticatedCustomersRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
