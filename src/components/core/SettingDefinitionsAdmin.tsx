@@ -93,7 +93,7 @@ export function SettingDefinitionsAdmin({ defaultCategory }: { defaultCategory?:
                 initial={editing}
                 onSave={(d) => saveMut.mutate(d)}
                 saving={saveMut.isPending}
-                lockKey={!!(editing as Def).key && defs?.some((x) => x.key === editing.key)}
+                lockKey={!!editing.key && (defs?.some((x) => x.key === editing.key) ?? false)}
               />
             )}
           </DialogContent>
