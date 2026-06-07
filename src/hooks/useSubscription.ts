@@ -31,11 +31,12 @@ export interface SubscriptionRow {
 export function useSubscription() {
   const { data: currentUser } = useCurrentUser();
   const userId = currentUser?.user?.id;
+  const isStaff = !!currentUser?.isImpulsionandoStaff;
   const env = getPaddleEnvironment();
 
   const query = useQuery({
     queryKey: ["my-subscription", userId, env],
-    enabled: !!userId,
+    enabled: !!userId && !isStaff,
     staleTime: 30_000,
     queryFn: async () => {
       const { data, error } = await supabase
@@ -53,9 +54,10 @@ export function useSubscription() {
 
   // Realtime: refetch when this user's subscription row changes
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || isStaff) return;
+    const channelName = `subscription-${userId}-${crypto.randomUUID()}`;
     const channel = supabase
-      .channel(`subscription-${userId}`)
+      .channel(channelName)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "subscriptions", filter: `user_id=eq.${userId}` },
@@ -63,9 +65,9 @@ export function useSubscription() {
       )
       .subscribe();
     return () => {
-      supabase.removeChannel(channel);
+      void supabase.removeChannel(channel);
     };
-  }, [userId, query]);
+  }, [userId, isStaff, query.refetch]);
 
   const sub = query.data ?? null;
   const periodEnd = sub?.current_period_end ? new Date(sub.current_period_end).getTime() : null;
