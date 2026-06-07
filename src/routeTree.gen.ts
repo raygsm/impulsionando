@@ -68,6 +68,7 @@ import { Route as AuthenticatedSalesRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedPrivacyRouteImport } from './routes/_authenticated/privacy'
 import { Route as AuthenticatedPermissionsRouteImport } from './routes/_authenticated/permissions'
+import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedNichesRouteImport } from './routes/_authenticated/niches'
 import { Route as AuthenticatedModulesRouteImport } from './routes/_authenticated/modules'
 import { Route as AuthenticatedMinhaAssinaturaRouteImport } from './routes/_authenticated/minha-assinatura'
@@ -76,6 +77,7 @@ import { Route as AuthenticatedFinanceRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCustomersRouteImport } from './routes/_authenticated/customers'
 import { Route as AuthenticatedCrmRouteImport } from './routes/_authenticated/crm'
+import { Route as AuthenticatedCoreRouteImport } from './routes/_authenticated/core'
 import { Route as AuthenticatedCompaniesRouteImport } from './routes/_authenticated/companies'
 import { Route as AuthenticatedBiRouteImport } from './routes/_authenticated/bi'
 import { Route as AuthenticatedAuditRouteImport } from './routes/_authenticated/audit'
@@ -88,6 +90,7 @@ import { Route as AuthenticatedInventoryIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedFinanceIndexRouteImport } from './routes/_authenticated/finance.index'
 import { Route as AuthenticatedEhrIndexRouteImport } from './routes/_authenticated/ehr.index'
 import { Route as AuthenticatedCrmIndexRouteImport } from './routes/_authenticated/crm.index'
+import { Route as AuthenticatedCoreIndexRouteImport } from './routes/_authenticated/core.index'
 import { Route as AuthenticatedBiIndexRouteImport } from './routes/_authenticated/bi.index'
 import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenticated/agenda.index'
 import { Route as AuthenticatedAffiliatesIndexRouteImport } from './routes/_authenticated/affiliates.index'
@@ -116,6 +119,7 @@ import { Route as AuthenticatedCrmPipelinesRouteImport } from './routes/_authent
 import { Route as AuthenticatedCrmLeadsRouteImport } from './routes/_authenticated/crm.leads'
 import { Route as AuthenticatedCrmBoardRouteImport } from './routes/_authenticated/crm.board'
 import { Route as AuthenticatedCrmActivitiesRouteImport } from './routes/_authenticated/crm.activities'
+import { Route as AuthenticatedCoreClientesRouteImport } from './routes/_authenticated/core.clientes'
 import { Route as AuthenticatedBiNichesRouteImport } from './routes/_authenticated/bi.niches'
 import { Route as AuthenticatedBiMasterRouteImport } from './routes/_authenticated/bi.master'
 import { Route as AuthenticatedBiCompanyRouteImport } from './routes/_authenticated/bi.company'
@@ -162,6 +166,7 @@ import { Route as ApiPublicDemoSendTestRouteImport } from './routes/api/public/d
 import { Route as ApiPaymentsInfinitepayCreateRouteImport } from './routes/api/payments/infinitepay.create'
 import { Route as ApiPaymentsInfinitepayCheckStatusRouteImport } from './routes/api/payments/infinitepay.check-status'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
+import { Route as AuthenticatedCoreClienteIdRouteImport } from './routes/_authenticated/core.cliente.$id'
 import { Route as AuthenticatedAdminModulosClonagemRouteImport } from './routes/_authenticated/admin.modulos.clonagem'
 import { Route as ApiPublicPaymentsInfinitepayWebhookRouteImport } from './routes/api/public/payments/infinitepay.webhook'
 
@@ -460,6 +465,11 @@ const AuthenticatedPermissionsRoute =
     path: '/permissions',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedNichesRoute = AuthenticatedNichesRouteImport.update({
   id: '/niches',
   path: '/niches',
@@ -499,6 +509,11 @@ const AuthenticatedCustomersRoute = AuthenticatedCustomersRouteImport.update({
 const AuthenticatedCrmRoute = AuthenticatedCrmRouteImport.update({
   id: '/crm',
   path: '/crm',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCoreRoute = AuthenticatedCoreRouteImport.update({
+  id: '/core',
+  path: '/core',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedCompaniesRoute = AuthenticatedCompaniesRouteImport.update({
@@ -564,6 +579,11 @@ const AuthenticatedCrmIndexRoute = AuthenticatedCrmIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthenticatedCrmRoute,
+} as any)
+const AuthenticatedCoreIndexRoute = AuthenticatedCoreIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedCoreRoute,
 } as any)
 const AuthenticatedBiIndexRoute = AuthenticatedBiIndexRouteImport.update({
   id: '/',
@@ -723,6 +743,12 @@ const AuthenticatedCrmActivitiesRoute =
     id: '/activities',
     path: '/activities',
     getParentRoute: () => AuthenticatedCrmRoute,
+  } as any)
+const AuthenticatedCoreClientesRoute =
+  AuthenticatedCoreClientesRouteImport.update({
+    id: '/clientes',
+    path: '/clientes',
+    getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
 const AuthenticatedBiNichesRoute = AuthenticatedBiNichesRouteImport.update({
   id: '/niches',
@@ -994,6 +1020,12 @@ const AuthenticatedSalesCashIdRoute =
     path: '/$id',
     getParentRoute: () => AuthenticatedSalesCashRoute,
   } as any)
+const AuthenticatedCoreClienteIdRoute =
+  AuthenticatedCoreClienteIdRouteImport.update({
+    id: '/cliente/$id',
+    path: '/cliente/$id',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedAdminModulosClonagemRoute =
   AuthenticatedAdminModulosClonagemRouteImport.update({
     id: '/admin/modulos/clonagem',
@@ -1032,6 +1064,7 @@ export interface FileRoutesByFullPath {
   '/audit': typeof AuthenticatedAuditRoute
   '/bi': typeof AuthenticatedBiRouteWithChildren
   '/companies': typeof AuthenticatedCompaniesRoute
+  '/core': typeof AuthenticatedCoreRouteWithChildren
   '/crm': typeof AuthenticatedCrmRouteWithChildren
   '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -1040,6 +1073,7 @@ export interface FileRoutesByFullPath {
   '/minha-assinatura': typeof AuthenticatedMinhaAssinaturaRoute
   '/modules': typeof AuthenticatedModulesRoute
   '/niches': typeof AuthenticatedNichesRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
   '/permissions': typeof AuthenticatedPermissionsRoute
   '/privacy': typeof AuthenticatedPrivacyRoute
   '/reports': typeof AuthenticatedReportsRouteWithChildren
@@ -1109,6 +1143,7 @@ export interface FileRoutesByFullPath {
   '/bi/company': typeof AuthenticatedBiCompanyRoute
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
+  '/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/crm/board': typeof AuthenticatedCrmBoardRoute
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
@@ -1137,6 +1172,7 @@ export interface FileRoutesByFullPath {
   '/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/bi/': typeof AuthenticatedBiIndexRoute
+  '/core/': typeof AuthenticatedCoreIndexRoute
   '/crm/': typeof AuthenticatedCrmIndexRoute
   '/ehr/': typeof AuthenticatedEhrIndexRoute
   '/finance/': typeof AuthenticatedFinanceIndexRoute
@@ -1144,6 +1180,7 @@ export interface FileRoutesByFullPath {
   '/reports/': typeof AuthenticatedReportsIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
+  '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
@@ -1188,6 +1225,7 @@ export interface FileRoutesByTo {
   '/minha-assinatura': typeof AuthenticatedMinhaAssinaturaRoute
   '/modules': typeof AuthenticatedModulesRoute
   '/niches': typeof AuthenticatedNichesRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
   '/permissions': typeof AuthenticatedPermissionsRoute
   '/privacy': typeof AuthenticatedPrivacyRoute
   '/sectors': typeof AuthenticatedSectorsRoute
@@ -1255,6 +1293,7 @@ export interface FileRoutesByTo {
   '/bi/company': typeof AuthenticatedBiCompanyRoute
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
+  '/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/crm/board': typeof AuthenticatedCrmBoardRoute
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
@@ -1283,6 +1322,7 @@ export interface FileRoutesByTo {
   '/affiliates': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda': typeof AuthenticatedAgendaIndexRoute
   '/bi': typeof AuthenticatedBiIndexRoute
+  '/core': typeof AuthenticatedCoreIndexRoute
   '/crm': typeof AuthenticatedCrmIndexRoute
   '/ehr': typeof AuthenticatedEhrIndexRoute
   '/finance': typeof AuthenticatedFinanceIndexRoute
@@ -1290,6 +1330,7 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedReportsIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
+  '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
@@ -1336,6 +1377,7 @@ export interface FileRoutesById {
   '/_authenticated/audit': typeof AuthenticatedAuditRoute
   '/_authenticated/bi': typeof AuthenticatedBiRouteWithChildren
   '/_authenticated/companies': typeof AuthenticatedCompaniesRoute
+  '/_authenticated/core': typeof AuthenticatedCoreRouteWithChildren
   '/_authenticated/crm': typeof AuthenticatedCrmRouteWithChildren
   '/_authenticated/customers': typeof AuthenticatedCustomersRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -1344,6 +1386,7 @@ export interface FileRoutesById {
   '/_authenticated/minha-assinatura': typeof AuthenticatedMinhaAssinaturaRoute
   '/_authenticated/modules': typeof AuthenticatedModulesRoute
   '/_authenticated/niches': typeof AuthenticatedNichesRoute
+  '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/permissions': typeof AuthenticatedPermissionsRoute
   '/_authenticated/privacy': typeof AuthenticatedPrivacyRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRouteWithChildren
@@ -1413,6 +1456,7 @@ export interface FileRoutesById {
   '/_authenticated/bi/company': typeof AuthenticatedBiCompanyRoute
   '/_authenticated/bi/master': typeof AuthenticatedBiMasterRoute
   '/_authenticated/bi/niches': typeof AuthenticatedBiNichesRoute
+  '/_authenticated/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/_authenticated/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/_authenticated/crm/board': typeof AuthenticatedCrmBoardRoute
   '/_authenticated/crm/leads': typeof AuthenticatedCrmLeadsRoute
@@ -1441,6 +1485,7 @@ export interface FileRoutesById {
   '/_authenticated/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/_authenticated/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/_authenticated/bi/': typeof AuthenticatedBiIndexRoute
+  '/_authenticated/core/': typeof AuthenticatedCoreIndexRoute
   '/_authenticated/crm/': typeof AuthenticatedCrmIndexRoute
   '/_authenticated/ehr/': typeof AuthenticatedEhrIndexRoute
   '/_authenticated/finance/': typeof AuthenticatedFinanceIndexRoute
@@ -1448,6 +1493,7 @@ export interface FileRoutesById {
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
   '/_authenticated/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
+  '/_authenticated/core/cliente/$id': typeof AuthenticatedCoreClienteIdRoute
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
@@ -1494,6 +1540,7 @@ export interface FileRouteTypes {
     | '/audit'
     | '/bi'
     | '/companies'
+    | '/core'
     | '/crm'
     | '/customers'
     | '/dashboard'
@@ -1502,6 +1549,7 @@ export interface FileRouteTypes {
     | '/minha-assinatura'
     | '/modules'
     | '/niches'
+    | '/onboarding'
     | '/permissions'
     | '/privacy'
     | '/reports'
@@ -1571,6 +1619,7 @@ export interface FileRouteTypes {
     | '/bi/company'
     | '/bi/master'
     | '/bi/niches'
+    | '/core/clientes'
     | '/crm/activities'
     | '/crm/board'
     | '/crm/leads'
@@ -1599,6 +1648,7 @@ export interface FileRouteTypes {
     | '/affiliates/'
     | '/agenda/'
     | '/bi/'
+    | '/core/'
     | '/crm/'
     | '/ehr/'
     | '/finance/'
@@ -1606,6 +1656,7 @@ export interface FileRouteTypes {
     | '/reports/'
     | '/sales/'
     | '/admin/modulos/clonagem'
+    | '/core/cliente/$id'
     | '/sales/cash/$id'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
@@ -1650,6 +1701,7 @@ export interface FileRouteTypes {
     | '/minha-assinatura'
     | '/modules'
     | '/niches'
+    | '/onboarding'
     | '/permissions'
     | '/privacy'
     | '/sectors'
@@ -1717,6 +1769,7 @@ export interface FileRouteTypes {
     | '/bi/company'
     | '/bi/master'
     | '/bi/niches'
+    | '/core/clientes'
     | '/crm/activities'
     | '/crm/board'
     | '/crm/leads'
@@ -1745,6 +1798,7 @@ export interface FileRouteTypes {
     | '/affiliates'
     | '/agenda'
     | '/bi'
+    | '/core'
     | '/crm'
     | '/ehr'
     | '/finance'
@@ -1752,6 +1806,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/sales'
     | '/admin/modulos/clonagem'
+    | '/core/cliente/$id'
     | '/sales/cash/$id'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
@@ -1797,6 +1852,7 @@ export interface FileRouteTypes {
     | '/_authenticated/audit'
     | '/_authenticated/bi'
     | '/_authenticated/companies'
+    | '/_authenticated/core'
     | '/_authenticated/crm'
     | '/_authenticated/customers'
     | '/_authenticated/dashboard'
@@ -1805,6 +1861,7 @@ export interface FileRouteTypes {
     | '/_authenticated/minha-assinatura'
     | '/_authenticated/modules'
     | '/_authenticated/niches'
+    | '/_authenticated/onboarding'
     | '/_authenticated/permissions'
     | '/_authenticated/privacy'
     | '/_authenticated/reports'
@@ -1874,6 +1931,7 @@ export interface FileRouteTypes {
     | '/_authenticated/bi/company'
     | '/_authenticated/bi/master'
     | '/_authenticated/bi/niches'
+    | '/_authenticated/core/clientes'
     | '/_authenticated/crm/activities'
     | '/_authenticated/crm/board'
     | '/_authenticated/crm/leads'
@@ -1902,6 +1960,7 @@ export interface FileRouteTypes {
     | '/_authenticated/affiliates/'
     | '/_authenticated/agenda/'
     | '/_authenticated/bi/'
+    | '/_authenticated/core/'
     | '/_authenticated/crm/'
     | '/_authenticated/ehr/'
     | '/_authenticated/finance/'
@@ -1909,6 +1968,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reports/'
     | '/_authenticated/sales/'
     | '/_authenticated/admin/modulos/clonagem'
+    | '/_authenticated/core/cliente/$id'
     | '/_authenticated/sales/cash/$id'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
@@ -2411,6 +2471,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPermissionsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/onboarding': {
+      id: '/_authenticated/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/niches': {
       id: '/_authenticated/niches'
       path: '/niches'
@@ -2465,6 +2532,13 @@ declare module '@tanstack/react-router' {
       path: '/crm'
       fullPath: '/crm'
       preLoaderRoute: typeof AuthenticatedCrmRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/core': {
+      id: '/_authenticated/core'
+      path: '/core'
+      fullPath: '/core'
+      preLoaderRoute: typeof AuthenticatedCoreRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/companies': {
@@ -2550,6 +2624,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/crm/'
       preLoaderRoute: typeof AuthenticatedCrmIndexRouteImport
       parentRoute: typeof AuthenticatedCrmRoute
+    }
+    '/_authenticated/core/': {
+      id: '/_authenticated/core/'
+      path: '/'
+      fullPath: '/core/'
+      preLoaderRoute: typeof AuthenticatedCoreIndexRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
     }
     '/_authenticated/bi/': {
       id: '/_authenticated/bi/'
@@ -2746,6 +2827,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/crm/activities'
       preLoaderRoute: typeof AuthenticatedCrmActivitiesRouteImport
       parentRoute: typeof AuthenticatedCrmRoute
+    }
+    '/_authenticated/core/clientes': {
+      id: '/_authenticated/core/clientes'
+      path: '/clientes'
+      fullPath: '/core/clientes'
+      preLoaderRoute: typeof AuthenticatedCoreClientesRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
     }
     '/_authenticated/bi/niches': {
       id: '/_authenticated/bi/niches'
@@ -3069,6 +3157,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSalesCashIdRouteImport
       parentRoute: typeof AuthenticatedSalesCashRoute
     }
+    '/_authenticated/core/cliente/$id': {
+      id: '/_authenticated/core/cliente/$id'
+      path: '/cliente/$id'
+      fullPath: '/core/cliente/$id'
+      preLoaderRoute: typeof AuthenticatedCoreClienteIdRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/admin/modulos/clonagem': {
       id: '/_authenticated/admin/modulos/clonagem'
       path: '/admin/modulos/clonagem'
@@ -3174,6 +3269,21 @@ const AuthenticatedBiRouteChildren: AuthenticatedBiRouteChildren = {
 const AuthenticatedBiRouteWithChildren = AuthenticatedBiRoute._addFileChildren(
   AuthenticatedBiRouteChildren,
 )
+
+interface AuthenticatedCoreRouteChildren {
+  AuthenticatedCoreClientesRoute: typeof AuthenticatedCoreClientesRoute
+  AuthenticatedCoreIndexRoute: typeof AuthenticatedCoreIndexRoute
+  AuthenticatedCoreClienteIdRoute: typeof AuthenticatedCoreClienteIdRoute
+}
+
+const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
+  AuthenticatedCoreClientesRoute: AuthenticatedCoreClientesRoute,
+  AuthenticatedCoreIndexRoute: AuthenticatedCoreIndexRoute,
+  AuthenticatedCoreClienteIdRoute: AuthenticatedCoreClienteIdRoute,
+}
+
+const AuthenticatedCoreRouteWithChildren =
+  AuthenticatedCoreRoute._addFileChildren(AuthenticatedCoreRouteChildren)
 
 interface AuthenticatedCrmRouteChildren {
   AuthenticatedCrmActivitiesRoute: typeof AuthenticatedCrmActivitiesRoute
@@ -3297,6 +3407,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAuditRoute: typeof AuthenticatedAuditRoute
   AuthenticatedBiRoute: typeof AuthenticatedBiRouteWithChildren
   AuthenticatedCompaniesRoute: typeof AuthenticatedCompaniesRoute
+  AuthenticatedCoreRoute: typeof AuthenticatedCoreRouteWithChildren
   AuthenticatedCrmRoute: typeof AuthenticatedCrmRouteWithChildren
   AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
@@ -3305,6 +3416,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMinhaAssinaturaRoute: typeof AuthenticatedMinhaAssinaturaRoute
   AuthenticatedModulesRoute: typeof AuthenticatedModulesRoute
   AuthenticatedNichesRoute: typeof AuthenticatedNichesRoute
+  AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedPermissionsRoute: typeof AuthenticatedPermissionsRoute
   AuthenticatedPrivacyRoute: typeof AuthenticatedPrivacyRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRouteWithChildren
@@ -3332,6 +3444,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAuditRoute: AuthenticatedAuditRoute,
   AuthenticatedBiRoute: AuthenticatedBiRouteWithChildren,
   AuthenticatedCompaniesRoute: AuthenticatedCompaniesRoute,
+  AuthenticatedCoreRoute: AuthenticatedCoreRouteWithChildren,
   AuthenticatedCrmRoute: AuthenticatedCrmRouteWithChildren,
   AuthenticatedCustomersRoute: AuthenticatedCustomersRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
@@ -3340,6 +3453,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMinhaAssinaturaRoute: AuthenticatedMinhaAssinaturaRoute,
   AuthenticatedModulesRoute: AuthenticatedModulesRoute,
   AuthenticatedNichesRoute: AuthenticatedNichesRoute,
+  AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedPermissionsRoute: AuthenticatedPermissionsRoute,
   AuthenticatedPrivacyRoute: AuthenticatedPrivacyRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRouteWithChildren,
@@ -3476,13 +3590,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

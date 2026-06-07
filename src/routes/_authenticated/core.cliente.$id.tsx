@@ -1,0 +1,182 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { getClient360, completeChecklistItem } from "@/lib/onboarding.functions";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { OnboardingWizard } from "@/components/core/OnboardingWizard";
+import { CheckCircle2, Circle, Building2 } from "lucide-react";
+import { toast } from "sonner";
+
+export const Route = createFileRoute("/_authenticated/core/cliente/$id")({
+  component: ClientePage,
+});
+
+const CHECKLIST_LABELS: Record<string, string> = {
+  payment_approved: "Pagamento aprovado",
+  onboarding_done: "Onboarding concluído",
+  subdomain_reserved: "Subdomínio reservado",
+  domain_requested: "Registro de domínio solicitado",
+  domain_migration_requested: "Migração de domínio solicitada",
+  emails_requested: "E-mails corporativos solicitados",
+  modules_activated: "Módulos ativados",
+  client_released: "Cliente liberado",
+};
+
+function ClientePage() {
+  const { id } = Route.useParams();
+  const qc = useQueryClient();
+  const fetch360 = useServerFn(getClient360);
+  const completeItem = useServerFn(completeChecklistItem);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["client-360", id],
+    queryFn: () => fetch360({ data: { companyId: id } }),
+  });
+
+  const toggleItem = useMutation({
+    mutationFn: (vars: { itemKey: string; status: "done" | "pending" }) =>
+      completeItem({ data: { companyId: id, itemKey: vars.itemKey, status: vars.status } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["client-360", id] });
+      toast.success("Checklist atualizado");
+    },
+  });
+
+  if (isLoading) return <Card className="p-6">Carregando…</Card>;
+  if (!data?.company) return <Card className="p-6">Cliente não encontrado.</Card>;
+
+  const c = data.company;
+
+  return (
+    <div className="space-y-4">
+      <Card className="p-5 flex items-start gap-4">
+        <div className="w-12 h-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+          <Building2 className="w-6 h-6" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-xl font-bold truncate">{c.name}</h1>
+          <div className="text-sm text-muted-foreground">{c.email ?? "—"} · {c.phone ?? "—"}</div>
+        </div>
+        <Badge variant={c.is_active ? "default" : "outline"}>{c.is_active ? "Ativo" : "Inativo"}</Badge>
+      </Card>
+
+      <Tabs defaultValue="checklist">
+        <TabsList className="flex-wrap h-auto">
+          <TabsTrigger value="checklist">Checklist</TabsTrigger>
+          <TabsTrigger value="onboarding">Onboarding</TabsTrigger>
+          <TabsTrigger value="modulos">Módulos</TabsTrigger>
+          <TabsTrigger value="contratos">Contratos</TabsTrigger>
+          <TabsTrigger value="dominio">Domínio</TabsTrigger>
+          <TabsTrigger value="emails">E-mails</TabsTrigger>
+          <TabsTrigger value="timeline">Timeline</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="checklist">
+          <Card className="p-4">
+            <h3 className="font-semibold mb-3">Checklist de implantação</h3>
+            <div className="space-y-2">
+              {Object.entries(CHECKLIST_LABELS).map(([key, label]) => {
+                const item = data.checklist.find((x: any) => x.item_key === key);
+                const done = item?.status === "done";
+                return (
+                  <div key={key} className="flex items-center gap-2 text-sm">
+                    <button
+                      type="button"
+                      onClick={() => toggleItem.mutate({ itemKey: key, status: done ? "pending" : "done" })}
+                      className="text-primary"
+                    >
+                      {done ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5 text-muted-foreground" />}
+                    </button>
+                    <span className={done ? "line-through text-muted-foreground" : ""}>{label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="onboarding">
+          <OnboardingWizard companyId={id} />
+        </TabsContent>
+
+        <TabsContent value="modulos">
+          <Card className="p-4 space-y-2">
+            <h3 className="font-semibold mb-2">Módulos ativos</h3>
+            {data.modules.length === 0 && <p className="text-sm text-muted-foreground">Nenhum módulo ativo. Use a página de Módulos para instalar.</p>}
+            {data.modules.map((m: any, i: number) => (
+              <div key={i} className="flex items-center justify-between text-sm border-b last:border-0 py-1.5">
+                <span>{m.modules?.name ?? m.modules?.slug}</span>
+                <Badge variant="outline">{m.modules?.slug}</Badge>
+              </div>
+            ))}
+            <Button asChild size="sm" variant="outline" className="mt-2">
+              <a href="/modules">Gerenciar módulos</a>
+            </Button>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="contratos">
+          <Card className="p-4 space-y-2">
+            <h3 className="font-semibold mb-2">Contratos</h3>
+            {data.contracts.length === 0 && <p className="text-sm text-muted-foreground">Sem contratos.</p>}
+            {data.contracts.map((ct: any) => (
+              <div key={ct.id} className="text-sm border-b last:border-0 py-2">
+                <div className="flex justify-between">
+                  <span>R$ {Number(ct.monthly_amount).toFixed(2)} / mês</span>
+                  <Badge variant={ct.status === "active" ? "default" : "outline"}>{ct.status}</Badge>
+                </div>
+                <div className="text-xs text-muted-foreground">Próx. vencimento: {ct.next_due_date ?? "—"}</div>
+              </div>
+            ))}
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="dominio">
+          <Card className="p-4 space-y-2">
+            <h3 className="font-semibold mb-2">Solicitações de domínio</h3>
+            {data.domain.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma solicitação.</p>}
+            {data.domain.map((d: any) => (
+              <div key={d.id} className="text-sm border-b last:border-0 py-2">
+                <div className="flex justify-between">
+                  <span className="font-medium">{d.requested_value ?? "—"}</span>
+                  <Badge variant="outline">{d.mode}</Badge>
+                </div>
+                <div className="text-xs text-muted-foreground">Status: {d.status}</div>
+              </div>
+            ))}
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="emails">
+          <Card className="p-4 space-y-2">
+            <h3 className="font-semibold mb-2">Solicitações de e-mail corporativo</h3>
+            {data.emails.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma solicitação.</p>}
+            {data.emails.map((e: any) => (
+              <div key={e.id} className="flex justify-between text-sm border-b last:border-0 py-1.5">
+                <span>{e.full_address ?? e.address_prefix}</span>
+                <Badge variant="outline">{e.status}</Badge>
+              </div>
+            ))}
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="timeline">
+          <Card className="p-4 space-y-2">
+            <h3 className="font-semibold mb-2">Atividades recentes</h3>
+            {data.activities.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma atividade registrada.</p>}
+            {data.activities.map((a: any) => (
+              <div key={a.id} className="text-sm border-b last:border-0 py-2">
+                <div className="font-medium">{a.title}</div>
+                <div className="text-xs text-muted-foreground">{a.description}</div>
+                <div className="text-[10px] text-muted-foreground mt-0.5">{new Date(a.created_at).toLocaleString("pt-BR")}</div>
+              </div>
+            ))}
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}

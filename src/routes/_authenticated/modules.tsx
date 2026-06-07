@@ -109,12 +109,26 @@ function ModulesPage() {
   }, [dbModules, enabledByModuleId]);
 
   const toggle = useMutation({
-    mutationFn: async ({ moduleId, enabled }: { moduleId: string; enabled: boolean }) => {
+    mutationFn: async ({ moduleId, enabled, slug }: { moduleId: string; enabled: boolean; slug: string }) => {
       const { error } = await supabase.from("company_modules").upsert(
         { company_id: effectiveCompanyId, module_id: moduleId, is_enabled: enabled },
         { onConflict: "company_id,module_id" },
       );
       if (error) throw error;
+      // Registra no log de auditoria e checklist (best-effort)
+      await supabase.from("audit_logs").insert({
+        company_id: effectiveCompanyId,
+        action: enabled ? "module_installed" : "module_uninstalled",
+        entity: "module",
+        entity_id: moduleId,
+        metadata: { slug },
+      } as never);
+      if (enabled) {
+        await supabase.from("onboarding_checklist").upsert(
+          { company_id: effectiveCompanyId, item_key: "modules_activated", status: "done", completed_at: new Date().toISOString() },
+          { onConflict: "company_id,item_key" },
+        );
+      }
     },
     onSuccess: () => {
       toast.success("Módulo atualizado");
@@ -229,7 +243,7 @@ function ModulesPage() {
               isSuper={isSuper}
               canToggle={isSuper && !!dbEntry && !!effectiveCompanyId}
               onToggle={(enabled) =>
-                dbEntry && toggle.mutate({ moduleId: dbEntry.id, enabled })
+                dbEntry && toggle.mutate({ moduleId: dbEntry.id, enabled, slug: dbEntry.slug })
               }
             />
           );
