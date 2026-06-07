@@ -12,7 +12,9 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Clock, Users, Plus, Trash2, RotateCcw, Sparkles, ListChecks, Bell, Briefcase, MessageSquare, User, LayoutDashboard, Sliders } from "lucide-react";
+import { Calendar, Clock, Users, Plus, Trash2, RotateCcw, Sparkles, ListChecks, Bell, Briefcase, MessageSquare, User, LayoutDashboard, Sliders, Layers } from "lucide-react";
+import { AgendaRecursos } from "@/components/demo/agenda/AgendaRecursos";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useDemoState, uid, brl } from "@/lib/demoSandbox";
 import { DemoContractCTA } from "@/components/demo/DemoContractCTA";
@@ -61,6 +63,7 @@ function DemoAgenda() {
   const [dataAtual, setDataAtual] = useState(() => new Date().toISOString().slice(0, 10));
   const [aba, setAba] = useState<string>("visao");
   const [prefill, setPrefill] = useState<{ cliente: string; telefone: string } | null>(null);
+  const [reagendar, setReagendar] = useState<Agendamento | null>(null);
   const [nichoDemo, setNichoDemo] = useState(() => {
     if (typeof window === "undefined") return "servicos";
     return new URLSearchParams(window.location.search).get("nicho") ?? "servicos";
@@ -195,6 +198,7 @@ function DemoAgenda() {
             <TabsTrigger value="espera"><Users className="w-4 h-4 mr-1" />Fila de espera</TabsTrigger>
             <TabsTrigger value="painel"><Clock className="w-4 h-4 mr-1" />Painel</TabsTrigger>
             <TabsTrigger value="params"><Sliders className="w-4 h-4 mr-1" />Parametrizações</TabsTrigger>
+            <TabsTrigger value="recursos"><Layers className="w-4 h-4 mr-1" />Recursos</TabsTrigger>
           </TabsList>
 
           <TabsContent value="visao" className="mt-4 space-y-3">
@@ -323,6 +327,9 @@ function DemoAgenda() {
                           <div className="flex justify-end gap-1">
                             <Button size="sm" variant="outline" title="Confirmar via WhatsApp" onClick={() => gotoWhatsapp({ nome: a.cliente, telefone: a.telefone }, `Olá ${a.cliente}, confirmando seu agendamento ${a.hora} de ${servs.find((s) => s.id === a.servicoId)?.nome ?? ""}.`)}>
                               <MessageSquare className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button size="sm" variant="outline" title="Reagendar" onClick={() => setReagendar(a)}>
+                              <Clock className="w-3.5 h-3.5" />
                             </Button>
                             <Button size="sm" variant="outline" title="Ver no CRM" onClick={() => gotoCrm({ nome: a.cliente, telefone: a.telefone })}>
                               <User className="w-3.5 h-3.5" />
@@ -459,7 +466,26 @@ function DemoAgenda() {
               </Card>
             ))}
           </TabsContent>
+
+          <TabsContent value="recursos" className="mt-4">
+            <AgendaRecursos nicho={nichoDemo} />
+          </TabsContent>
         </Tabs>
+
+        {/* Reagendar — confirmação obrigatória (drag-and-drop / mobile) */}
+        <ReagendarDialog
+          open={!!reagendar}
+          original={reagendar}
+          profs={profs}
+          servs={servs}
+          agds={agds}
+          onClose={() => setReagendar(null)}
+          onConfirm={(updated) => {
+            setAgds((p) => p.map((a) => a.id === updated.id ? updated : a));
+            toast.success("DEMONSTRAÇÃO — VERSÃO TESTE — Agendamento reagendado. Logs e comunicações simuladas.");
+            setReagendar(null);
+          }}
+        />
       </main>
       <PublicFooter />
     </div>
@@ -608,5 +634,80 @@ function NovaEspera({ servs, onCreate }: { servs: Servico[]; onCreate: (e: Esper
       <div><Label className="text-xs">Preferência</Label><Input value={f.preferencia} onChange={(e) => setF({ ...f, preferencia: e.target.value })} /></div>
       <Button className="sm:col-span-4 bg-gradient-primary" disabled={!f.cliente || !f.servicoId} onClick={() => { onCreate({ id: uid("es"), ...f }); setF({ cliente: "", telefone: "", servicoId: "", preferencia: "" }); }}><Plus className="w-4 h-4 mr-1" />Adicionar à fila</Button>
     </div>
+  );
+}
+
+function ReagendarDialog({
+  open, original, profs, servs, agds, onClose, onConfirm,
+}: {
+  open: boolean;
+  original: Agendamento | null;
+  profs: Profissional[];
+  servs: Servico[];
+  agds: Agendamento[];
+  onClose: () => void;
+  onConfirm: (a: Agendamento) => void;
+}) {
+  const [f, setF] = useState<Agendamento | null>(null);
+  useEffect(() => { setF(original); }, [original?.id]);
+  if (!original || !f) {
+    return (
+      <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+        <DialogContent />
+      </Dialog>
+    );
+  }
+  const conflitos = agds.filter((a) =>
+    a.id !== f.id && a.status !== "cancelado" &&
+    a.profId === f.profId && a.data === f.data && a.hora === f.hora);
+
+  const profAntes = profs.find((p) => p.id === original.profId)?.nome;
+  const profDepois = profs.find((p) => p.id === f.profId)?.nome;
+  const servNome = servs.find((s) => s.id === f.servicoId)?.nome;
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Confirmar alteração de horário?</DialogTitle>
+          <DialogDescription>DEMONSTRAÇÃO — VERSÃO TESTE — comunicações serão simuladas.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2 text-sm">
+          <div><strong>Cliente:</strong> {f.cliente}</div>
+          <div><strong>Serviço:</strong> {servNome ?? "—"}</div>
+          <div className="grid grid-cols-2 gap-2 pt-2 border-t">
+            <div>
+              <div className="text-xs text-muted-foreground">Antes</div>
+              <div>{original.data} {original.hora}</div>
+              <div className="text-xs">{profAntes}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Depois</div>
+              <div className="flex gap-1">
+                <Input type="date" value={f.data} onChange={(e) => setF({ ...f, data: e.target.value })} className="h-8" />
+                <Input type="time" value={f.hora} onChange={(e) => setF({ ...f, hora: e.target.value })} className="h-8 w-24" />
+              </div>
+              <Select value={f.profId} onValueChange={(v) => setF({ ...f, profId: v })}>
+                <SelectTrigger className="h-8 mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>{profs.map((p) => <SelectItem key={p.id} value={p.id}>{p.nome}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+          </div>
+          {conflitos.length > 0 && (
+            <div className="rounded border border-amber-300 bg-amber-50 dark:bg-amber-950/30 p-2 text-xs">
+              ⚠ Este horário possui conflito com outro agendamento ou bloqueio.
+              <div className="mt-1">{conflitos.map((c) => c.cliente).join(", ")}</div>
+            </div>
+          )}
+          <div className="text-xs text-muted-foreground pt-2 border-t">
+            Comunicações que serão enviadas (simulado): cliente, profissional, recepção/gestão.
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose}>Cancelar</Button>
+          <Button className="bg-gradient-primary" onClick={() => onConfirm(f)}>Confirmar alteração</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
