@@ -67,13 +67,13 @@ export const updateCompanyIdentity = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase } = context;
     // Normaliza strings vazias para null (e-mails)
-    const clean: Record<string, unknown> = {};
+    const clean: Record<string, string | null> = {};
     for (const [k, v] of Object.entries(data.patch)) {
-      clean[k] = v === "" ? null : v;
+      clean[k] = v === "" || v === undefined ? null : (v as string | null);
     }
     const { data: updated, error } = await supabase
       .from("companies")
-      .update(clean)
+      .update(clean as never)
       .eq("id", data.companyId)
       .select("*")
       .single();
