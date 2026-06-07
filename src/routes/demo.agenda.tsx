@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Clock, Users, Plus, Trash2, RotateCcw, Sparkles, ListChecks, Bell, Briefcase, MessageSquare, User, LayoutDashboard, Sliders, Layers, FileText, Map } from "lucide-react";
+import { Calendar, Clock, Users, Plus, Trash2, RotateCcw, Sparkles, ListChecks, Bell, Briefcase, MessageSquare, User, LayoutDashboard, Sliders, Layers, FileText, Map, UserCog } from "lucide-react";
 import { AgendaRecursos } from "@/components/demo/agenda/AgendaRecursos";
 import { AgendaFluxosPanel } from "@/components/demo/agenda/AgendaFluxosPanel";
 import { AgendaComunicacaoPanel } from "@/components/demo/agenda/AgendaComunicacaoPanel";
