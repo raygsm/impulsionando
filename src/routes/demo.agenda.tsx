@@ -168,16 +168,64 @@ function DemoAgenda() {
           </div>
         </div>
 
+        {/* Captura obrigatória do lead — gate da demo completa */}
+        <LeadDemoCapture
+          moduleSlug="agenda"
+          moduleName="Agenda Online"
+          description="Antes de liberar sua demonstração da Agenda Online, informe seu nome e WhatsApp. Assim conseguimos personalizar seu teste e, se fizer sentido, ajudar depois na configuração real."
+          onCaptured={(l) => setLead(l)}
+        />
+
+        {leadCaptured && lead && (
+          <Card className="mt-4 p-3 flex items-center justify-between gap-3 flex-wrap text-xs border-primary/30 bg-primary/5">
+            <div>
+              Olá, <strong>{lead.name}</strong> — sua demonstração da Agenda Online está liberada como <strong>Lead DEMO</strong>.
+            </div>
+            <Badge variant="outline">DEMONSTRAÇÃO — VERSÃO TESTE</Badge>
+          </Card>
+        )}
+
         <Tabs value={aba} onValueChange={setAba} className="mt-6">
           <TabsList className="flex-wrap h-auto">
+            <TabsTrigger value="visao"><LayoutDashboard className="w-4 h-4 mr-1" />Visão Geral</TabsTrigger>
             <TabsTrigger value="grade"><Calendar className="w-4 h-4 mr-1" />Grade</TabsTrigger>
             <TabsTrigger value="profs"><Briefcase className="w-4 h-4 mr-1" />Profissionais</TabsTrigger>
             <TabsTrigger value="servs"><ListChecks className="w-4 h-4 mr-1" />Serviços</TabsTrigger>
             <TabsTrigger value="agendar"><Plus className="w-4 h-4 mr-1" />Novo agendamento</TabsTrigger>
             <TabsTrigger value="espera"><Users className="w-4 h-4 mr-1" />Fila de espera</TabsTrigger>
             <TabsTrigger value="painel"><Clock className="w-4 h-4 mr-1" />Painel</TabsTrigger>
-            <TabsTrigger value="params"><Bell className="w-4 h-4 mr-1" />Parametrização</TabsTrigger>
+            <TabsTrigger value="params"><Sliders className="w-4 h-4 mr-1" />Parametrizações</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="visao" className="mt-4 space-y-3">
+            <Card className="p-4">
+              <div className="flex items-start justify-between gap-3 flex-wrap">
+                <div>
+                  <h2 className="text-lg font-semibold">Visão Geral da Agenda Online</h2>
+                  <p className="text-sm text-muted-foreground max-w-2xl">
+                    Áreas previstas no módulo, com o que cada uma faz e o impacto na operação. Tudo o que você
+                    fizer aqui está em ambiente <strong>DEMONSTRAÇÃO — VERSÃO TESTE</strong> — nenhum dado real é afetado.
+                  </p>
+                </div>
+                <Badge variant="outline">PAGO — DEMO</Badge>
+              </div>
+            </Card>
+            <div className="grid md:grid-cols-2 gap-2">
+              {AREAS_AGENDA.map((a) => (
+                <Card key={a.title} className="p-3 text-sm space-y-1">
+                  <div className="font-medium">{a.title}</div>
+                  <div className="text-xs text-muted-foreground">{a.what}</div>
+                  <div className="text-xs"><span className="text-muted-foreground">Impacto:</span> {a.impact}</div>
+                  <div className="flex flex-wrap gap-1 pt-1">
+                    {a.comm && <Badge variant="outline" className="text-[10px]">Dispara comunicação</Badge>}
+                    {a.logs && <Badge variant="outline" className="text-[10px]">Gera log</Badge>}
+                    {a.dash && <Badge variant="outline" className="text-[10px]">Atualiza dashboard</Badge>}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
 
           <TabsContent value="grade" className="mt-4 space-y-3">
             <Card className="p-3 flex items-center gap-3">
