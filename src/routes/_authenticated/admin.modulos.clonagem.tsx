@@ -467,6 +467,37 @@ function CloneCenterPage() {
                     >
                       <Copy className="w-4 h-4 mr-1" /> Duplicar
                     </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button size="sm" variant="ghost">
+                          <Download className="w-4 h-4 mr-1" /> Exportar
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={() => {
+                            exportCloneAsJSON(i, actor);
+                            toast.success("Arquivo JSON gerado.");
+                            refresh();
+                          }}
+                        >
+                          <FileJson className="w-4 h-4 mr-2" /> Exportar como JSON
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={async () => {
+                            try {
+                              await exportCloneAsZIP(i, actor);
+                              toast.success("Arquivo ZIP gerado.");
+                              refresh();
+                            } catch {
+                              toast.error("Falha ao gerar ZIP.");
+                            }
+                          }}
+                        >
+                          <FileArchive className="w-4 h-4 mr-2" /> Exportar como ZIP
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </Card>
               );
