@@ -166,13 +166,15 @@ function CloneCenterPage() {
       </Card>
 
       <Tabs defaultValue="base" className="w-full">
-        <TabsList>
+        <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="base">Módulos-Base</TabsTrigger>
-          <TabsTrigger value="instances">Instâncias</TabsTrigger>
+          <TabsTrigger value="instances">Clones Criados</TabsTrigger>
+          <TabsTrigger value="presets">Presets por nicho</TabsTrigger>
           <TabsTrigger value="planned">Próximos módulos</TabsTrigger>
           <TabsTrigger value="logs">Logs internos</TabsTrigger>
           <TabsTrigger value="layers">Camadas</TabsTrigger>
         </TabsList>
+
 
         <TabsContent value="base" className="space-y-3 pt-4">
           <div className="flex justify-end">
