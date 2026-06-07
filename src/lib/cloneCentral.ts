@@ -39,29 +39,111 @@ export interface ModuleBase {
   updatedAt: string;
 }
 
+export type InstanceStatus =
+  | "Criado"
+  | "Aguardando configuração"
+  | "DEMO pronta"
+  | "TESTE pronto"
+  | "REAL aguardando configuração"
+  | "Erro na clonagem"
+  | "Arquivado";
+
+export interface AgendaInitialConfig {
+  publicName: string;
+  internalName: string;
+  niche: string;
+  responsibleName: string;
+  responsibleEmail?: string;
+  responsibleWhatsapp?: string;
+  environment: "DEMO" | "TESTE" | "REAL";
+  notes?: string;
+  structure: {
+    profissionais: boolean;
+    servicos: boolean;
+    unidades: boolean;
+    salas: boolean;
+    pagamento: boolean;
+    fila: boolean;
+    lembretes: boolean;
+    reagendamento: boolean;
+    cancelamentoCliente: boolean;
+    dashboard: boolean;
+    whatsapp: boolean;
+    email: boolean;
+  };
+  operation: {
+    horarioFuncionamento: string;
+    duracaoPadrao: number;
+    intervalo: number;
+    antecedenciaMin: number;
+    prazoCancelar: number;
+    prazoReagendar: number;
+    encaixe: boolean;
+    noShow: boolean;
+    listaEspera: boolean;
+  };
+  communication: {
+    whatsapp: boolean;
+    email: boolean;
+    modelosPadrao: boolean;
+    exigirConfirmacao: boolean;
+    confirmacaoAgendamento: boolean;
+    lembrete24h: boolean;
+    lembrete2h: boolean;
+    avisoReagendamento: boolean;
+    avisoCancelamento: boolean;
+    pesquisaPos: boolean;
+  };
+  integrations: {
+    crm: boolean;
+    whatsapp: boolean;
+    pagamentos: boolean;
+    voip: boolean;
+    bi: boolean;
+    whiteLabel: boolean;
+  };
+}
+
 export interface CloneInstance {
   id: string;
-  baseId: string;          // referência ao ModuleBase
-  layer: Exclude<CloneLayer, "base">; // "demo" | "real"
-  targetName: string;      // nome do projeto/cliente/demo
+  baseId: string;
+  layer: Exclude<CloneLayer, "base">;
+  targetName: string;
+  fantasy?: string;
   niche?: string;
+  preset?: string;
+  purpose?: string;
+  environment?: "DEMO" | "TESTE" | "REAL";
+  status: InstanceStatus;
+  responsibleName?: string;
+  responsibleEmail?: string;
+  createdBy?: string;
+  integrations?: string[];
+  internalUrl?: string;
   notes?: string;
+  config?: AgendaInitialConfig;
+  archived?: boolean;
   createdAt: string;
 }
 
 export interface CloneLog {
   id: string;
   at: string;
-  actor: string;           // email/nome do usuário interno
+  actor: string;
   action:
     | "criou-base"
     | "atualizou-base"
     | "clonou-demo"
     | "clonou-real"
+    | "configurou"
+    | "arquivou"
+    | "duplicou"
     | "removeu"
     | "tentativa-acesso-negado";
   detail: string;
+  instanceId?: string;
 }
+
 
 const K_BASES = "imp.clone.bases.v1";
 const K_INSTANCES = "imp.clone.instances.v1";
