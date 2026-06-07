@@ -67,7 +67,7 @@ function CoreClientes() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="font-semibold truncate">{c.name}</div>
-                <div className="text-xs text-muted-foreground truncate">/{c.slug}</div>
+                <div className="text-xs text-muted-foreground truncate">{c.id.slice(0, 8)}</div>
               </div>
               <div className="hidden sm:flex items-center gap-2 text-xs">
                 <Badge variant={c.is_active ? "default" : "outline"}>{c.is_active ? "Ativo" : "Inativo"}</Badge>
