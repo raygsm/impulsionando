@@ -46,7 +46,7 @@ function BillingPolicyPage() {
   useEffect(() => {
     if (!policy) return;
     setName(policy.name);
-    setSteps((policy.steps as Step[]) ?? []);
+    setSteps((policy.steps as unknown as Step[]) ?? []);
     setSuspendOffset(policy.suspend_offset_days ?? 1);
   }, [policy]);
 
