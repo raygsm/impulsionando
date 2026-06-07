@@ -33,7 +33,7 @@ import {
   type EnvioLog,
 } from "@/lib/agendaComunicacao";
 
-const CANAL_ICON: Record<Canal, JSX.Element> = {
+const CANAL_ICON: Record<Canal, React.ReactNode> = {
   whatsapp: <MessageSquare className="w-3.5 h-3.5" />,
   email: <Mail className="w-3.5 h-3.5" />,
   sms: <MessageSquare className="w-3.5 h-3.5" />,
