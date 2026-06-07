@@ -52,10 +52,8 @@ export function AgendaComunicacaoPanel({ nicho }: { nicho: string }) {
   }
 
   function pushEnvio(e: Omit<EnvioLog, "id" | "data" | "status">) {
-    update((s) => ({
-      ...s,
-      envios: [{ id: uid("en"), data: new Date().toISOString(), status: "enviado", ...e }, ...s.envios].slice(0, 50),
-    }));
+    const entry: EnvioLog = { id: uid("en"), data: new Date().toISOString(), status: "enviado", ...e };
+    update((s) => ({ ...s, envios: [entry, ...s.envios].slice(0, 50) }));
   }
 
   return (
