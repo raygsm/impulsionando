@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Clock, Users, Plus, Trash2, RotateCcw, Sparkles, ListChecks, Bell, Briefcase, MessageSquare, User } from "lucide-react";
+import { Calendar, Clock, Users, Plus, Trash2, RotateCcw, Sparkles, ListChecks, Bell, Briefcase, MessageSquare, User, LayoutDashboard, Sliders } from "lucide-react";
 import { toast } from "sonner";
 import { useDemoState, uid, brl } from "@/lib/demoSandbox";
 import { DemoContractCTA } from "@/components/demo/DemoContractCTA";
@@ -21,6 +21,15 @@ import { gotoCrm, gotoWhatsapp } from "@/lib/demoCrossLink";
 import { validateAgendamento, findConflicts, formatConflictMessage, type ConflictAgd } from "@/lib/agendaConflict.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { createAgendaMock, getAgendaMockConfig } from "@/lib/demoModuleMocks";
+import { LeadDemoCapture, getCapturedLead, type LeadDemoInfo } from "@/components/demo/LeadDemoCapture";
+import {
+  AGENDA_PARAM_DEFS,
+  AREAS_AGENDA,
+  loadAgendaParams,
+  saveAgendaParams,
+  type AgendaParams,
+  type AgendaParamKey,
+} from "@/lib/agendaDemoConfig";
 
 export const Route = createFileRoute("/demo/agenda")({
   head: () => ({
