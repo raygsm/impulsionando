@@ -38,6 +38,10 @@ import {
   Archive,
   CheckCircle2,
   ExternalLink,
+  Download,
+  Upload,
+  FileJson,
+  FileArchive,
 } from "lucide-react";
 import {
   cloneStore,
@@ -49,6 +53,17 @@ import {
   type CloneInstance,
   type CloneLog,
 } from "@/lib/cloneCentral";
+import {
+  exportCloneAsJSON,
+  exportCloneAsZIP,
+  importCloneFromFile,
+} from "@/lib/cloneExport";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { CloneWizard } from "@/components/admin/CloneWizard";
 import { AgendaConfigWizard } from "@/components/admin/AgendaConfigWizard";
 
@@ -291,6 +306,43 @@ function CloneCenterPage() {
         </TabsContent>
 
         <TabsContent value="instances" className="space-y-3 pt-4">
+          <div className="flex justify-end">
+            <input
+              id="clone-import-file"
+              type="file"
+              accept=".json,.zip,application/json,application/zip"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                e.target.value = "";
+                if (!file) return;
+                try {
+                  const res = await importCloneFromFile(file, actor);
+                  toast.success(
+                    res.renamedTo
+                      ? `Importado como "${res.renamedTo}" para evitar conflito.`
+                      : "Módulo importado com sucesso.",
+                  );
+                  if (res.baseImported) {
+                    toast.info("Módulo-base também foi importado.");
+                  }
+                  refresh();
+                } catch (err) {
+                  toast.error(
+                    err instanceof Error ? err.message : "Falha ao importar arquivo.",
+                  );
+                }
+              }}
+            />
+            <Button
+              variant="outline"
+              onClick={() => document.getElementById("clone-import-file")?.click()}
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              Importar módulo (JSON/ZIP)
+            </Button>
+          </div>
+
           <Card className="p-3 grid md:grid-cols-5 gap-2">
             <Input
               placeholder="Buscar projeto/cliente"
@@ -415,6 +467,37 @@ function CloneCenterPage() {
                     >
                       <Copy className="w-4 h-4 mr-1" /> Duplicar
                     </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button size="sm" variant="ghost">
+                          <Download className="w-4 h-4 mr-1" /> Exportar
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={() => {
+                            exportCloneAsJSON(i, actor);
+                            toast.success("Arquivo JSON gerado.");
+                            refresh();
+                          }}
+                        >
+                          <FileJson className="w-4 h-4 mr-2" /> Exportar como JSON
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={async () => {
+                            try {
+                              await exportCloneAsZIP(i, actor);
+                              toast.success("Arquivo ZIP gerado.");
+                              refresh();
+                            } catch {
+                              toast.error("Falha ao gerar ZIP.");
+                            }
+                          }}
+                        >
+                          <FileArchive className="w-4 h-4 mr-2" /> Exportar como ZIP
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </Card>
               );
