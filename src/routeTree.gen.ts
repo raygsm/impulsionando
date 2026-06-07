@@ -119,6 +119,7 @@ import { Route as AuthenticatedCrmPipelinesRouteImport } from './routes/_authent
 import { Route as AuthenticatedCrmLeadsRouteImport } from './routes/_authenticated/crm.leads'
 import { Route as AuthenticatedCrmBoardRouteImport } from './routes/_authenticated/crm.board'
 import { Route as AuthenticatedCrmActivitiesRouteImport } from './routes/_authenticated/crm.activities'
+import { Route as AuthenticatedCoreModulosRouteImport } from './routes/_authenticated/core.modulos'
 import { Route as AuthenticatedCoreClientesRouteImport } from './routes/_authenticated/core.clientes'
 import { Route as AuthenticatedBiNichesRouteImport } from './routes/_authenticated/bi.niches'
 import { Route as AuthenticatedBiMasterRouteImport } from './routes/_authenticated/bi.master'
@@ -166,6 +167,7 @@ import { Route as ApiPublicDemoSendTestRouteImport } from './routes/api/public/d
 import { Route as ApiPaymentsInfinitepayCreateRouteImport } from './routes/api/payments/infinitepay.create'
 import { Route as ApiPaymentsInfinitepayCheckStatusRouteImport } from './routes/api/payments/infinitepay.check-status'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
+import { Route as AuthenticatedCoreModulosSlugRouteImport } from './routes/_authenticated/core.modulos.$slug'
 import { Route as AuthenticatedCoreClienteIdRouteImport } from './routes/_authenticated/core.cliente.$id'
 import { Route as AuthenticatedAdminModulosClonagemRouteImport } from './routes/_authenticated/admin.modulos.clonagem'
 import { Route as ApiPublicPaymentsInfinitepayWebhookRouteImport } from './routes/api/public/payments/infinitepay.webhook'
@@ -744,6 +746,12 @@ const AuthenticatedCrmActivitiesRoute =
     path: '/activities',
     getParentRoute: () => AuthenticatedCrmRoute,
   } as any)
+const AuthenticatedCoreModulosRoute =
+  AuthenticatedCoreModulosRouteImport.update({
+    id: '/modulos',
+    path: '/modulos',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreClientesRoute =
   AuthenticatedCoreClientesRouteImport.update({
     id: '/clientes',
@@ -1020,6 +1028,12 @@ const AuthenticatedSalesCashIdRoute =
     path: '/$id',
     getParentRoute: () => AuthenticatedSalesCashRoute,
   } as any)
+const AuthenticatedCoreModulosSlugRoute =
+  AuthenticatedCoreModulosSlugRouteImport.update({
+    id: '/$slug',
+    path: '/$slug',
+    getParentRoute: () => AuthenticatedCoreModulosRoute,
+  } as any)
 const AuthenticatedCoreClienteIdRoute =
   AuthenticatedCoreClienteIdRouteImport.update({
     id: '/cliente/$id',
@@ -1144,6 +1158,7 @@ export interface FileRoutesByFullPath {
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
+  '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/crm/board': typeof AuthenticatedCrmBoardRoute
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
@@ -1181,6 +1196,7 @@ export interface FileRoutesByFullPath {
   '/sales/': typeof AuthenticatedSalesIndexRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRoute
+  '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
@@ -1294,6 +1310,7 @@ export interface FileRoutesByTo {
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
+  '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/crm/board': typeof AuthenticatedCrmBoardRoute
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
@@ -1331,6 +1348,7 @@ export interface FileRoutesByTo {
   '/sales': typeof AuthenticatedSalesIndexRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRoute
+  '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
@@ -1457,6 +1475,7 @@ export interface FileRoutesById {
   '/_authenticated/bi/master': typeof AuthenticatedBiMasterRoute
   '/_authenticated/bi/niches': typeof AuthenticatedBiNichesRoute
   '/_authenticated/core/clientes': typeof AuthenticatedCoreClientesRoute
+  '/_authenticated/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/_authenticated/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/_authenticated/crm/board': typeof AuthenticatedCrmBoardRoute
   '/_authenticated/crm/leads': typeof AuthenticatedCrmLeadsRoute
@@ -1494,6 +1513,7 @@ export interface FileRoutesById {
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
   '/_authenticated/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/_authenticated/core/cliente/$id': typeof AuthenticatedCoreClienteIdRoute
+  '/_authenticated/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
@@ -1620,6 +1640,7 @@ export interface FileRouteTypes {
     | '/bi/master'
     | '/bi/niches'
     | '/core/clientes'
+    | '/core/modulos'
     | '/crm/activities'
     | '/crm/board'
     | '/crm/leads'
@@ -1657,6 +1678,7 @@ export interface FileRouteTypes {
     | '/sales/'
     | '/admin/modulos/clonagem'
     | '/core/cliente/$id'
+    | '/core/modulos/$slug'
     | '/sales/cash/$id'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
@@ -1770,6 +1792,7 @@ export interface FileRouteTypes {
     | '/bi/master'
     | '/bi/niches'
     | '/core/clientes'
+    | '/core/modulos'
     | '/crm/activities'
     | '/crm/board'
     | '/crm/leads'
@@ -1807,6 +1830,7 @@ export interface FileRouteTypes {
     | '/sales'
     | '/admin/modulos/clonagem'
     | '/core/cliente/$id'
+    | '/core/modulos/$slug'
     | '/sales/cash/$id'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
@@ -1932,6 +1956,7 @@ export interface FileRouteTypes {
     | '/_authenticated/bi/master'
     | '/_authenticated/bi/niches'
     | '/_authenticated/core/clientes'
+    | '/_authenticated/core/modulos'
     | '/_authenticated/crm/activities'
     | '/_authenticated/crm/board'
     | '/_authenticated/crm/leads'
@@ -1969,6 +1994,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sales/'
     | '/_authenticated/admin/modulos/clonagem'
     | '/_authenticated/core/cliente/$id'
+    | '/_authenticated/core/modulos/$slug'
     | '/_authenticated/sales/cash/$id'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
@@ -2828,6 +2854,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCrmActivitiesRouteImport
       parentRoute: typeof AuthenticatedCrmRoute
     }
+    '/_authenticated/core/modulos': {
+      id: '/_authenticated/core/modulos'
+      path: '/modulos'
+      fullPath: '/core/modulos'
+      preLoaderRoute: typeof AuthenticatedCoreModulosRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/clientes': {
       id: '/_authenticated/core/clientes'
       path: '/clientes'
@@ -3157,6 +3190,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSalesCashIdRouteImport
       parentRoute: typeof AuthenticatedSalesCashRoute
     }
+    '/_authenticated/core/modulos/$slug': {
+      id: '/_authenticated/core/modulos/$slug'
+      path: '/$slug'
+      fullPath: '/core/modulos/$slug'
+      preLoaderRoute: typeof AuthenticatedCoreModulosSlugRouteImport
+      parentRoute: typeof AuthenticatedCoreModulosRoute
+    }
     '/_authenticated/core/cliente/$id': {
       id: '/_authenticated/core/cliente/$id'
       path: '/cliente/$id'
@@ -3270,14 +3310,30 @@ const AuthenticatedBiRouteWithChildren = AuthenticatedBiRoute._addFileChildren(
   AuthenticatedBiRouteChildren,
 )
 
+interface AuthenticatedCoreModulosRouteChildren {
+  AuthenticatedCoreModulosSlugRoute: typeof AuthenticatedCoreModulosSlugRoute
+}
+
+const AuthenticatedCoreModulosRouteChildren: AuthenticatedCoreModulosRouteChildren =
+  {
+    AuthenticatedCoreModulosSlugRoute: AuthenticatedCoreModulosSlugRoute,
+  }
+
+const AuthenticatedCoreModulosRouteWithChildren =
+  AuthenticatedCoreModulosRoute._addFileChildren(
+    AuthenticatedCoreModulosRouteChildren,
+  )
+
 interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreClientesRoute: typeof AuthenticatedCoreClientesRoute
+  AuthenticatedCoreModulosRoute: typeof AuthenticatedCoreModulosRouteWithChildren
   AuthenticatedCoreIndexRoute: typeof AuthenticatedCoreIndexRoute
   AuthenticatedCoreClienteIdRoute: typeof AuthenticatedCoreClienteIdRoute
 }
 
 const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreClientesRoute: AuthenticatedCoreClientesRoute,
+  AuthenticatedCoreModulosRoute: AuthenticatedCoreModulosRouteWithChildren,
   AuthenticatedCoreIndexRoute: AuthenticatedCoreIndexRoute,
   AuthenticatedCoreClienteIdRoute: AuthenticatedCoreClienteIdRoute,
 }

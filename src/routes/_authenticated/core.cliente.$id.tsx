@@ -2,12 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getClient360, completeChecklistItem } from "@/lib/onboarding.functions";
+import { getClientModules, installModule, uninstallModule, updateClientModuleToLatest } from "@/lib/modules.functions";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OnboardingWizard } from "@/components/core/OnboardingWizard";
-import { CheckCircle2, Circle, Building2 } from "lucide-react";
+import { CheckCircle2, Circle, Building2, Download, RefreshCw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/core/cliente/$id")({
@@ -103,19 +104,7 @@ function ClientePage() {
         </TabsContent>
 
         <TabsContent value="modulos">
-          <Card className="p-4 space-y-2">
-            <h3 className="font-semibold mb-2">Módulos ativos</h3>
-            {data.modules.length === 0 && <p className="text-sm text-muted-foreground">Nenhum módulo ativo. Use a página de Módulos para instalar.</p>}
-            {data.modules.map((m: any, i: number) => (
-              <div key={i} className="flex items-center justify-between text-sm border-b last:border-0 py-1.5">
-                <span>{m.modules?.name ?? m.modules?.slug}</span>
-                <Badge variant="outline">{m.modules?.slug}</Badge>
-              </div>
-            ))}
-            <Button asChild size="sm" variant="outline" className="mt-2">
-              <a href="/modules">Gerenciar módulos</a>
-            </Button>
-          </Card>
+          <ClientModulesPanel companyId={id} />
         </TabsContent>
 
         <TabsContent value="contratos">
