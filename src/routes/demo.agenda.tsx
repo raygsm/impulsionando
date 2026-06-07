@@ -102,6 +102,8 @@ function DemoAgenda() {
   }
 
   // Deep-link via ?cliente=&telefone= vindo de outros módulos (CRM/WhatsApp)
+  useEffect(() => { ensureSeedBases(); }, []);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
