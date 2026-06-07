@@ -254,10 +254,10 @@ export async function autoProvisionFromPayment(orderNsu: string): Promise<{
       await supabaseAdmin.rpc("enqueue_message", {
         _event_code: "user_welcome",
         _company_id: companyId,
-        _recipient_user_id: userId,
-        _recipient_email: p.customer_email,
-        _recipient_phone: p.customer_phone,
-        _recipient_name: p.customer_name,
+        _recipient_user_id: userId ?? undefined,
+        _recipient_email: p.customer_email ?? "",
+        _recipient_phone: p.customer_phone ?? "",
+        _recipient_name: p.customer_name ?? "Cliente",
         _payload: {
           user_name: p.customer_name ?? "Cliente",
           user_email: p.customer_email ?? "",
@@ -267,7 +267,7 @@ export async function autoProvisionFromPayment(orderNsu: string): Promise<{
         _channels: ["email", "whatsapp", "in_app"],
         _reference_type: "infinitepay_payment",
         _reference_id: orderNsu,
-      });
+      } as never);
       await appendLog(orderNsu, { step: "comms", ok: true });
     } catch (e: any) {
       await appendLog(orderNsu, { step: "comms", error: e.message });
