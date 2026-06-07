@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OnboardingWizard } from "@/components/core/OnboardingWizard";
+import { IdentityTab } from "@/components/core/IdentityTab";
 import { CheckCircle2, Circle, Building2, Download, RefreshCw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
