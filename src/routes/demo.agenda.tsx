@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Clock, Users, Plus, Trash2, RotateCcw, Sparkles, ListChecks, Bell, Briefcase, MessageSquare, User } from "lucide-react";
+import { Calendar, Clock, Users, Plus, Trash2, RotateCcw, Sparkles, ListChecks, Bell, Briefcase, MessageSquare, User, LayoutDashboard, Sliders } from "lucide-react";
 import { toast } from "sonner";
 import { useDemoState, uid, brl } from "@/lib/demoSandbox";
 import { DemoContractCTA } from "@/components/demo/DemoContractCTA";
@@ -21,6 +21,15 @@ import { gotoCrm, gotoWhatsapp } from "@/lib/demoCrossLink";
 import { validateAgendamento, findConflicts, formatConflictMessage, type ConflictAgd } from "@/lib/agendaConflict.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { createAgendaMock, getAgendaMockConfig } from "@/lib/demoModuleMocks";
+import { LeadDemoCapture, getCapturedLead, type LeadDemoInfo } from "@/components/demo/LeadDemoCapture";
+import {
+  AGENDA_PARAM_DEFS,
+  AREAS_AGENDA,
+  loadAgendaParams,
+  saveAgendaParams,
+  type AgendaParams,
+  type AgendaParamKey,
+} from "@/lib/agendaDemoConfig";
 
 export const Route = createFileRoute("/demo/agenda")({
   head: () => ({
@@ -50,12 +59,26 @@ function DemoAgenda() {
     lembrete24h: true, lembrete1h: true, confirmaWhats: true, bloqueioFeriado: false, reagendamentoAuto: true,
   });
   const [dataAtual, setDataAtual] = useState(() => new Date().toISOString().slice(0, 10));
-  const [aba, setAba] = useState<string>("grade");
+  const [aba, setAba] = useState<string>("visao");
   const [prefill, setPrefill] = useState<{ cliente: string; telefone: string } | null>(null);
   const [nichoDemo, setNichoDemo] = useState(() => {
     if (typeof window === "undefined") return "servicos";
     return new URLSearchParams(window.location.search).get("nicho") ?? "servicos";
   });
+
+  // Captura obrigatória do lead antes da demo completa
+  const [lead, setLead] = useState<LeadDemoInfo | null>(() => getCapturedLead("agenda"));
+  const leadCaptured = !!lead;
+
+  // Parametrizações SIM/NÃO completas (BLOCO 1/5)
+  const [fullParams, setFullParams] = useState<AgendaParams>(() => loadAgendaParams());
+  function setParam(k: AgendaParamKey, v: boolean) {
+    setFullParams((prev) => {
+      const next = { ...prev, [k]: v };
+      saveAgendaParams(next);
+      return next;
+    });
+  }
 
   // Deep-link via ?cliente=&telefone= vindo de outros módulos (CRM/WhatsApp)
   useEffect(() => {
@@ -145,16 +168,64 @@ function DemoAgenda() {
           </div>
         </div>
 
+        {/* Captura obrigatória do lead — gate da demo completa */}
+        <LeadDemoCapture
+          moduleSlug="agenda"
+          moduleName="Agenda Online"
+          description="Antes de liberar sua demonstração da Agenda Online, informe seu nome e WhatsApp. Assim conseguimos personalizar seu teste e, se fizer sentido, ajudar depois na configuração real."
+          onCaptured={(l) => setLead(l)}
+        />
+
+        {leadCaptured && lead && (
+          <Card className="mt-4 p-3 flex items-center justify-between gap-3 flex-wrap text-xs border-primary/30 bg-primary/5">
+            <div>
+              Olá, <strong>{lead.name}</strong> — sua demonstração da Agenda Online está liberada como <strong>Lead DEMO</strong>.
+            </div>
+            <Badge variant="outline">DEMONSTRAÇÃO — VERSÃO TESTE</Badge>
+          </Card>
+        )}
+
         <Tabs value={aba} onValueChange={setAba} className="mt-6">
           <TabsList className="flex-wrap h-auto">
+            <TabsTrigger value="visao"><LayoutDashboard className="w-4 h-4 mr-1" />Visão Geral</TabsTrigger>
             <TabsTrigger value="grade"><Calendar className="w-4 h-4 mr-1" />Grade</TabsTrigger>
             <TabsTrigger value="profs"><Briefcase className="w-4 h-4 mr-1" />Profissionais</TabsTrigger>
             <TabsTrigger value="servs"><ListChecks className="w-4 h-4 mr-1" />Serviços</TabsTrigger>
             <TabsTrigger value="agendar"><Plus className="w-4 h-4 mr-1" />Novo agendamento</TabsTrigger>
             <TabsTrigger value="espera"><Users className="w-4 h-4 mr-1" />Fila de espera</TabsTrigger>
             <TabsTrigger value="painel"><Clock className="w-4 h-4 mr-1" />Painel</TabsTrigger>
-            <TabsTrigger value="params"><Bell className="w-4 h-4 mr-1" />Parametrização</TabsTrigger>
+            <TabsTrigger value="params"><Sliders className="w-4 h-4 mr-1" />Parametrizações</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="visao" className="mt-4 space-y-3">
+            <Card className="p-4">
+              <div className="flex items-start justify-between gap-3 flex-wrap">
+                <div>
+                  <h2 className="text-lg font-semibold">Visão Geral da Agenda Online</h2>
+                  <p className="text-sm text-muted-foreground max-w-2xl">
+                    Áreas previstas no módulo, com o que cada uma faz e o impacto na operação. Tudo o que você
+                    fizer aqui está em ambiente <strong>DEMONSTRAÇÃO — VERSÃO TESTE</strong> — nenhum dado real é afetado.
+                  </p>
+                </div>
+                <Badge variant="outline">PAGO — DEMO</Badge>
+              </div>
+            </Card>
+            <div className="grid md:grid-cols-2 gap-2">
+              {AREAS_AGENDA.map((a) => (
+                <Card key={a.title} className="p-3 text-sm space-y-1">
+                  <div className="font-medium">{a.title}</div>
+                  <div className="text-xs text-muted-foreground">{a.what}</div>
+                  <div className="text-xs"><span className="text-muted-foreground">Impacto:</span> {a.impact}</div>
+                  <div className="flex flex-wrap gap-1 pt-1">
+                    {a.comm && <Badge variant="outline" className="text-[10px]">Dispara comunicação</Badge>}
+                    {a.logs && <Badge variant="outline" className="text-[10px]">Gera log</Badge>}
+                    {a.dash && <Badge variant="outline" className="text-[10px]">Atualiza dashboard</Badge>}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
 
           <TabsContent value="grade" className="mt-4 space-y-3">
             <Card className="p-3 flex items-center gap-3">
@@ -360,14 +431,33 @@ function DemoAgenda() {
             <RoiSimulator presetKey="agenda" />
           </TabsContent>
 
-          <TabsContent value="params" className="mt-4">
-            <Card className="p-5 space-y-4">
-              <ParamToggle label="Lembrete 24h antes" hint="WhatsApp/e-mail automático na véspera." value={params.lembrete24h} onChange={(v) => setParams({ ...params, lembrete24h: v })} />
-              <ParamToggle label="Lembrete 1h antes" hint="Push final para reduzir no-show." value={params.lembrete1h} onChange={(v) => setParams({ ...params, lembrete1h: v })} />
-              <ParamToggle label="Confirmação por WhatsApp" hint="Cliente confirma com 1 clique no link." value={params.confirmaWhats} onChange={(v) => setParams({ ...params, confirmaWhats: v })} />
-              <ParamToggle label="Bloqueio em feriados" hint="Calendário oficial bloqueia agendamento." value={params.bloqueioFeriado} onChange={(v) => setParams({ ...params, bloqueioFeriado: v })} />
-              <ParamToggle label="Reagendamento automático" hint="Cancelado libera horário para fila de espera." value={params.reagendamentoAuto} onChange={(v) => setParams({ ...params, reagendamentoAuto: v })} />
+          <TabsContent value="params" className="mt-4 space-y-4">
+            <Card className="p-4 text-sm">
+              <div className="flex items-start justify-between gap-3 flex-wrap">
+                <div>
+                  <div className="font-semibold">Parametrizações SIM/NÃO</div>
+                  <p className="text-xs text-muted-foreground max-w-2xl">
+                    Ative ou desative cada recurso e veja como a Agenda se adapta. Tudo aqui é DEMO —
+                    comunicações enviadas terão a marca "TESTE — DEMONSTRAÇÃO — VERSÃO TESTE".
+                  </p>
+                </div>
+                <Badge variant="outline">DEMONSTRAÇÃO — VERSÃO TESTE</Badge>
+              </div>
             </Card>
+            {Array.from(new Set(AGENDA_PARAM_DEFS.map((p) => p.group))).map((group) => (
+              <Card key={group} className="p-4 space-y-3">
+                <div className="font-medium text-sm">{group}</div>
+                {AGENDA_PARAM_DEFS.filter((p) => p.group === group).map((p) => (
+                  <ParamToggle
+                    key={p.key}
+                    label={p.label}
+                    hint={p.hint}
+                    value={fullParams[p.key]}
+                    onChange={(v) => setParam(p.key, v)}
+                  />
+                ))}
+              </Card>
+            ))}
           </TabsContent>
         </Tabs>
       </main>
