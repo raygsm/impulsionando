@@ -1,100 +1,87 @@
-## Bloco 5/5 — Agenda Online: dashboard, jornada guiada, nichos, logs e fechamento
+## Objetivo
 
-Tudo permanece no escopo `demo` (frontend, localStorage, nenhum dado real afetado). Reaproveita estados já criados nos blocos 1–4: `agendaDemoConfig`, `agendaResources`, `agendaFluxos`, `agendaComunicacao` e o `cloneCentral` da Central Interna.
+Implementar a política padrão de **faturamento recorrente, régua de cobrança automática (D-7 / D-1 / D0 / D+1) e suspensão/reativação automáticas** no ERP da Impulsionando, e aplicar essa política ao primeiro cliente real: **Patrícia Lenine Psicologia**.
 
-### 1. Novo arquivo `src/lib/agendaNichos.ts`
-Preset central por nicho (`clinicas`, `estetica`, `fitness`, `juridico`, `bar`, `eventos`, `servicos`). Para cada um:
-- `labels` (Paciente/Cliente/Aluno, Médico/Professor/Advogado, Consulta/Aula/Reserva, Sala/Mesa/Turma…);
-- `recursosPrioritarios` (lista de chaves de `AGENDA_PARAM_DEFS` que ficam em destaque/ligadas no preset);
-- `servicosExemplo` (textos prontos para popular `Servico[]` do mock);
-- `ctas` específicas e textos de jornada adaptados.
-Função `getNichoPreset(nicho)` e `applyNichoPreset(nicho)` que reescreve labels/serviços no localStorage da demo, gera log e dispara toast de confirmação. Sem mexer em dados reais.
+A regra precisa virar **modelo padrão**: toda nova contratação herda a mesma régua sem intervenção manual.
 
-### 2. Novo `src/lib/agendaLogs.ts`
-Log unificado da Agenda (independente dos logs internos de Clonagem do Bloco 4 da Central). Tipos:
-- `AgendaLogEntry { id, modulo:"Agenda Online", area, acao, sessao, lead?, cliente?, profissional?, dataHora, status:"concluido"|"simulado_demo"|"pendente"|"falhou"|"aguardando_credenciais"|"cancelado", ambiente:"DEMO"|"TESTE"|"REAL", canal?, destinatario?, origem?, erro? }`.
-- API: `appendAgendaLog(entry)`, `listAgendaLogs(filters?)`, `clearAgendaLogs()`.
-- Helpers especializados (`logAgendamentoCriado`, `logCancelamento`, `logReagendamento`, `logNoShow`, `logPagamentoDemo`, `logQrCode`, `logComunicacao`, `logJornada`, `logResetLocal`, `logCtaClicado`, etc.) para garantir cobertura dos 30+ eventos do Bloco 47.
-- Substituir os `appendLog` ad-hoc dos `agendaFluxos`/`agendaComunicacao` por um shim que também grava neste log unificado.
+## O que JÁ existe (vamos reutilizar, não recriar)
 
-### 3. Novo painel `src/components/demo/agenda/AgendaDashboard.tsx`
-Dashboard **específico** da Agenda — não reutiliza o KPI genérico atual. Lê estados de `agendaResources`, agendamentos (`ag.agds`), `agendaFluxos` (pagamentos/fila/encaixes/retornos/pesquisas) e `agendaComunicacao` (envios). Composto por:
+- `fin_transactions` (receitas/despesas, status, vencimento) → usado para setup e mensalidades
+- `fin_accounts`, `fin_categories`, `fin_payment_methods` → contas, categorias, métodos
+- `subscriptions` (cliente, plano, ciclo, status, período) → contrato recorrente Paddle/Stripe
+- `message_outbox` + `message_templates` → envio WhatsApp/e-mail
+- `companies`, `company_modules`, `customers` → cadastro do cliente Patrícia Lenine
+- `notifications`, `audit_logs` → trilha de auditoria
+- Rotas: `finance.*`, `admin.billing`, `minha-assinatura`
 
-- Cabeçalho com 3 botões: **Atualizar dashboard**, **Exportar demo** (mostra texto "Exportação preparada para próxima fase técnica.") e seletor de período.
-- Faixa de filtros: Período, Profissional, Serviço, Unidade, Sala, Status, Pagamento, Origem, Cliente, Canal, Ambiente.
-- Grade de KPIs (cards pequenos), cobrindo os 30 indicadores do Bloco 43 (Agendamentos do dia/semana/mês, Confirmados, Aguardando confirmação, Aguardando pagamento, PAGO — DEMO, Cancelados, Reagendados, No-show, Atendidos, Retornos, Fila, Encaixes, Horários livres, Bloqueados, Pagamentos simulados, QR Codes, Lembretes/WhatsApps/E-mails enviados-simulados, Taxa de confirmação/cancelamento/no-show).
-- Seções de gráficos/tabelas (recharts já está no projeto):
-  - Agenda por status (barras);
-  - Agendamentos por profissional / por serviço;
-  - Ocupação por dia (linha);
-  - Ocupação por profissional / sala / unidade (barras horizontais);
-  - Cancelamentos por motivo, No-show por cliente, Fila por serviço;
-  - Pagamentos simulados por status (pizza);
-  - Lembretes enviados por canal;
-  - Origem dos agendamentos;
-  - Top serviços, top profissionais, horários mais procurados.
-- Rodapé com atalhos: Ver agendamentos, Ver profissionais, Ver pagamentos, Ver fila, Ver no-show, Ver logs — todos navegam para a aba/tab correspondente já existente (set `aba`).
+## O que falta (novo)
 
-Nova aba "Dashboard" entra na barra de tabs do `demo.agenda.tsx`, como **primeira** aba (ou logo após Visão Geral), conforme a regra do Bloco 43 ("não usar dashboard genérico"). O `painel` atual é mantido como histórico simples, mas o `Painel` antigo deixa de ser a referência principal.
+### 1. Schema (1 migração)
 
-### 4. Novo `src/components/demo/agenda/AgendaJornadaGuiada.tsx`
-Wizard de 18 etapas (Bloco 44) em `Dialog` cheio, com `step`, `setStep`, barra de progresso, e três botões: **Voltar**, **Pular etapa**, **Continuar**. Cada etapa traz:
-- título, texto curto (exatamente os textos do bloco),
-- ação ilustrativa (ex: "abrir aba Profissionais", "abrir simulação de pagamento") que muda a aba ativa via callback,
-- feedback visual (toast + checkmark verde),
-- registro no `agendaLogs` (`jornada_etapa_concluida` / `jornada_etapa_pulada`).
+Novas tabelas em `public`:
 
-No final: tela de conclusão com texto oficial e CTAs:
-- Contratar Agenda real (`/planos?modulo=agenda`);
-- Adicionar Agenda ao orçamento (`/contratar?incluir=agenda`);
-- Testar outros módulos (chama o seletor "Outros Módulos");
-- Falar com consultor (`/contato?assunto=agenda`).
+- `billing_plans` — catálogo de planos (Mensal R$ 99,90, Trimestral, Anual etc.) com `setup_fee`, `recurring_amount`, `cycle`, `due_day`.
+- `billing_contracts` — contrato ativo de cada cliente (company_id, plan_id, start_date, due_day, status: `active|suspended|cancelled`, next_due_date, last_paid_at).
+- `billing_invoices` — fatura mensal gerada (contract_id, period_start, period_end, due_date, amount, status: `open|paid|overdue|cancelled`, pix_payload, paid_at).
+- `billing_dunning_policy` — régua padrão configurável (steps: dias relativos, canais, template_key, ação).
+- `billing_dunning_runs` — log de cada disparo (invoice_id, step, channel, sent_at, status).
+- `billing_suspensions` — histórico de suspensão/reativação (contract_id, suspended_at, reason, reactivated_at).
 
-Botão **INICIAR JORNADA GUIADA DA AGENDA** entra no topo da rota (perto do banner DEMO) e no dashboard.
+Tudo com RLS por `company_id` + GRANTs (admin/superuser veem global).
 
-### 5. Aplicação de nicho na rota `src/routes/demo.agenda.tsx`
-- Já existe `nichoDemo` (query `?nicho=…`). Adicionar `Select` no topo da página com os 7 nichos do Bloco 45; ao trocar, chamar `applyNichoPreset(nicho)` (com confirmação) e re-renderizar labels.
-- Substituir strings hard-coded ("Cliente", "Profissional", "Serviço") por `labels.cliente` / `labels.profissional` / `labels.servico` lidos do preset, em todas as tabs (mantém código intacto, só troca textos).
-- Botão **Outros Módulos** (já obrigatório no Bloco 48) — abrir `Dialog` listando os módulos disponíveis em `cloneCentral.MODULOS_BASE`/lista existente, com Nome/Categoria/Descrição. Ao escolher, navegar para `/demo/<modulo>` preservando o lead capturado.
-- Botão **ZERAR DADOS DA DEMO** (Bloco 49) já existe via `useDemoState` resets; consolidar em um único botão com `confirm` exibindo o texto oficial, e que chame `resetAll()` (profs, servs, agds, espera, params, fluxos, comunicação, logs locais). Mantém lead capturado para não bloquear a demo.
+### 2. Lógica automática (cron + server functions)
 
-### 6. CTAs de contratação real (Bloco 50)
-Componente `AgendaCtaStrip` reutilizável, inserido em:
-- topo do dashboard (banner);
-- final da jornada guiada;
-- rodapé da rota.
-Cada botão chama `logCtaClicado({ destino, lead })` antes de navegar.
+- Server fn `runBillingCycle` (já fica registrada como cron pg_cron diário às 00:05):
+  - gera próxima fatura quando faltar 7 dias para `next_due_date`
+  - dispara passo D-7 / D-1 / D0 conforme `billing_dunning_policy`
+  - às 00:01 do dia seguinte ao vencimento: marca `overdue`, suspende contrato, grava em `billing_suspensions`
+- Server fn `markInvoicePaid` → libera contrato, dispara reativação automática, registra `paid_at` no `fin_transactions` + recibo NFe (flag).
+- Reativação consulta `billing_suspensions` em aberto e atualiza `contracts.status = active`.
 
-### 7. Estados vazios e botões "vivos"
-- Substituir `<p>Sem profissionais.</p>` etc. pelas frases do Bloco 52 ("Nenhum profissional cadastrado ainda. Crie o primeiro…").
-- Para qualquer ação que dependa de credenciais externas (WhatsApp real, e-mail real, VoIP), mostrar a string oficial: **"Recurso preparado — aguardando credenciais externas."** Já há sinal visual com selo TESTE; reforçar nos handlers para evitar clique morto.
-- Garantir que cada botão da lista do Bloco 51 tenha pelo menos um `toast`/log de retorno.
+Templates de mensagem (`message_templates`) com PIX (chave, copia-e-cola, QR placeholder). Renderização final via `message_outbox`.
 
-### 8. Aba "Logs" da Agenda
-Reaproveita a tabela já existente de `EnvioLog` no painel de Comunicação, mas adiciona, em uma nova aba "Logs" (ou subaba no dashboard), o feed completo de `agendaLogs` com filtros por área/ação/status/canal/ambiente e botão Limpar (somente registros locais). Cada linha mostra módulo, área, ação, status, ambiente, data, e — se houver — canal/destinatário/erro.
+### 3. Efeito de suspensão no app
 
-### 9. Checklist e testes (Blocos 53–54)
-Não precisa de código adicional além do que está acima; o plano cobre todos os 50 itens. A verificação será feita após implementar:
-- abrir `/demo/agenda` em desktop + mobile (viewport 375),
-- rodar a jornada guiada do início ao fim,
-- conferir indicadores do dashboard após criar/cancelar/pagar,
-- conferir adaptação de labels ao trocar para "clinicas", "fitness" e "bar",
-- confirmar que `Zerar dados` só limpa localStorage da Agenda.
+- Hook `useContractStatus()` consulta o contrato ativo da empresa.
+- Em `_authenticated/route.tsx`: se `status = suspended` → redireciona para `/conta-suspensa` (página nova com instruções e botão "Já paguei").
+- Páginas públicas do tenant (agenda pública / site) mostram banner "Serviço temporariamente indisponível por pendência financeira" (componente `<SuspendedBanner />` consumido pelas rotas de paciente/agenda pública).
+- Bloqueio de novos agendamentos: `agenda_appointments` policy adicional via trigger checando contrato ativo.
 
-### Resumo de arquivos
-**Novos**
-- `src/lib/agendaNichos.ts`
-- `src/lib/agendaLogs.ts`
-- `src/components/demo/agenda/AgendaDashboard.tsx`
-- `src/components/demo/agenda/AgendaJornadaGuiada.tsx`
-- `src/components/demo/agenda/AgendaCtaStrip.tsx`
-- `src/components/demo/agenda/OutrosModulosDialog.tsx`
+### 4. UI nova
 
-**Editados**
-- `src/routes/demo.agenda.tsx` (novas abas Dashboard / Logs, jornada, seletor de nicho, Outros Módulos, Zerar dados consolidado, labels dinâmicos, estados vazios)
-- `src/lib/agendaFluxos.ts` e `src/lib/agendaComunicacao.ts` (encaminhar `appendLog` para `agendaLogs`)
+- `/_authenticated/admin/billing-policy.tsx` — editar a régua padrão (D-7/D-1/D0/D+1), templates, e ativar para todas as empresas.
+- `/_authenticated/admin/billing-contracts.tsx` — lista de contratos recorrentes, status, próximo vencimento, ações (forçar suspensão / reativar / marcar pago / gerar fatura agora).
+- `/_authenticated/admin/billing-contracts.$id.tsx` — detalhe do contrato com timeline de faturas + log de cobranças + suspensões.
+- Card no `admin.billing` existente: "Receita recorrente do mês", "Inadimplentes", "Suspensos".
+- `/conta-suspensa.tsx` — página da cliente quando suspensa.
 
-### Garantias
-- Tudo permanece em `/demo/*` — sem mudanças em rotas autenticadas, sem migrações de banco, sem chamadas a APIs reais.
-- Nenhum pagamento, credencial ou dado real é tocado. Toda comunicação mantém o selo "TESTE — DEMONSTRAÇÃO — VERSÃO TESTE".
-- Recursos da Central Interna de Clonagem (Bloco 46) já existem em `src/lib/cloneCentral.ts`; o plano apenas confirma que a Agenda continua marcada como **módulo-base v1.0.0** e exclusiva da Impulsionando — nenhuma alteração necessária para o item 46.
+### 5. Seed do cliente Patrícia Lenine (via `supabase--insert`)
+
+- Cria `company` "Patrícia Lenine Psicologia" (subdomínio `patricialenine`).
+- Cria `customer` Patrícia.
+- Cria `fin_transaction` receita R$ 307,00 categoria "Setup / Implantação", pago em 08/06/2026 via Pix.
+- Cria `billing_plan` "Mensal — Licença de Uso" (R$ 99,90, due_day=5).
+- Cria `billing_contract` ativo, start 05/07/2026, next_due_date 05/07/2026.
+- Marca registro de Nota Fiscal (flag `nfe_issued_at=08/06/2026`).
+
+### 6. Política como padrão
+
+- Linha única em `billing_dunning_policy` com `is_default=true` e os 4 passos.
+- Trigger ao inserir novo `billing_contract`: se a empresa não tem política própria, herda a default.
+
+## Detalhes técnicos resumidos
+
+- Cron via pg_cron chamando `/api/public/hooks/billing-tick` (apikey anon).
+- Envio: o `runBillingCycle` apenas insere em `message_outbox`; o flusher existente entrega.
+- PIX: campos `pix_key`, `pix_copy_paste`, `pix_qr_url` no `billing_invoices` (gerados no momento da fatura — placeholder estático no MVP, integração InfinitePay já existe no projeto).
+- Tudo idempotente via `unique(invoice_id, step)` em `billing_dunning_runs`.
+
+## Fora do escopo desta etapa
+
+- Geração real de NFe (apenas marcamos a flag; integração fiscal fica para depois).
+- Geração dinâmica de QR Pix por fatura (usa o copia-e-cola configurado no plano por enquanto).
+- Despublicação real do site do tenant (banner cobre o caso; "despublicar" de fato exige integração com publishing — fica como TODO marcado).
+
+## Confirmação
+
+Topa que eu siga exatamente esse escopo, incluindo seed da Patrícia Lenine e cron diário? Se sim, executo: migração → server fns → UI admin → página `/conta-suspensa` → seed de dados → cron.
