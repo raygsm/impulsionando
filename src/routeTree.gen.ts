@@ -89,6 +89,7 @@ import { Route as AuthenticatedInventoryIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedFinanceIndexRouteImport } from './routes/_authenticated/finance.index'
 import { Route as AuthenticatedEhrIndexRouteImport } from './routes/_authenticated/ehr.index'
 import { Route as AuthenticatedCrmIndexRouteImport } from './routes/_authenticated/crm.index'
+import { Route as AuthenticatedCoreIndexRouteImport } from './routes/_authenticated/core.index'
 import { Route as AuthenticatedBiIndexRouteImport } from './routes/_authenticated/bi.index'
 import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenticated/agenda.index'
 import { Route as AuthenticatedAffiliatesIndexRouteImport } from './routes/_authenticated/affiliates.index'
@@ -571,6 +572,11 @@ const AuthenticatedCrmIndexRoute = AuthenticatedCrmIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedCrmRoute,
 } as any)
+const AuthenticatedCoreIndexRoute = AuthenticatedCoreIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedCoreRoute,
+} as any)
 const AuthenticatedBiIndexRoute = AuthenticatedBiIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -1038,7 +1044,7 @@ export interface FileRoutesByFullPath {
   '/audit': typeof AuthenticatedAuditRoute
   '/bi': typeof AuthenticatedBiRouteWithChildren
   '/companies': typeof AuthenticatedCompaniesRoute
-  '/core': typeof AuthenticatedCoreRoute
+  '/core': typeof AuthenticatedCoreRouteWithChildren
   '/crm': typeof AuthenticatedCrmRouteWithChildren
   '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -1144,6 +1150,7 @@ export interface FileRoutesByFullPath {
   '/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/bi/': typeof AuthenticatedBiIndexRoute
+  '/core/': typeof AuthenticatedCoreIndexRoute
   '/crm/': typeof AuthenticatedCrmIndexRoute
   '/ehr/': typeof AuthenticatedEhrIndexRoute
   '/finance/': typeof AuthenticatedFinanceIndexRoute
@@ -1190,7 +1197,6 @@ export interface FileRoutesByTo {
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/audit': typeof AuthenticatedAuditRoute
   '/companies': typeof AuthenticatedCompaniesRoute
-  '/core': typeof AuthenticatedCoreRoute
   '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/minha-assinatura': typeof AuthenticatedMinhaAssinaturaRoute
@@ -1291,6 +1297,7 @@ export interface FileRoutesByTo {
   '/affiliates': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda': typeof AuthenticatedAgendaIndexRoute
   '/bi': typeof AuthenticatedBiIndexRoute
+  '/core': typeof AuthenticatedCoreIndexRoute
   '/crm': typeof AuthenticatedCrmIndexRoute
   '/ehr': typeof AuthenticatedEhrIndexRoute
   '/finance': typeof AuthenticatedFinanceIndexRoute
@@ -1344,7 +1351,7 @@ export interface FileRoutesById {
   '/_authenticated/audit': typeof AuthenticatedAuditRoute
   '/_authenticated/bi': typeof AuthenticatedBiRouteWithChildren
   '/_authenticated/companies': typeof AuthenticatedCompaniesRoute
-  '/_authenticated/core': typeof AuthenticatedCoreRoute
+  '/_authenticated/core': typeof AuthenticatedCoreRouteWithChildren
   '/_authenticated/crm': typeof AuthenticatedCrmRouteWithChildren
   '/_authenticated/customers': typeof AuthenticatedCustomersRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -1450,6 +1457,7 @@ export interface FileRoutesById {
   '/_authenticated/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/_authenticated/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/_authenticated/bi/': typeof AuthenticatedBiIndexRoute
+  '/_authenticated/core/': typeof AuthenticatedCoreIndexRoute
   '/_authenticated/crm/': typeof AuthenticatedCrmIndexRoute
   '/_authenticated/ehr/': typeof AuthenticatedEhrIndexRoute
   '/_authenticated/finance/': typeof AuthenticatedFinanceIndexRoute
@@ -1609,6 +1617,7 @@ export interface FileRouteTypes {
     | '/affiliates/'
     | '/agenda/'
     | '/bi/'
+    | '/core/'
     | '/crm/'
     | '/ehr/'
     | '/finance/'
@@ -1655,7 +1664,6 @@ export interface FileRouteTypes {
     | '/access-profiles'
     | '/audit'
     | '/companies'
-    | '/core'
     | '/customers'
     | '/dashboard'
     | '/minha-assinatura'
@@ -1756,6 +1764,7 @@ export interface FileRouteTypes {
     | '/affiliates'
     | '/agenda'
     | '/bi'
+    | '/core'
     | '/crm'
     | '/ehr'
     | '/finance'
@@ -1914,6 +1923,7 @@ export interface FileRouteTypes {
     | '/_authenticated/affiliates/'
     | '/_authenticated/agenda/'
     | '/_authenticated/bi/'
+    | '/_authenticated/core/'
     | '/_authenticated/crm/'
     | '/_authenticated/ehr/'
     | '/_authenticated/finance/'
@@ -2570,6 +2580,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCrmIndexRouteImport
       parentRoute: typeof AuthenticatedCrmRoute
     }
+    '/_authenticated/core/': {
+      id: '/_authenticated/core/'
+      path: '/'
+      fullPath: '/core/'
+      preLoaderRoute: typeof AuthenticatedCoreIndexRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/bi/': {
       id: '/_authenticated/bi/'
       path: '/'
@@ -3194,6 +3211,17 @@ const AuthenticatedBiRouteWithChildren = AuthenticatedBiRoute._addFileChildren(
   AuthenticatedBiRouteChildren,
 )
 
+interface AuthenticatedCoreRouteChildren {
+  AuthenticatedCoreIndexRoute: typeof AuthenticatedCoreIndexRoute
+}
+
+const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
+  AuthenticatedCoreIndexRoute: AuthenticatedCoreIndexRoute,
+}
+
+const AuthenticatedCoreRouteWithChildren =
+  AuthenticatedCoreRoute._addFileChildren(AuthenticatedCoreRouteChildren)
+
 interface AuthenticatedCrmRouteChildren {
   AuthenticatedCrmActivitiesRoute: typeof AuthenticatedCrmActivitiesRoute
   AuthenticatedCrmBoardRoute: typeof AuthenticatedCrmBoardRoute
@@ -3316,7 +3344,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAuditRoute: typeof AuthenticatedAuditRoute
   AuthenticatedBiRoute: typeof AuthenticatedBiRouteWithChildren
   AuthenticatedCompaniesRoute: typeof AuthenticatedCompaniesRoute
-  AuthenticatedCoreRoute: typeof AuthenticatedCoreRoute
+  AuthenticatedCoreRoute: typeof AuthenticatedCoreRouteWithChildren
   AuthenticatedCrmRoute: typeof AuthenticatedCrmRouteWithChildren
   AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
@@ -3352,7 +3380,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAuditRoute: AuthenticatedAuditRoute,
   AuthenticatedBiRoute: AuthenticatedBiRouteWithChildren,
   AuthenticatedCompaniesRoute: AuthenticatedCompaniesRoute,
-  AuthenticatedCoreRoute: AuthenticatedCoreRoute,
+  AuthenticatedCoreRoute: AuthenticatedCoreRouteWithChildren,
   AuthenticatedCrmRoute: AuthenticatedCrmRouteWithChildren,
   AuthenticatedCustomersRoute: AuthenticatedCustomersRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
