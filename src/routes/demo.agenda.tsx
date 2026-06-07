@@ -59,7 +59,7 @@ function DemoAgenda() {
     lembrete24h: true, lembrete1h: true, confirmaWhats: true, bloqueioFeriado: false, reagendamentoAuto: true,
   });
   const [dataAtual, setDataAtual] = useState(() => new Date().toISOString().slice(0, 10));
-  const [aba, setAba] = useState<string>("grade");
+  const [aba, setAba] = useState<string>("visao");
   const [prefill, setPrefill] = useState<{ cliente: string; telefone: string } | null>(null);
   const [nichoDemo, setNichoDemo] = useState(() => {
     if (typeof window === "undefined") return "servicos";
