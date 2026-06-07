@@ -58,8 +58,8 @@ export function AgendaDashboard({
     const servs = loadJson<Servico[]>("imp.demo.ag.servs", []);
     const agds = loadJson<Agendamento[]>("imp.demo.ag.agds", []);
     const espera = loadJson<unknown[]>("imp.demo.ag.espera", []);
-    const recursos = loadAgendaResources();
-    const fluxos = loadAgendaFluxos();
+    const recursos = loadResources();
+    const fluxos = loadFluxos();
     const comm = loadComunicacao();
     return { profs, servs, agds, espera, recursos, fluxos, comm };
     // eslint-disable-next-line react-hooks/exhaustive-deps
