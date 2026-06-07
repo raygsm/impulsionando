@@ -78,7 +78,7 @@ function CloneCenterPage() {
   const [fStatus, setFStatus] = useState("all");
   const [fNiche, setFNiche] = useState("all");
   const [fSearch, setFSearch] = useState("");
-
+  const [logsInstanceId, setLogsInstanceId] = useState<string | null>(null);
 
   const isAllowed = !!me?.isSuperAdmin;
 
@@ -88,12 +88,39 @@ function CloneCenterPage() {
     setLogs(cloneStore.listLogs());
   }
 
+  function archiveInstance(i: CloneInstance) {
+    const updated: CloneInstance = { ...i, archived: true, status: "Arquivado" };
+    const all = cloneStore.listInstances().map((x) => (x.id === i.id ? updated : x));
+    if (typeof window !== "undefined") {
+      localStorage.setItem("imp.clone.instances.v1", JSON.stringify(all));
+    }
+    cloneStore.pushLog({
+      actor: me?.user.email ?? "interno",
+      action: "arquivou",
+      detail: `Instância arquivada — ${i.targetName}`,
+      instanceId: i.id,
+    });
+    toast.success("Clone arquivado.");
+    refresh();
+  }
+
+  const filteredInstances = instances.filter((i) => {
+    if (fModule !== "all" && i.baseId !== fModule) return false;
+    if (fEnv !== "all" && i.environment !== fEnv) return false;
+    if (fStatus !== "all" && i.status !== fStatus) return false;
+    if (fNiche !== "all" && i.niche !== fNiche) return false;
+    if (fSearch.trim() && !i.targetName.toLowerCase().includes(fSearch.trim().toLowerCase()))
+      return false;
+    return true;
+  });
+
   useEffect(() => {
     if (isAllowed) {
       ensureSeedBases();
       refresh();
     }
   }, [isAllowed]);
+
 
   // Log tentativa negada (uma vez)
   useMemo(() => {
