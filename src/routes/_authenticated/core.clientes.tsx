@@ -16,7 +16,7 @@ function CoreClientes() {
     queryFn: async () => {
       const { data: companies } = await supabase
         .from("companies")
-        .select("id, name, slug, is_active, created_at")
+        .select("id, name, is_active, created_at")
         .eq("is_master", false)
         .order("created_at", { ascending: false });
 
