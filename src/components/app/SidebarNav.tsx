@@ -6,6 +6,7 @@ import type { CurrentUser } from "@/lib/auth";
 import { NAV_GROUPS, TOP_ITEMS, type NavItem, type NavGroup } from "./nav-config";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { useActiveCompany } from "@/hooks/use-active-company";
+import { useImpersonation } from "@/hooks/use-impersonation";
 
 function isItemActive(pathname: string, to: string) {
   return pathname === to || pathname.startsWith(to + "/");
