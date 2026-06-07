@@ -24,6 +24,7 @@ import { Route as PacienteRouteImport } from './routes/paciente'
 import { Route as OrcamentoRouteImport } from './routes/orcamento'
 import { Route as ModulosRouteImport } from './routes/modulos'
 import { Route as ContatoRouteImport } from './routes/contato'
+import { Route as ContaSuspensaRouteImport } from './routes/conta-suspensa'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -234,6 +235,11 @@ const ModulosRoute = ModulosRouteImport.update({
 const ContatoRoute = ContatoRouteImport.update({
   id: '/contato',
   path: '/contato',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContaSuspensaRoute = ContaSuspensaRouteImport.update({
+  id: '/conta-suspensa',
+  path: '/conta-suspensa',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -983,6 +989,7 @@ const ApiPublicPaymentsInfinitepayWebhookRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
@@ -1135,6 +1142,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
   '/orcamento': typeof OrcamentoRoute
   '/planos': typeof PlanosRouteWithChildren
@@ -1279,6 +1287,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
@@ -1433,6 +1442,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/conta-suspensa'
     | '/contato'
     | '/modulos'
     | '/orcamento'
@@ -1585,6 +1595,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/conta-suspensa'
     | '/contato'
     | '/orcamento'
     | '/planos'
@@ -1728,6 +1739,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/conta-suspensa'
     | '/contato'
     | '/modulos'
     | '/orcamento'
@@ -1882,6 +1894,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ContaSuspensaRoute: typeof ContaSuspensaRoute
   ContatoRoute: typeof ContatoRoute
   ModulosRoute: typeof ModulosRouteWithChildren
   OrcamentoRoute: typeof OrcamentoRoute
@@ -2048,6 +2061,13 @@ declare module '@tanstack/react-router' {
       path: '/contato'
       fullPath: '/contato'
       preLoaderRoute: typeof ContatoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conta-suspensa': {
+      id: '/conta-suspensa'
+      path: '/conta-suspensa'
+      fullPath: '/conta-suspensa'
+      preLoaderRoute: typeof ContaSuspensaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -3321,6 +3341,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ContaSuspensaRoute: ContaSuspensaRoute,
   ContatoRoute: ContatoRoute,
   ModulosRoute: ModulosRouteWithChildren,
   OrcamentoRoute: OrcamentoRoute,
