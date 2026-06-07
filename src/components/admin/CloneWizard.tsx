@@ -55,7 +55,7 @@ interface Props {
   base: ModuleBase;
   actor: string;
   canClone: boolean;
-  onCreated: () => void;
+  onCreated: (instanceId: string) => void;
 }
 
 const STEPS = ["Módulo-base", "Finalidade", "Dados", "Ambiente", "Preset", "Integrações", "Revisão"];
