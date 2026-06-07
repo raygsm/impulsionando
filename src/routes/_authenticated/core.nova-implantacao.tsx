@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import {
   Sparkles, Upload, CheckCircle2, XCircle, ArrowRight, ArrowLeft,
   Loader2, FileText, Image as ImageIcon, Rocket,
