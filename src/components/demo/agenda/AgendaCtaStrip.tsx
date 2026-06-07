@@ -1,10 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Sparkles, FileText, MessageSquare, Layers } from "lucide-react";
+import { Sparkles, FileText, MessageSquare, Layers, Copy } from "lucide-react";
 import { AgendaLog } from "@/lib/agendaLogs";
 import { toast } from "sonner";
 
-export function AgendaCtaStrip({ lead, onOutrosModulos }: { lead?: string; onOutrosModulos?: () => void }) {
+export function AgendaCtaStrip({
+  lead,
+  onOutrosModulos,
+  onClonarModulo,
+}: {
+  lead?: string;
+  onOutrosModulos?: () => void;
+  onClonarModulo?: () => void;
+}) {
   function go(destino: string, msg: string) {
     AgendaLog.ctaClicado(destino, lead);
     toast.success(msg);
@@ -16,13 +24,22 @@ export function AgendaCtaStrip({ lead, onOutrosModulos }: { lead?: string; onOut
         <div>
           <div className="font-semibold">Gostou da Agenda? Transforme esta demonstração em operação real.</div>
           <p className="text-xs text-muted-foreground max-w-2xl">
-            Organize seus horários, reduza faltas e automatize confirmações. Adicione a Agenda ao seu plano e avance para contratação.
+            Organize seus horários, reduza faltas e automatize confirmações. Adicione a Agenda ao seu plano, clone como novo projeto para um cliente ou avance para contratação.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button size="sm" className="bg-gradient-primary" onClick={() => go("/planos?modulo=agenda", "Levando para planos com Agenda pré-selecionada…")}>
             <Sparkles className="w-4 h-4 mr-1" /> Contratar Agenda real
           </Button>
+          {onClonarModulo && (
+            <Button
+              size="sm"
+              variant="default"
+              onClick={() => { AgendaLog.ctaClicado("clonar_modulo", lead); onClonarModulo(); }}
+            >
+              <Copy className="w-4 h-4 mr-1" /> Clonar módulo
+            </Button>
+          )}
           <Button size="sm" variant="outline" onClick={() => go("/contato?assunto=orcamento-agenda", "Adicionando Agenda ao orçamento…")}>
             <FileText className="w-4 h-4 mr-1" /> Adicionar ao orçamento
           </Button>
