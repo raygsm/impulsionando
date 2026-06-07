@@ -478,6 +478,10 @@ function DemoAgenda() {
           <TabsContent value="fluxos" className="mt-4">
             <AgendaFluxosPanel nicho={nichoDemo} />
           </TabsContent>
+
+          <TabsContent value="comunicacao" className="mt-4">
+            <AgendaComunicacaoPanel nicho={nichoDemo} />
+          </TabsContent>
         </Tabs>
 
         {/* Reagendar — confirmação obrigatória (drag-and-drop / mobile) */}
