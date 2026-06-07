@@ -1639,6 +1639,112 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_project_files: {
+        Row: {
+          bucket_path: string
+          created_at: string
+          generation_id: string
+          id: string
+          kind: string
+          mime_type: string | null
+          original_name: string | null
+          size_bytes: number | null
+        }
+        Insert: {
+          bucket_path: string
+          created_at?: string
+          generation_id: string
+          id?: string
+          kind: string
+          mime_type?: string | null
+          original_name?: string | null
+          size_bytes?: number | null
+        }
+        Update: {
+          bucket_path?: string
+          created_at?: string
+          generation_id?: string
+          id?: string
+          kind?: string
+          mime_type?: string | null
+          original_name?: string | null
+          size_bytes?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_project_files_generation_id_fkey"
+            columns: ["generation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_project_generations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_project_generations: {
+        Row: {
+          ai_analysis: Json | null
+          ai_model: string | null
+          approved_at: string | null
+          approved_by: string | null
+          client_data: Json
+          company_id: string | null
+          created_at: string
+          created_by: string
+          error_message: string | null
+          id: string
+          project_data: Json
+          prompt: string
+          provisioned_at: string | null
+          status: string
+          updated_at: string
+          uploaded_files: Json
+        }
+        Insert: {
+          ai_analysis?: Json | null
+          ai_model?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          client_data?: Json
+          company_id?: string | null
+          created_at?: string
+          created_by: string
+          error_message?: string | null
+          id?: string
+          project_data?: Json
+          prompt: string
+          provisioned_at?: string | null
+          status?: string
+          updated_at?: string
+          uploaded_files?: Json
+        }
+        Update: {
+          ai_analysis?: Json | null
+          ai_model?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          client_data?: Json
+          company_id?: string | null
+          created_at?: string
+          created_by?: string
+          error_message?: string | null
+          id?: string
+          project_data?: Json
+          prompt?: string
+          provisioned_at?: string | null
+          status?: string
+          updated_at?: string
+          uploaded_files?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_project_generations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string

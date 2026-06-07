@@ -1,73 +1,107 @@
-# Revisão Final de Governança — Core Master
+# Core AI — Gerador Universal de Projetos por Prompt
 
-Auditoria dos 10 pontos solicitados. Para cada item: **(A) Já existe** — apenas exponho/conecto no painel; **(N) Falta** — crio o mínimo. Sem recriar módulos.
+Adicionar ao Core Master um fluxo único de **"Criar Projeto por Prompt"** que recebe dados do cliente, prompt em linguagem natural e arquivos, usa IA para analisar e sugerir módulos/páginas/comunicações, e — após aprovação humana — provisiona o cliente inteiro reusando o que já existe.
 
-## Mapa de cobertura atual × ações
+## Princípio de reuso (zero retrabalho)
 
-| # | Item | Estado hoje | Ação |
-|---|------|-------------|------|
-| 1 | Matriz global de parâmetros | Parcial — `setting_definitions` + `company_settings` existem; falta aplicação em massa | **N parcial**: nova aba "Parâmetros Globais" em `/core` com aplicar em (todos / white-label / cliente) |
-| 2 | Versionamento de módulos | `module_versions` existe; falta escopo de aplicação | **N parcial**: diálogo "Aplicar versão" com escopo (cliente / WL / todos) |
-| 3 | Clonagem de projeto | Não existe | **N**: serverFn `cloneCompany` + botão em `/core/cliente/$id` |
-| 4 | Clonagem de configurações | Não existe | **N**: diálogo "Copiar configurações" (origem→destino, marcar áreas: agenda, comunicação, cobrança, CRM, dashboard, permissões) |
-| 5 | Checklist de implantação | `onboarding_checklist` existe; já exposto | **A**: garantir aba "Implantação" visível no cliente com os 10 itens padronizados |
-| 6 | Central de testes | Não existe | **N**: `/core/testes` + serverFn `runClientHealthCheck` (login, whatsapp, email, agenda, cobrança, pix, NF, dashboard) |
-| 7 | Central de eventos (tela) | Catálogo em código + `message_outbox` + `message_templates`; falta tela unificada | **N parcial**: `/core/eventos` listando evento × canal × template × última/próxima execução |
-| 8 | Visão financeira master | `billing_invoices` + `subscriptions` existem; falta dashboard | **N**: `/core/financeiro-master` com MRR, ARR, ativos, suspensos, churn, LTV, inadimplência, receita por módulo/WL/segmento |
-| 9 | Modo suporte (entrar como cliente) | Não existe | **N**: serverFn `enterAsClient` (super-admin → qualquer; WL → próprios) + log em `audit_logs` obrigatório + banner "Modo Suporte" |
-| 10 | Certificação real | Já implementado (readiness_status + checklist) | **A**: filtro "somente certificados" no marketplace de instalação |
+| Já existe | Vou reusar |
+|---|---|
+| `provisioning.functions.ts` (criação de empresa) | sim, sem alterar |
+| `governance.functions.ts → cloneCompany` | sim, para template inicial |
+| `modules.functions.ts → installModule` | sim, para aplicar módulos sugeridos |
+| `moduleSegmentTemplates.ts` | sim, IA escolhe o template |
+| `communicationEvents.ts` (catálogo de 18 eventos) | sim |
+| Trigger `tg_notify_welcome` + `enqueue_message('user_welcome')` | sim — usuário master já recebe boas-vindas automaticamente |
+| Tabela `onboarding_checklist` | sim, gera checklist final |
+| `companies` (logo, cores, identidade) | sim, IA preenche |
+| Lovable AI Gateway (`LOVABLE_API_KEY`) + `google/gemini-3-flash-preview` | sim |
 
-## Arquivos a criar (mínimos)
+**Não vou criar:** novos módulos, novas páginas públicas, novos componentes de comunicação, novos triggers.
 
-**Server functions** (`src/lib/governance.functions.ts` — novo):
-- `applyGlobalSetting({ key, value, scope: 'all'|'white_label'|'company', target_id })`
-- `applyModuleVersion({ module_id, version_id, scope, target_id })`
-- `cloneCompany({ source_company_id, new_name, new_owner_email })`
-- `copyCompanySettings({ source_id, target_id, areas: string[] })`
-- `runClientHealthCheck({ company_id })` — retorna `{ login, whatsapp, email, agenda, cobranca, pix, nf, dashboard: 'pass'|'fail'|'pending' }`
-- `enterAsClient({ company_id })` — valida escopo, grava `audit_logs`, retorna token de impersonação curto
+## Entregáveis (mínimo necessário)
 
-**Rotas** (em `src/routes/_authenticated/`):
-- `core.parametros.tsx` — Matriz global
-- `core.eventos.tsx` — Central de eventos
-- `core.testes.tsx` — Central de testes
-- `core.financeiro-master.tsx` — Visão financeira
+### 1. Banco — 2 tabelas + 1 bucket
 
-**Componentes** (em `src/components/core/`):
-- `CloneCompanyDialog.tsx`
-- `CopySettingsDialog.tsx`
-- `ApplyVersionScopeDialog.tsx`
-- `SupportModeBanner.tsx` (renderizado no `_authenticated` layout quando há impersonação ativa)
+```sql
+-- Histórico de gerações por IA
+CREATE TABLE public.ai_project_generations (
+  id uuid PK, company_id uuid NULL,
+  prompt text, client_data jsonb, project_data jsonb,
+  uploaded_files jsonb,        -- [{path, type, size}]
+  ai_analysis jsonb,           -- saída do modelo (segmento, módulos, páginas, comunicações)
+  status text,                 -- 'rascunho' | 'analisado' | 'aprovado' | 'provisionado' | 'cancelado'
+  created_by uuid, approved_by uuid, approved_at, provisioned_at,
+  created_at, updated_at
+);
 
-**Edições pontuais**:
-- `core.tsx` — adicionar 4 entradas de menu (Parâmetros, Eventos, Testes, Financeiro Master)
-- `core.cliente.$id.tsx` — botões "Clonar projeto", "Copiar configurações de…", "Entrar como cliente"
-- `core.modulos.$slug.tsx` — diálogo de aplicação com escopo na aba Versões
-- `_authenticated.tsx` (layout) — montar `SupportModeBanner`
+-- Linha por arquivo (FK -> generation)
+CREATE TABLE public.ai_project_files (
+  id uuid PK, generation_id uuid FK,
+  kind text,                   -- 'logo' | 'institucional' | 'apoio'
+  bucket_path text, mime_type text, size_bytes int, created_at
+);
+```
 
-## Migração necessária
+GRANTs + RLS: super-admin e staff Impulsionando podem ler/escrever; ninguém mais.
 
-Uma única migração:
-- `support_sessions` (id, super_user_id, company_id, started_at, ended_at, reason) — log obrigatório de "entrar como cliente"
-- `governance_applications` (id, kind: setting|version, scope, target_id, payload, applied_by, applied_at) — auditoria de aplicações em massa
-- GRANTs + RLS (super-admin only)
+Bucket privado `ai-project-uploads` (RLS na storage.objects: só staff Impulsionando).
 
-Sem alterar tabelas existentes.
+### 2. Server functions — `src/lib/ai-generator.functions.ts` (NOVA)
 
-## Fora de escopo
+| Função | O que faz |
+|---|---|
+| `analyzeProjectPrompt` | Chama Lovable AI Gateway (`generateText` + `Output.object` Zod) → devolve `{segmento, modulos_sugeridos[], paginas_sugeridas[], comunicacoes[], identidade_sugerida}` |
+| `saveDraftGeneration` | Persiste rascunho em `ai_project_generations` + linhas em `ai_project_files` |
+| `approveAndProvision` | Reusa `cloneCompany`/`createCompany` existente + `installModule` por módulo sugerido + `enqueue_message('user_welcome')` (já automático via trigger) + popula `onboarding_checklist` |
+| `listGenerationHistory` | Lista para a aba Histórico |
 
-- Não recriar módulos, telas de cliente, fluxos de cobrança, comunicação ou agenda.
-- Não trocar arquitetura de RLS.
-- Item 10 não precisa de código novo — já está pronto, só filtro.
+A IA **só sugere dentro do catálogo `modules` certificado**. O system prompt recebe a lista de slugs disponíveis e o JSON Schema restringe `modulos_sugeridos[]` a esse enum.
 
-## Validação
+### 3. UI — 1 nova rota com wizard
 
-Ao final, super-admin consegue, a partir de `/core`:
-1. Aplicar um parâmetro a todos os clientes em 2 cliques.
-2. Promover uma versão de módulo para todos.
-3. Clonar Patrícia Lenine → novo cliente em <1min.
-4. Rodar teste completo em qualquer cliente e ver pass/fail.
-5. Ver MRR/ARR/Churn em tempo real.
-6. Entrar como cliente com log automático.
+`src/routes/_authenticated/core.nova-implantacao.tsx` (NOVA)
 
-Confirma para eu executar?
+Wizard de 5 etapas em um único componente:
+
+1. **Cliente** — formulário com validação Zod (CPF/CNPJ, e-mail, WhatsApp, CEP)
+2. **Projeto** — nome, subdomínio, domínio, segmento, cidade, estado
+3. **Prompt** — Textarea grande
+4. **Uploads** — 3 dropzones (logo / institucionais / apoio) → upload para bucket
+5. **Análise + Aprovação** — botão "Analisar Projeto" chama `analyzeProjectPrompt`, mostra resumo (cliente, projeto, módulos, páginas, comunicações), 3 botões: **Aprovar e Criar** / **Editar Prompt** / **Cancelar**
+
+Após aprovação → chama `approveAndProvision` → exibe checklist com ✅ por item.
+
+### 4. Atalho no menu
+
+Em `core.tsx` adicionar item "Nova Implantação por IA" apontando para `/core/nova-implantacao`. **Não removo** nada existente.
+
+## Limites honestos do que a IA realmente faz
+
+- ✅ **Analisa** o prompt e sugere segmento, módulos, páginas, comunicações, identidade
+- ✅ **Provisiona** o cliente: cria empresa, instala módulos certificados, ativa comunicações, cria usuário master, dispara boas-vindas
+- ✅ **Aplica identidade visual** (logo, cores) lendo arquivos enviados — cor primária via análise do logo
+- ⚠️ **NÃO gera código novo de páginas públicas.** "Home / Quem Somos / Serviços / FAQ" são entregues como **conteúdo editável** dentro do módulo `area_cliente`/site institucional já existente — não como rotas TanStack novas (isso exigiria Lovable).
+- ⚠️ A geração de **subdomínio próprio (`cliente.impulsionando.com.br`)** é registrada em `onboarding_domain_requests` (tabela já existente) para o DNS ser configurado manualmente fora do escopo deste recurso.
+
+Estas duas ressalvas são honestas e estão alinhadas com a arquitetura atual; o restante do prompt é entregue 100%.
+
+## Detalhes técnicos
+
+- **AI Gateway:** padrão de `connecting-to-ai-models-tanstack` + `ai-sdk-lovable-gateway`. Helper já não existe; criar `src/lib/ai-gateway.server.ts` (único arquivo server-only, ~30 linhas). Modelo: `google/gemini-3-flash-preview`. Saída estruturada via `Output.object` (Zod).
+- **Uploads:** `supabase.storage.from('ai-project-uploads').upload(...)` direto do browser (autenticado como super-admin); paths gravados em `ai_project_files`.
+- **Multipart na chamada de IA:** IA recebe apenas o **prompt + tipos de arquivos enviados** (não os bytes); arquivos grandes ficam no bucket para uso posterior pela equipe na edição de identidade.
+- **Aprovação obrigatória:** `approveAndProvision` só roda após o usuário clicar "Aprovar e Criar" — nunca dispara automaticamente.
+- **Auditoria:** cada provisionamento grava em `audit_logs` (`action='ai_provision'`) com `ai_project_generations.id` para rastreabilidade.
+
+## O que NÃO vou fazer (anti-escopo)
+
+- Criar novas rotas públicas dinâmicas para o site do cliente final
+- Criar novos componentes de página (Home/FAQ/etc.) como rotas TanStack
+- Criar novo provedor de DNS automático
+- Alterar `tg_notify_welcome`, `enqueue_message`, ou qualquer trigger existente
+- Mexer em RLS/permissões fora das 2 tabelas novas
+- Adicionar dependências npm — `ai` e `@ai-sdk/openai-compatible` se ainda não estiverem, são as únicas
+
+## Resultado final
+
+Super-admin abre `/core/nova-implantacao`, cola um prompt como o exemplo da Patrícia Lenine, anexa logo, clica em "Analisar Projeto", revisa o resumo, clica em "Aprovar e Criar" → em <30s o cliente está provisionado, com módulos certificados instalados, identidade aplicada, usuário master criado, boas-vindas enviadas, checklist preenchido — sem voltar ao Lovable.
