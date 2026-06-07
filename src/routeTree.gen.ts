@@ -165,6 +165,7 @@ import { Route as ApiPublicDemoSendTestRouteImport } from './routes/api/public/d
 import { Route as ApiPaymentsInfinitepayCreateRouteImport } from './routes/api/payments/infinitepay.create'
 import { Route as ApiPaymentsInfinitepayCheckStatusRouteImport } from './routes/api/payments/infinitepay.check-status'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
+import { Route as AuthenticatedCoreClienteIdRouteImport } from './routes/_authenticated/core.cliente.$id'
 import { Route as AuthenticatedAdminModulosClonagemRouteImport } from './routes/_authenticated/admin.modulos.clonagem'
 import { Route as ApiPublicPaymentsInfinitepayWebhookRouteImport } from './routes/api/public/payments/infinitepay.webhook'
 
@@ -1013,6 +1014,12 @@ const AuthenticatedSalesCashIdRoute =
     path: '/$id',
     getParentRoute: () => AuthenticatedSalesCashRoute,
   } as any)
+const AuthenticatedCoreClienteIdRoute =
+  AuthenticatedCoreClienteIdRouteImport.update({
+    id: '/cliente/$id',
+    path: '/cliente/$id',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedAdminModulosClonagemRoute =
   AuthenticatedAdminModulosClonagemRouteImport.update({
     id: '/admin/modulos/clonagem',
@@ -1166,6 +1173,7 @@ export interface FileRoutesByFullPath {
   '/reports/': typeof AuthenticatedReportsIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
+  '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
@@ -1314,6 +1322,7 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedReportsIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
+  '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
@@ -1475,6 +1484,7 @@ export interface FileRoutesById {
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
   '/_authenticated/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
+  '/_authenticated/core/cliente/$id': typeof AuthenticatedCoreClienteIdRoute
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
@@ -1636,6 +1646,7 @@ export interface FileRouteTypes {
     | '/reports/'
     | '/sales/'
     | '/admin/modulos/clonagem'
+    | '/core/cliente/$id'
     | '/sales/cash/$id'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
@@ -1784,6 +1795,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/sales'
     | '/admin/modulos/clonagem'
+    | '/core/cliente/$id'
     | '/sales/cash/$id'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
@@ -1944,6 +1956,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reports/'
     | '/_authenticated/sales/'
     | '/_authenticated/admin/modulos/clonagem'
+    | '/_authenticated/core/cliente/$id'
     | '/_authenticated/sales/cash/$id'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
@@ -3125,6 +3138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSalesCashIdRouteImport
       parentRoute: typeof AuthenticatedSalesCashRoute
     }
+    '/_authenticated/core/cliente/$id': {
+      id: '/_authenticated/core/cliente/$id'
+      path: '/cliente/$id'
+      fullPath: '/core/cliente/$id'
+      preLoaderRoute: typeof AuthenticatedCoreClienteIdRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/admin/modulos/clonagem': {
       id: '/_authenticated/admin/modulos/clonagem'
       path: '/admin/modulos/clonagem'
@@ -3234,11 +3254,13 @@ const AuthenticatedBiRouteWithChildren = AuthenticatedBiRoute._addFileChildren(
 interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreClientesRoute: typeof AuthenticatedCoreClientesRoute
   AuthenticatedCoreIndexRoute: typeof AuthenticatedCoreIndexRoute
+  AuthenticatedCoreClienteIdRoute: typeof AuthenticatedCoreClienteIdRoute
 }
 
 const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreClientesRoute: AuthenticatedCoreClientesRoute,
   AuthenticatedCoreIndexRoute: AuthenticatedCoreIndexRoute,
+  AuthenticatedCoreClienteIdRoute: AuthenticatedCoreClienteIdRoute,
 }
 
 const AuthenticatedCoreRouteWithChildren =
