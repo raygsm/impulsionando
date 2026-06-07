@@ -8,8 +8,8 @@ import { RefreshCw, Download, Calendar, Users, Briefcase, Wallet, Bell, ListChec
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { toast } from "sonner";
 import { AgendaLog } from "@/lib/agendaLogs";
-import { loadAgendaResources } from "@/lib/agendaResources";
-import { loadAgendaFluxos } from "@/lib/agendaFluxos";
+import { loadResources } from "@/lib/agendaResources";
+import { loadFluxos } from "@/lib/agendaFluxos";
 import { loadComunicacao } from "@/lib/agendaComunicacao";
 import { labelsFor } from "@/lib/agendaNichos";
 
