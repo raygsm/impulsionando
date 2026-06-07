@@ -490,7 +490,7 @@ function CloneCenterPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Wizard */}
+      {/* Wizard de clonagem */}
       {wizardBase && (
         <CloneWizard
           open={!!wizardBase}
@@ -498,9 +498,89 @@ function CloneCenterPage() {
           base={wizardBase}
           actor={actor}
           canClone={isAllowed}
-          onCreated={refresh}
+          onCreated={(id) => {
+            refresh();
+            setSuccessInstanceId(id);
+          }}
         />
       )}
+
+      {/* Sucesso pós-clonagem */}
+      <Dialog open={!!successInstanceId} onOpenChange={(v) => !v && setSuccessInstanceId(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-green-600" />
+              Clonagem concluída
+            </DialogTitle>
+            <DialogDescription>
+              Módulo clonado com sucesso. A nova instância foi criada a partir do módulo-base
+              selecionado, sem copiar dados reais de outros clientes.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              onClick={() => toast.info("Acesso à instância — preparado para próxima fase técnica.")}
+            >
+              <ExternalLink className="w-4 h-4 mr-1" /> Acessar novo projeto
+            </Button>
+            <Button
+              onClick={() => {
+                const inst = cloneStore.listInstances().find((i) => i.id === successInstanceId);
+                setSuccessInstanceId(null);
+                if (inst) setConfigInstance(inst);
+              }}
+            >
+              <Settings className="w-4 h-4 mr-1" /> Configurar agora
+            </Button>
+            <Button variant="ghost" onClick={() => { setLogsInstanceId(successInstanceId); setSuccessInstanceId(null); }}>
+              <History className="w-4 h-4 mr-1" /> Ver logs
+            </Button>
+            <Button variant="ghost" onClick={() => setSuccessInstanceId(null)}>
+              Voltar à Central
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Configuração inicial Agenda */}
+      {configInstance && (
+        <AgendaConfigWizard
+          open={!!configInstance}
+          onOpenChange={(v) => !v && setConfigInstance(null)}
+          instance={configInstance}
+          actor={actor}
+          onSaved={refresh}
+        />
+      )}
+
+      {/* Logs por instância */}
+      <Dialog open={!!logsInstanceId} onOpenChange={(v) => !v && setLogsInstanceId(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Logs da instância</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            {logs.filter((l) => l.instanceId === logsInstanceId).length === 0 ? (
+              <p className="text-sm text-muted-foreground">Sem logs para esta instância.</p>
+            ) : (
+              logs
+                .filter((l) => l.instanceId === logsInstanceId)
+                .map((l) => (
+                  <Card key={l.id} className="p-2 text-sm">
+                    <div className="font-medium">{l.action}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {l.actor} · {new Date(l.at).toLocaleString("pt-BR")}
+                    </div>
+                    <div className="text-xs">{l.detail}</div>
+                  </Card>
+                ))
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
 
       {/* Detalhe do módulo-base */}
       <Dialog open={!!detailBase} onOpenChange={(v) => !v && setDetailBase(null)}>
