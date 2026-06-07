@@ -243,7 +243,7 @@ function ModulesPage() {
               isSuper={isSuper}
               canToggle={isSuper && !!dbEntry && !!effectiveCompanyId}
               onToggle={(enabled) =>
-                dbEntry && toggle.mutate({ moduleId: dbEntry.id, enabled })
+                dbEntry && toggle.mutate({ moduleId: dbEntry.id, enabled, slug: dbEntry.slug })
               }
             />
           );
