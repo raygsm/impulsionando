@@ -22,7 +22,7 @@ export type NichoPreset = {
   nome: string;
   descricao: string;
   labels: NichoLabels;
-  recursosPrioritarios: AgendaParamKey[];
+  recursosPrioritarios: string[];
   servicosExemplo: { nome: string; duracao: number; preco: number }[];
   ctasDestaque: string[];
 };
