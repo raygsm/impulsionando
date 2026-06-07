@@ -92,8 +92,8 @@ export function AgendaDashboard({
   const taxaCancelamento = total ? Math.round((cancelados / total) * 100) : 0;
 
   const pagamentos = data.fluxos.pagamentos ?? [];
-  const aguardandoPag = pagamentos.filter((p) => p.status === "aguardando").length;
-  const pagosDemo = pagamentos.filter((p) => p.status === "pago_demo" || p.status === "PAGO_DEMO" || p.status === "pago").length;
+  const aguardandoPag = pagamentos.filter((p) => p.status === "aguardando_pagamento" || p.status === "link_enviado").length;
+  const pagosDemo = pagamentos.filter((p) => p.status === "pago_demo").length;
   const qrCodes = pagamentos.length;
 
   const envios = data.comm.envios ?? [];
