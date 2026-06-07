@@ -1,69 +1,91 @@
-## Análise (o que já existe — NÃO recriar)
+# Central Master de Configuração — Plano de Execução
 
-- `companies` já tem: `name`, `legal_name`, `document`, `email`, `phone`, `logo_url`, `is_master`, `status`, `niche_id`.
-- `company_settings` (chave/valor JSONB) já existe — usado para extensões.
-- `message_templates` (95 templates globais com `company_id = NULL`) e `enqueue_message()` + `render_template()` já operam o motor de variáveis `{{...}}`.
-- `onboarding_domain_requests` já guarda domínio/subdomínio.
-- `/adm` (Core Manager) + Cliente 360 + `core.modulos` + `core.implantacoes` já existem.
-- Provisionamento automático (`autoProvisionFromPayment`) já cria empresa + contrato + módulos.
+O escopo é grande demais para uma única entrega. Vou trabalhar em fases curtas, **sempre reaproveitando** as telas, tabelas e funções que já existem no projeto (companies, company_modules, company_settings, setting_definitions, message_templates, message_outbox, billing_*, audit_logs, user_profiles, profile_permissions, customers, agenda_*, crm_*, fin_*, etc.).
 
-## Princípio
+Nada será reconstruído. Só vou **expor, conectar e parametrizar** no painel `/core` (Master).
 
-Não criar nova tabela de identidade. **Estender `companies`** com os campos faltantes (additivo, sem quebrar nada) e fazer o `enqueue_message` **injetar automaticamente** as variáveis `{{company_*}}` em TODA mensagem, sem alterar 1 template sequer.
+---
 
-## Etapas
+## O que JÁ existe e será apenas exposto/conectado (sem refazer)
 
-### 1. Migration aditiva em `companies`
-Adicionar colunas (todas nullable, sem default destrutivo):
-`trade_name`, `company_type`, `segment`, `primary_color`, `secondary_color`,
-`whatsapp`, `financial_email`, `support_email`, `commercial_email`,
-`domain`, `subdomain`, `website`, `instagram`, `facebook`,
-`address_line`, `address_city`, `address_state`, `address_zip`,
-`owner_name`.
+- **Impersonação** (`use-impersonation` + `ImpersonationBanner`) — já implementada na fase anterior.
+- **Instalador de módulos por empresa** — aba "Módulos" em `core.cliente.$id.tsx` usando `company_modules` + `module_versions`.
+- **Parâmetros Sim/Não por cliente** — `ClientSettingsPanel` + tabela `setting_definitions`/`company_settings` (18 parâmetros já semeados).
+- **Templates de comunicação** — `message_templates` + `message_outbox` + `enqueue_message()` (e-mail/WhatsApp/in-app já funcionam).
+- **Régua de cobrança** — `billing_contracts`, `billing_invoices`, `billing_dunning_policy`, `billing_run_cycle()`.
+- **Auditoria** — `audit_logs` + trigger `tg_audit` (basta exibir).
+- **Permissões** — `profiles`, `profile_permissions`, `user_permission_overrides`, `user_has_permission()`.
+- **Pendências** — calculáveis a partir das tabelas existentes (sem nova tabela).
 
-Os campos `name`, `email`, `phone`, `logo_url` já existem — reaproveitar.
+---
 
-### 2. Função `public.company_identity_payload(uuid)`
-Retorna `jsonb` com TODAS as variáveis `company_*` da empresa (name, logo, email, whatsapp, domain, subdomain, primary_color, etc.). Usa fallback para empresa master quando `company_id IS NULL`.
+## Fases (entrego uma por vez, validamos, seguimos)
 
-### 3. Patch em `enqueue_message`
-Antes de chamar `render_template`, fazer:
-```
-_merged := company_identity_payload(_company_id) || _payload
-```
-→ payload do chamador tem prioridade, mas TODA mensagem ganha automaticamente `{{company_name}}`, `{{company_logo}}`, `{{company_whatsapp}}`, etc. **Nenhum template existente precisa ser editado.**
+### Fase A — Hub Central + Pendências por cliente
+1. Refinar `/core/cliente/:id` para virar o **hub único** com abas claras: **Dados Gerais · Módulos · Parâmetros · Comunicação · Financeiro · Fiscal · Agenda · CRM · Permissões · Pendências · Logs**.
+2. Cada aba reaproveita componente existente (ex.: `IdentityTab`, `ClientSettingsPanel`, `OnboardingWizard`, billing já pronto).
+3. Nova aba **Pendências**: consulta agregada (sem nova tabela) que lista o que falta — e-mail, WhatsApp, Pix, QR, gateway, CNPJ inválido, módulo incompleto, fatura vencida, etc.
+4. Nova aba **Logs**: lê `audit_logs` filtrando por `company_id`.
 
-### 4. UI — Edição de Identidade no `/adm`
-Estender a página `core.cliente.$id.tsx` (Cliente 360) com aba **"Identidade"**:
-- formulário completo com todos os campos novos + logo + cores;
-- preview de "como o cliente final verá" (nome, logo, cor primária);
-- exibir: domínio, subdomínio, WhatsApp ativo, e-mails ativos, módulos instalados, última comunicação enviada (consulta `message_outbox` ordenada por `created_at`).
+### Fase B — Parâmetros expandidos (Sim/Não para tudo que é mutável)
+Adicionar definições novas em `setting_definitions` cobrindo:
+- Agenda (já existe parcial) — completar regras de cancelamento/remarcação/confirmar após pagamento.
+- Financeiro — multa, juros, desconto, dia vencimento, tolerância, gateway ativo, recorrência, suspensão/reativação automática.
+- Fiscal — emitir NF Sim/Não, automático após pagto, código serviço, alíquota, município, e-mail fiscal.
+- Comunicação — remetente, e-mail técnico, e-mail resposta, WhatsApp envio/suporte, assinatura, rodapé, links.
+- CRM — origem padrão, responsável padrão, follow-up.
+- Portal cliente, Relatórios, Notificações, Aparência.
 
-Server fn `updateCompanyIdentity` em `src/lib/company-identity.functions.ts`, gated por `is_impulsionando_staff` OU `company.write`.
+Tudo via `ClientSettingsPanel` (já agrupa por categoria automaticamente). **Zero código novo de UI.**
 
-### 5. Auditoria
-Já existe `audit_logs` + trigger `tg_audit` em `companies`. Toda alteração de identidade fica registrada automaticamente.
+### Fase C — Editor de comunicação por cliente
+Tela única que lista eventos (a partir de `message_templates`), permite por evento:
+- Toggle e-mail / WhatsApp
+- Editar assunto + corpo (override por `company_id` — a coluna já existe)
+- Inserir variáveis dinâmicas (palette com `[NOME_CLIENTE]`, `[VALOR]`, etc. mapeadas para o payload do `enqueue_message`)
+- Testar envio (chama `enqueue_message` com dados de teste)
+- Histórico → consulta `message_outbox` filtrada
 
-### 6. Mensagens — sem mudanças
-Como o `enqueue_message` agora injeta a identidade, os 95 templates existentes passam a ser contextuais automaticamente. **Nenhum template duplicado, nenhuma reescrita.**
+### Fase D — Construtor de campos personalizados
+**Esta é a única tabela nova realmente necessária**: `custom_fields` + `custom_field_values` (por entidade: customer, lead, appointment, etc.), com:
+- Tipo (texto, número, CPF, CNPJ, CEP, data, lista, sim/não, upload, etc.)
+- Obrigatório/Visível/Editável/Exibir em X — todos Sim/Não
+- Validação, máscara, valor padrão, ordem, campo dependente
+- UI no master para criar/editar; renderização condicional onde fizer sentido (começo pelo cadastro de cliente)
 
-## Detalhes técnicos
+### Fase E — Painel Financeiro/Fiscal acionável
+- Botões já no hub: **Baixa manual** (com modal: valor, data, forma, obs, comprovante → grava `fin_transactions` + `billing_invoices`), **Reprocessar NF**, **Reenviar comunicação**, **Suspender/Reativar** manualmente.
+- Tudo registra em `audit_logs` (trigger já faz).
 
-- Arquivos novos: `src/lib/company-identity.functions.ts`, um componente `IdentityTab.tsx` consumido por `core.cliente.$id.tsx`.
-- Arquivos editados: `core.cliente.$id.tsx` (adiciona aba), 1 migration.
-- Nada removido. Nada renomeado. Nenhum módulo tocado.
-- Cliente 360 e `/adm` continuam sendo os únicos pontos de gestão.
+### Fase F — White Label (escopo reduzido)
+RLS já distingue `is_super_admin` vs `is_impulsionando_staff` vs usuários de empresa. Adicionar:
+- Flag `is_white_label` em `companies` + `parent_company_id` (relação WL → clientes).
+- Helper `is_white_label_of(_user, _company)` + ajuste de policies para que WL veja só seus clientes.
+- Reaproveita a mesma UI `/core` com filtro automático.
 
-## Fora de escopo (não fazer agora)
+---
 
-- Refatorar os 95 templates (desnecessário — herança via payload resolve).
-- Criar tabela `company_profile` separada (duplicaria `companies`).
-- Mexer em provisionamento (já cria company → identidade preenchida via edição depois ou via dados do checkout).
-- UI de troca de templates por empresa (já existe `message_templates.company_id` para override).
+## O que NÃO vou fazer (para não gastar créditos à toa)
 
-## Validação final
+- Não vou criar telas novas paralelas às existentes (`/settings`, `/audit`, `/permissions`, `/admin/billing-*` continuam vivos — viram links/abas do hub).
+- Não vou refazer agenda, CRM, financeiro, PDV — eles já estão parametrizados via `company_settings` + flags.
+- Não vou trocar o stack nem migrar dados.
+- Não vou adicionar integrações fiscais novas se já existir uma; só vou expor parâmetros.
 
-Após aplicar:
-1. `SELECT company_identity_payload((SELECT id FROM companies WHERE name ILIKE '%patricia%'));` deve retornar JSON completo.
-2. Enviar `enqueue_message('appointment_confirmed', <company_id>, ...)` e confirmar que `message_outbox.body` contém o WhatsApp/logo/nome **da empresa**, não da Impulsionando.
-3. Editar identidade em `/adm/core/cliente/:id` → aba Identidade → salvar → reenviar → body muda automaticamente.
+---
+
+## Detalhes técnicos (resumidos)
+
+- Toda escrita passa pelas tabelas que **já têm trigger `tg_audit`** → logs automáticos.
+- Parâmetros: chave única `(company_id, key)` em `company_settings` — já existe `onConflict` no upsert.
+- Variáveis dinâmicas: `enqueue_message` já faz `company_identity_payload || payload` — a paleta apenas mostra as chaves disponíveis.
+- Pendências: query única no servidor (server function) que devolve um array tipado `{ key, label, severity, fix_path }`.
+- Custom fields (Fase D): única migração SQL real do plano; tudo o resto é UI + seeds.
+
+---
+
+## Por onde começar?
+
+Sugiro **Fase A + Fase B juntas** (hub + parâmetros expandidos) — entregam a maior parte da sensação de "tudo configurável pelo painel" sem mexer em schema novo. Depois decidimos as próximas.
+
+Confirma que posso seguir por aí, ou quer priorizar outra fase primeiro (ex.: começar pela Fase C — editor de comunicação, já que e-mail/WhatsApp foi a dor original)?
