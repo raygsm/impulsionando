@@ -1,82 +1,69 @@
-## Diagnóstico — o que JÁ existe (não recriar)
+## Análise (o que já existe — NÃO recriar)
 
-Já implementado no projeto, será 100% reaproveitado:
+- `companies` já tem: `name`, `legal_name`, `document`, `email`, `phone`, `logo_url`, `is_master`, `status`, `niche_id`.
+- `company_settings` (chave/valor JSONB) já existe — usado para extensões.
+- `message_templates` (95 templates globais com `company_id = NULL`) e `enqueue_message()` + `render_template()` já operam o motor de variáveis `{{...}}`.
+- `onboarding_domain_requests` já guarda domínio/subdomínio.
+- `/adm` (Core Manager) + Cliente 360 + `core.modulos` + `core.implantacoes` já existem.
+- Provisionamento automático (`autoProvisionFromPayment`) já cria empresa + contrato + módulos.
 
-- **Multi-tenant**: tabela `companies`, `company_modules`, `modules`, `company_units`, `is_master` flag, `CompanyPicker`, `useActiveCompany`.
-- **Catálogo de módulos**: `src/data/motherModules.ts` + página `/modules` (já permite ativar/desativar módulo por empresa para super admin).
-- **Billing/Contratos**: `billing_contracts`, `billing_invoices`, `billing_plans`, `billing_dunning_policy`, `BillingGate`, páginas `admin.billing-*`.
-- **Onboarding/contratação**: `quotes`, `checkout.success.tsx`, `DemoContractFlow`, `payments/infinitepay.*`, `fin_transactions`.
-- **Comunicação**: `message_outbox`, `message_templates`, `agendaComunicacao`, e-mails, WhatsApp via z-api.
-- **CRM/Timeline**: `crm_leads`, `crm_activities`, `audit_logs`.
-- **Permissões**: `permissions`, `profile_permissions`, `user_permission_overrides`.
-- **Clone/instalação**: `CloneWizard`, `cloneCentral`, `admin.modulos.clonagem`.
+## Princípio
 
-## O que falta de verdade (única coisa a criar)
+Não criar nova tabela de identidade. **Estender `companies`** com os campos faltantes (additivo, sem quebrar nada) e fazer o `enqueue_message` **injetar automaticamente** as variáveis `{{company_*}}` em TODA mensagem, sem alterar 1 template sequer.
 
-Exclusivamente uma **camada administrativa superior** ("Core Manager") + **fluxo pós-pagamento** de onboarding com **domínio/subdomínio/e-mails**. Nenhum módulo novo, nenhuma duplicação.
+## Etapas
 
-### 1. Hub Core Manager (super admin)
-Rota nova `/_authenticated/core/` agregando o que já existe (sem duplicar telas):
-- `core.index.tsx` — dashboard com KPIs (clientes ativos, MRR, módulos instalados, onboardings pendentes) lendo de tabelas existentes.
-- `core.clientes.tsx` — lista de `companies` (não master) com status de implantação.
-- `core.cliente.$id.tsx` — **Cliente 360°**: aba Dados (companies), Contratos (billing_contracts), Pagamentos (fin_transactions), Módulos (company_modules), Comunicações (message_outbox), Domínio (novo), Usuários (user_profiles), Logs (audit_logs), Checklist (novo).
+### 1. Migration aditiva em `companies`
+Adicionar colunas (todas nullable, sem default destrutivo):
+`trade_name`, `company_type`, `segment`, `primary_color`, `secondary_color`,
+`whatsapp`, `financial_email`, `support_email`, `commercial_email`,
+`domain`, `subdomain`, `website`, `instagram`, `facebook`,
+`address_line`, `address_city`, `address_state`, `address_zip`,
+`owner_name`.
 
-Tudo são **views agregadoras** sobre tabelas existentes — sem novas tabelas para dados já armazenados.
+Os campos `name`, `email`, `phone`, `logo_url` já existem — reaproveitar.
 
-### 2. Instalador de módulos por cliente
-Reaproveitar `/modules` existente; adicionar botão **"Instalar"** que, além do toggle atual em `company_modules`:
-- escreve linha em `audit_logs` ("module_installed")
-- dispara `message_outbox` (e-mail de boas-vindas do módulo via template existente)
-- marca item no checklist de implantação
+### 2. Função `public.company_identity_payload(uuid)`
+Retorna `jsonb` com TODAS as variáveis `company_*` da empresa (name, logo, email, whatsapp, domain, subdomain, primary_color, etc.). Usa fallback para empresa master quando `company_id IS NULL`.
 
-Nenhum código de módulo é clonado — apenas a flag `is_enabled=true` já existente.
+### 3. Patch em `enqueue_message`
+Antes de chamar `render_template`, fazer:
+```
+_merged := company_identity_payload(_company_id) || _payload
+```
+→ payload do chamador tem prioridade, mas TODA mensagem ganha automaticamente `{{company_name}}`, `{{company_logo}}`, `{{company_whatsapp}}`, etc. **Nenhum template existente precisa ser editado.**
 
-### 3. Onboarding pós-pagamento (novo, mínimo)
-Disparado em `checkout.success.tsx` (já existe). Novo wizard `OnboardingWizard.tsx` com 4 passos:
-1. **Domínio**: rádio (já possuo / não possuo / quero registrar) + campos condicionais → grava em nova tabela `onboarding_domain_requests`.
-2. **Subdomínio** (se "não possuo"): valida disponibilidade em `companies.slug` (já existe) + confirmação dupla → reserva.
-3. **E-mails corporativos**: se subdomínio → 3 campos fixos; se domínio próprio → multiselect de prefixos (contato/sac/financeiro/…) → grava em `onboarding_email_requests`.
-4. **Resumo + Checklist**: marca itens em `onboarding_checklist`.
+### 4. UI — Edição de Identidade no `/adm`
+Estender a página `core.cliente.$id.tsx` (Cliente 360) com aba **"Identidade"**:
+- formulário completo com todos os campos novos + logo + cores;
+- preview de "como o cliente final verá" (nome, logo, cor primária);
+- exibir: domínio, subdomínio, WhatsApp ativo, e-mails ativos, módulos instalados, última comunicação enviada (consulta `message_outbox` ordenada por `created_at`).
 
-Cada passo registra em `message_outbox` (e-mail + WhatsApp) e em `crm_activities` (timeline).
+Server fn `updateCompanyIdentity` em `src/lib/company-identity.functions.ts`, gated por `is_impulsionando_staff` OU `company.write`.
 
-### 4. Schema novo (apenas o estritamente necessário)
+### 5. Auditoria
+Já existe `audit_logs` + trigger `tg_audit` em `companies`. Toda alteração de identidade fica registrada automaticamente.
 
-Uma migration com 3 tabelas pequenas + RLS + GRANTs:
+### 6. Mensagens — sem mudanças
+Como o `enqueue_message` agora injeta a identidade, os 95 templates existentes passam a ser contextuais automaticamente. **Nenhum template duplicado, nenhuma reescrita.**
 
-- `onboarding_domain_requests` (company_id, mode `subdomain|own|register`, requested_value, contact_*, status)
-- `onboarding_email_requests` (company_id, address_prefix, full_address, status)
-- `onboarding_checklist` (company_id, item_key, status, completed_at) — 8 itens fixos da spec
+## Detalhes técnicos
 
-Tudo escopado por `company_id` com RLS via `has_role` existente.
+- Arquivos novos: `src/lib/company-identity.functions.ts`, um componente `IdentityTab.tsx` consumido por `core.cliente.$id.tsx`.
+- Arquivos editados: `core.cliente.$id.tsx` (adiciona aba), 1 migration.
+- Nada removido. Nada renomeado. Nenhum módulo tocado.
+- Cliente 360 e `/adm` continuam sendo os únicos pontos de gestão.
 
-### 5. Nav + acesso
-Adicionar grupo "Core Manager" em `nav-config.tsx` visível apenas para `isImpulsionandoStaff` — não toca em nada que cliente final vê.
+## Fora de escopo (não fazer agora)
 
-## O que NÃO será feito
+- Refatorar os 95 templates (desnecessário — herança via payload resolve).
+- Criar tabela `company_profile` separada (duplicaria `companies`).
+- Mexer em provisionamento (já cria company → identidade preenchida via edição depois ou via dados do checkout).
+- UI de troca de templates por empresa (já existe `message_templates.company_id` para override).
 
-- Não criar tabelas para dados que já existem (clientes, módulos, billing, contratos, comunicações, logs).
-- Não duplicar páginas de Agenda, CRM, PDV, Financeiro, etc.
-- Não criar "Core Manager > Billing" — vai apontar para `/admin/billing-contracts` que já existe.
-- Não criar verificação real de DNS / registro real de domínio: apenas **registrar solicitação** (a spec pede isso explicitamente: "Nossa equipe entrará em contato").
-- Não criar provisionamento real de e-mail: apenas registrar solicitação + criar tarefa interna (a spec pede isso).
+## Validação final
 
-## Resumo de arquivos
-
-**Migration**: 1 migration nova (3 tabelas + RLS + GRANTs).
-
-**Criar (poucos arquivos)**:
-- `src/routes/_authenticated/core.tsx` (layout com Outlet)
-- `src/routes/_authenticated/core.index.tsx` (dashboard agregador)
-- `src/routes/_authenticated/core.clientes.tsx` (lista)
-- `src/routes/_authenticated/core.cliente.$id.tsx` (360°)
-- `src/components/core/OnboardingWizard.tsx`
-- `src/components/core/DomainStep.tsx`, `EmailStep.tsx`, `ChecklistView.tsx`
-- `src/lib/onboarding.functions.ts` (server fns)
-
-**Editar (cirurgicamente)**:
-- `src/components/app/nav-config.tsx` — adicionar grupo "Core Manager" (staff only)
-- `src/routes/checkout.success.tsx` — disparar `OnboardingWizard` quando pagamento for de novo cliente
-- `src/routes/_authenticated/modules.tsx` — adicionar botão "Instalar" que log+notifica (sem alterar lógica do toggle)
-
-Confirmação esperada antes de implementar.
+Após aplicar:
+1. `SELECT company_identity_payload((SELECT id FROM companies WHERE name ILIKE '%patricia%'));` deve retornar JSON completo.
+2. Enviar `enqueue_message('appointment_confirmed', <company_id>, ...)` e confirmar que `message_outbox.body` contém o WhatsApp/logo/nome **da empresa**, não da Impulsionando.
+3. Editar identidade em `/adm/core/cliente/:id` → aba Identidade → salvar → reenviar → body muda automaticamente.
