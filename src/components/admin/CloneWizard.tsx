@@ -157,6 +157,17 @@ export function CloneWizard({ open, onOpenChange, base, actor, canClone, onCreat
       integrations,
       internalUrl: `/admin/modulos/clonagem/instancia/${id}`,
       notes,
+      versionBase: base.version,
+      versionClone: base.version,
+      updateAvailable: false,
+      lastSyncAt: new Date().toISOString(),
+      versionStatus: "atual",
+      compatibility: "compativel",
+      canReceiveBaseUpdate: true,
+      hasLocalCustomization: false,
+      allowAutoUpdate: false,
+      requiresManualReview: environment === "REAL",
+      changelog: [`v${base.version} — criado a partir do módulo-base ${base.name}.`],
       createdAt: new Date().toISOString(),
     });
     cloneStore.pushLog({
