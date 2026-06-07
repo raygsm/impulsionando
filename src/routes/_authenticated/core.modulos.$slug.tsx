@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ModuleCertificationPanel } from "@/components/core/ModuleCertificationPanel";
 import { InstallModuleDialog } from "@/components/core/InstallModuleDialog";
 import { SettingDefinitionsAdmin } from "@/components/core/SettingDefinitionsAdmin";
+import { ApplyVersionScopeDialog } from "@/components/core/ApplyVersionScopeDialog";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/core/modulos/$slug")({
@@ -143,7 +144,10 @@ function ModuleDetail() {
 
         <TabsContent value="versoes">
           <Card className="p-4">
-            <h3 className="font-semibold mb-3">Histórico de versões</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold">Histórico de versões</h3>
+              <ApplyVersionScopeDialog moduleId={m.id} moduleName={m.name} defaultVersion={m.current_version} />
+            </div>
             <div className="space-y-1.5">
               {data.versions.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma versão publicada ainda.</p>}
               {data.versions.map((v: { id: string; version: string; released_at: string; notes?: string | null }) => (
