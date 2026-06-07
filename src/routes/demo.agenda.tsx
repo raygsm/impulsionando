@@ -66,6 +66,20 @@ function DemoAgenda() {
     return new URLSearchParams(window.location.search).get("nicho") ?? "servicos";
   });
 
+  // Captura obrigatória do lead antes da demo completa
+  const [lead, setLead] = useState<LeadDemoInfo | null>(() => getCapturedLead("agenda"));
+  const leadCaptured = !!lead;
+
+  // Parametrizações SIM/NÃO completas (BLOCO 1/5)
+  const [fullParams, setFullParams] = useState<AgendaParams>(() => loadAgendaParams());
+  function setParam(k: AgendaParamKey, v: boolean) {
+    setFullParams((prev) => {
+      const next = { ...prev, [k]: v };
+      saveAgendaParams(next);
+      return next;
+    });
+  }
+
   // Deep-link via ?cliente=&telefone= vindo de outros módulos (CRM/WhatsApp)
   useEffect(() => {
     if (typeof window === "undefined") return;
