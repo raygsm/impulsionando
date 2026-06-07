@@ -118,6 +118,7 @@ import { Route as AuthenticatedCrmPipelinesRouteImport } from './routes/_authent
 import { Route as AuthenticatedCrmLeadsRouteImport } from './routes/_authenticated/crm.leads'
 import { Route as AuthenticatedCrmBoardRouteImport } from './routes/_authenticated/crm.board'
 import { Route as AuthenticatedCrmActivitiesRouteImport } from './routes/_authenticated/crm.activities'
+import { Route as AuthenticatedCoreClientesRouteImport } from './routes/_authenticated/core.clientes'
 import { Route as AuthenticatedBiNichesRouteImport } from './routes/_authenticated/bi.niches'
 import { Route as AuthenticatedBiMasterRouteImport } from './routes/_authenticated/bi.master'
 import { Route as AuthenticatedBiCompanyRouteImport } from './routes/_authenticated/bi.company'
@@ -736,6 +737,12 @@ const AuthenticatedCrmActivitiesRoute =
     path: '/activities',
     getParentRoute: () => AuthenticatedCrmRoute,
   } as any)
+const AuthenticatedCoreClientesRoute =
+  AuthenticatedCoreClientesRouteImport.update({
+    id: '/clientes',
+    path: '/clientes',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedBiNichesRoute = AuthenticatedBiNichesRouteImport.update({
   id: '/niches',
   path: '/niches',
@@ -1122,6 +1129,7 @@ export interface FileRoutesByFullPath {
   '/bi/company': typeof AuthenticatedBiCompanyRoute
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
+  '/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/crm/board': typeof AuthenticatedCrmBoardRoute
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
@@ -1269,6 +1277,7 @@ export interface FileRoutesByTo {
   '/bi/company': typeof AuthenticatedBiCompanyRoute
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
+  '/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/crm/board': typeof AuthenticatedCrmBoardRoute
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
@@ -1429,6 +1438,7 @@ export interface FileRoutesById {
   '/_authenticated/bi/company': typeof AuthenticatedBiCompanyRoute
   '/_authenticated/bi/master': typeof AuthenticatedBiMasterRoute
   '/_authenticated/bi/niches': typeof AuthenticatedBiNichesRoute
+  '/_authenticated/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/_authenticated/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/_authenticated/crm/board': typeof AuthenticatedCrmBoardRoute
   '/_authenticated/crm/leads': typeof AuthenticatedCrmLeadsRoute
@@ -1589,6 +1599,7 @@ export interface FileRouteTypes {
     | '/bi/company'
     | '/bi/master'
     | '/bi/niches'
+    | '/core/clientes'
     | '/crm/activities'
     | '/crm/board'
     | '/crm/leads'
@@ -1736,6 +1747,7 @@ export interface FileRouteTypes {
     | '/bi/company'
     | '/bi/master'
     | '/bi/niches'
+    | '/core/clientes'
     | '/crm/activities'
     | '/crm/board'
     | '/crm/leads'
@@ -1895,6 +1907,7 @@ export interface FileRouteTypes {
     | '/_authenticated/bi/company'
     | '/_authenticated/bi/master'
     | '/_authenticated/bi/niches'
+    | '/_authenticated/core/clientes'
     | '/_authenticated/crm/activities'
     | '/_authenticated/crm/board'
     | '/_authenticated/crm/leads'
@@ -2783,6 +2796,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCrmActivitiesRouteImport
       parentRoute: typeof AuthenticatedCrmRoute
     }
+    '/_authenticated/core/clientes': {
+      id: '/_authenticated/core/clientes'
+      path: '/clientes'
+      fullPath: '/core/clientes'
+      preLoaderRoute: typeof AuthenticatedCoreClientesRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/bi/niches': {
       id: '/_authenticated/bi/niches'
       path: '/niches'
@@ -3212,10 +3232,12 @@ const AuthenticatedBiRouteWithChildren = AuthenticatedBiRoute._addFileChildren(
 )
 
 interface AuthenticatedCoreRouteChildren {
+  AuthenticatedCoreClientesRoute: typeof AuthenticatedCoreClientesRoute
   AuthenticatedCoreIndexRoute: typeof AuthenticatedCoreIndexRoute
 }
 
 const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
+  AuthenticatedCoreClientesRoute: AuthenticatedCoreClientesRoute,
   AuthenticatedCoreIndexRoute: AuthenticatedCoreIndexRoute,
 }
 
