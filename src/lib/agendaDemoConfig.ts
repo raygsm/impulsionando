@@ -68,7 +68,8 @@ export interface AgendaParamDef {
     | "No-show"
     | "Tarefas"
     | "Logs e dashboard"
-    | "Integrações";
+    | "Integrações"
+    | "Substituição de profissional";
   default: boolean;
 }
 
