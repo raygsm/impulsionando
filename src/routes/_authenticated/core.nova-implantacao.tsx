@@ -96,7 +96,7 @@ function NovaImplantacaoIA() {
       const path = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
       const { error } = await supabase.storage.from("ai-project-uploads").upload(path, file);
       if (error) {
-        toast({ title: "Falha no upload", description: error.message, variant: "destructive" });
+        toast.error("Falha no upload: " + error.message);
         continue;
       }
       setFiles((prev) => [
@@ -108,11 +108,11 @@ function NovaImplantacaoIA() {
 
   const validateStep1 = () => {
     if (!client.companyName || !client.responsibleName || !client.email || !client.whatsapp || !client.document) {
-      toast({ title: "Campos obrigatórios", description: "Preencha empresa, responsável, e-mail, WhatsApp e documento.", variant: "destructive" });
+      toast.error("Preencha empresa, responsável, e-mail, WhatsApp e documento.");
       return false;
     }
     if (!/^\S+@\S+\.\S+$/.test(client.email)) {
-      toast({ title: "E-mail inválido", variant: "destructive" });
+      toast.error("E-mail inválido");
       return false;
     }
     return true;
@@ -120,7 +120,7 @@ function NovaImplantacaoIA() {
 
   const validateStep2 = () => {
     if (!project.projectName || !project.subdomain) {
-      toast({ title: "Nome do projeto e subdomínio são obrigatórios", variant: "destructive" });
+      toast.error("Nome do projeto e subdomínio são obrigatórios");
       return false;
     }
     return true;
@@ -128,7 +128,7 @@ function NovaImplantacaoIA() {
 
   const handleAnalyze = async () => {
     if (prompt.trim().length < 20) {
-      toast({ title: "Prompt muito curto", description: "Descreva o projeto com ao menos 20 caracteres.", variant: "destructive" });
+      toast.error("Descreva o projeto com ao menos 20 caracteres.");
       return;
     }
     setAnalyzing(true);
@@ -155,7 +155,7 @@ function NovaImplantacaoIA() {
       setGenerationId(saved.id ?? null);
       setStep(5);
     } catch (e: any) {
-      toast({ title: "Falha na análise", description: e.message, variant: "destructive" });
+      toast.error("Falha na análise: " + e.message);
     } finally {
       setAnalyzing(false);
     }
@@ -167,9 +167,9 @@ function NovaImplantacaoIA() {
     try {
       const result = await provisionFn({ data: { generationId } });
       setChecklist(result.checklist ?? []);
-      toast({ title: "Cliente provisionado!", description: `${result.name} criado com sucesso.` });
+      toast.success(`${result.name} criado com sucesso.`);
     } catch (e: any) {
-      toast({ title: "Falha no provisionamento", description: e.message, variant: "destructive" });
+      toast.error("Falha no provisionamento: " + e.message);
     } finally {
       setProvisioning(false);
     }
