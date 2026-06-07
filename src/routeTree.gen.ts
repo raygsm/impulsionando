@@ -68,6 +68,7 @@ import { Route as AuthenticatedSalesRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedPrivacyRouteImport } from './routes/_authenticated/privacy'
 import { Route as AuthenticatedPermissionsRouteImport } from './routes/_authenticated/permissions'
+import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedNichesRouteImport } from './routes/_authenticated/niches'
 import { Route as AuthenticatedModulesRouteImport } from './routes/_authenticated/modules'
 import { Route as AuthenticatedMinhaAssinaturaRouteImport } from './routes/_authenticated/minha-assinatura'
@@ -464,6 +465,11 @@ const AuthenticatedPermissionsRoute =
     path: '/permissions',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedNichesRoute = AuthenticatedNichesRouteImport.update({
   id: '/niches',
   path: '/niches',
@@ -1067,6 +1073,7 @@ export interface FileRoutesByFullPath {
   '/minha-assinatura': typeof AuthenticatedMinhaAssinaturaRoute
   '/modules': typeof AuthenticatedModulesRoute
   '/niches': typeof AuthenticatedNichesRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
   '/permissions': typeof AuthenticatedPermissionsRoute
   '/privacy': typeof AuthenticatedPrivacyRoute
   '/reports': typeof AuthenticatedReportsRouteWithChildren
@@ -1218,6 +1225,7 @@ export interface FileRoutesByTo {
   '/minha-assinatura': typeof AuthenticatedMinhaAssinaturaRoute
   '/modules': typeof AuthenticatedModulesRoute
   '/niches': typeof AuthenticatedNichesRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
   '/permissions': typeof AuthenticatedPermissionsRoute
   '/privacy': typeof AuthenticatedPrivacyRoute
   '/sectors': typeof AuthenticatedSectorsRoute
@@ -1378,6 +1386,7 @@ export interface FileRoutesById {
   '/_authenticated/minha-assinatura': typeof AuthenticatedMinhaAssinaturaRoute
   '/_authenticated/modules': typeof AuthenticatedModulesRoute
   '/_authenticated/niches': typeof AuthenticatedNichesRoute
+  '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/permissions': typeof AuthenticatedPermissionsRoute
   '/_authenticated/privacy': typeof AuthenticatedPrivacyRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRouteWithChildren
@@ -1540,6 +1549,7 @@ export interface FileRouteTypes {
     | '/minha-assinatura'
     | '/modules'
     | '/niches'
+    | '/onboarding'
     | '/permissions'
     | '/privacy'
     | '/reports'
@@ -1691,6 +1701,7 @@ export interface FileRouteTypes {
     | '/minha-assinatura'
     | '/modules'
     | '/niches'
+    | '/onboarding'
     | '/permissions'
     | '/privacy'
     | '/sectors'
@@ -1850,6 +1861,7 @@ export interface FileRouteTypes {
     | '/_authenticated/minha-assinatura'
     | '/_authenticated/modules'
     | '/_authenticated/niches'
+    | '/_authenticated/onboarding'
     | '/_authenticated/permissions'
     | '/_authenticated/privacy'
     | '/_authenticated/reports'
@@ -2457,6 +2469,13 @@ declare module '@tanstack/react-router' {
       path: '/permissions'
       fullPath: '/permissions'
       preLoaderRoute: typeof AuthenticatedPermissionsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/onboarding': {
+      id: '/_authenticated/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/niches': {
@@ -3397,6 +3416,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMinhaAssinaturaRoute: typeof AuthenticatedMinhaAssinaturaRoute
   AuthenticatedModulesRoute: typeof AuthenticatedModulesRoute
   AuthenticatedNichesRoute: typeof AuthenticatedNichesRoute
+  AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedPermissionsRoute: typeof AuthenticatedPermissionsRoute
   AuthenticatedPrivacyRoute: typeof AuthenticatedPrivacyRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRouteWithChildren
@@ -3433,6 +3453,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMinhaAssinaturaRoute: AuthenticatedMinhaAssinaturaRoute,
   AuthenticatedModulesRoute: AuthenticatedModulesRoute,
   AuthenticatedNichesRoute: AuthenticatedNichesRoute,
+  AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedPermissionsRoute: AuthenticatedPermissionsRoute,
   AuthenticatedPrivacyRoute: AuthenticatedPrivacyRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRouteWithChildren,

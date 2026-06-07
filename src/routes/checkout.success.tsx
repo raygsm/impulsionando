@@ -90,7 +90,12 @@ function SuccessPage() {
               {checking ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Verificando...</> : "Verificar pagamento"}
             </Button>
           )}
-          <Button asChild variant={isPaid ? "default" : "outline"}>
+          {isPaid && (
+            <Button asChild variant="default">
+              <Link to="/onboarding">Configurar minha conta</Link>
+            </Button>
+          )}
+          <Button asChild variant={isPaid ? "outline" : "outline"}>
             <Link to="/">Voltar ao site</Link>
           </Button>
         </div>
