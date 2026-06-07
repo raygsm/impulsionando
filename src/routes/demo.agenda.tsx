@@ -569,7 +569,7 @@ function DemoAgenda() {
           base={AGENDA_ONLINE_BASE}
           actor={lead?.name || lead?.email || "Demo Agenda"}
           canClone={true}
-          onCreated={(id) => {
+          onCreated={(id: string) => {
             setClonarOpen(false);
             setClonarSucessoId(id);
             AgendaLog.ctaClicado(`clone_concluido:${id}`, lead?.name);
