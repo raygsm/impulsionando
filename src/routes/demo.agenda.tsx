@@ -578,6 +578,86 @@ function DemoAgenda() {
   );
 }
 
+function AgendaLogsPanel({ tick, onClear }: { tick: number; onClear: () => void }) {
+  const [filtroStatus, setFiltroStatus] = useState<string>("__all");
+  const [filtroArea, setFiltroArea] = useState<string>("__all");
+  const logs = useMemo<AgendaLogEntry[]>(() => listAgendaLogs(), [tick]);
+  const areas = Array.from(new Set(logs.map((l) => l.area)));
+  const filtered = logs.filter((l) =>
+    (filtroStatus === "__all" || l.status === filtroStatus) &&
+    (filtroArea === "__all" || l.area === filtroArea));
+
+  return (
+    <div className="space-y-3">
+      <Card className="p-3 text-xs flex items-center justify-between gap-2 flex-wrap">
+        <div className="text-muted-foreground">
+          Os logs registram cada ação importante realizada na Agenda, permitindo rastreabilidade, auditoria e melhor gestão da operação.
+        </div>
+        <div className="flex flex-wrap gap-2 items-end">
+          <Select value={filtroArea} onValueChange={setFiltroArea}>
+            <SelectTrigger className="h-8 w-40 text-xs"><SelectValue placeholder="Área" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all">Todas as áreas</SelectItem>
+              {areas.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Select value={filtroStatus} onValueChange={setFiltroStatus}>
+            <SelectTrigger className="h-8 w-44 text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all">Todos os status</SelectItem>
+              <SelectItem value="concluido">Concluído</SelectItem>
+              <SelectItem value="simulado_demo">Simulado — DEMO</SelectItem>
+              <SelectItem value="pendente">Pendente</SelectItem>
+              <SelectItem value="falhou">Falhou</SelectItem>
+              <SelectItem value="aguardando_credenciais">Aguardando credenciais</SelectItem>
+              <SelectItem value="cancelado">Cancelado</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button size="sm" variant="ghost" onClick={onClear}>Limpar logs</Button>
+        </div>
+      </Card>
+      <Card className="p-0 overflow-auto">
+        {filtered.length === 0 ? (
+          <p className="p-4 text-xs text-muted-foreground">
+            Nenhum log ainda. Execute ações na Agenda (criar, cancelar, simular pagamento, etc.) e os registros aparecem aqui.
+          </p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Data</TableHead>
+                <TableHead>Área</TableHead>
+                <TableHead>Ação</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Ambiente</TableHead>
+                <TableHead>Detalhes</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.slice(0, 200).map((l) => (
+                <TableRow key={l.id}>
+                  <TableCell className="text-xs whitespace-nowrap">{new Date(l.dataHora).toLocaleString("pt-BR")}</TableCell>
+                  <TableCell className="text-xs">{l.area}</TableCell>
+                  <TableCell className="text-xs">{l.acao}</TableCell>
+                  <TableCell><Badge variant="outline" className="text-[10px]">{l.status}</Badge></TableCell>
+                  <TableCell className="text-xs">{l.ambiente}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">
+                    {[l.cliente && `cliente: ${l.cliente}`, l.profissional && `prof: ${l.profissional}`,
+                      l.canal && `canal: ${l.canal}`, l.destinatario && `→ ${l.destinatario}`,
+                      l.origem && `origem: ${l.origem}`, l.erro && `erro: ${l.erro}`]
+                      .filter(Boolean).join(" • ")}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+
 function KPI({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return <Card className={`p-4 ${accent ? "border-primary/40" : ""}`}><div className="text-xs text-muted-foreground">{label}</div><div className={`text-2xl font-bold mt-1 ${accent ? "text-primary" : ""}`}>{value}</div></Card>;
 }
