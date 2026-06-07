@@ -39,7 +39,20 @@ export type AgendaParamKey =
   | "integrarWhatsapp"
   | "integrarPagamentos"
   | "integrarVoip"
-  | "integrarBi";
+  | "integrarBi"
+  // 18.1 — Substituição automática de profissional
+  | "substAtiva"
+  | "substAvisoAuto"
+  | "substPrimeiroAceitar"
+  | "substAprovacaoGestao"
+  | "substAvisarCliente"
+  | "substClienteRecusa"
+  | "substCancelarSemSub"
+  | "substFilaSemSub"
+  | "substTarefaSemSub"
+  | "substHistAgendamento"
+  | "substHistOriginal"
+  | "substHistNovo";
 
 export interface AgendaParamDef {
   key: AgendaParamKey;
