@@ -144,7 +144,7 @@ function ModuleDetail() {
             <h3 className="font-semibold mb-3">Histórico de versões</h3>
             <div className="space-y-1.5">
               {data.versions.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma versão publicada ainda.</p>}
-              {data.versions.map((v: { id: string; version: string; released_at: string; notes?: string }) => (
+              {data.versions.map((v: { id: string; version: string; released_at: string; notes?: string | null }) => (
                 <div key={v.id} className="border-b last:border-0 py-1.5 text-sm">
                   <div className="flex items-center justify-between">
                     <span className="font-medium">v{v.version}</span>
@@ -162,7 +162,7 @@ function ModuleDetail() {
             <h3 className="font-semibold mb-3">Clientes utilizando ({data.installs.length})</h3>
             <div className="space-y-1.5 max-h-96 overflow-auto">
               {data.installs.length === 0 && <p className="text-sm text-muted-foreground">Sem instalações ativas.</p>}
-              {data.installs.map((i: { installed_version?: string; companies?: { id: string; name: string } }, idx: number) => {
+              {data.installs.map((i: { installed_version?: string | null; companies?: { id: string; name: string } | null }, idx: number) => {
                 const outdated = i.installed_version && i.installed_version !== m.current_version;
                 return (
                   <div key={idx} className="flex items-center justify-between text-sm border-b last:border-0 py-1.5">

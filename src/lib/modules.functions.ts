@@ -47,7 +47,7 @@ export const getModuleDetail = createServerFn({ method: "GET" })
       supabase.from("module_versions").select("*").eq("module_id", m.id).order("released_at", { ascending: false }),
       supabase
         .from("company_modules")
-        .select("installed_version, is_enabled, installed_at, companies!inner(id, name, slug)")
+        .select("installed_version, is_enabled, installed_at, companies!inner(id, name)")
         .eq("module_id", m.id)
         .eq("is_enabled", true),
     ]);
