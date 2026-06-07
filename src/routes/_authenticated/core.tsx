@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, Link, useLocation } from "@tanstack/react-router";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Card } from "@/components/ui/card";
-import { Building2, LayoutDashboard, Boxes, CreditCard, Globe } from "lucide-react";
+import { Building2, LayoutDashboard, Boxes, CreditCard, Globe, Rocket } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/core")({
   head: () => ({ meta: [{ title: "Core Manager — Impulsionando" }, { name: "robots", content: "noindex" }] }),
@@ -23,6 +23,7 @@ function CoreLayout() {
     { to: "/core", label: "Visão geral", icon: LayoutDashboard, exact: true },
     { to: "/core/clientes", label: "Clientes", icon: Building2 },
     { to: "/core/modulos", label: "Biblioteca de Módulos", icon: Boxes },
+    { to: "/core/implantacoes", label: "Implantações", icon: Rocket },
     { to: "/admin/billing-contracts", label: "Contratos", icon: CreditCard },
     { to: "/admin/billing-policy", label: "Régua", icon: Globe },
   ];
