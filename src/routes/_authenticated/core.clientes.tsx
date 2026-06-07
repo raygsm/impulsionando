@@ -1,10 +1,12 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/app/PageElements";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useImpersonation } from "@/hooks/use-impersonation";
+import { Building2, ArrowRight, Eye } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/core/clientes")({
   component: CoreClientes,
