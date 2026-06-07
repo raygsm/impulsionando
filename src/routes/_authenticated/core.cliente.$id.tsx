@@ -13,6 +13,7 @@ import { ClientSettingsPanel } from "@/components/core/ClientSettingsPanel";
 import { ClientPendingsPanel } from "@/components/core/ClientPendingsPanel";
 import { ClientLogsPanel } from "@/components/core/ClientLogsPanel";
 import { ClientCommunicationPanel } from "@/components/core/ClientCommunicationPanel";
+import { ClientOperationsPanel } from "@/components/core/ClientOperationsPanel";
 import { useImpersonation } from "@/hooks/use-impersonation";
 import { useNavigate } from "@tanstack/react-router";
 import { CheckCircle2, Circle, Building2, Download, RefreshCw, Trash2, Eye } from "lucide-react";
