@@ -633,3 +633,78 @@ function NovaEspera({ servs, onCreate }: { servs: Servico[]; onCreate: (e: Esper
     </div>
   );
 }
+
+function ReagendarDialog({
+  open, original, profs, servs, agds, onClose, onConfirm,
+}: {
+  open: boolean;
+  original: Agendamento | null;
+  profs: Profissional[];
+  servs: Servico[];
+  agds: Agendamento[];
+  onClose: () => void;
+  onConfirm: (a: Agendamento) => void;
+}) {
+  const [f, setF] = useState<Agendamento | null>(null);
+  useEffect(() => { setF(original); }, [original?.id]);
+  if (!original || !f) {
+    return (
+      <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+        <DialogContent />
+      </Dialog>
+    );
+  }
+  const conflitos = agds.filter((a) =>
+    a.id !== f.id && a.status !== "cancelado" &&
+    a.profId === f.profId && a.data === f.data && a.hora === f.hora);
+
+  const profAntes = profs.find((p) => p.id === original.profId)?.nome;
+  const profDepois = profs.find((p) => p.id === f.profId)?.nome;
+  const servNome = servs.find((s) => s.id === f.servicoId)?.nome;
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Confirmar alteração de horário?</DialogTitle>
+          <DialogDescription>DEMONSTRAÇÃO — VERSÃO TESTE — comunicações serão simuladas.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2 text-sm">
+          <div><strong>Cliente:</strong> {f.cliente}</div>
+          <div><strong>Serviço:</strong> {servNome ?? "—"}</div>
+          <div className="grid grid-cols-2 gap-2 pt-2 border-t">
+            <div>
+              <div className="text-xs text-muted-foreground">Antes</div>
+              <div>{original.data} {original.hora}</div>
+              <div className="text-xs">{profAntes}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Depois</div>
+              <div className="flex gap-1">
+                <Input type="date" value={f.data} onChange={(e) => setF({ ...f, data: e.target.value })} className="h-8" />
+                <Input type="time" value={f.hora} onChange={(e) => setF({ ...f, hora: e.target.value })} className="h-8 w-24" />
+              </div>
+              <Select value={f.profId} onValueChange={(v) => setF({ ...f, profId: v })}>
+                <SelectTrigger className="h-8 mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>{profs.map((p) => <SelectItem key={p.id} value={p.id}>{p.nome}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+          </div>
+          {conflitos.length > 0 && (
+            <div className="rounded border border-amber-300 bg-amber-50 dark:bg-amber-950/30 p-2 text-xs">
+              ⚠ Este horário possui conflito com outro agendamento ou bloqueio.
+              <div className="mt-1">{conflitos.map((c) => c.cliente).join(", ")}</div>
+            </div>
+          )}
+          <div className="text-xs text-muted-foreground pt-2 border-t">
+            Comunicações que serão enviadas (simulado): cliente, profissional, recepção/gestão.
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose}>Cancelar</Button>
+          <Button className="bg-gradient-primary" onClick={() => onConfirm(f)}>Confirmar alteração</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
