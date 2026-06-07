@@ -1,7 +1,7 @@
 // Presets por nicho da Agenda Online (DEMO).
 // Adapta labels, exemplos de serviços, recursos prioritários e CTAs.
 
-import type { AgendaParamKey } from "./agendaDemoConfig";
+// recursosPrioritarios é apenas informacional (chips no preset).
 
 export type NichoSlug = "clinicas" | "estetica" | "fitness" | "juridico" | "bar" | "eventos" | "servicos";
 
