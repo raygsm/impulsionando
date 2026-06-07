@@ -431,14 +431,33 @@ function DemoAgenda() {
             <RoiSimulator presetKey="agenda" />
           </TabsContent>
 
-          <TabsContent value="params" className="mt-4">
-            <Card className="p-5 space-y-4">
-              <ParamToggle label="Lembrete 24h antes" hint="WhatsApp/e-mail automático na véspera." value={params.lembrete24h} onChange={(v) => setParams({ ...params, lembrete24h: v })} />
-              <ParamToggle label="Lembrete 1h antes" hint="Push final para reduzir no-show." value={params.lembrete1h} onChange={(v) => setParams({ ...params, lembrete1h: v })} />
-              <ParamToggle label="Confirmação por WhatsApp" hint="Cliente confirma com 1 clique no link." value={params.confirmaWhats} onChange={(v) => setParams({ ...params, confirmaWhats: v })} />
-              <ParamToggle label="Bloqueio em feriados" hint="Calendário oficial bloqueia agendamento." value={params.bloqueioFeriado} onChange={(v) => setParams({ ...params, bloqueioFeriado: v })} />
-              <ParamToggle label="Reagendamento automático" hint="Cancelado libera horário para fila de espera." value={params.reagendamentoAuto} onChange={(v) => setParams({ ...params, reagendamentoAuto: v })} />
+          <TabsContent value="params" className="mt-4 space-y-4">
+            <Card className="p-4 text-sm">
+              <div className="flex items-start justify-between gap-3 flex-wrap">
+                <div>
+                  <div className="font-semibold">Parametrizações SIM/NÃO</div>
+                  <p className="text-xs text-muted-foreground max-w-2xl">
+                    Ative ou desative cada recurso e veja como a Agenda se adapta. Tudo aqui é DEMO —
+                    comunicações enviadas terão a marca "TESTE — DEMONSTRAÇÃO — VERSÃO TESTE".
+                  </p>
+                </div>
+                <Badge variant="outline">DEMONSTRAÇÃO — VERSÃO TESTE</Badge>
+              </div>
             </Card>
+            {Array.from(new Set(AGENDA_PARAM_DEFS.map((p) => p.group))).map((group) => (
+              <Card key={group} className="p-4 space-y-3">
+                <div className="font-medium text-sm">{group}</div>
+                {AGENDA_PARAM_DEFS.filter((p) => p.group === group).map((p) => (
+                  <ParamToggle
+                    key={p.key}
+                    label={p.label}
+                    hint={p.hint}
+                    value={fullParams[p.key]}
+                    onChange={(v) => setParam(p.key, v)}
+                  />
+                ))}
+              </Card>
+            ))}
           </TabsContent>
         </Tabs>
       </main>
