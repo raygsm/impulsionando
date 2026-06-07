@@ -14,7 +14,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   ShieldAlert,
   Boxes,
@@ -25,16 +34,23 @@ import {
   Eye,
   Plus,
   History,
+  Settings,
+  Archive,
+  CheckCircle2,
+  ExternalLink,
 } from "lucide-react";
 import {
   cloneStore,
   ensureSeedBases,
   PLANNED_MODULES,
+  PRESET_DETAILS,
+  NICHE_PRESETS,
   type ModuleBase,
   type CloneInstance,
   type CloneLog,
 } from "@/lib/cloneCentral";
 import { CloneWizard } from "@/components/admin/CloneWizard";
+import { AgendaConfigWizard } from "@/components/admin/AgendaConfigWizard";
 
 export const Route = createFileRoute("/_authenticated/admin/modulos/clonagem")({
   head: () => ({ meta: [{ title: "Clonagem de Módulos — Impulsionando" }] }),
@@ -53,6 +69,16 @@ function CloneCenterPage() {
   const [wizardBase, setWizardBase] = useState<ModuleBase | null>(null);
   const [detailBase, setDetailBase] = useState<ModuleBase | null>(null);
   const [logsBase, setLogsBase] = useState<ModuleBase | null>(null);
+  const [configInstance, setConfigInstance] = useState<CloneInstance | null>(null);
+  const [successInstanceId, setSuccessInstanceId] = useState<string | null>(null);
+
+  // Filtros Clones Criados
+  const [fModule, setFModule] = useState("all");
+  const [fEnv, setFEnv] = useState("all");
+  const [fStatus, setFStatus] = useState("all");
+  const [fNiche, setFNiche] = useState("all");
+  const [fSearch, setFSearch] = useState("");
+  const [logsInstanceId, setLogsInstanceId] = useState<string | null>(null);
 
   const isAllowed = !!me?.isSuperAdmin;
 
@@ -62,12 +88,39 @@ function CloneCenterPage() {
     setLogs(cloneStore.listLogs());
   }
 
+  function archiveInstance(i: CloneInstance) {
+    const updated: CloneInstance = { ...i, archived: true, status: "Arquivado" };
+    const all = cloneStore.listInstances().map((x) => (x.id === i.id ? updated : x));
+    if (typeof window !== "undefined") {
+      localStorage.setItem("imp.clone.instances.v1", JSON.stringify(all));
+    }
+    cloneStore.pushLog({
+      actor: me?.user.email ?? "interno",
+      action: "arquivou",
+      detail: `Instância arquivada — ${i.targetName}`,
+      instanceId: i.id,
+    });
+    toast.success("Clone arquivado.");
+    refresh();
+  }
+
+  const filteredInstances = instances.filter((i) => {
+    if (fModule !== "all" && i.baseId !== fModule) return false;
+    if (fEnv !== "all" && i.environment !== fEnv) return false;
+    if (fStatus !== "all" && i.status !== fStatus) return false;
+    if (fNiche !== "all" && i.niche !== fNiche) return false;
+    if (fSearch.trim() && !i.targetName.toLowerCase().includes(fSearch.trim().toLowerCase()))
+      return false;
+    return true;
+  });
+
   useEffect(() => {
     if (isAllowed) {
       ensureSeedBases();
       refresh();
     }
   }, [isAllowed]);
+
 
   // Log tentativa negada (uma vez)
   useMemo(() => {
@@ -140,13 +193,15 @@ function CloneCenterPage() {
       </Card>
 
       <Tabs defaultValue="base" className="w-full">
-        <TabsList>
+        <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="base">Módulos-Base</TabsTrigger>
-          <TabsTrigger value="instances">Instâncias</TabsTrigger>
+          <TabsTrigger value="instances">Clones Criados</TabsTrigger>
+          <TabsTrigger value="presets">Presets por nicho</TabsTrigger>
           <TabsTrigger value="planned">Próximos módulos</TabsTrigger>
           <TabsTrigger value="logs">Logs internos</TabsTrigger>
           <TabsTrigger value="layers">Camadas</TabsTrigger>
         </TabsList>
+
 
         <TabsContent value="base" className="space-y-3 pt-4">
           <div className="flex justify-end">
@@ -212,33 +267,149 @@ function CloneCenterPage() {
         </TabsContent>
 
         <TabsContent value="instances" className="space-y-3 pt-4">
-          {instances.length === 0 ? (
+          <Card className="p-3 grid md:grid-cols-5 gap-2">
+            <Input
+              placeholder="Buscar projeto/cliente"
+              value={fSearch}
+              onChange={(e) => setFSearch(e.target.value)}
+            />
+            <Select value={fModule} onValueChange={setFModule}>
+              <SelectTrigger><SelectValue placeholder="Módulo" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os módulos</SelectItem>
+                {bases.map((b) => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select value={fEnv} onValueChange={setFEnv}>
+              <SelectTrigger><SelectValue placeholder="Ambiente" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os ambientes</SelectItem>
+                <SelectItem value="DEMO">DEMO</SelectItem>
+                <SelectItem value="TESTE">TESTE</SelectItem>
+                <SelectItem value="REAL">REAL</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={fStatus} onValueChange={setFStatus}>
+              <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os status</SelectItem>
+                <SelectItem value="Criado">Criado</SelectItem>
+                <SelectItem value="Aguardando configuração">Aguardando configuração</SelectItem>
+                <SelectItem value="DEMO pronta">DEMO pronta</SelectItem>
+                <SelectItem value="TESTE pronto">TESTE pronto</SelectItem>
+                <SelectItem value="REAL aguardando configuração">REAL aguardando configuração</SelectItem>
+                <SelectItem value="Arquivado">Arquivado</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={fNiche} onValueChange={setFNiche}>
+              <SelectTrigger><SelectValue placeholder="Nicho" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os nichos</SelectItem>
+                {NICHE_PRESETS.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </Card>
+
+          {filteredInstances.length === 0 ? (
             <Card className="p-8 text-center text-sm text-muted-foreground">
-              Nenhuma instância clonada ainda.
+              Nenhum clone encontrado com os filtros aplicados.
             </Card>
           ) : (
-            instances.map((i) => {
+            filteredInstances.map((i) => {
               const base = bases.find((b) => b.id === i.baseId);
               return (
-                <Card key={i.id} className="p-4 flex items-center justify-between gap-3">
-                  <div>
-                    <div className="font-medium">{i.targetName}</div>
-                    <div className="text-xs text-muted-foreground">
-                      Base: {base?.name ?? i.baseId} · {i.niche ?? "—"} ·{" "}
-                      {new Date(i.createdAt).toLocaleString("pt-BR")}
+                <Card key={i.id} className="p-4 space-y-2">
+                  <div className="flex items-start justify-between gap-3 flex-wrap">
+                    <div className="min-w-0">
+                      <div className="font-medium">
+                        {i.targetName} {i.fantasy ? <span className="text-muted-foreground">({i.fantasy})</span> : null}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Base: {base?.name ?? i.baseId} · v{base?.version ?? "?"} ·{" "}
+                        {i.niche ?? "—"} · Preset: {i.preset ?? "—"}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Responsável: {i.responsibleName ?? "—"} · Criado por: {i.createdBy ?? "—"} ·{" "}
+                        {new Date(i.createdAt).toLocaleString("pt-BR")}
+                      </div>
+                      {i.integrations && i.integrations.length > 0 && (
+                        <div className="text-xs text-muted-foreground">
+                          Integrações: {i.integrations.join(", ")}
+                        </div>
+                      )}
                     </div>
-                    {i.notes && (
-                      <div className="text-xs text-muted-foreground mt-1">{i.notes}</div>
-                    )}
+                    <div className="flex flex-col items-end gap-1">
+                      <Badge variant={i.environment === "REAL" ? "default" : "secondary"}>
+                        {i.environment ?? (i.layer === "real" ? "REAL" : "DEMO")}
+                      </Badge>
+                      <Badge variant="outline">{i.status}</Badge>
+                      {i.archived && <Badge variant="destructive">Arquivado</Badge>}
+                    </div>
                   </div>
-                  <Badge variant={i.layer === "real" ? "default" : "secondary"}>
-                    {i.layer === "real" ? "Cliente Real" : "DEMO"}
-                  </Badge>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => toast.info("Acesso à instância — preparado para próxima fase técnica.")}
+                    >
+                      <ExternalLink className="w-4 h-4 mr-1" /> Acessar
+                    </Button>
+                    <Button size="sm" onClick={() => setConfigInstance(i)}>
+                      <Settings className="w-4 h-4 mr-1" /> Configurar
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => setLogsInstanceId(i.id)}>
+                      <History className="w-4 h-4 mr-1" /> Ver logs
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => archiveInstance(i)}
+                      disabled={i.archived}
+                    >
+                      <Archive className="w-4 h-4 mr-1" /> Arquivar
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        const b = bases.find((b) => b.id === i.baseId);
+                        if (b) setWizardBase(b);
+                      }}
+                    >
+                      <Copy className="w-4 h-4 mr-1" /> Duplicar
+                    </Button>
+                  </div>
                 </Card>
               );
             })
           )}
         </TabsContent>
+
+        <TabsContent value="presets" className="pt-4 space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Cada preset adapta labels, exemplos, serviços padrão, status, textos, comunicações,
+            dashboards, permissões sugeridas e parametrizações padrão.
+          </p>
+          <div className="grid md:grid-cols-2 gap-3">
+            {Object.entries(PRESET_DETAILS).map(([name, d]) => (
+              <Card key={name} className="p-4 space-y-2">
+                <div className="font-semibold">{name}</div>
+                <div className="text-xs">
+                  <span className="text-muted-foreground">Labels:</span> {d.labels.join(" · ")}
+                </div>
+                <div className="text-xs">
+                  <span className="text-muted-foreground">Recursos padrão:</span>{" "}
+                  {d.features.join(", ")}
+                </div>
+                <div className="text-xs">
+                  <span className="text-muted-foreground">Serviços mock (DEMO):</span>{" "}
+                  {d.mockServices.join(", ")}
+                </div>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
 
         <TabsContent value="planned" className="pt-4">
           <Card className="p-4">
@@ -319,7 +490,7 @@ function CloneCenterPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Wizard */}
+      {/* Wizard de clonagem */}
       {wizardBase && (
         <CloneWizard
           open={!!wizardBase}
@@ -327,9 +498,89 @@ function CloneCenterPage() {
           base={wizardBase}
           actor={actor}
           canClone={isAllowed}
-          onCreated={refresh}
+          onCreated={(id) => {
+            refresh();
+            setSuccessInstanceId(id);
+          }}
         />
       )}
+
+      {/* Sucesso pós-clonagem */}
+      <Dialog open={!!successInstanceId} onOpenChange={(v) => !v && setSuccessInstanceId(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-green-600" />
+              Clonagem concluída
+            </DialogTitle>
+            <DialogDescription>
+              Módulo clonado com sucesso. A nova instância foi criada a partir do módulo-base
+              selecionado, sem copiar dados reais de outros clientes.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              onClick={() => toast.info("Acesso à instância — preparado para próxima fase técnica.")}
+            >
+              <ExternalLink className="w-4 h-4 mr-1" /> Acessar novo projeto
+            </Button>
+            <Button
+              onClick={() => {
+                const inst = cloneStore.listInstances().find((i) => i.id === successInstanceId);
+                setSuccessInstanceId(null);
+                if (inst) setConfigInstance(inst);
+              }}
+            >
+              <Settings className="w-4 h-4 mr-1" /> Configurar agora
+            </Button>
+            <Button variant="ghost" onClick={() => { setLogsInstanceId(successInstanceId); setSuccessInstanceId(null); }}>
+              <History className="w-4 h-4 mr-1" /> Ver logs
+            </Button>
+            <Button variant="ghost" onClick={() => setSuccessInstanceId(null)}>
+              Voltar à Central
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Configuração inicial Agenda */}
+      {configInstance && (
+        <AgendaConfigWizard
+          open={!!configInstance}
+          onOpenChange={(v) => !v && setConfigInstance(null)}
+          instance={configInstance}
+          actor={actor}
+          onSaved={refresh}
+        />
+      )}
+
+      {/* Logs por instância */}
+      <Dialog open={!!logsInstanceId} onOpenChange={(v) => !v && setLogsInstanceId(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Logs da instância</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            {logs.filter((l) => l.instanceId === logsInstanceId).length === 0 ? (
+              <p className="text-sm text-muted-foreground">Sem logs para esta instância.</p>
+            ) : (
+              logs
+                .filter((l) => l.instanceId === logsInstanceId)
+                .map((l) => (
+                  <Card key={l.id} className="p-2 text-sm">
+                    <div className="font-medium">{l.action}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {l.actor} · {new Date(l.at).toLocaleString("pt-BR")}
+                    </div>
+                    <div className="text-xs">{l.detail}</div>
+                  </Card>
+                ))
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
 
       {/* Detalhe do módulo-base */}
       <Dialog open={!!detailBase} onOpenChange={(v) => !v && setDetailBase(null)}>

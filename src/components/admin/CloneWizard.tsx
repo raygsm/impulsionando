@@ -31,7 +31,6 @@ import {
   NICHE_PRESETS,
   PURPOSES,
   uid,
-  type CloneWizardInput,
   type Environment,
   type Integration,
   type ModuleBase,
@@ -55,7 +54,7 @@ interface Props {
   base: ModuleBase;
   actor: string;
   canClone: boolean;
-  onCreated: () => void;
+  onCreated: (instanceId: string) => void;
 }
 
 const STEPS = ["Módulo-base", "Finalidade", "Dados", "Ambiente", "Preset", "Integrações", "Revisão"];
@@ -134,42 +133,46 @@ export function CloneWizard({ open, onOpenChange, base, actor, canClone, onCreat
       return;
     }
     const layer = environment === "REAL" ? "real" : "demo";
-    const input: CloneWizardInput = {
-      baseId: base.id,
-      purpose,
-      projectName,
-      fantasy,
-      niche: niche as NichePreset | "Outro",
-      responsibleName,
-      responsibleEmail,
-      responsibleWhatsapp,
-      notes,
-      environment,
-      preset,
-      integrations,
-      securityAck,
-    };
-
+    const status =
+      environment === "REAL"
+        ? "REAL aguardando configuração"
+        : environment === "TESTE"
+        ? "TESTE pronto"
+        : "DEMO pronta";
+    const id = uid();
     cloneStore.saveInstance({
-      id: uid(),
+      id,
       baseId: base.id,
       layer,
       targetName: projectName,
+      fantasy,
       niche,
-      notes: `Finalidade: ${purpose} · Ambiente: ${environment} · Preset: ${preset} · Integrações: ${integrations.join(", ") || "—"}${notes ? " · Obs: " + notes : ""}`,
+      preset,
+      purpose,
+      environment,
+      status,
+      responsibleName,
+      responsibleEmail,
+      createdBy: actor,
+      integrations,
+      internalUrl: `/admin/modulos/clonagem/instancia/${id}`,
+      notes,
       createdAt: new Date().toISOString(),
     });
     cloneStore.pushLog({
       actor,
       action: layer === "real" ? "clonou-real" : "clonou-demo",
       detail: `${base.name} → ${projectName} (${environment} / ${preset})`,
+      instanceId: id,
     });
 
-    toast.success("Clonagem concluída — instância criada.");
-    onCreated();
+    toast.success(
+      "Módulo clonado com sucesso. A nova instância foi criada a partir do módulo-base selecionado, sem copiar dados reais de outros clientes."
+    );
+    onCreated(id);
     onOpenChange(false);
-    void input;
   }
+
 
   function toggleIntegration(i: Integration) {
     setIntegrations((prev) => (prev.includes(i) ? prev.filter((x) => x !== i) : [...prev, i]));

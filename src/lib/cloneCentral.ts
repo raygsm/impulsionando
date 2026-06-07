@@ -39,29 +39,111 @@ export interface ModuleBase {
   updatedAt: string;
 }
 
+export type InstanceStatus =
+  | "Criado"
+  | "Aguardando configuração"
+  | "DEMO pronta"
+  | "TESTE pronto"
+  | "REAL aguardando configuração"
+  | "Erro na clonagem"
+  | "Arquivado";
+
+export interface AgendaInitialConfig {
+  publicName: string;
+  internalName: string;
+  niche: string;
+  responsibleName: string;
+  responsibleEmail?: string;
+  responsibleWhatsapp?: string;
+  environment: "DEMO" | "TESTE" | "REAL";
+  notes?: string;
+  structure: {
+    profissionais: boolean;
+    servicos: boolean;
+    unidades: boolean;
+    salas: boolean;
+    pagamento: boolean;
+    fila: boolean;
+    lembretes: boolean;
+    reagendamento: boolean;
+    cancelamentoCliente: boolean;
+    dashboard: boolean;
+    whatsapp: boolean;
+    email: boolean;
+  };
+  operation: {
+    horarioFuncionamento: string;
+    duracaoPadrao: number;
+    intervalo: number;
+    antecedenciaMin: number;
+    prazoCancelar: number;
+    prazoReagendar: number;
+    encaixe: boolean;
+    noShow: boolean;
+    listaEspera: boolean;
+  };
+  communication: {
+    whatsapp: boolean;
+    email: boolean;
+    modelosPadrao: boolean;
+    exigirConfirmacao: boolean;
+    confirmacaoAgendamento: boolean;
+    lembrete24h: boolean;
+    lembrete2h: boolean;
+    avisoReagendamento: boolean;
+    avisoCancelamento: boolean;
+    pesquisaPos: boolean;
+  };
+  integrations: {
+    crm: boolean;
+    whatsapp: boolean;
+    pagamentos: boolean;
+    voip: boolean;
+    bi: boolean;
+    whiteLabel: boolean;
+  };
+}
+
 export interface CloneInstance {
   id: string;
-  baseId: string;          // referência ao ModuleBase
-  layer: Exclude<CloneLayer, "base">; // "demo" | "real"
-  targetName: string;      // nome do projeto/cliente/demo
+  baseId: string;
+  layer: Exclude<CloneLayer, "base">;
+  targetName: string;
+  fantasy?: string;
   niche?: string;
+  preset?: string;
+  purpose?: string;
+  environment?: "DEMO" | "TESTE" | "REAL";
+  status: InstanceStatus;
+  responsibleName?: string;
+  responsibleEmail?: string;
+  createdBy?: string;
+  integrations?: string[];
+  internalUrl?: string;
   notes?: string;
+  config?: AgendaInitialConfig;
+  archived?: boolean;
   createdAt: string;
 }
 
 export interface CloneLog {
   id: string;
   at: string;
-  actor: string;           // email/nome do usuário interno
+  actor: string;
   action:
     | "criou-base"
     | "atualizou-base"
     | "clonou-demo"
     | "clonou-real"
+    | "configurou"
+    | "arquivou"
+    | "duplicou"
     | "removeu"
     | "tentativa-acesso-negado";
   detail: string;
+  instanceId?: string;
 }
+
 
 const K_BASES = "imp.clone.bases.v1";
 const K_INSTANCES = "imp.clone.instances.v1";
@@ -199,6 +281,60 @@ export const PRESET_LABELS: Record<string, Record<string, string>> = {
   "Eventos/WMP": { cliente: "Participante", profissional: "Parceiro", servico: "Atendimento", evento: "Evento" },
   "Serviços profissionais": { cliente: "Cliente", profissional: "Profissional", servico: "Serviço" },
   "Genérico": { cliente: "Cliente", profissional: "Profissional", servico: "Serviço" },
+};
+
+export interface PresetDetail {
+  labels: string[];
+  features: string[];
+  mockServices: string[];
+}
+
+export const PRESET_DETAILS: Record<string, PresetDetail> = {
+  "Clínica": {
+    labels: ["Paciente", "Médico", "Consulta", "Retorno", "Sala", "Especialidade"],
+    features: ["pagamento para confirmar", "lembrete 24h", "lembrete 2h", "retorno", "no-show", "fila de espera", "integração com prontuário preparada", "comunicação com paciente", "comunicação com médico", "dashboard de consultas"],
+    mockServices: ["Consulta inicial", "Retorno", "Avaliação clínica", "Teleconsulta"],
+  },
+  "Consultório": {
+    labels: ["Paciente", "Profissional", "Atendimento", "Retorno", "Sala"],
+    features: ["agendamento online", "confirmação", "lembrete", "pagamento", "no-show", "fila de espera"],
+    mockServices: ["Atendimento inicial", "Retorno", "Consulta online"],
+  },
+  "Estética": {
+    labels: ["Cliente", "Profissional", "Procedimento", "Pacote", "Retorno"],
+    features: ["agenda por profissional", "comissão", "pacote", "retorno", "lembrete", "pagamento", "pesquisa pós-atendimento"],
+    mockServices: ["Avaliação estética", "Limpeza de pele", "Procedimento facial", "Retorno do pacote"],
+  },
+  "Academia/Fitness": {
+    labels: ["Aluno", "Professor", "Aula", "Treino", "Check-in"],
+    features: ["check-in", "plano", "mensalidade", "limite de vagas", "turma", "lembrete de aula", "reagendamento"],
+    mockServices: ["Aula experimental", "Personal trainer", "Avaliação física", "Treino funcional"],
+  },
+  "Jurídico": {
+    labels: ["Cliente", "Advogado", "Reunião", "Audiência", "Prazo"],
+    features: ["reunião", "audiência", "lembrete", "documentos", "tarefa", "comunicação com cliente", "integração futura com módulo jurídico"],
+    mockServices: ["Reunião inicial", "Alinhamento de processo", "Audiência", "Revisão contratual"],
+  },
+  "Bar/Restaurante": {
+    labels: ["Cliente", "Reserva", "Mesa", "Evento", "Lista de espera"],
+    features: ["reserva", "sinal", "mesa", "fila de espera", "no-show", "lembrete", "confirmação por WhatsApp", "dashboard de ocupação"],
+    mockServices: ["Reserva de mesa", "Reserva para evento", "Jantar harmonizado", "Lista de espera"],
+  },
+  "Eventos/WMP": {
+    labels: ["Parceiro", "DJ", "Evento", "Horário de chegada", "Apresentação"],
+    features: ["contrato", "agenda de evento", "aceite", "check-in", "reputação", "comunicação com parceiro", "integração futura com módulo WMP"],
+    mockServices: ["Evento rooftop", "Apresentação DJ", "Evento recorrente", "Chegada técnica"],
+  },
+  "Serviços profissionais": {
+    labels: ["Cliente", "Profissional", "Serviço", "Atendimento", "Horário"],
+    features: ["agendamento", "lembrete", "pagamento", "confirmação", "reagendamento", "histórico do cliente"],
+    mockServices: ["Atendimento inicial", "Consultoria", "Visita técnica", "Reunião online"],
+  },
+  "Genérico": {
+    labels: ["Cliente", "Profissional", "Serviço", "Horário", "Agendamento"],
+    features: ["agenda básica", "confirmação", "lembrete", "cancelamento", "reagendamento", "dashboard simples"],
+    mockServices: ["Atendimento", "Reunião", "Serviço padrão"],
+  },
 };
 
 export interface CloneWizardInput {
