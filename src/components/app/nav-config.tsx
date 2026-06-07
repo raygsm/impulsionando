@@ -27,7 +27,7 @@ export interface NavGroup {
 
 export const TOP_ITEMS: NavItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, perm: "dashboard.read" },
-  { to: "/core", label: "Core Manager", icon: ShieldCheck, superOnly: true },
+  { to: "/adm", label: "/adm — Central Impulsionando", icon: ShieldCheck, superOnly: true },
 ];
 
 export const NAV_GROUPS: NavGroup[] = [
