@@ -371,10 +371,23 @@ function CloneCenterPage() {
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2 pt-1">
+                    <Button size="sm" variant="outline" onClick={() => setDetailInstance(i)}>
+                      <Eye className="w-4 h-4 mr-1" /> Ver detalhes
+                    </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => toast.info("Acesso à instância — preparado para próxima fase técnica.")}
+                      onClick={() => {
+                        cloneStore.pushLog({
+                          actor,
+                          action: "acessou-clone",
+                          detail: `Acesso à instância ${i.targetName} — preparado para próxima fase técnica.`,
+                          instanceId: i.id,
+                          status: "iniciado",
+                        });
+                        toast.info("Acesso à instância — preparado para próxima fase técnica.");
+                        refresh();
+                      }}
                     >
                       <ExternalLink className="w-4 h-4 mr-1" /> Acessar
                     </Button>
@@ -387,7 +400,7 @@ function CloneCenterPage() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => archiveInstance(i)}
+                      onClick={() => { setArchiveReason(""); setArchiveTarget(i); }}
                       disabled={i.archived}
                     >
                       <Archive className="w-4 h-4 mr-1" /> Arquivar
