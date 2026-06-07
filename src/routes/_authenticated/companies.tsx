@@ -25,6 +25,8 @@ export const Route = createFileRoute("/_authenticated/companies")({
 function CompaniesPage() {
   const qc = useQueryClient();
   const { data: me } = useCurrentUser();
+  const navigate = useNavigate();
+  const { startImpersonation } = useImpersonation();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", legal_name: "", document: "", email: "", niche_id: "", is_demo: false });
 
