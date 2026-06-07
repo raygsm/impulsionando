@@ -222,10 +222,11 @@ function DemoAgenda() {
 
         <Tabs value={aba} onValueChange={setAba} className="mt-6">
           <TabsList className="flex-wrap h-auto">
+            <TabsTrigger value="dashboard"><LayoutDashboard className="w-4 h-4 mr-1" />Dashboard</TabsTrigger>
             <TabsTrigger value="visao"><LayoutDashboard className="w-4 h-4 mr-1" />Visão Geral</TabsTrigger>
             <TabsTrigger value="grade"><Calendar className="w-4 h-4 mr-1" />Grade</TabsTrigger>
-            <TabsTrigger value="profs"><Briefcase className="w-4 h-4 mr-1" />Profissionais</TabsTrigger>
-            <TabsTrigger value="servs"><ListChecks className="w-4 h-4 mr-1" />Serviços</TabsTrigger>
+            <TabsTrigger value="profs"><Briefcase className="w-4 h-4 mr-1" />{labelsFor(nichoDemo).profissionalPlural}</TabsTrigger>
+            <TabsTrigger value="servs"><ListChecks className="w-4 h-4 mr-1" />{labelsFor(nichoDemo).servicoPlural}</TabsTrigger>
             <TabsTrigger value="agendar"><Plus className="w-4 h-4 mr-1" />Novo agendamento</TabsTrigger>
             <TabsTrigger value="espera"><Users className="w-4 h-4 mr-1" />Fila de espera</TabsTrigger>
             <TabsTrigger value="painel"><Clock className="w-4 h-4 mr-1" />Painel</TabsTrigger>
@@ -233,6 +234,7 @@ function DemoAgenda() {
             <TabsTrigger value="recursos"><Layers className="w-4 h-4 mr-1" />Recursos</TabsTrigger>
             <TabsTrigger value="fluxos"><Bell className="w-4 h-4 mr-1" />Fluxos</TabsTrigger>
             <TabsTrigger value="comunicacao"><MessageSquare className="w-4 h-4 mr-1" />Comunicação</TabsTrigger>
+            <TabsTrigger value="logs"><FileText className="w-4 h-4 mr-1" />Logs</TabsTrigger>
           </TabsList>
 
           <TabsContent value="visao" className="mt-4 space-y-3">
