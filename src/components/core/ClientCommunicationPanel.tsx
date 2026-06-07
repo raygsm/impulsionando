@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Mail, MessageCircle, Bell, Pencil } from "lucide-react";
+import { COMMUNICATION_EVENTS, EVENT_BY_CODE, type CommChannel } from "@/data/communicationEvents";
 
 type Template = {
   id: string;
