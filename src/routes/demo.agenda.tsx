@@ -15,6 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Calendar, Clock, Users, Plus, Trash2, RotateCcw, Sparkles, ListChecks, Bell, Briefcase, MessageSquare, User, LayoutDashboard, Sliders, Layers } from "lucide-react";
 import { AgendaRecursos } from "@/components/demo/agenda/AgendaRecursos";
 import { AgendaFluxosPanel } from "@/components/demo/agenda/AgendaFluxosPanel";
+import { AgendaComunicacaoPanel } from "@/components/demo/agenda/AgendaComunicacaoPanel";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useDemoState, uid, brl } from "@/lib/demoSandbox";
@@ -201,6 +202,7 @@ function DemoAgenda() {
             <TabsTrigger value="params"><Sliders className="w-4 h-4 mr-1" />Parametrizações</TabsTrigger>
             <TabsTrigger value="recursos"><Layers className="w-4 h-4 mr-1" />Recursos</TabsTrigger>
             <TabsTrigger value="fluxos"><Bell className="w-4 h-4 mr-1" />Fluxos</TabsTrigger>
+            <TabsTrigger value="comunicacao"><MessageSquare className="w-4 h-4 mr-1" />Comunicação</TabsTrigger>
           </TabsList>
 
           <TabsContent value="visao" className="mt-4 space-y-3">
@@ -475,6 +477,10 @@ function DemoAgenda() {
 
           <TabsContent value="fluxos" className="mt-4">
             <AgendaFluxosPanel nicho={nichoDemo} />
+          </TabsContent>
+
+          <TabsContent value="comunicacao" className="mt-4">
+            <AgendaComunicacaoPanel nicho={nichoDemo} />
           </TabsContent>
         </Tabs>
 
