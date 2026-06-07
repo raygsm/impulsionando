@@ -44,6 +44,8 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/modules", label: "Módulos", icon: Boxes, perm: "modules.read" },
       { to: "/admin/trials", label: "Trials (7 dias)", icon: Sparkles, superOnly: true },
       { to: "/admin/billing", label: "Billing", icon: CreditCard, superOnly: true },
+      { to: "/admin/billing-contracts", label: "Contratos recorrentes", icon: CreditCard, superOnly: true },
+      { to: "/admin/billing-policy", label: "Régua de cobrança", icon: CreditCard, superOnly: true },
       { to: "/admin/modulos/clonagem", label: "Clonagem de Módulos", icon: Copy, superOnly: true },
       { to: "/minha-assinatura", label: "Minha Assinatura", icon: CreditCard },
       { to: "/settings", label: "Configurações", icon: SlidersHorizontal, perm: "settings.read" },

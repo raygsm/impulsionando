@@ -1689,6 +1689,341 @@ export type Database = {
           },
         ]
       }
+      billing_contracts: {
+        Row: {
+          company_id: string
+          created_at: string
+          due_day: number
+          id: string
+          last_paid_at: string | null
+          next_due_date: string
+          nfe_issued_at: string | null
+          notes: string | null
+          pix_copy_paste: string | null
+          pix_key: string | null
+          plan_id: string
+          policy_id: string | null
+          recurring_amount: number
+          setup_amount: number
+          setup_paid_at: string | null
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          due_day?: number
+          id?: string
+          last_paid_at?: string | null
+          next_due_date: string
+          nfe_issued_at?: string | null
+          notes?: string | null
+          pix_copy_paste?: string | null
+          pix_key?: string | null
+          plan_id: string
+          policy_id?: string | null
+          recurring_amount: number
+          setup_amount?: number
+          setup_paid_at?: string | null
+          start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          due_day?: number
+          id?: string
+          last_paid_at?: string | null
+          next_due_date?: string
+          nfe_issued_at?: string | null
+          notes?: string | null
+          pix_copy_paste?: string | null
+          pix_key?: string | null
+          plan_id?: string
+          policy_id?: string | null
+          recurring_amount?: number
+          setup_amount?: number
+          setup_paid_at?: string | null
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_contracts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_contracts_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "billing_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_contracts_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "billing_dunning_policy"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_dunning_policy: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          is_default: boolean
+          name: string
+          steps: Json
+          suspend_offset_days: number
+          suspend_time: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name: string
+          steps?: Json
+          suspend_offset_days?: number
+          suspend_time?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name?: string
+          steps?: Json
+          suspend_offset_days?: number
+          suspend_time?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      billing_dunning_runs: {
+        Row: {
+          channel: string
+          detail: string | null
+          id: string
+          invoice_id: string
+          sent_at: string
+          status: string
+          step: string
+        }
+        Insert: {
+          channel: string
+          detail?: string | null
+          id?: string
+          invoice_id: string
+          sent_at?: string
+          status?: string
+          step: string
+        }
+        Update: {
+          channel?: string
+          detail?: string | null
+          id?: string
+          invoice_id?: string
+          sent_at?: string
+          status?: string
+          step?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_dunning_runs_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "billing_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_invoices: {
+        Row: {
+          amount: number
+          company_id: string
+          contract_id: string
+          created_at: string
+          due_date: string
+          fin_transaction_id: string | null
+          id: string
+          paid_at: string | null
+          period_end: string
+          period_start: string
+          pix_copy_paste: string | null
+          pix_key: string | null
+          pix_qr_url: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          company_id: string
+          contract_id: string
+          created_at?: string
+          due_date: string
+          fin_transaction_id?: string | null
+          id?: string
+          paid_at?: string | null
+          period_end: string
+          period_start: string
+          pix_copy_paste?: string | null
+          pix_key?: string | null
+          pix_qr_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          company_id?: string
+          contract_id?: string
+          created_at?: string
+          due_date?: string
+          fin_transaction_id?: string | null
+          id?: string
+          paid_at?: string | null
+          period_end?: string
+          period_start?: string
+          pix_copy_paste?: string | null
+          pix_key?: string | null
+          pix_qr_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_invoices_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "billing_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_invoices_fin_transaction_id_fkey"
+            columns: ["fin_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "fin_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_plans: {
+        Row: {
+          code: string
+          created_at: string
+          cycle: string
+          description: string | null
+          due_day: number
+          id: string
+          is_active: boolean
+          is_default: boolean
+          name: string
+          recurring_amount: number
+          setup_fee: number
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          cycle?: string
+          description?: string | null
+          due_day?: number
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name: string
+          recurring_amount: number
+          setup_fee?: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          cycle?: string
+          description?: string | null
+          due_day?: number
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name?: string
+          recurring_amount?: number
+          setup_fee?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      billing_suspensions: {
+        Row: {
+          company_id: string
+          contract_id: string
+          id: string
+          invoice_id: string | null
+          reactivated_at: string | null
+          reactivated_reason: string | null
+          reason: string | null
+          suspended_at: string
+        }
+        Insert: {
+          company_id: string
+          contract_id: string
+          id?: string
+          invoice_id?: string | null
+          reactivated_at?: string | null
+          reactivated_reason?: string | null
+          reason?: string | null
+          suspended_at?: string
+        }
+        Update: {
+          company_id?: string
+          contract_id?: string
+          id?: string
+          invoice_id?: string | null
+          reactivated_at?: string | null
+          reactivated_reason?: string | null
+          reason?: string | null
+          suspended_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_suspensions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_suspensions_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "billing_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_suspensions_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "billing_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           created_at: string
@@ -5096,6 +5431,20 @@ export type Database = {
     }
     Functions: {
       _trial_norm: { Args: { _v: string }; Returns: string }
+      billing_check_company_status: {
+        Args: { _company: string }
+        Returns: {
+          contract_id: string
+          next_due_date: string
+          overdue_invoice_id: string
+          status: string
+        }[]
+      }
+      billing_mark_paid: {
+        Args: { _invoice_id: string; _paid_at?: string }
+        Returns: string
+      }
+      billing_run_cycle: { Args: never; Returns: Json }
       current_user_company_ids: { Args: never; Returns: string[] }
       customer_anonymize: {
         Args: { _customer_id: string; _reason?: string }

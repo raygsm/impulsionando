@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { AppShell } from "@/components/app/AppShell";
+import { BillingGate } from "@/components/app/BillingGate";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/_authenticated")({
   },
   component: () => (
     <AppShell>
+      <BillingGate />
       <Outlet />
     </AppShell>
   ),

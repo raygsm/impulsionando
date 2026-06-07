@@ -24,6 +24,7 @@ import { Route as PacienteRouteImport } from './routes/paciente'
 import { Route as OrcamentoRouteImport } from './routes/orcamento'
 import { Route as ModulosRouteImport } from './routes/modulos'
 import { Route as ContatoRouteImport } from './routes/contato'
+import { Route as ContaSuspensaRouteImport } from './routes/conta-suspensa'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -141,6 +142,8 @@ import { Route as AuthenticatedAffiliatesBumpsRouteImport } from './routes/_auth
 import { Route as AuthenticatedAffiliatesAffiliatesRouteImport } from './routes/_authenticated/affiliates.affiliates'
 import { Route as AuthenticatedAdminUptimeRouteImport } from './routes/_authenticated/admin.uptime'
 import { Route as AuthenticatedAdminTrialsRouteImport } from './routes/_authenticated/admin.trials'
+import { Route as AuthenticatedAdminBillingPolicyRouteImport } from './routes/_authenticated/admin.billing-policy'
+import { Route as AuthenticatedAdminBillingContractsRouteImport } from './routes/_authenticated/admin.billing-contracts'
 import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authenticated/admin.billing'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -153,6 +156,7 @@ import { Route as ApiPublicHooksUptimeWhatsappTestRouteImport } from './routes/a
 import { Route as ApiPublicHooksUptimeCheckRouteImport } from './routes/api/public/hooks/uptime-check'
 import { Route as ApiPublicHooksMarketingLeadNotifyRouteImport } from './routes/api/public/hooks/marketing-lead-notify'
 import { Route as ApiPublicHooksCommsSelfTestRouteImport } from './routes/api/public/hooks/comms-self-test'
+import { Route as ApiPublicHooksBillingTickRouteImport } from './routes/api/public/hooks/billing-tick'
 import { Route as ApiPublicHooksAffAdvanceCommissionsRouteImport } from './routes/api/public/hooks/aff-advance-commissions'
 import { Route as ApiPublicDemoSendTestRouteImport } from './routes/api/public/demo/send-test'
 import { Route as ApiPaymentsInfinitepayCreateRouteImport } from './routes/api/payments/infinitepay.create'
@@ -234,6 +238,11 @@ const ModulosRoute = ModulosRouteImport.update({
 const ContatoRoute = ContatoRouteImport.update({
   id: '/contato',
   path: '/contato',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContaSuspensaRoute = ContaSuspensaRouteImport.update({
+  id: '/conta-suspensa',
+  path: '/conta-suspensa',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -868,6 +877,18 @@ const AuthenticatedAdminTrialsRoute =
     path: '/admin/trials',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminBillingPolicyRoute =
+  AuthenticatedAdminBillingPolicyRouteImport.update({
+    id: '/admin/billing-policy',
+    path: '/admin/billing-policy',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminBillingContractsRoute =
+  AuthenticatedAdminBillingContractsRouteImport.update({
+    id: '/admin/billing-contracts',
+    path: '/admin/billing-contracts',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminBillingRoute =
   AuthenticatedAdminBillingRouteImport.update({
     id: '/admin/billing',
@@ -938,6 +959,12 @@ const ApiPublicHooksCommsSelfTestRoute =
     path: '/api/public/hooks/comms-self-test',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksBillingTickRoute =
+  ApiPublicHooksBillingTickRouteImport.update({
+    id: '/api/public/hooks/billing-tick',
+    path: '/api/public/hooks/billing-tick',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksAffAdvanceCommissionsRoute =
   ApiPublicHooksAffAdvanceCommissionsRouteImport.update({
     id: '/api/public/hooks/aff-advance-commissions',
@@ -983,6 +1010,7 @@ const ApiPublicPaymentsInfinitepayWebhookRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
@@ -1053,6 +1081,8 @@ export interface FileRoutesByFullPath {
   '/paciente/': typeof PacienteIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
+  '/admin/billing-contracts': typeof AuthenticatedAdminBillingContractsRoute
+  '/admin/billing-policy': typeof AuthenticatedAdminBillingPolicyRoute
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/affiliates/affiliates': typeof AuthenticatedAffiliatesAffiliatesRoute
@@ -1119,6 +1149,7 @@ export interface FileRoutesByFullPath {
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
+  '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
@@ -1135,6 +1166,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
   '/orcamento': typeof OrcamentoRoute
   '/planos': typeof PlanosRouteWithChildren
@@ -1195,6 +1227,8 @@ export interface FileRoutesByTo {
   '/paciente': typeof PacienteIndexRoute
   '/trabalhe-conosco': typeof TrabalheConoscoIndexRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
+  '/admin/billing-contracts': typeof AuthenticatedAdminBillingContractsRoute
+  '/admin/billing-policy': typeof AuthenticatedAdminBillingPolicyRoute
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/affiliates/affiliates': typeof AuthenticatedAffiliatesAffiliatesRoute
@@ -1261,6 +1295,7 @@ export interface FileRoutesByTo {
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
+  '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
@@ -1279,6 +1314,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
@@ -1349,6 +1385,8 @@ export interface FileRoutesById {
   '/paciente/': typeof PacienteIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/_authenticated/admin/billing': typeof AuthenticatedAdminBillingRoute
+  '/_authenticated/admin/billing-contracts': typeof AuthenticatedAdminBillingContractsRoute
+  '/_authenticated/admin/billing-policy': typeof AuthenticatedAdminBillingPolicyRoute
   '/_authenticated/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/_authenticated/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/_authenticated/affiliates/affiliates': typeof AuthenticatedAffiliatesAffiliatesRoute
@@ -1415,6 +1453,7 @@ export interface FileRoutesById {
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
+  '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
@@ -1433,6 +1472,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/conta-suspensa'
     | '/contato'
     | '/modulos'
     | '/orcamento'
@@ -1503,6 +1543,8 @@ export interface FileRouteTypes {
     | '/paciente/'
     | '/trabalhe-conosco/'
     | '/admin/billing'
+    | '/admin/billing-contracts'
+    | '/admin/billing-policy'
     | '/admin/trials'
     | '/admin/uptime'
     | '/affiliates/affiliates'
@@ -1569,6 +1611,7 @@ export interface FileRouteTypes {
     | '/api/payments/infinitepay/create'
     | '/api/public/demo/send-test'
     | '/api/public/hooks/aff-advance-commissions'
+    | '/api/public/hooks/billing-tick'
     | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/uptime-check'
@@ -1585,6 +1628,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/conta-suspensa'
     | '/contato'
     | '/orcamento'
     | '/planos'
@@ -1645,6 +1689,8 @@ export interface FileRouteTypes {
     | '/paciente'
     | '/trabalhe-conosco'
     | '/admin/billing'
+    | '/admin/billing-contracts'
+    | '/admin/billing-policy'
     | '/admin/trials'
     | '/admin/uptime'
     | '/affiliates/affiliates'
@@ -1711,6 +1757,7 @@ export interface FileRouteTypes {
     | '/api/payments/infinitepay/create'
     | '/api/public/demo/send-test'
     | '/api/public/hooks/aff-advance-commissions'
+    | '/api/public/hooks/billing-tick'
     | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/uptime-check'
@@ -1728,6 +1775,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/conta-suspensa'
     | '/contato'
     | '/modulos'
     | '/orcamento'
@@ -1798,6 +1846,8 @@ export interface FileRouteTypes {
     | '/paciente/'
     | '/trabalhe-conosco/'
     | '/_authenticated/admin/billing'
+    | '/_authenticated/admin/billing-contracts'
+    | '/_authenticated/admin/billing-policy'
     | '/_authenticated/admin/trials'
     | '/_authenticated/admin/uptime'
     | '/_authenticated/affiliates/affiliates'
@@ -1864,6 +1914,7 @@ export interface FileRouteTypes {
     | '/api/payments/infinitepay/create'
     | '/api/public/demo/send-test'
     | '/api/public/hooks/aff-advance-commissions'
+    | '/api/public/hooks/billing-tick'
     | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/uptime-check'
@@ -1882,6 +1933,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ContaSuspensaRoute: typeof ContaSuspensaRoute
   ContatoRoute: typeof ContatoRoute
   ModulosRoute: typeof ModulosRouteWithChildren
   OrcamentoRoute: typeof OrcamentoRoute
@@ -1929,6 +1981,7 @@ export interface RootRouteChildren {
   ApiPaymentsInfinitepayCreateRoute: typeof ApiPaymentsInfinitepayCreateRoute
   ApiPublicDemoSendTestRoute: typeof ApiPublicDemoSendTestRoute
   ApiPublicHooksAffAdvanceCommissionsRoute: typeof ApiPublicHooksAffAdvanceCommissionsRoute
+  ApiPublicHooksBillingTickRoute: typeof ApiPublicHooksBillingTickRoute
   ApiPublicHooksCommsSelfTestRoute: typeof ApiPublicHooksCommsSelfTestRoute
   ApiPublicHooksMarketingLeadNotifyRoute: typeof ApiPublicHooksMarketingLeadNotifyRoute
   ApiPublicHooksUptimeCheckRoute: typeof ApiPublicHooksUptimeCheckRoute
@@ -2048,6 +2101,13 @@ declare module '@tanstack/react-router' {
       path: '/contato'
       fullPath: '/contato'
       preLoaderRoute: typeof ContatoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conta-suspensa': {
+      id: '/conta-suspensa'
+      path: '/conta-suspensa'
+      fullPath: '/conta-suspensa'
+      preLoaderRoute: typeof ContaSuspensaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -2869,6 +2929,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTrialsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/billing-policy': {
+      id: '/_authenticated/admin/billing-policy'
+      path: '/admin/billing-policy'
+      fullPath: '/admin/billing-policy'
+      preLoaderRoute: typeof AuthenticatedAdminBillingPolicyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/billing-contracts': {
+      id: '/_authenticated/admin/billing-contracts'
+      path: '/admin/billing-contracts'
+      fullPath: '/admin/billing-contracts'
+      preLoaderRoute: typeof AuthenticatedAdminBillingContractsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/billing': {
       id: '/_authenticated/admin/billing'
       path: '/admin/billing'
@@ -2951,6 +3025,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/hooks/comms-self-test'
       fullPath: '/api/public/hooks/comms-self-test'
       preLoaderRoute: typeof ApiPublicHooksCommsSelfTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/billing-tick': {
+      id: '/api/public/hooks/billing-tick'
+      path: '/api/public/hooks/billing-tick'
+      fullPath: '/api/public/hooks/billing-tick'
+      preLoaderRoute: typeof ApiPublicHooksBillingTickRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/aff-advance-commissions': {
@@ -3234,6 +3315,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedUnitsRoute: typeof AuthenticatedUnitsRoute
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
   AuthenticatedAdminBillingRoute: typeof AuthenticatedAdminBillingRoute
+  AuthenticatedAdminBillingContractsRoute: typeof AuthenticatedAdminBillingContractsRoute
+  AuthenticatedAdminBillingPolicyRoute: typeof AuthenticatedAdminBillingPolicyRoute
   AuthenticatedAdminTrialsRoute: typeof AuthenticatedAdminTrialsRoute
   AuthenticatedAdminUptimeRoute: typeof AuthenticatedAdminUptimeRoute
   AuthenticatedEhrIdRoute: typeof AuthenticatedEhrIdRoute
@@ -3267,6 +3350,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedUnitsRoute: AuthenticatedUnitsRoute,
   AuthenticatedUsersRoute: AuthenticatedUsersRoute,
   AuthenticatedAdminBillingRoute: AuthenticatedAdminBillingRoute,
+  AuthenticatedAdminBillingContractsRoute:
+    AuthenticatedAdminBillingContractsRoute,
+  AuthenticatedAdminBillingPolicyRoute: AuthenticatedAdminBillingPolicyRoute,
   AuthenticatedAdminTrialsRoute: AuthenticatedAdminTrialsRoute,
   AuthenticatedAdminUptimeRoute: AuthenticatedAdminUptimeRoute,
   AuthenticatedEhrIdRoute: AuthenticatedEhrIdRoute,
@@ -3321,6 +3407,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ContaSuspensaRoute: ContaSuspensaRoute,
   ContatoRoute: ContatoRoute,
   ModulosRoute: ModulosRouteWithChildren,
   OrcamentoRoute: OrcamentoRoute,
@@ -3370,6 +3457,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicDemoSendTestRoute: ApiPublicDemoSendTestRoute,
   ApiPublicHooksAffAdvanceCommissionsRoute:
     ApiPublicHooksAffAdvanceCommissionsRoute,
+  ApiPublicHooksBillingTickRoute: ApiPublicHooksBillingTickRoute,
   ApiPublicHooksCommsSelfTestRoute: ApiPublicHooksCommsSelfTestRoute,
   ApiPublicHooksMarketingLeadNotifyRoute:
     ApiPublicHooksMarketingLeadNotifyRoute,
@@ -3388,13 +3476,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
