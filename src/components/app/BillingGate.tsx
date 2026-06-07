@@ -18,7 +18,7 @@ export function BillingGate() {
   const { data: me } = useCurrentUser();
   const fn = useServerFn(getMyBillingStatus);
 
-  const enabled = !!companyId && !me?.isSuperAdmin && !me?.isStaff;
+  const enabled = !!companyId && !me?.isSuperAdmin && !me?.isImpulsionandoStaff;
   const { data } = useQuery({
     queryKey: ["billing-gate", companyId],
     enabled,
