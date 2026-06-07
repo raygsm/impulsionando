@@ -328,6 +328,9 @@ function DemoAgenda() {
                             <Button size="sm" variant="outline" title="Confirmar via WhatsApp" onClick={() => gotoWhatsapp({ nome: a.cliente, telefone: a.telefone }, `Olá ${a.cliente}, confirmando seu agendamento ${a.hora} de ${servs.find((s) => s.id === a.servicoId)?.nome ?? ""}.`)}>
                               <MessageSquare className="w-3.5 h-3.5" />
                             </Button>
+                            <Button size="sm" variant="outline" title="Reagendar" onClick={() => setReagendar(a)}>
+                              <Clock className="w-3.5 h-3.5" />
+                            </Button>
                             <Button size="sm" variant="outline" title="Ver no CRM" onClick={() => gotoCrm({ nome: a.cliente, telefone: a.telefone })}>
                               <User className="w-3.5 h-3.5" />
                             </Button>
