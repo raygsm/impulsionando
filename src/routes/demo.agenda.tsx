@@ -533,7 +533,7 @@ function DemoAgenda() {
           </TabsContent>
 
           <TabsContent value="dashboard" className="mt-4 space-y-4">
-            <AgendaCtaStrip lead={lead?.name} onOutrosModulos={() => setOutrosOpen(true)} />
+            <AgendaCtaStrip lead={lead?.name} onOutrosModulos={() => setOutrosOpen(true)} onClonarModulo={() => setClonarOpen(true)} />
             <AgendaDashboard nicho={nichoDemo} onGoTab={setAba} />
           </TabsContent>
 
@@ -543,7 +543,7 @@ function DemoAgenda() {
         </Tabs>
 
         <div className="mt-6">
-          <AgendaCtaStrip lead={lead?.name} onOutrosModulos={() => setOutrosOpen(true)} />
+          <AgendaCtaStrip lead={lead?.name} onOutrosModulos={() => setOutrosOpen(true)} onClonarModulo={() => setClonarOpen(true)} />
         </div>
 
         {/* Jornada guiada */}
@@ -557,6 +557,45 @@ function DemoAgenda() {
 
         {/* Outros módulos */}
         <OutrosModulosDialog open={outrosOpen} onOpenChange={setOutrosOpen} lead={lead?.name} />
+
+        {/* Clonar módulo — cria novo projeto/cliente a partir do módulo-base Agenda Online */}
+        <CloneWizard
+          open={clonarOpen}
+          onOpenChange={setClonarOpen}
+          base={AGENDA_ONLINE_BASE}
+          actor={lead?.name || lead?.email || "Demo Agenda"}
+          canClone={true}
+          onCreated={(id) => {
+            setClonarOpen(false);
+            setClonarSucessoId(id);
+            AgendaLog.ctaClicado(`clone_concluido:${id}`, lead?.name);
+          }}
+        />
+
+        {/* Sucesso pós-clonagem */}
+        <Dialog open={!!clonarSucessoId} onOpenChange={(v) => !v && setClonarSucessoId(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Módulo clonado com sucesso</DialogTitle>
+              <DialogDescription>
+                Uma nova instância do módulo Agenda Online foi criada para o novo projeto/cliente a partir do módulo-base, sem copiar dados reais de outros clientes. Você pode acompanhá-la na Central Interna de Clonagem.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex-col sm:flex-row gap-2">
+              <Button variant="ghost" onClick={() => setClonarSucessoId(null)}>Fechar</Button>
+              <Button
+                className="bg-gradient-primary"
+                onClick={() => {
+                  setClonarSucessoId(null);
+                  if (typeof window !== "undefined") window.location.href = "/admin/modulos/clonagem";
+                }}
+              >
+                Ver na Central de Clonagem
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
 
         {/* Zerar dados — confirmação obrigatória */}
         <Dialog open={zerarOpen} onOpenChange={setZerarOpen}>
