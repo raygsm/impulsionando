@@ -462,7 +462,26 @@ function DemoAgenda() {
               </Card>
             ))}
           </TabsContent>
+
+          <TabsContent value="recursos" className="mt-4">
+            <AgendaRecursos nicho={nichoDemo} />
+          </TabsContent>
         </Tabs>
+
+        {/* Reagendar — confirmação obrigatória (drag-and-drop / mobile) */}
+        <ReagendarDialog
+          open={!!reagendar}
+          original={reagendar}
+          profs={profs}
+          servs={servs}
+          agds={agds}
+          onClose={() => setReagendar(null)}
+          onConfirm={(updated) => {
+            setAgds((p) => p.map((a) => a.id === updated.id ? updated : a));
+            toast.success("DEMONSTRAÇÃO — VERSÃO TESTE — Agendamento reagendado. Logs e comunicações simuladas.");
+            setReagendar(null);
+          }}
+        />
       </main>
       <PublicFooter />
     </div>
