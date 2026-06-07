@@ -67,7 +67,22 @@ function ClientePage() {
           <h1 className="text-xl font-bold truncate">{c.name}</h1>
           <div className="text-sm text-muted-foreground">{c.email ?? "—"} · {c.phone ?? "—"}</div>
         </div>
-        <Badge variant={c.is_active ? "default" : "outline"}>{c.is_active ? "Ativo" : "Inativo"}</Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant={c.is_active ? "default" : "outline"}>{c.is_active ? "Ativo" : "Inativo"}</Badge>
+          {c.is_active && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                startImpersonation({ companyId: id, companyName: c.name });
+                navigate({ to: "/dashboard" });
+              }}
+            >
+              <Eye className="w-3.5 h-3.5 mr-1" />
+              Acessar como cliente
+            </Button>
+          )}
+        </div>
       </Card>
 
       <Tabs defaultValue="checklist">
