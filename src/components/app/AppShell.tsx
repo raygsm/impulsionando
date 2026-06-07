@@ -4,6 +4,7 @@ import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 import { TrialBanner } from "./TrialBanner";
 import { PastDueBanner } from "@/components/PastDueBanner";
+import { ImpersonationBanner } from "./ImpersonationBanner";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMyTrial } from "@/hooks/use-trial";
 import { useSubscription } from "@/hooks/useSubscription";
