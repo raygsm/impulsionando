@@ -1,91 +1,95 @@
-# Central Master de Configuração — Plano de Execução
+# Certificação de Módulos — Plano Cirúrgico
 
-O escopo é grande demais para uma única entrega. Vou trabalhar em fases curtas, **sempre reaproveitando** as telas, tabelas e funções que já existem no projeto (companies, company_modules, company_settings, setting_definitions, message_templates, message_outbox, billing_*, audit_logs, user_profiles, profile_permissions, customers, agenda_*, crm_*, fin_*, etc.).
-
-Nada será reconstruído. Só vou **expor, conectar e parametrizar** no painel `/core` (Master).
+Escopo: **não recriar nada**. Apenas adicionar a camada de **certificação, instalação 1-clique e templates por segmento** em cima do que já existe (`modules`, `company_modules`, `module_versions`, `setting_definitions`, `company_settings`).
 
 ---
 
-## O que JÁ existe e será apenas exposto/conectado (sem refazer)
+## Fase 1 — Matriz de Prontidão (status por módulo)
 
-- **Impersonação** (`use-impersonation` + `ImpersonationBanner`) — já implementada na fase anterior.
-- **Instalador de módulos por empresa** — aba "Módulos" em `core.cliente.$id.tsx` usando `company_modules` + `module_versions`.
-- **Parâmetros Sim/Não por cliente** — `ClientSettingsPanel` + tabela `setting_definitions`/`company_settings` (18 parâmetros já semeados).
-- **Templates de comunicação** — `message_templates` + `message_outbox` + `enqueue_message()` (e-mail/WhatsApp/in-app já funcionam).
-- **Régua de cobrança** — `billing_contracts`, `billing_invoices`, `billing_dunning_policy`, `billing_run_cycle()`.
-- **Auditoria** — `audit_logs` + trigger `tg_audit` (basta exibir).
-- **Permissões** — `profiles`, `profile_permissions`, `user_permission_overrides`, `user_has_permission()`.
-- **Pendências** — calculáveis a partir das tabelas existentes (sem nova tabela).
+**Migration** (1 só):
+- Adicionar colunas em `public.modules`:
+  - `readiness_status text default 'em_desenvolvimento'` — enum lógico: `em_desenvolvimento | em_revisao | em_testes | certificado | publicado`
+  - `readiness_checklist jsonb default '{}'` — 13 flags do checklist (interface, permissões, dashboard, relatórios, logs, comunicação, integrações, parâmetros, instalação, remoção, atualização, demonstração, fluxos)
+  - `demo_url text`, `docs_url text`, `segments text[] default '{}'`
+- Nenhuma nova tabela.
 
----
-
-## Fases (entrego uma por vez, validamos, seguimos)
-
-### Fase A — Hub Central + Pendências por cliente
-1. Refinar `/core/cliente/:id` para virar o **hub único** com abas claras: **Dados Gerais · Módulos · Parâmetros · Comunicação · Financeiro · Fiscal · Agenda · CRM · Permissões · Pendências · Logs**.
-2. Cada aba reaproveita componente existente (ex.: `IdentityTab`, `ClientSettingsPanel`, `OnboardingWizard`, billing já pronto).
-3. Nova aba **Pendências**: consulta agregada (sem nova tabela) que lista o que falta — e-mail, WhatsApp, Pix, QR, gateway, CNPJ inválido, módulo incompleto, fatura vencida, etc.
-4. Nova aba **Logs**: lê `audit_logs` filtrando por `company_id`.
-
-### Fase B — Parâmetros expandidos (Sim/Não para tudo que é mutável)
-Adicionar definições novas em `setting_definitions` cobrindo:
-- Agenda (já existe parcial) — completar regras de cancelamento/remarcação/confirmar após pagamento.
-- Financeiro — multa, juros, desconto, dia vencimento, tolerância, gateway ativo, recorrência, suspensão/reativação automática.
-- Fiscal — emitir NF Sim/Não, automático após pagto, código serviço, alíquota, município, e-mail fiscal.
-- Comunicação — remetente, e-mail técnico, e-mail resposta, WhatsApp envio/suporte, assinatura, rodapé, links.
-- CRM — origem padrão, responsável padrão, follow-up.
-- Portal cliente, Relatórios, Notificações, Aparência.
-
-Tudo via `ClientSettingsPanel` (já agrupa por categoria automaticamente). **Zero código novo de UI.**
-
-### Fase C — Editor de comunicação por cliente
-Tela única que lista eventos (a partir de `message_templates`), permite por evento:
-- Toggle e-mail / WhatsApp
-- Editar assunto + corpo (override por `company_id` — a coluna já existe)
-- Inserir variáveis dinâmicas (palette com `[NOME_CLIENTE]`, `[VALOR]`, etc. mapeadas para o payload do `enqueue_message`)
-- Testar envio (chama `enqueue_message` com dados de teste)
-- Histórico → consulta `message_outbox` filtrada
-
-### Fase D — Construtor de campos personalizados
-**Esta é a única tabela nova realmente necessária**: `custom_fields` + `custom_field_values` (por entidade: customer, lead, appointment, etc.), com:
-- Tipo (texto, número, CPF, CNPJ, CEP, data, lista, sim/não, upload, etc.)
-- Obrigatório/Visível/Editável/Exibir em X — todos Sim/Não
-- Validação, máscara, valor padrão, ordem, campo dependente
-- UI no master para criar/editar; renderização condicional onde fizer sentido (começo pelo cadastro de cliente)
-
-### Fase E — Painel Financeiro/Fiscal acionável
-- Botões já no hub: **Baixa manual** (com modal: valor, data, forma, obs, comprovante → grava `fin_transactions` + `billing_invoices`), **Reprocessar NF**, **Reenviar comunicação**, **Suspender/Reativar** manualmente.
-- Tudo registra em `audit_logs` (trigger já faz).
-
-### Fase F — White Label (escopo reduzido)
-RLS já distingue `is_super_admin` vs `is_impulsionando_staff` vs usuários de empresa. Adicionar:
-- Flag `is_white_label` em `companies` + `parent_company_id` (relação WL → clientes).
-- Helper `is_white_label_of(_user, _company)` + ajuste de policies para que WL veja só seus clientes.
-- Reaproveita a mesma UI `/core` com filtro automático.
+**UI** (reaproveitando rotas existentes):
+- `src/routes/_authenticated/core.modulos.tsx` — adicionar coluna **Status** + filtro (somente "Certificado" e "Publicado" aparecem como instaláveis).
+- `src/routes/_authenticated/core.modulos.$slug.tsx` — nova aba **Certificação** com:
+  - 13 checkboxes do checklist (gravam em `readiness_checklist`)
+  - Select de status
+  - Campos `demo_url`, `docs_url`, `segments[]`
+  - Botão "Marcar como Certificado" (só habilita se 13/13 ✓)
+- Sem novas páginas, sem novos componentes pesados.
 
 ---
 
-## O que NÃO vou fazer (para não gastar créditos à toa)
+## Fase 2 — Instalação em 1 Clique
 
-- Não vou criar telas novas paralelas às existentes (`/settings`, `/audit`, `/permissions`, `/admin/billing-*` continuam vivos — viram links/abas do hub).
-- Não vou refazer agenda, CRM, financeiro, PDV — eles já estão parametrizados via `company_settings` + flags.
-- Não vou trocar o stack nem migrar dados.
-- Não vou adicionar integrações fiscais novas se já existir uma; só vou expor parâmetros.
+Reaproveita `company_modules` (já existe) + `auto-provisioning.server.ts` (já tem lógica de instalar módulos com dependências).
+
+**Novo server fn** em `src/lib/modules.functions.ts` (arquivo já existe):
+- `installModuleOnCompany({ moduleSlug, companyId, segmentTemplate? })`:
+  1. Valida que módulo está `certificado` ou `publicado`
+  2. Resolve dependências (já tem essa lógica)
+  3. `upsert` em `company_modules` com `is_enabled=true`
+  4. Aplica template do segmento (se passado) em `company_settings` via `setting_definitions`
+  5. Loga em `audit_logs`
+- `uninstallModuleFromCompany({ moduleSlug, companyId })` — desativa (`is_enabled=false`) + log.
+
+**UI**:
+- No `core.modulos.$slug.tsx`, adicionar botão **"Instalar no Cliente"** que abre um diálogo:
+  - Select de empresa (query `companies`)
+  - Select de template de segmento (lê `modules.segments` + presets default)
+  - Botão Instalar → chama `installModuleOnCompany`
+- No `core.cliente.$id.tsx` aba **Módulos** (já existe), adicionar o mesmo fluxo "Instalar módulo" filtrando só módulos certificados.
 
 ---
 
-## Detalhes técnicos (resumidos)
+## Fase 3 — Templates por Segmento
 
-- Toda escrita passa pelas tabelas que **já têm trigger `tg_audit`** → logs automáticos.
-- Parâmetros: chave única `(company_id, key)` em `company_settings` — já existe `onConflict` no upsert.
-- Variáveis dinâmicas: `enqueue_message` já faz `company_identity_payload || payload` — a paleta apenas mostra as chaves disponíveis.
-- Pendências: query única no servidor (server function) que devolve um array tipado `{ key, label, severity, fix_path }`.
-- Custom fields (Fase D): única migração SQL real do plano; tudo o resto é UI + seeds.
+Sem nova tabela. Templates ficam como **JSON estático** em `src/data/moduleSegmentTemplates.ts`:
+
+```ts
+export const SEGMENT_TEMPLATES = {
+  agenda: {
+    clinica: { 'agenda.confirm_after_payment': true, 'agenda.hold_minutes': 30, ... },
+    psicologia: { ... },
+    academia: { ... },
+    // etc
+  },
+  crm: { ... },
+}
+```
+
+`installModuleOnCompany` lê esse mapa e faz `upsert` em `company_settings`. Editar templates = editar o arquivo (uma vez), sem migration.
+
+Segmentos cobertos: clínica, psicologia, gastro, academia, crossfit, restaurante, bar, microcervejaria, escritório, eventos, educação, viagens.
 
 ---
 
-## Por onde começar?
+## Fora do escopo (explicitamente)
 
-Sugiro **Fase A + Fase B juntas** (hub + parâmetros expandidos) — entregam a maior parte da sensação de "tudo configurável pelo painel" sem mexer em schema novo. Depois decidimos as próximas.
+- ❌ Não vou recriar Agenda/CRM/Financeiro/PDV/NF/Checkout/PDV/BI/Portal/Formulários — eles já existem.
+- ❌ Não vou implementar integrações novas (NFSe municipal, gateway X) — fica como flag no checklist e o gestor marca quando integrar.
+- ❌ Não vou criar páginas de demo novas — `demo_url` aponta para as rotas `/demo.*` que já existem.
+- ❌ Não vou tocar em RLS dos módulos existentes.
 
-Confirma que posso seguir por aí, ou quer priorizar outra fase primeiro (ex.: começar pela Fase C — editor de comunicação, já que e-mail/WhatsApp foi a dor original)?
+---
+
+## Entregáveis
+
+1. **1 migration** (colunas em `modules`).
+2. **1 arquivo de templates** (`src/data/moduleSegmentTemplates.ts`).
+3. **2 server fns novas** em `src/lib/modules.functions.ts` (install/uninstall).
+4. **Aba Certificação** em `core.modulos.$slug.tsx`.
+5. **Diálogo Instalar no Cliente** (componente único reutilizado nas 2 telas).
+6. **Filtro/coluna Status** em `core.modulos.tsx`.
+
+Tudo o resto (checklist do usuário: parâmetros, comunicação, logs, pendências, white label) já foi entregue nas fases A-C anteriores.
+
+---
+
+## Próximos passos sugeridos pelo usuário
+
+Após aprovar este plano, recomendo executar **Fase 1 + Fase 2 juntas** (matriz + instalação), e depois Fase 3 (templates) numa segunda rodada — assim você já consegue marcar módulos como certificados e instalar com config default antes de termos os 12 segmentos preenchidos.

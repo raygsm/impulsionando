@@ -4183,10 +4183,14 @@ export type Database = {
       modules: {
         Row: {
           category: string | null
+          certified_at: string | null
+          certified_by: string | null
           created_at: string
           current_version: string
+          demo_url: string | null
           dependencies: string[]
           description: string | null
+          docs_url: string | null
           icon: string | null
           id: string
           is_active: boolean
@@ -4194,6 +4198,9 @@ export type Database = {
           last_version_at: string
           name: string
           owner: string | null
+          readiness_checklist: Json
+          readiness_status: string
+          segments: string[]
           slug: string
           sort_order: number
           status: string
@@ -4201,10 +4208,14 @@ export type Database = {
         }
         Insert: {
           category?: string | null
+          certified_at?: string | null
+          certified_by?: string | null
           created_at?: string
           current_version?: string
+          demo_url?: string | null
           dependencies?: string[]
           description?: string | null
+          docs_url?: string | null
           icon?: string | null
           id?: string
           is_active?: boolean
@@ -4212,6 +4223,9 @@ export type Database = {
           last_version_at?: string
           name: string
           owner?: string | null
+          readiness_checklist?: Json
+          readiness_status?: string
+          segments?: string[]
           slug: string
           sort_order?: number
           status?: string
@@ -4219,10 +4233,14 @@ export type Database = {
         }
         Update: {
           category?: string | null
+          certified_at?: string | null
+          certified_by?: string | null
           created_at?: string
           current_version?: string
+          demo_url?: string | null
           dependencies?: string[]
           description?: string | null
+          docs_url?: string | null
           icon?: string | null
           id?: string
           is_active?: boolean
@@ -4230,6 +4248,9 @@ export type Database = {
           last_version_at?: string
           name?: string
           owner?: string | null
+          readiness_checklist?: Json
+          readiness_status?: string
+          segments?: string[]
           slug?: string
           sort_order?: number
           status?: string

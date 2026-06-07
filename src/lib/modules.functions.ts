@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { getSegmentTemplate, type SegmentKey } from "@/data/moduleSegmentTemplates";
 
 /**
  * Core Modules — Biblioteca Central de Módulos.
@@ -46,7 +47,7 @@ export const getModuleDetail = createServerFn({ method: "GET" })
       supabase.from("module_versions").select("*").eq("module_id", m.id).order("released_at", { ascending: false }),
       supabase
         .from("company_modules")
-        .select("installed_version, is_enabled, installed_at, companies!inner(id, name, slug)")
+        .select("installed_version, is_enabled, installed_at, companies!inner(id, name)")
         .eq("module_id", m.id)
         .eq("is_enabled", true),
     ]);
@@ -251,3 +252,255 @@ export const coreModulesDashboard = createServerFn({ method: "GET" })
       ranking,
     };
   });
+
+/* ============================================================
+ * CERTIFICAÇÃO DE MÓDULOS — Matriz de Prontidão
+ * ============================================================ */
+
+const ReadinessChecklistSchema = z.object({
+  interface: z.boolean().optional(),
+  permissions: z.boolean().optional(),
+  dashboard: z.boolean().optional(),
+  reports: z.boolean().optional(),
+  logs: z.boolean().optional(),
+  communication: z.boolean().optional(),
+  integrations: z.boolean().optional(),
+  parameters: z.boolean().optional(),
+  install: z.boolean().optional(),
+  uninstall: z.boolean().optional(),
+  update: z.boolean().optional(),
+  demo: z.boolean().optional(),
+  flows: z.boolean().optional(),
+});
+
+export const READINESS_CHECKLIST_KEYS = [
+  "interface",
+  "permissions",
+  "dashboard",
+  "reports",
+  "logs",
+  "communication",
+  "integrations",
+  "parameters",
+  "install",
+  "uninstall",
+  "update",
+  "demo",
+  "flows",
+] as const;
+
+export const READINESS_CHECKLIST_LABELS: Record<string, string> = {
+  interface: "Interface pronta",
+  permissions: "Permissões funcionando",
+  dashboard: "Dashboard funcionando",
+  reports: "Relatórios funcionando",
+  logs: "Logs funcionando",
+  communication: "Comunicação funcionando",
+  integrations: "Integrações funcionando",
+  parameters: "Parametrizações funcionando",
+  install: "Instalação funcionando",
+  uninstall: "Remoção funcionando",
+  update: "Atualização funcionando",
+  demo: "Demonstração funcionando",
+  flows: "Fluxos completos funcionando",
+};
+
+export const READINESS_STATUS_LABELS: Record<string, string> = {
+  em_desenvolvimento: "Em desenvolvimento",
+  em_revisao: "Em revisão",
+  em_testes: "Em testes",
+  certificado: "Certificado",
+  publicado: "Publicado",
+};
+
+const CertificationSchema = z.object({
+  slug: z.string().min(1).max(100),
+  readiness_status: z.enum(["em_desenvolvimento", "em_revisao", "em_testes", "certificado", "publicado"]).optional(),
+  readiness_checklist: ReadinessChecklistSchema.optional(),
+  demo_url: z.string().max(500).optional().nullable(),
+  docs_url: z.string().max(500).optional().nullable(),
+  segments: z.array(z.string().min(1).max(50)).max(20).optional(),
+});
+
+export const updateModuleCertification = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => CertificationSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: m } = await supabase.from("modules").select("id").eq("slug", data.slug).maybeSingle();
+    if (!m) throw new Error("Módulo não encontrado");
+
+    const patch: Record<string, unknown> = {};
+    if (data.readiness_status !== undefined) patch.readiness_status = data.readiness_status;
+    if (data.readiness_checklist !== undefined) patch.readiness_checklist = data.readiness_checklist;
+    if (data.demo_url !== undefined) patch.demo_url = data.demo_url;
+    if (data.docs_url !== undefined) patch.docs_url = data.docs_url;
+    if (data.segments !== undefined) patch.segments = data.segments;
+
+    if (data.readiness_status === "certificado" || data.readiness_status === "publicado") {
+      patch.certified_at = new Date().toISOString();
+      patch.certified_by = userId;
+    }
+
+    const { error } = await supabase.from("modules").update(patch as never).eq("id", m.id);
+    if (error) throw new Error(error.message);
+
+    await supabase.from("audit_logs").insert({
+      action: "module.certification.updated",
+      entity: "modules",
+      entity_id: m.id,
+      after: { slug: data.slug, ...patch },
+    } as never);
+
+    return { ok: true };
+  });
+
+const InstallWithTemplateSchema = z.object({
+  companyId: z.string().uuid(),
+  slug: z.string().min(1).max(100),
+  segment: z
+    .enum([
+      "default",
+      "clinica",
+      "psicologia",
+      "gastroenterologia",
+      "academia",
+      "crossfit",
+      "restaurante",
+      "bar",
+      "microcervejaria",
+      "escritorio",
+      "eventos",
+      "educacao",
+      "viagens",
+    ])
+    .default("default"),
+  installDependencies: z.boolean().default(true),
+});
+
+/**
+ * Instalação em 1 clique: instala o módulo + dependências + aplica template do segmento
+ * em company_settings. Só permite instalar módulos certificados ou publicados.
+ */
+export const installModuleWithTemplate = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => InstallWithTemplateSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: m } = await supabase
+      .from("modules")
+      .select("id, slug, current_version, dependencies, readiness_status")
+      .eq("slug", data.slug)
+      .maybeSingle();
+    if (!m) throw new Error("Módulo não encontrado");
+
+    const status = (m as { readiness_status?: string }).readiness_status;
+    if (status !== "certificado" && status !== "publicado") {
+      throw new Error(
+        `Módulo "${m.slug}" ainda não foi certificado para instalação (status: ${status ?? "em_desenvolvimento"}).`,
+      );
+    }
+
+    const installedSlugs: string[] = [];
+
+    // Dependências (instaladas automaticamente se installDependencies=true)
+    const deps = ((m.dependencies ?? []) as string[]) || [];
+    if (deps.length > 0) {
+      const { data: depMods } = await supabase
+        .from("modules")
+        .select("id, slug, current_version, readiness_status")
+        .in("slug", deps);
+      const { data: enabledDeps } = await supabase
+        .from("company_modules")
+        .select("module_id, is_enabled")
+        .eq("company_id", data.companyId)
+        .in("module_id", (depMods ?? []).map((d: { id: string }) => d.id));
+      const enabledSet = new Set(
+        (enabledDeps ?? []).filter((r: { is_enabled: boolean }) => r.is_enabled).map((r: { module_id: string }) => r.module_id),
+      );
+      for (const d of depMods ?? []) {
+        if (enabledSet.has(d.id)) continue;
+        if (!data.installDependencies) {
+          throw new Error(`Dependência não instalada: ${d.slug}`);
+        }
+        const dStatus = (d as { readiness_status?: string }).readiness_status;
+        if (dStatus !== "certificado" && dStatus !== "publicado") {
+          throw new Error(`Dependência "${d.slug}" não está certificada.`);
+        }
+        await supabase.from("company_modules").upsert(
+          {
+            company_id: data.companyId,
+            module_id: d.id,
+            is_enabled: true,
+            installed_version: d.current_version,
+            installed_at: new Date().toISOString(),
+            enabled_at: new Date().toISOString(),
+          },
+          { onConflict: "company_id,module_id" },
+        );
+        installedSlugs.push(d.slug);
+      }
+    }
+
+    // Módulo principal
+    const { error } = await supabase.from("company_modules").upsert(
+      {
+        company_id: data.companyId,
+        module_id: m.id,
+        is_enabled: true,
+        installed_version: m.current_version,
+        installed_at: new Date().toISOString(),
+        enabled_at: new Date().toISOString(),
+      },
+      { onConflict: "company_id,module_id" },
+    );
+    if (error) throw new Error(error.message);
+    installedSlugs.push(m.slug);
+
+    // Aplica template do segmento em company_settings
+    const template = getSegmentTemplate(m.slug, data.segment as SegmentKey);
+    const settingsApplied: string[] = [];
+    for (const [key, value] of Object.entries(template)) {
+      const { error: sErr } = await supabase.from("company_settings").upsert(
+        {
+          company_id: data.companyId,
+          key,
+          value: value as never,
+          updated_at: new Date().toISOString(),
+        } as never,
+        { onConflict: "company_id,key" },
+      );
+      if (!sErr) settingsApplied.push(key);
+    }
+
+    await supabase.from("audit_logs").insert({
+      action: "module.installed_with_template",
+      entity: "company_modules",
+      entity_id: m.id,
+      after: {
+        company_id: data.companyId,
+        slug: m.slug,
+        segment: data.segment,
+        installed: installedSlugs,
+        settings_applied: settingsApplied,
+      },
+    } as never);
+
+    await supabase.from("onboarding_checklist").upsert(
+      {
+        company_id: data.companyId,
+        item_key: "modules_activated",
+        status: "done",
+        completed_at: new Date().toISOString(),
+      },
+      { onConflict: "company_id,item_key" },
+    );
+
+    return {
+      ok: true,
+      installed: installedSlugs,
+      settingsApplied,
+      segment: data.segment,
+    };
+  });
+
