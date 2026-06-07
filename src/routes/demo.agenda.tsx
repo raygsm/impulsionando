@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Clock, Users, Plus, Trash2, RotateCcw, Sparkles, ListChecks, Bell, Briefcase, MessageSquare, User, LayoutDashboard, Sliders, Layers, FileText, Map } from "lucide-react";
+import { Calendar, Clock, Users, Plus, Trash2, RotateCcw, Sparkles, ListChecks, Bell, Briefcase, MessageSquare, User, LayoutDashboard, Sliders, Layers, FileText, Map, UserCog } from "lucide-react";
 import { AgendaRecursos } from "@/components/demo/agenda/AgendaRecursos";
 import { AgendaFluxosPanel } from "@/components/demo/agenda/AgendaFluxosPanel";
 import { AgendaComunicacaoPanel } from "@/components/demo/agenda/AgendaComunicacaoPanel";
@@ -20,6 +20,7 @@ import { AgendaDashboard } from "@/components/demo/agenda/AgendaDashboard";
 import { AgendaJornadaGuiada } from "@/components/demo/agenda/AgendaJornadaGuiada";
 import { AgendaCtaStrip } from "@/components/demo/agenda/AgendaCtaStrip";
 import { OutrosModulosDialog } from "@/components/demo/agenda/OutrosModulosDialog";
+import { AgendaSubstituicaoPanel, SubstAtalhos } from "@/components/demo/agenda/AgendaSubstituicaoPanel";
 import { NICHO_OPTIONS, labelsFor } from "@/lib/agendaNichos";
 import { AgendaLog, listAgendaLogs, clearAgendaLogs, type AgendaLogEntry } from "@/lib/agendaLogs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
@@ -229,6 +230,7 @@ function DemoAgenda() {
             <TabsTrigger value="servs"><ListChecks className="w-4 h-4 mr-1" />{labelsFor(nichoDemo).servicoPlural}</TabsTrigger>
             <TabsTrigger value="agendar"><Plus className="w-4 h-4 mr-1" />Novo agendamento</TabsTrigger>
             <TabsTrigger value="espera"><Users className="w-4 h-4 mr-1" />Fila de espera</TabsTrigger>
+            <TabsTrigger value="substituicao"><UserCog className="w-4 h-4 mr-1" />Substituição</TabsTrigger>
             <TabsTrigger value="painel"><Clock className="w-4 h-4 mr-1" />Painel</TabsTrigger>
             <TabsTrigger value="params"><Sliders className="w-4 h-4 mr-1" />Parametrizações</TabsTrigger>
             <TabsTrigger value="recursos"><Layers className="w-4 h-4 mr-1" />Recursos</TabsTrigger>
@@ -459,6 +461,21 @@ function DemoAgenda() {
               )}
             </Card>
           </TabsContent>
+
+          <TabsContent value="substituicao" className="mt-4 space-y-4">
+            <SubstAtalhos onGoLogs={() => setAba("logs")} onGoDashboard={() => setAba("dashboard")} />
+            <AgendaSubstituicaoPanel
+              profs={profs}
+              servs={servs}
+              agds={agds}
+              onUpdateAgds={setAgds}
+              avisarCliente={fullParams.substAvisarCliente}
+              primeiroAceitar={fullParams.substPrimeiroAceitar}
+              filaSemSub={fullParams.substFilaSemSub}
+              tarefaSemSub={fullParams.substTarefaSemSub}
+            />
+          </TabsContent>
+
 
           <TabsContent value="painel" className="mt-4 space-y-4">
             <div className="grid sm:grid-cols-4 gap-3">

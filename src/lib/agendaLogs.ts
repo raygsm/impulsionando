@@ -148,4 +148,36 @@ export const AgendaLog = {
     appendAgendaLog({ area: "Nicho", acao: "preset_aplicado", origem: nicho, status: "concluido", ambiente: "DEMO" }),
   aguardandoCredencial: (recurso: string) =>
     appendAgendaLog({ area: "Integração", acao: "aguardando_credenciais_externas", origem: recurso, status: "aguardando_credenciais", ambiente: "DEMO" }),
+
+  // 18.1 — Substituição automática de profissional
+  substCancelouAgenda: (profissional: string) =>
+    appendAgendaLog({ area: "Substituição", acao: "profissional_cancelou_agenda", profissional, status: "concluido", ambiente: "DEMO" }),
+  substAfetadosIdentificados: (profissional: string, qtd: number) =>
+    appendAgendaLog({ area: "Substituição", acao: "agendamentos_afetados_identificados", profissional, origem: `${qtd} horário(s)`, status: "concluido", ambiente: "DEMO" }),
+  substBuscaIniciada: (profissional: string) =>
+    appendAgendaLog({ area: "Substituição", acao: "busca_substituto_iniciada", profissional, status: "concluido", ambiente: "DEMO" }),
+  substCompativeisEncontrados: (qtd: number) =>
+    appendAgendaLog({ area: "Substituição", acao: "profissionais_compativeis_encontrados", origem: `${qtd} compatível(is)`, status: "concluido", ambiente: "DEMO" }),
+  substAvisoEnviado: (qtd: number, canal: string) =>
+    appendAgendaLog({ area: "Substituição", acao: "aviso_enviado_profissionais", origem: `${qtd} aviso(s)`, canal, status: "simulado_demo", ambiente: "DEMO" }),
+  substAceito: (profissional: string, cliente: string) =>
+    appendAgendaLog({ area: "Substituição", acao: "profissional_aceitou", profissional, cliente, status: "concluido", ambiente: "DEMO" }),
+  substRecusado: (profissional: string) =>
+    appendAgendaLog({ area: "Substituição", acao: "profissional_recusou", profissional, status: "concluido", ambiente: "DEMO" }),
+  substHorarioAssumido: (profissional: string, cliente: string) =>
+    appendAgendaLog({ area: "Substituição", acao: "horario_assumido", profissional, cliente, status: "concluido", ambiente: "DEMO" }),
+  substHorarioJaAssumido: (profissional: string) =>
+    appendAgendaLog({ area: "Substituição", acao: "horario_ja_assumido", profissional, status: "cancelado", ambiente: "DEMO" }),
+  substClienteAvisado: (cliente: string, canal: string) =>
+    appendAgendaLog({ area: "Substituição", acao: "cliente_avisado", cliente, canal, status: "simulado_demo", ambiente: "DEMO" }),
+  substGestaoAvisada: (cliente: string) =>
+    appendAgendaLog({ area: "Substituição", acao: "gestao_avisada", cliente, status: "simulado_demo", ambiente: "DEMO" }),
+  substSemSubstituto: (cliente: string) =>
+    appendAgendaLog({ area: "Substituição", acao: "nenhum_profissional_aceitou", cliente, status: "pendente", ambiente: "DEMO" }),
+  substTarefaRecepcao: (cliente: string) =>
+    appendAgendaLog({ area: "Substituição", acao: "tarefa_recepcao_criada", cliente, status: "concluido", ambiente: "DEMO" }),
+  substConcluida: (cliente: string, profissional: string) =>
+    appendAgendaLog({ area: "Substituição", acao: "substituicao_concluida", cliente, profissional, status: "concluido", ambiente: "DEMO" }),
+  substCanceladaSemSub: (cliente: string) =>
+    appendAgendaLog({ area: "Substituição", acao: "substituicao_cancelada", cliente, status: "cancelado", ambiente: "DEMO" }),
 };
