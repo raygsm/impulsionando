@@ -20,6 +20,7 @@ import { AgendaDashboard } from "@/components/demo/agenda/AgendaDashboard";
 import { AgendaJornadaGuiada } from "@/components/demo/agenda/AgendaJornadaGuiada";
 import { AgendaCtaStrip } from "@/components/demo/agenda/AgendaCtaStrip";
 import { OutrosModulosDialog } from "@/components/demo/agenda/OutrosModulosDialog";
+import { AgendaSubstituicaoPanel, SubstAtalhos } from "@/components/demo/agenda/AgendaSubstituicaoPanel";
 import { NICHO_OPTIONS, labelsFor } from "@/lib/agendaNichos";
 import { AgendaLog, listAgendaLogs, clearAgendaLogs, type AgendaLogEntry } from "@/lib/agendaLogs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
