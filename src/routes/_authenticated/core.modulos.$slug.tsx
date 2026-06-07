@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ModuleCertificationPanel } from "@/components/core/ModuleCertificationPanel";
 import { InstallModuleDialog } from "@/components/core/InstallModuleDialog";
+import { SettingDefinitionsAdmin } from "@/components/core/SettingDefinitionsAdmin";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/core/modulos/$slug")({
