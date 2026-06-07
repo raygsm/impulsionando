@@ -240,33 +240,149 @@ function CloneCenterPage() {
         </TabsContent>
 
         <TabsContent value="instances" className="space-y-3 pt-4">
-          {instances.length === 0 ? (
+          <Card className="p-3 grid md:grid-cols-5 gap-2">
+            <Input
+              placeholder="Buscar projeto/cliente"
+              value={fSearch}
+              onChange={(e) => setFSearch(e.target.value)}
+            />
+            <Select value={fModule} onValueChange={setFModule}>
+              <SelectTrigger><SelectValue placeholder="Módulo" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os módulos</SelectItem>
+                {bases.map((b) => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select value={fEnv} onValueChange={setFEnv}>
+              <SelectTrigger><SelectValue placeholder="Ambiente" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os ambientes</SelectItem>
+                <SelectItem value="DEMO">DEMO</SelectItem>
+                <SelectItem value="TESTE">TESTE</SelectItem>
+                <SelectItem value="REAL">REAL</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={fStatus} onValueChange={setFStatus}>
+              <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os status</SelectItem>
+                <SelectItem value="Criado">Criado</SelectItem>
+                <SelectItem value="Aguardando configuração">Aguardando configuração</SelectItem>
+                <SelectItem value="DEMO pronta">DEMO pronta</SelectItem>
+                <SelectItem value="TESTE pronto">TESTE pronto</SelectItem>
+                <SelectItem value="REAL aguardando configuração">REAL aguardando configuração</SelectItem>
+                <SelectItem value="Arquivado">Arquivado</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={fNiche} onValueChange={setFNiche}>
+              <SelectTrigger><SelectValue placeholder="Nicho" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os nichos</SelectItem>
+                {NICHE_PRESETS.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </Card>
+
+          {filteredInstances.length === 0 ? (
             <Card className="p-8 text-center text-sm text-muted-foreground">
-              Nenhuma instância clonada ainda.
+              Nenhum clone encontrado com os filtros aplicados.
             </Card>
           ) : (
-            instances.map((i) => {
+            filteredInstances.map((i) => {
               const base = bases.find((b) => b.id === i.baseId);
               return (
-                <Card key={i.id} className="p-4 flex items-center justify-between gap-3">
-                  <div>
-                    <div className="font-medium">{i.targetName}</div>
-                    <div className="text-xs text-muted-foreground">
-                      Base: {base?.name ?? i.baseId} · {i.niche ?? "—"} ·{" "}
-                      {new Date(i.createdAt).toLocaleString("pt-BR")}
+                <Card key={i.id} className="p-4 space-y-2">
+                  <div className="flex items-start justify-between gap-3 flex-wrap">
+                    <div className="min-w-0">
+                      <div className="font-medium">
+                        {i.targetName} {i.fantasy ? <span className="text-muted-foreground">({i.fantasy})</span> : null}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Base: {base?.name ?? i.baseId} · v{base?.version ?? "?"} ·{" "}
+                        {i.niche ?? "—"} · Preset: {i.preset ?? "—"}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Responsável: {i.responsibleName ?? "—"} · Criado por: {i.createdBy ?? "—"} ·{" "}
+                        {new Date(i.createdAt).toLocaleString("pt-BR")}
+                      </div>
+                      {i.integrations && i.integrations.length > 0 && (
+                        <div className="text-xs text-muted-foreground">
+                          Integrações: {i.integrations.join(", ")}
+                        </div>
+                      )}
                     </div>
-                    {i.notes && (
-                      <div className="text-xs text-muted-foreground mt-1">{i.notes}</div>
-                    )}
+                    <div className="flex flex-col items-end gap-1">
+                      <Badge variant={i.environment === "REAL" ? "default" : "secondary"}>
+                        {i.environment ?? (i.layer === "real" ? "REAL" : "DEMO")}
+                      </Badge>
+                      <Badge variant="outline">{i.status}</Badge>
+                      {i.archived && <Badge variant="destructive">Arquivado</Badge>}
+                    </div>
                   </div>
-                  <Badge variant={i.layer === "real" ? "default" : "secondary"}>
-                    {i.layer === "real" ? "Cliente Real" : "DEMO"}
-                  </Badge>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => toast.info("Acesso à instância — preparado para próxima fase técnica.")}
+                    >
+                      <ExternalLink className="w-4 h-4 mr-1" /> Acessar
+                    </Button>
+                    <Button size="sm" onClick={() => setConfigInstance(i)}>
+                      <Settings className="w-4 h-4 mr-1" /> Configurar
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => setLogsInstanceId(i.id)}>
+                      <History className="w-4 h-4 mr-1" /> Ver logs
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => archiveInstance(i)}
+                      disabled={i.archived}
+                    >
+                      <Archive className="w-4 h-4 mr-1" /> Arquivar
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        const b = bases.find((b) => b.id === i.baseId);
+                        if (b) setWizardBase(b);
+                      }}
+                    >
+                      <Copy className="w-4 h-4 mr-1" /> Duplicar
+                    </Button>
+                  </div>
                 </Card>
               );
             })
           )}
         </TabsContent>
+
+        <TabsContent value="presets" className="pt-4 space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Cada preset adapta labels, exemplos, serviços padrão, status, textos, comunicações,
+            dashboards, permissões sugeridas e parametrizações padrão.
+          </p>
+          <div className="grid md:grid-cols-2 gap-3">
+            {Object.entries(PRESET_DETAILS).map(([name, d]) => (
+              <Card key={name} className="p-4 space-y-2">
+                <div className="font-semibold">{name}</div>
+                <div className="text-xs">
+                  <span className="text-muted-foreground">Labels:</span> {d.labels.join(" · ")}
+                </div>
+                <div className="text-xs">
+                  <span className="text-muted-foreground">Recursos padrão:</span>{" "}
+                  {d.features.join(", ")}
+                </div>
+                <div className="text-xs">
+                  <span className="text-muted-foreground">Serviços mock (DEMO):</span>{" "}
+                  {d.mockServices.join(", ")}
+                </div>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
 
         <TabsContent value="planned" className="pt-4">
           <Card className="p-4">
