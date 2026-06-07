@@ -206,6 +206,10 @@ function ClientePage() {
           </Card>
         </TabsContent>
       </Tabs>
+        <TabsContent value="logs">
+          <ClientLogsPanel companyId={id} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
