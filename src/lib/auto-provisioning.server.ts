@@ -38,16 +38,6 @@ function slugify(s: string): string {
     .slice(0, 50);
 }
 
-async function uniqueSlug(base: string): Promise<string> {
-  let candidate = base || "empresa";
-  for (let i = 0; i < 30; i++) {
-    const { data } = await supabaseAdmin.from("companies").select("id").eq("slug", candidate).maybeSingle();
-    if (!data) return candidate;
-    candidate = `${base}-${Math.floor(1000 + Math.random() * 9000)}`;
-  }
-  return `${base}-${Date.now().toString(36)}`;
-}
-
 async function appendLog(orderNsu: string, entry: Record<string, unknown>) {
   const { data } = await supabaseAdmin
     .from("infinitepay_payments")
@@ -92,13 +82,10 @@ export async function autoProvisionFromPayment(orderNsu: string): Promise<{
   let companyId = p.empresa_id;
   if (!companyId) {
     const baseName = p.customer_name || (p.customer_email?.split("@")[0] ?? "Empresa Cliente");
-    const baseSlug = slugify(baseName);
-    const slug = await uniqueSlug(baseSlug);
     const { data: company, error: cErr } = await supabaseAdmin
       .from("companies")
       .insert({
         name: baseName,
-        slug,
         email: p.customer_email,
         phone: p.customer_phone,
         is_active: true,
@@ -115,7 +102,7 @@ export async function autoProvisionFromPayment(orderNsu: string): Promise<{
       throw new Error(cErr.message);
     }
     companyId = company.id;
-    await appendLog(orderNsu, { step: "company", id: companyId, slug });
+    await appendLog(orderNsu, { step: "company", id: companyId, slug: slugify(baseName) });
   }
 
   // 2. Usuário administrador (se ainda não existe)
