@@ -91,6 +91,7 @@ function ClientePage() {
           <TabsTrigger value="identidade">Identidade</TabsTrigger>
           <TabsTrigger value="onboarding">Onboarding</TabsTrigger>
           <TabsTrigger value="modulos">Módulos</TabsTrigger>
+          <TabsTrigger value="parametros">Parâmetros</TabsTrigger>
           <TabsTrigger value="contratos">Contratos</TabsTrigger>
           <TabsTrigger value="dominio">Domínio</TabsTrigger>
           <TabsTrigger value="emails">E-mails</TabsTrigger>
