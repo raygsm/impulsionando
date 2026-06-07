@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listModulesLibrary, coreModulesDashboard } from "@/lib/modules.functions";
+import { listModulesLibrary, coreModulesDashboard, READINESS_STATUS_LABELS } from "@/lib/modules.functions";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/app/PageElements";
@@ -68,7 +68,10 @@ function CoreModulosPage() {
       <Card className="p-4">
         <h3 className="font-semibold mb-3">Catálogo completo</h3>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {(lib?.modules ?? []).map((m: any) => (
+          {(lib?.modules ?? []).map((m: any) => {
+            const status = m.readiness_status ?? "em_desenvolvimento";
+            const installable = status === "certificado" || status === "publicado";
+            return (
             <Link
               key={m.id}
               to="/core/modulos/$slug"
@@ -82,7 +85,10 @@ function CoreModulosPage() {
                 </div>
                 <Badge variant="outline">v{m.current_version}</Badge>
               </div>
-              <div className="mt-2 flex items-center justify-between text-xs">
+              <div className="mt-2 flex items-center justify-between text-xs gap-2 flex-wrap">
+                <Badge variant={installable ? "default" : "outline"} className="text-[10px]">
+                  {READINESS_STATUS_LABELS[status] ?? status}
+                </Badge>
                 <span className="text-muted-foreground">{m.installs} instalações</span>
                 {m.outdated > 0 ? (
                   <span className="text-amber-600">{m.outdated} desatualizados</span>
@@ -94,7 +100,8 @@ function CoreModulosPage() {
                 <div className="mt-1 text-[10px] text-muted-foreground">Depende de: {(m.dependencies as string[]).join(", ")}</div>
               )}
             </Link>
-          ))}
+            );
+          })}
         </div>
       </Card>
     </>
