@@ -226,6 +226,15 @@ export async function checkInfinitePayStatusCore(
         },
       })
       .eq("order_nsu", row.order_nsu);
+
+    // Provisionamento automático (idempotente). Falhas não bloqueiam a verificação.
+    try {
+      const { autoProvisionFromPayment } = await import("./auto-provisioning.server");
+      await autoProvisionFromPayment(row.order_nsu);
+    } catch (e) {
+      console.error("[infinitepay check] auto-provision error", e);
+    }
+
     return {
       ok: true as const,
       status: "paid",

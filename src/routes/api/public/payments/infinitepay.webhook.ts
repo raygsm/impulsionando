@@ -140,6 +140,14 @@ export const Route = createFileRoute("/api/public/payments/infinitepay/webhook")
           return jsonResp(500, { success: false, message: "Erro ao atualizar pedido" });
         }
 
+        // Provisionamento automático (idempotente). Falhas não bloqueiam o webhook.
+        try {
+          const { autoProvisionFromPayment } = await import("@/lib/auto-provisioning.server");
+          await autoProvisionFromPayment(order_nsu);
+        } catch (e) {
+          console.error("[infinitepay webhook] auto-provision error", e);
+        }
+
         return jsonResp(200, { success: true, message: null });
       },
     },
