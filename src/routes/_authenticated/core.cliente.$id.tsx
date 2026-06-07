@@ -87,18 +87,24 @@ function ClientePage() {
         </div>
       </Card>
 
-      <Tabs defaultValue="checklist">
+      <Tabs defaultValue="pendencias">
         <TabsList className="flex-wrap h-auto">
+          <TabsTrigger value="pendencias">Pendências</TabsTrigger>
           <TabsTrigger value="checklist">Checklist</TabsTrigger>
-          <TabsTrigger value="identidade">Identidade</TabsTrigger>
+          <TabsTrigger value="identidade">Dados Gerais</TabsTrigger>
           <TabsTrigger value="onboarding">Onboarding</TabsTrigger>
           <TabsTrigger value="modulos">Módulos</TabsTrigger>
           <TabsTrigger value="parametros">Parâmetros</TabsTrigger>
-          <TabsTrigger value="contratos">Contratos</TabsTrigger>
+          <TabsTrigger value="contratos">Financeiro</TabsTrigger>
           <TabsTrigger value="dominio">Domínio</TabsTrigger>
           <TabsTrigger value="emails">E-mails</TabsTrigger>
           <TabsTrigger value="timeline">Timeline</TabsTrigger>
+          <TabsTrigger value="logs">Logs</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="pendencias">
+          <ClientPendingsPanel companyId={id} />
+        </TabsContent>
 
         <TabsContent value="checklist">
           <Card className="p-4">
