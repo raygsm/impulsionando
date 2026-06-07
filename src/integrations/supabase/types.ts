@@ -3503,12 +3503,16 @@ export type Database = {
           id: string
           installments: number | null
           invoice_slug: string | null
+          module_slugs: string[]
           modulo_id: string | null
           order_nsu: string
           paid_amount: number | null
           paid_at: string | null
           plano_id: string | null
           provider: string
+          provisioned_at: string | null
+          provisioning_log: Json
+          provisioning_status: string
           raw_request: Json | null
           raw_response: Json | null
           receipt_url: string | null
@@ -3533,12 +3537,16 @@ export type Database = {
           id?: string
           installments?: number | null
           invoice_slug?: string | null
+          module_slugs?: string[]
           modulo_id?: string | null
           order_nsu: string
           paid_amount?: number | null
           paid_at?: string | null
           plano_id?: string | null
           provider?: string
+          provisioned_at?: string | null
+          provisioning_log?: Json
+          provisioning_status?: string
           raw_request?: Json | null
           raw_response?: Json | null
           receipt_url?: string | null
@@ -3563,12 +3571,16 @@ export type Database = {
           id?: string
           installments?: number | null
           invoice_slug?: string | null
+          module_slugs?: string[]
           modulo_id?: string | null
           order_nsu?: string
           paid_amount?: number | null
           paid_at?: string | null
           plano_id?: string | null
           provider?: string
+          provisioned_at?: string | null
+          provisioning_log?: Json
+          provisioning_status?: string
           raw_request?: Json | null
           raw_response?: Json | null
           receipt_url?: string | null
