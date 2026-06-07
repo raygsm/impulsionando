@@ -10,6 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OnboardingWizard } from "@/components/core/OnboardingWizard";
 import { IdentityTab } from "@/components/core/IdentityTab";
 import { ClientSettingsPanel } from "@/components/core/ClientSettingsPanel";
+import { ClientPendingsPanel } from "@/components/core/ClientPendingsPanel";
+import { ClientLogsPanel } from "@/components/core/ClientLogsPanel";
 import { useImpersonation } from "@/hooks/use-impersonation";
 import { useNavigate } from "@tanstack/react-router";
 import { CheckCircle2, Circle, Building2, Download, RefreshCw, Trash2, Eye } from "lucide-react";
