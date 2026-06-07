@@ -4233,6 +4233,138 @@ export type Database = {
           },
         ]
       }
+      onboarding_checklist: {
+        Row: {
+          company_id: string
+          completed_at: string | null
+          created_at: string
+          id: string
+          item_key: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          item_key: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          item_key?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_checklist_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      onboarding_domain_requests: {
+        Row: {
+          alternatives: string | null
+          company_id: string
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          id: string
+          mode: string
+          notes: string | null
+          requested_value: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          alternatives?: string | null
+          company_id: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          mode: string
+          notes?: string | null
+          requested_value?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          alternatives?: string | null
+          company_id?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          mode?: string
+          notes?: string | null
+          requested_value?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_domain_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      onboarding_email_requests: {
+        Row: {
+          address_prefix: string
+          company_id: string
+          created_at: string
+          full_address: string | null
+          id: string
+          notes: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          address_prefix: string
+          company_id: string
+          created_at?: string
+          full_address?: string | null
+          id?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          address_prefix?: string
+          company_id?: string
+          created_at?: string
+          full_address?: string | null
+          id?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_email_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       permissions: {
         Row: {
           code: string
@@ -5445,6 +5577,10 @@ export type Database = {
         Returns: string
       }
       billing_run_cycle: { Args: never; Returns: Json }
+      core_user_belongs_to_company: {
+        Args: { _company_id: string; _uid: string }
+        Returns: boolean
+      }
       current_user_company_ids: { Args: never; Returns: string[] }
       customer_anonymize: {
         Args: { _customer_id: string; _reason?: string }
