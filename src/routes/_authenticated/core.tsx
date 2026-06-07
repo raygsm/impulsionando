@@ -22,7 +22,7 @@ function CoreLayout() {
   const tabs = [
     { to: "/core", label: "Visão geral", icon: LayoutDashboard, exact: true },
     { to: "/core/clientes", label: "Clientes", icon: Building2 },
-    { to: "/modules", label: "Módulos", icon: Boxes },
+    { to: "/core/modulos", label: "Biblioteca de Módulos", icon: Boxes },
     { to: "/admin/billing-contracts", label: "Contratos", icon: CreditCard },
     { to: "/admin/billing-policy", label: "Régua", icon: Globe },
   ];

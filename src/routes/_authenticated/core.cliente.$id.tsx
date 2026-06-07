@@ -2,12 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getClient360, completeChecklistItem } from "@/lib/onboarding.functions";
+import { getClientModules, installModule, uninstallModule, updateClientModuleToLatest } from "@/lib/modules.functions";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OnboardingWizard } from "@/components/core/OnboardingWizard";
-import { CheckCircle2, Circle, Building2 } from "lucide-react";
+import { CheckCircle2, Circle, Building2, Download, RefreshCw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/core/cliente/$id")({
@@ -103,19 +104,7 @@ function ClientePage() {
         </TabsContent>
 
         <TabsContent value="modulos">
-          <Card className="p-4 space-y-2">
-            <h3 className="font-semibold mb-2">Módulos ativos</h3>
-            {data.modules.length === 0 && <p className="text-sm text-muted-foreground">Nenhum módulo ativo. Use a página de Módulos para instalar.</p>}
-            {data.modules.map((m: any, i: number) => (
-              <div key={i} className="flex items-center justify-between text-sm border-b last:border-0 py-1.5">
-                <span>{m.modules?.name ?? m.modules?.slug}</span>
-                <Badge variant="outline">{m.modules?.slug}</Badge>
-              </div>
-            ))}
-            <Button asChild size="sm" variant="outline" className="mt-2">
-              <a href="/modules">Gerenciar módulos</a>
-            </Button>
-          </Card>
+          <ClientModulesPanel companyId={id} />
         </TabsContent>
 
         <TabsContent value="contratos">
@@ -177,6 +166,93 @@ function ClientePage() {
           </Card>
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+function ClientModulesPanel({ companyId }: { companyId: string }) {
+  const qc = useQueryClient();
+  const fetchList = useServerFn(getClientModules);
+  const install = useServerFn(installModule);
+  const uninstall = useServerFn(uninstallModule);
+  const update = useServerFn(updateClientModuleToLatest);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["client-modules", companyId],
+    queryFn: () => fetchList({ data: { companyId } }),
+  });
+
+  const installMut = useMutation({
+    mutationFn: (slug: string) => install({ data: { companyId, slug } }),
+    onSuccess: () => { toast.success("Módulo instalado"); qc.invalidateQueries({ queryKey: ["client-modules", companyId] }); qc.invalidateQueries({ queryKey: ["client-360", companyId] }); },
+    onError: (e: any) => toast.error(e.message),
+  });
+  const uninstallMut = useMutation({
+    mutationFn: (slug: string) => uninstall({ data: { companyId, slug } }),
+    onSuccess: () => { toast.success("Módulo desinstalado"); qc.invalidateQueries({ queryKey: ["client-modules", companyId] }); },
+    onError: (e: any) => toast.error(e.message),
+  });
+  const updateMut = useMutation({
+    mutationFn: (slug: string) => update({ data: { companyId, slug } }),
+    onSuccess: () => { toast.success("Módulo atualizado para a versão atual"); qc.invalidateQueries({ queryKey: ["client-modules", companyId] }); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  if (isLoading) return <Card className="p-4">Carregando módulos…</Card>;
+  const installed = (data?.modules ?? []).filter((m: any) => m.is_installed);
+  const available = (data?.modules ?? []).filter((m: any) => !m.is_installed);
+
+  return (
+    <div className="space-y-4">
+      <Card className="p-4">
+        <h3 className="font-semibold mb-3">Módulos instalados ({installed.length})</h3>
+        {installed.length === 0 && <p className="text-sm text-muted-foreground">Nenhum módulo instalado ainda.</p>}
+        <div className="space-y-1.5">
+          {installed.map((m: any) => (
+            <div key={m.id} className="flex items-center justify-between gap-2 border-b last:border-0 py-2 text-sm">
+              <div className="min-w-0">
+                <div className="font-medium truncate">{m.name}</div>
+                <div className="text-xs text-muted-foreground">
+                  Instalado v{m.installed_version ?? "?"} · Atual v{m.current_version}
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5">
+                {m.has_update && (
+                  <Button size="sm" variant="default" onClick={() => updateMut.mutate(m.slug)} disabled={updateMut.isPending}>
+                    <RefreshCw className="w-3.5 h-3.5 mr-1" />Atualizar
+                  </Button>
+                )}
+                <Button size="sm" variant="ghost" onClick={() => uninstallMut.mutate(m.slug)} disabled={uninstallMut.isPending}>
+                  <Trash2 className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      <Card className="p-4">
+        <h3 className="font-semibold mb-3">Módulos disponíveis ({available.length})</h3>
+        <div className="space-y-1.5">
+          {available.map((m: any) => (
+            <div key={m.id} className="flex items-center justify-between gap-2 border-b last:border-0 py-2 text-sm">
+              <div className="min-w-0">
+                <div className="font-medium truncate">{m.name}</div>
+                <div className="text-xs text-muted-foreground">
+                  v{m.current_version}
+                  {(m.dependencies ?? []).length > 0 && <> · depende de: {(m.dependencies as string[]).join(", ")}</>}
+                </div>
+              </div>
+              <Button size="sm" variant="outline" onClick={() => installMut.mutate(m.slug)} disabled={installMut.isPending}>
+                <Download className="w-3.5 h-3.5 mr-1" />Instalar
+              </Button>
+            </div>
+          ))}
+        </div>
+        <p className="text-xs text-muted-foreground mt-3">
+          Instalar = ativar permissões, menus, rotas e integrações do módulo no Core. Não duplica código nem tabelas.
+        </p>
+      </Card>
     </div>
   );
 }

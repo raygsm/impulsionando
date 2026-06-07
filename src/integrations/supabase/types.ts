@@ -2089,6 +2089,8 @@ export type Database = {
           created_at: string
           enabled_at: string | null
           id: string
+          installed_at: string | null
+          installed_version: string | null
           is_enabled: boolean
           module_id: string
           updated_at: string
@@ -2098,6 +2100,8 @@ export type Database = {
           created_at?: string
           enabled_at?: string | null
           id?: string
+          installed_at?: string | null
+          installed_version?: string | null
           is_enabled?: boolean
           module_id: string
           updated_at?: string
@@ -2107,6 +2111,8 @@ export type Database = {
           created_at?: string
           enabled_at?: string | null
           id?: string
+          installed_at?: string | null
+          installed_version?: string | null
           is_enabled?: boolean
           module_id?: string
           updated_at?: string
@@ -4064,44 +4070,100 @@ export type Database = {
           },
         ]
       }
+      module_versions: {
+        Row: {
+          created_at: string
+          id: string
+          module_id: string
+          notes: string | null
+          released_at: string
+          released_by: string | null
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          module_id: string
+          notes?: string | null
+          released_at?: string
+          released_by?: string | null
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          module_id?: string
+          notes?: string | null
+          released_at?: string
+          released_by?: string | null
+          updated_at?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_versions_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       modules: {
         Row: {
           category: string | null
           created_at: string
+          current_version: string
+          dependencies: string[]
           description: string | null
           icon: string | null
           id: string
           is_active: boolean
           is_core: boolean
+          last_version_at: string
           name: string
+          owner: string | null
           slug: string
           sort_order: number
+          status: string
           updated_at: string
         }
         Insert: {
           category?: string | null
           created_at?: string
+          current_version?: string
+          dependencies?: string[]
           description?: string | null
           icon?: string | null
           id?: string
           is_active?: boolean
           is_core?: boolean
+          last_version_at?: string
           name: string
+          owner?: string | null
           slug: string
           sort_order?: number
+          status?: string
           updated_at?: string
         }
         Update: {
           category?: string | null
           created_at?: string
+          current_version?: string
+          dependencies?: string[]
           description?: string | null
           icon?: string | null
           id?: string
           is_active?: boolean
           is_core?: boolean
+          last_version_at?: string
           name?: string
+          owner?: string | null
           slug?: string
           sort_order?: number
+          status?: string
           updated_at?: string
         }
         Relationships: []
