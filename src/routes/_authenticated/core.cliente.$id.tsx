@@ -33,6 +33,8 @@ const CHECKLIST_LABELS: Record<string, string> = {
 function ClientePage() {
   const { id } = Route.useParams();
   const qc = useQueryClient();
+  const navigate = useNavigate();
+  const { startImpersonation } = useImpersonation();
   const fetch360 = useServerFn(getClient360);
   const completeItem = useServerFn(completeChecklistItem);
 
