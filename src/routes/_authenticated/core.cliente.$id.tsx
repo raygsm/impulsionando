@@ -12,6 +12,7 @@ import { IdentityTab } from "@/components/core/IdentityTab";
 import { ClientSettingsPanel } from "@/components/core/ClientSettingsPanel";
 import { ClientPendingsPanel } from "@/components/core/ClientPendingsPanel";
 import { ClientLogsPanel } from "@/components/core/ClientLogsPanel";
+import { ClientCommunicationPanel } from "@/components/core/ClientCommunicationPanel";
 import { useImpersonation } from "@/hooks/use-impersonation";
 import { useNavigate } from "@tanstack/react-router";
 import { CheckCircle2, Circle, Building2, Download, RefreshCw, Trash2, Eye } from "lucide-react";
@@ -95,6 +96,7 @@ function ClientePage() {
           <TabsTrigger value="onboarding">Onboarding</TabsTrigger>
           <TabsTrigger value="modulos">Módulos</TabsTrigger>
           <TabsTrigger value="parametros">Parâmetros</TabsTrigger>
+          <TabsTrigger value="comunicacao">Comunicação</TabsTrigger>
           <TabsTrigger value="contratos">Financeiro</TabsTrigger>
           <TabsTrigger value="dominio">Domínio</TabsTrigger>
           <TabsTrigger value="emails">E-mails</TabsTrigger>
@@ -145,6 +147,10 @@ function ClientePage() {
 
         <TabsContent value="parametros">
           <ClientSettingsPanel companyId={id} />
+        </TabsContent>
+
+        <TabsContent value="comunicacao">
+          <ClientCommunicationPanel companyId={id} />
         </TabsContent>
 
         <TabsContent value="contratos">
