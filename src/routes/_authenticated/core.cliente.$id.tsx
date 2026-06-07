@@ -101,8 +101,13 @@ function ClientePage() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="identidade">
+          <IdentityTab companyId={id} />
+        </TabsContent>
+
         <TabsContent value="onboarding">
           <OnboardingWizard companyId={id} />
+
         </TabsContent>
 
         <TabsContent value="modulos">
