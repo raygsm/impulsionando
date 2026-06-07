@@ -230,6 +230,7 @@ function DemoAgenda() {
             <TabsTrigger value="servs"><ListChecks className="w-4 h-4 mr-1" />{labelsFor(nichoDemo).servicoPlural}</TabsTrigger>
             <TabsTrigger value="agendar"><Plus className="w-4 h-4 mr-1" />Novo agendamento</TabsTrigger>
             <TabsTrigger value="espera"><Users className="w-4 h-4 mr-1" />Fila de espera</TabsTrigger>
+            <TabsTrigger value="substituicao"><UserCog className="w-4 h-4 mr-1" />Substituição</TabsTrigger>
             <TabsTrigger value="painel"><Clock className="w-4 h-4 mr-1" />Painel</TabsTrigger>
             <TabsTrigger value="params"><Sliders className="w-4 h-4 mr-1" />Parametrizações</TabsTrigger>
             <TabsTrigger value="recursos"><Layers className="w-4 h-4 mr-1" />Recursos</TabsTrigger>
