@@ -9,7 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OnboardingWizard } from "@/components/core/OnboardingWizard";
 import { IdentityTab } from "@/components/core/IdentityTab";
-import { CheckCircle2, Circle, Building2, Download, RefreshCw, Trash2 } from "lucide-react";
+import { ClientSettingsPanel } from "@/components/core/ClientSettingsPanel";
+import { useImpersonation } from "@/hooks/use-impersonation";
+import { useNavigate } from "@tanstack/react-router";
+import { CheckCircle2, Circle, Building2, Download, RefreshCw, Trash2, Eye } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/core/cliente/$id")({
