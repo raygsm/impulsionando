@@ -75,24 +75,38 @@ export function ClientCommunicationPanel({ companyId }: { companyId: string }) {
     },
   });
 
-  // Merge: per-event+channel, prefer per-company override over global
+  // Merge catalog × existing templates: every event×channel always selectable.
   const merged = useMemo(() => {
     const map = new Map<string, Template>();
+    // Start from catalog so untouched events still appear
+    COMMUNICATION_EVENTS.forEach((ev) => {
+      ev.defaultChannels.forEach((ch) => {
+        const key = `${ev.code}::${ch}`;
+        map.set(key, {
+          id: `virtual:${key}`,
+          company_id: null,
+          event_code: ev.code,
+          channel: ch,
+          locale: "pt-BR",
+          subject: null,
+          body: "",
+          is_active: false,
+        });
+      });
+    });
+    // Overlay with DB rows (per-company override wins over global)
     (templates ?? []).forEach((t) => {
       const key = `${t.event_code}::${t.channel}`;
       const existing = map.get(key);
-      if (!existing) {
-        map.set(key, t);
-      } else if (t.company_id && !existing.company_id) {
-        map.set(key, t); // override wins
-      }
+      if (!existing || (t.company_id && !existing.company_id)) map.set(key, t);
+      else if (existing.id.startsWith("virtual:")) map.set(key, t);
     });
-    return Array.from(map.values()).filter((t) =>
-      filter
-        ? t.event_code.toLowerCase().includes(filter.toLowerCase()) ||
-          t.channel.toLowerCase().includes(filter.toLowerCase())
-        : true,
-    );
+    return Array.from(map.values()).filter((t) => {
+      if (!filter) return true;
+      const ev = EVENT_BY_CODE[t.event_code];
+      const hay = `${t.event_code} ${t.channel} ${ev?.label ?? ""} ${ev?.group ?? ""}`.toLowerCase();
+      return hay.includes(filter.toLowerCase());
+    });
   }, [templates, filter]);
 
   const saveMut = useMutation({
