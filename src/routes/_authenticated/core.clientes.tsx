@@ -13,6 +13,8 @@ export const Route = createFileRoute("/_authenticated/core/clientes")({
 });
 
 function CoreClientes() {
+  const navigate = useNavigate();
+  const { startImpersonation } = useImpersonation();
   const { data, isLoading } = useQuery({
     queryKey: ["core-clientes"],
     queryFn: async () => {
