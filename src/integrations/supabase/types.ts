@@ -1695,6 +1695,8 @@ export type Database = {
           project_data: Json
           prompt: string
           provisioned_at: string | null
+          provisioning_started_at: string | null
+          provisioning_steps: Json
           status: string
           updated_at: string
           uploaded_files: Json
@@ -1713,6 +1715,8 @@ export type Database = {
           project_data?: Json
           prompt: string
           provisioned_at?: string | null
+          provisioning_started_at?: string | null
+          provisioning_steps?: Json
           status?: string
           updated_at?: string
           uploaded_files?: Json
@@ -1731,6 +1735,8 @@ export type Database = {
           project_data?: Json
           prompt?: string
           provisioned_at?: string | null
+          provisioning_started_at?: string | null
+          provisioning_steps?: Json
           status?: string
           updated_at?: string
           uploaded_files?: Json
