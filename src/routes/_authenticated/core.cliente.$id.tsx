@@ -68,6 +68,7 @@ function ClientePage() {
       <Tabs defaultValue="checklist">
         <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="checklist">Checklist</TabsTrigger>
+          <TabsTrigger value="identidade">Identidade</TabsTrigger>
           <TabsTrigger value="onboarding">Onboarding</TabsTrigger>
           <TabsTrigger value="modulos">Módulos</TabsTrigger>
           <TabsTrigger value="contratos">Contratos</TabsTrigger>
