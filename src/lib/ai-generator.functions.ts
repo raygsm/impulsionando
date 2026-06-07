@@ -440,6 +440,7 @@ export const approveAndProvision = createServerFn({ method: "POST" })
       }
 
       const slugs: string[] = (analysis.modulos_sugeridos ?? []).filter(Boolean);
+      const safeCompanyId = companyId as string;
       let installed = 0;
       let skipped = 0;
       for (const slug of slugs) {
@@ -454,13 +455,13 @@ export const approveAndProvision = createServerFn({ method: "POST" })
         }
         const { error } = await supabase.from("company_modules").upsert(
           {
-            company_id: companyId,
+            company_id: safeCompanyId,
             module_id: (m as any).id,
             is_enabled: true,
             installed_version: (m as any).current_version,
             installed_at: new Date().toISOString(),
             enabled_at: new Date().toISOString(),
-          },
+          } as never,
           { onConflict: "company_id,module_id" },
         );
         if (!error) installed++;
