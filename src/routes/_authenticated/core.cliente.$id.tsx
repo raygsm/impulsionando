@@ -44,6 +44,7 @@ function ClientePage() {
   const { startImpersonation } = useImpersonation();
   const fetch360 = useServerFn(getClient360);
   const completeItem = useServerFn(completeChecklistItem);
+  const enterAsClientFn = useServerFn(enterAsClient);
 
   const { data, isLoading } = useQuery({
     queryKey: ["client-360", id],
