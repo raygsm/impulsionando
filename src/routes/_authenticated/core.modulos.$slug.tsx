@@ -98,6 +98,7 @@ function ModuleDetail() {
           <TabsTrigger value="certificacao">Certificação</TabsTrigger>
           <TabsTrigger value="versoes">Versões</TabsTrigger>
           <TabsTrigger value="instalacoes">Instalações</TabsTrigger>
+          <TabsTrigger value="definicoes">Definições</TabsTrigger>
         </TabsList>
 
         <TabsContent value="visao">
