@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import {
   Building2, LayoutDashboard, Boxes, CreditCard, Globe, Rocket,
   KanbanSquare, Wallet, MessageSquare, Users, KeyRound, FileSearch,
-  SlidersHorizontal, Plug,
+  SlidersHorizontal, Plug, HeartPulse,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/core")({
@@ -26,6 +26,7 @@ function CoreLayout() {
   // Menu Master /adm — usa apenas rotas já existentes; nenhuma tela duplicada.
   const tabs = [
     { to: "/core", label: "Dashboard", icon: LayoutDashboard, exact: true },
+    { to: "/core/saude", label: "Saúde", icon: HeartPulse },
     { to: "/core/clientes", label: "Clientes (360)", icon: Building2 },
     { to: "/crm/board", label: "CRM", icon: KanbanSquare },
     { to: "/finance", label: "ERP / Financeiro", icon: Wallet },

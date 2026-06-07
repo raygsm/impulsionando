@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Mail, MessageCircle, Bell, Pencil } from "lucide-react";
+import { COMMUNICATION_EVENTS, EVENT_BY_CODE } from "@/data/communicationEvents";
 
 type Template = {
   id: string;
@@ -74,24 +75,38 @@ export function ClientCommunicationPanel({ companyId }: { companyId: string }) {
     },
   });
 
-  // Merge: per-event+channel, prefer per-company override over global
+  // Merge catalog × existing templates: every event×channel always selectable.
   const merged = useMemo(() => {
     const map = new Map<string, Template>();
+    // Start from catalog so untouched events still appear
+    COMMUNICATION_EVENTS.forEach((ev) => {
+      ev.defaultChannels.forEach((ch) => {
+        const key = `${ev.code}::${ch}`;
+        map.set(key, {
+          id: `virtual:${key}`,
+          company_id: null,
+          event_code: ev.code,
+          channel: ch,
+          locale: "pt-BR",
+          subject: null,
+          body: "",
+          is_active: false,
+        });
+      });
+    });
+    // Overlay with DB rows (per-company override wins over global)
     (templates ?? []).forEach((t) => {
       const key = `${t.event_code}::${t.channel}`;
       const existing = map.get(key);
-      if (!existing) {
-        map.set(key, t);
-      } else if (t.company_id && !existing.company_id) {
-        map.set(key, t); // override wins
-      }
+      if (!existing || (t.company_id && !existing.company_id)) map.set(key, t);
+      else if (existing.id.startsWith("virtual:")) map.set(key, t);
     });
-    return Array.from(map.values()).filter((t) =>
-      filter
-        ? t.event_code.toLowerCase().includes(filter.toLowerCase()) ||
-          t.channel.toLowerCase().includes(filter.toLowerCase())
-        : true,
-    );
+    return Array.from(map.values()).filter((t) => {
+      if (!filter) return true;
+      const ev = EVENT_BY_CODE[t.event_code];
+      const hay = `${t.event_code} ${t.channel} ${ev?.label ?? ""} ${ev?.group ?? ""}`.toLowerCase();
+      return hay.includes(filter.toLowerCase());
+    });
   }, [templates, filter]);
 
   const saveMut = useMutation({
@@ -175,10 +190,16 @@ export function ClientCommunicationPanel({ companyId }: { companyId: string }) {
               <div key={`${t.event_code}-${t.channel}`} className="flex items-center gap-3 py-2.5 text-sm">
                 <Icon className="w-4 h-4 text-muted-foreground shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium truncate">{t.event_code}</div>
+                  <div className="font-medium truncate">
+                    {EVENT_BY_CODE[t.event_code]?.label ?? t.event_code}
+                  </div>
                   <div className="text-xs text-muted-foreground flex items-center gap-1.5">
                     <span>{CHANNEL_LABEL[t.channel] ?? t.channel}</span>
+                    {EVENT_BY_CODE[t.event_code]?.group && (
+                      <Badge variant="secondary" className="text-[10px] h-4">{EVENT_BY_CODE[t.event_code].group}</Badge>
+                    )}
                     {isOverride && <Badge variant="outline" className="text-[10px] h-4">personalizado</Badge>}
+                    {t.id.startsWith("virtual:") && <Badge variant="outline" className="text-[10px] h-4">não configurado</Badge>}
                   </div>
                 </div>
                 <Switch

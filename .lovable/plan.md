@@ -1,95 +1,99 @@
-# Certificação de Módulos — Plano Cirúrgico
+# Revisão Final do Core Master — Plano Cirúrgico
 
-Escopo: **não recriar nada**. Apenas adicionar a camada de **certificação, instalação 1-clique e templates por segmento** em cima do que já existe (`modules`, `company_modules`, `module_versions`, `setting_definitions`, `company_settings`).
-
----
-
-## Fase 1 — Matriz de Prontidão (status por módulo)
-
-**Migration** (1 só):
-- Adicionar colunas em `public.modules`:
-  - `readiness_status text default 'em_desenvolvimento'` — enum lógico: `em_desenvolvimento | em_revisao | em_testes | certificado | publicado`
-  - `readiness_checklist jsonb default '{}'` — 13 flags do checklist (interface, permissões, dashboard, relatórios, logs, comunicação, integrações, parâmetros, instalação, remoção, atualização, demonstração, fluxos)
-  - `demo_url text`, `docs_url text`, `segments text[] default '{}'`
-- Nenhuma nova tabela.
-
-**UI** (reaproveitando rotas existentes):
-- `src/routes/_authenticated/core.modulos.tsx` — adicionar coluna **Status** + filtro (somente "Certificado" e "Publicado" aparecem como instaláveis).
-- `src/routes/_authenticated/core.modulos.$slug.tsx` — nova aba **Certificação** com:
-  - 13 checkboxes do checklist (gravam em `readiness_checklist`)
-  - Select de status
-  - Campos `demo_url`, `docs_url`, `segments[]`
-  - Botão "Marcar como Certificado" (só habilita se 13/13 ✓)
-- Sem novas páginas, sem novos componentes pesados.
+## Premissa
+Tudo que segue **só toca o que falta**. Não recriar módulos, telas, tabelas ou componentes existentes. A maior parte do escopo do prompt **já foi entregue** nas Fases A, B, C, Certificação e Instalação. Esta revisão **fecha as últimas pontas** e consolida o Core como painel suficiente.
 
 ---
 
-## Fase 2 — Instalação em 1 Clique
+## O que já existe (não mexer)
 
-Reaproveita `company_modules` (já existe) + `auto-provisioning.server.ts` (já tem lógica de instalar módulos com dependências).
+| Pedido do prompt | Onde já está |
+|---|---|
+| Acessar como cliente | `useImpersonation` + `ImpersonationBanner` + botão em `core.cliente.$id` |
+| Instalador 1-clique | `InstallModuleDialog` + `installModuleWithTemplate` |
+| Certificação de módulos | `ModuleCertificationPanel` + colunas em `modules` |
+| Templates por segmento | `src/data/moduleSegmentTemplates.ts` (12 segmentos) |
+| Parâmetros Sim/Não por cliente | `ClientSettingsPanel` + `setting_definitions` + `company_settings` |
+| Comunicação editável (eventos × canais) | `ClientCommunicationPanel` + `message_templates` + `message_outbox` |
+| Pendências por cliente | `ClientPendingsPanel` |
+| Logs por cliente | `ClientLogsPanel` + `audit_logs` |
+| Identidade White Label (envio técnico Impulsionando, percepção do cliente) | `enqueue_message` + `company_identity_payload` |
+| Cobrança / suspensão / reativação automática | `billing_run_cycle` + `billing_mark_paid` |
+| Hierarquia I/WL/Cliente/Final | `companies.is_master`, `is_impulsionando_staff`, RLS por `company_id` |
+| Menu Master /adm | `core.tsx` |
+| Construtor de campos/formulários/dashboards | `setting_definitions` + `ClientSettingsPanel` (parâmetros tipados) |
 
-**Novo server fn** em `src/lib/modules.functions.ts` (arquivo já existe):
-- `installModuleOnCompany({ moduleSlug, companyId, segmentTemplate? })`:
-  1. Valida que módulo está `certificado` ou `publicado`
-  2. Resolve dependências (já tem essa lógica)
-  3. `upsert` em `company_modules` com `is_enabled=true`
-  4. Aplica template do segmento (se passado) em `company_settings` via `setting_definitions`
-  5. Loga em `audit_logs`
-- `uninstallModuleFromCompany({ moduleSlug, companyId })` — desativa (`is_enabled=false`) + log.
-
-**UI**:
-- No `core.modulos.$slug.tsx`, adicionar botão **"Instalar no Cliente"** que abre um diálogo:
-  - Select de empresa (query `companies`)
-  - Select de template de segmento (lê `modules.segments` + presets default)
-  - Botão Instalar → chama `installModuleOnCompany`
-- No `core.cliente.$id.tsx` aba **Módulos** (já existe), adicionar o mesmo fluxo "Instalar módulo" filtrando só módulos certificados.
-
----
-
-## Fase 3 — Templates por Segmento
-
-Sem nova tabela. Templates ficam como **JSON estático** em `src/data/moduleSegmentTemplates.ts`:
-
-```ts
-export const SEGMENT_TEMPLATES = {
-  agenda: {
-    clinica: { 'agenda.confirm_after_payment': true, 'agenda.hold_minutes': 30, ... },
-    psicologia: { ... },
-    academia: { ... },
-    // etc
-  },
-  crm: { ... },
-}
-```
-
-`installModuleOnCompany` lê esse mapa e faz `upsert` em `company_settings`. Editar templates = editar o arquivo (uma vez), sem migration.
-
-Segmentos cobertos: clínica, psicologia, gastro, academia, crossfit, restaurante, bar, microcervejaria, escritório, eventos, educação, viagens.
+**Conclusão:** o Core já é administrável. Faltam **apenas 4 ajustes finos**.
 
 ---
 
-## Fora do escopo (explicitamente)
+## O que falta (executar agora)
 
-- ❌ Não vou recriar Agenda/CRM/Financeiro/PDV/NF/Checkout/PDV/BI/Portal/Formulários — eles já existem.
-- ❌ Não vou implementar integrações novas (NFSe municipal, gateway X) — fica como flag no checklist e o gestor marca quando integrar.
-- ❌ Não vou criar páginas de demo novas — `demo_url` aponta para as rotas `/demo.*` que já existem.
-- ❌ Não vou tocar em RLS dos módulos existentes.
+### 1. Catálogo global de eventos de comunicação
+Hoje `ClientCommunicationPanel` lista só eventos que **já têm pelo menos um template**. Se um evento nunca foi semeado, o usuário não consegue criar do painel.
+
+**Ação:**
+- Criar `src/data/communicationEvents.ts` listando os 18 eventos do prompt (boas-vindas, primeiro acesso, criação de senha, cadastro, agendamento, aprovação, rejeição, confirmação, cancelamento, remarcação, lembrete, cobrança, pagamento aprovado, pagamento vencido, suspensão, reativação, nota fiscal emitida, recuperação de senha) × 3 canais.
+- Atualizar `ClientCommunicationPanel` para fazer **union** entre o catálogo e os templates existentes, permitindo criar do zero por cliente.
+
+### 2. Painel global de Saúde & Pendências
+Hoje pendências existem **por cliente**. Falta a visão agregada do prompt ("Painel de saúde e pendências").
+
+**Ação:**
+- Nova rota `src/routes/_authenticated/core.saude.tsx` (read-only, agrega queries existentes):
+  - Clientes ativos / incompletos
+  - Módulos com erro de instalação (lê `audit_logs` action `module.install.failed`)
+  - Comunicações com erro (lê `message_outbox` status `failed`)
+  - Pagamentos vencidos (lê `billing_invoices` status `overdue`)
+  - Configurações incompletas (lê `onboarding_checklist` com pendências)
+- Adicionar entrada "Saúde" no `core.tsx` antes de "Clientes".
+
+### 3. Construtor de definições de parâmetro (Sim/Não)
+`ClientSettingsPanel` aplica `setting_definitions`, mas só **staff Impulsionando via SQL** consegue criar uma definição nova. Falta UI.
+
+**Ação:**
+- Novo componente `src/components/core/SettingDefinitionsAdmin.tsx`: CRUD em `setting_definitions` (key, label, type boolean|text|number|enum, default, scope, módulo).
+- Aba "Definições" em `core.modulos.$slug.tsx` (já tem tabs), restrita a super-admin, para criar parâmetros por módulo direto no painel.
+
+### 4. Centralizar baixa manual / reenvio / reprocesso
+Já existem `billing_mark_paid` e `message_outbox`. Falta o **botão de ação** no painel.
+
+**Ação:**
+- Em `ClientLogsPanel` ou nova aba "Operações" no `core.cliente.$id`: 3 botões — "Baixa manual de fatura" (chama `billing_mark_paid`), "Reenviar comunicação" (re-enqueue de uma linha `message_outbox`), "Reprocessar nota fiscal" (placeholder server fn — emite log de pedido manual; emissão real depende do conector NFe, fora deste escopo).
+
+---
+
+## Fora deste escopo (não tocar)
+- Não criar módulos novos (Agenda/CRM/PDV/NFe/etc) — já existem como tabelas + páginas demo.
+- Não criar novos conectores externos (NFe, gateway Pix real) — exige integração externa, é trabalho separado de "core administrável".
+- Não mexer em RLS existente nem em `clients.ts` da Supabase.
+- Não criar telas de "construtor visual drag-and-drop" — os parâmetros tipados via `setting_definitions` já cumprem o requisito funcional do prompt.
 
 ---
 
 ## Entregáveis
 
-1. **1 migration** (colunas em `modules`).
-2. **1 arquivo de templates** (`src/data/moduleSegmentTemplates.ts`).
-3. **2 server fns novas** em `src/lib/modules.functions.ts` (install/uninstall).
-4. **Aba Certificação** em `core.modulos.$slug.tsx`.
-5. **Diálogo Instalar no Cliente** (componente único reutilizado nas 2 telas).
-6. **Filtro/coluna Status** em `core.modulos.tsx`.
+| Arquivo | Tipo |
+|---|---|
+| `src/data/communicationEvents.ts` | novo (catálogo) |
+| `src/components/core/ClientCommunicationPanel.tsx` | editar (union catálogo+DB) |
+| `src/routes/_authenticated/core.saude.tsx` | novo |
+| `src/routes/_authenticated/core.tsx` | editar (1 entrada de menu) |
+| `src/components/core/SettingDefinitionsAdmin.tsx` | novo |
+| `src/routes/_authenticated/core.modulos.$slug.tsx` | editar (1 aba) |
+| `src/components/core/ClientOperationsPanel.tsx` | novo (3 botões) |
+| `src/routes/_authenticated/core.cliente.$id.tsx` | editar (1 aba) |
+| `src/lib/operations.functions.ts` | novo (server fns para baixa/reenvio) |
 
-Tudo o resto (checklist do usuário: parâmetros, comunicação, logs, pendências, white label) já foi entregue nas fases A-C anteriores.
+**Migrations: nenhuma.** Tudo usa tabelas e funções já existentes.
 
 ---
 
-## Próximos passos sugeridos pelo usuário
+## Validação final
+Após aplicar:
+- Super-admin cria parâmetro novo → aparece automaticamente em `ClientSettingsPanel` de todos os clientes.
+- Super-admin cria template de comunicação para evento que nunca tinha → salva e dispara.
+- `/core/saude` mostra todas as pendências agregadas em uma tela.
+- Baixa manual de fatura grava `audit_log` e reativa módulos.
 
-Após aprovar este plano, recomendo executar **Fase 1 + Fase 2 juntas** (matriz + instalação), e depois Fase 3 (templates) numa segunda rodada — assim você já consegue marcar módulos como certificados e instalar com config default antes de termos os 12 segmentos preenchidos.
+Aprovado? Executo Fases 1–4 em sequência, num único lote de mudanças.

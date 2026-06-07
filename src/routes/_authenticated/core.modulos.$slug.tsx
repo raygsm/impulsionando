@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ModuleCertificationPanel } from "@/components/core/ModuleCertificationPanel";
 import { InstallModuleDialog } from "@/components/core/InstallModuleDialog";
+import { SettingDefinitionsAdmin } from "@/components/core/SettingDefinitionsAdmin";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/core/modulos/$slug")({
@@ -97,6 +98,7 @@ function ModuleDetail() {
           <TabsTrigger value="certificacao">Certificação</TabsTrigger>
           <TabsTrigger value="versoes">Versões</TabsTrigger>
           <TabsTrigger value="instalacoes">Instalações</TabsTrigger>
+          <TabsTrigger value="definicoes">Definições</TabsTrigger>
         </TabsList>
 
         <TabsContent value="visao">
@@ -177,6 +179,10 @@ function ModuleDetail() {
               })}
             </div>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="definicoes">
+          <SettingDefinitionsAdmin defaultCategory={m.slug} />
         </TabsContent>
       </Tabs>
     </div>
