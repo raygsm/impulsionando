@@ -155,6 +155,10 @@ function ClientePage() {
           <ClientCommunicationPanel companyId={id} />
         </TabsContent>
 
+        <TabsContent value="operacoes">
+          <ClientOperationsPanel companyId={id} />
+        </TabsContent>
+
         <TabsContent value="contratos">
           <Card className="p-4 space-y-2">
             <h3 className="font-semibold mb-2">Contratos</h3>
