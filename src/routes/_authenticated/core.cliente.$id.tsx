@@ -98,6 +98,7 @@ function ClientePage() {
           <TabsTrigger value="modulos">Módulos</TabsTrigger>
           <TabsTrigger value="parametros">Parâmetros</TabsTrigger>
           <TabsTrigger value="comunicacao">Comunicação</TabsTrigger>
+          <TabsTrigger value="operacoes">Operações</TabsTrigger>
           <TabsTrigger value="contratos">Financeiro</TabsTrigger>
           <TabsTrigger value="dominio">Domínio</TabsTrigger>
           <TabsTrigger value="emails">E-mails</TabsTrigger>
