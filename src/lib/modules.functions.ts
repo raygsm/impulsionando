@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { getSegmentTemplate, type SegmentKey } from "@/data/moduleSegmentTemplates";
 
 /**
  * Core Modules — Biblioteca Central de Módulos.
