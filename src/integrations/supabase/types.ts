@@ -2026,10 +2026,20 @@ export type Database = {
       }
       companies: {
         Row: {
+          address_city: string | null
+          address_line: string | null
+          address_state: string | null
+          address_zip: string | null
+          commercial_email: string | null
+          company_type: string | null
           created_at: string
           document: string | null
+          domain: string | null
           email: string | null
+          facebook: string | null
+          financial_email: string | null
           id: string
+          instagram: string | null
           is_active: boolean
           is_demo: boolean
           is_master: boolean
@@ -2037,15 +2047,34 @@ export type Database = {
           logo_url: string | null
           name: string
           niche_id: string | null
+          owner_name: string | null
           phone: string | null
+          primary_color: string | null
+          secondary_color: string | null
+          segment: string | null
           status: string
+          subdomain: string | null
+          support_email: string | null
+          trade_name: string | null
           updated_at: string
+          website: string | null
+          whatsapp: string | null
         }
         Insert: {
+          address_city?: string | null
+          address_line?: string | null
+          address_state?: string | null
+          address_zip?: string | null
+          commercial_email?: string | null
+          company_type?: string | null
           created_at?: string
           document?: string | null
+          domain?: string | null
           email?: string | null
+          facebook?: string | null
+          financial_email?: string | null
           id?: string
+          instagram?: string | null
           is_active?: boolean
           is_demo?: boolean
           is_master?: boolean
@@ -2053,15 +2082,34 @@ export type Database = {
           logo_url?: string | null
           name: string
           niche_id?: string | null
+          owner_name?: string | null
           phone?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          segment?: string | null
           status?: string
+          subdomain?: string | null
+          support_email?: string | null
+          trade_name?: string | null
           updated_at?: string
+          website?: string | null
+          whatsapp?: string | null
         }
         Update: {
+          address_city?: string | null
+          address_line?: string | null
+          address_state?: string | null
+          address_zip?: string | null
+          commercial_email?: string | null
+          company_type?: string | null
           created_at?: string
           document?: string | null
+          domain?: string | null
           email?: string | null
+          facebook?: string | null
+          financial_email?: string | null
           id?: string
+          instagram?: string | null
           is_active?: boolean
           is_demo?: boolean
           is_master?: boolean
@@ -2069,9 +2117,18 @@ export type Database = {
           logo_url?: string | null
           name?: string
           niche_id?: string | null
+          owner_name?: string | null
           phone?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          segment?: string | null
           status?: string
+          subdomain?: string | null
+          support_email?: string | null
+          trade_name?: string | null
           updated_at?: string
+          website?: string | null
+          whatsapp?: string | null
         }
         Relationships: [
           {
@@ -5651,6 +5708,7 @@ export type Database = {
         Returns: string
       }
       billing_run_cycle: { Args: never; Returns: Json }
+      company_identity_payload: { Args: { _company_id: string }; Returns: Json }
       core_user_belongs_to_company: {
         Args: { _company_id: string; _uid: string }
         Returns: boolean

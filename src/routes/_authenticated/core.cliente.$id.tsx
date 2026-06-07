@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OnboardingWizard } from "@/components/core/OnboardingWizard";
+import { IdentityTab } from "@/components/core/IdentityTab";
 import { CheckCircle2, Circle, Building2, Download, RefreshCw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -67,6 +68,7 @@ function ClientePage() {
       <Tabs defaultValue="checklist">
         <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="checklist">Checklist</TabsTrigger>
+          <TabsTrigger value="identidade">Identidade</TabsTrigger>
           <TabsTrigger value="onboarding">Onboarding</TabsTrigger>
           <TabsTrigger value="modulos">Módulos</TabsTrigger>
           <TabsTrigger value="contratos">Contratos</TabsTrigger>
@@ -99,8 +101,13 @@ function ClientePage() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="identidade">
+          <IdentityTab companyId={id} />
+        </TabsContent>
+
         <TabsContent value="onboarding">
           <OnboardingWizard companyId={id} />
+
         </TabsContent>
 
         <TabsContent value="modulos">
