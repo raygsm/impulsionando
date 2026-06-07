@@ -91,8 +91,16 @@ function CloneCenterPage() {
     setLogs(cloneStore.listLogs());
   }
 
-  function archiveInstance(i: CloneInstance) {
-    const updated: CloneInstance = { ...i, archived: true, status: "Arquivado" };
+  function archiveInstance(i: CloneInstance, reason: string) {
+    const now = new Date().toISOString();
+    const updated: CloneInstance = {
+      ...i,
+      archived: true,
+      status: "Arquivado",
+      archiveReason: reason,
+      archivedBy: me?.user.email ?? "interno",
+      archivedAt: now,
+    };
     const all = cloneStore.listInstances().map((x) => (x.id === i.id ? updated : x));
     if (typeof window !== "undefined") {
       localStorage.setItem("imp.clone.instances.v1", JSON.stringify(all));
@@ -100,10 +108,23 @@ function CloneCenterPage() {
     cloneStore.pushLog({
       actor: me?.user.email ?? "interno",
       action: "arquivou",
-      detail: `Instância arquivada — ${i.targetName}`,
+      detail: `Instância arquivada — ${i.targetName}. Motivo: ${reason || "—"}`,
       instanceId: i.id,
+      status: "concluido",
     });
-    toast.success("Clone arquivado.");
+    toast.success("Clone arquivado. Registros internos preservados.");
+    refresh();
+  }
+
+  function futurePhase(label: string, instanceId?: string, action?: "verificou-atualizacao" | "reverteu-versao" | "promoveu-melhoria") {
+    cloneStore.pushLog({
+      actor: me?.user.email ?? "interno",
+      action: action ?? "verificou-atualizacao",
+      detail: `${label} — preparado para próxima fase técnica.`,
+      instanceId,
+      status: "iniciado",
+    });
+    toast.info("Recurso preparado para próxima fase técnica.");
     refresh();
   }
 
