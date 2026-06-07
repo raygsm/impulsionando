@@ -69,7 +69,12 @@ function DemoAgenda() {
     lembrete24h: true, lembrete1h: true, confirmaWhats: true, bloqueioFeriado: false, reagendamentoAuto: true,
   });
   const [dataAtual, setDataAtual] = useState(() => new Date().toISOString().slice(0, 10));
-  const [aba, setAba] = useState<string>("visao");
+  const [aba, setAba] = useState<string>("dashboard");
+  const [jornadaOpen, setJornadaOpen] = useState(false);
+  const [outrosOpen, setOutrosOpen] = useState(false);
+  const [zerarOpen, setZerarOpen] = useState(false);
+  const [logsTick, setLogsTick] = useState(0);
+  const refreshLogs = () => setLogsTick((t) => t + 1);
   const [prefill, setPrefill] = useState<{ cliente: string; telefone: string } | null>(null);
   const [reagendar, setReagendar] = useState<Agendamento | null>(null);
   const [nichoDemo, setNichoDemo] = useState(() => {
