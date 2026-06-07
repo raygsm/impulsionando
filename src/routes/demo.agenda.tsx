@@ -12,10 +12,16 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Clock, Users, Plus, Trash2, RotateCcw, Sparkles, ListChecks, Bell, Briefcase, MessageSquare, User, LayoutDashboard, Sliders, Layers } from "lucide-react";
+import { Calendar, Clock, Users, Plus, Trash2, RotateCcw, Sparkles, ListChecks, Bell, Briefcase, MessageSquare, User, LayoutDashboard, Sliders, Layers, FileText, Map } from "lucide-react";
 import { AgendaRecursos } from "@/components/demo/agenda/AgendaRecursos";
 import { AgendaFluxosPanel } from "@/components/demo/agenda/AgendaFluxosPanel";
 import { AgendaComunicacaoPanel } from "@/components/demo/agenda/AgendaComunicacaoPanel";
+import { AgendaDashboard } from "@/components/demo/agenda/AgendaDashboard";
+import { AgendaJornadaGuiada } from "@/components/demo/agenda/AgendaJornadaGuiada";
+import { AgendaCtaStrip } from "@/components/demo/agenda/AgendaCtaStrip";
+import { OutrosModulosDialog } from "@/components/demo/agenda/OutrosModulosDialog";
+import { NICHO_OPTIONS, labelsFor } from "@/lib/agendaNichos";
+import { AgendaLog, listAgendaLogs, clearAgendaLogs, type AgendaLogEntry } from "@/lib/agendaLogs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useDemoState, uid, brl } from "@/lib/demoSandbox";
@@ -63,7 +69,12 @@ function DemoAgenda() {
     lembrete24h: true, lembrete1h: true, confirmaWhats: true, bloqueioFeriado: false, reagendamentoAuto: true,
   });
   const [dataAtual, setDataAtual] = useState(() => new Date().toISOString().slice(0, 10));
-  const [aba, setAba] = useState<string>("visao");
+  const [aba, setAba] = useState<string>("dashboard");
+  const [jornadaOpen, setJornadaOpen] = useState(false);
+  const [outrosOpen, setOutrosOpen] = useState(false);
+  const [zerarOpen, setZerarOpen] = useState(false);
+  const [logsTick, setLogsTick] = useState(0);
+  const refreshLogs = () => setLogsTick((t) => t + 1);
   const [prefill, setPrefill] = useState<{ cliente: string; telefone: string } | null>(null);
   const [reagendar, setReagendar] = useState<Agendamento | null>(null);
   const [nichoDemo, setNichoDemo] = useState(() => {
@@ -136,7 +147,18 @@ function DemoAgenda() {
 
   function resetAll() {
     resetProfs(); resetServs(); resetAgds(); resetEspera(); resetParams();
-    toast.message("Demonstração zerada.");
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem("agenda.demo.resources.v1");
+        localStorage.removeItem("agenda.demo.fluxos.v1");
+        localStorage.removeItem("agenda.demo.comunicacao.v1");
+        localStorage.removeItem("imp.demo.mock.agenda");
+      } catch { /* ignore */ }
+    }
+    clearAgendaLogs();
+    AgendaLog.resetLocal();
+    refreshLogs();
+    toast.success("Dados demonstrativos da Agenda restaurados para o padrão inicial.");
   }
 
   function alterarStatus(id: string, status: Agendamento["status"]) {
@@ -168,8 +190,16 @@ function DemoAgenda() {
               size="default"
               variant="default"
             />
+            <Select value={nichoDemo} onValueChange={(v) => { setNichoDemo(v); AgendaLog.nichoAplicado(v); toast.success(`Preset de nicho aplicado: ${v}.`); }}>
+              <SelectTrigger className="h-9 w-44"><SelectValue placeholder="Nicho" /></SelectTrigger>
+              <SelectContent>
+                {NICHO_OPTIONS.map((n) => <SelectItem key={n.value} value={n.value}>{n.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Button variant="outline" onClick={() => setJornadaOpen(true)}><Map className="w-4 h-4 mr-1" />Iniciar jornada guiada</Button>
             <Button variant="outline" onClick={seed}><Sparkles className="w-4 h-4 mr-1" />Popular demo</Button>
-            <Button variant="ghost" onClick={resetAll}><RotateCcw className="w-4 h-4 mr-1" />Zerar</Button>
+            <Button variant="outline" onClick={() => setOutrosOpen(true)}><Layers className="w-4 h-4 mr-1" />Outros módulos</Button>
+            <Button variant="ghost" onClick={() => setZerarOpen(true)}><RotateCcw className="w-4 h-4 mr-1" />Zerar dados da DEMO</Button>
           </div>
         </div>
 
@@ -192,10 +222,11 @@ function DemoAgenda() {
 
         <Tabs value={aba} onValueChange={setAba} className="mt-6">
           <TabsList className="flex-wrap h-auto">
+            <TabsTrigger value="dashboard"><LayoutDashboard className="w-4 h-4 mr-1" />Dashboard</TabsTrigger>
             <TabsTrigger value="visao"><LayoutDashboard className="w-4 h-4 mr-1" />Visão Geral</TabsTrigger>
             <TabsTrigger value="grade"><Calendar className="w-4 h-4 mr-1" />Grade</TabsTrigger>
-            <TabsTrigger value="profs"><Briefcase className="w-4 h-4 mr-1" />Profissionais</TabsTrigger>
-            <TabsTrigger value="servs"><ListChecks className="w-4 h-4 mr-1" />Serviços</TabsTrigger>
+            <TabsTrigger value="profs"><Briefcase className="w-4 h-4 mr-1" />{labelsFor(nichoDemo).profissionalPlural}</TabsTrigger>
+            <TabsTrigger value="servs"><ListChecks className="w-4 h-4 mr-1" />{labelsFor(nichoDemo).servicoPlural}</TabsTrigger>
             <TabsTrigger value="agendar"><Plus className="w-4 h-4 mr-1" />Novo agendamento</TabsTrigger>
             <TabsTrigger value="espera"><Users className="w-4 h-4 mr-1" />Fila de espera</TabsTrigger>
             <TabsTrigger value="painel"><Clock className="w-4 h-4 mr-1" />Painel</TabsTrigger>
@@ -203,6 +234,7 @@ function DemoAgenda() {
             <TabsTrigger value="recursos"><Layers className="w-4 h-4 mr-1" />Recursos</TabsTrigger>
             <TabsTrigger value="fluxos"><Bell className="w-4 h-4 mr-1" />Fluxos</TabsTrigger>
             <TabsTrigger value="comunicacao"><MessageSquare className="w-4 h-4 mr-1" />Comunicação</TabsTrigger>
+            <TabsTrigger value="logs"><FileText className="w-4 h-4 mr-1" />Logs</TabsTrigger>
           </TabsList>
 
           <TabsContent value="visao" className="mt-4 space-y-3">
@@ -482,7 +514,49 @@ function DemoAgenda() {
           <TabsContent value="comunicacao" className="mt-4">
             <AgendaComunicacaoPanel nicho={nichoDemo} />
           </TabsContent>
+
+          <TabsContent value="dashboard" className="mt-4 space-y-4">
+            <AgendaCtaStrip lead={lead?.name} onOutrosModulos={() => setOutrosOpen(true)} />
+            <AgendaDashboard nicho={nichoDemo} onGoTab={setAba} />
+          </TabsContent>
+
+          <TabsContent value="logs" className="mt-4">
+            <AgendaLogsPanel tick={logsTick} onClear={() => { clearAgendaLogs(); refreshLogs(); toast.success("Logs locais limpos."); }} />
+          </TabsContent>
         </Tabs>
+
+        <div className="mt-6">
+          <AgendaCtaStrip lead={lead?.name} onOutrosModulos={() => setOutrosOpen(true)} />
+        </div>
+
+        {/* Jornada guiada */}
+        <AgendaJornadaGuiada
+          open={jornadaOpen}
+          onOpenChange={setJornadaOpen}
+          onGoTab={setAba}
+          onContratar={() => { if (typeof window !== "undefined") window.location.href = "/planos?modulo=agenda"; }}
+          onOutrosModulos={() => { setJornadaOpen(false); setOutrosOpen(true); }}
+        />
+
+        {/* Outros módulos */}
+        <OutrosModulosDialog open={outrosOpen} onOpenChange={setOutrosOpen} lead={lead?.name} />
+
+        {/* Zerar dados — confirmação obrigatória */}
+        <Dialog open={zerarOpen} onOpenChange={setZerarOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Zerar dados da DEMO</DialogTitle>
+              <DialogDescription>
+                Tem certeza que deseja zerar os dados desta demonstração? Apenas os dados fictícios da Agenda,
+                neste navegador, serão apagados. Outros usuários não serão afetados.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setZerarOpen(false)}>Cancelar</Button>
+              <Button className="bg-gradient-primary" onClick={() => { resetAll(); setZerarOpen(false); }}>Zerar dados</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Reagendar — confirmação obrigatória (drag-and-drop / mobile) */}
         <ReagendarDialog
@@ -503,6 +577,86 @@ function DemoAgenda() {
     </div>
   );
 }
+
+function AgendaLogsPanel({ tick, onClear }: { tick: number; onClear: () => void }) {
+  const [filtroStatus, setFiltroStatus] = useState<string>("__all");
+  const [filtroArea, setFiltroArea] = useState<string>("__all");
+  const logs = useMemo<AgendaLogEntry[]>(() => listAgendaLogs(), [tick]);
+  const areas = Array.from(new Set(logs.map((l) => l.area)));
+  const filtered = logs.filter((l) =>
+    (filtroStatus === "__all" || l.status === filtroStatus) &&
+    (filtroArea === "__all" || l.area === filtroArea));
+
+  return (
+    <div className="space-y-3">
+      <Card className="p-3 text-xs flex items-center justify-between gap-2 flex-wrap">
+        <div className="text-muted-foreground">
+          Os logs registram cada ação importante realizada na Agenda, permitindo rastreabilidade, auditoria e melhor gestão da operação.
+        </div>
+        <div className="flex flex-wrap gap-2 items-end">
+          <Select value={filtroArea} onValueChange={setFiltroArea}>
+            <SelectTrigger className="h-8 w-40 text-xs"><SelectValue placeholder="Área" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all">Todas as áreas</SelectItem>
+              {areas.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Select value={filtroStatus} onValueChange={setFiltroStatus}>
+            <SelectTrigger className="h-8 w-44 text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all">Todos os status</SelectItem>
+              <SelectItem value="concluido">Concluído</SelectItem>
+              <SelectItem value="simulado_demo">Simulado — DEMO</SelectItem>
+              <SelectItem value="pendente">Pendente</SelectItem>
+              <SelectItem value="falhou">Falhou</SelectItem>
+              <SelectItem value="aguardando_credenciais">Aguardando credenciais</SelectItem>
+              <SelectItem value="cancelado">Cancelado</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button size="sm" variant="ghost" onClick={onClear}>Limpar logs</Button>
+        </div>
+      </Card>
+      <Card className="p-0 overflow-auto">
+        {filtered.length === 0 ? (
+          <p className="p-4 text-xs text-muted-foreground">
+            Nenhum log ainda. Execute ações na Agenda (criar, cancelar, simular pagamento, etc.) e os registros aparecem aqui.
+          </p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Data</TableHead>
+                <TableHead>Área</TableHead>
+                <TableHead>Ação</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Ambiente</TableHead>
+                <TableHead>Detalhes</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.slice(0, 200).map((l) => (
+                <TableRow key={l.id}>
+                  <TableCell className="text-xs whitespace-nowrap">{new Date(l.dataHora).toLocaleString("pt-BR")}</TableCell>
+                  <TableCell className="text-xs">{l.area}</TableCell>
+                  <TableCell className="text-xs">{l.acao}</TableCell>
+                  <TableCell><Badge variant="outline" className="text-[10px]">{l.status}</Badge></TableCell>
+                  <TableCell className="text-xs">{l.ambiente}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">
+                    {[l.cliente && `cliente: ${l.cliente}`, l.profissional && `prof: ${l.profissional}`,
+                      l.canal && `canal: ${l.canal}`, l.destinatario && `→ ${l.destinatario}`,
+                      l.origem && `origem: ${l.origem}`, l.erro && `erro: ${l.erro}`]
+                      .filter(Boolean).join(" • ")}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </Card>
+    </div>
+  );
+}
+
 
 function KPI({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return <Card className={`p-4 ${accent ? "border-primary/40" : ""}`}><div className="text-xs text-muted-foreground">{label}</div><div className={`text-2xl font-bold mt-1 ${accent ? "text-primary" : ""}`}>{value}</div></Card>;
