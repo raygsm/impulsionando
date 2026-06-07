@@ -462,6 +462,21 @@ function DemoAgenda() {
             </Card>
           </TabsContent>
 
+          <TabsContent value="substituicao" className="mt-4 space-y-4">
+            <SubstAtalhos onGoLogs={() => setAba("logs")} onGoDashboard={() => setAba("dashboard")} />
+            <AgendaSubstituicaoPanel
+              profs={profs}
+              servs={servs}
+              agds={agds}
+              onUpdateAgds={setAgds}
+              avisarCliente={fullParams.substAvisarCliente}
+              primeiroAceitar={fullParams.substPrimeiroAceitar}
+              filaSemSub={fullParams.substFilaSemSub}
+              tarefaSemSub={fullParams.substTarefaSemSub}
+            />
+          </TabsContent>
+
+
           <TabsContent value="painel" className="mt-4 space-y-4">
             <div className="grid sm:grid-cols-4 gap-3">
               <KPI label="Total agendamentos" value={String(dash.total)} />
