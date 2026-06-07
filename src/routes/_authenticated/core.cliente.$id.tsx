@@ -9,7 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OnboardingWizard } from "@/components/core/OnboardingWizard";
 import { IdentityTab } from "@/components/core/IdentityTab";
-import { CheckCircle2, Circle, Building2, Download, RefreshCw, Trash2 } from "lucide-react";
+import { ClientSettingsPanel } from "@/components/core/ClientSettingsPanel";
+import { useImpersonation } from "@/hooks/use-impersonation";
+import { useNavigate } from "@tanstack/react-router";
+import { CheckCircle2, Circle, Building2, Download, RefreshCw, Trash2, Eye } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/core/cliente/$id")({
@@ -30,6 +33,8 @@ const CHECKLIST_LABELS: Record<string, string> = {
 function ClientePage() {
   const { id } = Route.useParams();
   const qc = useQueryClient();
+  const navigate = useNavigate();
+  const { startImpersonation } = useImpersonation();
   const fetch360 = useServerFn(getClient360);
   const completeItem = useServerFn(completeChecklistItem);
 
@@ -62,7 +67,22 @@ function ClientePage() {
           <h1 className="text-xl font-bold truncate">{c.name}</h1>
           <div className="text-sm text-muted-foreground">{c.email ?? "—"} · {c.phone ?? "—"}</div>
         </div>
-        <Badge variant={c.is_active ? "default" : "outline"}>{c.is_active ? "Ativo" : "Inativo"}</Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant={c.is_active ? "default" : "outline"}>{c.is_active ? "Ativo" : "Inativo"}</Badge>
+          {c.is_active && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                startImpersonation({ companyId: id, companyName: c.name });
+                navigate({ to: "/dashboard" });
+              }}
+            >
+              <Eye className="w-3.5 h-3.5 mr-1" />
+              Acessar como cliente
+            </Button>
+          )}
+        </div>
       </Card>
 
       <Tabs defaultValue="checklist">
@@ -71,6 +91,7 @@ function ClientePage() {
           <TabsTrigger value="identidade">Identidade</TabsTrigger>
           <TabsTrigger value="onboarding">Onboarding</TabsTrigger>
           <TabsTrigger value="modulos">Módulos</TabsTrigger>
+          <TabsTrigger value="parametros">Parâmetros</TabsTrigger>
           <TabsTrigger value="contratos">Contratos</TabsTrigger>
           <TabsTrigger value="dominio">Domínio</TabsTrigger>
           <TabsTrigger value="emails">E-mails</TabsTrigger>
@@ -112,6 +133,10 @@ function ClientePage() {
 
         <TabsContent value="modulos">
           <ClientModulesPanel companyId={id} />
+        </TabsContent>
+
+        <TabsContent value="parametros">
+          <ClientSettingsPanel companyId={id} />
         </TabsContent>
 
         <TabsContent value="contratos">

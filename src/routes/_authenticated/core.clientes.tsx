@@ -1,16 +1,20 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/app/PageElements";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useImpersonation } from "@/hooks/use-impersonation";
+import { Building2, ArrowRight, Eye } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/core/clientes")({
   component: CoreClientes,
 });
 
 function CoreClientes() {
+  const navigate = useNavigate();
+  const { startImpersonation } = useImpersonation();
   const { data, isLoading } = useQuery({
     queryKey: ["core-clientes"],
     queryFn: async () => {
@@ -55,13 +59,12 @@ function CoreClientes() {
       <div className="grid gap-3">
         {isLoading && <Card className="p-4 text-sm text-muted-foreground">Carregando…</Card>}
         {(data ?? []).map((c) => (
-          <Link
-            key={c.id}
-            to="/core/cliente/$id"
-            params={{ id: c.id }}
-            className="block"
-          >
-            <Card className="p-4 hover:border-primary/40 transition flex items-center gap-4">
+          <Card key={c.id} className="p-4 hover:border-primary/40 transition flex items-center gap-4">
+            <Link
+              to="/core/cliente/$id"
+              params={{ id: c.id }}
+              className="flex items-center gap-4 flex-1 min-w-0"
+            >
               <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
                 <Building2 className="w-5 h-5" />
               </div>
@@ -79,8 +82,21 @@ function CoreClientes() {
                 )}
               </div>
               <ArrowRight className="w-4 h-4 text-muted-foreground" />
-            </Card>
-          </Link>
+            </Link>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                startImpersonation({ companyId: c.id, companyName: c.name });
+                navigate({ to: "/dashboard" });
+              }}
+            >
+              <Eye className="w-3.5 h-3.5 mr-1" />
+              Acessar como cliente
+            </Button>
+          </Card>
         ))}
         {!isLoading && (data ?? []).length === 0 && (
           <Card className="p-6 text-sm text-muted-foreground text-center">Nenhum cliente cadastrado ainda.</Card>

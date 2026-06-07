@@ -4,6 +4,7 @@ import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 import { TrialBanner } from "./TrialBanner";
 import { PastDueBanner } from "@/components/PastDueBanner";
+import { ImpersonationBanner } from "./ImpersonationBanner";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMyTrial } from "@/hooks/use-trial";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -90,6 +91,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <Sidebar currentUser={data} />
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar currentUser={data} />
+        <ImpersonationBanner />
         <TrialBanner />
         <PastDueBanner />
         <main className="flex-1 p-6 lg:p-8 overflow-x-hidden">{children}</main>

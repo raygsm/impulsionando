@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,9 +12,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useImpersonation } from "@/hooks/use-impersonation";
 
 export const Route = createFileRoute("/_authenticated/companies")({
   head: () => ({ meta: [{ title: "Empresas — Impulsionando" }] }),
@@ -24,6 +25,8 @@ export const Route = createFileRoute("/_authenticated/companies")({
 function CompaniesPage() {
   const qc = useQueryClient();
   const { data: me } = useCurrentUser();
+  const navigate = useNavigate();
+  const { startImpersonation } = useImpersonation();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", legal_name: "", document: "", email: "", niche_id: "", is_demo: false });
 
@@ -131,11 +134,25 @@ function CompaniesPage() {
                   {c.is_demo && <Badge variant="outline" className="ml-1">Demo</Badge>}
                 </TableCell>
                 <TableCell>
-                  {me?.isSuperAdmin && !c.is_master && (
-                    <Button size="icon" variant="ghost" aria-label={`Remover empresa ${c.name}`} onClick={() => confirm(`Remover ${c.name}?`) && remove.mutate(c.id)}>
-                      <Trash2 className="w-4 h-4 text-destructive" />
-                    </Button>
-                  )}
+                  <div className="flex items-center justify-end gap-1">
+                    {me?.isSuperAdmin && !c.is_master && c.is_active && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          startImpersonation({ companyId: c.id, companyName: c.name });
+                          navigate({ to: "/dashboard" });
+                        }}
+                      >
+                        <Eye className="w-3.5 h-3.5 mr-1" />Acessar
+                      </Button>
+                    )}
+                    {me?.isSuperAdmin && !c.is_master && (
+                      <Button size="icon" variant="ghost" aria-label={`Remover empresa ${c.name}`} onClick={() => confirm(`Remover ${c.name}?`) && remove.mutate(c.id)}>
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
