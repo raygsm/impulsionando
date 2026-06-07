@@ -200,6 +200,7 @@ function DemoAgenda() {
             <TabsTrigger value="painel"><Clock className="w-4 h-4 mr-1" />Painel</TabsTrigger>
             <TabsTrigger value="params"><Sliders className="w-4 h-4 mr-1" />Parametrizações</TabsTrigger>
             <TabsTrigger value="recursos"><Layers className="w-4 h-4 mr-1" />Recursos</TabsTrigger>
+            <TabsTrigger value="fluxos"><Bell className="w-4 h-4 mr-1" />Fluxos</TabsTrigger>
           </TabsList>
 
           <TabsContent value="visao" className="mt-4 space-y-3">
