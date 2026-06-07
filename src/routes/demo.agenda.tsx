@@ -73,6 +73,8 @@ function DemoAgenda() {
   const [aba, setAba] = useState<string>("dashboard");
   const [jornadaOpen, setJornadaOpen] = useState(false);
   const [outrosOpen, setOutrosOpen] = useState(false);
+  const [clonarOpen, setClonarOpen] = useState(false);
+  const [clonarSucessoId, setClonarSucessoId] = useState<string | null>(null);
   const [zerarOpen, setZerarOpen] = useState(false);
   const [logsTick, setLogsTick] = useState(0);
   const refreshLogs = () => setLogsTick((t) => t + 1);
