@@ -514,7 +514,49 @@ function DemoAgenda() {
           <TabsContent value="comunicacao" className="mt-4">
             <AgendaComunicacaoPanel nicho={nichoDemo} />
           </TabsContent>
+
+          <TabsContent value="dashboard" className="mt-4 space-y-4">
+            <AgendaCtaStrip lead={lead?.name} onOutrosModulos={() => setOutrosOpen(true)} />
+            <AgendaDashboard nicho={nichoDemo} onGoTab={setAba} />
+          </TabsContent>
+
+          <TabsContent value="logs" className="mt-4">
+            <AgendaLogsPanel tick={logsTick} onClear={() => { clearAgendaLogs(); refreshLogs(); toast.success("Logs locais limpos."); }} />
+          </TabsContent>
         </Tabs>
+
+        <div className="mt-6">
+          <AgendaCtaStrip lead={lead?.name} onOutrosModulos={() => setOutrosOpen(true)} />
+        </div>
+
+        {/* Jornada guiada */}
+        <AgendaJornadaGuiada
+          open={jornadaOpen}
+          onOpenChange={setJornadaOpen}
+          onGoTab={setAba}
+          onContratar={() => { if (typeof window !== "undefined") window.location.href = "/planos?modulo=agenda"; }}
+          onOutrosModulos={() => { setJornadaOpen(false); setOutrosOpen(true); }}
+        />
+
+        {/* Outros módulos */}
+        <OutrosModulosDialog open={outrosOpen} onOpenChange={setOutrosOpen} lead={lead?.name} />
+
+        {/* Zerar dados — confirmação obrigatória */}
+        <Dialog open={zerarOpen} onOpenChange={setZerarOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Zerar dados da DEMO</DialogTitle>
+              <DialogDescription>
+                Tem certeza que deseja zerar os dados desta demonstração? Apenas os dados fictícios da Agenda,
+                neste navegador, serão apagados. Outros usuários não serão afetados.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setZerarOpen(false)}>Cancelar</Button>
+              <Button className="bg-gradient-primary" onClick={() => { resetAll(); setZerarOpen(false); }}>Zerar dados</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Reagendar — confirmação obrigatória (drag-and-drop / mobile) */}
         <ReagendarDialog
