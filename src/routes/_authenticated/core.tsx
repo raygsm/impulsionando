@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import {
   Building2, LayoutDashboard, Boxes, CreditCard, Globe, Rocket,
   KanbanSquare, Wallet, MessageSquare, Users, KeyRound, FileSearch,
-  SlidersHorizontal, Plug, HeartPulse,
+  SlidersHorizontal, Plug, HeartPulse, FlaskConical, TrendingUp,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/core")({
@@ -27,7 +27,11 @@ function CoreLayout() {
   const tabs = [
     { to: "/core", label: "Dashboard", icon: LayoutDashboard, exact: true },
     { to: "/core/saude", label: "Saúde", icon: HeartPulse },
+    { to: "/core/financeiro-master", label: "Financeiro Master", icon: TrendingUp },
     { to: "/core/clientes", label: "Clientes (360)", icon: Building2 },
+    { to: "/core/testes", label: "Testes", icon: FlaskConical },
+    { to: "/core/parametros", label: "Parâmetros Globais", icon: SlidersHorizontal },
+    { to: "/core/eventos", label: "Eventos", icon: MessageSquare },
     { to: "/crm/board", label: "CRM", icon: KanbanSquare },
     { to: "/finance", label: "ERP / Financeiro", icon: Wallet },
     { to: "/admin/billing-contracts", label: "Billing", icon: CreditCard },
@@ -39,7 +43,6 @@ function CoreLayout() {
     { to: "/audit", label: "Auditoria", icon: FileSearch },
     { to: "/settings", label: "Configurações", icon: SlidersHorizontal },
     { to: "/modules", label: "Integrações", icon: Plug },
-    { to: "/marketing/leads", label: "Comunicações", icon: MessageSquare },
   ];
   return (
     <div className="space-y-4">

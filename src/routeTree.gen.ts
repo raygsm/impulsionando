@@ -120,9 +120,13 @@ import { Route as AuthenticatedCrmPipelinesRouteImport } from './routes/_authent
 import { Route as AuthenticatedCrmLeadsRouteImport } from './routes/_authenticated/crm.leads'
 import { Route as AuthenticatedCrmBoardRouteImport } from './routes/_authenticated/crm.board'
 import { Route as AuthenticatedCrmActivitiesRouteImport } from './routes/_authenticated/crm.activities'
+import { Route as AuthenticatedCoreTestesRouteImport } from './routes/_authenticated/core.testes'
 import { Route as AuthenticatedCoreSaudeRouteImport } from './routes/_authenticated/core.saude'
+import { Route as AuthenticatedCoreParametrosRouteImport } from './routes/_authenticated/core.parametros'
 import { Route as AuthenticatedCoreModulosRouteImport } from './routes/_authenticated/core.modulos'
 import { Route as AuthenticatedCoreImplantacoesRouteImport } from './routes/_authenticated/core.implantacoes'
+import { Route as AuthenticatedCoreFinanceiroMasterRouteImport } from './routes/_authenticated/core.financeiro-master'
+import { Route as AuthenticatedCoreEventosRouteImport } from './routes/_authenticated/core.eventos'
 import { Route as AuthenticatedCoreClientesRouteImport } from './routes/_authenticated/core.clientes'
 import { Route as AuthenticatedBiNichesRouteImport } from './routes/_authenticated/bi.niches'
 import { Route as AuthenticatedBiMasterRouteImport } from './routes/_authenticated/bi.master'
@@ -755,11 +759,22 @@ const AuthenticatedCrmActivitiesRoute =
     path: '/activities',
     getParentRoute: () => AuthenticatedCrmRoute,
   } as any)
+const AuthenticatedCoreTestesRoute = AuthenticatedCoreTestesRouteImport.update({
+  id: '/testes',
+  path: '/testes',
+  getParentRoute: () => AuthenticatedCoreRoute,
+} as any)
 const AuthenticatedCoreSaudeRoute = AuthenticatedCoreSaudeRouteImport.update({
   id: '/saude',
   path: '/saude',
   getParentRoute: () => AuthenticatedCoreRoute,
 } as any)
+const AuthenticatedCoreParametrosRoute =
+  AuthenticatedCoreParametrosRouteImport.update({
+    id: '/parametros',
+    path: '/parametros',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreModulosRoute =
   AuthenticatedCoreModulosRouteImport.update({
     id: '/modulos',
@@ -770,6 +785,18 @@ const AuthenticatedCoreImplantacoesRoute =
   AuthenticatedCoreImplantacoesRouteImport.update({
     id: '/implantacoes',
     path: '/implantacoes',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
+const AuthenticatedCoreFinanceiroMasterRoute =
+  AuthenticatedCoreFinanceiroMasterRouteImport.update({
+    id: '/financeiro-master',
+    path: '/financeiro-master',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
+const AuthenticatedCoreEventosRoute =
+  AuthenticatedCoreEventosRouteImport.update({
+    id: '/eventos',
+    path: '/eventos',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
 const AuthenticatedCoreClientesRoute =
@@ -1184,9 +1211,13 @@ export interface FileRoutesByFullPath {
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
+  '/core/eventos': typeof AuthenticatedCoreEventosRoute
+  '/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
+  '/core/parametros': typeof AuthenticatedCoreParametrosRoute
   '/core/saude': typeof AuthenticatedCoreSaudeRoute
+  '/core/testes': typeof AuthenticatedCoreTestesRoute
   '/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/crm/board': typeof AuthenticatedCrmBoardRoute
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
@@ -1340,9 +1371,13 @@ export interface FileRoutesByTo {
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
+  '/core/eventos': typeof AuthenticatedCoreEventosRoute
+  '/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
+  '/core/parametros': typeof AuthenticatedCoreParametrosRoute
   '/core/saude': typeof AuthenticatedCoreSaudeRoute
+  '/core/testes': typeof AuthenticatedCoreTestesRoute
   '/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/crm/board': typeof AuthenticatedCrmBoardRoute
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
@@ -1509,9 +1544,13 @@ export interface FileRoutesById {
   '/_authenticated/bi/master': typeof AuthenticatedBiMasterRoute
   '/_authenticated/bi/niches': typeof AuthenticatedBiNichesRoute
   '/_authenticated/core/clientes': typeof AuthenticatedCoreClientesRoute
+  '/_authenticated/core/eventos': typeof AuthenticatedCoreEventosRoute
+  '/_authenticated/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/_authenticated/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/_authenticated/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
+  '/_authenticated/core/parametros': typeof AuthenticatedCoreParametrosRoute
   '/_authenticated/core/saude': typeof AuthenticatedCoreSaudeRoute
+  '/_authenticated/core/testes': typeof AuthenticatedCoreTestesRoute
   '/_authenticated/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/_authenticated/crm/board': typeof AuthenticatedCrmBoardRoute
   '/_authenticated/crm/leads': typeof AuthenticatedCrmLeadsRoute
@@ -1678,9 +1717,13 @@ export interface FileRouteTypes {
     | '/bi/master'
     | '/bi/niches'
     | '/core/clientes'
+    | '/core/eventos'
+    | '/core/financeiro-master'
     | '/core/implantacoes'
     | '/core/modulos'
+    | '/core/parametros'
     | '/core/saude'
+    | '/core/testes'
     | '/crm/activities'
     | '/crm/board'
     | '/crm/leads'
@@ -1834,9 +1877,13 @@ export interface FileRouteTypes {
     | '/bi/master'
     | '/bi/niches'
     | '/core/clientes'
+    | '/core/eventos'
+    | '/core/financeiro-master'
     | '/core/implantacoes'
     | '/core/modulos'
+    | '/core/parametros'
     | '/core/saude'
+    | '/core/testes'
     | '/crm/activities'
     | '/crm/board'
     | '/crm/leads'
@@ -2002,9 +2049,13 @@ export interface FileRouteTypes {
     | '/_authenticated/bi/master'
     | '/_authenticated/bi/niches'
     | '/_authenticated/core/clientes'
+    | '/_authenticated/core/eventos'
+    | '/_authenticated/core/financeiro-master'
     | '/_authenticated/core/implantacoes'
     | '/_authenticated/core/modulos'
+    | '/_authenticated/core/parametros'
     | '/_authenticated/core/saude'
+    | '/_authenticated/core/testes'
     | '/_authenticated/crm/activities'
     | '/_authenticated/crm/board'
     | '/_authenticated/crm/leads'
@@ -2911,11 +2962,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCrmActivitiesRouteImport
       parentRoute: typeof AuthenticatedCrmRoute
     }
+    '/_authenticated/core/testes': {
+      id: '/_authenticated/core/testes'
+      path: '/testes'
+      fullPath: '/core/testes'
+      preLoaderRoute: typeof AuthenticatedCoreTestesRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/saude': {
       id: '/_authenticated/core/saude'
       path: '/saude'
       fullPath: '/core/saude'
       preLoaderRoute: typeof AuthenticatedCoreSaudeRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/core/parametros': {
+      id: '/_authenticated/core/parametros'
+      path: '/parametros'
+      fullPath: '/core/parametros'
+      preLoaderRoute: typeof AuthenticatedCoreParametrosRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
     '/_authenticated/core/modulos': {
@@ -2930,6 +2995,20 @@ declare module '@tanstack/react-router' {
       path: '/implantacoes'
       fullPath: '/core/implantacoes'
       preLoaderRoute: typeof AuthenticatedCoreImplantacoesRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/core/financeiro-master': {
+      id: '/_authenticated/core/financeiro-master'
+      path: '/financeiro-master'
+      fullPath: '/core/financeiro-master'
+      preLoaderRoute: typeof AuthenticatedCoreFinanceiroMasterRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/core/eventos': {
+      id: '/_authenticated/core/eventos'
+      path: '/eventos'
+      fullPath: '/core/eventos'
+      preLoaderRoute: typeof AuthenticatedCoreEventosRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
     '/_authenticated/core/clientes': {
@@ -3404,18 +3483,27 @@ const AuthenticatedCoreModulosRouteWithChildren =
 
 interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreClientesRoute: typeof AuthenticatedCoreClientesRoute
+  AuthenticatedCoreEventosRoute: typeof AuthenticatedCoreEventosRoute
+  AuthenticatedCoreFinanceiroMasterRoute: typeof AuthenticatedCoreFinanceiroMasterRoute
   AuthenticatedCoreImplantacoesRoute: typeof AuthenticatedCoreImplantacoesRoute
   AuthenticatedCoreModulosRoute: typeof AuthenticatedCoreModulosRouteWithChildren
+  AuthenticatedCoreParametrosRoute: typeof AuthenticatedCoreParametrosRoute
   AuthenticatedCoreSaudeRoute: typeof AuthenticatedCoreSaudeRoute
+  AuthenticatedCoreTestesRoute: typeof AuthenticatedCoreTestesRoute
   AuthenticatedCoreIndexRoute: typeof AuthenticatedCoreIndexRoute
   AuthenticatedCoreClienteIdRoute: typeof AuthenticatedCoreClienteIdRoute
 }
 
 const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreClientesRoute: AuthenticatedCoreClientesRoute,
+  AuthenticatedCoreEventosRoute: AuthenticatedCoreEventosRoute,
+  AuthenticatedCoreFinanceiroMasterRoute:
+    AuthenticatedCoreFinanceiroMasterRoute,
   AuthenticatedCoreImplantacoesRoute: AuthenticatedCoreImplantacoesRoute,
   AuthenticatedCoreModulosRoute: AuthenticatedCoreModulosRouteWithChildren,
+  AuthenticatedCoreParametrosRoute: AuthenticatedCoreParametrosRoute,
   AuthenticatedCoreSaudeRoute: AuthenticatedCoreSaudeRoute,
+  AuthenticatedCoreTestesRoute: AuthenticatedCoreTestesRoute,
   AuthenticatedCoreIndexRoute: AuthenticatedCoreIndexRoute,
   AuthenticatedCoreClienteIdRoute: AuthenticatedCoreClienteIdRoute,
 }

@@ -1,99 +1,73 @@
-# Revisão Final do Core Master — Plano Cirúrgico
+# Revisão Final de Governança — Core Master
 
-## Premissa
-Tudo que segue **só toca o que falta**. Não recriar módulos, telas, tabelas ou componentes existentes. A maior parte do escopo do prompt **já foi entregue** nas Fases A, B, C, Certificação e Instalação. Esta revisão **fecha as últimas pontas** e consolida o Core como painel suficiente.
+Auditoria dos 10 pontos solicitados. Para cada item: **(A) Já existe** — apenas exponho/conecto no painel; **(N) Falta** — crio o mínimo. Sem recriar módulos.
 
----
+## Mapa de cobertura atual × ações
 
-## O que já existe (não mexer)
+| # | Item | Estado hoje | Ação |
+|---|------|-------------|------|
+| 1 | Matriz global de parâmetros | Parcial — `setting_definitions` + `company_settings` existem; falta aplicação em massa | **N parcial**: nova aba "Parâmetros Globais" em `/core` com aplicar em (todos / white-label / cliente) |
+| 2 | Versionamento de módulos | `module_versions` existe; falta escopo de aplicação | **N parcial**: diálogo "Aplicar versão" com escopo (cliente / WL / todos) |
+| 3 | Clonagem de projeto | Não existe | **N**: serverFn `cloneCompany` + botão em `/core/cliente/$id` |
+| 4 | Clonagem de configurações | Não existe | **N**: diálogo "Copiar configurações" (origem→destino, marcar áreas: agenda, comunicação, cobrança, CRM, dashboard, permissões) |
+| 5 | Checklist de implantação | `onboarding_checklist` existe; já exposto | **A**: garantir aba "Implantação" visível no cliente com os 10 itens padronizados |
+| 6 | Central de testes | Não existe | **N**: `/core/testes` + serverFn `runClientHealthCheck` (login, whatsapp, email, agenda, cobrança, pix, NF, dashboard) |
+| 7 | Central de eventos (tela) | Catálogo em código + `message_outbox` + `message_templates`; falta tela unificada | **N parcial**: `/core/eventos` listando evento × canal × template × última/próxima execução |
+| 8 | Visão financeira master | `billing_invoices` + `subscriptions` existem; falta dashboard | **N**: `/core/financeiro-master` com MRR, ARR, ativos, suspensos, churn, LTV, inadimplência, receita por módulo/WL/segmento |
+| 9 | Modo suporte (entrar como cliente) | Não existe | **N**: serverFn `enterAsClient` (super-admin → qualquer; WL → próprios) + log em `audit_logs` obrigatório + banner "Modo Suporte" |
+| 10 | Certificação real | Já implementado (readiness_status + checklist) | **A**: filtro "somente certificados" no marketplace de instalação |
 
-| Pedido do prompt | Onde já está |
-|---|---|
-| Acessar como cliente | `useImpersonation` + `ImpersonationBanner` + botão em `core.cliente.$id` |
-| Instalador 1-clique | `InstallModuleDialog` + `installModuleWithTemplate` |
-| Certificação de módulos | `ModuleCertificationPanel` + colunas em `modules` |
-| Templates por segmento | `src/data/moduleSegmentTemplates.ts` (12 segmentos) |
-| Parâmetros Sim/Não por cliente | `ClientSettingsPanel` + `setting_definitions` + `company_settings` |
-| Comunicação editável (eventos × canais) | `ClientCommunicationPanel` + `message_templates` + `message_outbox` |
-| Pendências por cliente | `ClientPendingsPanel` |
-| Logs por cliente | `ClientLogsPanel` + `audit_logs` |
-| Identidade White Label (envio técnico Impulsionando, percepção do cliente) | `enqueue_message` + `company_identity_payload` |
-| Cobrança / suspensão / reativação automática | `billing_run_cycle` + `billing_mark_paid` |
-| Hierarquia I/WL/Cliente/Final | `companies.is_master`, `is_impulsionando_staff`, RLS por `company_id` |
-| Menu Master /adm | `core.tsx` |
-| Construtor de campos/formulários/dashboards | `setting_definitions` + `ClientSettingsPanel` (parâmetros tipados) |
+## Arquivos a criar (mínimos)
 
-**Conclusão:** o Core já é administrável. Faltam **apenas 4 ajustes finos**.
+**Server functions** (`src/lib/governance.functions.ts` — novo):
+- `applyGlobalSetting({ key, value, scope: 'all'|'white_label'|'company', target_id })`
+- `applyModuleVersion({ module_id, version_id, scope, target_id })`
+- `cloneCompany({ source_company_id, new_name, new_owner_email })`
+- `copyCompanySettings({ source_id, target_id, areas: string[] })`
+- `runClientHealthCheck({ company_id })` — retorna `{ login, whatsapp, email, agenda, cobranca, pix, nf, dashboard: 'pass'|'fail'|'pending' }`
+- `enterAsClient({ company_id })` — valida escopo, grava `audit_logs`, retorna token de impersonação curto
 
----
+**Rotas** (em `src/routes/_authenticated/`):
+- `core.parametros.tsx` — Matriz global
+- `core.eventos.tsx` — Central de eventos
+- `core.testes.tsx` — Central de testes
+- `core.financeiro-master.tsx` — Visão financeira
 
-## O que falta (executar agora)
+**Componentes** (em `src/components/core/`):
+- `CloneCompanyDialog.tsx`
+- `CopySettingsDialog.tsx`
+- `ApplyVersionScopeDialog.tsx`
+- `SupportModeBanner.tsx` (renderizado no `_authenticated` layout quando há impersonação ativa)
 
-### 1. Catálogo global de eventos de comunicação
-Hoje `ClientCommunicationPanel` lista só eventos que **já têm pelo menos um template**. Se um evento nunca foi semeado, o usuário não consegue criar do painel.
+**Edições pontuais**:
+- `core.tsx` — adicionar 4 entradas de menu (Parâmetros, Eventos, Testes, Financeiro Master)
+- `core.cliente.$id.tsx` — botões "Clonar projeto", "Copiar configurações de…", "Entrar como cliente"
+- `core.modulos.$slug.tsx` — diálogo de aplicação com escopo na aba Versões
+- `_authenticated.tsx` (layout) — montar `SupportModeBanner`
 
-**Ação:**
-- Criar `src/data/communicationEvents.ts` listando os 18 eventos do prompt (boas-vindas, primeiro acesso, criação de senha, cadastro, agendamento, aprovação, rejeição, confirmação, cancelamento, remarcação, lembrete, cobrança, pagamento aprovado, pagamento vencido, suspensão, reativação, nota fiscal emitida, recuperação de senha) × 3 canais.
-- Atualizar `ClientCommunicationPanel` para fazer **union** entre o catálogo e os templates existentes, permitindo criar do zero por cliente.
+## Migração necessária
 
-### 2. Painel global de Saúde & Pendências
-Hoje pendências existem **por cliente**. Falta a visão agregada do prompt ("Painel de saúde e pendências").
+Uma única migração:
+- `support_sessions` (id, super_user_id, company_id, started_at, ended_at, reason) — log obrigatório de "entrar como cliente"
+- `governance_applications` (id, kind: setting|version, scope, target_id, payload, applied_by, applied_at) — auditoria de aplicações em massa
+- GRANTs + RLS (super-admin only)
 
-**Ação:**
-- Nova rota `src/routes/_authenticated/core.saude.tsx` (read-only, agrega queries existentes):
-  - Clientes ativos / incompletos
-  - Módulos com erro de instalação (lê `audit_logs` action `module.install.failed`)
-  - Comunicações com erro (lê `message_outbox` status `failed`)
-  - Pagamentos vencidos (lê `billing_invoices` status `overdue`)
-  - Configurações incompletas (lê `onboarding_checklist` com pendências)
-- Adicionar entrada "Saúde" no `core.tsx` antes de "Clientes".
+Sem alterar tabelas existentes.
 
-### 3. Construtor de definições de parâmetro (Sim/Não)
-`ClientSettingsPanel` aplica `setting_definitions`, mas só **staff Impulsionando via SQL** consegue criar uma definição nova. Falta UI.
+## Fora de escopo
 
-**Ação:**
-- Novo componente `src/components/core/SettingDefinitionsAdmin.tsx`: CRUD em `setting_definitions` (key, label, type boolean|text|number|enum, default, scope, módulo).
-- Aba "Definições" em `core.modulos.$slug.tsx` (já tem tabs), restrita a super-admin, para criar parâmetros por módulo direto no painel.
+- Não recriar módulos, telas de cliente, fluxos de cobrança, comunicação ou agenda.
+- Não trocar arquitetura de RLS.
+- Item 10 não precisa de código novo — já está pronto, só filtro.
 
-### 4. Centralizar baixa manual / reenvio / reprocesso
-Já existem `billing_mark_paid` e `message_outbox`. Falta o **botão de ação** no painel.
+## Validação
 
-**Ação:**
-- Em `ClientLogsPanel` ou nova aba "Operações" no `core.cliente.$id`: 3 botões — "Baixa manual de fatura" (chama `billing_mark_paid`), "Reenviar comunicação" (re-enqueue de uma linha `message_outbox`), "Reprocessar nota fiscal" (placeholder server fn — emite log de pedido manual; emissão real depende do conector NFe, fora deste escopo).
+Ao final, super-admin consegue, a partir de `/core`:
+1. Aplicar um parâmetro a todos os clientes em 2 cliques.
+2. Promover uma versão de módulo para todos.
+3. Clonar Patrícia Lenine → novo cliente em <1min.
+4. Rodar teste completo em qualquer cliente e ver pass/fail.
+5. Ver MRR/ARR/Churn em tempo real.
+6. Entrar como cliente com log automático.
 
----
-
-## Fora deste escopo (não tocar)
-- Não criar módulos novos (Agenda/CRM/PDV/NFe/etc) — já existem como tabelas + páginas demo.
-- Não criar novos conectores externos (NFe, gateway Pix real) — exige integração externa, é trabalho separado de "core administrável".
-- Não mexer em RLS existente nem em `clients.ts` da Supabase.
-- Não criar telas de "construtor visual drag-and-drop" — os parâmetros tipados via `setting_definitions` já cumprem o requisito funcional do prompt.
-
----
-
-## Entregáveis
-
-| Arquivo | Tipo |
-|---|---|
-| `src/data/communicationEvents.ts` | novo (catálogo) |
-| `src/components/core/ClientCommunicationPanel.tsx` | editar (union catálogo+DB) |
-| `src/routes/_authenticated/core.saude.tsx` | novo |
-| `src/routes/_authenticated/core.tsx` | editar (1 entrada de menu) |
-| `src/components/core/SettingDefinitionsAdmin.tsx` | novo |
-| `src/routes/_authenticated/core.modulos.$slug.tsx` | editar (1 aba) |
-| `src/components/core/ClientOperationsPanel.tsx` | novo (3 botões) |
-| `src/routes/_authenticated/core.cliente.$id.tsx` | editar (1 aba) |
-| `src/lib/operations.functions.ts` | novo (server fns para baixa/reenvio) |
-
-**Migrations: nenhuma.** Tudo usa tabelas e funções já existentes.
-
----
-
-## Validação final
-Após aplicar:
-- Super-admin cria parâmetro novo → aparece automaticamente em `ClientSettingsPanel` de todos os clientes.
-- Super-admin cria template de comunicação para evento que nunca tinha → salva e dispara.
-- `/core/saude` mostra todas as pendências agregadas em uma tela.
-- Baixa manual de fatura grava `audit_log` e reativa módulos.
-
-Aprovado? Executo Fases 1–4 em sequência, num único lote de mudanças.
+Confirma para eu executar?

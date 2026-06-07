@@ -14,8 +14,11 @@ import { ClientPendingsPanel } from "@/components/core/ClientPendingsPanel";
 import { ClientLogsPanel } from "@/components/core/ClientLogsPanel";
 import { ClientCommunicationPanel } from "@/components/core/ClientCommunicationPanel";
 import { ClientOperationsPanel } from "@/components/core/ClientOperationsPanel";
+import { CloneCompanyDialog } from "@/components/core/CloneCompanyDialog";
+import { CopySettingsDialog } from "@/components/core/CopySettingsDialog";
 import { useImpersonation } from "@/hooks/use-impersonation";
 import { useNavigate } from "@tanstack/react-router";
+import { enterAsClient } from "@/lib/governance.functions";
 import { CheckCircle2, Circle, Building2, Download, RefreshCw, Trash2, Eye } from "lucide-react";
 import { toast } from "sonner";
 
@@ -41,6 +44,7 @@ function ClientePage() {
   const { startImpersonation } = useImpersonation();
   const fetch360 = useServerFn(getClient360);
   const completeItem = useServerFn(completeChecklistItem);
+  const enterAsClientFn = useServerFn(enterAsClient);
 
   const { data, isLoading } = useQuery({
     queryKey: ["client-360", id],
@@ -71,19 +75,27 @@ function ClientePage() {
           <h1 className="text-xl font-bold truncate">{c.name}</h1>
           <div className="text-sm text-muted-foreground">{c.email ?? "—"} · {c.phone ?? "—"}</div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Badge variant={c.is_active ? "default" : "outline"}>{c.is_active ? "Ativo" : "Inativo"}</Badge>
+          <CloneCompanyDialog sourceCompanyId={id} sourceName={c.name} />
+          <CopySettingsDialog targetCompanyId={id} targetName={c.name} />
           {c.is_active && (
             <Button
               size="sm"
               variant="outline"
-              onClick={() => {
+              onClick={async () => {
+                try {
+                  await enterAsClient({ data: { company_id: id, reason: "Modo suporte" } });
+                } catch (e: any) {
+                  toast.error(e?.message ?? "Falha ao registrar sessão de suporte");
+                  return;
+                }
                 startImpersonation({ companyId: id, companyName: c.name });
                 navigate({ to: "/dashboard" });
               }}
             >
               <Eye className="w-3.5 h-3.5 mr-1" />
-              Acessar como cliente
+              Entrar como cliente
             </Button>
           )}
         </div>

@@ -3544,6 +3544,45 @@ export type Database = {
           },
         ]
       }
+      governance_applications: {
+        Row: {
+          affected_count: number
+          applied_at: string
+          applied_by: string
+          applied_by_email: string | null
+          created_at: string
+          id: string
+          kind: string
+          payload: Json
+          scope: string
+          target_id: string | null
+        }
+        Insert: {
+          affected_count?: number
+          applied_at?: string
+          applied_by: string
+          applied_by_email?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          payload?: Json
+          scope: string
+          target_id?: string | null
+        }
+        Update: {
+          affected_count?: number
+          applied_at?: string
+          applied_by?: string
+          applied_by_email?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          payload?: Json
+          scope?: string
+          target_id?: string | null
+        }
+        Relationships: []
+      }
       infinitepay_payments: {
         Row: {
           amount: number
@@ -5198,6 +5237,47 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      support_sessions: {
+        Row: {
+          company_id: string
+          created_at: string
+          ended_at: string | null
+          id: string
+          reason: string | null
+          started_at: string
+          super_user_email: string | null
+          super_user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          reason?: string | null
+          started_at?: string
+          super_user_email?: string | null
+          super_user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          reason?: string | null
+          started_at?: string
+          super_user_email?: string | null
+          super_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_sessions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       suppressed_emails: {
         Row: {
