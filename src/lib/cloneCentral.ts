@@ -283,6 +283,60 @@ export const PRESET_LABELS: Record<string, Record<string, string>> = {
   "Genérico": { cliente: "Cliente", profissional: "Profissional", servico: "Serviço" },
 };
 
+export interface PresetDetail {
+  labels: string[];
+  features: string[];
+  mockServices: string[];
+}
+
+export const PRESET_DETAILS: Record<string, PresetDetail> = {
+  "Clínica": {
+    labels: ["Paciente", "Médico", "Consulta", "Retorno", "Sala", "Especialidade"],
+    features: ["pagamento para confirmar", "lembrete 24h", "lembrete 2h", "retorno", "no-show", "fila de espera", "integração com prontuário preparada", "comunicação com paciente", "comunicação com médico", "dashboard de consultas"],
+    mockServices: ["Consulta inicial", "Retorno", "Avaliação clínica", "Teleconsulta"],
+  },
+  "Consultório": {
+    labels: ["Paciente", "Profissional", "Atendimento", "Retorno", "Sala"],
+    features: ["agendamento online", "confirmação", "lembrete", "pagamento", "no-show", "fila de espera"],
+    mockServices: ["Atendimento inicial", "Retorno", "Consulta online"],
+  },
+  "Estética": {
+    labels: ["Cliente", "Profissional", "Procedimento", "Pacote", "Retorno"],
+    features: ["agenda por profissional", "comissão", "pacote", "retorno", "lembrete", "pagamento", "pesquisa pós-atendimento"],
+    mockServices: ["Avaliação estética", "Limpeza de pele", "Procedimento facial", "Retorno do pacote"],
+  },
+  "Academia/Fitness": {
+    labels: ["Aluno", "Professor", "Aula", "Treino", "Check-in"],
+    features: ["check-in", "plano", "mensalidade", "limite de vagas", "turma", "lembrete de aula", "reagendamento"],
+    mockServices: ["Aula experimental", "Personal trainer", "Avaliação física", "Treino funcional"],
+  },
+  "Jurídico": {
+    labels: ["Cliente", "Advogado", "Reunião", "Audiência", "Prazo"],
+    features: ["reunião", "audiência", "lembrete", "documentos", "tarefa", "comunicação com cliente", "integração futura com módulo jurídico"],
+    mockServices: ["Reunião inicial", "Alinhamento de processo", "Audiência", "Revisão contratual"],
+  },
+  "Bar/Restaurante": {
+    labels: ["Cliente", "Reserva", "Mesa", "Evento", "Lista de espera"],
+    features: ["reserva", "sinal", "mesa", "fila de espera", "no-show", "lembrete", "confirmação por WhatsApp", "dashboard de ocupação"],
+    mockServices: ["Reserva de mesa", "Reserva para evento", "Jantar harmonizado", "Lista de espera"],
+  },
+  "Eventos/WMP": {
+    labels: ["Parceiro", "DJ", "Evento", "Horário de chegada", "Apresentação"],
+    features: ["contrato", "agenda de evento", "aceite", "check-in", "reputação", "comunicação com parceiro", "integração futura com módulo WMP"],
+    mockServices: ["Evento rooftop", "Apresentação DJ", "Evento recorrente", "Chegada técnica"],
+  },
+  "Serviços profissionais": {
+    labels: ["Cliente", "Profissional", "Serviço", "Atendimento", "Horário"],
+    features: ["agendamento", "lembrete", "pagamento", "confirmação", "reagendamento", "histórico do cliente"],
+    mockServices: ["Atendimento inicial", "Consultoria", "Visita técnica", "Reunião online"],
+  },
+  "Genérico": {
+    labels: ["Cliente", "Profissional", "Serviço", "Horário", "Agendamento"],
+    features: ["agenda básica", "confirmação", "lembrete", "cancelamento", "reagendamento", "dashboard simples"],
+    mockServices: ["Atendimento", "Reunião", "Serviço padrão"],
+  },
+};
+
 export interface CloneWizardInput {
   baseId: string;
   purpose: PurposeValue;
