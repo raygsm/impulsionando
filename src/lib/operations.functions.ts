@@ -97,8 +97,8 @@ export const requestInvoiceReprocess = createServerFn({ method: "POST" })
 const DefSchema = z.object({
   key: z.string().min(2).max(120).regex(/^[a-z0-9_.]+$/, "use letras minúsculas, números e _ ."),
   label: z.string().min(1).max(200),
-  description: z.string().max(1000).optional().nullable(),
-  category: z.string().max(80).optional().nullable(),
+  description: z.string().max(1000).optional().transform((v) => v ?? undefined),
+  category: z.string().max(80).optional().transform((v) => v ?? undefined),
   value_type: z.enum(["boolean", "text", "number", "json"]),
   default_value: z.any(),
   is_company_editable: z.boolean().default(true),

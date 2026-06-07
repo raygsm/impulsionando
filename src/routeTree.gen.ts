@@ -120,6 +120,7 @@ import { Route as AuthenticatedCrmPipelinesRouteImport } from './routes/_authent
 import { Route as AuthenticatedCrmLeadsRouteImport } from './routes/_authenticated/crm.leads'
 import { Route as AuthenticatedCrmBoardRouteImport } from './routes/_authenticated/crm.board'
 import { Route as AuthenticatedCrmActivitiesRouteImport } from './routes/_authenticated/crm.activities'
+import { Route as AuthenticatedCoreSaudeRouteImport } from './routes/_authenticated/core.saude'
 import { Route as AuthenticatedCoreModulosRouteImport } from './routes/_authenticated/core.modulos'
 import { Route as AuthenticatedCoreImplantacoesRouteImport } from './routes/_authenticated/core.implantacoes'
 import { Route as AuthenticatedCoreClientesRouteImport } from './routes/_authenticated/core.clientes'
@@ -754,6 +755,11 @@ const AuthenticatedCrmActivitiesRoute =
     path: '/activities',
     getParentRoute: () => AuthenticatedCrmRoute,
   } as any)
+const AuthenticatedCoreSaudeRoute = AuthenticatedCoreSaudeRouteImport.update({
+  id: '/saude',
+  path: '/saude',
+  getParentRoute: () => AuthenticatedCoreRoute,
+} as any)
 const AuthenticatedCoreModulosRoute =
   AuthenticatedCoreModulosRouteImport.update({
     id: '/modulos',
@@ -1180,6 +1186,7 @@ export interface FileRoutesByFullPath {
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
+  '/core/saude': typeof AuthenticatedCoreSaudeRoute
   '/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/crm/board': typeof AuthenticatedCrmBoardRoute
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
@@ -1335,6 +1342,7 @@ export interface FileRoutesByTo {
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
+  '/core/saude': typeof AuthenticatedCoreSaudeRoute
   '/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/crm/board': typeof AuthenticatedCrmBoardRoute
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
@@ -1503,6 +1511,7 @@ export interface FileRoutesById {
   '/_authenticated/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/_authenticated/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/_authenticated/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
+  '/_authenticated/core/saude': typeof AuthenticatedCoreSaudeRoute
   '/_authenticated/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/_authenticated/crm/board': typeof AuthenticatedCrmBoardRoute
   '/_authenticated/crm/leads': typeof AuthenticatedCrmLeadsRoute
@@ -1671,6 +1680,7 @@ export interface FileRouteTypes {
     | '/core/clientes'
     | '/core/implantacoes'
     | '/core/modulos'
+    | '/core/saude'
     | '/crm/activities'
     | '/crm/board'
     | '/crm/leads'
@@ -1826,6 +1836,7 @@ export interface FileRouteTypes {
     | '/core/clientes'
     | '/core/implantacoes'
     | '/core/modulos'
+    | '/core/saude'
     | '/crm/activities'
     | '/crm/board'
     | '/crm/leads'
@@ -1993,6 +2004,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/clientes'
     | '/_authenticated/core/implantacoes'
     | '/_authenticated/core/modulos'
+    | '/_authenticated/core/saude'
     | '/_authenticated/crm/activities'
     | '/_authenticated/crm/board'
     | '/_authenticated/crm/leads'
@@ -2899,6 +2911,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCrmActivitiesRouteImport
       parentRoute: typeof AuthenticatedCrmRoute
     }
+    '/_authenticated/core/saude': {
+      id: '/_authenticated/core/saude'
+      path: '/saude'
+      fullPath: '/core/saude'
+      preLoaderRoute: typeof AuthenticatedCoreSaudeRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/modulos': {
       id: '/_authenticated/core/modulos'
       path: '/modulos'
@@ -3387,6 +3406,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreClientesRoute: typeof AuthenticatedCoreClientesRoute
   AuthenticatedCoreImplantacoesRoute: typeof AuthenticatedCoreImplantacoesRoute
   AuthenticatedCoreModulosRoute: typeof AuthenticatedCoreModulosRouteWithChildren
+  AuthenticatedCoreSaudeRoute: typeof AuthenticatedCoreSaudeRoute
   AuthenticatedCoreIndexRoute: typeof AuthenticatedCoreIndexRoute
   AuthenticatedCoreClienteIdRoute: typeof AuthenticatedCoreClienteIdRoute
 }
@@ -3395,6 +3415,7 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreClientesRoute: AuthenticatedCoreClientesRoute,
   AuthenticatedCoreImplantacoesRoute: AuthenticatedCoreImplantacoesRoute,
   AuthenticatedCoreModulosRoute: AuthenticatedCoreModulosRouteWithChildren,
+  AuthenticatedCoreSaudeRoute: AuthenticatedCoreSaudeRoute,
   AuthenticatedCoreIndexRoute: AuthenticatedCoreIndexRoute,
   AuthenticatedCoreClienteIdRoute: AuthenticatedCoreClienteIdRoute,
 }
