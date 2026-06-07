@@ -1,10 +1,14 @@
 import { createFileRoute, Outlet, Link, useLocation } from "@tanstack/react-router";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Card } from "@/components/ui/card";
-import { Building2, LayoutDashboard, Boxes, CreditCard, Globe, Rocket } from "lucide-react";
+import {
+  Building2, LayoutDashboard, Boxes, CreditCard, Globe, Rocket,
+  KanbanSquare, Wallet, MessageSquare, Users, KeyRound, FileSearch,
+  SlidersHorizontal, Plug,
+} from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/core")({
-  head: () => ({ meta: [{ title: "Core Manager — Impulsionando" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "/adm — Impulsionando Core" }, { name: "robots", content: "noindex" }] }),
   component: CoreLayout,
 });
 
@@ -15,21 +19,30 @@ function CoreLayout() {
     return (
       <Card className="p-6">
         <h2 className="font-semibold mb-2">Acesso restrito</h2>
-        <p className="text-sm text-muted-foreground">Apenas equipe Impulsionando acessa o Core Manager.</p>
+        <p className="text-sm text-muted-foreground">Apenas equipe Impulsionando acessa /adm (Core Manager).</p>
       </Card>
     );
   }
+  // Menu Master /adm — usa apenas rotas já existentes; nenhuma tela duplicada.
   const tabs = [
-    { to: "/core", label: "Visão geral", icon: LayoutDashboard, exact: true },
-    { to: "/core/clientes", label: "Clientes", icon: Building2 },
-    { to: "/core/modulos", label: "Biblioteca de Módulos", icon: Boxes },
+    { to: "/core", label: "Dashboard", icon: LayoutDashboard, exact: true },
+    { to: "/core/clientes", label: "Clientes (360)", icon: Building2 },
+    { to: "/crm/board", label: "CRM", icon: KanbanSquare },
+    { to: "/finance", label: "ERP / Financeiro", icon: Wallet },
+    { to: "/admin/billing-contracts", label: "Billing", icon: CreditCard },
     { to: "/core/implantacoes", label: "Implantações", icon: Rocket },
-    { to: "/admin/billing-contracts", label: "Contratos", icon: CreditCard },
-    { to: "/admin/billing-policy", label: "Régua", icon: Globe },
+    { to: "/core/modulos", label: "Biblioteca de Módulos", icon: Boxes },
+    { to: "/admin/billing-policy", label: "Régua / Domínios", icon: Globe },
+    { to: "/users", label: "Usuários", icon: Users },
+    { to: "/permissions", label: "Permissões", icon: KeyRound },
+    { to: "/audit", label: "Auditoria", icon: FileSearch },
+    { to: "/settings", label: "Configurações", icon: SlidersHorizontal },
+    { to: "/modules", label: "Integrações", icon: Plug },
+    { to: "/marketing/leads", label: "Comunicações", icon: MessageSquare },
   ];
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 flex-wrap border-b pb-2">
+      <div className="flex items-center gap-1.5 flex-wrap border-b pb-2">
         {tabs.map((t) => {
           const active = t.exact ? location.pathname === t.to : location.pathname.startsWith(t.to);
           const Icon = t.icon;
