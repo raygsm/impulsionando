@@ -180,6 +180,10 @@ function ModuleDetail() {
             </div>
           </Card>
         </TabsContent>
+
+        <TabsContent value="definicoes">
+          <SettingDefinitionsAdmin defaultCategory={m.slug} />
+        </TabsContent>
       </Tabs>
     </div>
   );
