@@ -14,7 +14,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   ShieldAlert,
   Boxes,
@@ -25,16 +34,23 @@ import {
   Eye,
   Plus,
   History,
+  Settings,
+  Archive,
+  CheckCircle2,
+  ExternalLink,
 } from "lucide-react";
 import {
   cloneStore,
   ensureSeedBases,
   PLANNED_MODULES,
+  PRESET_DETAILS,
+  NICHE_PRESETS,
   type ModuleBase,
   type CloneInstance,
   type CloneLog,
 } from "@/lib/cloneCentral";
 import { CloneWizard } from "@/components/admin/CloneWizard";
+import { AgendaConfigWizard } from "@/components/admin/AgendaConfigWizard";
 
 export const Route = createFileRoute("/_authenticated/admin/modulos/clonagem")({
   head: () => ({ meta: [{ title: "Clonagem de Módulos — Impulsionando" }] }),
@@ -53,6 +69,16 @@ function CloneCenterPage() {
   const [wizardBase, setWizardBase] = useState<ModuleBase | null>(null);
   const [detailBase, setDetailBase] = useState<ModuleBase | null>(null);
   const [logsBase, setLogsBase] = useState<ModuleBase | null>(null);
+  const [configInstance, setConfigInstance] = useState<CloneInstance | null>(null);
+  const [successInstanceId, setSuccessInstanceId] = useState<string | null>(null);
+
+  // Filtros Clones Criados
+  const [fModule, setFModule] = useState("all");
+  const [fEnv, setFEnv] = useState("all");
+  const [fStatus, setFStatus] = useState("all");
+  const [fNiche, setFNiche] = useState("all");
+  const [fSearch, setFSearch] = useState("");
+
 
   const isAllowed = !!me?.isSuperAdmin;
 
