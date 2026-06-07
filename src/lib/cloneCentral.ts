@@ -123,6 +123,22 @@ export interface CloneInstance {
   notes?: string;
   config?: AgendaInitialConfig;
   archived?: boolean;
+  archiveReason?: string;
+  archivedBy?: string;
+  archivedAt?: string;
+  // Versionamento — preparado para próxima fase técnica
+  versionBase?: string;
+  versionClone?: string;
+  updateAvailable?: boolean;
+  lastUpdateAt?: string;
+  lastSyncAt?: string;
+  versionStatus?: "atual" | "desatualizado" | "customizado";
+  compatibility?: "compativel" | "atencao" | "incompativel";
+  canReceiveBaseUpdate?: boolean;
+  hasLocalCustomization?: boolean;
+  allowAutoUpdate?: boolean;
+  requiresManualReview?: boolean;
+  changelog?: string[];
   createdAt: string;
 }
 
@@ -133,15 +149,30 @@ export interface CloneLog {
   action:
     | "criou-base"
     | "atualizou-base"
+    | "acesso-central"
+    | "abriu-wizard"
+    | "selecionou-base"
+    | "escolheu-ambiente"
+    | "escolheu-preset"
+    | "selecionou-integracoes"
+    | "confirmou-clonagem"
     | "clonou-demo"
     | "clonou-real"
+    | "falha-clonagem"
+    | "abriu-config"
     | "configurou"
+    | "acessou-clone"
     | "arquivou"
     | "duplicou"
     | "removeu"
-    | "tentativa-acesso-negado";
+    | "verificou-atualizacao"
+    | "reverteu-versao"
+    | "promoveu-melhoria"
+    | "tentativa-acesso-negado"
+    | "tentativa-acao-sem-permissao";
   detail: string;
   instanceId?: string;
+  status?: "iniciado" | "em-andamento" | "concluido" | "falhou" | "bloqueado" | "cancelado";
 }
 
 
