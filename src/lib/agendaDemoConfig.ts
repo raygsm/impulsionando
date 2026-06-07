@@ -116,6 +116,19 @@ export const AGENDA_PARAM_DEFS: AgendaParamDef[] = [
   { key: "integrarPagamentos", group: "Integrações", default: true, label: "Integrar com Pagamentos?", hint: "Cobranças, Pix, cartão (simulado em DEMO)." },
   { key: "integrarVoip", group: "Integrações", default: false, label: "Integrar com VoIP?", hint: "Permite acionar ligação a partir do agendamento." },
   { key: "integrarBi", group: "Integrações", default: true, label: "Integrar com BI?", hint: "Exporta dados para dashboards avançados." },
+  // 18.1 — Substituição automática de profissional
+  { key: "substAtiva", group: "Substituição de profissional", default: true, label: "Permitir substituição automática de profissional?", hint: "Quando um profissional cancelar a agenda, o sistema procura substitutos aptos automaticamente." },
+  { key: "substAvisoAuto", group: "Substituição de profissional", default: true, label: "Avisar profissionais compatíveis automaticamente?", hint: "Dispara WhatsApp/e-mail para todos os profissionais aptos no mesmo dia/horário." },
+  { key: "substPrimeiroAceitar", group: "Substituição de profissional", default: true, label: "Confirmar para o primeiro profissional que aceitar?", hint: "O primeiro aceite assume o horário; demais são avisados de que a vaga foi preenchida." },
+  { key: "substAprovacaoGestao", group: "Substituição de profissional", default: false, label: "Exigir aprovação da gestão antes da substituição?", hint: "Substituição só é efetivada após aprovação manual de um gestor." },
+  { key: "substAvisarCliente", group: "Substituição de profissional", default: true, label: "Avisar cliente/paciente sobre troca de profissional?", hint: "Envia comunicação informando que o atendimento será mantido com o novo profissional." },
+  { key: "substClienteRecusa", group: "Substituição de profissional", default: false, label: "Permitir que cliente recuse troca de profissional?", hint: "Cliente pode optar por aguardar o profissional original ou reagendar." },
+  { key: "substCancelarSemSub", group: "Substituição de profissional", default: false, label: "Cancelar horário se ninguém aceitar?", hint: "Após o prazo, o agendamento é cancelado automaticamente quando não há substituto." },
+  { key: "substFilaSemSub", group: "Substituição de profissional", default: true, label: "Enviar para fila de espera se ninguém aceitar?", hint: "Cliente vai para a fila de espera caso nenhum profissional assuma o horário." },
+  { key: "substTarefaSemSub", group: "Substituição de profissional", default: true, label: "Criar tarefa para recepção se ninguém aceitar?", hint: "Gera tarefa manual para a recepção tratar o caso." },
+  { key: "substHistAgendamento", group: "Substituição de profissional", default: true, label: "Registrar substituição no histórico do agendamento?", hint: "Mantém rastreabilidade da troca dentro do próprio agendamento." },
+  { key: "substHistOriginal", group: "Substituição de profissional", default: true, label: "Registrar substituição no histórico do profissional original?", hint: "Aparece no histórico do profissional que cancelou a agenda." },
+  { key: "substHistNovo", group: "Substituição de profissional", default: true, label: "Registrar substituição no histórico do novo profissional?", hint: "Aparece no histórico de quem assumiu o atendimento." },
 ];
 
 export type AgendaParams = Record<AgendaParamKey, boolean>;
