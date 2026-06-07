@@ -79,6 +79,9 @@ function CloneCenterPage() {
   const [fNiche, setFNiche] = useState("all");
   const [fSearch, setFSearch] = useState("");
   const [logsInstanceId, setLogsInstanceId] = useState<string | null>(null);
+  const [detailInstance, setDetailInstance] = useState<CloneInstance | null>(null);
+  const [archiveTarget, setArchiveTarget] = useState<CloneInstance | null>(null);
+  const [archiveReason, setArchiveReason] = useState("");
 
   const isAllowed = !!me?.isSuperAdmin;
 
