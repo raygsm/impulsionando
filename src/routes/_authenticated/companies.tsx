@@ -134,11 +134,25 @@ function CompaniesPage() {
                   {c.is_demo && <Badge variant="outline" className="ml-1">Demo</Badge>}
                 </TableCell>
                 <TableCell>
-                  {me?.isSuperAdmin && !c.is_master && (
-                    <Button size="icon" variant="ghost" aria-label={`Remover empresa ${c.name}`} onClick={() => confirm(`Remover ${c.name}?`) && remove.mutate(c.id)}>
-                      <Trash2 className="w-4 h-4 text-destructive" />
-                    </Button>
-                  )}
+                  <div className="flex items-center justify-end gap-1">
+                    {me?.isSuperAdmin && !c.is_master && c.is_active && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          startImpersonation({ companyId: c.id, companyName: c.name });
+                          navigate({ to: "/dashboard" });
+                        }}
+                      >
+                        <Eye className="w-3.5 h-3.5 mr-1" />Acessar
+                      </Button>
+                    )}
+                    {me?.isSuperAdmin && !c.is_master && (
+                      <Button size="icon" variant="ghost" aria-label={`Remover empresa ${c.name}`} onClick={() => confirm(`Remover ${c.name}?`) && remove.mutate(c.id)}>
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
