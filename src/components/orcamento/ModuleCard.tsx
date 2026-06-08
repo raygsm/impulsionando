@@ -14,26 +14,31 @@ interface ModuleCardProps {
   module: CatalogModule;
   selected: boolean;
   onToggle: () => void;
+  /** Quando definido, desabilita o card e mostra o motivo. */
+  lockReason?: string | null;
 }
 
-export function ModuleCard({ module, selected, onToggle }: ModuleCardProps) {
+export function ModuleCard({ module, selected, onToggle, lockReason }: ModuleCardProps) {
+  const locked = !!lockReason;
   return (
     <Card
       role="button"
-      tabIndex={0}
+      tabIndex={locked ? -1 : 0}
       aria-pressed={selected}
-      onClick={onToggle}
+      aria-disabled={locked}
+      onClick={() => { if (!locked) onToggle(); }}
       onKeyDown={(e) => {
+        if (locked) return;
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           onToggle();
         }
       }}
       className={cn(
-        "relative cursor-pointer p-5 transition-all hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-        selected
-          ? "border-primary bg-primary/5 shadow-sm"
-          : "border-border hover:border-primary/40",
+        "relative p-5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        locked
+          ? "opacity-60 cursor-not-allowed border-border"
+          : "cursor-pointer hover:shadow-md " + (selected ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary/40"),
       )}
     >
       <div className="flex items-start justify-between gap-3">
