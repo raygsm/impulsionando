@@ -161,6 +161,8 @@ export function ModulePicker({
                     {modules.map((mod) => {
                       const status = statusFor(mod.slug);
                       const isSelected = !!status;
+                      const locked = isLocked(mod.slug);
+                      const reason = lockReason(mod.slug);
                       const Icon = mod.icon;
                       return (
                         <Card
@@ -170,7 +172,8 @@ export function ModulePicker({
                             status === "incluído" &&
                               "border-primary ring-1 ring-primary/30 bg-primary/5",
                             status === "adicional" &&
-                              "border-amber-400 ring-1 ring-amber-300/50 bg-amber-50/40 dark:bg-amber-950/20"
+                              "border-amber-400 ring-1 ring-amber-300/50 bg-amber-50/40 dark:bg-amber-950/20",
+                            locked && "opacity-60",
                           )}
                         >
                           <div className="flex items-start gap-3">
@@ -178,12 +181,16 @@ export function ModulePicker({
                               id={`mod-${mod.slug}`}
                               checked={isSelected}
                               onCheckedChange={() => toggle(mod.slug)}
+                              disabled={locked}
                               aria-label={`Selecionar ${mod.shortName}`}
                             />
                             <div className="flex-1 min-w-0">
                               <label
                                 htmlFor={`mod-${mod.slug}`}
-                                className="flex items-center gap-2 font-medium text-sm cursor-pointer"
+                                className={cn(
+                                  "flex items-center gap-2 font-medium text-sm",
+                                  locked ? "cursor-not-allowed" : "cursor-pointer",
+                                )}
                               >
                                 <Icon className="w-4 h-4 text-primary shrink-0" />
                                 <span className="truncate">{mod.shortName}</span>
@@ -201,19 +208,20 @@ export function ModulePicker({
                             >
                               <Info className="w-3.5 h-3.5" /> Saiba mais
                             </button>
-                            {status === "incluído" && (
+                            {locked ? (
+                              <Badge variant="outline" className="text-[10px]">{reason}</Badge>
+                            ) : status === "incluído" ? (
                               <span className="inline-flex items-center gap-1 text-xs text-emerald-600">
                                 <CheckCircle2 className="w-3.5 h-3.5" /> Incluído
                               </span>
-                            )}
-                            {status === "adicional" && (
+                            ) : status === "adicional" ? (
                               <span className="inline-flex items-center gap-1 text-xs text-amber-700">
                                 <Plus className="w-3.5 h-3.5" /> Adicional
                                 {extraPriceCents
                                   ? ` · +${formatBRL(extraPriceCents)}/mês`
                                   : ""}
                               </span>
-                            )}
+                            ) : null}
                           </div>
                         </Card>
                       );
