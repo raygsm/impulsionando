@@ -1,78 +1,63 @@
+# Plano enxuto — Fases 3, 4, 5 e 6 da Fábrica de Projetos
 
-# Fase 2 + Fase 3 — Plano de execução enxuto (máximo reuso)
+## Diagnóstico antes de codar
 
-## Diagnóstico
-
-A maior parte do que a Fase 2 e a Fase 3 pedem **já existe** no projeto. Recriar é o que devo evitar.
-
-| Fase pedida | Já existe |
-|---|---|
-| Wizard "Criar Projeto" (etapas 1–7) | `/core/nova-implantacao` (prompt → análise → provisionamento async, com merge por CPF/CNPJ e ambiente DEMO/TESTE/REAL) |
-| Cadastro/seleção de cliente | tabela `companies` (34 colunas) + lógica de reuso já no wizard atual |
-| Escolha de template / clonagem / vazio | tabela `site_templates` + `/core/templates` (Fase 1) + `/admin/modulos/clonagem` |
-| Seleção de módulos | `/core/modulos` + `modules` + `company_modules` + `InstallModuleDialog` (instalação em 1 clique com `installModuleWithTemplate`) |
-| Preset por nicho | `src/data/moduleSegmentTemplates.ts` (`SEGMENT_LABELS`) — já consumido pelo `InstallModuleDialog` |
-| Configurações iniciais (SIM/NÃO) | `setting_definitions` + `company_settings` |
-| Permissões / automações / templates de mensagem / dashboard / logs | `permissions`, `message_templates`, `audit_logs`, `notifications` |
-| Logs do provisionamento | `ai_project_generations` (eventos + status em tempo real) + `audit_logs` |
-| Mocks DEMO vs REAL limpo | já isolados via `companies.environment` + rotas `/demo.*` |
-
-**Conclusão:** não preciso de novo wizard de 7 etapas nem de uma "Central de Instalação" inteira. Preciso de **2 orquestradores enxutos** que costuram o que já existe, mais um pouco de UI.
+| Fase | Status real | Ação |
+|---|---|---|
+| **Fase 3 — Central de Instalação + Assistente Pós-Instalação** | ✅ **Já entregue** na execução anterior: `core.instalar-modulo.tsx`, `InstallModuleDialog`, `core.cliente.$id.modulo.$slug.configurar.tsx`, `moduleAssistantSteps.ts` (8 passos da Agenda), status em `company_modules.status`, presets por nicho (`SEGMENT_LABELS`), `installModuleWithTemplate` (só estrutura, nunca dados reais). | **Não recriar.** Vou apenas confirmar no checklist final. |
+| **Fase 4 — Criador de Páginas / Templates / Prompts** | 🟡 Parcial: já existem `site_templates`, `ai_prompt_library`, `generated_pages` (tabelas + RLS), `/core/templates`, `/core/prompts`. Falta a **tela de geração por projeto** com variáveis, seções, "tentar sem Lovable primeiro". | **Construir aqui.** |
+| **Fase 5 — Blindagem / LGPD / Logs** | ✅ Em grande parte já existe: `is_impulsionando_staff`, `user_has_permission`, RLS em todas as tabelas, `audit_logs`, `lgpd_consents`, `data_deletion_requests`, `data_export_requests`, `customer_anonymize`, mascaramento de credenciais. | **Auditar e documentar**, não recriar. |
+| **Fase 6 — Checklist final** | — | **Entregar documento** consolidando o que existe e onde. |
 
 ## O que vou construir (deltas mínimos)
 
-### Delta 1 — Página "Criar Projeto" assistida (`/core/criar-projeto`)
-Wizard curto de **3 passos** que apenas orquestra peças existentes:
+### Delta A — Fase 4: Criador de Páginas por Projeto
+Uma rota nova: `/core/cliente/$id/paginas` que junta o que já existe:
+1. **Seletor de Template** — lista `site_templates` (já existe). Botão "Aplicar template" copia páginas para `generated_pages` do cliente.
+2. **Lista de páginas geradas** (`generated_pages` filtrado por `company_id`) — editar nome, slug, status.
+3. **Editor de página individual** (`/core/cliente/$id/paginas/$pageId`) com:
+   - campos: nome, slug, nicho, objetivo, prompt, variáveis (JSON), status
+   - botão **"Gerar sem Lovable"** → renderiza substituindo variáveis (`{{nome_cliente}}`, `{{nicho}}`, etc.) com dados de `companies` + módulos instalados, grava em `generated_pages.content`
+   - botão **"Copiar prompt para Lovable"** → quando template não cobre
+   - dropdown **"Reusar prompt salvo"** → lista `ai_prompt_library`, incrementa `usage_count`
+4. **Biblioteca de seções reutilizáveis** — arquivo declarativo `src/data/pageSections.ts` com 15 seções (Hero, Dor, Solução, Benefícios, Como funciona, Módulos, Demo, Depoimentos, Planos, FAQ, CTA WhatsApp, CTA Contratar, Rodapé, LGPD, Termos), cada uma com campos editáveis (título, subtítulo, texto, CTA, ativo, ordem). Renderizado no editor como lista drag/toggle.
+5. **Variáveis suportadas** declaradas em `src/data/pageVariables.ts` (lista das 13 variáveis do enunciado).
 
-1. **Cliente + Projeto** — formulário único com busca por CPF/CNPJ que reusa `companies` existentes (mesma lógica já implementada no `nova-implantacao`); campos: nome, fantasia, responsável, WhatsApp, email, documento, nicho, ambiente (DEMO/TESTE/REAL), domínio, status, observações.
-2. **Modelo + Módulos + Preset** — uma tela só: radio de modelo (Template / Clonar / Vazio / DEMO base / Módulo-base / Combinação), seleção múltipla de módulos (lista vinda de `modules`), preset por nicho (`SEGMENT_LABELS`), toggles SIM/NÃO de comunicação/dashboard/permissões/automações.
-3. **Revisão** — resumo + checkbox de confirmação + botão "Criar Projeto". Pós-criação: tela de sucesso com 5 botões (Acessar / Configurar módulos / Criar páginas / Ver logs / Voltar).
+**Server fns** (append em `factory.functions.ts`):
+- `applyTemplateToProject({ companyId, templateId })` — copia páginas do template para `generated_pages`.
+- `upsertGeneratedPage({ id?, companyId, name, slug, niche, objective, prompt, variables, status })`.
+- `renderPageFromTemplate({ pageId })` — substitui variáveis, popula `content`, grava log em `ai_project_generations`.
 
-O wizard chama UMA server fn nova `createProjectFromFactory` em `src/lib/factory.functions.ts` que:
-- cria/atualiza `companies` (com merge por documento);
-- para cada módulo selecionado, chama `installModuleWithTemplate` (já existe — instala estrutura + dependências + preset, NUNCA copia dados reais);
-- aplica toggles em `company_settings`;
-- grava `ai_project_generations` (status + events) para log/timeline;
-- registra entradas em `audit_logs`.
+### Delta B — Fase 6: Documento de auditoria final
+Arquivo `docs/FABRICA_PROJETOS.md` com:
+- mapa "onde fica cada coisa" (rotas + arquivos)
+- checklist de 34 itens da Fase 6, marcando cada um com ✅ + referência ao arquivo/rota responsável
+- passo a passo dos fluxos (criar cliente, instalar módulo, gerar página, quando recorrer ao Lovable)
 
-> Mantém `/core/nova-implantacao` como caminho "via prompt de IA". A nova rota é o caminho "sem IA, sem consumir crédito".
+### Delta C — Fase 5 (auditoria, sem código novo)
+No mesmo `FABRICA_PROJETOS.md`, seção "Blindagem": listo as garantias já existentes (RLS, `is_impulsionando_staff`, `user_has_permission`, `audit_logs`, LGPD, mascaramento). **Não recrio nada** — se algo faltar concretamente, abro como pendência no doc para tratarmos em iteração futura.
 
-### Delta 2 — "Instalar Módulo" no Cliente 360 (Fase 3)
-Não preciso de uma nova área. O `InstallModuleDialog` já instala em 1 clique com preset. Vou:
-- Adicionar uma rota leve `/core/instalar-modulo` (atalho a partir do menu) que apenas abre o mesmo dialog em modo "selecionar cliente + projeto + módulo + preset" e, depois de instalar, redireciona para um "Assistente de Configuração do Módulo Instalado".
-- Criar o **Assistente de configuração pós-instalação** (`/core/cliente/$id/modulo/$slug/configurar`) com 8 passos curtos (Identificação → Recursos → Permissões → Comunicação → Integrações → Automação → Dashboard → Finalização) — usa `setting_definitions` por módulo + toggles. Para o módulo **Agenda Online** (prioritário), os SIM/NÃO específicos (profissionais, serviços, salas, fila, no-show, lembrete 24h/2h, WhatsApp/email/VoIP) viram um preset declarativo em `src/data/moduleAssistantSteps.ts`.
-- Status do módulo instalado já existe em `company_modules.status` — só preciso pintar o badge (instalado / aguardando configuração / configurado / ativo / pausado / suspenso / arquivado / erro).
+## O que NÃO vou fazer
 
-### Delta 3 — Log/timeline visível
-Aproveito `ai_project_generations.events` (já gravado pelo wizard atual). Para o novo `createProjectFromFactory`, gravo no mesmo formato (`projeto_iniciado`, `cliente_criado`, `projeto_criado`, `template_aplicado`, `modulos_instalados`, `preset_aplicado`, `config_salva`, `projeto_concluido`, `erro`). A página de logs já existe.
+- ❌ Recriar Central de Instalação (já feita).
+- ❌ Recriar tabelas de templates/prompts/páginas (já existem).
+- ❌ Nova migration (tudo cabe nas tabelas atuais).
+- ❌ Recriar RLS / auth / LGPD (já blindado).
+- ❌ Mexer em `nova-implantacao`, demo, trial.
 
-### Delta 4 — Menu
-No `core.tsx`, adicionar 2 itens: **Criar Projeto** (`/core/criar-projeto`) e **Instalar Módulo** (`/core/instalar-modulo`). Sem novas seções/agrupamentos visuais.
-
-## O que NÃO vou fazer (e por quê)
-
-- ❌ Reescrever `/core/nova-implantacao` — ele é o caminho via IA e continua existindo.
-- ❌ Nova tabela `projects` — `companies` + `company_modules` já cobrem.
-- ❌ Nova tabela de logs — `ai_project_generations` + `audit_logs` cobrem.
-- ❌ Recriar `InstallModuleDialog`, `OnboardingWizard`, `ClientSettingsPanel` — todos reusados.
-- ❌ Nova lógica de "nunca copiar dados reais" — `installModuleWithTemplate` já é estrutural.
-- ❌ Mexer em DEMO/`/demo.*` ou trials.
-
-## Arquivos a criar / editar
+## Arquivos
 
 **Novos (4):**
-- `src/lib/factory.functions.ts` — adicionar `createProjectFromFactory` (append à existente)
-- `src/routes/_authenticated/core.criar-projeto.tsx` — wizard 3 passos
-- `src/routes/_authenticated/core.instalar-modulo.tsx` — atalho + escolha + dispara `InstallModuleDialog`
-- `src/routes/_authenticated/core.cliente.$id.modulo.$slug.configurar.tsx` — assistente pós-instalação
-- `src/data/moduleAssistantSteps.ts` — passos declarativos por módulo (Agenda primeiro)
+- `src/routes/_authenticated/core.cliente.$id.paginas.tsx` — lista + aplicar template
+- `src/routes/_authenticated/core.cliente.$id.paginas.$pageId.tsx` — editor de página
+- `src/data/pageSections.ts` — 15 seções declarativas
+- `src/data/pageVariables.ts` — 13 variáveis declarativas
+- `docs/FABRICA_PROJETOS.md` — entrega final (Fase 6)
 
-**Editados (1):**
-- `src/routes/_authenticated/core.tsx` — 2 itens no menu
+**Editados (2):**
+- `src/lib/factory.functions.ts` — 3 server fns appended
+- `src/routes/_authenticated/core.tsx` — link "Páginas do Projeto" no menu (opcional, já há `/core/templates` e `/core/prompts`)
 
-**Sem migration nova.** Tudo cabe nas tabelas atuais.
-
-## Estimativa
-1 server fn + 3 rotas novas + 1 patch de menu. Nada apagado. Nenhum módulo recriado.
+**Sem migration. Sem credito Lovable em runtime.**
 
 ## Confirma para eu executar?
