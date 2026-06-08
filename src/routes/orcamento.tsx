@@ -573,6 +573,30 @@ function StepSegmento({ state, dispatch }: StepProps) {
 function StepModulos({ state, dispatch }: StepProps) {
   const grouped = useMemo(() => modulesByCategory(), []);
   const updateFn = useServerFn(updateQuote);
+  const fetchAvailability = useServerFn(getCommercialAvailability);
+  const { data: availability } = useQuery({
+    queryKey: ["commercial-availability"],
+    queryFn: () => fetchAvailability(),
+    staleTime: 60_000,
+  });
+  const availableSet = useMemo(
+    () => (availability ? new Set(availability.availableModuleSlugs) : null),
+    [availability],
+  );
+
+  function lockReasonFor(motherSlug: string): string | null {
+    if (!availableSet) return null;
+    if (availableSet.has(motherSlug)) return null;
+    const s = availability?.moduleStatus?.[motherSlug];
+    if (!s) return "Indisponível para contratação";
+    if (s.status === "sob_consulta") return "Sob consulta";
+    if (s.status === "em_breve") return "Em breve";
+    if (s.status === "indisponivel_temporariamente") return "Indisponível temporariamente";
+    if (s.status === "exclusivo_interno") return "Exclusivo interno";
+    if (s.status === "exclusivo_white_label") return "Exclusivo White Label";
+    return "Indisponível para contratação";
+  }
+
 
   // Sincroniza módulos com banco em background
   const lastSyncedRef = useRef<string>("");
