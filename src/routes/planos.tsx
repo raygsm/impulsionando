@@ -537,6 +537,8 @@ function PlanosPage() {
           planSubtitle={picker.plan.tagline}
           initialSelected={pickedModules[picker.plan.name] ?? []}
           extraPriceCents={EXTRA_MODULE_BRL * 100}
+          availableSlugs={availability?.availableModuleSlugs}
+          moduleStatus={availability?.moduleStatus}
           confirmLabel="Continuar para o resumo da contratação"
           onConfirm={(slugs) => {
             const plan = picker.plan!;
