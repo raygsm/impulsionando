@@ -627,6 +627,7 @@ function StepModulos({ state, dispatch }: StepProps) {
               <ModuleCard
                 key={mod.slug} module={mod}
                 selected={state.selected.includes(mod.slug)}
+                lockReason={lockReasonFor(mod.motherSlug)}
                 onToggle={() => {
                   dispatch({ type: "TOGGLE_MODULE", slug: mod.slug });
                   const wasSelected = state.selected.includes(mod.slug);
