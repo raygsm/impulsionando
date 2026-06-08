@@ -39,7 +39,7 @@ export const runCommittee = createServerFn({ method: "POST" })
       user_id: userId,
     });
 
-    let responseJson: unknown = null;
+    let responseJson: Record<string, unknown> = {};
     let responseText = "";
     let httpStatus = 0;
     try {
@@ -51,23 +51,21 @@ export const runCommittee = createServerFn({ method: "POST" })
       httpStatus = res.status;
       responseText = await res.text();
       try {
-        responseJson = JSON.parse(responseText);
+        const parsed = JSON.parse(responseText);
+        responseJson = parsed && typeof parsed === "object" ? parsed : { value: parsed };
       } catch {
         responseJson = { raw: responseText };
       }
 
       if (!res.ok) throw new Error(`HTTP ${res.status}: ${responseText.slice(0, 300)}`);
 
-      const ok =
-        responseJson &&
-        typeof responseJson === "object" &&
-        (responseJson as Record<string, unknown>).status === "ok";
+      const ok = responseJson.status === "ok";
 
       await supabase.from("agent_outputs").insert({
         demand_id: demandId,
         agent_id: "n8n-comite",
         output_type: "webhook_response",
-        content: responseJson as Record<string, unknown>,
+        content: responseJson as never,
         is_final: !!ok,
       });
 
@@ -78,20 +76,26 @@ export const runCommittee = createServerFn({ method: "POST" })
       await supabase.from("agent_logs").insert({
         demand_id: demandId,
         event: ok ? "webhook.ok" : "webhook.received",
-        details: { httpStatus, response: responseJson },
+        details: { httpStatus, response: responseJson } as never,
         user_id: userId,
       });
 
-      return { ok: true, httpStatus, response: responseJson, finalStatus: ok ? "concluida" : "em_analise" };
+      return {
+        ok: true as const,
+        httpStatus,
+        response: responseJson,
+        finalStatus: ok ? "concluida" : "em_analise",
+      };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       await supabase.from("agent_demands").update({ status: "erro" }).eq("id", demandId);
       await supabase.from("agent_logs").insert({
         demand_id: demandId,
         event: "webhook.error",
-        details: { httpStatus, message, response: responseText },
+        details: { httpStatus, message, response: responseText } as never,
         user_id: userId,
       });
-      return { ok: false, httpStatus, error: message, finalStatus: "erro" as const };
+      return { ok: false as const, httpStatus, error: message, response: {}, finalStatus: "erro" };
     }
   });
+
