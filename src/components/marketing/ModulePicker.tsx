@@ -54,6 +54,8 @@ export function ModulePicker({
   extraPriceCents = 0,
   confirmLabel = "Continuar para o resumo da contratação",
   onConfirm,
+  availableSlugs,
+  moduleStatus,
 }: ModulePickerProps) {
   const [selected, setSelected] = useState<string[]>(initialSelected);
   const [detail, setDetail] = useState<MotherModule | null>(null);
