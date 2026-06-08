@@ -1055,10 +1055,10 @@ function StepPagamento({ state, dispatch, totals, onReset }: StepProps) {
 
 
   async function handleRequest() {
-    if (!state.quoteId) return;
+    if (!state.quoteId || !state.publicToken) return;
     setLoading(true);
     try {
-      await reqPaymentFn({ data: { id: state.quoteId } });
+      await reqPaymentFn({ data: { id: state.quoteId, publicToken: state.publicToken } });
       dispatch({ type: "SET", patch: { paymentRequested: true } });
       setRequested(true);
       toast.success("Solicitação registrada! Nossa equipe entra em contato em até 1 dia útil com o link de pagamento.");
