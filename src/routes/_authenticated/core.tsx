@@ -38,6 +38,8 @@ function CoreLayout() {
     { to: "/core/nova-implantacao", label: "Nova Implantação (IA)", icon: Sparkles },
     { to: "/core/implantacoes", label: "Implantações", icon: Rocket },
     { to: "/core/modulos", label: "Biblioteca de Módulos", icon: Boxes },
+    { to: "/core/templates", label: "Templates de Site", icon: Globe },
+    { to: "/core/prompts", label: "Prompts (IA)", icon: Sparkles },
     { to: "/admin/billing-policy", label: "Régua / Domínios", icon: Globe },
     { to: "/users", label: "Usuários", icon: Users },
     { to: "/permissions", label: "Permissões", icon: KeyRound },

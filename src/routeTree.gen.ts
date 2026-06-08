@@ -121,7 +121,9 @@ import { Route as AuthenticatedCrmLeadsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedCrmBoardRouteImport } from './routes/_authenticated/crm.board'
 import { Route as AuthenticatedCrmActivitiesRouteImport } from './routes/_authenticated/crm.activities'
 import { Route as AuthenticatedCoreTestesRouteImport } from './routes/_authenticated/core.testes'
+import { Route as AuthenticatedCoreTemplatesRouteImport } from './routes/_authenticated/core.templates'
 import { Route as AuthenticatedCoreSaudeRouteImport } from './routes/_authenticated/core.saude'
+import { Route as AuthenticatedCorePromptsRouteImport } from './routes/_authenticated/core.prompts'
 import { Route as AuthenticatedCoreParametrosRouteImport } from './routes/_authenticated/core.parametros'
 import { Route as AuthenticatedCoreNovaImplantacaoRouteImport } from './routes/_authenticated/core.nova-implantacao'
 import { Route as AuthenticatedCoreModulosRouteImport } from './routes/_authenticated/core.modulos'
@@ -765,11 +767,23 @@ const AuthenticatedCoreTestesRoute = AuthenticatedCoreTestesRouteImport.update({
   path: '/testes',
   getParentRoute: () => AuthenticatedCoreRoute,
 } as any)
+const AuthenticatedCoreTemplatesRoute =
+  AuthenticatedCoreTemplatesRouteImport.update({
+    id: '/templates',
+    path: '/templates',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreSaudeRoute = AuthenticatedCoreSaudeRouteImport.update({
   id: '/saude',
   path: '/saude',
   getParentRoute: () => AuthenticatedCoreRoute,
 } as any)
+const AuthenticatedCorePromptsRoute =
+  AuthenticatedCorePromptsRouteImport.update({
+    id: '/prompts',
+    path: '/prompts',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreParametrosRoute =
   AuthenticatedCoreParametrosRouteImport.update({
     id: '/parametros',
@@ -1224,7 +1238,9 @@ export interface FileRoutesByFullPath {
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/core/parametros': typeof AuthenticatedCoreParametrosRoute
+  '/core/prompts': typeof AuthenticatedCorePromptsRoute
   '/core/saude': typeof AuthenticatedCoreSaudeRoute
+  '/core/templates': typeof AuthenticatedCoreTemplatesRoute
   '/core/testes': typeof AuthenticatedCoreTestesRoute
   '/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/crm/board': typeof AuthenticatedCrmBoardRoute
@@ -1385,7 +1401,9 @@ export interface FileRoutesByTo {
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/core/parametros': typeof AuthenticatedCoreParametrosRoute
+  '/core/prompts': typeof AuthenticatedCorePromptsRoute
   '/core/saude': typeof AuthenticatedCoreSaudeRoute
+  '/core/templates': typeof AuthenticatedCoreTemplatesRoute
   '/core/testes': typeof AuthenticatedCoreTestesRoute
   '/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/crm/board': typeof AuthenticatedCrmBoardRoute
@@ -1559,7 +1577,9 @@ export interface FileRoutesById {
   '/_authenticated/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/_authenticated/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/_authenticated/core/parametros': typeof AuthenticatedCoreParametrosRoute
+  '/_authenticated/core/prompts': typeof AuthenticatedCorePromptsRoute
   '/_authenticated/core/saude': typeof AuthenticatedCoreSaudeRoute
+  '/_authenticated/core/templates': typeof AuthenticatedCoreTemplatesRoute
   '/_authenticated/core/testes': typeof AuthenticatedCoreTestesRoute
   '/_authenticated/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/_authenticated/crm/board': typeof AuthenticatedCrmBoardRoute
@@ -1733,7 +1753,9 @@ export interface FileRouteTypes {
     | '/core/modulos'
     | '/core/nova-implantacao'
     | '/core/parametros'
+    | '/core/prompts'
     | '/core/saude'
+    | '/core/templates'
     | '/core/testes'
     | '/crm/activities'
     | '/crm/board'
@@ -1894,7 +1916,9 @@ export interface FileRouteTypes {
     | '/core/modulos'
     | '/core/nova-implantacao'
     | '/core/parametros'
+    | '/core/prompts'
     | '/core/saude'
+    | '/core/templates'
     | '/core/testes'
     | '/crm/activities'
     | '/crm/board'
@@ -2067,7 +2091,9 @@ export interface FileRouteTypes {
     | '/_authenticated/core/modulos'
     | '/_authenticated/core/nova-implantacao'
     | '/_authenticated/core/parametros'
+    | '/_authenticated/core/prompts'
     | '/_authenticated/core/saude'
+    | '/_authenticated/core/templates'
     | '/_authenticated/core/testes'
     | '/_authenticated/crm/activities'
     | '/_authenticated/crm/board'
@@ -2982,11 +3008,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreTestesRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/templates': {
+      id: '/_authenticated/core/templates'
+      path: '/templates'
+      fullPath: '/core/templates'
+      preLoaderRoute: typeof AuthenticatedCoreTemplatesRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/saude': {
       id: '/_authenticated/core/saude'
       path: '/saude'
       fullPath: '/core/saude'
       preLoaderRoute: typeof AuthenticatedCoreSaudeRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/core/prompts': {
+      id: '/_authenticated/core/prompts'
+      path: '/prompts'
+      fullPath: '/core/prompts'
+      preLoaderRoute: typeof AuthenticatedCorePromptsRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
     '/_authenticated/core/parametros': {
@@ -3509,7 +3549,9 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreModulosRoute: typeof AuthenticatedCoreModulosRouteWithChildren
   AuthenticatedCoreNovaImplantacaoRoute: typeof AuthenticatedCoreNovaImplantacaoRoute
   AuthenticatedCoreParametrosRoute: typeof AuthenticatedCoreParametrosRoute
+  AuthenticatedCorePromptsRoute: typeof AuthenticatedCorePromptsRoute
   AuthenticatedCoreSaudeRoute: typeof AuthenticatedCoreSaudeRoute
+  AuthenticatedCoreTemplatesRoute: typeof AuthenticatedCoreTemplatesRoute
   AuthenticatedCoreTestesRoute: typeof AuthenticatedCoreTestesRoute
   AuthenticatedCoreIndexRoute: typeof AuthenticatedCoreIndexRoute
   AuthenticatedCoreClienteIdRoute: typeof AuthenticatedCoreClienteIdRoute
@@ -3524,7 +3566,9 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreModulosRoute: AuthenticatedCoreModulosRouteWithChildren,
   AuthenticatedCoreNovaImplantacaoRoute: AuthenticatedCoreNovaImplantacaoRoute,
   AuthenticatedCoreParametrosRoute: AuthenticatedCoreParametrosRoute,
+  AuthenticatedCorePromptsRoute: AuthenticatedCorePromptsRoute,
   AuthenticatedCoreSaudeRoute: AuthenticatedCoreSaudeRoute,
+  AuthenticatedCoreTemplatesRoute: AuthenticatedCoreTemplatesRoute,
   AuthenticatedCoreTestesRoute: AuthenticatedCoreTestesRoute,
   AuthenticatedCoreIndexRoute: AuthenticatedCoreIndexRoute,
   AuthenticatedCoreClienteIdRoute: AuthenticatedCoreClienteIdRoute,
@@ -3841,13 +3885,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -1,107 +1,70 @@
-# Core AI — Gerador Universal de Projetos por Prompt
+# Fábrica de Projetos — Auditoria + Plano de Deltas
 
-Adicionar ao Core Master um fluxo único de **"Criar Projeto por Prompt"** que recebe dados do cliente, prompt em linguagem natural e arquivos, usa IA para analisar e sugerir módulos/páginas/comunicações, e — após aprovação humana — provisiona o cliente inteiro reusando o que já existe.
+## 1. O que JÁ existe (não será recriado)
 
-## Princípio de reuso (zero retrabalho)
-
-| Já existe | Vou reusar |
+| Necessidade do prompt | Já existe em |
 |---|---|
-| `provisioning.functions.ts` (criação de empresa) | sim, sem alterar |
-| `governance.functions.ts → cloneCompany` | sim, para template inicial |
-| `modules.functions.ts → installModule` | sim, para aplicar módulos sugeridos |
-| `moduleSegmentTemplates.ts` | sim, IA escolhe o template |
-| `communicationEvents.ts` (catálogo de 18 eventos) | sim |
-| Trigger `tg_notify_welcome` + `enqueue_message('user_welcome')` | sim — usuário master já recebe boas-vindas automaticamente |
-| Tabela `onboarding_checklist` | sim, gera checklist final |
-| `companies` (logo, cores, identidade) | sim, IA preenche |
-| Lovable AI Gateway (`LOVABLE_API_KEY`) + `google/gemini-3-flash-preview` | sim |
+| Área interna restrita à equipe | `/core` (rota `_authenticated/core.tsx`) — gate `isImpulsionandoStaff` |
+| Entidade Cliente | tabela `companies` (33 colunas, com segment/owner/document/branding) |
+| Entidade Projeto / Implantação | `companies` + `onboarding_checklist` + `onboarding_domain_requests` |
+| Módulo-base | tabela `modules` + `module_versions` |
+| Módulo instalado | tabela `company_modules` |
+| Biblioteca de módulos | `/core/modulos` + `/core/modulos/$slug` |
+| Implantações | `/core/implantacoes` |
+| Clonagem de módulos | `/admin/modulos/clonagem` |
+| Wizard "Novo projeto com IA" | `/core/nova-implantacao` (prompt → análise → provisionamento async) |
+| Cliente 360 | `/core/clientes` + `/core/cliente/$id` |
+| Parâmetros globais | `/core/parametros` + `setting_definitions` |
+| Templates de mensagem | `message_templates` |
+| Saúde / Testes / Eventos | `/core/saude`, `/core/testes`, `/core/eventos` |
+| Trials / Demo | `trial_subscriptions` + rotas `/demo.*` |
 
-**Não vou criar:** novos módulos, novas páginas públicas, novos componentes de comunicação, novos triggers.
+**Conclusão:** a "Fábrica de Projetos" descrita é, em ~80%, o `/core` atual + `/core/nova-implantacao`. Não há motivo para criar uma área nova nem nova rota `/admin/fabrica-projetos`.
 
-## Entregáveis (mínimo necessário)
+## 2. O que FALTA (deltas mínimos)
 
-### 1. Banco — 2 tabelas + 1 bucket
+### Delta A — Ambiente DEMO/TESTE/REAL explícito por projeto
+- Hoje: existem trials, demo público (`/demo.*`) e clientes reais, mas não há um **flag único** em `companies` separando os três.
+- Add: coluna `companies.environment` enum `('demo','teste','real')` default `'real'`; preencher por backfill (trials→demo, master→real, demais→real).
+- Filtros por ambiente em `/core/clientes` e `/core/implantacoes` (somente UI).
+- `core.nova-implantacao` já pergunta o tipo na etapa 2 — só passar a gravar nessa coluna.
 
-```sql
--- Histórico de gerações por IA
-CREATE TABLE public.ai_project_generations (
-  id uuid PK, company_id uuid NULL,
-  prompt text, client_data jsonb, project_data jsonb,
-  uploaded_files jsonb,        -- [{path, type, size}]
-  ai_analysis jsonb,           -- saída do modelo (segmento, módulos, páginas, comunicações)
-  status text,                 -- 'rascunho' | 'analisado' | 'aprovado' | 'provisionado' | 'cancelado'
-  created_by uuid, approved_by uuid, approved_at, provisioned_at,
-  created_at, updated_at
-);
+### Delta B — Templates de front-end (catálogo reutilizável)
+- Nova tabela `site_templates` (nome, nicho, descrição, páginas[], seções[], cores, status).
+- Tela `/core/templates` (CRUD restrito a staff) para cadastrar/clonar templates.
+- `core.nova-implantacao` passa a sugerir e aplicar `site_template_id` quando a IA escolhe um template existente — se não houver, segue como hoje.
 
--- Linha por arquivo (FK -> generation)
-CREATE TABLE public.ai_project_files (
-  id uuid PK, generation_id uuid FK,
-  kind text,                   -- 'logo' | 'institucional' | 'apoio'
-  bucket_path text, mime_type text, size_bytes int, created_at
-);
-```
+### Delta C — Prompts salvos (biblioteca reutilizável)
+- Nova tabela `ai_prompt_library` (nome, categoria, nicho, finalidade, prompt, variables jsonb, version, created_by).
+- Tela `/core/prompts` (CRUD staff).
+- Botão "Carregar prompt salvo" na etapa 3 do wizard `nova-implantacao`.
+- Botão "Salvar este prompt" após uma análise bem-sucedida.
 
-GRANTs + RLS: super-admin e staff Impulsionando podem ler/escrever; ninguém mais.
+### Delta D — Páginas geradas (rastreio do output)
+- Nova tabela `generated_pages` (company_id, generation_id, template_id, name, slug, content jsonb, prompt_used, status).
+- Já produzimos páginas no provisionamento; só falta persistir o output para reuso/edição.
+- Aba "Páginas geradas" em `/core/cliente/$id`.
 
-Bucket privado `ai-project-uploads` (RLS na storage.objects: só staff Impulsionando).
+### Delta E — Renomear o agrupamento de menu
+- No `core.tsx`, adicionar uma seção "Fábrica de Projetos" agrupando os itens já existentes (Nova Implantação, Templates, Prompts, Biblioteca de Módulos, Clonagem, Implantações). Apenas reordenação visual.
 
-### 2. Server functions — `src/lib/ai-generator.functions.ts` (NOVA)
+## 3. O que NÃO será feito (e por quê)
 
-| Função | O que faz |
-|---|---|
-| `analyzeProjectPrompt` | Chama Lovable AI Gateway (`generateText` + `Output.object` Zod) → devolve `{segmento, modulos_sugeridos[], paginas_sugeridas[], comunicacoes[], identidade_sugerida}` |
-| `saveDraftGeneration` | Persiste rascunho em `ai_project_generations` + linhas em `ai_project_files` |
-| `approveAndProvision` | Reusa `cloneCompany`/`createCompany` existente + `installModule` por módulo sugerido + `enqueue_message('user_welcome')` (já automático via trigger) + popula `onboarding_checklist` |
-| `listGenerationHistory` | Lista para a aba Histórico |
+- ❌ Nova rota `/admin/fabrica-projetos` — duplicaria `/core`.
+- ❌ Nova tabela `clients` / `projects` — `companies` já cobre ambos.
+- ❌ Reescrita do wizard — o atual já faz prompt → análise → provisionamento async com merge de duplicados.
+- ❌ Nova autenticação / permissões — o gate `isImpulsionandoStaff` já existe em `core.tsx`.
+- ❌ Mexer em DEMO/`/demo.*` ou trials — já isolados.
 
-A IA **só sugere dentro do catálogo `modules` certificado**. O system prompt recebe a lista de slugs disponíveis e o JSON Schema restringe `modulos_sugeridos[]` a esse enum.
+## 4. Ordem de execução
 
-### 3. UI — 1 nova rota com wizard
+1. Migration única: `companies.environment` + `site_templates` + `ai_prompt_library` + `generated_pages` (com GRANTs e RLS staff-only).
+2. Server fns em `src/lib/factory.functions.ts` (CRUD templates/prompts; salvar página gerada).
+3. UI: `/core/templates`, `/core/prompts` (listas + formulário simples reutilizando `Card`/`Input`/`Button`).
+4. Patch leve em `core.nova-implantacao.tsx`: carregar prompt salvo, salvar prompt, gravar `environment`, persistir páginas no fim do provisionamento.
+5. Patch leve em `core.cliente.$id.tsx`: aba "Páginas geradas".
+6. Patch em `core.tsx`: subgrupo visual "Fábrica de Projetos".
 
-`src/routes/_authenticated/core.nova-implantacao.tsx` (NOVA)
+Total estimado: **1 migration + 1 server-fn file + 2 rotas novas + 3 patches leves**. Nenhum arquivo existente é apagado.
 
-Wizard de 5 etapas em um único componente:
-
-1. **Cliente** — formulário com validação Zod (CPF/CNPJ, e-mail, WhatsApp, CEP)
-2. **Projeto** — nome, subdomínio, domínio, segmento, cidade, estado
-3. **Prompt** — Textarea grande
-4. **Uploads** — 3 dropzones (logo / institucionais / apoio) → upload para bucket
-5. **Análise + Aprovação** — botão "Analisar Projeto" chama `analyzeProjectPrompt`, mostra resumo (cliente, projeto, módulos, páginas, comunicações), 3 botões: **Aprovar e Criar** / **Editar Prompt** / **Cancelar**
-
-Após aprovação → chama `approveAndProvision` → exibe checklist com ✅ por item.
-
-### 4. Atalho no menu
-
-Em `core.tsx` adicionar item "Nova Implantação por IA" apontando para `/core/nova-implantacao`. **Não removo** nada existente.
-
-## Limites honestos do que a IA realmente faz
-
-- ✅ **Analisa** o prompt e sugere segmento, módulos, páginas, comunicações, identidade
-- ✅ **Provisiona** o cliente: cria empresa, instala módulos certificados, ativa comunicações, cria usuário master, dispara boas-vindas
-- ✅ **Aplica identidade visual** (logo, cores) lendo arquivos enviados — cor primária via análise do logo
-- ⚠️ **NÃO gera código novo de páginas públicas.** "Home / Quem Somos / Serviços / FAQ" são entregues como **conteúdo editável** dentro do módulo `area_cliente`/site institucional já existente — não como rotas TanStack novas (isso exigiria Lovable).
-- ⚠️ A geração de **subdomínio próprio (`cliente.impulsionando.com.br`)** é registrada em `onboarding_domain_requests` (tabela já existente) para o DNS ser configurado manualmente fora do escopo deste recurso.
-
-Estas duas ressalvas são honestas e estão alinhadas com a arquitetura atual; o restante do prompt é entregue 100%.
-
-## Detalhes técnicos
-
-- **AI Gateway:** padrão de `connecting-to-ai-models-tanstack` + `ai-sdk-lovable-gateway`. Helper já não existe; criar `src/lib/ai-gateway.server.ts` (único arquivo server-only, ~30 linhas). Modelo: `google/gemini-3-flash-preview`. Saída estruturada via `Output.object` (Zod).
-- **Uploads:** `supabase.storage.from('ai-project-uploads').upload(...)` direto do browser (autenticado como super-admin); paths gravados em `ai_project_files`.
-- **Multipart na chamada de IA:** IA recebe apenas o **prompt + tipos de arquivos enviados** (não os bytes); arquivos grandes ficam no bucket para uso posterior pela equipe na edição de identidade.
-- **Aprovação obrigatória:** `approveAndProvision` só roda após o usuário clicar "Aprovar e Criar" — nunca dispara automaticamente.
-- **Auditoria:** cada provisionamento grava em `audit_logs` (`action='ai_provision'`) com `ai_project_generations.id` para rastreabilidade.
-
-## O que NÃO vou fazer (anti-escopo)
-
-- Criar novas rotas públicas dinâmicas para o site do cliente final
-- Criar novos componentes de página (Home/FAQ/etc.) como rotas TanStack
-- Criar novo provedor de DNS automático
-- Alterar `tg_notify_welcome`, `enqueue_message`, ou qualquer trigger existente
-- Mexer em RLS/permissões fora das 2 tabelas novas
-- Adicionar dependências npm — `ai` e `@ai-sdk/openai-compatible` se ainda não estiverem, são as únicas
-
-## Resultado final
-
-Super-admin abre `/core/nova-implantacao`, cola um prompt como o exemplo da Patrícia Lenine, anexa logo, clica em "Analisar Projeto", revisa o resumo, clica em "Aprovar e Criar" → em <30s o cliente está provisionado, com módulos certificados instalados, identidade aplicada, usuário master criado, boas-vindas enviadas, checklist preenchido — sem voltar ao Lovable.
+## Confirma este plano antes de executar?
