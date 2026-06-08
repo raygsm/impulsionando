@@ -1751,6 +1751,54 @@ export type Database = {
           },
         ]
       }
+      ai_prompt_library: {
+        Row: {
+          category: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          niche: string | null
+          prompt: string
+          purpose: string | null
+          status: string
+          updated_at: string
+          usage_count: number
+          variables: Json
+          version: number
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          niche?: string | null
+          prompt: string
+          purpose?: string | null
+          status?: string
+          updated_at?: string
+          usage_count?: number
+          variables?: Json
+          version?: number
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          niche?: string | null
+          prompt?: string
+          purpose?: string | null
+          status?: string
+          updated_at?: string
+          usage_count?: number
+          variables?: Json
+          version?: number
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
@@ -2148,6 +2196,7 @@ export type Database = {
           document: string | null
           domain: string | null
           email: string | null
+          environment: Database["public"]["Enums"]["company_environment"]
           facebook: string | null
           financial_email: string | null
           id: string
@@ -2183,6 +2232,7 @@ export type Database = {
           document?: string | null
           domain?: string | null
           email?: string | null
+          environment?: Database["public"]["Enums"]["company_environment"]
           facebook?: string | null
           financial_email?: string | null
           id?: string
@@ -2218,6 +2268,7 @@ export type Database = {
           document?: string | null
           domain?: string | null
           email?: string | null
+          environment?: Database["public"]["Enums"]["company_environment"]
           facebook?: string | null
           financial_email?: string | null
           id?: string
@@ -3652,6 +3703,73 @@ export type Database = {
             columns: ["unit_id"]
             isOneToOne: false
             referencedRelation: "company_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      generated_pages: {
+        Row: {
+          company_id: string | null
+          content: Json
+          created_at: string
+          created_by: string | null
+          generation_id: string | null
+          id: string
+          name: string
+          prompt_used: string | null
+          slug: string
+          status: string
+          template_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          content?: Json
+          created_at?: string
+          created_by?: string | null
+          generation_id?: string | null
+          id?: string
+          name: string
+          prompt_used?: string | null
+          slug: string
+          status?: string
+          template_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          content?: Json
+          created_at?: string
+          created_by?: string | null
+          generation_id?: string | null
+          id?: string
+          name?: string
+          prompt_used?: string | null
+          slug?: string
+          status?: string
+          template_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_pages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "generated_pages_generation_id_fkey"
+            columns: ["generation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_project_generations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "generated_pages_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "site_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -5299,6 +5417,51 @@ export type Database = {
         }
         Relationships: []
       }
+      site_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          default_colors: Json
+          description: string | null
+          id: string
+          name: string
+          niche: string | null
+          pages: Json
+          sections: Json
+          slug: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          default_colors?: Json
+          description?: string | null
+          id?: string
+          name: string
+          niche?: string | null
+          pages?: Json
+          sections?: Json
+          slug: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          default_colors?: Json
+          description?: string | null
+          id?: string
+          name?: string
+          niche?: string | null
+          pages?: Json
+          sections?: Json
+          slug?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           cancel_at_period_end: boolean | null
@@ -6101,6 +6264,7 @@ export type Database = {
         | "estornado"
         | "chargeback"
         | "bloqueado"
+      company_environment: "demo" | "teste" | "real"
       trial_plan_choice: "essencial" | "integrado" | "avancado" | "sob_medida"
       trial_status:
         | "solicitado"
@@ -6295,6 +6459,7 @@ export const Constants = {
         "chargeback",
         "bloqueado",
       ],
+      company_environment: ["demo", "teste", "real"],
       trial_plan_choice: ["essencial", "integrado", "avancado", "sob_medida"],
       trial_status: [
         "solicitado",
