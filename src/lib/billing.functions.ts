@@ -226,7 +226,7 @@ export const updateMasterPlan = createServerFn({ method: "POST" })
     }
     if (Object.keys(patch).length === 0) return { ok: true, changed: 0 };
 
-    const { error } = await supabaseAdmin.from("billing_plans").update(patch).eq("id", data.id);
+    const { error } = await supabaseAdmin.from("billing_plans").update(patch as never).eq("id", data.id);
     if (error) throw new Error(error.message);
 
     await supabaseAdmin.from("audit_logs").insert({
