@@ -91,6 +91,67 @@ function clientIp(req: Request): string | null {
   );
 }
 
+/**
+ * Valida que todos os slugs do catálogo informados correspondem a módulos
+ * com `status_comercial = 'disponivel_contratacao'` (e `is_active`,
+ * `show_in_checkout`). Lança erro com a lista de slugs indisponíveis.
+ *
+ * Cada slug do catálogo é mapeado para `motherSlug`, que é o slug do
+ * registro em `public.modules`.
+ */
+async function assertModulesAvailable(catalogSlugs: string[]): Promise<void> {
+  if (!catalogSlugs.length) return;
+
+  const catalogBySlug = new Map(CATALOG_MODULES.map((m) => [m.slug, m]));
+  const unknown: string[] = [];
+  const motherSlugs = new Set<string>();
+  for (const slug of catalogSlugs) {
+    const mod = catalogBySlug.get(slug);
+    if (!mod) {
+      unknown.push(slug);
+      continue;
+    }
+    motherSlugs.add(mod.motherSlug);
+  }
+  if (unknown.length) {
+    throw new Error(`Módulos desconhecidos: ${unknown.join(", ")}`);
+  }
+
+  const supabase = await getAdmin();
+  const { data, error } = await supabase
+    .from("modules")
+    .select("slug, status_comercial, is_active, show_in_checkout")
+    .in("slug", Array.from(motherSlugs));
+
+  if (error) {
+    throw new Error(`Falha ao validar disponibilidade comercial: ${error.message}`);
+  }
+
+  const availableMotherSlugs = new Set(
+    (data ?? [])
+      .filter(
+        (r) =>
+          r.is_active &&
+          r.show_in_checkout &&
+          r.status_comercial === "disponivel_contratacao",
+      )
+      .map((r) => r.slug as string),
+  );
+
+  const unavailable = catalogSlugs.filter((slug) => {
+    const m = catalogBySlug.get(slug);
+    return !m || !availableMotherSlugs.has(m.motherSlug);
+  });
+
+  if (unavailable.length) {
+    const names = unavailable.map((s) => catalogBySlug.get(s)?.name ?? s).join(", ");
+    throw new Error(
+      `Os seguintes módulos não estão disponíveis para contratação no momento: ${names}.`,
+    );
+  }
+}
+
+
 /* --------------------------- Server fns --------------------------- */
 
 /** Cria orçamento (etapa 1 do wizard, após preencher lead). */
