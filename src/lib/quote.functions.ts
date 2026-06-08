@@ -129,11 +129,11 @@ export const createQuote = createServerFn({ method: "POST" })
     const { data: row, error } = await supabase
       .from("quotes")
       .insert(insertRow)
-      .select("id, quote_number")
+      .select("id, quote_number, public_token")
       .single();
 
     if (error) throw new Error(`Não foi possível salvar o orçamento: ${error.message}`);
-    return { id: row.id, quoteNumber: row.quote_number };
+    return { id: row.id, quoteNumber: row.quote_number, publicToken: (row as { public_token: string }).public_token };
   });
 
 /** Atualiza módulos/empresa/segmento do orçamento durante o wizard. */
@@ -161,8 +161,15 @@ export const updateQuote = createServerFn({ method: "POST" })
     if (data.segment !== undefined) update.segment = data.segment;
     if (data.status) update.status = data.status;
 
-    const { error } = await supabase.from("quotes").update(update as never).eq("id", data.id);
+    const { data: updated, error } = await supabase
+      .from("quotes")
+      .update(update as never)
+      .eq("id", data.id)
+      .eq("public_token", data.publicToken)
+      .select("id")
+      .maybeSingle();
     if (error) throw new Error(`Não foi possível atualizar o orçamento: ${error.message}`);
+    if (!updated) throw new Error("Token inválido ou orçamento não encontrado.");
     return { ok: true };
   });
 
@@ -172,7 +179,7 @@ export const acceptQuote = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const supabase = await getAdmin();
 
-    const { error } = await supabase
+    const { data: updated, error } = await supabase
       .from("quotes")
       .update({
         accepted_at: new Date().toISOString(),
@@ -180,21 +187,31 @@ export const acceptQuote = createServerFn({ method: "POST" })
         accepted_terms: data.terms,
         status: "accepted",
       } as never)
-      .eq("id", data.id);
+      .eq("id", data.id)
+      .eq("public_token", data.publicToken)
+      .is("accepted_at", null)
+      .select("id, accepted_at")
+      .maybeSingle();
 
     if (error) throw new Error(`Não foi possível registrar o aceite: ${error.message}`);
-    return { ok: true, acceptedAt: new Date().toISOString() };
+    if (!updated) throw new Error("Token inválido, orçamento já aceito ou inexistente.");
+    return { ok: true, acceptedAt: (updated as { accepted_at: string }).accepted_at };
   });
 
 /** Marca como "pagamento solicitado" — usado quando o lead clica em pagar. */
 export const requestPayment = createServerFn({ method: "POST" })
-  .inputValidator((data) => z.object({ id: z.string().uuid() }).parse(data))
+  .inputValidator((data) => requestPaymentSchema.parse(data))
   .handler(async ({ data }) => {
     const supabase = await getAdmin();
-    const { error } = await supabase
+    const { data: updated, error } = await supabase
       .from("quotes")
       .update({ status: "payment_requested" })
-      .eq("id", data.id);
+      .eq("id", data.id)
+      .eq("public_token", data.publicToken)
+      .eq("status", "accepted")
+      .select("id")
+      .maybeSingle();
     if (error) throw new Error(error.message);
+    if (!updated) throw new Error("Token inválido ou aceite ainda não registrado.");
     return { ok: true };
   });
