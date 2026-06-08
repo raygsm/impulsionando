@@ -156,3 +156,129 @@ export const listBillingPlans = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return { plans: data ?? [] };
   });
+
+/* ============================================================
+ * GESTÃO MASTER DE PLANOS — Comercial
+ * ============================================================ */
+
+const PlanCommercialSchema = z.object({
+  id: z.string().uuid(),
+  status_comercial: z.enum(PLAN_STATUS_COMERCIAL_VALUES).optional(),
+  name: z.string().min(1).max(200).optional(),
+  description: z.string().max(2000).nullable().optional(),
+  recurring_amount: z.number().min(0).max(10_000_000).optional(),
+  setup_fee: z.number().min(0).max(10_000_000).optional(),
+  min_contract_days: z.number().int().min(0).max(3650).optional(),
+  min_installments: z.number().int().min(0).max(120).optional(),
+  included_module_count: z.number().int().min(0).max(100).optional(),
+  extra_module_price: z.number().min(0).max(1_000_000).optional(),
+  discount_percent: z.number().min(0).max(100).optional(),
+  show_on_site: z.boolean().optional(),
+  show_in_checkout: z.boolean().optional(),
+  allow_direct_checkout: z.boolean().optional(),
+  route_to_quote: z.boolean().optional(),
+  route_to_whatsapp: z.boolean().optional(),
+  cta: z.string().max(120).nullable().optional(),
+  legal_text: z.string().max(2000).nullable().optional(),
+  internal_notes: z.string().max(4000).nullable().optional(),
+  is_active: z.boolean().optional(),
+  sort_order: z.number().int().min(0).max(9999).optional(),
+});
+
+export const listMasterPlans = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data: staff } = await supabase.rpc("is_impulsionando_staff", { _user: userId });
+    if (!staff) throw new Error("Apenas equipe Impulsionando.");
+    const { data, error } = await supabaseAdmin
+      .from("billing_plans")
+      .select("*")
+      .order("sort_order")
+      .order("recurring_amount");
+    if (error) throw new Error(error.message);
+    return { plans: data ?? [] };
+  });
+
+export const updateMasterPlan = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => PlanCommercialSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: staff } = await supabase.rpc("is_impulsionando_staff", { _user: userId });
+    if (!staff) throw new Error("Apenas equipe Impulsionando.");
+
+    const { data: before } = await supabaseAdmin
+      .from("billing_plans")
+      .select("*")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (!before) throw new Error("Plano não encontrado");
+
+    const patch: Record<string, unknown> = {};
+    const beforeLog: Record<string, unknown> = {};
+    const afterLog: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(data)) {
+      if (k === "id" || v === undefined) continue;
+      patch[k] = v;
+      beforeLog[k] = (before as never as Record<string, unknown>)[k] ?? null;
+      afterLog[k] = v;
+    }
+    if (Object.keys(patch).length === 0) return { ok: true, changed: 0 };
+
+    const { error } = await supabaseAdmin.from("billing_plans").update(patch).eq("id", data.id);
+    if (error) throw new Error(error.message);
+
+    await supabaseAdmin.from("audit_logs").insert({
+      action: "plan.commercial.updated",
+      entity: "billing_plans",
+      entity_id: data.id,
+      before: beforeLog,
+      after: afterLog,
+    } as never);
+
+    return { ok: true, changed: Object.keys(patch).length };
+  });
+
+/* ============================================================
+ * MÓDULOS PARA FINALIZAÇÃO COMERCIAL — Lista priorizada
+ * ============================================================ */
+
+export const listModulesPendingCommercialization = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data: staff } = await supabase.rpc("is_impulsionando_staff", { _user: userId });
+    if (!staff) throw new Error("Apenas equipe Impulsionando.");
+
+    const { data: modules, error } = await supabaseAdmin
+      .from("modules")
+      .select("id, slug, name, description, status_tecnico, status_comercial, monthly_price, setup_fee, min_contract_days, min_installments, show_on_site, show_in_checkout, show_in_plans, show_price, allow_standalone, cta_primary, commercial_url, readiness_status, readiness_checklist, demo_url, docs_url")
+      .eq("is_active", true)
+      .order("name");
+    if (error) throw new Error(error.message);
+
+    const rows = (modules ?? []).map((m: any) => {
+      const checks = [
+        { key: "status_tecnico_ok", label: "Status técnico definido", ok: !!m.status_tecnico && m.status_tecnico !== "rascunho" },
+        { key: "status_comercial_ok", label: "Status comercial definido", ok: !!m.status_comercial && m.status_comercial !== "oculto" },
+        { key: "monthly_price", label: "Mensalidade definida", ok: Number(m.monthly_price ?? 0) > 0 },
+        { key: "setup_fee", label: "Setup definido", ok: Number(m.setup_fee ?? 0) >= 0 && m.setup_fee !== null },
+        { key: "min_contract", label: "Contrato mínimo definido", ok: Number(m.min_contract_days ?? 0) > 0 },
+        { key: "min_installments", label: "Mensalidades obrigatórias", ok: Number(m.min_installments ?? 0) > 0 },
+        { key: "description", label: "Descrição comercial", ok: !!m.description && m.description.length > 20 },
+        { key: "cta_primary", label: "CTA principal", ok: !!m.cta_primary },
+        { key: "commercial_url", label: "URL comercial", ok: !!m.commercial_url },
+        { key: "show_on_site", label: "Visível no site", ok: !!m.show_on_site },
+        { key: "demo_url", label: "Demonstração configurada", ok: !!m.demo_url },
+        { key: "docs_url", label: "Documentação configurada", ok: !!m.docs_url },
+      ];
+      const done = checks.filter((c) => c.ok).length;
+      const ready = done === checks.length;
+      return { ...m, checks, done, total: checks.length, ready };
+    });
+
+    const pending = rows.filter((r) => !r.ready).sort((a, b) => b.done - a.done);
+    const ready = rows.filter((r) => r.ready);
+    return { pending, ready, total: rows.length };
+  });
