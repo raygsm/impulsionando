@@ -98,7 +98,7 @@ export const upsertPrompt = createServerFn({ method: "POST" })
       niche: data.niche ?? null,
       purpose: data.purpose ?? null,
       prompt: data.prompt,
-      variables: data.variables ?? {},
+      variables: (data.variables ?? {}) as never,
       status: data.status ?? "active",
       created_by: context.userId,
     };
