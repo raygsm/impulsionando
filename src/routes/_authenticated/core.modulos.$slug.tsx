@@ -97,11 +97,16 @@ function ModuleDetail() {
       <Tabs defaultValue="visao">
         <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="visao">Visão geral</TabsTrigger>
+          <TabsTrigger value="comercial">Comercial</TabsTrigger>
           <TabsTrigger value="certificacao">Certificação</TabsTrigger>
           <TabsTrigger value="versoes">Versões</TabsTrigger>
           <TabsTrigger value="instalacoes">Instalações</TabsTrigger>
           <TabsTrigger value="definicoes">Definições</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="comercial">
+          <ModuleCommercialPanel module={m as never} />
+        </TabsContent>
 
         <TabsContent value="visao">
           <Card className="p-4">
