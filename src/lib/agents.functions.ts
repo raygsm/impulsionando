@@ -83,7 +83,7 @@ export const runCommittee = createServerFn({ method: "POST" })
       return {
         ok: true as const,
         httpStatus,
-        response: responseJson,
+        responseJson: JSON.stringify(responseJson),
         finalStatus: ok ? "concluida" : "em_analise",
       };
     } catch (err) {
@@ -95,7 +95,8 @@ export const runCommittee = createServerFn({ method: "POST" })
         details: { httpStatus, message, response: responseText } as never,
         user_id: userId,
       });
-      return { ok: false as const, httpStatus, error: message, response: {}, finalStatus: "erro" };
+      return { ok: false as const, httpStatus, error: message, responseJson: "{}", finalStatus: "erro" };
     }
   });
+
 
