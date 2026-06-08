@@ -173,6 +173,13 @@ function PlanosPage() {
   const [annual, setAnnual] = useState(false);
   const { openCheckout, loading: checkoutLoading } = usePaddleCheckout();
   const { data: user } = useCurrentUser();
+  const fetchAvailability = useServerFn(getCommercialAvailability);
+  const { data: availability } = useQuery({
+    queryKey: ["commercial-availability"],
+    queryFn: () => fetchAvailability(),
+    staleTime: 60_000,
+  });
+
   const [pixState, setPixState] = useState<{
     open: boolean;
     amountCents: number;
