@@ -6070,6 +6070,7 @@ export type Database = {
     }
     Functions: {
       _trial_norm: { Args: { _v: string }; Returns: string }
+      assert_billing_finance_rls: { Args: never; Returns: undefined }
       billing_check_company_status: {
         Args: { _company: string }
         Returns: {
