@@ -205,6 +205,9 @@ export const createQuote = createServerFn({ method: "POST" })
 export const updateQuote = createServerFn({ method: "POST" })
   .inputValidator((data) => updateQuoteSchema.parse(data))
   .handler(async ({ data }) => {
+    if (data.modules) {
+      await assertModulesAvailable(data.modules);
+    }
     const supabase = await getAdmin();
     const update: Record<string, unknown> = {};
 
@@ -217,6 +220,7 @@ export const updateQuote = createServerFn({ method: "POST" })
       update.setup_cents = totals.setupCents;
       update.total_cents = totals.totalCents;
     }
+
     if (data.company) {
       update.company_name = data.company.companyName ?? null;
       update.company_tax_id = data.company.companyTaxId ?? null;
