@@ -131,6 +131,7 @@ import { Route as AuthenticatedCoreModulosRouteImport } from './routes/_authenti
 import { Route as AuthenticatedCoreInstalarModuloRouteImport } from './routes/_authenticated/core.instalar-modulo'
 import { Route as AuthenticatedCoreImplantacoesRouteImport } from './routes/_authenticated/core.implantacoes'
 import { Route as AuthenticatedCoreFinanceiroMasterRouteImport } from './routes/_authenticated/core.financeiro-master'
+import { Route as AuthenticatedCoreFinalizacaoComercialRouteImport } from './routes/_authenticated/core.finalizacao-comercial'
 import { Route as AuthenticatedCoreEventosRouteImport } from './routes/_authenticated/core.eventos'
 import { Route as AuthenticatedCoreCriarProjetoRouteImport } from './routes/_authenticated/core.criar-projeto'
 import { Route as AuthenticatedCoreClientesRouteImport } from './routes/_authenticated/core.clientes'
@@ -831,6 +832,12 @@ const AuthenticatedCoreFinanceiroMasterRoute =
     path: '/financeiro-master',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreFinalizacaoComercialRoute =
+  AuthenticatedCoreFinalizacaoComercialRouteImport.update({
+    id: '/finalizacao-comercial',
+    path: '/finalizacao-comercial',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreEventosRoute =
   AuthenticatedCoreEventosRouteImport.update({
     id: '/eventos',
@@ -1275,6 +1282,7 @@ export interface FileRoutesByFullPath {
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
+  '/core/finalizacao-comercial': typeof AuthenticatedCoreFinalizacaoComercialRoute
   '/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
@@ -1444,6 +1452,7 @@ export interface FileRoutesByTo {
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
+  '/core/finalizacao-comercial': typeof AuthenticatedCoreFinalizacaoComercialRoute
   '/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
@@ -1626,6 +1635,7 @@ export interface FileRoutesById {
   '/_authenticated/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/_authenticated/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
   '/_authenticated/core/eventos': typeof AuthenticatedCoreEventosRoute
+  '/_authenticated/core/finalizacao-comercial': typeof AuthenticatedCoreFinalizacaoComercialRoute
   '/_authenticated/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/_authenticated/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/_authenticated/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
@@ -1808,6 +1818,7 @@ export interface FileRouteTypes {
     | '/core/clientes'
     | '/core/criar-projeto'
     | '/core/eventos'
+    | '/core/finalizacao-comercial'
     | '/core/financeiro-master'
     | '/core/implantacoes'
     | '/core/instalar-modulo'
@@ -1977,6 +1988,7 @@ export interface FileRouteTypes {
     | '/core/clientes'
     | '/core/criar-projeto'
     | '/core/eventos'
+    | '/core/finalizacao-comercial'
     | '/core/financeiro-master'
     | '/core/implantacoes'
     | '/core/instalar-modulo'
@@ -2158,6 +2170,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/clientes'
     | '/_authenticated/core/criar-projeto'
     | '/_authenticated/core/eventos'
+    | '/_authenticated/core/finalizacao-comercial'
     | '/_authenticated/core/financeiro-master'
     | '/_authenticated/core/implantacoes'
     | '/_authenticated/core/instalar-modulo'
@@ -3155,6 +3168,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreFinanceiroMasterRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/finalizacao-comercial': {
+      id: '/_authenticated/core/finalizacao-comercial'
+      path: '/finalizacao-comercial'
+      fullPath: '/core/finalizacao-comercial'
+      preLoaderRoute: typeof AuthenticatedCoreFinalizacaoComercialRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/eventos': {
       id: '/_authenticated/core/eventos'
       path: '/eventos'
@@ -3697,6 +3717,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreClientesRoute: typeof AuthenticatedCoreClientesRoute
   AuthenticatedCoreCriarProjetoRoute: typeof AuthenticatedCoreCriarProjetoRoute
   AuthenticatedCoreEventosRoute: typeof AuthenticatedCoreEventosRoute
+  AuthenticatedCoreFinalizacaoComercialRoute: typeof AuthenticatedCoreFinalizacaoComercialRoute
   AuthenticatedCoreFinanceiroMasterRoute: typeof AuthenticatedCoreFinanceiroMasterRoute
   AuthenticatedCoreImplantacoesRoute: typeof AuthenticatedCoreImplantacoesRoute
   AuthenticatedCoreInstalarModuloRoute: typeof AuthenticatedCoreInstalarModuloRoute
@@ -3716,6 +3737,8 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreClientesRoute: AuthenticatedCoreClientesRoute,
   AuthenticatedCoreCriarProjetoRoute: AuthenticatedCoreCriarProjetoRoute,
   AuthenticatedCoreEventosRoute: AuthenticatedCoreEventosRoute,
+  AuthenticatedCoreFinalizacaoComercialRoute:
+    AuthenticatedCoreFinalizacaoComercialRoute,
   AuthenticatedCoreFinanceiroMasterRoute:
     AuthenticatedCoreFinanceiroMasterRoute,
   AuthenticatedCoreImplantacoesRoute: AuthenticatedCoreImplantacoesRoute,
