@@ -423,3 +423,152 @@ export const saveModuleAssistantSettings = createServerFn({ method: "POST" })
     } as never);
     return { ok: true };
   });
+
+// ============ Fase 4: Criador de Páginas / Templates por Projeto ============
+export const applyTemplateToProject = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { companyId: string; templateId: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: tpl, error: tplErr } = await supabase
+      .from("site_templates")
+      .select("id, name, slug, niche, pages, sections, default_colors")
+      .eq("id", data.templateId)
+      .single();
+    if (tplErr || !tpl) throw new Error(`Template não encontrado: ${tplErr?.message ?? ""}`);
+
+    const pages = Array.isArray(tpl.pages) ? (tpl.pages as Array<Record<string, unknown> | string>) : [];
+    const created: string[] = [];
+    for (const p of pages) {
+      const isStr = typeof p === "string";
+      const name = isStr ? (p as string) : String((p as Record<string, unknown>).name ?? (p as Record<string, unknown>).slug ?? "Página");
+      const slug = isStr
+        ? (p as string).toLowerCase().replace(/[^a-z0-9]+/g, "-")
+        : String((p as Record<string, unknown>).slug ?? name.toLowerCase().replace(/[^a-z0-9]+/g, "-"));
+      const { data: row } = await supabase
+        .from("generated_pages")
+        .insert({
+          company_id: data.companyId,
+          template_id: tpl.id,
+          name,
+          slug,
+          content: {
+            sections: tpl.sections ?? [],
+            colors: tpl.default_colors ?? {},
+          } as never,
+          status: "draft",
+          created_by: userId,
+        } as never)
+        .select("id")
+        .single();
+      if (row) created.push((row as { id: string }).id);
+    }
+
+    await supabase.from("audit_logs").insert({
+      action: "factory.pages.template_applied",
+      entity: "generated_pages",
+      entity_id: data.companyId,
+      after: { template: tpl.slug, pages: created.length } as never,
+    } as never);
+
+    return { created };
+  });
+
+export const upsertGeneratedPage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: {
+    id?: string;
+    companyId: string;
+    name: string;
+    slug: string;
+    content?: unknown;
+    promptUsed?: string | null;
+    status?: string;
+    templateId?: string | null;
+  }) => d)
+  .handler(async ({ data, context }) => {
+    const payload = {
+      company_id: data.companyId,
+      name: data.name,
+      slug: data.slug,
+      content: (data.content ?? {}) as never,
+      prompt_used: data.promptUsed ?? null,
+      status: data.status ?? "draft",
+      template_id: data.templateId ?? null,
+      created_by: context.userId,
+    };
+    if (data.id) {
+      const { error } = await context.supabase
+        .from("generated_pages")
+        .update(payload as never)
+        .eq("id", data.id);
+      if (error) throw new Error(error.message);
+      return { id: data.id };
+    }
+    const { data: row, error } = await context.supabase
+      .from("generated_pages")
+      .insert(payload as never)
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    return { id: (row as { id: string }).id };
+  });
+
+export const deleteGeneratedPage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("generated_pages").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const getGeneratedPage = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { data: row, error } = await context.supabase
+      .from("generated_pages")
+      .select("*")
+      .eq("id", data.id)
+      .single();
+    if (error) throw new Error(error.message);
+    return { page: row };
+  });
+
+export const getProjectVariables = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { companyId: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { data: c } = await context.supabase
+      .from("companies")
+      .select("name, trade_name, segment, whatsapp, email, domain, primary_color, address_city")
+      .eq("id", data.companyId)
+      .maybeSingle();
+    const { data: mods } = await context.supabase
+      .from("company_modules")
+      .select("modules(name, slug)")
+      .eq("company_id", data.companyId)
+      .eq("is_enabled", true);
+    const moduleNames = (mods ?? [])
+      .map((r) => (r as { modules: { name: string } | null }).modules?.name)
+      .filter(Boolean)
+      .join(", ");
+    return {
+      variables: {
+        nome_cliente: c?.trade_name || c?.name || "",
+        nome_projeto: c?.name || "",
+        nicho: c?.segment || "",
+        cidade: c?.address_city || "",
+        whatsapp: c?.whatsapp || "",
+        email: c?.email || "",
+        modulos: moduleNames,
+        cta_principal: "Fale conosco",
+        dominio: c?.domain || "",
+        cor_principal: c?.primary_color || "#0ea5e9",
+        servicos: "",
+        beneficios: "",
+        diferenciais: "",
+      } as Record<string, string>,
+    };
+  });

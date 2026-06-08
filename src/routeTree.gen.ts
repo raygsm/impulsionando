@@ -184,6 +184,8 @@ import { Route as AuthenticatedCoreModulosSlugRouteImport } from './routes/_auth
 import { Route as AuthenticatedCoreClienteIdRouteImport } from './routes/_authenticated/core.cliente.$id'
 import { Route as AuthenticatedAdminModulosClonagemRouteImport } from './routes/_authenticated/admin.modulos.clonagem'
 import { Route as ApiPublicPaymentsInfinitepayWebhookRouteImport } from './routes/api/public/payments/infinitepay.webhook'
+import { Route as AuthenticatedCoreClienteIdPaginasRouteImport } from './routes/_authenticated/core.cliente.$id.paginas'
+import { Route as AuthenticatedCoreClienteIdPaginasPageIdRouteImport } from './routes/_authenticated/core.cliente.$id.paginas.$pageId'
 import { Route as AuthenticatedCoreClienteIdModuloSlugConfigurarRouteImport } from './routes/_authenticated/core.cliente.$id.modulo.$slug.configurar'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
@@ -1140,6 +1142,18 @@ const ApiPublicPaymentsInfinitepayWebhookRoute =
     path: '/api/public/payments/infinitepay/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedCoreClienteIdPaginasRoute =
+  AuthenticatedCoreClienteIdPaginasRouteImport.update({
+    id: '/paginas',
+    path: '/paginas',
+    getParentRoute: () => AuthenticatedCoreClienteIdRoute,
+  } as any)
+const AuthenticatedCoreClienteIdPaginasPageIdRoute =
+  AuthenticatedCoreClienteIdPaginasPageIdRouteImport.update({
+    id: '/$pageId',
+    path: '/$pageId',
+    getParentRoute: () => AuthenticatedCoreClienteIdPaginasRoute,
+  } as any)
 const AuthenticatedCoreClienteIdModuloSlugConfigurarRoute =
   AuthenticatedCoreClienteIdModuloSlugConfigurarRouteImport.update({
     id: '/modulo/$slug/configurar',
@@ -1321,7 +1335,9 @@ export interface FileRoutesByFullPath {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
   '/api/public/payments/infinitepay/webhook': typeof ApiPublicPaymentsInfinitepayWebhookRoute
+  '/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
 }
 export interface FileRoutesByTo {
@@ -1487,7 +1503,9 @@ export interface FileRoutesByTo {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
   '/api/public/payments/infinitepay/webhook': typeof ApiPublicPaymentsInfinitepayWebhookRoute
+  '/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
 }
 export interface FileRoutesById {
@@ -1666,7 +1684,9 @@ export interface FileRoutesById {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/_authenticated/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
   '/api/public/payments/infinitepay/webhook': typeof ApiPublicPaymentsInfinitepayWebhookRoute
+  '/_authenticated/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/_authenticated/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
 }
 export interface FileRouteTypes {
@@ -1845,7 +1865,9 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/core/cliente/$id/paginas'
     | '/api/public/payments/infinitepay/webhook'
+    | '/core/cliente/$id/paginas/$pageId'
     | '/core/cliente/$id/modulo/$slug/configurar'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -2011,7 +2033,9 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/core/cliente/$id/paginas'
     | '/api/public/payments/infinitepay/webhook'
+    | '/core/cliente/$id/paginas/$pageId'
     | '/core/cliente/$id/modulo/$slug/configurar'
   id:
     | '__root__'
@@ -2189,7 +2213,9 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/_authenticated/core/cliente/$id/paginas'
     | '/api/public/payments/infinitepay/webhook'
+    | '/_authenticated/core/cliente/$id/paginas/$pageId'
     | '/_authenticated/core/cliente/$id/modulo/$slug/configurar'
   fileRoutesById: FileRoutesById
 }
@@ -3488,6 +3514,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsInfinitepayWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/core/cliente/$id/paginas': {
+      id: '/_authenticated/core/cliente/$id/paginas'
+      path: '/paginas'
+      fullPath: '/core/cliente/$id/paginas'
+      preLoaderRoute: typeof AuthenticatedCoreClienteIdPaginasRouteImport
+      parentRoute: typeof AuthenticatedCoreClienteIdRoute
+    }
+    '/_authenticated/core/cliente/$id/paginas/$pageId': {
+      id: '/_authenticated/core/cliente/$id/paginas/$pageId'
+      path: '/$pageId'
+      fullPath: '/core/cliente/$id/paginas/$pageId'
+      preLoaderRoute: typeof AuthenticatedCoreClienteIdPaginasPageIdRouteImport
+      parentRoute: typeof AuthenticatedCoreClienteIdPaginasRoute
+    }
     '/_authenticated/core/cliente/$id/modulo/$slug/configurar': {
       id: '/_authenticated/core/cliente/$id/modulo/$slug/configurar'
       path: '/modulo/$slug/configurar'
@@ -3601,12 +3641,30 @@ const AuthenticatedCoreModulosRouteWithChildren =
     AuthenticatedCoreModulosRouteChildren,
   )
 
+interface AuthenticatedCoreClienteIdPaginasRouteChildren {
+  AuthenticatedCoreClienteIdPaginasPageIdRoute: typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
+}
+
+const AuthenticatedCoreClienteIdPaginasRouteChildren: AuthenticatedCoreClienteIdPaginasRouteChildren =
+  {
+    AuthenticatedCoreClienteIdPaginasPageIdRoute:
+      AuthenticatedCoreClienteIdPaginasPageIdRoute,
+  }
+
+const AuthenticatedCoreClienteIdPaginasRouteWithChildren =
+  AuthenticatedCoreClienteIdPaginasRoute._addFileChildren(
+    AuthenticatedCoreClienteIdPaginasRouteChildren,
+  )
+
 interface AuthenticatedCoreClienteIdRouteChildren {
+  AuthenticatedCoreClienteIdPaginasRoute: typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
   AuthenticatedCoreClienteIdModuloSlugConfigurarRoute: typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
 }
 
 const AuthenticatedCoreClienteIdRouteChildren: AuthenticatedCoreClienteIdRouteChildren =
   {
+    AuthenticatedCoreClienteIdPaginasRoute:
+      AuthenticatedCoreClienteIdPaginasRouteWithChildren,
     AuthenticatedCoreClienteIdModuloSlugConfigurarRoute:
       AuthenticatedCoreClienteIdModuloSlugConfigurarRoute,
   }
