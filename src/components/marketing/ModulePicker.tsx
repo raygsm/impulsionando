@@ -301,14 +301,17 @@ export function ModulePicker({
                   Fechar
                 </Button>
                 <Button
+                  disabled={isLocked(detail.slug)}
                   onClick={() => {
                     if (!selected.includes(detail.slug)) toggle(detail.slug);
                     setDetail(null);
                   }}
                 >
-                  {selected.includes(detail.slug)
-                    ? "Já selecionado"
-                    : "Selecionar este módulo"}
+                  {isLocked(detail.slug)
+                    ? (lockReason(detail.slug) ?? "Indisponível")
+                    : selected.includes(detail.slug)
+                      ? "Já selecionado"
+                      : "Selecionar este módulo"}
                 </Button>
               </div>
             </>
