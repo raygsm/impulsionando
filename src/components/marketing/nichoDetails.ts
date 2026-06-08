@@ -7,7 +7,9 @@ import {
   ShoppingBag,
   Building2,
   Dumbbell,
+  Home,
 } from "lucide-react";
+
 import type { ComponentType } from "react";
 
 export interface NichoDetail {
