@@ -110,6 +110,7 @@ import { Route as AuthenticatedInventorySuppliersRouteImport } from './routes/_a
 import { Route as AuthenticatedInventoryProductsRouteImport } from './routes/_authenticated/inventory.products'
 import { Route as AuthenticatedInventoryMovementsRouteImport } from './routes/_authenticated/inventory.movements'
 import { Route as AuthenticatedInventoryCategoriesRouteImport } from './routes/_authenticated/inventory.categories'
+import { Route as AuthenticatedImobiliariaModulosRouteImport } from './routes/_authenticated/imobiliaria.modulos'
 import { Route as AuthenticatedImobiliariaMatchesRouteImport } from './routes/_authenticated/imobiliaria.matches'
 import { Route as AuthenticatedImobiliariaIntencoesRouteImport } from './routes/_authenticated/imobiliaria.intencoes'
 import { Route as AuthenticatedImobiliariaImoveisRouteImport } from './routes/_authenticated/imobiliaria.imoveis'
@@ -714,6 +715,12 @@ const AuthenticatedInventoryCategoriesRoute =
     id: '/categories',
     path: '/categories',
     getParentRoute: () => AuthenticatedInventoryRoute,
+  } as any)
+const AuthenticatedImobiliariaModulosRoute =
+  AuthenticatedImobiliariaModulosRouteImport.update({
+    id: '/imobiliaria/modulos',
+    path: '/imobiliaria/modulos',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedImobiliariaMatchesRoute =
   AuthenticatedImobiliariaMatchesRouteImport.update({
@@ -1328,6 +1335,7 @@ export interface FileRoutesByFullPath {
   '/imobiliaria/imoveis': typeof AuthenticatedImobiliariaImoveisRoute
   '/imobiliaria/intencoes': typeof AuthenticatedImobiliariaIntencoesRoute
   '/imobiliaria/matches': typeof AuthenticatedImobiliariaMatchesRoute
+  '/imobiliaria/modulos': typeof AuthenticatedImobiliariaModulosRoute
   '/inventory/categories': typeof AuthenticatedInventoryCategoriesRoute
   '/inventory/movements': typeof AuthenticatedInventoryMovementsRoute
   '/inventory/products': typeof AuthenticatedInventoryProductsRoute
@@ -1501,6 +1509,7 @@ export interface FileRoutesByTo {
   '/imobiliaria/imoveis': typeof AuthenticatedImobiliariaImoveisRoute
   '/imobiliaria/intencoes': typeof AuthenticatedImobiliariaIntencoesRoute
   '/imobiliaria/matches': typeof AuthenticatedImobiliariaMatchesRoute
+  '/imobiliaria/modulos': typeof AuthenticatedImobiliariaModulosRoute
   '/inventory/categories': typeof AuthenticatedInventoryCategoriesRoute
   '/inventory/movements': typeof AuthenticatedInventoryMovementsRoute
   '/inventory/products': typeof AuthenticatedInventoryProductsRoute
@@ -1687,6 +1696,7 @@ export interface FileRoutesById {
   '/_authenticated/imobiliaria/imoveis': typeof AuthenticatedImobiliariaImoveisRoute
   '/_authenticated/imobiliaria/intencoes': typeof AuthenticatedImobiliariaIntencoesRoute
   '/_authenticated/imobiliaria/matches': typeof AuthenticatedImobiliariaMatchesRoute
+  '/_authenticated/imobiliaria/modulos': typeof AuthenticatedImobiliariaModulosRoute
   '/_authenticated/inventory/categories': typeof AuthenticatedInventoryCategoriesRoute
   '/_authenticated/inventory/movements': typeof AuthenticatedInventoryMovementsRoute
   '/_authenticated/inventory/products': typeof AuthenticatedInventoryProductsRoute
@@ -1873,6 +1883,7 @@ export interface FileRouteTypes {
     | '/imobiliaria/imoveis'
     | '/imobiliaria/intencoes'
     | '/imobiliaria/matches'
+    | '/imobiliaria/modulos'
     | '/inventory/categories'
     | '/inventory/movements'
     | '/inventory/products'
@@ -2046,6 +2057,7 @@ export interface FileRouteTypes {
     | '/imobiliaria/imoveis'
     | '/imobiliaria/intencoes'
     | '/imobiliaria/matches'
+    | '/imobiliaria/modulos'
     | '/inventory/categories'
     | '/inventory/movements'
     | '/inventory/products'
@@ -2231,6 +2243,7 @@ export interface FileRouteTypes {
     | '/_authenticated/imobiliaria/imoveis'
     | '/_authenticated/imobiliaria/intencoes'
     | '/_authenticated/imobiliaria/matches'
+    | '/_authenticated/imobiliaria/modulos'
     | '/_authenticated/inventory/categories'
     | '/_authenticated/inventory/movements'
     | '/_authenticated/inventory/products'
@@ -3059,6 +3072,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/inventory/categories'
       preLoaderRoute: typeof AuthenticatedInventoryCategoriesRouteImport
       parentRoute: typeof AuthenticatedInventoryRoute
+    }
+    '/_authenticated/imobiliaria/modulos': {
+      id: '/_authenticated/imobiliaria/modulos'
+      path: '/imobiliaria/modulos'
+      fullPath: '/imobiliaria/modulos'
+      preLoaderRoute: typeof AuthenticatedImobiliariaModulosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/imobiliaria/matches': {
       id: '/_authenticated/imobiliaria/matches'
@@ -3969,6 +3989,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedImobiliariaImoveisRoute: typeof AuthenticatedImobiliariaImoveisRoute
   AuthenticatedImobiliariaIntencoesRoute: typeof AuthenticatedImobiliariaIntencoesRoute
   AuthenticatedImobiliariaMatchesRoute: typeof AuthenticatedImobiliariaMatchesRoute
+  AuthenticatedImobiliariaModulosRoute: typeof AuthenticatedImobiliariaModulosRoute
   AuthenticatedMarketingLeadsRoute: typeof AuthenticatedMarketingLeadsRoute
   AuthenticatedEhrIndexRoute: typeof AuthenticatedEhrIndexRoute
   AuthenticatedAdminModulosClonagemRoute: typeof AuthenticatedAdminModulosClonagemRoute
@@ -4012,6 +4033,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedImobiliariaIntencoesRoute:
     AuthenticatedImobiliariaIntencoesRoute,
   AuthenticatedImobiliariaMatchesRoute: AuthenticatedImobiliariaMatchesRoute,
+  AuthenticatedImobiliariaModulosRoute: AuthenticatedImobiliariaModulosRoute,
   AuthenticatedMarketingLeadsRoute: AuthenticatedMarketingLeadsRoute,
   AuthenticatedEhrIndexRoute: AuthenticatedEhrIndexRoute,
   AuthenticatedAdminModulosClonagemRoute:

@@ -80,6 +80,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/imobiliaria/imoveis", label: "Imóveis", icon: Home },
       { to: "/imobiliaria/intencoes", label: "Intenções de busca", icon: SearchIcon },
       { to: "/imobiliaria/matches", label: "Matches", icon: Zap },
+      { to: "/imobiliaria/modulos", label: "Módulos do nicho", icon: Boxes },
     ],
   },
   {
