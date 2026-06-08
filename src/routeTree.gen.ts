@@ -130,6 +130,7 @@ import { Route as AuthenticatedCoreModulosRouteImport } from './routes/_authenti
 import { Route as AuthenticatedCoreImplantacoesRouteImport } from './routes/_authenticated/core.implantacoes'
 import { Route as AuthenticatedCoreFinanceiroMasterRouteImport } from './routes/_authenticated/core.financeiro-master'
 import { Route as AuthenticatedCoreEventosRouteImport } from './routes/_authenticated/core.eventos'
+import { Route as AuthenticatedCoreCriarProjetoRouteImport } from './routes/_authenticated/core.criar-projeto'
 import { Route as AuthenticatedCoreClientesRouteImport } from './routes/_authenticated/core.clientes'
 import { Route as AuthenticatedBiNichesRouteImport } from './routes/_authenticated/bi.niches'
 import { Route as AuthenticatedBiMasterRouteImport } from './routes/_authenticated/bi.master'
@@ -820,6 +821,12 @@ const AuthenticatedCoreEventosRoute =
     path: '/eventos',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreCriarProjetoRoute =
+  AuthenticatedCoreCriarProjetoRouteImport.update({
+    id: '/criar-projeto',
+    path: '/criar-projeto',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreClientesRoute =
   AuthenticatedCoreClientesRouteImport.update({
     id: '/clientes',
@@ -1232,6 +1239,7 @@ export interface FileRoutesByFullPath {
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
+  '/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
@@ -1395,6 +1403,7 @@ export interface FileRoutesByTo {
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
+  '/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
@@ -1571,6 +1580,7 @@ export interface FileRoutesById {
   '/_authenticated/bi/master': typeof AuthenticatedBiMasterRoute
   '/_authenticated/bi/niches': typeof AuthenticatedBiNichesRoute
   '/_authenticated/core/clientes': typeof AuthenticatedCoreClientesRoute
+  '/_authenticated/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
   '/_authenticated/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/_authenticated/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/_authenticated/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
@@ -1747,6 +1757,7 @@ export interface FileRouteTypes {
     | '/bi/master'
     | '/bi/niches'
     | '/core/clientes'
+    | '/core/criar-projeto'
     | '/core/eventos'
     | '/core/financeiro-master'
     | '/core/implantacoes'
@@ -1910,6 +1921,7 @@ export interface FileRouteTypes {
     | '/bi/master'
     | '/bi/niches'
     | '/core/clientes'
+    | '/core/criar-projeto'
     | '/core/eventos'
     | '/core/financeiro-master'
     | '/core/implantacoes'
@@ -2085,6 +2097,7 @@ export interface FileRouteTypes {
     | '/_authenticated/bi/master'
     | '/_authenticated/bi/niches'
     | '/_authenticated/core/clientes'
+    | '/_authenticated/core/criar-projeto'
     | '/_authenticated/core/eventos'
     | '/_authenticated/core/financeiro-master'
     | '/_authenticated/core/implantacoes'
@@ -3071,6 +3084,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreEventosRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/criar-projeto': {
+      id: '/_authenticated/core/criar-projeto'
+      path: '/criar-projeto'
+      fullPath: '/core/criar-projeto'
+      preLoaderRoute: typeof AuthenticatedCoreCriarProjetoRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/clientes': {
       id: '/_authenticated/core/clientes'
       path: '/clientes'
@@ -3543,6 +3563,7 @@ const AuthenticatedCoreModulosRouteWithChildren =
 
 interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreClientesRoute: typeof AuthenticatedCoreClientesRoute
+  AuthenticatedCoreCriarProjetoRoute: typeof AuthenticatedCoreCriarProjetoRoute
   AuthenticatedCoreEventosRoute: typeof AuthenticatedCoreEventosRoute
   AuthenticatedCoreFinanceiroMasterRoute: typeof AuthenticatedCoreFinanceiroMasterRoute
   AuthenticatedCoreImplantacoesRoute: typeof AuthenticatedCoreImplantacoesRoute
@@ -3559,6 +3580,7 @@ interface AuthenticatedCoreRouteChildren {
 
 const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreClientesRoute: AuthenticatedCoreClientesRoute,
+  AuthenticatedCoreCriarProjetoRoute: AuthenticatedCoreCriarProjetoRoute,
   AuthenticatedCoreEventosRoute: AuthenticatedCoreEventosRoute,
   AuthenticatedCoreFinanceiroMasterRoute:
     AuthenticatedCoreFinanceiroMasterRoute,
