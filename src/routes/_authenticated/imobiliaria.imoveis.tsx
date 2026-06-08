@@ -160,7 +160,7 @@ function Page() {
       <PageHeader
         title="Imóveis"
         description="Cadastro de imóveis disponíveis. Imóveis com status ‘ativo’ disparam matching com intenções de busca."
-        icon={Building2}
+        
         action={<Button onClick={openNew}><Plus className="w-4 h-4 mr-1" /> Novo imóvel</Button>}
       />
 
