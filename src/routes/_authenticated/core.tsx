@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import {
   Building2, LayoutDashboard, Boxes, CreditCard, Globe, Rocket,
   KanbanSquare, Wallet, MessageSquare, Users, KeyRound, FileSearch,
-  SlidersHorizontal, Plug, HeartPulse, FlaskConical, TrendingUp, Sparkles,
+  SlidersHorizontal, Plug, HeartPulse, FlaskConical, TrendingUp, Sparkles, CheckCircle2,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/core")({
