@@ -124,6 +124,7 @@ import { Route as AuthenticatedCoreTestesRouteImport } from './routes/_authentic
 import { Route as AuthenticatedCoreTemplatesRouteImport } from './routes/_authenticated/core.templates'
 import { Route as AuthenticatedCoreSaudeRouteImport } from './routes/_authenticated/core.saude'
 import { Route as AuthenticatedCorePromptsRouteImport } from './routes/_authenticated/core.prompts'
+import { Route as AuthenticatedCorePlanosRouteImport } from './routes/_authenticated/core.planos'
 import { Route as AuthenticatedCoreParametrosRouteImport } from './routes/_authenticated/core.parametros'
 import { Route as AuthenticatedCoreNovaImplantacaoRouteImport } from './routes/_authenticated/core.nova-implantacao'
 import { Route as AuthenticatedCoreModulosRouteImport } from './routes/_authenticated/core.modulos'
@@ -789,6 +790,11 @@ const AuthenticatedCorePromptsRoute =
     path: '/prompts',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCorePlanosRoute = AuthenticatedCorePlanosRouteImport.update({
+  id: '/planos',
+  path: '/planos',
+  getParentRoute: () => AuthenticatedCoreRoute,
+} as any)
 const AuthenticatedCoreParametrosRoute =
   AuthenticatedCoreParametrosRouteImport.update({
     id: '/parametros',
@@ -1275,6 +1281,7 @@ export interface FileRoutesByFullPath {
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/core/parametros': typeof AuthenticatedCoreParametrosRoute
+  '/core/planos': typeof AuthenticatedCorePlanosRoute
   '/core/prompts': typeof AuthenticatedCorePromptsRoute
   '/core/saude': typeof AuthenticatedCoreSaudeRoute
   '/core/templates': typeof AuthenticatedCoreTemplatesRoute
@@ -1443,6 +1450,7 @@ export interface FileRoutesByTo {
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/core/parametros': typeof AuthenticatedCoreParametrosRoute
+  '/core/planos': typeof AuthenticatedCorePlanosRoute
   '/core/prompts': typeof AuthenticatedCorePromptsRoute
   '/core/saude': typeof AuthenticatedCoreSaudeRoute
   '/core/templates': typeof AuthenticatedCoreTemplatesRoute
@@ -1624,6 +1632,7 @@ export interface FileRoutesById {
   '/_authenticated/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/_authenticated/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/_authenticated/core/parametros': typeof AuthenticatedCoreParametrosRoute
+  '/_authenticated/core/planos': typeof AuthenticatedCorePlanosRoute
   '/_authenticated/core/prompts': typeof AuthenticatedCorePromptsRoute
   '/_authenticated/core/saude': typeof AuthenticatedCoreSaudeRoute
   '/_authenticated/core/templates': typeof AuthenticatedCoreTemplatesRoute
@@ -1805,6 +1814,7 @@ export interface FileRouteTypes {
     | '/core/modulos'
     | '/core/nova-implantacao'
     | '/core/parametros'
+    | '/core/planos'
     | '/core/prompts'
     | '/core/saude'
     | '/core/templates'
@@ -1973,6 +1983,7 @@ export interface FileRouteTypes {
     | '/core/modulos'
     | '/core/nova-implantacao'
     | '/core/parametros'
+    | '/core/planos'
     | '/core/prompts'
     | '/core/saude'
     | '/core/templates'
@@ -2153,6 +2164,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/modulos'
     | '/_authenticated/core/nova-implantacao'
     | '/_authenticated/core/parametros'
+    | '/_authenticated/core/planos'
     | '/_authenticated/core/prompts'
     | '/_authenticated/core/saude'
     | '/_authenticated/core/templates'
@@ -3094,6 +3106,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCorePromptsRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/planos': {
+      id: '/_authenticated/core/planos'
+      path: '/planos'
+      fullPath: '/core/planos'
+      preLoaderRoute: typeof AuthenticatedCorePlanosRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/parametros': {
       id: '/_authenticated/core/parametros'
       path: '/parametros'
@@ -3684,6 +3703,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreModulosRoute: typeof AuthenticatedCoreModulosRouteWithChildren
   AuthenticatedCoreNovaImplantacaoRoute: typeof AuthenticatedCoreNovaImplantacaoRoute
   AuthenticatedCoreParametrosRoute: typeof AuthenticatedCoreParametrosRoute
+  AuthenticatedCorePlanosRoute: typeof AuthenticatedCorePlanosRoute
   AuthenticatedCorePromptsRoute: typeof AuthenticatedCorePromptsRoute
   AuthenticatedCoreSaudeRoute: typeof AuthenticatedCoreSaudeRoute
   AuthenticatedCoreTemplatesRoute: typeof AuthenticatedCoreTemplatesRoute
@@ -3703,6 +3723,7 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreModulosRoute: AuthenticatedCoreModulosRouteWithChildren,
   AuthenticatedCoreNovaImplantacaoRoute: AuthenticatedCoreNovaImplantacaoRoute,
   AuthenticatedCoreParametrosRoute: AuthenticatedCoreParametrosRoute,
+  AuthenticatedCorePlanosRoute: AuthenticatedCorePlanosRoute,
   AuthenticatedCorePromptsRoute: AuthenticatedCorePromptsRoute,
   AuthenticatedCoreSaudeRoute: AuthenticatedCoreSaudeRoute,
   AuthenticatedCoreTemplatesRoute: AuthenticatedCoreTemplatesRoute,
