@@ -36,6 +36,8 @@ function CoreLayout() {
     { to: "/finance", label: "ERP / Financeiro", icon: Wallet },
     { to: "/admin/billing-contracts", label: "Billing", icon: CreditCard },
     { to: "/core/nova-implantacao", label: "Nova Implantação (IA)", icon: Sparkles },
+    { to: "/core/criar-projeto", label: "Criar Projeto (Fábrica)", icon: Rocket },
+    { to: "/core/instalar-modulo", label: "Instalar Módulo", icon: Boxes },
     { to: "/core/implantacoes", label: "Implantações", icon: Rocket },
     { to: "/core/modulos", label: "Biblioteca de Módulos", icon: Boxes },
     { to: "/core/templates", label: "Templates de Site", icon: Globe },
