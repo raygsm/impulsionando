@@ -439,7 +439,7 @@ function StepLead({ state, dispatch, search }: StepProps) {
           },
         },
       });
-      dispatch({ type: "SET", patch: { quoteId: result.id, quoteNumber: result.quoteNumber, step: 2 } });
+      dispatch({ type: "SET", patch: { quoteId: result.id, quoteNumber: result.quoteNumber, publicToken: result.publicToken, step: 2 } });
     } catch (e) {
       toast.error((e as Error).message || "Não foi possível salvar agora. Tente novamente.");
     } finally {
