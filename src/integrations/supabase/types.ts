@@ -4895,6 +4895,7 @@ export type Database = {
           lead_whatsapp: string
           modules: string[]
           origin: string | null
+          public_token: string
           quote_number: string
           segment: string | null
           setup_cents: number
@@ -4929,6 +4930,7 @@ export type Database = {
           lead_whatsapp: string
           modules?: string[]
           origin?: string | null
+          public_token?: string
           quote_number: string
           segment?: string | null
           setup_cents?: number
@@ -4963,6 +4965,7 @@ export type Database = {
           lead_whatsapp?: string
           modules?: string[]
           origin?: string | null
+          public_token?: string
           quote_number?: string
           segment?: string | null
           setup_cents?: number
@@ -6070,7 +6073,17 @@ export type Database = {
     }
     Functions: {
       _trial_norm: { Args: { _v: string }; Returns: string }
+      aff_payout_request: {
+        Args: {
+          _amount: number
+          _bank_data?: Json
+          _company_id: string
+          _pix_key?: string
+        }
+        Returns: string
+      }
       assert_billing_finance_rls: { Args: never; Returns: undefined }
+      assert_quotes_no_anon_update: { Args: never; Returns: undefined }
       billing_check_company_status: {
         Args: { _company: string }
         Returns: {

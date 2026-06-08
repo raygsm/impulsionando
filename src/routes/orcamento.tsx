@@ -186,6 +186,7 @@ type WizardState = {
   // estado do servidor
   quoteId: string | null;
   quoteNumber: string | null;
+  publicToken: string | null;
   acceptedAt: string | null;
   paymentRequested: boolean;
 };
@@ -197,7 +198,7 @@ const initialState: WizardState = {
   selected: [],
   companyName: "", companyTaxId: "", companyLegalName: "",
   accepted: { terms: false, modules: false, deadlines: false, integrations: false, refund: false },
-  quoteId: null, quoteNumber: null, acceptedAt: null, paymentRequested: false,
+  quoteId: null, quoteNumber: null, publicToken: null, acceptedAt: null, paymentRequested: false,
 };
 
 type Action =
@@ -438,7 +439,7 @@ function StepLead({ state, dispatch, search }: StepProps) {
           },
         },
       });
-      dispatch({ type: "SET", patch: { quoteId: result.id, quoteNumber: result.quoteNumber, step: 2 } });
+      dispatch({ type: "SET", patch: { quoteId: result.id, quoteNumber: result.quoteNumber, publicToken: result.publicToken, step: 2 } });
     } catch (e) {
       toast.error((e as Error).message || "Não foi possível salvar agora. Tente novamente.");
     } finally {
@@ -574,16 +575,16 @@ function StepModulos({ state, dispatch }: StepProps) {
   // Sincroniza módulos com banco em background
   const lastSyncedRef = useRef<string>("");
   useEffect(() => {
-    if (!state.quoteId) return;
+    if (!state.quoteId || !state.publicToken) return;
     const key = state.selected.slice().sort().join(",");
     if (key === lastSyncedRef.current) return;
     lastSyncedRef.current = key;
     const t = setTimeout(() => {
-      updateFn({ data: { id: state.quoteId!, modules: state.selected, category: state.category, segment: state.segment } })
+      updateFn({ data: { id: state.quoteId!, publicToken: state.publicToken!, modules: state.selected, category: state.category, segment: state.segment } })
         .catch(() => { /* silent */ });
     }, 800);
     return () => clearTimeout(t);
-  }, [state.quoteId, state.selected, state.category, state.segment, updateFn]);
+  }, [state.quoteId, state.publicToken, state.selected, state.category, state.segment, updateFn]);
 
   return (
     <Card className="p-6">
@@ -771,12 +772,13 @@ function StepEmpresa({ state, dispatch }: StepProps) {
   const [saving, setSaving] = useState(false);
 
   async function handleNext() {
-    if (state.quoteId) {
+    if (state.quoteId && state.publicToken) {
       setSaving(true);
       try {
         await updateFn({
           data: {
             id: state.quoteId,
+            publicToken: state.publicToken,
             company: {
               companyName: state.companyName || undefined,
               companyTaxId: state.companyTaxId || undefined,
@@ -930,7 +932,7 @@ function StepAceite({ state, dispatch }: StepProps) {
   }
 
   async function handleAccept() {
-    if (!state.quoteId) {
+    if (!state.quoteId || !state.publicToken) {
       toast.error("Orçamento não foi salvo. Volte ao início e tente novamente.");
       return;
     }
@@ -940,6 +942,7 @@ function StepAceite({ state, dispatch }: StepProps) {
       const result = await acceptFn({
         data: {
           id: state.quoteId,
+          publicToken: state.publicToken,
           userAgent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 500) : undefined,
           terms: {
             terms: true, modules: true, deadlines: true, integrations: true, refund: true,
@@ -1052,10 +1055,10 @@ function StepPagamento({ state, dispatch, totals, onReset }: StepProps) {
 
 
   async function handleRequest() {
-    if (!state.quoteId) return;
+    if (!state.quoteId || !state.publicToken) return;
     setLoading(true);
     try {
-      await reqPaymentFn({ data: { id: state.quoteId } });
+      await reqPaymentFn({ data: { id: state.quoteId, publicToken: state.publicToken } });
       dispatch({ type: "SET", patch: { paymentRequested: true } });
       setRequested(true);
       toast.success("Solicitação registrada! Nossa equipe entra em contato em até 1 dia útil com o link de pagamento.");

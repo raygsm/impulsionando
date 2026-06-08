@@ -114,3 +114,47 @@ por estarem fora do escopo solicitado. Recomenda-se tratamento posterior:
 - Findings do scan: **45 → 28** (somente warnings esperados restam).
 - Itens ignorados intencionais: `aff_sales` autoacesso de afiliado,
   `notifications` INSERT por service_role.
+
+---
+
+## 7. Correções adicionais — quotes / aff_payouts / message_outbox
+
+### quotes — UPDATE anônimo eliminado
+
+- Policy removida: `"Anyone can update draft quote within 24h"` (UPDATE anon).
+- Nova coluna: `quotes.public_token uuid` (único, default `gen_random_uuid()`).
+- Server functions (`updateQuote`, `acceptQuote`, `requestPayment`) exigem
+  `publicToken` no payload e filtram `eq("public_token", token)`. Sem token
+  válido o servidor retorna erro e nada é gravado.
+- `acceptQuote` rejeita orçamentos já aceitos (`accepted_at IS NULL`).
+- `requestPayment` só aceita quando `status='accepted'`.
+- Quem pode atualizar agora: apenas via server-fn portando token (lead que
+  iniciou o orçamento) ou master staff via console (SELECT/DELETE policies
+  pré-existentes).
+- Trava de regressão: `assert_quotes_no_anon_update()`.
+
+### aff_payouts — saldo validado
+
+- Policy removida: `aff_payouts_insert_self`.
+- Nova policy `aff_payouts_insert_staff`: INSERT direto somente para staff
+  Impulsionando ou usuários com `aff.payout.write`.
+- Nova função `aff_payout_request(_company_id, _amount, _pix_key, _bank_data)`:
+  - Valida vínculo do usuário com a empresa.
+  - Calcula saldo = comissões liberadas (`released_at IS NOT NULL`)
+    – pagas (status `pago`)
+    – em aberto (`solicitado`/`em_analise`/`aprovado`).
+  - Rejeita `_amount <= 0` e `_amount > _available`.
+  - Insere com status `solicitado` e `recipient_user_id = auth.uid()`.
+- Estados de payout (enum `aff_payout_status` existente):
+  `solicitado` → `em_analise` → `aprovado` → `pago` (ou `recusado`/`cancelado`).
+- EXECUTE da função: `authenticated` + `service_role` apenas.
+
+### message_outbox — auditoria de escopo
+
+- Policy `mo_select` mantida: já escopa por `company_id` + exige
+  `communication.outbox.read` ou `recipient_user_id = auth.uid()`.
+- Auditoria de atribuição: a permissão `communication.outbox.read` **não está
+  atribuída a nenhum perfil** atualmente (`profile_permissions` vazio para
+  esse code). Risco efetivo = 0.
+- Não há leitura cross-empresa: a cláusula `user_belongs_to_company(...)`
+  garante isolamento entre clientes/projetos.
