@@ -9,6 +9,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { computeQuote } from "@/lib/pricing";
+import { CATALOG_MODULES } from "@/data/moduleCatalog";
+
 
 /* ----------------------------- Schemas ----------------------------- */
 
