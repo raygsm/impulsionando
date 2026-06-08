@@ -1,6 +1,25 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { z } from "zod";
+
+export const PLAN_STATUS_COMERCIAL_VALUES = [
+  "disponivel_contratacao",
+  "sob_consulta",
+  "em_breve",
+  "oculto",
+  "exclusivo_interno",
+  "exclusivo_white_label",
+] as const;
+
+export const PLAN_STATUS_COMERCIAL_LABELS: Record<string, string> = {
+  disponivel_contratacao: "Disponível para contratação",
+  sob_consulta: "Sob consulta",
+  em_breve: "Em breve",
+  oculto: "Oculto",
+  exclusivo_interno: "Exclusivo interno",
+  exclusivo_white_label: "Exclusivo White Label",
+};
 
 /** Lista todos os contratos recorrentes (somente staff). */
 export const listBillingContracts = createServerFn({ method: "GET" })
