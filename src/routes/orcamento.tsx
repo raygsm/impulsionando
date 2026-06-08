@@ -772,12 +772,13 @@ function StepEmpresa({ state, dispatch }: StepProps) {
   const [saving, setSaving] = useState(false);
 
   async function handleNext() {
-    if (state.quoteId) {
+    if (state.quoteId && state.publicToken) {
       setSaving(true);
       try {
         await updateFn({
           data: {
             id: state.quoteId,
+            publicToken: state.publicToken,
             company: {
               companyName: state.companyName || undefined,
               companyTaxId: state.companyTaxId || undefined,
