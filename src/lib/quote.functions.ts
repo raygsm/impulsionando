@@ -158,8 +158,10 @@ async function assertModulesAvailable(catalogSlugs: string[]): Promise<void> {
 export const createQuote = createServerFn({ method: "POST" })
   .inputValidator((data) => createQuoteSchema.parse(data))
   .handler(async ({ data }) => {
+    await assertModulesAvailable(data.modules);
     const supabase = await getAdmin();
     const totals = computeQuote(data.modules);
+
 
     const insertRow = {
       lead_name: data.lead.name,
