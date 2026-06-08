@@ -64,6 +64,29 @@ export function ModulePicker({
   const includedCount = quotaIsFinite ? Math.min(selected.length, quota) : selected.length;
   const extraCount = quotaIsFinite ? Math.max(0, selected.length - quota) : 0;
 
+  const availableSet = useMemo(
+    () => (availableSlugs ? new Set(availableSlugs) : null),
+    [availableSlugs],
+  );
+
+  function isLocked(slug: string): boolean {
+    if (!availableSet) return false;
+    return !availableSet.has(slug);
+  }
+
+  function lockReason(slug: string): string | null {
+    if (!moduleStatus) return isLocked(slug) ? "Indisponível para contratação" : null;
+    const s = moduleStatus[slug];
+    if (!s) return isLocked(slug) ? "Indisponível para contratação" : null;
+    if (s.status === "disponivel_contratacao" && s.show_in_checkout) return null;
+    if (s.status === "sob_consulta") return "Sob consulta — fale com um consultor";
+    if (s.status === "em_breve") return "Em breve";
+    if (s.status === "indisponivel_temporariamente") return "Indisponível temporariamente";
+    if (s.status === "exclusivo_interno") return "Exclusivo interno";
+    if (s.status === "exclusivo_white_label") return "Exclusivo White Label";
+    return "Indisponível para contratação";
+  }
+
   const grouped = useMemo(() => {
     const byCat = new Map<string, MotherModule[]>();
     for (const m of MOTHER_MODULES) {
@@ -79,6 +102,7 @@ export function ModulePicker({
   }
 
   function toggle(slug: string) {
+    if (isLocked(slug)) return;
     setSelected((prev) =>
       prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]
     );
