@@ -124,12 +124,14 @@ import { Route as AuthenticatedCoreTestesRouteImport } from './routes/_authentic
 import { Route as AuthenticatedCoreTemplatesRouteImport } from './routes/_authenticated/core.templates'
 import { Route as AuthenticatedCoreSaudeRouteImport } from './routes/_authenticated/core.saude'
 import { Route as AuthenticatedCorePromptsRouteImport } from './routes/_authenticated/core.prompts'
+import { Route as AuthenticatedCorePlanosRouteImport } from './routes/_authenticated/core.planos'
 import { Route as AuthenticatedCoreParametrosRouteImport } from './routes/_authenticated/core.parametros'
 import { Route as AuthenticatedCoreNovaImplantacaoRouteImport } from './routes/_authenticated/core.nova-implantacao'
 import { Route as AuthenticatedCoreModulosRouteImport } from './routes/_authenticated/core.modulos'
 import { Route as AuthenticatedCoreInstalarModuloRouteImport } from './routes/_authenticated/core.instalar-modulo'
 import { Route as AuthenticatedCoreImplantacoesRouteImport } from './routes/_authenticated/core.implantacoes'
 import { Route as AuthenticatedCoreFinanceiroMasterRouteImport } from './routes/_authenticated/core.financeiro-master'
+import { Route as AuthenticatedCoreFinalizacaoComercialRouteImport } from './routes/_authenticated/core.finalizacao-comercial'
 import { Route as AuthenticatedCoreEventosRouteImport } from './routes/_authenticated/core.eventos'
 import { Route as AuthenticatedCoreCriarProjetoRouteImport } from './routes/_authenticated/core.criar-projeto'
 import { Route as AuthenticatedCoreClientesRouteImport } from './routes/_authenticated/core.clientes'
@@ -789,6 +791,11 @@ const AuthenticatedCorePromptsRoute =
     path: '/prompts',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCorePlanosRoute = AuthenticatedCorePlanosRouteImport.update({
+  id: '/planos',
+  path: '/planos',
+  getParentRoute: () => AuthenticatedCoreRoute,
+} as any)
 const AuthenticatedCoreParametrosRoute =
   AuthenticatedCoreParametrosRouteImport.update({
     id: '/parametros',
@@ -823,6 +830,12 @@ const AuthenticatedCoreFinanceiroMasterRoute =
   AuthenticatedCoreFinanceiroMasterRouteImport.update({
     id: '/financeiro-master',
     path: '/financeiro-master',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
+const AuthenticatedCoreFinalizacaoComercialRoute =
+  AuthenticatedCoreFinalizacaoComercialRouteImport.update({
+    id: '/finalizacao-comercial',
+    path: '/finalizacao-comercial',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
 const AuthenticatedCoreEventosRoute =
@@ -1269,12 +1282,14 @@ export interface FileRoutesByFullPath {
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
+  '/core/finalizacao-comercial': typeof AuthenticatedCoreFinalizacaoComercialRoute
   '/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/core/parametros': typeof AuthenticatedCoreParametrosRoute
+  '/core/planos': typeof AuthenticatedCorePlanosRoute
   '/core/prompts': typeof AuthenticatedCorePromptsRoute
   '/core/saude': typeof AuthenticatedCoreSaudeRoute
   '/core/templates': typeof AuthenticatedCoreTemplatesRoute
@@ -1437,12 +1452,14 @@ export interface FileRoutesByTo {
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
+  '/core/finalizacao-comercial': typeof AuthenticatedCoreFinalizacaoComercialRoute
   '/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/core/parametros': typeof AuthenticatedCoreParametrosRoute
+  '/core/planos': typeof AuthenticatedCorePlanosRoute
   '/core/prompts': typeof AuthenticatedCorePromptsRoute
   '/core/saude': typeof AuthenticatedCoreSaudeRoute
   '/core/templates': typeof AuthenticatedCoreTemplatesRoute
@@ -1618,12 +1635,14 @@ export interface FileRoutesById {
   '/_authenticated/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/_authenticated/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
   '/_authenticated/core/eventos': typeof AuthenticatedCoreEventosRoute
+  '/_authenticated/core/finalizacao-comercial': typeof AuthenticatedCoreFinalizacaoComercialRoute
   '/_authenticated/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/_authenticated/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/_authenticated/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
   '/_authenticated/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/_authenticated/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/_authenticated/core/parametros': typeof AuthenticatedCoreParametrosRoute
+  '/_authenticated/core/planos': typeof AuthenticatedCorePlanosRoute
   '/_authenticated/core/prompts': typeof AuthenticatedCorePromptsRoute
   '/_authenticated/core/saude': typeof AuthenticatedCoreSaudeRoute
   '/_authenticated/core/templates': typeof AuthenticatedCoreTemplatesRoute
@@ -1799,12 +1818,14 @@ export interface FileRouteTypes {
     | '/core/clientes'
     | '/core/criar-projeto'
     | '/core/eventos'
+    | '/core/finalizacao-comercial'
     | '/core/financeiro-master'
     | '/core/implantacoes'
     | '/core/instalar-modulo'
     | '/core/modulos'
     | '/core/nova-implantacao'
     | '/core/parametros'
+    | '/core/planos'
     | '/core/prompts'
     | '/core/saude'
     | '/core/templates'
@@ -1967,12 +1988,14 @@ export interface FileRouteTypes {
     | '/core/clientes'
     | '/core/criar-projeto'
     | '/core/eventos'
+    | '/core/finalizacao-comercial'
     | '/core/financeiro-master'
     | '/core/implantacoes'
     | '/core/instalar-modulo'
     | '/core/modulos'
     | '/core/nova-implantacao'
     | '/core/parametros'
+    | '/core/planos'
     | '/core/prompts'
     | '/core/saude'
     | '/core/templates'
@@ -2147,12 +2170,14 @@ export interface FileRouteTypes {
     | '/_authenticated/core/clientes'
     | '/_authenticated/core/criar-projeto'
     | '/_authenticated/core/eventos'
+    | '/_authenticated/core/finalizacao-comercial'
     | '/_authenticated/core/financeiro-master'
     | '/_authenticated/core/implantacoes'
     | '/_authenticated/core/instalar-modulo'
     | '/_authenticated/core/modulos'
     | '/_authenticated/core/nova-implantacao'
     | '/_authenticated/core/parametros'
+    | '/_authenticated/core/planos'
     | '/_authenticated/core/prompts'
     | '/_authenticated/core/saude'
     | '/_authenticated/core/templates'
@@ -3094,6 +3119,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCorePromptsRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/planos': {
+      id: '/_authenticated/core/planos'
+      path: '/planos'
+      fullPath: '/core/planos'
+      preLoaderRoute: typeof AuthenticatedCorePlanosRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/parametros': {
       id: '/_authenticated/core/parametros'
       path: '/parametros'
@@ -3134,6 +3166,13 @@ declare module '@tanstack/react-router' {
       path: '/financeiro-master'
       fullPath: '/core/financeiro-master'
       preLoaderRoute: typeof AuthenticatedCoreFinanceiroMasterRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/core/finalizacao-comercial': {
+      id: '/_authenticated/core/finalizacao-comercial'
+      path: '/finalizacao-comercial'
+      fullPath: '/core/finalizacao-comercial'
+      preLoaderRoute: typeof AuthenticatedCoreFinalizacaoComercialRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
     '/_authenticated/core/eventos': {
@@ -3678,12 +3717,14 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreClientesRoute: typeof AuthenticatedCoreClientesRoute
   AuthenticatedCoreCriarProjetoRoute: typeof AuthenticatedCoreCriarProjetoRoute
   AuthenticatedCoreEventosRoute: typeof AuthenticatedCoreEventosRoute
+  AuthenticatedCoreFinalizacaoComercialRoute: typeof AuthenticatedCoreFinalizacaoComercialRoute
   AuthenticatedCoreFinanceiroMasterRoute: typeof AuthenticatedCoreFinanceiroMasterRoute
   AuthenticatedCoreImplantacoesRoute: typeof AuthenticatedCoreImplantacoesRoute
   AuthenticatedCoreInstalarModuloRoute: typeof AuthenticatedCoreInstalarModuloRoute
   AuthenticatedCoreModulosRoute: typeof AuthenticatedCoreModulosRouteWithChildren
   AuthenticatedCoreNovaImplantacaoRoute: typeof AuthenticatedCoreNovaImplantacaoRoute
   AuthenticatedCoreParametrosRoute: typeof AuthenticatedCoreParametrosRoute
+  AuthenticatedCorePlanosRoute: typeof AuthenticatedCorePlanosRoute
   AuthenticatedCorePromptsRoute: typeof AuthenticatedCorePromptsRoute
   AuthenticatedCoreSaudeRoute: typeof AuthenticatedCoreSaudeRoute
   AuthenticatedCoreTemplatesRoute: typeof AuthenticatedCoreTemplatesRoute
@@ -3696,6 +3737,8 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreClientesRoute: AuthenticatedCoreClientesRoute,
   AuthenticatedCoreCriarProjetoRoute: AuthenticatedCoreCriarProjetoRoute,
   AuthenticatedCoreEventosRoute: AuthenticatedCoreEventosRoute,
+  AuthenticatedCoreFinalizacaoComercialRoute:
+    AuthenticatedCoreFinalizacaoComercialRoute,
   AuthenticatedCoreFinanceiroMasterRoute:
     AuthenticatedCoreFinanceiroMasterRoute,
   AuthenticatedCoreImplantacoesRoute: AuthenticatedCoreImplantacoesRoute,
@@ -3703,6 +3746,7 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreModulosRoute: AuthenticatedCoreModulosRouteWithChildren,
   AuthenticatedCoreNovaImplantacaoRoute: AuthenticatedCoreNovaImplantacaoRoute,
   AuthenticatedCoreParametrosRoute: AuthenticatedCoreParametrosRoute,
+  AuthenticatedCorePlanosRoute: AuthenticatedCorePlanosRoute,
   AuthenticatedCorePromptsRoute: AuthenticatedCorePromptsRoute,
   AuthenticatedCoreSaudeRoute: AuthenticatedCoreSaudeRoute,
   AuthenticatedCoreTemplatesRoute: AuthenticatedCoreTemplatesRoute,
@@ -4022,13 +4066,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

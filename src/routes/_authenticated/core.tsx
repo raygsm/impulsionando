@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import {
   Building2, LayoutDashboard, Boxes, CreditCard, Globe, Rocket,
   KanbanSquare, Wallet, MessageSquare, Users, KeyRound, FileSearch,
-  SlidersHorizontal, Plug, HeartPulse, FlaskConical, TrendingUp, Sparkles,
+  SlidersHorizontal, Plug, HeartPulse, FlaskConical, TrendingUp, Sparkles, CheckCircle2,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/core")({
@@ -40,6 +40,9 @@ function CoreLayout() {
     { to: "/core/instalar-modulo", label: "Instalar Módulo", icon: Boxes },
     { to: "/core/implantacoes", label: "Implantações", icon: Rocket },
     { to: "/core/modulos", label: "Biblioteca de Módulos", icon: Boxes },
+    { to: "/core/modulos", label: "Biblioteca de Módulos", icon: Boxes },
+    { to: "/core/finalizacao-comercial", label: "Finalização Comercial", icon: CheckCircle2 },
+    { to: "/core/planos", label: "Gestão de Planos", icon: CreditCard },
     { to: "/core/templates", label: "Templates de Site", icon: Globe },
     { to: "/core/prompts", label: "Prompts (IA)", icon: Sparkles },
     { to: "/core/clientes", label: "Páginas por Cliente", icon: FileSearch },
