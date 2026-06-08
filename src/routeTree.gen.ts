@@ -110,6 +110,9 @@ import { Route as AuthenticatedInventorySuppliersRouteImport } from './routes/_a
 import { Route as AuthenticatedInventoryProductsRouteImport } from './routes/_authenticated/inventory.products'
 import { Route as AuthenticatedInventoryMovementsRouteImport } from './routes/_authenticated/inventory.movements'
 import { Route as AuthenticatedInventoryCategoriesRouteImport } from './routes/_authenticated/inventory.categories'
+import { Route as AuthenticatedImobiliariaMatchesRouteImport } from './routes/_authenticated/imobiliaria.matches'
+import { Route as AuthenticatedImobiliariaIntencoesRouteImport } from './routes/_authenticated/imobiliaria.intencoes'
+import { Route as AuthenticatedImobiliariaImoveisRouteImport } from './routes/_authenticated/imobiliaria.imoveis'
 import { Route as AuthenticatedFinanceTransactionsRouteImport } from './routes/_authenticated/finance.transactions'
 import { Route as AuthenticatedFinanceMethodsRouteImport } from './routes/_authenticated/finance.methods'
 import { Route as AuthenticatedFinanceCommissionsRouteImport } from './routes/_authenticated/finance.commissions'
@@ -712,6 +715,24 @@ const AuthenticatedInventoryCategoriesRoute =
     path: '/categories',
     getParentRoute: () => AuthenticatedInventoryRoute,
   } as any)
+const AuthenticatedImobiliariaMatchesRoute =
+  AuthenticatedImobiliariaMatchesRouteImport.update({
+    id: '/imobiliaria/matches',
+    path: '/imobiliaria/matches',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedImobiliariaIntencoesRoute =
+  AuthenticatedImobiliariaIntencoesRouteImport.update({
+    id: '/imobiliaria/intencoes',
+    path: '/imobiliaria/intencoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedImobiliariaImoveisRoute =
+  AuthenticatedImobiliariaImoveisRouteImport.update({
+    id: '/imobiliaria/imoveis',
+    path: '/imobiliaria/imoveis',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedFinanceTransactionsRoute =
   AuthenticatedFinanceTransactionsRouteImport.update({
     id: '/transactions',
@@ -1304,6 +1325,9 @@ export interface FileRoutesByFullPath {
   '/finance/commissions': typeof AuthenticatedFinanceCommissionsRoute
   '/finance/methods': typeof AuthenticatedFinanceMethodsRoute
   '/finance/transactions': typeof AuthenticatedFinanceTransactionsRoute
+  '/imobiliaria/imoveis': typeof AuthenticatedImobiliariaImoveisRoute
+  '/imobiliaria/intencoes': typeof AuthenticatedImobiliariaIntencoesRoute
+  '/imobiliaria/matches': typeof AuthenticatedImobiliariaMatchesRoute
   '/inventory/categories': typeof AuthenticatedInventoryCategoriesRoute
   '/inventory/movements': typeof AuthenticatedInventoryMovementsRoute
   '/inventory/products': typeof AuthenticatedInventoryProductsRoute
@@ -1474,6 +1498,9 @@ export interface FileRoutesByTo {
   '/finance/commissions': typeof AuthenticatedFinanceCommissionsRoute
   '/finance/methods': typeof AuthenticatedFinanceMethodsRoute
   '/finance/transactions': typeof AuthenticatedFinanceTransactionsRoute
+  '/imobiliaria/imoveis': typeof AuthenticatedImobiliariaImoveisRoute
+  '/imobiliaria/intencoes': typeof AuthenticatedImobiliariaIntencoesRoute
+  '/imobiliaria/matches': typeof AuthenticatedImobiliariaMatchesRoute
   '/inventory/categories': typeof AuthenticatedInventoryCategoriesRoute
   '/inventory/movements': typeof AuthenticatedInventoryMovementsRoute
   '/inventory/products': typeof AuthenticatedInventoryProductsRoute
@@ -1657,6 +1684,9 @@ export interface FileRoutesById {
   '/_authenticated/finance/commissions': typeof AuthenticatedFinanceCommissionsRoute
   '/_authenticated/finance/methods': typeof AuthenticatedFinanceMethodsRoute
   '/_authenticated/finance/transactions': typeof AuthenticatedFinanceTransactionsRoute
+  '/_authenticated/imobiliaria/imoveis': typeof AuthenticatedImobiliariaImoveisRoute
+  '/_authenticated/imobiliaria/intencoes': typeof AuthenticatedImobiliariaIntencoesRoute
+  '/_authenticated/imobiliaria/matches': typeof AuthenticatedImobiliariaMatchesRoute
   '/_authenticated/inventory/categories': typeof AuthenticatedInventoryCategoriesRoute
   '/_authenticated/inventory/movements': typeof AuthenticatedInventoryMovementsRoute
   '/_authenticated/inventory/products': typeof AuthenticatedInventoryProductsRoute
@@ -1840,6 +1870,9 @@ export interface FileRouteTypes {
     | '/finance/commissions'
     | '/finance/methods'
     | '/finance/transactions'
+    | '/imobiliaria/imoveis'
+    | '/imobiliaria/intencoes'
+    | '/imobiliaria/matches'
     | '/inventory/categories'
     | '/inventory/movements'
     | '/inventory/products'
@@ -2010,6 +2043,9 @@ export interface FileRouteTypes {
     | '/finance/commissions'
     | '/finance/methods'
     | '/finance/transactions'
+    | '/imobiliaria/imoveis'
+    | '/imobiliaria/intencoes'
+    | '/imobiliaria/matches'
     | '/inventory/categories'
     | '/inventory/movements'
     | '/inventory/products'
@@ -2192,6 +2228,9 @@ export interface FileRouteTypes {
     | '/_authenticated/finance/commissions'
     | '/_authenticated/finance/methods'
     | '/_authenticated/finance/transactions'
+    | '/_authenticated/imobiliaria/imoveis'
+    | '/_authenticated/imobiliaria/intencoes'
+    | '/_authenticated/imobiliaria/matches'
     | '/_authenticated/inventory/categories'
     | '/_authenticated/inventory/movements'
     | '/_authenticated/inventory/products'
@@ -3020,6 +3059,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/inventory/categories'
       preLoaderRoute: typeof AuthenticatedInventoryCategoriesRouteImport
       parentRoute: typeof AuthenticatedInventoryRoute
+    }
+    '/_authenticated/imobiliaria/matches': {
+      id: '/_authenticated/imobiliaria/matches'
+      path: '/imobiliaria/matches'
+      fullPath: '/imobiliaria/matches'
+      preLoaderRoute: typeof AuthenticatedImobiliariaMatchesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/imobiliaria/intencoes': {
+      id: '/_authenticated/imobiliaria/intencoes'
+      path: '/imobiliaria/intencoes'
+      fullPath: '/imobiliaria/intencoes'
+      preLoaderRoute: typeof AuthenticatedImobiliariaIntencoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/imobiliaria/imoveis': {
+      id: '/_authenticated/imobiliaria/imoveis'
+      path: '/imobiliaria/imoveis'
+      fullPath: '/imobiliaria/imoveis'
+      preLoaderRoute: typeof AuthenticatedImobiliariaImoveisRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/finance/transactions': {
       id: '/_authenticated/finance/transactions'
@@ -3906,6 +3966,9 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminTrialsRoute: typeof AuthenticatedAdminTrialsRoute
   AuthenticatedAdminUptimeRoute: typeof AuthenticatedAdminUptimeRoute
   AuthenticatedEhrIdRoute: typeof AuthenticatedEhrIdRoute
+  AuthenticatedImobiliariaImoveisRoute: typeof AuthenticatedImobiliariaImoveisRoute
+  AuthenticatedImobiliariaIntencoesRoute: typeof AuthenticatedImobiliariaIntencoesRoute
+  AuthenticatedImobiliariaMatchesRoute: typeof AuthenticatedImobiliariaMatchesRoute
   AuthenticatedMarketingLeadsRoute: typeof AuthenticatedMarketingLeadsRoute
   AuthenticatedEhrIndexRoute: typeof AuthenticatedEhrIndexRoute
   AuthenticatedAdminModulosClonagemRoute: typeof AuthenticatedAdminModulosClonagemRoute
@@ -3945,6 +4008,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminTrialsRoute: AuthenticatedAdminTrialsRoute,
   AuthenticatedAdminUptimeRoute: AuthenticatedAdminUptimeRoute,
   AuthenticatedEhrIdRoute: AuthenticatedEhrIdRoute,
+  AuthenticatedImobiliariaImoveisRoute: AuthenticatedImobiliariaImoveisRoute,
+  AuthenticatedImobiliariaIntencoesRoute:
+    AuthenticatedImobiliariaIntencoesRoute,
+  AuthenticatedImobiliariaMatchesRoute: AuthenticatedImobiliariaMatchesRoute,
   AuthenticatedMarketingLeadsRoute: AuthenticatedMarketingLeadsRoute,
   AuthenticatedEhrIndexRoute: AuthenticatedEhrIndexRoute,
   AuthenticatedAdminModulosClonagemRoute:
@@ -4066,13 +4133,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

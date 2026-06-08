@@ -5095,6 +5095,268 @@ export type Database = {
         }
         Relationships: []
       }
+      realestate_properties: {
+        Row: {
+          address_line: string | null
+          area_total: number | null
+          area_useful: number | null
+          bathrooms: number
+          bedrooms: number
+          broker_user_id: string | null
+          city: string | null
+          company_id: string
+          condo_fee: number | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          features: Json
+          id: string
+          iptu: number | null
+          is_published: boolean
+          latitude: number | null
+          longitude: number | null
+          neighborhood: string | null
+          operation: Database["public"]["Enums"]["realestate_operation"]
+          parking_spots: number
+          photos: Json
+          property_type: Database["public"]["Enums"]["realestate_property_type"]
+          reference_code: string | null
+          rent_price: number | null
+          sale_price: number | null
+          state: string | null
+          status: Database["public"]["Enums"]["realestate_property_status"]
+          suites: number
+          title: string
+          updated_at: string
+          zip: string | null
+        }
+        Insert: {
+          address_line?: string | null
+          area_total?: number | null
+          area_useful?: number | null
+          bathrooms?: number
+          bedrooms?: number
+          broker_user_id?: string | null
+          city?: string | null
+          company_id: string
+          condo_fee?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          features?: Json
+          id?: string
+          iptu?: number | null
+          is_published?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          neighborhood?: string | null
+          operation?: Database["public"]["Enums"]["realestate_operation"]
+          parking_spots?: number
+          photos?: Json
+          property_type?: Database["public"]["Enums"]["realestate_property_type"]
+          reference_code?: string | null
+          rent_price?: number | null
+          sale_price?: number | null
+          state?: string | null
+          status?: Database["public"]["Enums"]["realestate_property_status"]
+          suites?: number
+          title: string
+          updated_at?: string
+          zip?: string | null
+        }
+        Update: {
+          address_line?: string | null
+          area_total?: number | null
+          area_useful?: number | null
+          bathrooms?: number
+          bedrooms?: number
+          broker_user_id?: string | null
+          city?: string | null
+          company_id?: string
+          condo_fee?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          features?: Json
+          id?: string
+          iptu?: number | null
+          is_published?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          neighborhood?: string | null
+          operation?: Database["public"]["Enums"]["realestate_operation"]
+          parking_spots?: number
+          photos?: Json
+          property_type?: Database["public"]["Enums"]["realestate_property_type"]
+          reference_code?: string | null
+          rent_price?: number | null
+          sale_price?: number | null
+          state?: string | null
+          status?: Database["public"]["Enums"]["realestate_property_status"]
+          suites?: number
+          title?: string
+          updated_at?: string
+          zip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "realestate_properties_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      realestate_property_matches: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          intent_id: string
+          notified_at: string
+          property_id: string
+          score: number
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          intent_id: string
+          notified_at?: string
+          property_id: string
+          score?: number
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          intent_id?: string
+          notified_at?: string
+          property_id?: string
+          score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "realestate_property_matches_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "realestate_property_matches_intent_id_fkey"
+            columns: ["intent_id"]
+            isOneToOne: false
+            referencedRelation: "realestate_search_intents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "realestate_property_matches_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "realestate_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      realestate_search_intents: {
+        Row: {
+          area_min: number | null
+          bathrooms_min: number
+          bedrooms_min: number
+          cities: string[]
+          company_id: string
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          created_by: string | null
+          customer_id: string | null
+          id: string
+          lead_id: string | null
+          neighborhoods: string[]
+          notes: string | null
+          operation: Database["public"]["Enums"]["realestate_operation"]
+          parking_min: number
+          price_max: number | null
+          price_min: number | null
+          property_types: Database["public"]["Enums"]["realestate_property_type"][]
+          status: Database["public"]["Enums"]["realestate_intent_status"]
+          updated_at: string
+        }
+        Insert: {
+          area_min?: number | null
+          bathrooms_min?: number
+          bedrooms_min?: number
+          cities?: string[]
+          company_id: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          id?: string
+          lead_id?: string | null
+          neighborhoods?: string[]
+          notes?: string | null
+          operation?: Database["public"]["Enums"]["realestate_operation"]
+          parking_min?: number
+          price_max?: number | null
+          price_min?: number | null
+          property_types?: Database["public"]["Enums"]["realestate_property_type"][]
+          status?: Database["public"]["Enums"]["realestate_intent_status"]
+          updated_at?: string
+        }
+        Update: {
+          area_min?: number | null
+          bathrooms_min?: number
+          bedrooms_min?: number
+          cities?: string[]
+          company_id?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          id?: string
+          lead_id?: string | null
+          neighborhoods?: string[]
+          notes?: string | null
+          operation?: Database["public"]["Enums"]["realestate_operation"]
+          parking_min?: number
+          price_max?: number | null
+          price_min?: number | null
+          property_types?: Database["public"]["Enums"]["realestate_property_type"][]
+          status?: Database["public"]["Enums"]["realestate_intent_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "realestate_search_intents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "realestate_search_intents_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "realestate_search_intents_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sales_cash_session_counts: {
         Row: {
           counted_amount: number
@@ -6288,6 +6550,14 @@ export type Database = {
           read_ct: number
         }[]
       }
+      realestate_run_match_for_intent: {
+        Args: { _intent_id: string }
+        Returns: number
+      }
+      realestate_run_match_for_property: {
+        Args: { _property_id: string }
+        Returns: number
+      }
       render_template: {
         Args: { _payload: Json; _template: string }
         Returns: string
@@ -6393,6 +6663,29 @@ export type Database = {
         | "chargeback"
         | "bloqueado"
       company_environment: "demo" | "teste" | "real"
+      realestate_intent_status: "ativo" | "pausado" | "atendido" | "arquivado"
+      realestate_operation: "venda" | "locacao" | "venda_ou_locacao"
+      realestate_property_status:
+        | "rascunho"
+        | "ativo"
+        | "reservado"
+        | "vendido"
+        | "locado"
+        | "inativo"
+      realestate_property_type:
+        | "apartamento"
+        | "casa"
+        | "casa_condominio"
+        | "terreno"
+        | "sala_comercial"
+        | "loja"
+        | "galpao"
+        | "sitio"
+        | "chacara"
+        | "cobertura"
+        | "kitnet"
+        | "studio"
+        | "outro"
       trial_plan_choice: "essencial" | "integrado" | "avancado" | "sob_medida"
       trial_status:
         | "solicitado"
@@ -6588,6 +6881,31 @@ export const Constants = {
         "bloqueado",
       ],
       company_environment: ["demo", "teste", "real"],
+      realestate_intent_status: ["ativo", "pausado", "atendido", "arquivado"],
+      realestate_operation: ["venda", "locacao", "venda_ou_locacao"],
+      realestate_property_status: [
+        "rascunho",
+        "ativo",
+        "reservado",
+        "vendido",
+        "locado",
+        "inativo",
+      ],
+      realestate_property_type: [
+        "apartamento",
+        "casa",
+        "casa_condominio",
+        "terreno",
+        "sala_comercial",
+        "loja",
+        "galpao",
+        "sitio",
+        "chacara",
+        "cobertura",
+        "kitnet",
+        "studio",
+        "outro",
+      ],
       trial_plan_choice: ["essencial", "integrado", "avancado", "sob_medida"],
       trial_status: [
         "solicitado",

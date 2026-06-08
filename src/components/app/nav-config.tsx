@@ -7,6 +7,7 @@ import {
   ShoppingCart, Receipt, Plus, Wallet as WalletIcon,
   Contact, BarChart3, ShieldCheck, Inbox, GraduationCap, Stethoscope, Sparkles,
   Handshake, Link2, Ticket, Briefcase, BadgeDollarSign, TrendingUp, Banknote, Copy,
+  Home, Search as SearchIcon, Zap,
 } from "lucide-react";
 
 
@@ -71,6 +72,14 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Saúde",
     items: [
       { to: "/ehr", label: "Prontuário Eletrônico", icon: Stethoscope, perm: "ehr.record.read" },
+    ],
+  },
+  {
+    label: "Imobiliária",
+    items: [
+      { to: "/imobiliaria/imoveis", label: "Imóveis", icon: Home },
+      { to: "/imobiliaria/intencoes", label: "Intenções de busca", icon: SearchIcon },
+      { to: "/imobiliaria/matches", label: "Matches", icon: Zap },
     ],
   },
   {
