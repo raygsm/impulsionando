@@ -6,7 +6,7 @@ import { useActiveCompany } from "@/hooks/use-active-company";
 import { PageHeader, EmptyState } from "@/components/app/PageElements";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Zap } from "lucide-react";
+
 
 export const Route = createFileRoute("/_authenticated/imobiliaria/matches")({
   head: () => ({ meta: [{ title: "Matches — Imobiliária" }] }),
