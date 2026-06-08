@@ -84,11 +84,18 @@ function NichosIndex() {
               slugs: ["ecommerce"],
             },
             {
+              label: "Imobiliárias",
+              description:
+                "Vitrine inteligente de imóveis, CRM com corretores e gerentes, e ERP de comissões, repasses e contratos — modular e integrado.",
+              slugs: ["imobiliaria"],
+            },
+            {
               label: "White Label e Parceiros",
               description:
                 "Agências, integradores, revendedores e consultorias que vendem tecnologia com marca própria.",
               slugs: ["white-label"],
             },
+
           ];
 
           return CATEGORIAS_NICHO.map((cat) => {
