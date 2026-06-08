@@ -127,6 +127,7 @@ import { Route as AuthenticatedCorePromptsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedCoreParametrosRouteImport } from './routes/_authenticated/core.parametros'
 import { Route as AuthenticatedCoreNovaImplantacaoRouteImport } from './routes/_authenticated/core.nova-implantacao'
 import { Route as AuthenticatedCoreModulosRouteImport } from './routes/_authenticated/core.modulos'
+import { Route as AuthenticatedCoreInstalarModuloRouteImport } from './routes/_authenticated/core.instalar-modulo'
 import { Route as AuthenticatedCoreImplantacoesRouteImport } from './routes/_authenticated/core.implantacoes'
 import { Route as AuthenticatedCoreFinanceiroMasterRouteImport } from './routes/_authenticated/core.financeiro-master'
 import { Route as AuthenticatedCoreEventosRouteImport } from './routes/_authenticated/core.eventos'
@@ -803,6 +804,12 @@ const AuthenticatedCoreModulosRoute =
     path: '/modulos',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreInstalarModuloRoute =
+  AuthenticatedCoreInstalarModuloRouteImport.update({
+    id: '/instalar-modulo',
+    path: '/instalar-modulo',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreImplantacoesRoute =
   AuthenticatedCoreImplantacoesRouteImport.update({
     id: '/implantacoes',
@@ -1243,6 +1250,7 @@ export interface FileRoutesByFullPath {
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
+  '/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/core/parametros': typeof AuthenticatedCoreParametrosRoute
@@ -1407,6 +1415,7 @@ export interface FileRoutesByTo {
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
+  '/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/core/parametros': typeof AuthenticatedCoreParametrosRoute
@@ -1584,6 +1593,7 @@ export interface FileRoutesById {
   '/_authenticated/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/_authenticated/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/_authenticated/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
+  '/_authenticated/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
   '/_authenticated/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/_authenticated/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/_authenticated/core/parametros': typeof AuthenticatedCoreParametrosRoute
@@ -1761,6 +1771,7 @@ export interface FileRouteTypes {
     | '/core/eventos'
     | '/core/financeiro-master'
     | '/core/implantacoes'
+    | '/core/instalar-modulo'
     | '/core/modulos'
     | '/core/nova-implantacao'
     | '/core/parametros'
@@ -1925,6 +1936,7 @@ export interface FileRouteTypes {
     | '/core/eventos'
     | '/core/financeiro-master'
     | '/core/implantacoes'
+    | '/core/instalar-modulo'
     | '/core/modulos'
     | '/core/nova-implantacao'
     | '/core/parametros'
@@ -2101,6 +2113,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/eventos'
     | '/_authenticated/core/financeiro-master'
     | '/_authenticated/core/implantacoes'
+    | '/_authenticated/core/instalar-modulo'
     | '/_authenticated/core/modulos'
     | '/_authenticated/core/nova-implantacao'
     | '/_authenticated/core/parametros'
@@ -3063,6 +3076,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreModulosRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/instalar-modulo': {
+      id: '/_authenticated/core/instalar-modulo'
+      path: '/instalar-modulo'
+      fullPath: '/core/instalar-modulo'
+      preLoaderRoute: typeof AuthenticatedCoreInstalarModuloRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/implantacoes': {
       id: '/_authenticated/core/implantacoes'
       path: '/implantacoes'
@@ -3567,6 +3587,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreEventosRoute: typeof AuthenticatedCoreEventosRoute
   AuthenticatedCoreFinanceiroMasterRoute: typeof AuthenticatedCoreFinanceiroMasterRoute
   AuthenticatedCoreImplantacoesRoute: typeof AuthenticatedCoreImplantacoesRoute
+  AuthenticatedCoreInstalarModuloRoute: typeof AuthenticatedCoreInstalarModuloRoute
   AuthenticatedCoreModulosRoute: typeof AuthenticatedCoreModulosRouteWithChildren
   AuthenticatedCoreNovaImplantacaoRoute: typeof AuthenticatedCoreNovaImplantacaoRoute
   AuthenticatedCoreParametrosRoute: typeof AuthenticatedCoreParametrosRoute
@@ -3585,6 +3606,7 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreFinanceiroMasterRoute:
     AuthenticatedCoreFinanceiroMasterRoute,
   AuthenticatedCoreImplantacoesRoute: AuthenticatedCoreImplantacoesRoute,
+  AuthenticatedCoreInstalarModuloRoute: AuthenticatedCoreInstalarModuloRoute,
   AuthenticatedCoreModulosRoute: AuthenticatedCoreModulosRouteWithChildren,
   AuthenticatedCoreNovaImplantacaoRoute: AuthenticatedCoreNovaImplantacaoRoute,
   AuthenticatedCoreParametrosRoute: AuthenticatedCoreParametrosRoute,
