@@ -127,9 +127,11 @@ import { Route as AuthenticatedCorePromptsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedCoreParametrosRouteImport } from './routes/_authenticated/core.parametros'
 import { Route as AuthenticatedCoreNovaImplantacaoRouteImport } from './routes/_authenticated/core.nova-implantacao'
 import { Route as AuthenticatedCoreModulosRouteImport } from './routes/_authenticated/core.modulos'
+import { Route as AuthenticatedCoreInstalarModuloRouteImport } from './routes/_authenticated/core.instalar-modulo'
 import { Route as AuthenticatedCoreImplantacoesRouteImport } from './routes/_authenticated/core.implantacoes'
 import { Route as AuthenticatedCoreFinanceiroMasterRouteImport } from './routes/_authenticated/core.financeiro-master'
 import { Route as AuthenticatedCoreEventosRouteImport } from './routes/_authenticated/core.eventos'
+import { Route as AuthenticatedCoreCriarProjetoRouteImport } from './routes/_authenticated/core.criar-projeto'
 import { Route as AuthenticatedCoreClientesRouteImport } from './routes/_authenticated/core.clientes'
 import { Route as AuthenticatedBiNichesRouteImport } from './routes/_authenticated/bi.niches'
 import { Route as AuthenticatedBiMasterRouteImport } from './routes/_authenticated/bi.master'
@@ -182,6 +184,7 @@ import { Route as AuthenticatedCoreModulosSlugRouteImport } from './routes/_auth
 import { Route as AuthenticatedCoreClienteIdRouteImport } from './routes/_authenticated/core.cliente.$id'
 import { Route as AuthenticatedAdminModulosClonagemRouteImport } from './routes/_authenticated/admin.modulos.clonagem'
 import { Route as ApiPublicPaymentsInfinitepayWebhookRouteImport } from './routes/api/public/payments/infinitepay.webhook'
+import { Route as AuthenticatedCoreClienteIdModuloSlugConfigurarRouteImport } from './routes/_authenticated/core.cliente.$id.modulo.$slug.configurar'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
@@ -802,6 +805,12 @@ const AuthenticatedCoreModulosRoute =
     path: '/modulos',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreInstalarModuloRoute =
+  AuthenticatedCoreInstalarModuloRouteImport.update({
+    id: '/instalar-modulo',
+    path: '/instalar-modulo',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreImplantacoesRoute =
   AuthenticatedCoreImplantacoesRouteImport.update({
     id: '/implantacoes',
@@ -818,6 +827,12 @@ const AuthenticatedCoreEventosRoute =
   AuthenticatedCoreEventosRouteImport.update({
     id: '/eventos',
     path: '/eventos',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
+const AuthenticatedCoreCriarProjetoRoute =
+  AuthenticatedCoreCriarProjetoRouteImport.update({
+    id: '/criar-projeto',
+    path: '/criar-projeto',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
 const AuthenticatedCoreClientesRoute =
@@ -1125,6 +1140,12 @@ const ApiPublicPaymentsInfinitepayWebhookRoute =
     path: '/api/public/payments/infinitepay/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedCoreClienteIdModuloSlugConfigurarRoute =
+  AuthenticatedCoreClienteIdModuloSlugConfigurarRouteImport.update({
+    id: '/modulo/$slug/configurar',
+    path: '/modulo/$slug/configurar',
+    getParentRoute: () => AuthenticatedCoreClienteIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -1232,9 +1253,11 @@ export interface FileRoutesByFullPath {
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
+  '/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
+  '/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/core/parametros': typeof AuthenticatedCoreParametrosRoute
@@ -1278,7 +1301,7 @@ export interface FileRoutesByFullPath {
   '/reports/': typeof AuthenticatedReportsIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
-  '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRoute
+  '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
@@ -1299,6 +1322,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/api/public/payments/infinitepay/webhook': typeof ApiPublicPaymentsInfinitepayWebhookRoute
+  '/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -1395,9 +1419,11 @@ export interface FileRoutesByTo {
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
+  '/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
+  '/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/core/parametros': typeof AuthenticatedCoreParametrosRoute
@@ -1441,7 +1467,7 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedReportsIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
-  '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRoute
+  '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
@@ -1462,6 +1488,7 @@ export interface FileRoutesByTo {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/api/public/payments/infinitepay/webhook': typeof ApiPublicPaymentsInfinitepayWebhookRoute
+  '/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -1571,9 +1598,11 @@ export interface FileRoutesById {
   '/_authenticated/bi/master': typeof AuthenticatedBiMasterRoute
   '/_authenticated/bi/niches': typeof AuthenticatedBiNichesRoute
   '/_authenticated/core/clientes': typeof AuthenticatedCoreClientesRoute
+  '/_authenticated/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
   '/_authenticated/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/_authenticated/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/_authenticated/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
+  '/_authenticated/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
   '/_authenticated/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/_authenticated/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/_authenticated/core/parametros': typeof AuthenticatedCoreParametrosRoute
@@ -1617,7 +1646,7 @@ export interface FileRoutesById {
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
   '/_authenticated/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
-  '/_authenticated/core/cliente/$id': typeof AuthenticatedCoreClienteIdRoute
+  '/_authenticated/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
   '/_authenticated/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
@@ -1638,6 +1667,7 @@ export interface FileRoutesById {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/api/public/payments/infinitepay/webhook': typeof ApiPublicPaymentsInfinitepayWebhookRoute
+  '/_authenticated/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1747,9 +1777,11 @@ export interface FileRouteTypes {
     | '/bi/master'
     | '/bi/niches'
     | '/core/clientes'
+    | '/core/criar-projeto'
     | '/core/eventos'
     | '/core/financeiro-master'
     | '/core/implantacoes'
+    | '/core/instalar-modulo'
     | '/core/modulos'
     | '/core/nova-implantacao'
     | '/core/parametros'
@@ -1814,6 +1846,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/api/public/payments/infinitepay/webhook'
+    | '/core/cliente/$id/modulo/$slug/configurar'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1910,9 +1943,11 @@ export interface FileRouteTypes {
     | '/bi/master'
     | '/bi/niches'
     | '/core/clientes'
+    | '/core/criar-projeto'
     | '/core/eventos'
     | '/core/financeiro-master'
     | '/core/implantacoes'
+    | '/core/instalar-modulo'
     | '/core/modulos'
     | '/core/nova-implantacao'
     | '/core/parametros'
@@ -1977,6 +2012,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/api/public/payments/infinitepay/webhook'
+    | '/core/cliente/$id/modulo/$slug/configurar'
   id:
     | '__root__'
     | '/'
@@ -2085,9 +2121,11 @@ export interface FileRouteTypes {
     | '/_authenticated/bi/master'
     | '/_authenticated/bi/niches'
     | '/_authenticated/core/clientes'
+    | '/_authenticated/core/criar-projeto'
     | '/_authenticated/core/eventos'
     | '/_authenticated/core/financeiro-master'
     | '/_authenticated/core/implantacoes'
+    | '/_authenticated/core/instalar-modulo'
     | '/_authenticated/core/modulos'
     | '/_authenticated/core/nova-implantacao'
     | '/_authenticated/core/parametros'
@@ -2152,6 +2190,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/api/public/payments/infinitepay/webhook'
+    | '/_authenticated/core/cliente/$id/modulo/$slug/configurar'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -3050,6 +3089,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreModulosRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/instalar-modulo': {
+      id: '/_authenticated/core/instalar-modulo'
+      path: '/instalar-modulo'
+      fullPath: '/core/instalar-modulo'
+      preLoaderRoute: typeof AuthenticatedCoreInstalarModuloRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/implantacoes': {
       id: '/_authenticated/core/implantacoes'
       path: '/implantacoes'
@@ -3069,6 +3115,13 @@ declare module '@tanstack/react-router' {
       path: '/eventos'
       fullPath: '/core/eventos'
       preLoaderRoute: typeof AuthenticatedCoreEventosRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/core/criar-projeto': {
+      id: '/_authenticated/core/criar-projeto'
+      path: '/criar-projeto'
+      fullPath: '/core/criar-projeto'
+      preLoaderRoute: typeof AuthenticatedCoreCriarProjetoRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
     '/_authenticated/core/clientes': {
@@ -3435,6 +3488,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsInfinitepayWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/core/cliente/$id/modulo/$slug/configurar': {
+      id: '/_authenticated/core/cliente/$id/modulo/$slug/configurar'
+      path: '/modulo/$slug/configurar'
+      fullPath: '/core/cliente/$id/modulo/$slug/configurar'
+      preLoaderRoute: typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRouteImport
+      parentRoute: typeof AuthenticatedCoreClienteIdRoute
+    }
   }
 }
 
@@ -3541,11 +3601,28 @@ const AuthenticatedCoreModulosRouteWithChildren =
     AuthenticatedCoreModulosRouteChildren,
   )
 
+interface AuthenticatedCoreClienteIdRouteChildren {
+  AuthenticatedCoreClienteIdModuloSlugConfigurarRoute: typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
+}
+
+const AuthenticatedCoreClienteIdRouteChildren: AuthenticatedCoreClienteIdRouteChildren =
+  {
+    AuthenticatedCoreClienteIdModuloSlugConfigurarRoute:
+      AuthenticatedCoreClienteIdModuloSlugConfigurarRoute,
+  }
+
+const AuthenticatedCoreClienteIdRouteWithChildren =
+  AuthenticatedCoreClienteIdRoute._addFileChildren(
+    AuthenticatedCoreClienteIdRouteChildren,
+  )
+
 interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreClientesRoute: typeof AuthenticatedCoreClientesRoute
+  AuthenticatedCoreCriarProjetoRoute: typeof AuthenticatedCoreCriarProjetoRoute
   AuthenticatedCoreEventosRoute: typeof AuthenticatedCoreEventosRoute
   AuthenticatedCoreFinanceiroMasterRoute: typeof AuthenticatedCoreFinanceiroMasterRoute
   AuthenticatedCoreImplantacoesRoute: typeof AuthenticatedCoreImplantacoesRoute
+  AuthenticatedCoreInstalarModuloRoute: typeof AuthenticatedCoreInstalarModuloRoute
   AuthenticatedCoreModulosRoute: typeof AuthenticatedCoreModulosRouteWithChildren
   AuthenticatedCoreNovaImplantacaoRoute: typeof AuthenticatedCoreNovaImplantacaoRoute
   AuthenticatedCoreParametrosRoute: typeof AuthenticatedCoreParametrosRoute
@@ -3554,15 +3631,17 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreTemplatesRoute: typeof AuthenticatedCoreTemplatesRoute
   AuthenticatedCoreTestesRoute: typeof AuthenticatedCoreTestesRoute
   AuthenticatedCoreIndexRoute: typeof AuthenticatedCoreIndexRoute
-  AuthenticatedCoreClienteIdRoute: typeof AuthenticatedCoreClienteIdRoute
+  AuthenticatedCoreClienteIdRoute: typeof AuthenticatedCoreClienteIdRouteWithChildren
 }
 
 const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreClientesRoute: AuthenticatedCoreClientesRoute,
+  AuthenticatedCoreCriarProjetoRoute: AuthenticatedCoreCriarProjetoRoute,
   AuthenticatedCoreEventosRoute: AuthenticatedCoreEventosRoute,
   AuthenticatedCoreFinanceiroMasterRoute:
     AuthenticatedCoreFinanceiroMasterRoute,
   AuthenticatedCoreImplantacoesRoute: AuthenticatedCoreImplantacoesRoute,
+  AuthenticatedCoreInstalarModuloRoute: AuthenticatedCoreInstalarModuloRoute,
   AuthenticatedCoreModulosRoute: AuthenticatedCoreModulosRouteWithChildren,
   AuthenticatedCoreNovaImplantacaoRoute: AuthenticatedCoreNovaImplantacaoRoute,
   AuthenticatedCoreParametrosRoute: AuthenticatedCoreParametrosRoute,
@@ -3571,7 +3650,7 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreTemplatesRoute: AuthenticatedCoreTemplatesRoute,
   AuthenticatedCoreTestesRoute: AuthenticatedCoreTestesRoute,
   AuthenticatedCoreIndexRoute: AuthenticatedCoreIndexRoute,
-  AuthenticatedCoreClienteIdRoute: AuthenticatedCoreClienteIdRoute,
+  AuthenticatedCoreClienteIdRoute: AuthenticatedCoreClienteIdRouteWithChildren,
 }
 
 const AuthenticatedCoreRouteWithChildren =

@@ -1,70 +1,78 @@
-# Fábrica de Projetos — Auditoria + Plano de Deltas
 
-## 1. O que JÁ existe (não será recriado)
+# Fase 2 + Fase 3 — Plano de execução enxuto (máximo reuso)
 
-| Necessidade do prompt | Já existe em |
+## Diagnóstico
+
+A maior parte do que a Fase 2 e a Fase 3 pedem **já existe** no projeto. Recriar é o que devo evitar.
+
+| Fase pedida | Já existe |
 |---|---|
-| Área interna restrita à equipe | `/core` (rota `_authenticated/core.tsx`) — gate `isImpulsionandoStaff` |
-| Entidade Cliente | tabela `companies` (33 colunas, com segment/owner/document/branding) |
-| Entidade Projeto / Implantação | `companies` + `onboarding_checklist` + `onboarding_domain_requests` |
-| Módulo-base | tabela `modules` + `module_versions` |
-| Módulo instalado | tabela `company_modules` |
-| Biblioteca de módulos | `/core/modulos` + `/core/modulos/$slug` |
-| Implantações | `/core/implantacoes` |
-| Clonagem de módulos | `/admin/modulos/clonagem` |
-| Wizard "Novo projeto com IA" | `/core/nova-implantacao` (prompt → análise → provisionamento async) |
-| Cliente 360 | `/core/clientes` + `/core/cliente/$id` |
-| Parâmetros globais | `/core/parametros` + `setting_definitions` |
-| Templates de mensagem | `message_templates` |
-| Saúde / Testes / Eventos | `/core/saude`, `/core/testes`, `/core/eventos` |
-| Trials / Demo | `trial_subscriptions` + rotas `/demo.*` |
+| Wizard "Criar Projeto" (etapas 1–7) | `/core/nova-implantacao` (prompt → análise → provisionamento async, com merge por CPF/CNPJ e ambiente DEMO/TESTE/REAL) |
+| Cadastro/seleção de cliente | tabela `companies` (34 colunas) + lógica de reuso já no wizard atual |
+| Escolha de template / clonagem / vazio | tabela `site_templates` + `/core/templates` (Fase 1) + `/admin/modulos/clonagem` |
+| Seleção de módulos | `/core/modulos` + `modules` + `company_modules` + `InstallModuleDialog` (instalação em 1 clique com `installModuleWithTemplate`) |
+| Preset por nicho | `src/data/moduleSegmentTemplates.ts` (`SEGMENT_LABELS`) — já consumido pelo `InstallModuleDialog` |
+| Configurações iniciais (SIM/NÃO) | `setting_definitions` + `company_settings` |
+| Permissões / automações / templates de mensagem / dashboard / logs | `permissions`, `message_templates`, `audit_logs`, `notifications` |
+| Logs do provisionamento | `ai_project_generations` (eventos + status em tempo real) + `audit_logs` |
+| Mocks DEMO vs REAL limpo | já isolados via `companies.environment` + rotas `/demo.*` |
 
-**Conclusão:** a "Fábrica de Projetos" descrita é, em ~80%, o `/core` atual + `/core/nova-implantacao`. Não há motivo para criar uma área nova nem nova rota `/admin/fabrica-projetos`.
+**Conclusão:** não preciso de novo wizard de 7 etapas nem de uma "Central de Instalação" inteira. Preciso de **2 orquestradores enxutos** que costuram o que já existe, mais um pouco de UI.
 
-## 2. O que FALTA (deltas mínimos)
+## O que vou construir (deltas mínimos)
 
-### Delta A — Ambiente DEMO/TESTE/REAL explícito por projeto
-- Hoje: existem trials, demo público (`/demo.*`) e clientes reais, mas não há um **flag único** em `companies` separando os três.
-- Add: coluna `companies.environment` enum `('demo','teste','real')` default `'real'`; preencher por backfill (trials→demo, master→real, demais→real).
-- Filtros por ambiente em `/core/clientes` e `/core/implantacoes` (somente UI).
-- `core.nova-implantacao` já pergunta o tipo na etapa 2 — só passar a gravar nessa coluna.
+### Delta 1 — Página "Criar Projeto" assistida (`/core/criar-projeto`)
+Wizard curto de **3 passos** que apenas orquestra peças existentes:
 
-### Delta B — Templates de front-end (catálogo reutilizável)
-- Nova tabela `site_templates` (nome, nicho, descrição, páginas[], seções[], cores, status).
-- Tela `/core/templates` (CRUD restrito a staff) para cadastrar/clonar templates.
-- `core.nova-implantacao` passa a sugerir e aplicar `site_template_id` quando a IA escolhe um template existente — se não houver, segue como hoje.
+1. **Cliente + Projeto** — formulário único com busca por CPF/CNPJ que reusa `companies` existentes (mesma lógica já implementada no `nova-implantacao`); campos: nome, fantasia, responsável, WhatsApp, email, documento, nicho, ambiente (DEMO/TESTE/REAL), domínio, status, observações.
+2. **Modelo + Módulos + Preset** — uma tela só: radio de modelo (Template / Clonar / Vazio / DEMO base / Módulo-base / Combinação), seleção múltipla de módulos (lista vinda de `modules`), preset por nicho (`SEGMENT_LABELS`), toggles SIM/NÃO de comunicação/dashboard/permissões/automações.
+3. **Revisão** — resumo + checkbox de confirmação + botão "Criar Projeto". Pós-criação: tela de sucesso com 5 botões (Acessar / Configurar módulos / Criar páginas / Ver logs / Voltar).
 
-### Delta C — Prompts salvos (biblioteca reutilizável)
-- Nova tabela `ai_prompt_library` (nome, categoria, nicho, finalidade, prompt, variables jsonb, version, created_by).
-- Tela `/core/prompts` (CRUD staff).
-- Botão "Carregar prompt salvo" na etapa 3 do wizard `nova-implantacao`.
-- Botão "Salvar este prompt" após uma análise bem-sucedida.
+O wizard chama UMA server fn nova `createProjectFromFactory` em `src/lib/factory.functions.ts` que:
+- cria/atualiza `companies` (com merge por documento);
+- para cada módulo selecionado, chama `installModuleWithTemplate` (já existe — instala estrutura + dependências + preset, NUNCA copia dados reais);
+- aplica toggles em `company_settings`;
+- grava `ai_project_generations` (status + events) para log/timeline;
+- registra entradas em `audit_logs`.
 
-### Delta D — Páginas geradas (rastreio do output)
-- Nova tabela `generated_pages` (company_id, generation_id, template_id, name, slug, content jsonb, prompt_used, status).
-- Já produzimos páginas no provisionamento; só falta persistir o output para reuso/edição.
-- Aba "Páginas geradas" em `/core/cliente/$id`.
+> Mantém `/core/nova-implantacao` como caminho "via prompt de IA". A nova rota é o caminho "sem IA, sem consumir crédito".
 
-### Delta E — Renomear o agrupamento de menu
-- No `core.tsx`, adicionar uma seção "Fábrica de Projetos" agrupando os itens já existentes (Nova Implantação, Templates, Prompts, Biblioteca de Módulos, Clonagem, Implantações). Apenas reordenação visual.
+### Delta 2 — "Instalar Módulo" no Cliente 360 (Fase 3)
+Não preciso de uma nova área. O `InstallModuleDialog` já instala em 1 clique com preset. Vou:
+- Adicionar uma rota leve `/core/instalar-modulo` (atalho a partir do menu) que apenas abre o mesmo dialog em modo "selecionar cliente + projeto + módulo + preset" e, depois de instalar, redireciona para um "Assistente de Configuração do Módulo Instalado".
+- Criar o **Assistente de configuração pós-instalação** (`/core/cliente/$id/modulo/$slug/configurar`) com 8 passos curtos (Identificação → Recursos → Permissões → Comunicação → Integrações → Automação → Dashboard → Finalização) — usa `setting_definitions` por módulo + toggles. Para o módulo **Agenda Online** (prioritário), os SIM/NÃO específicos (profissionais, serviços, salas, fila, no-show, lembrete 24h/2h, WhatsApp/email/VoIP) viram um preset declarativo em `src/data/moduleAssistantSteps.ts`.
+- Status do módulo instalado já existe em `company_modules.status` — só preciso pintar o badge (instalado / aguardando configuração / configurado / ativo / pausado / suspenso / arquivado / erro).
 
-## 3. O que NÃO será feito (e por quê)
+### Delta 3 — Log/timeline visível
+Aproveito `ai_project_generations.events` (já gravado pelo wizard atual). Para o novo `createProjectFromFactory`, gravo no mesmo formato (`projeto_iniciado`, `cliente_criado`, `projeto_criado`, `template_aplicado`, `modulos_instalados`, `preset_aplicado`, `config_salva`, `projeto_concluido`, `erro`). A página de logs já existe.
 
-- ❌ Nova rota `/admin/fabrica-projetos` — duplicaria `/core`.
-- ❌ Nova tabela `clients` / `projects` — `companies` já cobre ambos.
-- ❌ Reescrita do wizard — o atual já faz prompt → análise → provisionamento async com merge de duplicados.
-- ❌ Nova autenticação / permissões — o gate `isImpulsionandoStaff` já existe em `core.tsx`.
-- ❌ Mexer em DEMO/`/demo.*` ou trials — já isolados.
+### Delta 4 — Menu
+No `core.tsx`, adicionar 2 itens: **Criar Projeto** (`/core/criar-projeto`) e **Instalar Módulo** (`/core/instalar-modulo`). Sem novas seções/agrupamentos visuais.
 
-## 4. Ordem de execução
+## O que NÃO vou fazer (e por quê)
 
-1. Migration única: `companies.environment` + `site_templates` + `ai_prompt_library` + `generated_pages` (com GRANTs e RLS staff-only).
-2. Server fns em `src/lib/factory.functions.ts` (CRUD templates/prompts; salvar página gerada).
-3. UI: `/core/templates`, `/core/prompts` (listas + formulário simples reutilizando `Card`/`Input`/`Button`).
-4. Patch leve em `core.nova-implantacao.tsx`: carregar prompt salvo, salvar prompt, gravar `environment`, persistir páginas no fim do provisionamento.
-5. Patch leve em `core.cliente.$id.tsx`: aba "Páginas geradas".
-6. Patch em `core.tsx`: subgrupo visual "Fábrica de Projetos".
+- ❌ Reescrever `/core/nova-implantacao` — ele é o caminho via IA e continua existindo.
+- ❌ Nova tabela `projects` — `companies` + `company_modules` já cobrem.
+- ❌ Nova tabela de logs — `ai_project_generations` + `audit_logs` cobrem.
+- ❌ Recriar `InstallModuleDialog`, `OnboardingWizard`, `ClientSettingsPanel` — todos reusados.
+- ❌ Nova lógica de "nunca copiar dados reais" — `installModuleWithTemplate` já é estrutural.
+- ❌ Mexer em DEMO/`/demo.*` ou trials.
 
-Total estimado: **1 migration + 1 server-fn file + 2 rotas novas + 3 patches leves**. Nenhum arquivo existente é apagado.
+## Arquivos a criar / editar
 
-## Confirma este plano antes de executar?
+**Novos (4):**
+- `src/lib/factory.functions.ts` — adicionar `createProjectFromFactory` (append à existente)
+- `src/routes/_authenticated/core.criar-projeto.tsx` — wizard 3 passos
+- `src/routes/_authenticated/core.instalar-modulo.tsx` — atalho + escolha + dispara `InstallModuleDialog`
+- `src/routes/_authenticated/core.cliente.$id.modulo.$slug.configurar.tsx` — assistente pós-instalação
+- `src/data/moduleAssistantSteps.ts` — passos declarativos por módulo (Agenda primeiro)
+
+**Editados (1):**
+- `src/routes/_authenticated/core.tsx` — 2 itens no menu
+
+**Sem migration nova.** Tudo cabe nas tabelas atuais.
+
+## Estimativa
+1 server fn + 3 rotas novas + 1 patch de menu. Nada apagado. Nenhum módulo recriado.
+
+## Confirma para eu executar?

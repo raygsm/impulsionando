@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { z } from "zod";
+import { getSegmentTemplate, type SegmentKey } from "@/data/moduleSegmentTemplates";
 
 // ============ Site Templates ============
 export const listSiteTemplates = createServerFn({ method: "GET" })
@@ -159,4 +161,265 @@ export const listGeneratedPagesByCompany = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     return { pages: rows ?? [] };
+  });
+
+// ============ Fase 2: Criar Projeto da Fábrica ============
+const CreateProjectSchema = z.object({
+  client: z.object({
+    existingCompanyId: z.string().uuid().optional(),
+    name: z.string().min(1).max(200),
+    tradeName: z.string().max(200).optional().or(z.literal("")),
+    legalName: z.string().max(200).optional().or(z.literal("")),
+    ownerName: z.string().max(200).optional().or(z.literal("")),
+    whatsapp: z.string().max(50).optional().or(z.literal("")),
+    email: z.string().max(200).optional().or(z.literal("")),
+    document: z.string().max(30).optional().or(z.literal("")),
+    segment: z.string().max(80).optional().or(z.literal("")),
+    notes: z.string().max(2000).optional().or(z.literal("")),
+  }),
+  project: z.object({
+    name: z.string().min(1).max(200),
+    niche: z.string().max(80).optional().or(z.literal("")),
+    environment: z.enum(["demo", "teste", "real"]),
+    domain: z.string().max(200).optional().or(z.literal("")),
+    subdomain: z.string().max(80).optional().or(z.literal("")),
+    internalOwner: z.string().max(200).optional().or(z.literal("")),
+    clientOwner: z.string().max(200).optional().or(z.literal("")),
+    status: z.string().max(40).optional().or(z.literal("")),
+  }),
+  model: z.object({
+    kind: z.enum(["template", "clone", "empty", "demo-base", "module-base", "combo"]),
+    templateId: z.string().uuid().optional(),
+    sourceCompanyId: z.string().uuid().optional(),
+  }),
+  modules: z
+    .array(z.object({ slug: z.string().min(1).max(80), segment: z.string().max(40).default("default") }))
+    .default([]),
+  toggles: z.record(z.string().max(80), z.boolean()).default({}),
+  confirm: z.literal(true),
+});
+
+export const createProjectFromFactory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => CreateProjectSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const events: Array<{ at: string; key: string; ok: boolean; message?: string }> = [];
+    const push = (key: string, ok: boolean, message?: string) =>
+      events.push({ at: new Date().toISOString(), key, ok, ...(message ? { message } : {}) });
+
+    push("projeto_iniciado", true);
+
+    // 1) Reuse company by id or document, else create
+    let companyId = data.client.existingCompanyId;
+    if (!companyId && data.client.document) {
+      const { data: existing } = await supabase
+        .from("companies")
+        .select("id")
+        .eq("document", data.client.document)
+        .maybeSingle();
+      if (existing) companyId = existing.id;
+    }
+    const companyPayload: Record<string, unknown> = {
+      name: data.client.name,
+      trade_name: data.client.tradeName || null,
+      legal_name: data.client.legalName || null,
+      owner_name: data.client.ownerName || null,
+      whatsapp: data.client.whatsapp || null,
+      email: data.client.email || null,
+      document: data.client.document || null,
+      segment: data.client.segment || data.project.niche || null,
+      environment: data.project.environment,
+      domain: data.project.domain || null,
+      subdomain: data.project.subdomain || null,
+      status: data.project.status || "active",
+    };
+    if (companyId) {
+      const { error } = await supabase.from("companies").update(companyPayload as never).eq("id", companyId);
+      if (error) throw new Error(`Falha ao atualizar cliente: ${error.message}`);
+      push("cliente_reutilizado", true);
+    } else {
+      const { data: c, error } = await supabase
+        .from("companies")
+        .insert(companyPayload as never)
+        .select("id")
+        .single();
+      if (error || !c) throw new Error(`Falha ao criar cliente: ${error?.message ?? "sem retorno"}`);
+      companyId = c.id;
+      push("cliente_criado", true);
+    }
+    push("projeto_criado", true, data.project.name);
+    push("ambiente_definido", true, data.project.environment);
+    if (data.project.niche) push("nicho_escolhido", true, data.project.niche);
+    push("template_escolhido", true, data.model.kind);
+
+    // 2) Generation row for log/timeline (reuses existing table)
+    const { data: gen } = await supabase
+      .from("ai_project_generations")
+      .insert({
+        company_id: companyId,
+        created_by: userId,
+        prompt: `[FÁBRICA] ${data.project.name}`,
+        client_data: data.client as never,
+        project_data: data.project as never,
+        uploaded_files: [] as never,
+        status: "provisioning",
+        provisioning_steps: events as never,
+        provisioning_started_at: new Date().toISOString(),
+        approved_by: userId,
+        approved_at: new Date().toISOString(),
+      } as never)
+      .select("id")
+      .single();
+    const generationId = (gen as { id: string } | null)?.id ?? null;
+
+    // 3) Install modules + presets (structural only — no real data copy)
+    const installed: string[] = [];
+    const failed: { slug: string; reason: string }[] = [];
+    for (const mod of data.modules) {
+      const { data: m } = await supabase
+        .from("modules")
+        .select("id, slug, current_version, readiness_status")
+        .eq("slug", mod.slug)
+        .maybeSingle();
+      if (!m) {
+        failed.push({ slug: mod.slug, reason: "não encontrado" });
+        push(`modulo_falhou:${mod.slug}`, false, "não encontrado");
+        continue;
+      }
+      const { error: instErr } = await supabase.from("company_modules").upsert(
+        {
+          company_id: companyId,
+          module_id: m.id,
+          is_enabled: true,
+          installed_version: m.current_version,
+          installed_at: new Date().toISOString(),
+          enabled_at: new Date().toISOString(),
+        } as never,
+        { onConflict: "company_id,module_id" },
+      );
+      if (instErr) {
+        failed.push({ slug: mod.slug, reason: instErr.message });
+        push(`modulo_falhou:${mod.slug}`, false, instErr.message);
+        continue;
+      }
+      const template = getSegmentTemplate(m.slug, (mod.segment || "default") as SegmentKey);
+      for (const [key, value] of Object.entries(template)) {
+        await supabase.from("company_settings").upsert(
+          {
+            company_id: companyId,
+            key,
+            value: value as never,
+            updated_at: new Date().toISOString(),
+          } as never,
+          { onConflict: "company_id,key" },
+        );
+      }
+      installed.push(m.slug);
+    }
+    if (installed.length) push("modulos_instalados", true, installed.join(", "));
+    push("preset_aplicado", true);
+
+    // 4) Apply factory toggles into company_settings
+    for (const [key, val] of Object.entries(data.toggles)) {
+      await supabase.from("company_settings").upsert(
+        {
+          company_id: companyId,
+          key: `factory.${key}`,
+          value: val as never,
+          updated_at: new Date().toISOString(),
+        } as never,
+        { onConflict: "company_id,key" },
+      );
+    }
+    push("config_salva", true);
+
+    // 5) Audit
+    await supabase.from("audit_logs").insert({
+      action: "factory.project.created",
+      entity: "companies",
+      entity_id: companyId,
+      after: {
+        project: data.project,
+        modules: installed,
+        failed,
+        model: data.model,
+      } as never,
+    } as never);
+
+    push("projeto_concluido", failed.length === 0, failed.length ? `Falhas: ${failed.map((f) => f.slug).join(", ")}` : undefined);
+    if (generationId) {
+      await supabase
+        .from("ai_project_generations")
+        .update({
+          status: failed.length ? "completed_with_errors" : "completed",
+          provisioned_at: new Date().toISOString(),
+          provisioning_steps: events as never,
+          error_message: failed.length ? `Falhas: ${failed.map((f) => f.slug).join(", ")}` : null,
+        } as never)
+        .eq("id", generationId);
+    }
+
+    return {
+      companyId: companyId!,
+      generationId,
+      installed,
+      failed,
+      events,
+    };
+  });
+
+// ============ Fase 3: Helpers para Instalação/Configuração Pós-Install ============
+export const listCompaniesForFactory = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data } = await context.supabase
+      .from("companies")
+      .select("id, name, trade_name, document, environment, segment, status, is_master, is_active")
+      .eq("is_master", false)
+      .order("name");
+    return { companies: data ?? [] };
+  });
+
+export const listInstallableModules = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data } = await context.supabase
+      .from("modules")
+      .select("id, slug, name, description, category, readiness_status, current_version, dependencies, sort_order")
+      .eq("is_active", true)
+      .order("sort_order");
+    return { modules: data ?? [] };
+  });
+
+export const getCompanyModuleSettings = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { companyId: string; prefix: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { data: rows } = await context.supabase
+      .from("company_settings")
+      .select("key, value")
+      .eq("company_id", data.companyId)
+      .like("key", `${data.prefix}%`);
+    return { settings: rows ?? [] };
+  });
+
+export const saveModuleAssistantSettings = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { companyId: string; values: Record<string, unknown>; markConfigured?: boolean; moduleSlug?: string }) => d)
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    for (const [key, value] of Object.entries(data.values)) {
+      await supabase.from("company_settings").upsert(
+        { company_id: data.companyId, key, value: value as never, updated_at: new Date().toISOString() } as never,
+        { onConflict: "company_id,key" },
+      );
+    }
+    await supabase.from("audit_logs").insert({
+      action: "factory.module.configured",
+      entity: "company_settings",
+      entity_id: data.companyId,
+      after: { module: data.moduleSlug, keys: Object.keys(data.values) } as never,
+    } as never);
+    return { ok: true };
   });
