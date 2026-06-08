@@ -629,6 +629,98 @@ export const NICHO_DETAILS: NichoDetail[] = [
     ctaSecondary: { label: "Ver o Showroom Fitness", href: "/showroom/fitness" },
     demoRoute: "/showroom/fitness",
   },
+
+  // ============================================================
+  // 9. IMOBILIÁRIAS — Vitrine + CRM Imobiliário + ERP Imobiliário
+  // ============================================================
+  {
+    slug: "imobiliaria",
+    title:
+      "Imobiliária modular: Vitrine inteligente, CRM com corretores e ERP para comissões e repasses — tudo integrado.",
+    subtitle:
+      "Comece com uma vitrine inteligente para exibir imóveis, captar interessados e ler a demanda. Evolua para CRM com distribuição de leads, follow-up e WhatsApp. Complete com ERP para contratos, comissões, repasses e financeiro. Cada módulo trabalha por si — e todos se conectam automaticamente quando contratados.",
+    shortLabel: "Imobiliárias",
+    cardDesc:
+      "Vitrine de imóveis, intenção de busca, alerta automático, CRM com corretores e gerentes, follow-up, WhatsApp, funil comercial e ERP de comissões, contratos e repasses.",
+    icon: Home,
+    pains: [
+      "Imóveis espalhados em planilhas, fotos no WhatsApp e portais soltos.",
+      "Interessado que perde o interesse antes do corretor responder.",
+      "Lead distribuído sem critério — quem pegar primeiro atende.",
+      "Corretor sem follow-up estruturado; lead esfria.",
+      "Gerente sem visão de quem está atendendo o quê.",
+      "Comissão calculada no caderno; repasse atrasa.",
+      "Contratos e documentos misturados em e-mail e pastas.",
+      "Vendas e locações concluídas sem alimentar o financeiro.",
+      "Sem leitura de quais bairros, faixas de preço e tipos vendem.",
+      "Cliente cadastra busca uma vez e nunca mais recebe imóvel compatível.",
+    ],
+    silentLosses: [
+      "Lead novo que entra fora do horário e ninguém responde.",
+      "Interessado com perfil claro que nunca mais é avisado quando entra um imóvel compatível.",
+      "Corretor que recebeu o lead e não fez o primeiro contato — e a gestão não vê.",
+      "Imóvel reduzido de preço sem aviso aos interessados antigos.",
+      "Comissão prevista sem virar comissão controlada.",
+      "Repasse atrasado por falta de visibilidade do que foi recebido.",
+      "Dados de busca dos clientes não usados como inteligência comercial.",
+    ],
+    solution: [
+      "Vitrine pública com imóveis, filtros avançados e página individual",
+      "Cadastro de intenção de busca (Avise-me quando aparecer imóvel compatível)",
+      "Alerta automático de novo imóvel compatível com a busca salva",
+      "Captação de interessados com origem e LGPD",
+      "Distribuição de leads: manual, randômica, rodízio, por região, tipo, ticket ou gerente",
+      "Cadastro completo de corretores, gerentes, equipes e regiões",
+      "Funil comercial imobiliário com temperatura do lead",
+      "Follow-up automático e manual com SLA e redistribuição",
+      "WhatsApp e e-mail orquestrados pelo CommunicationDispatcher",
+      "Marcar venda ou locação concluída com valor final e comissão prevista",
+      "ERP de contratos, comissões, repasses e valores a receber",
+      "Dashboards por corretor, gerente e gestão da imobiliária",
+    ],
+    journey: [
+      { step: "Cliente acessa a Vitrine", detail: "Filtra por compra/locação, bairro, tipo, valor, quartos e características." },
+      { step: "Cliente salva intenção de busca", detail: "Avise-me quando aparecer um imóvel compatível — perfil fica registrado." },
+      { step: "Imobiliária cadastra novo imóvel", detail: "Sistema compara com buscas salvas e dispara alerta automático ao interessado." },
+      { step: "Interessado vira lead no CRM", detail: "Se o CRM estiver contratado, o interessado é distribuído conforme a regra (rodízio, região, gerente, corretor)." },
+      { step: "Corretor recebe lead no WhatsApp", detail: "Mensagem com nome, perfil de busca e prazo de primeiro contato. Gerente é avisado em cópia." },
+      { step: "Funil avança com follow-up", detail: "Imóveis enviados, visita agendada, proposta, negociação — cada etapa atualiza o histórico." },
+      { step: "Venda ou locação é concluída", detail: "Corretor (ou gerente) marca como concluída no CRM com valor final e comissão prevista." },
+      { step: "ERP recebe a operação", detail: "Se o ERP estiver contratado, comissão, repasse, contrato e documentos passam a ser controlados automaticamente." },
+      { step: "Gestão acompanha dashboards", detail: "Performance por corretor, equipe, região, bairro, faixa de preço e canal de origem." },
+    ],
+    extraBlock: {
+      title: "Como os módulos se integram automaticamente",
+      lines: [
+        "Vitrine + CRM: interessado captado vira lead, intenção de busca vira perfil, imóvel de interesse fica vinculado.",
+        "CRM + Comunicação: lead atribuído, follow-up vencido, venda concluída e redistribuição disparam WhatsApp/e-mail com log.",
+        "CRM + ERP: venda/locação concluída no CRM cria comissão, repasse e contrato controlados no ERP — sem retrabalho.",
+        "Vitrine + Comunicação: novo imóvel compatível avisa o lead com WhatsApp/e-mail; confirmação de cadastro também.",
+        "ERP + Comunicação: comissão aprovada, repasse pendente e pagamento podem gerar avisos com log.",
+        "Cada módulo funciona sozinho. Cada combinação amplifica — sem duplicar cadastro, sem trocar de sistema.",
+      ],
+    },
+    modules: ["sites", "crm", "whatsapp", "agenda", "pagamentos", "fiscal", "bi", "permissoes"],
+    benefits: [
+      "Vitrine pública profissional pronta para captar",
+      "Intenção de busca + alerta automático = lead que volta sozinho",
+      "Distribuição de leads com critério (rodízio, região, gerente, ticket)",
+      "SLA de primeiro contato com redistribuição automática",
+      "Funil imobiliário com temperatura do lead",
+      "Dashboards por corretor, gerente e gestão",
+      "ERP que recebe a venda do CRM sem retrabalho",
+      "Comissões e repasses controlados",
+      "WhatsApp e e-mail em todos os pontos críticos",
+      "Comece com a Vitrine; evolua sem trocar de sistema",
+    ],
+    ctaPrimary: {
+      label: "Quero a operação imobiliária organizada",
+      whatsappMsg:
+        "Olá, sou de uma imobiliária e quero conhecer a solução modular da Impulsionando — Vitrine, CRM e ERP imobiliário.",
+    },
+    ctaSecondary: { label: "Montar meu orçamento imobiliário", href: "/orcamento" },
+  },
 ];
 
 export const findNicho = (slug: string) => NICHO_DETAILS.find((n) => n.slug === slug);
+
