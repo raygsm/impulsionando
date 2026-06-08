@@ -168,6 +168,7 @@ import { Route as AuthenticatedAdminTrialsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminBillingPolicyRouteImport } from './routes/_authenticated/admin.billing-policy'
 import { Route as AuthenticatedAdminBillingContractsRouteImport } from './routes/_authenticated/admin.billing-contracts'
 import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authenticated/admin.billing'
+import { Route as AuthenticatedAdmAgentesRouteImport } from './routes/_authenticated/adm.agentes'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -1055,6 +1056,11 @@ const AuthenticatedAdminBillingRoute =
     path: '/admin/billing',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdmAgentesRoute = AuthenticatedAdmAgentesRouteImport.update({
+  id: '/agentes',
+  path: '/agentes',
+  getParentRoute: () => AuthenticatedAdmRoute,
+} as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -1222,7 +1228,7 @@ export interface FileRoutesByFullPath {
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
-  '/adm': typeof AuthenticatedAdmRoute
+  '/adm': typeof AuthenticatedAdmRouteWithChildren
   '/affiliates': typeof AuthenticatedAffiliatesRouteWithChildren
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/audit': typeof AuthenticatedAuditRoute
@@ -1278,6 +1284,7 @@ export interface FileRoutesByFullPath {
   '/nichos/': typeof NichosIndexRoute
   '/paciente/': typeof PacienteIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
+  '/adm/agentes': typeof AuthenticatedAdmAgentesRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/admin/billing-contracts': typeof AuthenticatedAdminBillingContractsRoute
   '/admin/billing-policy': typeof AuthenticatedAdminBillingPolicyRoute
@@ -1405,7 +1412,7 @@ export interface FileRoutesByTo {
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
-  '/adm': typeof AuthenticatedAdmRoute
+  '/adm': typeof AuthenticatedAdmRouteWithChildren
   '/audit': typeof AuthenticatedAuditRoute
   '/companies': typeof AuthenticatedCompaniesRoute
   '/customers': typeof AuthenticatedCustomersRoute
@@ -1452,6 +1459,7 @@ export interface FileRoutesByTo {
   '/nichos': typeof NichosIndexRoute
   '/paciente': typeof PacienteIndexRoute
   '/trabalhe-conosco': typeof TrabalheConoscoIndexRoute
+  '/adm/agentes': typeof AuthenticatedAdmAgentesRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/admin/billing-contracts': typeof AuthenticatedAdminBillingContractsRoute
   '/admin/billing-policy': typeof AuthenticatedAdminBillingPolicyRoute
@@ -1583,7 +1591,7 @@ export interface FileRoutesById {
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/access-profiles': typeof AuthenticatedAccessProfilesRoute
-  '/_authenticated/adm': typeof AuthenticatedAdmRoute
+  '/_authenticated/adm': typeof AuthenticatedAdmRouteWithChildren
   '/_authenticated/affiliates': typeof AuthenticatedAffiliatesRouteWithChildren
   '/_authenticated/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/_authenticated/audit': typeof AuthenticatedAuditRoute
@@ -1639,6 +1647,7 @@ export interface FileRoutesById {
   '/nichos/': typeof NichosIndexRoute
   '/paciente/': typeof PacienteIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
+  '/_authenticated/adm/agentes': typeof AuthenticatedAdmAgentesRoute
   '/_authenticated/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/_authenticated/admin/billing-contracts': typeof AuthenticatedAdminBillingContractsRoute
   '/_authenticated/admin/billing-policy': typeof AuthenticatedAdminBillingPolicyRoute
@@ -1826,6 +1835,7 @@ export interface FileRouteTypes {
     | '/nichos/'
     | '/paciente/'
     | '/trabalhe-conosco/'
+    | '/adm/agentes'
     | '/admin/billing'
     | '/admin/billing-contracts'
     | '/admin/billing-policy'
@@ -2000,6 +2010,7 @@ export interface FileRouteTypes {
     | '/nichos'
     | '/paciente'
     | '/trabalhe-conosco'
+    | '/adm/agentes'
     | '/admin/billing'
     | '/admin/billing-contracts'
     | '/admin/billing-policy'
@@ -2186,6 +2197,7 @@ export interface FileRouteTypes {
     | '/nichos/'
     | '/paciente/'
     | '/trabalhe-conosco/'
+    | '/_authenticated/adm/agentes'
     | '/_authenticated/admin/billing'
     | '/_authenticated/admin/billing-contracts'
     | '/_authenticated/admin/billing-policy'
@@ -3479,6 +3491,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminBillingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/adm/agentes': {
+      id: '/_authenticated/adm/agentes'
+      path: '/agentes'
+      fullPath: '/adm/agentes'
+      preLoaderRoute: typeof AuthenticatedAdmAgentesRouteImport
+      parentRoute: typeof AuthenticatedAdmRoute
+    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -3656,6 +3675,17 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AuthenticatedAdmRouteChildren {
+  AuthenticatedAdmAgentesRoute: typeof AuthenticatedAdmAgentesRoute
+}
+
+const AuthenticatedAdmRouteChildren: AuthenticatedAdmRouteChildren = {
+  AuthenticatedAdmAgentesRoute: AuthenticatedAdmAgentesRoute,
+}
+
+const AuthenticatedAdmRouteWithChildren =
+  AuthenticatedAdmRoute._addFileChildren(AuthenticatedAdmRouteChildren)
 
 interface AuthenticatedAffiliatesRouteChildren {
   AuthenticatedAffiliatesAffiliatesRoute: typeof AuthenticatedAffiliatesAffiliatesRoute
@@ -3955,7 +3985,7 @@ const AuthenticatedSalesRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccessProfilesRoute: typeof AuthenticatedAccessProfilesRoute
-  AuthenticatedAdmRoute: typeof AuthenticatedAdmRoute
+  AuthenticatedAdmRoute: typeof AuthenticatedAdmRouteWithChildren
   AuthenticatedAffiliatesRoute: typeof AuthenticatedAffiliatesRouteWithChildren
   AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRouteWithChildren
   AuthenticatedAuditRoute: typeof AuthenticatedAuditRoute
@@ -3997,7 +4027,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccessProfilesRoute: AuthenticatedAccessProfilesRoute,
-  AuthenticatedAdmRoute: AuthenticatedAdmRoute,
+  AuthenticatedAdmRoute: AuthenticatedAdmRouteWithChildren,
   AuthenticatedAffiliatesRoute: AuthenticatedAffiliatesRouteWithChildren,
   AuthenticatedAgendaRoute: AuthenticatedAgendaRouteWithChildren,
   AuthenticatedAuditRoute: AuthenticatedAuditRoute,
@@ -4155,13 +4185,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
