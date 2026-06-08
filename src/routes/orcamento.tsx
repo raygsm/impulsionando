@@ -575,16 +575,16 @@ function StepModulos({ state, dispatch }: StepProps) {
   // Sincroniza módulos com banco em background
   const lastSyncedRef = useRef<string>("");
   useEffect(() => {
-    if (!state.quoteId) return;
+    if (!state.quoteId || !state.publicToken) return;
     const key = state.selected.slice().sort().join(",");
     if (key === lastSyncedRef.current) return;
     lastSyncedRef.current = key;
     const t = setTimeout(() => {
-      updateFn({ data: { id: state.quoteId!, modules: state.selected, category: state.category, segment: state.segment } })
+      updateFn({ data: { id: state.quoteId!, publicToken: state.publicToken!, modules: state.selected, category: state.category, segment: state.segment } })
         .catch(() => { /* silent */ });
     }, 800);
     return () => clearTimeout(t);
-  }, [state.quoteId, state.selected, state.category, state.segment, updateFn]);
+  }, [state.quoteId, state.publicToken, state.selected, state.category, state.segment, updateFn]);
 
   return (
     <Card className="p-6">
