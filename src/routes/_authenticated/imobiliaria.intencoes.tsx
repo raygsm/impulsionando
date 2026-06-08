@@ -135,8 +135,7 @@ function Page() {
       <PageHeader
         title="Intenções de busca"
         description="Cada intenção é um perfil de busca. Sempre que um imóvel ativo combinar, o lead recebe WhatsApp + e-mail automaticamente."
-        icon={Search}
-        actions={<Button onClick={openNew}><Plus className="w-4 h-4 mr-1" /> Nova intenção</Button>}
+        action={<Button onClick={openNew}><Plus className="w-4 h-4 mr-1" /> Nova intenção</Button>}
       />
 
       {!companyId ? (

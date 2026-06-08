@@ -35,7 +35,6 @@ function Page() {
       <PageHeader
         title="Matches notificados"
         description="Histórico de pareamentos imóvel × intenção que dispararam WhatsApp/e-mail."
-        icon={Zap}
       />
       {!companyId ? (
         <Card className="p-6"><p className="text-sm text-muted-foreground">Selecione uma empresa.</p></Card>
