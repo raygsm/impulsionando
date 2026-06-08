@@ -32,9 +32,9 @@ export const upsertSiteTemplate = createServerFn({ method: "POST" })
       slug: data.slug,
       niche: data.niche ?? null,
       description: data.description ?? null,
-      pages: data.pages ?? [],
-      sections: data.sections ?? [],
-      default_colors: data.default_colors ?? {},
+      pages: (data.pages ?? []) as never,
+      sections: (data.sections ?? []) as never,
+      default_colors: (data.default_colors ?? {}) as never,
       status: data.status ?? "active",
       created_by: context.userId,
     };
