@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { z } from "zod";
+import { getSegmentTemplate, type SegmentKey } from "@/data/moduleSegmentTemplates";
 
 // ============ Site Templates ============
 export const listSiteTemplates = createServerFn({ method: "GET" })
