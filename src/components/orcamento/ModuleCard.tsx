@@ -99,6 +99,12 @@ export function ModuleCard({ module, selected, onToggle, lockReason }: ModuleCar
         )}
       </div>
 
+      {locked && (
+        <div className="mt-3 text-xs">
+          <Badge variant="outline">{lockReason}</Badge>
+        </div>
+      )}
+
       {module.combinesWith.length > 0 && (
         <p className="mt-3 text-xs text-muted-foreground">
           <span className="font-medium">Combina com:</span>{" "}
