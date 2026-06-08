@@ -31,6 +31,10 @@ interface ModulePickerProps {
   confirmLabel?: string;
   /** Callback ao confirmar — recebe slugs selecionados */
   onConfirm: (selectedSlugs: string[]) => void;
+  /** Slugs liberados para contratação. Se undefined, mostra todos. */
+  availableSlugs?: string[];
+  /** Status comercial por slug (para badges como "sob consulta", "em breve"). */
+  moduleStatus?: Record<string, { status: string; allow_standalone: boolean; show_in_checkout: boolean }>;
 }
 
 /**
@@ -50,6 +54,8 @@ export function ModulePicker({
   extraPriceCents = 0,
   confirmLabel = "Continuar para o resumo da contratação",
   onConfirm,
+  availableSlugs,
+  moduleStatus,
 }: ModulePickerProps) {
   const [selected, setSelected] = useState<string[]>(initialSelected);
   const [detail, setDetail] = useState<MotherModule | null>(null);
@@ -57,6 +63,29 @@ export function ModulePicker({
   const quotaIsFinite = Number.isFinite(quota);
   const includedCount = quotaIsFinite ? Math.min(selected.length, quota) : selected.length;
   const extraCount = quotaIsFinite ? Math.max(0, selected.length - quota) : 0;
+
+  const availableSet = useMemo(
+    () => (availableSlugs ? new Set(availableSlugs) : null),
+    [availableSlugs],
+  );
+
+  function isLocked(slug: string): boolean {
+    if (!availableSet) return false;
+    return !availableSet.has(slug);
+  }
+
+  function lockReason(slug: string): string | null {
+    if (!moduleStatus) return isLocked(slug) ? "Indisponível para contratação" : null;
+    const s = moduleStatus[slug];
+    if (!s) return isLocked(slug) ? "Indisponível para contratação" : null;
+    if (s.status === "disponivel_contratacao" && s.show_in_checkout) return null;
+    if (s.status === "sob_consulta") return "Sob consulta — fale com um consultor";
+    if (s.status === "em_breve") return "Em breve";
+    if (s.status === "indisponivel_temporariamente") return "Indisponível temporariamente";
+    if (s.status === "exclusivo_interno") return "Exclusivo interno";
+    if (s.status === "exclusivo_white_label") return "Exclusivo White Label";
+    return "Indisponível para contratação";
+  }
 
   const grouped = useMemo(() => {
     const byCat = new Map<string, MotherModule[]>();
@@ -73,6 +102,7 @@ export function ModulePicker({
   }
 
   function toggle(slug: string) {
+    if (isLocked(slug)) return;
     setSelected((prev) =>
       prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]
     );
@@ -131,6 +161,8 @@ export function ModulePicker({
                     {modules.map((mod) => {
                       const status = statusFor(mod.slug);
                       const isSelected = !!status;
+                      const locked = isLocked(mod.slug);
+                      const reason = lockReason(mod.slug);
                       const Icon = mod.icon;
                       return (
                         <Card
@@ -140,7 +172,8 @@ export function ModulePicker({
                             status === "incluído" &&
                               "border-primary ring-1 ring-primary/30 bg-primary/5",
                             status === "adicional" &&
-                              "border-amber-400 ring-1 ring-amber-300/50 bg-amber-50/40 dark:bg-amber-950/20"
+                              "border-amber-400 ring-1 ring-amber-300/50 bg-amber-50/40 dark:bg-amber-950/20",
+                            locked && "opacity-60",
                           )}
                         >
                           <div className="flex items-start gap-3">
@@ -148,12 +181,16 @@ export function ModulePicker({
                               id={`mod-${mod.slug}`}
                               checked={isSelected}
                               onCheckedChange={() => toggle(mod.slug)}
+                              disabled={locked}
                               aria-label={`Selecionar ${mod.shortName}`}
                             />
                             <div className="flex-1 min-w-0">
                               <label
                                 htmlFor={`mod-${mod.slug}`}
-                                className="flex items-center gap-2 font-medium text-sm cursor-pointer"
+                                className={cn(
+                                  "flex items-center gap-2 font-medium text-sm",
+                                  locked ? "cursor-not-allowed" : "cursor-pointer",
+                                )}
                               >
                                 <Icon className="w-4 h-4 text-primary shrink-0" />
                                 <span className="truncate">{mod.shortName}</span>
@@ -171,19 +208,20 @@ export function ModulePicker({
                             >
                               <Info className="w-3.5 h-3.5" /> Saiba mais
                             </button>
-                            {status === "incluído" && (
+                            {locked ? (
+                              <Badge variant="outline" className="text-[10px]">{reason}</Badge>
+                            ) : status === "incluído" ? (
                               <span className="inline-flex items-center gap-1 text-xs text-emerald-600">
                                 <CheckCircle2 className="w-3.5 h-3.5" /> Incluído
                               </span>
-                            )}
-                            {status === "adicional" && (
+                            ) : status === "adicional" ? (
                               <span className="inline-flex items-center gap-1 text-xs text-amber-700">
                                 <Plus className="w-3.5 h-3.5" /> Adicional
                                 {extraPriceCents
                                   ? ` · +${formatBRL(extraPriceCents)}/mês`
                                   : ""}
                               </span>
-                            )}
+                            ) : null}
                           </div>
                         </Card>
                       );
@@ -263,14 +301,17 @@ export function ModulePicker({
                   Fechar
                 </Button>
                 <Button
+                  disabled={isLocked(detail.slug)}
                   onClick={() => {
                     if (!selected.includes(detail.slug)) toggle(detail.slug);
                     setDetail(null);
                   }}
                 >
-                  {selected.includes(detail.slug)
-                    ? "Já selecionado"
-                    : "Selecionar este módulo"}
+                  {isLocked(detail.slug)
+                    ? (lockReason(detail.slug) ?? "Indisponível")
+                    : selected.includes(detail.slug)
+                      ? "Já selecionado"
+                      : "Selecionar este módulo"}
                 </Button>
               </div>
             </>

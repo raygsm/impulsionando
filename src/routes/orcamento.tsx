@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
+import { getCommercialAvailability } from "@/lib/commercial.functions";
 import {
   ArrowLeft, ArrowRight, CheckCircle2, FileText, Loader2,
   Printer, Sparkles, ShieldCheck, MessageCircle, AlertTriangle, Copy, RotateCcw,
@@ -571,6 +573,30 @@ function StepSegmento({ state, dispatch }: StepProps) {
 function StepModulos({ state, dispatch }: StepProps) {
   const grouped = useMemo(() => modulesByCategory(), []);
   const updateFn = useServerFn(updateQuote);
+  const fetchAvailability = useServerFn(getCommercialAvailability);
+  const { data: availability } = useQuery({
+    queryKey: ["commercial-availability"],
+    queryFn: () => fetchAvailability(),
+    staleTime: 60_000,
+  });
+  const availableSet = useMemo(
+    () => (availability ? new Set(availability.availableModuleSlugs) : null),
+    [availability],
+  );
+
+  function lockReasonFor(motherSlug: string): string | null {
+    if (!availableSet) return null;
+    if (availableSet.has(motherSlug)) return null;
+    const s = availability?.moduleStatus?.[motherSlug];
+    if (!s) return "Indisponível para contratação";
+    if (s.status === "sob_consulta") return "Sob consulta";
+    if (s.status === "em_breve") return "Em breve";
+    if (s.status === "indisponivel_temporariamente") return "Indisponível temporariamente";
+    if (s.status === "exclusivo_interno") return "Exclusivo interno";
+    if (s.status === "exclusivo_white_label") return "Exclusivo White Label";
+    return "Indisponível para contratação";
+  }
+
 
   // Sincroniza módulos com banco em background
   const lastSyncedRef = useRef<string>("");
@@ -601,6 +627,7 @@ function StepModulos({ state, dispatch }: StepProps) {
               <ModuleCard
                 key={mod.slug} module={mod}
                 selected={state.selected.includes(mod.slug)}
+                lockReason={lockReasonFor(mod.motherSlug)}
                 onToggle={() => {
                   dispatch({ type: "TOGGLE_MODULE", slug: mod.slug });
                   const wasSelected = state.selected.includes(mod.slug);

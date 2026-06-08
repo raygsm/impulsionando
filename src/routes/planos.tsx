@@ -1,5 +1,8 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { getCommercialAvailability } from "@/lib/commercial.functions";
 import {
   ArrowRight, MessageCircle, Sparkles, CheckCircle2, Minus, HelpCircle, Star,
 } from "lucide-react";
@@ -170,6 +173,13 @@ function PlanosPage() {
   const [annual, setAnnual] = useState(false);
   const { openCheckout, loading: checkoutLoading } = usePaddleCheckout();
   const { data: user } = useCurrentUser();
+  const fetchAvailability = useServerFn(getCommercialAvailability);
+  const { data: availability } = useQuery({
+    queryKey: ["commercial-availability"],
+    queryFn: () => fetchAvailability(),
+    staleTime: 60_000,
+  });
+
   const [pixState, setPixState] = useState<{
     open: boolean;
     amountCents: number;
@@ -527,6 +537,8 @@ function PlanosPage() {
           planSubtitle={picker.plan.tagline}
           initialSelected={pickedModules[picker.plan.name] ?? []}
           extraPriceCents={EXTRA_MODULE_BRL * 100}
+          availableSlugs={availability?.availableModuleSlugs}
+          moduleStatus={availability?.moduleStatus}
           confirmLabel="Continuar para o resumo da contratação"
           onConfirm={(slugs) => {
             const plan = picker.plan!;
