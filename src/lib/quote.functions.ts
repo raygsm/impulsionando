@@ -47,15 +47,17 @@ const createQuoteSchema = z.object({
 
 const updateQuoteSchema = z.object({
   id: z.string().uuid(),
+  publicToken: z.string().uuid(),
   modules: z.array(z.string().trim().min(1).max(40).regex(/^[a-z0-9_]+$/)).max(30).optional(),
   company: companySchema.optional(),
   category: z.string().trim().max(60).optional().or(z.literal("")).transform((v) => v || null).optional(),
   segment: z.string().trim().max(80).optional().or(z.literal("")).transform((v) => v || null).optional(),
-  status: z.enum(["draft", "reviewed", "accepted", "payment_requested"]).optional(),
+  status: z.enum(["draft", "reviewed"]).optional(),
 });
 
 const acceptQuoteSchema = z.object({
   id: z.string().uuid(),
+  publicToken: z.string().uuid(),
   userAgent: z.string().trim().max(500).optional().or(z.literal("")).transform((v) => v || null),
   terms: z.object({
     terms: z.literal(true),
@@ -64,6 +66,11 @@ const acceptQuoteSchema = z.object({
     integrations: z.literal(true),
     refund: z.literal(true),
   }),
+});
+
+const requestPaymentSchema = z.object({
+  id: z.string().uuid(),
+  publicToken: z.string().uuid(),
 });
 
 /* ----------------------------- Helpers ----------------------------- */
