@@ -13,6 +13,7 @@ import { ModuleCertificationPanel } from "@/components/core/ModuleCertificationP
 import { InstallModuleDialog } from "@/components/core/InstallModuleDialog";
 import { SettingDefinitionsAdmin } from "@/components/core/SettingDefinitionsAdmin";
 import { ApplyVersionScopeDialog } from "@/components/core/ApplyVersionScopeDialog";
+import { ModuleCommercialPanel } from "@/components/core/ModuleCommercialPanel";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/core/modulos/$slug")({
