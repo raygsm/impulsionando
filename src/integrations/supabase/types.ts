@@ -1639,6 +1639,124 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_demands: {
+        Row: {
+          agentes_selecionados: string[] | null
+          cliente: string | null
+          contexto: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          objetivo: string | null
+          projeto: string | null
+          status: string
+          tipo_entrega: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          agentes_selecionados?: string[] | null
+          cliente?: string | null
+          contexto?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          objetivo?: string | null
+          projeto?: string | null
+          status?: string
+          tipo_entrega?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          agentes_selecionados?: string[] | null
+          cliente?: string | null
+          contexto?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          objetivo?: string | null
+          projeto?: string | null
+          status?: string
+          tipo_entrega?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      agent_logs: {
+        Row: {
+          created_at: string
+          demand_id: string | null
+          details: Json | null
+          event: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          demand_id?: string | null
+          details?: Json | null
+          event: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          demand_id?: string | null
+          details?: Json | null
+          event?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_logs_demand_id_fkey"
+            columns: ["demand_id"]
+            isOneToOne: false
+            referencedRelation: "agent_demands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_outputs: {
+        Row: {
+          agent_id: string | null
+          content: Json | null
+          created_at: string
+          demand_id: string
+          id: string
+          is_final: boolean
+          output_type: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          content?: Json | null
+          created_at?: string
+          demand_id: string
+          id?: string
+          is_final?: boolean
+          output_type?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          content?: Json | null
+          created_at?: string
+          demand_id?: string
+          id?: string
+          is_final?: boolean
+          output_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_outputs_demand_id_fkey"
+            columns: ["demand_id"]
+            isOneToOne: false
+            referencedRelation: "agent_demands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_project_files: {
         Row: {
           bucket_path: string
