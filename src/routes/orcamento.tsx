@@ -186,6 +186,7 @@ type WizardState = {
   // estado do servidor
   quoteId: string | null;
   quoteNumber: string | null;
+  publicToken: string | null;
   acceptedAt: string | null;
   paymentRequested: boolean;
 };
@@ -197,7 +198,7 @@ const initialState: WizardState = {
   selected: [],
   companyName: "", companyTaxId: "", companyLegalName: "",
   accepted: { terms: false, modules: false, deadlines: false, integrations: false, refund: false },
-  quoteId: null, quoteNumber: null, acceptedAt: null, paymentRequested: false,
+  quoteId: null, quoteNumber: null, publicToken: null, acceptedAt: null, paymentRequested: false,
 };
 
 type Action =
