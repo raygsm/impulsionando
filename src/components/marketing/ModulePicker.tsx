@@ -31,6 +31,10 @@ interface ModulePickerProps {
   confirmLabel?: string;
   /** Callback ao confirmar — recebe slugs selecionados */
   onConfirm: (selectedSlugs: string[]) => void;
+  /** Slugs liberados para contratação. Se undefined, mostra todos. */
+  availableSlugs?: string[];
+  /** Status comercial por slug (para badges como "sob consulta", "em breve"). */
+  moduleStatus?: Record<string, { status: string; allow_standalone: boolean; show_in_checkout: boolean }>;
 }
 
 /**
