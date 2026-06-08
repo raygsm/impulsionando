@@ -13,6 +13,7 @@ import { ModuleCertificationPanel } from "@/components/core/ModuleCertificationP
 import { InstallModuleDialog } from "@/components/core/InstallModuleDialog";
 import { SettingDefinitionsAdmin } from "@/components/core/SettingDefinitionsAdmin";
 import { ApplyVersionScopeDialog } from "@/components/core/ApplyVersionScopeDialog";
+import { ModuleCommercialPanel } from "@/components/core/ModuleCommercialPanel";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/core/modulos/$slug")({
@@ -96,11 +97,16 @@ function ModuleDetail() {
       <Tabs defaultValue="visao">
         <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="visao">Visão geral</TabsTrigger>
+          <TabsTrigger value="comercial">Comercial</TabsTrigger>
           <TabsTrigger value="certificacao">Certificação</TabsTrigger>
           <TabsTrigger value="versoes">Versões</TabsTrigger>
           <TabsTrigger value="instalacoes">Instalações</TabsTrigger>
           <TabsTrigger value="definicoes">Definições</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="comercial">
+          <ModuleCommercialPanel module={m as never} />
+        </TabsContent>
 
         <TabsContent value="visao">
           <Card className="p-4">

@@ -2086,45 +2086,93 @@ export type Database = {
       }
       billing_plans: {
         Row: {
+          allow_direct_checkout: boolean
           code: string
           created_at: string
+          cta: string | null
           cycle: string
           description: string | null
+          discount_percent: number
           due_day: number
+          extra_module_price: number
           id: string
+          included_module_count: number
+          included_modules: string[]
+          internal_notes: string | null
           is_active: boolean
           is_default: boolean
+          legal_text: string | null
+          min_contract_days: number
+          min_installments: number
           name: string
           recurring_amount: number
+          route_to_quote: boolean
+          route_to_whatsapp: boolean
           setup_fee: number
+          show_in_checkout: boolean
+          show_on_site: boolean
+          sort_order: number
+          status_comercial: string
           updated_at: string
         }
         Insert: {
+          allow_direct_checkout?: boolean
           code: string
           created_at?: string
+          cta?: string | null
           cycle?: string
           description?: string | null
+          discount_percent?: number
           due_day?: number
+          extra_module_price?: number
           id?: string
+          included_module_count?: number
+          included_modules?: string[]
+          internal_notes?: string | null
           is_active?: boolean
           is_default?: boolean
+          legal_text?: string | null
+          min_contract_days?: number
+          min_installments?: number
           name: string
           recurring_amount: number
+          route_to_quote?: boolean
+          route_to_whatsapp?: boolean
           setup_fee?: number
+          show_in_checkout?: boolean
+          show_on_site?: boolean
+          sort_order?: number
+          status_comercial?: string
           updated_at?: string
         }
         Update: {
+          allow_direct_checkout?: boolean
           code?: string
           created_at?: string
+          cta?: string | null
           cycle?: string
           description?: string | null
+          discount_percent?: number
           due_day?: number
+          extra_module_price?: number
           id?: string
+          included_module_count?: number
+          included_modules?: string[]
+          internal_notes?: string | null
           is_active?: boolean
           is_default?: boolean
+          legal_text?: string | null
+          min_contract_days?: number
+          min_installments?: number
           name?: string
           recurring_amount?: number
+          route_to_quote?: boolean
+          route_to_whatsapp?: boolean
           setup_fee?: number
+          show_in_checkout?: boolean
+          show_on_site?: boolean
+          sort_order?: number
+          status_comercial?: string
           updated_at?: string
         }
         Relationships: []
@@ -4451,78 +4499,144 @@ export type Database = {
       }
       modules: {
         Row: {
+          allow_combo: boolean
+          allow_standalone: boolean
+          allow_trial: boolean
+          allow_white_label: boolean
           category: string | null
           certified_at: string | null
           certified_by: string | null
+          commercial_url: string | null
           created_at: string
+          cta_primary: string | null
+          cta_secondary: string | null
           current_version: string
           demo_url: string | null
           dependencies: string[]
           description: string | null
+          description_long: string | null
           docs_url: string | null
+          features: Json
           icon: string | null
           id: string
+          internal_notes: string | null
           is_active: boolean
           is_core: boolean
           last_version_at: string
+          limits: Json
+          min_contract_days: number
+          min_installments: number
+          monthly_price: number
           name: string
           owner: string | null
           readiness_checklist: Json
           readiness_status: string
           segments: string[]
+          setup_fee: number
+          show_in_checkout: boolean
+          show_in_demo: boolean
+          show_in_plans: boolean
+          show_on_site: boolean
+          show_price: boolean
           slug: string
           sort_order: number
           status: string
+          status_comercial: string
+          status_tecnico: string
           updated_at: string
         }
         Insert: {
+          allow_combo?: boolean
+          allow_standalone?: boolean
+          allow_trial?: boolean
+          allow_white_label?: boolean
           category?: string | null
           certified_at?: string | null
           certified_by?: string | null
+          commercial_url?: string | null
           created_at?: string
+          cta_primary?: string | null
+          cta_secondary?: string | null
           current_version?: string
           demo_url?: string | null
           dependencies?: string[]
           description?: string | null
+          description_long?: string | null
           docs_url?: string | null
+          features?: Json
           icon?: string | null
           id?: string
+          internal_notes?: string | null
           is_active?: boolean
           is_core?: boolean
           last_version_at?: string
+          limits?: Json
+          min_contract_days?: number
+          min_installments?: number
+          monthly_price?: number
           name: string
           owner?: string | null
           readiness_checklist?: Json
           readiness_status?: string
           segments?: string[]
+          setup_fee?: number
+          show_in_checkout?: boolean
+          show_in_demo?: boolean
+          show_in_plans?: boolean
+          show_on_site?: boolean
+          show_price?: boolean
           slug: string
           sort_order?: number
           status?: string
+          status_comercial?: string
+          status_tecnico?: string
           updated_at?: string
         }
         Update: {
+          allow_combo?: boolean
+          allow_standalone?: boolean
+          allow_trial?: boolean
+          allow_white_label?: boolean
           category?: string | null
           certified_at?: string | null
           certified_by?: string | null
+          commercial_url?: string | null
           created_at?: string
+          cta_primary?: string | null
+          cta_secondary?: string | null
           current_version?: string
           demo_url?: string | null
           dependencies?: string[]
           description?: string | null
+          description_long?: string | null
           docs_url?: string | null
+          features?: Json
           icon?: string | null
           id?: string
+          internal_notes?: string | null
           is_active?: boolean
           is_core?: boolean
           last_version_at?: string
+          limits?: Json
+          min_contract_days?: number
+          min_installments?: number
+          monthly_price?: number
           name?: string
           owner?: string | null
           readiness_checklist?: Json
           readiness_status?: string
           segments?: string[]
+          setup_fee?: number
+          show_in_checkout?: boolean
+          show_in_demo?: boolean
+          show_in_plans?: boolean
+          show_on_site?: boolean
+          show_price?: boolean
           slug?: string
           sort_order?: number
           status?: string
+          status_comercial?: string
+          status_tecnico?: string
           updated_at?: string
         }
         Relationships: []

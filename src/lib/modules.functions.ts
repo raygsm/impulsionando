@@ -313,6 +313,100 @@ export const READINESS_STATUS_LABELS: Record<string, string> = {
   publicado: "Publicado",
 };
 
+/* ============================================================
+ * STATUS TÉCNICO × STATUS COMERCIAL — Gestão Master
+ * ============================================================ */
+
+export const STATUS_TECNICO_VALUES = [
+  "rascunho","em_desenvolvimento","em_revisao","em_homologacao",
+  "pronto_para_demo","pronto_para_venda","ativo","pausado","arquivado","obsoleto",
+] as const;
+
+export const STATUS_TECNICO_LABELS: Record<string, string> = {
+  rascunho: "Rascunho",
+  em_desenvolvimento: "Em desenvolvimento",
+  em_revisao: "Em revisão",
+  em_homologacao: "Em homologação",
+  pronto_para_demo: "Pronto para demo",
+  pronto_para_venda: "Pronto para venda",
+  ativo: "Ativo no sistema",
+  pausado: "Pausado",
+  arquivado: "Arquivado",
+  obsoleto: "Obsoleto",
+};
+
+export const STATUS_COMERCIAL_VALUES = [
+  "disponivel_contratacao","disponivel_demo","sob_consulta","em_breve",
+  "indisponivel_temporariamente","exclusivo_interno","exclusivo_white_label","oculto",
+] as const;
+
+export const STATUS_COMERCIAL_LABELS: Record<string, string> = {
+  disponivel_contratacao: "Disponível para contratação",
+  disponivel_demo: "Disponível para demonstração",
+  sob_consulta: "Sob consulta",
+  em_breve: "Em breve",
+  indisponivel_temporariamente: "Indisponível temporariamente",
+  exclusivo_interno: "Exclusivo para clientes internos",
+  exclusivo_white_label: "Exclusivo White Label",
+  oculto: "Oculto",
+};
+
+const CommercialSchema = z.object({
+  slug: z.string().min(1).max(100),
+  status_tecnico: z.enum(STATUS_TECNICO_VALUES).optional(),
+  status_comercial: z.enum(STATUS_COMERCIAL_VALUES).optional(),
+  monthly_price: z.number().min(0).max(1_000_000).optional(),
+  setup_fee: z.number().min(0).max(1_000_000).optional(),
+  min_contract_days: z.number().int().min(0).max(3650).optional(),
+  min_installments: z.number().int().min(0).max(120).optional(),
+  show_on_site: z.boolean().optional(),
+  show_in_demo: z.boolean().optional(),
+  show_in_checkout: z.boolean().optional(),
+  show_in_plans: z.boolean().optional(),
+  show_price: z.boolean().optional(),
+  allow_standalone: z.boolean().optional(),
+  allow_combo: z.boolean().optional(),
+  allow_white_label: z.boolean().optional(),
+  allow_trial: z.boolean().optional(),
+  cta_primary: z.string().max(80).nullable().optional(),
+  cta_secondary: z.string().max(80).nullable().optional(),
+  commercial_url: z.string().max(500).nullable().optional(),
+  internal_notes: z.string().max(4000).nullable().optional(),
+});
+
+export const updateModuleCommercial = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => CommercialSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: m } = await supabase.from("modules").select("id, slug, status_tecnico, status_comercial, monthly_price, setup_fee").eq("slug", data.slug).maybeSingle();
+    if (!m) throw new Error("Módulo não encontrado");
+
+    const patch: Record<string, unknown> = {};
+    const before: Record<string, unknown> = {};
+    const after: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(data)) {
+      if (k === "slug" || v === undefined) continue;
+      patch[k] = v;
+      before[k] = (m as never as Record<string, unknown>)[k] ?? null;
+      after[k] = v;
+    }
+    if (Object.keys(patch).length === 0) return { ok: true, changed: 0 };
+
+    const { error } = await supabase.from("modules").update(patch as never).eq("id", m.id);
+    if (error) throw new Error(error.message);
+
+    await supabase.from("audit_logs").insert({
+      action: "module.commercial.updated",
+      entity: "modules",
+      entity_id: m.id,
+      before,
+      after,
+    } as never);
+
+    return { ok: true, changed: Object.keys(patch).length };
+  });
+
 const CertificationSchema = z.object({
   slug: z.string().min(1).max(100),
   readiness_status: z.enum(["em_desenvolvimento", "em_revisao", "em_testes", "certificado", "publicado"]).optional(),
