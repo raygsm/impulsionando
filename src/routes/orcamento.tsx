@@ -932,7 +932,7 @@ function StepAceite({ state, dispatch }: StepProps) {
   }
 
   async function handleAccept() {
-    if (!state.quoteId) {
+    if (!state.quoteId || !state.publicToken) {
       toast.error("Orçamento não foi salvo. Volte ao início e tente novamente.");
       return;
     }
@@ -942,6 +942,7 @@ function StepAceite({ state, dispatch }: StepProps) {
       const result = await acceptFn({
         data: {
           id: state.quoteId,
+          publicToken: state.publicToken,
           userAgent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 500) : undefined,
           terms: {
             terms: true, modules: true, deadlines: true, integrations: true, refund: true,
