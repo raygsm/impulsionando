@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
+import { getCommercialAvailability } from "@/lib/commercial.functions";
 import {
   ArrowLeft, ArrowRight, CheckCircle2, FileText, Loader2,
   Printer, Sparkles, ShieldCheck, MessageCircle, AlertTriangle, Copy, RotateCcw,
