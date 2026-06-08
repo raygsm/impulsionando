@@ -75,6 +75,14 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    label: "Imobiliária",
+    items: [
+      { to: "/imobiliaria/imoveis", label: "Imóveis", icon: Home },
+      { to: "/imobiliaria/intencoes", label: "Intenções de busca", icon: SearchIcon },
+      { to: "/imobiliaria/matches", label: "Matches", icon: Zap },
+    ],
+  },
+  {
     label: "Agenda",
     items: [
       { to: "/agenda", label: "Hoje", icon: Calendar, perm: "agenda.appointment.read" },
