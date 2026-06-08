@@ -29,6 +29,7 @@ export interface NavGroup {
 export const TOP_ITEMS: NavItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, perm: "dashboard.read" },
   { to: "/adm", label: "/adm — Central Impulsionando", icon: ShieldCheck, superOnly: true },
+  { to: "/adm/agentes", label: "Central de Agentes", icon: Bot, superOnly: true },
 ];
 
 export const NAV_GROUPS: NavGroup[] = [
