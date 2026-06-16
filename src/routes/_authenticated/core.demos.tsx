@@ -250,7 +250,20 @@ function CoreDemosPage() {
   const [historySearch, setHistorySearch] = useState("");
   const debouncedSearch = useDebouncedValue(historySearch, 350);
   const [selectedRun, setSelectedRun] = useState<SmokeRunRow | null>(null);
-  const [includeRawLogs, setIncludeRawLogs] = useState(true);
+  const [includeRawLogs, setIncludeRawLogs] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    const v = window.localStorage.getItem("core-demos.zip.includeRawLogs");
+    return v === null ? true : v === "1";
+  });
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(
+        "core-demos.zip.includeRawLogs",
+        includeRawLogs ? "1" : "0",
+      );
+    }
+  }, [includeRawLogs]);
+
 
 
   // Reset page when filters change (debounced text)
