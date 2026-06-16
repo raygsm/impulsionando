@@ -231,12 +231,14 @@ export const issueTickets = createServerFn({ method: "POST" })
 export const transferTicket = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: {
-    ticketId: string; toName: string; toEmail: string; toPhone?: string; reason?: string;
+    ticketId: string; toName: string; toEmail: string; toPhone?: string;
+    toDocument?: string; reason?: string;
   }) => ({
     ticketId: UUID.parse(d.ticketId),
     toName: z.string().min(2).max(200).parse(d.toName),
     toEmail: z.string().email().parse(d.toEmail),
     toPhone: d.toPhone,
+    toDocument: d.toDocument,
     reason: d.reason,
   }))
   .handler(async ({ data, context }) => {
@@ -246,9 +248,72 @@ export const transferTicket = createServerFn({ method: "POST" })
       _to_email: data.toEmail,
       _to_phone: data.toPhone ?? null,
       _reason: data.reason ?? null,
+      _to_document: data.toDocument ?? null,
     } as never);
     if (error) throw new Error(error.message);
     return { transferId: out as unknown as string };
+  });
+
+// ---------- TRANSFER POLICY (config rápida) ----------
+const TransferPolicyInput = z.object({
+  eventId: UUID,
+  transferPolicy: z.enum(["livre", "com_aprovacao", "bloqueada"]),
+  transferDeadlineHours: z.number().int().min(0).max(8760).nullable(),
+  transferFeeCents: z.number().int().min(0).max(1_000_000),
+  transferRequiresDocument: z.boolean(),
+});
+
+export const updateTransferPolicy = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => TransferPolicyInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: out, error } = await context.supabase
+      .from("evt_events")
+      .update({
+        transfer_policy: data.transferPolicy,
+        transfer_deadline_hours: data.transferDeadlineHours,
+        transfer_fee_cents: data.transferFeeCents,
+        transfer_requires_document: data.transferRequiresDocument,
+      })
+      .eq("id", data.eventId)
+      .select("id,transfer_policy,transfer_deadline_hours,transfer_fee_cents,transfer_requires_document")
+      .single();
+    if (error) throw new Error(error.message);
+    return out;
+  });
+
+export const listTransfers = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { eventId: string; status?: "pendente" | "aprovada" | "rejeitada" | "cancelada" }) => ({
+    eventId: UUID.parse(d.eventId),
+    status: d.status,
+  }))
+  .handler(async ({ data, context }) => {
+    let q = context.supabase
+      .from("evt_ticket_transfers")
+      .select("id,ticket_id,from_name,from_email,to_name,to_email,to_phone,to_document,status,fee_cents,reason,decided_at,created_at,evt_tickets!inner(event_id,code)")
+      .eq("evt_tickets.event_id", data.eventId)
+      .order("created_at", { ascending: false })
+      .limit(200);
+    if (data.status) q = q.eq("status", data.status);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return { items: rows ?? [] };
+  });
+
+export const decideTransfer = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { transferId: string; decision: "aprovada" | "rejeitada" }) => ({
+    transferId: UUID.parse(d.transferId),
+    decision: z.enum(["aprovada", "rejeitada"]).parse(d.decision),
+  }))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc("evt_decide_transfer" as never, {
+      _transfer_id: data.transferId,
+      _decision: data.decision,
+    } as never);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
 
 // ---------- CHECK-IN POR QR ----------
