@@ -336,7 +336,8 @@ export const listApprovalQueue = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     const from = (data.page - 1) * data.pageSize;
     const to = from + data.pageSize - 1;
-    const statuses = data.status?.length ? data.status : ["pending", "changes_requested", "rejected"];
+    const statuses: Array<"pending" | "changes_requested" | "rejected" | "approved"> =
+      data.status?.length ? data.status : ["pending", "changes_requested", "rejected"];
 
     let q = context.supabase
       .from("realestate_properties")
