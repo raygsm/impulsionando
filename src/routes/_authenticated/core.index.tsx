@@ -19,7 +19,8 @@ function CoreIndex() {
 
   const cards = [
     { label: "Clientes ativos", value: `${data?.active ?? 0} / ${data?.total ?? 0}`, icon: Building2 },
-    { label: "MRR (contratos ativos)", value: `R$ ${(data?.mrr ?? 0).toFixed(2)}`, icon: CreditCard },
+    { label: "MRR (contratos ativos)", value: fmtBRL(data?.mrr ?? 0), icon: CreditCard },
+    { label: "Inadimplência", value: `${data?.overdueCount ?? 0} · ${fmtBRL(data?.overdueAmount ?? 0)}`, icon: CircleDollarSign },
     { label: "Bloqueados (suspensos)", value: data?.blocked ?? 0, icon: ShieldOff },
     { label: "Em onboarding", value: data?.onboarding ?? 0, icon: ClipboardList },
     { label: "Aguardando domínio", value: data?.awaitingDomain ?? 0, icon: Globe },
@@ -27,6 +28,13 @@ function CoreIndex() {
     { label: "Provisionamentos pendentes", value: data?.provisioningPending ?? 0, icon: AlertTriangle },
     { label: "Implantações concluídas", value: data?.provisioningDone ?? 0, icon: Rocket },
   ];
+
+  const byNiche = data?.byNiche ?? [];
+  const topModules = data?.topModules ?? [];
+  const topPlans = data?.topPlans ?? [];
+  const maxNiche = Math.max(1, ...byNiche.map((n) => n.count));
+  const maxMod = Math.max(1, ...topModules.map((m) => m.count));
+  const maxPlan = Math.max(1, ...topPlans.map((p) => p.count));
 
   return (
     <>
