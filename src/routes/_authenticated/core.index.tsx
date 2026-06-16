@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { coreExecutiveDashboard } from "@/lib/provisioning.functions";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/app/PageElements";
-import { Building2, Boxes, CreditCard, ClipboardList, AlertTriangle, Globe, Rocket, ShieldOff, PieChart, Package, CircleDollarSign } from "lucide-react";
+import { Building2, Boxes, CreditCard, ClipboardList, AlertTriangle, Globe, Rocket, ShieldOff, PieChart, Package, CircleDollarSign, TrendingUp, Wallet, CalendarClock, Target } from "lucide-react";
 
 const fmtBRL = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
