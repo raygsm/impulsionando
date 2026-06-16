@@ -44,6 +44,7 @@ import {
   Download,
   FileText,
   FileArchive,
+  ShieldCheck,
   BookmarkPlus,
   X,
   ChevronLeft,
