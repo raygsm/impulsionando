@@ -221,13 +221,76 @@ function CoreDemosPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const replayMut = useMutation({
+    mutationFn: (runId: string) => replay({ data: { runId } }),
+    onSuccess: (r) => {
+      qc.invalidateQueries({ queryKey: ["core-smoke-history"] });
+      if (r.success) toast.success(`Replay ✅ (de ${r.replayOf.slice(0, 8)})`);
+      else toast.error(`Replay ❌ houve falhas`);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const handleExportCsv = async () => {
+    const r = await exportHistory();
+    const rows = (r.runs ?? []) as unknown as SmokeRunRow[];
+    const header = [
+      "id",
+      "created_at",
+      "label",
+      "niche_slug",
+      "success",
+      "duration_ms",
+      "batch_id",
+      "replay_of",
+      "ids",
+      "steps",
+      "error",
+    ];
+    const lines = [header.join(",")];
+    for (const row of rows) {
+      lines.push(
+        [
+          row.id,
+          row.created_at,
+          row.label,
+          row.niche_slug,
+          row.success,
+          row.duration_ms,
+          row.batch_id,
+          row.replay_of,
+          row.ids,
+          (row.steps ?? [])
+            .map((s) => `${s.ok ? "OK" : "FAIL"}:${s.key}${s.detail ? "=" + s.detail : ""}`)
+            .join(" | "),
+          row.error,
+        ]
+          .map(csvCell)
+          .join(","),
+      );
+    }
+    downloadBlob(lines.join("\n"), `smoke-history-${Date.now()}.csv`, "text/csv;charset=utf-8");
+    toast.success(`CSV exportado (${rows.length} linhas)`);
+  };
+
+  const handleExportPdf = async () => {
+    const r = await exportHistory();
+    const rows = (r.runs ?? []) as unknown as SmokeRunRow[];
+    printHistoryPDF(rows);
+  };
+
   const demos = (data?.demos ?? []) as unknown as DemoRow[];
   const history = (historyData?.runs ?? []) as unknown as SmokeRunRow[];
+  const historyTotal = historyData?.total ?? 0;
 
-  // Filtros
+  // Filtros + paginação + ordenação dos demos
   const [search, setSearch] = useState("");
   const [nicheFilter, setNicheFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sortKey, setSortKey] = useState<SortKey>("name");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [demoPage, setDemoPage] = useState(0);
+  const [demoPageSize, setDemoPageSize] = useState(12);
 
   const niches = useMemo(() => {
     const map = new Map<string, string>();
@@ -239,7 +302,7 @@ function CoreDemosPage() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return demos.filter((d) => {
+    const list = demos.filter((d) => {
       if (nicheFilter !== "all" && d.niche?.slug !== nicheFilter) return false;
       const invoice = d.contracts?.[0]?.invoices?.[0];
       if (statusFilter !== "all") {
@@ -253,7 +316,33 @@ function CoreDemosPage() {
         .toLowerCase();
       return hay.includes(q);
     });
-  }, [demos, search, nicheFilter, statusFilter]);
+
+    const dir = sortDir === "asc" ? 1 : -1;
+    list.sort((a, b) => {
+      const ia = a.contracts?.[0]?.invoices?.[0];
+      const ib = b.contracts?.[0]?.invoices?.[0];
+      switch (sortKey) {
+        case "name":
+          return (a.trade_name ?? a.name ?? "").localeCompare(b.trade_name ?? b.name ?? "") * dir;
+        case "niche":
+          return ((a.niche?.name ?? "").localeCompare(b.niche?.name ?? "")) * dir;
+        case "invoice_amount":
+          return ((Number(ia?.amount ?? 0) - Number(ib?.amount ?? 0))) * dir;
+        case "invoice_due":
+          return ((ia?.due_date ?? "").localeCompare(ib?.due_date ?? "")) * dir;
+        case "invoice_status":
+          return ((ia?.status ?? "").localeCompare(ib?.status ?? "")) * dir;
+      }
+      return 0;
+    });
+    return list;
+  }, [demos, search, nicheFilter, statusFilter, sortKey, sortDir]);
+
+  const pagedDemos = useMemo(
+    () => filtered.slice(demoPage * demoPageSize, demoPage * demoPageSize + demoPageSize),
+    [filtered, demoPage, demoPageSize],
+  );
+  const totalDemoPages = Math.max(1, Math.ceil(filtered.length / demoPageSize));
 
   const runBatchAllNiches = () => {
     const targets =
