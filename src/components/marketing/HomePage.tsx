@@ -120,8 +120,9 @@ export function HomePage() {
         <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <div className="max-w-3xl mb-8">
             <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-3 py-1 text-xs mb-3">
-              <Sparkles className="w-3.5 h-3.5 /> Tecnologia + Estratégia
+              <Sparkles className="w-3.5 h-3.5" /> Tecnologia + Estratégia
             </div>
+
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">
               Marketing e tecnologia operando juntos.
             </h2>
