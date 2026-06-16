@@ -196,6 +196,25 @@ const CreateProjectSchema = z.object({
     .array(z.object({ slug: z.string().min(1).max(80), segment: z.string().max(40).default("default") }))
     .default([]),
   toggles: z.record(z.string().max(80), z.boolean()).default({}),
+  plan: z
+    .object({
+      planId: z.string().uuid().optional(),
+      setupAmount: z.number().min(0).optional(),
+      recurringAmount: z.number().min(0).optional(),
+      dueDay: z.number().int().min(1).max(28).optional(),
+      setupPaid: z.boolean().optional(),
+      pixKey: z.string().max(200).optional().or(z.literal("")),
+      generateFirstInvoice: z.boolean().optional(),
+    })
+    .optional(),
+  adminUser: z
+    .object({
+      email: z.string().email().optional().or(z.literal("")),
+      name: z.string().max(200).optional().or(z.literal("")),
+      phone: z.string().max(50).optional().or(z.literal("")),
+      sendWelcome: z.boolean().optional(),
+    })
+    .optional(),
   confirm: z.literal(true),
 });
 
