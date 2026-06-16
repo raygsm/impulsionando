@@ -70,9 +70,18 @@ function normalize(s: string) {
 
 export function Topbar({ currentUser }: { currentUser: CurrentUser }) {
   const navigate = useNavigate();
-  const name = currentUser.memberships[0]?.display_name ?? currentUser.user.email ?? "Usuário";
+  const { companyId } = useActiveCompany();
+  // Identidade do usuário logado (auth.user), nunca a empresa
+  const metaName =
+    (currentUser.user.user_metadata as { display_name?: string; full_name?: string } | null)?.display_name ??
+    (currentUser.user.user_metadata as { display_name?: string; full_name?: string } | null)?.full_name ??
+    null;
+  // Membership da empresa ativa (para mostrar o cargo correto naquele contexto)
+  const activeMembership =
+    currentUser.memberships.find((m) => m.company_id === companyId) ?? currentUser.memberships[0];
+  const name = metaName ?? activeMembership?.display_name ?? currentUser.user.email ?? "Usuário";
   const initials = name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
-  const roleLabel = currentUser.memberships[0]?.profiles?.name ?? "Usuário";
+  const roleLabel = activeMembership?.profiles?.name ?? "Usuário";
 
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
