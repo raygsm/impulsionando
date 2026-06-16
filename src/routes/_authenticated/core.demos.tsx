@@ -71,7 +71,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import JSZip from "jszip";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -217,6 +217,14 @@ ${rows
   w.document.close();
 }
 
+type PurgeSampleRow = {
+  id: string;
+  niche: string;
+  status: "success" | "failure";
+  label: string | null;
+  createdAt: string;
+};
+
 function downloadLastPurgePdf(retention: {
   retentionDays: number;
   schedule: string;
@@ -228,6 +236,8 @@ function downloadLastPurgePdf(retention: {
   lastTrigger: "scheduled" | "manual" | null;
   lastByNiche: Record<string, number>;
   lastByStatus: Record<string, number>;
+  lastSamples?: PurgeSampleRow[];
+  lastSampleCount?: number;
   lastLogId: string | null;
 }) {
   if (!retention.lastRunAt) return;
@@ -268,9 +278,98 @@ function downloadLastPurgePdf(retention: {
     headStyles: { fillColor: [99, 102, 241] },
   });
 
+  // Lista paginada dos smoke_runs removidos (até 500 amostras vindas do RPC)
+  const samples = retention.lastSamples ?? [];
+  const totalRemoved = retention.lastRemovedCount ?? 0;
+  const sampleCount = retention.lastSampleCount ?? samples.length;
+  let cursor = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable
+    .finalY + 12;
+
+  doc.setFontSize(12);
+  doc.text(
+    `Execuções removidas (amostra ${sampleCount} de ${totalRemoved})`,
+    14,
+    cursor,
+  );
+  cursor += 4;
+
+  const pageSize = 25;
+  const totalPages = Math.max(1, Math.ceil(samples.length / pageSize));
+  for (let p = 0; p < totalPages; p++) {
+    if (p > 0) {
+      doc.addPage();
+      cursor = 18;
+      doc.setFontSize(12);
+      doc.text(
+        `Execuções removidas — página ${p + 1}/${totalPages}`,
+        14,
+        cursor,
+      );
+      cursor += 4;
+    }
+    const slice = samples.slice(p * pageSize, (p + 1) * pageSize);
+    autoTable(doc, {
+      startY: cursor + 2,
+      head: [["#", "ID", "Nicho", "Status", "Label"]],
+      body: slice.length
+        ? slice.map((s, i) => [
+            String(p * pageSize + i + 1),
+            s.id.slice(0, 8) + "…",
+            s.niche,
+            s.status,
+            (s.label ?? "").slice(0, 38),
+          ])
+        : [["—", "—", "—", "—", "—"]],
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [99, 102, 241] },
+      columnStyles: {
+        0: { cellWidth: 10 },
+        1: { cellWidth: 28 },
+        2: { cellWidth: 32 },
+        3: { cellWidth: 22 },
+      },
+    });
+  }
+  if (totalRemoved > samples.length) {
+    const finalY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY;
+    doc.setFontSize(8);
+    doc.setTextColor(120);
+    doc.text(
+      `Amostra limitada a ${samples.length} registros — o purge removeu ${totalRemoved} no total.`,
+      14,
+      finalY + 6,
+    );
+    doc.setTextColor(0);
+  }
+
   const stamp = new Date(retention.lastRunAt).toISOString().replace(/[:.]/g, "-");
   doc.save(`purge-report_${stamp}.pdf`);
 }
+
+function downloadPurgeFailureAudit(payload: {
+  message: string;
+  attemptedAt: string;
+  retentionDays: number;
+  partialRemoved: number | null;
+  lastKnownLogId: string | null;
+  rpcName: string;
+  stack?: string;
+}) {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  const stamp = payload.attemptedAt.replace(/[:.]/g, "-");
+  a.download = `purge-failure-audit_${stamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+
 
 
 
@@ -298,29 +397,68 @@ function CoreDemosPage() {
   const [lastPurgeResult, setLastPurgeResult] = useState<{
     totalRemoved: number;
     ranAt: string;
+    sampleCount: number;
   } | null>(null);
+  const [purgeError, setPurgeError] = useState<{
+    message: string;
+    attemptedAt: string;
+    retentionDays: number;
+    partialRemoved: number | null;
+    lastKnownLogId: string | null;
+    aborted?: boolean;
+  } | null>(null);
+  const purgeAbortRef = useRef<AbortController | null>(null);
+
+  const cancelManualPurge = () => {
+    if (purgeAbortRef.current) {
+      purgeAbortRef.current.abort();
+      toast("Cancelando purge…", {
+        description:
+          "O servidor pode terminar a execução, mas o cliente parou de aguardar.",
+      });
+    }
+  };
 
   const runManualPurge = async () => {
     setConfirmPurgeOpen(false);
+    setPurgeError(null);
     setPurging(true);
     setPurgeProgress(8);
-    // Smooth progress trickle while RPC runs
     const ticker = setInterval(() => {
       setPurgeProgress((p) => (p < 88 ? p + 6 : p));
     }, 220);
+    const controller = new AbortController();
+    purgeAbortRef.current = controller;
+    const attemptedAt = new Date().toISOString();
     try {
-      const res = await purgeNow({ data: {} });
+      const abortPromise = new Promise<never>((_, reject) => {
+        controller.signal.addEventListener("abort", () => {
+          const err = new Error("AbortError");
+          err.name = "AbortError";
+          reject(err);
+        });
+      });
+      const res = await Promise.race([
+        purgeNow({ data: {}, signal: controller.signal } as Parameters<typeof purgeNow>[0]),
+        abortPromise,
+      ]);
+
       clearInterval(ticker);
       setPurgeProgress(100);
-      setLastPurgeResult({ totalRemoved: res.totalRemoved, ranAt: res.ranAt });
+      setLastPurgeResult({
+        totalRemoved: res.totalRemoved,
+        ranAt: res.ranAt,
+        sampleCount: res.sampleCount ?? res.samples?.length ?? 0,
+      });
       const refreshed = await refetchRetention();
       qc.invalidateQueries({ queryKey: ["core-smoke-history"] });
       const retentionSnapshot = refreshed.data ?? null;
+      const sampleCount = res.sampleCount ?? res.samples?.length ?? 0;
       toast.success(
         `Purge concluído — ${res.totalRemoved} execução(ões) removida(s).`,
         {
-          description: `Trigger: manual · ${new Date(res.ranAt).toLocaleString("pt-BR")}`,
-          duration: 12_000,
+          description: `Trigger: manual · ${new Date(res.ranAt).toLocaleString("pt-BR")}\nAmostra: ${sampleCount} smoke_runs registrados no relatório.`,
+          duration: 14_000,
           action: retentionSnapshot && retentionSnapshot.lastRunAt
             ? {
                 label: "Baixar PDF",
@@ -331,8 +469,35 @@ function CoreDemosPage() {
       );
     } catch (e) {
       clearInterval(ticker);
-      toast.error((e as Error).message ?? "Falha ao disparar purge.");
+      const err = e as Error & { name?: string };
+      const aborted = err?.name === "AbortError" || controller.signal.aborted;
+      // Tenta obter contagem parcial atual via refetch (transação rola tudo ou nada,
+      // mas se outra execução agendada rodou no meio guardamos o estado conhecido).
+      let partial: number | null = null;
+      let lastLogId: string | null = null;
+      try {
+        const r = await refetchRetention();
+        partial = r.data?.lastRemovedCount ?? null;
+        lastLogId = r.data?.lastLogId ?? null;
+      } catch {
+        // ignore
+      }
+      setPurgeError({
+        message: aborted
+          ? "Execução cancelada pelo cliente — servidor pode ter concluído."
+          : err.message || "Erro desconhecido no RPC trigger_smoke_purge.",
+        attemptedAt,
+        retentionDays: retention?.retentionDays ?? 180,
+        partialRemoved: partial,
+        lastKnownLogId: lastLogId,
+        aborted,
+      });
+      toast.error(
+        aborted ? "Purge cancelado" : "Falha ao disparar purge",
+        { description: err.message?.slice(0, 200) },
+      );
     } finally {
+      purgeAbortRef.current = null;
       setTimeout(() => {
         setPurging(false);
         setPurgeProgress(0);
@@ -342,12 +507,33 @@ function CoreDemosPage() {
 
 
 
+
   // filtros + paginação do histórico
   const [historyPage, setHistoryPage] = useState(0);
   const historyPageSize = 20;
   const [historySince, setHistorySince] = useState<string>("all");
-  const [historyStatus, setHistoryStatus] = useState<"all" | "success" | "failure">("all");
-  const [historyNicheSlug, setHistoryNicheSlug] = useState<string | null>(null);
+  const [historyStatus, setHistoryStatus] = useState<"all" | "success" | "failure">(() => {
+    if (typeof window === "undefined") return "all";
+    const v = window.localStorage.getItem("core-demos.history.status");
+    return v === "success" || v === "failure" ? v : "all";
+  });
+  const [historyNicheSlug, setHistoryNicheSlug] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return window.localStorage.getItem("core-demos.history.nicheSlug") || null;
+  });
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("core-demos.history.status", historyStatus);
+  }, [historyStatus]);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (historyNicheSlug) {
+      window.localStorage.setItem("core-demos.history.nicheSlug", historyNicheSlug);
+    } else {
+      window.localStorage.removeItem("core-demos.history.nicheSlug");
+    }
+  }, [historyNicheSlug]);
+
   const [historySearch, setHistorySearch] = useState("");
   const debouncedSearch = useDebouncedValue(historySearch, 350);
   const [selectedRun, setSelectedRun] = useState<SmokeRunRow | null>(null);
@@ -1195,15 +1381,75 @@ function CoreDemosPage() {
               </div>
             </div>
 
-            {/* Indicador de progresso durante o purge manual */}
+            {/* Indicador de progresso + cancelar durante o purge manual */}
             {purging && (
               <div className="mb-3">
                 <Progress value={purgeProgress} className="h-1.5" />
-                <div className="text-[10px] text-muted-foreground mt-1">
-                  Executando purge… {purgeProgress}%
+                <div className="flex items-center justify-between mt-1 text-[10px] text-muted-foreground">
+                  <span>Executando purge… {purgeProgress}%</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-[10px]"
+                    onClick={cancelManualPurge}
+                    disabled={purgeProgress >= 100}
+                  >
+                    <X className="mr-1 h-3 w-3" /> Cancelar
+                  </Button>
                 </div>
               </div>
             )}
+
+            {/* Painel de erro do último purge manual */}
+            {purgeError && (
+              <div className="mb-3 rounded border border-destructive/40 bg-destructive/5 px-3 py-2.5 text-xs">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <XCircle className="h-4 w-4 text-destructive" />
+                  <span className="font-medium text-destructive">
+                    {purgeError.aborted ? "Purge cancelado" : "Falha no purge manual"}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="ml-auto h-7"
+                    onClick={() =>
+                      downloadPurgeFailureAudit({
+                        message: purgeError.message,
+                        attemptedAt: purgeError.attemptedAt,
+                        retentionDays: purgeError.retentionDays,
+                        partialRemoved: purgeError.partialRemoved,
+                        lastKnownLogId: purgeError.lastKnownLogId,
+                        rpcName: "trigger_smoke_purge",
+                      })
+                    }
+                  >
+                    <Download className="mr-2 h-3 w-3" />
+                    Log de auditoria
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={() => setPurgeError(null)}
+                    className="text-muted-foreground hover:text-foreground"
+                    aria-label="Fechar"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                <div className="text-foreground break-words font-mono text-[11px]">
+                  {purgeError.message}
+                </div>
+                <div className="mt-1 text-muted-foreground">
+                  Tentado em {new Date(purgeError.attemptedAt).toLocaleString("pt-BR")} ·
+                  janela {purgeError.retentionDays}d · removidos (parcial):{" "}
+                  <strong>{purgeError.partialRemoved ?? "—"}</strong>
+                  {purgeError.lastKnownLogId
+                    ? ` · último log: ${purgeError.lastKnownLogId.slice(0, 8)}…`
+                    : ""}
+                </div>
+              </div>
+            )}
+
+
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 text-muted-foreground">
               <div>
