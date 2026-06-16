@@ -27,6 +27,7 @@ import { Route as ModulosRouteImport } from './routes/modulos'
 import { Route as EmpresasRouteImport } from './routes/empresas'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as ContaSuspensaRouteImport } from './routes/conta-suspensa'
+import { Route as ConsumidorRouteImport } from './routes/consumidor'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -286,6 +287,11 @@ const ContatoRoute = ContatoRouteImport.update({
 const ContaSuspensaRoute = ContaSuspensaRouteImport.update({
   id: '/conta-suspensa',
   path: '/conta-suspensa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConsumidorRoute = ConsumidorRouteImport.update({
+  id: '/consumidor',
+  path: '/consumidor',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -1229,6 +1235,7 @@ const AuthenticatedCoreClienteIdModuloSlugConfigurarRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
   '/empresas': typeof EmpresasRoute
@@ -1418,6 +1425,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
   '/empresas': typeof EmpresasRoute
@@ -1598,6 +1606,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
   '/empresas': typeof EmpresasRoute
@@ -1789,6 +1798,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/consumidor'
     | '/conta-suspensa'
     | '/contato'
     | '/empresas'
@@ -1978,6 +1988,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/consumidor'
     | '/conta-suspensa'
     | '/contato'
     | '/empresas'
@@ -2157,6 +2168,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/consumidor'
     | '/conta-suspensa'
     | '/contato'
     | '/empresas'
@@ -2348,6 +2360,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ConsumidorRoute: typeof ConsumidorRoute
   ContaSuspensaRoute: typeof ContaSuspensaRoute
   ContatoRoute: typeof ContatoRoute
   EmpresasRoute: typeof EmpresasRoute
@@ -2540,6 +2553,13 @@ declare module '@tanstack/react-router' {
       path: '/conta-suspensa'
       fullPath: '/conta-suspensa'
       preLoaderRoute: typeof ContaSuspensaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/consumidor': {
+      id: '/consumidor'
+      path: '/consumidor'
+      fullPath: '/consumidor'
+      preLoaderRoute: typeof ConsumidorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -4176,6 +4196,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ConsumidorRoute: ConsumidorRoute,
   ContaSuspensaRoute: ContaSuspensaRoute,
   ContatoRoute: ContatoRoute,
   EmpresasRoute: EmpresasRoute,

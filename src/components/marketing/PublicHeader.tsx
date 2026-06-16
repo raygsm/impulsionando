@@ -1,286 +1,42 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { MessageCircle, PlayCircle, Menu, ChevronDown } from "lucide-react";
+import { MessageCircle, PlayCircle, Menu, LogIn } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import logoAsset from "@/assets/logo-impulsionando.png.asset.json";
 
 const WHATSAPP_URL =
-  "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20falar%20com%20a%20Impulsionando%20Tecnologia%20sobre%20m%C3%B3dulos%2C%20automa%C3%A7%C3%A3o%2C%20agenda%20online%2C%20WhatsApp%2C%20CRM%20ou%20sistemas%20personalizados.";
+  "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20falar%20com%20um%20especialista%20da%20Impulsionando.";
 
-type NavItem = { to: string; label: string; desc?: string; external?: boolean };
-type NavGroup = { heading: string; items: NavItem[] };
+type MainLink = { to: "/" | "/empresas" | "/white-label" | "/consumidor" | "/demo" | "/planos"; label: string; exact?: boolean };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SOLUÇÕES — agrupado por área funcional. Cada item aponta para módulos existentes.
-// ─────────────────────────────────────────────────────────────────────────────
-const SOLUCOES_GROUPS: NavGroup[] = [
-  {
-    heading: "Comercial & Atendimento",
-    items: [
-      { to: "/modulos/crm", label: "CRM, Leads e Funis", desc: "Jornada completa do lead à fidelização" },
-      { to: "/modulos/automacao", label: "WhatsApp & Comunicação", desc: "Atendimento 24h, lembretes e IA" },
-    ],
-  },
-  {
-    heading: "Operação",
-    items: [
-      { to: "/modulos/agenda", label: "Agenda & Reservas", desc: "Agendamento, reagendamento, lista de espera" },
-      { to: "/modulos/commerce", label: "Vendas & Checkout", desc: "Pedidos, Pix, cartão, baixa automática" },
-      { to: "/modulos/pdv", label: "PDV & Comandas", desc: "Caixa, mesas, fechamento de comanda" },
-      { to: "/modulos/estoque", label: "Estoque & Compras", desc: "Produtos, fornecedores, alertas" },
-      { to: "/modulos/delivery", label: "Delivery & Entregas", desc: "Pedido online, entregador, status" },
-    ],
-  },
-  {
-    heading: "Crescimento",
-    items: [
-      { to: "/modulos/fidelizacao", label: "Afiliados, Cupons e Indicações", desc: "Links únicos, splits, painel do afiliado" },
-      { to: "/modulos/bi", label: "Dashboards & BI", desc: "Indicadores por nicho, comparativos, exportação" },
-      { to: "/modulos/eventos", label: "Eventos & Ingressos", desc: "Lotes, check-in, transferência de titular" },
-    ],
-  },
-  {
-    heading: "Plataforma",
-    items: [
-      { to: "/modulos/erp", label: "ERP, Usuários & Permissões", desc: "Setores, auditoria, financeiro, assinaturas" },
-      { to: "/modulos/saude", label: "Prontuário & Saúde", desc: "Evoluções, exames, área do paciente" },
-      { to: "/modulos/area_cliente", label: "Área do Cliente", desc: "Histórico, documentos, autoatendimento" },
-      { to: "/modulos/white_label", label: "White Label & Multi-empresa", desc: "Operação para agências e revendas" },
-    ],
-  },
-  {
-    heading: "Catálogo completo",
-    items: [
-      { to: "/modulos", label: "Todos os Módulos Disponíveis →", desc: "Ver a vitrine completa de módulos" },
-    ],
-  },
-
+const MAIN_NAV: MainLink[] = [
+  { to: "/", label: "Início", exact: true },
+  { to: "/empresas", label: "Empresas" },
+  { to: "/white-label", label: "White Label" },
+  { to: "/consumidor", label: "Consumidor" },
+  { to: "/demo", label: "Demonstrações" },
+  { to: "/planos", label: "Planos" },
 ];
 
-// ─────────────────────────────────────────────────────────────────────────────
-// NICHOS — 7 categorias principais, cada uma apontando para páginas de nicho existentes.
-// ─────────────────────────────────────────────────────────────────────────────
-const NICHOS_GROUPS: NavGroup[] = [
-  {
-    heading: "Saúde, Bem-estar e Performance",
-    items: [
-      { to: "/nichos/clinicas", label: "Clínicas, consultórios e profissionais", desc: "Agenda médica, prontuário, área do paciente" },
-      { to: "/nichos/fitness", label: "Academias, CrossFit, Personal e Pilates", desc: "Turmas, planos, presença, reativação" },
-    ],
-  },
-  {
-    heading: "Alimentação, Bebidas e Experiências",
-    items: [
-      { to: "/nichos/bares-restaurantes", label: "Bares, restaurantes, delivery e cafés", desc: "Reservas, comandas, PDV, delivery" },
-      { to: "/nichos/microcervejarias", label: "Microcervejarias", desc: "Rótulos, lotes, B2B, recompra" },
-      { to: "/nichos/fornecedores", label: "Fornecedores e distribuidores", desc: "Catálogo B2B, pedidos, giro" },
-    ],
-  },
-  {
-    heading: "Serviços, Educação e Atendimento",
-    items: [
-      { to: "/nichos/servicos", label: "Prestadores, consultorias e escolas", desc: "Orçamentos, propostas, follow-up, pacotes" },
-    ],
-  },
-  {
-    heading: "Varejo, E-commerce e Produtos",
-    items: [
-      { to: "/nichos/ecommerce", label: "Lojas, supermercados e e-commerce", desc: "Recompra, clube de vantagens, segmentação" },
-    ],
-  },
-  {
-    heading: "Eventos & White Label",
-    items: [
-      { to: "/showroom/eventos", label: "Eventos e ingressos", desc: "Lotes, check-in, transferência, NPS" },
-      { to: "/nichos/white-label", label: "White Label e Parceiros", desc: "Briefing, módulos, recorrência, multi-cliente" },
-    ],
-  },
-  {
-    heading: "Todos os nichos",
-    items: [
-      { to: "/nichos", label: "Ver todos os nichos →", desc: "Catálogo completo por segmento" },
-    ],
-  },
-];
-
-// ─────────────────────────────────────────────────────────────────────────────
-// SOLUÇÕES — agrupado por público (Empresas / White Label / Consumidores)
-// ─────────────────────────────────────────────────────────────────────────────
-const SOLUCOES_AUDIENCE_GROUPS: NavGroup[] = [
-  {
-    heading: "Para Empresas",
-    items: [
-      { to: "/empresas", label: "Visão geral por segmento", desc: "Hub com todos os nichos atendidos" },
-      { to: "/nichos/clinicas", label: "Clínicas", desc: "Agenda, prontuário, WhatsApp, financeiro" },
-      { to: "/nichos/imobiliaria", label: "Imobiliárias", desc: "Captação, CRM, visitas, IA comercial" },
-      { to: "/nichos/bares-restaurantes", label: "Restaurantes", desc: "Delivery, PDV, cupons, fidelidade" },
-      { to: "/nichos/fitness", label: "Academias", desc: "Planos, avaliações, agenda, financeiro" },
-      { to: "/nichos/concessionarias", label: "Concessionárias", desc: "Estoque, CRM, pós-venda, leads" },
-      { to: "/nichos/servicos", label: "Prestadores de serviço", desc: "Orçamentos, agenda, CRM, cobrança" },
-      { to: "/nichos/ecommerce", label: "Comércio", desc: "PDV, estoque, recompra, fidelidade" },
-    ],
-  },
-  {
-    heading: "Para White Label",
-    items: [
-      { to: "/white-label", label: "Sua marca, seu domínio, seus clientes", desc: "Plataforma SaaS pronta para revenda" },
-      { to: "/demo/white-label", label: "Ver Plataforma White Label", desc: "Tour navegável da operação revendedora" },
-      { to: "/nichos/white-label", label: "Casos e parceiros", desc: "Como agências e franqueadoras usam" },
-    ],
-  },
-  {
-    heading: "Para Consumidores",
-    items: [
-      { to: "/auth", label: "Área do Cliente", desc: "Acesse agendas, pedidos e documentos" },
-      { to: "/modulos/fidelizacao", label: "Fidelidade e Cupons", desc: "Programas, indicações e vantagens" },
-      { to: "/showroom/eventos", label: "Eventos e Ingressos", desc: "Compra, check-in e transferência" },
-    ],
-  },
-];
-
-const PLANOS: NavItem[] = [
-  { to: "/planos", label: "Planos e preços", desc: "Compare módulos, recursos e limites" },
-  { to: "/orcamento", label: "Orçamento personalizado", desc: "Monte um plano sob medida para seu negócio" },
-];
-
-
-
-
-function useIsActivePath(path: string) {
+function useIsActive(path: string, exact?: boolean) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  if (path === "/modulos") {
-    return pathname === "/modulos";
-  }
-  if (path.startsWith("/modulos/")) {
-    return pathname === path;
-  }
-  if (path.startsWith("/nichos/")) {
-    return pathname === path;
-  }
-  return pathname === path;
+  if (exact) return pathname === path;
+  return pathname === path || pathname.startsWith(path + "/");
 }
 
-function useHasActiveChild(groups: NavGroup[]) {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-  return groups.some((g) =>
-    g.items.some((it) => {
-      if (it.to === "/modulos") return pathname === "/modulos";
-      if (it.to.startsWith("/modulos/")) return pathname === it.to;
-      if (it.to.startsWith("/nichos/")) return pathname === it.to;
-      return pathname === it.to;
-    })
-  );
-}
-
-function useHasActiveFlat(items: NavItem[]) {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-  return items.some((it) => pathname === it.to);
-}
-
-function ItemLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
-  const isActive = useIsActivePath(item.to);
-  const activeClass = isActive ? "bg-accent text-accent-foreground" : "";
-
-  if (item.external) {
-    return (
-      <a
-        href={item.to}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={onClick}
-        className={`flex flex-col items-start gap-0.5 py-2 cursor-pointer w-full rounded-sm px-2 ${activeClass}`}
-      >
-        <span className="text-sm font-medium text-foreground">{item.label}</span>
-        {item.desc && <span className="text-xs text-muted-foreground">{item.desc}</span>}
-      </a>
-    );
-  }
-
-  const moduleSlugMatch = item.to.match(/^\/modulos\/([^/]+)$/);
-  const nichoSlugMatch = item.to.match(/^\/nichos\/([^/]+)$/);
-
-  const content = (
-    <>
-      <span className="text-sm font-medium text-foreground">{item.label}</span>
-      {item.desc && <span className="text-xs text-muted-foreground">{item.desc}</span>}
-    </>
-  );
-  const className = `flex flex-col items-start gap-0.5 py-2 cursor-pointer w-full rounded-sm px-2 ${activeClass}`;
-
-  if (moduleSlugMatch) {
-    return (
-      <Link to="/modulos/$slug" params={{ slug: moduleSlugMatch[1] }} onClick={onClick} className={className}>
-        {content}
-      </Link>
-    );
-  }
-  if (nichoSlugMatch) {
-    return (
-      <Link to="/nichos/$slug" params={{ slug: nichoSlugMatch[1] }} onClick={onClick} className={className}>
-        {content}
-      </Link>
-    );
-  }
+function HeaderLink({ item, onClick }: { item: MainLink; onClick?: () => void }) {
+  const active = useIsActive(item.to, item.exact);
   return (
-    <Link to={item.to} onClick={onClick} className={className}>
-      {content}
+    <Link
+      to={item.to}
+      onClick={onClick}
+      className={`px-3 py-2.5 lg:px-4 lg:py-3 text-sm lg:text-[15px] transition-colors rounded-md ${
+        active ? "text-foreground font-medium bg-accent" : "text-muted-foreground hover:text-foreground"
+      }`}
+    >
+      {item.label}
     </Link>
-  );
-}
-
-
-function DesktopDropdownFlat({ label, items }: { label: string; items: NavItem[] }) {
-  const hasActive = useHasActiveFlat(items);
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className={`px-3 py-2.5 lg:px-4 lg:py-3 text-sm lg:text-[15px] hover:text-foreground transition-colors rounded-md inline-flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-ring ${hasActive ? "text-foreground font-medium bg-accent" : "text-muted-foreground"}`}>
-        {label}
-        <ChevronDown className="w-4 h-4" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-80">
-        {items.map((it) => (
-          <DropdownMenuItem key={it.to + it.label} asChild>
-            <ItemLink item={it} />
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
-function DesktopDropdownGrouped({ label, groups }: { label: string; groups: NavGroup[] }) {
-  const hasActive = useHasActiveChild(groups);
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className={`px-3 py-2.5 lg:px-4 lg:py-3 text-sm lg:text-[15px] hover:text-foreground transition-colors rounded-md inline-flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-ring ${hasActive ? "text-foreground font-medium bg-accent" : "text-muted-foreground"}`}>
-        {label}
-        <ChevronDown className="w-4 h-4" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-[420px] max-h-[80vh] overflow-y-auto">
-        {groups.map((g, idx) => (
-          <div key={g.heading}>
-            {idx > 0 && <DropdownMenuSeparator />}
-            <DropdownMenuLabel className="text-xs uppercase tracking-wider text-muted-foreground">
-              {g.heading}
-            </DropdownMenuLabel>
-            {g.items.map((it) => (
-              <DropdownMenuItem key={it.to + it.label} asChild>
-                <ItemLink item={it} />
-              </DropdownMenuItem>
-            ))}
-          </div>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
   );
 }
 
@@ -289,69 +45,39 @@ export function PublicHeader() {
 
   return (
     <header className="sticky top-0 z-30 w-full border-b border-border bg-background/80 backdrop-blur">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 sm:h-20 md:h-24 lg:h-32 flex items-center justify-between gap-2 sm:gap-4">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 sm:h-20 md:h-24 lg:h-28 flex items-center justify-between gap-2 sm:gap-4">
         <Link to="/" className="flex items-center gap-2 shrink-0 min-w-0">
           <img
             src={logoAsset.url}
             alt="Impulsionando Tecnologia"
-            className="h-10 sm:h-12 md:h-16 lg:h-24 w-auto object-contain"
+            className="h-10 sm:h-12 md:h-16 lg:h-20 w-auto object-contain"
           />
         </Link>
 
-        <nav className="hidden lg:flex items-center gap-2">
-          <Link
-            to="/"
-            className="px-3 py-3 text-[15px] text-muted-foreground hover:text-foreground transition-colors rounded-md"
-            activeProps={{ className: "text-foreground font-medium" }}
-            activeOptions={{ exact: true }}
-          >
-            Início
-          </Link>
-          <DesktopDropdownGrouped label="Soluções" groups={SOLUCOES_AUDIENCE_GROUPS} />
-          <Link
-            to="/white-label"
-            className="px-3 py-3 text-[15px] text-muted-foreground hover:text-foreground transition-colors rounded-md"
-            activeProps={{ className: "text-foreground font-medium" }}
-          >
-            White Label
-          </Link>
-          <Link
-            to="/empresas"
-            className="px-3 py-3 text-[15px] text-muted-foreground hover:text-foreground transition-colors rounded-md"
-            activeProps={{ className: "text-foreground font-medium" }}
-          >
-            Empresas
-          </Link>
-          <DesktopDropdownFlat label="Planos" items={PLANOS} />
-          <Link
-            to="/contato"
-            className="px-3 py-3 text-[15px] text-muted-foreground hover:text-foreground transition-colors rounded-md"
-            activeProps={{ className: "text-foreground font-medium" }}
-          >
-            Contato
-          </Link>
+        <nav className="hidden lg:flex items-center gap-1">
+          {MAIN_NAV.map((item) => (
+            <HeaderLink key={item.to} item={item} />
+          ))}
         </nav>
 
-
         <div className="flex items-center gap-2 lg:gap-3">
-          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex lg:h-10 lg:px-4 lg:text-[15px]">
-            <Link to="/auth">Entrar</Link>
-          </Button>
-          <Button
-            asChild
-            size="sm"
-            className="gap-2 bg-gradient-primary shadow-elegant hover:shadow-card-hover hidden md:inline-flex lg:h-10 lg:px-5 lg:text-[15px]"
-          >
+          <Button asChild size="sm" className="gap-2 bg-gradient-primary shadow-elegant hover:shadow-card-hover hidden md:inline-flex lg:h-10 lg:px-4">
             <Link to="/demo">
-              <PlayCircle className="w-4 h-4 lg:w-[18px] lg:h-[18px]" />
-              <span>Demonstração</span>
+              <PlayCircle className="w-4 h-4" />
+              <span>Ver demonstração</span>
             </Link>
           </Button>
-          <Button asChild size="sm" className="btn-whatsapp gap-2 hidden md:inline-flex lg:h-10 lg:px-5 lg:text-[15px]">
+          <Button asChild size="sm" className="btn-whatsapp gap-2 hidden md:inline-flex lg:h-10 lg:px-4">
             <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-              <MessageCircle className="w-4 h-4 lg:w-[18px] lg:h-[18px]" />
-              <span className="hidden lg:inline">WhatsApp</span>
+              <MessageCircle className="w-4 h-4" />
+              <span className="hidden lg:inline">Falar com especialista</span>
             </a>
+          </Button>
+          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex lg:h-10 lg:px-3 gap-1.5">
+            <Link to="/auth">
+              <LogIn className="w-4 h-4" />
+              <span>Entrar</span>
+            </Link>
           </Button>
 
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -362,78 +88,25 @@ export function PublicHeader() {
             </SheetTrigger>
             <SheetContent side="right" className="w-[88vw] sm:w-96 overflow-y-auto">
               <SheetTitle className="text-left">Menu</SheetTitle>
-                <div className="mt-6 flex flex-col gap-6">
-                  <Link to="/" onClick={() => setMobileOpen(false)} className="text-base font-medium">
-                    Início
-                  </Link>
+              <div className="mt-6 flex flex-col gap-2">
+                {MAIN_NAV.map((item) => (
+                  <HeaderLink key={item.to} item={item} onClick={() => setMobileOpen(false)} />
+                ))}
 
-                  <Link to="/empresas" onClick={() => setMobileOpen(false)} className="text-base font-medium">
-                    Empresas
-                  </Link>
-                  <Link to="/white-label" onClick={() => setMobileOpen(false)} className="text-base font-medium">
-                    White Label
-                  </Link>
-
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                      Soluções
-                    </p>
-                    <div className="flex flex-col gap-3">
-                      {SOLUCOES_AUDIENCE_GROUPS.map((g) => (
-                        <div key={g.heading}>
-                          <p className="text-[11px] uppercase tracking-wider text-muted-foreground/70 mt-2 mb-1">
-                            {g.heading}
-                          </p>
-                          <div className="flex flex-col gap-1">
-                            {g.items.map((it) => (
-                              <div key={it.to + it.label} className="text-sm text-foreground/90 hover:text-foreground">
-                                <ItemLink item={it} onClick={() => setMobileOpen(false)} />
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                      Planos
-                    </p>
-                    <div className="flex flex-col gap-2">
-                      {PLANOS.map((it) => (
-                        <div key={it.to + it.label} className="text-sm text-foreground/90 hover:text-foreground">
-                          <ItemLink item={it} onClick={() => setMobileOpen(false)} />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                <Link
-                  to="/contato"
-                  onClick={() => setMobileOpen(false)}
-                  className="text-base font-medium"
-                >
-                  Contato
-                </Link>
-
-                <div className="flex flex-col gap-2 pt-4 border-t border-border">
+                <div className="flex flex-col gap-2 pt-4 mt-2 border-t border-border">
                   <Button asChild className="bg-gradient-primary">
                     <Link to="/demo" onClick={() => setMobileOpen(false)}>
-                      <PlayCircle className="w-4 h-4 mr-2" />
-                      Demonstração
+                      <PlayCircle className="w-4 h-4 mr-2" /> Ver demonstração
                     </Link>
                   </Button>
                   <Button asChild className="btn-whatsapp">
                     <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                      <MessageCircle className="w-4 h-4 mr-2" />
-                      WhatsApp
+                      <MessageCircle className="w-4 h-4 mr-2" /> Falar com especialista
                     </a>
                   </Button>
                   <Button asChild variant="outline">
                     <Link to="/auth" onClick={() => setMobileOpen(false)}>
-                      Entrar
+                      <LogIn className="w-4 h-4 mr-2" /> Entrar
                     </Link>
                   </Button>
                 </div>
