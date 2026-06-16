@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useMemo, useState } from "react";
 import { fetchMacroDashboard, fetchMacroFiltersMeta } from "@/lib/core-dashboard.functions";
 import { downloadCsv, downloadTablePdf, fmtBRLCents } from "@/lib/exports";
+import { logExport } from "@/lib/core-export-logs.functions";
 import { LayoutDashboard, TrendingUp, Users, Activity, Download, FileText, Filter } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/core/dashboard-macro")({
