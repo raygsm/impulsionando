@@ -258,7 +258,10 @@ export const checkInByQr = createServerFn({ method: "POST" })
       _gate: data.gate ?? null,
     } as never);
     if (error) throw new Error(error.message);
-    return out as Record<string, unknown>;
+    return out as unknown as {
+      ok: boolean; reason?: string; checkin_id?: string;
+      holder?: string; event_id?: string; ticket_code?: string; used_at?: string;
+    };
   });
 
 // ---------- CANCEL TICKET ----------
