@@ -205,11 +205,20 @@ function Page() {
           ? "Revise imóveis enviados pelos corretores antes de publicar."
           : "Você não tem permissão de aprovação — apenas visualização da fila."}
         action={
-          <Button asChild variant="outline" size="sm">
-            <Link to="/imobiliaria/imoveis">Voltar à carteira</Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/perfil/notificacoes">Preferências</Link>
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => batchExport.mutate()} disabled={batchExport.isPending}>
+              <Download className="w-4 h-4 mr-1" /> Exportar fila (CSV)
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/imobiliaria/imoveis">Voltar à carteira</Link>
+            </Button>
+          </div>
         }
       />
+
 
       {!companyId ? (
         <Card className="p-6"><p className="text-sm text-muted-foreground">Selecione uma empresa.</p></Card>
