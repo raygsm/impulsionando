@@ -22,10 +22,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { PageHeader } from "@/components/app/PageElements";
 import { toast } from "sonner";
 import {
@@ -35,7 +37,6 @@ import {
   XCircle,
   Loader2,
   Search,
-  ChevronDown,
   History,
   Play,
   RotateCcw,
@@ -161,9 +162,22 @@ function CoreDemosPage() {
   const replay = useServerFn(replaySmokeRun);
   const exportHistory = useServerFn(exportSmokeHistory);
 
-  // paginação histórico
+  // filtros + paginação do histórico
   const [historyPage, setHistoryPage] = useState(0);
   const historyPageSize = 20;
+  const [historySince, setHistorySince] = useState<string>("all"); // "all" | "7" | "30" | "90"
+  const [historyStatus, setHistoryStatus] = useState<"all" | "success" | "failure">("all");
+  const [historySearch, setHistorySearch] = useState("");
+  const [selectedRun, setSelectedRun] = useState<SmokeRunRow | null>(null);
+
+  const historyFilters = useMemo(
+    () => ({
+      sinceDays: historySince === "all" ? null : Number(historySince),
+      status: historyStatus,
+      search: historySearch.trim() || undefined,
+    }),
+    [historySince, historyStatus, historySearch],
+  );
 
   const { data, isLoading } = useQuery({
     queryKey: ["core-demos"],
@@ -171,10 +185,14 @@ function CoreDemosPage() {
   });
 
   const { data: historyData, isLoading: loadingHistory } = useQuery({
-    queryKey: ["core-smoke-history", historyPage],
+    queryKey: ["core-smoke-history", historyPage, historyFilters],
     queryFn: () =>
       fetchHistory({
-        data: { limit: historyPageSize, offset: historyPage * historyPageSize },
+        data: {
+          limit: historyPageSize,
+          offset: historyPage * historyPageSize,
+          ...historyFilters,
+        },
       }),
   });
 
@@ -232,7 +250,7 @@ function CoreDemosPage() {
   });
 
   const handleExportCsv = async () => {
-    const r = await exportHistory();
+    const r = await exportHistory({ data: historyFilters });
     const rows = (r.runs ?? []) as unknown as SmokeRunRow[];
     const header = [
       "id",
@@ -274,7 +292,7 @@ function CoreDemosPage() {
   };
 
   const handleExportPdf = async () => {
-    const r = await exportHistory();
+    const r = await exportHistory({ data: historyFilters });
     const rows = (r.runs ?? []) as unknown as SmokeRunRow[];
     printHistoryPDF(rows);
   };
@@ -671,85 +689,114 @@ function CoreDemosPage() {
             </Button>
           </div>
         </div>
+
+        {/* filtros do histórico */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
+          <div className="md:col-span-2 relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por label, nicho ou erro…"
+              className="pl-8"
+              value={historySearch}
+              onChange={(e) => {
+                setHistorySearch(e.target.value);
+                setHistoryPage(0);
+              }}
+            />
+          </div>
+          <Select
+            value={historySince}
+            onValueChange={(v) => {
+              setHistorySince(v);
+              setHistoryPage(0);
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Intervalo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todo o histórico</SelectItem>
+              <SelectItem value="7">Últimos 7 dias</SelectItem>
+              <SelectItem value="30">Últimos 30 dias</SelectItem>
+              <SelectItem value="90">Últimos 90 dias</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
+            value={historyStatus}
+            onValueChange={(v) => {
+              setHistoryStatus(v as "all" | "success" | "failure");
+              setHistoryPage(0);
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os status</SelectItem>
+              <SelectItem value="success">Apenas sucesso</SelectItem>
+              <SelectItem value="failure">Apenas falhas</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         {loadingHistory ? (
           <div className="text-sm text-muted-foreground">Carregando…</div>
         ) : history.length === 0 ? (
           <div className="text-sm text-muted-foreground">
-            Nenhuma execução registrada ainda.
+            Nenhuma execução bate com os filtros atuais.
           </div>
         ) : (
           <>
             <div className="space-y-1">
               {history.map((h) => (
-                <Collapsible key={h.id}>
-                  <div className="flex items-center gap-1">
-                    <CollapsibleTrigger className="flex-1">
-                      <div className="flex items-center gap-2 text-sm border rounded px-2 py-1.5 hover:bg-muted/50 w-full">
-                        {h.success ? (
-                          <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-                        ) : (
-                          <XCircle className="h-4 w-4 text-destructive shrink-0" />
-                        )}
-                        <span className="font-mono text-xs truncate">{h.label ?? "—"}</span>
-                        {h.niche_slug && (
-                          <Badge variant="outline" className="text-xs">
-                            {h.niche_slug}
-                          </Badge>
-                        )}
-                        {h.batch_id && (
-                          <Badge variant="secondary" className="text-xs">
-                            batch {h.batch_id.slice(0, 6)}
-                          </Badge>
-                        )}
-                        {h.replay_of && (
-                          <Badge variant="outline" className="text-xs">
-                            replay de {h.replay_of.slice(0, 6)}
-                          </Badge>
-                        )}
-                        <span className="ml-auto text-xs text-muted-foreground">
-                          {h.duration_ms}ms · {new Date(h.created_at).toLocaleString("pt-BR")}
-                        </span>
-                        <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-                      </div>
-                    </CollapsibleTrigger>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      title="Reexecutar com os mesmos parâmetros"
-                      onClick={() => replayMut.mutate(h.id)}
-                      disabled={replayMut.isPending}
-                    >
-                      {replayMut.isPending && replayMut.variables === h.id ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                <div key={h.id} className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedRun(h)}
+                    className="flex-1 text-left"
+                  >
+                    <div className="flex items-center gap-2 text-sm border rounded px-2 py-1.5 hover:bg-muted/50 w-full">
+                      {h.success ? (
+                        <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
                       ) : (
-                        <RotateCcw className="h-3.5 w-3.5" />
+                        <XCircle className="h-4 w-4 text-destructive shrink-0" />
                       )}
-                    </Button>
-                  </div>
-                  <CollapsibleContent className="px-2 py-2">
-                    {h.error && (
-                      <div className="text-xs text-destructive mb-2">erro: {h.error}</div>
+                      <span className="font-mono text-xs truncate">{h.label ?? "—"}</span>
+                      {h.niche_slug && (
+                        <Badge variant="outline" className="text-xs">
+                          {h.niche_slug}
+                        </Badge>
+                      )}
+                      {h.batch_id && (
+                        <Badge variant="secondary" className="text-xs">
+                          batch {h.batch_id.slice(0, 6)}
+                        </Badge>
+                      )}
+                      {h.replay_of && (
+                        <Badge variant="outline" className="text-xs">
+                          replay de {h.replay_of.slice(0, 6)}
+                        </Badge>
+                      )}
+                      <span className="ml-auto text-xs text-muted-foreground">
+                        {h.duration_ms}ms ·{" "}
+                        {new Date(h.created_at).toLocaleString("pt-BR")}
+                      </span>
+                    </div>
+                  </button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    title="Reexecutar com os mesmos parâmetros"
+                    onClick={() => replayMut.mutate(h.id)}
+                    disabled={replayMut.isPending}
+                  >
+                    {replayMut.isPending && replayMut.variables === h.id ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <RotateCcw className="h-3.5 w-3.5" />
                     )}
-                    <ul className="space-y-0.5 text-xs">
-                      {(h.steps ?? []).map((s, i) => (
-                        <li key={i} className="flex items-start gap-2">
-                          {s.ok ? (
-                            <CheckCircle2 className="h-3 w-3 text-emerald-500 mt-0.5 shrink-0" />
-                          ) : (
-                            <XCircle className="h-3 w-3 text-destructive mt-0.5 shrink-0" />
-                          )}
-                          <span className="font-mono">{s.key}</span>
-                          {s.detail && (
-                            <span className="text-muted-foreground">— {s.detail}</span>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                    <pre className="mt-2 text-[10px] bg-muted/40 rounded p-2 overflow-x-auto">
-                      {JSON.stringify(h.ids, null, 2)}
-                    </pre>
-                  </CollapsibleContent>
-                </Collapsible>
+                  </Button>
+                </div>
               ))}
             </div>
             {historyTotal > historyPageSize && (
@@ -779,6 +826,156 @@ function CoreDemosPage() {
           </>
         )}
       </Card>
+
+      {/* Modal de detalhes da execução */}
+      <Dialog open={!!selectedRun} onOpenChange={(o) => !o && setSelectedRun(null)}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+          {selectedRun && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  {selectedRun.success ? (
+                    <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                  ) : (
+                    <XCircle className="h-5 w-5 text-destructive" />
+                  )}
+                  <span className="font-mono text-sm">{selectedRun.label ?? "—"}</span>
+                </DialogTitle>
+                <DialogDescription className="flex flex-wrap items-center gap-2 mt-1">
+                  <span>
+                    {new Date(selectedRun.created_at).toLocaleString("pt-BR")} ·{" "}
+                    {selectedRun.duration_ms}ms
+                  </span>
+                  {selectedRun.niche_slug && (
+                    <Badge variant="outline">{selectedRun.niche_slug}</Badge>
+                  )}
+                  {selectedRun.batch_id && (
+                    <Badge variant="secondary">
+                      batch {selectedRun.batch_id.slice(0, 8)}
+                    </Badge>
+                  )}
+                  {selectedRun.replay_of && (
+                    <Badge variant="outline">
+                      replay de {selectedRun.replay_of.slice(0, 8)}
+                    </Badge>
+                  )}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4">
+                {selectedRun.error && (
+                  <div className="text-sm text-destructive border border-destructive/30 rounded p-3 bg-destructive/5">
+                    <div className="font-semibold mb-1">Erro</div>
+                    <div className="font-mono text-xs whitespace-pre-wrap">
+                      {selectedRun.error}
+                    </div>
+                  </div>
+                )}
+
+                <section>
+                  <h4 className="text-sm font-semibold mb-2">
+                    Etapas do wizard ({selectedRun.steps?.length ?? 0})
+                  </h4>
+                  <ol className="space-y-1.5">
+                    {(selectedRun.steps ?? []).map((s, i) => (
+                      <li
+                        key={i}
+                        className="flex items-start gap-2 text-sm border-l-2 pl-3 py-0.5"
+                        style={{
+                          borderColor: s.ok
+                            ? "hsl(var(--primary))"
+                            : "hsl(var(--destructive))",
+                        }}
+                      >
+                        <span className="text-xs text-muted-foreground w-5 shrink-0">
+                          {i + 1}.
+                        </span>
+                        {s.ok ? (
+                          <CheckCircle2 className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                        ) : (
+                          <XCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+                        )}
+                        <div className="flex-1">
+                          <div className="font-mono text-xs">{s.key}</div>
+                          {s.detail && (
+                            <div className="text-xs text-muted-foreground">
+                              {s.detail}
+                            </div>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+
+                <section>
+                  <h4 className="text-sm font-semibold mb-2">IDs utilizados</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                    {Object.entries(selectedRun.ids ?? {}).map(([k, v]) => (
+                      <div key={k} className="border rounded p-2">
+                        <div className="text-muted-foreground text-[10px] uppercase">
+                          {k}
+                        </div>
+                        <div className="font-mono break-all">{v ?? "—"}</div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                <section>
+                  <h4 className="text-sm font-semibold mb-2">Logs brutos (JSON)</h4>
+                  <pre className="text-[11px] bg-muted/40 rounded p-3 overflow-x-auto">
+                    {JSON.stringify(
+                      {
+                        id: selectedRun.id,
+                        label: selectedRun.label,
+                        niche_slug: selectedRun.niche_slug,
+                        success: selectedRun.success,
+                        duration_ms: selectedRun.duration_ms,
+                        batch_id: selectedRun.batch_id,
+                        replay_of: selectedRun.replay_of,
+                        created_at: selectedRun.created_at,
+                        error: selectedRun.error,
+                        ids: selectedRun.ids,
+                        steps: selectedRun.steps,
+                      },
+                      null,
+                      2,
+                    )}
+                  </pre>
+                </section>
+
+                <div className="flex justify-end gap-2 pt-2 border-t">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const json = JSON.stringify(selectedRun, null, 2);
+                      navigator.clipboard.writeText(json).then(
+                        () => toast.success("JSON copiado"),
+                        () => toast.error("Falha ao copiar"),
+                      );
+                    }}
+                  >
+                    Copiar JSON
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      replayMut.mutate(selectedRun.id);
+                      setSelectedRun(null);
+                    }}
+                    disabled={replayMut.isPending}
+                  >
+                    <RotateCcw className="mr-2 h-3.5 w-3.5" />
+                    Reexecutar
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

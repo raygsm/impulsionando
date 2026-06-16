@@ -452,20 +452,57 @@ export const replaySmokeRun = createServerFn({ method: "POST" })
     return { ...result, newRunId: newId, replayOf: o.id };
   });
 
+const historyFiltersSchema = z
+  .object({
+    limit: z.number().int().min(1).max(200).optional(),
+    offset: z.number().int().min(0).optional(),
+    sinceDays: z.number().int().min(1).max(3650).nullable().optional(),
+    status: z.enum(["all", "success", "failure"]).optional(),
+    search: z.string().optional(),
+    nicheSlug: z.string().nullable().optional(),
+  })
+  .optional();
+
+type AdminClient = Awaited<typeof import("@/integrations/supabase/client.server")>["supabaseAdmin"];
+
+function buildHistoryQuery(
+  client: AdminClient,
+  filters: {
+    sinceDays?: number | null;
+    status?: "all" | "success" | "failure";
+    search?: string;
+    nicheSlug?: string | null;
+  },
+  withCount: boolean,
+) {
+  let q = client
+    .from("core_smoke_runs")
+    .select(
+      "id, triggered_by, label, niche_slug, success, duration_ms, steps, ids, error, batch_id, replay_of, created_at",
+      withCount ? { count: "exact" } : undefined,
+    )
+    .order("created_at", { ascending: false });
+
+  if (filters.sinceDays && filters.sinceDays > 0) {
+    const since = new Date(Date.now() - filters.sinceDays * 86_400_000).toISOString();
+    q = q.gte("created_at", since);
+  }
+  if (filters.status === "success") q = q.eq("success", true);
+  else if (filters.status === "failure") q = q.eq("success", false);
+  if (filters.nicheSlug) q = q.eq("niche_slug", filters.nicheSlug);
+  if (filters.search && filters.search.trim()) {
+    const s = filters.search.trim().replace(/[%,]/g, "");
+    q = q.or(`label.ilike.%${s}%,niche_slug.ilike.%${s}%,error.ilike.%${s}%`);
+  }
+  return q;
+}
+
 /**
- * Histórico das execuções do smoke test, paginado.
+ * Histórico das execuções do smoke test, paginado e filtrado.
  */
 export const listSmokeHistory = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z
-      .object({
-        limit: z.number().int().min(1).max(200).optional(),
-        offset: z.number().int().min(0).optional(),
-      })
-      .optional()
-      .parse(d ?? {}),
-  )
+  .inputValidator((d: unknown) => historyFiltersSchema.parse(d ?? {}))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { data: isStaff } = await supabase.rpc("is_impulsionando_staff", { _user: userId });
@@ -474,38 +511,45 @@ export const listSmokeHistory = createServerFn({ method: "GET" })
     const limit = data?.limit ?? 50;
     const offset = data?.offset ?? 0;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rows, error, count } = await supabaseAdmin
-      .from("core_smoke_runs")
-      .select(
-        "id, triggered_by, label, niche_slug, success, duration_ms, steps, ids, error, batch_id, replay_of, created_at",
-        { count: "exact" },
-      )
-      .order("created_at", { ascending: false })
-      .range(offset, offset + limit - 1);
+    const { data: rows, error, count } = await buildHistoryQuery(
+      supabaseAdmin,
+      {
+        sinceDays: data?.sinceDays ?? null,
+        status: data?.status ?? "all",
+        search: data?.search,
+        nicheSlug: data?.nicheSlug ?? null,
+      },
+      true,
+    ).range(offset, offset + limit - 1);
     if (error) throw new Error(error.message);
     return { runs: rows ?? [], total: count ?? 0 };
   });
 
 /**
- * Histórico completo (até 1000) para export CSV/PDF.
+ * Histórico completo (até 1000) para export CSV/PDF — usa os mesmos filtros da listagem.
  */
 export const exportSmokeHistory = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((d: unknown) => historyFiltersSchema.parse(d ?? {}))
+  .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { data: isStaff } = await supabase.rpc("is_impulsionando_staff", { _user: userId });
     if (!isStaff) throw new Error("Acesso restrito à equipe Impulsionando.");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rows, error } = await supabaseAdmin
-      .from("core_smoke_runs")
-      .select(
-        "id, triggered_by, label, niche_slug, success, duration_ms, steps, ids, error, batch_id, replay_of, created_at",
-      )
-      .order("created_at", { ascending: false })
-      .limit(1000);
+    const { data: rows, error } = await buildHistoryQuery(
+      supabaseAdmin,
+      {
+        sinceDays: data?.sinceDays ?? null,
+        status: data?.status ?? "all",
+        search: data?.search,
+        nicheSlug: data?.nicheSlug ?? null,
+      },
+      false,
+    ).limit(1000);
     if (error) throw new Error(error.message);
     return { runs: rows ?? [] };
   });
+
 
 
