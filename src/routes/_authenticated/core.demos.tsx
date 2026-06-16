@@ -31,6 +31,18 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Progress } from "@/components/ui/progress";
+
 import { PageHeader } from "@/components/app/PageElements";
 import { toast } from "sonner";
 import {
@@ -281,22 +293,53 @@ function CoreDemosPage() {
   });
 
   const [purging, setPurging] = useState(false);
-  const handleManualPurge = async () => {
-    if (!confirm("Disparar purge manual agora? Execuções antigas serão removidas.")) return;
+  const [purgeProgress, setPurgeProgress] = useState(0);
+  const [confirmPurgeOpen, setConfirmPurgeOpen] = useState(false);
+  const [lastPurgeResult, setLastPurgeResult] = useState<{
+    totalRemoved: number;
+    ranAt: string;
+  } | null>(null);
+
+  const runManualPurge = async () => {
+    setConfirmPurgeOpen(false);
     setPurging(true);
+    setPurgeProgress(8);
+    // Smooth progress trickle while RPC runs
+    const ticker = setInterval(() => {
+      setPurgeProgress((p) => (p < 88 ? p + 6 : p));
+    }, 220);
     try {
       const res = await purgeNow({ data: {} });
-      toast.success(
-        `Purge concluído: ${res.totalRemoved} execução(ões) removida(s).`,
-      );
-      await refetchRetention();
+      clearInterval(ticker);
+      setPurgeProgress(100);
+      setLastPurgeResult({ totalRemoved: res.totalRemoved, ranAt: res.ranAt });
+      const refreshed = await refetchRetention();
       qc.invalidateQueries({ queryKey: ["core-smoke-history"] });
+      const retentionSnapshot = refreshed.data ?? null;
+      toast.success(
+        `Purge concluído — ${res.totalRemoved} execução(ões) removida(s).`,
+        {
+          description: `Trigger: manual · ${new Date(res.ranAt).toLocaleString("pt-BR")}`,
+          duration: 12_000,
+          action: retentionSnapshot && retentionSnapshot.lastRunAt
+            ? {
+                label: "Baixar PDF",
+                onClick: () => downloadLastPurgePdf(retentionSnapshot),
+              }
+            : undefined,
+        },
+      );
     } catch (e) {
+      clearInterval(ticker);
       toast.error((e as Error).message ?? "Falha ao disparar purge.");
     } finally {
-      setPurging(false);
+      setTimeout(() => {
+        setPurging(false);
+        setPurgeProgress(0);
+      }, 600);
     }
   };
+
 
 
   // filtros + paginação do histórico
@@ -304,6 +347,7 @@ function CoreDemosPage() {
   const historyPageSize = 20;
   const [historySince, setHistorySince] = useState<string>("all");
   const [historyStatus, setHistoryStatus] = useState<"all" | "success" | "failure">("all");
+  const [historyNicheSlug, setHistoryNicheSlug] = useState<string | null>(null);
   const [historySearch, setHistorySearch] = useState("");
   const debouncedSearch = useDebouncedValue(historySearch, 350);
   const [selectedRun, setSelectedRun] = useState<SmokeRunRow | null>(null);
@@ -326,16 +370,18 @@ function CoreDemosPage() {
   // Reset page when filters change (debounced text)
   useEffect(() => {
     setHistoryPage(0);
-  }, [debouncedSearch, historySince, historyStatus]);
+  }, [debouncedSearch, historySince, historyStatus, historyNicheSlug]);
 
   const historyFilters = useMemo(
     () => ({
       sinceDays: historySince === "all" ? null : Number(historySince),
       status: historyStatus,
       search: debouncedSearch.trim() || undefined,
+      nicheSlug: historyNicheSlug,
     }),
-    [historySince, historyStatus, debouncedSearch],
+    [historySince, historyStatus, debouncedSearch, historyNicheSlug],
   );
+
 
   // Filter presets (localStorage)
   const [presets, setPresets] = useState<HistoryPreset[]>(() => loadPresets());
@@ -1136,7 +1182,7 @@ function CoreDemosPage() {
                 <Button
                   variant="default"
                   size="sm"
-                  onClick={handleManualPurge}
+                  onClick={() => setConfirmPurgeOpen(true)}
                   disabled={purging}
                 >
                   {purging ? (
@@ -1148,6 +1194,17 @@ function CoreDemosPage() {
                 </Button>
               </div>
             </div>
+
+            {/* Indicador de progresso durante o purge manual */}
+            {purging && (
+              <div className="mb-3">
+                <Progress value={purgeProgress} className="h-1.5" />
+                <div className="text-[10px] text-muted-foreground mt-1">
+                  Executando purge… {purgeProgress}%
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 text-muted-foreground">
               <div>
                 <div className="text-[10px] uppercase tracking-wide">Janela</div>
@@ -1208,8 +1265,11 @@ function CoreDemosPage() {
             {retention.lastRunAt && (retention.lastRemovedCount ?? 0) > 0 && (
               <div className="mt-3 pt-3 border-t border-primary/10 grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
-                    Removidos por nicho
+                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1 flex items-center gap-2">
+                    <span>Removidos por nicho</span>
+                    <span className="text-muted-foreground/70 normal-case tracking-normal">
+                      (clique para filtrar histórico)
+                    </span>
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {Object.entries(retention.lastByNiche ?? {}).length === 0 ? (
@@ -1217,17 +1277,41 @@ function CoreDemosPage() {
                     ) : (
                       Object.entries(retention.lastByNiche)
                         .sort((a, b) => b[1] - a[1])
-                        .map(([k, c]) => (
-                          <Badge key={k} variant="outline" className="font-normal">
-                            {k} · {c}
-                          </Badge>
-                        ))
+                        .map(([k, c]) => {
+                          const active = historyNicheSlug === k;
+                          return (
+                            <button
+                              key={k}
+                              type="button"
+                              onClick={() => {
+                                setHistoryNicheSlug(active ? null : k);
+                                setHistoryPage(0);
+                              }}
+                              className="focus:outline-none"
+                              title={
+                                active
+                                  ? "Remover filtro"
+                                  : `Filtrar histórico por nicho "${k}"`
+                              }
+                            >
+                              <Badge
+                                variant={active ? "default" : "outline"}
+                                className="font-normal cursor-pointer hover:bg-muted"
+                              >
+                                {k} · {c}
+                              </Badge>
+                            </button>
+                          );
+                        })
                     )}
                   </div>
                 </div>
                 <div>
-                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
-                    Removidos por status
+                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1 flex items-center gap-2">
+                    <span>Removidos por status</span>
+                    <span className="text-muted-foreground/70 normal-case tracking-normal">
+                      (clique para filtrar histórico)
+                    </span>
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {Object.entries(retention.lastByStatus ?? {}).length === 0 ? (
@@ -1235,22 +1319,106 @@ function CoreDemosPage() {
                     ) : (
                       Object.entries(retention.lastByStatus)
                         .sort((a, b) => b[1] - a[1])
-                        .map(([k, c]) => (
-                          <Badge
-                            key={k}
-                            variant={k === "success" ? "secondary" : "destructive"}
-                            className="font-normal"
-                          >
-                            {k} · {c}
-                          </Badge>
-                        ))
+                        .map(([k, c]) => {
+                          const statusKey = (k === "success" || k === "failure"
+                            ? k
+                            : "all") as "all" | "success" | "failure";
+                          const active = historyStatus === statusKey;
+                          return (
+                            <button
+                              key={k}
+                              type="button"
+                              onClick={() => {
+                                setHistoryStatus(active ? "all" : statusKey);
+                                setHistoryPage(0);
+                              }}
+                              className="focus:outline-none"
+                              title={
+                                active
+                                  ? "Remover filtro"
+                                  : `Filtrar histórico por status "${k}"`
+                              }
+                            >
+                              <Badge
+                                variant={
+                                  active
+                                    ? "default"
+                                    : k === "success"
+                                      ? "secondary"
+                                      : "destructive"
+                                }
+                                className="font-normal cursor-pointer"
+                              >
+                                {k} · {c}
+                              </Badge>
+                            </button>
+                          );
+                        })
                     )}
                   </div>
                 </div>
+                {(historyNicheSlug || historyStatus !== "all") && (
+                  <div className="md:col-span-2 flex items-center gap-2 text-[11px]">
+                    <span className="text-muted-foreground">
+                      Filtros do último purge aplicados ao histórico:
+                    </span>
+                    {historyNicheSlug && (
+                      <Badge variant="default" className="font-normal">
+                        nicho: {historyNicheSlug}
+                      </Badge>
+                    )}
+                    {historyStatus !== "all" && (
+                      <Badge variant="default" className="font-normal">
+                        status: {historyStatus}
+                      </Badge>
+                    )}
+                    <button
+                      type="button"
+                      className="ml-auto inline-flex items-center gap-1 text-muted-foreground hover:text-foreground"
+                      onClick={() => {
+                        setHistoryNicheSlug(null);
+                        setHistoryStatus("all");
+                        setHistoryPage(0);
+                      }}
+                    >
+                      <X className="h-3 w-3" /> limpar
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
         )}
+
+        {/* Modal de confirmação do purge manual */}
+        <AlertDialog open={confirmPurgeOpen} onOpenChange={setConfirmPurgeOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Disparar purge manual?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Todas as execuções do smoke test com mais de{" "}
+                <strong>{retention?.retentionDays ?? 180} dias</strong> serão
+                removidas permanentemente do histórico. Esta ação não pode ser
+                desfeita.
+                {lastPurgeResult && (
+                  <span className="block mt-2 text-xs">
+                    Último purge nesta sessão: {lastPurgeResult.totalRemoved}{" "}
+                    removida(s) em{" "}
+                    {new Date(lastPurgeResult.ranAt).toLocaleString("pt-BR")}.
+                  </span>
+                )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={runManualPurge}>
+                <Trash2 className="mr-2 h-3.5 w-3.5" />
+                Confirmar purge
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
 
 
 
