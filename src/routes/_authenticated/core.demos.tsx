@@ -10,6 +10,8 @@ import {
   replaySmokeRun,
   exportSmokeHistory,
   getSmokeRetentionPolicy,
+  triggerSmokePurge,
+
 } from "@/lib/demos.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -203,6 +205,63 @@ ${rows
   w.document.close();
 }
 
+function downloadLastPurgePdf(retention: {
+  retentionDays: number;
+  schedule: string;
+  scheduleLabel: string;
+  active: boolean;
+  lastRunAt: string | null;
+  lastRunStatus: string | null;
+  lastRemovedCount: number | null;
+  lastTrigger: "scheduled" | "manual" | null;
+  lastByNiche: Record<string, number>;
+  lastByStatus: Record<string, number>;
+  lastLogId: string | null;
+}) {
+  if (!retention.lastRunAt) return;
+  const doc = new jsPDF();
+  const ranAt = new Date(retention.lastRunAt).toLocaleString("pt-BR");
+  doc.setFontSize(16);
+  doc.text("Relatório do último purge — Smoke Tests", 14, 18);
+  doc.setFontSize(10);
+  doc.text(`Executado em: ${ranAt}`, 14, 28);
+  doc.text(`Trigger: ${retention.lastTrigger ?? "—"}`, 14, 34);
+  doc.text(`Janela de retenção: ${retention.retentionDays} dias`, 14, 40);
+  doc.text(
+    `Agenda: ${retention.scheduleLabel} (${retention.schedule}) — ${retention.active ? "ativa" : "pausada"}`,
+    14,
+    46,
+  );
+  doc.text(`Total removido: ${retention.lastRemovedCount ?? 0}`, 14, 52);
+  doc.text(`Status: ${retention.lastRunStatus ?? "—"}`, 14, 58);
+  if (retention.lastLogId) doc.text(`Log ID: ${retention.lastLogId}`, 14, 64);
+
+  const byNiche = Object.entries(retention.lastByNiche ?? {}).sort((a, b) => b[1] - a[1]);
+  const byStatus = Object.entries(retention.lastByStatus ?? {}).sort((a, b) => b[1] - a[1]);
+
+  autoTable(doc, {
+    startY: 74,
+    head: [["Nicho", "Removidos"]],
+    body: byNiche.length ? byNiche.map(([k, v]) => [k, String(v)]) : [["—", "0"]],
+    styles: { fontSize: 9 },
+    headStyles: { fillColor: [99, 102, 241] },
+  });
+  const afterNiche = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable
+    .finalY + 8;
+  autoTable(doc, {
+    startY: afterNiche,
+    head: [["Status", "Removidos"]],
+    body: byStatus.length ? byStatus.map(([k, v]) => [k, String(v)]) : [["—", "0"]],
+    styles: { fontSize: 9 },
+    headStyles: { fillColor: [99, 102, 241] },
+  });
+
+  const stamp = new Date(retention.lastRunAt).toISOString().replace(/[:.]/g, "-");
+  doc.save(`purge-report_${stamp}.pdf`);
+}
+
+
+
 function CoreDemosPage() {
   const qc = useQueryClient();
   const fetchDemos = useServerFn(listDemoCompanies);
@@ -213,12 +272,32 @@ function CoreDemosPage() {
   const replay = useServerFn(replaySmokeRun);
   const exportHistory = useServerFn(exportSmokeHistory);
   const fetchRetention = useServerFn(getSmokeRetentionPolicy);
+  const purgeNow = useServerFn(triggerSmokePurge);
 
-  const { data: retention } = useQuery({
+  const { data: retention, refetch: refetchRetention } = useQuery({
     queryKey: ["core-smoke-retention"],
     queryFn: () => fetchRetention(),
     staleTime: 5 * 60_000,
   });
+
+  const [purging, setPurging] = useState(false);
+  const handleManualPurge = async () => {
+    if (!confirm("Disparar purge manual agora? Execuções antigas serão removidas.")) return;
+    setPurging(true);
+    try {
+      const res = await purgeNow({ data: {} });
+      toast.success(
+        `Purge concluído: ${res.totalRemoved} execução(ões) removida(s).`,
+      );
+      await refetchRetention();
+      qc.invalidateQueries({ queryKey: ["core-smoke-history"] });
+    } catch (e) {
+      toast.error((e as Error).message ?? "Falha ao disparar purge.");
+    } finally {
+      setPurging(false);
+    }
+  };
+
 
   // filtros + paginação do histórico
   const [historyPage, setHistoryPage] = useState(0);
@@ -228,7 +307,20 @@ function CoreDemosPage() {
   const [historySearch, setHistorySearch] = useState("");
   const debouncedSearch = useDebouncedValue(historySearch, 350);
   const [selectedRun, setSelectedRun] = useState<SmokeRunRow | null>(null);
-  const [includeRawLogs, setIncludeRawLogs] = useState(true);
+  const [includeRawLogs, setIncludeRawLogs] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    const v = window.localStorage.getItem("core-demos.zip.includeRawLogs");
+    return v === null ? true : v === "1";
+  });
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(
+        "core-demos.zip.includeRawLogs",
+        includeRawLogs ? "1" : "0",
+      );
+    }
+  }, [includeRawLogs]);
+
 
 
   // Reset page when filters change (debounced text)
@@ -1019,12 +1111,42 @@ function CoreDemosPage() {
         {/* Painel de retenção detalhado */}
         {retention && (
           <div className="mb-3 rounded border border-primary/20 bg-primary/5 px-3 py-2.5 text-xs">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
               <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
               <span className="font-medium">Política de retenção do histórico</span>
-              <Badge variant={retention.active ? "secondary" : "outline"} className="ml-auto">
+              <Badge variant={retention.active ? "secondary" : "outline"}>
                 {retention.active ? "ativa" : "pausada"}
               </Badge>
+              {retention.lastTrigger && (
+                <Badge variant="outline" className="capitalize">
+                  último: {retention.lastTrigger === "manual" ? "manual" : "agendado"}
+                </Badge>
+              )}
+              <div className="ml-auto flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => downloadLastPurgePdf(retention)}
+                  disabled={!retention.lastRunAt}
+                  title={retention.lastRunAt ? "Baixar relatório PDF do último purge" : "Nenhum purge executado"}
+                >
+                  <FileText className="mr-2 h-3.5 w-3.5" />
+                  PDF do último purge
+                </Button>
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={handleManualPurge}
+                  disabled={purging}
+                >
+                  {purging ? (
+                    <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Trash2 className="mr-2 h-3.5 w-3.5" />
+                  )}
+                  Disparar purge agora
+                </Button>
+              </div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 text-muted-foreground">
               <div>
@@ -1081,8 +1203,55 @@ function CoreDemosPage() {
                 </div>
               </div>
             </div>
+
+            {/* Breakdown do último purge por nicho e status */}
+            {retention.lastRunAt && (retention.lastRemovedCount ?? 0) > 0 && (
+              <div className="mt-3 pt-3 border-t border-primary/10 grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
+                    Removidos por nicho
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {Object.entries(retention.lastByNiche ?? {}).length === 0 ? (
+                      <span className="text-muted-foreground">—</span>
+                    ) : (
+                      Object.entries(retention.lastByNiche)
+                        .sort((a, b) => b[1] - a[1])
+                        .map(([k, c]) => (
+                          <Badge key={k} variant="outline" className="font-normal">
+                            {k} · {c}
+                          </Badge>
+                        ))
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
+                    Removidos por status
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {Object.entries(retention.lastByStatus ?? {}).length === 0 ? (
+                      <span className="text-muted-foreground">—</span>
+                    ) : (
+                      Object.entries(retention.lastByStatus)
+                        .sort((a, b) => b[1] - a[1])
+                        .map(([k, c]) => (
+                          <Badge
+                            key={k}
+                            variant={k === "success" ? "secondary" : "destructive"}
+                            className="font-normal"
+                          >
+                            {k} · {c}
+                          </Badge>
+                        ))
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
+
 
 
 
