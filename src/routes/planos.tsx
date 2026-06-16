@@ -237,15 +237,19 @@ function PlanosPage() {
         },
       });
     } catch {
-      const finalValue = annual ? totalMonthly * 10 : totalMonthly;
+      // Pix fallback espelha o ciclo mínimo cobrado pelo gateway:
+      // - Mensal: setup + 3 mensalidades (mínimo 90 dias)
+      // - Anual: setup + 12× preço/mês no rate anual (= 10× preço cheio, 2 meses grátis)
+      const cycleMonths = annual ? 12 : 3;
+      const cycleValue = totalMonthly * cycleMonths;
       toast.message(
         "Instabilidade no checkout. Liberei o pagamento via Pix para você seguir agora.",
       );
       setPixState({
         open: true,
-        amountCents: Math.round((setup + finalValue) * 100),
+        amountCents: Math.round((setup + cycleValue) * 100),
         txid: `PLANO-${plan.name.toUpperCase()}-${annual ? "ANUAL" : "MENSAL"}`,
-        label: `Plano ${plan.name}${modules.length ? ` (${modules.length} mód.)` : ""} — ${annual ? "anual" : "mensal"} — inclui setup`,
+        label: `Plano ${plan.name}${modules.length ? ` (${modules.length} mód.)` : ""} — ${annual ? "anual (setup + 12 mensalidades)" : "mensal (setup + 3 mensalidades)"}`,
       });
     }
   }
