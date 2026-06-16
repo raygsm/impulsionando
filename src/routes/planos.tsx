@@ -313,9 +313,12 @@ function PlanosPage() {
             Pague só pelo que usar.<br />Escale quando precisar.
           </h1>
           <p className="text-lg text-white/85 max-w-2xl mx-auto leading-relaxed mt-6">
-            Quatro planos cobrem desde o autônomo até a operação multi-empresa.
-            Sem letras miúdas, sem custo escondido.
+            Três planos atrelados ao salário mínimo (½ SM, 1 SM e 2 SM) cobrem do módulo único à operação multi-empresa.
+            Mais a opção <strong>Sob Medida</strong> para escopos específicos. Sem letras miúdas.
           </p>
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-accent/20 border border-accent/40 px-4 py-1.5 text-sm">
+            <Sparkles className="w-4 h-4" /> Comece com <strong className="font-semibold">7 dias de Trial</strong> com tudo liberado — sem cartão
+          </div>
           {/* Toggle mensal/anual */}
           <div className="mt-8 inline-flex items-center gap-1 p-1 rounded-full bg-white/10 backdrop-blur">
             <button
@@ -622,6 +625,7 @@ function PlanosPage() {
           )}
           setupCents={(PLAN_SETUP_BRL[summary.plan.name] ?? 0) * 100}
           extraPriceCents={EXTRA_MODULE_BRL * 100}
+          annual={annual}
           confirmLabel={`Confirmar e ir para o pagamento ${annual ? "anual" : "mensal"}`}
           onEditModules={() => {
             const plan = summary.plan!;
