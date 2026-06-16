@@ -1370,15 +1370,75 @@ function CoreDemosPage() {
               </div>
             </div>
 
-            {/* Indicador de progresso durante o purge manual */}
+            {/* Indicador de progresso + cancelar durante o purge manual */}
             {purging && (
               <div className="mb-3">
                 <Progress value={purgeProgress} className="h-1.5" />
-                <div className="text-[10px] text-muted-foreground mt-1">
-                  Executando purge… {purgeProgress}%
+                <div className="flex items-center justify-between mt-1 text-[10px] text-muted-foreground">
+                  <span>Executando purge… {purgeProgress}%</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-[10px]"
+                    onClick={cancelManualPurge}
+                    disabled={purgeProgress >= 100}
+                  >
+                    <X className="mr-1 h-3 w-3" /> Cancelar
+                  </Button>
                 </div>
               </div>
             )}
+
+            {/* Painel de erro do último purge manual */}
+            {purgeError && (
+              <div className="mb-3 rounded border border-destructive/40 bg-destructive/5 px-3 py-2.5 text-xs">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <XCircle className="h-4 w-4 text-destructive" />
+                  <span className="font-medium text-destructive">
+                    {purgeError.aborted ? "Purge cancelado" : "Falha no purge manual"}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="ml-auto h-7"
+                    onClick={() =>
+                      downloadPurgeFailureAudit({
+                        message: purgeError.message,
+                        attemptedAt: purgeError.attemptedAt,
+                        retentionDays: purgeError.retentionDays,
+                        partialRemoved: purgeError.partialRemoved,
+                        lastKnownLogId: purgeError.lastKnownLogId,
+                        rpcName: "trigger_smoke_purge",
+                      })
+                    }
+                  >
+                    <Download className="mr-2 h-3 w-3" />
+                    Log de auditoria
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={() => setPurgeError(null)}
+                    className="text-muted-foreground hover:text-foreground"
+                    aria-label="Fechar"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                <div className="text-foreground break-words font-mono text-[11px]">
+                  {purgeError.message}
+                </div>
+                <div className="mt-1 text-muted-foreground">
+                  Tentado em {new Date(purgeError.attemptedAt).toLocaleString("pt-BR")} ·
+                  janela {purgeError.retentionDays}d · removidos (parcial):{" "}
+                  <strong>{purgeError.partialRemoved ?? "—"}</strong>
+                  {purgeError.lastKnownLogId
+                    ? ` · último log: ${purgeError.lastKnownLogId.slice(0, 8)}…`
+                    : ""}
+                </div>
+              </div>
+            )}
+
+
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 text-muted-foreground">
               <div>
