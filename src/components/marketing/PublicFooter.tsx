@@ -51,9 +51,9 @@ export function PublicFooter() {
         </div>
 
         <div>
-          <div className="text-sm font-semibold mb-3">Grupo Impulsionando</div>
+          <div className="text-sm font-semibold mb-3">Impulsionando Tecnologia</div>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/sobre" className="hover:text-foreground">Sobre o grupo</Link></li>
+            <li><Link to="/sobre" className="hover:text-foreground">Sobre a empresa</Link></li>
             <li><Link to="/contato" className="hover:text-foreground">Contato</Link></li>
             <li><Link to="/trabalhe-conosco" className="hover:text-foreground">Trabalhe conosco</Link></li>
             <li>
@@ -63,7 +63,7 @@ export function PublicFooter() {
                 rel="noopener noreferrer"
                 className="hover:text-foreground inline-flex items-center gap-1"
               >
-                Impulsionando Brasil (Marketing) ↗
+                Impulsionando Brasil — estratégia e marketing ↗
               </a>
             </li>
             <li><Link to="/termos" className="hover:text-foreground">Termos de Uso</Link></li>
@@ -71,6 +71,7 @@ export function PublicFooter() {
             <li><Link to="/privacidade" className="hover:text-foreground">Política de Privacidade (LGPD)</Link></li>
           </ul>
         </div>
+
       </div>
 
       <div className="border-t border-border">

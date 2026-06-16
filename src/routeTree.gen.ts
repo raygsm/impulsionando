@@ -60,6 +60,7 @@ import { Route as DemoChecklistRouteImport } from './routes/demo.checklist'
 import { Route as DemoAgendaRouteImport } from './routes/demo.agenda'
 import { Route as DemoAfiliadosRouteImport } from './routes/demo.afiliados'
 import { Route as DemoAdvogadosRouteImport } from './routes/demo.advogados'
+import { Route as ContratarSobMedidaRouteImport } from './routes/contratar.sob-medida'
 import { Route as ComoFuncionaFitnessRouteImport } from './routes/como-funciona.fitness'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
@@ -147,6 +148,7 @@ import { Route as AuthenticatedCoreDashboardsRouteImport } from './routes/_authe
 import { Route as AuthenticatedCoreCriarProjetoRouteImport } from './routes/_authenticated/core.criar-projeto'
 import { Route as AuthenticatedCoreConfiguracoesRouteImport } from './routes/_authenticated/core.configuracoes'
 import { Route as AuthenticatedCoreClientesRouteImport } from './routes/_authenticated/core.clientes'
+import { Route as AuthenticatedCoreBriefingsRouteImport } from './routes/_authenticated/core.briefings'
 import { Route as AuthenticatedBiNichesRouteImport } from './routes/_authenticated/bi.niches'
 import { Route as AuthenticatedBiMasterRouteImport } from './routes/_authenticated/bi.master'
 import { Route as AuthenticatedBiCompanyRouteImport } from './routes/_authenticated/bi.company'
@@ -196,6 +198,8 @@ import { Route as ApiPaymentsInfinitepayCreateRouteImport } from './routes/api/p
 import { Route as ApiPaymentsInfinitepayCheckStatusRouteImport } from './routes/api/payments/infinitepay.check-status'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
 import { Route as AuthenticatedCoreModulosSlugRouteImport } from './routes/_authenticated/core.modulos.$slug'
+import { Route as AuthenticatedCoreIntegracoesN8nRouteImport } from './routes/_authenticated/core.integracoes.n8n'
+import { Route as AuthenticatedCoreIntegracoesMercadopagoRouteImport } from './routes/_authenticated/core.integracoes.mercadopago'
 import { Route as AuthenticatedCoreClienteIdRouteImport } from './routes/_authenticated/core.cliente.$id'
 import { Route as AuthenticatedAdminModulosClonagemRouteImport } from './routes/_authenticated/admin.modulos.clonagem'
 import { Route as ApiPublicPaymentsInfinitepayWebhookRouteImport } from './routes/api/public/payments/infinitepay.webhook'
@@ -455,6 +459,11 @@ const DemoAfiliadosRoute = DemoAfiliadosRouteImport.update({
 const DemoAdvogadosRoute = DemoAdvogadosRouteImport.update({
   id: '/demo/advogados',
   path: '/demo/advogados',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContratarSobMedidaRoute = ContratarSobMedidaRouteImport.update({
+  id: '/contratar/sob-medida',
+  path: '/contratar/sob-medida',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComoFuncionaFitnessRoute = ComoFuncionaFitnessRouteImport.update({
@@ -935,6 +944,12 @@ const AuthenticatedCoreClientesRoute =
     path: '/clientes',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreBriefingsRoute =
+  AuthenticatedCoreBriefingsRouteImport.update({
+    id: '/briefings',
+    path: '/briefings',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedBiNichesRoute = AuthenticatedBiNichesRouteImport.update({
   id: '/niches',
   path: '/niches',
@@ -1221,6 +1236,18 @@ const AuthenticatedCoreModulosSlugRoute =
     path: '/$slug',
     getParentRoute: () => AuthenticatedCoreModulosRoute,
   } as any)
+const AuthenticatedCoreIntegracoesN8nRoute =
+  AuthenticatedCoreIntegracoesN8nRouteImport.update({
+    id: '/integracoes/n8n',
+    path: '/integracoes/n8n',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
+const AuthenticatedCoreIntegracoesMercadopagoRoute =
+  AuthenticatedCoreIntegracoesMercadopagoRouteImport.update({
+    id: '/integracoes/mercadopago',
+    path: '/integracoes/mercadopago',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreClienteIdRoute =
   AuthenticatedCoreClienteIdRouteImport.update({
     id: '/cliente/$id',
@@ -1308,6 +1335,7 @@ export interface FileRoutesByFullPath {
   '/users': typeof AuthenticatedUsersRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
+  '/contratar/sob-medida': typeof ContratarSobMedidaRoute
   '/demo/advogados': typeof DemoAdvogadosRoute
   '/demo/afiliados': typeof DemoAfiliadosRoute
   '/demo/agenda': typeof DemoAgendaRoute
@@ -1367,6 +1395,7 @@ export interface FileRoutesByFullPath {
   '/bi/company': typeof AuthenticatedBiCompanyRoute
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
+  '/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/core/configuracoes': typeof AuthenticatedCoreConfiguracoesRoute
   '/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
@@ -1428,6 +1457,8 @@ export interface FileRoutesByFullPath {
   '/sales/': typeof AuthenticatedSalesIndexRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
+  '/core/integracoes/mercadopago': typeof AuthenticatedCoreIntegracoesMercadopagoRoute
+  '/core/integracoes/n8n': typeof AuthenticatedCoreIntegracoesN8nRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
@@ -1491,6 +1522,7 @@ export interface FileRoutesByTo {
   '/users': typeof AuthenticatedUsersRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
+  '/contratar/sob-medida': typeof ContratarSobMedidaRoute
   '/demo/advogados': typeof DemoAdvogadosRoute
   '/demo/afiliados': typeof DemoAfiliadosRoute
   '/demo/agenda': typeof DemoAgendaRoute
@@ -1550,6 +1582,7 @@ export interface FileRoutesByTo {
   '/bi/company': typeof AuthenticatedBiCompanyRoute
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
+  '/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/core/configuracoes': typeof AuthenticatedCoreConfiguracoesRoute
   '/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
@@ -1611,6 +1644,8 @@ export interface FileRoutesByTo {
   '/sales': typeof AuthenticatedSalesIndexRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
+  '/core/integracoes/mercadopago': typeof AuthenticatedCoreIntegracoesMercadopagoRoute
+  '/core/integracoes/n8n': typeof AuthenticatedCoreIntegracoesN8nRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
@@ -1687,6 +1722,7 @@ export interface FileRoutesById {
   '/_authenticated/users': typeof AuthenticatedUsersRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
+  '/contratar/sob-medida': typeof ContratarSobMedidaRoute
   '/demo/advogados': typeof DemoAdvogadosRoute
   '/demo/afiliados': typeof DemoAfiliadosRoute
   '/demo/agenda': typeof DemoAgendaRoute
@@ -1746,6 +1782,7 @@ export interface FileRoutesById {
   '/_authenticated/bi/company': typeof AuthenticatedBiCompanyRoute
   '/_authenticated/bi/master': typeof AuthenticatedBiMasterRoute
   '/_authenticated/bi/niches': typeof AuthenticatedBiNichesRoute
+  '/_authenticated/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/_authenticated/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/_authenticated/core/configuracoes': typeof AuthenticatedCoreConfiguracoesRoute
   '/_authenticated/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
@@ -1807,6 +1844,8 @@ export interface FileRoutesById {
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
   '/_authenticated/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/_authenticated/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
+  '/_authenticated/core/integracoes/mercadopago': typeof AuthenticatedCoreIntegracoesMercadopagoRoute
+  '/_authenticated/core/integracoes/n8n': typeof AuthenticatedCoreIntegracoesN8nRoute
   '/_authenticated/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
@@ -1883,6 +1922,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/checkout/success'
     | '/como-funciona/fitness'
+    | '/contratar/sob-medida'
     | '/demo/advogados'
     | '/demo/afiliados'
     | '/demo/agenda'
@@ -1942,6 +1982,7 @@ export interface FileRouteTypes {
     | '/bi/company'
     | '/bi/master'
     | '/bi/niches'
+    | '/core/briefings'
     | '/core/clientes'
     | '/core/configuracoes'
     | '/core/criar-projeto'
@@ -2003,6 +2044,8 @@ export interface FileRouteTypes {
     | '/sales/'
     | '/admin/modulos/clonagem'
     | '/core/cliente/$id'
+    | '/core/integracoes/mercadopago'
+    | '/core/integracoes/n8n'
     | '/core/modulos/$slug'
     | '/sales/cash/$id'
     | '/api/payments/infinitepay/check-status'
@@ -2066,6 +2109,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/checkout/success'
     | '/como-funciona/fitness'
+    | '/contratar/sob-medida'
     | '/demo/advogados'
     | '/demo/afiliados'
     | '/demo/agenda'
@@ -2125,6 +2169,7 @@ export interface FileRouteTypes {
     | '/bi/company'
     | '/bi/master'
     | '/bi/niches'
+    | '/core/briefings'
     | '/core/clientes'
     | '/core/configuracoes'
     | '/core/criar-projeto'
@@ -2186,6 +2231,8 @@ export interface FileRouteTypes {
     | '/sales'
     | '/admin/modulos/clonagem'
     | '/core/cliente/$id'
+    | '/core/integracoes/mercadopago'
+    | '/core/integracoes/n8n'
     | '/core/modulos/$slug'
     | '/sales/cash/$id'
     | '/api/payments/infinitepay/check-status'
@@ -2261,6 +2308,7 @@ export interface FileRouteTypes {
     | '/_authenticated/users'
     | '/checkout/success'
     | '/como-funciona/fitness'
+    | '/contratar/sob-medida'
     | '/demo/advogados'
     | '/demo/afiliados'
     | '/demo/agenda'
@@ -2320,6 +2368,7 @@ export interface FileRouteTypes {
     | '/_authenticated/bi/company'
     | '/_authenticated/bi/master'
     | '/_authenticated/bi/niches'
+    | '/_authenticated/core/briefings'
     | '/_authenticated/core/clientes'
     | '/_authenticated/core/configuracoes'
     | '/_authenticated/core/criar-projeto'
@@ -2381,6 +2430,8 @@ export interface FileRouteTypes {
     | '/_authenticated/sales/'
     | '/_authenticated/admin/modulos/clonagem'
     | '/_authenticated/core/cliente/$id'
+    | '/_authenticated/core/integracoes/mercadopago'
+    | '/_authenticated/core/integracoes/n8n'
     | '/_authenticated/core/modulos/$slug'
     | '/_authenticated/sales/cash/$id'
     | '/api/payments/infinitepay/check-status'
@@ -2431,6 +2482,7 @@ export interface RootRouteChildren {
   WhiteLabelRoute: typeof WhiteLabelRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   ComoFuncionaFitnessRoute: typeof ComoFuncionaFitnessRoute
+  ContratarSobMedidaRoute: typeof ContratarSobMedidaRoute
   DemoAdvogadosRoute: typeof DemoAdvogadosRoute
   DemoAfiliadosRoute: typeof DemoAfiliadosRoute
   DemoAgendaRoute: typeof DemoAgendaRoute
@@ -2834,6 +2886,13 @@ declare module '@tanstack/react-router' {
       path: '/demo/advogados'
       fullPath: '/demo/advogados'
       preLoaderRoute: typeof DemoAdvogadosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contratar/sob-medida': {
+      id: '/contratar/sob-medida'
+      path: '/contratar/sob-medida'
+      fullPath: '/contratar/sob-medida'
+      preLoaderRoute: typeof ContratarSobMedidaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/como-funciona/fitness': {
@@ -3445,6 +3504,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreClientesRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/briefings': {
+      id: '/_authenticated/core/briefings'
+      path: '/briefings'
+      fullPath: '/core/briefings'
+      preLoaderRoute: typeof AuthenticatedCoreBriefingsRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/bi/niches': {
       id: '/_authenticated/bi/niches'
       path: '/niches'
@@ -3788,6 +3854,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreModulosSlugRouteImport
       parentRoute: typeof AuthenticatedCoreModulosRoute
     }
+    '/_authenticated/core/integracoes/n8n': {
+      id: '/_authenticated/core/integracoes/n8n'
+      path: '/integracoes/n8n'
+      fullPath: '/core/integracoes/n8n'
+      preLoaderRoute: typeof AuthenticatedCoreIntegracoesN8nRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/core/integracoes/mercadopago': {
+      id: '/_authenticated/core/integracoes/mercadopago'
+      path: '/integracoes/mercadopago'
+      fullPath: '/core/integracoes/mercadopago'
+      preLoaderRoute: typeof AuthenticatedCoreIntegracoesMercadopagoRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/cliente/$id': {
       id: '/_authenticated/core/cliente/$id'
       path: '/cliente/$id'
@@ -3981,6 +4061,7 @@ const AuthenticatedCoreClienteIdRouteWithChildren =
   )
 
 interface AuthenticatedCoreRouteChildren {
+  AuthenticatedCoreBriefingsRoute: typeof AuthenticatedCoreBriefingsRoute
   AuthenticatedCoreClientesRoute: typeof AuthenticatedCoreClientesRoute
   AuthenticatedCoreConfiguracoesRoute: typeof AuthenticatedCoreConfiguracoesRoute
   AuthenticatedCoreCriarProjetoRoute: typeof AuthenticatedCoreCriarProjetoRoute
@@ -4003,9 +4084,12 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreTestesRoute: typeof AuthenticatedCoreTestesRoute
   AuthenticatedCoreIndexRoute: typeof AuthenticatedCoreIndexRoute
   AuthenticatedCoreClienteIdRoute: typeof AuthenticatedCoreClienteIdRouteWithChildren
+  AuthenticatedCoreIntegracoesMercadopagoRoute: typeof AuthenticatedCoreIntegracoesMercadopagoRoute
+  AuthenticatedCoreIntegracoesN8nRoute: typeof AuthenticatedCoreIntegracoesN8nRoute
 }
 
 const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
+  AuthenticatedCoreBriefingsRoute: AuthenticatedCoreBriefingsRoute,
   AuthenticatedCoreClientesRoute: AuthenticatedCoreClientesRoute,
   AuthenticatedCoreConfiguracoesRoute: AuthenticatedCoreConfiguracoesRoute,
   AuthenticatedCoreCriarProjetoRoute: AuthenticatedCoreCriarProjetoRoute,
@@ -4030,6 +4114,9 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreTestesRoute: AuthenticatedCoreTestesRoute,
   AuthenticatedCoreIndexRoute: AuthenticatedCoreIndexRoute,
   AuthenticatedCoreClienteIdRoute: AuthenticatedCoreClienteIdRouteWithChildren,
+  AuthenticatedCoreIntegracoesMercadopagoRoute:
+    AuthenticatedCoreIntegracoesMercadopagoRoute,
+  AuthenticatedCoreIntegracoesN8nRoute: AuthenticatedCoreIntegracoesN8nRoute,
 }
 
 const AuthenticatedCoreRouteWithChildren =
@@ -4303,6 +4390,7 @@ const rootRouteChildren: RootRouteChildren = {
   WhiteLabelRoute: WhiteLabelRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
   ComoFuncionaFitnessRoute: ComoFuncionaFitnessRoute,
+  ContratarSobMedidaRoute: ContratarSobMedidaRoute,
   DemoAdvogadosRoute: DemoAdvogadosRoute,
   DemoAfiliadosRoute: DemoAfiliadosRoute,
   DemoAgendaRoute: DemoAgendaRoute,

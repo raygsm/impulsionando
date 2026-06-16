@@ -2611,6 +2611,78 @@ export type Database = {
           },
         ]
       }
+      core_briefings: {
+        Row: {
+          answers: Json
+          assigned_to: string | null
+          budget_range: string | null
+          company_name: string
+          contact_email: string
+          contact_name: string
+          contact_whatsapp: string
+          created_at: string
+          current_tools: string | null
+          goals: string | null
+          id: string
+          integrations_needed: string | null
+          niche: string | null
+          notes: string | null
+          required_modules: string[] | null
+          reviewed_at: string | null
+          source: string | null
+          status: string
+          team_size: string | null
+          updated_at: string
+          urgency: string | null
+        }
+        Insert: {
+          answers?: Json
+          assigned_to?: string | null
+          budget_range?: string | null
+          company_name: string
+          contact_email: string
+          contact_name: string
+          contact_whatsapp: string
+          created_at?: string
+          current_tools?: string | null
+          goals?: string | null
+          id?: string
+          integrations_needed?: string | null
+          niche?: string | null
+          notes?: string | null
+          required_modules?: string[] | null
+          reviewed_at?: string | null
+          source?: string | null
+          status?: string
+          team_size?: string | null
+          updated_at?: string
+          urgency?: string | null
+        }
+        Update: {
+          answers?: Json
+          assigned_to?: string | null
+          budget_range?: string | null
+          company_name?: string
+          contact_email?: string
+          contact_name?: string
+          contact_whatsapp?: string
+          created_at?: string
+          current_tools?: string | null
+          goals?: string | null
+          id?: string
+          integrations_needed?: string | null
+          niche?: string | null
+          notes?: string | null
+          required_modules?: string[] | null
+          reviewed_at?: string | null
+          source?: string | null
+          status?: string
+          team_size?: string | null
+          updated_at?: string
+          urgency?: string | null
+        }
+        Relationships: []
+      }
       core_company_feature_values: {
         Row: {
           company_id: string
@@ -2755,6 +2827,87 @@ export type Database = {
             referencedColumns: ["slug"]
           },
         ]
+      }
+      core_integration_logs: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          error: string | null
+          event_type: string
+          id: string
+          integration_slug: string
+          request: Json | null
+          response: Json | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          error?: string | null
+          event_type: string
+          id?: string
+          integration_slug: string
+          request?: Json | null
+          response?: Json | null
+          status: string
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          error?: string | null
+          event_type?: string
+          id?: string
+          integration_slug?: string
+          request?: Json | null
+          response?: Json | null
+          status?: string
+        }
+        Relationships: []
+      }
+      core_integrations: {
+        Row: {
+          config: Json
+          created_at: string
+          environment: string
+          id: string
+          is_active: boolean
+          last_error: string | null
+          last_test_at: string | null
+          name: string
+          secret_refs: Json
+          slug: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          environment?: string
+          id?: string
+          is_active?: boolean
+          last_error?: string | null
+          last_test_at?: string | null
+          name: string
+          secret_refs?: Json
+          slug: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          environment?: string
+          id?: string
+          is_active?: boolean
+          last_error?: string | null
+          last_test_at?: string | null
+          name?: string
+          secret_refs?: Json
+          slug?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       core_menu_items: {
         Row: {

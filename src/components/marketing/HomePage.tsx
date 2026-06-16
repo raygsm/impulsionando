@@ -24,8 +24,9 @@ export function HomePage() {
             <div className="text-center max-w-3xl mx-auto space-y-4 sm:space-y-5">
               <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur px-3 py-1 text-[11px] sm:text-xs">
                 <Sparkles className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">Grupo Impulsionando · Tecnologia + Marketing</span>
+                <span className="truncate">Tecnologia desenvolvida pela Impulsionando Tecnologia · em parceria com a Impulsionando Brasil (estratégia)</span>
               </div>
+
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight">
                 Impulsionando Tecnologia
               </h1>
@@ -115,20 +116,24 @@ export function HomePage() {
           </div>
         </section>
 
-        {/* PARCERIA GRUPO IMPULSIONANDO */}
+        {/* PARCERIA TECNOLOGIA + BRASIL */}
         <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <div className="max-w-3xl mb-8">
             <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-3 py-1 text-xs mb-3">
-              <Sparkles className="w-3.5 h-3.5" /> Parceria Grupo Impulsionando
+              <Sparkles className="w-3.5 h-3.5" /> Tecnologia + Estratégia
             </div>
+
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">
-              Marketing e tecnologia, integrados quando você quiser.
+              Marketing e tecnologia operando juntos.
             </h2>
             <p className="text-muted-foreground mt-3 leading-relaxed text-sm sm:text-base">
-              Somos duas empresas do mesmo grupo. Contrate cada uma separadamente ou combine marketing
-              e tecnologia em uma operação única, sem retrabalho entre fornecedores.
+              A <strong>Impulsionando Brasil</strong> desenha as estratégias, jornadas, fluxos e campanhas.
+              A <strong>Impulsionando Tecnologia</strong> transforma essas jornadas em sistemas,
+              automações e dashboards. Contrate cada uma separadamente ou combine as duas em uma
+              operação única, sem retrabalho entre fornecedores.
             </p>
           </div>
+
           <div className="grid md:grid-cols-2 gap-5">
             <Card className="p-6 sm:p-7 flex flex-col">
               <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Impulsionando Brasil</div>
