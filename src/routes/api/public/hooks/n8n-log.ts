@@ -101,19 +101,23 @@ export const Route = createFileRoute("/api/public/hooks/n8n-log")({
             finished_at: parsed.finished_at ?? null,
           };
 
-          // Upsert por (workflow_name, step, idempotency_key) quando informado.
+          // Idempotência: se vier idempotency_key, checa existência antes de inserir
+          // (o índice único é parcial, então não dá pra usar upsert via PostgREST).
           if (parsed.idempotency_key) {
-            const { error } = await supabaseAdmin
+            const { data: existing, error: selErr } = await supabaseAdmin
               .from("n8n_workflow_runs")
-              .upsert(row as never, {
-                onConflict: "workflow_name,step,idempotency_key",
-                ignoreDuplicates: false,
-              });
-            if (error) throw error;
-          } else {
-            const { error } = await supabaseAdmin.from("n8n_workflow_runs").insert(row as never);
-            if (error) throw error;
+              .select("id")
+              .eq("workflow_name", parsed.workflow_name)
+              .eq("step", parsed.step)
+              .eq("idempotency_key", parsed.idempotency_key)
+              .maybeSingle();
+            if (selErr) throw selErr;
+            if (existing) {
+              return Response.json({ ok: true, duplicate: true, id: existing.id });
+            }
           }
+          const { error } = await supabaseAdmin.from("n8n_workflow_runs").insert(row as never);
+          if (error) throw error;
 
           // Alerta de falha crítica → notifica staff (in-app) quando step terminou em failed.
           if (parsed.status === "failed") {

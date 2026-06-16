@@ -90,10 +90,27 @@ async function expectViewEmpty() {
   failed++;
 }
 
+async function expectJourneyEmpty() {
+  const { data, error } = await supabase.from("n8n_lead_journey").select("*").limit(5);
+  if (error) {
+    console.log(`✓ view n8n_lead_journey: anon bloqueado (${error.message}).`);
+    passed++;
+    return;
+  }
+  if (!data || data.length === 0) {
+    console.log(`✓ view n8n_lead_journey: anon retornou 0 linhas.`);
+    passed++;
+    return;
+  }
+  console.error(`✗ view n8n_lead_journey: anon recebeu ${data.length} linhas — VAZAMENTO!`);
+  failed++;
+}
+
 console.log(`🔎 Validando RLS isolation contra ${url}\n`);
 for (const t of PROTECTED_TABLES) await expectEmpty(t);
 for (const t of PUBLIC_READ_TABLES) await expectPublicReadable(t);
 await expectViewEmpty();
+await expectJourneyEmpty();
 
 console.log(`\nResumo: ${passed} ok · ${failed} falha(s).`);
 if (failed > 0) {
