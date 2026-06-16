@@ -7,6 +7,7 @@ import {
   createProjectFromFactory,
   listInstallableModules,
   listSiteTemplates,
+  listBillingPlansForFactory,
 } from "@/lib/factory.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,23 @@ const NICHES = [
 ];
 
 type Step = 1 | 2 | 3 | 4;
+
+type PlanForm = {
+  planId?: string;
+  setupAmount?: number;
+  recurringAmount?: number;
+  dueDay?: number;
+  setupPaid: boolean;
+  pixKey: string;
+  generateFirstInvoice: boolean;
+};
+
+type AdminForm = {
+  email: string;
+  name: string;
+  phone: string;
+  sendWelcome: boolean;
+};
 
 type ClientForm = {
   existingCompanyId?: string;
@@ -88,7 +106,18 @@ function CriarProjetoPage() {
     permissoes_padrao: true, modelos_mensagens: true, automacoes_padrao: true,
   });
   const [confirm, setConfirm] = useState(false);
-  const [result, setResult] = useState<null | { companyId: string; generationId: string | null; installed: string[]; failed: { slug: string; reason: string }[] }>(null);
+  const [plan, setPlan] = useState<PlanForm>({
+    setupPaid: false,
+    pixKey: "",
+    generateFirstInvoice: true,
+  });
+  const [admin, setAdmin] = useState<AdminForm>({
+    email: "",
+    name: "",
+    phone: "",
+    sendWelcome: true,
+  });
+  const [result, setResult] = useState<null | { companyId: string; generationId: string | null; installed: string[]; failed: { slug: string; reason: string }[]; contractId?: string | null; firstInvoiceId?: string | null; adminUserId?: string | null }>(null);
 
   // Search existing companies by document/name
   const { data: searchData } = useQuery({
@@ -114,6 +143,11 @@ function CriarProjetoPage() {
     queryFn: () => listTemplatesFn(),
     enabled: modelKind === "template",
   });
+  const listPlansFn = useServerFn(listBillingPlansForFactory);
+  const { data: plansData } = useQuery({
+    queryKey: ["factory-plans"],
+    queryFn: () => listPlansFn(),
+  });
 
   const createFn = useServerFn(createProjectFromFactory);
   const createMut = useMutation({
@@ -125,6 +159,23 @@ function CriarProjetoPage() {
           model: { kind: modelKind, templateId, sourceCompanyId },
           modules: Array.from(selectedModules).map((slug) => ({ slug, segment: preset })),
           toggles,
+          plan: plan.planId
+            ? {
+                planId: plan.planId,
+                setupAmount: plan.setupAmount,
+                recurringAmount: plan.recurringAmount,
+                dueDay: plan.dueDay,
+                setupPaid: plan.setupPaid,
+                pixKey: plan.pixKey || undefined,
+                generateFirstInvoice: plan.generateFirstInvoice,
+              }
+            : undefined,
+          adminUser: {
+            email: admin.email || client.email || undefined,
+            name: admin.name || client.ownerName || undefined,
+            phone: admin.phone || client.whatsapp || undefined,
+            sendWelcome: admin.sendWelcome,
+          },
           confirm: true,
         },
       }),
@@ -397,14 +448,130 @@ function CriarProjetoPage() {
 
       {step === 3 && (
         <Card className="p-6 space-y-4">
-          <h2 className="font-semibold">Etapa 3 — Revisão</h2>
-          <Summary client={client} project={project} modelKind={modelKind} preset={preset} modules={Array.from(selectedModules)} toggles={toggles} />
+          <h2 className="font-semibold">Etapa 3 — Plano, Cobrança & Administrador</h2>
+
+          <div>
+            <Label className="text-xs">Plano contratado</Label>
+            <Select
+              value={plan.planId ?? ""}
+              onValueChange={(v) => {
+                const p = (plansData?.plans ?? []).find((pl: { id: string }) => pl.id === v);
+                setPlan((s) => ({
+                  ...s,
+                  planId: v,
+                  setupAmount: p ? Number(p.setup_fee) : undefined,
+                  recurringAmount: p ? Number(p.recurring_amount) : undefined,
+                  dueDay: p ? p.due_day : undefined,
+                }));
+              }}
+            >
+              <SelectTrigger><SelectValue placeholder="Selecione o plano…" /></SelectTrigger>
+              <SelectContent>
+                {(plansData?.plans ?? []).map((p: { id: string; name: string; recurring_amount: number; setup_fee: number; cycle: string }) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.name} — R$ {Number(p.recurring_amount).toFixed(2)}/{p.cycle === "monthly" ? "mês" : p.cycle}
+                    {Number(p.setup_fee) > 0 ? ` · setup R$ ${Number(p.setup_fee).toFixed(2)}` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-[11px] text-muted-foreground mt-1">Sem plano? Pule esta seção — você pode contratar depois.</p>
+          </div>
+
+          {plan.planId && (
+            <div className="grid md:grid-cols-4 gap-3">
+              <Field label="Mensalidade (R$)">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={plan.recurringAmount ?? ""}
+                  onChange={(e) => setPlan({ ...plan, recurringAmount: e.target.value ? Number(e.target.value) : undefined })}
+                />
+              </Field>
+              <Field label="Setup (R$)">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={plan.setupAmount ?? ""}
+                  onChange={(e) => setPlan({ ...plan, setupAmount: e.target.value ? Number(e.target.value) : undefined })}
+                />
+              </Field>
+              <Field label="Dia de vencimento">
+                <Input
+                  type="number"
+                  min={1}
+                  max={28}
+                  value={plan.dueDay ?? ""}
+                  onChange={(e) => setPlan({ ...plan, dueDay: e.target.value ? Number(e.target.value) : undefined })}
+                />
+              </Field>
+              <Field label="Chave PIX (cobrança)">
+                <Input value={plan.pixKey} onChange={(e) => setPlan({ ...plan, pixKey: e.target.value })} />
+              </Field>
+              <label className="flex items-center gap-2 text-sm md:col-span-2">
+                <Checkbox checked={plan.setupPaid} onCheckedChange={(v) => setPlan({ ...plan, setupPaid: !!v })} />
+                <span>Setup já pago / cortesia</span>
+              </label>
+              <label className="flex items-center gap-2 text-sm md:col-span-2">
+                <Checkbox checked={plan.generateFirstInvoice} onCheckedChange={(v) => setPlan({ ...plan, generateFirstInvoice: !!v })} />
+                <span>Gerar 1ª fatura automaticamente</span>
+              </label>
+            </div>
+          )}
+
+          <hr />
+
+          <h3 className="font-semibold text-sm">Usuário Administrador da Empresa</h3>
+          <div className="grid md:grid-cols-2 gap-3">
+            <Field label="E-mail do administrador">
+              <Input
+                type="email"
+                value={admin.email}
+                placeholder={client.email || "admin@empresa.com.br"}
+                onChange={(e) => setAdmin({ ...admin, email: e.target.value })}
+              />
+            </Field>
+            <Field label="Nome do administrador">
+              <Input
+                value={admin.name}
+                placeholder={client.ownerName || "Nome do responsável"}
+                onChange={(e) => setAdmin({ ...admin, name: e.target.value })}
+              />
+            </Field>
+            <Field label="WhatsApp">
+              <Input
+                value={admin.phone}
+                placeholder={client.whatsapp || "(00) 00000-0000"}
+                onChange={(e) => setAdmin({ ...admin, phone: e.target.value })}
+              />
+            </Field>
+            <label className="flex items-center gap-2 text-sm mt-6">
+              <Checkbox checked={admin.sendWelcome} onCheckedChange={(v) => setAdmin({ ...admin, sendWelcome: !!v })} />
+              <span>Enviar e-mail de boas-vindas com link de acesso</span>
+            </label>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Se em branco, usaremos o e-mail/nome/whatsapp do cliente da Etapa 1.
+            O usuário é criado já vinculado à empresa com o perfil <b>Gestor da Empresa</b>.
+          </p>
+
+          <div className="flex justify-between pt-2">
+            <Button variant="ghost" onClick={() => setStep(2)}><ArrowLeft className="w-4 h-4 mr-1" /> Voltar</Button>
+            <Button onClick={() => setStep(4)}>Continuar <ArrowRight className="w-4 h-4 ml-1" /></Button>
+          </div>
+        </Card>
+      )}
+
+      {step === 4 && (
+        <Card className="p-6 space-y-4">
+          <h2 className="font-semibold">Etapa 4 — Revisão</h2>
+          <Summary client={client} project={project} modelKind={modelKind} preset={preset} modules={Array.from(selectedModules)} toggles={toggles} plan={plan} admin={admin} plansData={plansData?.plans ?? []} />
           <label className="flex items-start gap-2 text-sm bg-muted/40 p-3 rounded">
             <Checkbox checked={confirm} onCheckedChange={(v) => setConfirm(!!v)} className="mt-0.5" />
             <span>Confirmo que desejo criar este projeto e entendo que a estrutura será gerada sem copiar dados reais de outros clientes.</span>
           </label>
           <div className="flex justify-between pt-2">
-            <Button variant="ghost" onClick={() => setStep(2)}><ArrowLeft className="w-4 h-4 mr-1" /> Voltar</Button>
+            <Button variant="ghost" onClick={() => setStep(3)}><ArrowLeft className="w-4 h-4 mr-1" /> Voltar</Button>
             <Button disabled={!confirm || createMut.isPending} onClick={() => createMut.mutate()}>
               {createMut.isPending ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Criando…</> : <><Rocket className="w-4 h-4 mr-1" /> Criar Projeto</>}
             </Button>
@@ -416,7 +583,7 @@ function CriarProjetoPage() {
 }
 
 function Stepper({ step }: { step: Step }) {
-  const labels = ["Cliente + Projeto", "Modelo + Módulos", "Revisão"];
+  const labels = ["Cliente + Projeto", "Modelo + Módulos", "Plano & Admin", "Revisão"];
   return (
     <div className="flex gap-2 text-xs">
       {labels.map((l, i) => {
@@ -443,9 +610,11 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function Summary({ client, project, modelKind, preset, modules, toggles }: {
+function Summary({ client, project, modelKind, preset, modules, toggles, plan, admin, plansData }: {
   client: ClientForm; project: ProjectForm; modelKind: string; preset: SegmentKey; modules: string[]; toggles: Record<string, boolean>;
+  plan?: PlanForm; admin?: AdminForm; plansData?: Array<{ id: string; name: string; recurring_amount: number; setup_fee: number }>;
 }) {
+  const selectedPlan = plan?.planId ? plansData?.find((p) => p.id === plan.planId) : undefined;
   return (
     <div className="grid md:grid-cols-2 gap-3 text-sm">
       <Block title="Cliente">
@@ -465,6 +634,22 @@ function Summary({ client, project, modelKind, preset, modules, toggles }: {
       </Block>
       <Block title="Módulos">
         {modules.length === 0 ? <span className="text-muted-foreground">Nenhum</span> : modules.map((m) => <Badge key={m} variant="outline" className="mr-1 mb-1">{m}</Badge>)}
+      </Block>
+      <Block title="Plano & Cobrança">
+        {selectedPlan ? (
+          <>
+            <b>{selectedPlan.name}</b>
+            <div>Mensalidade: R$ {(plan?.recurringAmount ?? Number(selectedPlan.recurring_amount)).toFixed(2)}</div>
+            <div>Setup: R$ {(plan?.setupAmount ?? Number(selectedPlan.setup_fee)).toFixed(2)} {plan?.setupPaid ? "(pago)" : ""}</div>
+            <div className="text-muted-foreground">Venc. dia {plan?.dueDay ?? "—"} · {plan?.generateFirstInvoice ? "1ª fatura será gerada" : "sem fatura inicial"}</div>
+          </>
+        ) : <span className="text-muted-foreground">Sem plano (contratar depois)</span>}
+      </Block>
+      <Block title="Administrador">
+        <b>{admin?.name || client.ownerName || "—"}</b>
+        <div className="text-muted-foreground">{admin?.email || client.email || "sem e-mail"}</div>
+        <div className="text-muted-foreground">{admin?.phone || client.whatsapp || ""}</div>
+        <div className="text-xs mt-1">{admin?.sendWelcome ? "✓ Boas-vindas será enviado" : "Boas-vindas desativado"}</div>
       </Block>
       <Block title="Configurações iniciais">
         <ul className="text-xs space-y-0.5">
