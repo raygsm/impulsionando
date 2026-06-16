@@ -50,7 +50,7 @@ export const updateIntegration = createServerFn({ method: "POST" })
     if (data.status !== undefined) patch.status = data.status;
     if (data.is_active !== undefined) patch.is_active = data.is_active;
     const { error } = await context.supabase
-      .from("core_integrations").update(patch).eq("slug", data.slug);
+      .from("core_integrations").update(patch as any).eq("slug", data.slug);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
