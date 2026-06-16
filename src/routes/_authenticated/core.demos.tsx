@@ -168,9 +168,22 @@ function CoreDemosPage() {
   const replay = useServerFn(replaySmokeRun);
   const exportHistory = useServerFn(exportSmokeHistory);
 
-  // paginação histórico
+  // filtros + paginação do histórico
   const [historyPage, setHistoryPage] = useState(0);
   const historyPageSize = 20;
+  const [historySince, setHistorySince] = useState<string>("all"); // "all" | "7" | "30" | "90"
+  const [historyStatus, setHistoryStatus] = useState<"all" | "success" | "failure">("all");
+  const [historySearch, setHistorySearch] = useState("");
+  const [selectedRun, setSelectedRun] = useState<SmokeRunRow | null>(null);
+
+  const historyFilters = useMemo(
+    () => ({
+      sinceDays: historySince === "all" ? null : Number(historySince),
+      status: historyStatus,
+      search: historySearch.trim() || undefined,
+    }),
+    [historySince, historyStatus, historySearch],
+  );
 
   const { data, isLoading } = useQuery({
     queryKey: ["core-demos"],
@@ -178,10 +191,14 @@ function CoreDemosPage() {
   });
 
   const { data: historyData, isLoading: loadingHistory } = useQuery({
-    queryKey: ["core-smoke-history", historyPage],
+    queryKey: ["core-smoke-history", historyPage, historyFilters],
     queryFn: () =>
       fetchHistory({
-        data: { limit: historyPageSize, offset: historyPage * historyPageSize },
+        data: {
+          limit: historyPageSize,
+          offset: historyPage * historyPageSize,
+          ...historyFilters,
+        },
       }),
   });
 
