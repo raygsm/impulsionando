@@ -463,8 +463,10 @@ const historyFiltersSchema = z
   })
   .optional();
 
+type AdminClient = Awaited<typeof import("@/integrations/supabase/client.server")>["supabaseAdmin"];
+
 function buildHistoryQuery(
-  client: Awaited<ReturnType<typeof import("@/integrations/supabase/client.server").then>>["supabaseAdmin"],
+  client: AdminClient,
   filters: {
     sinceDays?: number | null;
     status?: "all" | "success" | "failure";
