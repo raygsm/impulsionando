@@ -48,10 +48,10 @@ function ConfiguracoesPage() {
   return (
     <div className="space-y-6 p-4 md:p-6">
       <PageHeader
-        icon={Settings2}
         title="Configurações globais"
         description="Parâmetros da plataforma editáveis pelo CORE. Afetam todos os tenants."
       />
+      <Settings2 className="hidden" />
 
       {isLoading && <p className="text-sm text-muted-foreground">Carregando…</p>}
 
