@@ -12,8 +12,9 @@ import {
   getEvent, upsertTicketType, issueTickets, transferTicket, cancelTicket, checkInByQr,
   updateTransferPolicy, listTransfers, decideTransfer,
 } from "@/lib/events.functions";
-import { Ticket, ArrowLeft, QrCode, ShieldCheck, Settings2, Check, X } from "lucide-react";
+import { Ticket, ArrowLeft, QrCode, ShieldCheck, Settings2, Check, X, Download, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { downloadCsv, downloadTablePdf } from "@/lib/exports";
 
 export const Route = createFileRoute("/_authenticated/eventos/$id")({
   head: () => ({ meta: [{ title: "Evento" }, { name: "robots", content: "noindex" }] }),
@@ -322,11 +323,54 @@ function EventDetail() {
       </div>
 
       <Card className="p-0 overflow-hidden">
-        <div className="p-4 border-b font-semibold flex items-center justify-between">
-          <span>Transferências ({transfersData?.items.length ?? 0})</span>
-          <span className="text-xs text-muted-foreground">
-            Pendentes: {(transfersData?.items ?? []).filter((t) => t.status === "pendente").length}
-          </span>
+        <div className="p-4 border-b font-semibold flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-3">
+            <span>Transferências ({transfersData?.items.length ?? 0})</span>
+            <span className="text-xs text-muted-foreground">
+              Pendentes: {(transfersData?.items ?? []).filter((t) => t.status === "pendente").length}
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => {
+              const rows = (transfersData?.items ?? []).map((t) => ({
+                criada_em: new Date(t.created_at).toLocaleString("pt-BR"),
+                ingresso: (t as { evt_tickets?: { code?: string } }).evt_tickets?.code ?? "",
+                de_nome: t.from_name, de_email: t.from_email,
+                para_nome: t.to_name, para_email: t.to_email,
+                para_doc: t.to_document ?? "",
+                status: t.status,
+                taxa_brl: t.fee_cents ? (Number(t.fee_cents) / 100).toFixed(2).replace(".", ",") : "0,00",
+                decidida_em: t.decided_at ? new Date(t.decided_at).toLocaleString("pt-BR") : "",
+              }));
+              downloadCsv(`transferencias-${id}.csv`,
+                ["criada_em", "ingresso", "de_nome", "de_email", "para_nome", "para_email", "para_doc", "status", "taxa_brl", "decidida_em"], rows);
+            }} disabled={!transfersData?.items?.length}>
+              <Download className="w-4 h-4 mr-1" /> CSV
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => downloadTablePdf({
+              filename: `transferencias-${id}.pdf`,
+              title: `Transferências — ${ev?.title ?? id}`,
+              subtitle: `${transfersData?.items?.length ?? 0} registros`,
+              columns: [
+                { key: "criada", label: "Criada" },
+                { key: "ingresso", label: "Ingresso", width: 80 },
+                { key: "de", label: "De" },
+                { key: "para", label: "Para" },
+                { key: "status", label: "Status", width: 80 },
+                { key: "taxa", label: "Taxa", align: "right", width: 70 },
+              ],
+              rows: (transfersData?.items ?? []).map((t) => ({
+                criada: new Date(t.created_at).toLocaleString("pt-BR"),
+                ingresso: (t as { evt_tickets?: { code?: string } }).evt_tickets?.code ?? "—",
+                de: `${t.from_name} <${t.from_email}>`,
+                para: `${t.to_name} <${t.to_email}>`,
+                status: t.status,
+                taxa: t.fee_cents ? `R$ ${(Number(t.fee_cents) / 100).toFixed(2)}` : "—",
+              })),
+            })} disabled={!transfersData?.items?.length}>
+              <FileText className="w-4 h-4 mr-1" /> PDF
+            </Button>
+          </div>
         </div>
         <table className="w-full text-sm">
           <thead className="bg-muted/40 text-xs uppercase">
@@ -370,6 +414,76 @@ function EventDetail() {
         </table>
       </Card>
 
+      <Card className="p-0 overflow-hidden">
+        <div className="p-4 border-b font-semibold flex items-center justify-between flex-wrap gap-2">
+          <span>Check-ins ({data?.checkins.length ?? 0})</span>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => {
+              const ticketByCode = new Map((data?.tickets ?? []).map((t) => [t.id, t]));
+              const rows = (data?.checkins ?? []).map((c) => {
+                const tk = ticketByCode.get(c.ticket_id);
+                return {
+                  quando: new Date(c.checked_in_at).toLocaleString("pt-BR"),
+                  ingresso: tk?.code ?? "",
+                  portador: tk?.holder_name ?? "",
+                  email: tk?.holder_email ?? "",
+                  portao: c.gate ?? "",
+                };
+              });
+              downloadCsv(`checkins-${id}.csv`, ["quando", "ingresso", "portador", "email", "portao"], rows);
+            }} disabled={!data?.checkins?.length}>
+              <Download className="w-4 h-4 mr-1" /> CSV
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => {
+              const ticketByCode = new Map((data?.tickets ?? []).map((t) => [t.id, t]));
+              downloadTablePdf({
+                filename: `checkins-${id}.pdf`,
+                title: `Check-ins — ${ev?.title ?? id}`,
+                subtitle: `${data?.checkins.length ?? 0} entradas registradas`,
+                columns: [
+                  { key: "quando", label: "Quando", width: 140 },
+                  { key: "ingresso", label: "Ingresso", width: 90 },
+                  { key: "portador", label: "Portador" },
+                  { key: "email", label: "E-mail" },
+                  { key: "portao", label: "Portão", width: 80 },
+                ],
+                rows: (data?.checkins ?? []).map((c) => {
+                  const tk = ticketByCode.get(c.ticket_id);
+                  return {
+                    quando: new Date(c.checked_in_at).toLocaleString("pt-BR"),
+                    ingresso: tk?.code ?? "—",
+                    portador: tk?.holder_name ?? "—",
+                    email: tk?.holder_email ?? "—",
+                    portao: c.gate ?? "—",
+                  };
+                }),
+              });
+            }} disabled={!data?.checkins?.length}>
+              <FileText className="w-4 h-4 mr-1" /> PDF
+            </Button>
+          </div>
+        </div>
+        <table className="w-full text-sm">
+          <thead className="bg-muted/40 text-xs uppercase">
+            <tr><th className="text-left p-3">Quando</th><th className="text-left p-3">Ingresso</th><th className="text-left p-3">Portão</th></tr>
+          </thead>
+          <tbody>
+            {(data?.checkins ?? []).map((c) => {
+              const tk = (data?.tickets ?? []).find((x) => x.id === c.ticket_id);
+              return (
+                <tr key={c.id} className="border-t">
+                  <td className="p-3 text-xs">{new Date(c.checked_in_at).toLocaleString("pt-BR")}</td>
+                  <td className="p-3 font-mono text-xs">{tk?.code ?? "—"} <span className="text-muted-foreground">{tk?.holder_name ?? ""}</span></td>
+                  <td className="p-3 text-xs">{c.gate ?? "—"}</td>
+                </tr>
+              );
+            })}
+            {(!data?.checkins || data.checkins.length === 0) && (
+              <tr><td colSpan={3} className="p-6 text-center text-sm text-muted-foreground">Nenhum check-in registrado.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </Card>
 
       <Card className="p-0 overflow-hidden">
         <div className="p-4 border-b font-semibold">Ingressos ({data?.tickets.length ?? 0})</div>
