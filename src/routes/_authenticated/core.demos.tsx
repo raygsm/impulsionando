@@ -205,6 +205,63 @@ ${rows
   w.document.close();
 }
 
+function downloadLastPurgePdf(retention: {
+  retentionDays: number;
+  schedule: string;
+  scheduleLabel: string;
+  active: boolean;
+  lastRunAt: string | null;
+  lastRunStatus: string | null;
+  lastRemovedCount: number | null;
+  lastTrigger: "scheduled" | "manual" | null;
+  lastByNiche: Record<string, number>;
+  lastByStatus: Record<string, number>;
+  lastLogId: string | null;
+}) {
+  if (!retention.lastRunAt) return;
+  const doc = new jsPDF();
+  const ranAt = new Date(retention.lastRunAt).toLocaleString("pt-BR");
+  doc.setFontSize(16);
+  doc.text("Relatório do último purge — Smoke Tests", 14, 18);
+  doc.setFontSize(10);
+  doc.text(`Executado em: ${ranAt}`, 14, 28);
+  doc.text(`Trigger: ${retention.lastTrigger ?? "—"}`, 14, 34);
+  doc.text(`Janela de retenção: ${retention.retentionDays} dias`, 14, 40);
+  doc.text(
+    `Agenda: ${retention.scheduleLabel} (${retention.schedule}) — ${retention.active ? "ativa" : "pausada"}`,
+    14,
+    46,
+  );
+  doc.text(`Total removido: ${retention.lastRemovedCount ?? 0}`, 14, 52);
+  doc.text(`Status: ${retention.lastRunStatus ?? "—"}`, 14, 58);
+  if (retention.lastLogId) doc.text(`Log ID: ${retention.lastLogId}`, 14, 64);
+
+  const byNiche = Object.entries(retention.lastByNiche ?? {}).sort((a, b) => b[1] - a[1]);
+  const byStatus = Object.entries(retention.lastByStatus ?? {}).sort((a, b) => b[1] - a[1]);
+
+  autoTable(doc, {
+    startY: 74,
+    head: [["Nicho", "Removidos"]],
+    body: byNiche.length ? byNiche.map(([k, v]) => [k, String(v)]) : [["—", "0"]],
+    styles: { fontSize: 9 },
+    headStyles: { fillColor: [99, 102, 241] },
+  });
+  const afterNiche = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable
+    .finalY + 8;
+  autoTable(doc, {
+    startY: afterNiche,
+    head: [["Status", "Removidos"]],
+    body: byStatus.length ? byStatus.map(([k, v]) => [k, String(v)]) : [["—", "0"]],
+    styles: { fontSize: 9 },
+    headStyles: { fillColor: [99, 102, 241] },
+  });
+
+  const stamp = new Date(retention.lastRunAt).toISOString().replace(/[:.]/g, "-");
+  doc.save(`purge-report_${stamp}.pdf`);
+}
+
+
+
 function CoreDemosPage() {
   const qc = useQueryClient();
   const fetchDemos = useServerFn(listDemoCompanies);
