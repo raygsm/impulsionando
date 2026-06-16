@@ -7,6 +7,7 @@ import { template as trialEndingTemplate } from './trial-ending'
 import { template as welcomePaidTemplate } from './welcome-paid'
 import { template as invoicePaidTemplate } from './invoice-paid'
 import { template as invoiceOverdueTemplate } from './invoice-overdue'
+import { template as realestatePropertyApprovalTemplate } from './realestate-property-approval'
 
 export interface TemplateEntry {
   component: ComponentType<any>
