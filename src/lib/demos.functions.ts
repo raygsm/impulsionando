@@ -126,7 +126,7 @@ export const runWizardSmokeTest = createServerFn({ method: "POST" })
     let contractId: string | null = null;
     let firstInvoiceId: string | null = null;
     let adminUserId: string | null = null;
-    let messageId: number | null = null;
+    let messageId: string | null = null;
 
     try {
       // 1) plano
