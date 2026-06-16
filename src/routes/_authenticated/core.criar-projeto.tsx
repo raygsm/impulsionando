@@ -7,6 +7,7 @@ import {
   createProjectFromFactory,
   listInstallableModules,
   listSiteTemplates,
+  listBillingPlansForFactory,
 } from "@/lib/factory.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
