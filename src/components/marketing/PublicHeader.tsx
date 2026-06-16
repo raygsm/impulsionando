@@ -45,12 +45,12 @@ export function PublicHeader() {
 
   return (
     <header className="sticky top-0 z-30 w-full border-b border-border bg-background/80 backdrop-blur">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 sm:h-20 md:h-24 lg:h-28 flex items-center justify-between gap-2 sm:gap-4">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-24 sm:h-32 md:h-40 lg:h-48 flex items-center justify-between gap-2 sm:gap-4">
         <Link to="/" className="flex items-center gap-2 shrink-0 min-w-0">
           <img
             src={logoAsset.url}
             alt="Impulsionando Tecnologia"
-            className="h-10 sm:h-12 md:h-16 lg:h-20 w-auto object-contain"
+            className="h-20 sm:h-24 md:h-32 lg:h-40 w-auto object-contain"
           />
         </Link>
 
