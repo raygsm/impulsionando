@@ -246,8 +246,51 @@ function PlanosPage() {
       <PaymentTestModeBanner />
       <PublicHeader />
 
+      {/* SELETOR DE PÚBLICO */}
+      <section className="border-b border-border bg-muted/30">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+          <div className="text-center mb-4">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Planos por público</div>
+            <h2 className="text-lg sm:text-xl font-semibold tracking-tight">Para qual perfil você está vendo planos?</h2>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 max-w-3xl mx-auto" role="tablist">
+            {([
+              { id: "empresas", label: "Empresas", icon: Building2 },
+              { id: "white-label", label: "White Label", icon: Layers },
+              { id: "consumidor", label: "Consumidor", icon: UserRound },
+            ] as { id: Audience; label: string; icon: typeof Building2 }[]).map(({ id, label, icon: Icon }) => {
+              const active = audience === id;
+              return (
+                <button
+                  key={id}
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setAudience(id)}
+                  className={cn(
+                    "flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md border text-sm font-medium transition-all",
+                    active
+                      ? "border-primary bg-primary text-primary-foreground shadow-elegant"
+                      : "border-border bg-background text-muted-foreground hover:text-foreground hover:bg-accent"
+                  )}
+                >
+                  <Icon className="w-4 h-4" /> {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
 
+      {audience === "white-label" && (
+        <WhiteLabelPlansPanel />
+      )}
 
+      {audience === "consumidor" && (
+        <ConsumidorPlansPanel />
+      )}
+
+      {audience === "empresas" && (
+        <>
       {/* HERO */}
       <section className="relative overflow-hidden bg-gradient-hero text-primary-foreground">
         <div className="pointer-events-none absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full bg-accent/30 blur-3xl" />
