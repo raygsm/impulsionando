@@ -467,3 +467,128 @@ export const exportPropertyApprovalCsv = createServerFn({ method: "GET" })
     };
   });
 
+// ============ Batch queue export (current filters) ============
+const BatchExportInput = QueueQueryInput.extend({
+  pageSize: z.number().int().min(5).max(1000).default(500),
+});
+
+export const exportApprovalQueueCsv = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => BatchExportInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const statuses: Array<"pending" | "changes_requested" | "rejected" | "approved"> =
+      data.status?.length ? data.status : ["pending", "changes_requested", "rejected"];
+
+    let q = context.supabase
+      .from("realestate_properties")
+      .select(
+        "id, reference_code, title, operation, property_type, sale_price, rent_price, neighborhood, city, approval_status, submitted_for_review_at, submitted_by, reviewed_by, reviewed_at, review_notes",
+      )
+      .eq("company_id", data.companyId)
+      .in("approval_status", statuses);
+
+    if (data.search?.trim()) {
+      const s = data.search.trim().replace(/[%,]/g, "");
+      q = q.or(`title.ilike.%${s}%,reference_code.ilike.%${s}%,neighborhood.ilike.%${s}%,city.ilike.%${s}%`);
+    }
+    if (data.reviewerId) q = q.eq("reviewed_by", data.reviewerId);
+    if (data.submitterId) q = q.eq("submitted_by", data.submitterId);
+    if (data.dateFrom) q = q.gte("submitted_for_review_at", data.dateFrom);
+    if (data.dateTo) q = q.lte("submitted_for_review_at", data.dateTo);
+
+    const { data: rows, error } = await q
+      .order("submitted_for_review_at", { ascending: false, nullsFirst: false })
+      .limit(data.pageSize);
+    if (error) throw new Error(error.message);
+
+    const userIds = Array.from(new Set((rows ?? []).flatMap((r: any) => [r.reviewed_by, r.submitted_by]).filter(Boolean) as string[]));
+    let actors: Record<string, string> = {};
+    if (userIds.length) {
+      const { data: profiles } = await context.supabase
+        .from("user_profiles").select("user_id, display_name, email").in("user_id", userIds);
+      for (const p of (profiles ?? []) as any[]) {
+        actors[p.user_id] = p.display_name || p.email || "Usuário";
+      }
+    }
+
+    const esc = (v: unknown) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const header = [
+      "Referência", "Título", "Operação", "Tipo", "Preço", "Bairro", "Cidade",
+      "Status", "Enviado em", "Enviado por", "Revisado em", "Revisado por", "Observações",
+    ].join(",");
+    const lines = (rows ?? []).map((r: any) => {
+      const price = r.operation === "locacao" ? r.rent_price : r.sale_price;
+      return [
+        r.reference_code ?? "", r.title ?? "", r.operation ?? "", r.property_type ?? "",
+        price ?? "", r.neighborhood ?? "", r.city ?? "", r.approval_status ?? "",
+        r.submitted_for_review_at ? new Date(r.submitted_for_review_at).toLocaleString("pt-BR") : "",
+        actors[r.submitted_by] ?? "",
+        r.reviewed_at ? new Date(r.reviewed_at).toLocaleString("pt-BR") : "",
+        actors[r.reviewed_by] ?? "",
+        r.review_notes ?? "",
+      ].map(esc).join(",");
+    });
+
+    return {
+      filename: `fila-aprovacao-${new Date().toISOString().slice(0, 10)}.csv`,
+      csv: [header, ...lines].join("\n"),
+      total: rows?.length ?? 0,
+    };
+  });
+
+// ============ Notification preferences ============
+const APPROVAL_CATEGORIES = ["realestate.approval.submitted", "realestate.approval.decision"] as const;
+const PREF_CHANNELS = ["in_app", "email"] as const;
+
+export const getNotificationPreferences = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("notification_preferences")
+      .select("category, channel, enabled, company_id")
+      .eq("user_id", context.userId)
+      .is("company_id", null)
+      .in("category", APPROVAL_CATEGORIES as unknown as string[]);
+    if (error) throw new Error(error.message);
+
+    const { data: prof } = await context.supabase
+      .from("user_profiles").select("email").eq("user_id", context.userId).limit(1).maybeSingle();
+    const email = (prof as any)?.email as string | undefined;
+    let suppression: { suppressed: boolean; reason?: string } = { suppressed: false };
+    if (email) {
+      const { data: sup } = await context.supabase
+        .from("suppressed_emails").select("reason").eq("email", email.toLowerCase()).maybeSingle();
+      if (sup) suppression = { suppressed: true, reason: (sup as any).reason };
+    }
+
+    return {
+      preferences: data ?? [],
+      email: email ?? null,
+      suppression,
+      categories: APPROVAL_CATEGORIES,
+      channels: PREF_CHANNELS,
+    };
+  });
+
+export const updateNotificationPreference = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({
+    category: z.enum(APPROVAL_CATEGORIES),
+    channel: z.enum(PREF_CHANNELS),
+    enabled: z.boolean(),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("notification_preferences")
+      .upsert(
+        { user_id: context.userId, company_id: null, category: data.category, channel: data.channel, enabled: data.enabled },
+        { onConflict: "user_id,category,channel" } as any,
+      );
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+
