@@ -13,7 +13,7 @@ interface Props {
 const Email = ({ name, planName, daysLeft, trialEndsAt, checkoutUrl }: Props) => (
   <Html lang="pt-BR" dir="ltr">
     <Head />
-    <Preview>Faltam {daysLeft ?? 2} dias para o fim do seu teste</Preview>
+    <Preview>{`Faltam ${daysLeft ?? 2} dias para o fim do seu teste`}</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>Seu teste termina em {daysLeft ?? 2} dias ⏰</Heading>
