@@ -260,14 +260,14 @@ export const runWizardSmokeTest = createServerFn({ method: "POST" })
       // verifica que a mensagem foi enfileirada
       const { data: msg } = await supabaseAdmin
         .from("message_outbox")
-        .select("id, event_code, channels")
+        .select("id, event_code, channel")
         .eq("event_code", "user_welcome")
         .eq("recipient_email", testEmail)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
       if (msg) {
-        messageId = (msg as { id: number }).id;
+        messageId = (msg as { id: string }).id;
         ok("mensagem_enfileirada", `outbox#${messageId}`);
       } else {
         fail("mensagem_enfileirada", "linha não encontrada em message_outbox");
