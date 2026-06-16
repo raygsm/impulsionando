@@ -97,28 +97,28 @@ function EmpresasPage() {
       <main className="flex-1">
         <section className="relative overflow-hidden bg-gradient-hero text-primary-foreground">
           <div className="pointer-events-none absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full bg-accent/30 blur-3xl" />
-          <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-16 lg:py-24 text-center">
+          <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-24 text-center">
             <Badge className="bg-white/15 text-primary-foreground border-0 mb-4">Para Empresas</Badge>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
               Escolha seu segmento
             </h1>
-            <p className="mt-4 text-lg text-white/85 max-w-2xl mx-auto leading-relaxed">
+            <p className="mt-4 text-base sm:text-lg text-white/85 max-w-2xl mx-auto leading-relaxed">
               A plataforma é a mesma, mas cada nicho recebe módulos, telas e automações desenhados
               para a realidade do seu mercado.
             </p>
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+          <div className="grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {SEGMENTS.map((s) => {
               const Icon = s.icon;
               return (
-                <Card key={s.slug} className="p-8 flex flex-col hover:shadow-card-hover transition-all">
-                  <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary inline-flex items-center justify-center mb-5">
+                <Card key={s.slug} className="p-5 sm:p-8 flex flex-col hover:shadow-card-hover transition-all">
+                  <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary inline-flex items-center justify-center mb-5 shrink-0">
                     <Icon className="w-7 h-7" />
                   </div>
-                  <h2 className="text-2xl font-bold tracking-tight">{s.title}</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{s.title}</h2>
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     {s.modules.map((m) => (
                       <Badge key={m} variant="secondary" className="text-[11px]">{m}</Badge>
@@ -128,14 +128,14 @@ function EmpresasPage() {
                     {s.blurb}
                   </p>
                   <div className="flex flex-col gap-2 mt-6">
-                    <Button asChild className="gap-2 bg-gradient-primary">
+                    <Button asChild className="gap-2 bg-gradient-primary w-full">
                       <Link to="/nichos/$slug" params={{ slug: s.nichoSlug }}>
-                        <PlayCircle className="w-4 h-4" /> Ver Demonstração
+                        <PlayCircle className="w-4 h-4 shrink-0" /> Ver Demonstração
                       </Link>
                     </Button>
-                    <Button asChild variant="ghost" size="sm">
+                    <Button asChild variant="ghost" size="sm" className="w-full">
                       <Link to="/nichos/$slug" params={{ slug: s.nichoSlug }}>
-                        Ver como funciona <ArrowRight className="w-4 h-4 ml-1" />
+                        Ver como funciona <ArrowRight className="w-4 h-4 ml-1 shrink-0" />
                       </Link>
                     </Button>
                   </div>
@@ -146,19 +146,19 @@ function EmpresasPage() {
         </section>
 
         <section className="bg-muted/30 border-y border-border">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16 text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16 text-center">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">
               Não encontrou seu segmento?
             </h2>
-            <p className="mt-3 text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            <p className="mt-3 text-muted-foreground max-w-2xl mx-auto leading-relaxed text-sm sm:text-base">
               A Impulsionando atende mais de 20 nichos, do consultório ao distribuidor B2B.
               Fale com um especialista e monte sua operação sob medida.
             </p>
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-              <Button asChild size="lg" className="bg-gradient-primary gap-2">
+            <div className="mt-6 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-center gap-3">
+              <Button asChild size="lg" className="bg-gradient-primary gap-2 w-full sm:w-auto">
                 <Link to="/orcamento">Simular Meu Projeto <ArrowRight className="w-4 h-4" /></Link>
               </Button>
-              <Button asChild size="lg" className="btn-whatsapp gap-2">
+              <Button asChild size="lg" className="btn-whatsapp gap-2 w-full sm:w-auto">
                 <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
                   <MessageCircle className="w-4 h-4" /> Falar com Especialista
                 </a>

@@ -47,28 +47,28 @@ function WhiteLabelPage() {
         <section className="relative overflow-hidden bg-gradient-hero text-primary-foreground">
           <div className="pointer-events-none absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full bg-accent/30 blur-3xl" />
           <div className="pointer-events-none absolute -top-32 -left-32 w-[400px] h-[400px] rounded-full bg-primary-glow/30 blur-3xl" />
-          <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
-            <div className="max-w-3xl space-y-6">
+          <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20 lg:py-28">
+            <div className="max-w-3xl space-y-5 sm:space-y-6">
               <Badge className="bg-white/15 text-primary-foreground border-0">
                 <Layers className="w-3.5 h-3.5 mr-1" /> White Label
               </Badge>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight">
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight break-words">
                 Crie sua própria plataforma SaaS — sem precisar desenvolver.
               </h1>
-              <p className="text-lg text-white/85 leading-relaxed max-w-2xl">
+              <p className="text-base sm:text-lg text-white/85 leading-relaxed max-w-2xl">
                 Venda sistemas com a sua marca. Controle clientes, faturamento e módulos.
                 Para agências, consultorias, franqueadoras e grupos empresariais que querem
                 transformar serviço em receita recorrente.
               </p>
-              <div className="flex flex-wrap gap-3 pt-2">
-                <Button asChild size="lg" className="gap-2 bg-white text-primary hover:bg-white/90">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 pt-2">
+                <Button asChild size="lg" className="gap-2 bg-white text-primary hover:bg-white/90 w-full sm:w-auto">
                   <Link to="/demo/white-label">
-                    <PlayCircle className="w-4 h-4" /> Ver Plataforma White Label
+                    <PlayCircle className="w-4 h-4 shrink-0" /> Ver Plataforma White Label
                   </Link>
                 </Button>
-                <Button asChild size="lg" className="gap-2 bg-accent text-accent-foreground hover:bg-accent/90">
+                <Button asChild size="lg" className="gap-2 bg-accent text-accent-foreground hover:bg-accent/90 w-full sm:w-auto">
                   <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                    Solicitar Apresentação <ArrowRight className="w-4 h-4" />
+                    Solicitar Apresentação <ArrowRight className="w-4 h-4 shrink-0" />
                   </a>
                 </Button>
               </div>
@@ -124,26 +124,26 @@ function WhiteLabelPage() {
         </section>
 
         {/* PLANOS / CTA */}
-        <section className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-20 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+        <section className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20 text-center">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">
             Pronto para vender a sua plataforma?
           </h2>
-          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto leading-relaxed text-sm sm:text-base">
             Os planos White Label são montados por volume de clientes, módulos ativos e nível
             de suporte. Solicite uma apresentação para receber uma proposta sob medida.
           </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Button asChild size="lg" className="bg-gradient-primary gap-2">
+          <div className="mt-8 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-center gap-3">
+            <Button asChild size="lg" className="bg-gradient-primary gap-2 w-full sm:w-auto">
               <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
                 Solicitar Apresentação <ArrowRight className="w-4 h-4" />
               </a>
             </Button>
-            <Button asChild size="lg" variant="outline" className="gap-2">
+            <Button asChild size="lg" variant="outline" className="gap-2 w-full sm:w-auto">
               <Link to="/demo/white-label">
                 <PlayCircle className="w-4 h-4" /> Ver Plataforma White Label
               </Link>
             </Button>
-            <Button asChild size="lg" className="btn-whatsapp gap-2">
+            <Button asChild size="lg" className="btn-whatsapp gap-2 w-full sm:w-auto">
               <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
                 <MessageCircle className="w-4 h-4" /> Falar com Especialista
               </a>
