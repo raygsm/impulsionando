@@ -176,10 +176,56 @@ async function logReview(
   });
 }
 
+async function ensureApprover(supabase: any, userId: string, companyId: string) {
+  const { data, error } = await supabase.rpc("user_has_permission", {
+    _user: userId, _company: companyId, _perm: "realestate.property.approve",
+  });
+  if (error) throw new Error("Falha ao verificar permissão de aprovação");
+  if (!data) throw new Error("Você não tem permissão para revisar imóveis desta imobiliária");
+}
+
+async function loadPropertyMeta(supabase: any, propertyId: string) {
+  const { data, error } = await supabase
+    .from("realestate_properties")
+    .select("id, company_id, title, reference_code, submitted_by")
+    .eq("id", propertyId)
+    .single();
+  if (error) throw new Error(error.message);
+  return data as { id: string; company_id: string; title: string; reference_code: string | null; submitted_by: string | null };
+}
+
+async function dispatchNotification(args: {
+  event: "submitted" | "approved" | "rejected" | "changes_requested";
+  propertyId: string;
+  companyId: string;
+  propertyTitle: string;
+  referenceCode: string | null;
+  submitterUserId: string | null;
+  reviewerUserId: string | null;
+  notes: string | null | undefined;
+}) {
+  try {
+    const { notifyPropertyApprovalEvent } = await import("./realestate-approval-notify.server");
+    await notifyPropertyApprovalEvent({
+      event: args.event,
+      propertyId: args.propertyId,
+      companyId: args.companyId,
+      propertyTitle: args.propertyTitle,
+      referenceCode: args.referenceCode,
+      submitterUserId: args.submitterUserId,
+      reviewerUserId: args.reviewerUserId,
+      notes: args.notes ?? null,
+    });
+  } catch (err) {
+    console.error("dispatchNotification failed", err);
+  }
+}
+
 export const submitPropertyForReview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => ApprovalActionInput.parse(d))
   .handler(async ({ data, context }) => {
+    const meta = await loadPropertyMeta(context.supabase, data.propertyId);
     const { data: prop, error: e1 } = await context.supabase
       .from("realestate_properties")
       .update({
@@ -189,89 +235,154 @@ export const submitPropertyForReview = createServerFn({ method: "POST" })
         is_published: false,
       })
       .eq("id", data.propertyId)
-      .select("id, company_id")
+      .select("id, company_id, title, reference_code")
       .single();
     if (e1) throw new Error(e1.message);
     await logReview(context.supabase, prop.id, prop.company_id, "submitted", context.userId, data.notes);
+    await dispatchNotification({
+      event: "submitted",
+      propertyId: prop.id,
+      companyId: prop.company_id,
+      propertyTitle: prop.title ?? meta.title,
+      referenceCode: prop.reference_code ?? meta.reference_code,
+      submitterUserId: context.userId,
+      reviewerUserId: null,
+      notes: data.notes,
+    });
     return { ok: true };
   });
+
+async function performReview(
+  context: any,
+  data: { propertyId: string; notes?: string | null },
+  next: "approved" | "rejected" | "changes_requested",
+) {
+  const meta = await loadPropertyMeta(context.supabase, data.propertyId);
+  await ensureApprover(context.supabase, context.userId, meta.company_id);
+
+  const { data: prop, error: e1 } = await context.supabase
+    .from("realestate_properties")
+    .update({
+      approval_status: next,
+      reviewed_by: context.userId,
+      reviewed_at: new Date().toISOString(),
+      review_notes: data.notes ?? null,
+      is_published: next === "approved",
+    })
+    .eq("id", data.propertyId)
+    .select("id, company_id, title, reference_code, submitted_by")
+    .single();
+  if (e1) throw new Error(e1.message);
+  await logReview(context.supabase, prop.id, prop.company_id, next, context.userId, data.notes);
+  await dispatchNotification({
+    event: next,
+    propertyId: prop.id,
+    companyId: prop.company_id,
+    propertyTitle: prop.title ?? meta.title,
+    referenceCode: prop.reference_code ?? meta.reference_code,
+    submitterUserId: prop.submitted_by ?? meta.submitted_by,
+    reviewerUserId: context.userId,
+    notes: data.notes,
+  });
+  return { ok: true };
+}
 
 export const approveProperty = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => ApprovalActionInput.parse(d))
-  .handler(async ({ data, context }) => {
-    const { data: prop, error: e1 } = await context.supabase
-      .from("realestate_properties")
-      .update({
-        approval_status: "approved",
-        reviewed_by: context.userId,
-        reviewed_at: new Date().toISOString(),
-        review_notes: data.notes ?? null,
-        is_published: true,
-      })
-      .eq("id", data.propertyId)
-      .select("id, company_id")
-      .single();
-    if (e1) throw new Error(e1.message);
-    await logReview(context.supabase, prop.id, prop.company_id, "approved", context.userId, data.notes);
-    return { ok: true };
-  });
+  .handler(async ({ data, context }) => performReview(context, data, "approved"));
 
 export const rejectProperty = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => ApprovalActionInput.parse(d))
   .handler(async ({ data, context }) => {
-    const { data: prop, error: e1 } = await context.supabase
-      .from("realestate_properties")
-      .update({
-        approval_status: "rejected",
-        reviewed_by: context.userId,
-        reviewed_at: new Date().toISOString(),
-        review_notes: data.notes ?? null,
-        is_published: false,
-      })
-      .eq("id", data.propertyId)
-      .select("id, company_id")
-      .single();
-    if (e1) throw new Error(e1.message);
-    await logReview(context.supabase, prop.id, prop.company_id, "rejected", context.userId, data.notes);
-    return { ok: true };
+    if (!data.notes || !data.notes.trim()) throw new Error("Informe o motivo da rejeição");
+    return performReview(context, data, "rejected");
   });
 
 export const requestPropertyChanges = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => ApprovalActionInput.parse(d))
   .handler(async ({ data, context }) => {
-    const { data: prop, error: e1 } = await context.supabase
-      .from("realestate_properties")
-      .update({
-        approval_status: "changes_requested",
-        reviewed_by: context.userId,
-        reviewed_at: new Date().toISOString(),
-        review_notes: data.notes ?? null,
-        is_published: false,
-      })
-      .eq("id", data.propertyId)
-      .select("id, company_id")
-      .single();
-    if (e1) throw new Error(e1.message);
-    await logReview(context.supabase, prop.id, prop.company_id, "changes_requested", context.userId, data.notes);
-    return { ok: true };
+    if (!data.notes || !data.notes.trim()) throw new Error("Descreva os ajustes necessários");
+    return performReview(context, data, "changes_requested");
   });
 
-export const listApprovalQueue = createServerFn({ method: "GET" })
+export const canApproveProperties = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { companyId: string }) => z.object({ companyId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    const { data: rows, error } = await context.supabase
+    const { data: ok } = await context.supabase.rpc("user_has_permission", {
+      _user: context.userId, _company: data.companyId, _perm: "realestate.property.approve",
+    });
+    return { canApprove: !!ok };
+  });
+
+const QueueQueryInput = z.object({
+  companyId: z.string().uuid(),
+  search: z.string().max(120).optional().nullable(),
+  status: z.array(z.enum(["pending", "changes_requested", "rejected", "approved"])).optional(),
+  reviewerId: z.string().uuid().optional().nullable(),
+  submitterId: z.string().uuid().optional().nullable(),
+  dateFrom: z.string().datetime().optional().nullable(),
+  dateTo: z.string().datetime().optional().nullable(),
+  page: z.number().int().min(1).default(1),
+  pageSize: z.number().int().min(5).max(100).default(20),
+});
+
+export const listApprovalQueue = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => QueueQueryInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const from = (data.page - 1) * data.pageSize;
+    const to = from + data.pageSize - 1;
+    const statuses: Array<"pending" | "changes_requested" | "rejected" | "approved"> =
+      data.status?.length ? data.status : ["pending", "changes_requested", "rejected"];
+
+    let q = context.supabase
       .from("realestate_properties")
-      .select("id, reference_code, title, operation, property_type, sale_price, rent_price, neighborhood, city, approval_status, submitted_for_review_at, submitted_by, reviewed_at, review_notes, photos")
+      .select(
+        "id, reference_code, title, operation, property_type, sale_price, rent_price, neighborhood, city, approval_status, submitted_for_review_at, submitted_by, reviewed_by, reviewed_at, review_notes, photos",
+        { count: "exact" },
+      )
       .eq("company_id", data.companyId)
-      .in("approval_status", ["pending", "changes_requested", "rejected"])
+      .in("approval_status", statuses);
+
+    if (data.search?.trim()) {
+      const s = data.search.trim().replace(/[%,]/g, "");
+      q = q.or(`title.ilike.%${s}%,reference_code.ilike.%${s}%,neighborhood.ilike.%${s}%,city.ilike.%${s}%`);
+    }
+    if (data.reviewerId) q = q.eq("reviewed_by", data.reviewerId);
+    if (data.submitterId) q = q.eq("submitted_by", data.submitterId);
+    if (data.dateFrom) q = q.gte("submitted_for_review_at", data.dateFrom);
+    if (data.dateTo) q = q.lte("submitted_for_review_at", data.dateTo);
+
+    const { data: rows, error, count } = await q
       .order("submitted_for_review_at", { ascending: false, nullsFirst: false })
-      .limit(500);
+      .range(from, to);
     if (error) throw new Error(error.message);
-    return { items: rows ?? [] };
+
+    // Reviewer directory for filter dropdown
+    const userIds = Array.from(
+      new Set(
+        (rows ?? [])
+          .flatMap((r: any) => [r.reviewed_by, r.submitted_by])
+          .filter(Boolean) as string[],
+      ),
+    );
+    let directory: Array<{ id: string; name: string }> = [];
+    if (userIds.length) {
+      const { data: profiles } = await context.supabase
+        .from("user_profiles")
+        .select("user_id, display_name, email")
+        .in("user_id", userIds);
+      directory = (profiles ?? []).map((p: any) => ({
+        id: p.user_id,
+        name: p.display_name || p.email || "Usuário",
+      }));
+    }
+
+    return { items: rows ?? [], total: count ?? 0, page: data.page, pageSize: data.pageSize, directory };
   });
 
 export const listPropertyReviewHistory = createServerFn({ method: "GET" })
@@ -284,5 +395,75 @@ export const listPropertyReviewHistory = createServerFn({ method: "GET" })
       .eq("property_id", data.propertyId)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return { reviews: rows ?? [] };
+
+    const actorIds = Array.from(new Set((rows ?? []).map((r: any) => r.actor_id).filter(Boolean)));
+    let actors: Record<string, string> = {};
+    if (actorIds.length) {
+      const { data: profiles } = await context.supabase
+        .from("user_profiles")
+        .select("user_id, display_name, email")
+        .in("user_id", actorIds);
+      for (const p of (profiles ?? []) as any[]) {
+        actors[p.user_id] = p.display_name || p.email || "Usuário";
+      }
+    }
+    return { reviews: rows ?? [], actors };
   });
+
+export const exportPropertyApprovalCsv = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { propertyId: string }) => z.object({ propertyId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: prop, error: e1 } = await context.supabase
+      .from("realestate_properties")
+      .select("id, company_id, title, reference_code, approval_status")
+      .eq("id", data.propertyId)
+      .single();
+    if (e1) throw new Error(e1.message);
+
+    const { data: rows, error: e2 } = await context.supabase
+      .from("realestate_property_reviews")
+      .select("id, action, actor_id, notes, created_at")
+      .eq("property_id", data.propertyId)
+      .order("created_at", { ascending: true });
+    if (e2) throw new Error(e2.message);
+
+    const actorIds = Array.from(new Set((rows ?? []).map((r: any) => r.actor_id).filter(Boolean)));
+    let actors: Record<string, string> = {};
+    if (actorIds.length) {
+      const { data: profiles } = await context.supabase
+        .from("user_profiles")
+        .select("user_id, display_name, email")
+        .in("user_id", actorIds);
+      for (const p of (profiles ?? []) as any[]) {
+        actors[p.user_id] = p.display_name || p.email || "Usuário";
+      }
+    }
+
+    const escape = (v: unknown) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const header = ["Data/Hora", "Ação", "Responsável", "Observações"].join(",");
+    const lines = (rows ?? []).map((r: any) =>
+      [
+        new Date(r.created_at).toLocaleString("pt-BR"),
+        r.action,
+        actors[r.actor_id] ?? r.actor_id ?? "—",
+        r.notes ?? "",
+      ].map(escape).join(","),
+    );
+    const meta = [
+      `# Imóvel,${escape(prop.title)}`,
+      `# Referência,${escape(prop.reference_code ?? "")}`,
+      `# Status atual,${escape(prop.approval_status)}`,
+      `# Exportado em,${escape(new Date().toLocaleString("pt-BR"))}`,
+    ].join("\n");
+    const csv = [meta, "", header, ...lines].join("\n");
+
+    return {
+      filename: `aprovacao-${prop.reference_code || prop.id}.csv`,
+      csv,
+    };
+  });
+
