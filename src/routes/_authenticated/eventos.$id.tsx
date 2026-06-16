@@ -10,8 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import {
   getEvent, upsertTicketType, issueTickets, transferTicket, cancelTicket, checkInByQr,
+  updateTransferPolicy, listTransfers, decideTransfer,
 } from "@/lib/events.functions";
-import { Ticket, ArrowLeft, QrCode, ShieldCheck } from "lucide-react";
+import { Ticket, ArrowLeft, QrCode, ShieldCheck, Settings2, Check, X } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/eventos/$id")({
