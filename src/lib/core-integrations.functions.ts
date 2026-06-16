@@ -221,7 +221,7 @@ export const updateBriefingStatus = createServerFn({ method: "POST" })
     await assertStaff(context.supabase, context.userId);
     const patch: Record<string, unknown> = { status: data.status, reviewed_at: new Date().toISOString() };
     if (data.notes !== undefined) patch.notes = data.notes;
-    const { error } = await context.supabase.from("core_briefings").update(patch).eq("id", data.id);
+    const { error } = await context.supabase.from("core_briefings").update(patch as any).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
