@@ -137,192 +137,301 @@ async function executeSmokeOnce(opts: {
   let adminUserId: string | null = null;
   let messageId: string | null = null;
   let errorMsg: string | undefined;
-    let companyId: string | null = null;
-    let contractId: string | null = null;
-    let firstInvoiceId: string | null = null;
-    let adminUserId: string | null = null;
-    let messageId: string | null = null;
 
-    try {
-      // 1) plano
-      const { data: plan } = await supabaseAdmin
-        .from("billing_plans")
-        .select("id, recurring_amount, setup_fee, due_day")
-        .eq("is_active", true)
-        .order("recurring_amount")
-        .limit(1)
+  try {
+    // 1) plano
+    const { data: plan } = await supabaseAdmin
+      .from("billing_plans")
+      .select("id, recurring_amount, setup_fee, due_day")
+      .eq("is_active", true)
+      .order("recurring_amount")
+      .limit(1)
+      .maybeSingle();
+    if (!plan) throw new Error("Sem billing_plan ativo");
+    ok("plano_localizado", plan.id);
+
+    // 2) empresa
+    let nicheId: string | null = null;
+    if (opts.nicheSlug) {
+      const { data: n } = await supabaseAdmin
+        .from("niches")
+        .select("id")
+        .eq("slug", opts.nicheSlug)
         .maybeSingle();
-      if (!plan) throw new Error("Sem billing_plan ativo");
-      ok("plano_localizado", plan.id);
-
-      // 2) empresa
-      const { data: comp, error: cErr } = await supabaseAdmin
-        .from("companies")
-        .insert({
-          name: `Smoke ${stamp}`,
-          trade_name: `Smoke ${stamp}`,
-          email: testEmail,
-          is_demo: true,
-          is_active: true,
-          status: "active",
-          environment: "teste",
-        } as never)
-        .select("id")
-        .single();
-      if (cErr || !comp) throw new Error(`Empresa: ${cErr?.message}`);
-      companyId = comp.id;
-      ok("empresa_criada", companyId);
-
-      // 3) admin
-      const { data: created, error: uErr } = await supabaseAdmin.auth.admin.createUser({
-        email: testEmail,
-        email_confirm: true,
-        user_metadata: { display_name: "Smoke Admin" },
-      });
-      if (uErr || !created.user) throw new Error(`Admin: ${uErr?.message}`);
-      adminUserId = created.user.id;
-      ok("admin_criado", adminUserId);
-
-      const { data: gestor } = await supabaseAdmin
-        .from("profiles")
-        .select("id")
-        .eq("slug", "gestor-empresa")
-        .maybeSingle();
-      if (gestor) {
-        await supabaseAdmin.from("user_profiles").insert({
-          user_id: adminUserId,
-          company_id: companyId,
-          profile_id: gestor.id,
-          display_name: "Smoke Admin",
-          email: testEmail,
-          is_active: true,
-        } as never);
-        ok("admin_vinculado", "gestor-empresa");
-      } else {
-        fail("admin_vinculado", "perfil gestor-empresa não encontrado");
-      }
-
-      // 4) magic link
-      const { data: link, error: lErr } = await supabaseAdmin.auth.admin.generateLink({
-        type: "magiclink",
-        email: testEmail,
-      });
-      if (lErr) fail("magic_link", lErr.message);
-      else ok("magic_link", link?.properties?.action_link ? "ok" : "vazio");
-
-      // 5) contrato
-      const dueDay = Math.min(plan.due_day ?? 10, 28);
-      const today = new Date();
-      const due = new Date(today.getFullYear(), today.getMonth() + 1, dueDay);
-      const todayIso = today.toISOString().slice(0, 10);
-      const dueIso = due.toISOString().slice(0, 10);
-      const { data: ct, error: ctErr } = await supabaseAdmin
-        .from("billing_contracts")
-        .insert({
-          company_id: companyId,
-          plan_id: plan.id,
-          start_date: todayIso,
-          due_day: dueDay,
-          next_due_date: dueIso,
-          recurring_amount: Number(plan.recurring_amount),
-          setup_amount: Number(plan.setup_fee ?? 0),
-          status: "active",
-        } as never)
-        .select("id")
-        .single();
-      if (ctErr || !ct) throw new Error(`Contrato: ${ctErr?.message}`);
-      contractId = ct.id;
-      ok("contrato_criado", contractId);
-
-      // 6) 1ª fatura
-      const amount = Number(plan.recurring_amount) + Number(plan.setup_fee ?? 0);
-      const { data: inv, error: invErr } = await supabaseAdmin
-        .from("billing_invoices")
-        .insert({
-          contract_id: contractId,
-          company_id: companyId,
-          period_start: todayIso,
-          period_end: dueIso,
-          due_date: dueIso,
-          amount,
-          status: "open",
-        } as never)
-        .select("id")
-        .single();
-      if (invErr || !inv) throw new Error(`Fatura: ${invErr?.message}`);
-      firstInvoiceId = inv.id;
-      ok("fatura_gerada", `R$ ${amount.toFixed(2)}`);
-
-      // 7) enqueue user_welcome
-      await supabaseAdmin.rpc("enqueue_message", {
-        _event_code: "user_welcome",
-        _company_id: companyId,
-        _recipient_user_id: adminUserId,
-        _recipient_email: testEmail,
-        _recipient_phone: "",
-        _recipient_name: "Smoke Admin",
-        _payload: {
-          user_name: "Smoke Admin",
-          user_email: testEmail,
-          app_url: "https://impulsionando.com.br/onboarding",
-          invite_link: link?.properties?.action_link ?? "",
-        } as never,
-        _channels: ["email", "whatsapp", "in_app"] as never,
-        _reference_type: "factory_project",
-        _reference_id: companyId,
-      } as never);
-
-      // verifica que a mensagem foi enfileirada
-      const { data: msg } = await supabaseAdmin
-        .from("message_outbox")
-        .select("id, event_code, channel")
-        .eq("event_code", "user_welcome")
-        .eq("recipient_email", testEmail)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (msg) {
-        messageId = (msg as { id: string }).id;
-        ok("mensagem_enfileirada", `outbox#${messageId}`);
-      } else {
-        fail("mensagem_enfileirada", "linha não encontrada em message_outbox");
-      }
-
-      return {
-        success: steps.every((s) => s.ok),
-        steps,
-        ids: { companyId, contractId, firstInvoiceId, adminUserId, messageId },
-      };
-    } catch (e) {
-      fail("excecao", (e as Error).message);
-      return {
-        success: false,
-        steps,
-        ids: { companyId, contractId, firstInvoiceId, adminUserId, messageId },
-      };
-    } finally {
-      // cleanup — best-effort
-      try {
-        if (messageId !== null) {
-          await supabaseAdmin.from("message_outbox").delete().eq("id", messageId);
-        }
-        if (firstInvoiceId) {
-          await supabaseAdmin.from("billing_invoices").delete().eq("id", firstInvoiceId);
-        }
-        if (contractId) {
-          await supabaseAdmin.from("billing_contracts").delete().eq("id", contractId);
-        }
-        if (adminUserId && companyId) {
-          await supabaseAdmin.from("user_profiles").delete().eq("user_id", adminUserId).eq("company_id", companyId);
-        }
-        if (companyId) {
-          await supabaseAdmin.from("companies").delete().eq("id", companyId);
-        }
-        if (adminUserId) {
-          await supabaseAdmin.auth.admin.deleteUser(adminUserId);
-        }
-      } catch {
-        // silencioso — cleanup é best-effort
-      }
+      nicheId = n?.id ?? null;
     }
+    const { data: comp, error: cErr } = await supabaseAdmin
+      .from("companies")
+      .insert({
+        name: `Smoke ${opts.label}`,
+        trade_name: `Smoke ${opts.label}`,
+        email: testEmail,
+        is_demo: true,
+        is_active: true,
+        status: "active",
+        environment: "teste",
+        niche_id: nicheId,
+      } as never)
+      .select("id")
+      .single();
+    if (cErr || !comp) throw new Error(`Empresa: ${cErr?.message}`);
+    companyId = comp.id;
+    ok("empresa_criada", companyId);
+
+    // 3) admin
+    const { data: created, error: uErr } = await supabaseAdmin.auth.admin.createUser({
+      email: testEmail,
+      email_confirm: true,
+      user_metadata: { display_name: "Smoke Admin" },
+    });
+    if (uErr || !created.user) throw new Error(`Admin: ${uErr?.message}`);
+    adminUserId = created.user.id;
+    ok("admin_criado", adminUserId);
+
+    const { data: gestor } = await supabaseAdmin
+      .from("profiles")
+      .select("id")
+      .eq("slug", "gestor-empresa")
+      .maybeSingle();
+    if (gestor) {
+      await supabaseAdmin.from("user_profiles").insert({
+        user_id: adminUserId,
+        company_id: companyId,
+        profile_id: gestor.id,
+        display_name: "Smoke Admin",
+        email: testEmail,
+        is_active: true,
+      } as never);
+      ok("admin_vinculado", "gestor-empresa");
+    } else {
+      fail("admin_vinculado", "perfil gestor-empresa não encontrado");
+    }
+
+    // 4) magic link
+    const { data: link, error: lErr } = await supabaseAdmin.auth.admin.generateLink({
+      type: "magiclink",
+      email: testEmail,
+    });
+    if (lErr) fail("magic_link", lErr.message);
+    else ok("magic_link", link?.properties?.action_link ? "ok" : "vazio");
+
+    // 5) contrato
+    const dueDay = Math.min(plan.due_day ?? 10, 28);
+    const today = new Date();
+    const due = new Date(today.getFullYear(), today.getMonth() + 1, dueDay);
+    const todayIso = today.toISOString().slice(0, 10);
+    const dueIso = due.toISOString().slice(0, 10);
+    const { data: ct, error: ctErr } = await supabaseAdmin
+      .from("billing_contracts")
+      .insert({
+        company_id: companyId,
+        plan_id: plan.id,
+        start_date: todayIso,
+        due_day: dueDay,
+        next_due_date: dueIso,
+        recurring_amount: Number(plan.recurring_amount),
+        setup_amount: Number(plan.setup_fee ?? 0),
+        status: "active",
+      } as never)
+      .select("id")
+      .single();
+    if (ctErr || !ct) throw new Error(`Contrato: ${ctErr?.message}`);
+    contractId = ct.id;
+    ok("contrato_criado", contractId);
+
+    // 6) 1ª fatura
+    const amount = Number(plan.recurring_amount) + Number(plan.setup_fee ?? 0);
+    const { data: inv, error: invErr } = await supabaseAdmin
+      .from("billing_invoices")
+      .insert({
+        contract_id: contractId,
+        company_id: companyId,
+        period_start: todayIso,
+        period_end: dueIso,
+        due_date: dueIso,
+        amount,
+        status: "open",
+      } as never)
+      .select("id")
+      .single();
+    if (invErr || !inv) throw new Error(`Fatura: ${invErr?.message}`);
+    firstInvoiceId = inv.id;
+    ok("fatura_gerada", `R$ ${amount.toFixed(2)}`);
+
+    // 7) enqueue user_welcome
+    await supabaseAdmin.rpc("enqueue_message", {
+      _event_code: "user_welcome",
+      _company_id: companyId,
+      _recipient_user_id: adminUserId,
+      _recipient_email: testEmail,
+      _recipient_phone: "",
+      _recipient_name: "Smoke Admin",
+      _payload: {
+        user_name: "Smoke Admin",
+        user_email: testEmail,
+        app_url: "https://impulsionando.com.br/onboarding",
+        invite_link: link?.properties?.action_link ?? "",
+      } as never,
+      _channels: ["email", "whatsapp", "in_app"] as never,
+      _reference_type: "factory_project",
+      _reference_id: companyId,
+    } as never);
+
+    const { data: msg } = await supabaseAdmin
+      .from("message_outbox")
+      .select("id, event_code, channel")
+      .eq("event_code", "user_welcome")
+      .eq("recipient_email", testEmail)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (msg) {
+      messageId = (msg as { id: string }).id;
+      ok("mensagem_enfileirada", `outbox#${messageId}`);
+    } else {
+      fail("mensagem_enfileirada", "linha não encontrada em message_outbox");
+    }
+  } catch (e) {
+    errorMsg = (e as Error).message;
+    fail("excecao", errorMsg);
+  } finally {
+    // cleanup — best-effort
+    try {
+      if (messageId !== null) {
+        await supabaseAdmin.from("message_outbox").delete().eq("id", messageId);
+      }
+      if (firstInvoiceId) {
+        await supabaseAdmin.from("billing_invoices").delete().eq("id", firstInvoiceId);
+      }
+      if (contractId) {
+        await supabaseAdmin.from("billing_contracts").delete().eq("id", contractId);
+      }
+      if (adminUserId && companyId) {
+        await supabaseAdmin.from("user_profiles").delete().eq("user_id", adminUserId).eq("company_id", companyId);
+      }
+      if (companyId) {
+        await supabaseAdmin.from("companies").delete().eq("id", companyId);
+      }
+      if (adminUserId) {
+        await supabaseAdmin.auth.admin.deleteUser(adminUserId);
+      }
+    } catch {
+      // silencioso
+    }
+  }
+
+  return {
+    success: steps.every((s) => s.ok),
+    steps,
+    ids: { companyId, contractId, firstInvoiceId, adminUserId, messageId },
+    durationMs: Date.now() - start,
+    label: opts.label,
+    nicheSlug: opts.nicheSlug,
+    ...(errorMsg ? { error: errorMsg } : {}),
+  };
+}
+
+async function persistRun(
+  triggeredBy: string,
+  result: SmokeResult,
+  batchId: string | null,
+): Promise<void> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  await supabaseAdmin.from("core_smoke_runs").insert({
+    triggered_by: triggeredBy,
+    label: result.label,
+    niche_slug: result.nicheSlug,
+    success: result.success,
+    duration_ms: result.durationMs,
+    steps: result.steps as never,
+    ids: result.ids as never,
+    error: result.error ?? null,
+    batch_id: batchId,
+  } as never);
+}
+
+/**
+ * Smoke test do wizard — execução única.
+ */
+export const runWizardSmokeTest = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({ label: z.string().optional(), nicheSlug: z.string().optional() })
+      .optional()
+      .parse(d ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isStaff } = await supabase.rpc("is_impulsionando_staff", { _user: userId });
+    if (!isStaff) throw new Error("Acesso restrito à equipe Impulsionando.");
+
+    const result = await executeSmokeOnce({
+      label: data?.label ?? `single-${Date.now()}`,
+      nicheSlug: data?.nicheSlug ?? null,
+    });
+    await persistRun(userId, result, null);
+    return result;
   });
+
+/**
+ * Smoke test em lote — executa para múltiplos nichos/labels em sequência.
+ */
+export const runWizardSmokeBatch = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        targets: z
+          .array(z.object({ label: z.string(), nicheSlug: z.string().nullable() }))
+          .min(1)
+          .max(20),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isStaff } = await supabase.rpc("is_impulsionando_staff", { _user: userId });
+    if (!isStaff) throw new Error("Acesso restrito à equipe Impulsionando.");
+
+    const batchId = crypto.randomUUID();
+    const results: SmokeResult[] = [];
+    for (const t of data.targets) {
+      const r = await executeSmokeOnce({ label: t.label, nicheSlug: t.nicheSlug });
+      results.push(r);
+      await persistRun(userId, r, batchId);
+    }
+    const totalMs = results.reduce((acc, r) => acc + r.durationMs, 0);
+    const okCount = results.filter((r) => r.success).length;
+    return {
+      batchId,
+      totalMs,
+      okCount,
+      failCount: results.length - okCount,
+      results,
+    };
+  });
+
+/**
+ * Histórico das execuções do smoke test.
+ */
+export const listSmokeHistory = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ limit: z.number().int().min(1).max(200).optional() }).optional().parse(d ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isStaff } = await supabase.rpc("is_impulsionando_staff", { _user: userId });
+    if (!isStaff) throw new Error("Acesso restrito à equipe Impulsionando.");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await supabaseAdmin
+      .from("core_smoke_runs")
+      .select("id, triggered_by, label, niche_slug, success, duration_ms, steps, ids, error, batch_id, created_at")
+      .order("created_at", { ascending: false })
+      .limit(data?.limit ?? 50);
+    if (error) throw new Error(error.message);
+    return { runs: rows ?? [] };
+  });
+
