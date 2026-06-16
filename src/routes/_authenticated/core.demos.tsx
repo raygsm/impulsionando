@@ -439,9 +439,49 @@ function CoreDemosPage() {
             </SelectContent>
           </Select>
         </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
+          <Select value={sortKey} onValueChange={(v) => setSortKey(v as SortKey)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Ordenar por" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="name">Nome</SelectItem>
+              <SelectItem value="niche">Nicho</SelectItem>
+              <SelectItem value="invoice_amount">Valor da 1ª fatura</SelectItem>
+              <SelectItem value="invoice_due">Vencimento</SelectItem>
+              <SelectItem value="invoice_status">Status da fatura</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={sortDir} onValueChange={(v) => setSortDir(v as SortDir)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Direção" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="asc">Crescente</SelectItem>
+              <SelectItem value="desc">Decrescente</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
+            value={String(demoPageSize)}
+            onValueChange={(v) => {
+              setDemoPageSize(Number(v));
+              setDemoPage(0);
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Itens por página" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="6">6 / página</SelectItem>
+              <SelectItem value="12">12 / página</SelectItem>
+              <SelectItem value="24">24 / página</SelectItem>
+              <SelectItem value="48">48 / página</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground">
           <span>
-            {filtered.length} de {demos.length} demos
+            {filtered.length} de {demos.length} demos · pág. {demoPage + 1}/{totalDemoPages}
           </span>
           {filtered.length > 0 && filtered.length !== demos.length && (
             <Button
@@ -451,7 +491,7 @@ function CoreDemosPage() {
               disabled={batchMut.isPending}
             >
               <Play className="mr-2 h-3.5 w-3.5" />
-              Rodar smoke nas {filtered.length} demos filtradas
+              Rodar smoke nas {Math.min(filtered.length, 20)} demos filtradas
             </Button>
           )}
         </div>
