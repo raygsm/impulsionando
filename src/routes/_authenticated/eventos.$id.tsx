@@ -12,8 +12,9 @@ import {
   getEvent, upsertTicketType, issueTickets, transferTicket, cancelTicket, checkInByQr,
   updateTransferPolicy, listTransfers, decideTransfer,
 } from "@/lib/events.functions";
-import { Ticket, ArrowLeft, QrCode, ShieldCheck, Settings2, Check, X } from "lucide-react";
+import { Ticket, ArrowLeft, QrCode, ShieldCheck, Settings2, Check, X, Download, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { downloadCsv, downloadTablePdf } from "@/lib/exports";
 
 export const Route = createFileRoute("/_authenticated/eventos/$id")({
   head: () => ({ meta: [{ title: "Evento" }, { name: "robots", content: "noindex" }] }),
