@@ -5,6 +5,7 @@ import {
   Building2, LayoutDashboard, Boxes, CreditCard, Globe, Rocket,
   KanbanSquare, Wallet, MessageSquare, Users, KeyRound, FileSearch,
   SlidersHorizontal, Plug, HeartPulse, FlaskConical, TrendingUp, Sparkles, CheckCircle2,
+  Megaphone, FileCode,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/core")({
@@ -32,6 +33,8 @@ function CoreLayout() {
     { to: "/core/testes", label: "Testes", icon: FlaskConical },
     { to: "/core/parametros", label: "Parâmetros Globais", icon: SlidersHorizontal },
     { to: "/core/eventos", label: "Eventos", icon: MessageSquare },
+    { to: "/core/marketing-leads", label: "Leads /marketing", icon: Megaphone },
+    { to: "/core/marketing-pages", label: "CMS /marketing", icon: FileCode },
     { to: "/crm/board", label: "CRM", icon: KanbanSquare },
     { to: "/finance", label: "ERP / Financeiro", icon: Wallet },
     { to: "/admin/billing-contracts", label: "Billing", icon: CreditCard },
