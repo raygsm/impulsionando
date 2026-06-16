@@ -24,8 +24,9 @@ export function HomePage() {
             <div className="text-center max-w-3xl mx-auto space-y-4 sm:space-y-5">
               <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur px-3 py-1 text-[11px] sm:text-xs">
                 <Sparkles className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">Grupo Impulsionando · Tecnologia + Marketing</span>
+                <span className="truncate">Tecnologia desenvolvida pela Impulsionando Tecnologia · em parceria com a Impulsionando Brasil (estratégia)</span>
               </div>
+
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight">
                 Impulsionando Tecnologia
               </h1>
