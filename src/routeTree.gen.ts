@@ -135,12 +135,15 @@ import { Route as AuthenticatedCorePlanosRouteImport } from './routes/_authentic
 import { Route as AuthenticatedCoreParametrosRouteImport } from './routes/_authenticated/core.parametros'
 import { Route as AuthenticatedCoreNovaImplantacaoRouteImport } from './routes/_authenticated/core.nova-implantacao'
 import { Route as AuthenticatedCoreModulosRouteImport } from './routes/_authenticated/core.modulos'
+import { Route as AuthenticatedCoreMenusRouteImport } from './routes/_authenticated/core.menus'
 import { Route as AuthenticatedCoreInstalarModuloRouteImport } from './routes/_authenticated/core.instalar-modulo'
 import { Route as AuthenticatedCoreImplantacoesRouteImport } from './routes/_authenticated/core.implantacoes'
+import { Route as AuthenticatedCoreFlagsRouteImport } from './routes/_authenticated/core.flags'
 import { Route as AuthenticatedCoreFinanceiroMasterRouteImport } from './routes/_authenticated/core.financeiro-master'
 import { Route as AuthenticatedCoreFinalizacaoComercialRouteImport } from './routes/_authenticated/core.finalizacao-comercial'
 import { Route as AuthenticatedCoreEventosRouteImport } from './routes/_authenticated/core.eventos'
 import { Route as AuthenticatedCoreDemosRouteImport } from './routes/_authenticated/core.demos'
+import { Route as AuthenticatedCoreDashboardsRouteImport } from './routes/_authenticated/core.dashboards'
 import { Route as AuthenticatedCoreCriarProjetoRouteImport } from './routes/_authenticated/core.criar-projeto'
 import { Route as AuthenticatedCoreConfiguracoesRouteImport } from './routes/_authenticated/core.configuracoes'
 import { Route as AuthenticatedCoreClientesRouteImport } from './routes/_authenticated/core.clientes'
@@ -863,6 +866,11 @@ const AuthenticatedCoreModulosRoute =
     path: '/modulos',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreMenusRoute = AuthenticatedCoreMenusRouteImport.update({
+  id: '/menus',
+  path: '/menus',
+  getParentRoute: () => AuthenticatedCoreRoute,
+} as any)
 const AuthenticatedCoreInstalarModuloRoute =
   AuthenticatedCoreInstalarModuloRouteImport.update({
     id: '/instalar-modulo',
@@ -875,6 +883,11 @@ const AuthenticatedCoreImplantacoesRoute =
     path: '/implantacoes',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreFlagsRoute = AuthenticatedCoreFlagsRouteImport.update({
+  id: '/flags',
+  path: '/flags',
+  getParentRoute: () => AuthenticatedCoreRoute,
+} as any)
 const AuthenticatedCoreFinanceiroMasterRoute =
   AuthenticatedCoreFinanceiroMasterRouteImport.update({
     id: '/financeiro-master',
@@ -898,6 +911,12 @@ const AuthenticatedCoreDemosRoute = AuthenticatedCoreDemosRouteImport.update({
   path: '/demos',
   getParentRoute: () => AuthenticatedCoreRoute,
 } as any)
+const AuthenticatedCoreDashboardsRoute =
+  AuthenticatedCoreDashboardsRouteImport.update({
+    id: '/dashboards',
+    path: '/dashboards',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreCriarProjetoRoute =
   AuthenticatedCoreCriarProjetoRouteImport.update({
     id: '/criar-projeto',
@@ -1351,12 +1370,15 @@ export interface FileRoutesByFullPath {
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/core/configuracoes': typeof AuthenticatedCoreConfiguracoesRoute
   '/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
+  '/core/dashboards': typeof AuthenticatedCoreDashboardsRoute
   '/core/demos': typeof AuthenticatedCoreDemosRoute
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/core/finalizacao-comercial': typeof AuthenticatedCoreFinalizacaoComercialRoute
   '/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
+  '/core/flags': typeof AuthenticatedCoreFlagsRoute
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
+  '/core/menus': typeof AuthenticatedCoreMenusRoute
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/core/parametros': typeof AuthenticatedCoreParametrosRoute
@@ -1531,12 +1553,15 @@ export interface FileRoutesByTo {
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/core/configuracoes': typeof AuthenticatedCoreConfiguracoesRoute
   '/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
+  '/core/dashboards': typeof AuthenticatedCoreDashboardsRoute
   '/core/demos': typeof AuthenticatedCoreDemosRoute
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/core/finalizacao-comercial': typeof AuthenticatedCoreFinalizacaoComercialRoute
   '/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
+  '/core/flags': typeof AuthenticatedCoreFlagsRoute
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
+  '/core/menus': typeof AuthenticatedCoreMenusRoute
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/core/parametros': typeof AuthenticatedCoreParametrosRoute
@@ -1724,12 +1749,15 @@ export interface FileRoutesById {
   '/_authenticated/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/_authenticated/core/configuracoes': typeof AuthenticatedCoreConfiguracoesRoute
   '/_authenticated/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
+  '/_authenticated/core/dashboards': typeof AuthenticatedCoreDashboardsRoute
   '/_authenticated/core/demos': typeof AuthenticatedCoreDemosRoute
   '/_authenticated/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/_authenticated/core/finalizacao-comercial': typeof AuthenticatedCoreFinalizacaoComercialRoute
   '/_authenticated/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
+  '/_authenticated/core/flags': typeof AuthenticatedCoreFlagsRoute
   '/_authenticated/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/_authenticated/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
+  '/_authenticated/core/menus': typeof AuthenticatedCoreMenusRoute
   '/_authenticated/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/_authenticated/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/_authenticated/core/parametros': typeof AuthenticatedCoreParametrosRoute
@@ -1917,12 +1945,15 @@ export interface FileRouteTypes {
     | '/core/clientes'
     | '/core/configuracoes'
     | '/core/criar-projeto'
+    | '/core/dashboards'
     | '/core/demos'
     | '/core/eventos'
     | '/core/finalizacao-comercial'
     | '/core/financeiro-master'
+    | '/core/flags'
     | '/core/implantacoes'
     | '/core/instalar-modulo'
+    | '/core/menus'
     | '/core/modulos'
     | '/core/nova-implantacao'
     | '/core/parametros'
@@ -2097,12 +2128,15 @@ export interface FileRouteTypes {
     | '/core/clientes'
     | '/core/configuracoes'
     | '/core/criar-projeto'
+    | '/core/dashboards'
     | '/core/demos'
     | '/core/eventos'
     | '/core/finalizacao-comercial'
     | '/core/financeiro-master'
+    | '/core/flags'
     | '/core/implantacoes'
     | '/core/instalar-modulo'
+    | '/core/menus'
     | '/core/modulos'
     | '/core/nova-implantacao'
     | '/core/parametros'
@@ -2289,12 +2323,15 @@ export interface FileRouteTypes {
     | '/_authenticated/core/clientes'
     | '/_authenticated/core/configuracoes'
     | '/_authenticated/core/criar-projeto'
+    | '/_authenticated/core/dashboards'
     | '/_authenticated/core/demos'
     | '/_authenticated/core/eventos'
     | '/_authenticated/core/finalizacao-comercial'
     | '/_authenticated/core/financeiro-master'
+    | '/_authenticated/core/flags'
     | '/_authenticated/core/implantacoes'
     | '/_authenticated/core/instalar-modulo'
+    | '/_authenticated/core/menus'
     | '/_authenticated/core/modulos'
     | '/_authenticated/core/nova-implantacao'
     | '/_authenticated/core/parametros'
@@ -3324,6 +3361,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreModulosRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/menus': {
+      id: '/_authenticated/core/menus'
+      path: '/menus'
+      fullPath: '/core/menus'
+      preLoaderRoute: typeof AuthenticatedCoreMenusRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/instalar-modulo': {
       id: '/_authenticated/core/instalar-modulo'
       path: '/instalar-modulo'
@@ -3336,6 +3380,13 @@ declare module '@tanstack/react-router' {
       path: '/implantacoes'
       fullPath: '/core/implantacoes'
       preLoaderRoute: typeof AuthenticatedCoreImplantacoesRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/core/flags': {
+      id: '/_authenticated/core/flags'
+      path: '/flags'
+      fullPath: '/core/flags'
+      preLoaderRoute: typeof AuthenticatedCoreFlagsRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
     '/_authenticated/core/financeiro-master': {
@@ -3364,6 +3415,13 @@ declare module '@tanstack/react-router' {
       path: '/demos'
       fullPath: '/core/demos'
       preLoaderRoute: typeof AuthenticatedCoreDemosRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/core/dashboards': {
+      id: '/_authenticated/core/dashboards'
+      path: '/dashboards'
+      fullPath: '/core/dashboards'
+      preLoaderRoute: typeof AuthenticatedCoreDashboardsRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
     '/_authenticated/core/criar-projeto': {
@@ -3926,12 +3984,15 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreClientesRoute: typeof AuthenticatedCoreClientesRoute
   AuthenticatedCoreConfiguracoesRoute: typeof AuthenticatedCoreConfiguracoesRoute
   AuthenticatedCoreCriarProjetoRoute: typeof AuthenticatedCoreCriarProjetoRoute
+  AuthenticatedCoreDashboardsRoute: typeof AuthenticatedCoreDashboardsRoute
   AuthenticatedCoreDemosRoute: typeof AuthenticatedCoreDemosRoute
   AuthenticatedCoreEventosRoute: typeof AuthenticatedCoreEventosRoute
   AuthenticatedCoreFinalizacaoComercialRoute: typeof AuthenticatedCoreFinalizacaoComercialRoute
   AuthenticatedCoreFinanceiroMasterRoute: typeof AuthenticatedCoreFinanceiroMasterRoute
+  AuthenticatedCoreFlagsRoute: typeof AuthenticatedCoreFlagsRoute
   AuthenticatedCoreImplantacoesRoute: typeof AuthenticatedCoreImplantacoesRoute
   AuthenticatedCoreInstalarModuloRoute: typeof AuthenticatedCoreInstalarModuloRoute
+  AuthenticatedCoreMenusRoute: typeof AuthenticatedCoreMenusRoute
   AuthenticatedCoreModulosRoute: typeof AuthenticatedCoreModulosRouteWithChildren
   AuthenticatedCoreNovaImplantacaoRoute: typeof AuthenticatedCoreNovaImplantacaoRoute
   AuthenticatedCoreParametrosRoute: typeof AuthenticatedCoreParametrosRoute
@@ -3948,14 +4009,17 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreClientesRoute: AuthenticatedCoreClientesRoute,
   AuthenticatedCoreConfiguracoesRoute: AuthenticatedCoreConfiguracoesRoute,
   AuthenticatedCoreCriarProjetoRoute: AuthenticatedCoreCriarProjetoRoute,
+  AuthenticatedCoreDashboardsRoute: AuthenticatedCoreDashboardsRoute,
   AuthenticatedCoreDemosRoute: AuthenticatedCoreDemosRoute,
   AuthenticatedCoreEventosRoute: AuthenticatedCoreEventosRoute,
   AuthenticatedCoreFinalizacaoComercialRoute:
     AuthenticatedCoreFinalizacaoComercialRoute,
   AuthenticatedCoreFinanceiroMasterRoute:
     AuthenticatedCoreFinanceiroMasterRoute,
+  AuthenticatedCoreFlagsRoute: AuthenticatedCoreFlagsRoute,
   AuthenticatedCoreImplantacoesRoute: AuthenticatedCoreImplantacoesRoute,
   AuthenticatedCoreInstalarModuloRoute: AuthenticatedCoreInstalarModuloRoute,
+  AuthenticatedCoreMenusRoute: AuthenticatedCoreMenusRoute,
   AuthenticatedCoreModulosRoute: AuthenticatedCoreModulosRouteWithChildren,
   AuthenticatedCoreNovaImplantacaoRoute: AuthenticatedCoreNovaImplantacaoRoute,
   AuthenticatedCoreParametrosRoute: AuthenticatedCoreParametrosRoute,
