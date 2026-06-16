@@ -335,19 +335,26 @@ async function persistRun(
   triggeredBy: string,
   result: SmokeResult,
   batchId: string | null,
-): Promise<void> {
+  replayOf: string | null = null,
+): Promise<string | null> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  await supabaseAdmin.from("core_smoke_runs").insert({
-    triggered_by: triggeredBy,
-    label: result.label,
-    niche_slug: result.nicheSlug,
-    success: result.success,
-    duration_ms: result.durationMs,
-    steps: result.steps as never,
-    ids: result.ids as never,
-    error: result.error ?? null,
-    batch_id: batchId,
-  } as never);
+  const { data } = await supabaseAdmin
+    .from("core_smoke_runs")
+    .insert({
+      triggered_by: triggeredBy,
+      label: result.label,
+      niche_slug: result.nicheSlug,
+      success: result.success,
+      duration_ms: result.durationMs,
+      steps: result.steps as never,
+      ids: result.ids as never,
+      error: result.error ?? null,
+      batch_id: batchId,
+      replay_of: replayOf,
+    } as never)
+    .select("id")
+    .single();
+  return (data as { id: string } | null)?.id ?? null;
 }
 
 /**
@@ -413,14 +420,78 @@ export const runWizardSmokeBatch = createServerFn({ method: "POST" })
   });
 
 /**
- * Histórico das execuções do smoke test.
+ * Reexecuta uma run registrada usando o mesmo label/nicho.
+ * Observação: como o smoke test sempre limpa os artefatos no final, os IDs
+ * originais (companyId/contractId/...) já não existem no banco. A reexecução
+ * mantém os parâmetros (label/niche) e fica vinculada à run original via
+ * `replay_of`, permitindo auditoria do encadeamento.
+ */
+export const replaySmokeRun = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ runId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isStaff } = await supabase.rpc("is_impulsionando_staff", { _user: userId });
+    if (!isStaff) throw new Error("Acesso restrito à equipe Impulsionando.");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: original, error } = await supabaseAdmin
+      .from("core_smoke_runs")
+      .select("id, label, niche_slug")
+      .eq("id", data.runId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!original) throw new Error("Execução original não encontrada.");
+
+    const o = original as { id: string; label: string | null; niche_slug: string | null };
+    const result = await executeSmokeOnce({
+      label: o.label ?? `replay-${Date.now()}`,
+      nicheSlug: o.niche_slug,
+    });
+    const newId = await persistRun(userId, result, null, o.id);
+    return { ...result, newRunId: newId, replayOf: o.id };
+  });
+
+/**
+ * Histórico das execuções do smoke test, paginado.
  */
 export const listSmokeHistory = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ limit: z.number().int().min(1).max(200).optional() }).optional().parse(d ?? {}),
+    z
+      .object({
+        limit: z.number().int().min(1).max(200).optional(),
+        offset: z.number().int().min(0).optional(),
+      })
+      .optional()
+      .parse(d ?? {}),
   )
   .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isStaff } = await supabase.rpc("is_impulsionando_staff", { _user: userId });
+    if (!isStaff) throw new Error("Acesso restrito à equipe Impulsionando.");
+
+    const limit = data?.limit ?? 50;
+    const offset = data?.offset ?? 0;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error, count } = await supabaseAdmin
+      .from("core_smoke_runs")
+      .select(
+        "id, triggered_by, label, niche_slug, success, duration_ms, steps, ids, error, batch_id, replay_of, created_at",
+        { count: "exact" },
+      )
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
+    if (error) throw new Error(error.message);
+    return { runs: rows ?? [], total: count ?? 0 };
+  });
+
+/**
+ * Histórico completo (até 1000) para export CSV/PDF.
+ */
+export const exportSmokeHistory = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
     const { supabase, userId } = context;
     const { data: isStaff } = await supabase.rpc("is_impulsionando_staff", { _user: userId });
     if (!isStaff) throw new Error("Acesso restrito à equipe Impulsionando.");
@@ -428,10 +499,13 @@ export const listSmokeHistory = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await supabaseAdmin
       .from("core_smoke_runs")
-      .select("id, triggered_by, label, niche_slug, success, duration_ms, steps, ids, error, batch_id, created_at")
+      .select(
+        "id, triggered_by, label, niche_slug, success, duration_ms, steps, ids, error, batch_id, replay_of, created_at",
+      )
       .order("created_at", { ascending: false })
-      .limit(data?.limit ?? 50);
+      .limit(1000);
     if (error) throw new Error(error.message);
     return { runs: rows ?? [] };
   });
+
 
