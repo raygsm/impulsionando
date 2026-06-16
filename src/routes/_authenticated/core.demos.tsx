@@ -71,7 +71,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import JSZip from "jszip";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
