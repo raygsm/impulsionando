@@ -207,18 +207,66 @@ function CoreDemosPage() {
   // filtros + paginação do histórico
   const [historyPage, setHistoryPage] = useState(0);
   const historyPageSize = 20;
-  const [historySince, setHistorySince] = useState<string>("all"); // "all" | "7" | "30" | "90"
+  const [historySince, setHistorySince] = useState<string>("all");
   const [historyStatus, setHistoryStatus] = useState<"all" | "success" | "failure">("all");
   const [historySearch, setHistorySearch] = useState("");
+  const debouncedSearch = useDebouncedValue(historySearch, 350);
   const [selectedRun, setSelectedRun] = useState<SmokeRunRow | null>(null);
+
+  // Reset page when filters change (debounced text)
+  useEffect(() => {
+    setHistoryPage(0);
+  }, [debouncedSearch, historySince, historyStatus]);
 
   const historyFilters = useMemo(
     () => ({
       sinceDays: historySince === "all" ? null : Number(historySince),
       status: historyStatus,
-      search: historySearch.trim() || undefined,
+      search: debouncedSearch.trim() || undefined,
     }),
-    [historySince, historyStatus, historySearch],
+    [historySince, historyStatus, debouncedSearch],
+  );
+
+  // Filter presets (localStorage)
+  const [presets, setPresets] = useState<HistoryPreset[]>(() => loadPresets());
+  const persistPresets = (list: HistoryPreset[]) => {
+    setPresets(list);
+    savePresetsToStorage(list);
+  };
+  const handleSavePreset = () => {
+    const name = window.prompt(
+      "Nome do conjunto de filtros",
+      `Preset ${presets.length + 1}`,
+    );
+    if (!name) return;
+    const next: HistoryPreset = {
+      id: crypto.randomUUID(),
+      name: name.trim(),
+      since: historySince,
+      status: historyStatus,
+      search: historySearch,
+    };
+    persistPresets([next, ...presets].slice(0, 12));
+    toast.success(`Preset "${next.name}" salvo`);
+  };
+  const applyPreset = (p: HistoryPreset) => {
+    setHistorySince(p.since);
+    setHistoryStatus(p.status);
+    setHistorySearch(p.search);
+    setHistoryPage(0);
+  };
+  const removePreset = (id: string) => {
+    persistPresets(presets.filter((p) => p.id !== id));
+  };
+  const activePresetId = useMemo(
+    () =>
+      presets.find(
+        (p) =>
+          p.since === historySince &&
+          p.status === historyStatus &&
+          p.search === historySearch,
+      )?.id ?? null,
+    [presets, historySince, historyStatus, historySearch],
   );
 
   const { data, isLoading } = useQuery({
