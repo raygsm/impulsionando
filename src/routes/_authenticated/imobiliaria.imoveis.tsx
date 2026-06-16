@@ -44,6 +44,15 @@ type Property = {
   bedrooms: number; suites: number; bathrooms: number; parking_spots: number;
   neighborhood: string | null; city: string | null; state: string | null;
   is_published: boolean;
+  approval_status?: "pending" | "approved" | "changes_requested" | "rejected" | null;
+  review_notes?: string | null;
+};
+
+const APPROVAL_LABEL: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+  approved: { label: "Aprovado", variant: "default" },
+  pending: { label: "Aguardando aprovação", variant: "secondary" },
+  changes_requested: { label: "Ajustes solicitados", variant: "outline" },
+  rejected: { label: "Rejeitado", variant: "destructive" },
 };
 
 const emptyForm = {
