@@ -62,14 +62,14 @@ function WhiteLabelPage() {
               </p>
               <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 pt-2">
                 <Button asChild size="lg" className="gap-2 bg-white text-primary hover:bg-white/90 w-full sm:w-auto">
-                  <Link to="/demo/white-label">
-                    <PlayCircle className="w-4 h-4 shrink-0" /> Ver Plataforma White Label
-                  </Link>
-                </Button>
-                <Button asChild size="lg" className="gap-2 bg-accent text-accent-foreground hover:bg-accent/90 w-full sm:w-auto">
                   <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                    Solicitar Apresentação <ArrowRight className="w-4 h-4 shrink-0" />
+                    Quero minha plataforma White Label <ArrowRight className="w-4 h-4 shrink-0" />
                   </a>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="gap-2 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white w-full sm:w-auto">
+                  <Link to="/demo">
+                    <PlayCircle className="w-4 h-4 shrink-0" /> Ver demonstração
+                  </Link>
                 </Button>
               </div>
             </div>
