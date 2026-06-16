@@ -1,0 +1,109 @@
+{
+  "name": "Impulsionando — 01 Captação · Lead Nurturing 14d",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-captured",
+        "responseMode": "responseNode",
+        "options": { "rawBody": true }
+      },
+      "id": "wh-lead",
+      "name": "Webhook lead.captured",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "const crypto = require('crypto');\nconst sig = $input.first().json.headers['x-impulsionando-signature'] || '';\nconst raw = $input.first().json.body;\nconst h = crypto.createHmac('sha256', $env.IMPULSIONANDO_WEBHOOK_SECRET).update(typeof raw==='string'?raw:JSON.stringify(raw)).digest('hex');\nif (h !== sig) throw new Error('invalid signature');\nreturn [{ json: typeof raw==='string'?JSON.parse(raw):raw }];"
+      },
+      "id": "verify",
+      "name": "Verify HMAC",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [440, 300]
+    },
+    {
+      "parameters": { "responseCode": 200, "responseBody": "ok" },
+      "id": "resp",
+      "name": "Respond 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [640, 180]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send",
+        "method": "POST",
+        "jsonBody": "={\n  \"template\": \"lead-welcome\",\n  \"to\": \"{{$json.email}}\",\n  \"props\": { \"name\": \"{{$json.name || 'tudo bem'}}\", \"source\": \"{{$json.source}}\" }\n}",
+        "sendBody": true,
+        "specifyBody": "json"
+      },
+      "id": "email-t0",
+      "name": "Email T+0 Welcome",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [640, 420]
+    },
+    { "parameters": { "amount": 2, "unit": "days" }, "id": "wait-2d", "name": "Wait 2d", "type": "n8n-nodes-base.wait", "typeVersion": 1, "position": [840, 420] },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send",
+        "method": "POST",
+        "jsonBody": "={\"template\":\"lead-case-study\",\"to\":\"{{$('Verify HMAC').first().json.email}}\",\"props\":{}}",
+        "sendBody": true, "specifyBody": "json"
+      },
+      "id": "email-t2", "name": "Email T+2 Case",
+      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1040, 420]
+    },
+    { "parameters": { "amount": 3, "unit": "days" }, "id": "wait-5d", "name": "Wait 3d", "type": "n8n-nodes-base.wait", "typeVersion": 1, "position": [1240, 420] },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send",
+        "method": "POST",
+        "jsonBody": "={\"template\":\"lead-roi-calc\",\"to\":\"{{$('Verify HMAC').first().json.email}}\",\"props\":{}}",
+        "sendBody": true, "specifyBody": "json"
+      },
+      "id": "email-t5", "name": "Email T+5 ROI",
+      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1440, 420]
+    },
+    { "parameters": { "amount": 4, "unit": "days" }, "id": "wait-9d", "name": "Wait 4d", "type": "n8n-nodes-base.wait", "typeVersion": 1, "position": [1640, 420] },
+    {
+      "parameters": {
+        "url": "https://api.z-api.io/instances/{{$env.ZAPI_INSTANCE}}/token/{{$env.ZAPI_TOKEN}}/send-text",
+        "method": "POST",
+        "jsonBody": "={\"phone\":\"{{$('Verify HMAC').first().json.phone || ''}}\",\"message\":\"Oi! Aqui é da Impulsionando 👋 Vi que você baixou nosso material. Posso te mostrar a demo em 15min essa semana?\"}",
+        "sendBody": true, "specifyBody": "json"
+      },
+      "id": "wa-t9", "name": "WhatsApp T+9 Convite Demo",
+      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1840, 420]
+    },
+    { "parameters": { "amount": 5, "unit": "days" }, "id": "wait-14d", "name": "Wait 5d", "type": "n8n-nodes-base.wait", "typeVersion": 1, "position": [2040, 420] },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send",
+        "method": "POST",
+        "jsonBody": "={\"template\":\"lead-last-call\",\"to\":\"{{$('Verify HMAC').first().json.email}}\",\"props\":{\"trialUrl\":\"{{$env.IMPULSIONANDO_API_BASE}}/planos?audience=empresas&utm_source=nurturing\"}}",
+        "sendBody": true, "specifyBody": "json"
+      },
+      "id": "email-t14", "name": "Email T+14 Last Call → Trial",
+      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [2240, 420]
+    }
+  ],
+  "connections": {
+    "Webhook lead.captured": { "main": [[{ "node": "Verify HMAC", "type": "main", "index": 0 }]] },
+    "Verify HMAC": { "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }, { "node": "Email T+0 Welcome", "type": "main", "index": 0 }]] },
+    "Email T+0 Welcome": { "main": [[{ "node": "Wait 2d", "type": "main", "index": 0 }]] },
+    "Wait 2d": { "main": [[{ "node": "Email T+2 Case", "type": "main", "index": 0 }]] },
+    "Email T+2 Case": { "main": [[{ "node": "Wait 3d", "type": "main", "index": 0 }]] },
+    "Wait 3d": { "main": [[{ "node": "Email T+5 ROI", "type": "main", "index": 0 }]] },
+    "Email T+5 ROI": { "main": [[{ "node": "Wait 4d", "type": "main", "index": 0 }]] },
+    "Wait 4d": { "main": [[{ "node": "WhatsApp T+9 Convite Demo", "type": "main", "index": 0 }]] },
+    "WhatsApp T+9 Convite Demo": { "main": [[{ "node": "Wait 5d", "type": "main", "index": 0 }]] },
+    "Wait 5d": { "main": [[{ "node": "Email T+14 Last Call → Trial", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "versionId": "v1.0.0"
+}

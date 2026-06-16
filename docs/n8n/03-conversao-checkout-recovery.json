@@ -1,0 +1,47 @@
+{
+  "name": "Impulsionando — 03 Conversão · Checkout Recovery",
+  "nodes": [
+    { "parameters": { "httpMethod": "POST", "path": "checkout-abandoned", "responseMode": "responseNode" }, "id": "wh", "name": "Webhook checkout.abandoned", "type": "n8n-nodes-base.webhook", "typeVersion": 2, "position": [220, 300] },
+    { "parameters": { "functionCode": "const c=require('crypto');const s=$input.first().json.headers['x-impulsionando-signature']||'';const r=$input.first().json.body;const h=c.createHmac('sha256',$env.IMPULSIONANDO_WEBHOOK_SECRET).update(typeof r==='string'?r:JSON.stringify(r)).digest('hex');if(h!==s)throw new Error('sig');return[{json: typeof r==='string'?JSON.parse(r):r}];" }, "id": "ver", "name": "Verify HMAC", "type": "n8n-nodes-base.function", "typeVersion": 1, "position": [420, 300] },
+    { "parameters": { "responseCode": 200, "responseBody": "ok" }, "id": "resp", "name": "Respond 200", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [620, 180] },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send", "method": "POST", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={\"template\":\"checkout-recover-30min\",\"to\":\"{{$json.email}}\",\"props\":{\"plan\":\"{{$json.plan}}\",\"recoverUrl\":\"{{$json.recoverUrl}}\"}}"
+      },
+      "id": "t0", "name": "T+30min Email", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [620, 420]
+    },
+    { "parameters": { "amount": 24, "unit": "hours" }, "id": "w1", "name": "Wait 24h", "type": "n8n-nodes-base.wait", "typeVersion": 1, "position": [820, 420] },
+    {
+      "parameters": { "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/checkout/status", "method": "GET", "sendQuery": true, "queryParameters": { "parameters": [{ "name": "email", "value": "={{$('Verify HMAC').first().json.email}}" }, { "name": "plan", "value": "={{$('Verify HMAC').first().json.plan}}" }] } },
+      "id": "st1", "name": "Check status", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1020, 420]
+    },
+    { "parameters": { "conditions": { "string": [{ "value1": "={{$json.status}}", "operation": "equal", "value2": "paid" }] } }, "id": "if1", "name": "Já pagou?", "type": "n8n-nodes-base.if", "typeVersion": 1, "position": [1220, 420] },
+    {
+      "parameters": {
+        "url": "https://api.z-api.io/instances/{{$env.ZAPI_INSTANCE}}/token/{{$env.ZAPI_TOKEN}}/send-text", "method": "POST", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={\"phone\":\"{{$('Verify HMAC').first().json.phone}}\",\"message\":\"Oi! Vi que você começou a contratar o plano {{$('Verify HMAC').first().json.plan}} mas não finalizou. Posso te ajudar? Se preferir Pix manual eu já te envio o QR Code com o valor exato do ciclo inicial.\"}"
+      },
+      "id": "wa1", "name": "T+24h WA", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1420, 520]
+    },
+    { "parameters": { "amount": 48, "unit": "hours" }, "id": "w2", "name": "Wait 48h", "type": "n8n-nodes-base.wait", "typeVersion": 1, "position": [1620, 520] },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send", "method": "POST", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={\"template\":\"checkout-recover-last\",\"to\":\"{{$('Verify HMAC').first().json.email}}\",\"props\":{\"plan\":\"{{$('Verify HMAC').first().json.plan}}\",\"recoverUrl\":\"{{$('Verify HMAC').first().json.recoverUrl}}\",\"discount\":\"setup_50pct\"}}"
+      },
+      "id": "t72", "name": "T+72h Last Offer (-50% setup)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1820, 520]
+    }
+  ],
+  "connections": {
+    "Webhook checkout.abandoned": { "main": [[{ "node": "Verify HMAC", "type": "main", "index": 0 }]] },
+    "Verify HMAC": { "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }, { "node": "T+30min Email", "type": "main", "index": 0 }]] },
+    "T+30min Email": { "main": [[{ "node": "Wait 24h", "type": "main", "index": 0 }]] },
+    "Wait 24h": { "main": [[{ "node": "Check status", "type": "main", "index": 0 }]] },
+    "Check status": { "main": [[{ "node": "Já pagou?", "type": "main", "index": 0 }]] },
+    "Já pagou?": { "main": [[], [{ "node": "T+24h WA", "type": "main", "index": 0 }]] },
+    "T+24h WA": { "main": [[{ "node": "Wait 48h", "type": "main", "index": 0 }]] },
+    "Wait 48h": { "main": [[{ "node": "T+72h Last Offer (-50% setup)", "type": "main", "index": 0 }]] }
+  },
+  "active": false, "settings": { "executionOrder": "v1" }, "versionId": "v1.0.0"
+}

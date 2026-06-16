@@ -1,0 +1,49 @@
+{
+  "name": "Impulsionando — 04 Relacionamento · Onboarding Pago (D0/D7/D30)",
+  "nodes": [
+    { "parameters": { "httpMethod": "POST", "path": "invoice-paid", "responseMode": "responseNode" }, "id": "wh", "name": "Webhook invoice.paid", "type": "n8n-nodes-base.webhook", "typeVersion": 2, "position": [220, 300] },
+    { "parameters": { "functionCode": "const c=require('crypto');const s=$input.first().json.headers['x-impulsionando-signature']||'';const r=$input.first().json.body;const h=c.createHmac('sha256',$env.IMPULSIONANDO_WEBHOOK_SECRET).update(typeof r==='string'?r:JSON.stringify(r)).digest('hex');if(h!==s)throw new Error('sig');const j=typeof r==='string'?JSON.parse(r):r;return[{json:j}];" }, "id": "ver", "name": "Verify HMAC", "type": "n8n-nodes-base.function", "typeVersion": 1, "position": [420, 300] },
+    { "parameters": { "responseCode": 200, "responseBody": "ok" }, "id": "resp", "name": "Respond 200", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [620, 180] },
+    { "parameters": { "conditions": { "string": [{ "value1": "={{$json.invoiceSeq}}", "operation": "equal", "value2": "1" }] } }, "id": "iffirst", "name": "Primeira fatura?", "type": "n8n-nodes-base.if", "typeVersion": 1, "position": [620, 420] },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send", "method": "POST", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={\"template\":\"welcome-paid\",\"to\":\"{{$('Verify HMAC').first().json.email}}\",\"props\":{\"plan\":\"{{$('Verify HMAC').first().json.plan}}\",\"amount\":\"{{$('Verify HMAC').first().json.amount}}\",\"appUrl\":\"{{$env.IMPULSIONANDO_API_BASE}}/app\"}}"
+      },
+      "id": "d0", "name": "D0 welcome-paid", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [820, 320]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send", "method": "POST", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={\"template\":\"invoice-paid\",\"to\":\"{{$('Verify HMAC').first().json.email}}\",\"props\":{\"invoiceId\":\"{{$('Verify HMAC').first().json.invoiceId}}\",\"amount\":\"{{$('Verify HMAC').first().json.amount}}\",\"paidAt\":\"{{$now}}\",\"receiptUrl\":\"{{$('Verify HMAC').first().json.receiptUrl}}\"}}"
+      },
+      "id": "rec", "name": "Recibo invoice-paid", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [820, 520]
+    },
+    { "parameters": { "amount": 7, "unit": "days" }, "id": "w7", "name": "Wait 7d", "type": "n8n-nodes-base.wait", "typeVersion": 1, "position": [1020, 320] },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send", "method": "POST", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={\"template\":\"onboarding-checkin-7d\",\"to\":\"{{$('Verify HMAC').first().json.email}}\",\"props\":{\"plan\":\"{{$('Verify HMAC').first().json.plan}}\"}}"
+      },
+      "id": "d7", "name": "D+7 Checkin", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1220, 320]
+    },
+    { "parameters": { "amount": 23, "unit": "days" }, "id": "w30", "name": "Wait 23d (→ D+30)", "type": "n8n-nodes-base.wait", "typeVersion": 1, "position": [1420, 320] },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send", "method": "POST", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={\"template\":\"onboarding-review-30d\",\"to\":\"{{$('Verify HMAC').first().json.email}}\",\"props\":{\"upgradeUrl\":\"{{$env.IMPULSIONANDO_API_BASE}}/planos?utm_source=review-30d\"}}"
+      },
+      "id": "d30", "name": "D+30 Review + Upgrade", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1620, 320]
+    }
+  ],
+  "connections": {
+    "Webhook invoice.paid": { "main": [[{ "node": "Verify HMAC", "type": "main", "index": 0 }]] },
+    "Verify HMAC": { "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }, { "node": "Primeira fatura?", "type": "main", "index": 0 }]] },
+    "Primeira fatura?": { "main": [[{ "node": "D0 welcome-paid", "type": "main", "index": 0 }], [{ "node": "Recibo invoice-paid", "type": "main", "index": 0 }]] },
+    "D0 welcome-paid": { "main": [[{ "node": "Wait 7d", "type": "main", "index": 0 }]] },
+    "Wait 7d": { "main": [[{ "node": "D+7 Checkin", "type": "main", "index": 0 }]] },
+    "D+7 Checkin": { "main": [[{ "node": "Wait 23d (→ D+30)", "type": "main", "index": 0 }]] },
+    "Wait 23d (→ D+30)": { "main": [[{ "node": "D+30 Review + Upgrade", "type": "main", "index": 0 }]] }
+  },
+  "active": false, "settings": { "executionOrder": "v1" }, "versionId": "v1.0.0"
+}

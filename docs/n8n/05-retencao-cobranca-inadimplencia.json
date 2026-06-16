@@ -1,0 +1,53 @@
+{
+  "name": "Impulsionando — 05 Retenção · Régua de Inadimplência (D+1/3/7/15)",
+  "nodes": [
+    { "parameters": { "httpMethod": "POST", "path": "invoice-overdue", "responseMode": "responseNode" }, "id": "wh", "name": "Webhook invoice.overdue", "type": "n8n-nodes-base.webhook", "typeVersion": 2, "position": [220, 300] },
+    { "parameters": { "functionCode": "const c=require('crypto');const s=$input.first().json.headers['x-impulsionando-signature']||'';const r=$input.first().json.body;const h=c.createHmac('sha256',$env.IMPULSIONANDO_WEBHOOK_SECRET).update(typeof r==='string'?r:JSON.stringify(r)).digest('hex');if(h!==s)throw new Error('sig');return[{json: typeof r==='string'?JSON.parse(r):r}];" }, "id": "ver", "name": "Verify HMAC", "type": "n8n-nodes-base.function", "typeVersion": 1, "position": [420, 300] },
+    { "parameters": { "responseCode": 200, "responseBody": "ok" }, "id": "resp", "name": "Respond 200", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [620, 180] },
+    { "parameters": { "rules": { "rules": [ { "value2": "1", "output": 0 }, { "value2": "3", "output": 1 }, { "value2": "7", "output": 2 }, { "value2": "15", "output": 3 } ] }, "value1": "={{$json.daysOverdue}}", "dataPropertyName": "daysOverdue" }, "id": "sw", "name": "Switch by daysOverdue", "type": "n8n-nodes-base.switch", "typeVersion": 1, "position": [620, 420] },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send", "method": "POST", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={\"template\":\"invoice-overdue\",\"to\":\"{{$('Verify HMAC').first().json.email}}\",\"props\":{\"invoiceId\":\"{{$('Verify HMAC').first().json.invoiceId}}\",\"dueDate\":\"{{$('Verify HMAC').first().json.dueDate}}\",\"payUrl\":\"{{$('Verify HMAC').first().json.payUrl}}\",\"tone\":\"gentle\"}}"
+      },
+      "id": "d1", "name": "D+1 Lembrete gentil", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [820, 320]
+    },
+    {
+      "parameters": {
+        "url": "https://api.z-api.io/instances/{{$env.ZAPI_INSTANCE}}/token/{{$env.ZAPI_TOKEN}}/send-text", "method": "POST", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={\"phone\":\"{{$('Verify HMAC').first().json.phone}}\",\"message\":\"Olá! Sua fatura {{$('Verify HMAC').first().json.invoiceId}} venceu há 3 dias. Posso te enviar o boleto/Pix atualizado? Link: {{$('Verify HMAC').first().json.payUrl}}\"}"
+      },
+      "id": "d3", "name": "D+3 WA + link pagto", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [820, 460]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send", "method": "POST", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={\"template\":\"invoice-overdue\",\"to\":\"{{$('Verify HMAC').first().json.email}}\",\"props\":{\"invoiceId\":\"{{$('Verify HMAC').first().json.invoiceId}}\",\"dueDate\":\"{{$('Verify HMAC').first().json.dueDate}}\",\"payUrl\":\"{{$('Verify HMAC').first().json.payUrl}}\",\"tone\":\"warning\",\"suspensionIn\":\"8 dias\"}}"
+      },
+      "id": "d7", "name": "D+7 Aviso suspensão", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [820, 600]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/billing/suspend", "method": "POST", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={\"tenantId\":\"{{$('Verify HMAC').first().json.tenantId}}\",\"reason\":\"overdue_15d\",\"keepReadonly\":true}"
+      },
+      "id": "d15s", "name": "D+15 Suspende (read-only)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [820, 740]
+    },
+    {
+      "parameters": { "channel": "ops", "text": "🚨 Tenant {{$('Verify HMAC').first().json.tenantId}} suspenso por inadimplência 15 dias. Email: {{$('Verify HMAC').first().json.email}}", "webhookUrl": "={{$env.SLACK_OPS_WEBHOOK}}" },
+      "id": "slack", "name": "Slack #ops", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1020, 740]
+    }
+  ],
+  "connections": {
+    "Webhook invoice.overdue": { "main": [[{ "node": "Verify HMAC", "type": "main", "index": 0 }]] },
+    "Verify HMAC": { "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }, { "node": "Switch by daysOverdue", "type": "main", "index": 0 }]] },
+    "Switch by daysOverdue": { "main": [
+      [{ "node": "D+1 Lembrete gentil", "type": "main", "index": 0 }],
+      [{ "node": "D+3 WA + link pagto", "type": "main", "index": 0 }],
+      [{ "node": "D+7 Aviso suspensão", "type": "main", "index": 0 }],
+      [{ "node": "D+15 Suspende (read-only)", "type": "main", "index": 0 }]
+    ] },
+    "D+15 Suspende (read-only)": { "main": [[{ "node": "Slack #ops", "type": "main", "index": 0 }]] }
+  },
+  "active": false, "settings": { "executionOrder": "v1" }, "versionId": "v1.0.0"
+}

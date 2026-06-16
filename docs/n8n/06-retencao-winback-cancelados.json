@@ -1,0 +1,50 @@
+{
+  "name": "Impulsionando — 06 Retenção · Win-back Cancelados (7/30/90d)",
+  "nodes": [
+    { "parameters": { "httpMethod": "POST", "path": "subscription-cancelled", "responseMode": "responseNode" }, "id": "wh", "name": "Webhook subscription.cancelled", "type": "n8n-nodes-base.webhook", "typeVersion": 2, "position": [220, 300] },
+    { "parameters": { "functionCode": "const c=require('crypto');const s=$input.first().json.headers['x-impulsionando-signature']||'';const r=$input.first().json.body;const h=c.createHmac('sha256',$env.IMPULSIONANDO_WEBHOOK_SECRET).update(typeof r==='string'?r:JSON.stringify(r)).digest('hex');if(h!==s)throw new Error('sig');return[{json: typeof r==='string'?JSON.parse(r):r}];" }, "id": "ver", "name": "Verify HMAC", "type": "n8n-nodes-base.function", "typeVersion": 1, "position": [420, 300] },
+    { "parameters": { "responseCode": 200, "responseBody": "ok" }, "id": "resp", "name": "Respond 200", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [620, 180] },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send", "method": "POST", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={\"template\":\"cancel-confirm-exit-survey\",\"to\":\"{{$json.email}}\",\"props\":{\"reason\":\"{{$json.reason || 'nao_informado'}}\",\"surveyUrl\":\"{{$env.IMPULSIONANDO_API_BASE}}/feedback/cancel?tid={{$json.tenantId}}\"}}"
+      },
+      "id": "d0", "name": "D0 Exit survey", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [620, 420]
+    },
+    { "parameters": { "amount": 7, "unit": "days" }, "id": "w7", "name": "Wait 7d", "type": "n8n-nodes-base.wait", "typeVersion": 1, "position": [820, 420] },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send", "method": "POST", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={\"template\":\"winback-d7-improvements\",\"to\":\"{{$('Verify HMAC').first().json.email}}\",\"props\":{}}"
+      },
+      "id": "d7", "name": "D+7 O que melhoramos", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1020, 420]
+    },
+    { "parameters": { "amount": 23, "unit": "days" }, "id": "w30", "name": "Wait 23d", "type": "n8n-nodes-base.wait", "typeVersion": 1, "position": [1220, 420] },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send", "method": "POST", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={\"template\":\"winback-d30-offer\",\"to\":\"{{$('Verify HMAC').first().json.email}}\",\"props\":{\"offer\":\"30pct_setup_off\",\"reactivateUrl\":\"{{$env.IMPULSIONANDO_API_BASE}}/planos?utm_source=winback-30d&coupon=VOLTA30\"}}"
+      },
+      "id": "d30", "name": "D+30 Oferta (-30% setup)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1420, 420]
+    },
+    { "parameters": { "amount": 60, "unit": "days" }, "id": "w90", "name": "Wait 60d (→ D+90)", "type": "n8n-nodes-base.wait", "typeVersion": 1, "position": [1620, 420] },
+    {
+      "parameters": {
+        "url": "https://api.z-api.io/instances/{{$env.ZAPI_INSTANCE}}/token/{{$env.ZAPI_TOKEN}}/send-text", "method": "POST", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={\"phone\":\"{{$('Verify HMAC').first().json.phone}}\",\"message\":\"Oi! Faz 90 dias que você saiu. Lançamos novos módulos e estamos reabrindo trial estendido (14d) para quem já foi cliente. Topa testar?\"}"
+      },
+      "id": "d90", "name": "D+90 WA Trial 14d", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1820, 420]
+    }
+  ],
+  "connections": {
+    "Webhook subscription.cancelled": { "main": [[{ "node": "Verify HMAC", "type": "main", "index": 0 }]] },
+    "Verify HMAC": { "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }, { "node": "D0 Exit survey", "type": "main", "index": 0 }]] },
+    "D0 Exit survey": { "main": [[{ "node": "Wait 7d", "type": "main", "index": 0 }]] },
+    "Wait 7d": { "main": [[{ "node": "D+7 O que melhoramos", "type": "main", "index": 0 }]] },
+    "D+7 O que melhoramos": { "main": [[{ "node": "Wait 23d", "type": "main", "index": 0 }]] },
+    "Wait 23d": { "main": [[{ "node": "D+30 Oferta (-30% setup)", "type": "main", "index": 0 }]] },
+    "D+30 Oferta (-30% setup)": { "main": [[{ "node": "Wait 60d (→ D+90)", "type": "main", "index": 0 }]] },
+    "Wait 60d (→ D+90)": { "main": [[{ "node": "D+90 WA Trial 14d", "type": "main", "index": 0 }]] }
+  },
+  "active": false, "settings": { "executionOrder": "v1" }, "versionId": "v1.0.0"
+}
