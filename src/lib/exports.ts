@@ -35,10 +35,10 @@ export function downloadTablePdf(opts: {
   doc.setFontSize(14); doc.setFont("helvetica", "bold");
   doc.text(opts.title, margin, y); y += 18;
   if (opts.subtitle) {
-    doc.setFontSize(9); doc.setFont("helvetica", "normal"); doc.setTextColor(110);
+    doc.setFontSize(9); doc.setFont("helvetica", "normal"); doc.setTextColor(110,110,110);
     doc.text(opts.subtitle, margin, y); y += 14;
   }
-  doc.setTextColor(0);
+  doc.setTextColor(0,0,0);
 
   const totalW = pageW - margin * 2;
   const defWidths = opts.columns.map((c) => c.width ?? 0);
@@ -76,11 +76,11 @@ export function downloadTablePdf(opts: {
       x += w;
     });
     y += 16;
-    doc.setDrawColor(230); doc.line(margin, y, margin + totalW, y);
+    doc.setDrawColor(230,230,230); doc.line(margin, y, margin + totalW, y);
   }
 
   if (opts.footer) {
-    doc.setFontSize(8); doc.setTextColor(120);
+    doc.setFontSize(8); doc.setTextColor(120,120,120);
     doc.text(opts.footer, margin, pageH - 20);
   }
   doc.save(opts.filename);
