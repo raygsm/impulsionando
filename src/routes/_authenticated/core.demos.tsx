@@ -397,29 +397,57 @@ function CoreDemosPage() {
   const [lastPurgeResult, setLastPurgeResult] = useState<{
     totalRemoved: number;
     ranAt: string;
+    sampleCount: number;
   } | null>(null);
+  const [purgeError, setPurgeError] = useState<{
+    message: string;
+    attemptedAt: string;
+    retentionDays: number;
+    partialRemoved: number | null;
+    lastKnownLogId: string | null;
+    aborted?: boolean;
+  } | null>(null);
+  const purgeAbortRef = useRef<AbortController | null>(null);
+
+  const cancelManualPurge = () => {
+    if (purgeAbortRef.current) {
+      purgeAbortRef.current.abort();
+      toast("Cancelando purge…", {
+        description:
+          "O servidor pode terminar a execução, mas o cliente parou de aguardar.",
+      });
+    }
+  };
 
   const runManualPurge = async () => {
     setConfirmPurgeOpen(false);
+    setPurgeError(null);
     setPurging(true);
     setPurgeProgress(8);
-    // Smooth progress trickle while RPC runs
     const ticker = setInterval(() => {
       setPurgeProgress((p) => (p < 88 ? p + 6 : p));
     }, 220);
+    const controller = new AbortController();
+    purgeAbortRef.current = controller;
+    const attemptedAt = new Date().toISOString();
     try {
-      const res = await purgeNow({ data: {} });
+      const res = await purgeNow({ data: {}, signal: controller.signal });
       clearInterval(ticker);
       setPurgeProgress(100);
-      setLastPurgeResult({ totalRemoved: res.totalRemoved, ranAt: res.ranAt });
+      setLastPurgeResult({
+        totalRemoved: res.totalRemoved,
+        ranAt: res.ranAt,
+        sampleCount: res.sampleCount ?? res.samples?.length ?? 0,
+      });
       const refreshed = await refetchRetention();
       qc.invalidateQueries({ queryKey: ["core-smoke-history"] });
       const retentionSnapshot = refreshed.data ?? null;
+      const sampleCount = res.sampleCount ?? res.samples?.length ?? 0;
       toast.success(
         `Purge concluído — ${res.totalRemoved} execução(ões) removida(s).`,
         {
-          description: `Trigger: manual · ${new Date(res.ranAt).toLocaleString("pt-BR")}`,
-          duration: 12_000,
+          description: `Trigger: manual · ${new Date(res.ranAt).toLocaleString("pt-BR")}\nAmostra: ${sampleCount} smoke_runs registrados no relatório.`,
+          duration: 14_000,
           action: retentionSnapshot && retentionSnapshot.lastRunAt
             ? {
                 label: "Baixar PDF",
@@ -430,14 +458,42 @@ function CoreDemosPage() {
       );
     } catch (e) {
       clearInterval(ticker);
-      toast.error((e as Error).message ?? "Falha ao disparar purge.");
+      const err = e as Error & { name?: string };
+      const aborted = err?.name === "AbortError" || controller.signal.aborted;
+      // Tenta obter contagem parcial atual via refetch (transação rola tudo ou nada,
+      // mas se outra execução agendada rodou no meio guardamos o estado conhecido).
+      let partial: number | null = null;
+      let lastLogId: string | null = null;
+      try {
+        const r = await refetchRetention();
+        partial = r.data?.lastRemovedCount ?? null;
+        lastLogId = r.data?.lastLogId ?? null;
+      } catch {
+        // ignore
+      }
+      setPurgeError({
+        message: aborted
+          ? "Execução cancelada pelo cliente — servidor pode ter concluído."
+          : err.message || "Erro desconhecido no RPC trigger_smoke_purge.",
+        attemptedAt,
+        retentionDays: retention?.retentionDays ?? 180,
+        partialRemoved: partial,
+        lastKnownLogId: lastLogId,
+        aborted,
+      });
+      toast.error(
+        aborted ? "Purge cancelado" : "Falha ao disparar purge",
+        { description: err.message?.slice(0, 200) },
+      );
     } finally {
+      purgeAbortRef.current = null;
       setTimeout(() => {
         setPurging(false);
         setPurgeProgress(0);
       }, 600);
     }
   };
+
 
 
 
