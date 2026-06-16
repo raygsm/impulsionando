@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import type { CurrentUser } from "@/lib/auth";
+import { useActiveCompany } from "@/hooks/use-active-company";
 import { MobileSidebar } from "./MobileSidebar";
 import { NotificationsBell } from "./NotificationsBell";
 
