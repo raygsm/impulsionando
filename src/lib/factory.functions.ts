@@ -353,6 +353,191 @@ export const createProjectFromFactory = createServerFn({ method: "POST" })
     }
     push("config_salva", true);
 
+    // 4.1) Plano + Setup + Contrato + 1ª Fatura + Admin user + Welcome
+    let contractId: string | null = null;
+    let firstInvoiceId: string | null = null;
+    let adminUserId: string | null = null;
+    let inviteLink: string | null = null;
+
+    const needsAdmin = !!(data.adminUser?.email || data.client.email);
+    const needsPlan = !!(data.plan?.planId);
+
+    if (needsAdmin || needsPlan) {
+      try {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+        if (needsAdmin) {
+          const adminEmail = (data.adminUser?.email || data.client.email || "").toLowerCase();
+          const adminName = data.adminUser?.name || data.client.ownerName || data.client.name;
+          const adminPhone = data.adminUser?.phone || data.client.whatsapp || null;
+
+          if (adminEmail) {
+            const { data: list } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 200 });
+            const found = list?.users?.find((u) => (u.email ?? "").toLowerCase() === adminEmail);
+            if (found) {
+              adminUserId = found.id;
+              push("admin_reutilizado", true, adminEmail);
+            } else {
+              const { data: created, error: uErr } = await supabaseAdmin.auth.admin.createUser({
+                email: adminEmail,
+                email_confirm: true,
+                user_metadata: { display_name: adminName, phone: adminPhone },
+              });
+              if (uErr || !created.user) {
+                push("admin_falhou", false, uErr?.message ?? "sem retorno");
+              } else {
+                adminUserId = created.user.id;
+                push("admin_criado", true, adminEmail);
+                const { data: link } = await supabaseAdmin.auth.admin.generateLink({
+                  type: "magiclink",
+                  email: adminEmail,
+                });
+                inviteLink = link?.properties?.action_link ?? null;
+              }
+            }
+
+            if (adminUserId) {
+              const { data: gestor } = await supabaseAdmin
+                .from("profiles")
+                .select("id")
+                .eq("slug", "gestor-empresa")
+                .maybeSingle();
+              if (gestor) {
+                await supabaseAdmin.from("user_profiles").upsert(
+                  {
+                    user_id: adminUserId,
+                    company_id: companyId!,
+                    profile_id: gestor.id,
+                    display_name: adminName,
+                    email: adminEmail,
+                    is_active: true,
+                  } as never,
+                  { onConflict: "user_id,company_id" },
+                );
+                push("admin_vinculado", true, "gestor-empresa");
+              }
+            }
+          }
+        }
+
+        if (needsPlan && data.plan?.planId) {
+          const { data: plan } = await supabaseAdmin
+            .from("billing_plans")
+            .select("id, recurring_amount, setup_fee, due_day")
+            .eq("id", data.plan.planId)
+            .maybeSingle();
+
+          if (plan) {
+            const dueDay = data.plan.dueDay ?? plan.due_day;
+            const recurring = data.plan.recurringAmount ?? Number(plan.recurring_amount);
+            const setupAmt = data.plan.setupAmount ?? Number(plan.setup_fee);
+            const today = new Date();
+            const due = new Date(today.getFullYear(), today.getMonth() + 1, dueDay);
+            const todayIso = today.toISOString().slice(0, 10);
+            const dueIso = due.toISOString().slice(0, 10);
+
+            const { data: existingContract } = await supabaseAdmin
+              .from("billing_contracts")
+              .select("id")
+              .eq("company_id", companyId!)
+              .maybeSingle();
+
+            if (existingContract) {
+              contractId = existingContract.id;
+              push("contrato_reutilizado", true);
+            } else {
+              const { data: ct, error: ctErr } = await supabaseAdmin
+                .from("billing_contracts")
+                .insert({
+                  company_id: companyId!,
+                  plan_id: plan.id,
+                  start_date: todayIso,
+                  due_day: dueDay,
+                  next_due_date: dueIso,
+                  recurring_amount: recurring,
+                  setup_amount: setupAmt,
+                  setup_paid_at: data.plan.setupPaid ? new Date().toISOString() : null,
+                  pix_key: data.plan.pixKey || null,
+                  status: "active",
+                } as never)
+                .select("id")
+                .single();
+              if (ctErr || !ct) {
+                push("contrato_falhou", false, ctErr?.message ?? "sem retorno");
+              } else {
+                contractId = (ct as { id: string }).id;
+                push("contrato_criado", true, `R$ ${recurring.toFixed(2)}/mês`);
+              }
+            }
+
+            if (contractId && (data.plan.generateFirstInvoice ?? true)) {
+              const amount = recurring + (setupAmt && !data.plan.setupPaid ? setupAmt : 0);
+              const { data: inv, error: invErr } = await supabaseAdmin
+                .from("billing_invoices")
+                .upsert(
+                  {
+                    contract_id: contractId,
+                    company_id: companyId!,
+                    period_start: todayIso,
+                    period_end: dueIso,
+                    due_date: dueIso,
+                    amount,
+                    status: "open",
+                    pix_key: data.plan.pixKey || null,
+                  } as never,
+                  { onConflict: "contract_id,due_date" },
+                )
+                .select("id")
+                .single();
+              if (invErr || !inv) {
+                push("fatura_falhou", false, invErr?.message ?? "sem retorno");
+              } else {
+                firstInvoiceId = (inv as { id: string }).id;
+                push("fatura_gerada", true, `R$ ${amount.toFixed(2)} venc. ${dueIso}`);
+              }
+            }
+          } else {
+            push("plano_nao_encontrado", false, data.plan.planId);
+          }
+        }
+
+        if (data.adminUser?.sendWelcome !== false) {
+          const welcomeEmail = (data.adminUser?.email || data.client.email || "").toLowerCase();
+          const welcomeName = data.adminUser?.name || data.client.ownerName || data.client.name;
+          const welcomePhone = data.adminUser?.phone || data.client.whatsapp || null;
+          if (welcomeEmail) {
+            try {
+              await supabaseAdmin.rpc("enqueue_message", {
+                _event_code: "user_welcome",
+                _company_id: companyId!,
+                _recipient_user_id: adminUserId ?? undefined,
+                _recipient_email: welcomeEmail,
+                _recipient_phone: welcomePhone ?? "",
+                _recipient_name: welcomeName ?? "Cliente",
+                _payload: {
+                  user_name: welcomeName ?? "Cliente",
+                  user_email: welcomeEmail,
+                  app_url: "https://impulsionando.com.br/onboarding",
+                  invite_link: inviteLink ?? "https://impulsionando.com.br/auth",
+                  company_name: data.client.tradeName || data.client.name,
+                  project_name: data.project.name,
+                  modules: installed.join(", "),
+                } as never,
+                _channels: ["email", "whatsapp", "in_app"] as never,
+                _reference_type: "factory_project",
+                _reference_id: companyId!,
+              } as never);
+              push("boas_vindas_enviado", true, welcomeEmail);
+            } catch (e) {
+              push("boas_vindas_falhou", false, (e as Error).message);
+            }
+          }
+        }
+      } catch (e) {
+        push("provisionamento_extra_falhou", false, (e as Error).message);
+      }
+    }
+
     // 5) Audit
     await supabase.from("audit_logs").insert({
       action: "factory.project.created",
@@ -363,6 +548,9 @@ export const createProjectFromFactory = createServerFn({ method: "POST" })
         modules: installed,
         failed,
         model: data.model,
+        contractId,
+        firstInvoiceId,
+        adminUserId,
       } as never,
     } as never);
 
@@ -385,6 +573,10 @@ export const createProjectFromFactory = createServerFn({ method: "POST" })
       installed,
       failed,
       events,
+      contractId,
+      firstInvoiceId,
+      adminUserId,
+      inviteLink,
     };
   });
 
