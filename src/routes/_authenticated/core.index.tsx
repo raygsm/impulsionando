@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { coreExecutiveDashboard } from "@/lib/provisioning.functions";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/app/PageElements";
-import { Building2, Boxes, CreditCard, ClipboardList, AlertTriangle, Globe, Rocket, ShieldOff, PieChart, Package, CircleDollarSign } from "lucide-react";
+import { Building2, Boxes, CreditCard, ClipboardList, AlertTriangle, Globe, Rocket, ShieldOff, PieChart, Package, CircleDollarSign, TrendingUp, Wallet, CalendarClock, Target } from "lucide-react";
 
 const fmtBRL = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -17,9 +17,15 @@ function CoreIndex() {
   const fetchDash = useServerFn(coreExecutiveDashboard);
   const { data } = useQuery({ queryKey: ["core-exec-dash"], queryFn: () => fetchDash() });
 
+  const growth = data?.growthPct ?? 0;
+  const growthLabel = `${growth >= 0 ? "+" : ""}${growth.toFixed(1)}%`;
   const cards = [
     { label: "Clientes ativos", value: `${data?.active ?? 0} / ${data?.total ?? 0}`, icon: Building2 },
     { label: "MRR (contratos ativos)", value: fmtBRL(data?.mrr ?? 0), icon: CreditCard },
+    { label: "Receita recebida (mês)", value: fmtBRL(data?.receivedMonth ?? 0), icon: Wallet },
+    { label: "Receita prevista (30d)", value: fmtBRL(data?.forecast30d ?? 0), icon: CalendarClock },
+    { label: "Crescimento mensal", value: `${growthLabel} (${data?.newCur ?? 0} novos)`, icon: TrendingUp },
+    { label: "Conversão demo → pago", value: `${(data?.conversionPct ?? 0).toFixed(1)}% (${data?.trialConverted ?? 0}/${data?.trialTotal ?? 0})`, icon: Target },
     { label: "Inadimplência", value: `${data?.overdueCount ?? 0} · ${fmtBRL(data?.overdueAmount ?? 0)}`, icon: CircleDollarSign },
     { label: "Bloqueados (suspensos)", value: data?.blocked ?? 0, icon: ShieldOff },
     { label: "Em onboarding", value: data?.onboarding ?? 0, icon: ClipboardList },
