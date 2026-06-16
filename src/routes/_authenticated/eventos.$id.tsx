@@ -121,8 +121,48 @@ function EventDetail() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+  const mPolicy = useMutation({
+    mutationFn: () => savePolicy({
+      data: {
+        eventId: id,
+        transferPolicy: policy!.transferPolicy,
+        transferDeadlineHours: policy!.transferDeadlineHours === ""
+          ? null
+          : Number(policy!.transferDeadlineHours),
+        transferFeeCents: Math.round(Number(policy!.transferFeeCents || 0) * 100),
+        transferRequiresDocument: policy!.transferRequiresDocument,
+      },
+    }),
+    onSuccess: () => {
+      toast.success("Política de transferência atualizada");
+      qc.invalidateQueries({ queryKey: ["evt_event", id] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const mDecide = useMutation({
+    mutationFn: (v: { transferId: string; decision: "aprovada" | "rejeitada" }) =>
+      decide({ data: v }),
+    onSuccess: (_r, v) => {
+      toast.success(v.decision === "aprovada" ? "Transferência aprovada" : "Transferência rejeitada");
+      qc.invalidateQueries({ queryKey: ["evt_transfers", id] });
+      qc.invalidateQueries({ queryKey: ["evt_event", id] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const ev = data?.event;
+
+  useEffect(() => {
+    if (ev && !policy) {
+      setPolicy({
+        transferPolicy: (ev.transfer_policy ?? "livre") as "livre" | "com_aprovacao" | "bloqueada",
+        transferDeadlineHours: ev.transfer_deadline_hours == null ? "" : String(ev.transfer_deadline_hours),
+        transferFeeCents: ev.transfer_fee_cents == null ? "0" : (Number(ev.transfer_fee_cents) / 100).toFixed(2),
+        transferRequiresDocument: !!ev.transfer_requires_document,
+      });
+    }
+  }, [ev, policy]);
+
 
   return (
     <div className="space-y-4">
