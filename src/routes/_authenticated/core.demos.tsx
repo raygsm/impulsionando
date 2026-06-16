@@ -293,22 +293,53 @@ function CoreDemosPage() {
   });
 
   const [purging, setPurging] = useState(false);
-  const handleManualPurge = async () => {
-    if (!confirm("Disparar purge manual agora? Execuções antigas serão removidas.")) return;
+  const [purgeProgress, setPurgeProgress] = useState(0);
+  const [confirmPurgeOpen, setConfirmPurgeOpen] = useState(false);
+  const [lastPurgeResult, setLastPurgeResult] = useState<{
+    totalRemoved: number;
+    ranAt: string;
+  } | null>(null);
+
+  const runManualPurge = async () => {
+    setConfirmPurgeOpen(false);
     setPurging(true);
+    setPurgeProgress(8);
+    // Smooth progress trickle while RPC runs
+    const ticker = setInterval(() => {
+      setPurgeProgress((p) => (p < 88 ? p + 6 : p));
+    }, 220);
     try {
       const res = await purgeNow({ data: {} });
-      toast.success(
-        `Purge concluído: ${res.totalRemoved} execução(ões) removida(s).`,
-      );
-      await refetchRetention();
+      clearInterval(ticker);
+      setPurgeProgress(100);
+      setLastPurgeResult({ totalRemoved: res.totalRemoved, ranAt: res.ranAt });
+      const refreshed = await refetchRetention();
       qc.invalidateQueries({ queryKey: ["core-smoke-history"] });
+      const retentionSnapshot = refreshed.data ?? null;
+      toast.success(
+        `Purge concluído — ${res.totalRemoved} execução(ões) removida(s).`,
+        {
+          description: `Trigger: manual · ${new Date(res.ranAt).toLocaleString("pt-BR")}`,
+          duration: 12_000,
+          action: retentionSnapshot && retentionSnapshot.lastRunAt
+            ? {
+                label: "Baixar PDF",
+                onClick: () => downloadLastPurgePdf(retentionSnapshot),
+              }
+            : undefined,
+        },
+      );
     } catch (e) {
+      clearInterval(ticker);
       toast.error((e as Error).message ?? "Falha ao disparar purge.");
     } finally {
-      setPurging(false);
+      setTimeout(() => {
+        setPurging(false);
+        setPurgeProgress(0);
+      }, 600);
     }
   };
+
 
 
   // filtros + paginação do histórico
