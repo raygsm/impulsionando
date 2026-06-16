@@ -212,6 +212,23 @@ function Page() {
             <Button variant="outline" size="sm" onClick={() => batchExport.mutate()} disabled={batchExport.isPending}>
               <Download className="w-4 h-4 mr-1" /> Exportar fila (CSV)
             </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link
+                to="/imobiliaria/aprovacoes/imprimir-fila"
+                search={{
+                  status,
+                  search: search || undefined,
+                  reviewerId: reviewerId || undefined,
+                  dateFrom: dateFrom ? new Date(dateFrom).toISOString() : undefined,
+                  dateTo: dateTo ? new Date(dateTo + "T23:59:59").toISOString() : undefined,
+                  pageSize: 500,
+                }}
+                target="_blank"
+              >
+                <Printer className="w-4 h-4 mr-1" /> PDF da fila
+              </Link>
+            </Button>
+
             <Button asChild variant="outline" size="sm">
               <Link to="/imobiliaria/imoveis">Voltar à carteira</Link>
             </Button>
