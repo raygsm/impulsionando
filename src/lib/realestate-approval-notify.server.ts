@@ -174,6 +174,22 @@ export async function notifyPropertyApprovalEvent(args: NotifyApprovalArgs): Pro
 
   if (!recipientUserIds.length) return
 
+  // Notification preference category for this event
+  const prefCategory = event === 'submitted' ? 'realestate.approval.submitted' : 'realestate.approval.decision'
+  const { data: prefs } = await supabaseAdmin
+    .from('notification_preferences')
+    .select('user_id, channel, enabled')
+    .in('user_id', recipientUserIds)
+    .is('company_id', null)
+    .eq('category', prefCategory)
+  const prefMap = new Map<string, { in_app: boolean; email: boolean }>()
+  for (const uid of recipientUserIds) prefMap.set(uid, { in_app: true, email: true })
+  for (const row of (prefs ?? []) as any[]) {
+    const cur = prefMap.get(row.user_id)!
+    if (row.channel === 'in_app') cur.in_app = !!row.enabled
+    else if (row.channel === 'email') cur.email = !!row.enabled
+  }
+
   // Company name (for email body)
   const { data: company } = await supabaseAdmin
     .from('companies')
@@ -194,22 +210,26 @@ export async function notifyPropertyApprovalEvent(args: NotifyApprovalArgs): Pro
       ? `${APP_BASE_URL}/imobiliaria/aprovacoes`
       : `${APP_BASE_URL}/imobiliaria/imoveis`
 
-  // In-app notifications (batch insert)
-  await supabaseAdmin.from('notifications').insert(
-    recipientUserIds.map((uid) => ({
-      user_id: uid,
-      company_id: companyId,
-      category: 'realestate.approval',
-      severity: NOTIF_SEVERITY[event],
-      title: NOTIF_TITLE[event],
-      message: `${propertyTitle}${notes ? ` — ${notes}` : ''}`,
-      action_url: actionUrl,
-      action_label: event === 'submitted' ? 'Revisar' : 'Abrir imóvel',
-    })),
-  )
+  // In-app notifications — only for users who opted in
+  const inAppRecipients = recipientUserIds.filter((uid) => prefMap.get(uid)?.in_app !== false)
+  if (inAppRecipients.length) {
+    await supabaseAdmin.from('notifications').insert(
+      inAppRecipients.map((uid) => ({
+        user_id: uid,
+        company_id: companyId,
+        category: 'realestate.approval',
+        severity: NOTIF_SEVERITY[event],
+        title: NOTIF_TITLE[event],
+        message: `${propertyTitle}${notes ? ` — ${notes}` : ''}`,
+        action_url: actionUrl,
+        action_label: event === 'submitted' ? 'Revisar' : 'Abrir imóvel',
+      })),
+    )
+  }
 
-  // Email each recipient (best-effort, individual failures don't block the others)
-  const contacts = await getUserContacts(recipientUserIds)
+  // Email — only for users who opted in
+  const emailUserIds = recipientUserIds.filter((uid) => prefMap.get(uid)?.email !== false)
+  const contacts = await getUserContacts(emailUserIds)
   for (const contact of contacts) {
     if (!contact.email) continue
     try {
@@ -232,3 +252,4 @@ export async function notifyPropertyApprovalEvent(args: NotifyApprovalArgs): Pro
     }
   }
 }
+
