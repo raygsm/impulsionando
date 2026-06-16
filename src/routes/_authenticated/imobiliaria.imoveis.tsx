@@ -75,6 +75,7 @@ function Page() {
   const fetchList = useServerFn(listProperties);
   const fetchUpsert = useServerFn(upsertProperty);
   const fetchDelete = useServerFn(deleteProperty);
+  const fetchSubmit = useServerFn(submitPropertyForReview);
 
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<typeof emptyForm>(emptyForm);
@@ -83,6 +84,16 @@ function Page() {
     queryKey: ["realestate-props", companyId],
     enabled: !!companyId,
     queryFn: () => fetchList({ data: { companyId } }),
+  });
+
+  const submitReview = useMutation({
+    mutationFn: (id: string) => fetchSubmit({ data: { propertyId: id } }),
+    onSuccess: () => {
+      toast.success("Enviado para aprovação");
+      qc.invalidateQueries({ queryKey: ["realestate-props", companyId] });
+      qc.invalidateQueries({ queryKey: ["realestate-approvals", companyId] });
+    },
+    onError: (e: any) => toast.error(e.message ?? "Erro"),
   });
 
   const upsert = useMutation({
