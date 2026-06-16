@@ -106,7 +106,18 @@ function CriarProjetoPage() {
     permissoes_padrao: true, modelos_mensagens: true, automacoes_padrao: true,
   });
   const [confirm, setConfirm] = useState(false);
-  const [result, setResult] = useState<null | { companyId: string; generationId: string | null; installed: string[]; failed: { slug: string; reason: string }[] }>(null);
+  const [plan, setPlan] = useState<PlanForm>({
+    setupPaid: false,
+    pixKey: "",
+    generateFirstInvoice: true,
+  });
+  const [admin, setAdmin] = useState<AdminForm>({
+    email: "",
+    name: "",
+    phone: "",
+    sendWelcome: true,
+  });
+  const [result, setResult] = useState<null | { companyId: string; generationId: string | null; installed: string[]; failed: { slug: string; reason: string }[]; contractId?: string | null; firstInvoiceId?: string | null; adminUserId?: string | null }>(null);
 
   // Search existing companies by document/name
   const { data: searchData } = useQuery({
