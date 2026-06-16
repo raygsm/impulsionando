@@ -21,7 +21,8 @@ import { execSync } from "node:child_process";
 type Row = Record<string, string>;
 
 function q(sql: string): Row[] {
-  const out = execSync(`psql -At -F "|" -c ${JSON.stringify(sql)}`, {
+  const flat = sql.replace(/\s+/g, " ").trim();
+  const out = execSync(`psql -At -F "|" -c ${JSON.stringify(flat)}`, {
     encoding: "utf8",
     env: process.env,
   });
