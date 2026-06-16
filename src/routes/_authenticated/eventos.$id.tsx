@@ -15,6 +15,7 @@ import {
 import { Ticket, ArrowLeft, QrCode, ShieldCheck, Settings2, Check, X, Download, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { downloadCsv, downloadTablePdf } from "@/lib/exports";
+import { logExport } from "@/lib/core-export-logs.functions";
 
 export const Route = createFileRoute("/_authenticated/eventos/$id")({
   head: () => ({ meta: [{ title: "Evento" }, { name: "robots", content: "noindex" }] }),
