@@ -31,4 +31,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'welcome-paid': welcomePaidTemplate,
   'invoice-paid': invoicePaidTemplate,
   'invoice-overdue': invoiceOverdueTemplate,
+  'realestate-property-approval': realestatePropertyApprovalTemplate,
 }
