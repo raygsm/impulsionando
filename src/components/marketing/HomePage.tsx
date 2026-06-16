@@ -44,87 +44,91 @@ export function HomePage() {
       <section className="relative overflow-hidden bg-gradient-hero text-primary-foreground">
         <div className="pointer-events-none absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full bg-accent/30 blur-3xl" />
         <div className="pointer-events-none absolute -top-32 -left-32 w-[400px] h-[400px] rounded-full bg-primary-glow/30 blur-3xl" />
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-          <div className="text-center max-w-3xl mx-auto space-y-5">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur px-3 py-1 text-xs">
-              <Sparkles className="w-3.5 h-3.5" /> Grupo Impulsionando · Tecnologia + Marketing
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-24">
+          <div className="text-center max-w-3xl mx-auto space-y-4 sm:space-y-5">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur px-3 py-1 text-[11px] sm:text-xs">
+              <Sparkles className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">Grupo Impulsionando · Tecnologia + Marketing</span>
             </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight">
               Quem é você?
             </h1>
-            <p className="text-lg text-white/85 leading-relaxed">
+            <p className="text-base sm:text-lg text-white/85 leading-relaxed">
               Escolha o caminho que combina com o seu objetivo. A plataforma é a mesma —
               o que muda é o jeito que ela trabalha pra você.
             </p>
           </div>
 
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
+          <div className="mt-8 sm:mt-12 grid gap-5 sm:gap-6 sm:grid-cols-2 md:grid-cols-3">
             {/* EMPRESA */}
-            <Card className="group p-7 flex flex-col bg-white text-foreground hover:shadow-card-hover transition-all">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary inline-flex items-center justify-center mb-4">
+            <Card className="group p-5 sm:p-7 flex flex-col bg-white text-foreground hover:shadow-card-hover transition-all">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary inline-flex items-center justify-center mb-4 shrink-0">
                 <Building2 className="w-6 h-6" />
               </div>
-              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Sou uma empresa</div>
-              <h2 className="text-2xl font-bold tracking-tight">
+              <div className="text-[11px] sm:text-xs uppercase tracking-wider text-muted-foreground mb-1">Sou uma empresa</div>
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
                 Quero automatizar meu negócio
               </h2>
               <p className="text-sm text-muted-foreground mt-3 leading-relaxed flex-1">
                 Clínica, imobiliária, restaurante, academia, concessionária, escritório, comércio.
                 Sistema pronto para o seu segmento com agenda, CRM, WhatsApp, financeiro e BI.
               </p>
-              <Button asChild className="mt-6 gap-2 bg-gradient-primary shadow-elegant">
+              <Button asChild className="mt-6 gap-2 bg-gradient-primary shadow-elegant w-full">
                 <Link to="/empresas">
-                  Quero automatizar meu negócio <ArrowRight className="w-4 h-4" />
+                  <span className="truncate">Automatizar meu negócio</span>
+                  <ArrowRight className="w-4 h-4 shrink-0" />
                 </Link>
               </Button>
             </Card>
 
             {/* WHITE LABEL */}
-            <Card className="group p-7 flex flex-col bg-white text-foreground hover:shadow-card-hover transition-all md:scale-[1.02] md:-translate-y-1 ring-1 ring-accent/40">
-              <div className="w-12 h-12 rounded-xl bg-accent/15 text-accent inline-flex items-center justify-center mb-4">
+            <Card className="group p-5 sm:p-7 flex flex-col bg-white text-foreground hover:shadow-card-hover transition-all md:scale-[1.02] md:-translate-y-1 ring-1 ring-accent/40 sm:col-span-2 md:col-span-1">
+              <div className="w-12 h-12 rounded-xl bg-accent/15 text-accent inline-flex items-center justify-center mb-4 shrink-0">
                 <Layers className="w-6 h-6" />
               </div>
-              <div className="text-xs uppercase tracking-wider text-accent mb-1">Quero minha própria plataforma</div>
-              <h2 className="text-2xl font-bold tracking-tight">
+              <div className="text-[11px] sm:text-xs uppercase tracking-wider text-accent mb-1">Quero minha própria plataforma</div>
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
                 White Label
               </h2>
               <p className="text-sm text-muted-foreground mt-3 leading-relaxed flex-1">
                 Agências, consultorias, franqueadoras e grupos empresariais.
                 Sua marca, seu domínio, seus clientes, seu faturamento — sem precisar desenvolver.
               </p>
-              <Button asChild className="mt-6 gap-2 bg-accent text-accent-foreground hover:bg-accent/90">
+              <Button asChild className="mt-6 gap-2 bg-accent text-accent-foreground hover:bg-accent/90 w-full">
                 <Link to="/white-label">
-                  Quero vender minha própria plataforma <ArrowRight className="w-4 h-4" />
+                  <span className="truncate">Vender minha plataforma</span>
+                  <ArrowRight className="w-4 h-4 shrink-0" />
                 </Link>
               </Button>
             </Card>
 
             {/* CONSUMIDOR */}
-            <Card className="group p-7 flex flex-col bg-white text-foreground hover:shadow-card-hover transition-all">
-              <div className="w-12 h-12 rounded-xl bg-muted text-foreground inline-flex items-center justify-center mb-4">
+            <Card className="group p-5 sm:p-7 flex flex-col bg-white text-foreground hover:shadow-card-hover transition-all sm:col-span-2 md:col-span-1">
+              <div className="w-12 h-12 rounded-xl bg-muted text-foreground inline-flex items-center justify-center mb-4 shrink-0">
                 <UserRound className="w-6 h-6" />
               </div>
-              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Sou consumidor</div>
-              <h2 className="text-2xl font-bold tracking-tight">
+              <div className="text-[11px] sm:text-xs uppercase tracking-wider text-muted-foreground mb-1">Sou consumidor</div>
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
                 Entrar na minha área
               </h2>
               <p className="text-sm text-muted-foreground mt-3 leading-relaxed flex-1">
                 Quero acessar minhas agendas, pedidos, eventos, cupons, programas de fidelidade
                 e serviços contratados em empresas que usam a plataforma.
               </p>
-              <Button asChild variant="outline" className="mt-6 gap-2">
+              <Button asChild variant="outline" className="mt-6 gap-2 w-full">
                 <Link to="/auth">
-                  Entrar na minha área <ArrowRight className="w-4 h-4" />
+                  <span className="truncate">Entrar na minha área</span>
+                  <ArrowRight className="w-4 h-4 shrink-0" />
                 </Link>
               </Button>
             </Card>
           </div>
 
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-            <Button asChild size="lg" className="gap-2 bg-white text-primary hover:bg-white/90">
+          <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-center gap-3">
+            <Button asChild size="lg" className="gap-2 bg-white text-primary hover:bg-white/90 w-full sm:w-auto">
               <Link to="/demo">Ver demonstrações <ArrowRight className="w-4 h-4" /></Link>
             </Button>
-            <Button asChild size="lg" className="btn-whatsapp gap-2">
+            <Button asChild size="lg" className="btn-whatsapp gap-2 w-full sm:w-auto">
               <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
                 <MessageCircle className="w-4 h-4" /> Falar com Especialista
               </a>
