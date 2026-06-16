@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useMemo, useState } from "react";
 import { fetchMacroDashboard, fetchMacroFiltersMeta } from "@/lib/core-dashboard.functions";
 import { downloadCsv, downloadTablePdf, fmtBRLCents } from "@/lib/exports";
+import { logExport } from "@/lib/core-export-logs.functions";
 import { LayoutDashboard, TrendingUp, Users, Activity, Download, FileText, Filter } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/core/dashboard-macro")({
@@ -31,6 +32,7 @@ function isoDateOnly(iso: string) { return iso.slice(0, 10); }
 function MacroDashboard() {
   const fetcher = useServerFn(fetchMacroDashboard);
   const meta = useServerFn(fetchMacroFiltersMeta);
+  const logger = useServerFn(logExport);
   const [filters, setFilters] = useState<Filters>({
     days: 30, from: "", to: "",
     companyId: "", nicheSlug: "", regua: "", workflow: "",
@@ -51,6 +53,10 @@ function MacroDashboard() {
     if (filters.workflow) arg.workflow = filters.workflow;
     return arg;
   }, [filters]);
+
+  const trackExport = (kind: "csv" | "pdf", scope: string, rowCount: number) => {
+    logger({ data: { kind, scope, params: queryArgs as Record<string, unknown>, rowCount, companyId: filters.companyId || null } }).catch(() => {});
+  };
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["macro-dashboard", queryArgs],
@@ -76,33 +82,31 @@ function MacroDashboard() {
     (filters.workflow ? ` · Módulo: ${filters.workflow}` : "");
 
   function exportCompaniesCsv() {
+    const rows = data!.allCompanies.map((c) => ({
+      empresa: c.companyName,
+      receita_brl: (c.revenueCents / 100).toFixed(2).replace(".", ","),
+      n8n_total: c.n8nTotal,
+      n8n_falhas: c.n8nFailed,
+    }));
     downloadCsv(`empresas-${fromLabel}-${toLabel}.csv`,
-      ["empresa", "receita_brl", "n8n_total", "n8n_falhas"],
-      data!.allCompanies.map((c) => ({
-        empresa: c.companyName,
-        receita_brl: (c.revenueCents / 100).toFixed(2).replace(".", ","),
-        n8n_total: c.n8nTotal,
-        n8n_falhas: c.n8nFailed,
-      })),
-    );
+      ["empresa", "receita_brl", "n8n_total", "n8n_falhas"], rows);
+    trackExport("csv", "dashboard_macro.companies", rows.length);
   }
   function exportNichesCsv() {
+    const rows = Object.entries(data!.byNiche).map(([_, v]) => ({
+      nicho: v.nicheName, empresas: v.companies,
+      receita_brl: (v.revenueCents / 100).toFixed(2).replace(".", ","),
+      n8n_total: v.n8nTotal, n8n_falhas: v.n8nFailed,
+    }));
     downloadCsv(`nichos-${fromLabel}-${toLabel}.csv`,
-      ["nicho", "empresas", "receita_brl", "n8n_total", "n8n_falhas"],
-      Object.entries(data!.byNiche).map(([k, v]) => ({
-        nicho: v.nicheName,
-        empresas: v.companies,
-        receita_brl: (v.revenueCents / 100).toFixed(2).replace(".", ","),
-        n8n_total: v.n8nTotal,
-        n8n_falhas: v.n8nFailed,
-      })),
-    );
+      ["nicho", "empresas", "receita_brl", "n8n_total", "n8n_falhas"], rows);
+    trackExport("csv", "dashboard_macro.niches", rows.length);
   }
   function exportReguasCsv() {
+    const rows = Object.entries(data!.n8nByRegua).map(([k, v]) => ({ regua: k, total: v.total, ok: v.ok, falhas: v.failed }));
     downloadCsv(`reguas-${fromLabel}-${toLabel}.csv`,
-      ["regua", "total", "ok", "falhas"],
-      Object.entries(data!.n8nByRegua).map(([k, v]) => ({ regua: k, total: v.total, ok: v.ok, falhas: v.failed })),
-    );
+      ["regua", "total", "ok", "falhas"], rows);
+    trackExport("csv", "dashboard_macro.reguas", rows.length);
   }
 
   function monthlyPdf() {
@@ -155,7 +159,9 @@ function MacroDashboard() {
         })),
         footer: "Impulsionando Tecnologia",
       });
+      trackExport("pdf", "dashboard_macro.companies_pdf", data!.allCompanies.length);
     }, 200);
+    trackExport("pdf", "dashboard_macro.monthly_pdf", 11);
   }
 
   return (

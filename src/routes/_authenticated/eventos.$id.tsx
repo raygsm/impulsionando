@@ -15,6 +15,7 @@ import {
 import { Ticket, ArrowLeft, QrCode, ShieldCheck, Settings2, Check, X, Download, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { downloadCsv, downloadTablePdf } from "@/lib/exports";
+import { logExport } from "@/lib/core-export-logs.functions";
 
 export const Route = createFileRoute("/_authenticated/eventos/$id")({
   head: () => ({ meta: [{ title: "Evento" }, { name: "robots", content: "noindex" }] }),
@@ -34,6 +35,9 @@ function EventDetail() {
   const savePolicy = useServerFn(updateTransferPolicy);
   const listTr = useServerFn(listTransfers);
   const decide = useServerFn(decideTransfer);
+  const logger = useServerFn(logExport);
+  const trackExport = (kind: "csv" | "pdf", scope: string, rowCount: number) =>
+    logger({ data: { kind, scope, params: { eventId: id }, rowCount, companyId: activeCompanyId ?? null } }).catch(() => {});
 
   const { data } = useQuery({
     queryKey: ["evt_event", id],
@@ -344,10 +348,11 @@ function EventDetail() {
               }));
               downloadCsv(`transferencias-${id}.csv`,
                 ["criada_em", "ingresso", "de_nome", "de_email", "para_nome", "para_email", "para_doc", "status", "taxa_brl", "decidida_em"], rows);
+              trackExport("csv", "evt_transfers.csv", rows.length);
             }} disabled={!transfersData?.items?.length}>
               <Download className="w-4 h-4 mr-1" /> CSV
             </Button>
-            <Button size="sm" variant="outline" onClick={() => downloadTablePdf({
+            <Button size="sm" variant="outline" onClick={() => { downloadTablePdf({
               filename: `transferencias-${id}.pdf`,
               title: `Transferências — ${ev?.title ?? id}`,
               subtitle: `${transfersData?.items?.length ?? 0} registros`,
@@ -367,7 +372,7 @@ function EventDetail() {
                 status: t.status,
                 taxa: t.fee_cents ? `R$ ${(Number(t.fee_cents) / 100).toFixed(2)}` : "—",
               })),
-            })} disabled={!transfersData?.items?.length}>
+            }); trackExport("pdf", "evt_transfers.pdf", transfersData?.items?.length ?? 0); }} disabled={!transfersData?.items?.length}>
               <FileText className="w-4 h-4 mr-1" /> PDF
             </Button>
           </div>
@@ -431,6 +436,7 @@ function EventDetail() {
                 };
               });
               downloadCsv(`checkins-${id}.csv`, ["quando", "ingresso", "portador", "email", "portao"], rows);
+              trackExport("csv", "evt_checkins.csv", rows.length);
             }} disabled={!data?.checkins?.length}>
               <Download className="w-4 h-4 mr-1" /> CSV
             </Button>
@@ -458,6 +464,7 @@ function EventDetail() {
                   };
                 }),
               });
+              trackExport("pdf", "evt_checkins.pdf", data?.checkins?.length ?? 0);
             }} disabled={!data?.checkins?.length}>
               <FileText className="w-4 h-4 mr-1" /> PDF
             </Button>
