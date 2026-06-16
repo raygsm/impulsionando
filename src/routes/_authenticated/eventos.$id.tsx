@@ -436,6 +436,7 @@ function EventDetail() {
                 };
               });
               downloadCsv(`checkins-${id}.csv`, ["quando", "ingresso", "portador", "email", "portao"], rows);
+              trackExport("csv", "evt_checkins.csv", rows.length);
             }} disabled={!data?.checkins?.length}>
               <Download className="w-4 h-4 mr-1" /> CSV
             </Button>
