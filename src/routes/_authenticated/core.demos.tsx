@@ -340,9 +340,22 @@ function CoreDemosPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const handleExportCsv = async () => {
-    const r = await exportHistory({ data: historyFilters });
-    const rows = (r.runs ?? []) as unknown as SmokeRunRow[];
+  const buildExportFilename = (ext: string) => {
+    const period =
+      historySince === "all" ? "all" : `last${historySince}d`;
+    const status = historyStatus === "all" ? "any" : historyStatus;
+    const slug = (debouncedSearch || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 24);
+    const stamp = new Date().toISOString().slice(0, 10);
+    const parts = ["smoke-history", stamp, period, status];
+    if (slug) parts.push(`q-${slug}`);
+    return `${parts.join("_")}.${ext}`;
+  };
+
+  const buildCsv = (rows: SmokeRunRow[]) => {
     const header = [
       "id",
       "created_at",
@@ -378,14 +391,102 @@ function CoreDemosPage() {
           .join(","),
       );
     }
-    downloadBlob(lines.join("\n"), `smoke-history-${Date.now()}.csv`, "text/csv;charset=utf-8");
+    return lines.join("\n");
+  };
+
+  const buildPdfBlob = (rows: SmokeRunRow[]): Blob => {
+    const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+    doc.setFontSize(14);
+    doc.text("Histórico Smoke Tests", 40, 36);
+    doc.setFontSize(9);
+    doc.text(
+      `Gerado em ${new Date().toLocaleString("pt-BR")} · período: ${
+        historySince === "all" ? "todo" : `últimos ${historySince}d`
+      } · status: ${historyStatus} · busca: ${debouncedSearch || "—"} · ${rows.length} linha(s)`,
+      40,
+      52,
+    );
+    autoTable(doc, {
+      startY: 70,
+      styles: { fontSize: 7, cellPadding: 3, overflow: "linebreak" },
+      headStyles: { fillColor: [243, 244, 246], textColor: 20 },
+      head: [["Data", "Label", "Nicho", "Status", "Tempo", "Batch", "Replay", "Etapas", "Erro"]],
+      body: rows.map((r) => [
+        new Date(r.created_at).toLocaleString("pt-BR"),
+        r.label ?? "—",
+        r.niche_slug ?? "—",
+        r.success ? "OK" : "FALHA",
+        `${r.duration_ms}ms`,
+        r.batch_id ? r.batch_id.slice(0, 8) : "—",
+        r.replay_of ? r.replay_of.slice(0, 8) : "—",
+        (r.steps ?? [])
+          .map((s) => `${s.ok ? "✓" : "✗"} ${s.key}`)
+          .join("\n"),
+        r.error ?? "",
+      ]),
+      columnStyles: {
+        7: { cellWidth: 180 },
+        8: { cellWidth: 120 },
+      },
+    });
+    return doc.output("blob");
+  };
+
+  const handleExportCsv = async () => {
+    const r = await exportHistory({ data: historyFilters });
+    const rows = (r.runs ?? []) as unknown as SmokeRunRow[];
+    downloadBlob(buildCsv(rows), buildExportFilename("csv"), "text/csv;charset=utf-8");
     toast.success(`CSV exportado (${rows.length} linhas)`);
   };
 
   const handleExportPdf = async () => {
     const r = await exportHistory({ data: historyFilters });
     const rows = (r.runs ?? []) as unknown as SmokeRunRow[];
-    printHistoryPDF(rows);
+    const blob = buildPdfBlob(rows);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = buildExportFilename("pdf");
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(`PDF exportado (${rows.length} linhas)`);
+  };
+
+  const handleExportZip = async () => {
+    const r = await exportHistory({ data: historyFilters });
+    const rows = (r.runs ?? []) as unknown as SmokeRunRow[];
+    const zip = new JSZip();
+    const base = buildExportFilename("").replace(/\.$/, "");
+    zip.file(`${base}.csv`, buildCsv(rows));
+    zip.file(`${base}.pdf`, buildPdfBlob(rows));
+    zip.file(
+      "manifest.json",
+      JSON.stringify(
+        {
+          generatedAt: new Date().toISOString(),
+          filters: {
+            sinceDays: historyFilters.sinceDays,
+            status: historyFilters.status,
+            search: historyFilters.search ?? null,
+          },
+          rowCount: rows.length,
+        },
+        null,
+        2,
+      ),
+    );
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+    const url = URL.createObjectURL(zipBlob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = buildExportFilename("zip");
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(`ZIP exportado (${rows.length} linhas)`);
   };
 
   const demos = (data?.demos ?? []) as unknown as DemoRow[];
