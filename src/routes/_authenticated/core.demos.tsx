@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   listDemoCompanies,
@@ -42,10 +42,52 @@ import {
   RotateCcw,
   Download,
   FileText,
+  FileArchive,
+  BookmarkPlus,
+  X,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import JSZip from "jszip";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
+
+function useDebouncedValue<T>(value: T, delay = 300): T {
+  const [v, setV] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setV(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return v;
+}
+
+type HistoryPreset = {
+  id: string;
+  name: string;
+  since: string;
+  status: "all" | "success" | "failure";
+  search: string;
+};
+
+const PRESETS_KEY = "core-demos:history-presets";
+
+function loadPresets(): HistoryPreset[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(PRESETS_KEY);
+    return raw ? (JSON.parse(raw) as HistoryPreset[]) : [];
+  } catch {
+    return [];
+  }
+}
+function savePresetsToStorage(list: HistoryPreset[]) {
+  try {
+    window.localStorage.setItem(PRESETS_KEY, JSON.stringify(list));
+  } catch {
+    /* ignore */
+  }
+}
 
 const fmtBRL = (v: number) =>
   Number(v ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
