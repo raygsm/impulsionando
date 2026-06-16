@@ -91,7 +91,7 @@ for (const f of filters) {
      WHERE i.status='paid' AND i.created_at >= '${from}'
      ${f.nicheSlug
         ? `AND EXISTS (SELECT 1 FROM companies c JOIN niches n ON n.id=c.niche_id
-                       WHERE c.id=i.company_id AND n.slug=${JSON.stringify(f.nicheSlug)})`
+                       WHERE c.id=i.company_id AND n.slug=${"'" + f.nicheSlug + "'"})`
         : ""}`,
   ));
   check(`revenue(${f.label})`, revScan, revSql, 0.001);
@@ -108,10 +108,10 @@ for (const f of filters) {
   // n8n events / failures
   const nWhere = [
     `created_at >= '${from}'`,
-    f.regua ? `regua=${JSON.stringify(f.regua)}` : null,
-    f.workflow ? `workflow_name=${JSON.stringify(f.workflow)}` : null,
+    f.regua ? `regua=${"'" + f.regua + "'"}` : null,
+    f.workflow ? `workflow_name=${"'" + f.workflow + "'"}` : null,
     f.nicheSlug
-      ? `tenant_id IN (SELECT id FROM companies WHERE niche_id=(SELECT id FROM niches WHERE slug=${JSON.stringify(f.nicheSlug)}))`
+      ? `tenant_id IN (SELECT id FROM companies WHERE niche_id=(SELECT id FROM niches WHERE slug=${"'" + f.nicheSlug + "'"}))`
       : null,
   ].filter(Boolean).join(" AND ");
   const nTotal = Number(scalar(`SELECT COUNT(*) FROM n8n_workflow_runs WHERE ${nWhere}`));
