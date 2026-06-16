@@ -307,7 +307,21 @@ export function PublicHeader() {
           >
             Início
           </Link>
-          <DesktopDropdownGrouped label="Nichos" groups={NICHOS_GROUPS} />
+          <DesktopDropdownGrouped label="Soluções" groups={SOLUCOES_AUDIENCE_GROUPS} />
+          <Link
+            to="/white-label"
+            className="px-3 py-3 text-[15px] text-muted-foreground hover:text-foreground transition-colors rounded-md"
+            activeProps={{ className: "text-foreground font-medium" }}
+          >
+            White Label
+          </Link>
+          <Link
+            to="/empresas"
+            className="px-3 py-3 text-[15px] text-muted-foreground hover:text-foreground transition-colors rounded-md"
+            activeProps={{ className: "text-foreground font-medium" }}
+          >
+            Empresas
+          </Link>
           <DesktopDropdownFlat label="Planos" items={PLANOS} />
           <Link
             to="/contato"
@@ -317,6 +331,7 @@ export function PublicHeader() {
             Contato
           </Link>
         </nav>
+
 
         <div className="flex items-center gap-2 lg:gap-3">
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex lg:h-10 lg:px-4 lg:text-[15px]">
