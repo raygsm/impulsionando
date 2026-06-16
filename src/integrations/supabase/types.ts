@@ -3137,6 +3137,50 @@ export type Database = {
         }
         Relationships: []
       }
+      core_export_logs: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          id: string
+          kind: string
+          notes: string | null
+          params: Json
+          row_count: number
+          scope: string
+          user_id: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          notes?: string | null
+          params?: Json
+          row_count?: number
+          scope: string
+          user_id?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          notes?: string | null
+          params?: Json
+          row_count?: number
+          scope?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_export_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       core_feature_flags: {
         Row: {
           category: string
