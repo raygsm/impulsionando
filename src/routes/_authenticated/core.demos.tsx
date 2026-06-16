@@ -870,6 +870,9 @@ function CoreDemosPage() {
           <History className="h-4 w-4 text-muted-foreground" />
           <h3 className="text-sm font-semibold">Histórico de smoke tests</h3>
           <Badge variant="secondary">{historyTotal}</Badge>
+          {fetchingHistory && !loadingHistory && (
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+          )}
           <div className="ml-auto flex gap-2">
             <Button variant="outline" size="sm" onClick={handleExportCsv}>
               <Download className="mr-2 h-3.5 w-3.5" />
@@ -879,7 +882,58 @@ function CoreDemosPage() {
               <FileText className="mr-2 h-3.5 w-3.5" />
               PDF
             </Button>
+            <Button variant="outline" size="sm" onClick={handleExportZip}>
+              <FileArchive className="mr-2 h-3.5 w-3.5" />
+              ZIP (CSV+PDF)
+            </Button>
           </div>
+        </div>
+
+        {/* Presets de filtros salvos */}
+        <div className="flex items-center gap-2 flex-wrap mb-3">
+          <span className="text-xs text-muted-foreground">Presets:</span>
+          {presets.length === 0 && (
+            <span className="text-xs text-muted-foreground italic">
+              nenhum salvo ainda
+            </span>
+          )}
+          {presets.map((p) => (
+            <div
+              key={p.id}
+              className={`flex items-center gap-1 border rounded-full pl-2 pr-1 py-0.5 text-xs ${
+                activePresetId === p.id
+                  ? "bg-primary/10 border-primary/40"
+                  : "hover:bg-muted/50"
+              }`}
+            >
+              <button
+                type="button"
+                onClick={() => applyPreset(p)}
+                className="flex items-center gap-1"
+                title={`período: ${p.since} · status: ${p.status} · busca: ${p.search || "—"}`}
+              >
+                <span>{p.name}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => removePreset(p.id)}
+                className="p-0.5 hover:text-destructive"
+                title="Remover preset"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          ))}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-xs ml-auto"
+            onClick={handleSavePreset}
+            disabled={presets.length >= 12}
+          >
+            <BookmarkPlus className="mr-1 h-3.5 w-3.5" />
+            Salvar filtros atuais
+          </Button>
         </div>
 
         {/* filtros do histórico */}
@@ -890,19 +944,10 @@ function CoreDemosPage() {
               placeholder="Buscar por label, nicho ou erro…"
               className="pl-8"
               value={historySearch}
-              onChange={(e) => {
-                setHistorySearch(e.target.value);
-                setHistoryPage(0);
-              }}
+              onChange={(e) => setHistorySearch(e.target.value)}
             />
           </div>
-          <Select
-            value={historySince}
-            onValueChange={(v) => {
-              setHistorySince(v);
-              setHistoryPage(0);
-            }}
-          >
+          <Select value={historySince} onValueChange={setHistorySince}>
             <SelectTrigger>
               <SelectValue placeholder="Intervalo" />
             </SelectTrigger>
@@ -915,10 +960,7 @@ function CoreDemosPage() {
           </Select>
           <Select
             value={historyStatus}
-            onValueChange={(v) => {
-              setHistoryStatus(v as "all" | "success" | "failure");
-              setHistoryPage(0);
-            }}
+            onValueChange={(v) => setHistoryStatus(v as "all" | "success" | "failure")}
           >
             <SelectTrigger>
               <SelectValue placeholder="Status" />
@@ -932,6 +974,7 @@ function CoreDemosPage() {
         </div>
 
         {loadingHistory ? (
+
           <div className="text-sm text-muted-foreground">Carregando…</div>
         ) : history.length === 0 ? (
           <div className="text-sm text-muted-foreground">
