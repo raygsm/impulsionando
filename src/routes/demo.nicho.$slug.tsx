@@ -12,6 +12,7 @@ import {
   AlertTriangle, ShieldCheck, BadgeDollarSign, Sparkles,
 } from "lucide-react";
 import { getDemoEventos, formatBRL, NICHO_LABELS, type Nicho } from "@/lib/demoNicho";
+import { useDemoTracker } from "@/hooks/useDemoTracker";
 
 const SUPORTADOS: Nicho[] = ["eventos"];
 
@@ -74,6 +75,7 @@ function DemoNichoPage() {
 function DemoEventosNicho() {
   const d = getDemoEventos();
   const labels = NICHO_LABELS.eventos;
+  const { track } = useDemoTracker("eventos");
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -101,7 +103,12 @@ function DemoEventosNicho() {
           <KpiCard icon={ShieldCheck} label="Cancelamento < 72h" value={`${d.kpis.taxaCancelamento72h}%`} />
         </div>
 
-        <Tabs defaultValue="briefing" className="w-full">
+        <Tabs
+          defaultValue="briefing"
+          className="w-full"
+          onValueChange={(v) => track("nav", `tab.${v}`, 2)}
+        >
+
           <TabsList className="flex flex-wrap h-auto justify-start gap-1">
             <TabsTrigger value="briefing"><FileSignature className="w-4 h-4 mr-1.5" />Briefing & Contratantes</TabsTrigger>
             <TabsTrigger value="agenda"><CalendarClock className="w-4 h-4 mr-1.5" />Agenda</TabsTrigger>

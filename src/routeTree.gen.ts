@@ -149,6 +149,7 @@ import { Route as AuthenticatedCoreFinanceiroMasterRouteImport } from './routes/
 import { Route as AuthenticatedCoreFinalizacaoComercialRouteImport } from './routes/_authenticated/core.finalizacao-comercial'
 import { Route as AuthenticatedCoreEventosRouteImport } from './routes/_authenticated/core.eventos'
 import { Route as AuthenticatedCoreDemosRouteImport } from './routes/_authenticated/core.demos'
+import { Route as AuthenticatedCoreDemoInsightsRouteImport } from './routes/_authenticated/core.demo-insights'
 import { Route as AuthenticatedCoreDashboardsRouteImport } from './routes/_authenticated/core.dashboards'
 import { Route as AuthenticatedCoreDashboardMacroRouteImport } from './routes/_authenticated/core.dashboard-macro'
 import { Route as AuthenticatedCoreCriarProjetoRouteImport } from './routes/_authenticated/core.criar-projeto'
@@ -956,6 +957,12 @@ const AuthenticatedCoreDemosRoute = AuthenticatedCoreDemosRouteImport.update({
   path: '/demos',
   getParentRoute: () => AuthenticatedCoreRoute,
 } as any)
+const AuthenticatedCoreDemoInsightsRoute =
+  AuthenticatedCoreDemoInsightsRouteImport.update({
+    id: '/demo-insights',
+    path: '/demo-insights',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreDashboardsRoute =
   AuthenticatedCoreDashboardsRouteImport.update({
     id: '/dashboards',
@@ -1456,6 +1463,7 @@ export interface FileRoutesByFullPath {
   '/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
   '/core/dashboard-macro': typeof AuthenticatedCoreDashboardMacroRoute
   '/core/dashboards': typeof AuthenticatedCoreDashboardsRoute
+  '/core/demo-insights': typeof AuthenticatedCoreDemoInsightsRoute
   '/core/demos': typeof AuthenticatedCoreDemosRoute
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/core/finalizacao-comercial': typeof AuthenticatedCoreFinalizacaoComercialRoute
@@ -1651,6 +1659,7 @@ export interface FileRoutesByTo {
   '/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
   '/core/dashboard-macro': typeof AuthenticatedCoreDashboardMacroRoute
   '/core/dashboards': typeof AuthenticatedCoreDashboardsRoute
+  '/core/demo-insights': typeof AuthenticatedCoreDemoInsightsRoute
   '/core/demos': typeof AuthenticatedCoreDemosRoute
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/core/finalizacao-comercial': typeof AuthenticatedCoreFinalizacaoComercialRoute
@@ -1859,6 +1868,7 @@ export interface FileRoutesById {
   '/_authenticated/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
   '/_authenticated/core/dashboard-macro': typeof AuthenticatedCoreDashboardMacroRoute
   '/_authenticated/core/dashboards': typeof AuthenticatedCoreDashboardsRoute
+  '/_authenticated/core/demo-insights': typeof AuthenticatedCoreDemoInsightsRoute
   '/_authenticated/core/demos': typeof AuthenticatedCoreDemosRoute
   '/_authenticated/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/_authenticated/core/finalizacao-comercial': typeof AuthenticatedCoreFinalizacaoComercialRoute
@@ -2067,6 +2077,7 @@ export interface FileRouteTypes {
     | '/core/criar-projeto'
     | '/core/dashboard-macro'
     | '/core/dashboards'
+    | '/core/demo-insights'
     | '/core/demos'
     | '/core/eventos'
     | '/core/finalizacao-comercial'
@@ -2262,6 +2273,7 @@ export interface FileRouteTypes {
     | '/core/criar-projeto'
     | '/core/dashboard-macro'
     | '/core/dashboards'
+    | '/core/demo-insights'
     | '/core/demos'
     | '/core/eventos'
     | '/core/finalizacao-comercial'
@@ -2469,6 +2481,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/criar-projeto'
     | '/_authenticated/core/dashboard-macro'
     | '/_authenticated/core/dashboards'
+    | '/_authenticated/core/demo-insights'
     | '/_authenticated/core/demos'
     | '/_authenticated/core/eventos'
     | '/_authenticated/core/finalizacao-comercial'
@@ -3613,6 +3626,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreDemosRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/demo-insights': {
+      id: '/_authenticated/core/demo-insights'
+      path: '/demo-insights'
+      fullPath: '/core/demo-insights'
+      preLoaderRoute: typeof AuthenticatedCoreDemoInsightsRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/dashboards': {
       id: '/_authenticated/core/dashboards'
       path: '/dashboards'
@@ -4225,6 +4245,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreCriarProjetoRoute: typeof AuthenticatedCoreCriarProjetoRoute
   AuthenticatedCoreDashboardMacroRoute: typeof AuthenticatedCoreDashboardMacroRoute
   AuthenticatedCoreDashboardsRoute: typeof AuthenticatedCoreDashboardsRoute
+  AuthenticatedCoreDemoInsightsRoute: typeof AuthenticatedCoreDemoInsightsRoute
   AuthenticatedCoreDemosRoute: typeof AuthenticatedCoreDemosRoute
   AuthenticatedCoreEventosRoute: typeof AuthenticatedCoreEventosRoute
   AuthenticatedCoreFinalizacaoComercialRoute: typeof AuthenticatedCoreFinalizacaoComercialRoute
@@ -4255,6 +4276,7 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreCriarProjetoRoute: AuthenticatedCoreCriarProjetoRoute,
   AuthenticatedCoreDashboardMacroRoute: AuthenticatedCoreDashboardMacroRoute,
   AuthenticatedCoreDashboardsRoute: AuthenticatedCoreDashboardsRoute,
+  AuthenticatedCoreDemoInsightsRoute: AuthenticatedCoreDemoInsightsRoute,
   AuthenticatedCoreDemosRoute: AuthenticatedCoreDemosRoute,
   AuthenticatedCoreEventosRoute: AuthenticatedCoreEventosRoute,
   AuthenticatedCoreFinalizacaoComercialRoute:

@@ -2718,6 +2718,8 @@ export type Database = {
           commercial_email: string | null
           company_type: string | null
           created_at: string
+          demo_expires_at: string | null
+          demo_niche: string | null
           document: string | null
           domain: string | null
           email: string | null
@@ -2754,6 +2756,8 @@ export type Database = {
           commercial_email?: string | null
           company_type?: string | null
           created_at?: string
+          demo_expires_at?: string | null
+          demo_niche?: string | null
           document?: string | null
           domain?: string | null
           email?: string | null
@@ -2790,6 +2794,8 @@ export type Database = {
           commercial_email?: string | null
           company_type?: string | null
           created_at?: string
+          demo_expires_at?: string | null
+          demo_niche?: string | null
           document?: string | null
           domain?: string | null
           email?: string | null
@@ -4021,6 +4027,103 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      demo_actions: {
+        Row: {
+          action_key: string
+          created_at: string
+          id: string
+          module: string
+          niche_slug: string
+          payload: Json
+          session_id: string
+          user_id: string | null
+          weight: number
+        }
+        Insert: {
+          action_key: string
+          created_at?: string
+          id?: string
+          module: string
+          niche_slug: string
+          payload?: Json
+          session_id: string
+          user_id?: string | null
+          weight?: number
+        }
+        Update: {
+          action_key?: string
+          created_at?: string
+          id?: string
+          module?: string
+          niche_slug?: string
+          payload?: Json
+          session_id?: string
+          user_id?: string | null
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demo_actions_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "demo_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      demo_sessions: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          duration_seconds: number | null
+          ended_at: string | null
+          id: string
+          ip: unknown
+          metadata: Json
+          niche_slug: string
+          score: number | null
+          started_at: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          ip?: unknown
+          metadata?: Json
+          niche_slug: string
+          score?: number | null
+          started_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          ip?: unknown
+          metadata?: Json
+          niche_slug?: string
+          score?: number | null
+          started_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demo_sessions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ehr_documents: {
         Row: {
@@ -8056,6 +8159,7 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      demo_score: { Args: { _session_id: string }; Returns: number }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
