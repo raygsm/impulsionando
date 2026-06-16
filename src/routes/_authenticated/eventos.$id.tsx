@@ -30,17 +30,31 @@ function EventDetail() {
   const transfer = useServerFn(transferTicket);
   const cancel = useServerFn(cancelTicket);
   const checkin = useServerFn(checkInByQr);
+  const savePolicy = useServerFn(updateTransferPolicy);
+  const listTr = useServerFn(listTransfers);
+  const decide = useServerFn(decideTransfer);
 
   const { data } = useQuery({
     queryKey: ["evt_event", id],
     queryFn: () => get({ data: { id } }),
   });
 
+  const { data: transfersData } = useQuery({
+    queryKey: ["evt_transfers", id],
+    queryFn: () => listTr({ data: { eventId: id } }),
+  });
+
   const [tt, setTt] = useState({ name: "", price: "", quantity: "", perPersonLimit: "5" });
   const [iss, setIss] = useState({ ttId: "", name: "", email: "", phone: "", qty: "1" });
-  const [tr, setTr] = useState({ ticketId: "", toName: "", toEmail: "", toPhone: "" });
+  const [tr, setTr] = useState({ ticketId: "", toName: "", toEmail: "", toPhone: "", toDocument: "" });
   const [qrTok, setQrTok] = useState("");
   const [qrResult, setQrResult] = useState<unknown>(null);
+  const [policy, setPolicy] = useState<{
+    transferPolicy: "livre" | "com_aprovacao" | "bloqueada";
+    transferDeadlineHours: string;
+    transferFeeCents: string;
+    transferRequiresDocument: boolean;
+  } | null>(null);
 
   const mTt = useMutation({
     mutationFn: () => upsertTt({
