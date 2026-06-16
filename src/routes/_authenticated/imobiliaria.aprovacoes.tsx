@@ -9,8 +9,10 @@ import {
   requestPropertyChanges,
   listPropertyReviewHistory,
   exportPropertyApprovalCsv,
+  exportApprovalQueueCsv,
   canApproveProperties,
 } from "@/lib/realestate.functions";
+
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { PageHeader, EmptyState } from "@/components/app/PageElements";
 import { Card } from "@/components/ui/card";
@@ -97,6 +99,8 @@ function Page() {
   const fetchChanges = useServerFn(requestPropertyChanges);
   const fetchExport = useServerFn(exportPropertyApprovalCsv);
   const fetchCanApprove = useServerFn(canApproveProperties);
+  const fetchBatchExport = useServerFn(exportApprovalQueueCsv);
+
 
   const [status, setStatus] = useState<Status[]>(["pending"]);
   const [search, setSearch] = useState("");
@@ -133,7 +137,10 @@ function Page() {
     queryKey: ["realestate-approvals", queryArgs],
     enabled: !!companyId,
     queryFn: () => fetchQueue({ data: queryArgs }),
+    refetchInterval: 15000,
+    refetchOnWindowFocus: true,
   });
+
   const items = (data?.items ?? []) as QueueItem[];
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -169,6 +176,16 @@ function Page() {
     onError: (e: any) => toast.error(e.message ?? "Erro ao exportar"),
   });
 
+  const batchExport = useMutation({
+    mutationFn: () => fetchBatchExport({ data: { ...queryArgs, pageSize: 500 } }),
+    onSuccess: (resp) => {
+      downloadFile(resp.filename, resp.csv);
+      toast.success(`${resp.total} registro(s) exportado(s)`);
+    },
+    onError: (e: any) => toast.error(e.message ?? "Erro na exportação em lote"),
+  });
+
+
   const toggleStatus = (s: Status) => {
     setPage(1);
     setStatus((prev) => prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]);
@@ -188,11 +205,20 @@ function Page() {
           ? "Revise imóveis enviados pelos corretores antes de publicar."
           : "Você não tem permissão de aprovação — apenas visualização da fila."}
         action={
-          <Button asChild variant="outline" size="sm">
-            <Link to="/imobiliaria/imoveis">Voltar à carteira</Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/perfil/notificacoes">Preferências</Link>
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => batchExport.mutate()} disabled={batchExport.isPending}>
+              <Download className="w-4 h-4 mr-1" /> Exportar fila (CSV)
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/imobiliaria/imoveis">Voltar à carteira</Link>
+            </Button>
+          </div>
         }
       />
+
 
       {!companyId ? (
         <Card className="p-6"><p className="text-sm text-muted-foreground">Selecione uma empresa.</p></Card>
