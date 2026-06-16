@@ -1054,12 +1054,42 @@ function CoreDemosPage() {
         {/* Painel de retenção detalhado */}
         {retention && (
           <div className="mb-3 rounded border border-primary/20 bg-primary/5 px-3 py-2.5 text-xs">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
               <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
               <span className="font-medium">Política de retenção do histórico</span>
-              <Badge variant={retention.active ? "secondary" : "outline"} className="ml-auto">
+              <Badge variant={retention.active ? "secondary" : "outline"}>
                 {retention.active ? "ativa" : "pausada"}
               </Badge>
+              {retention.lastTrigger && (
+                <Badge variant="outline" className="capitalize">
+                  último: {retention.lastTrigger === "manual" ? "manual" : "agendado"}
+                </Badge>
+              )}
+              <div className="ml-auto flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => downloadLastPurgePdf(retention)}
+                  disabled={!retention.lastRunAt}
+                  title={retention.lastRunAt ? "Baixar relatório PDF do último purge" : "Nenhum purge executado"}
+                >
+                  <FileText className="mr-2 h-3.5 w-3.5" />
+                  PDF do último purge
+                </Button>
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={handleManualPurge}
+                  disabled={purging}
+                >
+                  {purging ? (
+                    <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Trash2 className="mr-2 h-3.5 w-3.5" />
+                  )}
+                  Disparar purge agora
+                </Button>
+              </div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 text-muted-foreground">
               <div>
@@ -1116,8 +1146,55 @@ function CoreDemosPage() {
                 </div>
               </div>
             </div>
+
+            {/* Breakdown do último purge por nicho e status */}
+            {retention.lastRunAt && (retention.lastRemovedCount ?? 0) > 0 && (
+              <div className="mt-3 pt-3 border-t border-primary/10 grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
+                    Removidos por nicho
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {Object.entries(retention.lastByNiche ?? {}).length === 0 ? (
+                      <span className="text-muted-foreground">—</span>
+                    ) : (
+                      Object.entries(retention.lastByNiche)
+                        .sort((a, b) => b[1] - a[1])
+                        .map(([k, c]) => (
+                          <Badge key={k} variant="outline" className="font-normal">
+                            {k} · {c}
+                          </Badge>
+                        ))
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
+                    Removidos por status
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {Object.entries(retention.lastByStatus ?? {}).length === 0 ? (
+                      <span className="text-muted-foreground">—</span>
+                    ) : (
+                      Object.entries(retention.lastByStatus)
+                        .sort((a, b) => b[1] - a[1])
+                        .map(([k, c]) => (
+                          <Badge
+                            key={k}
+                            variant={k === "success" ? "secondary" : "destructive"}
+                            className="font-normal"
+                          >
+                            {k} · {c}
+                          </Badge>
+                        ))
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
+
 
 
 
