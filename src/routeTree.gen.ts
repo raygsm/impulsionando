@@ -25,6 +25,7 @@ import { Route as PacienteRouteImport } from './routes/paciente'
 import { Route as OrcamentoRouteImport } from './routes/orcamento'
 import { Route as ModulosRouteImport } from './routes/modulos'
 import { Route as EmpresasRouteImport } from './routes/empresas'
+import { Route as ContratarRouteImport } from './routes/contratar'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as ContaSuspensaRouteImport } from './routes/conta-suspensa'
 import { Route as ConsumidorRouteImport } from './routes/consumidor'
@@ -287,6 +288,11 @@ const EmpresasRoute = EmpresasRouteImport.update({
   path: '/empresas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContratarRoute = ContratarRouteImport.update({
+  id: '/contratar',
+  path: '/contratar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContatoRoute = ContatoRouteImport.update({
   id: '/contato',
   path: '/contato',
@@ -462,9 +468,9 @@ const DemoAdvogadosRoute = DemoAdvogadosRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContratarSobMedidaRoute = ContratarSobMedidaRouteImport.update({
-  id: '/contratar/sob-medida',
-  path: '/contratar/sob-medida',
-  getParentRoute: () => rootRouteImport,
+  id: '/sob-medida',
+  path: '/sob-medida',
+  getParentRoute: () => ContratarRoute,
 } as any)
 const ComoFuncionaFitnessRoute = ComoFuncionaFitnessRouteImport.update({
   id: '/como-funciona/fitness',
@@ -1291,6 +1297,7 @@ export interface FileRoutesByFullPath {
   '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
+  '/contratar': typeof ContratarRouteWithChildren
   '/empresas': typeof EmpresasRoute
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
@@ -1489,6 +1496,7 @@ export interface FileRoutesByTo {
   '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
+  '/contratar': typeof ContratarRouteWithChildren
   '/empresas': typeof EmpresasRoute
   '/orcamento': typeof OrcamentoRoute
   '/planos': typeof PlanosRouteWithChildren
@@ -1678,6 +1686,7 @@ export interface FileRoutesById {
   '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
+  '/contratar': typeof ContratarRouteWithChildren
   '/empresas': typeof EmpresasRoute
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
@@ -1878,6 +1887,7 @@ export interface FileRouteTypes {
     | '/consumidor'
     | '/conta-suspensa'
     | '/contato'
+    | '/contratar'
     | '/empresas'
     | '/modulos'
     | '/orcamento'
@@ -2076,6 +2086,7 @@ export interface FileRouteTypes {
     | '/consumidor'
     | '/conta-suspensa'
     | '/contato'
+    | '/contratar'
     | '/empresas'
     | '/orcamento'
     | '/planos'
@@ -2264,6 +2275,7 @@ export interface FileRouteTypes {
     | '/consumidor'
     | '/conta-suspensa'
     | '/contato'
+    | '/contratar'
     | '/empresas'
     | '/modulos'
     | '/orcamento'
@@ -2464,6 +2476,7 @@ export interface RootRouteChildren {
   ConsumidorRoute: typeof ConsumidorRoute
   ContaSuspensaRoute: typeof ContaSuspensaRoute
   ContatoRoute: typeof ContatoRoute
+  ContratarRoute: typeof ContratarRouteWithChildren
   EmpresasRoute: typeof EmpresasRoute
   ModulosRoute: typeof ModulosRouteWithChildren
   OrcamentoRoute: typeof OrcamentoRoute
@@ -2482,7 +2495,6 @@ export interface RootRouteChildren {
   WhiteLabelRoute: typeof WhiteLabelRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   ComoFuncionaFitnessRoute: typeof ComoFuncionaFitnessRoute
-  ContratarSobMedidaRoute: typeof ContratarSobMedidaRoute
   DemoAdvogadosRoute: typeof DemoAdvogadosRoute
   DemoAfiliadosRoute: typeof DemoAfiliadosRoute
   DemoAgendaRoute: typeof DemoAgendaRoute
@@ -2641,6 +2653,13 @@ declare module '@tanstack/react-router' {
       path: '/empresas'
       fullPath: '/empresas'
       preLoaderRoute: typeof EmpresasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contratar': {
+      id: '/contratar'
+      path: '/contratar'
+      fullPath: '/contratar'
+      preLoaderRoute: typeof ContratarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contato': {
@@ -2890,10 +2909,10 @@ declare module '@tanstack/react-router' {
     }
     '/contratar/sob-medida': {
       id: '/contratar/sob-medida'
-      path: '/contratar/sob-medida'
+      path: '/sob-medida'
       fullPath: '/contratar/sob-medida'
       preLoaderRoute: typeof ContratarSobMedidaRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ContratarRoute
     }
     '/como-funciona/fitness': {
       id: '/como-funciona/fitness'
@@ -4327,6 +4346,18 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface ContratarRouteChildren {
+  ContratarSobMedidaRoute: typeof ContratarSobMedidaRoute
+}
+
+const ContratarRouteChildren: ContratarRouteChildren = {
+  ContratarSobMedidaRoute: ContratarSobMedidaRoute,
+}
+
+const ContratarRouteWithChildren = ContratarRoute._addFileChildren(
+  ContratarRouteChildren,
+)
+
 interface ModulosRouteChildren {
   ModulosSlugRoute: typeof ModulosSlugRoute
   ModulosIndexRoute: typeof ModulosIndexRoute
@@ -4372,6 +4403,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConsumidorRoute: ConsumidorRoute,
   ContaSuspensaRoute: ContaSuspensaRoute,
   ContatoRoute: ContatoRoute,
+  ContratarRoute: ContratarRouteWithChildren,
   EmpresasRoute: EmpresasRoute,
   ModulosRoute: ModulosRouteWithChildren,
   OrcamentoRoute: OrcamentoRoute,
@@ -4390,7 +4422,6 @@ const rootRouteChildren: RootRouteChildren = {
   WhiteLabelRoute: WhiteLabelRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
   ComoFuncionaFitnessRoute: ComoFuncionaFitnessRoute,
-  ContratarSobMedidaRoute: ContratarSobMedidaRoute,
   DemoAdvogadosRoute: DemoAdvogadosRoute,
   DemoAfiliadosRoute: DemoAfiliadosRoute,
   DemoAgendaRoute: DemoAgendaRoute,
