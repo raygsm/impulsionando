@@ -171,7 +171,10 @@ function formatBRL(v: number) {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+type Audience = "empresas" | "white-label" | "consumidor";
+
 function PlanosPage() {
+  const [audience, setAudience] = useState<Audience>("empresas");
   const [annual, setAnnual] = useState(false);
   const { openCheckout, loading: checkoutLoading } = usePaddleCheckout();
   const { data: user } = useCurrentUser();
