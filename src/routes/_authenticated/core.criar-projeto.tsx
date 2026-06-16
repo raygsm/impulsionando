@@ -610,9 +610,11 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function Summary({ client, project, modelKind, preset, modules, toggles }: {
+function Summary({ client, project, modelKind, preset, modules, toggles, plan, admin, plansData }: {
   client: ClientForm; project: ProjectForm; modelKind: string; preset: SegmentKey; modules: string[]; toggles: Record<string, boolean>;
+  plan?: PlanForm; admin?: AdminForm; plansData?: Array<{ id: string; name: string; recurring_amount: number; setup_fee: number }>;
 }) {
+  const selectedPlan = plan?.planId ? plansData?.find((p) => p.id === plan.planId) : undefined;
   return (
     <div className="grid md:grid-cols-2 gap-3 text-sm">
       <Block title="Cliente">
@@ -632,6 +634,22 @@ function Summary({ client, project, modelKind, preset, modules, toggles }: {
       </Block>
       <Block title="Módulos">
         {modules.length === 0 ? <span className="text-muted-foreground">Nenhum</span> : modules.map((m) => <Badge key={m} variant="outline" className="mr-1 mb-1">{m}</Badge>)}
+      </Block>
+      <Block title="Plano & Cobrança">
+        {selectedPlan ? (
+          <>
+            <b>{selectedPlan.name}</b>
+            <div>Mensalidade: R$ {(plan?.recurringAmount ?? Number(selectedPlan.recurring_amount)).toFixed(2)}</div>
+            <div>Setup: R$ {(plan?.setupAmount ?? Number(selectedPlan.setup_fee)).toFixed(2)} {plan?.setupPaid ? "(pago)" : ""}</div>
+            <div className="text-muted-foreground">Venc. dia {plan?.dueDay ?? "—"} · {plan?.generateFirstInvoice ? "1ª fatura será gerada" : "sem fatura inicial"}</div>
+          </>
+        ) : <span className="text-muted-foreground">Sem plano (contratar depois)</span>}
+      </Block>
+      <Block title="Administrador">
+        <b>{admin?.name || client.ownerName || "—"}</b>
+        <div className="text-muted-foreground">{admin?.email || client.email || "sem e-mail"}</div>
+        <div className="text-muted-foreground">{admin?.phone || client.whatsapp || ""}</div>
+        <div className="text-xs mt-1">{admin?.sendWelcome ? "✓ Boas-vindas será enviado" : "Boas-vindas desativado"}</div>
       </Block>
       <Block title="Configurações iniciais">
         <ul className="text-xs space-y-0.5">
