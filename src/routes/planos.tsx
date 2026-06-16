@@ -313,9 +313,12 @@ function PlanosPage() {
             Pague só pelo que usar.<br />Escale quando precisar.
           </h1>
           <p className="text-lg text-white/85 max-w-2xl mx-auto leading-relaxed mt-6">
-            Quatro planos cobrem desde o autônomo até a operação multi-empresa.
-            Sem letras miúdas, sem custo escondido.
+            Três planos atrelados ao salário mínimo (½ SM, 1 SM e 2 SM) cobrem do módulo único à operação multi-empresa.
+            Mais a opção <strong>Sob Medida</strong> para escopos específicos. Sem letras miúdas.
           </p>
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-accent/20 border border-accent/40 px-4 py-1.5 text-sm">
+            <Sparkles className="w-4 h-4" /> Comece com <strong className="font-semibold">7 dias de Trial</strong> com tudo liberado — sem cartão
+          </div>
           {/* Toggle mensal/anual */}
           <div className="mt-8 inline-flex items-center gap-1 p-1 rounded-full bg-white/10 backdrop-blur">
             <button
@@ -467,6 +470,71 @@ function PlanosPage() {
             </Link>
           </Button>
         </div>
+      </section>
+
+      {/* MÓDULOS POR PLANO + SINERGIAS */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-3xl mb-8">
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">O que compõe cada plano</h2>
+          <p className="text-muted-foreground mt-3 leading-relaxed">
+            Lista explícita dos módulos disponíveis em cada plano e exemplos de pares com alta sinergia
+            entre eles. Você escolhe os módulos principais dentro da quota do plano.
+          </p>
+        </div>
+        <div className="grid md:grid-cols-3 gap-4">
+          {/* Essencial */}
+          <Card className="p-5 flex flex-col">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">Plano Essencial</div>
+            <div className="text-lg font-semibold mt-1">1 módulo principal à escolha</div>
+            <ul className="mt-3 space-y-1.5 text-sm">
+              <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" /> CRM (leads, oportunidades, pipeline)</li>
+              <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" /> Agenda (profissionais, serviços, bloqueios)</li>
+              <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" /> EHR — Prontuário Eletrônico</li>
+              <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" /> PDV / Frente de caixa</li>
+              <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" /> Vitrine Imobiliária</li>
+              <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" /> Área do Cliente</li>
+              <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" /> Eventos</li>
+            </ul>
+            <div className="mt-4 rounded-md bg-muted/40 p-3 text-xs text-muted-foreground">
+              <strong className="text-foreground">Sempre incluso:</strong> dashboard, cadastros, perfis e permissões, auditoria, financeiro essencial.
+            </div>
+          </Card>
+
+          {/* Integrado */}
+          <Card className="p-5 flex flex-col border-primary/40 ring-1 ring-primary/10">
+            <div className="text-xs uppercase tracking-wider text-primary">Plano Integrado · pares curados</div>
+            <div className="text-lg font-semibold mt-1">2 módulos com alta sinergia</div>
+            <ul className="mt-3 space-y-2 text-sm">
+              <li><strong>CRM + Agenda</strong> — lead vira agendamento sem digitar duas vezes.</li>
+              <li><strong>PDV + Estoque</strong> — venda baixa estoque em tempo real.</li>
+              <li><strong>Commerce + Delivery</strong> — pedido online entra direto na rota.</li>
+              <li><strong>Vitrine + CRM Imobiliário</strong> — visita do site vira lead qualificado.</li>
+              <li><strong>EHR + Agenda Clínica</strong> — prontuário pré-carregado na consulta.</li>
+              <li><strong>Área do Cliente + Automação</strong> — autoatendimento + jornadas.</li>
+            </ul>
+            <div className="mt-4 rounded-md bg-muted/40 p-3 text-xs text-muted-foreground">
+              <strong className="text-foreground">A mais que o Essencial:</strong> financeiro completo, central de mensagens (WhatsApp + e-mail), API & webhooks, automações cruzadas.
+            </div>
+          </Card>
+
+          {/* Avançado */}
+          <Card className="p-5 flex flex-col">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">Plano Avançado · operação ponta a ponta</div>
+            <div className="text-lg font-semibold mt-1">3 módulos principais + BI</div>
+            <ul className="mt-3 space-y-2 text-sm">
+              <li><strong>ERP + CRM + Agenda + BI</strong> — clínica/serviço com gestão financeira.</li>
+              <li><strong>Commerce + PDV + Estoque + BI</strong> — varejo omnichannel real.</li>
+              <li><strong>Vitrine + CRM Imobiliário + ERP + BI</strong> — imobiliária com pipeline e contratos.</li>
+              <li><strong>EHR + Agenda + Área do Cliente + BI</strong> — clínica completa.</li>
+            </ul>
+            <div className="mt-4 rounded-md bg-muted/40 p-3 text-xs text-muted-foreground">
+              <strong className="text-foreground">A mais que o Integrado:</strong> BI consolidado, multi-unidades (até 3), governança LGPD, auditoria expandida, homologação e acompanhamento técnico.
+            </div>
+          </Card>
+        </div>
+        <p className="text-center text-xs text-muted-foreground mt-6">
+          Módulos extras além da quota: <strong>{formatBRL(EXTRA_MODULE_BRL)}/mês</strong> cada — somáveis em qualquer plano.
+        </p>
       </section>
 
       {/* COMPARE TABLE */}
@@ -622,6 +690,7 @@ function PlanosPage() {
           )}
           setupCents={(PLAN_SETUP_BRL[summary.plan.name] ?? 0) * 100}
           extraPriceCents={EXTRA_MODULE_BRL * 100}
+          annual={annual}
           confirmLabel={`Confirmar e ir para o pagamento ${annual ? "anual" : "mensal"}`}
           onEditModules={() => {
             const plan = summary.plan!;
