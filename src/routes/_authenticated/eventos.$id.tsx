@@ -372,7 +372,7 @@ function EventDetail() {
                 status: t.status,
                 taxa: t.fee_cents ? `R$ ${(Number(t.fee_cents) / 100).toFixed(2)}` : "—",
               })),
-            })} disabled={!transfersData?.items?.length}>
+            }); trackExport("pdf", "evt_transfers.pdf", transfersData?.items?.length ?? 0); }} disabled={!transfersData?.items?.length}>
               <FileText className="w-4 h-4 mr-1" /> PDF
             </Button>
           </div>
