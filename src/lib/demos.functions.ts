@@ -570,5 +570,11 @@ export const getSmokeRetentionPolicy = createServerFn({ method: "GET" })
       schedule: string;
       active: boolean;
       scheduleLabel: string;
+      lastRunAt: string | null;
+      lastRunEndAt: string | null;
+      lastRunStatus: string | null;
+      lastRemovedCount: number | null;
+      nextRunAt: string | null;
     };
+
   });
