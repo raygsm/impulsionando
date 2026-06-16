@@ -578,9 +578,19 @@ export const getSmokeRetentionPolicy = createServerFn({ method: "GET" })
       lastTrigger: "scheduled" | "manual" | null;
       lastByNiche: Record<string, number>;
       lastByStatus: Record<string, number>;
+      lastSamples: PurgeSample[];
+      lastSampleCount: number;
       lastLogId: string | null;
     };
   });
+
+export type PurgeSample = {
+  id: string;
+  niche: string;
+  status: "success" | "failure";
+  label: string | null;
+  createdAt: string;
+};
 
 export const triggerSmokePurge = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -598,9 +608,12 @@ export const triggerSmokePurge = createServerFn({ method: "POST" })
       totalRemoved: number;
       byNiche: Record<string, number>;
       byStatus: Record<string, number>;
+      samples: PurgeSample[];
+      sampleCount: number;
       retentionDays: number;
       trigger: string;
       ranAt: string;
     };
   });
+
 
