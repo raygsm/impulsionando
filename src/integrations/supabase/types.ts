@@ -6678,6 +6678,7 @@ export type Database = {
         }
         Returns: number
       }
+      get_smoke_retention_info: { Args: never; Returns: Json }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean
@@ -6713,6 +6714,7 @@ export type Database = {
         }
         Returns: string
       }
+      purge_smoke_runs: { Args: { days?: number }; Returns: number }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
