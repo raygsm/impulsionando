@@ -20,7 +20,7 @@ export const startTrial = createServerFn({ method: 'POST' })
       _contact_company: data.contact_company,
       _contact_email: data.contact_email.toLowerCase(),
       _contact_whatsapp: data.contact_whatsapp,
-      _contact_doc: data.contact_doc || null,
+      _contact_doc: data.contact_doc || '',
       _chosen_plan: data.plan_code,
       _source: 'site_contratar',
     })
