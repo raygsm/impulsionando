@@ -83,8 +83,73 @@ type SmokeRunRow = {
   ids: Record<string, string | null>;
   error: string | null;
   batch_id: string | null;
+  replay_of: string | null;
   created_at: string;
 };
+
+type SortKey = "name" | "niche" | "invoice_amount" | "invoice_due" | "invoice_status";
+type SortDir = "asc" | "desc";
+
+function csvCell(v: unknown): string {
+  if (v === null || v === undefined) return "";
+  const s = typeof v === "object" ? JSON.stringify(v) : String(v);
+  return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function downloadBlob(content: string, filename: string, mime: string) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function printHistoryPDF(rows: SmokeRunRow[]) {
+  const w = window.open("", "_blank", "width=900,height=700");
+  if (!w) return;
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>Histórico Smoke Tests</title>
+<style>
+  body{font-family:system-ui,-apple-system,sans-serif;padding:24px;color:#111}
+  h1{font-size:18px;margin:0 0 16px}
+  table{border-collapse:collapse;width:100%;font-size:11px}
+  th,td{border:1px solid #ddd;padding:6px 8px;text-align:left;vertical-align:top}
+  th{background:#f3f4f6}
+  .ok{color:#059669;font-weight:600}
+  .fail{color:#dc2626;font-weight:600}
+  pre{margin:0;font-size:10px;white-space:pre-wrap;word-break:break-all}
+</style></head><body>
+<h1>Histórico Smoke Tests — ${new Date().toLocaleString("pt-BR")}</h1>
+<table><thead><tr>
+  <th>Data</th><th>Label</th><th>Nicho</th><th>Status</th><th>Tempo</th>
+  <th>Batch</th><th>Replay de</th><th>IDs</th><th>Logs</th><th>Erro</th>
+</tr></thead><tbody>
+${rows
+  .map(
+    (r) => `<tr>
+  <td>${new Date(r.created_at).toLocaleString("pt-BR")}</td>
+  <td>${r.label ?? "—"}</td>
+  <td>${r.niche_slug ?? "—"}</td>
+  <td class="${r.success ? "ok" : "fail"}">${r.success ? "OK" : "FALHA"}</td>
+  <td>${r.duration_ms}ms</td>
+  <td>${r.batch_id ? r.batch_id.slice(0, 8) : "—"}</td>
+  <td>${r.replay_of ? r.replay_of.slice(0, 8) : "—"}</td>
+  <td><pre>${JSON.stringify(r.ids, null, 2)}</pre></td>
+  <td><pre>${(r.steps ?? []).map((s) => `${s.ok ? "✓" : "✗"} ${s.key}${s.detail ? " — " + s.detail : ""}`).join("\n")}</pre></td>
+  <td>${r.error ?? ""}</td>
+</tr>`,
+  )
+  .join("")}
+</tbody></table>
+<script>window.onload=()=>{setTimeout(()=>window.print(),300)}</script>
+</body></html>`;
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+}
 
 function CoreDemosPage() {
   const qc = useQueryClient();
