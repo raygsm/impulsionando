@@ -49,7 +49,14 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  Clock,
+  CalendarClock,
+  Trash2,
+  
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+
 import { useMemo, useState, useEffect } from "react";
 import JSZip from "jszip";
 import { jsPDF } from "jspdf";
@@ -221,6 +228,8 @@ function CoreDemosPage() {
   const [historySearch, setHistorySearch] = useState("");
   const debouncedSearch = useDebouncedValue(historySearch, 350);
   const [selectedRun, setSelectedRun] = useState<SmokeRunRow | null>(null);
+  const [includeRawLogs, setIncludeRawLogs] = useState(true);
+
 
   // Reset page when filters change (debounced text)
   useEffect(() => {
@@ -472,14 +481,17 @@ function CoreDemosPage() {
     zip.file(`${base}.csv`, buildCsv(rows));
     zip.file(`${base}.pdf`, buildPdfBlob(rows));
 
-    // Raw per-run JSON (full audit trail offline)
-    const runsFolder = zip.folder("runs");
-    for (const row of rows) {
-      runsFolder?.file(`${row.id}.json`, JSON.stringify(row, null, 2));
+    // Raw per-run JSON (full audit trail offline) — gated by toggle
+    const includedRawIds: string[] = [];
+    if (includeRawLogs) {
+      const runsFolder = zip.folder("runs");
+      for (const row of rows) {
+        runsFolder?.file(`${row.id}.json`, JSON.stringify(row, null, 2));
+        includedRawIds.push(row.id);
+      }
+      zip.file("runs.ndjson", rows.map((r) => JSON.stringify(r)).join("\n"));
     }
-    // Single newline-delimited JSON file with all runs
-    zip.file("runs.ndjson", rows.map((r) => JSON.stringify(r)).join("\n"));
-    // Pretty array of all runs
+    // Pretty array of all runs (always included — compact audit summary)
     zip.file("runs.json", JSON.stringify(rows, null, 2));
 
     // Aggregates
@@ -505,6 +517,7 @@ function CoreDemosPage() {
     const manifest = {
       generatedAt: new Date().toISOString(),
       generatedBy: "core/demos history export",
+      includeRawLogs,
       filters: {
         sinceDays: historyFilters.sinceDays,
         status: historyFilters.status,
@@ -535,19 +548,42 @@ function CoreDemosPage() {
             schedule: retention.schedule,
             scheduleLabel: retention.scheduleLabel,
             active: retention.active,
+            lastRunAt: retention.lastRunAt,
+            lastRunStatus: retention.lastRunStatus,
+            lastRemovedCount: retention.lastRemovedCount,
+            nextRunAt: retention.nextRunAt,
           }
         : null,
       files: {
         csv: `${base}.csv`,
         pdf: `${base}.pdf`,
-        runsDir: "runs/<id>.json",
-        runsNdjson: "runs.ndjson",
         runsJson: "runs.json",
+        runsDir: includeRawLogs ? "runs/<id>.json" : null,
+        runsNdjson: includeRawLogs ? "runs.ndjson" : null,
       },
+      rawRunIds: includedRawIds,
     };
     zip.file("manifest.json", JSON.stringify(manifest, null, 2));
 
     const zipBlob = await zip.generateAsync({ type: "blob" });
+
+    // ---- Client-side validation: ensure ZIP contains all expected files
+    const verify = await JSZip.loadAsync(zipBlob);
+    const expected: string[] = ["manifest.json", "runs.json", `${base}.csv`, `${base}.pdf`];
+    if (includeRawLogs) {
+      expected.push("runs.ndjson");
+      for (const id of includedRawIds) expected.push(`runs/${id}.json`);
+    }
+    const missing = expected.filter((p) => !verify.file(p));
+    if (missing.length > 0) {
+      toast.error(
+        `ZIP inválido — arquivos ausentes: ${missing.slice(0, 3).join(", ")}${
+          missing.length > 3 ? ` (+${missing.length - 3})` : ""
+        }`,
+      );
+      return;
+    }
+
     const url = URL.createObjectURL(zipBlob);
     const a = document.createElement("a");
     a.href = url;
@@ -556,8 +592,13 @@ function CoreDemosPage() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    toast.success(`ZIP exportado (${rows.length} runs · ${okCount} ok / ${failCount} falhas)`);
+    toast.success(
+      `ZIP exportado (${rows.length} runs · ${okCount} ok / ${failCount} falhas${
+        includeRawLogs ? "" : " · sem logs brutos"
+      })`,
+    );
   };
+
 
 
   const demos = (data?.demos ?? []) as unknown as DemoRow[];
@@ -960,22 +1001,90 @@ function CoreDemosPage() {
           </div>
         </div>
 
-        {/* Política de retenção */}
+        {/* Toggle: incluir logs brutos no ZIP */}
+        <div className="flex items-center gap-2 mb-3 text-xs">
+          <Switch
+            id="zip-raw-logs"
+            checked={includeRawLogs}
+            onCheckedChange={setIncludeRawLogs}
+          />
+          <Label htmlFor="zip-raw-logs" className="cursor-pointer">
+            Incluir logs brutos no ZIP{" "}
+            <span className="text-muted-foreground">
+              (runs/&lt;id&gt;.json + runs.ndjson — aumenta o tamanho)
+            </span>
+          </Label>
+        </div>
+
+        {/* Painel de retenção detalhado */}
         {retention && (
-          <div className="flex items-start gap-2 mb-3 rounded border border-primary/20 bg-primary/5 px-3 py-2 text-xs">
-            <ShieldCheck className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-            <div className="flex-1">
-              <div className="font-medium">
-                Retenção automática: {retention.retentionDays} dias
-              </div>
-              <div className="text-muted-foreground">
-                Limpeza agendada {retention.scheduleLabel.toLowerCase()} (cron{" "}
-                <code className="font-mono">{retention.schedule}</code>) ·{" "}
+          <div className="mb-3 rounded border border-primary/20 bg-primary/5 px-3 py-2.5 text-xs">
+            <div className="flex items-center gap-2 mb-2">
+              <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+              <span className="font-medium">Política de retenção do histórico</span>
+              <Badge variant={retention.active ? "secondary" : "outline"} className="ml-auto">
                 {retention.active ? "ativa" : "pausada"}
+              </Badge>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 text-muted-foreground">
+              <div>
+                <div className="text-[10px] uppercase tracking-wide">Janela</div>
+                <div className="text-foreground font-medium">
+                  {retention.retentionDays} dias
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] uppercase tracking-wide flex items-center gap-1">
+                  <Clock className="h-3 w-3" /> Agenda
+                </div>
+                <div className="text-foreground font-medium">
+                  {retention.scheduleLabel}
+                </div>
+                <div className="font-mono text-[10px]">{retention.schedule}</div>
+              </div>
+              <div>
+                <div className="text-[10px] uppercase tracking-wide flex items-center gap-1">
+                  <CalendarClock className="h-3 w-3" /> Próxima execução
+                </div>
+                <div className="text-foreground font-medium">
+                  {retention.nextRunAt
+                    ? new Date(retention.nextRunAt).toLocaleString("pt-BR", {
+                        dateStyle: "short",
+                        timeStyle: "short",
+                      })
+                    : "—"}
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] uppercase tracking-wide flex items-center gap-1">
+                  <Trash2 className="h-3 w-3" /> Último purge
+                </div>
+                <div className="text-foreground font-medium">
+                  {retention.lastRunAt
+                    ? new Date(retention.lastRunAt).toLocaleString("pt-BR", {
+                        dateStyle: "short",
+                        timeStyle: "short",
+                      })
+                    : "ainda não executou"}
+                </div>
+                <div className="text-[10px]">
+                  {retention.lastRunAt ? (
+                    <>
+                      {retention.lastRemovedCount !== null
+                        ? `${retention.lastRemovedCount} removida(s)`
+                        : "execuções removidas: —"}
+                      {retention.lastRunStatus
+                        ? ` · ${retention.lastRunStatus}`
+                        : ""}
+                    </>
+                  ) : null}
+                </div>
               </div>
             </div>
           </div>
         )}
+
+
 
 
         {/* Presets de filtros salvos */}
