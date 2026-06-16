@@ -32,6 +32,10 @@ function isoDateOnly(iso: string) { return iso.slice(0, 10); }
 function MacroDashboard() {
   const fetcher = useServerFn(fetchMacroDashboard);
   const meta = useServerFn(fetchMacroFiltersMeta);
+  const logger = useServerFn(logExport);
+  const trackExport = (kind: "csv" | "pdf", scope: string, rowCount: number) => {
+    logger({ data: { kind, scope, params: queryArgs as Record<string, unknown>, rowCount, companyId: filters.companyId || null } }).catch(() => {});
+  };
   const [filters, setFilters] = useState<Filters>({
     days: 30, from: "", to: "",
     companyId: "", nicheSlug: "", regua: "", workflow: "",
