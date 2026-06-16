@@ -553,3 +553,22 @@ export const exportSmokeHistory = createServerFn({ method: "GET" })
 
 
 
+
+export const getSmokeRetentionPolicy = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data: isStaff } = await supabase.rpc("is_impulsionando_staff", { _user: userId });
+    if (!isStaff) throw new Error("Acesso restrito à equipe Impulsionando.");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin.rpc("get_smoke_retention_info");
+    if (error) throw new Error(error.message);
+    return data as {
+      retentionDays: number;
+      jobName: string;
+      schedule: string;
+      active: boolean;
+      scheduleLabel: string;
+    };
+  });
