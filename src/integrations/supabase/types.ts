@@ -5304,6 +5304,81 @@ export type Database = {
         }
         Relationships: []
       }
+      n8n_workflow_runs: {
+        Row: {
+          channel: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          error: string | null
+          event_name: string
+          finished_at: string | null
+          http_status: number | null
+          id: string
+          idempotency_key: string | null
+          latency_ms: number | null
+          lead_id: string | null
+          payload: Json
+          regua: string
+          started_at: string
+          status: string
+          step: string
+          tenant_id: string | null
+          workflow_name: string
+          workflow_version: string | null
+        }
+        Insert: {
+          channel?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          error?: string | null
+          event_name: string
+          finished_at?: string | null
+          http_status?: number | null
+          id?: string
+          idempotency_key?: string | null
+          latency_ms?: number | null
+          lead_id?: string | null
+          payload?: Json
+          regua: string
+          started_at?: string
+          status: string
+          step: string
+          tenant_id?: string | null
+          workflow_name: string
+          workflow_version?: string | null
+        }
+        Update: {
+          channel?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          error?: string | null
+          event_name?: string
+          finished_at?: string | null
+          http_status?: number | null
+          id?: string
+          idempotency_key?: string | null
+          latency_ms?: number | null
+          lead_id?: string | null
+          payload?: Json
+          regua?: string
+          started_at?: string
+          status?: string
+          step?: string
+          tenant_id?: string | null
+          workflow_name?: string
+          workflow_version?: string | null
+        }
+        Relationships: []
+      }
       niches: {
         Row: {
           created_at: string
@@ -7108,7 +7183,20 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      n8n_lead_journey: {
+        Row: {
+          contact_email: string | null
+          events: number | null
+          failures: number | null
+          first_seen_at: string | null
+          last_seen_at: string | null
+          reguas: string[] | null
+          successes: number | null
+          timeline: Json | null
+          workflows: string[] | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       _trial_norm: { Args: { _v: string }; Returns: string }
