@@ -298,7 +298,7 @@ function CoreDemosPage() {
   };
 
   const handleExportPdf = async () => {
-    const r = await exportHistory();
+    const r = await exportHistory({ data: historyFilters });
     const rows = (r.runs ?? []) as unknown as SmokeRunRow[];
     printHistoryPDF(rows);
   };
