@@ -78,8 +78,8 @@ function CoreDemosPage() {
     <div className="space-y-6">
       <PageHeader
         title="Demos por nicho"
-        subtitle="Empresas demonstração geradas pelo CORE com contrato e 1ª fatura prontos."
-        actions={
+        description="Empresas demonstração geradas pelo CORE com contrato e 1ª fatura prontos."
+        action={
           <Button
             onClick={() => smokeMut.mutate()}
             disabled={smokeMut.isPending}
