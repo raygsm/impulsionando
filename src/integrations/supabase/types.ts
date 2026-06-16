@@ -4488,7 +4488,10 @@ export type Database = {
           state: string | null
           status: string
           title: string
+          transfer_deadline_hours: number | null
+          transfer_fee_cents: number
           transfer_policy: string
+          transfer_requires_document: boolean
           updated_at: string
           venue_address: string | null
           venue_name: string | null
@@ -4512,7 +4515,10 @@ export type Database = {
           state?: string | null
           status?: string
           title: string
+          transfer_deadline_hours?: number | null
+          transfer_fee_cents?: number
           transfer_policy?: string
+          transfer_requires_document?: boolean
           updated_at?: string
           venue_address?: string | null
           venue_name?: string | null
@@ -4536,7 +4542,10 @@ export type Database = {
           state?: string | null
           status?: string
           title?: string
+          transfer_deadline_hours?: number | null
+          transfer_fee_cents?: number
           transfer_policy?: string
+          transfer_requires_document?: boolean
           updated_at?: string
           venue_address?: string | null
           venue_name?: string | null
@@ -4557,12 +4566,15 @@ export type Database = {
           company_id: string
           created_at: string
           created_by: string | null
+          decided_at: string | null
+          fee_cents: number
           from_email: string
           from_name: string
           id: string
           reason: string | null
           status: string
           ticket_id: string
+          to_document: string | null
           to_email: string
           to_name: string
           to_phone: string | null
@@ -4573,12 +4585,15 @@ export type Database = {
           company_id: string
           created_at?: string
           created_by?: string | null
+          decided_at?: string | null
+          fee_cents?: number
           from_email: string
           from_name: string
           id?: string
           reason?: string | null
           status?: string
           ticket_id: string
+          to_document?: string | null
           to_email: string
           to_name: string
           to_phone?: string | null
@@ -4589,12 +4604,15 @@ export type Database = {
           company_id?: string
           created_at?: string
           created_by?: string | null
+          decided_at?: string | null
+          fee_cents?: number
           from_email?: string
           from_name?: string
           id?: string
           reason?: string | null
           status?: string
           ticket_id?: string
+          to_document?: string | null
           to_email?: string
           to_name?: string
           to_phone?: string | null
@@ -8017,16 +8035,32 @@ export type Database = {
         Args: { _gate?: string; _qr_token: string }
         Returns: Json
       }
-      evt_transfer_ticket: {
-        Args: {
-          _reason?: string
-          _ticket_id: string
-          _to_email: string
-          _to_name: string
-          _to_phone?: string
-        }
+      evt_decide_transfer: {
+        Args: { _decision: string; _transfer_id: string }
         Returns: string
       }
+      evt_transfer_ticket:
+        | {
+            Args: {
+              _reason?: string
+              _ticket_id: string
+              _to_email: string
+              _to_name: string
+              _to_phone?: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              _reason?: string
+              _ticket_id: string
+              _to_document?: string
+              _to_email: string
+              _to_name: string
+              _to_phone?: string
+            }
+            Returns: string
+          }
       get_smoke_retention_info: { Args: never; Returns: Json }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
