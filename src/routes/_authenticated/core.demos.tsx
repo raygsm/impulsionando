@@ -1001,22 +1001,90 @@ function CoreDemosPage() {
           </div>
         </div>
 
-        {/* Política de retenção */}
+        {/* Toggle: incluir logs brutos no ZIP */}
+        <div className="flex items-center gap-2 mb-3 text-xs">
+          <Switch
+            id="zip-raw-logs"
+            checked={includeRawLogs}
+            onCheckedChange={setIncludeRawLogs}
+          />
+          <Label htmlFor="zip-raw-logs" className="cursor-pointer">
+            Incluir logs brutos no ZIP{" "}
+            <span className="text-muted-foreground">
+              (runs/&lt;id&gt;.json + runs.ndjson — aumenta o tamanho)
+            </span>
+          </Label>
+        </div>
+
+        {/* Painel de retenção detalhado */}
         {retention && (
-          <div className="flex items-start gap-2 mb-3 rounded border border-primary/20 bg-primary/5 px-3 py-2 text-xs">
-            <ShieldCheck className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-            <div className="flex-1">
-              <div className="font-medium">
-                Retenção automática: {retention.retentionDays} dias
-              </div>
-              <div className="text-muted-foreground">
-                Limpeza agendada {retention.scheduleLabel.toLowerCase()} (cron{" "}
-                <code className="font-mono">{retention.schedule}</code>) ·{" "}
+          <div className="mb-3 rounded border border-primary/20 bg-primary/5 px-3 py-2.5 text-xs">
+            <div className="flex items-center gap-2 mb-2">
+              <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+              <span className="font-medium">Política de retenção do histórico</span>
+              <Badge variant={retention.active ? "secondary" : "outline"} className="ml-auto">
                 {retention.active ? "ativa" : "pausada"}
+              </Badge>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 text-muted-foreground">
+              <div>
+                <div className="text-[10px] uppercase tracking-wide">Janela</div>
+                <div className="text-foreground font-medium">
+                  {retention.retentionDays} dias
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] uppercase tracking-wide flex items-center gap-1">
+                  <Clock className="h-3 w-3" /> Agenda
+                </div>
+                <div className="text-foreground font-medium">
+                  {retention.scheduleLabel}
+                </div>
+                <div className="font-mono text-[10px]">{retention.schedule}</div>
+              </div>
+              <div>
+                <div className="text-[10px] uppercase tracking-wide flex items-center gap-1">
+                  <CalendarClock className="h-3 w-3" /> Próxima execução
+                </div>
+                <div className="text-foreground font-medium">
+                  {retention.nextRunAt
+                    ? new Date(retention.nextRunAt).toLocaleString("pt-BR", {
+                        dateStyle: "short",
+                        timeStyle: "short",
+                      })
+                    : "—"}
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] uppercase tracking-wide flex items-center gap-1">
+                  <Trash2 className="h-3 w-3" /> Último purge
+                </div>
+                <div className="text-foreground font-medium">
+                  {retention.lastRunAt
+                    ? new Date(retention.lastRunAt).toLocaleString("pt-BR", {
+                        dateStyle: "short",
+                        timeStyle: "short",
+                      })
+                    : "ainda não executou"}
+                </div>
+                <div className="text-[10px]">
+                  {retention.lastRunAt ? (
+                    <>
+                      {retention.lastRemovedCount !== null
+                        ? `${retention.lastRemovedCount} removida(s)`
+                        : "execuções removidas: —"}
+                      {retention.lastRunStatus
+                        ? ` · ${retention.lastRunStatus}`
+                        : ""}
+                    </>
+                  ) : null}
+                </div>
               </div>
             </div>
           </div>
         )}
+
+
 
 
         {/* Presets de filtros salvos */}
