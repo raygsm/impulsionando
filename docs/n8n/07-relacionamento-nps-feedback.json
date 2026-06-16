@@ -1,0 +1,52 @@
+{
+  "name": "Impulsionando — 07 Relacionamento · NPS Mensal + Roteamento",
+  "nodes": [
+    { "parameters": { "httpMethod": "POST", "path": "nps-due", "responseMode": "responseNode" }, "id": "wh", "name": "Webhook nps.due", "type": "n8n-nodes-base.webhook", "typeVersion": 2, "position": [220, 300] },
+    { "parameters": { "functionCode": "const c=require('crypto');const s=$input.first().json.headers['x-impulsionando-signature']||'';const r=$input.first().json.body;const h=c.createHmac('sha256',$env.IMPULSIONANDO_WEBHOOK_SECRET).update(typeof r==='string'?r:JSON.stringify(r)).digest('hex');if(h!==s)throw new Error('sig');return[{json: typeof r==='string'?JSON.parse(r):r}];" }, "id": "ver", "name": "Verify HMAC", "type": "n8n-nodes-base.function", "typeVersion": 1, "position": [420, 300] },
+    { "parameters": { "responseCode": 200, "responseBody": "ok" }, "id": "resp", "name": "Respond 200", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [620, 180] },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send", "method": "POST", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={\"template\":\"nps-survey\",\"to\":\"{{$json.email}}\",\"props\":{\"surveyUrl\":\"{{$env.IMPULSIONANDO_API_BASE}}/nps?tid={{$json.tenantId}}\"}}"
+      },
+      "id": "send", "name": "Enviar NPS", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [620, 420]
+    },
+    { "parameters": { "httpMethod": "POST", "path": "nps-response", "responseMode": "responseNode" }, "id": "whr", "name": "Webhook nps.response", "type": "n8n-nodes-base.webhook", "typeVersion": 2, "position": [220, 700] },
+    { "parameters": { "functionCode": "const c=require('crypto');const s=$input.first().json.headers['x-impulsionando-signature']||'';const r=$input.first().json.body;const h=c.createHmac('sha256',$env.IMPULSIONANDO_WEBHOOK_SECRET).update(typeof r==='string'?r:JSON.stringify(r)).digest('hex');if(h!==s)throw new Error('sig');return[{json: typeof r==='string'?JSON.parse(r):r}];" }, "id": "verr", "name": "Verify HMAC 2", "type": "n8n-nodes-base.function", "typeVersion": 1, "position": [420, 700] },
+    { "parameters": { "responseCode": 200, "responseBody": "ok" }, "id": "rr", "name": "Respond 200#2", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [620, 580] },
+    {
+      "parameters": { "rules": { "rules": [ { "operation": "smallerEqual", "value2": 6, "output": 0 }, { "operation": "smallerEqual", "value2": 8, "output": 1 }, { "operation": "larger", "value2": 8, "output": 2 } ] }, "value1": "={{$json.score}}", "dataType": "number" },
+      "id": "sw", "name": "Score?", "type": "n8n-nodes-base.switch", "typeVersion": 1, "position": [620, 800]
+    },
+    {
+      "parameters": { "channel": "ops", "text": "🔴 Detrator NPS ({{$('Verify HMAC 2').first().json.score}}) — Tenant {{$('Verify HMAC 2').first().json.tenantId}} / {{$('Verify HMAC 2').first().json.email}}. CS abrir conversa em até 4h.", "webhookUrl": "={{$env.SLACK_OPS_WEBHOOK}}" },
+      "id": "det", "name": "Slack Detrator → CS", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [820, 700]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send", "method": "POST", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={\"template\":\"nps-passive-thanks\",\"to\":\"{{$('Verify HMAC 2').first().json.email}}\",\"props\":{}}"
+      },
+      "id": "pas", "name": "Passivo Thanks", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [820, 800]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send", "method": "POST", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={\"template\":\"nps-promoter-referral\",\"to\":\"{{$('Verify HMAC 2').first().json.email}}\",\"props\":{\"referralUrl\":\"{{$env.IMPULSIONANDO_API_BASE}}/indique?tid={{$('Verify HMAC 2').first().json.tenantId}}\"}}"
+      },
+      "id": "pro", "name": "Promotor → Indicação", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [820, 900]
+    }
+  ],
+  "connections": {
+    "Webhook nps.due": { "main": [[{ "node": "Verify HMAC", "type": "main", "index": 0 }]] },
+    "Verify HMAC": { "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }, { "node": "Enviar NPS", "type": "main", "index": 0 }]] },
+    "Webhook nps.response": { "main": [[{ "node": "Verify HMAC 2", "type": "main", "index": 0 }]] },
+    "Verify HMAC 2": { "main": [[{ "node": "Respond 200#2", "type": "main", "index": 0 }, { "node": "Score?", "type": "main", "index": 0 }]] },
+    "Score?": { "main": [
+      [{ "node": "Slack Detrator → CS", "type": "main", "index": 0 }],
+      [{ "node": "Passivo Thanks", "type": "main", "index": 0 }],
+      [{ "node": "Promotor → Indicação", "type": "main", "index": 0 }]
+    ] }
+  },
+  "active": false, "settings": { "executionOrder": "v1" }, "versionId": "v1.0.0"
+}

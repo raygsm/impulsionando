@@ -138,32 +138,44 @@ const COMPARE: Row[] = [
 
 const FAQ = [
   {
+    q: "Como funciona o Trial de 7 dias?",
+    a: "Você libera o ambiente com TODOS os módulos do plano escolhido por 7 dias, sem cartão obrigatório no início. Ao converter, entra no ciclo regular: setup + 3 mensalidades (mensal) ou setup + anuidade (anual). O conteúdo criado no Trial é preservado.",
+  },
+  {
+    q: "Quem é elegível ao Trial?",
+    a: "Empresas com CNPJ ativo e e-mail corporativo. Cada CNPJ tem direito a 1 Trial. Whitelabel/Sob Medida não usam Trial — entram via POC dedicada.",
+  },
+  {
+    q: "O que acontece no fim do Trial se eu não converter?",
+    a: "O ambiente entra em modo somente-leitura por 15 dias para você exportar dados (LGPD). Sem cobrança automática se o cartão não foi cadastrado.",
+  },
+  {
+    q: "Por que o mínimo é 90 dias no mensal?",
+    a: "Os 90 dias cobrem o setup técnico, o onboarding e a curva de adoção. O ciclo cobrado é setup + 3 mensalidades (4 pagamentos no total). Depois disso, segue mês a mês sem fidelidade.",
+  },
+  {
     q: "Posso trocar de plano depois?",
     a: "Sim, a qualquer momento. Pagamentos são proporcionais e o histórico do sistema é preservado.",
   },
   {
     q: "Tem fidelidade?",
-    a: "Não há fidelidade obrigatória no mensal. No anual, oferecemos desconto equivalente a 2 meses grátis.",
+    a: "Não há fidelidade obrigatória no mensal após os 90 dias iniciais. No anual, oferecemos desconto equivalente a 2 meses grátis (paga 10, usa 12).",
   },
   {
     q: "Como funciona o desconto anual?",
-    a: "Você paga 10 meses e usa 12. O desconto é aplicado direto no checkout.",
+    a: "Você paga o equivalente a 10 meses e usa 12. O checkout cobra setup + anuidade (12× preço/mês com desconto aplicado). É um único contrato anual.",
   },
   {
     q: "Quais formas de pagamento?",
-    a: "Cartão de crédito, Pix recorrente, boleto (anual) e link de pagamento.",
-  },
-  {
-    q: "Posso testar antes de contratar?",
-    a: "Sim. Temos demo navegável em /demo, e oferecemos período de validação na implantação.",
+    a: "Cartão de crédito, Pix recorrente, boleto (anual) e link de pagamento. Se o checkout falhar, liberamos Pix manual com o valor exato do ciclo inicial.",
   },
   {
     q: "O preço inclui implantação?",
-    a: "No Essencial é self-service. Integrado e Avançado incluem onboarding guiado. Sob Medida tem implantação dedicada orçada à parte.",
+    a: "No Essencial é self-service com setup R$ 297. Integrado e Avançado incluem onboarding guiado com setup proporcional. Sob Medida tem implantação dedicada orçada à parte.",
   },
   {
     q: "Os módulos podem ser adicionados depois?",
-    a: "Sim. Você pode evoluir do Essencial ao Avançado adicionando módulos quando precisar.",
+    a: "Sim. Você pode evoluir do Essencial ao Avançado adicionando módulos quando precisar. Módulos extras custam R$ 497/mês cada.",
   },
   {
     q: "Tem versão white label?",
@@ -237,15 +249,19 @@ function PlanosPage() {
         },
       });
     } catch {
-      const finalValue = annual ? totalMonthly * 10 : totalMonthly;
+      // Pix fallback espelha o ciclo mínimo cobrado pelo gateway:
+      // - Mensal: setup + 3 mensalidades (mínimo 90 dias)
+      // - Anual: setup + 12× preço/mês no rate anual (= 10× preço cheio, 2 meses grátis)
+      const cycleMonths = annual ? 12 : 3;
+      const cycleValue = totalMonthly * cycleMonths;
       toast.message(
         "Instabilidade no checkout. Liberei o pagamento via Pix para você seguir agora.",
       );
       setPixState({
         open: true,
-        amountCents: Math.round((setup + finalValue) * 100),
+        amountCents: Math.round((setup + cycleValue) * 100),
         txid: `PLANO-${plan.name.toUpperCase()}-${annual ? "ANUAL" : "MENSAL"}`,
-        label: `Plano ${plan.name}${modules.length ? ` (${modules.length} mód.)` : ""} — ${annual ? "anual" : "mensal"} — inclui setup`,
+        label: `Plano ${plan.name}${modules.length ? ` (${modules.length} mód.)` : ""} — ${annual ? "anual (setup + 12 mensalidades)" : "mensal (setup + 3 mensalidades)"}`,
       });
     }
   }

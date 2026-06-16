@@ -1,0 +1,78 @@
+{
+  "name": "Impulsionando — 02 Conversão · Trial Onboarding (D0/D1/D3/D5/D6)",
+  "nodes": [
+    { "parameters": { "httpMethod": "POST", "path": "trial-started", "responseMode": "responseNode" }, "id": "wh", "name": "Webhook trial.started", "type": "n8n-nodes-base.webhook", "typeVersion": 2, "position": [220, 300] },
+    { "parameters": { "functionCode": "const c=require('crypto');const s=$input.first().json.headers['x-impulsionando-signature']||'';const r=$input.first().json.body;const h=c.createHmac('sha256',$env.IMPULSIONANDO_WEBHOOK_SECRET).update(typeof r==='string'?r:JSON.stringify(r)).digest('hex');if(h!==s)throw new Error('sig');return[{json: typeof r==='string'?JSON.parse(r):r}];" }, "id": "ver", "name": "Verify HMAC", "type": "n8n-nodes-base.function", "typeVersion": 1, "position": [420, 300] },
+    { "parameters": { "responseCode": 200, "responseBody": "ok" }, "id": "resp", "name": "Respond 200", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [620, 180] },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send", "method": "POST", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={\"template\":\"trial-started\",\"to\":\"{{$json.email}}\",\"props\":{\"plan\":\"{{$json.plan}}\",\"trialEndsAt\":\"{{$json.trialEndsAt}}\",\"loginUrl\":\"{{$env.IMPULSIONANDO_API_BASE}}/app\"}}"
+      },
+      "id": "d0", "name": "D0 Email trial-started", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [620, 420]
+    },
+    { "parameters": { "amount": 1, "unit": "days" }, "id": "w1", "name": "Wait 1d", "type": "n8n-nodes-base.wait", "typeVersion": 1, "position": [820, 420] },
+    {
+      "parameters": { "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/trial/activity", "method": "GET", "sendQuery": true, "queryParameters": { "parameters": [{ "name": "tenantId", "value": "={{$('Verify HMAC').first().json.tenantId}}" }] } },
+      "id": "act1", "name": "Check activity D1", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1020, 420]
+    },
+    {
+      "parameters": { "conditions": { "boolean": [{ "value1": "={{$json.firstLoginDone}}", "value2": false }] } },
+      "id": "if1", "name": "Nunca logou?", "type": "n8n-nodes-base.if", "typeVersion": 1, "position": [1220, 420]
+    },
+    {
+      "parameters": {
+        "url": "https://api.z-api.io/instances/{{$env.ZAPI_INSTANCE}}/token/{{$env.ZAPI_TOKEN}}/send-text", "method": "POST", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={\"phone\":\"{{$('Verify HMAC').first().json.phone}}\",\"message\":\"Seu trial Impulsionando está ativo 🚀 Posso te dar um tour de 10min e configurar seu primeiro fluxo?\"}"
+      },
+      "id": "wa1", "name": "D1 WA Tour", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1420, 320]
+    },
+    { "parameters": { "amount": 2, "unit": "days" }, "id": "w3", "name": "Wait 2d (→ D3)", "type": "n8n-nodes-base.wait", "typeVersion": 1, "position": [1420, 520] },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send", "method": "POST", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={\"template\":\"trial-quickwin\",\"to\":\"{{$('Verify HMAC').first().json.email}}\",\"props\":{\"plan\":\"{{$('Verify HMAC').first().json.plan}}\"}}"
+      },
+      "id": "d3", "name": "D3 Email quick-win", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1620, 520]
+    },
+    { "parameters": { "amount": 2, "unit": "days" }, "id": "w5", "name": "Wait 2d (→ D5)", "type": "n8n-nodes-base.wait", "typeVersion": 1, "position": [1820, 520] },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send", "method": "POST", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={\"template\":\"trial-social-proof\",\"to\":\"{{$('Verify HMAC').first().json.email}}\",\"props\":{}}"
+      },
+      "id": "d5", "name": "D5 Social Proof", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [2020, 520]
+    },
+    { "parameters": { "amount": 1, "unit": "days" }, "id": "w6", "name": "Wait 1d (→ D6)", "type": "n8n-nodes-base.wait", "typeVersion": 1, "position": [2220, 520] },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send", "method": "POST", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={\"template\":\"trial-ending\",\"to\":\"{{$('Verify HMAC').first().json.email}}\",\"props\":{\"hoursLeft\":24,\"plan\":\"{{$('Verify HMAC').first().json.plan}}\",\"checkoutUrl\":\"{{$env.IMPULSIONANDO_API_BASE}}/planos?audience=empresas&utm_source=trial-ending\"}}"
+      },
+      "id": "d6e", "name": "D6 Email trial-ending", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [2420, 520]
+    },
+    {
+      "parameters": {
+        "url": "https://api.z-api.io/instances/{{$env.ZAPI_INSTANCE}}/token/{{$env.ZAPI_TOKEN}}/send-text", "method": "POST", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={\"phone\":\"{{$('Verify HMAC').first().json.phone}}\",\"message\":\"Seu trial vence amanhã ⏰ Quer que eu já gere o link de checkout do plano {{$('Verify HMAC').first().json.plan}}? Setup + 3 mensalidades, sem fidelidade depois dos 90 dias.\"}"
+      },
+      "id": "d6w", "name": "D6 WA urgency", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [2620, 520]
+    }
+  ],
+  "connections": {
+    "Webhook trial.started": { "main": [[{ "node": "Verify HMAC", "type": "main", "index": 0 }]] },
+    "Verify HMAC": { "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }, { "node": "D0 Email trial-started", "type": "main", "index": 0 }]] },
+    "D0 Email trial-started": { "main": [[{ "node": "Wait 1d", "type": "main", "index": 0 }]] },
+    "Wait 1d": { "main": [[{ "node": "Check activity D1", "type": "main", "index": 0 }]] },
+    "Check activity D1": { "main": [[{ "node": "Nunca logou?", "type": "main", "index": 0 }]] },
+    "Nunca logou?": { "main": [[{ "node": "D1 WA Tour", "type": "main", "index": 0 }], [{ "node": "Wait 2d (→ D3)", "type": "main", "index": 0 }]] },
+    "D1 WA Tour": { "main": [[{ "node": "Wait 2d (→ D3)", "type": "main", "index": 0 }]] },
+    "Wait 2d (→ D3)": { "main": [[{ "node": "D3 Email quick-win", "type": "main", "index": 0 }]] },
+    "D3 Email quick-win": { "main": [[{ "node": "Wait 2d (→ D5)", "type": "main", "index": 0 }]] },
+    "Wait 2d (→ D5)": { "main": [[{ "node": "D5 Social Proof", "type": "main", "index": 0 }]] },
+    "D5 Social Proof": { "main": [[{ "node": "Wait 1d (→ D6)", "type": "main", "index": 0 }]] },
+    "Wait 1d (→ D6)": { "main": [[{ "node": "D6 Email trial-ending", "type": "main", "index": 0 }]] },
+    "D6 Email trial-ending": { "main": [[{ "node": "D6 WA urgency", "type": "main", "index": 0 }]] }
+  },
+  "active": false, "settings": { "executionOrder": "v1" }, "versionId": "v1.0.0"
+}
