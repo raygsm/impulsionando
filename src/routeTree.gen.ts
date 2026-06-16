@@ -60,6 +60,7 @@ import { Route as DemoChecklistRouteImport } from './routes/demo.checklist'
 import { Route as DemoAgendaRouteImport } from './routes/demo.agenda'
 import { Route as DemoAfiliadosRouteImport } from './routes/demo.afiliados'
 import { Route as DemoAdvogadosRouteImport } from './routes/demo.advogados'
+import { Route as ContratarSobMedidaRouteImport } from './routes/contratar.sob-medida'
 import { Route as ComoFuncionaFitnessRouteImport } from './routes/como-funciona.fitness'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
@@ -458,6 +459,11 @@ const DemoAfiliadosRoute = DemoAfiliadosRouteImport.update({
 const DemoAdvogadosRoute = DemoAdvogadosRouteImport.update({
   id: '/demo/advogados',
   path: '/demo/advogados',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContratarSobMedidaRoute = ContratarSobMedidaRouteImport.update({
+  id: '/contratar/sob-medida',
+  path: '/contratar/sob-medida',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComoFuncionaFitnessRoute = ComoFuncionaFitnessRouteImport.update({
@@ -1329,6 +1335,7 @@ export interface FileRoutesByFullPath {
   '/users': typeof AuthenticatedUsersRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
+  '/contratar/sob-medida': typeof ContratarSobMedidaRoute
   '/demo/advogados': typeof DemoAdvogadosRoute
   '/demo/afiliados': typeof DemoAfiliadosRoute
   '/demo/agenda': typeof DemoAgendaRoute
@@ -1515,6 +1522,7 @@ export interface FileRoutesByTo {
   '/users': typeof AuthenticatedUsersRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
+  '/contratar/sob-medida': typeof ContratarSobMedidaRoute
   '/demo/advogados': typeof DemoAdvogadosRoute
   '/demo/afiliados': typeof DemoAfiliadosRoute
   '/demo/agenda': typeof DemoAgendaRoute
@@ -1714,6 +1722,7 @@ export interface FileRoutesById {
   '/_authenticated/users': typeof AuthenticatedUsersRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
+  '/contratar/sob-medida': typeof ContratarSobMedidaRoute
   '/demo/advogados': typeof DemoAdvogadosRoute
   '/demo/afiliados': typeof DemoAfiliadosRoute
   '/demo/agenda': typeof DemoAgendaRoute
@@ -1913,6 +1922,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/checkout/success'
     | '/como-funciona/fitness'
+    | '/contratar/sob-medida'
     | '/demo/advogados'
     | '/demo/afiliados'
     | '/demo/agenda'
@@ -2099,6 +2109,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/checkout/success'
     | '/como-funciona/fitness'
+    | '/contratar/sob-medida'
     | '/demo/advogados'
     | '/demo/afiliados'
     | '/demo/agenda'
@@ -2297,6 +2308,7 @@ export interface FileRouteTypes {
     | '/_authenticated/users'
     | '/checkout/success'
     | '/como-funciona/fitness'
+    | '/contratar/sob-medida'
     | '/demo/advogados'
     | '/demo/afiliados'
     | '/demo/agenda'
@@ -2470,6 +2482,7 @@ export interface RootRouteChildren {
   WhiteLabelRoute: typeof WhiteLabelRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   ComoFuncionaFitnessRoute: typeof ComoFuncionaFitnessRoute
+  ContratarSobMedidaRoute: typeof ContratarSobMedidaRoute
   DemoAdvogadosRoute: typeof DemoAdvogadosRoute
   DemoAfiliadosRoute: typeof DemoAfiliadosRoute
   DemoAgendaRoute: typeof DemoAgendaRoute
@@ -2873,6 +2886,13 @@ declare module '@tanstack/react-router' {
       path: '/demo/advogados'
       fullPath: '/demo/advogados'
       preLoaderRoute: typeof DemoAdvogadosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contratar/sob-medida': {
+      id: '/contratar/sob-medida'
+      path: '/contratar/sob-medida'
+      fullPath: '/contratar/sob-medida'
+      preLoaderRoute: typeof ContratarSobMedidaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/como-funciona/fitness': {
@@ -4370,6 +4390,7 @@ const rootRouteChildren: RootRouteChildren = {
   WhiteLabelRoute: WhiteLabelRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
   ComoFuncionaFitnessRoute: ComoFuncionaFitnessRoute,
+  ContratarSobMedidaRoute: ContratarSobMedidaRoute,
   DemoAdvogadosRoute: DemoAdvogadosRoute,
   DemoAfiliadosRoute: DemoAfiliadosRoute,
   DemoAgendaRoute: DemoAgendaRoute,
