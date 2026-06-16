@@ -1,10 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import {
   MessageCircle, ArrowRight, CheckCircle2, Sparkles,
-  Info, Target,
+  Info, Target, Building2, Layers, UserRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+
 import { PublicHeader } from "./PublicHeader";
 import { PublicFooter } from "./PublicFooter";
 import { MODULE_DETAILS } from "./moduleDetails";
