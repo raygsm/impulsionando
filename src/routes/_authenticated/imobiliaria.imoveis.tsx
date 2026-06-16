@@ -180,9 +180,15 @@ function Page() {
     <div className="space-y-4">
       <PageHeader
         title="Imóveis"
-        description="Cadastro de imóveis disponíveis. Imóveis com status ‘ativo’ disparam matching com intenções de busca."
-        
-        action={<Button onClick={openNew}><Plus className="w-4 h-4 mr-1" /> Novo imóvel</Button>}
+        description="Cadastro de imóveis disponíveis. Imóveis aprovados ficam públicos e disparam matching."
+        action={
+          <div className="flex gap-2">
+            <Button asChild variant="outline" size="sm">
+              <Link to="/imobiliaria/aprovacoes">Fila de aprovação</Link>
+            </Button>
+            <Button onClick={openNew}><Plus className="w-4 h-4 mr-1" /> Novo imóvel</Button>
+          </div>
+        }
       />
 
       {!companyId ? (
@@ -193,7 +199,10 @@ function Page() {
         <EmptyState title="Nenhum imóvel" description="Comece cadastrando o primeiro imóvel." />
       ) : (
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {properties.map((p) => (
+          {properties.map((p) => {
+            const ap = APPROVAL_LABEL[p.approval_status ?? "approved"] ?? APPROVAL_LABEL.approved;
+            const canSubmit = !p.approval_status || p.approval_status === "changes_requested" || p.approval_status === "rejected";
+            return (
             <Card key={p.id} className="p-4 space-y-2">
               <div className="flex items-start justify-between gap-2">
                 <div>
@@ -202,8 +211,16 @@ function Page() {
                     {p.reference_code ? `Ref ${p.reference_code} · ` : ""}{p.neighborhood ?? "-"}, {p.city ?? "-"}
                   </div>
                 </div>
-                <Badge variant={p.status === "ativo" ? "default" : "secondary"}>{p.status}</Badge>
+                <div className="flex flex-col items-end gap-1">
+                  <Badge variant={p.status === "ativo" ? "default" : "secondary"}>{p.status}</Badge>
+                  <Badge variant={ap.variant}>{ap.label}</Badge>
+                </div>
               </div>
+              {p.review_notes && (p.approval_status === "changes_requested" || p.approval_status === "rejected") && (
+                <div className="text-xs rounded border border-amber-200 bg-amber-50 p-2 text-amber-900 dark:bg-amber-950/30 dark:text-amber-200 dark:border-amber-900">
+                  <span className="font-medium">Revisor:</span> {p.review_notes}
+                </div>
+              )}
               <div className="text-sm flex flex-wrap gap-2">
                 <Badge variant="outline">{p.operation}</Badge>
                 <Badge variant="outline">{p.property_type}</Badge>
@@ -214,16 +231,21 @@ function Page() {
                   ? p.rent_price ? `R$ ${p.rent_price.toLocaleString("pt-BR")}/mês` : "—"
                   : p.sale_price ? `R$ ${p.sale_price.toLocaleString("pt-BR")}` : "—"}
               </div>
-              <div className="flex gap-2 pt-2">
+              <div className="flex flex-wrap gap-2 pt-2">
                 <Button size="sm" variant="outline" onClick={() => openEdit(p)}>
                   <Pencil className="w-3 h-3 mr-1" /> Editar
                 </Button>
+                {canSubmit && (
+                  <Button size="sm" onClick={() => submitReview.mutate(p.id)} disabled={submitReview.isPending}>
+                    Enviar p/ aprovação
+                  </Button>
+                )}
                 <Button size="sm" variant="ghost" onClick={() => del.mutate(p.id)}>
                   <Trash2 className="w-3 h-3" />
                 </Button>
               </div>
             </Card>
-          ))}
+          );})}
         </div>
       )}
 
