@@ -2618,6 +2618,7 @@ export type Database = {
           created_at: string
           id: string
           ran_at: string
+          removed_samples: Json
           retention_days: number
           total_removed: number
           trigger: string
@@ -2629,6 +2630,7 @@ export type Database = {
           created_at?: string
           id?: string
           ran_at?: string
+          removed_samples?: Json
           retention_days: number
           total_removed?: number
           trigger?: string
@@ -2640,6 +2642,7 @@ export type Database = {
           created_at?: string
           id?: string
           ran_at?: string
+          removed_samples?: Json
           retention_days?: number
           total_removed?: number
           trigger?: string
