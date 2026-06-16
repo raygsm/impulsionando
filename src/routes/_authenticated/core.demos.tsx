@@ -52,7 +52,7 @@ import {
   Clock,
   CalendarClock,
   Trash2,
-  AlertTriangle,
+  
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
