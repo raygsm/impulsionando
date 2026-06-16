@@ -347,6 +347,7 @@ function CoreDemosPage() {
   const historyPageSize = 20;
   const [historySince, setHistorySince] = useState<string>("all");
   const [historyStatus, setHistoryStatus] = useState<"all" | "success" | "failure">("all");
+  const [historyNicheSlug, setHistoryNicheSlug] = useState<string | null>(null);
   const [historySearch, setHistorySearch] = useState("");
   const debouncedSearch = useDebouncedValue(historySearch, 350);
   const [selectedRun, setSelectedRun] = useState<SmokeRunRow | null>(null);
@@ -369,16 +370,18 @@ function CoreDemosPage() {
   // Reset page when filters change (debounced text)
   useEffect(() => {
     setHistoryPage(0);
-  }, [debouncedSearch, historySince, historyStatus]);
+  }, [debouncedSearch, historySince, historyStatus, historyNicheSlug]);
 
   const historyFilters = useMemo(
     () => ({
       sinceDays: historySince === "all" ? null : Number(historySince),
       status: historyStatus,
       search: debouncedSearch.trim() || undefined,
+      nicheSlug: historyNicheSlug,
     }),
-    [historySince, historyStatus, debouncedSearch],
+    [historySince, historyStatus, debouncedSearch, historyNicheSlug],
   );
+
 
   // Filter presets (localStorage)
   const [presets, setPresets] = useState<HistoryPreset[]>(() => loadPresets());
