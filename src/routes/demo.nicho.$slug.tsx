@@ -12,6 +12,7 @@ import {
   AlertTriangle, ShieldCheck, BadgeDollarSign, Sparkles,
 } from "lucide-react";
 import { getDemoEventos, formatBRL, NICHO_LABELS, type Nicho } from "@/lib/demoNicho";
+import { useDemoTracker } from "@/hooks/useDemoTracker";
 
 const SUPORTADOS: Nicho[] = ["eventos"];
 
