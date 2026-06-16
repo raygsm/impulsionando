@@ -783,3 +783,16 @@ export const getProjectVariables = createServerFn({ method: "GET" })
       } as Record<string, string>,
     };
   });
+
+// ============ Fase 5: Planos para o wizard ============
+export const listBillingPlansForFactory = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("billing_plans")
+      .select("id, code, name, description, setup_fee, recurring_amount, cycle, due_day, is_default, is_active, included_modules, included_module_count, extra_module_price")
+      .eq("is_active", true)
+      .order("sort_order");
+    if (error) throw new Error(error.message);
+    return { plans: data ?? [] };
+  });
