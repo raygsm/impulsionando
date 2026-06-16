@@ -567,6 +567,8 @@ function PlanosPage() {
           </div>
         </Card>
       </section>
+        </>
+      )}
 
       <PublicFooter />
       <PixFallbackDialog
