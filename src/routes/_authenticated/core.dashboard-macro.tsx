@@ -54,6 +54,10 @@ function MacroDashboard() {
     return arg;
   }, [filters]);
 
+  const trackExport = (kind: "csv" | "pdf", scope: string, rowCount: number) => {
+    logger({ data: { kind, scope, params: queryArgs as Record<string, unknown>, rowCount, companyId: filters.companyId || null } }).catch(() => {});
+  };
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["macro-dashboard", queryArgs],
     queryFn: () => fetcher({ data: queryArgs as never }),
