@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   listDemoCompanies,
@@ -42,10 +42,52 @@ import {
   RotateCcw,
   Download,
   FileText,
+  FileArchive,
+  BookmarkPlus,
+  X,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import JSZip from "jszip";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
+
+function useDebouncedValue<T>(value: T, delay = 300): T {
+  const [v, setV] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setV(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return v;
+}
+
+type HistoryPreset = {
+  id: string;
+  name: string;
+  since: string;
+  status: "all" | "success" | "failure";
+  search: string;
+};
+
+const PRESETS_KEY = "core-demos:history-presets";
+
+function loadPresets(): HistoryPreset[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(PRESETS_KEY);
+    return raw ? (JSON.parse(raw) as HistoryPreset[]) : [];
+  } catch {
+    return [];
+  }
+}
+function savePresetsToStorage(list: HistoryPreset[]) {
+  try {
+    window.localStorage.setItem(PRESETS_KEY, JSON.stringify(list));
+  } catch {
+    /* ignore */
+  }
+}
 
 const fmtBRL = (v: number) =>
   Number(v ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -165,18 +207,66 @@ function CoreDemosPage() {
   // filtros + paginação do histórico
   const [historyPage, setHistoryPage] = useState(0);
   const historyPageSize = 20;
-  const [historySince, setHistorySince] = useState<string>("all"); // "all" | "7" | "30" | "90"
+  const [historySince, setHistorySince] = useState<string>("all");
   const [historyStatus, setHistoryStatus] = useState<"all" | "success" | "failure">("all");
   const [historySearch, setHistorySearch] = useState("");
+  const debouncedSearch = useDebouncedValue(historySearch, 350);
   const [selectedRun, setSelectedRun] = useState<SmokeRunRow | null>(null);
+
+  // Reset page when filters change (debounced text)
+  useEffect(() => {
+    setHistoryPage(0);
+  }, [debouncedSearch, historySince, historyStatus]);
 
   const historyFilters = useMemo(
     () => ({
       sinceDays: historySince === "all" ? null : Number(historySince),
       status: historyStatus,
-      search: historySearch.trim() || undefined,
+      search: debouncedSearch.trim() || undefined,
     }),
-    [historySince, historyStatus, historySearch],
+    [historySince, historyStatus, debouncedSearch],
+  );
+
+  // Filter presets (localStorage)
+  const [presets, setPresets] = useState<HistoryPreset[]>(() => loadPresets());
+  const persistPresets = (list: HistoryPreset[]) => {
+    setPresets(list);
+    savePresetsToStorage(list);
+  };
+  const handleSavePreset = () => {
+    const name = window.prompt(
+      "Nome do conjunto de filtros",
+      `Preset ${presets.length + 1}`,
+    );
+    if (!name) return;
+    const next: HistoryPreset = {
+      id: crypto.randomUUID(),
+      name: name.trim(),
+      since: historySince,
+      status: historyStatus,
+      search: historySearch,
+    };
+    persistPresets([next, ...presets].slice(0, 12));
+    toast.success(`Preset "${next.name}" salvo`);
+  };
+  const applyPreset = (p: HistoryPreset) => {
+    setHistorySince(p.since);
+    setHistoryStatus(p.status);
+    setHistorySearch(p.search);
+    setHistoryPage(0);
+  };
+  const removePreset = (id: string) => {
+    persistPresets(presets.filter((p) => p.id !== id));
+  };
+  const activePresetId = useMemo(
+    () =>
+      presets.find(
+        (p) =>
+          p.since === historySince &&
+          p.status === historyStatus &&
+          p.search === historySearch,
+      )?.id ?? null,
+    [presets, historySince, historyStatus, historySearch],
   );
 
   const { data, isLoading } = useQuery({
@@ -184,7 +274,7 @@ function CoreDemosPage() {
     queryFn: () => fetchDemos(),
   });
 
-  const { data: historyData, isLoading: loadingHistory } = useQuery({
+  const { data: historyData, isLoading: loadingHistory, isFetching: fetchingHistory } = useQuery({
     queryKey: ["core-smoke-history", historyPage, historyFilters],
     queryFn: () =>
       fetchHistory({
@@ -194,6 +284,7 @@ function CoreDemosPage() {
           ...historyFilters,
         },
       }),
+    placeholderData: keepPreviousData,
   });
 
   const impersonateMut = useMutation({
@@ -249,9 +340,22 @@ function CoreDemosPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const handleExportCsv = async () => {
-    const r = await exportHistory({ data: historyFilters });
-    const rows = (r.runs ?? []) as unknown as SmokeRunRow[];
+  const buildExportFilename = (ext: string) => {
+    const period =
+      historySince === "all" ? "all" : `last${historySince}d`;
+    const status = historyStatus === "all" ? "any" : historyStatus;
+    const slug = (debouncedSearch || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 24);
+    const stamp = new Date().toISOString().slice(0, 10);
+    const parts = ["smoke-history", stamp, period, status];
+    if (slug) parts.push(`q-${slug}`);
+    return `${parts.join("_")}.${ext}`;
+  };
+
+  const buildCsv = (rows: SmokeRunRow[]) => {
     const header = [
       "id",
       "created_at",
@@ -287,14 +391,102 @@ function CoreDemosPage() {
           .join(","),
       );
     }
-    downloadBlob(lines.join("\n"), `smoke-history-${Date.now()}.csv`, "text/csv;charset=utf-8");
+    return lines.join("\n");
+  };
+
+  const buildPdfBlob = (rows: SmokeRunRow[]): Blob => {
+    const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+    doc.setFontSize(14);
+    doc.text("Histórico Smoke Tests", 40, 36);
+    doc.setFontSize(9);
+    doc.text(
+      `Gerado em ${new Date().toLocaleString("pt-BR")} · período: ${
+        historySince === "all" ? "todo" : `últimos ${historySince}d`
+      } · status: ${historyStatus} · busca: ${debouncedSearch || "—"} · ${rows.length} linha(s)`,
+      40,
+      52,
+    );
+    autoTable(doc, {
+      startY: 70,
+      styles: { fontSize: 7, cellPadding: 3, overflow: "linebreak" },
+      headStyles: { fillColor: [243, 244, 246], textColor: 20 },
+      head: [["Data", "Label", "Nicho", "Status", "Tempo", "Batch", "Replay", "Etapas", "Erro"]],
+      body: rows.map((r) => [
+        new Date(r.created_at).toLocaleString("pt-BR"),
+        r.label ?? "—",
+        r.niche_slug ?? "—",
+        r.success ? "OK" : "FALHA",
+        `${r.duration_ms}ms`,
+        r.batch_id ? r.batch_id.slice(0, 8) : "—",
+        r.replay_of ? r.replay_of.slice(0, 8) : "—",
+        (r.steps ?? [])
+          .map((s) => `${s.ok ? "✓" : "✗"} ${s.key}`)
+          .join("\n"),
+        r.error ?? "",
+      ]),
+      columnStyles: {
+        7: { cellWidth: 180 },
+        8: { cellWidth: 120 },
+      },
+    });
+    return doc.output("blob");
+  };
+
+  const handleExportCsv = async () => {
+    const r = await exportHistory({ data: historyFilters });
+    const rows = (r.runs ?? []) as unknown as SmokeRunRow[];
+    downloadBlob(buildCsv(rows), buildExportFilename("csv"), "text/csv;charset=utf-8");
     toast.success(`CSV exportado (${rows.length} linhas)`);
   };
 
   const handleExportPdf = async () => {
     const r = await exportHistory({ data: historyFilters });
     const rows = (r.runs ?? []) as unknown as SmokeRunRow[];
-    printHistoryPDF(rows);
+    const blob = buildPdfBlob(rows);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = buildExportFilename("pdf");
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(`PDF exportado (${rows.length} linhas)`);
+  };
+
+  const handleExportZip = async () => {
+    const r = await exportHistory({ data: historyFilters });
+    const rows = (r.runs ?? []) as unknown as SmokeRunRow[];
+    const zip = new JSZip();
+    const base = buildExportFilename("").replace(/\.$/, "");
+    zip.file(`${base}.csv`, buildCsv(rows));
+    zip.file(`${base}.pdf`, buildPdfBlob(rows));
+    zip.file(
+      "manifest.json",
+      JSON.stringify(
+        {
+          generatedAt: new Date().toISOString(),
+          filters: {
+            sinceDays: historyFilters.sinceDays,
+            status: historyFilters.status,
+            search: historyFilters.search ?? null,
+          },
+          rowCount: rows.length,
+        },
+        null,
+        2,
+      ),
+    );
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+    const url = URL.createObjectURL(zipBlob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = buildExportFilename("zip");
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(`ZIP exportado (${rows.length} linhas)`);
   };
 
   const demos = (data?.demos ?? []) as unknown as DemoRow[];
@@ -678,6 +870,9 @@ function CoreDemosPage() {
           <History className="h-4 w-4 text-muted-foreground" />
           <h3 className="text-sm font-semibold">Histórico de smoke tests</h3>
           <Badge variant="secondary">{historyTotal}</Badge>
+          {fetchingHistory && !loadingHistory && (
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+          )}
           <div className="ml-auto flex gap-2">
             <Button variant="outline" size="sm" onClick={handleExportCsv}>
               <Download className="mr-2 h-3.5 w-3.5" />
@@ -687,7 +882,58 @@ function CoreDemosPage() {
               <FileText className="mr-2 h-3.5 w-3.5" />
               PDF
             </Button>
+            <Button variant="outline" size="sm" onClick={handleExportZip}>
+              <FileArchive className="mr-2 h-3.5 w-3.5" />
+              ZIP (CSV+PDF)
+            </Button>
           </div>
+        </div>
+
+        {/* Presets de filtros salvos */}
+        <div className="flex items-center gap-2 flex-wrap mb-3">
+          <span className="text-xs text-muted-foreground">Presets:</span>
+          {presets.length === 0 && (
+            <span className="text-xs text-muted-foreground italic">
+              nenhum salvo ainda
+            </span>
+          )}
+          {presets.map((p) => (
+            <div
+              key={p.id}
+              className={`flex items-center gap-1 border rounded-full pl-2 pr-1 py-0.5 text-xs ${
+                activePresetId === p.id
+                  ? "bg-primary/10 border-primary/40"
+                  : "hover:bg-muted/50"
+              }`}
+            >
+              <button
+                type="button"
+                onClick={() => applyPreset(p)}
+                className="flex items-center gap-1"
+                title={`período: ${p.since} · status: ${p.status} · busca: ${p.search || "—"}`}
+              >
+                <span>{p.name}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => removePreset(p.id)}
+                className="p-0.5 hover:text-destructive"
+                title="Remover preset"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          ))}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-xs ml-auto"
+            onClick={handleSavePreset}
+            disabled={presets.length >= 12}
+          >
+            <BookmarkPlus className="mr-1 h-3.5 w-3.5" />
+            Salvar filtros atuais
+          </Button>
         </div>
 
         {/* filtros do histórico */}
@@ -698,19 +944,10 @@ function CoreDemosPage() {
               placeholder="Buscar por label, nicho ou erro…"
               className="pl-8"
               value={historySearch}
-              onChange={(e) => {
-                setHistorySearch(e.target.value);
-                setHistoryPage(0);
-              }}
+              onChange={(e) => setHistorySearch(e.target.value)}
             />
           </div>
-          <Select
-            value={historySince}
-            onValueChange={(v) => {
-              setHistorySince(v);
-              setHistoryPage(0);
-            }}
-          >
+          <Select value={historySince} onValueChange={setHistorySince}>
             <SelectTrigger>
               <SelectValue placeholder="Intervalo" />
             </SelectTrigger>
@@ -723,10 +960,7 @@ function CoreDemosPage() {
           </Select>
           <Select
             value={historyStatus}
-            onValueChange={(v) => {
-              setHistoryStatus(v as "all" | "success" | "failure");
-              setHistoryPage(0);
-            }}
+            onValueChange={(v) => setHistoryStatus(v as "all" | "success" | "failure")}
           >
             <SelectTrigger>
               <SelectValue placeholder="Status" />
@@ -740,6 +974,7 @@ function CoreDemosPage() {
         </div>
 
         {loadingHistory ? (
+
           <div className="text-sm text-muted-foreground">Carregando…</div>
         ) : history.length === 0 ? (
           <div className="text-sm text-muted-foreground">
