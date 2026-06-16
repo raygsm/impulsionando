@@ -217,6 +217,14 @@ ${rows
   w.document.close();
 }
 
+type PurgeSampleRow = {
+  id: string;
+  niche: string;
+  status: "success" | "failure";
+  label: string | null;
+  createdAt: string;
+};
+
 function downloadLastPurgePdf(retention: {
   retentionDays: number;
   schedule: string;
@@ -228,6 +236,8 @@ function downloadLastPurgePdf(retention: {
   lastTrigger: "scheduled" | "manual" | null;
   lastByNiche: Record<string, number>;
   lastByStatus: Record<string, number>;
+  lastSamples?: PurgeSampleRow[];
+  lastSampleCount?: number;
   lastLogId: string | null;
 }) {
   if (!retention.lastRunAt) return;
@@ -268,9 +278,98 @@ function downloadLastPurgePdf(retention: {
     headStyles: { fillColor: [99, 102, 241] },
   });
 
+  // Lista paginada dos smoke_runs removidos (até 500 amostras vindas do RPC)
+  const samples = retention.lastSamples ?? [];
+  const totalRemoved = retention.lastRemovedCount ?? 0;
+  const sampleCount = retention.lastSampleCount ?? samples.length;
+  let cursor = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable
+    .finalY + 12;
+
+  doc.setFontSize(12);
+  doc.text(
+    `Execuções removidas (amostra ${sampleCount} de ${totalRemoved})`,
+    14,
+    cursor,
+  );
+  cursor += 4;
+
+  const pageSize = 25;
+  const totalPages = Math.max(1, Math.ceil(samples.length / pageSize));
+  for (let p = 0; p < totalPages; p++) {
+    if (p > 0) {
+      doc.addPage();
+      cursor = 18;
+      doc.setFontSize(12);
+      doc.text(
+        `Execuções removidas — página ${p + 1}/${totalPages}`,
+        14,
+        cursor,
+      );
+      cursor += 4;
+    }
+    const slice = samples.slice(p * pageSize, (p + 1) * pageSize);
+    autoTable(doc, {
+      startY: cursor + 2,
+      head: [["#", "ID", "Nicho", "Status", "Label"]],
+      body: slice.length
+        ? slice.map((s, i) => [
+            String(p * pageSize + i + 1),
+            s.id.slice(0, 8) + "…",
+            s.niche,
+            s.status,
+            (s.label ?? "").slice(0, 38),
+          ])
+        : [["—", "—", "—", "—", "—"]],
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [99, 102, 241] },
+      columnStyles: {
+        0: { cellWidth: 10 },
+        1: { cellWidth: 28 },
+        2: { cellWidth: 32 },
+        3: { cellWidth: 22 },
+      },
+    });
+  }
+  if (totalRemoved > samples.length) {
+    const finalY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY;
+    doc.setFontSize(8);
+    doc.setTextColor(120);
+    doc.text(
+      `Amostra limitada a ${samples.length} registros — o purge removeu ${totalRemoved} no total.`,
+      14,
+      finalY + 6,
+    );
+    doc.setTextColor(0);
+  }
+
   const stamp = new Date(retention.lastRunAt).toISOString().replace(/[:.]/g, "-");
   doc.save(`purge-report_${stamp}.pdf`);
 }
+
+function downloadPurgeFailureAudit(payload: {
+  message: string;
+  attemptedAt: string;
+  retentionDays: number;
+  partialRemoved: number | null;
+  lastKnownLogId: string | null;
+  rpcName: string;
+  stack?: string;
+}) {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  const stamp = payload.attemptedAt.replace(/[:.]/g, "-");
+  a.download = `purge-failure-audit_${stamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+
 
 
 
