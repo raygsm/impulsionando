@@ -583,7 +583,7 @@ function CriarProjetoPage() {
 }
 
 function Stepper({ step }: { step: Step }) {
-  const labels = ["Cliente + Projeto", "Modelo + Módulos", "Revisão"];
+  const labels = ["Cliente + Projeto", "Modelo + Módulos", "Plano & Admin", "Revisão"];
   return (
     <div className="flex gap-2 text-xs">
       {labels.map((l, i) => {
