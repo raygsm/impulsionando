@@ -629,3 +629,86 @@ function PlanosPage() {
     </div>
   );
 }
+
+function WhiteLabelPlansPanel() {
+  return (
+    <>
+      <section className="relative overflow-hidden bg-gradient-hero text-primary-foreground">
+        <div className="pointer-events-none absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full bg-accent/30 blur-3xl" />
+        <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20 text-center">
+          <Badge className="bg-white/15 text-primary-foreground border-0 mb-4">
+            <Layers className="w-3.5 h-3.5 mr-1" /> Planos White Label
+          </Badge>
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
+            Plataforma com a sua marca
+          </h1>
+          <p className="mt-4 text-base sm:text-lg text-white/85 max-w-2xl mx-auto leading-relaxed">
+            Os planos White Label são montados por volume de clientes, módulos ativos e nível de suporte.
+            Recursos detalhados estão na jornada White Label.
+          </p>
+          <div className="mt-8 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-center gap-3">
+            <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 gap-2 w-full sm:w-auto">
+              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+                Quero minha plataforma White Label <ArrowRight className="w-4 h-4" />
+              </a>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white gap-2 w-full sm:w-auto">
+              <Link to="/white-label">Ver jornada White Label <ArrowRight className="w-4 h-4" /></Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+      <section className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <div className="grid sm:grid-cols-3 gap-4 sm:gap-5">
+          {[
+            { title: "Sob medida", desc: "Plano dimensionado para o seu volume de clientes e operação." },
+            { title: "Setup dedicado", desc: "Implantação acompanhada por especialista, do domínio à marca." },
+            { title: "Crescimento sem teto", desc: "Adicione módulos, clientes e marcas conforme escala." },
+          ].map((b) => (
+            <Card key={b.title} className="p-6">
+              <h3 className="font-semibold tracking-tight">{b.title}</h3>
+              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{b.desc}</p>
+            </Card>
+          ))}
+        </div>
+        <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
+          <Button asChild size="lg" className="btn-whatsapp gap-2 w-full sm:w-auto">
+            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+              <MessageCircle className="w-4 h-4" /> Falar com especialista
+            </a>
+          </Button>
+          <Button asChild size="lg" variant="outline" className="gap-2 w-full sm:w-auto">
+            <Link to="/demo"><PlayCircle className="w-4 h-4" /> Ver demonstração</Link>
+          </Button>
+        </div>
+      </section>
+    </>
+  );
+}
+
+function ConsumidorPlansPanel() {
+  return (
+    <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20 text-center">
+      <Badge variant="secondary" className="mb-4">
+        <UserRound className="w-3.5 h-3.5 mr-1" /> Consumidor
+      </Badge>
+      <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
+        Acesso gratuito para consumidores
+      </h1>
+      <p className="mt-4 text-base sm:text-lg text-muted-foreground leading-relaxed">
+        Consumidores acessam benefícios, fidelidade, parceiros, eventos e experiências sem custo —
+        através das empresas participantes da rede Impulsionando.
+      </p>
+      <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
+        <Button asChild size="lg" className="bg-gradient-primary gap-2 w-full sm:w-auto">
+          <Link to="/auth">
+            Quero acessar benefícios <ArrowRight className="w-4 h-4" />
+          </Link>
+        </Button>
+        <Button asChild size="lg" variant="outline" className="gap-2 w-full sm:w-auto">
+          <Link to="/consumidor">Ver jornada do consumidor <ArrowRight className="w-4 h-4" /></Link>
+        </Button>
+      </div>
+    </section>
+  );
+}
