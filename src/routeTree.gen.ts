@@ -24,6 +24,7 @@ import { Route as PlanosRouteImport } from './routes/planos'
 import { Route as PacienteRouteImport } from './routes/paciente'
 import { Route as OrcamentoRouteImport } from './routes/orcamento'
 import { Route as ModulosRouteImport } from './routes/modulos'
+import { Route as MarketingRouteImport } from './routes/marketing'
 import { Route as EmpresasRouteImport } from './routes/empresas'
 import { Route as ContratarRouteImport } from './routes/contratar'
 import { Route as ContatoRouteImport } from './routes/contato'
@@ -289,6 +290,11 @@ const OrcamentoRoute = OrcamentoRouteImport.update({
 const ModulosRoute = ModulosRouteImport.update({
   id: '/modulos',
   path: '/modulos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketingRoute = MarketingRouteImport.update({
+  id: '/marketing',
+  path: '/marketing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmpresasRoute = EmpresasRouteImport.update({
@@ -1353,6 +1359,7 @@ export interface FileRoutesByFullPath {
   '/contato': typeof ContatoRoute
   '/contratar': typeof ContratarRouteWithChildren
   '/empresas': typeof EmpresasRoute
+  '/marketing': typeof MarketingRoute
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
   '/paciente': typeof PacienteRouteWithChildren
@@ -1560,6 +1567,7 @@ export interface FileRoutesByTo {
   '/contato': typeof ContatoRoute
   '/contratar': typeof ContratarRouteWithChildren
   '/empresas': typeof EmpresasRoute
+  '/marketing': typeof MarketingRoute
   '/orcamento': typeof OrcamentoRoute
   '/planos': typeof PlanosRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
@@ -1758,6 +1766,7 @@ export interface FileRoutesById {
   '/contato': typeof ContatoRoute
   '/contratar': typeof ContratarRouteWithChildren
   '/empresas': typeof EmpresasRoute
+  '/marketing': typeof MarketingRoute
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
   '/paciente': typeof PacienteRouteWithChildren
@@ -1967,6 +1976,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/contratar'
     | '/empresas'
+    | '/marketing'
     | '/modulos'
     | '/orcamento'
     | '/paciente'
@@ -2174,6 +2184,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/contratar'
     | '/empresas'
+    | '/marketing'
     | '/orcamento'
     | '/planos'
     | '/privacidade'
@@ -2371,6 +2382,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/contratar'
     | '/empresas'
+    | '/marketing'
     | '/modulos'
     | '/orcamento'
     | '/paciente'
@@ -2580,6 +2592,7 @@ export interface RootRouteChildren {
   ContatoRoute: typeof ContatoRoute
   ContratarRoute: typeof ContratarRouteWithChildren
   EmpresasRoute: typeof EmpresasRoute
+  MarketingRoute: typeof MarketingRoute
   ModulosRoute: typeof ModulosRouteWithChildren
   OrcamentoRoute: typeof OrcamentoRoute
   PacienteRoute: typeof PacienteRouteWithChildren
@@ -2749,6 +2762,13 @@ declare module '@tanstack/react-router' {
       path: '/modulos'
       fullPath: '/modulos'
       preLoaderRoute: typeof ModulosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/marketing': {
+      id: '/marketing'
+      path: '/marketing'
+      fullPath: '/marketing'
+      preLoaderRoute: typeof MarketingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/empresas': {
@@ -4578,6 +4598,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContatoRoute: ContatoRoute,
   ContratarRoute: ContratarRouteWithChildren,
   EmpresasRoute: EmpresasRoute,
+  MarketingRoute: MarketingRoute,
   ModulosRoute: ModulosRouteWithChildren,
   OrcamentoRoute: OrcamentoRoute,
   PacienteRoute: PacienteRouteWithChildren,
