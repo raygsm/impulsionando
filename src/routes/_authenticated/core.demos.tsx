@@ -7,6 +7,8 @@ import {
   runWizardSmokeTest,
   runWizardSmokeBatch,
   listSmokeHistory,
+  replaySmokeRun,
+  exportSmokeHistory,
 } from "@/lib/demos.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,6 +38,11 @@ import {
   ChevronDown,
   History,
   Play,
+  RotateCcw,
+  Download,
+  FileText,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 
