@@ -48,7 +48,7 @@ export function downloadTablePdf(opts: {
   const widths = defWidths.map((n) => (n || flexW));
 
   // header
-  doc.setFillColor(240); doc.rect(margin, y, totalW, 18, "F");
+  doc.setFillColor(240, 240, 240); doc.rect(margin, y, totalW, 18, "F");
   doc.setFont("helvetica", "bold"); doc.setFontSize(9);
   let x = margin + 4;
   opts.columns.forEach((c, i) => {
