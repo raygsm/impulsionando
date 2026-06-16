@@ -656,12 +656,20 @@ function CoreDemosPage() {
 
       {/* Histórico */}
       <Card className="p-4">
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-2 mb-3 flex-wrap">
           <History className="h-4 w-4 text-muted-foreground" />
           <h3 className="text-sm font-semibold">Histórico de smoke tests</h3>
-          <Badge variant="secondary" className="ml-auto">
-            {history.length}
-          </Badge>
+          <Badge variant="secondary">{historyTotal}</Badge>
+          <div className="ml-auto flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleExportCsv}>
+              <Download className="mr-2 h-3.5 w-3.5" />
+              CSV
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExportPdf}>
+              <FileText className="mr-2 h-3.5 w-3.5" />
+              PDF
+            </Button>
+          </div>
         </div>
         {loadingHistory ? (
           <div className="text-sm text-muted-foreground">Carregando…</div>
@@ -670,59 +678,105 @@ function CoreDemosPage() {
             Nenhuma execução registrada ainda.
           </div>
         ) : (
-          <div className="space-y-1">
-            {history.map((h) => (
-              <Collapsible key={h.id}>
-                <CollapsibleTrigger className="w-full">
-                  <div className="flex items-center gap-2 text-sm border rounded px-2 py-1.5 hover:bg-muted/50">
-                    {h.success ? (
-                      <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-                    ) : (
-                      <XCircle className="h-4 w-4 text-destructive shrink-0" />
-                    )}
-                    <span className="font-mono text-xs">{h.label ?? "—"}</span>
-                    {h.niche_slug && (
-                      <Badge variant="outline" className="text-xs">
-                        {h.niche_slug}
-                      </Badge>
-                    )}
-                    {h.batch_id && (
-                      <Badge variant="secondary" className="text-xs">
-                        batch {h.batch_id.slice(0, 6)}
-                      </Badge>
-                    )}
-                    <span className="ml-auto text-xs text-muted-foreground">
-                      {h.duration_ms}ms · {new Date(h.created_at).toLocaleString("pt-BR")}
-                    </span>
-                    <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="px-2 py-2">
-                  {h.error && (
-                    <div className="text-xs text-destructive mb-2">erro: {h.error}</div>
-                  )}
-                  <ul className="space-y-0.5 text-xs">
-                    {(h.steps ?? []).map((s, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        {s.ok ? (
-                          <CheckCircle2 className="h-3 w-3 text-emerald-500 mt-0.5 shrink-0" />
+          <>
+            <div className="space-y-1">
+              {history.map((h) => (
+                <Collapsible key={h.id}>
+                  <div className="flex items-center gap-1">
+                    <CollapsibleTrigger className="flex-1">
+                      <div className="flex items-center gap-2 text-sm border rounded px-2 py-1.5 hover:bg-muted/50 w-full">
+                        {h.success ? (
+                          <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
                         ) : (
-                          <XCircle className="h-3 w-3 text-destructive mt-0.5 shrink-0" />
+                          <XCircle className="h-4 w-4 text-destructive shrink-0" />
                         )}
-                        <span className="font-mono">{s.key}</span>
-                        {s.detail && (
-                          <span className="text-muted-foreground">— {s.detail}</span>
+                        <span className="font-mono text-xs truncate">{h.label ?? "—"}</span>
+                        {h.niche_slug && (
+                          <Badge variant="outline" className="text-xs">
+                            {h.niche_slug}
+                          </Badge>
                         )}
-                      </li>
-                    ))}
-                  </ul>
-                  <pre className="mt-2 text-[10px] bg-muted/40 rounded p-2 overflow-x-auto">
-                    {JSON.stringify(h.ids, null, 2)}
-                  </pre>
-                </CollapsibleContent>
-              </Collapsible>
-            ))}
-          </div>
+                        {h.batch_id && (
+                          <Badge variant="secondary" className="text-xs">
+                            batch {h.batch_id.slice(0, 6)}
+                          </Badge>
+                        )}
+                        {h.replay_of && (
+                          <Badge variant="outline" className="text-xs">
+                            replay de {h.replay_of.slice(0, 6)}
+                          </Badge>
+                        )}
+                        <span className="ml-auto text-xs text-muted-foreground">
+                          {h.duration_ms}ms · {new Date(h.created_at).toLocaleString("pt-BR")}
+                        </span>
+                        <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                      </div>
+                    </CollapsibleTrigger>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      title="Reexecutar com os mesmos parâmetros"
+                      onClick={() => replayMut.mutate(h.id)}
+                      disabled={replayMut.isPending}
+                    >
+                      {replayMut.isPending && replayMut.variables === h.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <RotateCcw className="h-3.5 w-3.5" />
+                      )}
+                    </Button>
+                  </div>
+                  <CollapsibleContent className="px-2 py-2">
+                    {h.error && (
+                      <div className="text-xs text-destructive mb-2">erro: {h.error}</div>
+                    )}
+                    <ul className="space-y-0.5 text-xs">
+                      {(h.steps ?? []).map((s, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          {s.ok ? (
+                            <CheckCircle2 className="h-3 w-3 text-emerald-500 mt-0.5 shrink-0" />
+                          ) : (
+                            <XCircle className="h-3 w-3 text-destructive mt-0.5 shrink-0" />
+                          )}
+                          <span className="font-mono">{s.key}</span>
+                          {s.detail && (
+                            <span className="text-muted-foreground">— {s.detail}</span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                    <pre className="mt-2 text-[10px] bg-muted/40 rounded p-2 overflow-x-auto">
+                      {JSON.stringify(h.ids, null, 2)}
+                    </pre>
+                  </CollapsibleContent>
+                </Collapsible>
+              ))}
+            </div>
+            {historyTotal > historyPageSize && (
+              <div className="flex items-center justify-center gap-2 mt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setHistoryPage((p) => Math.max(0, p - 1))}
+                  disabled={historyPage === 0}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-xs text-muted-foreground">
+                  Página {historyPage + 1} de{" "}
+                  {Math.max(1, Math.ceil(historyTotal / historyPageSize))}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setHistoryPage((p) => p + 1)}
+                  disabled={(historyPage + 1) * historyPageSize >= historyTotal}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </Card>
     </div>
