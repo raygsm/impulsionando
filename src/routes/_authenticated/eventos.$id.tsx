@@ -92,12 +92,14 @@ function EventDetail() {
       data: {
         ticketId: tr.ticketId, toName: tr.toName, toEmail: tr.toEmail,
         toPhone: tr.toPhone || undefined,
+        toDocument: tr.toDocument || undefined,
       },
     }),
     onSuccess: () => {
       toast.success("Transferência registrada");
-      setTr({ ticketId: "", toName: "", toEmail: "", toPhone: "" });
+      setTr({ ticketId: "", toName: "", toEmail: "", toPhone: "", toDocument: "" });
       qc.invalidateQueries({ queryKey: ["evt_event", id] });
+      qc.invalidateQueries({ queryKey: ["evt_transfers", id] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
