@@ -2611,6 +2611,306 @@ export type Database = {
           },
         ]
       }
+      core_company_feature_values: {
+        Row: {
+          company_id: string
+          created_at: string
+          flag_key: string
+          id: string
+          module_slug: string | null
+          updated_at: string
+          updated_by: string | null
+          value: boolean
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          flag_key: string
+          id?: string
+          module_slug?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          value?: boolean
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          flag_key?: string
+          id?: string
+          module_slug?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          value?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_company_feature_values_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      core_dashboard_widgets: {
+        Row: {
+          audience: string[]
+          config: Json
+          created_at: string
+          dashboard_key: string
+          data_source: string | null
+          description: string | null
+          id: string
+          is_visible: boolean
+          niche_slugs: string[]
+          required_module_slug: string | null
+          sort_order: number
+          title: string
+          updated_at: string
+          widget_key: string
+          widget_type: string
+        }
+        Insert: {
+          audience?: string[]
+          config?: Json
+          created_at?: string
+          dashboard_key: string
+          data_source?: string | null
+          description?: string | null
+          id?: string
+          is_visible?: boolean
+          niche_slugs?: string[]
+          required_module_slug?: string | null
+          sort_order?: number
+          title: string
+          updated_at?: string
+          widget_key: string
+          widget_type?: string
+        }
+        Update: {
+          audience?: string[]
+          config?: Json
+          created_at?: string
+          dashboard_key?: string
+          data_source?: string | null
+          description?: string | null
+          id?: string
+          is_visible?: boolean
+          niche_slugs?: string[]
+          required_module_slug?: string | null
+          sort_order?: number
+          title?: string
+          updated_at?: string
+          widget_key?: string
+          widget_type?: string
+        }
+        Relationships: []
+      }
+      core_feature_flags: {
+        Row: {
+          category: string
+          created_at: string
+          default_value: boolean
+          description: string | null
+          id: string
+          is_active: boolean
+          key: string
+          label: string
+          module_slug: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          default_value?: boolean
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          key: string
+          label: string
+          module_slug?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          default_value?: boolean
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          key?: string
+          label?: string
+          module_slug?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_feature_flags_module_slug_fkey"
+            columns: ["module_slug"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
+      core_menu_items: {
+        Row: {
+          audience: string[]
+          created_at: string
+          icon: string | null
+          id: string
+          is_system: boolean
+          is_visible: boolean
+          label: string
+          metadata: Json
+          niche_slugs: string[]
+          parent_id: string | null
+          required_module_slug: string | null
+          required_permission: string | null
+          required_plan_codes: string[]
+          route: string | null
+          scope: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          audience?: string[]
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_system?: boolean
+          is_visible?: boolean
+          label: string
+          metadata?: Json
+          niche_slugs?: string[]
+          parent_id?: string | null
+          required_module_slug?: string | null
+          required_permission?: string | null
+          required_plan_codes?: string[]
+          route?: string | null
+          scope?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          audience?: string[]
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_system?: boolean
+          is_visible?: boolean
+          label?: string
+          metadata?: Json
+          niche_slugs?: string[]
+          parent_id?: string | null
+          required_module_slug?: string | null
+          required_permission?: string | null
+          required_plan_codes?: string[]
+          route?: string | null
+          scope?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_menu_items_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "core_menu_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      core_niche_modules: {
+        Row: {
+          created_at: string
+          id: string
+          is_optional: boolean
+          is_recommended: boolean
+          module_slug: string
+          niche_id: string
+          notes: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_optional?: boolean
+          is_recommended?: boolean
+          module_slug: string
+          niche_id: string
+          notes?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_optional?: boolean
+          is_recommended?: boolean
+          module_slug?: string
+          niche_id?: string
+          notes?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_niche_modules_module_slug_fkey"
+            columns: ["module_slug"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "core_niche_modules_niche_id_fkey"
+            columns: ["niche_id"]
+            isOneToOne: false
+            referencedRelation: "niches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      core_settings: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          is_editable: boolean
+          key: string
+          label: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          is_editable?: boolean
+          key: string
+          label: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          is_editable?: boolean
+          key?: string
+          label?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       core_smoke_purge_log: {
         Row: {
           by_niche: Json
