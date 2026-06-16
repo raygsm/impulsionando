@@ -960,6 +960,24 @@ function CoreDemosPage() {
           </div>
         </div>
 
+        {/* Política de retenção */}
+        {retention && (
+          <div className="flex items-start gap-2 mb-3 rounded border border-primary/20 bg-primary/5 px-3 py-2 text-xs">
+            <ShieldCheck className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <div className="font-medium">
+                Retenção automática: {retention.retentionDays} dias
+              </div>
+              <div className="text-muted-foreground">
+                Limpeza agendada {retention.scheduleLabel.toLowerCase()} (cron{" "}
+                <code className="font-mono">{retention.schedule}</code>) ·{" "}
+                {retention.active ? "ativa" : "pausada"}
+              </div>
+            </div>
+          </div>
+        )}
+
+
         {/* Presets de filtros salvos */}
         <div className="flex items-center gap-2 flex-wrap mb-3">
           <span className="text-xs text-muted-foreground">Presets:</span>
