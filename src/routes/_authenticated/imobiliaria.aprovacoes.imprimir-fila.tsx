@@ -73,7 +73,7 @@ function Page() {
         </p>
         {Object.keys(search).length > 0 && (
           <div className="text-xs mt-2 space-y-0.5">
-            {search.status?.length ? <div><strong>Status:</strong> {search.status.map((s) => STATUS_LABEL[s]).join(", ")}</div> : null}
+            {search.status?.length ? <div><strong>Status:</strong> {search.status.map((s: string) => STATUS_LABEL[s]).join(", ")}</div> : null}
             {search.search ? <div><strong>Busca:</strong> {search.search}</div> : null}
             {search.dateFrom ? <div><strong>De:</strong> {search.dateFrom}</div> : null}
             {search.dateTo ? <div><strong>Até:</strong> {search.dateTo}</div> : null}
