@@ -52,9 +52,13 @@ function TermosPage() {
           <Section title="1. Identificação do prestador">
             <p>
               O serviço é prestado por <strong>Impulsionando Tecnologia</strong>, CNPJ
-              54.295.500/0001-27, parte do grupo Impulsionando Brasil. Contato:
+              54.295.500/0001-27. A <strong>Impulsionando Tecnologia</strong> desenvolve e opera
+              sistemas, plataformas, automações e dashboards; a <strong>Impulsionando Brasil</strong>
+              é uma empresa parceira independente, responsável por estratégia, marketing, CRM,
+              jornadas, fluxos comerciais e campanhas. Contato:
               {" "}<a href="mailto:sac@impulsionando.com.br" className="text-primary underline">sac@impulsionando.com.br</a>.
             </p>
+
           </Section>
 
           <Section title="2. Aceitação">
