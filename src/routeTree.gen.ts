@@ -216,6 +216,7 @@ import { Route as AuthenticatedCoreIntegracoesMercadopagoRouteImport } from './r
 import { Route as AuthenticatedCoreClienteIdRouteImport } from './routes/_authenticated/core.cliente.$id'
 import { Route as AuthenticatedAdminModulosClonagemRouteImport } from './routes/_authenticated/admin.modulos.clonagem'
 import { Route as ApiPublicPaymentsInfinitepayWebhookRouteImport } from './routes/api/public/payments/infinitepay.webhook'
+import { Route as AuthenticatedImobiliariaAprovacoesIdImprimirRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes.$id.imprimir'
 import { Route as AuthenticatedCoreClienteIdPaginasRouteImport } from './routes/_authenticated/core.cliente.$id.paginas'
 import { Route as AuthenticatedCoreClienteIdPaginasPageIdRouteImport } from './routes/_authenticated/core.cliente.$id.paginas.$pageId'
 import { Route as AuthenticatedCoreClienteIdModuloSlugConfigurarRouteImport } from './routes/_authenticated/core.cliente.$id.modulo.$slug.configurar'
@@ -1353,6 +1354,12 @@ const ApiPublicPaymentsInfinitepayWebhookRoute =
     path: '/api/public/payments/infinitepay/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedImobiliariaAprovacoesIdImprimirRoute =
+  AuthenticatedImobiliariaAprovacoesIdImprimirRouteImport.update({
+    id: '/$id/imprimir',
+    path: '/$id/imprimir',
+    getParentRoute: () => AuthenticatedImobiliariaAprovacoesRoute,
+  } as any)
 const AuthenticatedCoreClienteIdPaginasRoute =
   AuthenticatedCoreClienteIdPaginasRouteImport.update({
     id: '/paginas',
@@ -1522,7 +1529,7 @@ export interface FileRoutesByFullPath {
   '/finance/commissions': typeof AuthenticatedFinanceCommissionsRoute
   '/finance/methods': typeof AuthenticatedFinanceMethodsRoute
   '/finance/transactions': typeof AuthenticatedFinanceTransactionsRoute
-  '/imobiliaria/aprovacoes': typeof AuthenticatedImobiliariaAprovacoesRoute
+  '/imobiliaria/aprovacoes': typeof AuthenticatedImobiliariaAprovacoesRouteWithChildren
   '/imobiliaria/imoveis': typeof AuthenticatedImobiliariaImoveisRoute
   '/imobiliaria/intencoes': typeof AuthenticatedImobiliariaIntencoesRoute
   '/imobiliaria/matches': typeof AuthenticatedImobiliariaMatchesRoute
@@ -1579,6 +1586,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
+  '/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
   '/api/public/payments/infinitepay/webhook': typeof ApiPublicPaymentsInfinitepayWebhookRoute
   '/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
@@ -1722,7 +1730,7 @@ export interface FileRoutesByTo {
   '/finance/commissions': typeof AuthenticatedFinanceCommissionsRoute
   '/finance/methods': typeof AuthenticatedFinanceMethodsRoute
   '/finance/transactions': typeof AuthenticatedFinanceTransactionsRoute
-  '/imobiliaria/aprovacoes': typeof AuthenticatedImobiliariaAprovacoesRoute
+  '/imobiliaria/aprovacoes': typeof AuthenticatedImobiliariaAprovacoesRouteWithChildren
   '/imobiliaria/imoveis': typeof AuthenticatedImobiliariaImoveisRoute
   '/imobiliaria/intencoes': typeof AuthenticatedImobiliariaIntencoesRoute
   '/imobiliaria/matches': typeof AuthenticatedImobiliariaMatchesRoute
@@ -1779,6 +1787,7 @@ export interface FileRoutesByTo {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
+  '/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
   '/api/public/payments/infinitepay/webhook': typeof ApiPublicPaymentsInfinitepayWebhookRoute
   '/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
@@ -1935,7 +1944,7 @@ export interface FileRoutesById {
   '/_authenticated/finance/commissions': typeof AuthenticatedFinanceCommissionsRoute
   '/_authenticated/finance/methods': typeof AuthenticatedFinanceMethodsRoute
   '/_authenticated/finance/transactions': typeof AuthenticatedFinanceTransactionsRoute
-  '/_authenticated/imobiliaria/aprovacoes': typeof AuthenticatedImobiliariaAprovacoesRoute
+  '/_authenticated/imobiliaria/aprovacoes': typeof AuthenticatedImobiliariaAprovacoesRouteWithChildren
   '/_authenticated/imobiliaria/imoveis': typeof AuthenticatedImobiliariaImoveisRoute
   '/_authenticated/imobiliaria/intencoes': typeof AuthenticatedImobiliariaIntencoesRoute
   '/_authenticated/imobiliaria/matches': typeof AuthenticatedImobiliariaMatchesRoute
@@ -1992,6 +2001,7 @@ export interface FileRoutesById {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/_authenticated/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
+  '/_authenticated/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
   '/api/public/payments/infinitepay/webhook': typeof ApiPublicPaymentsInfinitepayWebhookRoute
   '/_authenticated/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/_authenticated/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
@@ -2205,6 +2215,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/core/cliente/$id/paginas'
+    | '/imobiliaria/aprovacoes/$id/imprimir'
     | '/api/public/payments/infinitepay/webhook'
     | '/core/cliente/$id/paginas/$pageId'
     | '/core/cliente/$id/modulo/$slug/configurar'
@@ -2405,6 +2416,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/core/cliente/$id/paginas'
+    | '/imobiliaria/aprovacoes/$id/imprimir'
     | '/api/public/payments/infinitepay/webhook'
     | '/core/cliente/$id/paginas/$pageId'
     | '/core/cliente/$id/modulo/$slug/configurar'
@@ -2617,6 +2629,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/_authenticated/core/cliente/$id/paginas'
+    | '/_authenticated/imobiliaria/aprovacoes/$id/imprimir'
     | '/api/public/payments/infinitepay/webhook'
     | '/_authenticated/core/cliente/$id/paginas/$pageId'
     | '/_authenticated/core/cliente/$id/modulo/$slug/configurar'
@@ -4147,6 +4160,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsInfinitepayWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/imobiliaria/aprovacoes/$id/imprimir': {
+      id: '/_authenticated/imobiliaria/aprovacoes/$id/imprimir'
+      path: '/$id/imprimir'
+      fullPath: '/imobiliaria/aprovacoes/$id/imprimir'
+      preLoaderRoute: typeof AuthenticatedImobiliariaAprovacoesIdImprimirRouteImport
+      parentRoute: typeof AuthenticatedImobiliariaAprovacoesRoute
+    }
     '/_authenticated/core/cliente/$id/paginas': {
       id: '/_authenticated/core/cliente/$id/paginas'
       path: '/paginas'
@@ -4505,6 +4525,21 @@ const AuthenticatedSalesRouteChildren: AuthenticatedSalesRouteChildren = {
 const AuthenticatedSalesRouteWithChildren =
   AuthenticatedSalesRoute._addFileChildren(AuthenticatedSalesRouteChildren)
 
+interface AuthenticatedImobiliariaAprovacoesRouteChildren {
+  AuthenticatedImobiliariaAprovacoesIdImprimirRoute: typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
+}
+
+const AuthenticatedImobiliariaAprovacoesRouteChildren: AuthenticatedImobiliariaAprovacoesRouteChildren =
+  {
+    AuthenticatedImobiliariaAprovacoesIdImprimirRoute:
+      AuthenticatedImobiliariaAprovacoesIdImprimirRoute,
+  }
+
+const AuthenticatedImobiliariaAprovacoesRouteWithChildren =
+  AuthenticatedImobiliariaAprovacoesRoute._addFileChildren(
+    AuthenticatedImobiliariaAprovacoesRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccessProfilesRoute: typeof AuthenticatedAccessProfilesRoute
   AuthenticatedAdmRoute: typeof AuthenticatedAdmRouteWithChildren
@@ -4540,7 +4575,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedComunidadeIdRoute: typeof AuthenticatedComunidadeIdRoute
   AuthenticatedEhrIdRoute: typeof AuthenticatedEhrIdRoute
   AuthenticatedEventosIdRoute: typeof AuthenticatedEventosIdRoute
-  AuthenticatedImobiliariaAprovacoesRoute: typeof AuthenticatedImobiliariaAprovacoesRoute
+  AuthenticatedImobiliariaAprovacoesRoute: typeof AuthenticatedImobiliariaAprovacoesRouteWithChildren
   AuthenticatedImobiliariaImoveisRoute: typeof AuthenticatedImobiliariaImoveisRoute
   AuthenticatedImobiliariaIntencoesRoute: typeof AuthenticatedImobiliariaIntencoesRoute
   AuthenticatedImobiliariaMatchesRoute: typeof AuthenticatedImobiliariaMatchesRoute
@@ -4589,7 +4624,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEhrIdRoute: AuthenticatedEhrIdRoute,
   AuthenticatedEventosIdRoute: AuthenticatedEventosIdRoute,
   AuthenticatedImobiliariaAprovacoesRoute:
-    AuthenticatedImobiliariaAprovacoesRoute,
+    AuthenticatedImobiliariaAprovacoesRouteWithChildren,
   AuthenticatedImobiliariaImoveisRoute: AuthenticatedImobiliariaImoveisRoute,
   AuthenticatedImobiliariaIntencoesRoute:
     AuthenticatedImobiliariaIntencoesRoute,
