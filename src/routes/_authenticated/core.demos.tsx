@@ -431,7 +431,18 @@ function CoreDemosPage() {
     purgeAbortRef.current = controller;
     const attemptedAt = new Date().toISOString();
     try {
-      const res = await purgeNow({ data: {}, signal: controller.signal });
+      const abortPromise = new Promise<never>((_, reject) => {
+        controller.signal.addEventListener("abort", () => {
+          const err = new Error("AbortError");
+          err.name = "AbortError";
+          reject(err);
+        });
+      });
+      const res = await Promise.race([
+        purgeNow({ data: {}, signal: controller.signal } as Parameters<typeof purgeNow>[0]),
+        abortPromise,
+      ]);
+
       clearInterval(ticker);
       setPurgeProgress(100);
       setLastPurgeResult({
