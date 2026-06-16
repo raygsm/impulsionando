@@ -12,15 +12,17 @@ import {
   AlertTriangle, ShieldCheck, BadgeDollarSign, Sparkles,
 } from "lucide-react";
 import { getDemoEventos, formatBRL, NICHO_LABELS, type Nicho } from "@/lib/demoNicho";
+import { getRichNiche, RICH_NICHES, type RichNiche } from "@/lib/demoNichoExtras";
+import { NichoDemoRich } from "@/components/demo/NichoDemoRich";
 import { useDemoTracker } from "@/hooks/useDemoTracker";
 
-const SUPORTADOS: Nicho[] = ["eventos"];
+const SUPORTADOS: string[] = ["eventos", ...RICH_NICHES];
 
 export const Route = createFileRoute("/demo/nicho/$slug")({
   head: ({ params }) => ({
     meta: [
       { title: `Demo do nicho ${params.slug} — Impulsionando Tecnologia` },
-      { name: "description", content: `Demonstração interativa dos recursos do nicho ${params.slug}: jornada completa de briefing, agenda, parceiros, contrato, comunicação e resultado.` },
+      { name: "description", content: `Demonstração interativa dos recursos do nicho ${params.slug}: jornada completa, automações, comunicação WhatsApp+e-mail e BI.` },
       { property: "og:title", content: `Demo do nicho ${params.slug} — Impulsionando` },
     ],
   }),
@@ -33,10 +35,10 @@ export const Route = createFileRoute("/demo/nicho/$slug")({
     </div>
   ),
   loader: ({ params }) => {
-    if (!SUPORTADOS.includes(params.slug as Nicho)) {
+    if (!SUPORTADOS.includes(params.slug)) {
       throw notFound();
     }
-    return { slug: params.slug as Nicho };
+    return { slug: params.slug };
   },
 });
 
@@ -48,7 +50,7 @@ function NichoNotFound() {
         <Badge variant="outline" className="mb-3">Em breve</Badge>
         <h1 className="text-3xl font-bold tracking-tight">Demo deste nicho ainda não está pronta</h1>
         <p className="mt-3 text-muted-foreground">
-          A demo do nicho Eventos / WMP já está disponível. Outros nichos serão liberados em breve.
+          Demos disponíveis: Eventos / WMP, Saúde, Bares, Imobiliária, Comércio, Serviços e Comunidade.
         </p>
         <div className="mt-6 flex justify-center gap-3 flex-wrap">
           <Button asChild className="bg-gradient-primary">
@@ -68,9 +70,12 @@ function NichoNotFound() {
 
 function DemoNichoPage() {
   const { slug } = Route.useLoaderData();
-  if (slug !== "eventos") return <NichoNotFound />;
-  return <DemoEventosNicho />;
+  if (slug === "eventos") return <DemoEventosNicho />;
+  const cfg = getRichNiche(slug as RichNiche);
+  if (!cfg) return <NichoNotFound />;
+  return <NichoDemoRich config={cfg} />;
 }
+
 
 function DemoEventosNicho() {
   const d = getDemoEventos();
