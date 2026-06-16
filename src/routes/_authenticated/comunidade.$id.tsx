@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { useCompanyContext } from "@/hooks/useCompanyContext";
+import { useActiveCompany } from "@/hooks/use-active-company";
 import {
   getCommunity, upsertMember, createMembership, markMembershipPaid, recordAttendance, recordDonation,
 } from "@/lib/community.functions";
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/comunidade/$id")({
 
 function CommDetail() {
   const { id } = Route.useParams();
-  const { activeCompanyId } = useCompanyContext();
+  const { companyId: activeCompanyId } = useActiveCompany();
   const qc = useQueryClient();
   const get = useServerFn(getCommunity);
   const upM = useServerFn(upsertMember);

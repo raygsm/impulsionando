@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { useCompanyContext } from "@/hooks/useCompanyContext";
+import { useActiveCompany } from "@/hooks/use-active-company";
 import {
   getEvent, upsertTicketType, issueTickets, transferTicket, cancelTicket, checkInByQr,
 } from "@/lib/events.functions";
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/_authenticated/eventos/$id")({
 
 function EventDetail() {
   const { id } = Route.useParams();
-  const { activeCompanyId } = useCompanyContext();
+  const { companyId: activeCompanyId } = useActiveCompany();
   const qc = useQueryClient();
   const get = useServerFn(getEvent);
   const upsertTt = useServerFn(upsertTicketType);

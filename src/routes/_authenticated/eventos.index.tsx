@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useCompanyContext } from "@/hooks/useCompanyContext";
+import { useActiveCompany } from "@/hooks/use-active-company";
 import { listEvents, upsertEvent } from "@/lib/events.functions";
 import { Ticket, Plus, ExternalLink } from "lucide-react";
 import { Link } from "@tanstack/react-router";
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/eventos/")({
 });
 
 function EventsList() {
-  const { activeCompanyId } = useCompanyContext();
+  const { companyId: activeCompanyId } = useActiveCompany();
   const qc = useQueryClient();
   const list = useServerFn(listEvents);
   const upsert = useServerFn(upsertEvent);

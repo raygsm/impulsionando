@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { useCompanyContext } from "@/hooks/useCompanyContext";
+import { useActiveCompany } from "@/hooks/use-active-company";
 import { listCommunities, upsertCommunity } from "@/lib/community.functions";
 import { Users, Plus, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_authenticated/comunidade/")({
 });
 
 function CommList() {
-  const { activeCompanyId } = useCompanyContext();
+  const { companyId: activeCompanyId } = useActiveCompany();
   const qc = useQueryClient();
   const list = useServerFn(listCommunities);
   const upsert = useServerFn(upsertCommunity);
