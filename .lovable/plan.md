@@ -1,63 +1,84 @@
-# Plano enxuto — Fases 3, 4, 5 e 6 da Fábrica de Projetos
+## Princípio
+**Não recriar nada.** O projeto já tem ~120 tabelas, RLS, perfis (Super Admin / Staff Impulsionando / PJ / Operador / PF), módulos (CRM, Agenda, EHR, Finance, Sales, Inventory, Afiliados, Marketing, Trial, Billing, Agentes IA), webhooks InfinitePay, fila de mensagens multicanal e dashboards. O trabalho é **mapear → conectar → consolidar → expor no CORE**, não reconstruir.
 
-## Diagnóstico antes de codar
+## Fase 0 — Auditoria (entrega antes de qualquer código)
 
-| Fase | Status real | Ação |
-|---|---|---|
-| **Fase 3 — Central de Instalação + Assistente Pós-Instalação** | ✅ **Já entregue** na execução anterior: `core.instalar-modulo.tsx`, `InstallModuleDialog`, `core.cliente.$id.modulo.$slug.configurar.tsx`, `moduleAssistantSteps.ts` (8 passos da Agenda), status em `company_modules.status`, presets por nicho (`SEGMENT_LABELS`), `installModuleWithTemplate` (só estrutura, nunca dados reais). | **Não recriar.** Vou apenas confirmar no checklist final. |
-| **Fase 4 — Criador de Páginas / Templates / Prompts** | 🟡 Parcial: já existem `site_templates`, `ai_prompt_library`, `generated_pages` (tabelas + RLS), `/core/templates`, `/core/prompts`. Falta a **tela de geração por projeto** com variáveis, seções, "tentar sem Lovable primeiro". | **Construir aqui.** |
-| **Fase 5 — Blindagem / LGPD / Logs** | ✅ Em grande parte já existe: `is_impulsionando_staff`, `user_has_permission`, RLS em todas as tabelas, `audit_logs`, `lgpd_consents`, `data_deletion_requests`, `data_export_requests`, `customer_anonymize`, mascaramento de credenciais. | **Auditar e documentar**, não recriar. |
-| **Fase 6 — Checklist final** | — | **Entregar documento** consolidando o que existe e onde. |
+Gerar um documento `docs/CORE-AUDIT.md` listando, por área:
+- Tabelas existentes vs. tabelas pedidas no prompt → mapa de equivalência (ex: `companies` = `empresas`, `user_profiles` = `usuarios`, `billing_plans` = `planos`, `company_modules` = `empresa_modulos`, `trial_subscriptions` já cobre demo/trial, `infinitepay_payments` + `billing_invoices` cobrem cobrança).
+- Rotas/telas existentes em `src/routes/_authenticated/admin.*` (billing-contracts, trials, agentes, etc.) e o que falta.
+- Gaps reais (não duplicações): hub CORE unificado, CRUD visual de nichos/módulos/planos, gerador de demo por nicho, dashboard consolidado por nicho.
 
-## O que vou construir (deltas mínimos)
+Sem essa fase, qualquer migration nova arrisca colidir com schema existente.
 
-### Delta A — Fase 4: Criador de Páginas por Projeto
-Uma rota nova: `/core/cliente/$id/paginas` que junta o que já existe:
-1. **Seletor de Template** — lista `site_templates` (já existe). Botão "Aplicar template" copia páginas para `generated_pages` do cliente.
-2. **Lista de páginas geradas** (`generated_pages` filtrado por `company_id`) — editar nome, slug, status.
-3. **Editor de página individual** (`/core/cliente/$id/paginas/$pageId`) com:
-   - campos: nome, slug, nicho, objetivo, prompt, variáveis (JSON), status
-   - botão **"Gerar sem Lovable"** → renderiza substituindo variáveis (`{{nome_cliente}}`, `{{nicho}}`, etc.) com dados de `companies` + módulos instalados, grava em `generated_pages.content`
-   - botão **"Copiar prompt para Lovable"** → quando template não cobre
-   - dropdown **"Reusar prompt salvo"** → lista `ai_prompt_library`, incrementa `usage_count`
-4. **Biblioteca de seções reutilizáveis** — arquivo declarativo `src/data/pageSections.ts` com 15 seções (Hero, Dor, Solução, Benefícios, Como funciona, Módulos, Demo, Depoimentos, Planos, FAQ, CTA WhatsApp, CTA Contratar, Rodapé, LGPD, Termos), cada uma com campos editáveis (título, subtítulo, texto, CTA, ativo, ordem). Renderizado no editor como lista drag/toggle.
-5. **Variáveis suportadas** declaradas em `src/data/pageVariables.ts` (lista das 13 variáveis do enunciado).
+## Fase 1 — Hub CORE (somente UI, zero schema novo)
 
-**Server fns** (append em `factory.functions.ts`):
-- `applyTemplateToProject({ companyId, templateId })` — copia páginas do template para `generated_pages`.
-- `upsertGeneratedPage({ id?, companyId, name, slug, niche, objective, prompt, variables, status })`.
-- `renderPageFromTemplate({ pageId })` — substitui variáveis, popula `content`, grava log em `ai_project_generations`.
+Rota única `/_authenticated/core` (Super Admin apenas) com navegação para telas que **já existem**:
+- Empresas (`companies`) — criar/editar/suspender
+- Nichos (`niches`)
+- Módulos (`modules` + `company_modules`)
+- Planos (`billing_plans`)
+- Contratos & Faturas (`billing_contracts`, `billing_invoices`) — já existe em `/admin/billing-contracts`
+- Trials/Demos (`trial_subscriptions`) — já existe em `/admin/trials`
+- Templates de e-mail (`message_templates`)
+- Logs & auditoria (`audit_logs`)
+- Agentes IA (`/adm/agentes`) — já existe
 
-### Delta B — Fase 6: Documento de auditoria final
-Arquivo `docs/FABRICA_PROJETOS.md` com:
-- mapa "onde fica cada coisa" (rotas + arquivos)
-- checklist de 34 itens da Fase 6, marcando cada um com ✅ + referência ao arquivo/rota responsável
-- passo a passo dos fluxos (criar cliente, instalar módulo, gerar página, quando recorrer ao Lovable)
+Entrega: 1 página índice + sidebar. Nenhuma tabela criada.
 
-### Delta C — Fase 5 (auditoria, sem código novo)
-No mesmo `FABRICA_PROJETOS.md`, seção "Blindagem": listo as garantias já existentes (RLS, `is_impulsionando_staff`, `user_has_permission`, `audit_logs`, LGPD, mascaramento). **Não recrio nada** — se algo faltar concretamente, abro como pendência no doc para tratarmos em iteração futura.
+## Fase 2 — Gaps de CRUD no CORE
 
-## O que NÃO vou fazer
+Construir só o que **não tem tela ainda**, sempre lendo tabelas existentes:
+1. CRUD de **nichos** com associação de módulos padrão.
+2. CRUD de **módulos** (slug, nome, descrição, ícone, categoria).
+3. CRUD de **planos** com seleção visual de módulos incluídos + setup + recorrência + vencimento default dia 5.
+4. Wizard "Criar cliente" — 1 fluxo que: cria `company` → vincula `niche` → ativa `company_modules` do plano → cria `billing_contract` → envia welcome via `enqueue_message`. Tudo via `createServerFn` com `requireSupabaseAuth` + `is_super_admin`.
 
-- ❌ Recriar Central de Instalação (já feita).
-- ❌ Recriar tabelas de templates/prompts/páginas (já existem).
-- ❌ Nova migration (tudo cabe nas tabelas atuais).
-- ❌ Recriar RLS / auth / LGPD (já blindado).
-- ❌ Mexer em `nova-implantacao`, demo, trial.
+## Fase 3 — Dashboard CORE consolidado
 
-## Arquivos
+View SQL `core_dashboard_stats` (somente leitura) agregando:
+- `companies` ativos/suspensos por nicho
+- `billing_invoices` MRR/inadimplência
+- `company_modules` adesão por módulo
+- `trial_subscriptions` conversão
 
-**Novos (4):**
-- `src/routes/_authenticated/core.cliente.$id.paginas.tsx` — lista + aplicar template
-- `src/routes/_authenticated/core.cliente.$id.paginas.$pageId.tsx` — editor de página
-- `src/data/pageSections.ts` — 15 seções declarativas
-- `src/data/pageVariables.ts` — 13 variáveis declarativas
-- `docs/FABRICA_PROJETOS.md` — entrega final (Fase 6)
+Tela `/core/dashboard` consumindo a view via server function. Sem schema novo além da view.
 
-**Editados (2):**
-- `src/lib/factory.functions.ts` — 3 server fns appended
-- `src/routes/_authenticated/core.tsx` — link "Páginas do Projeto" no menu (opcional, já há `/core/templates` e `/core/prompts`)
+## Fase 4 — Régua de cobrança (validar, não recriar)
 
-**Sem migration. Sem credito Lovable em runtime.**
+A função `billing_run_cycle()` **já implementa** D-7, D-1, D0, suspensão automática e `enqueue_message`. Ações:
+- Confirmar cron pg_cron rodando diariamente.
+- Revisar `message_templates` para `billing_*` com identidade Impulsionando.
+- Tela CORE para editar templates inline.
 
-## Confirma para eu executar?
+## Fase 5 — Demo por nicho
+
+Função `core_provision_demo(_niche, _plan)` que:
+- Cria company `is_demo=true` (adicionar coluna se não existir)
+- Aplica módulos do plano
+- Seeda dados fictícios por nicho (clínica, bar, imobiliária, veículos)
+- Retorna URL de acesso
+
+Reaproveita `trial_subscriptions` para expiração.
+
+## Fase 6 — Dashboards por nicho
+
+Templates de dashboard por `niche.slug` em `src/components/dashboards/by-niche/*`. Renderizados condicionalmente no dashboard PJ existente, lendo dados que **já são gravados** pelos módulos atuais.
+
+## Detalhes técnicos
+
+- **Stack**: TanStack Start + Supabase (Lovable Cloud). Não usar Edge Functions para lógica interna — `createServerFn` em `src/lib/core.functions.ts`.
+- **Permissão**: toda rota CORE sob `_authenticated/core/` com `beforeLoad` checando `is_super_admin`.
+- **RLS**: usar `is_super_admin(auth.uid())` já existente. Não criar novas policies amplas.
+- **Migrations**: apenas (a) view de dashboard, (b) flag `is_demo` em `companies` se faltar, (c) seeds de nichos/módulos se faltarem. Nenhum CREATE TABLE redundante.
+- **Webhook InfinitePay**: já existe — não tocar.
+- **Salário mínimo configurável**: linha em `setting_definitions` (tabela já existe).
+
+## Próximo passo concreto
+
+Aprovando o plano, eu começo pela **Fase 0 (auditoria)** e entrego o documento + a tela índice do CORE (Fase 1) na próxima rodada — sem migrations, sem risco de regressão. Depois validamos juntos antes de avançar para Fase 2.
+
+## O que NÃO será feito agora
+
+- Reescrever autenticação, dashboards CHRISMED, módulo financeiro, InfinitePay, webhooks, fila de mensagens, RLS existente.
+- Migrar Mercado Pago (não está no schema atual — InfinitePay é o gateway ativo). Se Mercado Pago é requisito, tratamos em fase própria.
+- Construir tudo das seções 6–14 do prompt num único passo. Cada módulo "novo" pedido (vaquinha, sorteios, fidelidade, marketplace) vira fase própria depois do CORE estar sólido.
