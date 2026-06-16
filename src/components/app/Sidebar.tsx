@@ -8,7 +8,7 @@ export function Sidebar({ currentUser }: { currentUser: CurrentUser }) {
   return (
     <aside className="hidden lg:flex flex-col w-72 bg-sidebar text-sidebar-foreground border-r border-sidebar-border shrink-0">
       <div className="px-4 py-5 flex items-center justify-center border-b border-sidebar-border bg-white/95">
-        <img src={logoAsset.url} alt="Impulsionando Tecnologia" className="h-24 w-auto object-contain" />
+        <img src={logoAsset.url} alt="Impulsionando Tecnologia" className="h-48 w-auto object-contain" />
       </div>
       <SidebarNav currentUser={currentUser} />
       <div className="p-3 border-t border-sidebar-border text-xs text-sidebar-foreground/60">
