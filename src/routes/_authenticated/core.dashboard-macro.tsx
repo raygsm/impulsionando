@@ -159,7 +159,9 @@ function MacroDashboard() {
         })),
         footer: "Impulsionando Tecnologia",
       });
+      trackExport("pdf", "dashboard_macro.companies_pdf", data!.allCompanies.length);
     }, 200);
+    trackExport("pdf", "dashboard_macro.monthly_pdf", 11);
   }
 
   return (
