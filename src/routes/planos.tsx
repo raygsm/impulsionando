@@ -5,8 +5,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { getCommercialAvailability } from "@/lib/commercial.functions";
 import {
   ArrowRight, MessageCircle, Sparkles, CheckCircle2, Minus, HelpCircle, Star,
+  Building2, Layers, UserRound, PlayCircle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
