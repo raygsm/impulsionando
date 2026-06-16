@@ -204,6 +204,13 @@ function CoreDemosPage() {
   const fetchHistory = useServerFn(listSmokeHistory);
   const replay = useServerFn(replaySmokeRun);
   const exportHistory = useServerFn(exportSmokeHistory);
+  const fetchRetention = useServerFn(getSmokeRetentionPolicy);
+
+  const { data: retention } = useQuery({
+    queryKey: ["core-smoke-retention"],
+    queryFn: () => fetchRetention(),
+    staleTime: 5 * 60_000,
+  });
 
   // filtros + paginação do histórico
   const [historyPage, setHistoryPage] = useState(0);
