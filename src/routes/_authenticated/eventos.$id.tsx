@@ -35,6 +35,9 @@ function EventDetail() {
   const savePolicy = useServerFn(updateTransferPolicy);
   const listTr = useServerFn(listTransfers);
   const decide = useServerFn(decideTransfer);
+  const logger = useServerFn(logExport);
+  const trackExport = (kind: "csv" | "pdf", scope: string, rowCount: number) =>
+    logger({ data: { kind, scope, params: { eventId: id }, rowCount, companyId: activeCompanyId ?? null } }).catch(() => {});
 
   const { data } = useQuery({
     queryKey: ["evt_event", id],
