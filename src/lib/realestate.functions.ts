@@ -152,3 +152,137 @@ export const listMatches = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return { matches: rows ?? [] };
   });
+
+// ============ Approval Workflow ============
+const ApprovalActionInput = z.object({
+  propertyId: z.string().uuid(),
+  notes: z.string().max(2000).optional().nullable(),
+});
+
+async function logReview(
+  supabase: any,
+  propertyId: string,
+  companyId: string,
+  action: "submitted" | "approved" | "rejected" | "changes_requested",
+  actorId: string | null,
+  notes: string | null | undefined,
+) {
+  await supabase.from("realestate_property_reviews").insert({
+    property_id: propertyId,
+    company_id: companyId,
+    action,
+    actor_id: actorId,
+    notes: notes ?? null,
+  });
+}
+
+export const submitPropertyForReview = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => ApprovalActionInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: prop, error: e1 } = await context.supabase
+      .from("realestate_properties")
+      .update({
+        approval_status: "pending",
+        submitted_for_review_at: new Date().toISOString(),
+        submitted_by: context.userId,
+        is_published: false,
+      })
+      .eq("id", data.propertyId)
+      .select("id, company_id")
+      .single();
+    if (e1) throw new Error(e1.message);
+    await logReview(context.supabase, prop.id, prop.company_id, "submitted", context.userId, data.notes);
+    return { ok: true };
+  });
+
+export const approveProperty = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => ApprovalActionInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: prop, error: e1 } = await context.supabase
+      .from("realestate_properties")
+      .update({
+        approval_status: "approved",
+        reviewed_by: context.userId,
+        reviewed_at: new Date().toISOString(),
+        review_notes: data.notes ?? null,
+        is_published: true,
+      })
+      .eq("id", data.propertyId)
+      .select("id, company_id")
+      .single();
+    if (e1) throw new Error(e1.message);
+    await logReview(context.supabase, prop.id, prop.company_id, "approved", context.userId, data.notes);
+    return { ok: true };
+  });
+
+export const rejectProperty = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => ApprovalActionInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: prop, error: e1 } = await context.supabase
+      .from("realestate_properties")
+      .update({
+        approval_status: "rejected",
+        reviewed_by: context.userId,
+        reviewed_at: new Date().toISOString(),
+        review_notes: data.notes ?? null,
+        is_published: false,
+      })
+      .eq("id", data.propertyId)
+      .select("id, company_id")
+      .single();
+    if (e1) throw new Error(e1.message);
+    await logReview(context.supabase, prop.id, prop.company_id, "rejected", context.userId, data.notes);
+    return { ok: true };
+  });
+
+export const requestPropertyChanges = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => ApprovalActionInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: prop, error: e1 } = await context.supabase
+      .from("realestate_properties")
+      .update({
+        approval_status: "changes_requested",
+        reviewed_by: context.userId,
+        reviewed_at: new Date().toISOString(),
+        review_notes: data.notes ?? null,
+        is_published: false,
+      })
+      .eq("id", data.propertyId)
+      .select("id, company_id")
+      .single();
+    if (e1) throw new Error(e1.message);
+    await logReview(context.supabase, prop.id, prop.company_id, "changes_requested", context.userId, data.notes);
+    return { ok: true };
+  });
+
+export const listApprovalQueue = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { companyId: string }) => z.object({ companyId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await context.supabase
+      .from("realestate_properties")
+      .select("id, reference_code, title, operation, property_type, sale_price, rent_price, neighborhood, city, approval_status, submitted_for_review_at, submitted_by, reviewed_at, review_notes, photos")
+      .eq("company_id", data.companyId)
+      .in("approval_status", ["pending", "changes_requested", "rejected"])
+      .order("submitted_for_review_at", { ascending: false, nullsFirst: false })
+      .limit(500);
+    if (error) throw new Error(error.message);
+    return { items: rows ?? [] };
+  });
+
+export const listPropertyReviewHistory = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { propertyId: string }) => z.object({ propertyId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await context.supabase
+      .from("realestate_property_reviews")
+      .select("id, action, actor_id, notes, created_at")
+      .eq("property_id", data.propertyId)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return { reviews: rows ?? [] };
+  });
