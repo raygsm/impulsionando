@@ -137,6 +137,7 @@ import { Route as AuthenticatedCorePlanosRouteImport } from './routes/_authentic
 import { Route as AuthenticatedCoreParametrosRouteImport } from './routes/_authenticated/core.parametros'
 import { Route as AuthenticatedCoreNovaImplantacaoRouteImport } from './routes/_authenticated/core.nova-implantacao'
 import { Route as AuthenticatedCoreModulosRouteImport } from './routes/_authenticated/core.modulos'
+import { Route as AuthenticatedCoreMetricasReguasRouteImport } from './routes/_authenticated/core.metricas-reguas'
 import { Route as AuthenticatedCoreMenusRouteImport } from './routes/_authenticated/core.menus'
 import { Route as AuthenticatedCoreInstalarModuloRouteImport } from './routes/_authenticated/core.instalar-modulo'
 import { Route as AuthenticatedCoreImplantacoesRouteImport } from './routes/_authenticated/core.implantacoes'
@@ -882,6 +883,12 @@ const AuthenticatedCoreModulosRoute =
     path: '/modulos',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreMetricasReguasRoute =
+  AuthenticatedCoreMetricasReguasRouteImport.update({
+    id: '/metricas-reguas',
+    path: '/metricas-reguas',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreMenusRoute = AuthenticatedCoreMenusRouteImport.update({
   id: '/menus',
   path: '/menus',
@@ -1421,6 +1428,7 @@ export interface FileRoutesByFullPath {
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
   '/core/menus': typeof AuthenticatedCoreMenusRoute
+  '/core/metricas-reguas': typeof AuthenticatedCoreMetricasReguasRoute
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/core/parametros': typeof AuthenticatedCoreParametrosRoute
@@ -1610,6 +1618,7 @@ export interface FileRoutesByTo {
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
   '/core/menus': typeof AuthenticatedCoreMenusRoute
+  '/core/metricas-reguas': typeof AuthenticatedCoreMetricasReguasRoute
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/core/parametros': typeof AuthenticatedCoreParametrosRoute
@@ -1812,6 +1821,7 @@ export interface FileRoutesById {
   '/_authenticated/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/_authenticated/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
   '/_authenticated/core/menus': typeof AuthenticatedCoreMenusRoute
+  '/_authenticated/core/metricas-reguas': typeof AuthenticatedCoreMetricasReguasRoute
   '/_authenticated/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/_authenticated/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/_authenticated/core/parametros': typeof AuthenticatedCoreParametrosRoute
@@ -2014,6 +2024,7 @@ export interface FileRouteTypes {
     | '/core/implantacoes'
     | '/core/instalar-modulo'
     | '/core/menus'
+    | '/core/metricas-reguas'
     | '/core/modulos'
     | '/core/nova-implantacao'
     | '/core/parametros'
@@ -2203,6 +2214,7 @@ export interface FileRouteTypes {
     | '/core/implantacoes'
     | '/core/instalar-modulo'
     | '/core/menus'
+    | '/core/metricas-reguas'
     | '/core/modulos'
     | '/core/nova-implantacao'
     | '/core/parametros'
@@ -2404,6 +2416,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/implantacoes'
     | '/_authenticated/core/instalar-modulo'
     | '/_authenticated/core/menus'
+    | '/_authenticated/core/metricas-reguas'
     | '/_authenticated/core/modulos'
     | '/_authenticated/core/nova-implantacao'
     | '/_authenticated/core/parametros'
@@ -3452,6 +3465,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreModulosRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/metricas-reguas': {
+      id: '/_authenticated/core/metricas-reguas'
+      path: '/metricas-reguas'
+      fullPath: '/core/metricas-reguas'
+      preLoaderRoute: typeof AuthenticatedCoreMetricasReguasRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/menus': {
       id: '/_authenticated/core/menus'
       path: '/menus'
@@ -4113,6 +4133,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreImplantacoesRoute: typeof AuthenticatedCoreImplantacoesRoute
   AuthenticatedCoreInstalarModuloRoute: typeof AuthenticatedCoreInstalarModuloRoute
   AuthenticatedCoreMenusRoute: typeof AuthenticatedCoreMenusRoute
+  AuthenticatedCoreMetricasReguasRoute: typeof AuthenticatedCoreMetricasReguasRoute
   AuthenticatedCoreModulosRoute: typeof AuthenticatedCoreModulosRouteWithChildren
   AuthenticatedCoreNovaImplantacaoRoute: typeof AuthenticatedCoreNovaImplantacaoRoute
   AuthenticatedCoreParametrosRoute: typeof AuthenticatedCoreParametrosRoute
@@ -4143,6 +4164,7 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreImplantacoesRoute: AuthenticatedCoreImplantacoesRoute,
   AuthenticatedCoreInstalarModuloRoute: AuthenticatedCoreInstalarModuloRoute,
   AuthenticatedCoreMenusRoute: AuthenticatedCoreMenusRoute,
+  AuthenticatedCoreMetricasReguasRoute: AuthenticatedCoreMetricasReguasRoute,
   AuthenticatedCoreModulosRoute: AuthenticatedCoreModulosRouteWithChildren,
   AuthenticatedCoreNovaImplantacaoRoute: AuthenticatedCoreNovaImplantacaoRoute,
   AuthenticatedCoreParametrosRoute: AuthenticatedCoreParametrosRoute,
