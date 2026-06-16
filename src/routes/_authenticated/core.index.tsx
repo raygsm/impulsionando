@@ -4,7 +4,10 @@ import { useServerFn } from "@tanstack/react-start";
 import { coreExecutiveDashboard } from "@/lib/provisioning.functions";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/app/PageElements";
-import { Building2, Boxes, CreditCard, ClipboardList, AlertTriangle, Globe, Rocket, ShieldOff } from "lucide-react";
+import { Building2, Boxes, CreditCard, ClipboardList, AlertTriangle, Globe, Rocket, ShieldOff, PieChart, Package, CircleDollarSign } from "lucide-react";
+
+const fmtBRL = (v: number) =>
+  v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 export const Route = createFileRoute("/_authenticated/core/")({
   component: CoreIndex,
@@ -16,7 +19,8 @@ function CoreIndex() {
 
   const cards = [
     { label: "Clientes ativos", value: `${data?.active ?? 0} / ${data?.total ?? 0}`, icon: Building2 },
-    { label: "MRR (contratos ativos)", value: `R$ ${(data?.mrr ?? 0).toFixed(2)}`, icon: CreditCard },
+    { label: "MRR (contratos ativos)", value: fmtBRL(data?.mrr ?? 0), icon: CreditCard },
+    { label: "Inadimplência", value: `${data?.overdueCount ?? 0} · ${fmtBRL(data?.overdueAmount ?? 0)}`, icon: CircleDollarSign },
     { label: "Bloqueados (suspensos)", value: data?.blocked ?? 0, icon: ShieldOff },
     { label: "Em onboarding", value: data?.onboarding ?? 0, icon: ClipboardList },
     { label: "Aguardando domínio", value: data?.awaitingDomain ?? 0, icon: Globe },
@@ -24,6 +28,13 @@ function CoreIndex() {
     { label: "Provisionamentos pendentes", value: data?.provisioningPending ?? 0, icon: AlertTriangle },
     { label: "Implantações concluídas", value: data?.provisioningDone ?? 0, icon: Rocket },
   ];
+
+  const byNiche = data?.byNiche ?? [];
+  const topModules = data?.topModules ?? [];
+  const topPlans = data?.topPlans ?? [];
+  const maxNiche = Math.max(1, ...byNiche.map((n) => n.count));
+  const maxMod = Math.max(1, ...topModules.map((m) => m.count));
+  const maxPlan = Math.max(1, ...topPlans.map((p) => p.count));
 
   return (
     <>
@@ -47,6 +58,66 @@ function CoreIndex() {
           );
         })}
       </div>
+
+      <div className="grid lg:grid-cols-3 gap-3 mt-4">
+        <Card className="p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <PieChart className="w-4 h-4 text-primary" />
+            <h3 className="font-semibold">Clientes por nicho</h3>
+          </div>
+          {byNiche.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Sem dados ainda.</p>
+          ) : (
+            <ul className="space-y-2">
+              {byNiche.map((n) => (
+                <li key={n.name} className="text-sm">
+                  <div className="flex justify-between"><span>{n.name}</span><span className="font-medium">{n.count}</span></div>
+                  <div className="h-1.5 bg-muted rounded mt-1 overflow-hidden"><div className="h-full bg-primary" style={{ width: `${(n.count / maxNiche) * 100}%` }} /></div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+
+        <Card className="p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <Package className="w-4 h-4 text-primary" />
+            <h3 className="font-semibold">Top módulos instalados</h3>
+          </div>
+          {topModules.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Sem dados ainda.</p>
+          ) : (
+            <ul className="space-y-2">
+              {topModules.map((m) => (
+                <li key={m.name} className="text-sm">
+                  <div className="flex justify-between"><span>{m.name}</span><span className="font-medium">{m.count}</span></div>
+                  <div className="h-1.5 bg-muted rounded mt-1 overflow-hidden"><div className="h-full bg-primary" style={{ width: `${(m.count / maxMod) * 100}%` }} /></div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+
+        <Card className="p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <CreditCard className="w-4 h-4 text-primary" />
+            <h3 className="font-semibold">Planos ativos</h3>
+          </div>
+          {topPlans.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Sem dados ainda.</p>
+          ) : (
+            <ul className="space-y-2">
+              {topPlans.map((p) => (
+                <li key={p.name} className="text-sm">
+                  <div className="flex justify-between"><span>{p.name}</span><span className="font-medium">{p.count}</span></div>
+                  <div className="h-1.5 bg-muted rounded mt-1 overflow-hidden"><div className="h-full bg-primary" style={{ width: `${(p.count / maxPlan) * 100}%` }} /></div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+      </div>
+
 
       <Card className="p-5 mt-4">
         <h3 className="font-semibold mb-2">Atalhos rápidos</h3>
