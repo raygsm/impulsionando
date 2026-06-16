@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WhiteLabelRouteImport } from './routes/white-label'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TrialRouteImport } from './routes/trial'
 import { Route as TesteRouteImport } from './routes/teste'
@@ -23,6 +24,7 @@ import { Route as PlanosRouteImport } from './routes/planos'
 import { Route as PacienteRouteImport } from './routes/paciente'
 import { Route as OrcamentoRouteImport } from './routes/orcamento'
 import { Route as ModulosRouteImport } from './routes/modulos'
+import { Route as EmpresasRouteImport } from './routes/empresas'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as ContaSuspensaRouteImport } from './routes/conta-suspensa'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -196,6 +198,11 @@ import { Route as AuthenticatedCoreClienteIdPaginasRouteImport } from './routes/
 import { Route as AuthenticatedCoreClienteIdPaginasPageIdRouteImport } from './routes/_authenticated/core.cliente.$id.paginas.$pageId'
 import { Route as AuthenticatedCoreClienteIdModuloSlugConfigurarRouteImport } from './routes/_authenticated/core.cliente.$id.modulo.$slug.configurar'
 
+const WhiteLabelRoute = WhiteLabelRouteImport.update({
+  id: '/white-label',
+  path: '/white-label',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
   path: '/unsubscribe',
@@ -264,6 +271,11 @@ const OrcamentoRoute = OrcamentoRouteImport.update({
 const ModulosRoute = ModulosRouteImport.update({
   id: '/modulos',
   path: '/modulos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmpresasRoute = EmpresasRouteImport.update({
+  id: '/empresas',
+  path: '/empresas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContatoRoute = ContatoRouteImport.update({
@@ -1219,6 +1231,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
+  '/empresas': typeof EmpresasRoute
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
   '/paciente': typeof PacienteRouteWithChildren
@@ -1233,6 +1246,7 @@ export interface FileRoutesByFullPath {
   '/teste': typeof TesteRoute
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/white-label': typeof WhiteLabelRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/adm': typeof AuthenticatedAdmRouteWithChildren
   '/affiliates': typeof AuthenticatedAffiliatesRouteWithChildren
@@ -1406,6 +1420,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
+  '/empresas': typeof EmpresasRoute
   '/orcamento': typeof OrcamentoRoute
   '/planos': typeof PlanosRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
@@ -1418,6 +1433,7 @@ export interface FileRoutesByTo {
   '/teste': typeof TesteRoute
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/white-label': typeof WhiteLabelRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/adm': typeof AuthenticatedAdmRouteWithChildren
   '/audit': typeof AuthenticatedAuditRoute
@@ -1584,6 +1600,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
+  '/empresas': typeof EmpresasRoute
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
   '/paciente': typeof PacienteRouteWithChildren
@@ -1598,6 +1615,7 @@ export interface FileRoutesById {
   '/teste': typeof TesteRoute
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/white-label': typeof WhiteLabelRoute
   '/_authenticated/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/_authenticated/adm': typeof AuthenticatedAdmRouteWithChildren
   '/_authenticated/affiliates': typeof AuthenticatedAffiliatesRouteWithChildren
@@ -1773,6 +1791,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/conta-suspensa'
     | '/contato'
+    | '/empresas'
     | '/modulos'
     | '/orcamento'
     | '/paciente'
@@ -1787,6 +1806,7 @@ export interface FileRouteTypes {
     | '/teste'
     | '/trial'
     | '/unsubscribe'
+    | '/white-label'
     | '/access-profiles'
     | '/adm'
     | '/affiliates'
@@ -1960,6 +1980,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/conta-suspensa'
     | '/contato'
+    | '/empresas'
     | '/orcamento'
     | '/planos'
     | '/privacidade'
@@ -1972,6 +1993,7 @@ export interface FileRouteTypes {
     | '/teste'
     | '/trial'
     | '/unsubscribe'
+    | '/white-label'
     | '/access-profiles'
     | '/adm'
     | '/audit'
@@ -2137,6 +2159,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/conta-suspensa'
     | '/contato'
+    | '/empresas'
     | '/modulos'
     | '/orcamento'
     | '/paciente'
@@ -2151,6 +2174,7 @@ export interface FileRouteTypes {
     | '/teste'
     | '/trial'
     | '/unsubscribe'
+    | '/white-label'
     | '/_authenticated/access-profiles'
     | '/_authenticated/adm'
     | '/_authenticated/affiliates'
@@ -2326,6 +2350,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ContaSuspensaRoute: typeof ContaSuspensaRoute
   ContatoRoute: typeof ContatoRoute
+  EmpresasRoute: typeof EmpresasRoute
   ModulosRoute: typeof ModulosRouteWithChildren
   OrcamentoRoute: typeof OrcamentoRoute
   PacienteRoute: typeof PacienteRouteWithChildren
@@ -2340,6 +2365,7 @@ export interface RootRouteChildren {
   TesteRoute: typeof TesteRoute
   TrialRoute: typeof TrialRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
+  WhiteLabelRoute: typeof WhiteLabelRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   ComoFuncionaFitnessRoute: typeof ComoFuncionaFitnessRoute
   DemoAdvogadosRoute: typeof DemoAdvogadosRoute
@@ -2390,6 +2416,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/white-label': {
+      id: '/white-label'
+      path: '/white-label'
+      fullPath: '/white-label'
+      preLoaderRoute: typeof WhiteLabelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/unsubscribe': {
       id: '/unsubscribe'
       path: '/unsubscribe'
@@ -2486,6 +2519,13 @@ declare module '@tanstack/react-router' {
       path: '/modulos'
       fullPath: '/modulos'
       preLoaderRoute: typeof ModulosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/empresas': {
+      id: '/empresas'
+      path: '/empresas'
+      fullPath: '/empresas'
+      preLoaderRoute: typeof EmpresasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contato': {
@@ -4138,6 +4178,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ContaSuspensaRoute: ContaSuspensaRoute,
   ContatoRoute: ContatoRoute,
+  EmpresasRoute: EmpresasRoute,
   ModulosRoute: ModulosRouteWithChildren,
   OrcamentoRoute: OrcamentoRoute,
   PacienteRoute: PacienteRouteWithChildren,
@@ -4152,6 +4193,7 @@ const rootRouteChildren: RootRouteChildren = {
   TesteRoute: TesteRoute,
   TrialRoute: TrialRoute,
   UnsubscribeRoute: UnsubscribeRoute,
+  WhiteLabelRoute: WhiteLabelRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
   ComoFuncionaFitnessRoute: ComoFuncionaFitnessRoute,
   DemoAdvogadosRoute: DemoAdvogadosRoute,

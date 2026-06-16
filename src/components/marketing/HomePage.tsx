@@ -1,10 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import {
   MessageCircle, ArrowRight, CheckCircle2, Sparkles,
-  Info, Target,
+  Info, Target, Building2, Layers, UserRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+
 import { PublicHeader } from "./PublicHeader";
 import { PublicFooter } from "./PublicFooter";
 import { MODULE_DETAILS } from "./moduleDetails";
@@ -39,48 +40,105 @@ export function HomePage() {
       <PublicHeader />
 
       <main className="flex-1">
-      {/* HERO */}
+      {/* HERO — seletor de público */}
       <section className="relative overflow-hidden bg-gradient-hero text-primary-foreground">
         <div className="pointer-events-none absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full bg-accent/30 blur-3xl" />
         <div className="pointer-events-none absolute -top-32 -left-32 w-[400px] h-[400px] rounded-full bg-primary-glow/30 blur-3xl" />
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
-          <div className="max-w-3xl space-y-6">
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+          <div className="text-center max-w-3xl mx-auto space-y-5">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur px-3 py-1 text-xs">
               <Sparkles className="w-3.5 h-3.5" /> Grupo Impulsionando · Tecnologia + Marketing
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight">
-              Estratégia que vende. Sistema que entrega. Um grupo, dois braços, uma operação completa.
+              Quem é você?
             </h1>
-            <p className="text-lg text-white/85 max-w-2xl leading-relaxed">
-              A <strong>Impulsionando Tecnologia</strong> cria sistemas, plataformas, CRMs, agendas, automações,
-              dashboards, checkouts, PDVs e integrações. A <strong>Impulsionando Brasil</strong> cuida do marketing,
-              tráfego, social media, funis e posicionamento. Juntas, transformam intenção em resultado real.
-            </p>
-            <p className="text-base font-semibold text-accent">
-              O limite é onde você quiser chegar.
-            </p>
-            <div className="flex flex-wrap gap-3 pt-2">
-              <Button asChild size="lg" className="gap-2 bg-white text-primary hover:bg-white/90">
-                <Link to="/orcamento">Quero criar meu sistema <ArrowRight className="w-4 h-4" /></Link>
-              </Button>
-              <Button asChild size="lg" className="gap-2 bg-accent text-accent-foreground hover:bg-accent/90">
-                <Link to="/demo">Solicitar demonstração <ArrowRight className="w-4 h-4" /></Link>
-              </Button>
-              <Button asChild size="lg" className="btn-whatsapp gap-2">
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="w-4 h-4" /> Falar no WhatsApp
-                </a>
-              </Button>
-            </div>
-            <p className="text-xs text-white/70 pt-1">
-              Procura apenas marketing digital? Vá direto para a{" "}
-              <a href="https://impulsionandobrasil.com.br" target="_blank" rel="noopener noreferrer" className="underline hover:text-white font-medium">
-                Impulsionando Brasil
-              </a>.
+            <p className="text-lg text-white/85 leading-relaxed">
+              Escolha o caminho que combina com o seu objetivo. A plataforma é a mesma —
+              o que muda é o jeito que ela trabalha pra você.
             </p>
           </div>
+
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            {/* EMPRESA */}
+            <Card className="group p-7 flex flex-col bg-white text-foreground hover:shadow-card-hover transition-all">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary inline-flex items-center justify-center mb-4">
+                <Building2 className="w-6 h-6" />
+              </div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Sou uma empresa</div>
+              <h2 className="text-2xl font-bold tracking-tight">
+                Quero automatizar meu negócio
+              </h2>
+              <p className="text-sm text-muted-foreground mt-3 leading-relaxed flex-1">
+                Clínica, imobiliária, restaurante, academia, concessionária, escritório, comércio.
+                Sistema pronto para o seu segmento com agenda, CRM, WhatsApp, financeiro e BI.
+              </p>
+              <Button asChild className="mt-6 gap-2 bg-gradient-primary shadow-elegant">
+                <Link to="/empresas">
+                  Quero automatizar meu negócio <ArrowRight className="w-4 h-4" />
+                </Link>
+              </Button>
+            </Card>
+
+            {/* WHITE LABEL */}
+            <Card className="group p-7 flex flex-col bg-white text-foreground hover:shadow-card-hover transition-all md:scale-[1.02] md:-translate-y-1 ring-1 ring-accent/40">
+              <div className="w-12 h-12 rounded-xl bg-accent/15 text-accent inline-flex items-center justify-center mb-4">
+                <Layers className="w-6 h-6" />
+              </div>
+              <div className="text-xs uppercase tracking-wider text-accent mb-1">Quero minha própria plataforma</div>
+              <h2 className="text-2xl font-bold tracking-tight">
+                White Label
+              </h2>
+              <p className="text-sm text-muted-foreground mt-3 leading-relaxed flex-1">
+                Agências, consultorias, franqueadoras e grupos empresariais.
+                Sua marca, seu domínio, seus clientes, seu faturamento — sem precisar desenvolver.
+              </p>
+              <Button asChild className="mt-6 gap-2 bg-accent text-accent-foreground hover:bg-accent/90">
+                <Link to="/white-label">
+                  Quero vender minha própria plataforma <ArrowRight className="w-4 h-4" />
+                </Link>
+              </Button>
+            </Card>
+
+            {/* CONSUMIDOR */}
+            <Card className="group p-7 flex flex-col bg-white text-foreground hover:shadow-card-hover transition-all">
+              <div className="w-12 h-12 rounded-xl bg-muted text-foreground inline-flex items-center justify-center mb-4">
+                <UserRound className="w-6 h-6" />
+              </div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Sou consumidor</div>
+              <h2 className="text-2xl font-bold tracking-tight">
+                Entrar na minha área
+              </h2>
+              <p className="text-sm text-muted-foreground mt-3 leading-relaxed flex-1">
+                Quero acessar minhas agendas, pedidos, eventos, cupons, programas de fidelidade
+                e serviços contratados em empresas que usam a plataforma.
+              </p>
+              <Button asChild variant="outline" className="mt-6 gap-2">
+                <Link to="/auth">
+                  Entrar na minha área <ArrowRight className="w-4 h-4" />
+                </Link>
+              </Button>
+            </Card>
+          </div>
+
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+            <Button asChild size="lg" className="gap-2 bg-white text-primary hover:bg-white/90">
+              <Link to="/demo">Ver demonstrações <ArrowRight className="w-4 h-4" /></Link>
+            </Button>
+            <Button asChild size="lg" className="btn-whatsapp gap-2">
+              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+                <MessageCircle className="w-4 h-4" /> Falar com Especialista
+              </a>
+            </Button>
+          </div>
+          <p className="text-xs text-white/70 pt-4 text-center">
+            Procura apenas marketing digital? Vá direto para a{" "}
+            <a href="https://impulsionandobrasil.com.br" target="_blank" rel="noopener noreferrer" className="underline hover:text-white font-medium">
+              Impulsionando Brasil
+            </a>.
+          </p>
         </div>
       </section>
+
 
       {/* PARCERIA GRUPO IMPULSIONANDO */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">

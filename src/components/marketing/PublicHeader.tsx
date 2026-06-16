@@ -113,12 +113,46 @@ const NICHOS_GROUPS: NavGroup[] = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PLANOS — preços + orçamento sob medida
+// SOLUÇÕES — agrupado por público (Empresas / White Label / Consumidores)
 // ─────────────────────────────────────────────────────────────────────────────
+const SOLUCOES_AUDIENCE_GROUPS: NavGroup[] = [
+  {
+    heading: "Para Empresas",
+    items: [
+      { to: "/empresas", label: "Visão geral por segmento", desc: "Hub com todos os nichos atendidos" },
+      { to: "/nichos/clinicas", label: "Clínicas", desc: "Agenda, prontuário, WhatsApp, financeiro" },
+      { to: "/nichos/imobiliaria", label: "Imobiliárias", desc: "Captação, CRM, visitas, IA comercial" },
+      { to: "/nichos/bares-restaurantes", label: "Restaurantes", desc: "Delivery, PDV, cupons, fidelidade" },
+      { to: "/nichos/fitness", label: "Academias", desc: "Planos, avaliações, agenda, financeiro" },
+      { to: "/nichos/concessionarias", label: "Concessionárias", desc: "Estoque, CRM, pós-venda, leads" },
+      { to: "/nichos/servicos", label: "Prestadores de serviço", desc: "Orçamentos, agenda, CRM, cobrança" },
+      { to: "/nichos/ecommerce", label: "Comércio", desc: "PDV, estoque, recompra, fidelidade" },
+    ],
+  },
+  {
+    heading: "Para White Label",
+    items: [
+      { to: "/white-label", label: "Sua marca, seu domínio, seus clientes", desc: "Plataforma SaaS pronta para revenda" },
+      { to: "/demo/white-label", label: "Ver Plataforma White Label", desc: "Tour navegável da operação revendedora" },
+      { to: "/nichos/white-label", label: "Casos e parceiros", desc: "Como agências e franqueadoras usam" },
+    ],
+  },
+  {
+    heading: "Para Consumidores",
+    items: [
+      { to: "/auth", label: "Área do Cliente", desc: "Acesse agendas, pedidos e documentos" },
+      { to: "/modulos/fidelizacao", label: "Fidelidade e Cupons", desc: "Programas, indicações e vantagens" },
+      { to: "/showroom/eventos", label: "Eventos e Ingressos", desc: "Compra, check-in e transferência" },
+    ],
+  },
+];
+
 const PLANOS: NavItem[] = [
   { to: "/planos", label: "Planos e preços", desc: "Compare módulos, recursos e limites" },
   { to: "/orcamento", label: "Orçamento personalizado", desc: "Monte um plano sob medida para seu negócio" },
 ];
+
+
 
 
 function useIsActivePath(path: string) {
@@ -273,7 +307,21 @@ export function PublicHeader() {
           >
             Início
           </Link>
-          <DesktopDropdownGrouped label="Nichos" groups={NICHOS_GROUPS} />
+          <DesktopDropdownGrouped label="Soluções" groups={SOLUCOES_AUDIENCE_GROUPS} />
+          <Link
+            to="/white-label"
+            className="px-3 py-3 text-[15px] text-muted-foreground hover:text-foreground transition-colors rounded-md"
+            activeProps={{ className: "text-foreground font-medium" }}
+          >
+            White Label
+          </Link>
+          <Link
+            to="/empresas"
+            className="px-3 py-3 text-[15px] text-muted-foreground hover:text-foreground transition-colors rounded-md"
+            activeProps={{ className: "text-foreground font-medium" }}
+          >
+            Empresas
+          </Link>
           <DesktopDropdownFlat label="Planos" items={PLANOS} />
           <Link
             to="/contato"
@@ -283,6 +331,7 @@ export function PublicHeader() {
             Contato
           </Link>
         </nav>
+
 
         <div className="flex items-center gap-2 lg:gap-3">
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex lg:h-10 lg:px-4 lg:text-[15px]">
@@ -318,12 +367,19 @@ export function PublicHeader() {
                     Início
                   </Link>
 
+                  <Link to="/empresas" onClick={() => setMobileOpen(false)} className="text-base font-medium">
+                    Empresas
+                  </Link>
+                  <Link to="/white-label" onClick={() => setMobileOpen(false)} className="text-base font-medium">
+                    White Label
+                  </Link>
+
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                      Nichos
+                      Soluções
                     </p>
                     <div className="flex flex-col gap-3">
-                      {NICHOS_GROUPS.map((g) => (
+                      {SOLUCOES_AUDIENCE_GROUPS.map((g) => (
                         <div key={g.heading}>
                           <p className="text-[11px] uppercase tracking-wider text-muted-foreground/70 mt-2 mb-1">
                             {g.heading}
@@ -339,6 +395,7 @@ export function PublicHeader() {
                       ))}
                     </div>
                   </div>
+
 
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
