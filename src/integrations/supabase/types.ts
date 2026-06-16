@@ -6781,6 +6781,7 @@ export type Database = {
       realestate_properties: {
         Row: {
           address_line: string | null
+          approval_status: Database["public"]["Enums"]["realestate_approval_status"]
           area_total: number | null
           area_useful: number | null
           bathrooms: number
@@ -6805,9 +6806,14 @@ export type Database = {
           property_type: Database["public"]["Enums"]["realestate_property_type"]
           reference_code: string | null
           rent_price: number | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           sale_price: number | null
           state: string | null
           status: Database["public"]["Enums"]["realestate_property_status"]
+          submitted_by: string | null
+          submitted_for_review_at: string | null
           suites: number
           title: string
           updated_at: string
@@ -6815,6 +6821,7 @@ export type Database = {
         }
         Insert: {
           address_line?: string | null
+          approval_status?: Database["public"]["Enums"]["realestate_approval_status"]
           area_total?: number | null
           area_useful?: number | null
           bathrooms?: number
@@ -6839,9 +6846,14 @@ export type Database = {
           property_type?: Database["public"]["Enums"]["realestate_property_type"]
           reference_code?: string | null
           rent_price?: number | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           sale_price?: number | null
           state?: string | null
           status?: Database["public"]["Enums"]["realestate_property_status"]
+          submitted_by?: string | null
+          submitted_for_review_at?: string | null
           suites?: number
           title: string
           updated_at?: string
@@ -6849,6 +6861,7 @@ export type Database = {
         }
         Update: {
           address_line?: string | null
+          approval_status?: Database["public"]["Enums"]["realestate_approval_status"]
           area_total?: number | null
           area_useful?: number | null
           bathrooms?: number
@@ -6873,9 +6886,14 @@ export type Database = {
           property_type?: Database["public"]["Enums"]["realestate_property_type"]
           reference_code?: string | null
           rent_price?: number | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           sale_price?: number | null
           state?: string | null
           status?: Database["public"]["Enums"]["realestate_property_status"]
+          submitted_by?: string | null
+          submitted_for_review_at?: string | null
           suites?: number
           title?: string
           updated_at?: string
@@ -6936,6 +6954,44 @@ export type Database = {
           },
           {
             foreignKeyName: "realestate_property_matches_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "realestate_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      realestate_property_reviews: {
+        Row: {
+          action: string
+          actor_id: string | null
+          company_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          property_id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          property_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          property_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "realestate_property_reviews_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "realestate_properties"
@@ -8414,6 +8470,11 @@ export type Database = {
         | "chargeback"
         | "bloqueado"
       company_environment: "demo" | "teste" | "real"
+      realestate_approval_status:
+        | "pending"
+        | "approved"
+        | "changes_requested"
+        | "rejected"
       realestate_intent_status: "ativo" | "pausado" | "atendido" | "arquivado"
       realestate_operation: "venda" | "locacao" | "venda_ou_locacao"
       realestate_property_status:
@@ -8632,6 +8693,12 @@ export const Constants = {
         "bloqueado",
       ],
       company_environment: ["demo", "teste", "real"],
+      realestate_approval_status: [
+        "pending",
+        "approved",
+        "changes_requested",
+        "rejected",
+      ],
       realestate_intent_status: ["ativo", "pausado", "atendido", "arquivado"],
       realestate_operation: ["venda", "locacao", "venda_ou_locacao"],
       realestate_property_status: [
