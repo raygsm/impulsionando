@@ -37,7 +37,6 @@ import {
   XCircle,
   Loader2,
   Search,
-  ChevronDown,
   History,
   Play,
   RotateCcw,
