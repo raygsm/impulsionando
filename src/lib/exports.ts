@@ -53,7 +53,7 @@ export function downloadTablePdf(opts: {
   let x = margin + 4;
   opts.columns.forEach((c, i) => {
     const w = widths[i];
-    doc.text(c.label, c.align === "right" ? x + w - 8 : x, y + 12, {
+    doc.text(String(c.label), c.align === "right" ? x + w - 8 : x, y + 12, {
       align: c.align === "right" ? "right" : "left",
     });
     x += w;
