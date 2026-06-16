@@ -132,10 +132,25 @@ export const coreExecutiveDashboard = createServerFn({ method: "GET" })
     const topPlans = Array.from(planCount, ([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count).slice(0, 8);
 
     // Inadimplência
-    const today = new Date().toISOString().slice(0, 10);
     const overdueList = (overdueInvoices ?? []).filter((i: any) => i.due_date && i.due_date < today);
     const overdueAmount = overdueList.reduce((s: number, i: any) => s + Number(i.amount ?? 0), 0);
     const overdueCount = overdueList.length;
+
+    // Receita recebida (mês)
+    const receivedMonth = (paidThisMonth ?? []).reduce((s: number, i: any) => s + Number(i.amount ?? 0), 0);
+
+    // Receita prevista (30d)
+    const forecast30d = (upcomingInvoices ?? []).reduce((s: number, i: any) => s + Number(i.amount ?? 0), 0);
+
+    // Crescimento mensal (novos clientes)
+    const newCur = companiesCurMonth?.length ?? 0;
+    const newPrev = companiesPrevMonth?.length ?? 0;
+    const growthPct = newPrev > 0 ? ((newCur - newPrev) / newPrev) * 100 : (newCur > 0 ? 100 : 0);
+
+    // Conversão demo → pago
+    const trialTotal = trialAll?.length ?? 0;
+    const trialConverted = (trialAll ?? []).filter((t: any) => t.status === "convertido" || t.status === "regularizado").length;
+    const conversionPct = trialTotal > 0 ? (trialConverted / trialTotal) * 100 : 0;
 
     return {
       total,
@@ -152,5 +167,13 @@ export const coreExecutiveDashboard = createServerFn({ method: "GET" })
       topPlans,
       overdueCount,
       overdueAmount,
+      receivedMonth,
+      forecast30d,
+      newCur,
+      newPrev,
+      growthPct,
+      trialTotal,
+      trialConverted,
+      conversionPct,
     };
   });
