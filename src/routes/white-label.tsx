@@ -126,26 +126,25 @@ function WhiteLabelPage() {
         {/* PLANOS / CTA */}
         <section className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20 text-center">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">
-            Pronto para vender a sua plataforma?
+            Pronto para lançar a sua plataforma?
           </h2>
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto leading-relaxed text-sm sm:text-base">
-            Os planos White Label são montados por volume de clientes, módulos ativos e nível
-            de suporte. Solicite uma apresentação para receber uma proposta sob medida.
+            Planos White Label montados por volume de clientes, módulos ativos e nível de suporte.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-center gap-3">
             <Button asChild size="lg" className="bg-gradient-primary gap-2 w-full sm:w-auto">
               <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                Solicitar Apresentação <ArrowRight className="w-4 h-4" />
+                Quero minha plataforma White Label <ArrowRight className="w-4 h-4" />
               </a>
             </Button>
             <Button asChild size="lg" variant="outline" className="gap-2 w-full sm:w-auto">
-              <Link to="/demo/white-label">
-                <PlayCircle className="w-4 h-4" /> Ver Plataforma White Label
+              <Link to="/demo">
+                <PlayCircle className="w-4 h-4" /> Ver demonstração
               </Link>
             </Button>
             <Button asChild size="lg" className="btn-whatsapp gap-2 w-full sm:w-auto">
               <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                <MessageCircle className="w-4 h-4" /> Falar com Especialista
+                <MessageCircle className="w-4 h-4" /> Falar com especialista
               </a>
             </Button>
           </div>
