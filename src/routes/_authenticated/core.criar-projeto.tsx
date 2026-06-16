@@ -143,6 +143,11 @@ function CriarProjetoPage() {
     queryFn: () => listTemplatesFn(),
     enabled: modelKind === "template",
   });
+  const listPlansFn = useServerFn(listBillingPlansForFactory);
+  const { data: plansData } = useQuery({
+    queryKey: ["factory-plans"],
+    queryFn: () => listPlansFn(),
+  });
 
   const createFn = useServerFn(createProjectFromFactory);
   const createMut = useMutation({
@@ -154,6 +159,23 @@ function CriarProjetoPage() {
           model: { kind: modelKind, templateId, sourceCompanyId },
           modules: Array.from(selectedModules).map((slug) => ({ slug, segment: preset })),
           toggles,
+          plan: plan.planId
+            ? {
+                planId: plan.planId,
+                setupAmount: plan.setupAmount,
+                recurringAmount: plan.recurringAmount,
+                dueDay: plan.dueDay,
+                setupPaid: plan.setupPaid,
+                pixKey: plan.pixKey || undefined,
+                generateFirstInvoice: plan.generateFirstInvoice,
+              }
+            : undefined,
+          adminUser: {
+            email: admin.email || client.email || undefined,
+            name: admin.name || client.ownerName || undefined,
+            phone: admin.phone || client.whatsapp || undefined,
+            sendWelcome: admin.sendWelcome,
+          },
           confirm: true,
         },
       }),
