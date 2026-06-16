@@ -25,6 +25,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { PageHeader } from "@/components/app/PageElements";
 import { toast } from "sonner";
+import { useMinimumWage } from "@/hooks/useCoreSetting";
 
 export const Route = createFileRoute("/_authenticated/core/planos")({
   head: () => ({ meta: [{ title: "Gestão Master de Planos" }, { name: "robots", content: "noindex" }] }),
@@ -59,6 +60,7 @@ type Plan = {
 
 function CorePlanosPage() {
   const fetchPlans = useServerFn(listMasterPlans);
+  const minWage = useMinimumWage();
   const { data } = useQuery({
     queryKey: ["core-master-plans"],
     queryFn: () => fetchPlans(),
@@ -69,8 +71,9 @@ function CorePlanosPage() {
     <>
       <PageHeader
         title="Gestão de Planos"
-        description="Defina status comercial, preço, contrato mínimo, visibilidade e CTAs por plano. Tudo é auditado."
+        description={`Defina status comercial, preço, contrato mínimo, visibilidade e CTAs por plano. Salário mínimo de referência: R$ ${minWage.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}. Tudo é auditado.`}
       />
+
       <Card className="p-4">
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {plans.map((p) => (
