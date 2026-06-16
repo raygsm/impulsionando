@@ -1,14 +1,43 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listDemoCompanies, impersonateDemo, runWizardSmokeTest } from "@/lib/demos.functions";
+import {
+  listDemoCompanies,
+  impersonateDemo,
+  runWizardSmokeTest,
+  runWizardSmokeBatch,
+  listSmokeHistory,
+} from "@/lib/demos.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { PageHeader } from "@/components/app/PageElements";
 import { toast } from "sonner";
-import { ExternalLink, FlaskConical, CheckCircle2, XCircle, Loader2 } from "lucide-react";
-import { useState } from "react";
+import {
+  ExternalLink,
+  FlaskConical,
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  Search,
+  ChevronDown,
+  History,
+  Play,
+} from "lucide-react";
+import { useMemo, useState } from "react";
 
 const fmtBRL = (v: number) =>
   Number(v ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -36,15 +65,36 @@ type DemoRow = {
   }>;
 };
 
+type SmokeStep = { key: string; ok: boolean; detail?: string };
+type SmokeRunRow = {
+  id: string;
+  label: string | null;
+  niche_slug: string | null;
+  success: boolean;
+  duration_ms: number;
+  steps: SmokeStep[];
+  ids: Record<string, string | null>;
+  error: string | null;
+  batch_id: string | null;
+  created_at: string;
+};
+
 function CoreDemosPage() {
   const qc = useQueryClient();
   const fetchDemos = useServerFn(listDemoCompanies);
   const impersonate = useServerFn(impersonateDemo);
   const smoke = useServerFn(runWizardSmokeTest);
+  const smokeBatch = useServerFn(runWizardSmokeBatch);
+  const fetchHistory = useServerFn(listSmokeHistory);
 
   const { data, isLoading } = useQuery({
     queryKey: ["core-demos"],
     queryFn: () => fetchDemos(),
+  });
+
+  const { data: historyData, isLoading: loadingHistory } = useQuery({
+    queryKey: ["core-smoke-history"],
+    queryFn: () => fetchHistory({ data: { limit: 50 } }),
   });
 
   const impersonateMut = useMutation({
@@ -61,18 +111,87 @@ function CoreDemosPage() {
   });
 
   const [smokeReport, setSmokeReport] = useState<Awaited<ReturnType<typeof smoke>> | null>(null);
+  const [batchReport, setBatchReport] = useState<Awaited<ReturnType<typeof smokeBatch>> | null>(
+    null,
+  );
+
   const smokeMut = useMutation({
-    mutationFn: () => smoke(),
+    mutationFn: (label: string) => smoke({ data: { label } }),
     onSuccess: (r) => {
       setSmokeReport(r);
       qc.invalidateQueries({ queryKey: ["core-demos"] });
-      if (r.success) toast.success("Smoke test do wizard: ✅ todos os passos OK");
-      else toast.error("Smoke test do wizard: ❌ houve falhas");
+      qc.invalidateQueries({ queryKey: ["core-smoke-history"] });
+      if (r.success) toast.success("Smoke test ✅ todos os passos OK");
+      else toast.error("Smoke test ❌ houve falhas");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const batchMut = useMutation({
+    mutationFn: (targets: Array<{ label: string; nicheSlug: string | null }>) =>
+      smokeBatch({ data: { targets } }),
+    onSuccess: (r) => {
+      setBatchReport(r);
+      qc.invalidateQueries({ queryKey: ["core-smoke-history"] });
+      if (r.failCount === 0)
+        toast.success(`Batch ✅ ${r.okCount}/${r.results.length} sucessos`);
+      else toast.error(`Batch ❌ ${r.failCount} falha(s) em ${r.results.length}`);
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const demos = (data?.demos ?? []) as unknown as DemoRow[];
+  const history = (historyData?.runs ?? []) as unknown as SmokeRunRow[];
+
+  // Filtros
+  const [search, setSearch] = useState("");
+  const [nicheFilter, setNicheFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+
+  const niches = useMemo(() => {
+    const map = new Map<string, string>();
+    demos.forEach((d) => {
+      if (d.niche?.slug) map.set(d.niche.slug, d.niche.name);
+    });
+    return Array.from(map, ([slug, name]) => ({ slug, name }));
+  }, [demos]);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return demos.filter((d) => {
+      if (nicheFilter !== "all" && d.niche?.slug !== nicheFilter) return false;
+      const invoice = d.contracts?.[0]?.invoices?.[0];
+      if (statusFilter !== "all") {
+        if (statusFilter === "none" && invoice) return false;
+        if (statusFilter !== "none" && invoice?.status !== statusFilter) return false;
+      }
+      if (!q) return true;
+      const hay = [d.name, d.trade_name, d.email, d.niche?.name, d.niche?.slug]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return hay.includes(q);
+    });
+  }, [demos, search, nicheFilter, statusFilter]);
+
+  const runBatchAllNiches = () => {
+    const targets =
+      niches.length > 0
+        ? niches.map((n) => ({ label: `${n.slug}-${Date.now()}`, nicheSlug: n.slug }))
+        : [{ label: `default-${Date.now()}`, nicheSlug: null }];
+    setBatchReport(null);
+    batchMut.mutate(targets);
+  };
+
+  const runBatchFiltered = () => {
+    if (filtered.length === 0) return;
+    const targets = filtered.slice(0, 20).map((d) => ({
+      label: `${d.niche?.slug ?? "x"}-${d.id.slice(0, 6)}`,
+      nicheSlug: d.niche?.slug ?? null,
+    }));
+    setBatchReport(null);
+    batchMut.mutate(targets);
+  };
 
   return (
     <div className="space-y-6">
@@ -80,26 +199,103 @@ function CoreDemosPage() {
         title="Demos por nicho"
         description="Empresas demonstração geradas pelo CORE com contrato e 1ª fatura prontos."
         action={
-          <Button
-            onClick={() => smokeMut.mutate()}
-            disabled={smokeMut.isPending}
-            variant="outline"
-          >
-            {smokeMut.isPending ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <FlaskConical className="mr-2 h-4 w-4" />
-            )}
-            Rodar smoke test do wizard
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              onClick={() => smokeMut.mutate(`single-${Date.now()}`)}
+              disabled={smokeMut.isPending || batchMut.isPending}
+              variant="outline"
+              size="sm"
+            >
+              {smokeMut.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <FlaskConical className="mr-2 h-4 w-4" />
+              )}
+              Smoke test (1x)
+            </Button>
+            <Button
+              onClick={runBatchAllNiches}
+              disabled={smokeMut.isPending || batchMut.isPending}
+              variant="outline"
+              size="sm"
+            >
+              {batchMut.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Play className="mr-2 h-4 w-4" />
+              )}
+              Rodar em todos os nichos ({niches.length || 1})
+            </Button>
+          </div>
         }
       />
 
+      {/* Filtros */}
+      <Card className="p-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div className="md:col-span-2 relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por nome, e-mail, empresa…"
+              className="pl-8"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <Select value={nicheFilter} onValueChange={setNicheFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Nicho" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os nichos</SelectItem>
+              {niches.map((n) => (
+                <SelectItem key={n.slug} value={n.slug}>
+                  {n.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Status da fatura" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Qualquer status</SelectItem>
+              <SelectItem value="open">Aberta</SelectItem>
+              <SelectItem value="paid">Paga</SelectItem>
+              <SelectItem value="overdue">Vencida</SelectItem>
+              <SelectItem value="canceled">Cancelada</SelectItem>
+              <SelectItem value="none">Sem fatura</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground">
+          <span>
+            {filtered.length} de {demos.length} demos
+          </span>
+          {filtered.length > 0 && filtered.length !== demos.length && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={runBatchFiltered}
+              disabled={batchMut.isPending}
+            >
+              <Play className="mr-2 h-3.5 w-3.5" />
+              Rodar smoke nas {filtered.length} demos filtradas
+            </Button>
+          )}
+        </div>
+      </Card>
+
+      {/* Relatório execução única */}
       {smokeReport && (
         <Card className="p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold">
-              Smoke test {smokeReport.success ? "✅" : "❌"}
+              Smoke test {smokeReport.success ? "✅" : "❌"} ·{" "}
+              <span className="text-muted-foreground font-normal">
+                {smokeReport.durationMs}ms
+              </span>
             </h3>
             <Button variant="ghost" size="sm" onClick={() => setSmokeReport(null)}>
               fechar
@@ -124,15 +320,60 @@ function CoreDemosPage() {
         </Card>
       )}
 
+      {/* Relatório batch */}
+      {batchReport && (
+        <Card className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold">
+              Batch{" "}
+              {batchReport.failCount === 0 ? "✅" : "❌"} · {batchReport.okCount} ok /{" "}
+              {batchReport.failCount} falhas ·{" "}
+              <span className="text-muted-foreground font-normal">
+                {batchReport.totalMs}ms · #{batchReport.batchId.slice(0, 8)}
+              </span>
+            </h3>
+            <Button variant="ghost" size="sm" onClick={() => setBatchReport(null)}>
+              fechar
+            </Button>
+          </div>
+          <div className="space-y-2">
+            {batchReport.results.map((r, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between text-sm border rounded p-2"
+              >
+                <div className="flex items-center gap-2">
+                  {r.success ? (
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                  ) : (
+                    <XCircle className="h-4 w-4 text-destructive" />
+                  )}
+                  <span className="font-mono">{r.label}</span>
+                  {r.nicheSlug && (
+                    <Badge variant="outline" className="text-xs">
+                      {r.nicheSlug}
+                    </Badge>
+                  )}
+                </div>
+                <span className="text-xs text-muted-foreground">{r.durationMs}ms</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Lista de demos */}
       {isLoading ? (
         <Card className="p-6 text-sm text-muted-foreground">Carregando demos…</Card>
-      ) : demos.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <Card className="p-6 text-sm text-muted-foreground">
-          Nenhuma empresa demo encontrada. A migration de seed cria uma por nicho ativo.
+          {demos.length === 0
+            ? "Nenhuma empresa demo encontrada. A migration de seed cria uma por nicho ativo."
+            : "Nenhuma demo bate com os filtros atuais."}
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {demos.map((d) => {
+          {filtered.map((d) => {
             const contract = d.contracts?.[0];
             const invoice = contract?.invoices?.[0];
             return (
@@ -146,11 +387,13 @@ function CoreDemosPage() {
                 </div>
 
                 <div className="text-xs space-y-1 text-muted-foreground">
-                  <div>e-mail: <span className="font-mono">{d.email}</span></div>
+                  <div>
+                    e-mail: <span className="font-mono">{d.email}</span>
+                  </div>
                   {contract && (
                     <div>
-                      contrato: {fmtBRL(Number(contract.recurring_amount))}/mês ·{" "}
-                      próx. {contract.next_due_date}
+                      contrato: {fmtBRL(Number(contract.recurring_amount))}/mês · próx.{" "}
+                      {contract.next_due_date}
                     </div>
                   )}
                   {invoice && (
@@ -175,6 +418,78 @@ function CoreDemosPage() {
           })}
         </div>
       )}
+
+      {/* Histórico */}
+      <Card className="p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <History className="h-4 w-4 text-muted-foreground" />
+          <h3 className="text-sm font-semibold">Histórico de smoke tests</h3>
+          <Badge variant="secondary" className="ml-auto">
+            {history.length}
+          </Badge>
+        </div>
+        {loadingHistory ? (
+          <div className="text-sm text-muted-foreground">Carregando…</div>
+        ) : history.length === 0 ? (
+          <div className="text-sm text-muted-foreground">
+            Nenhuma execução registrada ainda.
+          </div>
+        ) : (
+          <div className="space-y-1">
+            {history.map((h) => (
+              <Collapsible key={h.id}>
+                <CollapsibleTrigger className="w-full">
+                  <div className="flex items-center gap-2 text-sm border rounded px-2 py-1.5 hover:bg-muted/50">
+                    {h.success ? (
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-destructive shrink-0" />
+                    )}
+                    <span className="font-mono text-xs">{h.label ?? "—"}</span>
+                    {h.niche_slug && (
+                      <Badge variant="outline" className="text-xs">
+                        {h.niche_slug}
+                      </Badge>
+                    )}
+                    {h.batch_id && (
+                      <Badge variant="secondary" className="text-xs">
+                        batch {h.batch_id.slice(0, 6)}
+                      </Badge>
+                    )}
+                    <span className="ml-auto text-xs text-muted-foreground">
+                      {h.duration_ms}ms · {new Date(h.created_at).toLocaleString("pt-BR")}
+                    </span>
+                    <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="px-2 py-2">
+                  {h.error && (
+                    <div className="text-xs text-destructive mb-2">erro: {h.error}</div>
+                  )}
+                  <ul className="space-y-0.5 text-xs">
+                    {(h.steps ?? []).map((s, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        {s.ok ? (
+                          <CheckCircle2 className="h-3 w-3 text-emerald-500 mt-0.5 shrink-0" />
+                        ) : (
+                          <XCircle className="h-3 w-3 text-destructive mt-0.5 shrink-0" />
+                        )}
+                        <span className="font-mono">{s.key}</span>
+                        {s.detail && (
+                          <span className="text-muted-foreground">— {s.detail}</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                  <pre className="mt-2 text-[10px] bg-muted/40 rounded p-2 overflow-x-auto">
+                    {JSON.stringify(h.ids, null, 2)}
+                  </pre>
+                </CollapsibleContent>
+              </Collapsible>
+            ))}
+          </div>
+        )}
+      </Card>
     </div>
   );
 }
