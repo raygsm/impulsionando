@@ -43,6 +43,23 @@ const NICHES = [
 
 type Step = 1 | 2 | 3 | 4;
 
+type PlanForm = {
+  planId?: string;
+  setupAmount?: number;
+  recurringAmount?: number;
+  dueDay?: number;
+  setupPaid: boolean;
+  pixKey: string;
+  generateFirstInvoice: boolean;
+};
+
+type AdminForm = {
+  email: string;
+  name: string;
+  phone: string;
+  sendWelcome: boolean;
+};
+
 type ClientForm = {
   existingCompanyId?: string;
   name: string;
