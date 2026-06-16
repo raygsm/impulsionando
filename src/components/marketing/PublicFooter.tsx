@@ -9,8 +9,8 @@ export function PublicFooter() {
   return (
     <footer className="border-t border-border bg-card/30 mt-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 grid gap-10 md:grid-cols-5">
-        <div className="md:col-span-2 space-y-4">
-          <img src={logoAsset.url} alt="Impulsionando Tecnologia" className="h-32 md:h-40 w-auto object-contain" />
+        <div className="md:col-span-2 space-y-4 flex flex-col items-center text-center">
+          <img src={logoAsset.url} alt="Impulsionando Tecnologia" className="h-48 md:h-60 w-auto object-contain mx-auto" />
           <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
             Tecnologia, automação, sistemas inteligentes e integrações digitais para empresas que precisam crescer com organização e eficiência.
           </p>
