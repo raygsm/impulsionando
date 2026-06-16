@@ -25,6 +25,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { PageHeader } from "@/components/app/PageElements";
 import { toast } from "sonner";
+import { useMinimumWage } from "@/hooks/useCoreSetting";
 
 export const Route = createFileRoute("/_authenticated/core/planos")({
   head: () => ({ meta: [{ title: "Gestão Master de Planos" }, { name: "robots", content: "noindex" }] }),
