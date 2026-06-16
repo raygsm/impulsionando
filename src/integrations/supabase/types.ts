@@ -2611,6 +2611,42 @@ export type Database = {
           },
         ]
       }
+      core_smoke_purge_log: {
+        Row: {
+          by_niche: Json
+          by_status: Json
+          created_at: string
+          id: string
+          ran_at: string
+          retention_days: number
+          total_removed: number
+          trigger: string
+          triggered_by: string | null
+        }
+        Insert: {
+          by_niche?: Json
+          by_status?: Json
+          created_at?: string
+          id?: string
+          ran_at?: string
+          retention_days: number
+          total_removed?: number
+          trigger?: string
+          triggered_by?: string | null
+        }
+        Update: {
+          by_niche?: Json
+          by_status?: Json
+          created_at?: string
+          id?: string
+          ran_at?: string
+          retention_days?: number
+          total_removed?: number
+          trigger?: string
+          triggered_by?: string | null
+        }
+        Relationships: []
+      }
       core_smoke_runs: {
         Row: {
           batch_id: string | null
@@ -6715,6 +6751,14 @@ export type Database = {
         Returns: string
       }
       purge_smoke_runs: { Args: { days?: number }; Returns: number }
+      purge_smoke_runs_detailed: {
+        Args: {
+          days?: number
+          trigger_source?: string
+          triggered_by_user?: string
+        }
+        Returns: Json
+      }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
@@ -6778,6 +6822,7 @@ export type Database = {
         Returns: string
       }
       trial_regularize: { Args: { _trial_id: string }; Returns: string }
+      trigger_smoke_purge: { Args: { days?: number }; Returns: Json }
       user_belongs_to_company: {
         Args: { _company: string; _user: string }
         Returns: boolean
