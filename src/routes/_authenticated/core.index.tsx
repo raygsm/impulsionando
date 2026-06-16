@@ -59,6 +59,66 @@ function CoreIndex() {
         })}
       </div>
 
+      <div className="grid lg:grid-cols-3 gap-3 mt-4">
+        <Card className="p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <PieChart className="w-4 h-4 text-primary" />
+            <h3 className="font-semibold">Clientes por nicho</h3>
+          </div>
+          {byNiche.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Sem dados ainda.</p>
+          ) : (
+            <ul className="space-y-2">
+              {byNiche.map((n) => (
+                <li key={n.name} className="text-sm">
+                  <div className="flex justify-between"><span>{n.name}</span><span className="font-medium">{n.count}</span></div>
+                  <div className="h-1.5 bg-muted rounded mt-1 overflow-hidden"><div className="h-full bg-primary" style={{ width: `${(n.count / maxNiche) * 100}%` }} /></div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+
+        <Card className="p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <Package className="w-4 h-4 text-primary" />
+            <h3 className="font-semibold">Top módulos instalados</h3>
+          </div>
+          {topModules.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Sem dados ainda.</p>
+          ) : (
+            <ul className="space-y-2">
+              {topModules.map((m) => (
+                <li key={m.name} className="text-sm">
+                  <div className="flex justify-between"><span>{m.name}</span><span className="font-medium">{m.count}</span></div>
+                  <div className="h-1.5 bg-muted rounded mt-1 overflow-hidden"><div className="h-full bg-primary" style={{ width: `${(m.count / maxMod) * 100}%` }} /></div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+
+        <Card className="p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <CreditCard className="w-4 h-4 text-primary" />
+            <h3 className="font-semibold">Planos ativos</h3>
+          </div>
+          {topPlans.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Sem dados ainda.</p>
+          ) : (
+            <ul className="space-y-2">
+              {topPlans.map((p) => (
+                <li key={p.name} className="text-sm">
+                  <div className="flex justify-between"><span>{p.name}</span><span className="font-medium">{p.count}</span></div>
+                  <div className="h-1.5 bg-muted rounded mt-1 overflow-hidden"><div className="h-full bg-primary" style={{ width: `${(p.count / maxPlan) * 100}%` }} /></div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+      </div>
+
+
       <Card className="p-5 mt-4">
         <h3 className="font-semibold mb-2">Atalhos rápidos</h3>
         <div className="flex flex-wrap gap-2 text-sm">
