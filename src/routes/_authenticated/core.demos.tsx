@@ -481,14 +481,17 @@ function CoreDemosPage() {
     zip.file(`${base}.csv`, buildCsv(rows));
     zip.file(`${base}.pdf`, buildPdfBlob(rows));
 
-    // Raw per-run JSON (full audit trail offline)
-    const runsFolder = zip.folder("runs");
-    for (const row of rows) {
-      runsFolder?.file(`${row.id}.json`, JSON.stringify(row, null, 2));
+    // Raw per-run JSON (full audit trail offline) — gated by toggle
+    const includedRawIds: string[] = [];
+    if (includeRawLogs) {
+      const runsFolder = zip.folder("runs");
+      for (const row of rows) {
+        runsFolder?.file(`${row.id}.json`, JSON.stringify(row, null, 2));
+        includedRawIds.push(row.id);
+      }
+      zip.file("runs.ndjson", rows.map((r) => JSON.stringify(r)).join("\n"));
     }
-    // Single newline-delimited JSON file with all runs
-    zip.file("runs.ndjson", rows.map((r) => JSON.stringify(r)).join("\n"));
-    // Pretty array of all runs
+    // Pretty array of all runs (always included — compact audit summary)
     zip.file("runs.json", JSON.stringify(rows, null, 2));
 
     // Aggregates
@@ -514,6 +517,7 @@ function CoreDemosPage() {
     const manifest = {
       generatedAt: new Date().toISOString(),
       generatedBy: "core/demos history export",
+      includeRawLogs,
       filters: {
         sinceDays: historyFilters.sinceDays,
         status: historyFilters.status,
@@ -544,19 +548,42 @@ function CoreDemosPage() {
             schedule: retention.schedule,
             scheduleLabel: retention.scheduleLabel,
             active: retention.active,
+            lastRunAt: retention.lastRunAt,
+            lastRunStatus: retention.lastRunStatus,
+            lastRemovedCount: retention.lastRemovedCount,
+            nextRunAt: retention.nextRunAt,
           }
         : null,
       files: {
         csv: `${base}.csv`,
         pdf: `${base}.pdf`,
-        runsDir: "runs/<id>.json",
-        runsNdjson: "runs.ndjson",
         runsJson: "runs.json",
+        runsDir: includeRawLogs ? "runs/<id>.json" : null,
+        runsNdjson: includeRawLogs ? "runs.ndjson" : null,
       },
+      rawRunIds: includedRawIds,
     };
     zip.file("manifest.json", JSON.stringify(manifest, null, 2));
 
     const zipBlob = await zip.generateAsync({ type: "blob" });
+
+    // ---- Client-side validation: ensure ZIP contains all expected files
+    const verify = await JSZip.loadAsync(zipBlob);
+    const expected: string[] = ["manifest.json", "runs.json", `${base}.csv`, `${base}.pdf`];
+    if (includeRawLogs) {
+      expected.push("runs.ndjson");
+      for (const id of includedRawIds) expected.push(`runs/${id}.json`);
+    }
+    const missing = expected.filter((p) => !verify.file(p));
+    if (missing.length > 0) {
+      toast.error(
+        `ZIP inválido — arquivos ausentes: ${missing.slice(0, 3).join(", ")}${
+          missing.length > 3 ? ` (+${missing.length - 3})` : ""
+        }`,
+      );
+      return;
+    }
+
     const url = URL.createObjectURL(zipBlob);
     const a = document.createElement("a");
     a.href = url;
@@ -565,8 +592,13 @@ function CoreDemosPage() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    toast.success(`ZIP exportado (${rows.length} runs · ${okCount} ok / ${failCount} falhas)`);
+    toast.success(
+      `ZIP exportado (${rows.length} runs · ${okCount} ok / ${failCount} falhas${
+        includeRawLogs ? "" : " · sem logs brutos"
+      })`,
+    );
   };
+
 
 
   const demos = (data?.demos ?? []) as unknown as DemoRow[];
