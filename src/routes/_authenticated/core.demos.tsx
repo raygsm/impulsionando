@@ -274,7 +274,7 @@ function CoreDemosPage() {
     queryFn: () => fetchDemos(),
   });
 
-  const { data: historyData, isLoading: loadingHistory } = useQuery({
+  const { data: historyData, isLoading: loadingHistory, isFetching: fetchingHistory } = useQuery({
     queryKey: ["core-smoke-history", historyPage, historyFilters],
     queryFn: () =>
       fetchHistory({
@@ -284,6 +284,7 @@ function CoreDemosPage() {
           ...historyFilters,
         },
       }),
+    placeholderData: keepPreviousData,
   });
 
   const impersonateMut = useMutation({
