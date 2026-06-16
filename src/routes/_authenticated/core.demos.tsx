@@ -582,51 +582,76 @@ function CoreDemosPage() {
             : "Nenhuma demo bate com os filtros atuais."}
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((d) => {
-            const contract = d.contracts?.[0];
-            const invoice = contract?.invoices?.[0];
-            return (
-              <Card key={d.id} className="p-4 space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <div className="text-sm font-semibold">{d.trade_name || d.name}</div>
-                    <div className="text-xs text-muted-foreground">{d.niche?.name ?? "—"}</div>
-                  </div>
-                  <Badge variant="secondary">{d.environment ?? "demo"}</Badge>
-                </div>
-
-                <div className="text-xs space-y-1 text-muted-foreground">
-                  <div>
-                    e-mail: <span className="font-mono">{d.email}</span>
-                  </div>
-                  {contract && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {pagedDemos.map((d) => {
+              const contract = d.contracts?.[0];
+              const invoice = contract?.invoices?.[0];
+              return (
+                <Card key={d.id} className="p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
                     <div>
-                      contrato: {fmtBRL(Number(contract.recurring_amount))}/mês · próx.{" "}
-                      {contract.next_due_date}
+                      <div className="text-sm font-semibold">{d.trade_name || d.name}</div>
+                      <div className="text-xs text-muted-foreground">{d.niche?.name ?? "—"}</div>
                     </div>
-                  )}
-                  {invoice && (
-                    <div>
-                      1ª fatura: <Badge variant="outline">{invoice.status}</Badge>{" "}
-                      {fmtBRL(Number(invoice.amount))} · venc. {invoice.due_date}
-                    </div>
-                  )}
-                </div>
+                    <Badge variant="secondary">{d.environment ?? "demo"}</Badge>
+                  </div>
 
-                <Button
-                  size="sm"
-                  className="w-full"
-                  onClick={() => impersonateMut.mutate(d.id)}
-                  disabled={impersonateMut.isPending}
-                >
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  Entrar como admin demo
-                </Button>
-              </Card>
-            );
-          })}
-        </div>
+                  <div className="text-xs space-y-1 text-muted-foreground">
+                    <div>
+                      e-mail: <span className="font-mono">{d.email}</span>
+                    </div>
+                    {contract && (
+                      <div>
+                        contrato: {fmtBRL(Number(contract.recurring_amount))}/mês · próx.{" "}
+                        {contract.next_due_date}
+                      </div>
+                    )}
+                    {invoice && (
+                      <div>
+                        1ª fatura: <Badge variant="outline">{invoice.status}</Badge>{" "}
+                        {fmtBRL(Number(invoice.amount))} · venc. {invoice.due_date}
+                      </div>
+                    )}
+                  </div>
+
+                  <Button
+                    size="sm"
+                    className="w-full"
+                    onClick={() => impersonateMut.mutate(d.id)}
+                    disabled={impersonateMut.isPending}
+                  >
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    Entrar como admin demo
+                  </Button>
+                </Card>
+              );
+            })}
+          </div>
+          {totalDemoPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setDemoPage((p) => Math.max(0, p - 1))}
+                disabled={demoPage === 0}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-xs text-muted-foreground">
+                Página {demoPage + 1} de {totalDemoPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setDemoPage((p) => Math.min(totalDemoPages - 1, p + 1))}
+                disabled={demoPage >= totalDemoPages - 1}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </>
       )}
 
       {/* Histórico */}
