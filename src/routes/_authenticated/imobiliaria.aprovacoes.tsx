@@ -137,7 +137,10 @@ function Page() {
     queryKey: ["realestate-approvals", queryArgs],
     enabled: !!companyId,
     queryFn: () => fetchQueue({ data: queryArgs }),
+    refetchInterval: 15000,
+    refetchOnWindowFocus: true,
   });
+
   const items = (data?.items ?? []) as QueueItem[];
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
