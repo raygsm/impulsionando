@@ -571,10 +571,36 @@ export const getSmokeRetentionPolicy = createServerFn({ method: "GET" })
       active: boolean;
       scheduleLabel: string;
       lastRunAt: string | null;
-      lastRunEndAt: string | null;
+      lastRunEndAt?: string | null;
       lastRunStatus: string | null;
       lastRemovedCount: number | null;
       nextRunAt: string | null;
+      lastTrigger: "scheduled" | "manual" | null;
+      lastByNiche: Record<string, number>;
+      lastByStatus: Record<string, number>;
+      lastLogId: string | null;
     };
-
   });
+
+export const triggerSmokePurge = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { days?: number } | undefined) => input ?? {})
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isStaff } = await supabase.rpc("is_impulsionando_staff", { _user: userId });
+    if (!isStaff) throw new Error("Acesso restrito à equipe Impulsionando.");
+    const { data: res, error } = await supabase.rpc("trigger_smoke_purge", {
+      days: data.days ?? 180,
+    });
+    if (error) throw new Error(error.message);
+    return res as {
+      id: string;
+      totalRemoved: number;
+      byNiche: Record<string, number>;
+      byStatus: Record<string, number>;
+      retentionDays: number;
+      trigger: string;
+      ranAt: string;
+    };
+  });
+
