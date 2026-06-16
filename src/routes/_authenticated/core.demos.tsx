@@ -7,6 +7,8 @@ import {
   runWizardSmokeTest,
   runWizardSmokeBatch,
   listSmokeHistory,
+  replaySmokeRun,
+  exportSmokeHistory,
 } from "@/lib/demos.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,6 +38,11 @@ import {
   ChevronDown,
   History,
   Play,
+  RotateCcw,
+  Download,
+  FileText,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -76,8 +83,73 @@ type SmokeRunRow = {
   ids: Record<string, string | null>;
   error: string | null;
   batch_id: string | null;
+  replay_of: string | null;
   created_at: string;
 };
+
+type SortKey = "name" | "niche" | "invoice_amount" | "invoice_due" | "invoice_status";
+type SortDir = "asc" | "desc";
+
+function csvCell(v: unknown): string {
+  if (v === null || v === undefined) return "";
+  const s = typeof v === "object" ? JSON.stringify(v) : String(v);
+  return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function downloadBlob(content: string, filename: string, mime: string) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function printHistoryPDF(rows: SmokeRunRow[]) {
+  const w = window.open("", "_blank", "width=900,height=700");
+  if (!w) return;
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>Histórico Smoke Tests</title>
+<style>
+  body{font-family:system-ui,-apple-system,sans-serif;padding:24px;color:#111}
+  h1{font-size:18px;margin:0 0 16px}
+  table{border-collapse:collapse;width:100%;font-size:11px}
+  th,td{border:1px solid #ddd;padding:6px 8px;text-align:left;vertical-align:top}
+  th{background:#f3f4f6}
+  .ok{color:#059669;font-weight:600}
+  .fail{color:#dc2626;font-weight:600}
+  pre{margin:0;font-size:10px;white-space:pre-wrap;word-break:break-all}
+</style></head><body>
+<h1>Histórico Smoke Tests — ${new Date().toLocaleString("pt-BR")}</h1>
+<table><thead><tr>
+  <th>Data</th><th>Label</th><th>Nicho</th><th>Status</th><th>Tempo</th>
+  <th>Batch</th><th>Replay de</th><th>IDs</th><th>Logs</th><th>Erro</th>
+</tr></thead><tbody>
+${rows
+  .map(
+    (r) => `<tr>
+  <td>${new Date(r.created_at).toLocaleString("pt-BR")}</td>
+  <td>${r.label ?? "—"}</td>
+  <td>${r.niche_slug ?? "—"}</td>
+  <td class="${r.success ? "ok" : "fail"}">${r.success ? "OK" : "FALHA"}</td>
+  <td>${r.duration_ms}ms</td>
+  <td>${r.batch_id ? r.batch_id.slice(0, 8) : "—"}</td>
+  <td>${r.replay_of ? r.replay_of.slice(0, 8) : "—"}</td>
+  <td><pre>${JSON.stringify(r.ids, null, 2)}</pre></td>
+  <td><pre>${(r.steps ?? []).map((s) => `${s.ok ? "✓" : "✗"} ${s.key}${s.detail ? " — " + s.detail : ""}`).join("\n")}</pre></td>
+  <td>${r.error ?? ""}</td>
+</tr>`,
+  )
+  .join("")}
+</tbody></table>
+<script>window.onload=()=>{setTimeout(()=>window.print(),300)}</script>
+</body></html>`;
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+}
 
 function CoreDemosPage() {
   const qc = useQueryClient();
@@ -86,6 +158,12 @@ function CoreDemosPage() {
   const smoke = useServerFn(runWizardSmokeTest);
   const smokeBatch = useServerFn(runWizardSmokeBatch);
   const fetchHistory = useServerFn(listSmokeHistory);
+  const replay = useServerFn(replaySmokeRun);
+  const exportHistory = useServerFn(exportSmokeHistory);
+
+  // paginação histórico
+  const [historyPage, setHistoryPage] = useState(0);
+  const historyPageSize = 20;
 
   const { data, isLoading } = useQuery({
     queryKey: ["core-demos"],
@@ -93,8 +171,11 @@ function CoreDemosPage() {
   });
 
   const { data: historyData, isLoading: loadingHistory } = useQuery({
-    queryKey: ["core-smoke-history"],
-    queryFn: () => fetchHistory({ data: { limit: 50 } }),
+    queryKey: ["core-smoke-history", historyPage],
+    queryFn: () =>
+      fetchHistory({
+        data: { limit: historyPageSize, offset: historyPage * historyPageSize },
+      }),
   });
 
   const impersonateMut = useMutation({
@@ -140,13 +221,76 @@ function CoreDemosPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const replayMut = useMutation({
+    mutationFn: (runId: string) => replay({ data: { runId } }),
+    onSuccess: (r) => {
+      qc.invalidateQueries({ queryKey: ["core-smoke-history"] });
+      if (r.success) toast.success(`Replay ✅ (de ${r.replayOf.slice(0, 8)})`);
+      else toast.error(`Replay ❌ houve falhas`);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const handleExportCsv = async () => {
+    const r = await exportHistory();
+    const rows = (r.runs ?? []) as unknown as SmokeRunRow[];
+    const header = [
+      "id",
+      "created_at",
+      "label",
+      "niche_slug",
+      "success",
+      "duration_ms",
+      "batch_id",
+      "replay_of",
+      "ids",
+      "steps",
+      "error",
+    ];
+    const lines = [header.join(",")];
+    for (const row of rows) {
+      lines.push(
+        [
+          row.id,
+          row.created_at,
+          row.label,
+          row.niche_slug,
+          row.success,
+          row.duration_ms,
+          row.batch_id,
+          row.replay_of,
+          row.ids,
+          (row.steps ?? [])
+            .map((s) => `${s.ok ? "OK" : "FAIL"}:${s.key}${s.detail ? "=" + s.detail : ""}`)
+            .join(" | "),
+          row.error,
+        ]
+          .map(csvCell)
+          .join(","),
+      );
+    }
+    downloadBlob(lines.join("\n"), `smoke-history-${Date.now()}.csv`, "text/csv;charset=utf-8");
+    toast.success(`CSV exportado (${rows.length} linhas)`);
+  };
+
+  const handleExportPdf = async () => {
+    const r = await exportHistory();
+    const rows = (r.runs ?? []) as unknown as SmokeRunRow[];
+    printHistoryPDF(rows);
+  };
+
   const demos = (data?.demos ?? []) as unknown as DemoRow[];
   const history = (historyData?.runs ?? []) as unknown as SmokeRunRow[];
+  const historyTotal = historyData?.total ?? 0;
 
-  // Filtros
+  // Filtros + paginação + ordenação dos demos
   const [search, setSearch] = useState("");
   const [nicheFilter, setNicheFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sortKey, setSortKey] = useState<SortKey>("name");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [demoPage, setDemoPage] = useState(0);
+  const [demoPageSize, setDemoPageSize] = useState(12);
 
   const niches = useMemo(() => {
     const map = new Map<string, string>();
@@ -158,7 +302,7 @@ function CoreDemosPage() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return demos.filter((d) => {
+    const list = demos.filter((d) => {
       if (nicheFilter !== "all" && d.niche?.slug !== nicheFilter) return false;
       const invoice = d.contracts?.[0]?.invoices?.[0];
       if (statusFilter !== "all") {
@@ -172,7 +316,33 @@ function CoreDemosPage() {
         .toLowerCase();
       return hay.includes(q);
     });
-  }, [demos, search, nicheFilter, statusFilter]);
+
+    const dir = sortDir === "asc" ? 1 : -1;
+    list.sort((a, b) => {
+      const ia = a.contracts?.[0]?.invoices?.[0];
+      const ib = b.contracts?.[0]?.invoices?.[0];
+      switch (sortKey) {
+        case "name":
+          return (a.trade_name ?? a.name ?? "").localeCompare(b.trade_name ?? b.name ?? "") * dir;
+        case "niche":
+          return ((a.niche?.name ?? "").localeCompare(b.niche?.name ?? "")) * dir;
+        case "invoice_amount":
+          return ((Number(ia?.amount ?? 0) - Number(ib?.amount ?? 0))) * dir;
+        case "invoice_due":
+          return ((ia?.due_date ?? "").localeCompare(ib?.due_date ?? "")) * dir;
+        case "invoice_status":
+          return ((ia?.status ?? "").localeCompare(ib?.status ?? "")) * dir;
+      }
+      return 0;
+    });
+    return list;
+  }, [demos, search, nicheFilter, statusFilter, sortKey, sortDir]);
+
+  const pagedDemos = useMemo(
+    () => filtered.slice(demoPage * demoPageSize, demoPage * demoPageSize + demoPageSize),
+    [filtered, demoPage, demoPageSize],
+  );
+  const totalDemoPages = Math.max(1, Math.ceil(filtered.length / demoPageSize));
 
   const runBatchAllNiches = () => {
     const targets =
@@ -269,9 +439,49 @@ function CoreDemosPage() {
             </SelectContent>
           </Select>
         </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
+          <Select value={sortKey} onValueChange={(v) => setSortKey(v as SortKey)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Ordenar por" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="name">Nome</SelectItem>
+              <SelectItem value="niche">Nicho</SelectItem>
+              <SelectItem value="invoice_amount">Valor da 1ª fatura</SelectItem>
+              <SelectItem value="invoice_due">Vencimento</SelectItem>
+              <SelectItem value="invoice_status">Status da fatura</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={sortDir} onValueChange={(v) => setSortDir(v as SortDir)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Direção" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="asc">Crescente</SelectItem>
+              <SelectItem value="desc">Decrescente</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
+            value={String(demoPageSize)}
+            onValueChange={(v) => {
+              setDemoPageSize(Number(v));
+              setDemoPage(0);
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Itens por página" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="6">6 / página</SelectItem>
+              <SelectItem value="12">12 / página</SelectItem>
+              <SelectItem value="24">24 / página</SelectItem>
+              <SelectItem value="48">48 / página</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground">
           <span>
-            {filtered.length} de {demos.length} demos
+            {filtered.length} de {demos.length} demos · pág. {demoPage + 1}/{totalDemoPages}
           </span>
           {filtered.length > 0 && filtered.length !== demos.length && (
             <Button
@@ -281,7 +491,7 @@ function CoreDemosPage() {
               disabled={batchMut.isPending}
             >
               <Play className="mr-2 h-3.5 w-3.5" />
-              Rodar smoke nas {filtered.length} demos filtradas
+              Rodar smoke nas {Math.min(filtered.length, 20)} demos filtradas
             </Button>
           )}
         </div>
@@ -372,61 +582,94 @@ function CoreDemosPage() {
             : "Nenhuma demo bate com os filtros atuais."}
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((d) => {
-            const contract = d.contracts?.[0];
-            const invoice = contract?.invoices?.[0];
-            return (
-              <Card key={d.id} className="p-4 space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <div className="text-sm font-semibold">{d.trade_name || d.name}</div>
-                    <div className="text-xs text-muted-foreground">{d.niche?.name ?? "—"}</div>
-                  </div>
-                  <Badge variant="secondary">{d.environment ?? "demo"}</Badge>
-                </div>
-
-                <div className="text-xs space-y-1 text-muted-foreground">
-                  <div>
-                    e-mail: <span className="font-mono">{d.email}</span>
-                  </div>
-                  {contract && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {pagedDemos.map((d) => {
+              const contract = d.contracts?.[0];
+              const invoice = contract?.invoices?.[0];
+              return (
+                <Card key={d.id} className="p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
                     <div>
-                      contrato: {fmtBRL(Number(contract.recurring_amount))}/mês · próx.{" "}
-                      {contract.next_due_date}
+                      <div className="text-sm font-semibold">{d.trade_name || d.name}</div>
+                      <div className="text-xs text-muted-foreground">{d.niche?.name ?? "—"}</div>
                     </div>
-                  )}
-                  {invoice && (
-                    <div>
-                      1ª fatura: <Badge variant="outline">{invoice.status}</Badge>{" "}
-                      {fmtBRL(Number(invoice.amount))} · venc. {invoice.due_date}
-                    </div>
-                  )}
-                </div>
+                    <Badge variant="secondary">{d.environment ?? "demo"}</Badge>
+                  </div>
 
-                <Button
-                  size="sm"
-                  className="w-full"
-                  onClick={() => impersonateMut.mutate(d.id)}
-                  disabled={impersonateMut.isPending}
-                >
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  Entrar como admin demo
-                </Button>
-              </Card>
-            );
-          })}
-        </div>
+                  <div className="text-xs space-y-1 text-muted-foreground">
+                    <div>
+                      e-mail: <span className="font-mono">{d.email}</span>
+                    </div>
+                    {contract && (
+                      <div>
+                        contrato: {fmtBRL(Number(contract.recurring_amount))}/mês · próx.{" "}
+                        {contract.next_due_date}
+                      </div>
+                    )}
+                    {invoice && (
+                      <div>
+                        1ª fatura: <Badge variant="outline">{invoice.status}</Badge>{" "}
+                        {fmtBRL(Number(invoice.amount))} · venc. {invoice.due_date}
+                      </div>
+                    )}
+                  </div>
+
+                  <Button
+                    size="sm"
+                    className="w-full"
+                    onClick={() => impersonateMut.mutate(d.id)}
+                    disabled={impersonateMut.isPending}
+                  >
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    Entrar como admin demo
+                  </Button>
+                </Card>
+              );
+            })}
+          </div>
+          {totalDemoPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setDemoPage((p) => Math.max(0, p - 1))}
+                disabled={demoPage === 0}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-xs text-muted-foreground">
+                Página {demoPage + 1} de {totalDemoPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setDemoPage((p) => Math.min(totalDemoPages - 1, p + 1))}
+                disabled={demoPage >= totalDemoPages - 1}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </>
       )}
 
       {/* Histórico */}
       <Card className="p-4">
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-2 mb-3 flex-wrap">
           <History className="h-4 w-4 text-muted-foreground" />
           <h3 className="text-sm font-semibold">Histórico de smoke tests</h3>
-          <Badge variant="secondary" className="ml-auto">
-            {history.length}
-          </Badge>
+          <Badge variant="secondary">{historyTotal}</Badge>
+          <div className="ml-auto flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleExportCsv}>
+              <Download className="mr-2 h-3.5 w-3.5" />
+              CSV
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExportPdf}>
+              <FileText className="mr-2 h-3.5 w-3.5" />
+              PDF
+            </Button>
+          </div>
         </div>
         {loadingHistory ? (
           <div className="text-sm text-muted-foreground">Carregando…</div>
@@ -435,59 +678,105 @@ function CoreDemosPage() {
             Nenhuma execução registrada ainda.
           </div>
         ) : (
-          <div className="space-y-1">
-            {history.map((h) => (
-              <Collapsible key={h.id}>
-                <CollapsibleTrigger className="w-full">
-                  <div className="flex items-center gap-2 text-sm border rounded px-2 py-1.5 hover:bg-muted/50">
-                    {h.success ? (
-                      <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-                    ) : (
-                      <XCircle className="h-4 w-4 text-destructive shrink-0" />
-                    )}
-                    <span className="font-mono text-xs">{h.label ?? "—"}</span>
-                    {h.niche_slug && (
-                      <Badge variant="outline" className="text-xs">
-                        {h.niche_slug}
-                      </Badge>
-                    )}
-                    {h.batch_id && (
-                      <Badge variant="secondary" className="text-xs">
-                        batch {h.batch_id.slice(0, 6)}
-                      </Badge>
-                    )}
-                    <span className="ml-auto text-xs text-muted-foreground">
-                      {h.duration_ms}ms · {new Date(h.created_at).toLocaleString("pt-BR")}
-                    </span>
-                    <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="px-2 py-2">
-                  {h.error && (
-                    <div className="text-xs text-destructive mb-2">erro: {h.error}</div>
-                  )}
-                  <ul className="space-y-0.5 text-xs">
-                    {(h.steps ?? []).map((s, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        {s.ok ? (
-                          <CheckCircle2 className="h-3 w-3 text-emerald-500 mt-0.5 shrink-0" />
+          <>
+            <div className="space-y-1">
+              {history.map((h) => (
+                <Collapsible key={h.id}>
+                  <div className="flex items-center gap-1">
+                    <CollapsibleTrigger className="flex-1">
+                      <div className="flex items-center gap-2 text-sm border rounded px-2 py-1.5 hover:bg-muted/50 w-full">
+                        {h.success ? (
+                          <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
                         ) : (
-                          <XCircle className="h-3 w-3 text-destructive mt-0.5 shrink-0" />
+                          <XCircle className="h-4 w-4 text-destructive shrink-0" />
                         )}
-                        <span className="font-mono">{s.key}</span>
-                        {s.detail && (
-                          <span className="text-muted-foreground">— {s.detail}</span>
+                        <span className="font-mono text-xs truncate">{h.label ?? "—"}</span>
+                        {h.niche_slug && (
+                          <Badge variant="outline" className="text-xs">
+                            {h.niche_slug}
+                          </Badge>
                         )}
-                      </li>
-                    ))}
-                  </ul>
-                  <pre className="mt-2 text-[10px] bg-muted/40 rounded p-2 overflow-x-auto">
-                    {JSON.stringify(h.ids, null, 2)}
-                  </pre>
-                </CollapsibleContent>
-              </Collapsible>
-            ))}
-          </div>
+                        {h.batch_id && (
+                          <Badge variant="secondary" className="text-xs">
+                            batch {h.batch_id.slice(0, 6)}
+                          </Badge>
+                        )}
+                        {h.replay_of && (
+                          <Badge variant="outline" className="text-xs">
+                            replay de {h.replay_of.slice(0, 6)}
+                          </Badge>
+                        )}
+                        <span className="ml-auto text-xs text-muted-foreground">
+                          {h.duration_ms}ms · {new Date(h.created_at).toLocaleString("pt-BR")}
+                        </span>
+                        <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                      </div>
+                    </CollapsibleTrigger>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      title="Reexecutar com os mesmos parâmetros"
+                      onClick={() => replayMut.mutate(h.id)}
+                      disabled={replayMut.isPending}
+                    >
+                      {replayMut.isPending && replayMut.variables === h.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <RotateCcw className="h-3.5 w-3.5" />
+                      )}
+                    </Button>
+                  </div>
+                  <CollapsibleContent className="px-2 py-2">
+                    {h.error && (
+                      <div className="text-xs text-destructive mb-2">erro: {h.error}</div>
+                    )}
+                    <ul className="space-y-0.5 text-xs">
+                      {(h.steps ?? []).map((s, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          {s.ok ? (
+                            <CheckCircle2 className="h-3 w-3 text-emerald-500 mt-0.5 shrink-0" />
+                          ) : (
+                            <XCircle className="h-3 w-3 text-destructive mt-0.5 shrink-0" />
+                          )}
+                          <span className="font-mono">{s.key}</span>
+                          {s.detail && (
+                            <span className="text-muted-foreground">— {s.detail}</span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                    <pre className="mt-2 text-[10px] bg-muted/40 rounded p-2 overflow-x-auto">
+                      {JSON.stringify(h.ids, null, 2)}
+                    </pre>
+                  </CollapsibleContent>
+                </Collapsible>
+              ))}
+            </div>
+            {historyTotal > historyPageSize && (
+              <div className="flex items-center justify-center gap-2 mt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setHistoryPage((p) => Math.max(0, p - 1))}
+                  disabled={historyPage === 0}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-xs text-muted-foreground">
+                  Página {historyPage + 1} de{" "}
+                  {Math.max(1, Math.ceil(historyTotal / historyPageSize))}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setHistoryPage((p) => p + 1)}
+                  disabled={(historyPage + 1) * historyPageSize >= historyTotal}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </Card>
     </div>

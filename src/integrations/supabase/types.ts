@@ -2621,6 +2621,7 @@ export type Database = {
           ids: Json
           label: string | null
           niche_slug: string | null
+          replay_of: string | null
           steps: Json
           success: boolean
           triggered_by: string | null
@@ -2634,6 +2635,7 @@ export type Database = {
           ids?: Json
           label?: string | null
           niche_slug?: string | null
+          replay_of?: string | null
           steps?: Json
           success: boolean
           triggered_by?: string | null
@@ -2647,11 +2649,20 @@ export type Database = {
           ids?: Json
           label?: string | null
           niche_slug?: string | null
+          replay_of?: string | null
           steps?: Json
           success?: boolean
           triggered_by?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "core_smoke_runs_replay_of_fkey"
+            columns: ["replay_of"]
+            isOneToOne: false
+            referencedRelation: "core_smoke_runs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       crm_activities: {
         Row: {
