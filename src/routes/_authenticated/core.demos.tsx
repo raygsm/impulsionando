@@ -346,8 +346,28 @@ function CoreDemosPage() {
   const [historyPage, setHistoryPage] = useState(0);
   const historyPageSize = 20;
   const [historySince, setHistorySince] = useState<string>("all");
-  const [historyStatus, setHistoryStatus] = useState<"all" | "success" | "failure">("all");
-  const [historyNicheSlug, setHistoryNicheSlug] = useState<string | null>(null);
+  const [historyStatus, setHistoryStatus] = useState<"all" | "success" | "failure">(() => {
+    if (typeof window === "undefined") return "all";
+    const v = window.localStorage.getItem("core-demos.history.status");
+    return v === "success" || v === "failure" ? v : "all";
+  });
+  const [historyNicheSlug, setHistoryNicheSlug] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return window.localStorage.getItem("core-demos.history.nicheSlug") || null;
+  });
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("core-demos.history.status", historyStatus);
+  }, [historyStatus]);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (historyNicheSlug) {
+      window.localStorage.setItem("core-demos.history.nicheSlug", historyNicheSlug);
+    } else {
+      window.localStorage.removeItem("core-demos.history.nicheSlug");
+    }
+  }, [historyNicheSlug]);
+
   const [historySearch, setHistorySearch] = useState("");
   const debouncedSearch = useDebouncedValue(historySearch, 350);
   const [selectedRun, setSelectedRun] = useState<SmokeRunRow | null>(null);
