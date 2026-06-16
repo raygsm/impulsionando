@@ -11,13 +11,13 @@ async function assertStaff(supabase: any, userId: string) {
 export const listCoreSettings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
+    const { data, error } = await (context.supabase as any)
       .from("core_settings")
       .select("*")
       .order("category", { ascending: true })
       .order("key", { ascending: true });
     if (error) throw new Error(error.message);
-    return data ?? [];
+    return (data ?? []) as any[];
   });
 
 const upsertSchema = z.object({
@@ -34,16 +34,16 @@ export const upsertCoreSetting = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertStaff(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const patch: Record<string, unknown> = {
+    const patch: any = {
       key: data.key,
       value: data.value,
+      label: data.label ?? data.key,
       updated_by: context.userId,
       updated_at: new Date().toISOString(),
     };
-    if (data.label) patch.label = data.label;
     if (data.description !== undefined) patch.description = data.description;
     if (data.category) patch.category = data.category;
-    const { data: row, error } = await supabaseAdmin
+    const { data: row, error } = await (supabaseAdmin as any)
       .from("core_settings")
       .upsert(patch, { onConflict: "key" })
       .select()
