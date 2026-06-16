@@ -113,12 +113,46 @@ const NICHOS_GROUPS: NavGroup[] = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PLANOS — preços + orçamento sob medida
+// SOLUÇÕES — agrupado por público (Empresas / White Label / Consumidores)
 // ─────────────────────────────────────────────────────────────────────────────
+const SOLUCOES_AUDIENCE_GROUPS: NavGroup[] = [
+  {
+    heading: "Para Empresas",
+    items: [
+      { to: "/empresas", label: "Visão geral por segmento", desc: "Hub com todos os nichos atendidos" },
+      { to: "/nichos/clinicas", label: "Clínicas", desc: "Agenda, prontuário, WhatsApp, financeiro" },
+      { to: "/nichos/imobiliaria", label: "Imobiliárias", desc: "Captação, CRM, visitas, IA comercial" },
+      { to: "/nichos/bares-restaurantes", label: "Restaurantes", desc: "Delivery, PDV, cupons, fidelidade" },
+      { to: "/nichos/fitness", label: "Academias", desc: "Planos, avaliações, agenda, financeiro" },
+      { to: "/nichos/concessionarias", label: "Concessionárias", desc: "Estoque, CRM, pós-venda, leads" },
+      { to: "/nichos/servicos", label: "Prestadores de serviço", desc: "Orçamentos, agenda, CRM, cobrança" },
+      { to: "/nichos/ecommerce", label: "Comércio", desc: "PDV, estoque, recompra, fidelidade" },
+    ],
+  },
+  {
+    heading: "Para White Label",
+    items: [
+      { to: "/white-label", label: "Sua marca, seu domínio, seus clientes", desc: "Plataforma SaaS pronta para revenda" },
+      { to: "/demo/white-label", label: "Ver Plataforma White Label", desc: "Tour navegável da operação revendedora" },
+      { to: "/nichos/white-label", label: "Casos e parceiros", desc: "Como agências e franqueadoras usam" },
+    ],
+  },
+  {
+    heading: "Para Consumidores",
+    items: [
+      { to: "/auth", label: "Área do Cliente", desc: "Acesse agendas, pedidos e documentos" },
+      { to: "/modulos/fidelizacao", label: "Fidelidade e Cupons", desc: "Programas, indicações e vantagens" },
+      { to: "/showroom/eventos", label: "Eventos e Ingressos", desc: "Compra, check-in e transferência" },
+    ],
+  },
+];
+
 const PLANOS: NavItem[] = [
   { to: "/planos", label: "Planos e preços", desc: "Compare módulos, recursos e limites" },
   { to: "/orcamento", label: "Orçamento personalizado", desc: "Monte um plano sob medida para seu negócio" },
 ];
+
+
 
 
 function useIsActivePath(path: string) {
