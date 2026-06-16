@@ -10,6 +10,8 @@ import {
   replaySmokeRun,
   exportSmokeHistory,
   getSmokeRetentionPolicy,
+  triggerSmokePurge,
+
 } from "@/lib/demos.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
