@@ -94,9 +94,11 @@ import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedReportsIndexRouteImport } from './routes/_authenticated/reports.index'
 import { Route as AuthenticatedInventoryIndexRouteImport } from './routes/_authenticated/inventory.index'
 import { Route as AuthenticatedFinanceIndexRouteImport } from './routes/_authenticated/finance.index'
+import { Route as AuthenticatedEventosIndexRouteImport } from './routes/_authenticated/eventos.index'
 import { Route as AuthenticatedEhrIndexRouteImport } from './routes/_authenticated/ehr.index'
 import { Route as AuthenticatedCrmIndexRouteImport } from './routes/_authenticated/crm.index'
 import { Route as AuthenticatedCoreIndexRouteImport } from './routes/_authenticated/core.index'
+import { Route as AuthenticatedComunidadeIndexRouteImport } from './routes/_authenticated/comunidade.index'
 import { Route as AuthenticatedBiIndexRouteImport } from './routes/_authenticated/bi.index'
 import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenticated/agenda.index'
 import { Route as AuthenticatedAffiliatesIndexRouteImport } from './routes/_authenticated/affiliates.index'
@@ -124,6 +126,7 @@ import { Route as AuthenticatedFinanceMethodsRouteImport } from './routes/_authe
 import { Route as AuthenticatedFinanceCommissionsRouteImport } from './routes/_authenticated/finance.commissions'
 import { Route as AuthenticatedFinanceCategoriesRouteImport } from './routes/_authenticated/finance.categories'
 import { Route as AuthenticatedFinanceAccountsRouteImport } from './routes/_authenticated/finance.accounts'
+import { Route as AuthenticatedEventosIdRouteImport } from './routes/_authenticated/eventos.$id'
 import { Route as AuthenticatedEhrIdRouteImport } from './routes/_authenticated/ehr.$id'
 import { Route as AuthenticatedCrmPipelinesRouteImport } from './routes/_authenticated/crm.pipelines'
 import { Route as AuthenticatedCrmLeadsRouteImport } from './routes/_authenticated/crm.leads'
@@ -147,10 +150,12 @@ import { Route as AuthenticatedCoreFinalizacaoComercialRouteImport } from './rou
 import { Route as AuthenticatedCoreEventosRouteImport } from './routes/_authenticated/core.eventos'
 import { Route as AuthenticatedCoreDemosRouteImport } from './routes/_authenticated/core.demos'
 import { Route as AuthenticatedCoreDashboardsRouteImport } from './routes/_authenticated/core.dashboards'
+import { Route as AuthenticatedCoreDashboardMacroRouteImport } from './routes/_authenticated/core.dashboard-macro'
 import { Route as AuthenticatedCoreCriarProjetoRouteImport } from './routes/_authenticated/core.criar-projeto'
 import { Route as AuthenticatedCoreConfiguracoesRouteImport } from './routes/_authenticated/core.configuracoes'
 import { Route as AuthenticatedCoreClientesRouteImport } from './routes/_authenticated/core.clientes'
 import { Route as AuthenticatedCoreBriefingsRouteImport } from './routes/_authenticated/core.briefings'
+import { Route as AuthenticatedComunidadeIdRouteImport } from './routes/_authenticated/comunidade.$id'
 import { Route as AuthenticatedBiNichesRouteImport } from './routes/_authenticated/bi.niches'
 import { Route as AuthenticatedBiMasterRouteImport } from './routes/_authenticated/bi.master'
 import { Route as AuthenticatedBiCompanyRouteImport } from './routes/_authenticated/bi.company'
@@ -640,6 +645,12 @@ const AuthenticatedFinanceIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedFinanceRoute,
   } as any)
+const AuthenticatedEventosIndexRoute =
+  AuthenticatedEventosIndexRouteImport.update({
+    id: '/eventos/',
+    path: '/eventos/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedEhrIndexRoute = AuthenticatedEhrIndexRouteImport.update({
   id: '/ehr/',
   path: '/ehr/',
@@ -655,6 +666,12 @@ const AuthenticatedCoreIndexRoute = AuthenticatedCoreIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedCoreRoute,
 } as any)
+const AuthenticatedComunidadeIndexRoute =
+  AuthenticatedComunidadeIndexRouteImport.update({
+    id: '/comunidade/',
+    path: '/comunidade/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedBiIndexRoute = AuthenticatedBiIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -811,6 +828,11 @@ const AuthenticatedFinanceAccountsRoute =
     path: '/accounts',
     getParentRoute: () => AuthenticatedFinanceRoute,
   } as any)
+const AuthenticatedEventosIdRoute = AuthenticatedEventosIdRouteImport.update({
+  id: '/eventos/$id',
+  path: '/eventos/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedEhrIdRoute = AuthenticatedEhrIdRouteImport.update({
   id: '/ehr/$id',
   path: '/ehr/$id',
@@ -940,6 +962,12 @@ const AuthenticatedCoreDashboardsRoute =
     path: '/dashboards',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreDashboardMacroRoute =
+  AuthenticatedCoreDashboardMacroRouteImport.update({
+    id: '/dashboard-macro',
+    path: '/dashboard-macro',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreCriarProjetoRoute =
   AuthenticatedCoreCriarProjetoRouteImport.update({
     id: '/criar-projeto',
@@ -963,6 +991,12 @@ const AuthenticatedCoreBriefingsRoute =
     id: '/briefings',
     path: '/briefings',
     getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
+const AuthenticatedComunidadeIdRoute =
+  AuthenticatedComunidadeIdRouteImport.update({
+    id: '/comunidade/$id',
+    path: '/comunidade/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedBiNichesRoute = AuthenticatedBiNichesRouteImport.update({
   id: '/niches',
@@ -1415,10 +1449,12 @@ export interface FileRoutesByFullPath {
   '/bi/company': typeof AuthenticatedBiCompanyRoute
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
+  '/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
   '/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/core/configuracoes': typeof AuthenticatedCoreConfiguracoesRoute
   '/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
+  '/core/dashboard-macro': typeof AuthenticatedCoreDashboardMacroRoute
   '/core/dashboards': typeof AuthenticatedCoreDashboardsRoute
   '/core/demos': typeof AuthenticatedCoreDemosRoute
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
@@ -1442,6 +1478,7 @@ export interface FileRoutesByFullPath {
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
   '/crm/pipelines': typeof AuthenticatedCrmPipelinesRoute
   '/ehr/$id': typeof AuthenticatedEhrIdRoute
+  '/eventos/$id': typeof AuthenticatedEventosIdRoute
   '/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
   '/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
   '/finance/commissions': typeof AuthenticatedFinanceCommissionsRoute
@@ -1469,9 +1506,11 @@ export interface FileRoutesByFullPath {
   '/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/bi/': typeof AuthenticatedBiIndexRoute
+  '/comunidade/': typeof AuthenticatedComunidadeIndexRoute
   '/core/': typeof AuthenticatedCoreIndexRoute
   '/crm/': typeof AuthenticatedCrmIndexRoute
   '/ehr/': typeof AuthenticatedEhrIndexRoute
+  '/eventos/': typeof AuthenticatedEventosIndexRoute
   '/finance/': typeof AuthenticatedFinanceIndexRoute
   '/inventory/': typeof AuthenticatedInventoryIndexRoute
   '/reports/': typeof AuthenticatedReportsIndexRoute
@@ -1605,10 +1644,12 @@ export interface FileRoutesByTo {
   '/bi/company': typeof AuthenticatedBiCompanyRoute
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
+  '/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
   '/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/core/configuracoes': typeof AuthenticatedCoreConfiguracoesRoute
   '/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
+  '/core/dashboard-macro': typeof AuthenticatedCoreDashboardMacroRoute
   '/core/dashboards': typeof AuthenticatedCoreDashboardsRoute
   '/core/demos': typeof AuthenticatedCoreDemosRoute
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
@@ -1632,6 +1673,7 @@ export interface FileRoutesByTo {
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
   '/crm/pipelines': typeof AuthenticatedCrmPipelinesRoute
   '/ehr/$id': typeof AuthenticatedEhrIdRoute
+  '/eventos/$id': typeof AuthenticatedEventosIdRoute
   '/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
   '/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
   '/finance/commissions': typeof AuthenticatedFinanceCommissionsRoute
@@ -1659,9 +1701,11 @@ export interface FileRoutesByTo {
   '/affiliates': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda': typeof AuthenticatedAgendaIndexRoute
   '/bi': typeof AuthenticatedBiIndexRoute
+  '/comunidade': typeof AuthenticatedComunidadeIndexRoute
   '/core': typeof AuthenticatedCoreIndexRoute
   '/crm': typeof AuthenticatedCrmIndexRoute
   '/ehr': typeof AuthenticatedEhrIndexRoute
+  '/eventos': typeof AuthenticatedEventosIndexRoute
   '/finance': typeof AuthenticatedFinanceIndexRoute
   '/inventory': typeof AuthenticatedInventoryIndexRoute
   '/reports': typeof AuthenticatedReportsIndexRoute
@@ -1808,10 +1852,12 @@ export interface FileRoutesById {
   '/_authenticated/bi/company': typeof AuthenticatedBiCompanyRoute
   '/_authenticated/bi/master': typeof AuthenticatedBiMasterRoute
   '/_authenticated/bi/niches': typeof AuthenticatedBiNichesRoute
+  '/_authenticated/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
   '/_authenticated/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/_authenticated/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/_authenticated/core/configuracoes': typeof AuthenticatedCoreConfiguracoesRoute
   '/_authenticated/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
+  '/_authenticated/core/dashboard-macro': typeof AuthenticatedCoreDashboardMacroRoute
   '/_authenticated/core/dashboards': typeof AuthenticatedCoreDashboardsRoute
   '/_authenticated/core/demos': typeof AuthenticatedCoreDemosRoute
   '/_authenticated/core/eventos': typeof AuthenticatedCoreEventosRoute
@@ -1835,6 +1881,7 @@ export interface FileRoutesById {
   '/_authenticated/crm/leads': typeof AuthenticatedCrmLeadsRoute
   '/_authenticated/crm/pipelines': typeof AuthenticatedCrmPipelinesRoute
   '/_authenticated/ehr/$id': typeof AuthenticatedEhrIdRoute
+  '/_authenticated/eventos/$id': typeof AuthenticatedEventosIdRoute
   '/_authenticated/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
   '/_authenticated/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
   '/_authenticated/finance/commissions': typeof AuthenticatedFinanceCommissionsRoute
@@ -1862,9 +1909,11 @@ export interface FileRoutesById {
   '/_authenticated/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/_authenticated/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/_authenticated/bi/': typeof AuthenticatedBiIndexRoute
+  '/_authenticated/comunidade/': typeof AuthenticatedComunidadeIndexRoute
   '/_authenticated/core/': typeof AuthenticatedCoreIndexRoute
   '/_authenticated/crm/': typeof AuthenticatedCrmIndexRoute
   '/_authenticated/ehr/': typeof AuthenticatedEhrIndexRoute
+  '/_authenticated/eventos/': typeof AuthenticatedEventosIndexRoute
   '/_authenticated/finance/': typeof AuthenticatedFinanceIndexRoute
   '/_authenticated/inventory/': typeof AuthenticatedInventoryIndexRoute
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
@@ -2011,10 +2060,12 @@ export interface FileRouteTypes {
     | '/bi/company'
     | '/bi/master'
     | '/bi/niches'
+    | '/comunidade/$id'
     | '/core/briefings'
     | '/core/clientes'
     | '/core/configuracoes'
     | '/core/criar-projeto'
+    | '/core/dashboard-macro'
     | '/core/dashboards'
     | '/core/demos'
     | '/core/eventos'
@@ -2038,6 +2089,7 @@ export interface FileRouteTypes {
     | '/crm/leads'
     | '/crm/pipelines'
     | '/ehr/$id'
+    | '/eventos/$id'
     | '/finance/accounts'
     | '/finance/categories'
     | '/finance/commissions'
@@ -2065,9 +2117,11 @@ export interface FileRouteTypes {
     | '/affiliates/'
     | '/agenda/'
     | '/bi/'
+    | '/comunidade/'
     | '/core/'
     | '/crm/'
     | '/ehr/'
+    | '/eventos/'
     | '/finance/'
     | '/inventory/'
     | '/reports/'
@@ -2201,10 +2255,12 @@ export interface FileRouteTypes {
     | '/bi/company'
     | '/bi/master'
     | '/bi/niches'
+    | '/comunidade/$id'
     | '/core/briefings'
     | '/core/clientes'
     | '/core/configuracoes'
     | '/core/criar-projeto'
+    | '/core/dashboard-macro'
     | '/core/dashboards'
     | '/core/demos'
     | '/core/eventos'
@@ -2228,6 +2284,7 @@ export interface FileRouteTypes {
     | '/crm/leads'
     | '/crm/pipelines'
     | '/ehr/$id'
+    | '/eventos/$id'
     | '/finance/accounts'
     | '/finance/categories'
     | '/finance/commissions'
@@ -2255,9 +2312,11 @@ export interface FileRouteTypes {
     | '/affiliates'
     | '/agenda'
     | '/bi'
+    | '/comunidade'
     | '/core'
     | '/crm'
     | '/ehr'
+    | '/eventos'
     | '/finance'
     | '/inventory'
     | '/reports'
@@ -2403,10 +2462,12 @@ export interface FileRouteTypes {
     | '/_authenticated/bi/company'
     | '/_authenticated/bi/master'
     | '/_authenticated/bi/niches'
+    | '/_authenticated/comunidade/$id'
     | '/_authenticated/core/briefings'
     | '/_authenticated/core/clientes'
     | '/_authenticated/core/configuracoes'
     | '/_authenticated/core/criar-projeto'
+    | '/_authenticated/core/dashboard-macro'
     | '/_authenticated/core/dashboards'
     | '/_authenticated/core/demos'
     | '/_authenticated/core/eventos'
@@ -2430,6 +2491,7 @@ export interface FileRouteTypes {
     | '/_authenticated/crm/leads'
     | '/_authenticated/crm/pipelines'
     | '/_authenticated/ehr/$id'
+    | '/_authenticated/eventos/$id'
     | '/_authenticated/finance/accounts'
     | '/_authenticated/finance/categories'
     | '/_authenticated/finance/commissions'
@@ -2457,9 +2519,11 @@ export interface FileRouteTypes {
     | '/_authenticated/affiliates/'
     | '/_authenticated/agenda/'
     | '/_authenticated/bi/'
+    | '/_authenticated/comunidade/'
     | '/_authenticated/core/'
     | '/_authenticated/crm/'
     | '/_authenticated/ehr/'
+    | '/_authenticated/eventos/'
     | '/_authenticated/finance/'
     | '/_authenticated/inventory/'
     | '/_authenticated/reports/'
@@ -3164,6 +3228,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFinanceIndexRouteImport
       parentRoute: typeof AuthenticatedFinanceRoute
     }
+    '/_authenticated/eventos/': {
+      id: '/_authenticated/eventos/'
+      path: '/eventos'
+      fullPath: '/eventos/'
+      preLoaderRoute: typeof AuthenticatedEventosIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/ehr/': {
       id: '/_authenticated/ehr/'
       path: '/ehr'
@@ -3184,6 +3255,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/core/'
       preLoaderRoute: typeof AuthenticatedCoreIndexRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/comunidade/': {
+      id: '/_authenticated/comunidade/'
+      path: '/comunidade'
+      fullPath: '/comunidade/'
+      preLoaderRoute: typeof AuthenticatedComunidadeIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/bi/': {
       id: '/_authenticated/bi/'
@@ -3374,6 +3452,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFinanceAccountsRouteImport
       parentRoute: typeof AuthenticatedFinanceRoute
     }
+    '/_authenticated/eventos/$id': {
+      id: '/_authenticated/eventos/$id'
+      path: '/eventos/$id'
+      fullPath: '/eventos/$id'
+      preLoaderRoute: typeof AuthenticatedEventosIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/ehr/$id': {
       id: '/_authenticated/ehr/$id'
       path: '/ehr/$id'
@@ -3535,6 +3620,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreDashboardsRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/dashboard-macro': {
+      id: '/_authenticated/core/dashboard-macro'
+      path: '/dashboard-macro'
+      fullPath: '/core/dashboard-macro'
+      preLoaderRoute: typeof AuthenticatedCoreDashboardMacroRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/criar-projeto': {
       id: '/_authenticated/core/criar-projeto'
       path: '/criar-projeto'
@@ -3562,6 +3654,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/core/briefings'
       preLoaderRoute: typeof AuthenticatedCoreBriefingsRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/comunidade/$id': {
+      id: '/_authenticated/comunidade/$id'
+      path: '/comunidade/$id'
+      fullPath: '/comunidade/$id'
+      preLoaderRoute: typeof AuthenticatedComunidadeIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/bi/niches': {
       id: '/_authenticated/bi/niches'
@@ -4124,6 +4223,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreClientesRoute: typeof AuthenticatedCoreClientesRoute
   AuthenticatedCoreConfiguracoesRoute: typeof AuthenticatedCoreConfiguracoesRoute
   AuthenticatedCoreCriarProjetoRoute: typeof AuthenticatedCoreCriarProjetoRoute
+  AuthenticatedCoreDashboardMacroRoute: typeof AuthenticatedCoreDashboardMacroRoute
   AuthenticatedCoreDashboardsRoute: typeof AuthenticatedCoreDashboardsRoute
   AuthenticatedCoreDemosRoute: typeof AuthenticatedCoreDemosRoute
   AuthenticatedCoreEventosRoute: typeof AuthenticatedCoreEventosRoute
@@ -4153,6 +4253,7 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreClientesRoute: AuthenticatedCoreClientesRoute,
   AuthenticatedCoreConfiguracoesRoute: AuthenticatedCoreConfiguracoesRoute,
   AuthenticatedCoreCriarProjetoRoute: AuthenticatedCoreCriarProjetoRoute,
+  AuthenticatedCoreDashboardMacroRoute: AuthenticatedCoreDashboardMacroRoute,
   AuthenticatedCoreDashboardsRoute: AuthenticatedCoreDashboardsRoute,
   AuthenticatedCoreDemosRoute: AuthenticatedCoreDemosRoute,
   AuthenticatedCoreEventosRoute: AuthenticatedCoreEventosRoute,
@@ -4330,13 +4431,17 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminBillingPolicyRoute: typeof AuthenticatedAdminBillingPolicyRoute
   AuthenticatedAdminTrialsRoute: typeof AuthenticatedAdminTrialsRoute
   AuthenticatedAdminUptimeRoute: typeof AuthenticatedAdminUptimeRoute
+  AuthenticatedComunidadeIdRoute: typeof AuthenticatedComunidadeIdRoute
   AuthenticatedEhrIdRoute: typeof AuthenticatedEhrIdRoute
+  AuthenticatedEventosIdRoute: typeof AuthenticatedEventosIdRoute
   AuthenticatedImobiliariaImoveisRoute: typeof AuthenticatedImobiliariaImoveisRoute
   AuthenticatedImobiliariaIntencoesRoute: typeof AuthenticatedImobiliariaIntencoesRoute
   AuthenticatedImobiliariaMatchesRoute: typeof AuthenticatedImobiliariaMatchesRoute
   AuthenticatedImobiliariaModulosRoute: typeof AuthenticatedImobiliariaModulosRoute
   AuthenticatedMarketingLeadsRoute: typeof AuthenticatedMarketingLeadsRoute
+  AuthenticatedComunidadeIndexRoute: typeof AuthenticatedComunidadeIndexRoute
   AuthenticatedEhrIndexRoute: typeof AuthenticatedEhrIndexRoute
+  AuthenticatedEventosIndexRoute: typeof AuthenticatedEventosIndexRoute
   AuthenticatedAdminModulosClonagemRoute: typeof AuthenticatedAdminModulosClonagemRoute
 }
 
@@ -4373,14 +4478,18 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminBillingPolicyRoute: AuthenticatedAdminBillingPolicyRoute,
   AuthenticatedAdminTrialsRoute: AuthenticatedAdminTrialsRoute,
   AuthenticatedAdminUptimeRoute: AuthenticatedAdminUptimeRoute,
+  AuthenticatedComunidadeIdRoute: AuthenticatedComunidadeIdRoute,
   AuthenticatedEhrIdRoute: AuthenticatedEhrIdRoute,
+  AuthenticatedEventosIdRoute: AuthenticatedEventosIdRoute,
   AuthenticatedImobiliariaImoveisRoute: AuthenticatedImobiliariaImoveisRoute,
   AuthenticatedImobiliariaIntencoesRoute:
     AuthenticatedImobiliariaIntencoesRoute,
   AuthenticatedImobiliariaMatchesRoute: AuthenticatedImobiliariaMatchesRoute,
   AuthenticatedImobiliariaModulosRoute: AuthenticatedImobiliariaModulosRoute,
   AuthenticatedMarketingLeadsRoute: AuthenticatedMarketingLeadsRoute,
+  AuthenticatedComunidadeIndexRoute: AuthenticatedComunidadeIndexRoute,
   AuthenticatedEhrIndexRoute: AuthenticatedEhrIndexRoute,
+  AuthenticatedEventosIndexRoute: AuthenticatedEventosIndexRoute,
   AuthenticatedAdminModulosClonagemRoute:
     AuthenticatedAdminModulosClonagemRoute,
 }

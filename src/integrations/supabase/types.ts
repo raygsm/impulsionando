@@ -2350,6 +2350,365 @@ export type Database = {
           },
         ]
       }
+      comm_attendance: {
+        Row: {
+          community_id: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          event_date: string
+          event_name: string
+          id: string
+          member_id: string
+          notes: string | null
+          status: string
+        }
+        Insert: {
+          community_id: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          event_date: string
+          event_name: string
+          id?: string
+          member_id: string
+          notes?: string | null
+          status?: string
+        }
+        Update: {
+          community_id?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          event_date?: string
+          event_name?: string
+          id?: string
+          member_id?: string
+          notes?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comm_attendance_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "comm_communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comm_attendance_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comm_attendance_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "comm_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comm_communities: {
+        Row: {
+          accepts_donations: boolean
+          company_id: string
+          created_at: string
+          description: string | null
+          donation_purpose: string | null
+          id: string
+          is_active: boolean
+          kind: string
+          monthly_fee: number
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          accepts_donations?: boolean
+          company_id: string
+          created_at?: string
+          description?: string | null
+          donation_purpose?: string | null
+          id?: string
+          is_active?: boolean
+          kind?: string
+          monthly_fee?: number
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          accepts_donations?: boolean
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          donation_purpose?: string | null
+          id?: string
+          is_active?: boolean
+          kind?: string
+          monthly_fee?: number
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comm_communities_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comm_donations: {
+        Row: {
+          amount: number
+          community_id: string
+          company_id: string
+          created_at: string
+          donor_email: string | null
+          donor_name: string
+          donor_phone: string | null
+          fin_transaction_id: string | null
+          id: string
+          member_id: string | null
+          notes: string | null
+          payment_method: string | null
+          payment_reference: string | null
+          purpose: string | null
+          received_at: string
+        }
+        Insert: {
+          amount: number
+          community_id: string
+          company_id: string
+          created_at?: string
+          donor_email?: string | null
+          donor_name: string
+          donor_phone?: string | null
+          fin_transaction_id?: string | null
+          id?: string
+          member_id?: string | null
+          notes?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          purpose?: string | null
+          received_at?: string
+        }
+        Update: {
+          amount?: number
+          community_id?: string
+          company_id?: string
+          created_at?: string
+          donor_email?: string | null
+          donor_name?: string
+          donor_phone?: string | null
+          fin_transaction_id?: string | null
+          id?: string
+          member_id?: string | null
+          notes?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          purpose?: string | null
+          received_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comm_donations_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "comm_communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comm_donations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comm_donations_fin_transaction_id_fkey"
+            columns: ["fin_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "fin_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comm_donations_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "comm_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comm_members: {
+        Row: {
+          birthdate: string | null
+          community_id: string
+          company_id: string
+          created_at: string
+          customer_id: string | null
+          document: string | null
+          email: string | null
+          id: string
+          member_since: string
+          member_user_id: string | null
+          name: string
+          notes: string | null
+          phone: string | null
+          status: string
+          tags: string[]
+          updated_at: string
+        }
+        Insert: {
+          birthdate?: string | null
+          community_id: string
+          company_id: string
+          created_at?: string
+          customer_id?: string | null
+          document?: string | null
+          email?: string | null
+          id?: string
+          member_since?: string
+          member_user_id?: string | null
+          name: string
+          notes?: string | null
+          phone?: string | null
+          status?: string
+          tags?: string[]
+          updated_at?: string
+        }
+        Update: {
+          birthdate?: string | null
+          community_id?: string
+          company_id?: string
+          created_at?: string
+          customer_id?: string | null
+          document?: string | null
+          email?: string | null
+          id?: string
+          member_since?: string
+          member_user_id?: string | null
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          status?: string
+          tags?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comm_members_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "comm_communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comm_members_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comm_members_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comm_memberships: {
+        Row: {
+          amount: number
+          community_id: string
+          company_id: string
+          created_at: string
+          due_date: string
+          fin_transaction_id: string | null
+          id: string
+          member_id: string
+          paid_at: string | null
+          payment_method: string | null
+          payment_reference: string | null
+          period_month: number
+          period_year: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          community_id: string
+          company_id: string
+          created_at?: string
+          due_date: string
+          fin_transaction_id?: string | null
+          id?: string
+          member_id: string
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          period_month: number
+          period_year: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          community_id?: string
+          company_id?: string
+          created_at?: string
+          due_date?: string
+          fin_transaction_id?: string | null
+          id?: string
+          member_id?: string
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          period_month?: number
+          period_year?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comm_memberships_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "comm_communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comm_memberships_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comm_memberships_fin_transaction_id_fkey"
+            columns: ["fin_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "fin_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comm_memberships_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "comm_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           address_city: string | null
@@ -4050,6 +4409,389 @@ export type Database = {
           used_at?: string | null
         }
         Relationships: []
+      }
+      evt_checkins: {
+        Row: {
+          checked_in_at: string
+          company_id: string
+          created_at: string
+          event_id: string
+          gate: string | null
+          id: string
+          notes: string | null
+          operator_user_id: string | null
+          ticket_id: string
+        }
+        Insert: {
+          checked_in_at?: string
+          company_id: string
+          created_at?: string
+          event_id: string
+          gate?: string | null
+          id?: string
+          notes?: string | null
+          operator_user_id?: string | null
+          ticket_id: string
+        }
+        Update: {
+          checked_in_at?: string
+          company_id?: string
+          created_at?: string
+          event_id?: string
+          gate?: string | null
+          id?: string
+          notes?: string | null
+          operator_user_id?: string | null
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evt_checkins_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evt_checkins_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "evt_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evt_checkins_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "evt_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evt_events: {
+        Row: {
+          capacity: number | null
+          city: string | null
+          company_id: string
+          cover_url: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          ends_at: string
+          id: string
+          is_published: boolean
+          organizer_contact: string | null
+          organizer_name: string | null
+          refund_policy: string | null
+          slug: string
+          starts_at: string
+          state: string | null
+          status: string
+          title: string
+          transfer_policy: string
+          updated_at: string
+          venue_address: string | null
+          venue_name: string | null
+        }
+        Insert: {
+          capacity?: number | null
+          city?: string | null
+          company_id: string
+          cover_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at: string
+          id?: string
+          is_published?: boolean
+          organizer_contact?: string | null
+          organizer_name?: string | null
+          refund_policy?: string | null
+          slug: string
+          starts_at: string
+          state?: string | null
+          status?: string
+          title: string
+          transfer_policy?: string
+          updated_at?: string
+          venue_address?: string | null
+          venue_name?: string | null
+        }
+        Update: {
+          capacity?: number | null
+          city?: string | null
+          company_id?: string
+          cover_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string
+          id?: string
+          is_published?: boolean
+          organizer_contact?: string | null
+          organizer_name?: string | null
+          refund_policy?: string | null
+          slug?: string
+          starts_at?: string
+          state?: string | null
+          status?: string
+          title?: string
+          transfer_policy?: string
+          updated_at?: string
+          venue_address?: string | null
+          venue_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evt_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evt_ticket_transfers: {
+        Row: {
+          approved_by: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          from_email: string
+          from_name: string
+          id: string
+          reason: string | null
+          status: string
+          ticket_id: string
+          to_email: string
+          to_name: string
+          to_phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_by?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          from_email: string
+          from_name: string
+          id?: string
+          reason?: string | null
+          status?: string
+          ticket_id: string
+          to_email: string
+          to_name: string
+          to_phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_by?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          from_email?: string
+          from_name?: string
+          id?: string
+          reason?: string | null
+          status?: string
+          ticket_id?: string
+          to_email?: string
+          to_name?: string
+          to_phone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evt_ticket_transfers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evt_ticket_transfers_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "evt_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evt_ticket_types: {
+        Row: {
+          company_id: string
+          created_at: string
+          description: string | null
+          event_id: string
+          id: string
+          is_active: boolean
+          name: string
+          per_person_limit: number
+          price: number
+          quantity: number
+          quantity_sold: number
+          sale_ends_at: string | null
+          sale_starts_at: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          description?: string | null
+          event_id: string
+          id?: string
+          is_active?: boolean
+          name: string
+          per_person_limit?: number
+          price?: number
+          quantity: number
+          quantity_sold?: number
+          sale_ends_at?: string | null
+          sale_starts_at?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          event_id?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          per_person_limit?: number
+          price?: number
+          quantity?: number
+          quantity_sold?: number
+          sale_ends_at?: string | null
+          sale_starts_at?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evt_ticket_types_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evt_ticket_types_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "evt_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evt_tickets: {
+        Row: {
+          buyer_doc: string | null
+          buyer_email: string
+          buyer_name: string
+          buyer_phone: string | null
+          cancelled_at: string | null
+          code: string
+          company_id: string
+          created_at: string
+          customer_id: string | null
+          event_id: string
+          holder_email: string
+          holder_name: string
+          holder_phone: string | null
+          holder_user_id: string | null
+          id: string
+          issued_at: string
+          payment_reference: string | null
+          price_paid: number
+          qr_token: string
+          status: string
+          ticket_type_id: string
+          updated_at: string
+          used_at: string | null
+        }
+        Insert: {
+          buyer_doc?: string | null
+          buyer_email: string
+          buyer_name: string
+          buyer_phone?: string | null
+          cancelled_at?: string | null
+          code: string
+          company_id: string
+          created_at?: string
+          customer_id?: string | null
+          event_id: string
+          holder_email: string
+          holder_name: string
+          holder_phone?: string | null
+          holder_user_id?: string | null
+          id?: string
+          issued_at?: string
+          payment_reference?: string | null
+          price_paid?: number
+          qr_token: string
+          status?: string
+          ticket_type_id: string
+          updated_at?: string
+          used_at?: string | null
+        }
+        Update: {
+          buyer_doc?: string | null
+          buyer_email?: string
+          buyer_name?: string
+          buyer_phone?: string | null
+          cancelled_at?: string | null
+          code?: string
+          company_id?: string
+          created_at?: string
+          customer_id?: string | null
+          event_id?: string
+          holder_email?: string
+          holder_name?: string
+          holder_phone?: string | null
+          holder_user_id?: string | null
+          id?: string
+          issued_at?: string
+          payment_reference?: string | null
+          price_paid?: number
+          qr_token?: string
+          status?: string
+          ticket_type_id?: string
+          updated_at?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evt_tickets_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evt_tickets_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evt_tickets_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "evt_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evt_tickets_ticket_type_id_fkey"
+            columns: ["ticket_type_id"]
+            isOneToOne: false
+            referencedRelation: "evt_ticket_types"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       fin_accounts: {
         Row: {
@@ -7197,6 +7939,19 @@ export type Database = {
         }
         Relationships: []
       }
+      n8n_runs_by_company: {
+        Row: {
+          company_id: string | null
+          day: string | null
+          failures: number | null
+          oks: number | null
+          regua: string | null
+          status: string | null
+          total: number | null
+          workflow_name: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       _trial_norm: { Args: { _v: string }; Returns: string }
@@ -7257,6 +8012,20 @@ export type Database = {
           _reference_type?: string
         }
         Returns: number
+      }
+      evt_checkin_by_qr: {
+        Args: { _gate?: string; _qr_token: string }
+        Returns: Json
+      }
+      evt_transfer_ticket: {
+        Args: {
+          _reason?: string
+          _ticket_id: string
+          _to_email: string
+          _to_name: string
+          _to_phone?: string
+        }
+        Returns: string
       }
       get_smoke_retention_info: { Args: never; Returns: Json }
       has_active_subscription: {

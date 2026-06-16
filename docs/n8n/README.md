@@ -127,3 +127,39 @@ return [{ json: { body, sig } }];
 
 Depois um node HTTP Request com header `x-impulsionando-signature: {{$json.sig}}`
 e body `{{$json.body}}`.
+
+---
+
+## Validação de isolamento (RLS)
+
+Após qualquer mudança nas tabelas `n8n_workflow_runs`, `evt_*` ou `comm_*`,
+rode:
+
+```bash
+bun run scripts/verify-rls-isolation.ts
+```
+
+O script usa a chave **anon** (publishable) e confirma que:
+- Tabelas protegidas (`evt_tickets`, `comm_*`, `n8n_workflow_runs`) **não**
+  vazam linhas para `anon`.
+- Tabelas com leitura pública (`evt_events`, `evt_ticket_types`) só expõem
+  itens com `is_published = true` / `is_active = true`.
+- A view `n8n_runs_by_company` é `SECURITY INVOKER` — anon não enxerga nada.
+
+## Idempotência do hook `/api/public/hooks/n8n-log`
+
+- Sempre envie `idempotency_key` (ex.: `<execution_id>:<node_id>`).
+- O endpoint faz `upsert ON CONFLICT (workflow_name, step, idempotency_key)`,
+  então o N8N pode reexecutar sem duplicar trilha.
+- Assinatura HMAC-SHA256 sobre o **body cru** em `x-impulsionando-signature`
+  (segredo `IMPULSIONANDO_WEBHOOK_SECRET`). Fallback: `apikey: <anon>`.
+
+## Módulos novos disponíveis
+
+- **Eventos & Ingressos** (`/eventos`): CRUD evento, lotes, emissão,
+  transferência (conforme política), check-in via QR (`evt_checkin_by_qr`
+  é transacional — impede duplo uso).
+- **Comunidade/Associações** (`/comunidade`): membros, mensalidades,
+  presença e doações.
+- **Dashboard Macro Cross-Nicho** (`/core/dashboard-macro`): receita,
+  leads, conversões, churn e saúde N8N por nicho e por empresa.
