@@ -367,12 +367,19 @@ export function PublicHeader() {
                     Início
                   </Link>
 
+                  <Link to="/empresas" onClick={() => setMobileOpen(false)} className="text-base font-medium">
+                    Empresas
+                  </Link>
+                  <Link to="/white-label" onClick={() => setMobileOpen(false)} className="text-base font-medium">
+                    White Label
+                  </Link>
+
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                      Nichos
+                      Soluções
                     </p>
                     <div className="flex flex-col gap-3">
-                      {NICHOS_GROUPS.map((g) => (
+                      {SOLUCOES_AUDIENCE_GROUPS.map((g) => (
                         <div key={g.heading}>
                           <p className="text-[11px] uppercase tracking-wider text-muted-foreground/70 mt-2 mb-1">
                             {g.heading}
@@ -388,6 +395,7 @@ export function PublicHeader() {
                       ))}
                     </div>
                   </div>
+
 
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
