@@ -9,6 +9,7 @@ import {
   listSmokeHistory,
   replaySmokeRun,
   exportSmokeHistory,
+  getSmokeRetentionPolicy,
 } from "@/lib/demos.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
