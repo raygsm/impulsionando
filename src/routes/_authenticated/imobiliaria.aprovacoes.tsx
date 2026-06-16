@@ -99,6 +99,8 @@ function Page() {
   const fetchChanges = useServerFn(requestPropertyChanges);
   const fetchExport = useServerFn(exportPropertyApprovalCsv);
   const fetchCanApprove = useServerFn(canApproveProperties);
+  const fetchBatchExport = useServerFn(exportApprovalQueueCsv);
+
 
   const [status, setStatus] = useState<Status[]>(["pending"]);
   const [search, setSearch] = useState("");
