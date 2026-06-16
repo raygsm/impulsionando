@@ -49,7 +49,14 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  Clock,
+  CalendarClock,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+
 import { useMemo, useState, useEffect } from "react";
 import JSZip from "jszip";
 import { jsPDF } from "jspdf";
