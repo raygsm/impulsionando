@@ -113,6 +113,7 @@ import { Route as AuthenticatedReportsInventoryRouteImport } from './routes/_aut
 import { Route as AuthenticatedReportsFinanceRouteImport } from './routes/_authenticated/reports.finance'
 import { Route as AuthenticatedReportsCrmRouteImport } from './routes/_authenticated/reports.crm'
 import { Route as AuthenticatedReportsAgendaRouteImport } from './routes/_authenticated/reports.agenda'
+import { Route as AuthenticatedPerfilNotificacoesRouteImport } from './routes/_authenticated/perfil.notificacoes'
 import { Route as AuthenticatedMarketingLeadsRouteImport } from './routes/_authenticated/marketing.leads'
 import { Route as AuthenticatedInventorySuppliersRouteImport } from './routes/_authenticated/inventory.suppliers'
 import { Route as AuthenticatedInventoryProductsRouteImport } from './routes/_authenticated/inventory.products'
@@ -754,6 +755,12 @@ const AuthenticatedReportsAgendaRoute =
     id: '/agenda',
     path: '/agenda',
     getParentRoute: () => AuthenticatedReportsRoute,
+  } as any)
+const AuthenticatedPerfilNotificacoesRoute =
+  AuthenticatedPerfilNotificacoesRouteImport.update({
+    id: '/perfil/notificacoes',
+    path: '/perfil/notificacoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedMarketingLeadsRoute =
   AuthenticatedMarketingLeadsRouteImport.update({
@@ -1539,6 +1546,7 @@ export interface FileRoutesByFullPath {
   '/inventory/products': typeof AuthenticatedInventoryProductsRoute
   '/inventory/suppliers': typeof AuthenticatedInventorySuppliersRoute
   '/marketing/leads': typeof AuthenticatedMarketingLeadsRoute
+  '/perfil/notificacoes': typeof AuthenticatedPerfilNotificacoesRoute
   '/reports/agenda': typeof AuthenticatedReportsAgendaRoute
   '/reports/crm': typeof AuthenticatedReportsCrmRoute
   '/reports/finance': typeof AuthenticatedReportsFinanceRoute
@@ -1740,6 +1748,7 @@ export interface FileRoutesByTo {
   '/inventory/products': typeof AuthenticatedInventoryProductsRoute
   '/inventory/suppliers': typeof AuthenticatedInventorySuppliersRoute
   '/marketing/leads': typeof AuthenticatedMarketingLeadsRoute
+  '/perfil/notificacoes': typeof AuthenticatedPerfilNotificacoesRoute
   '/reports/agenda': typeof AuthenticatedReportsAgendaRoute
   '/reports/crm': typeof AuthenticatedReportsCrmRoute
   '/reports/finance': typeof AuthenticatedReportsFinanceRoute
@@ -1954,6 +1963,7 @@ export interface FileRoutesById {
   '/_authenticated/inventory/products': typeof AuthenticatedInventoryProductsRoute
   '/_authenticated/inventory/suppliers': typeof AuthenticatedInventorySuppliersRoute
   '/_authenticated/marketing/leads': typeof AuthenticatedMarketingLeadsRoute
+  '/_authenticated/perfil/notificacoes': typeof AuthenticatedPerfilNotificacoesRoute
   '/_authenticated/reports/agenda': typeof AuthenticatedReportsAgendaRoute
   '/_authenticated/reports/crm': typeof AuthenticatedReportsCrmRoute
   '/_authenticated/reports/finance': typeof AuthenticatedReportsFinanceRoute
@@ -2168,6 +2178,7 @@ export interface FileRouteTypes {
     | '/inventory/products'
     | '/inventory/suppliers'
     | '/marketing/leads'
+    | '/perfil/notificacoes'
     | '/reports/agenda'
     | '/reports/crm'
     | '/reports/finance'
@@ -2369,6 +2380,7 @@ export interface FileRouteTypes {
     | '/inventory/products'
     | '/inventory/suppliers'
     | '/marketing/leads'
+    | '/perfil/notificacoes'
     | '/reports/agenda'
     | '/reports/crm'
     | '/reports/finance'
@@ -2582,6 +2594,7 @@ export interface FileRouteTypes {
     | '/_authenticated/inventory/products'
     | '/_authenticated/inventory/suppliers'
     | '/_authenticated/marketing/leads'
+    | '/_authenticated/perfil/notificacoes'
     | '/_authenticated/reports/agenda'
     | '/_authenticated/reports/crm'
     | '/_authenticated/reports/finance'
@@ -3438,6 +3451,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/reports/agenda'
       preLoaderRoute: typeof AuthenticatedReportsAgendaRouteImport
       parentRoute: typeof AuthenticatedReportsRoute
+    }
+    '/_authenticated/perfil/notificacoes': {
+      id: '/_authenticated/perfil/notificacoes'
+      path: '/perfil/notificacoes'
+      fullPath: '/perfil/notificacoes'
+      preLoaderRoute: typeof AuthenticatedPerfilNotificacoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/marketing/leads': {
       id: '/_authenticated/marketing/leads'
@@ -4581,6 +4601,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedImobiliariaMatchesRoute: typeof AuthenticatedImobiliariaMatchesRoute
   AuthenticatedImobiliariaModulosRoute: typeof AuthenticatedImobiliariaModulosRoute
   AuthenticatedMarketingLeadsRoute: typeof AuthenticatedMarketingLeadsRoute
+  AuthenticatedPerfilNotificacoesRoute: typeof AuthenticatedPerfilNotificacoesRoute
   AuthenticatedComunidadeIndexRoute: typeof AuthenticatedComunidadeIndexRoute
   AuthenticatedEhrIndexRoute: typeof AuthenticatedEhrIndexRoute
   AuthenticatedEventosIndexRoute: typeof AuthenticatedEventosIndexRoute
@@ -4631,6 +4652,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedImobiliariaMatchesRoute: AuthenticatedImobiliariaMatchesRoute,
   AuthenticatedImobiliariaModulosRoute: AuthenticatedImobiliariaModulosRoute,
   AuthenticatedMarketingLeadsRoute: AuthenticatedMarketingLeadsRoute,
+  AuthenticatedPerfilNotificacoesRoute: AuthenticatedPerfilNotificacoesRoute,
   AuthenticatedComunidadeIndexRoute: AuthenticatedComunidadeIndexRoute,
   AuthenticatedEhrIndexRoute: AuthenticatedEhrIndexRoute,
   AuthenticatedEventosIndexRoute: AuthenticatedEventosIndexRoute,
