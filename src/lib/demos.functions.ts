@@ -99,29 +99,44 @@ export const impersonateDemo = createServerFn({ method: "POST" })
     };
   });
 
-/**
- * Smoke test do wizard "Criar Cliente em 1 tela".
- * Cria empresa temporária, valida criação de admin, contrato, 1ª fatura e enqueue
- * de user_welcome, e em seguida limpa todos os artefatos.
- *
- * Retorna um relatório passo-a-passo. NÃO depende de service-role no cliente:
- * tudo roda server-side via supabaseAdmin.
- */
-export const runWizardSmokeTest = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { supabase, userId } = context;
-    const { data: isStaff } = await supabase.rpc("is_impulsionando_staff", { _user: userId });
-    if (!isStaff) throw new Error("Acesso restrito à equipe Impulsionando.");
+type SmokeStep = { key: string; ok: boolean; detail?: string };
+type SmokeResult = {
+  success: boolean;
+  steps: SmokeStep[];
+  ids: {
+    companyId: string | null;
+    contractId: string | null;
+    firstInvoiceId: string | null;
+    adminUserId: string | null;
+    messageId: string | null;
+  };
+  durationMs: number;
+  label: string;
+  nicheSlug: string | null;
+  error?: string;
+};
 
-    type Step = { key: string; ok: boolean; detail?: string };
-    const steps: Step[] = [];
-    const ok = (key: string, detail?: string) => steps.push({ key, ok: true, ...(detail ? { detail } : {}) });
-    const fail = (key: string, detail: string) => steps.push({ key, ok: false, detail });
+async function executeSmokeOnce(opts: {
+  label: string;
+  nicheSlug: string | null;
+}): Promise<SmokeResult> {
+  const start = Date.now();
+  const steps: SmokeStep[] = [];
+  const ok = (key: string, detail?: string) =>
+    steps.push({ key, ok: true, ...(detail ? { detail } : {}) });
+  const fail = (key: string, detail: string) =>
+    steps.push({ key, ok: false, detail });
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const stamp = Date.now();
-    const testEmail = `wizard-smoke+${stamp}@impulsionando.com.br`;
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const stamp = Date.now() + Math.floor(Math.random() * 1000);
+  const slug = (opts.nicheSlug ?? "smoke").replace(/[^a-z0-9]/gi, "");
+  const testEmail = `wizard-smoke+${slug}-${stamp}@impulsionando.com.br`;
+  let companyId: string | null = null;
+  let contractId: string | null = null;
+  let firstInvoiceId: string | null = null;
+  let adminUserId: string | null = null;
+  let messageId: string | null = null;
+  let errorMsg: string | undefined;
     let companyId: string | null = null;
     let contractId: string | null = null;
     let firstInvoiceId: string | null = null;
