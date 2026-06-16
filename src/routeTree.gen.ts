@@ -143,6 +143,8 @@ import { Route as AuthenticatedCoreNovaImplantacaoRouteImport } from './routes/_
 import { Route as AuthenticatedCoreModulosRouteImport } from './routes/_authenticated/core.modulos'
 import { Route as AuthenticatedCoreMetricasReguasRouteImport } from './routes/_authenticated/core.metricas-reguas'
 import { Route as AuthenticatedCoreMenusRouteImport } from './routes/_authenticated/core.menus'
+import { Route as AuthenticatedCoreMarketingPagesRouteImport } from './routes/_authenticated/core.marketing-pages'
+import { Route as AuthenticatedCoreMarketingLeadsRouteImport } from './routes/_authenticated/core.marketing-leads'
 import { Route as AuthenticatedCoreInstalarModuloRouteImport } from './routes/_authenticated/core.instalar-modulo'
 import { Route as AuthenticatedCoreImplantacoesRouteImport } from './routes/_authenticated/core.implantacoes'
 import { Route as AuthenticatedCoreFlagsRouteImport } from './routes/_authenticated/core.flags'
@@ -923,6 +925,18 @@ const AuthenticatedCoreMenusRoute = AuthenticatedCoreMenusRouteImport.update({
   path: '/menus',
   getParentRoute: () => AuthenticatedCoreRoute,
 } as any)
+const AuthenticatedCoreMarketingPagesRoute =
+  AuthenticatedCoreMarketingPagesRouteImport.update({
+    id: '/marketing-pages',
+    path: '/marketing-pages',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
+const AuthenticatedCoreMarketingLeadsRoute =
+  AuthenticatedCoreMarketingLeadsRouteImport.update({
+    id: '/marketing-leads',
+    path: '/marketing-leads',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreInstalarModuloRoute =
   AuthenticatedCoreInstalarModuloRouteImport.update({
     id: '/instalar-modulo',
@@ -1478,6 +1492,8 @@ export interface FileRoutesByFullPath {
   '/core/flags': typeof AuthenticatedCoreFlagsRoute
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
+  '/core/marketing-leads': typeof AuthenticatedCoreMarketingLeadsRoute
+  '/core/marketing-pages': typeof AuthenticatedCoreMarketingPagesRoute
   '/core/menus': typeof AuthenticatedCoreMenusRoute
   '/core/metricas-reguas': typeof AuthenticatedCoreMetricasReguasRoute
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
@@ -1675,6 +1691,8 @@ export interface FileRoutesByTo {
   '/core/flags': typeof AuthenticatedCoreFlagsRoute
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
+  '/core/marketing-leads': typeof AuthenticatedCoreMarketingLeadsRoute
+  '/core/marketing-pages': typeof AuthenticatedCoreMarketingPagesRoute
   '/core/menus': typeof AuthenticatedCoreMenusRoute
   '/core/metricas-reguas': typeof AuthenticatedCoreMetricasReguasRoute
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
@@ -1885,6 +1903,8 @@ export interface FileRoutesById {
   '/_authenticated/core/flags': typeof AuthenticatedCoreFlagsRoute
   '/_authenticated/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/_authenticated/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
+  '/_authenticated/core/marketing-leads': typeof AuthenticatedCoreMarketingLeadsRoute
+  '/_authenticated/core/marketing-pages': typeof AuthenticatedCoreMarketingPagesRoute
   '/_authenticated/core/menus': typeof AuthenticatedCoreMenusRoute
   '/_authenticated/core/metricas-reguas': typeof AuthenticatedCoreMetricasReguasRoute
   '/_authenticated/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
@@ -2095,6 +2115,8 @@ export interface FileRouteTypes {
     | '/core/flags'
     | '/core/implantacoes'
     | '/core/instalar-modulo'
+    | '/core/marketing-leads'
+    | '/core/marketing-pages'
     | '/core/menus'
     | '/core/metricas-reguas'
     | '/core/modulos'
@@ -2292,6 +2314,8 @@ export interface FileRouteTypes {
     | '/core/flags'
     | '/core/implantacoes'
     | '/core/instalar-modulo'
+    | '/core/marketing-leads'
+    | '/core/marketing-pages'
     | '/core/menus'
     | '/core/metricas-reguas'
     | '/core/modulos'
@@ -2501,6 +2525,8 @@ export interface FileRouteTypes {
     | '/_authenticated/core/flags'
     | '/_authenticated/core/implantacoes'
     | '/_authenticated/core/instalar-modulo'
+    | '/_authenticated/core/marketing-leads'
+    | '/_authenticated/core/marketing-pages'
     | '/_authenticated/core/menus'
     | '/_authenticated/core/metricas-reguas'
     | '/_authenticated/core/modulos'
@@ -3597,6 +3623,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreMenusRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/marketing-pages': {
+      id: '/_authenticated/core/marketing-pages'
+      path: '/marketing-pages'
+      fullPath: '/core/marketing-pages'
+      preLoaderRoute: typeof AuthenticatedCoreMarketingPagesRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/core/marketing-leads': {
+      id: '/_authenticated/core/marketing-leads'
+      path: '/marketing-leads'
+      fullPath: '/core/marketing-leads'
+      preLoaderRoute: typeof AuthenticatedCoreMarketingLeadsRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/instalar-modulo': {
       id: '/_authenticated/core/instalar-modulo'
       path: '/instalar-modulo'
@@ -4273,6 +4313,8 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreFlagsRoute: typeof AuthenticatedCoreFlagsRoute
   AuthenticatedCoreImplantacoesRoute: typeof AuthenticatedCoreImplantacoesRoute
   AuthenticatedCoreInstalarModuloRoute: typeof AuthenticatedCoreInstalarModuloRoute
+  AuthenticatedCoreMarketingLeadsRoute: typeof AuthenticatedCoreMarketingLeadsRoute
+  AuthenticatedCoreMarketingPagesRoute: typeof AuthenticatedCoreMarketingPagesRoute
   AuthenticatedCoreMenusRoute: typeof AuthenticatedCoreMenusRoute
   AuthenticatedCoreMetricasReguasRoute: typeof AuthenticatedCoreMetricasReguasRoute
   AuthenticatedCoreModulosRoute: typeof AuthenticatedCoreModulosRouteWithChildren
@@ -4306,6 +4348,8 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreFlagsRoute: AuthenticatedCoreFlagsRoute,
   AuthenticatedCoreImplantacoesRoute: AuthenticatedCoreImplantacoesRoute,
   AuthenticatedCoreInstalarModuloRoute: AuthenticatedCoreInstalarModuloRoute,
+  AuthenticatedCoreMarketingLeadsRoute: AuthenticatedCoreMarketingLeadsRoute,
+  AuthenticatedCoreMarketingPagesRoute: AuthenticatedCoreMarketingPagesRoute,
   AuthenticatedCoreMenusRoute: AuthenticatedCoreMenusRoute,
   AuthenticatedCoreMetricasReguasRoute: AuthenticatedCoreMetricasReguasRoute,
   AuthenticatedCoreModulosRoute: AuthenticatedCoreModulosRouteWithChildren,
