@@ -176,6 +176,16 @@ function Page() {
     onError: (e: any) => toast.error(e.message ?? "Erro ao exportar"),
   });
 
+  const batchExport = useMutation({
+    mutationFn: () => fetchBatchExport({ data: { ...queryArgs, pageSize: 500 } }),
+    onSuccess: (resp) => {
+      downloadFile(resp.filename, resp.csv);
+      toast.success(`${resp.total} registro(s) exportado(s)`);
+    },
+    onError: (e: any) => toast.error(e.message ?? "Erro na exportação em lote"),
+  });
+
+
   const toggleStatus = (s: Status) => {
     setPage(1);
     setStatus((prev) => prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]);
