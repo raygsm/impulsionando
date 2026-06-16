@@ -1182,7 +1182,7 @@ function CoreDemosPage() {
                 <Button
                   variant="default"
                   size="sm"
-                  onClick={handleManualPurge}
+                  onClick={() => setConfirmPurgeOpen(true)}
                   disabled={purging}
                 >
                   {purging ? (
@@ -1194,6 +1194,17 @@ function CoreDemosPage() {
                 </Button>
               </div>
             </div>
+
+            {/* Indicador de progresso durante o purge manual */}
+            {purging && (
+              <div className="mb-3">
+                <Progress value={purgeProgress} className="h-1.5" />
+                <div className="text-[10px] text-muted-foreground mt-1">
+                  Executando purge… {purgeProgress}%
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 text-muted-foreground">
               <div>
                 <div className="text-[10px] uppercase tracking-wide">Janela</div>
