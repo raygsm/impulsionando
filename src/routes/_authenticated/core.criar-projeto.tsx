@@ -448,14 +448,130 @@ function CriarProjetoPage() {
 
       {step === 3 && (
         <Card className="p-6 space-y-4">
-          <h2 className="font-semibold">Etapa 3 — Revisão</h2>
-          <Summary client={client} project={project} modelKind={modelKind} preset={preset} modules={Array.from(selectedModules)} toggles={toggles} />
+          <h2 className="font-semibold">Etapa 3 — Plano, Cobrança & Administrador</h2>
+
+          <div>
+            <Label className="text-xs">Plano contratado</Label>
+            <Select
+              value={plan.planId ?? ""}
+              onValueChange={(v) => {
+                const p = (plansData?.plans ?? []).find((pl: { id: string }) => pl.id === v);
+                setPlan((s) => ({
+                  ...s,
+                  planId: v,
+                  setupAmount: p ? Number(p.setup_fee) : undefined,
+                  recurringAmount: p ? Number(p.recurring_amount) : undefined,
+                  dueDay: p ? p.due_day : undefined,
+                }));
+              }}
+            >
+              <SelectTrigger><SelectValue placeholder="Selecione o plano…" /></SelectTrigger>
+              <SelectContent>
+                {(plansData?.plans ?? []).map((p: { id: string; name: string; recurring_amount: number; setup_fee: number; cycle: string }) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.name} — R$ {Number(p.recurring_amount).toFixed(2)}/{p.cycle === "monthly" ? "mês" : p.cycle}
+                    {Number(p.setup_fee) > 0 ? ` · setup R$ ${Number(p.setup_fee).toFixed(2)}` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-[11px] text-muted-foreground mt-1">Sem plano? Pule esta seção — você pode contratar depois.</p>
+          </div>
+
+          {plan.planId && (
+            <div className="grid md:grid-cols-4 gap-3">
+              <Field label="Mensalidade (R$)">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={plan.recurringAmount ?? ""}
+                  onChange={(e) => setPlan({ ...plan, recurringAmount: e.target.value ? Number(e.target.value) : undefined })}
+                />
+              </Field>
+              <Field label="Setup (R$)">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={plan.setupAmount ?? ""}
+                  onChange={(e) => setPlan({ ...plan, setupAmount: e.target.value ? Number(e.target.value) : undefined })}
+                />
+              </Field>
+              <Field label="Dia de vencimento">
+                <Input
+                  type="number"
+                  min={1}
+                  max={28}
+                  value={plan.dueDay ?? ""}
+                  onChange={(e) => setPlan({ ...plan, dueDay: e.target.value ? Number(e.target.value) : undefined })}
+                />
+              </Field>
+              <Field label="Chave PIX (cobrança)">
+                <Input value={plan.pixKey} onChange={(e) => setPlan({ ...plan, pixKey: e.target.value })} />
+              </Field>
+              <label className="flex items-center gap-2 text-sm md:col-span-2">
+                <Checkbox checked={plan.setupPaid} onCheckedChange={(v) => setPlan({ ...plan, setupPaid: !!v })} />
+                <span>Setup já pago / cortesia</span>
+              </label>
+              <label className="flex items-center gap-2 text-sm md:col-span-2">
+                <Checkbox checked={plan.generateFirstInvoice} onCheckedChange={(v) => setPlan({ ...plan, generateFirstInvoice: !!v })} />
+                <span>Gerar 1ª fatura automaticamente</span>
+              </label>
+            </div>
+          )}
+
+          <hr />
+
+          <h3 className="font-semibold text-sm">Usuário Administrador da Empresa</h3>
+          <div className="grid md:grid-cols-2 gap-3">
+            <Field label="E-mail do administrador">
+              <Input
+                type="email"
+                value={admin.email}
+                placeholder={client.email || "admin@empresa.com.br"}
+                onChange={(e) => setAdmin({ ...admin, email: e.target.value })}
+              />
+            </Field>
+            <Field label="Nome do administrador">
+              <Input
+                value={admin.name}
+                placeholder={client.ownerName || "Nome do responsável"}
+                onChange={(e) => setAdmin({ ...admin, name: e.target.value })}
+              />
+            </Field>
+            <Field label="WhatsApp">
+              <Input
+                value={admin.phone}
+                placeholder={client.whatsapp || "(00) 00000-0000"}
+                onChange={(e) => setAdmin({ ...admin, phone: e.target.value })}
+              />
+            </Field>
+            <label className="flex items-center gap-2 text-sm mt-6">
+              <Checkbox checked={admin.sendWelcome} onCheckedChange={(v) => setAdmin({ ...admin, sendWelcome: !!v })} />
+              <span>Enviar e-mail de boas-vindas com link de acesso</span>
+            </label>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Se em branco, usaremos o e-mail/nome/whatsapp do cliente da Etapa 1.
+            O usuário é criado já vinculado à empresa com o perfil <b>Gestor da Empresa</b>.
+          </p>
+
+          <div className="flex justify-between pt-2">
+            <Button variant="ghost" onClick={() => setStep(2)}><ArrowLeft className="w-4 h-4 mr-1" /> Voltar</Button>
+            <Button onClick={() => setStep(4)}>Continuar <ArrowRight className="w-4 h-4 ml-1" /></Button>
+          </div>
+        </Card>
+      )}
+
+      {step === 4 && (
+        <Card className="p-6 space-y-4">
+          <h2 className="font-semibold">Etapa 4 — Revisão</h2>
+          <Summary client={client} project={project} modelKind={modelKind} preset={preset} modules={Array.from(selectedModules)} toggles={toggles} plan={plan} admin={admin} plansData={plansData?.plans ?? []} />
           <label className="flex items-start gap-2 text-sm bg-muted/40 p-3 rounded">
             <Checkbox checked={confirm} onCheckedChange={(v) => setConfirm(!!v)} className="mt-0.5" />
             <span>Confirmo que desejo criar este projeto e entendo que a estrutura será gerada sem copiar dados reais de outros clientes.</span>
           </label>
           <div className="flex justify-between pt-2">
-            <Button variant="ghost" onClick={() => setStep(2)}><ArrowLeft className="w-4 h-4 mr-1" /> Voltar</Button>
+            <Button variant="ghost" onClick={() => setStep(3)}><ArrowLeft className="w-4 h-4 mr-1" /> Voltar</Button>
             <Button disabled={!confirm || createMut.isPending} onClick={() => createMut.mutate()}>
               {createMut.isPending ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Criando…</> : <><Rocket className="w-4 h-4 mr-1" /> Criar Projeto</>}
             </Button>
