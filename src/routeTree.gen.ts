@@ -137,6 +137,7 @@ import { Route as AuthenticatedCorePlanosRouteImport } from './routes/_authentic
 import { Route as AuthenticatedCoreParametrosRouteImport } from './routes/_authenticated/core.parametros'
 import { Route as AuthenticatedCoreNovaImplantacaoRouteImport } from './routes/_authenticated/core.nova-implantacao'
 import { Route as AuthenticatedCoreModulosRouteImport } from './routes/_authenticated/core.modulos'
+import { Route as AuthenticatedCoreMetricasReguasRouteImport } from './routes/_authenticated/core.metricas-reguas'
 import { Route as AuthenticatedCoreMenusRouteImport } from './routes/_authenticated/core.menus'
 import { Route as AuthenticatedCoreInstalarModuloRouteImport } from './routes/_authenticated/core.instalar-modulo'
 import { Route as AuthenticatedCoreImplantacoesRouteImport } from './routes/_authenticated/core.implantacoes'
@@ -190,6 +191,7 @@ import { Route as ApiPublicOutboxProcessRouteImport } from './routes/api/public/
 import { Route as ApiPublicHooksZapiStatusRouteImport } from './routes/api/public/hooks/zapi-status'
 import { Route as ApiPublicHooksUptimeWhatsappTestRouteImport } from './routes/api/public/hooks/uptime-whatsapp-test'
 import { Route as ApiPublicHooksUptimeCheckRouteImport } from './routes/api/public/hooks/uptime-check'
+import { Route as ApiPublicHooksN8nLogRouteImport } from './routes/api/public/hooks/n8n-log'
 import { Route as ApiPublicHooksMarketingLeadNotifyRouteImport } from './routes/api/public/hooks/marketing-lead-notify'
 import { Route as ApiPublicHooksCommsSelfTestRouteImport } from './routes/api/public/hooks/comms-self-test'
 import { Route as ApiPublicHooksBillingTickRouteImport } from './routes/api/public/hooks/billing-tick'
@@ -881,6 +883,12 @@ const AuthenticatedCoreModulosRoute =
     path: '/modulos',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreMetricasReguasRoute =
+  AuthenticatedCoreMetricasReguasRouteImport.update({
+    id: '/metricas-reguas',
+    path: '/metricas-reguas',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreMenusRoute = AuthenticatedCoreMenusRouteImport.update({
   id: '/menus',
   path: '/menus',
@@ -1189,6 +1197,11 @@ const ApiPublicHooksUptimeCheckRoute =
     path: '/api/public/hooks/uptime-check',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksN8nLogRoute = ApiPublicHooksN8nLogRouteImport.update({
+  id: '/api/public/hooks/n8n-log',
+  path: '/api/public/hooks/n8n-log',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksMarketingLeadNotifyRoute =
   ApiPublicHooksMarketingLeadNotifyRouteImport.update({
     id: '/api/public/hooks/marketing-lead-notify',
@@ -1415,6 +1428,7 @@ export interface FileRoutesByFullPath {
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
   '/core/menus': typeof AuthenticatedCoreMenusRoute
+  '/core/metricas-reguas': typeof AuthenticatedCoreMetricasReguasRoute
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/core/parametros': typeof AuthenticatedCoreParametrosRoute
@@ -1475,6 +1489,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
+  '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
@@ -1603,6 +1618,7 @@ export interface FileRoutesByTo {
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
   '/core/menus': typeof AuthenticatedCoreMenusRoute
+  '/core/metricas-reguas': typeof AuthenticatedCoreMetricasReguasRoute
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/core/parametros': typeof AuthenticatedCoreParametrosRoute
@@ -1663,6 +1679,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
+  '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
@@ -1804,6 +1821,7 @@ export interface FileRoutesById {
   '/_authenticated/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
   '/_authenticated/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
   '/_authenticated/core/menus': typeof AuthenticatedCoreMenusRoute
+  '/_authenticated/core/metricas-reguas': typeof AuthenticatedCoreMetricasReguasRoute
   '/_authenticated/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/_authenticated/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/_authenticated/core/parametros': typeof AuthenticatedCoreParametrosRoute
@@ -1864,6 +1882,7 @@ export interface FileRoutesById {
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
+  '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
@@ -2005,6 +2024,7 @@ export interface FileRouteTypes {
     | '/core/implantacoes'
     | '/core/instalar-modulo'
     | '/core/menus'
+    | '/core/metricas-reguas'
     | '/core/modulos'
     | '/core/nova-implantacao'
     | '/core/parametros'
@@ -2065,6 +2085,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/billing-tick'
     | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/marketing-lead-notify'
+    | '/api/public/hooks/n8n-log'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
     | '/api/public/hooks/zapi-status'
@@ -2193,6 +2214,7 @@ export interface FileRouteTypes {
     | '/core/implantacoes'
     | '/core/instalar-modulo'
     | '/core/menus'
+    | '/core/metricas-reguas'
     | '/core/modulos'
     | '/core/nova-implantacao'
     | '/core/parametros'
@@ -2253,6 +2275,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/billing-tick'
     | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/marketing-lead-notify'
+    | '/api/public/hooks/n8n-log'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
     | '/api/public/hooks/zapi-status'
@@ -2393,6 +2416,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/implantacoes'
     | '/_authenticated/core/instalar-modulo'
     | '/_authenticated/core/menus'
+    | '/_authenticated/core/metricas-reguas'
     | '/_authenticated/core/modulos'
     | '/_authenticated/core/nova-implantacao'
     | '/_authenticated/core/parametros'
@@ -2453,6 +2477,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/billing-tick'
     | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/marketing-lead-notify'
+    | '/api/public/hooks/n8n-log'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
     | '/api/public/hooks/zapi-status'
@@ -2528,6 +2553,7 @@ export interface RootRouteChildren {
   ApiPublicHooksBillingTickRoute: typeof ApiPublicHooksBillingTickRoute
   ApiPublicHooksCommsSelfTestRoute: typeof ApiPublicHooksCommsSelfTestRoute
   ApiPublicHooksMarketingLeadNotifyRoute: typeof ApiPublicHooksMarketingLeadNotifyRoute
+  ApiPublicHooksN8nLogRoute: typeof ApiPublicHooksN8nLogRoute
   ApiPublicHooksUptimeCheckRoute: typeof ApiPublicHooksUptimeCheckRoute
   ApiPublicHooksUptimeWhatsappTestRoute: typeof ApiPublicHooksUptimeWhatsappTestRoute
   ApiPublicHooksZapiStatusRoute: typeof ApiPublicHooksZapiStatusRoute
@@ -3439,6 +3465,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreModulosRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/metricas-reguas': {
+      id: '/_authenticated/core/metricas-reguas'
+      path: '/metricas-reguas'
+      fullPath: '/core/metricas-reguas'
+      preLoaderRoute: typeof AuthenticatedCoreMetricasReguasRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/menus': {
       id: '/_authenticated/core/menus'
       path: '/menus'
@@ -3810,6 +3843,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksUptimeCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/n8n-log': {
+      id: '/api/public/hooks/n8n-log'
+      path: '/api/public/hooks/n8n-log'
+      fullPath: '/api/public/hooks/n8n-log'
+      preLoaderRoute: typeof ApiPublicHooksN8nLogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/marketing-lead-notify': {
       id: '/api/public/hooks/marketing-lead-notify'
       path: '/api/public/hooks/marketing-lead-notify'
@@ -4093,6 +4133,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreImplantacoesRoute: typeof AuthenticatedCoreImplantacoesRoute
   AuthenticatedCoreInstalarModuloRoute: typeof AuthenticatedCoreInstalarModuloRoute
   AuthenticatedCoreMenusRoute: typeof AuthenticatedCoreMenusRoute
+  AuthenticatedCoreMetricasReguasRoute: typeof AuthenticatedCoreMetricasReguasRoute
   AuthenticatedCoreModulosRoute: typeof AuthenticatedCoreModulosRouteWithChildren
   AuthenticatedCoreNovaImplantacaoRoute: typeof AuthenticatedCoreNovaImplantacaoRoute
   AuthenticatedCoreParametrosRoute: typeof AuthenticatedCoreParametrosRoute
@@ -4123,6 +4164,7 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreImplantacoesRoute: AuthenticatedCoreImplantacoesRoute,
   AuthenticatedCoreInstalarModuloRoute: AuthenticatedCoreInstalarModuloRoute,
   AuthenticatedCoreMenusRoute: AuthenticatedCoreMenusRoute,
+  AuthenticatedCoreMetricasReguasRoute: AuthenticatedCoreMetricasReguasRoute,
   AuthenticatedCoreModulosRoute: AuthenticatedCoreModulosRouteWithChildren,
   AuthenticatedCoreNovaImplantacaoRoute: AuthenticatedCoreNovaImplantacaoRoute,
   AuthenticatedCoreParametrosRoute: AuthenticatedCoreParametrosRoute,
@@ -4458,6 +4500,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksCommsSelfTestRoute: ApiPublicHooksCommsSelfTestRoute,
   ApiPublicHooksMarketingLeadNotifyRoute:
     ApiPublicHooksMarketingLeadNotifyRoute,
+  ApiPublicHooksN8nLogRoute: ApiPublicHooksN8nLogRoute,
   ApiPublicHooksUptimeCheckRoute: ApiPublicHooksUptimeCheckRoute,
   ApiPublicHooksUptimeWhatsappTestRoute: ApiPublicHooksUptimeWhatsappTestRoute,
   ApiPublicHooksZapiStatusRoute: ApiPublicHooksZapiStatusRoute,

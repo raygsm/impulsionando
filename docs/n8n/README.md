@@ -64,3 +64,66 @@ Os e-mails referenciam templates já registrados em
   `invoice-overdue`
 
 N8N chama `POST /api/public/email/send` com `{ template, to, props }`.
+
+## Trilha de auditoria (logs e alertas)
+
+Cada step relevante deve fazer **POST** em
+`/api/public/hooks/n8n-log` com:
+
+```
+POST https://impulsionando.com.br/api/public/hooks/n8n-log
+Content-Type: application/json
+x-impulsionando-signature: <hmac-sha256(rawBody, IMPULSIONANDO_WEBHOOK_SECRET)>
+
+{
+  "workflow_name": "Impulsionando — 02 Conversão · Trial Onboarding",
+  "workflow_version": "v1.0.0",
+  "regua": "conversao",            // captacao | conversao | relacionamento | retencao | outro
+  "event_name": "trial.started",
+  "step": "D0 Email trial-started",
+  "status": "ok",                  // received | ok | retry | failed | skipped | suppressed
+  "channel": "email",              // email | whatsapp | slack | internal | api | sms
+  "http_status": 202,
+  "latency_ms": 318,
+  "contact_email": "fulano@empresa.com",
+  "tenant_id": "uuid-opcional",
+  "entity_type": "trial",
+  "entity_id": "uuid-do-trial",
+  "payload": { "template": "trial-started", "plan": "Integrado" },
+  "idempotency_key": "trial:<trialId>:d0:email",
+  "error": null
+}
+```
+
+- Sempre envie `idempotency_key` por step para que retries do N8N não dupliquem
+  linhas (constraint única em `workflow_name + step + idempotency_key`).
+- Em `status: "failed"`, o backend cria notificação in-app para o staff
+  Impulsionando e o evento aparece em vermelho no painel de Métricas.
+- Auditoria por lead: `view public.n8n_lead_journey` agrega timeline por
+  `contact_email` com todos os workflows que ele/ela passou.
+- Painel: **Core → Métricas das Réguas** (`/core/metricas-reguas`).
+
+### Node N8N reusável (Function) para chamar o log
+
+```js
+// Coloque ANTES de cada HTTP Request importante, e DEPOIS para gravar o resultado
+const crypto = require('crypto');
+const body = JSON.stringify({
+  workflow_name: $workflow.name,
+  workflow_version: 'v1.0.0',
+  regua: $vars.regua,
+  event_name: $vars.event,
+  step: $node.name,
+  status: $json._status || 'received',
+  channel: $vars.channel,
+  contact_email: $vars.email,
+  tenant_id: $vars.tenantId,
+  payload: $json,
+  idempotency_key: `${$workflow.id}:${$execution.id}:${$node.name}`
+});
+const sig = crypto.createHmac('sha256', $env.IMPULSIONANDO_WEBHOOK_SECRET).update(body).digest('hex');
+return [{ json: { body, sig } }];
+```
+
+Depois um node HTTP Request com header `x-impulsionando-signature: {{$json.sig}}`
+e body `{{$json.body}}`.
