@@ -348,10 +348,11 @@ function EventDetail() {
               }));
               downloadCsv(`transferencias-${id}.csv`,
                 ["criada_em", "ingresso", "de_nome", "de_email", "para_nome", "para_email", "para_doc", "status", "taxa_brl", "decidida_em"], rows);
+              trackExport("csv", "evt_transfers.csv", rows.length);
             }} disabled={!transfersData?.items?.length}>
               <Download className="w-4 h-4 mr-1" /> CSV
             </Button>
-            <Button size="sm" variant="outline" onClick={() => downloadTablePdf({
+            <Button size="sm" variant="outline" onClick={() => { downloadTablePdf({
               filename: `transferencias-${id}.pdf`,
               title: `Transferências — ${ev?.title ?? id}`,
               subtitle: `${transfersData?.items?.length ?? 0} registros`,
