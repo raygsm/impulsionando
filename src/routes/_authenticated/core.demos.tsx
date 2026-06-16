@@ -228,6 +228,8 @@ function CoreDemosPage() {
   const [historySearch, setHistorySearch] = useState("");
   const debouncedSearch = useDebouncedValue(historySearch, 350);
   const [selectedRun, setSelectedRun] = useState<SmokeRunRow | null>(null);
+  const [includeRawLogs, setIncludeRawLogs] = useState(true);
+
 
   // Reset page when filters change (debounced text)
   useEffect(() => {
