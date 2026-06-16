@@ -33,8 +33,8 @@ const PLAN_QUOTA: Record<string, number> = {
 /** Setup de implantação (1ª parcela) em reais — usado no resumo de contratação. */
 const PLAN_SETUP_BRL: Record<string, number> = {
   Essencial: 297,
-  Integrado: 497,
-  Avançado: 997,
+  Integrado: 759,
+  Avançado: 1518,
 };
 
 /** Preço por módulo adicional além da quota do plano. */
@@ -70,41 +70,48 @@ type Plan = {
 const PLANS: Plan[] = [
   {
     name: "Essencial",
-    tagline: "Comece pelo módulo principal que mais dói.",
-    monthly: 697,
-    modulesLabel: "1 módulo principal ativo",
+    tagline: "Comece pelo módulo que mais dói hoje — sem peso desnecessário.",
+    monthly: 759,
+    modulesLabel: "1 módulo principal + base operacional",
     features: [
-      "1 módulo principal ativo após conversão (CRM, Agenda, Eventos, Área do Cliente etc.)",
-      "Até 3 usuários",
+      "1 módulo principal à escolha: CRM, Agenda, EHR (prontuário), PDV, Vitrine Imobiliária, Área do Cliente ou Eventos",
+      "Base inclusa: dashboard, cadastros, perfis e permissões, auditoria",
+      "Financeiro essencial (contas a receber + fluxo de caixa)",
+      "Até 3 usuários · 1 unidade",
       "Suporte por e-mail e WhatsApp",
-      "7 dias de Trial com tudo liberado",
+      "7 dias de Trial com tudo liberado, sem cartão",
     ],
     cta: "Começar Trial de 7 dias",
   },
   {
     name: "Integrado",
-    tagline: "Dois módulos principais trabalhando juntos.",
-    monthly: 997.9,
-    modulesLabel: "2 módulos principais ativos",
+    tagline: "Dois módulos que se potencializam, com automação entre eles.",
+    monthly: 1518,
+    modulesLabel: "2 módulos principais integrados + automação",
     features: [
-      "2 módulos principais integrados (ex.: CRM + Agenda, Commerce + Delivery)",
-      "Até 5 usuários",
-      "Maior prioridade no suporte",
-      "Automações entre módulos",
+      "Pares curados de alta sinergia: CRM + Agenda, PDV + Estoque, Commerce + Delivery, Vitrine + CRM Imobiliário, EHR + Agenda Clínica",
+      "Financeiro completo (contas a pagar/receber, conciliação, comissões)",
+      "Automações cruzadas entre módulos (gatilhos e fluxos)",
+      "Central de mensagens (WhatsApp + E-mail transacional)",
+      "Até 5 usuários · 1 unidade · API e webhooks",
+      "Suporte prioritário",
     ],
     highlight: true,
     cta: "Começar Trial de 7 dias",
   },
   {
     name: "Avançado",
-    tagline: "Operação digital de ponta a ponta.",
-    monthly: 1497.97,
-    modulesLabel: "3 módulos principais + BI",
+    tagline: "Operação digital ponta a ponta, com BI e multi-unidades.",
+    monthly: 3036,
+    modulesLabel: "3 módulos principais + BI & Dashboards",
     features: [
-      "3 módulos principais ativos + BI & Dashboards (ex.: ERP + CRM + Agenda + BI)",
-      "Até 10 usuários",
-      "Suporte prioritário",
-      "Acompanhamento técnico",
+      "3 módulos principais à escolha (ex.: ERP + CRM + Agenda, ou Commerce + PDV + Estoque)",
+      "BI & Dashboards consolidados com indicadores por unidade",
+      "Multi-unidades (até 3) e gestão por setores",
+      "Automação avançada multi-módulo + jornadas de CRM",
+      "Governança LGPD, exportações e logs de auditoria expandidos",
+      "Até 10 usuários · API, webhooks e ambiente de homologação",
+      "Suporte prioritário com acompanhamento técnico dedicado",
     ],
     cta: "Começar Trial de 7 dias",
   },
@@ -114,15 +121,18 @@ const PLANS: Plan[] = [
 type Row = { feature: string; values: (boolean | string)[] };
 
 const COMPARE: Row[] = [
-  { feature: "Módulos principais incluídos", values: ["1", "2", "3 + BI"] },
-  { feature: "Módulos adicionais", values: ["Sim", "Sim", "Sim"] },
+  { feature: "Módulos principais incluídos", values: ["1", "2 (par curado)", "3 + BI"] },
+  { feature: "Módulos adicionais", values: ["R$ 497/mês", "R$ 497/mês", "R$ 497/mês"] },
   { feature: "Usuários", values: ["Até 3", "Até 5", "Até 10"] },
   { feature: "Unidades / filiais", values: ["1", "1", "Até 3"] },
-  { feature: "Automações entre módulos", values: [false, true, true] },
+  { feature: "Financeiro", values: ["Essencial", "Completo", "Completo + DRE"] },
+  { feature: "Central de mensagens (WhatsApp + E-mail)", values: [false, true, true] },
+  { feature: "Automações entre módulos", values: [false, true, "Avançada"] },
   { feature: "BI & Dashboards consolidados", values: [false, false, true] },
   { feature: "API e webhooks", values: [false, true, true] },
+  { feature: "Governança LGPD + auditoria expandida", values: [false, false, true] },
   { feature: "Onboarding guiado", values: ["Self-service", "1h", "4h"] },
-  { feature: "Suporte", values: ["E-mail/WhatsApp", "Prioritário", "Prioritário"] },
+  { feature: "Suporte", values: ["E-mail/WhatsApp", "Prioritário", "Prioritário + técnico"] },
   { feature: "Contrato mínimo", values: ["90 dias", "90 dias", "90 dias"] },
 ];
 
