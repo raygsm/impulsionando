@@ -2611,6 +2611,48 @@ export type Database = {
           },
         ]
       }
+      core_smoke_runs: {
+        Row: {
+          batch_id: string | null
+          created_at: string
+          duration_ms: number
+          error: string | null
+          id: string
+          ids: Json
+          label: string | null
+          niche_slug: string | null
+          steps: Json
+          success: boolean
+          triggered_by: string | null
+        }
+        Insert: {
+          batch_id?: string | null
+          created_at?: string
+          duration_ms?: number
+          error?: string | null
+          id?: string
+          ids?: Json
+          label?: string | null
+          niche_slug?: string | null
+          steps?: Json
+          success: boolean
+          triggered_by?: string | null
+        }
+        Update: {
+          batch_id?: string | null
+          created_at?: string
+          duration_ms?: number
+          error?: string | null
+          id?: string
+          ids?: Json
+          label?: string | null
+          niche_slug?: string | null
+          steps?: Json
+          success?: boolean
+          triggered_by?: string | null
+        }
+        Relationships: []
+      }
       crm_activities: {
         Row: {
           activity_type: string
