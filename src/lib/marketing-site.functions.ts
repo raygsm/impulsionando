@@ -27,7 +27,7 @@ export const fetchImpulsionandoBrasilPages = createServerFn({ method: "GET" }).h
       .select("slug,name,content,status")
       .eq("status", "published");
     if (error) throw new Error(error.message);
-    return { pages: (data ?? []) as Array<{ slug: string; name: string; content: Record<string, unknown>; status: string }> };
+    return { pages: (data ?? []) as Array<{ slug: string; name: string; content: any; status: string }> };
   },
 );
 
