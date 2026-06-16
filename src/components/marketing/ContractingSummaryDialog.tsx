@@ -23,12 +23,14 @@ export interface ContractingSummaryProps {
   quota: number;
   /** Slugs selecionados (em ordem; os primeiros `quota` são incluídos, os demais adicionais). */
   selectedSlugs: string[];
-  /** Mensalidade base do plano em centavos. */
+  /** Mensalidade base do plano em centavos (no modo anual, já é o valor /mês com desconto). */
   baseMonthlyCents: number;
   /** Setup de implantação em centavos. */
   setupCents: number;
   /** Preço por módulo adicional em centavos. */
   extraPriceCents: number;
+  /** Ciclo de cobrança escolhido. */
+  annual?: boolean;
   /** Texto exibido no botão de confirmação final. */
   confirmLabel?: string;
   onConfirm: () => void;
@@ -54,6 +56,7 @@ export function ContractingSummaryDialog(props: ContractingSummaryProps) {
     baseMonthlyCents,
     setupCents,
     extraPriceCents,
+    annual = false,
     confirmLabel = "Confirmar contratação e ir para o pagamento",
     onConfirm,
     onEditModules,
@@ -62,16 +65,26 @@ export function ContractingSummaryDialog(props: ContractingSummaryProps) {
   const [aceites, setAceites] = useState<boolean[]>(() => ACEITE_KEYS.map(() => false));
   const allAccepted = aceites.every(Boolean);
 
-  const { included, extras, extrasMonthlyCents, totalMonthlyCents, cycleTotalCents } =
-    useMemo(() => {
-      const quotaIsFinite = Number.isFinite(quota);
-      const included = selectedSlugs.slice(0, quotaIsFinite ? quota : selectedSlugs.length);
-      const extras = quotaIsFinite ? selectedSlugs.slice(quota) : [];
-      const extrasMonthlyCents = extras.length * extraPriceCents;
-      const totalMonthlyCents = baseMonthlyCents + extrasMonthlyCents;
-      const cycleTotalCents = setupCents + totalMonthlyCents * 3;
-      return { included, extras, extrasMonthlyCents, totalMonthlyCents, cycleTotalCents };
-    }, [selectedSlugs, quota, baseMonthlyCents, extraPriceCents, setupCents]);
+  const {
+    included,
+    extras,
+    extrasMonthlyCents,
+    totalMonthlyCents,
+    annualTotalCents,
+    cycleTotalCents,
+  } = useMemo(() => {
+    const quotaIsFinite = Number.isFinite(quota);
+    const included = selectedSlugs.slice(0, quotaIsFinite ? quota : selectedSlugs.length);
+    const extras = quotaIsFinite ? selectedSlugs.slice(quota) : [];
+    const extrasMonthlyCents = extras.length * extraPriceCents;
+    const totalMonthlyCents = baseMonthlyCents + extrasMonthlyCents;
+    // Anual = 12 meses pagos à vista no preço /mês já com desconto (equivale a 10 mensalidades cheias, 2 grátis).
+    const annualTotalCents = totalMonthlyCents * 12;
+    const cycleTotalCents = annual
+      ? setupCents + annualTotalCents
+      : setupCents + totalMonthlyCents * 3;
+    return { included, extras, extrasMonthlyCents, totalMonthlyCents, annualTotalCents, cycleTotalCents };
+  }, [selectedSlugs, quota, baseMonthlyCents, extraPriceCents, setupCents, annual]);
 
   function moduleName(slug: string) {
     return MOTHER_MODULES.find((m) => m.slug === slug)?.shortName ?? slug;
@@ -142,7 +155,7 @@ export function ContractingSummaryDialog(props: ContractingSummaryProps) {
             {/* Valores */}
             <section className="space-y-1">
               <div className="flex justify-between">
-                <span>Mensalidade base do plano</span>
+                <span>Mensalidade base do plano{annual ? " (preço /mês no anual)" : ""}</span>
                 <span>{formatBRL(baseMonthlyCents)}</span>
               </div>
               {extras.length > 0 && (
@@ -154,9 +167,15 @@ export function ContractingSummaryDialog(props: ContractingSummaryProps) {
                 </div>
               )}
               <div className="flex justify-between font-semibold text-base pt-1">
-                <span>Total mensal</span>
+                <span>Total {annual ? "mensal equivalente" : "mensal"}</span>
                 <span>{formatBRL(totalMonthlyCents)}</span>
               </div>
+              {annual && (
+                <div className="flex justify-between">
+                  <span>Cobrança anual à vista (12 meses)</span>
+                  <span>{formatBRL(annualTotalCents)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-muted-foreground">
                 <span>Setup de implantação (1ª parcela)</span>
                 <span>{formatBRL(setupCents)}</span>
@@ -171,19 +190,36 @@ export function ContractingSummaryDialog(props: ContractingSummaryProps) {
                 <ShieldCheck className="w-4 h-4" />
                 Contrato mínimo de 90 dias
               </div>
-              <p className="text-xs text-amber-900/90 dark:text-amber-100/90 leading-relaxed">
-                A contratação possui <strong>permanência mínima de 90 dias</strong>,
-                equivalente a <strong>3 mensalidades obrigatórias</strong>. A primeira
-                parcela corresponde ao <strong>setup de implantação</strong>. Portanto,
-                o ciclo inicial obrigatório contempla{" "}
-                <strong>4 pagamentos: 1 setup + 3 mensalidades</strong>.
-              </p>
-              <ul className="text-xs text-amber-900/90 dark:text-amber-100/90 space-y-0.5">
-                <li>• Pagamento 1: Setup de implantação — {formatBRL(setupCents)}</li>
-                <li>• Pagamento 2: 1ª mensalidade — {formatBRL(totalMonthlyCents)}</li>
-                <li>• Pagamento 3: 2ª mensalidade — {formatBRL(totalMonthlyCents)}</li>
-                <li>• Pagamento 4: 3ª mensalidade — {formatBRL(totalMonthlyCents)}</li>
-              </ul>
+              {annual ? (
+                <>
+                  <p className="text-xs text-amber-900/90 dark:text-amber-100/90 leading-relaxed">
+                    No <strong>plano anual</strong>, o ciclo inicial obrigatório é coberto pelo
+                    pagamento anual à vista. São <strong>2 pagamentos no ciclo inicial</strong>:
+                    setup + 12 meses pagos antecipadamente (com 2 meses de desconto já aplicados
+                    no preço /mês).
+                  </p>
+                  <ul className="text-xs text-amber-900/90 dark:text-amber-100/90 space-y-0.5">
+                    <li>• Pagamento 1: Setup de implantação — {formatBRL(setupCents)}</li>
+                    <li>• Pagamento 2: Anuidade (12 meses) — {formatBRL(annualTotalCents)}</li>
+                  </ul>
+                </>
+              ) : (
+                <>
+                  <p className="text-xs text-amber-900/90 dark:text-amber-100/90 leading-relaxed">
+                    A contratação possui <strong>permanência mínima de 90 dias</strong>,
+                    equivalente a <strong>3 mensalidades obrigatórias</strong>. A primeira
+                    parcela corresponde ao <strong>setup de implantação</strong>. Portanto,
+                    o ciclo inicial obrigatório contempla{" "}
+                    <strong>4 pagamentos: 1 setup + 3 mensalidades</strong>.
+                  </p>
+                  <ul className="text-xs text-amber-900/90 dark:text-amber-100/90 space-y-0.5">
+                    <li>• Pagamento 1: Setup de implantação — {formatBRL(setupCents)}</li>
+                    <li>• Pagamento 2: 1ª mensalidade — {formatBRL(totalMonthlyCents)}</li>
+                    <li>• Pagamento 3: 2ª mensalidade — {formatBRL(totalMonthlyCents)}</li>
+                    <li>• Pagamento 4: 3ª mensalidade — {formatBRL(totalMonthlyCents)}</li>
+                  </ul>
+                </>
+              )}
               <div className="flex justify-between text-sm font-semibold pt-1 border-t border-amber-300/60">
                 <span>Total mínimo inicial</span>
                 <span>{formatBRL(cycleTotalCents)}</span>
