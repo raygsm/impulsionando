@@ -96,9 +96,10 @@ export const testIntegration = createServerFn({ method: "POST" })
 
     try {
       if (data.slug === "n8n") {
+        const cfg = (integ.config as any) ?? {};
         const url: string | undefined =
-          (integ.config?.webhooks?.[data.event] as string | undefined) ||
-          (integ.config?.base_url as string | undefined);
+          (cfg?.webhooks?.[data.event] as string | undefined) ||
+          (cfg?.base_url as string | undefined);
         if (!url) throw new Error("URL do webhook não configurada");
         const r = await fetch(url, {
           method: "POST",
