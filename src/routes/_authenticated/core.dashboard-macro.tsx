@@ -82,33 +82,31 @@ function MacroDashboard() {
     (filters.workflow ? ` · Módulo: ${filters.workflow}` : "");
 
   function exportCompaniesCsv() {
+    const rows = data!.allCompanies.map((c) => ({
+      empresa: c.companyName,
+      receita_brl: (c.revenueCents / 100).toFixed(2).replace(".", ","),
+      n8n_total: c.n8nTotal,
+      n8n_falhas: c.n8nFailed,
+    }));
     downloadCsv(`empresas-${fromLabel}-${toLabel}.csv`,
-      ["empresa", "receita_brl", "n8n_total", "n8n_falhas"],
-      data!.allCompanies.map((c) => ({
-        empresa: c.companyName,
-        receita_brl: (c.revenueCents / 100).toFixed(2).replace(".", ","),
-        n8n_total: c.n8nTotal,
-        n8n_falhas: c.n8nFailed,
-      })),
-    );
+      ["empresa", "receita_brl", "n8n_total", "n8n_falhas"], rows);
+    trackExport("csv", "dashboard_macro.companies", rows.length);
   }
   function exportNichesCsv() {
+    const rows = Object.entries(data!.byNiche).map(([_, v]) => ({
+      nicho: v.nicheName, empresas: v.companies,
+      receita_brl: (v.revenueCents / 100).toFixed(2).replace(".", ","),
+      n8n_total: v.n8nTotal, n8n_falhas: v.n8nFailed,
+    }));
     downloadCsv(`nichos-${fromLabel}-${toLabel}.csv`,
-      ["nicho", "empresas", "receita_brl", "n8n_total", "n8n_falhas"],
-      Object.entries(data!.byNiche).map(([k, v]) => ({
-        nicho: v.nicheName,
-        empresas: v.companies,
-        receita_brl: (v.revenueCents / 100).toFixed(2).replace(".", ","),
-        n8n_total: v.n8nTotal,
-        n8n_falhas: v.n8nFailed,
-      })),
-    );
+      ["nicho", "empresas", "receita_brl", "n8n_total", "n8n_falhas"], rows);
+    trackExport("csv", "dashboard_macro.niches", rows.length);
   }
   function exportReguasCsv() {
+    const rows = Object.entries(data!.n8nByRegua).map(([k, v]) => ({ regua: k, total: v.total, ok: v.ok, falhas: v.failed }));
     downloadCsv(`reguas-${fromLabel}-${toLabel}.csv`,
-      ["regua", "total", "ok", "falhas"],
-      Object.entries(data!.n8nByRegua).map(([k, v]) => ({ regua: k, total: v.total, ok: v.ok, falhas: v.failed })),
-    );
+      ["regua", "total", "ok", "falhas"], rows);
+    trackExport("csv", "dashboard_macro.reguas", rows.length);
   }
 
   function monthlyPdf() {
