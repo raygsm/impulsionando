@@ -1,0 +1,1 @@
+ALTER VIEW public.n8n_lead_journey SET (security_invoker = true);
