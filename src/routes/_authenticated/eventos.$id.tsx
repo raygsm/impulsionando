@@ -414,6 +414,76 @@ function EventDetail() {
         </table>
       </Card>
 
+      <Card className="p-0 overflow-hidden">
+        <div className="p-4 border-b font-semibold flex items-center justify-between flex-wrap gap-2">
+          <span>Check-ins ({data?.checkins.length ?? 0})</span>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => {
+              const ticketByCode = new Map((data?.tickets ?? []).map((t) => [t.id, t]));
+              const rows = (data?.checkins ?? []).map((c) => {
+                const tk = ticketByCode.get(c.ticket_id);
+                return {
+                  quando: new Date(c.checked_in_at).toLocaleString("pt-BR"),
+                  ingresso: tk?.code ?? "",
+                  portador: tk?.holder_name ?? "",
+                  email: tk?.holder_email ?? "",
+                  portao: c.gate ?? "",
+                };
+              });
+              downloadCsv(`checkins-${id}.csv`, ["quando", "ingresso", "portador", "email", "portao"], rows);
+            }} disabled={!data?.checkins?.length}>
+              <Download className="w-4 h-4 mr-1" /> CSV
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => {
+              const ticketByCode = new Map((data?.tickets ?? []).map((t) => [t.id, t]));
+              downloadTablePdf({
+                filename: `checkins-${id}.pdf`,
+                title: `Check-ins — ${ev?.title ?? id}`,
+                subtitle: `${data?.checkins.length ?? 0} entradas registradas`,
+                columns: [
+                  { key: "quando", label: "Quando", width: 140 },
+                  { key: "ingresso", label: "Ingresso", width: 90 },
+                  { key: "portador", label: "Portador" },
+                  { key: "email", label: "E-mail" },
+                  { key: "portao", label: "Portão", width: 80 },
+                ],
+                rows: (data?.checkins ?? []).map((c) => {
+                  const tk = ticketByCode.get(c.ticket_id);
+                  return {
+                    quando: new Date(c.checked_in_at).toLocaleString("pt-BR"),
+                    ingresso: tk?.code ?? "—",
+                    portador: tk?.holder_name ?? "—",
+                    email: tk?.holder_email ?? "—",
+                    portao: c.gate ?? "—",
+                  };
+                }),
+              });
+            }} disabled={!data?.checkins?.length}>
+              <FileText className="w-4 h-4 mr-1" /> PDF
+            </Button>
+          </div>
+        </div>
+        <table className="w-full text-sm">
+          <thead className="bg-muted/40 text-xs uppercase">
+            <tr><th className="text-left p-3">Quando</th><th className="text-left p-3">Ingresso</th><th className="text-left p-3">Portão</th></tr>
+          </thead>
+          <tbody>
+            {(data?.checkins ?? []).map((c) => {
+              const tk = (data?.tickets ?? []).find((x) => x.id === c.ticket_id);
+              return (
+                <tr key={c.id} className="border-t">
+                  <td className="p-3 text-xs">{new Date(c.checked_in_at).toLocaleString("pt-BR")}</td>
+                  <td className="p-3 font-mono text-xs">{tk?.code ?? "—"} <span className="text-muted-foreground">{tk?.holder_name ?? ""}</span></td>
+                  <td className="p-3 text-xs">{c.gate ?? "—"}</td>
+                </tr>
+              );
+            })}
+            {(!data?.checkins || data.checkins.length === 0) && (
+              <tr><td colSpan={3} className="p-6 text-center text-sm text-muted-foreground">Nenhum check-in registrado.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </Card>
 
       <Card className="p-0 overflow-hidden">
         <div className="p-4 border-b font-semibold">Ingressos ({data?.tickets.length ?? 0})</div>
