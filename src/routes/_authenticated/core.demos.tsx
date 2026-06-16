@@ -215,12 +215,32 @@ function CoreDemosPage() {
   const replay = useServerFn(replaySmokeRun);
   const exportHistory = useServerFn(exportSmokeHistory);
   const fetchRetention = useServerFn(getSmokeRetentionPolicy);
+  const purgeNow = useServerFn(triggerSmokePurge);
 
-  const { data: retention } = useQuery({
+  const { data: retention, refetch: refetchRetention } = useQuery({
     queryKey: ["core-smoke-retention"],
     queryFn: () => fetchRetention(),
     staleTime: 5 * 60_000,
   });
+
+  const [purging, setPurging] = useState(false);
+  const handleManualPurge = async () => {
+    if (!confirm("Disparar purge manual agora? Execuções antigas serão removidas.")) return;
+    setPurging(true);
+    try {
+      const res = await purgeNow({ data: {} });
+      toast.success(
+        `Purge concluído: ${res.totalRemoved} execução(ões) removida(s).`,
+      );
+      await refetchRetention();
+      qc.invalidateQueries({ queryKey: ["core-smoke-history"] });
+    } catch (e) {
+      toast.error((e as Error).message ?? "Falha ao disparar purge.");
+    } finally {
+      setPurging(false);
+    }
+  };
+
 
   // filtros + paginação do histórico
   const [historyPage, setHistoryPage] = useState(0);
