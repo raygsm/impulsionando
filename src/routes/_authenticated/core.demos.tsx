@@ -256,7 +256,7 @@ function CoreDemosPage() {
   });
 
   const handleExportCsv = async () => {
-    const r = await exportHistory();
+    const r = await exportHistory({ data: historyFilters });
     const rows = (r.runs ?? []) as unknown as SmokeRunRow[];
     const header = [
       "id",
