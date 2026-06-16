@@ -73,7 +73,7 @@ function isoFromDays(days: number): string {
 
 function whereCompanyJoin(nicheSlug?: string): string {
   if (!nicheSlug) return "";
-  return ` AND company_id IN (SELECT id FROM companies WHERE niche_id = (SELECT id FROM niches WHERE slug = ${JSON.stringify(nicheSlug)}))`;
+  return ` AND company_id IN (SELECT id FROM companies WHERE niche_id = (SELECT id FROM niches WHERE slug = ${"'" + nicheSlug + "'"}))`;
 }
 
 for (const f of filters) {
