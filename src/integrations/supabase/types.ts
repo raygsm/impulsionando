@@ -5325,6 +5325,44 @@ export type Database = {
           },
         ]
       }
+      generated_page_versions: {
+        Row: {
+          content: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          note: string | null
+          page_id: string
+          status: string
+        }
+        Insert: {
+          content: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          page_id: string
+          status?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          page_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_page_versions_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "generated_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       generated_pages: {
         Row: {
           company_id: string | null
