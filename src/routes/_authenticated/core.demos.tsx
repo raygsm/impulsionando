@@ -158,6 +158,12 @@ function CoreDemosPage() {
   const smoke = useServerFn(runWizardSmokeTest);
   const smokeBatch = useServerFn(runWizardSmokeBatch);
   const fetchHistory = useServerFn(listSmokeHistory);
+  const replay = useServerFn(replaySmokeRun);
+  const exportHistory = useServerFn(exportSmokeHistory);
+
+  // paginação histórico
+  const [historyPage, setHistoryPage] = useState(0);
+  const historyPageSize = 20;
 
   const { data, isLoading } = useQuery({
     queryKey: ["core-demos"],
@@ -165,8 +171,11 @@ function CoreDemosPage() {
   });
 
   const { data: historyData, isLoading: loadingHistory } = useQuery({
-    queryKey: ["core-smoke-history"],
-    queryFn: () => fetchHistory({ data: { limit: 50 } }),
+    queryKey: ["core-smoke-history", historyPage],
+    queryFn: () =>
+      fetchHistory({
+        data: { limit: historyPageSize, offset: historyPage * historyPageSize },
+      }),
   });
 
   const impersonateMut = useMutation({
