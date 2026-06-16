@@ -468,24 +468,85 @@ function CoreDemosPage() {
     const rows = (r.runs ?? []) as unknown as SmokeRunRow[];
     const zip = new JSZip();
     const base = buildExportFilename("").replace(/\.$/, "");
+
     zip.file(`${base}.csv`, buildCsv(rows));
     zip.file(`${base}.pdf`, buildPdfBlob(rows));
-    zip.file(
-      "manifest.json",
-      JSON.stringify(
-        {
-          generatedAt: new Date().toISOString(),
-          filters: {
-            sinceDays: historyFilters.sinceDays,
-            status: historyFilters.status,
-            search: historyFilters.search ?? null,
-          },
-          rowCount: rows.length,
-        },
-        null,
-        2,
-      ),
-    );
+
+    // Raw per-run JSON (full audit trail offline)
+    const runsFolder = zip.folder("runs");
+    for (const row of rows) {
+      runsFolder?.file(`${row.id}.json`, JSON.stringify(row, null, 2));
+    }
+    // Single newline-delimited JSON file with all runs
+    zip.file("runs.ndjson", rows.map((r) => JSON.stringify(r)).join("\n"));
+    // Pretty array of all runs
+    zip.file("runs.json", JSON.stringify(rows, null, 2));
+
+    // Aggregates
+    const okCount = rows.filter((r) => r.success).length;
+    const failCount = rows.length - okCount;
+    const durations = rows.map((r) => Number(r.duration_ms || 0));
+    const total = durations.reduce((a, b) => a + b, 0);
+    const avg = durations.length ? Math.round(total / durations.length) : 0;
+    const min = durations.length ? Math.min(...durations) : 0;
+    const max = durations.length ? Math.max(...durations) : 0;
+    const nicheCounts: Record<string, number> = {};
+    for (const r of rows) {
+      const k = r.niche_slug ?? "—";
+      nicheCounts[k] = (nicheCounts[k] ?? 0) + 1;
+    }
+    const sortedDates = rows
+      .map((r) => r.created_at)
+      .filter(Boolean)
+      .sort();
+    const firstAt = sortedDates[0] ?? null;
+    const lastAt = sortedDates[sortedDates.length - 1] ?? null;
+
+    const manifest = {
+      generatedAt: new Date().toISOString(),
+      generatedBy: "core/demos history export",
+      filters: {
+        sinceDays: historyFilters.sinceDays,
+        status: historyFilters.status,
+        search: historyFilters.search ?? null,
+      },
+      period: {
+        label:
+          historySince === "all" ? "todo o histórico" : `últimos ${historySince} dias`,
+        firstAt,
+        lastAt,
+      },
+      counts: {
+        total: rows.length,
+        success: okCount,
+        failure: failCount,
+        successRate: rows.length ? +(okCount / rows.length).toFixed(4) : 0,
+        byNiche: nicheCounts,
+      },
+      durations: {
+        totalMs: total,
+        avgMs: avg,
+        minMs: min,
+        maxMs: max,
+      },
+      retention: retention
+        ? {
+            retentionDays: retention.retentionDays,
+            schedule: retention.schedule,
+            scheduleLabel: retention.scheduleLabel,
+            active: retention.active,
+          }
+        : null,
+      files: {
+        csv: `${base}.csv`,
+        pdf: `${base}.pdf`,
+        runsDir: "runs/<id>.json",
+        runsNdjson: "runs.ndjson",
+        runsJson: "runs.json",
+      },
+    };
+    zip.file("manifest.json", JSON.stringify(manifest, null, 2));
+
     const zipBlob = await zip.generateAsync({ type: "blob" });
     const url = URL.createObjectURL(zipBlob);
     const a = document.createElement("a");
@@ -495,8 +556,9 @@ function CoreDemosPage() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    toast.success(`ZIP exportado (${rows.length} linhas)`);
+    toast.success(`ZIP exportado (${rows.length} runs · ${okCount} ok / ${failCount} falhas)`);
   };
+
 
   const demos = (data?.demos ?? []) as unknown as DemoRow[];
   const history = (historyData?.runs ?? []) as unknown as SmokeRunRow[];
