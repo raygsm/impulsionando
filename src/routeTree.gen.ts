@@ -31,6 +31,7 @@ import { Route as ContratarRouteImport } from './routes/contratar'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as ContaSuspensaRouteImport } from './routes/conta-suspensa'
 import { Route as ConsumidorRouteImport } from './routes/consumidor'
+import { Route as ClubeRouteImport } from './routes/clube'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -436,6 +437,11 @@ const ContaSuspensaRoute = ContaSuspensaRouteImport.update({
 const ConsumidorRoute = ConsumidorRouteImport.update({
   id: '/consumidor',
   path: '/consumidor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClubeRoute = ClubeRouteImport.update({
+  id: '/clube',
+  path: '/clube',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -2082,6 +2088,7 @@ const AuthenticatedCoreClienteIdModuloSlugConfigurarRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/clube': typeof AuthenticatedClubeRouteWithChildren
   '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
@@ -2111,7 +2118,6 @@ export interface FileRoutesByFullPath {
   '/audit': typeof AuthenticatedAuditRoute
   '/automacoes': typeof AuthenticatedAutomacoesRoute
   '/bi': typeof AuthenticatedBiRouteWithChildren
-  '/clube': typeof AuthenticatedClubeRouteWithChildren
   '/companies': typeof AuthenticatedCompaniesRoute
   '/core': typeof AuthenticatedCoreRouteWithChildren
   '/crm': typeof AuthenticatedCrmRouteWithChildren
@@ -2401,6 +2407,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/clube': typeof AuthenticatedClubeRouteWithChildren
   '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
@@ -2425,7 +2432,6 @@ export interface FileRoutesByTo {
   '/adm': typeof AuthenticatedAdmRouteWithChildren
   '/audit': typeof AuthenticatedAuditRoute
   '/automacoes': typeof AuthenticatedAutomacoesRoute
-  '/clube': typeof AuthenticatedClubeRouteWithChildren
   '/companies': typeof AuthenticatedCompaniesRoute
   '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -2711,6 +2717,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/clube': typeof ClubeRoute
   '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
@@ -3032,6 +3039,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/clube'
     | '/consumidor'
     | '/conta-suspensa'
     | '/contato'
@@ -3061,7 +3069,6 @@ export interface FileRouteTypes {
     | '/audit'
     | '/automacoes'
     | '/bi'
-    | '/clube'
     | '/companies'
     | '/core'
     | '/crm'
@@ -3351,6 +3358,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/clube'
     | '/consumidor'
     | '/conta-suspensa'
     | '/contato'
@@ -3375,7 +3383,6 @@ export interface FileRouteTypes {
     | '/adm'
     | '/audit'
     | '/automacoes'
-    | '/clube'
     | '/companies'
     | '/customers'
     | '/dashboard'
@@ -3660,6 +3667,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/clube'
     | '/consumidor'
     | '/conta-suspensa'
     | '/contato'
@@ -3981,6 +3989,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ClubeRoute: typeof ClubeRoute
   ConsumidorRoute: typeof ConsumidorRoute
   ContaSuspensaRoute: typeof ContaSuspensaRoute
   ContatoRoute: typeof ContatoRoute
@@ -4256,6 +4265,13 @@ declare module '@tanstack/react-router' {
       path: '/consumidor'
       fullPath: '/consumidor'
       preLoaderRoute: typeof ConsumidorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clube': {
+      id: '/clube'
+      path: '/clube'
+      fullPath: '/clube'
+      preLoaderRoute: typeof ClubeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -7051,6 +7067,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ClubeRoute: ClubeRoute,
   ConsumidorRoute: ConsumidorRoute,
   ContaSuspensaRoute: ContaSuspensaRoute,
   ContatoRoute: ContatoRoute,
