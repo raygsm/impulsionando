@@ -101,6 +101,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/sectors", label: "Setores", icon: Layers, perm: "sectors.read" },
       { to: "/users", label: "Usuários", icon: Users, perm: "users.read" },
       { to: "/access-profiles", label: "Perfis de acesso", icon: KeyRound, perm: "profiles.read" },
+      { to: "/access-profiles/matrix", label: "Matriz de Permissões", icon: KeyRound, perm: "profiles.read" },
       { to: "/permissions", label: "Permissões", icon: KeyRound, superOnly: true },
       { to: "/modules", label: "Módulos", icon: Boxes, perm: "modules.read" },
       { to: "/admin/trials", label: "Trials (7 dias)", icon: Sparkles, superOnly: true },
