@@ -6968,7 +6968,10 @@ export type Database = {
           company_id: string
           created_at: string
           id: string
+          metadata: Json
+          new_status: string | null
           notes: string | null
+          previous_status: string | null
           property_id: string
         }
         Insert: {
@@ -6977,7 +6980,10 @@ export type Database = {
           company_id: string
           created_at?: string
           id?: string
+          metadata?: Json
+          new_status?: string | null
           notes?: string | null
+          previous_status?: string | null
           property_id: string
         }
         Update: {
@@ -6986,7 +6992,10 @@ export type Database = {
           company_id?: string
           created_at?: string
           id?: string
+          metadata?: Json
+          new_status?: string | null
           notes?: string | null
+          previous_status?: string | null
           property_id?: string
         }
         Relationships: [

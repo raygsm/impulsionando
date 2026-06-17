@@ -166,6 +166,9 @@ async function logReview(
   action: "submitted" | "approved" | "rejected" | "changes_requested",
   actorId: string | null,
   notes: string | null | undefined,
+  previousStatus: string | null,
+  newStatus: string | null,
+  metadata: Record<string, unknown> = {},
 ) {
   await supabase.from("realestate_property_reviews").insert({
     property_id: propertyId,
@@ -173,6 +176,9 @@ async function logReview(
     action,
     actor_id: actorId,
     notes: notes ?? null,
+    previous_status: previousStatus,
+    new_status: newStatus,
+    metadata,
   });
 }
 
@@ -187,11 +193,11 @@ async function ensureApprover(supabase: any, userId: string, companyId: string) 
 async function loadPropertyMeta(supabase: any, propertyId: string) {
   const { data, error } = await supabase
     .from("realestate_properties")
-    .select("id, company_id, title, reference_code, submitted_by")
+    .select("id, company_id, title, reference_code, submitted_by, approval_status")
     .eq("id", propertyId)
     .single();
   if (error) throw new Error(error.message);
-  return data as { id: string; company_id: string; title: string; reference_code: string | null; submitted_by: string | null };
+  return data as { id: string; company_id: string; title: string; reference_code: string | null; submitted_by: string | null; approval_status: string | null };
 }
 
 async function dispatchNotification(args: {
@@ -226,6 +232,7 @@ export const submitPropertyForReview = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => ApprovalActionInput.parse(d))
   .handler(async ({ data, context }) => {
     const meta = await loadPropertyMeta(context.supabase, data.propertyId);
+    const previousStatus = meta.approval_status ?? null;
     const { data: prop, error: e1 } = await context.supabase
       .from("realestate_properties")
       .update({
@@ -238,7 +245,11 @@ export const submitPropertyForReview = createServerFn({ method: "POST" })
       .select("id, company_id, title, reference_code")
       .single();
     if (e1) throw new Error(e1.message);
-    await logReview(context.supabase, prop.id, prop.company_id, "submitted", context.userId, data.notes);
+    await logReview(
+      context.supabase, prop.id, prop.company_id, "submitted",
+      context.userId, data.notes, previousStatus, "pending",
+      { source: "submitPropertyForReview" },
+    );
     await dispatchNotification({
       event: "submitted",
       propertyId: prop.id,
@@ -273,7 +284,18 @@ async function performReview(
     .select("id, company_id, title, reference_code, submitted_by")
     .single();
   if (e1) throw new Error(e1.message);
-  await logReview(context.supabase, prop.id, prop.company_id, next, context.userId, data.notes);
+  const metadata: Record<string, unknown> = {
+    source: "performReview",
+    requires_notes: next === "rejected" || next === "changes_requested",
+    notes_length: data.notes ? data.notes.length : 0,
+  };
+  if (next === "rejected") metadata.rejection_reason = data.notes ?? null;
+  if (next === "changes_requested") metadata.requested_changes = data.notes ?? null;
+  await logReview(
+    context.supabase, prop.id, prop.company_id, next,
+    context.userId, data.notes,
+    meta.approval_status ?? null, next, metadata,
+  );
   await dispatchNotification({
     event: next,
     propertyId: prop.id,
@@ -391,7 +413,7 @@ export const listPropertyReviewHistory = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     const { data: rows, error } = await context.supabase
       .from("realestate_property_reviews")
-      .select("id, action, actor_id, notes, created_at")
+      .select("id, action, actor_id, notes, previous_status, new_status, metadata, created_at")
       .eq("property_id", data.propertyId)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
@@ -423,7 +445,7 @@ export const exportPropertyApprovalCsv = createServerFn({ method: "GET" })
 
     const { data: rows, error: e2 } = await context.supabase
       .from("realestate_property_reviews")
-      .select("id, action, actor_id, notes, created_at")
+      .select("id, action, actor_id, notes, previous_status, new_status, metadata, created_at")
       .eq("property_id", data.propertyId)
       .order("created_at", { ascending: true });
     if (e2) throw new Error(e2.message);
@@ -444,13 +466,16 @@ export const exportPropertyApprovalCsv = createServerFn({ method: "GET" })
       const s = v == null ? "" : String(v);
       return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
-    const header = ["Data/Hora", "Ação", "Responsável", "Observações"].join(",");
+    const header = ["Data/Hora", "Ação", "De", "Para", "Responsável", "Observações", "Metadata"].join(",");
     const lines = (rows ?? []).map((r: any) =>
       [
         new Date(r.created_at).toLocaleString("pt-BR"),
         r.action,
+        r.previous_status ?? "",
+        r.new_status ?? "",
         actors[r.actor_id] ?? r.actor_id ?? "—",
         r.notes ?? "",
+        r.metadata ? JSON.stringify(r.metadata) : "",
       ].map(escape).join(","),
     );
     const meta = [
@@ -539,7 +564,69 @@ export const exportApprovalQueueCsv = createServerFn({ method: "GET" })
     };
   });
 
-// ============ Notification preferences ============
+// Structured queue export — same validator/filters as listApprovalQueue,
+// returned as typed rows so the print/PDF page does not have to parse CSV.
+export const getApprovalQueueForExport = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => BatchExportInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const from = (data.page - 1) * data.pageSize;
+    const to = from + data.pageSize - 1;
+    const statuses: Array<"pending" | "changes_requested" | "rejected" | "approved"> =
+      data.status?.length ? data.status : ["pending", "changes_requested", "rejected"];
+
+    let q = context.supabase
+      .from("realestate_properties")
+      .select(
+        "id, reference_code, title, operation, property_type, sale_price, rent_price, neighborhood, city, approval_status, submitted_for_review_at, submitted_by, reviewed_by, reviewed_at, review_notes",
+        { count: "exact" },
+      )
+      .eq("company_id", data.companyId)
+      .in("approval_status", statuses);
+
+    if (data.search?.trim()) {
+      const s = data.search.trim().replace(/[%,]/g, "");
+      q = q.or(`title.ilike.%${s}%,reference_code.ilike.%${s}%,neighborhood.ilike.%${s}%,city.ilike.%${s}%`);
+    }
+    if (data.reviewerId) q = q.eq("reviewed_by", data.reviewerId);
+    if (data.submitterId) q = q.eq("submitted_by", data.submitterId);
+    if (data.dateFrom) q = q.gte("submitted_for_review_at", data.dateFrom);
+    if (data.dateTo) q = q.lte("submitted_for_review_at", data.dateTo);
+
+    const { data: rows, error, count } = await q
+      .order("submitted_for_review_at", { ascending: false, nullsFirst: false })
+      .range(from, to);
+    if (error) throw new Error(error.message);
+
+    const userIds = Array.from(new Set((rows ?? []).flatMap((r: any) => [r.reviewed_by, r.submitted_by]).filter(Boolean) as string[]));
+    let actors: Record<string, string> = {};
+    if (userIds.length) {
+      const { data: profiles } = await context.supabase
+        .from("user_profiles").select("user_id, display_name, email").in("user_id", userIds);
+      for (const p of (profiles ?? []) as any[]) {
+        actors[p.user_id] = p.display_name || p.email || "Usuário";
+      }
+    }
+
+    return {
+      items: rows ?? [],
+      actors,
+      total: count ?? 0,
+      page: data.page,
+      pageSize: data.pageSize,
+      filters: {
+        status: statuses,
+        search: data.search ?? null,
+        reviewerId: data.reviewerId ?? null,
+        submitterId: data.submitterId ?? null,
+        dateFrom: data.dateFrom ?? null,
+        dateTo: data.dateTo ?? null,
+      },
+      generatedAt: new Date().toISOString(),
+    };
+  });
+
+
 const APPROVAL_CATEGORIES = ["realestate.approval.submitted", "realestate.approval.decision"] as const;
 const PREF_CHANNELS = ["in_app", "email"] as const;
 

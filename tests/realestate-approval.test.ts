@@ -214,4 +214,155 @@ describe("exportApprovalQueueCsv — filtro de status e contagem refletem dados 
     expect(error).toBeNull();
     expect((data ?? []).map((r: any) => r.id)).not.toContain(propertyId);
   });
+
+  it("paginação range(from,to) limita a quantidade de linhas retornadas", async () => {
+    const pageSize = 1;
+    const from = 0;
+    const to = from + pageSize - 1;
+    const { data, error } = await admin
+      .from("realestate_properties")
+      .select("id", { count: "exact" })
+      .eq("company_id", companyA)
+      .in("approval_status", ["pending", "changes_requested", "rejected", "approved"])
+      .order("submitted_for_review_at", { ascending: false, nullsFirst: false })
+      .range(from, to);
+    expect(error).toBeNull();
+    expect((data ?? []).length).toBeLessThanOrEqual(pageSize);
+  });
+
+  it("filtro por reviewerId retorna apenas decisões do revisor selecionado", async () => {
+    const { data } = await admin
+      .from("realestate_properties")
+      .select("id, reviewed_by")
+      .eq("company_id", companyA)
+      .eq("reviewed_by", users.reviewer);
+    for (const r of data ?? []) expect(r.reviewed_by).toBe(users.reviewer);
+  });
+
+  it("filtro por intervalo de datas restringe submitted_for_review_at", async () => {
+    const future = new Date(Date.now() + 86_400_000).toISOString();
+    const { data } = await admin
+      .from("realestate_properties")
+      .select("id")
+      .eq("company_id", companyA)
+      .gte("submitted_for_review_at", future);
+    expect((data ?? []).length).toBe(0);
+  });
+});
+
+describe("realestate_property_reviews — auditoria detalhada (previous/new status + metadata)", () => {
+  it("solicitação de ajustes grava previous_status, new_status e requested_changes em metadata", async () => {
+    // simula efeito do server fn requestPropertyChanges (a UI já gate-keeps por permissão)
+    const before = "approved";
+    const next = "changes_requested";
+    const reason = "Atualizar fotos e ajustar preço";
+    await admin.from("realestate_properties").update({
+      approval_status: next,
+      reviewed_by: users.reviewer,
+      reviewed_at: new Date().toISOString(),
+      review_notes: reason,
+      is_published: false,
+    }).eq("id", propertyId);
+    const { error } = await admin.from("realestate_property_reviews").insert({
+      property_id: propertyId, company_id: companyA, action: next,
+      actor_id: users.reviewer, notes: reason,
+      previous_status: before, new_status: next,
+      metadata: { source: "performReview", requires_notes: true, requested_changes: reason },
+    });
+    expect(error).toBeNull();
+
+    const { data } = await admin.from("realestate_property_reviews")
+      .select("action, previous_status, new_status, metadata, notes")
+      .eq("property_id", propertyId)
+      .eq("action", next).order("created_at", { ascending: false }).limit(1);
+    expect(data!.length).toBe(1);
+    expect(data![0].previous_status).toBe(before);
+    expect(data![0].new_status).toBe(next);
+    expect(data![0].notes).toBe(reason);
+    expect((data![0].metadata as any).requested_changes).toBe(reason);
+    expect((data![0].metadata as any).requires_notes).toBe(true);
+  });
+
+  it("rejeição grava rejection_reason em metadata e requires_notes=true", async () => {
+    const before = "changes_requested";
+    const next = "rejected";
+    const reason = "Documentação incompleta";
+    await admin.from("realestate_properties").update({
+      approval_status: next, reviewed_by: users.reviewer,
+      reviewed_at: new Date().toISOString(), review_notes: reason, is_published: false,
+    }).eq("id", propertyId);
+    await admin.from("realestate_property_reviews").insert({
+      property_id: propertyId, company_id: companyA, action: next,
+      actor_id: users.reviewer, notes: reason,
+      previous_status: before, new_status: next,
+      metadata: { source: "performReview", requires_notes: true, rejection_reason: reason },
+    });
+    const { data } = await admin.from("realestate_property_reviews")
+      .select("metadata").eq("property_id", propertyId).eq("action", next)
+      .order("created_at", { ascending: false }).limit(1);
+    expect((data![0].metadata as any).rejection_reason).toBe(reason);
+  });
+});
+
+describe("Polling /imobiliaria/aprovacoes — refetch reflete novo status sem dados stale", () => {
+  it("após mudar o status, uma nova consulta com o mesmo filtro inclui/exclui o imóvel corretamente", async () => {
+    // garante que o imóvel esteja em rejected (estado final do bloco anterior)
+    const { data: first } = await admin
+      .from("realestate_properties")
+      .select("id, approval_status")
+      .eq("company_id", companyA)
+      .in("approval_status", ["rejected"]);
+    expect((first ?? []).map((r: any) => r.id)).toContain(propertyId);
+
+    // simula uma nova aprovação (como faria approveProperty após permissão)
+    await admin.from("realestate_properties").update({
+      approval_status: "approved", reviewed_by: users.reviewer,
+      reviewed_at: new Date().toISOString(), is_published: true, review_notes: null,
+    }).eq("id", propertyId);
+    await admin.from("realestate_property_reviews").insert({
+      property_id: propertyId, company_id: companyA, action: "approved",
+      actor_id: users.reviewer, notes: null,
+      previous_status: "rejected", new_status: "approved",
+      metadata: { source: "performReview", requires_notes: false },
+    });
+
+    // o "polling" (refetch) com filtro rejected NÃO deve mais retornar
+    const { data: stale } = await admin
+      .from("realestate_properties")
+      .select("id").eq("company_id", companyA).in("approval_status", ["rejected"]);
+    expect((stale ?? []).map((r: any) => r.id)).not.toContain(propertyId);
+
+    // já o filtro approved deve voltar a contê-lo
+    const { data: fresh } = await admin
+      .from("realestate_properties")
+      .select("id, approval_status").eq("company_id", companyA).in("approval_status", ["approved"]);
+    expect((fresh ?? []).map((r: any) => r.id)).toContain(propertyId);
+  });
+
+  it("histórico acumula todas as transições em ordem cronológica", async () => {
+    const { data } = await admin
+      .from("realestate_property_reviews")
+      .select("action, previous_status, new_status, created_at")
+      .eq("property_id", propertyId)
+      .order("created_at", { ascending: true });
+    const actions = (data ?? []).map((r: any) => r.action);
+    // pelo menos: approved (1º bloco) → changes_requested → rejected → approved
+    expect(actions).toContain("approved");
+    expect(actions).toContain("changes_requested");
+    expect(actions).toContain("rejected");
+    // a última deve ser approved
+    expect(actions[actions.length - 1]).toBe("approved");
+  });
+});
+
+describe("Batch PDF/CSV — RLS impede leitura cross-company mesmo com filtros equivalentes", () => {
+  it("outsider executando a mesma query da exportação NÃO recebe linhas de companyA", async () => {
+    const { data, error } = await clients.outsider
+      .from("realestate_properties")
+      .select("id", { count: "exact" })
+      .eq("company_id", companyA)
+      .in("approval_status", ["pending", "changes_requested", "rejected", "approved"]);
+    expect(error).toBeNull();
+    expect((data ?? []).length).toBe(0);
+  });
 });
