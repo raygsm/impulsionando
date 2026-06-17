@@ -173,6 +173,10 @@ function ShowroomHub() {
               </Button>
 
               <Button asChild size="lg" variant="outline">
+                <Link to="/showroom/academia">Academia</Link>
+              </Button>
+
+              <Button asChild size="lg" variant="outline">
                 <Link to="/showroom/comparativo-concorrentes">Comparativo concorrentes</Link>
               </Button>
 
