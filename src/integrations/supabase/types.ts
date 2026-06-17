@@ -8160,6 +8160,104 @@ export type Database = {
           },
         ]
       }
+      restaurant_menu_categories: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_menu_categories_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      restaurant_menu_items: {
+        Row: {
+          category_id: string | null
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          is_available: boolean
+          name: string
+          price_cents: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          is_available?: boolean
+          name: string
+          price_cents: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          is_available?: boolean
+          name?: string
+          price_cents?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_menu_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "restaurant_menu_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restaurant_menu_items_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       restaurant_table_sessions: {
         Row: {
           closed_at: string | null
@@ -9613,6 +9711,15 @@ export type Database = {
         Returns: undefined
       }
       _trial_norm: { Args: { _v: string }; Returns: string }
+      add_table_order_item: {
+        Args: {
+          _item_id: string
+          _notes?: string
+          _quantity?: number
+          _token: string
+        }
+        Returns: Json
+      }
       aff_payout_request: {
         Args: {
           _amount: number
@@ -9749,6 +9856,7 @@ export type Database = {
         }[]
       }
       get_smoke_retention_info: { Args: never; Returns: Json }
+      get_table_menu: { Args: { _token: string }; Returns: Json }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean

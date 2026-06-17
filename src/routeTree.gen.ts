@@ -157,6 +157,7 @@ import { Route as AuthenticatedSalesOrdersRouteImport } from './routes/_authenti
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
 import { Route as AuthenticatedSalesCashRouteImport } from './routes/_authenticated/sales.cash'
 import { Route as AuthenticatedRestauranteMesasRouteImport } from './routes/_authenticated/restaurante.mesas'
+import { Route as AuthenticatedRestauranteCardapioRouteImport } from './routes/_authenticated/restaurante.cardapio'
 import { Route as AuthenticatedReportsSalesRouteImport } from './routes/_authenticated/reports.sales'
 import { Route as AuthenticatedReportsInventoryRouteImport } from './routes/_authenticated/reports.inventory'
 import { Route as AuthenticatedReportsFinanceRouteImport } from './routes/_authenticated/reports.finance'
@@ -1040,6 +1041,12 @@ const AuthenticatedRestauranteMesasRoute =
   AuthenticatedRestauranteMesasRouteImport.update({
     id: '/restaurante/mesas',
     path: '/restaurante/mesas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedRestauranteCardapioRoute =
+  AuthenticatedRestauranteCardapioRouteImport.update({
+    id: '/restaurante/cardapio',
+    path: '/restaurante/cardapio',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedReportsSalesRoute =
@@ -2011,6 +2018,7 @@ export interface FileRoutesByFullPath {
   '/reports/finance': typeof AuthenticatedReportsFinanceRoute
   '/reports/inventory': typeof AuthenticatedReportsInventoryRoute
   '/reports/sales': typeof AuthenticatedReportsSalesRoute
+  '/restaurante/cardapio': typeof AuthenticatedRestauranteCardapioRoute
   '/restaurante/mesas': typeof AuthenticatedRestauranteMesasRoute
   '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/sales/new': typeof AuthenticatedSalesNewRoute
@@ -2277,6 +2285,7 @@ export interface FileRoutesByTo {
   '/reports/finance': typeof AuthenticatedReportsFinanceRoute
   '/reports/inventory': typeof AuthenticatedReportsInventoryRoute
   '/reports/sales': typeof AuthenticatedReportsSalesRoute
+  '/restaurante/cardapio': typeof AuthenticatedRestauranteCardapioRoute
   '/restaurante/mesas': typeof AuthenticatedRestauranteMesasRoute
   '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/sales/new': typeof AuthenticatedSalesNewRoute
@@ -2556,6 +2565,7 @@ export interface FileRoutesById {
   '/_authenticated/reports/finance': typeof AuthenticatedReportsFinanceRoute
   '/_authenticated/reports/inventory': typeof AuthenticatedReportsInventoryRoute
   '/_authenticated/reports/sales': typeof AuthenticatedReportsSalesRoute
+  '/_authenticated/restaurante/cardapio': typeof AuthenticatedRestauranteCardapioRoute
   '/_authenticated/restaurante/mesas': typeof AuthenticatedRestauranteMesasRoute
   '/_authenticated/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
@@ -2835,6 +2845,7 @@ export interface FileRouteTypes {
     | '/reports/finance'
     | '/reports/inventory'
     | '/reports/sales'
+    | '/restaurante/cardapio'
     | '/restaurante/mesas'
     | '/sales/cash'
     | '/sales/new'
@@ -3101,6 +3112,7 @@ export interface FileRouteTypes {
     | '/reports/finance'
     | '/reports/inventory'
     | '/reports/sales'
+    | '/restaurante/cardapio'
     | '/restaurante/mesas'
     | '/sales/cash'
     | '/sales/new'
@@ -3379,6 +3391,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reports/finance'
     | '/_authenticated/reports/inventory'
     | '/_authenticated/reports/sales'
+    | '/_authenticated/restaurante/cardapio'
     | '/_authenticated/restaurante/mesas'
     | '/_authenticated/sales/cash'
     | '/_authenticated/sales/new'
@@ -4591,6 +4604,13 @@ declare module '@tanstack/react-router' {
       path: '/restaurante/mesas'
       fullPath: '/restaurante/mesas'
       preLoaderRoute: typeof AuthenticatedRestauranteMesasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/restaurante/cardapio': {
+      id: '/_authenticated/restaurante/cardapio'
+      path: '/restaurante/cardapio'
+      fullPath: '/restaurante/cardapio'
+      preLoaderRoute: typeof AuthenticatedRestauranteCardapioRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/reports/sales': {
@@ -5921,6 +5941,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedImobiliariaVitrineRoute: typeof AuthenticatedImobiliariaVitrineRoute
   AuthenticatedMarketingLeadsRoute: typeof AuthenticatedMarketingLeadsRoute
   AuthenticatedPerfilNotificacoesRoute: typeof AuthenticatedPerfilNotificacoesRoute
+  AuthenticatedRestauranteCardapioRoute: typeof AuthenticatedRestauranteCardapioRoute
   AuthenticatedRestauranteMesasRoute: typeof AuthenticatedRestauranteMesasRoute
   AuthenticatedComunidadeIndexRoute: typeof AuthenticatedComunidadeIndexRoute
   AuthenticatedEhrIndexRoute: typeof AuthenticatedEhrIndexRoute
@@ -5981,6 +6002,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedImobiliariaVitrineRoute: AuthenticatedImobiliariaVitrineRoute,
   AuthenticatedMarketingLeadsRoute: AuthenticatedMarketingLeadsRoute,
   AuthenticatedPerfilNotificacoesRoute: AuthenticatedPerfilNotificacoesRoute,
+  AuthenticatedRestauranteCardapioRoute: AuthenticatedRestauranteCardapioRoute,
   AuthenticatedRestauranteMesasRoute: AuthenticatedRestauranteMesasRoute,
   AuthenticatedComunidadeIndexRoute: AuthenticatedComunidadeIndexRoute,
   AuthenticatedEhrIndexRoute: AuthenticatedEhrIndexRoute,
