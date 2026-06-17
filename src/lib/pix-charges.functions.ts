@@ -290,3 +290,36 @@ export const cancelPixCharge = createServerFn({ method: 'POST' })
     if (error) throw new Error(error.message)
     return { ok: true }
   })
+
+/**
+ * Admin-only: attach or update the receipt URL on a paid (or pending) charge.
+ * Useful for the "Comprovantes" panel when the link arrives after confirmation.
+ */
+export const updatePixReceipt = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        receiptUrl: z.string().url().nullable(),
+        notes: z.string().max(500).optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: isAdmin } = await context.supabase.rpc('has_role', {
+      _user_id: context.userId,
+      _role: 'admin',
+    })
+    if (!isAdmin) throw new Error('Forbidden')
+
+    const { error } = await context.supabase
+      .from('billing_pix_charges')
+      .update({
+        receipt_url: data.receiptUrl,
+        ...(data.notes !== undefined ? { notes: data.notes } : {}),
+      })
+      .eq('id', data.id)
+    if (error) throw new Error(error.message)
+    return { ok: true }
+  })
