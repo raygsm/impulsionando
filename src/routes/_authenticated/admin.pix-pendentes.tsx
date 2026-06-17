@@ -53,9 +53,27 @@ function PixPendentesPage() {
   const cancelFn = useServerFn(cancelPixCharge)
   const qc = useQueryClient()
 
+  const [filter, setFilter] = useState('')
+  const [planFilter, setPlanFilter] = useState<string>('all')
+  const [fromDate, setFromDate] = useState<string>('') // yyyy-mm-dd
+  const [toDate, setToDate] = useState<string>('')
+
+  const fromISO = fromDate ? new Date(fromDate + 'T00:00:00').toISOString() : undefined
+  const toISO = toDate ? new Date(toDate + 'T23:59:59').toISOString() : undefined
+
   const { data, isLoading } = useQuery({
-    queryKey: ['admin-pix-pending'],
-    queryFn: () => fetchList(),
+    queryKey: ['admin-pix-pending', { filter, planFilter, fromISO, toISO }],
+    queryFn: () =>
+      fetchList({
+        data: {
+          search: filter || undefined,
+          planCode: planFilter !== 'all' ? planFilter : undefined,
+          fromISO,
+          toISO,
+          statuses: ['pending', 'paid'],
+          limit: 300,
+        },
+      }),
     refetchInterval: 30_000,
   })
 
@@ -65,7 +83,6 @@ function PixPendentesPage() {
     payer: string | null
   } | null>(null)
   const [receiptUrl, setReceiptUrl] = useState('')
-  const [filter, setFilter] = useState('')
 
   const confirmMut = useMutation({
     mutationFn: (input: { id: string; receiptUrl?: string }) => confirmFn({ data: input }),
@@ -87,19 +104,14 @@ function PixPendentesPage() {
     onError: (e: any) => toast.error(e?.message ?? 'Falha ao cancelar.'),
   })
 
-  const filtered = (data ?? []).filter((c: any) => {
-    if (!filter) return true
-    const q = filter.toLowerCase()
-    return (
-      c.payer_name?.toLowerCase().includes(q) ||
-      c.payer_email?.toLowerCase().includes(q) ||
-      c.plan_code?.toLowerCase().includes(q) ||
-      String(c.unique_amount_cents).includes(q)
-    )
-  })
+  const rows = data ?? []
+  const planOptions = Array.from(new Set(rows.map((c: any) => c.plan_code).filter(Boolean)))
+  const pending = rows.filter((c: any) => c.status === 'pending')
+  const recent = rows.filter((c: any) => c.status === 'paid').slice(0, 20)
 
-  const pending = filtered.filter((c: any) => c.status === 'pending')
-  const recent = filtered.filter((c: any) => c.status === 'paid').slice(0, 20)
+  function clearFilters() {
+    setFilter(''); setPlanFilter('all'); setFromDate(''); setToDate('')
+  }
 
   return (
     <main className="container max-w-6xl mx-auto py-8 px-4 space-y-6">
