@@ -197,13 +197,21 @@ function Page() {
             </SelectContent>
           </Select>
         </div>
-        <div className="min-w-[150px]">
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">De</label>
+        <div className="min-w-[140px]">
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Criado de</label>
           <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
         </div>
-        <div className="min-w-[150px]">
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Até</label>
+        <div className="min-w-[140px]">
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Criado até</label>
           <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+        </div>
+        <div className="min-w-[140px]">
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">E-mail de</label>
+          <Input type="date" value={emailFrom} onChange={(e) => setEmailFrom(e.target.value)} />
+        </div>
+        <div className="min-w-[140px]">
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">E-mail até</label>
+          <Input type="date" value={emailTo} onChange={(e) => setEmailTo(e.target.value)} />
         </div>
         <div className="min-w-[180px]">
           <label className="text-xs font-medium text-muted-foreground mb-1 block">Exportar (filtro)</label>
@@ -232,6 +240,17 @@ function Page() {
             PDF
           </Button>
         </div>
+        {exporting && exportProgress.exportId && (
+          <div className="w-full mt-2">
+            <div className="flex justify-between text-xs text-muted-foreground mb-1">
+              <span>Export <code>{exportProgress.exportId.slice(0, 8)}</code> — {exportProgress.done} / {exportProgress.total || '?'}</span>
+              <span>{exportProgress.total ? Math.min(100, Math.round((exportProgress.done / exportProgress.total) * 100)) : 0}%</span>
+            </div>
+            <div className="w-full h-2 bg-muted rounded overflow-hidden">
+              <div className="h-full bg-primary transition-all" style={{ width: `${exportProgress.total ? Math.min(100, (exportProgress.done / exportProgress.total) * 100) : 5}%` }} />
+            </div>
+          </div>
+        )}
       </Card>
 
       {isLoading ? (
