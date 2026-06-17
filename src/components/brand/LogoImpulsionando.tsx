@@ -19,12 +19,12 @@ type Variant = 'auto' | 'light' | 'dark'
 type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'
 
 const SIZE: Record<Size, string> = {
-  xs: 'h-8',
-  sm: 'h-10',
-  md: 'h-16',
-  lg: 'h-24',
-  xl: 'h-32',
-  '2xl': 'h-40',
+  xs: 'h-10',
+  sm: 'h-[3.125rem]',
+  md: 'h-20',
+  lg: 'h-[7.5rem]',
+  xl: 'h-40',
+  '2xl': 'h-[12.5rem]',
 }
 
 export interface LogoImpulsionandoProps {
