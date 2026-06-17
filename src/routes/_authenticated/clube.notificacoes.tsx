@@ -21,7 +21,7 @@ export const Route = createFileRoute("/_authenticated/clube/notificacoes")({
 type FilterKind = "all" | "unread" | "journey" | "receipts";
 
 function ClubeNotificationsPage() {
-  const { user } = useCurrentUser();
+  const { data: user } = useCurrentUser();
   const { data, isLoading, refetch, isRefetching, unreadCount, markRead, markAllRead, remove } = useNotifications(user?.id);
   const [tab, setTab] = useState<FilterKind>("all");
   const [search, setSearch] = useState("");
