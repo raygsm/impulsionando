@@ -35,7 +35,10 @@ function smokeOnce(store: Store, niche: string, label: string) {
     steps.push({ key: "empresa_criada", ok: true });
 
     const slugs = TEMPLATES[niche] ?? [];
-    if (slugs.length === 0) throw new Error("nicho_sem_template");
+    if (slugs.length === 0) {
+      steps.push({ key: "nicho_template_aplicado", ok: false });
+      return { success: false, steps, companyId, label };
+    }
     for (const s of slugs) store.companyModules.add(`${companyId}:${s}`);
     steps.push({ key: "nicho_template_aplicado", ok: true });
 
