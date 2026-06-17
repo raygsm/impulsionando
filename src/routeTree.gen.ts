@@ -80,6 +80,7 @@ import { Route as ShowroomAtendimentoRouteImport } from './routes/showroom.atend
 import { Route as ShowroomApiPublicaRouteImport } from './routes/showroom.api-publica'
 import { Route as ShowroomAgendamentosOnlineRouteImport } from './routes/showroom.agendamentos-online'
 import { Route as ShowroomAgendaRouteImport } from './routes/showroom.agenda'
+import { Route as ShowroomAcademiaRouteImport } from './routes/showroom.academia'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
 import { Route as PlanosTesteRouteImport } from './routes/planos.teste'
 import { Route as PacienteIdRouteImport } from './routes/paciente.$id'
@@ -625,6 +626,11 @@ const ShowroomAgendamentosOnlineRoute =
 const ShowroomAgendaRoute = ShowroomAgendaRouteImport.update({
   id: '/showroom/agenda',
   path: '/showroom/agenda',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShowroomAcademiaRoute = ShowroomAcademiaRouteImport.update({
+  id: '/showroom/academia',
+  path: '/showroom/academia',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RSlugRoute = RSlugRouteImport.update({
@@ -1753,6 +1759,7 @@ export interface FileRoutesByFullPath {
   '/paciente/$id': typeof PacienteIdRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
+  '/showroom/academia': typeof ShowroomAcademiaRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
   '/showroom/agendamentos-online': typeof ShowroomAgendamentosOnlineRoute
   '/showroom/api-publica': typeof ShowroomApiPublicaRoute
@@ -2002,6 +2009,7 @@ export interface FileRoutesByTo {
   '/paciente/$id': typeof PacienteIdRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
+  '/showroom/academia': typeof ShowroomAcademiaRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
   '/showroom/agendamentos-online': typeof ShowroomAgendamentosOnlineRoute
   '/showroom/api-publica': typeof ShowroomApiPublicaRoute
@@ -2264,6 +2272,7 @@ export interface FileRoutesById {
   '/paciente/$id': typeof PacienteIdRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
+  '/showroom/academia': typeof ShowroomAcademiaRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
   '/showroom/agendamentos-online': typeof ShowroomAgendamentosOnlineRoute
   '/showroom/api-publica': typeof ShowroomApiPublicaRoute
@@ -2526,6 +2535,7 @@ export interface FileRouteTypes {
     | '/paciente/$id'
     | '/planos/teste'
     | '/r/$slug'
+    | '/showroom/academia'
     | '/showroom/agenda'
     | '/showroom/agendamentos-online'
     | '/showroom/api-publica'
@@ -2775,6 +2785,7 @@ export interface FileRouteTypes {
     | '/paciente/$id'
     | '/planos/teste'
     | '/r/$slug'
+    | '/showroom/academia'
     | '/showroom/agenda'
     | '/showroom/agendamentos-online'
     | '/showroom/api-publica'
@@ -3036,6 +3047,7 @@ export interface FileRouteTypes {
     | '/paciente/$id'
     | '/planos/teste'
     | '/r/$slug'
+    | '/showroom/academia'
     | '/showroom/agenda'
     | '/showroom/agendamentos-online'
     | '/showroom/api-publica'
@@ -3268,6 +3280,7 @@ export interface RootRouteChildren {
   ImoveisSlugRoute: typeof ImoveisSlugRouteWithChildren
   NichosSlugRoute: typeof NichosSlugRoute
   RSlugRoute: typeof RSlugRoute
+  ShowroomAcademiaRoute: typeof ShowroomAcademiaRoute
   ShowroomAgendaRoute: typeof ShowroomAgendaRoute
   ShowroomAgendamentosOnlineRoute: typeof ShowroomAgendamentosOnlineRoute
   ShowroomApiPublicaRoute: typeof ShowroomApiPublicaRoute
@@ -3835,6 +3848,13 @@ declare module '@tanstack/react-router' {
       path: '/showroom/agenda'
       fullPath: '/showroom/agenda'
       preLoaderRoute: typeof ShowroomAgendaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/showroom/academia': {
+      id: '/showroom/academia'
+      path: '/showroom/academia'
+      fullPath: '/showroom/academia'
+      preLoaderRoute: typeof ShowroomAcademiaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/r/$slug': {
@@ -5740,6 +5760,7 @@ const rootRouteChildren: RootRouteChildren = {
   ImoveisSlugRoute: ImoveisSlugRouteWithChildren,
   NichosSlugRoute: NichosSlugRoute,
   RSlugRoute: RSlugRoute,
+  ShowroomAcademiaRoute: ShowroomAcademiaRoute,
   ShowroomAgendaRoute: ShowroomAgendaRoute,
   ShowroomAgendamentosOnlineRoute: ShowroomAgendamentosOnlineRoute,
   ShowroomApiPublicaRoute: ShowroomApiPublicaRoute,
