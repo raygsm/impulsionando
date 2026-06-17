@@ -25,13 +25,13 @@ function WLCockpit() {
           .not("white_label_id", "is", null)
           .order("created_at", { ascending: false })
           .limit(50),
-        supabase.from("billing_invoices").select("amount_cents", { count: "exact" }).eq("status", "paid"),
+        supabase.from("billing_invoices").select("amount").eq("status", "paid"),
         supabase.from("billing_invoices").select("id", { count: "exact", head: true }).eq("status", "open"),
         supabase.from("company_modules").select("id", { count: "exact", head: true }).eq("is_enabled", true),
       ]);
       return {
         whiteLabels: wlList.data ?? [],
-        mrrCents: (mrr.data ?? []).reduce((a, b: any) => a + (b.amount_cents ?? 0), 0),
+        mrrCents: Math.round((mrr.data ?? []).reduce((a, b: any) => a + Number(b.amount ?? 0), 0) * 100),
         openInvoices: invoicesOpen.count ?? 0,
         enabledModules: modules.count ?? 0,
       };
