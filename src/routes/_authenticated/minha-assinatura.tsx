@@ -190,6 +190,16 @@ function MinhaAssinaturaPage() {
                 Trocar de plano
               </Button>
             )}
+            {PRODUCT_TO_PLAN_CODE[subscription.product_id] && (
+              <Button asChild variant="default" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                <Link
+                  to="/checkout/$plano"
+                  params={{ plano: PRODUCT_TO_PLAN_CODE[subscription.product_id] }}
+                >
+                  <QrCode className="w-4 h-4 mr-2" /> Pagar agora via Pix
+                </Link>
+              </Button>
+            )}
             <Button variant="outline" onClick={() => mPortal.mutate()} disabled={mPortal.isPending}>
               {mPortal.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <ExternalLink className="w-4 h-4 mr-2" />}
               Atualizar pagamento
