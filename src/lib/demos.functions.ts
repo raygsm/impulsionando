@@ -651,6 +651,44 @@ export const triggerSmokePurge = createServerFn({ method: "POST" })
       trigger: string;
       ranAt: string;
     };
+
+/**
+ * Smoke batch específico de templates por nicho: para cada nicho premium,
+ * roda o smoke completo (cria empresa → aplica template → valida módulos → purge).
+ * Garante que o "purge + recriação por nicho" funciona ponta-a-ponta.
+ */
+export const runNicheTemplatesSmoke = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data: isStaff } = await supabase.rpc("is_impulsionando_staff", { _user: userId });
+    if (!isStaff) throw new Error("Acesso restrito à equipe Impulsionando.");
+
+    const NICHES: { label: string; nicheSlug: string }[] = [
+      { label: "Clínicas (saúde)", nicheSlug: "saude" },
+      { label: "Bares e Restaurantes", nicheSlug: "bares" },
+      { label: "Microcervejarias", nicheSlug: "cervejarias" },
+      { label: "Serviços", nicheSlug: "servicos" },
+      { label: "E-commerce", nicheSlug: "ecommerce" },
+    ];
+
+    const batchId = crypto.randomUUID();
+    const results: SmokeResult[] = [];
+    for (const n of NICHES) {
+      const r = await executeSmokeOnce({ label: n.label, nicheSlug: n.nicheSlug });
+      results.push(r);
+      await persistRun(userId, r, batchId);
+    }
+    const totalMs = results.reduce((acc, r) => acc + r.durationMs, 0);
+    const okCount = results.filter((r) => r.success).length;
+    return {
+      batchId,
+      totalMs,
+      okCount,
+      failCount: results.length - okCount,
+      results,
+    };
   });
+
 
 
