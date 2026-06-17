@@ -76,11 +76,10 @@ function WalletPage() {
 
   const toggleLifetime = useMutation({
     mutationFn: async (v: { id: string; on: boolean }) => {
-      const patch: Partial<Affiliate> & { lifetime_granted_at?: string | null } = {
+      const { error } = await supabase.from("aff_affiliates").update({
         is_lifetime: v.on,
         lifetime_granted_at: v.on ? new Date().toISOString() : null,
-      };
-      const { error } = await supabase.from("aff_affiliates").update(patch).eq("id", v.id);
+      }).eq("id", v.id);
       if (error) throw error;
     },
     onSuccess: (_d, v) => {
