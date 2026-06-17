@@ -4,6 +4,7 @@
  * histórico para links/SEO antigos) e reforça as metatags voltadas
  * ao consumidor.
  */
+import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Route as ConsumidorRoute } from "./consumidor";
 
