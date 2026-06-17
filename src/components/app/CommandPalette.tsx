@@ -5,7 +5,8 @@ import {
 } from "@/components/ui/command";
 import { TOP_ITEMS, NAV_GROUPS, type NavItem } from "./nav-config";
 import { useFavorites } from "@/hooks/use-favorites";
-import { Star } from "lucide-react";
+import { useRecentPages } from "@/hooks/use-recent-pages";
+import { Star, Clock } from "lucide-react";
 
 type Entry = NavItem & { group: string };
 
