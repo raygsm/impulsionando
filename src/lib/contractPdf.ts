@@ -111,11 +111,45 @@ export function buildContractPdfBytes(c: ContractInput, stamp?: SignatureStamp):
   if (c.signer_name)  { doc.text(`Responsável: ${c.signer_name}`, margin, y); y += 14; }
   if (c.signer_email) { doc.text(`E-mail: ${c.signer_email}`, margin, y); y += 14; }
 
+  // ===== Carimbo de assinatura (após aceite) =====
+  if (stamp) {
+    doc.addPage();
+    let sy = margin;
+    doc.setFont("helvetica", "bold").setFontSize(14).setTextColor(6, 95, 70);
+    doc.text("✓ Contrato assinado eletronicamente", margin, sy); sy += 22;
+    doc.setFont("helvetica", "normal").setFontSize(10).setTextColor(0, 0, 0);
+    const lines = [
+      `Responsável: ${stamp.signer_name}`,
+      `E-mail: ${stamp.signer_email}`,
+      stamp.signer_doc ? `Documento: ${stamp.signer_doc}` : null,
+      `Data/hora da assinatura: ${new Date(stamp.signed_at).toLocaleString("pt-BR")}`,
+      stamp.ip_address ? `IP: ${stamp.ip_address}` : null,
+      stamp.user_agent ? `User-Agent: ${stamp.user_agent}` : null,
+    ].filter(Boolean) as string[];
+    lines.forEach((ln) => { doc.text(ln, margin, sy); sy += 14; });
+    sy += 8;
+    doc.setFont("helvetica", "bold").setFontSize(10);
+    doc.text("Hashes de integridade (SHA-256)", margin, sy); sy += 14;
+    doc.setFont("courier", "normal").setFontSize(9);
+    const wrap = (s: string) => doc.splitTextToSize(s, pageW - margin * 2);
+    doc.text("Documento original:", margin, sy); sy += 12;
+    wrap(stamp.original_file_hash).forEach((ln: string) => { doc.text(ln, margin, sy); sy += 11; });
+    sy += 6;
+    doc.text("Assinatura eletrônica:", margin, sy); sy += 12;
+    wrap(stamp.signature_hash).forEach((ln: string) => { doc.text(ln, margin, sy); sy += 11; });
+    sy += 10;
+    doc.setFont("helvetica", "italic").setFontSize(9).setTextColor(90, 90, 90);
+    doc.text(
+      "O hash original preserva a integridade do documento antes do carimbo. O hash de assinatura combina documento + assinante + data/hora, garantindo não-repúdio.",
+      margin, sy, { maxWidth: pageW - margin * 2 } as never,
+    );
+  }
+
   const pageCount = doc.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     doc.setFontSize(8).setTextColor(140, 140, 140);
-    doc.text(`Página ${i} de ${pageCount} · Impulsionando Tecnologia`, margin, 820);
+    doc.text(`Página ${i} de ${pageCount} · Impulsionando Tecnologia${c.version ? ` · v${c.version}` : ""}`, margin, 820);
   }
 
   const arrayBuf = doc.output("arraybuffer");
