@@ -175,8 +175,13 @@ function ClubePage() {
           />
         </TabsContent>
 
+        <TabsContent value="recomendacoes" className="mt-6">
+          <RecommendationsTab data={recommendations.data} />
+        </TabsContent>
 
-
+        <TabsContent value="comprovantes" className="mt-6">
+          <ReceiptsTab items={receipts.data ?? []} />
+        </TabsContent>
 
         <TabsContent value="plano" className="mt-6">
           <PlanTab
