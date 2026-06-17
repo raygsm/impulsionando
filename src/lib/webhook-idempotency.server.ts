@@ -62,11 +62,21 @@ export async function claimWebhookEvent(
 
 export async function recordWebhookResult(
   supabaseAdmin: SupabaseClient,
-  args: { source: string; event_id: string; result: unknown },
+  args: {
+    source: string;
+    event_id: string;
+    result: unknown;
+    status?: "processed" | "error" | "duplicate" | "replayed";
+    error?: string | null;
+  },
 ): Promise<void> {
+  const patch: Record<string, unknown> = { result: args.result as any };
+  if (args.status) patch.status = args.status;
+  if (args.error !== undefined) patch.error = args.error;
   await supabaseAdmin
     .from("webhook_event_log")
-    .update({ result: args.result as any })
+    .update(patch as any)
     .eq("source", args.source)
     .eq("event_id", args.event_id);
 }
+
