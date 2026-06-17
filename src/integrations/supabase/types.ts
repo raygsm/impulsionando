@@ -2982,6 +2982,150 @@ export type Database = {
           },
         ]
       }
+      contract_documents: {
+        Row: {
+          billing_contract_id: string | null
+          company_id: string
+          contract_number: string
+          created_at: string
+          file_hash: string
+          file_size_bytes: number
+          generated_at: string
+          generated_by: string | null
+          id: string
+          sent_at: string | null
+          snapshot: Json
+          status: string
+          storage_path: string
+          updated_at: string
+          version: number
+          white_label_id: string | null
+        }
+        Insert: {
+          billing_contract_id?: string | null
+          company_id: string
+          contract_number: string
+          created_at?: string
+          file_hash: string
+          file_size_bytes?: number
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          sent_at?: string | null
+          snapshot?: Json
+          status?: string
+          storage_path: string
+          updated_at?: string
+          version?: number
+          white_label_id?: string | null
+        }
+        Update: {
+          billing_contract_id?: string | null
+          company_id?: string
+          contract_number?: string
+          created_at?: string
+          file_hash?: string
+          file_size_bytes?: number
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          sent_at?: string | null
+          snapshot?: Json
+          status?: string
+          storage_path?: string
+          updated_at?: string
+          version?: number
+          white_label_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_documents_billing_contract_id_fkey"
+            columns: ["billing_contract_id"]
+            isOneToOne: false
+            referencedRelation: "billing_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contract_signatures: {
+        Row: {
+          company_id: string
+          contract_document_id: string
+          created_at: string
+          evidence: Json
+          id: string
+          ip_address: unknown
+          signature_hash: string
+          signed_at: string
+          signer_doc: string | null
+          signer_email: string
+          signer_name: string
+          signer_role: string | null
+          signer_user_id: string | null
+          status: string
+          user_agent: string | null
+          white_label_id: string | null
+        }
+        Insert: {
+          company_id: string
+          contract_document_id: string
+          created_at?: string
+          evidence?: Json
+          id?: string
+          ip_address?: unknown
+          signature_hash: string
+          signed_at?: string
+          signer_doc?: string | null
+          signer_email: string
+          signer_name: string
+          signer_role?: string | null
+          signer_user_id?: string | null
+          status?: string
+          user_agent?: string | null
+          white_label_id?: string | null
+        }
+        Update: {
+          company_id?: string
+          contract_document_id?: string
+          created_at?: string
+          evidence?: Json
+          id?: string
+          ip_address?: unknown
+          signature_hash?: string
+          signed_at?: string
+          signer_doc?: string | null
+          signer_email?: string
+          signer_name?: string
+          signer_role?: string | null
+          signer_user_id?: string | null
+          status?: string
+          user_agent?: string | null
+          white_label_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_signatures_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_signatures_contract_document_id_fkey"
+            columns: ["contract_document_id"]
+            isOneToOne: false
+            referencedRelation: "contract_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       core_briefings: {
         Row: {
           answers: Json
@@ -8937,6 +9081,75 @@ export type Database = {
           total_exported?: number
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      webhook_runs: {
+        Row: {
+          attempts: number
+          company_id: string | null
+          created_at: string
+          event: string
+          finished_at: string | null
+          http_method: string | null
+          id: string
+          idempotency_key: string | null
+          last_error: string | null
+          next_retry_at: string | null
+          request_payload: Json
+          response_body: string | null
+          response_status: number | null
+          started_at: string | null
+          status: string
+          target_url: string | null
+          triggered_by: string | null
+          updated_at: string
+          white_label_id: string | null
+          workflow: string
+        }
+        Insert: {
+          attempts?: number
+          company_id?: string | null
+          created_at?: string
+          event: string
+          finished_at?: string | null
+          http_method?: string | null
+          id?: string
+          idempotency_key?: string | null
+          last_error?: string | null
+          next_retry_at?: string | null
+          request_payload?: Json
+          response_body?: string | null
+          response_status?: number | null
+          started_at?: string | null
+          status?: string
+          target_url?: string | null
+          triggered_by?: string | null
+          updated_at?: string
+          white_label_id?: string | null
+          workflow: string
+        }
+        Update: {
+          attempts?: number
+          company_id?: string | null
+          created_at?: string
+          event?: string
+          finished_at?: string | null
+          http_method?: string | null
+          id?: string
+          idempotency_key?: string | null
+          last_error?: string | null
+          next_retry_at?: string | null
+          request_payload?: Json
+          response_body?: string | null
+          response_status?: number | null
+          started_at?: string | null
+          status?: string
+          target_url?: string | null
+          triggered_by?: string | null
+          updated_at?: string
+          white_label_id?: string | null
+          workflow?: string
         }
         Relationships: []
       }
