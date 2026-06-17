@@ -179,7 +179,7 @@ function ClubePage() {
         </TabsContent>
 
         <TabsContent value="comprovantes" className="mt-6">
-          <ReceiptsTab items={receipts.data ?? []} />
+          <ReceiptsTab fetchReceipts={(args) => receiptsFn({ data: args })} isPremium={isPremium} />
         </TabsContent>
 
         <TabsContent value="plano" className="mt-6">
