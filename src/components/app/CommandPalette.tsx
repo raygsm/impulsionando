@@ -5,7 +5,8 @@ import {
 } from "@/components/ui/command";
 import { TOP_ITEMS, NAV_GROUPS, type NavItem } from "./nav-config";
 import { useFavorites } from "@/hooks/use-favorites";
-import { Star } from "lucide-react";
+import { useRecentPages } from "@/hooks/use-recent-pages";
+import { Star, Clock } from "lucide-react";
 
 type Entry = NavItem & { group: string };
 
@@ -13,6 +14,7 @@ export function CommandPalette() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const { favorites } = useFavorites();
+  const recent = useRecentPages();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -56,6 +58,20 @@ export function CommandPalette() {
                   <Star className="mr-2 size-4 fill-amber-400 text-amber-400" />
                   <span>{f.label}</span>
                   <span className="ml-auto text-xs text-muted-foreground">{f.to}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+            <CommandSeparator />
+          </>
+        )}
+        {recent.length > 0 && (
+          <>
+            <CommandGroup heading="Recentes">
+              {recent.slice(0, 6).map((r) => (
+                <CommandItem key={`rec-${r.to}`} value={`recente ${r.label} ${r.to}`} onSelect={() => go(r.to)}>
+                  <Clock className="mr-2 size-4 text-muted-foreground" />
+                  <span>{r.label}</span>
+                  <span className="ml-auto text-xs text-muted-foreground">{r.to}</span>
                 </CommandItem>
               ))}
             </CommandGroup>

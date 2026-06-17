@@ -6,6 +6,7 @@ import { TrialBanner } from "./TrialBanner";
 import { PastDueBanner } from "@/components/PastDueBanner";
 import { ImpersonationBanner } from "./ImpersonationBanner";
 import { CommandPalette } from "./CommandPalette";
+import { Breadcrumbs } from "./Breadcrumbs";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMyTrial } from "@/hooks/use-trial";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -13,6 +14,8 @@ import { useCompanyModules, requiredModuleFor } from "@/hooks/useCompanyModules"
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { pushRecent } from "@/hooks/use-recent-pages";
+import { TOP_ITEMS, NAV_GROUPS } from "./nav-config";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
@@ -25,6 +28,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isLoading && !data && !error) navigate({ to: "/auth" });
   }, [data, isLoading, error, navigate]);
+
+  // Histórico recente (B19)
+  useEffect(() => {
+    const path = location.pathname;
+    if (path === "/" || path === "/auth" || path.startsWith("/auth/")) return;
+    const idx: Record<string, string> = {};
+    for (const it of TOP_ITEMS) idx[it.to] = it.label;
+    for (const g of NAV_GROUPS) for (const it of g.items) idx[it.to] = it.label;
+    const label = idx[path] ?? document.title.replace(" — Impulsionando", "") ?? path;
+    pushRecent(path, label);
+  }, [location.pathname]);
 
   // Gate de inadimplência (trial OU assinatura suspensa)
   const isSuspended = trialSuspended || subSuspended;
@@ -95,6 +109,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <ImpersonationBanner />
         <TrialBanner />
         <PastDueBanner />
+        <Breadcrumbs />
         <main className="flex-1 p-6 lg:p-8 overflow-x-hidden">{children}</main>
       </div>
       <CommandPalette />
