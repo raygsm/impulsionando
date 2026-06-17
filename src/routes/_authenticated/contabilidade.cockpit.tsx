@@ -73,13 +73,13 @@ function ContabCockpit() {
         }
       />
 
-      <Card className="p-4 mb-6 border-amber-200 bg-amber-50/50 dark:bg-amber-950/20">
+      <Card className="p-4 mb-6 border-emerald-200 bg-emerald-50/50 dark:bg-emerald-950/20">
         <div className="flex gap-3">
-          <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <BarChart3 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
           <div className="text-sm">
-            <p className="font-medium text-amber-900 dark:text-amber-100">B25 — Operação ativa</p>
-            <p className="text-amber-800/80 dark:text-amber-100/80 mt-1">
-              Clientes, documentos, obrigações e calendário fiscal já operacionais. Régua D-7/D-3/D-1/D0/D+5 gera lembretes automaticamente. Portal do cliente, IRPF, financeiro e demo virão nas próximas fases. <strong>Não substitui</strong> sistemas contábeis tradicionais (Domínio, Alterdata, Contmatic) — é a camada de relacionamento e experiência.
+            <p className="font-medium text-emerald-900 dark:text-emerald-100">Nicho completo — pronto para instalação</p>
+            <p className="text-emerald-800/80 dark:text-emerald-100/80 mt-1">
+              Todos os 12 módulos do nicho Contabilidade Inteligente estão operacionais: clientes, documentos, obrigações, calendário fiscal, régua D-7/D-3/D-1/D0/D+5, portal do cliente, tarefas, atendimento WhatsApp por departamento, IRPF (14 etapas), financeiro do escritório, contratos/onboarding e BI gerencial. <strong>Complementa</strong> sistemas contábeis tradicionais (Domínio, Alterdata, Contmatic) com a camada de relacionamento e experiência.
             </p>
           </div>
         </div>
@@ -117,12 +117,13 @@ function ContabCockpit() {
       </div>
 
       <Card className="p-6">
-        <h2 className="font-semibold mb-2">Roadmap das próximas fases</h2>
+        <h2 className="font-semibold mb-2">Roadmap entregue</h2>
         <ul className="text-sm space-y-1.5 text-muted-foreground">
-          <li><strong className="text-foreground">B24</strong> — Tabelas operacionais: clientes contábeis, documentos, solicitações, obrigações, calendário fiscal e régua D-7/D-3/D-1/D0.</li>
-          <li><strong className="text-foreground">B25</strong> — Portal do cliente (área exclusiva), tarefas internas e atendimento WhatsApp com triagem por departamento.</li>
-          <li><strong className="text-foreground">B26</strong> — Jornada IRPF completa (14 etapas), financeiro do escritório e contratos/onboarding.</li>
-          <li><strong className="text-foreground">B27</strong> — Demo "Contabilidade Horizonte" + 5 clientes fictícios, BI gerencial e empacotamento white-label.</li>
+          <li><strong className="text-foreground">B23</strong> — Fundação: catálogo de 12 módulos e cockpit central.</li>
+          <li><strong className="text-foreground">B24</strong> — Tabelas operacionais e régua D-7/D-3/D-1/D0/D+5 automática.</li>
+          <li><strong className="text-foreground">B25</strong> — Documentos (storage), obrigações e calendário fiscal.</li>
+          <li><strong className="text-foreground">B26</strong> — Portal do cliente (token), tarefas e atendimento WhatsApp por departamento.</li>
+          <li><strong className="text-foreground">B27</strong> — IRPF 14 etapas, financeiro do escritório, contratos/onboarding e BI gerencial.</li>
         </ul>
       </Card>
 

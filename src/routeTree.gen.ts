@@ -238,6 +238,7 @@ import { Route as AuthenticatedCoreClientesRouteImport } from './routes/_authent
 import { Route as AuthenticatedCoreBriefingsRouteImport } from './routes/_authenticated/core.briefings'
 import { Route as AuthenticatedContratoIdRouteImport } from './routes/_authenticated/contrato.$id'
 import { Route as AuthenticatedContabilidadeTarefasRouteImport } from './routes/_authenticated/contabilidade.tarefas'
+import { Route as AuthenticatedContabilidadeRelatoriosRouteImport } from './routes/_authenticated/contabilidade.relatorios'
 import { Route as AuthenticatedContabilidadePortalRouteImport } from './routes/_authenticated/contabilidade.portal'
 import { Route as AuthenticatedContabilidadeObrigacoesRouteImport } from './routes/_authenticated/contabilidade.obrigacoes'
 import { Route as AuthenticatedContabilidadeIrpfRouteImport } from './routes/_authenticated/contabilidade.irpf'
@@ -1548,6 +1549,12 @@ const AuthenticatedContabilidadeTarefasRoute =
     path: '/contabilidade/tarefas',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedContabilidadeRelatoriosRoute =
+  AuthenticatedContabilidadeRelatoriosRouteImport.update({
+    id: '/contabilidade/relatorios',
+    path: '/contabilidade/relatorios',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedContabilidadePortalRoute =
   AuthenticatedContabilidadePortalRouteImport.update({
     id: '/contabilidade/portal',
@@ -2200,6 +2207,7 @@ export interface FileRoutesByFullPath {
   '/contabilidade/irpf': typeof AuthenticatedContabilidadeIrpfRoute
   '/contabilidade/obrigacoes': typeof AuthenticatedContabilidadeObrigacoesRoute
   '/contabilidade/portal': typeof AuthenticatedContabilidadePortalRoute
+  '/contabilidade/relatorios': typeof AuthenticatedContabilidadeRelatoriosRoute
   '/contabilidade/tarefas': typeof AuthenticatedContabilidadeTarefasRoute
   '/contrato/$id': typeof AuthenticatedContratoIdRoute
   '/core/briefings': typeof AuthenticatedCoreBriefingsRoute
@@ -2500,6 +2508,7 @@ export interface FileRoutesByTo {
   '/contabilidade/irpf': typeof AuthenticatedContabilidadeIrpfRoute
   '/contabilidade/obrigacoes': typeof AuthenticatedContabilidadeObrigacoesRoute
   '/contabilidade/portal': typeof AuthenticatedContabilidadePortalRoute
+  '/contabilidade/relatorios': typeof AuthenticatedContabilidadeRelatoriosRoute
   '/contabilidade/tarefas': typeof AuthenticatedContabilidadeTarefasRoute
   '/contrato/$id': typeof AuthenticatedContratoIdRoute
   '/core/briefings': typeof AuthenticatedCoreBriefingsRoute
@@ -2813,6 +2822,7 @@ export interface FileRoutesById {
   '/_authenticated/contabilidade/irpf': typeof AuthenticatedContabilidadeIrpfRoute
   '/_authenticated/contabilidade/obrigacoes': typeof AuthenticatedContabilidadeObrigacoesRoute
   '/_authenticated/contabilidade/portal': typeof AuthenticatedContabilidadePortalRoute
+  '/_authenticated/contabilidade/relatorios': typeof AuthenticatedContabilidadeRelatoriosRoute
   '/_authenticated/contabilidade/tarefas': typeof AuthenticatedContabilidadeTarefasRoute
   '/_authenticated/contrato/$id': typeof AuthenticatedContratoIdRoute
   '/_authenticated/core/briefings': typeof AuthenticatedCoreBriefingsRoute
@@ -3126,6 +3136,7 @@ export interface FileRouteTypes {
     | '/contabilidade/irpf'
     | '/contabilidade/obrigacoes'
     | '/contabilidade/portal'
+    | '/contabilidade/relatorios'
     | '/contabilidade/tarefas'
     | '/contrato/$id'
     | '/core/briefings'
@@ -3426,6 +3437,7 @@ export interface FileRouteTypes {
     | '/contabilidade/irpf'
     | '/contabilidade/obrigacoes'
     | '/contabilidade/portal'
+    | '/contabilidade/relatorios'
     | '/contabilidade/tarefas'
     | '/contrato/$id'
     | '/core/briefings'
@@ -3738,6 +3750,7 @@ export interface FileRouteTypes {
     | '/_authenticated/contabilidade/irpf'
     | '/_authenticated/contabilidade/obrigacoes'
     | '/_authenticated/contabilidade/portal'
+    | '/_authenticated/contabilidade/relatorios'
     | '/_authenticated/contabilidade/tarefas'
     | '/_authenticated/contrato/$id'
     | '/_authenticated/core/briefings'
@@ -5604,6 +5617,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedContabilidadeTarefasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/contabilidade/relatorios': {
+      id: '/_authenticated/contabilidade/relatorios'
+      path: '/contabilidade/relatorios'
+      fullPath: '/contabilidade/relatorios'
+      preLoaderRoute: typeof AuthenticatedContabilidadeRelatoriosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/contabilidade/portal': {
       id: '/_authenticated/contabilidade/portal'
       path: '/contabilidade/portal'
@@ -6645,6 +6665,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedContabilidadeIrpfRoute: typeof AuthenticatedContabilidadeIrpfRoute
   AuthenticatedContabilidadeObrigacoesRoute: typeof AuthenticatedContabilidadeObrigacoesRoute
   AuthenticatedContabilidadePortalRoute: typeof AuthenticatedContabilidadePortalRoute
+  AuthenticatedContabilidadeRelatoriosRoute: typeof AuthenticatedContabilidadeRelatoriosRoute
   AuthenticatedContabilidadeTarefasRoute: typeof AuthenticatedContabilidadeTarefasRoute
   AuthenticatedContratoIdRoute: typeof AuthenticatedContratoIdRoute
   AuthenticatedEhrIdRoute: typeof AuthenticatedEhrIdRoute
@@ -6734,6 +6755,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedContabilidadeObrigacoesRoute:
     AuthenticatedContabilidadeObrigacoesRoute,
   AuthenticatedContabilidadePortalRoute: AuthenticatedContabilidadePortalRoute,
+  AuthenticatedContabilidadeRelatoriosRoute:
+    AuthenticatedContabilidadeRelatoriosRoute,
   AuthenticatedContabilidadeTarefasRoute:
     AuthenticatedContabilidadeTarefasRoute,
   AuthenticatedContratoIdRoute: AuthenticatedContratoIdRoute,
