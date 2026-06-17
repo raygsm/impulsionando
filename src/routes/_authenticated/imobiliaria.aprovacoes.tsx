@@ -27,7 +27,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Check, X, AlertCircle, History, Download, Printer, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Check, X, AlertCircle, History, Download, Printer, Search, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/imobiliaria/aprovacoes")({
