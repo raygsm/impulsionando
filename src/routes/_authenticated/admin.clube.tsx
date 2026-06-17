@@ -238,20 +238,90 @@ function statusBadge(status: string) {
   return <Badge variant="destructive"><XCircle className="w-3 h-3 mr-1" /> Erro</Badge>;
 }
 
+function toCsv(rows: any[], cols: { key: string; label: string; map?: (v: any, r: any) => any }[]) {
+  const esc = (v: any) => {
+    if (v == null) return "";
+    const s = String(v).replace(/"/g, '""');
+    return /[",\n;]/.test(s) ? `"${s}"` : s;
+  };
+  const header = cols.map((c) => esc(c.label)).join(",");
+  const body = rows.map((r) =>
+    cols.map((c) => esc(c.map ? c.map(r[c.key], r) : r[c.key])).join(","),
+  );
+  return [header, ...body].join("\n");
+}
+
+function downloadCsv(filename: string, csv: string) {
+  const blob = new Blob([`\ufeff${csv}`], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+
 function CronAuditPanel() {
   const fetchRuns = useServerFn(listClubeCronRuns);
   const fetchAudit = useServerFn(getJourneyLogAudit);
+
+  const [filters, setFilters] = useState<{
+    step_id?: string; channel: "all" | "email" | "whatsapp" | "in_app";
+    audience: "all" | "free" | "premium"; active: "all" | "on" | "off";
+    from?: string; to?: string; search?: string;
+  }>({ channel: "all", audience: "all", active: "all" });
+
   const runs = useQuery({ queryKey: ["admin-clube-cron-runs"], queryFn: () => fetchRuns() });
-  const audit = useQuery({ queryKey: ["admin-clube-journey-audit"], queryFn: () => fetchAudit() });
+  const audit = useQuery({
+    queryKey: ["admin-clube-journey-audit", filters],
+    queryFn: () => fetchAudit({ data: filters }),
+  });
+
+  const exportRunsCsv = () => {
+    const rows = runs.data ?? [];
+    const csv = toCsv(rows, [
+      { key: "started_at", label: "started_at" },
+      { key: "finished_at", label: "finished_at" },
+      { key: "job", label: "job" },
+      { key: "status", label: "status" },
+      { key: "enqueued", label: "enqueued" },
+      { key: "skipped", label: "skipped" },
+      { key: "error_count", label: "error_count" },
+      { key: "error_message", label: "error_message" },
+      { key: "details", label: "details", map: (v) => JSON.stringify(v ?? {}) },
+    ]);
+    downloadCsv(`clube-cron-log-${new Date().toISOString().slice(0, 10)}.csv`, csv);
+  };
+
+  const exportAuditCsv = () => {
+    const rows = audit.data?.perStep ?? [];
+    const csv = toCsv(rows, [
+      { key: "day_offset", label: "day_offset" },
+      { key: "channel", label: "channel" },
+      { key: "audience", label: "audience" },
+      { key: "event_code", label: "event_code" },
+      { key: "subject", label: "subject" },
+      { key: "active", label: "active" },
+      { key: "total", label: "total" },
+      { key: "unique_users", label: "unique_users" },
+      { key: "duplicates_blocked", label: "duplicates_blocked" },
+      { key: "last_enqueued_at", label: "last_enqueued_at" },
+    ]);
+    downloadCsv(`clube-journey-log-${new Date().toISOString().slice(0, 10)}.csv`, csv);
+  };
 
   return (
     <>
       <Card className="p-5">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
           <h2 className="font-semibold flex items-center gap-2"><Activity className="w-4 h-4" /> Últimas execuções do cron</h2>
-          <Button variant="outline" size="sm" onClick={() => { runs.refetch(); audit.refetch(); }}>
-            <RefreshCw className="w-3 h-3 mr-1" /> Atualizar
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={exportRunsCsv} disabled={!runs.data?.length}>
+              <Download className="w-3 h-3 mr-1" /> Exportar CSV
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => { runs.refetch(); audit.refetch(); }}>
+              <RefreshCw className="w-3 h-3 mr-1" /> Atualizar
+            </Button>
+          </div>
         </div>
         {runs.isLoading ? <p className="text-sm text-muted-foreground">Carregando…</p> : !runs.data?.length ? (
           <p className="text-sm text-muted-foreground">Nenhuma execução registrada ainda. O cron roda diariamente às 11h UTC.</p>
@@ -259,12 +329,13 @@ function CronAuditPanel() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="text-xs text-muted-foreground border-b">
-                <tr><th className="text-left py-2 pr-2">Quando</th><th className="text-left">Status</th><th className="text-right">Enfileiradas</th><th className="text-right">Puladas</th><th className="text-right">Erros</th><th className="text-left pl-3">Mensagem</th></tr>
+                <tr><th className="text-left py-2 pr-2">Quando</th><th className="text-left">Job</th><th className="text-left">Status</th><th className="text-right">Enf.</th><th className="text-right">Pul.</th><th className="text-right">Erros</th><th className="text-left pl-3">Mensagem</th></tr>
               </thead>
               <tbody>
                 {(runs.data ?? []).map((r: any) => (
                   <tr key={r.id} className="border-b last:border-0">
                     <td className="py-2 pr-2 whitespace-nowrap">{new Date(r.started_at).toLocaleString("pt-BR")}</td>
+                    <td className="text-xs"><code>{r.job}</code></td>
                     <td>{statusBadge(r.status)}</td>
                     <td className="text-right">{r.enqueued}</td>
                     <td className="text-right">{r.skipped}</td>
@@ -279,17 +350,59 @@ function CronAuditPanel() {
       </Card>
 
       <Card className="p-5">
-        <h2 className="font-semibold mb-3 flex items-center gap-2"><CalendarDays className="w-4 h-4" /> clube_journey_log por passo</h2>
+        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <h2 className="font-semibold flex items-center gap-2"><CalendarDays className="w-4 h-4" /> clube_journey_log por passo</h2>
+          <Button variant="outline" size="sm" onClick={exportAuditCsv} disabled={!audit.data?.perStep?.length}>
+            <Download className="w-3 h-3 mr-1" /> Exportar CSV
+          </Button>
+        </div>
+
+        <div className="grid gap-2 md:grid-cols-6 mb-4">
+          <div className="md:col-span-2">
+            <Label className="text-xs">Busca (código/assunto)</Label>
+            <Input value={filters.search ?? ""} onChange={(e) => setFilters({ ...filters, search: e.target.value || undefined })} placeholder="ex: clube_d3" />
+          </div>
+          <div>
+            <Label className="text-xs">Canal</Label>
+            <select className="w-full h-9 border rounded px-2 text-sm bg-background" value={filters.channel} onChange={(e) => setFilters({ ...filters, channel: e.target.value as any })}>
+              <option value="all">Todos</option><option value="email">Email</option><option value="whatsapp">WhatsApp</option><option value="in_app">In-app</option>
+            </select>
+          </div>
+          <div>
+            <Label className="text-xs">Público</Label>
+            <select className="w-full h-9 border rounded px-2 text-sm bg-background" value={filters.audience} onChange={(e) => setFilters({ ...filters, audience: e.target.value as any })}>
+              <option value="all">Todos</option><option value="free">Free</option><option value="premium">Premium</option>
+            </select>
+          </div>
+          <div>
+            <Label className="text-xs">Status</Label>
+            <select className="w-full h-9 border rounded px-2 text-sm bg-background" value={filters.active} onChange={(e) => setFilters({ ...filters, active: e.target.value as any })}>
+              <option value="all">Todos</option><option value="on">Ativos</option><option value="off">Inativos</option>
+            </select>
+          </div>
+          <div>
+            <Label className="text-xs">De</Label>
+            <Input type="date" value={filters.from?.slice(0, 10) ?? ""} onChange={(e) => setFilters({ ...filters, from: e.target.value ? `${e.target.value}T00:00:00Z` : undefined })} />
+          </div>
+          <div>
+            <Label className="text-xs">Até</Label>
+            <Input type="date" value={filters.to?.slice(0, 10) ?? ""} onChange={(e) => setFilters({ ...filters, to: e.target.value ? `${e.target.value}T23:59:59Z` : undefined })} />
+          </div>
+          <div className="md:col-span-6 flex justify-end">
+            <Button size="sm" variant="ghost" onClick={() => setFilters({ channel: "all", audience: "all", active: "all" })}>Limpar filtros</Button>
+          </div>
+        </div>
+
         {audit.isLoading ? <p className="text-sm text-muted-foreground">Carregando…</p> : (
           <>
             <p className="text-xs text-muted-foreground mb-3">
-              Total de eventos registrados: <strong>{audit.data?.totals.events ?? 0}</strong> em <strong>{audit.data?.totals.steps ?? 0}</strong> passos.
+              Total filtrado: <strong>{audit.data?.totals.events ?? 0}</strong> evento(s) em <strong>{audit.data?.totals.steps ?? 0}</strong> passo(s).
               Duplicados bloqueados pela unique constraint <code>(user_id, step_id)</code>.
             </p>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="text-xs text-muted-foreground border-b">
-                  <tr><th className="text-left py-2">Dia</th><th className="text-left">Canal</th><th className="text-left">Público</th><th className="text-left">Código</th><th className="text-right">Disparos</th><th className="text-right">Únicos</th><th className="text-right">Duplicados</th><th className="text-left pl-3">Último envio</th></tr>
+                  <tr><th className="text-left py-2">Dia</th><th className="text-left">Canal</th><th className="text-left">Público</th><th className="text-left">Código</th><th className="text-right">Disparos</th><th className="text-right">Únicos</th><th className="text-right">Duplicados</th><th className="text-left pl-3">Último envio</th><th></th></tr>
                 </thead>
                 <tbody>
                   {(audit.data?.perStep ?? []).map((s: any) => (
@@ -302,6 +415,11 @@ function CronAuditPanel() {
                       <td className="text-right">{s.unique_users}</td>
                       <td className={`text-right ${s.duplicates_blocked > 0 ? "text-amber-600 font-medium" : ""}`}>{s.duplicates_blocked}</td>
                       <td className="pl-3 text-xs text-muted-foreground whitespace-nowrap">{s.last_enqueued_at ? new Date(s.last_enqueued_at).toLocaleString("pt-BR") : "—"}</td>
+                      <td className="text-right">
+                        <Button size="sm" variant={filters.step_id === s.id ? "default" : "ghost"} onClick={() => setFilters({ ...filters, step_id: filters.step_id === s.id ? undefined : s.id })}>
+                          {filters.step_id === s.id ? "Limpar" : "Filtrar"}
+                        </Button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
