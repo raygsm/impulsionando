@@ -291,6 +291,41 @@ async function executeSmokeOnce(opts: {
     } else {
       fail("mensagem_enfileirada", "linha não encontrada em message_outbox");
     }
+
+    // 8) Aplica template do nicho (se houver) — purge + recriação completa por nicho
+    if (opts.nicheSlug && companyId) {
+      try {
+        const { data: tpl, error: tplErr } = await supabaseAdmin.rpc("apply_niche_template", {
+          p_company_id: companyId,
+          p_niche_slug: opts.nicheSlug,
+        } as never);
+        if (tplErr) {
+          fail("nicho_template_aplicado", tplErr.message);
+        } else {
+          const installed = (tpl as { installed_count?: number; installed_slugs?: string[] } | null);
+          const count = installed?.installed_count ?? 0;
+          // Confirma no banco
+          const { count: cmCount } = await supabaseAdmin
+            .from("company_modules")
+            .select("*", { count: "exact", head: true })
+            .eq("company_id", companyId)
+            .eq("is_enabled", true);
+          if (count > 0 && (cmCount ?? 0) >= count) {
+            ok(
+              "nicho_template_aplicado",
+              `${count} módulos · ${(installed?.installed_slugs ?? []).join(",")}`,
+            );
+          } else {
+            fail(
+              "nicho_template_aplicado",
+              `esperado ${count} módulos, encontrados ${cmCount ?? 0}`,
+            );
+          }
+        }
+      } catch (e) {
+        fail("nicho_template_aplicado", (e as Error).message);
+      }
+    }
   } catch (e) {
     errorMsg = (e as Error).message;
     fail("excecao", errorMsg);
