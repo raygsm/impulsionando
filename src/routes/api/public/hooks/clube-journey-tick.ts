@@ -5,9 +5,64 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
  * Cron diário: enfileira passos da jornada de 21 dias em message_outbox
  * (idempotente via clube_journey_log).
  *
- * - Registra execução em clube_cron_log (success/partial/error).
- * - Notifica admins (notifications) se houver falhas.
+ * - Retry com backoff exponencial em cada operação por membro/passo
+ * - Cada tentativa é registrada em clube_cron_log (job="clube-journey-tick-attempt")
+ * - Execução completa registrada como success/partial/error
+ * - Notifica admins via notifications quando há falhas residuais
  */
+
+const MAX_RETRIES = 3;
+const BACKOFF_BASE_MS = 250;
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+async function withRetry<T>(
+  label: string,
+  ctx: { user_id?: string; step_id?: string },
+  fn: () => Promise<T>,
+): Promise<T> {
+  let lastErr: any;
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    const startedAt = new Date().toISOString();
+    try {
+      const result = await fn();
+      if (attempt > 1) {
+        await supabaseAdmin.from("clube_cron_log").insert({
+          job: "clube-journey-tick-attempt",
+          status: "success",
+          enqueued: 0,
+          skipped: 0,
+          error_count: attempt - 1,
+          error_message: `recovered after ${attempt} attempts (${label})`,
+          details: { label, attempt, ...ctx } as any,
+          started_at: startedAt,
+          finished_at: new Date().toISOString(),
+        });
+      }
+      return result;
+    } catch (e: any) {
+      lastErr = e;
+      // unique_violation não deve fazer retry
+      if (e?.code === "23505") throw e;
+      await supabaseAdmin.from("clube_cron_log").insert({
+        job: "clube-journey-tick-attempt",
+        status: attempt === MAX_RETRIES ? "error" : "partial",
+        enqueued: 0,
+        skipped: 0,
+        error_count: 1,
+        error_message: `${label}: ${e?.message ?? String(e)}`,
+        details: { label, attempt, max: MAX_RETRIES, ...ctx } as any,
+        started_at: startedAt,
+        finished_at: new Date().toISOString(),
+      });
+      if (attempt === MAX_RETRIES) break;
+      const delay = BACKOFF_BASE_MS * Math.pow(2, attempt - 1) + Math.floor(Math.random() * 100);
+      await sleep(delay);
+    }
+  }
+  throw lastErr;
+}
+
 export const Route = createFileRoute("/api/public/hooks/clube-journey-tick")({
   server: {
     handlers: {
@@ -18,15 +73,23 @@ export const Route = createFileRoute("/api/public/hooks/clube-journey-tick")({
         const errors: Array<{ user_id?: string; step_id?: string; message: string }> = [];
 
         try {
-          const { data: steps, error: stepsErr } = await supabaseAdmin
-            .from("clube_journey_steps")
-            .select("id, day_offset, channel, audience, event_code, subject, body")
-            .eq("active", true);
+          const { data: steps, error: stepsErr } = await withRetry("fetch-steps", {}, async () => {
+            const r = await supabaseAdmin
+              .from("clube_journey_steps")
+              .select("id, day_offset, channel, audience, event_code, subject, body")
+              .eq("active", true);
+            if (r.error) throw r.error;
+            return r;
+          });
           if (stepsErr) throw stepsErr;
 
-          const { data: members, error: memErr } = await supabaseAdmin
-            .from("consumer_profiles")
-            .select("user_id, full_name, whatsapp, current_level, referral_code, total_visits, created_at");
+          const { data: members, error: memErr } = await withRetry("fetch-members", {}, async () => {
+            const r = await supabaseAdmin
+              .from("consumer_profiles")
+              .select("user_id, full_name, whatsapp, current_level, referral_code, total_visits, created_at");
+            if (r.error) throw r.error;
+            return r;
+          });
           if (memErr) throw memErr;
 
           const now = Date.now();
@@ -37,14 +100,22 @@ export const Route = createFileRoute("/api/public/hooks/clube-journey-tick")({
               const dueSteps = (steps ?? []).filter((s: any) => s.day_offset === days);
               if (!dueSteps.length) continue;
 
-              const { data: userRow } = await supabaseAdmin.auth.admin.getUserById(m.user_id);
+              const userRow = await withRetry("auth-getUser", { user_id: m.user_id }, async () => {
+                const r = await supabaseAdmin.auth.admin.getUserById(m.user_id);
+                if (r.error) throw r.error;
+                return r.data;
+              });
               const email = userRow?.user?.email ?? null;
 
-              const { data: ms } = await supabaseAdmin
-                .from("consumer_memberships")
-                .select("plan, status")
-                .eq("user_id", m.user_id)
-                .maybeSingle();
+              const ms = await withRetry("fetch-membership", { user_id: m.user_id }, async () => {
+                const r = await supabaseAdmin
+                  .from("consumer_memberships")
+                  .select("plan, status")
+                  .eq("user_id", m.user_id)
+                  .maybeSingle();
+                if (r.error) throw r.error;
+                return r.data;
+              });
               const isPremium = ms?.plan === "premium" && ms?.status === "active";
 
               for (const s of dueSteps as any[]) {
@@ -60,42 +131,50 @@ export const Route = createFileRoute("/api/public/hooks/clube-journey-tick")({
                 const render = (tpl: string | null | undefined) =>
                   (tpl ?? "").replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k] ?? "");
 
-                // Idempotência forte: insert no log primeiro com unique(user_id, step_id).
-                // Se conflitar, pulamos sem enfileirar mensagem duplicada.
-                const { error: logErr } = await supabaseAdmin
-                  .from("clube_journey_log")
-                  .insert({ user_id: m.user_id, step_id: s.id });
-
-                if (logErr) {
-                  // 23505 = unique_violation → já enviado anteriormente
-                  if ((logErr as any).code === "23505") { skipped++; continue; }
-                  throw logErr;
+                // Insert no log primeiro (unique constraint garante idempotência;
+                // 23505 = já enviado → não-retriable).
+                try {
+                  await withRetry("insert-log", { user_id: m.user_id, step_id: s.id }, async () => {
+                    const r = await supabaseAdmin
+                      .from("clube_journey_log")
+                      .insert({ user_id: m.user_id, step_id: s.id });
+                    if (r.error) throw r.error;
+                    return r;
+                  });
+                } catch (e: any) {
+                  if (e?.code === "23505") { skipped++; continue; }
+                  throw e;
                 }
 
-                const { error: outErr } = await supabaseAdmin.from("message_outbox").insert({
-                  event_code: s.event_code,
-                  channel: s.channel,
-                  recipient_user_id: m.user_id,
-                  recipient_email: s.channel === "email" ? email : null,
-                  recipient_phone: s.channel === "whatsapp" ? m.whatsapp : null,
-                  recipient_name: m.full_name,
-                  subject: render(s.subject),
-                  body: render(s.body),
-                  status: "queued",
-                  scheduled_at: new Date().toISOString(),
-                  reference_type: "clube_journey",
-                  reference_id: s.id,
-                });
-                if (outErr) {
-                  // rollback do log para permitir retry
+                try {
+                  await withRetry("enqueue-outbox", { user_id: m.user_id, step_id: s.id }, async () => {
+                    const r = await supabaseAdmin.from("message_outbox").insert({
+                      event_code: s.event_code,
+                      channel: s.channel,
+                      recipient_user_id: m.user_id,
+                      recipient_email: s.channel === "email" ? email : null,
+                      recipient_phone: s.channel === "whatsapp" ? m.whatsapp : null,
+                      recipient_name: m.full_name,
+                      subject: render(s.subject),
+                      body: render(s.body),
+                      status: "queued",
+                      scheduled_at: new Date().toISOString(),
+                      reference_type: "clube_journey",
+                      reference_id: s.id,
+                    });
+                    if (r.error) throw r.error;
+                    return r;
+                  });
+                  enqueued++;
+                } catch (e) {
+                  // Rollback do log para permitir retry no próximo tick
                   await supabaseAdmin
                     .from("clube_journey_log")
                     .delete()
                     .eq("user_id", m.user_id)
                     .eq("step_id", s.id);
-                  throw outErr;
+                  throw e;
                 }
-                enqueued++;
               }
             } catch (innerErr: any) {
               errors.push({ user_id: m.user_id, message: innerErr?.message ?? String(innerErr) });

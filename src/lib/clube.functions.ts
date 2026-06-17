@@ -563,28 +563,50 @@ export const listClubeCronRuns = createServerFn({ method: "GET" })
     return data ?? [];
   });
 
-export const getJourneyLogAudit = createServerFn({ method: "GET" })
+export const getJourneyLogAudit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((d: unknown) =>
+    z.object({
+      step_id: z.string().uuid().optional(),
+      channel: z.enum(["email", "whatsapp", "in_app", "all"]).default("all"),
+      audience: z.enum(["free", "premium", "all"]).default("all"),
+      active: z.enum(["all", "on", "off"]).default("all"),
+      from: z.string().optional(),
+      to: z.string().optional(),
+      search: z.string().max(120).optional(),
+    }).parse(d ?? {}),
+  )
+  .handler(async ({ data, context }) => {
     const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
     if (!isAdmin) throw new Error("Acesso restrito");
 
-    const [stepsRes, logRes] = await Promise.all([
-      context.supabase
-        .from("clube_journey_steps")
-        .select("id, day_offset, channel, audience, event_code, subject, active")
-        .order("day_offset", { ascending: true }),
-      context.supabase
-        .from("clube_journey_log")
-        .select("step_id, user_id, enqueued_at")
-        .order("enqueued_at", { ascending: false })
-        .limit(2000),
-    ]);
+    let stepQ = context.supabase
+      .from("clube_journey_steps")
+      .select("id, day_offset, channel, audience, event_code, subject, active")
+      .order("day_offset", { ascending: true });
+    if (data.channel !== "all") stepQ = stepQ.eq("channel", data.channel);
+    if (data.audience !== "all") stepQ = stepQ.eq("audience", data.audience);
+    if (data.active !== "all") stepQ = stepQ.eq("active", data.active === "on");
+    if (data.search) stepQ = stepQ.or(`event_code.ilike.%${data.search}%,subject.ilike.%${data.search}%`);
+
+    let logQ = context.supabase
+      .from("clube_journey_log")
+      .select("step_id, user_id, enqueued_at")
+      .order("enqueued_at", { ascending: false })
+      .limit(2000);
+    if (data.step_id) logQ = logQ.eq("step_id", data.step_id);
+    if (data.from) logQ = logQ.gte("enqueued_at", data.from);
+    if (data.to) logQ = logQ.lte("enqueued_at", data.to);
+
+    const [stepsRes, logRes] = await Promise.all([stepQ, logQ]);
     if (stepsRes.error) throw new Error(stepsRes.error.message);
     if (logRes.error) throw new Error(logRes.error.message);
 
+    const allowedStepIds = new Set((stepsRes.data ?? []).map((s: any) => s.id));
+    const logsFiltered = (logRes.data ?? []).filter((r: any) => allowedStepIds.has(r.step_id));
+
     const byStep = new Map<string, { total: number; uniqueUsers: Set<string>; last: string | null }>();
-    for (const row of (logRes.data ?? []) as any[]) {
+    for (const row of logsFiltered as any[]) {
       const cur = byStep.get(row.step_id) ?? { total: 0, uniqueUsers: new Set<string>(), last: null };
       cur.total += 1;
       cur.uniqueUsers.add(row.user_id);
@@ -607,7 +629,7 @@ export const getJourneyLogAudit = createServerFn({ method: "GET" })
 
     return {
       perStep,
-      totals: { steps: stepsRes.data?.length ?? 0, events: logRes.data?.length ?? 0 },
-      recent: (logRes.data ?? []).slice(0, 30),
+      totals: { steps: perStep.length, events: logsFiltered.length },
+      recent: logsFiltered.slice(0, 50),
     };
   });

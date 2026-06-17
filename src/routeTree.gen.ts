@@ -253,6 +253,7 @@ import { Route as AuthenticatedContabilidadeAtendimentoRouteImport } from './rou
 import { Route as AuthenticatedConsumerUnifiedRouteImport } from './routes/_authenticated/consumer.unified'
 import { Route as AuthenticatedComunidadeIdRouteImport } from './routes/_authenticated/comunidade.$id'
 import { Route as AuthenticatedCommercialCockpitRouteImport } from './routes/_authenticated/commercial.cockpit'
+import { Route as AuthenticatedClubeNotificacoesRouteImport } from './routes/_authenticated/clube.notificacoes'
 import { Route as AuthenticatedCheckoutPlanoRouteImport } from './routes/_authenticated/checkout.$plano'
 import { Route as AuthenticatedBiNichesRouteImport } from './routes/_authenticated/bi.niches'
 import { Route as AuthenticatedBiMasterRouteImport } from './routes/_authenticated/bi.master'
@@ -1645,6 +1646,12 @@ const AuthenticatedCommercialCockpitRoute =
     path: '/commercial/cockpit',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedClubeNotificacoesRoute =
+  AuthenticatedClubeNotificacoesRouteImport.update({
+    id: '/notificacoes',
+    path: '/notificacoes',
+    getParentRoute: () => AuthenticatedClubeRoute,
+  } as any)
 const AuthenticatedCheckoutPlanoRoute =
   AuthenticatedCheckoutPlanoRouteImport.update({
     id: '/checkout/$plano',
@@ -2104,7 +2111,7 @@ export interface FileRoutesByFullPath {
   '/audit': typeof AuthenticatedAuditRoute
   '/automacoes': typeof AuthenticatedAutomacoesRoute
   '/bi': typeof AuthenticatedBiRouteWithChildren
-  '/clube': typeof AuthenticatedClubeRoute
+  '/clube': typeof AuthenticatedClubeRouteWithChildren
   '/companies': typeof AuthenticatedCompaniesRoute
   '/core': typeof AuthenticatedCoreRouteWithChildren
   '/crm': typeof AuthenticatedCrmRouteWithChildren
@@ -2238,6 +2245,7 @@ export interface FileRoutesByFullPath {
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
   '/checkout/$plano': typeof AuthenticatedCheckoutPlanoRoute
+  '/clube/notificacoes': typeof AuthenticatedClubeNotificacoesRoute
   '/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
   '/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
   '/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
@@ -2417,7 +2425,7 @@ export interface FileRoutesByTo {
   '/adm': typeof AuthenticatedAdmRouteWithChildren
   '/audit': typeof AuthenticatedAuditRoute
   '/automacoes': typeof AuthenticatedAutomacoesRoute
-  '/clube': typeof AuthenticatedClubeRoute
+  '/clube': typeof AuthenticatedClubeRouteWithChildren
   '/companies': typeof AuthenticatedCompaniesRoute
   '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -2545,6 +2553,7 @@ export interface FileRoutesByTo {
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
   '/checkout/$plano': typeof AuthenticatedCheckoutPlanoRoute
+  '/clube/notificacoes': typeof AuthenticatedClubeNotificacoesRoute
   '/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
   '/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
   '/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
@@ -2731,7 +2740,7 @@ export interface FileRoutesById {
   '/_authenticated/audit': typeof AuthenticatedAuditRoute
   '/_authenticated/automacoes': typeof AuthenticatedAutomacoesRoute
   '/_authenticated/bi': typeof AuthenticatedBiRouteWithChildren
-  '/_authenticated/clube': typeof AuthenticatedClubeRoute
+  '/_authenticated/clube': typeof AuthenticatedClubeRouteWithChildren
   '/_authenticated/companies': typeof AuthenticatedCompaniesRoute
   '/_authenticated/core': typeof AuthenticatedCoreRouteWithChildren
   '/_authenticated/crm': typeof AuthenticatedCrmRouteWithChildren
@@ -2865,6 +2874,7 @@ export interface FileRoutesById {
   '/_authenticated/bi/master': typeof AuthenticatedBiMasterRoute
   '/_authenticated/bi/niches': typeof AuthenticatedBiNichesRoute
   '/_authenticated/checkout/$plano': typeof AuthenticatedCheckoutPlanoRoute
+  '/_authenticated/clube/notificacoes': typeof AuthenticatedClubeNotificacoesRoute
   '/_authenticated/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
   '/_authenticated/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
   '/_authenticated/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
@@ -3185,6 +3195,7 @@ export interface FileRouteTypes {
     | '/bi/master'
     | '/bi/niches'
     | '/checkout/$plano'
+    | '/clube/notificacoes'
     | '/commercial/cockpit'
     | '/comunidade/$id'
     | '/consumer/unified'
@@ -3492,6 +3503,7 @@ export interface FileRouteTypes {
     | '/bi/master'
     | '/bi/niches'
     | '/checkout/$plano'
+    | '/clube/notificacoes'
     | '/commercial/cockpit'
     | '/comunidade/$id'
     | '/consumer/unified'
@@ -3811,6 +3823,7 @@ export interface FileRouteTypes {
     | '/_authenticated/bi/master'
     | '/_authenticated/bi/niches'
     | '/_authenticated/checkout/$plano'
+    | '/_authenticated/clube/notificacoes'
     | '/_authenticated/commercial/cockpit'
     | '/_authenticated/comunidade/$id'
     | '/_authenticated/consumer/unified'
@@ -5799,6 +5812,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCommercialCockpitRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/clube/notificacoes': {
+      id: '/_authenticated/clube/notificacoes'
+      path: '/notificacoes'
+      fullPath: '/clube/notificacoes'
+      preLoaderRoute: typeof AuthenticatedClubeNotificacoesRouteImport
+      parentRoute: typeof AuthenticatedClubeRoute
+    }
     '/_authenticated/checkout/$plano': {
       id: '/_authenticated/checkout/$plano'
       path: '/checkout/$plano'
@@ -6432,6 +6452,17 @@ const AuthenticatedBiRouteWithChildren = AuthenticatedBiRoute._addFileChildren(
   AuthenticatedBiRouteChildren,
 )
 
+interface AuthenticatedClubeRouteChildren {
+  AuthenticatedClubeNotificacoesRoute: typeof AuthenticatedClubeNotificacoesRoute
+}
+
+const AuthenticatedClubeRouteChildren: AuthenticatedClubeRouteChildren = {
+  AuthenticatedClubeNotificacoesRoute: AuthenticatedClubeNotificacoesRoute,
+}
+
+const AuthenticatedClubeRouteWithChildren =
+  AuthenticatedClubeRoute._addFileChildren(AuthenticatedClubeRouteChildren)
+
 interface AuthenticatedCoreModulosRouteChildren {
   AuthenticatedCoreModulosSlugRoute: typeof AuthenticatedCoreModulosSlugRoute
 }
@@ -6749,7 +6780,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAuditRoute: typeof AuthenticatedAuditRoute
   AuthenticatedAutomacoesRoute: typeof AuthenticatedAutomacoesRoute
   AuthenticatedBiRoute: typeof AuthenticatedBiRouteWithChildren
-  AuthenticatedClubeRoute: typeof AuthenticatedClubeRoute
+  AuthenticatedClubeRoute: typeof AuthenticatedClubeRouteWithChildren
   AuthenticatedCompaniesRoute: typeof AuthenticatedCompaniesRoute
   AuthenticatedCoreRoute: typeof AuthenticatedCoreRouteWithChildren
   AuthenticatedCrmRoute: typeof AuthenticatedCrmRouteWithChildren
@@ -6833,7 +6864,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAuditRoute: AuthenticatedAuditRoute,
   AuthenticatedAutomacoesRoute: AuthenticatedAutomacoesRoute,
   AuthenticatedBiRoute: AuthenticatedBiRouteWithChildren,
-  AuthenticatedClubeRoute: AuthenticatedClubeRoute,
+  AuthenticatedClubeRoute: AuthenticatedClubeRouteWithChildren,
   AuthenticatedCompaniesRoute: AuthenticatedCompaniesRoute,
   AuthenticatedCoreRoute: AuthenticatedCoreRouteWithChildren,
   AuthenticatedCrmRoute: AuthenticatedCrmRouteWithChildren,
