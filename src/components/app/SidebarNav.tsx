@@ -1,25 +1,51 @@
 import { useState } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { ChevronDown } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import type { CurrentUser } from "@/lib/auth";
 import { NAV_GROUPS, TOP_ITEMS, type NavItem, type NavGroup } from "./nav-config";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { useImpersonation } from "@/hooks/use-impersonation";
+import { countPendingPixCharges } from "@/lib/pix-charges.functions";
 
 function isItemActive(pathname: string, to: string) {
   return pathname === to || pathname.startsWith(to + "/");
+}
+
+function usePendingPixBadge(enabled: boolean) {
+  return useQuery({
+    queryKey: ["nav", "pending-pix-count"],
+    queryFn: async () => {
+      const res = await countPendingPixCharges();
+      return res?.count ?? 0;
+    },
+    enabled,
+    refetchInterval: 60_000,
+    staleTime: 30_000,
+  });
+}
+
+function NavBadge({ count }: { count: number }) {
+  if (!count) return null;
+  return (
+    <span className="ml-auto inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full text-[10px] font-semibold bg-destructive text-destructive-foreground">
+      {count > 99 ? "99+" : count}
+    </span>
+  );
 }
 
 function NavLinkRow({
   item,
   active,
   onNavigate,
+  badgeCount,
 }: {
   item: NavItem;
   active: boolean;
   onNavigate?: () => void;
+  badgeCount?: number;
 }) {
   const Icon = item.icon;
   return (
@@ -35,20 +61,24 @@ function NavLinkRow({
     >
       <Icon className="w-4 h-4 shrink-0" />
       <span className="truncate">{item.label}</span>
+      {item.badge === "pendingPix" && <NavBadge count={badgeCount ?? 0} />}
     </Link>
   );
 }
+
 
 function Group({
   group,
   pathname,
   filterItem,
   onNavigate,
+  pendingPix,
 }: {
   group: NavGroup;
   pathname: string;
   filterItem: (i: NavItem) => boolean;
   onNavigate?: () => void;
+  pendingPix: number;
 }) {
   const items = group.items.filter(filterItem);
   if (items.length === 0) return null;
@@ -76,6 +106,7 @@ function Group({
               item={it}
               active={isItemActive(pathname, it.to)}
               onNavigate={onNavigate}
+              badgeCount={pendingPix}
             />
           ))}
         </div>
@@ -96,6 +127,7 @@ export function SidebarNav({
   const isSuper = currentUser.isSuperAdmin && !isImpersonating;
   const { companyId } = useActiveCompany();
   const { data: perms, isLoading: permsLoading } = useUserPermissions(companyId);
+  const { data: pendingPix = 0 } = usePendingPixBadge(isSuper);
 
   // Super admin enxerga tudo. Em modo impersonação, comporta-se como o cliente:
   // esconde itens superOnly e libera os demais (o master tem acesso global).
@@ -107,6 +139,7 @@ export function SidebarNav({
     if (permsLoading || !perms) return false;
     return perms.has(i.perm);
   };
+
 
   return (
     <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-1">
@@ -127,8 +160,10 @@ export function SidebarNav({
           pathname={location.pathname}
           filterItem={filterItem}
           onNavigate={onNavigate}
+          pendingPix={pendingPix}
         />
       ))}
+
     </nav>
   );
 }

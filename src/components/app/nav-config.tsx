@@ -19,7 +19,10 @@ export interface NavItem {
   superOnly?: boolean;
   /** Código de permissão necessário. Se ausente, o item é visível por padrão. */
   perm?: string;
+  /** Renderiza um contador dinâmico ao lado do label. */
+  badge?: "pendingPix";
 }
+
 
 export interface NavGroup {
   label: string;
@@ -101,7 +104,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/finance/accounts", label: "Contas", icon: Wallet, perm: "finance.account.write" },
       { to: "/finance/categories", label: "Categorias financeiras", icon: FolderTree, perm: "finance.category.write" },
       { to: "/finance/methods", label: "Métodos de pagamento", icon: CreditCard, perm: "finance.method.write" },
-      { to: "/finance/integracoes", label: "Integrações de pagamento", icon: Wallet, perm: "finance.method.write" },
+      { to: "/finance/integracoes", label: "Integrações de pagamento", icon: Wallet, perm: "finance.method.write", badge: "pendingPix" },
       { to: "/finance/commissions", label: "Comissões", icon: Percent, perm: "finance.commission.read" },
       { to: "/finance/cockpit", label: "Cockpit Financeiro", icon: TrendingUp, perm: "finance.transaction.read" },
       { to: "/finance/webhook-log", label: "Log de Webhooks", icon: HistoryIcon, perm: "finance.transaction.read" },

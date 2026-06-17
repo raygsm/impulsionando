@@ -214,6 +214,29 @@ export const listPendingPixCharges = createServerFn({ method: 'POST' })
   })
 
 /**
+ * Admin-only: lightweight count of pending Pix charges for sidebar badge.
+ * Returns 0 silently for non-admins (avoids noisy errors in the nav).
+ */
+export const countPendingPixCharges = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: isAdmin } = await context.supabase.rpc('has_role', {
+      _user_id: context.userId,
+      _role: 'admin',
+    })
+    if (!isAdmin) return { count: 0 }
+
+    const { count, error } = await context.supabase
+      .from('billing_pix_charges')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'pending')
+
+    if (error) return { count: 0 }
+    return { count: count ?? 0 }
+  })
+
+
+/**
  * Admin-only: mark a charge as paid. This is the SAME activation pathway the
  * MP webhook will trigger later — keep all side effects (release plan,
  * activate subscription, send welcome email) inside this handler.
