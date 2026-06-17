@@ -47,6 +47,7 @@ import { Route as PlanosTesteRouteImport } from './routes/planos.teste'
 import { Route as PacienteIdRouteImport } from './routes/paciente.$id'
 import { Route as NichosSlugRouteImport } from './routes/nichos.$slug'
 import { Route as ModulosSlugRouteImport } from './routes/modulos.$slug'
+import { Route as ImoveisSlugRouteImport } from './routes/imoveis.$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as DemoWhiteLabelRouteImport } from './routes/demo.white-label'
 import { Route as DemoWhatsappRouteImport } from './routes/demo.whatsapp'
@@ -416,6 +417,11 @@ const ModulosSlugRoute = ModulosSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => ModulosRoute,
+} as any)
+const ImoveisSlugRoute = ImoveisSlugRouteImport.update({
+  id: '/imoveis/$slug',
+  path: '/imoveis/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
@@ -1496,6 +1502,7 @@ export interface FileRoutesByFullPath {
   '/demo/whatsapp': typeof DemoWhatsappRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/imoveis/$slug': typeof ImoveisSlugRoute
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
@@ -1704,6 +1711,7 @@ export interface FileRoutesByTo {
   '/demo/whatsapp': typeof DemoWhatsappRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/imoveis/$slug': typeof ImoveisSlugRoute
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
@@ -1925,6 +1933,7 @@ export interface FileRoutesById {
   '/demo/whatsapp': typeof DemoWhatsappRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/imoveis/$slug': typeof ImoveisSlugRoute
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
@@ -2146,6 +2155,7 @@ export interface FileRouteTypes {
     | '/demo/whatsapp'
     | '/demo/white-label'
     | '/email/unsubscribe'
+    | '/imoveis/$slug'
     | '/modulos/$slug'
     | '/nichos/$slug'
     | '/paciente/$id'
@@ -2354,6 +2364,7 @@ export interface FileRouteTypes {
     | '/demo/whatsapp'
     | '/demo/white-label'
     | '/email/unsubscribe'
+    | '/imoveis/$slug'
     | '/modulos/$slug'
     | '/nichos/$slug'
     | '/paciente/$id'
@@ -2574,6 +2585,7 @@ export interface FileRouteTypes {
     | '/demo/whatsapp'
     | '/demo/white-label'
     | '/email/unsubscribe'
+    | '/imoveis/$slug'
     | '/modulos/$slug'
     | '/nichos/$slug'
     | '/paciente/$id'
@@ -2768,6 +2780,7 @@ export interface RootRouteChildren {
   DemoWhatsappRoute: typeof DemoWhatsappRoute
   DemoWhiteLabelRoute: typeof DemoWhiteLabelRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  ImoveisSlugRoute: typeof ImoveisSlugRoute
   NichosSlugRoute: typeof NichosSlugRoute
   RSlugRoute: typeof RSlugRoute
   ShowroomEventosRoute: typeof ShowroomEventosRoute
@@ -3069,6 +3082,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/modulos/$slug'
       preLoaderRoute: typeof ModulosSlugRouteImport
       parentRoute: typeof ModulosRoute
+    }
+    '/imoveis/$slug': {
+      id: '/imoveis/$slug'
+      path: '/imoveis/$slug'
+      fullPath: '/imoveis/$slug'
+      preLoaderRoute: typeof ImoveisSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/email/unsubscribe': {
       id: '/email/unsubscribe'
@@ -4888,6 +4908,7 @@ const rootRouteChildren: RootRouteChildren = {
   DemoWhatsappRoute: DemoWhatsappRoute,
   DemoWhiteLabelRoute: DemoWhiteLabelRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  ImoveisSlugRoute: ImoveisSlugRoute,
   NichosSlugRoute: NichosSlugRoute,
   RSlugRoute: RSlugRoute,
   ShowroomEventosRoute: ShowroomEventosRoute,
