@@ -295,12 +295,19 @@ function PollsCard({ polls, onVote }: { polls: any[]; onVote: (pollId: string, o
         <ul className="space-y-3">
           {polls.map((p) => (
             <li key={p.id} className="border rounded-lg p-3">
-              <p className="text-sm font-medium">{p.question}</p>
-              <p className="text-xs text-muted-foreground mt-1">{Array.isArray(p.options) ? p.options.length : 0} opções</p>
+              <p className="text-sm font-medium mb-2">{p.question}</p>
+              <div className="flex flex-wrap gap-2">
+                {(Array.isArray(p.options) ? p.options : []).map((opt: any) => (
+                  <Button key={opt.id} variant="outline" size="sm" onClick={() => onVote(p.id, String(opt.id))}>
+                    {opt.label}
+                  </Button>
+                ))}
+              </div>
             </li>
           ))}
         </ul>
       )}
+
     </Card>
   );
 }
