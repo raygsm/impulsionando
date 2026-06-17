@@ -68,6 +68,7 @@ import { Route as ShowroomEquipeRouteImport } from './routes/showroom.equipe'
 import { Route as ShowroomDashboardsRouteImport } from './routes/showroom.dashboards'
 import { Route as ShowroomCrmRouteImport } from './routes/showroom.crm'
 import { Route as ShowroomContratosRouteImport } from './routes/showroom.contratos'
+import { Route as ShowroomComparativoConcorrentesRouteImport } from './routes/showroom.comparativo-concorrentes'
 import { Route as ShowroomClinicasRouteImport } from './routes/showroom.clinicas'
 import { Route as ShowroomClientesRouteImport } from './routes/showroom.clientes'
 import { Route as ShowroomCheckoutRouteImport } from './routes/showroom.checkout'
@@ -564,6 +565,12 @@ const ShowroomContratosRoute = ShowroomContratosRouteImport.update({
   path: '/showroom/contratos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShowroomComparativoConcorrentesRoute =
+  ShowroomComparativoConcorrentesRouteImport.update({
+    id: '/showroom/comparativo-concorrentes',
+    path: '/showroom/comparativo-concorrentes',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ShowroomClinicasRoute = ShowroomClinicasRouteImport.update({
   id: '/showroom/clinicas',
   path: '/showroom/clinicas',
@@ -1757,6 +1764,7 @@ export interface FileRoutesByFullPath {
   '/showroom/checkout': typeof ShowroomCheckoutRoute
   '/showroom/clientes': typeof ShowroomClientesRoute
   '/showroom/clinicas': typeof ShowroomClinicasRoute
+  '/showroom/comparativo-concorrentes': typeof ShowroomComparativoConcorrentesRoute
   '/showroom/contratos': typeof ShowroomContratosRoute
   '/showroom/crm': typeof ShowroomCrmRoute
   '/showroom/dashboards': typeof ShowroomDashboardsRoute
@@ -2005,6 +2013,7 @@ export interface FileRoutesByTo {
   '/showroom/checkout': typeof ShowroomCheckoutRoute
   '/showroom/clientes': typeof ShowroomClientesRoute
   '/showroom/clinicas': typeof ShowroomClinicasRoute
+  '/showroom/comparativo-concorrentes': typeof ShowroomComparativoConcorrentesRoute
   '/showroom/contratos': typeof ShowroomContratosRoute
   '/showroom/crm': typeof ShowroomCrmRoute
   '/showroom/dashboards': typeof ShowroomDashboardsRoute
@@ -2266,6 +2275,7 @@ export interface FileRoutesById {
   '/showroom/checkout': typeof ShowroomCheckoutRoute
   '/showroom/clientes': typeof ShowroomClientesRoute
   '/showroom/clinicas': typeof ShowroomClinicasRoute
+  '/showroom/comparativo-concorrentes': typeof ShowroomComparativoConcorrentesRoute
   '/showroom/contratos': typeof ShowroomContratosRoute
   '/showroom/crm': typeof ShowroomCrmRoute
   '/showroom/dashboards': typeof ShowroomDashboardsRoute
@@ -2527,6 +2537,7 @@ export interface FileRouteTypes {
     | '/showroom/checkout'
     | '/showroom/clientes'
     | '/showroom/clinicas'
+    | '/showroom/comparativo-concorrentes'
     | '/showroom/contratos'
     | '/showroom/crm'
     | '/showroom/dashboards'
@@ -2775,6 +2786,7 @@ export interface FileRouteTypes {
     | '/showroom/checkout'
     | '/showroom/clientes'
     | '/showroom/clinicas'
+    | '/showroom/comparativo-concorrentes'
     | '/showroom/contratos'
     | '/showroom/crm'
     | '/showroom/dashboards'
@@ -3035,6 +3047,7 @@ export interface FileRouteTypes {
     | '/showroom/checkout'
     | '/showroom/clientes'
     | '/showroom/clinicas'
+    | '/showroom/comparativo-concorrentes'
     | '/showroom/contratos'
     | '/showroom/crm'
     | '/showroom/dashboards'
@@ -3266,6 +3279,7 @@ export interface RootRouteChildren {
   ShowroomCheckoutRoute: typeof ShowroomCheckoutRoute
   ShowroomClientesRoute: typeof ShowroomClientesRoute
   ShowroomClinicasRoute: typeof ShowroomClinicasRoute
+  ShowroomComparativoConcorrentesRoute: typeof ShowroomComparativoConcorrentesRoute
   ShowroomContratosRoute: typeof ShowroomContratosRoute
   ShowroomCrmRoute: typeof ShowroomCrmRoute
   ShowroomDashboardsRoute: typeof ShowroomDashboardsRoute
@@ -3737,6 +3751,13 @@ declare module '@tanstack/react-router' {
       path: '/showroom/contratos'
       fullPath: '/showroom/contratos'
       preLoaderRoute: typeof ShowroomContratosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/showroom/comparativo-concorrentes': {
+      id: '/showroom/comparativo-concorrentes'
+      path: '/showroom/comparativo-concorrentes'
+      fullPath: '/showroom/comparativo-concorrentes'
+      preLoaderRoute: typeof ShowroomComparativoConcorrentesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/showroom/clinicas': {
@@ -5730,6 +5751,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShowroomCheckoutRoute: ShowroomCheckoutRoute,
   ShowroomClientesRoute: ShowroomClientesRoute,
   ShowroomClinicasRoute: ShowroomClinicasRoute,
+  ShowroomComparativoConcorrentesRoute: ShowroomComparativoConcorrentesRoute,
   ShowroomContratosRoute: ShowroomContratosRoute,
   ShowroomCrmRoute: ShowroomCrmRoute,
   ShowroomDashboardsRoute: ShowroomDashboardsRoute,
