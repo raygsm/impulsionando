@@ -3258,6 +3258,7 @@ export type Database = {
           municipal_registration: string | null
           notes: string | null
           onboarding_step: number | null
+          portal_token: string | null
           responsible_user_id: string | null
           state_registration: string | null
           status: string
@@ -3282,6 +3283,7 @@ export type Database = {
           municipal_registration?: string | null
           notes?: string | null
           onboarding_step?: number | null
+          portal_token?: string | null
           responsible_user_id?: string | null
           state_registration?: string | null
           status?: string
@@ -3306,12 +3308,61 @@ export type Database = {
           municipal_registration?: string | null
           notes?: string | null
           onboarding_step?: number | null
+          portal_token?: string | null
           responsible_user_id?: string | null
           state_registration?: string | null
           status?: string
           tax_regime?: string | null
           trade_name?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      contab_departments: {
+        Row: {
+          color: string | null
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          lead_user_id: string | null
+          name: string
+          slug: string
+          sort_order: number | null
+          updated_at: string
+          whatsapp_keywords: string[] | null
+          whatsapp_phone: string | null
+        }
+        Insert: {
+          color?: string | null
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          lead_user_id?: string | null
+          name: string
+          slug: string
+          sort_order?: number | null
+          updated_at?: string
+          whatsapp_keywords?: string[] | null
+          whatsapp_phone?: string | null
+        }
+        Update: {
+          color?: string | null
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          lead_user_id?: string | null
+          name?: string
+          slug?: string
+          sort_order?: number | null
+          updated_at?: string
+          whatsapp_keywords?: string[] | null
+          whatsapp_phone?: string | null
         }
         Relationships: []
       }
@@ -3570,6 +3621,85 @@ export type Database = {
           },
           {
             foreignKeyName: "contab_reminders_obligation_id_fkey"
+            columns: ["obligation_id"]
+            isOneToOne: false
+            referencedRelation: "contab_obligations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contab_tasks: {
+        Row: {
+          assigned_to: string | null
+          client_id: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          document_id: string | null
+          done_at: string | null
+          due_date: string | null
+          id: string
+          metadata: Json
+          obligation_id: string | null
+          priority: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          client_id?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          document_id?: string | null
+          done_at?: string | null
+          due_date?: string | null
+          id?: string
+          metadata?: Json
+          obligation_id?: string | null
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          client_id?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          document_id?: string | null
+          done_at?: string | null
+          due_date?: string | null
+          id?: string
+          metadata?: Json
+          obligation_id?: string | null
+          priority?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contab_tasks_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "contab_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contab_tasks_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "contab_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contab_tasks_obligation_id_fkey"
             columns: ["obligation_id"]
             isOneToOne: false
             referencedRelation: "contab_obligations"
@@ -10391,6 +10521,7 @@ export type Database = {
             }
             Returns: string
           }
+      get_contab_portal_data: { Args: { _token: string }; Returns: Json }
       get_menu_for_audience: {
         Args: { _audience: string; _niche_slug?: string }
         Returns: {

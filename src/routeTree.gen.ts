@@ -153,6 +153,7 @@ import { Route as AuthenticatedCockpitsIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedBiIndexRouteImport } from './routes/_authenticated/bi.index'
 import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenticated/agenda.index'
 import { Route as AuthenticatedAffiliatesIndexRouteImport } from './routes/_authenticated/affiliates.index'
+import { Route as PortalContabilidadeTokenRouteImport } from './routes/portal.contabilidade.$token'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ImoveisSlugPropertyIdRouteImport } from './routes/imoveis.$slug.$propertyId'
 import { Route as DemoNichoSlugRouteImport } from './routes/demo.nicho.$slug'
@@ -236,11 +237,14 @@ import { Route as AuthenticatedCoreConfiguracoesRouteImport } from './routes/_au
 import { Route as AuthenticatedCoreClientesRouteImport } from './routes/_authenticated/core.clientes'
 import { Route as AuthenticatedCoreBriefingsRouteImport } from './routes/_authenticated/core.briefings'
 import { Route as AuthenticatedContratoIdRouteImport } from './routes/_authenticated/contrato.$id'
+import { Route as AuthenticatedContabilidadeTarefasRouteImport } from './routes/_authenticated/contabilidade.tarefas'
+import { Route as AuthenticatedContabilidadePortalRouteImport } from './routes/_authenticated/contabilidade.portal'
 import { Route as AuthenticatedContabilidadeObrigacoesRouteImport } from './routes/_authenticated/contabilidade.obrigacoes'
 import { Route as AuthenticatedContabilidadeDocumentosRouteImport } from './routes/_authenticated/contabilidade.documentos'
 import { Route as AuthenticatedContabilidadeCockpitRouteImport } from './routes/_authenticated/contabilidade.cockpit'
 import { Route as AuthenticatedContabilidadeClientesRouteImport } from './routes/_authenticated/contabilidade.clientes'
 import { Route as AuthenticatedContabilidadeCalendarioRouteImport } from './routes/_authenticated/contabilidade.calendario'
+import { Route as AuthenticatedContabilidadeAtendimentoRouteImport } from './routes/_authenticated/contabilidade.atendimento'
 import { Route as AuthenticatedConsumerUnifiedRouteImport } from './routes/_authenticated/consumer.unified'
 import { Route as AuthenticatedComunidadeIdRouteImport } from './routes/_authenticated/comunidade.$id'
 import { Route as AuthenticatedCommercialCockpitRouteImport } from './routes/_authenticated/commercial.cockpit'
@@ -1049,6 +1053,12 @@ const AuthenticatedAffiliatesIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedAffiliatesRoute,
   } as any)
+const PortalContabilidadeTokenRoute =
+  PortalContabilidadeTokenRouteImport.update({
+    id: '/portal/contabilidade/$token',
+    path: '/portal/contabilidade/$token',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
@@ -1529,6 +1539,18 @@ const AuthenticatedContratoIdRoute = AuthenticatedContratoIdRouteImport.update({
   path: '/contrato/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedContabilidadeTarefasRoute =
+  AuthenticatedContabilidadeTarefasRouteImport.update({
+    id: '/contabilidade/tarefas',
+    path: '/contabilidade/tarefas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedContabilidadePortalRoute =
+  AuthenticatedContabilidadePortalRouteImport.update({
+    id: '/contabilidade/portal',
+    path: '/contabilidade/portal',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedContabilidadeObrigacoesRoute =
   AuthenticatedContabilidadeObrigacoesRouteImport.update({
     id: '/contabilidade/obrigacoes',
@@ -1557,6 +1579,12 @@ const AuthenticatedContabilidadeCalendarioRoute =
   AuthenticatedContabilidadeCalendarioRouteImport.update({
     id: '/contabilidade/calendario',
     path: '/contabilidade/calendario',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedContabilidadeAtendimentoRoute =
+  AuthenticatedContabilidadeAtendimentoRouteImport.update({
+    id: '/contabilidade/atendimento',
+    path: '/contabilidade/atendimento',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedConsumerUnifiedRoute =
@@ -2141,11 +2169,14 @@ export interface FileRoutesByFullPath {
   '/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
   '/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
   '/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
+  '/contabilidade/atendimento': typeof AuthenticatedContabilidadeAtendimentoRoute
   '/contabilidade/calendario': typeof AuthenticatedContabilidadeCalendarioRoute
   '/contabilidade/clientes': typeof AuthenticatedContabilidadeClientesRoute
   '/contabilidade/cockpit': typeof AuthenticatedContabilidadeCockpitRoute
   '/contabilidade/documentos': typeof AuthenticatedContabilidadeDocumentosRoute
   '/contabilidade/obrigacoes': typeof AuthenticatedContabilidadeObrigacoesRoute
+  '/contabilidade/portal': typeof AuthenticatedContabilidadePortalRoute
+  '/contabilidade/tarefas': typeof AuthenticatedContabilidadeTarefasRoute
   '/contrato/$id': typeof AuthenticatedContratoIdRoute
   '/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
@@ -2229,6 +2260,7 @@ export interface FileRoutesByFullPath {
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/bi/': typeof AuthenticatedBiIndexRoute
@@ -2434,11 +2466,14 @@ export interface FileRoutesByTo {
   '/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
   '/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
   '/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
+  '/contabilidade/atendimento': typeof AuthenticatedContabilidadeAtendimentoRoute
   '/contabilidade/calendario': typeof AuthenticatedContabilidadeCalendarioRoute
   '/contabilidade/clientes': typeof AuthenticatedContabilidadeClientesRoute
   '/contabilidade/cockpit': typeof AuthenticatedContabilidadeCockpitRoute
   '/contabilidade/documentos': typeof AuthenticatedContabilidadeDocumentosRoute
   '/contabilidade/obrigacoes': typeof AuthenticatedContabilidadeObrigacoesRoute
+  '/contabilidade/portal': typeof AuthenticatedContabilidadePortalRoute
+  '/contabilidade/tarefas': typeof AuthenticatedContabilidadeTarefasRoute
   '/contrato/$id': typeof AuthenticatedContratoIdRoute
   '/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
@@ -2522,6 +2557,7 @@ export interface FileRoutesByTo {
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/affiliates': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda': typeof AuthenticatedAgendaIndexRoute
   '/bi': typeof AuthenticatedBiIndexRoute
@@ -2740,11 +2776,14 @@ export interface FileRoutesById {
   '/_authenticated/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
   '/_authenticated/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
   '/_authenticated/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
+  '/_authenticated/contabilidade/atendimento': typeof AuthenticatedContabilidadeAtendimentoRoute
   '/_authenticated/contabilidade/calendario': typeof AuthenticatedContabilidadeCalendarioRoute
   '/_authenticated/contabilidade/clientes': typeof AuthenticatedContabilidadeClientesRoute
   '/_authenticated/contabilidade/cockpit': typeof AuthenticatedContabilidadeCockpitRoute
   '/_authenticated/contabilidade/documentos': typeof AuthenticatedContabilidadeDocumentosRoute
   '/_authenticated/contabilidade/obrigacoes': typeof AuthenticatedContabilidadeObrigacoesRoute
+  '/_authenticated/contabilidade/portal': typeof AuthenticatedContabilidadePortalRoute
+  '/_authenticated/contabilidade/tarefas': typeof AuthenticatedContabilidadeTarefasRoute
   '/_authenticated/contrato/$id': typeof AuthenticatedContratoIdRoute
   '/_authenticated/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/_authenticated/core/clientes': typeof AuthenticatedCoreClientesRoute
@@ -2828,6 +2867,7 @@ export interface FileRoutesById {
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/_authenticated/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/_authenticated/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/_authenticated/bi/': typeof AuthenticatedBiIndexRoute
@@ -3046,11 +3086,14 @@ export interface FileRouteTypes {
     | '/commercial/cockpit'
     | '/comunidade/$id'
     | '/consumer/unified'
+    | '/contabilidade/atendimento'
     | '/contabilidade/calendario'
     | '/contabilidade/clientes'
     | '/contabilidade/cockpit'
     | '/contabilidade/documentos'
     | '/contabilidade/obrigacoes'
+    | '/contabilidade/portal'
+    | '/contabilidade/tarefas'
     | '/contrato/$id'
     | '/core/briefings'
     | '/core/clientes'
@@ -3134,6 +3177,7 @@ export interface FileRouteTypes {
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
+    | '/portal/contabilidade/$token'
     | '/affiliates/'
     | '/agenda/'
     | '/bi/'
@@ -3339,11 +3383,14 @@ export interface FileRouteTypes {
     | '/commercial/cockpit'
     | '/comunidade/$id'
     | '/consumer/unified'
+    | '/contabilidade/atendimento'
     | '/contabilidade/calendario'
     | '/contabilidade/clientes'
     | '/contabilidade/cockpit'
     | '/contabilidade/documentos'
     | '/contabilidade/obrigacoes'
+    | '/contabilidade/portal'
+    | '/contabilidade/tarefas'
     | '/contrato/$id'
     | '/core/briefings'
     | '/core/clientes'
@@ -3427,6 +3474,7 @@ export interface FileRouteTypes {
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
+    | '/portal/contabilidade/$token'
     | '/affiliates'
     | '/agenda'
     | '/bi'
@@ -3644,11 +3692,14 @@ export interface FileRouteTypes {
     | '/_authenticated/commercial/cockpit'
     | '/_authenticated/comunidade/$id'
     | '/_authenticated/consumer/unified'
+    | '/_authenticated/contabilidade/atendimento'
     | '/_authenticated/contabilidade/calendario'
     | '/_authenticated/contabilidade/clientes'
     | '/_authenticated/contabilidade/cockpit'
     | '/_authenticated/contabilidade/documentos'
     | '/_authenticated/contabilidade/obrigacoes'
+    | '/_authenticated/contabilidade/portal'
+    | '/_authenticated/contabilidade/tarefas'
     | '/_authenticated/contrato/$id'
     | '/_authenticated/core/briefings'
     | '/_authenticated/core/clientes'
@@ -3732,6 +3783,7 @@ export interface FileRouteTypes {
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
+    | '/portal/contabilidade/$token'
     | '/_authenticated/affiliates/'
     | '/_authenticated/agenda/'
     | '/_authenticated/bi/'
@@ -3882,6 +3934,7 @@ export interface RootRouteChildren {
   TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
   DemoNichoSlugRoute: typeof DemoNichoSlugRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  PortalContabilidadeTokenRoute: typeof PortalContabilidadeTokenRoute
   ApiPaymentsInfinitepayCheckStatusRoute: typeof ApiPaymentsInfinitepayCheckStatusRoute
   ApiPaymentsInfinitepayCreateRoute: typeof ApiPaymentsInfinitepayCreateRoute
   ApiPublicDemoFeiraLeadRoute: typeof ApiPublicDemoFeiraLeadRoute
@@ -4917,6 +4970,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAffiliatesIndexRouteImport
       parentRoute: typeof AuthenticatedAffiliatesRoute
     }
+    '/portal/contabilidade/$token': {
+      id: '/portal/contabilidade/$token'
+      path: '/portal/contabilidade/$token'
+      fullPath: '/portal/contabilidade/$token'
+      preLoaderRoute: typeof PortalContabilidadeTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
       path: '/lovable/email/suppression'
@@ -5498,6 +5558,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedContratoIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/contabilidade/tarefas': {
+      id: '/_authenticated/contabilidade/tarefas'
+      path: '/contabilidade/tarefas'
+      fullPath: '/contabilidade/tarefas'
+      preLoaderRoute: typeof AuthenticatedContabilidadeTarefasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/contabilidade/portal': {
+      id: '/_authenticated/contabilidade/portal'
+      path: '/contabilidade/portal'
+      fullPath: '/contabilidade/portal'
+      preLoaderRoute: typeof AuthenticatedContabilidadePortalRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/contabilidade/obrigacoes': {
       id: '/_authenticated/contabilidade/obrigacoes'
       path: '/contabilidade/obrigacoes'
@@ -5531,6 +5605,13 @@ declare module '@tanstack/react-router' {
       path: '/contabilidade/calendario'
       fullPath: '/contabilidade/calendario'
       preLoaderRoute: typeof AuthenticatedContabilidadeCalendarioRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/contabilidade/atendimento': {
+      id: '/_authenticated/contabilidade/atendimento'
+      path: '/contabilidade/atendimento'
+      fullPath: '/contabilidade/atendimento'
+      preLoaderRoute: typeof AuthenticatedContabilidadeAtendimentoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/consumer/unified': {
@@ -6494,11 +6575,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCommercialCockpitRoute: typeof AuthenticatedCommercialCockpitRoute
   AuthenticatedComunidadeIdRoute: typeof AuthenticatedComunidadeIdRoute
   AuthenticatedConsumerUnifiedRoute: typeof AuthenticatedConsumerUnifiedRoute
+  AuthenticatedContabilidadeAtendimentoRoute: typeof AuthenticatedContabilidadeAtendimentoRoute
   AuthenticatedContabilidadeCalendarioRoute: typeof AuthenticatedContabilidadeCalendarioRoute
   AuthenticatedContabilidadeClientesRoute: typeof AuthenticatedContabilidadeClientesRoute
   AuthenticatedContabilidadeCockpitRoute: typeof AuthenticatedContabilidadeCockpitRoute
   AuthenticatedContabilidadeDocumentosRoute: typeof AuthenticatedContabilidadeDocumentosRoute
   AuthenticatedContabilidadeObrigacoesRoute: typeof AuthenticatedContabilidadeObrigacoesRoute
+  AuthenticatedContabilidadePortalRoute: typeof AuthenticatedContabilidadePortalRoute
+  AuthenticatedContabilidadeTarefasRoute: typeof AuthenticatedContabilidadeTarefasRoute
   AuthenticatedContratoIdRoute: typeof AuthenticatedContratoIdRoute
   AuthenticatedEhrIdRoute: typeof AuthenticatedEhrIdRoute
   AuthenticatedEventosIdRoute: typeof AuthenticatedEventosIdRoute
@@ -6569,6 +6653,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCommercialCockpitRoute: AuthenticatedCommercialCockpitRoute,
   AuthenticatedComunidadeIdRoute: AuthenticatedComunidadeIdRoute,
   AuthenticatedConsumerUnifiedRoute: AuthenticatedConsumerUnifiedRoute,
+  AuthenticatedContabilidadeAtendimentoRoute:
+    AuthenticatedContabilidadeAtendimentoRoute,
   AuthenticatedContabilidadeCalendarioRoute:
     AuthenticatedContabilidadeCalendarioRoute,
   AuthenticatedContabilidadeClientesRoute:
@@ -6579,6 +6665,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedContabilidadeDocumentosRoute,
   AuthenticatedContabilidadeObrigacoesRoute:
     AuthenticatedContabilidadeObrigacoesRoute,
+  AuthenticatedContabilidadePortalRoute: AuthenticatedContabilidadePortalRoute,
+  AuthenticatedContabilidadeTarefasRoute:
+    AuthenticatedContabilidadeTarefasRoute,
   AuthenticatedContratoIdRoute: AuthenticatedContratoIdRoute,
   AuthenticatedEhrIdRoute: AuthenticatedEhrIdRoute,
   AuthenticatedEventosIdRoute: AuthenticatedEventosIdRoute,
@@ -6805,6 +6894,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
   DemoNichoSlugRoute: DemoNichoSlugRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  PortalContabilidadeTokenRoute: PortalContabilidadeTokenRoute,
   ApiPaymentsInfinitepayCheckStatusRoute:
     ApiPaymentsInfinitepayCheckStatusRoute,
   ApiPaymentsInfinitepayCreateRoute: ApiPaymentsInfinitepayCreateRoute,
