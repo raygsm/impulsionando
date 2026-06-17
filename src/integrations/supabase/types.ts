@@ -2993,10 +2993,16 @@ export type Database = {
           generated_at: string
           generated_by: string | null
           id: string
+          parent_document_id: string | null
           sent_at: string | null
+          signed_at: string | null
+          signed_file_hash: string | null
+          signed_storage_path: string | null
           snapshot: Json
           status: string
           storage_path: string
+          superseded_at: string | null
+          superseded_by_id: string | null
           updated_at: string
           version: number
           white_label_id: string | null
@@ -3011,10 +3017,16 @@ export type Database = {
           generated_at?: string
           generated_by?: string | null
           id?: string
+          parent_document_id?: string | null
           sent_at?: string | null
+          signed_at?: string | null
+          signed_file_hash?: string | null
+          signed_storage_path?: string | null
           snapshot?: Json
           status?: string
           storage_path: string
+          superseded_at?: string | null
+          superseded_by_id?: string | null
           updated_at?: string
           version?: number
           white_label_id?: string | null
@@ -3029,10 +3041,16 @@ export type Database = {
           generated_at?: string
           generated_by?: string | null
           id?: string
+          parent_document_id?: string | null
           sent_at?: string | null
+          signed_at?: string | null
+          signed_file_hash?: string | null
+          signed_storage_path?: string | null
           snapshot?: Json
           status?: string
           storage_path?: string
+          superseded_at?: string | null
+          superseded_by_id?: string | null
           updated_at?: string
           version?: number
           white_label_id?: string | null
@@ -3050,6 +3068,20 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_documents_parent_document_id_fkey"
+            columns: ["parent_document_id"]
+            isOneToOne: false
+            referencedRelation: "contract_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_documents_superseded_by_id_fkey"
+            columns: ["superseded_by_id"]
+            isOneToOne: false
+            referencedRelation: "contract_documents"
             referencedColumns: ["id"]
           },
         ]
