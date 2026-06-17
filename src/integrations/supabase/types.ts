@@ -11438,6 +11438,16 @@ export type Database = {
             Returns: boolean
           }
       is_super_admin: { Args: { _user: string }; Returns: boolean }
+      log_security_event: {
+        Args: {
+          _action: string
+          _company?: string
+          _entity: string
+          _entity_id?: string
+          _metadata?: Json
+        }
+        Returns: string
+      }
       mark_billing_invoice_paid: {
         Args: { _invoice_id: string }
         Returns: Json
