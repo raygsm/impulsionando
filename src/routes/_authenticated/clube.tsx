@@ -718,3 +718,69 @@ function HistoryTab({ isPremium, items, onAdd }: {
     </div>
   );
 }
+
+// ---------------------------------------------------------------
+function RecommendationsTab({ data }: { data?: { interests: string[]; items: any[] } }) {
+  const items = data?.items ?? [];
+  const interests = data?.interests ?? [];
+  return (
+    <div className="space-y-4">
+      <Card className="p-5">
+        <h2 className="font-semibold mb-1 flex items-center gap-2"><Star className="w-4 h-4 text-primary" /> Para você</h2>
+        <p className="text-sm text-muted-foreground">
+          {interests.length
+            ? <>Recomendações baseadas em: {interests.map((t) => <Badge key={t} variant="secondary" className="ml-1">{t}</Badge>)}</>
+            : <>Cadastre seus interesses na aba "Perfil e localização" para receber sugestões personalizadas.</>}
+        </p>
+      </Card>
+      {!items.length && <Card className="p-6 text-sm text-muted-foreground text-center">Nenhuma recomendação ainda — adicione interesses ou explore a aba Descobrir.</Card>}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {items.map((c) => (
+          <Card key={c.id} className="p-4 space-y-2">
+            <div className="flex items-center gap-3">
+              {c.logo_url ? <img src={c.logo_url} alt={c.trade_name || c.name} className="w-10 h-10 rounded object-cover" /> : <div className="w-10 h-10 rounded bg-muted" />}
+              <div className="min-w-0">
+                <div className="font-medium truncate">{c.trade_name || c.name}</div>
+                <div className="text-xs text-muted-foreground truncate">{c.segment} · {c.address_city}/{c.address_state}</div>
+              </div>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <Badge variant={c.score > 0 ? "default" : "secondary"}>Match {c.score}</Badge>
+              {c.public_slug && <Link to={"/" + c.public_slug as any} className="text-primary hover:underline">Ver →</Link>}
+            </div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------
+function ReceiptsTab({ items }: { items: any[] }) {
+  return (
+    <Card className="p-5">
+      <h2 className="font-semibold mb-3 flex items-center gap-2"><Receipt className="w-4 h-4" /> Comprovantes digitais</h2>
+      {!items.length && <p className="text-sm text-muted-foreground">Nenhum comprovante emitido ainda. Pagamentos Pix e consumos registrados aparecem aqui automaticamente.</p>}
+      <ul className="divide-y">
+        {items.map((r) => (
+          <li key={r.id} className="py-3 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="font-medium truncate">{r.title}</div>
+              <div className="text-xs text-muted-foreground">
+                {new Date(r.issued_at).toLocaleString("pt-BR")} · <Badge variant="outline" className="ml-1">{r.kind}</Badge>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="text-sm font-semibold">{BRL(r.amount_cents)}</span>
+              {r.receipt_url && (
+                <Button asChild size="sm" variant="outline">
+                  <a href={r.receipt_url} target="_blank" rel="noreferrer"><Download className="w-3 h-3 mr-1" /> Baixar</a>
+                </Button>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </Card>
+  );
+}
