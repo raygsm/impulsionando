@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { auditClinical } from "@/lib/clinical-audit.client";
 import { Plus, X, Check } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/agenda/appointments")({
@@ -85,13 +86,18 @@ function AppointmentsPage() {
       if (!svc) throw new Error("Selecione um serviço");
       const start = new Date(form.starts_at);
       const end = new Date(start.getTime() + svc.duration_min * 60_000);
-      const { error } = await supabase.from("agenda_appointments").insert({
+      const payload = {
         company_id: companyId, professional_id: form.professional_id, service_id: form.service_id,
         starts_at: start.toISOString(), ends_at: end.toISOString(),
         customer_name: form.customer_name, customer_phone: form.customer_phone || null,
         notes: form.notes || null, price: svc.price,
-      });
+      };
+      const { data: ins, error } = await supabase.from("agenda_appointments").insert(payload).select("id").maybeSingle();
       if (error) throw error;
+      if (companyId) auditClinical({
+        company_id: companyId, action: "appointment.create", entity: "agenda_appointments",
+        entity_id: ins?.id, after: payload as Record<string, unknown>,
+      });
     },
     onSuccess: () => {
       toast.success("Agendamento criado");
@@ -108,6 +114,17 @@ function AppointmentsPage() {
       if (status === "cancelled") patch.cancelled_at = new Date().toISOString();
       const { error } = await supabase.from("agenda_appointments").update(patch).eq("id", id);
       if (error) throw error;
+      if (companyId) {
+        const action =
+          status === "cancelled" ? "appointment.cancel"
+          : status === "completed" ? "appointment.complete"
+          : status === "no_show" ? "appointment.no_show"
+          : "appointment.update";
+        auditClinical({
+          company_id: companyId, action, entity: "agenda_appointments",
+          entity_id: id, after: patch as Record<string, unknown>,
+        });
+      }
     },
     onSuccess: () => { toast.success("Atualizado"); qc.invalidateQueries({ queryKey: ["agenda-appts"] }); },
     onError: (e: Error) => toast.error(e.message),
