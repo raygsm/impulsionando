@@ -260,6 +260,8 @@ export async function processInterest(
         actionUrl, receivedAt: new Date().toISOString(),
       },
       idempotencyKey: `re-vitrine-interest-agency-${interestId}-${email}`,
+      requestId,
+      metadata: { company_id: companyId, interest_id: interestId, audience: 'agency' },
     })
     if (r.status === 'queued' || r.status === 'suppressed') emailsQueued.push(email)
   }
@@ -275,11 +277,31 @@ export async function processInterest(
         receivedAt: new Date().toISOString(),
       },
       idempotencyKey: `re-vitrine-interest-customer-${interestId}`,
+      requestId,
+      metadata: { company_id: companyId, interest_id: interestId, audience: 'customer' },
     })
     if (r.status === 'queued' || r.status === 'suppressed') emailsQueued.push(input.contactEmail)
   }
 
-  return { ok: true, interestId, leadId: leadId!, messageId, historyId: (hist as any).id as string, emailsQueued }
+  await writeFlowAudit({
+    action: 'vitrine.interest.completed',
+    entity: 'realestate_interest',
+    entityId: interestId,
+    companyId,
+    requestId,
+    after: { lead_id: leadId, message_id: messageId, history_id: (hist as any).id, emails_queued: emailsQueued.length },
+  })
+  return { ok: true, requestId, interestId, leadId: leadId!, messageId, historyId: (hist as any).id as string, emailsQueued }
+  } catch (err: any) {
+    console.error('processInterest internal error', { requestId, err })
+    await writeFlowAudit({
+      action: 'vitrine.interest.failed',
+      entity: 'realestate_interest',
+      requestId,
+      after: { code: 'internal_error', error: err?.message ?? 'unknown' },
+    })
+    return { ok: false, requestId, code: 'internal_error', error: err?.message ?? 'unknown' }
+  }
 }
 
 // ---------------------------------------------------------------------------
