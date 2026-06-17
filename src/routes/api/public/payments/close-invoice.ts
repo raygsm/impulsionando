@@ -116,7 +116,7 @@ export const Route = createFileRoute("/api/public/payments/close-invoice")({
           });
         }
 
-        const { data, error } = await supabaseAdmin.rpc(rpc, {
+        const { data, error } = await (supabaseAdmin as any).rpc(rpc, {
           _invoice_id: parsed.invoice_id,
         });
         if (error) {
@@ -124,6 +124,8 @@ export const Route = createFileRoute("/api/public/payments/close-invoice")({
             source: "close-invoice",
             event_id: eventId,
             result: { ok: false, error: error.message },
+            status: "error",
+            error: error.message,
           });
           return Response.json(
             { error: "rpc_failed", detail: error.message },
@@ -148,6 +150,8 @@ export const Route = createFileRoute("/api/public/payments/close-invoice")({
           source: "close-invoice",
           event_id: eventId,
           result: { ok: true, rpc, data },
+          status: "processed",
+          error: null,
         });
 
         return Response.json({ ok: true, result: data });

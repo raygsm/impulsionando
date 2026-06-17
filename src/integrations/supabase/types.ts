@@ -8261,9 +8261,13 @@ export type Database = {
       restaurant_table_invoices: {
         Row: {
           amount_cents: number
+          attempt_number: number
           company_id: string
           created_at: string
+          expires_at: string | null
+          failed_at: string | null
           id: string
+          last_error: string | null
           order_nsu: string
           paid_at: string | null
           pix_copy_paste: string | null
@@ -8273,9 +8277,13 @@ export type Database = {
         }
         Insert: {
           amount_cents: number
+          attempt_number?: number
           company_id: string
           created_at?: string
+          expires_at?: string | null
+          failed_at?: string | null
           id?: string
+          last_error?: string | null
           order_nsu: string
           paid_at?: string | null
           pix_copy_paste?: string | null
@@ -8285,9 +8293,13 @@ export type Database = {
         }
         Update: {
           amount_cents?: number
+          attempt_number?: number
           company_id?: string
           created_at?: string
+          expires_at?: string | null
+          failed_at?: string | null
           id?: string
+          last_error?: string | null
           order_nsu?: string
           paid_at?: string | null
           pix_copy_paste?: string | null
@@ -8315,6 +8327,7 @@ export type Database = {
       restaurant_table_sessions: {
         Row: {
           bill_notified_at: string | null
+          bill_notified_sms_at: string | null
           closed_at: string | null
           company_id: string
           created_at: string
@@ -8334,6 +8347,7 @@ export type Database = {
         }
         Insert: {
           bill_notified_at?: string | null
+          bill_notified_sms_at?: string | null
           closed_at?: string | null
           company_id: string
           created_at?: string
@@ -8353,6 +8367,7 @@ export type Database = {
         }
         Update: {
           bill_notified_at?: string | null
+          bill_notified_sms_at?: string | null
           closed_at?: string | null
           company_id?: string
           created_at?: string
@@ -8604,6 +8619,7 @@ export type Database = {
           kitchen_status: string
           kitchen_updated_at: string
           notified_ready_at: string | null
+          notified_ready_sms_at: string | null
           order_id: string
           product_id: string | null
           quantity: number
@@ -8619,6 +8635,7 @@ export type Database = {
           kitchen_status?: string
           kitchen_updated_at?: string
           notified_ready_at?: string | null
+          notified_ready_sms_at?: string | null
           order_id: string
           product_id?: string | null
           quantity: number
@@ -8634,6 +8651,7 @@ export type Database = {
           kitchen_status?: string
           kitchen_updated_at?: string
           notified_ready_at?: string | null
+          notified_ready_sms_at?: string | null
           order_id?: string
           product_id?: string | null
           quantity?: number
@@ -9618,32 +9636,50 @@ export type Database = {
       }
       webhook_event_log: {
         Row: {
+          error: string | null
           event_id: string
           id: string
           payload: Json | null
           processed_at: string
+          replay_count: number
+          replay_reason: string | null
+          replayed_at: string | null
+          replayed_by: string | null
           result: Json | null
           source: string
+          status: string
           target_id: string | null
           target_kind: string | null
         }
         Insert: {
+          error?: string | null
           event_id: string
           id?: string
           payload?: Json | null
           processed_at?: string
+          replay_count?: number
+          replay_reason?: string | null
+          replayed_at?: string | null
+          replayed_by?: string | null
           result?: Json | null
           source: string
+          status?: string
           target_id?: string | null
           target_kind?: string | null
         }
         Update: {
+          error?: string | null
           event_id?: string
           id?: string
           payload?: Json | null
           processed_at?: string
+          replay_count?: number
+          replay_reason?: string | null
+          replayed_at?: string | null
+          replayed_by?: string | null
           result?: Json | null
           source?: string
+          status?: string
           target_id?: string | null
           target_kind?: string | null
         }
@@ -10064,11 +10100,23 @@ export type Database = {
         Args: { _token: string }
         Returns: Json
       }
+      restaurant_force_new_table_invoice: {
+        Args: { _token: string }
+        Returns: Json
+      }
       restaurant_get_table_invoice: {
         Args: { _invoice_id: string; _token: string }
         Returns: Json
       }
       restaurant_kitchen_board: { Args: never; Returns: Json }
+      restaurant_list_table_invoices: {
+        Args: { _token: string }
+        Returns: Json
+      }
+      restaurant_mark_table_invoice_failed: {
+        Args: { _invoice_id: string; _new_status?: string; _reason: string }
+        Returns: Json
+      }
       restaurant_mark_table_invoice_paid: {
         Args: { _invoice_id: string }
         Returns: Json
@@ -10138,6 +10186,10 @@ export type Database = {
       user_has_permission: {
         Args: { _company: string; _perm: string; _user: string }
         Returns: boolean
+      }
+      webhook_log_register_replay: {
+        Args: { _id: string; _reason: string; _user: string }
+        Returns: Json
       }
     }
     Enums: {

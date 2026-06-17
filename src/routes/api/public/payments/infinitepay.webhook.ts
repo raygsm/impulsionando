@@ -64,6 +64,38 @@ export const Route = createFileRoute("/api/public/payments/infinitepay/webhook")
           if (tinv.status === "paid") {
             return jsonResp(200, { success: true, message: null, duplicate: true });
           }
+
+          // --- Falha / expiração explícita no webhook ---
+          // InfinitePay pode entregar payload com `status: failed|expired|cancelled|refused`.
+          const rawStatus = String(payload?.status ?? payload?.payment_status ?? "")
+            .toLowerCase();
+          const failedStates = ["failed", "expired", "cancelled", "canceled", "refused", "declined"];
+          if (failedStates.includes(rawStatus)) {
+            const targetStatus = rawStatus === "expired" ? "expired" : "failed";
+            const reason = String(
+              payload?.message ?? payload?.error ?? rawStatus,
+            ).slice(0, 500);
+            const { error: failErr } = await (supabaseAdmin as any).rpc(
+              "restaurant_mark_table_invoice_failed",
+              { _invoice_id: tinv.id, _reason: reason, _new_status: targetStatus },
+            );
+            if (failErr) {
+              console.error("[infinitepay webhook] table fail RPC error", failErr);
+            }
+            try {
+              const { notifyTablePaymentFailed } = await import(
+                "@/lib/restaurant-customer-notify.server"
+              );
+              await notifyTablePaymentFailed({
+                session_id: tinv.session_id,
+                reason: targetStatus as "failed" | "expired",
+              });
+            } catch (e) {
+              console.warn("[infinitepay webhook] table fail notify error", e);
+            }
+            return jsonResp(200, { success: true, message: `payment ${targetStatus}` });
+          }
+
           const handleTable = (process.env.INFINITEPAY_HANDLE ?? "").replace(/^\$/, "");
           let tableConfirmed = false;
           let tableCheck: any = null;
