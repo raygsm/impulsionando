@@ -164,6 +164,9 @@ function ClubePage() {
               catch (e: any) { toast.error(e.message); }
             }}
           />
+        </TabsContent>
+
+
 
 
         <TabsContent value="plano" className="mt-6">
