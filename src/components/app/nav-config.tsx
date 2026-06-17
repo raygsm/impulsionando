@@ -80,6 +80,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Operação por nicho",
     items: [
       { to: "/imobiliaria/vitrine", label: "Imobiliária — vitrine", icon: Home },
+      { to: "/realestate/cockpit", label: "Imobiliária — cockpit", icon: Home },
       { to: "/imobiliaria/imoveis", label: "Imóveis", icon: Home },
       { to: "/imobiliaria/interessados", label: "Interessados", icon: Users2, perm: "realestate.interest.read" },
       { to: "/imobiliaria/mensagens", label: "Mensagens", icon: MessageSquare, perm: "realestate.message.read" },
