@@ -1,211 +1,424 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { useCurrentUser } from "@/hooks/use-current-user";
-import { supabase } from "@/integrations/supabase/client";
-import { OnboardingWizard } from "@/components/core/OnboardingWizard";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { PageHeader } from "@/components/app/PageElements";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import {
-  CheckCircle2,
-  Circle,
-  Sparkles,
-  Globe,
-  Mail,
-  Users,
-  Boxes,
-  ArrowRight,
+  Sparkles, Target, Building2, Stethoscope, Home as HomeIcon, Calendar as CalendarIcon,
+  ShoppingCart, GraduationCap, Briefcase, ArrowRight, ArrowLeft, CheckCircle2,
+  AlertTriangle, Lightbulb, Rocket,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
-  head: () => ({
-    meta: [
-      { title: "Onboarding — Impulsionando" },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
-  component: OnboardingMasterPage,
+  head: () => ({ meta: [{ title: "Onboarding — Impulsionando" }] }),
+  component: OnboardingPage,
 });
 
-type StepKey = "nicho" | "dominio" | "emails" | "equipe" | "modulos";
+// ────────────────────────────────────────────────────────────────────────────
+// 5 camadas: melhorar → nicho → diagnóstico → resultado → como
+// ────────────────────────────────────────────────────────────────────────────
 
-type Step = {
-  key: StepKey;
-  label: string;
-  description: string;
-  icon: typeof Sparkles;
-  to: string;
-  linkLabel: string;
-  done: boolean;
+type Goal = "vender_mais" | "organizar" | "cobrar_melhor" | "fidelizar" | "escalar" | "reduzir_custo";
+type Niche = "restaurante" | "imobiliaria" | "saude" | "agenda" | "varejo" | "educacao" | "servicos" | "outro";
+
+interface State {
+  step: number;
+  goal: Goal | null;
+  goalDetail: string;
+  niche: Niche | null;
+  nicheDetail: string;
+  diag: {
+    teamSize: string;
+    mainPain: string;
+    monthlyRevenue: string;
+    tools: string;
+  };
+  outcome: {
+    metric: string;
+    target: string;
+    horizon: "30d" | "90d" | "6m" | "12m";
+  };
+}
+
+const STORAGE_KEY = "impulsionando.onboarding.v1";
+
+const DEFAULT_STATE: State = {
+  step: 0,
+  goal: null,
+  goalDetail: "",
+  niche: null,
+  nicheDetail: "",
+  diag: { teamSize: "", mainPain: "", monthlyRevenue: "", tools: "" },
+  outcome: { metric: "", target: "", horizon: "90d" },
 };
 
-function OnboardingMasterPage() {
-  const { data: me } = useCurrentUser();
-  const companyId = me?.memberships?.[0]?.company_id;
+const GOALS: { id: Goal; label: string; desc: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { id: "vender_mais", label: "Vender mais", desc: "Crescer receita e fechar mais oportunidades.", icon: Rocket },
+  { id: "organizar", label: "Organizar a operação", desc: "Parar de perder informação no WhatsApp e na cabeça.", icon: Target },
+  { id: "cobrar_melhor", label: "Cobrar melhor", desc: "Reduzir inadimplência e automatizar faturas.", icon: Sparkles },
+  { id: "fidelizar", label: "Fidelizar clientes", desc: "Aumentar recompra, programa premium e LTV.", icon: CheckCircle2 },
+  { id: "escalar", label: "Escalar para multi-unidade", desc: "Padronizar processos para abrir filiais.", icon: Building2 },
+  { id: "reduzir_custo", label: "Reduzir custo operacional", desc: "Automatizar tarefas e cortar retrabalho.", icon: AlertTriangle },
+];
 
-  const { data: status } = useQuery({
-    queryKey: ["onboarding-status", companyId],
-    enabled: Boolean(companyId),
-    queryFn: async () => {
-      if (!companyId) return null;
-      const [company, modules, members, domain, email] = await Promise.all([
-        supabase.from("companies").select("id, niche_id").eq("id", companyId).maybeSingle(),
-        supabase.from("company_modules").select("id", { count: "exact", head: true }).eq("company_id", companyId).eq("is_enabled", true),
-        supabase.from("user_profiles").select("id", { count: "exact", head: true }).eq("company_id", companyId).eq("is_active", true),
-        supabase.from("onboarding_domain_requests").select("id", { count: "exact", head: true }).eq("company_id", companyId),
-        supabase.from("onboarding_email_requests").select("id", { count: "exact", head: true }).eq("company_id", companyId),
-      ]);
-      return {
-        hasNiche: Boolean(company.data?.niche_id),
-        modulesCount: modules.count ?? 0,
-        membersCount: members.count ?? 0,
-        hasDomainReq: (domain.count ?? 0) > 0,
-        hasEmailReq: (email.count ?? 0) > 0,
-      };
-    },
-  });
+const NICHES: { id: Niche; label: string; icon: React.ComponentType<{ className?: string }>; targetRoute: string }[] = [
+  { id: "restaurante", label: "Restaurante / Bar", icon: ShoppingCart, targetRoute: "/sales" },
+  { id: "imobiliaria", label: "Imobiliária", icon: HomeIcon, targetRoute: "/imobiliaria/vitrine" },
+  { id: "saude", label: "Saúde / Clínica", icon: Stethoscope, targetRoute: "/ehr" },
+  { id: "agenda", label: "Estética / Serviços com agenda", icon: CalendarIcon, targetRoute: "/agenda" },
+  { id: "varejo", label: "Varejo / Comércio", icon: ShoppingCart, targetRoute: "/sales/new" },
+  { id: "educacao", label: "Educação / Cursos", icon: GraduationCap, targetRoute: "/affiliates/products" },
+  { id: "servicos", label: "Serviços B2B", icon: Briefcase, targetRoute: "/crm/board" },
+  { id: "outro", label: "Outro", icon: Sparkles, targetRoute: "/dashboard" },
+];
 
-  if (!companyId) {
-    return (
-      <Card className="p-6 max-w-xl mx-auto">
-        <h2 className="font-semibold mb-2">Empresa não encontrada</h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          Não foi possível identificar sua empresa. Entre em contato com o suporte.
-        </p>
-        <Button asChild variant="outline"><Link to="/dashboard">Voltar</Link></Button>
-      </Card>
-    );
+// Recomendações por (goal, niche)
+function recommend(state: State): { module: string; route: string; why: string }[] {
+  const recs: { module: string; route: string; why: string }[] = [];
+  const niche = state.niche;
+  const goal = state.goal;
+
+  if (goal === "vender_mais") {
+    recs.push({ module: "CRM — Kanban de oportunidades", route: "/crm/board", why: "Centralize leads e mova pelo funil sem perder ninguém." });
+    recs.push({ module: "Leads do site", route: "/marketing/leads", why: "Capture e responda leads em minutos." });
+  }
+  if (goal === "organizar") {
+    recs.push({ module: "Agenda", route: "/agenda", why: "Visibilidade do dia e da semana, sem conflitos." });
+    recs.push({ module: "Clientes", route: "/customers", why: "Cadastro único, histórico e contato." });
+  }
+  if (goal === "cobrar_melhor") {
+    recs.push({ module: "Contratos recorrentes", route: "/admin/billing-contracts", why: "Faturamento automático + régua de cobrança." });
+    recs.push({ module: "Log de Webhooks", route: "/finance/webhook-log", why: "Acompanhe pagamentos PIX/cartão e reprocesse falhas." });
+  }
+  if (goal === "fidelizar") {
+    recs.push({ module: "Consumidor Premium", route: "/core/consumidor-premium", why: "Programa de assinatura para recompra." });
+  }
+  if (goal === "escalar") {
+    recs.push({ module: "Unidades", route: "/units", why: "Cadastre filiais e segregue operação." });
+    recs.push({ module: "Usuários e Perfis", route: "/users", why: "Defina quem acessa o quê em cada unidade." });
+  }
+  if (goal === "reduzir_custo") {
+    recs.push({ module: "Central de Agentes (IA)", route: "/adm/agentes", why: "Automatize tarefas repetitivas com IA." });
   }
 
-  const steps: Step[] = [
-    {
-      key: "nicho",
-      label: "Escolha seu nicho",
-      description: "Instala módulos, menus e relatórios certos para o segmento.",
-      icon: Sparkles,
-      to: "/onboarding/nicho",
-      linkLabel: "Configurar nicho",
-      done: status?.hasNiche ?? false,
-    },
-    {
-      key: "dominio",
-      label: "Domínio próprio",
-      description: "Conecte seudominio.com.br à plataforma.",
-      icon: Globe,
-      to: "/onboarding#wizard",
-      linkLabel: "Configurar domínio",
-      done: status?.hasDomainReq ?? false,
-    },
-    {
-      key: "emails",
-      label: "E-mails da empresa",
-      description: "Habilite envio com a sua marca (DKIM/SPF).",
-      icon: Mail,
-      to: "/onboarding#wizard",
-      linkLabel: "Configurar e-mails",
-      done: status?.hasEmailReq ?? false,
-    },
-    {
-      key: "equipe",
-      label: "Convide sua equipe",
-      description: "Adicione usuários com perfis pré-configurados.",
-      icon: Users,
-      to: "/users",
-      linkLabel: "Gerenciar usuários",
-      done: (status?.membersCount ?? 0) > 1,
-    },
-    {
-      key: "modulos",
-      label: "Módulos opcionais",
-      description: "Ative recursos extras além do template do nicho.",
-      icon: Boxes,
-      to: "/modules",
-      linkLabel: "Ver módulos",
-      done: (status?.modulesCount ?? 0) > 0,
-    },
-  ];
+  if (niche === "restaurante") {
+    recs.push({ module: "PDV / Pedidos", route: "/sales/new", why: "Comanda, mesa e fechamento de conta." });
+  } else if (niche === "imobiliaria") {
+    recs.push({ module: "Vitrine de imóveis", route: "/imobiliaria/vitrine", why: "Publique e capte interessados." });
+  } else if (niche === "saude") {
+    recs.push({ module: "Prontuário Eletrônico", route: "/ehr", why: "Atendimento, evolução e documentos." });
+  } else if (niche === "agenda") {
+    recs.push({ module: "Agendamentos", route: "/agenda/appointments", why: "Profissionais, serviços e horários." });
+  } else if (niche === "varejo") {
+    recs.push({ module: "Estoque", route: "/inventory", why: "Produtos, fornecedores e movimentações." });
+  } else if (niche === "educacao") {
+    recs.push({ module: "Produtos e Afiliados", route: "/affiliates/products", why: "Cursos, ofertas e comissões." });
+  } else if (niche === "servicos") {
+    recs.push({ module: "Funis de venda", route: "/crm/pipelines", why: "Adapte etapas ao seu processo comercial." });
+  }
 
-  const completed = steps.filter((s) => s.done).length;
-  const pct = Math.round((completed / steps.length) * 100);
+  // De-dup
+  const seen = new Set<string>();
+  return recs.filter((r) => (seen.has(r.route) ? false : (seen.add(r.route), true)));
+}
+
+function loadState(): State {
+  if (typeof window === "undefined") return DEFAULT_STATE;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return DEFAULT_STATE;
+    return { ...DEFAULT_STATE, ...JSON.parse(raw) };
+  } catch {
+    return DEFAULT_STATE;
+  }
+}
+
+function OnboardingPage() {
+  const navigate = useNavigate();
+  const [state, setState] = useState<State>(DEFAULT_STATE);
+
+  useEffect(() => {
+    setState(loadState());
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }, [state]);
+
+  const totalSteps = 5;
+  const progress = ((state.step + 1) / totalSteps) * 100;
+
+  const canNext = useMemo(() => {
+    switch (state.step) {
+      case 0: return !!state.goal;
+      case 1: return !!state.niche;
+      case 2: return state.diag.mainPain.trim().length > 3;
+      case 3: return state.outcome.metric.trim().length > 0 && state.outcome.target.trim().length > 0;
+      default: return true;
+    }
+  }, [state]);
+
+  const recs = useMemo(() => recommend(state), [state]);
+  const niche = NICHES.find((n) => n.id === state.niche);
+
+  function next() { setState((s) => ({ ...s, step: Math.min(s.step + 1, totalSteps - 1) })); }
+  function prev() { setState((s) => ({ ...s, step: Math.max(s.step - 1, 0) })); }
+  function reset() {
+    setState(DEFAULT_STATE);
+    if (typeof window !== "undefined") localStorage.removeItem(STORAGE_KEY);
+  }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Onboarding</h1>
-        <p className="text-sm text-muted-foreground">
-          Complete os passos abaixo para deixar sua operação 100% configurada.
-        </p>
+    <div className="container mx-auto py-6 max-w-3xl">
+      <PageHeader
+        icon={Sparkles}
+        title="Como podemos te ajudar a melhorar?"
+        description="5 perguntas rápidas pra montar seu plano de ação personalizado."
+      />
+
+      <div className="mb-6 flex items-center gap-3">
+        <Progress value={progress} className="flex-1" />
+        <Badge variant="outline">{state.step + 1} de {totalSteps}</Badge>
       </div>
 
-      <Card className="p-5">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <div className="text-sm font-medium">Progresso</div>
-            <div className="text-xs text-muted-foreground">
-              {completed} de {steps.length} passos concluídos
+      <Card className="p-6">
+        {state.step === 0 && (
+          <Step
+            badge="Camada 1 — Melhorar"
+            title="O que você quer melhorar primeiro?"
+            description="Escolha o objetivo principal pra esses próximos 90 dias. Você pode mudar depois."
+          >
+            <RadioGroup
+              value={state.goal ?? ""}
+              onValueChange={(v) => setState((s) => ({ ...s, goal: v as Goal }))}
+              className="grid sm:grid-cols-2 gap-3"
+            >
+              {GOALS.map((g) => {
+                const Icon = g.icon;
+                const active = state.goal === g.id;
+                return (
+                  <Label
+                    key={g.id}
+                    htmlFor={`goal-${g.id}`}
+                    className={`cursor-pointer rounded-md border p-4 flex gap-3 items-start transition ${active ? "border-primary bg-primary/5" : "hover:bg-muted/40"}`}
+                  >
+                    <RadioGroupItem value={g.id} id={`goal-${g.id}`} className="mt-1" />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 font-medium"><Icon className="h-4 w-4" /> {g.label}</div>
+                      <div className="text-sm text-muted-foreground mt-1">{g.desc}</div>
+                    </div>
+                  </Label>
+                );
+              })}
+            </RadioGroup>
+            <div className="mt-4">
+              <Label htmlFor="goalDetail">Conta em uma frase (opcional)</Label>
+              <Textarea
+                id="goalDetail"
+                placeholder="Ex.: quero dobrar minha receita do delivery em 6 meses."
+                value={state.goalDetail}
+                onChange={(e) => setState((s) => ({ ...s, goalDetail: e.target.value }))}
+                rows={2}
+              />
             </div>
-          </div>
-          <Badge variant={pct === 100 ? "default" : "secondary"}>{pct}%</Badge>
-        </div>
-        <div className="h-2 rounded-full bg-muted overflow-hidden">
-          <div
-            className="h-full bg-primary transition-all"
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-      </Card>
+          </Step>
+        )}
 
-      <div className="grid gap-3">
-        {steps.map((s) => {
-          const Icon = s.icon;
-          return (
-            <Card key={s.key} className="p-4">
-              <div className="flex items-start gap-3">
-                <div
-                  className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${
-                    s.done
-                      ? "bg-emerald-500/10 text-emerald-500"
-                      : "bg-primary/10 text-primary"
-                  }`}
-                >
-                  {s.done ? <CheckCircle2 className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-medium leading-tight">{s.label}</h3>
-                    {s.done ? (
-                      <Badge variant="outline" className="gap-1 text-xs">
-                        <CheckCircle2 className="h-3 w-3 text-emerald-500" /> Pronto
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="gap-1 text-xs text-muted-foreground">
-                        <Circle className="h-3 w-3" /> Pendente
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1">{s.description}</p>
-                </div>
-                <Button asChild size="sm" variant={s.done ? "outline" : "default"}>
-                  <Link to={s.to}>
-                    {s.done ? "Revisar" : s.linkLabel}
-                    <ArrowRight className="ml-1 h-4 w-4" />
-                  </Link>
-                </Button>
+        {state.step === 1 && (
+          <Step
+            badge="Camada 2 — Nicho"
+            title="Qual o seu negócio?"
+            description="Vamos ativar os módulos certos pro seu segmento."
+          >
+            <div className="grid sm:grid-cols-2 gap-3">
+              {NICHES.map((n) => {
+                const Icon = n.icon;
+                const active = state.niche === n.id;
+                return (
+                  <button
+                    key={n.id}
+                    type="button"
+                    onClick={() => setState((s) => ({ ...s, niche: n.id }))}
+                    className={`text-left rounded-md border p-4 flex items-center gap-3 transition ${active ? "border-primary bg-primary/5" : "hover:bg-muted/40"}`}
+                  >
+                    <Icon className="h-5 w-5 text-muted-foreground" />
+                    <span className="font-medium">{n.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="mt-4">
+              <Label htmlFor="nicheDetail">Algo específico do seu negócio? (opcional)</Label>
+              <Input
+                id="nicheDetail"
+                placeholder="Ex.: hamburgueria com delivery próprio + iFood."
+                value={state.nicheDetail}
+                onChange={(e) => setState((s) => ({ ...s, nicheDetail: e.target.value }))}
+              />
+            </div>
+          </Step>
+        )}
+
+        {state.step === 2 && (
+          <Step
+            badge="Camada 3 — Diagnóstico"
+            title="Como tá hoje?"
+            description="Quanto mais claro, melhor a recomendação."
+          >
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="teamSize">Tamanho da equipe</Label>
+                <Input id="teamSize" placeholder="Ex.: 8 pessoas"
+                  value={state.diag.teamSize}
+                  onChange={(e) => setState((s) => ({ ...s, diag: { ...s.diag, teamSize: e.target.value } }))} />
               </div>
-            </Card>
-          );
-        })}
-      </div>
+              <div>
+                <Label htmlFor="revenue">Faturamento mensal aprox.</Label>
+                <Input id="revenue" placeholder="Ex.: R$ 80.000"
+                  value={state.diag.monthlyRevenue}
+                  onChange={(e) => setState((s) => ({ ...s, diag: { ...s.diag, monthlyRevenue: e.target.value } }))} />
+              </div>
+            </div>
+            <div className="mt-4">
+              <Label htmlFor="tools">Que ferramentas usa hoje?</Label>
+              <Input id="tools" placeholder="Ex.: WhatsApp, planilha, iFood, Maquininha."
+                value={state.diag.tools}
+                onChange={(e) => setState((s) => ({ ...s, diag: { ...s.diag, tools: e.target.value } }))} />
+            </div>
+            <div className="mt-4">
+              <Label htmlFor="pain">Qual é a maior dor hoje? *</Label>
+              <Textarea id="pain" rows={3}
+                placeholder="Ex.: perco pedido na hora do pico, cliente reclama de demora, não sei quanto sobra no fim do mês."
+                value={state.diag.mainPain}
+                onChange={(e) => setState((s) => ({ ...s, diag: { ...s.diag, mainPain: e.target.value } }))} />
+            </div>
+          </Step>
+        )}
 
-      <Card id="wizard" className="p-5 space-y-4 scroll-mt-20">
-        <div>
-          <h2 className="font-semibold">Domínio e e-mails</h2>
-          <p className="text-sm text-muted-foreground">
-            Configure seu domínio próprio e o envio de e-mails com a marca da empresa.
-          </p>
+        {state.step === 3 && (
+          <Step
+            badge="Camada 4 — Resultado esperado"
+            title="O que seria um sucesso?"
+            description="Defina a meta. Sem meta, não dá pra medir."
+          >
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="metric">Métrica principal *</Label>
+                <Input id="metric" placeholder="Ex.: faturamento, ticket médio, agendamentos/semana"
+                  value={state.outcome.metric}
+                  onChange={(e) => setState((s) => ({ ...s, outcome: { ...s.outcome, metric: e.target.value } }))} />
+              </div>
+              <div>
+                <Label htmlFor="target">Meta *</Label>
+                <Input id="target" placeholder="Ex.: +30%, R$ 120k/mês, 40 agendamentos"
+                  value={state.outcome.target}
+                  onChange={(e) => setState((s) => ({ ...s, outcome: { ...s.outcome, target: e.target.value } }))} />
+              </div>
+            </div>
+            <div className="mt-4">
+              <Label>Horizonte</Label>
+              <RadioGroup
+                value={state.outcome.horizon}
+                onValueChange={(v) => setState((s) => ({ ...s, outcome: { ...s.outcome, horizon: v as State["outcome"]["horizon"] } }))}
+                className="grid grid-cols-4 gap-2 mt-2"
+              >
+                {(["30d", "90d", "6m", "12m"] as const).map((h) => (
+                  <Label
+                    key={h}
+                    htmlFor={`h-${h}`}
+                    className={`cursor-pointer rounded-md border p-3 text-center text-sm transition ${state.outcome.horizon === h ? "border-primary bg-primary/5" : "hover:bg-muted/40"}`}
+                  >
+                    <RadioGroupItem value={h} id={`h-${h}`} className="sr-only" />
+                    {h}
+                  </Label>
+                ))}
+              </RadioGroup>
+            </div>
+          </Step>
+        )}
+
+        {state.step === 4 && (
+          <Step
+            badge="Camada 5 — Como"
+            title="Seu plano de ação"
+            description="A Impulsionando vai te entregar isto agora."
+          >
+            <div className="mb-4 rounded-md border bg-muted/30 p-4 text-sm space-y-2">
+              <div><span className="text-muted-foreground">Quero melhorar:</span> <span className="font-medium">{GOALS.find(g => g.id === state.goal)?.label ?? "—"}</span></div>
+              <div><span className="text-muted-foreground">Nicho:</span> <span className="font-medium">{niche?.label ?? "—"}</span></div>
+              <div><span className="text-muted-foreground">Maior dor:</span> <span className="font-medium">{state.diag.mainPain || "—"}</span></div>
+              <div><span className="text-muted-foreground">Meta:</span> <span className="font-medium">{state.outcome.metric} {state.outcome.target ? `→ ${state.outcome.target}` : ""} ({state.outcome.horizon})</span></div>
+            </div>
+
+            <div className="flex items-center gap-2 mb-3">
+              <Lightbulb className="h-4 w-4 text-primary" />
+              <h3 className="font-semibold">Módulos recomendados pra você começar agora</h3>
+            </div>
+
+            <div className="space-y-2">
+              {recs.length === 0 && (
+                <div className="text-sm text-muted-foreground">Selecione objetivo e nicho pra ver recomendações.</div>
+              )}
+              {recs.map((r) => (
+                <Link
+                  key={r.route}
+                  to={r.route}
+                  className="block rounded-md border p-3 hover:bg-muted/40 transition"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <div className="font-medium">{r.module}</div>
+                      <div className="text-sm text-muted-foreground">{r.why}</div>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            <div className="mt-6 flex flex-wrap gap-2">
+              {niche && (
+                <Button onClick={() => navigate({ to: niche.targetRoute })}>
+                  <Rocket className="h-4 w-4 mr-2" /> Começar pelo módulo principal
+                </Button>
+              )}
+              <Button variant="outline" onClick={reset}>Refazer onboarding</Button>
+            </div>
+          </Step>
+        )}
+
+        <div className="flex justify-between mt-6 pt-4 border-t">
+          <Button variant="ghost" onClick={prev} disabled={state.step === 0}>
+            <ArrowLeft className="h-4 w-4 mr-2" /> Voltar
+          </Button>
+          {state.step < totalSteps - 1 ? (
+            <Button onClick={next} disabled={!canNext}>
+              Continuar <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          ) : (
+            <Button onClick={() => navigate({ to: "/dashboard" })}>
+              Ir para o Dashboard <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          )}
         </div>
-        <OnboardingWizard companyId={companyId} />
       </Card>
+    </div>
+  );
+}
+
+function Step({ badge, title, description, children }: { badge: string; title: string; description: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <Badge variant="secondary" className="mb-2">{badge}</Badge>
+      <h2 className="text-xl font-semibold">{title}</h2>
+      <p className="text-sm text-muted-foreground mb-5">{description}</p>
+      {children}
     </div>
   );
 }
