@@ -195,7 +195,36 @@ export async function processInterest(
     })
     .select('id')
     .single()
-  if (intErr) throw intErr
+  if (intErr) {
+    // Rate limit / audit: persist a denial event when the BEFORE INSERT trigger fires.
+    const msg = String((intErr as { message?: string })?.message ?? '')
+    if (msg.includes('rate_limit_exceeded')) {
+      const reason = /reason=([a-z_]+)/.exec(msg)?.[1] ?? 'unknown'
+      const observed = Number(/observed=(\d+)/.exec(msg)?.[1] ?? 0)
+      const limit = Number(/limit=(\d+)/.exec(msg)?.[1] ?? 0)
+      try {
+        await supabaseAdmin.from('audit_logs').insert({
+          company_id: companyId,
+          user_id: brokerUserId ?? null,
+          action: 'realestate.interest.rate_limited',
+          entity: 'realestate_interests',
+          metadata: {
+            reason,
+            observed_count: observed,
+            limit,
+            window_seconds: 60,
+            ip: input.ip ?? null,
+            contact_email: input.contactEmail ?? null,
+            source: input.source ?? 'vitrine',
+          },
+        })
+      } catch (e) {
+        console.warn('[realestate] failed to record rate limit audit:', e)
+      }
+    }
+    throw intErr
+  }
+
   const interestId = (interest as any).id as string
 
   const { data: msg, error: msgErr } = await supabaseAdmin.from('realestate_internal_messages').insert({
