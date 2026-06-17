@@ -1,0 +1,172 @@
+/**
+ * Vitrine imobiliária — server functions para o admin.
+ * Listagens, atualização de status, contadores, atribuição.
+ */
+import { createServerFn } from '@tanstack/react-start'
+import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
+import { z } from 'zod'
+
+const ListInterestsInput = z.object({
+  companyId: z.string().uuid(),
+  status: z.string().optional(),
+  search: z.string().optional(),
+  page: z.number().int().min(1).default(1),
+  pageSize: z.number().int().min(5).max(200).default(50),
+})
+
+export const listVitrineInterests = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: z.infer<typeof ListInterestsInput>) => ListInterestsInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const from = (data.page - 1) * data.pageSize
+    const to = from + data.pageSize - 1
+    let q = context.supabase
+      .from('realestate_interests')
+      .select(`id, created_at, updated_at, kind, status, contact_name, contact_email, contact_phone, contact_whatsapp,
+               message, source, last_action_at, responded_at, broker_user_id, lead_id,
+               property:property_id ( id, title, reference_code )`, { count: 'exact' })
+      .eq('company_id', data.companyId)
+      .order('created_at', { ascending: false })
+      .range(from, to)
+    if (data.status && data.status !== 'todos') q = q.eq('status', data.status)
+    if (data.search && data.search.trim()) {
+      const s = `%${data.search.trim()}%`
+      q = q.or(`contact_name.ilike.${s},contact_email.ilike.${s},contact_phone.ilike.${s}`)
+    }
+    const { data: rows, error, count } = await q
+    if (error) throw error
+    return { rows: rows ?? [], total: count ?? 0 }
+  })
+
+const UpdateInterestInput = z.object({
+  id: z.string().uuid(),
+  companyId: z.string().uuid(),
+  status: z.enum(['novo', 'em_atendimento', 'respondido', 'convertido', 'perdido', 'arquivado']).optional(),
+  brokerUserId: z.string().uuid().nullable().optional(),
+})
+
+export const updateVitrineInterest = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: z.infer<typeof UpdateInterestInput>) => UpdateInterestInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const patch: { last_action_at: string; status?: string; responded_at?: string; broker_user_id?: string | null } = { last_action_at: new Date().toISOString() }
+    if (data.status) {
+      patch.status = data.status
+      if (data.status === 'respondido') patch.responded_at = new Date().toISOString()
+    }
+    if (data.brokerUserId !== undefined) patch.broker_user_id = data.brokerUserId
+    const { data: row, error } = await context.supabase
+      .from('realestate_interests')
+      .update(patch)
+      .eq('id', data.id)
+      .eq('company_id', data.companyId)
+      .select('id, status, broker_user_id')
+      .single()
+    if (error) throw error
+    return row
+  })
+
+const ListMessagesInput = z.object({
+  companyId: z.string().uuid(),
+  status: z.string().optional(),
+  search: z.string().optional(),
+  page: z.number().int().min(1).default(1),
+  pageSize: z.number().int().min(5).max(200).default(50),
+})
+
+export const listVitrineMessages = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: z.infer<typeof ListMessagesInput>) => ListMessagesInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const from = (data.page - 1) * data.pageSize
+    const to = from + data.pageSize - 1
+    let q = context.supabase
+      .from('realestate_internal_messages')
+      .select(`id, created_at, updated_at, channel, request_kind, status, subject, body,
+               contact_name, contact_email, contact_phone, assigned_user_id, replies_count, last_reply_at,
+               property:property_id ( id, title, reference_code ), interest_id, intent_id, lead_id`,
+              { count: 'exact' })
+      .eq('company_id', data.companyId)
+      .order('created_at', { ascending: false })
+      .range(from, to)
+    if (data.status && data.status !== 'todos') q = q.eq('status', data.status)
+    if (data.search && data.search.trim()) {
+      const s = `%${data.search.trim()}%`
+      q = q.or(`subject.ilike.${s},contact_name.ilike.${s},contact_email.ilike.${s}`)
+    }
+    const { data: rows, error, count } = await q
+    if (error) throw error
+    return { rows: rows ?? [], total: count ?? 0 }
+  })
+
+const UpdateMessageInput = z.object({
+  id: z.string().uuid(),
+  companyId: z.string().uuid(),
+  status: z.enum(['nova', 'em_atendimento', 'respondida', 'arquivada']).optional(),
+  assignedUserId: z.string().uuid().nullable().optional(),
+})
+
+export const updateVitrineMessage = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: z.infer<typeof UpdateMessageInput>) => UpdateMessageInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const patch: { status?: string; last_reply_at?: string; assigned_user_id?: string | null } = {}
+    if (data.status) {
+      patch.status = data.status
+      if (data.status === 'respondida') {
+        patch.last_reply_at = new Date().toISOString()
+      }
+    }
+    if (data.assignedUserId !== undefined) patch.assigned_user_id = data.assignedUserId
+    const { data: row, error } = await context.supabase
+      .from('realestate_internal_messages')
+      .update(patch)
+      .eq('id', data.id)
+      .eq('company_id', data.companyId)
+      .select('id, status, assigned_user_id')
+      .single()
+    if (error) throw error
+    return row
+  })
+
+const CountersInput = z.object({ companyId: z.string().uuid() })
+
+export const getVitrineCounters = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: z.infer<typeof CountersInput>) => CountersInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const company = data.companyId
+    const tx = context.supabase
+
+    const since30 = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString()
+    const since7 = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString()
+
+    const [interestsTotal, interestsNew, interestsAttending, interests30, messagesNew, messagesTotal,
+           searchesActive, searchesTotal, propertiesActive, propertiesFeatured, leadsVitrine] = await Promise.all([
+      tx.from('realestate_interests').select('id', { count: 'exact', head: true }).eq('company_id', company),
+      tx.from('realestate_interests').select('id', { count: 'exact', head: true }).eq('company_id', company).eq('status', 'novo'),
+      tx.from('realestate_interests').select('id', { count: 'exact', head: true }).eq('company_id', company).eq('status', 'em_atendimento'),
+      tx.from('realestate_interests').select('id', { count: 'exact', head: true }).eq('company_id', company).gte('created_at', since30),
+      tx.from('realestate_internal_messages').select('id', { count: 'exact', head: true }).eq('company_id', company).eq('status', 'nova'),
+      tx.from('realestate_internal_messages').select('id', { count: 'exact', head: true }).eq('company_id', company),
+      tx.from('realestate_search_intents').select('id', { count: 'exact', head: true }).eq('company_id', company).eq('status', 'ativo'),
+      tx.from('realestate_search_intents').select('id', { count: 'exact', head: true }).eq('company_id', company),
+      tx.from('realestate_properties').select('id', { count: 'exact', head: true }).eq('company_id', company).eq('status', 'ativo').eq('is_published', true).eq('approval_status', 'approved'),
+      tx.from('realestate_properties').select('id', { count: 'exact', head: true }).eq('company_id', company).eq('status', 'ativo').eq('is_published', true).eq('approval_status', 'approved'),
+      tx.from('crm_leads').select('id', { count: 'exact', head: true }).eq('company_id', company).gte('created_at', since7).like('source', 'vitrine%'),
+    ])
+
+    return {
+      interestsTotal: interestsTotal.count ?? 0,
+      interestsNew: interestsNew.count ?? 0,
+      interestsAttending: interestsAttending.count ?? 0,
+      interestsLast30Days: interests30.count ?? 0,
+      messagesNew: messagesNew.count ?? 0,
+      messagesTotal: messagesTotal.count ?? 0,
+      searchesActive: searchesActive.count ?? 0,
+      searchesTotal: searchesTotal.count ?? 0,
+      propertiesActive: propertiesActive.count ?? 0,
+      propertiesFeatured: propertiesFeatured.count ?? 0,
+      leadsFromVitrineLast7Days: leadsVitrine.count ?? 0,
+    }
+  })

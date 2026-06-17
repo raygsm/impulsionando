@@ -8,6 +8,10 @@ import { template as welcomePaidTemplate } from './welcome-paid'
 import { template as invoicePaidTemplate } from './invoice-paid'
 import { template as invoiceOverdueTemplate } from './invoice-overdue'
 import { template as realestatePropertyApprovalTemplate } from './realestate-property-approval'
+import { template as realestateVitrineInterestCustomerTemplate } from './realestate-vitrine-interest-customer'
+import { template as realestateVitrineInterestAgencyTemplate } from './realestate-vitrine-interest-agency'
+import { template as realestateVitrineSearchCustomerTemplate } from './realestate-vitrine-search-customer'
+import { template as realestateVitrineSearchAgencyTemplate } from './realestate-vitrine-search-agency'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -32,4 +36,8 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'invoice-paid': invoicePaidTemplate,
   'invoice-overdue': invoiceOverdueTemplate,
   'realestate-property-approval': realestatePropertyApprovalTemplate,
+  'realestate-vitrine-interest-customer': realestateVitrineInterestCustomerTemplate,
+  'realestate-vitrine-interest-agency': realestateVitrineInterestAgencyTemplate,
+  'realestate-vitrine-search-customer': realestateVitrineSearchCustomerTemplate,
+  'realestate-vitrine-search-agency': realestateVitrineSearchAgencyTemplate,
 }

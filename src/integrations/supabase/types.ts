@@ -2738,6 +2738,7 @@ export type Database = {
           owner_name: string | null
           phone: string | null
           primary_color: string | null
+          public_slug: string | null
           secondary_color: string | null
           segment: string | null
           status: string
@@ -2745,6 +2746,7 @@ export type Database = {
           support_email: string | null
           trade_name: string | null
           updated_at: string
+          vitrine_enabled: boolean
           website: string | null
           whatsapp: string | null
         }
@@ -2776,6 +2778,7 @@ export type Database = {
           owner_name?: string | null
           phone?: string | null
           primary_color?: string | null
+          public_slug?: string | null
           secondary_color?: string | null
           segment?: string | null
           status?: string
@@ -2783,6 +2786,7 @@ export type Database = {
           support_email?: string | null
           trade_name?: string | null
           updated_at?: string
+          vitrine_enabled?: boolean
           website?: string | null
           whatsapp?: string | null
         }
@@ -2814,6 +2818,7 @@ export type Database = {
           owner_name?: string | null
           phone?: string | null
           primary_color?: string | null
+          public_slug?: string | null
           secondary_color?: string | null
           segment?: string | null
           status?: string
@@ -2821,6 +2826,7 @@ export type Database = {
           support_email?: string | null
           trade_name?: string | null
           updated_at?: string
+          vitrine_enabled?: boolean
           website?: string | null
           whatsapp?: string | null
         }
@@ -6778,6 +6784,199 @@ export type Database = {
         }
         Relationships: []
       }
+      realestate_interests: {
+        Row: {
+          broker_user_id: string | null
+          company_id: string
+          contact_email: string | null
+          contact_name: string
+          contact_phone: string | null
+          contact_whatsapp: string | null
+          created_at: string
+          id: string
+          ip: string | null
+          kind: string
+          last_action_at: string | null
+          lead_id: string | null
+          message: string | null
+          property_id: string
+          responded_at: string | null
+          source: string
+          status: string
+          updated_at: string
+          user_agent: string | null
+          utm: Json
+        }
+        Insert: {
+          broker_user_id?: string | null
+          company_id: string
+          contact_email?: string | null
+          contact_name: string
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
+          created_at?: string
+          id?: string
+          ip?: string | null
+          kind?: string
+          last_action_at?: string | null
+          lead_id?: string | null
+          message?: string | null
+          property_id: string
+          responded_at?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          user_agent?: string | null
+          utm?: Json
+        }
+        Update: {
+          broker_user_id?: string | null
+          company_id?: string
+          contact_email?: string | null
+          contact_name?: string
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
+          created_at?: string
+          id?: string
+          ip?: string | null
+          kind?: string
+          last_action_at?: string | null
+          lead_id?: string | null
+          message?: string | null
+          property_id?: string
+          responded_at?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          user_agent?: string | null
+          utm?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "realestate_interests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "realestate_interests_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "realestate_interests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "realestate_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      realestate_internal_messages: {
+        Row: {
+          assigned_user_id: string | null
+          body: string
+          channel: string
+          company_id: string
+          contact_email: string | null
+          contact_name: string
+          contact_phone: string | null
+          created_at: string
+          id: string
+          intent_id: string | null
+          interest_id: string | null
+          last_reply_at: string | null
+          lead_id: string | null
+          property_id: string | null
+          replies_count: number
+          request_kind: string
+          status: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_user_id?: string | null
+          body: string
+          channel?: string
+          company_id: string
+          contact_email?: string | null
+          contact_name: string
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          intent_id?: string | null
+          interest_id?: string | null
+          last_reply_at?: string | null
+          lead_id?: string | null
+          property_id?: string | null
+          replies_count?: number
+          request_kind?: string
+          status?: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_user_id?: string | null
+          body?: string
+          channel?: string
+          company_id?: string
+          contact_email?: string | null
+          contact_name?: string
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          intent_id?: string | null
+          interest_id?: string | null
+          last_reply_at?: string | null
+          lead_id?: string | null
+          property_id?: string | null
+          replies_count?: number
+          request_kind?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "realestate_internal_messages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "realestate_internal_messages_intent_id_fkey"
+            columns: ["intent_id"]
+            isOneToOne: false
+            referencedRelation: "realestate_search_intents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "realestate_internal_messages_interest_id_fkey"
+            columns: ["interest_id"]
+            isOneToOne: false
+            referencedRelation: "realestate_interests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "realestate_internal_messages_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "realestate_internal_messages_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "realestate_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       realestate_properties: {
         Row: {
           address_line: string | null
@@ -6909,6 +7108,64 @@ export type Database = {
           },
         ]
       }
+      realestate_property_history: {
+        Row: {
+          actor_lead_id: string | null
+          actor_user_id: string | null
+          company_id: string
+          created_at: string
+          description: string
+          event_code: string
+          id: string
+          payload: Json
+          property_id: string
+        }
+        Insert: {
+          actor_lead_id?: string | null
+          actor_user_id?: string | null
+          company_id: string
+          created_at?: string
+          description: string
+          event_code: string
+          id?: string
+          payload?: Json
+          property_id: string
+        }
+        Update: {
+          actor_lead_id?: string | null
+          actor_user_id?: string | null
+          company_id?: string
+          created_at?: string
+          description?: string
+          event_code?: string
+          id?: string
+          payload?: Json
+          property_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "realestate_property_history_actor_lead_id_fkey"
+            columns: ["actor_lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "realestate_property_history_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "realestate_property_history_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "realestate_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       realestate_property_matches: {
         Row: {
           company_id: string
@@ -7022,6 +7279,7 @@ export type Database = {
           created_by: string | null
           customer_id: string | null
           id: string
+          ip: string | null
           lead_id: string | null
           neighborhoods: string[]
           notes: string | null
@@ -7030,8 +7288,12 @@ export type Database = {
           price_max: number | null
           price_min: number | null
           property_types: Database["public"]["Enums"]["realestate_property_type"][]
+          source: string | null
           status: Database["public"]["Enums"]["realestate_intent_status"]
           updated_at: string
+          user_agent: string | null
+          utm: Json
+          whatsapp: string | null
         }
         Insert: {
           area_min?: number | null
@@ -7046,6 +7308,7 @@ export type Database = {
           created_by?: string | null
           customer_id?: string | null
           id?: string
+          ip?: string | null
           lead_id?: string | null
           neighborhoods?: string[]
           notes?: string | null
@@ -7054,8 +7317,12 @@ export type Database = {
           price_max?: number | null
           price_min?: number | null
           property_types?: Database["public"]["Enums"]["realestate_property_type"][]
+          source?: string | null
           status?: Database["public"]["Enums"]["realestate_intent_status"]
           updated_at?: string
+          user_agent?: string | null
+          utm?: Json
+          whatsapp?: string | null
         }
         Update: {
           area_min?: number | null
@@ -7070,6 +7337,7 @@ export type Database = {
           created_by?: string | null
           customer_id?: string | null
           id?: string
+          ip?: string | null
           lead_id?: string | null
           neighborhoods?: string[]
           notes?: string | null
@@ -7078,8 +7346,12 @@ export type Database = {
           price_max?: number | null
           price_min?: number | null
           property_types?: Database["public"]["Enums"]["realestate_property_type"][]
+          source?: string | null
           status?: Database["public"]["Enums"]["realestate_intent_status"]
           updated_at?: string
+          user_agent?: string | null
+          utm?: Json
+          whatsapp?: string | null
         }
         Relationships: [
           {
