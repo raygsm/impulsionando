@@ -99,9 +99,10 @@ export function PublicHeader() {
   return (
     <header className="sticky top-0 z-30 w-full border-b border-border bg-background/90 backdrop-blur">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-3">
-        <Link to="/" className="flex items-center shrink-0">
-          <LogoImpulsionando variant="light" size="lg" />
+        <Link to="/" className="flex items-center shrink-0 [&_img]:!h-56">
+          <LogoImpulsionando variant="light" size="xl" />
         </Link>
+
 
 
         <nav className="hidden lg:flex items-center gap-0.5">
