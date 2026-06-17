@@ -12,6 +12,7 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "test:rls": "vitest run tests/rls-permissions.test.ts",
+    "test:rls:contracts": "vitest run tests/rls-contracts-isolation.test.ts",
     "test:e2e": "playwright test"
   },
   "dependencies": {
