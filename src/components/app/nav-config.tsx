@@ -99,6 +99,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/niches", label: "Nichos", icon: Tags, superOnly: true },
       { to: "/units", label: "Unidades", icon: MapPin, perm: "units.read" },
       { to: "/sectors", label: "Setores", icon: Layers, perm: "sectors.read" },
+      { to: "/users/corporate", label: "Visão Corporativa", icon: Users, perm: "users.read" },
       { to: "/users", label: "Usuários", icon: Users, perm: "users.read" },
       { to: "/access-profiles", label: "Perfis de acesso", icon: KeyRound, perm: "profiles.read" },
       { to: "/access-profiles/matrix", label: "Matriz de Permissões", icon: KeyRound, perm: "profiles.read" },
