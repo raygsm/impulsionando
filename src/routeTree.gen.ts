@@ -104,6 +104,7 @@ import { Route as DemoCrmRouteImport } from './routes/demo.crm'
 import { Route as DemoClienteFinalRouteImport } from './routes/demo.cliente-final'
 import { Route as DemoCheckoutRouteImport } from './routes/demo.checkout'
 import { Route as DemoChecklistRouteImport } from './routes/demo.checklist'
+import { Route as DemoBeerHouseRouteImport } from './routes/demo.beer-house'
 import { Route as DemoAgendaRouteImport } from './routes/demo.agenda'
 import { Route as DemoAfiliadosRouteImport } from './routes/demo.afiliados'
 import { Route as DemoAdvogadosRouteImport } from './routes/demo.advogados'
@@ -772,6 +773,11 @@ const DemoCheckoutRoute = DemoCheckoutRouteImport.update({
 const DemoChecklistRoute = DemoChecklistRouteImport.update({
   id: '/demo/checklist',
   path: '/demo/checklist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoBeerHouseRoute = DemoBeerHouseRouteImport.update({
+  id: '/demo/beer-house',
+  path: '/demo/beer-house',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoAgendaRoute = DemoAgendaRouteImport.update({
@@ -1910,6 +1916,7 @@ export interface FileRoutesByFullPath {
   '/demo/advogados': typeof DemoAdvogadosRoute
   '/demo/afiliados': typeof DemoAfiliadosRoute
   '/demo/agenda': typeof DemoAgendaRoute
+  '/demo/beer-house': typeof DemoBeerHouseRoute
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/checkout': typeof DemoCheckoutRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
@@ -2185,6 +2192,7 @@ export interface FileRoutesByTo {
   '/demo/advogados': typeof DemoAdvogadosRoute
   '/demo/afiliados': typeof DemoAfiliadosRoute
   '/demo/agenda': typeof DemoAgendaRoute
+  '/demo/beer-house': typeof DemoBeerHouseRoute
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/checkout': typeof DemoCheckoutRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
@@ -2473,6 +2481,7 @@ export interface FileRoutesById {
   '/demo/advogados': typeof DemoAdvogadosRoute
   '/demo/afiliados': typeof DemoAfiliadosRoute
   '/demo/agenda': typeof DemoAgendaRoute
+  '/demo/beer-house': typeof DemoBeerHouseRoute
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/checkout': typeof DemoCheckoutRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
@@ -2761,6 +2770,7 @@ export interface FileRouteTypes {
     | '/demo/advogados'
     | '/demo/afiliados'
     | '/demo/agenda'
+    | '/demo/beer-house'
     | '/demo/checklist'
     | '/demo/checkout'
     | '/demo/cliente-final'
@@ -3036,6 +3046,7 @@ export interface FileRouteTypes {
     | '/demo/advogados'
     | '/demo/afiliados'
     | '/demo/agenda'
+    | '/demo/beer-house'
     | '/demo/checklist'
     | '/demo/checkout'
     | '/demo/cliente-final'
@@ -3323,6 +3334,7 @@ export interface FileRouteTypes {
     | '/demo/advogados'
     | '/demo/afiliados'
     | '/demo/agenda'
+    | '/demo/beer-house'
     | '/demo/checklist'
     | '/demo/checkout'
     | '/demo/cliente-final'
@@ -3582,6 +3594,7 @@ export interface RootRouteChildren {
   DemoAdvogadosRoute: typeof DemoAdvogadosRoute
   DemoAfiliadosRoute: typeof DemoAfiliadosRoute
   DemoAgendaRoute: typeof DemoAgendaRoute
+  DemoBeerHouseRoute: typeof DemoBeerHouseRoute
   DemoChecklistRoute: typeof DemoChecklistRoute
   DemoCheckoutRoute: typeof DemoCheckoutRoute
   DemoClienteFinalRoute: typeof DemoClienteFinalRoute
@@ -4338,6 +4351,13 @@ declare module '@tanstack/react-router' {
       path: '/demo/checklist'
       fullPath: '/demo/checklist'
       preLoaderRoute: typeof DemoChecklistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo/beer-house': {
+      id: '/demo/beer-house'
+      path: '/demo/beer-house'
+      fullPath: '/demo/beer-house'
+      preLoaderRoute: typeof DemoBeerHouseRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo/agenda': {
@@ -6321,6 +6341,7 @@ const rootRouteChildren: RootRouteChildren = {
   DemoAdvogadosRoute: DemoAdvogadosRoute,
   DemoAfiliadosRoute: DemoAfiliadosRoute,
   DemoAgendaRoute: DemoAgendaRoute,
+  DemoBeerHouseRoute: DemoBeerHouseRoute,
   DemoChecklistRoute: DemoChecklistRoute,
   DemoCheckoutRoute: DemoCheckoutRoute,
   DemoClienteFinalRoute: DemoClienteFinalRoute,
