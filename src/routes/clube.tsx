@@ -4,6 +4,7 @@
  * histórico para links/SEO antigos) e reforça as metatags voltadas
  * ao consumidor.
  */
+import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Route as ConsumidorRoute } from "./consumidor";
 
@@ -23,6 +24,10 @@ export const Route = createFileRoute("/clube")({
     ],
     links: [{ rel: "canonical", href: "https://impulsionando.com.br/clube" }],
   }),
-  // Reaproveita o componente da rota /consumidor para não duplicar UI.
-  component: ConsumidorRoute.options.component!,
+  component: ClubeRoute,
 });
+
+function ClubeRoute() {
+  const Comp = ConsumidorRoute.options.component as React.ComponentType;
+  return <Comp />;
+}
