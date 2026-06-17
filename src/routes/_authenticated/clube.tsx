@@ -31,11 +31,13 @@ import {
   getMyClubeOverview, updateClubeLocation, updateClubeInterests,
   listMyClubeAlerts, upsertClubeAlert, deleteClubeAlert,
   getMyReferralInfo, inviteReferral, createClubeVisit,
+  listClubePartners, listMyClubeConsumption, recordClubeConsumption, votePoll,
 } from "@/lib/clube.functions";
 import {
   Crown, Sparkles, Heart, Receipt, Copy, AlertCircle, Building2,
-  MapPin, Bell, Trophy, Gift, Plus, Trash2, Share2, Send, BellRing,
+  MapPin, Bell, Trophy, Gift, Plus, Trash2, Share2, Send, BellRing, Compass, History, Search,
 } from "lucide-react";
+
 
 export const Route = createFileRoute("/_authenticated/clube")({
   component: ClubePage,
