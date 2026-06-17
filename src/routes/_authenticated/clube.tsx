@@ -285,7 +285,7 @@ function RecentVisitsCard({ visits, onCheckin }: { visits: any[]; onCheckin: () 
   );
 }
 
-function PollsCard({ polls }: { polls: any[] }) {
+function PollsCard({ polls, onVote }: { polls: any[]; onVote: (pollId: string, optionId: string) => Promise<void> }) {
   return (
     <Card className="p-5">
       <h2 className="font-semibold flex items-center gap-2 mb-3"><Sparkles className="w-4 h-4" /> Sua opinião conta</h2>
