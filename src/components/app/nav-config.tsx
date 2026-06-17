@@ -133,6 +133,8 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Inteligência",
     items: [
+      { to: "/insights/respostas", label: "Dashboard de Respostas", icon: Sparkles },
+      { to: "/insights/oportunidades", label: "Central de Oportunidades", icon: Zap },
       { to: "/reports", label: "Relatórios — visão geral", icon: BarChart3, perm: "report.read" },
       { to: "/reports/sales", label: "Vendas", icon: ShoppingCart, perm: "report.read" },
       { to: "/reports/finance", label: "Financeiro", icon: Wallet, perm: "report.read" },
