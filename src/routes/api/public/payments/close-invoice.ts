@@ -1,12 +1,11 @@
 /**
- * Webhook público de pagamento — fecha faturas automaticamente.
+ * Webhook genérico que fecha faturas (consumidor premium + contratos ERP).
  *
- * POST /api/public/payments/webhook
+ * POST /api/public/payments/close-invoice
  * Header: x-webhook-signature: HMAC-SHA256 do corpo bruto com INFINITEPAY_WEBHOOK_SECRET
  * Body: { kind: "consumer" | "erp", invoice_id: uuid, status: "paid" }
  *
- * Compatível com provedores PIX / InfinitePay / Paddle desde que o adapter
- * envie esse formato. Para outros provedores, troque apenas o parser do body.
+ * Convive com /api/public/payments/webhook (que é o webhook nativo da Paddle/InfinitePay).
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { createHmac, timingSafeEqual } from "crypto";
@@ -31,7 +30,7 @@ function verifySignature(body: string, signature: string | null, secret: string)
   }
 }
 
-export const Route = createFileRoute("/api/public/payments/webhook")({
+export const Route = createFileRoute("/api/public/payments/close-invoice")({
   server: {
     handlers: {
       POST: async ({ request }) => {
