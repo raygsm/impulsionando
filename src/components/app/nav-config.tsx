@@ -8,7 +8,7 @@ import {
   Contact, BarChart3, ShieldCheck, Inbox, GraduationCap, Stethoscope, Sparkles,
   Handshake, Link2, Briefcase, BadgeDollarSign, TrendingUp, Banknote, Copy,
   Home, Search as SearchIcon, Zap, Bot, MessageSquare,
-  History as HistoryIcon,
+  History as HistoryIcon, Headphones, UserRound,
 } from "lucide-react";
 
 export interface NavItem {
