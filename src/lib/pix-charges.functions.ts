@@ -159,28 +159,58 @@ export const getPixChargeStatus = createServerFn({ method: 'POST' })
   })
 
 /**
- * Admin-only: list pending charges so the financial team can confirm
- * payments by cross-checking the bank statement.
+ * Admin-only: list charges with optional filters (status, date range, plan,
+ * free-text search by payer name/email/whatsapp/amount).
  */
-export const listPendingPixCharges = createServerFn({ method: 'GET' })
+const ListInput = z
+  .object({
+    statuses: z.array(z.enum(['pending', 'paid', 'expired', 'cancelled'])).optional(),
+    fromISO: z.string().datetime().optional(),
+    toISO: z.string().datetime().optional(),
+    planCode: z.string().optional(),
+    search: z.string().optional(),
+    limit: z.number().int().min(1).max(500).optional(),
+  })
+  .optional()
+
+export const listPendingPixCharges = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((input: unknown) => ListInput.parse(input))
+  .handler(async ({ data, context }) => {
     const { data: isAdmin } = await context.supabase.rpc('has_role', {
       _user_id: context.userId,
       _role: 'admin',
     })
     if (!isAdmin) throw new Error('Forbidden')
 
-    const { data, error } = await context.supabase
+    let q = context.supabase
       .from('billing_pix_charges')
       .select(
-        'id, plan_code, base_amount_cents, unique_amount_cents, status, payer_name, payer_email, payer_whatsapp, contract_id, company_id, created_at, expires_at, paid_at',
+        'id, plan_code, base_amount_cents, unique_amount_cents, status, payer_name, payer_email, payer_whatsapp, contract_id, company_id, created_at, expires_at, paid_at, receipt_url, txid, notes',
       )
-      .in('status', ['pending', 'paid'])
       .order('created_at', { ascending: false })
-      .limit(200)
+      .limit(data?.limit ?? 200)
+
+    q = q.in('status', data?.statuses ?? ['pending', 'paid'])
+    if (data?.fromISO) q = q.gte('created_at', data.fromISO)
+    if (data?.toISO) q = q.lte('created_at', data.toISO)
+    if (data?.planCode) q = q.eq('plan_code', data.planCode)
+    if (data?.search) {
+      const s = data.search.trim()
+      const orParts = [
+        `payer_name.ilike.%${s}%`,
+        `payer_email.ilike.%${s}%`,
+        `payer_whatsapp.ilike.%${s}%`,
+        `txid.ilike.%${s}%`,
+      ]
+      const asNum = Number(s.replace(/\D/g, ''))
+      if (Number.isFinite(asNum) && asNum > 0) orParts.push(`unique_amount_cents.eq.${asNum}`)
+      q = q.or(orParts.join(','))
+    }
+
+    const { data: rows, error } = await q
     if (error) throw new Error(error.message)
-    return data ?? []
+    return rows ?? []
   })
 
 /**
