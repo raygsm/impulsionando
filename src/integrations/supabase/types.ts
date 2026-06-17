@@ -2600,6 +2600,74 @@ export type Database = {
           },
         ]
       }
+      clube_journey_log: {
+        Row: {
+          enqueued_at: string
+          id: string
+          step_id: string
+          user_id: string
+        }
+        Insert: {
+          enqueued_at?: string
+          id?: string
+          step_id: string
+          user_id: string
+        }
+        Update: {
+          enqueued_at?: string
+          id?: string
+          step_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clube_journey_log_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "clube_journey_steps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clube_journey_steps: {
+        Row: {
+          active: boolean
+          audience: string
+          body: string
+          channel: string
+          created_at: string
+          day_offset: number
+          event_code: string
+          id: string
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          audience?: string
+          body: string
+          channel?: string
+          created_at?: string
+          day_offset: number
+          event_code: string
+          id?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          audience?: string
+          body?: string
+          channel?: string
+          created_at?: string
+          day_offset?: number
+          event_code?: string
+          id?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       clube_poll_votes: {
         Row: {
           created_at: string
@@ -2684,6 +2752,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      clube_receipts: {
+        Row: {
+          amount_cents: number
+          company_id: string | null
+          created_at: string
+          id: string
+          issued_at: string
+          kind: string
+          meta: Json
+          receipt_url: string | null
+          reference_id: string | null
+          reference_type: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          amount_cents?: number
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          issued_at?: string
+          kind?: string
+          meta?: Json
+          receipt_url?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          issued_at?: string
+          kind?: string
+          meta?: Json
+          receipt_url?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       clube_referrals: {
         Row: {

@@ -373,3 +373,160 @@ export const getAdminClubeOverview = createServerFn({ method: "GET" })
       recentSignups: recentSignups.data ?? [],
     };
   });
+
+// -----------------------------------------------------------------
+// Comprovantes digitais (Pix, consumo, manual)
+// -----------------------------------------------------------------
+export const listMyClubeReceipts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("clube_receipts")
+      .select("*")
+      .eq("user_id", context.userId)
+      .order("issued_at", { ascending: false })
+      .limit(100);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+// -----------------------------------------------------------------
+// Recomendações por interesse (matching simples por segmento / nome)
+// -----------------------------------------------------------------
+export const getClubeRecommendations = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const sb = context.supabase;
+    const { data: profile } = await sb
+      .from("consumer_profiles")
+      .select("interests_tags, city, state")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+
+    const tags: string[] = (profile?.interests_tags as any) ?? [];
+    const city = profile?.city as string | undefined;
+
+    let q = sb
+      .from("companies")
+      .select("id, name, trade_name, segment, logo_url, public_slug, address_city, address_state")
+      .eq("vitrine_enabled", true)
+      .limit(24);
+    if (city) q = q.ilike("address_city", `%${city}%`);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+
+    const scored = (rows ?? []).map((c: any) => {
+      const hay = `${c.segment ?? ""} ${c.trade_name ?? ""} ${c.name ?? ""}`.toLowerCase();
+      const score = tags.reduce((acc, t) => (hay.includes(t.toLowerCase()) ? acc + 1 : acc), 0);
+      return { ...c, score };
+    });
+    scored.sort((a, b) => b.score - a.score);
+    return { interests: tags, items: scored.slice(0, 12) };
+  });
+
+// -----------------------------------------------------------------
+// Admin: jornada de 21 dias (CRUD + run manual)
+// -----------------------------------------------------------------
+export const listJourneySteps = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("clube_journey_steps")
+      .select("*")
+      .order("day_offset", { ascending: true });
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+export const upsertJourneyStep = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      id: z.string().uuid().optional(),
+      day_offset: z.number().int().min(0).max(60),
+      channel: z.enum(["email", "whatsapp", "in_app"]),
+      audience: z.enum(["free", "premium", "all"]),
+      event_code: z.string().min(2).max(80),
+      subject: z.string().max(200).nullable().optional(),
+      body: z.string().min(2).max(2000),
+      active: z.boolean().default(true),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Acesso restrito");
+    const { error } = await context.supabase.from("clube_journey_steps").upsert(data as any);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const deleteJourneyStep = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Acesso restrito");
+    const { error } = await context.supabase.from("clube_journey_steps").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// -----------------------------------------------------------------
+// Enquetes (parceiro cria/edita, admin modera)
+// -----------------------------------------------------------------
+export const listMyPartnerPolls = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("clube_polls")
+      .select("*")
+      .eq("created_by", context.userId)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+export const upsertPartnerPoll = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      id: z.string().uuid().optional(),
+      company_id: z.string().uuid().optional(),
+      question: z.string().min(4).max(280),
+      options: z.array(z.object({ id: z.string().min(1).max(40), label: z.string().min(1).max(120) })).min(2).max(8),
+      kind: z.enum(["preference", "experience", "rating", "feature"]).default("preference"),
+      audience: z.enum(["all", "free", "premium", "city"]).default("all"),
+      city: z.string().max(120).optional(),
+      active: z.boolean().default(true),
+      closes_at: z.string().optional(),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const row = { ...data, created_by: context.userId } as any;
+    const { error } = await context.supabase.from("clube_polls").upsert(row);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const setPollActive = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid(), active: z.boolean() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("clube_polls").update({ active: data.active }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const listAdminPolls = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Acesso restrito");
+    const { data, error } = await context.supabase
+      .from("clube_polls")
+      .select("*, companies(trade_name, name)")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
