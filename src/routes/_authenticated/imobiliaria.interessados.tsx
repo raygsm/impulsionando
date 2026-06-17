@@ -53,10 +53,30 @@ function Page() {
   const qc = useQueryClient()
   const fetchList = useServerFn(listVitrineInterests)
   const fetchUpdate = useServerFn(updateVitrineInterest)
+  const fetchExport = useServerFn(exportVitrineDataset)
   const [status, setStatus] = useState('todos')
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
+  const [from, setFrom] = useState('')
+  const [to, setTo] = useState('')
+  const [exporting, setExporting] = useState(false)
   const pageSize = 25
+
+  async function handleExport() {
+    if (!companyId) return
+    setExporting(true)
+    try {
+      const r = await fetchExport({ data: { companyId, dataset: 'interests', status, search, from: from || undefined, to: to || undefined } })
+      const blob = new Blob([r.csv], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url; a.download = r.filename; a.click()
+      URL.revokeObjectURL(url)
+      toast.success(`${r.total} registro(s) exportado(s)`)
+    } catch (e: any) {
+      toast.error(e?.message ?? 'Falha ao exportar')
+    } finally { setExporting(false) }
+  }
 
   const { data, isLoading } = useQuery({
     queryKey: ['vitrine-interests', companyId, status, search, page],
