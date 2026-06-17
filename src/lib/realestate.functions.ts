@@ -232,6 +232,7 @@ export const submitPropertyForReview = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => ApprovalActionInput.parse(d))
   .handler(async ({ data, context }) => {
     const meta = await loadPropertyMeta(context.supabase, data.propertyId);
+    const previousStatus = meta.approval_status ?? null;
     const { data: prop, error: e1 } = await context.supabase
       .from("realestate_properties")
       .update({
@@ -244,7 +245,11 @@ export const submitPropertyForReview = createServerFn({ method: "POST" })
       .select("id, company_id, title, reference_code")
       .single();
     if (e1) throw new Error(e1.message);
-    await logReview(context.supabase, prop.id, prop.company_id, "submitted", context.userId, data.notes);
+    await logReview(
+      context.supabase, prop.id, prop.company_id, "submitted",
+      context.userId, data.notes, previousStatus, "pending",
+      { source: "submitPropertyForReview" },
+    );
     await dispatchNotification({
       event: "submitted",
       propertyId: prop.id,
