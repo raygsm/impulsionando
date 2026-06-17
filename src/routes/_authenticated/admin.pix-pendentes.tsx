@@ -65,7 +65,7 @@ function PixPendentesPage() {
   const [filter, setFilter] = useState('')
 
   const confirmMut = useMutation({
-    mutationFn: (input: { id: string; receiptUrl?: string }) => confirm({ data: input }),
+    mutationFn: (input: { id: string; receiptUrl?: string }) => confirmFn({ data: input }),
     onSuccess: () => {
       toast.success('Cobrança confirmada e plano liberado.')
       setConfirmTarget(null)
@@ -76,7 +76,7 @@ function PixPendentesPage() {
   })
 
   const cancelMut = useMutation({
-    mutationFn: (id: string) => cancel({ data: { id } }),
+    mutationFn: (id: string) => cancelFn({ data: { id } }),
     onSuccess: () => {
       toast.success('Cobrança cancelada.')
       qc.invalidateQueries({ queryKey: ['admin-pix-pending'] })
