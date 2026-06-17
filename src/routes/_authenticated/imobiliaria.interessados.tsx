@@ -273,6 +273,27 @@ function Page() {
             </div>
           </div>
         )}
+        {!exporting && trackedExportId && trackedLog?.row && (() => {
+          const row = trackedLog.row as any
+          const pct = row.total_expected ? Math.min(100, Math.round((row.total_exported / row.total_expected) * 100)) : (row.status === 'completed' ? 100 : 0)
+          const tone = row.status === 'failed' ? 'bg-red-500' : row.status === 'completed' ? 'bg-emerald-500' : 'bg-primary'
+          const label = row.status === 'running' ? 'Em execução' : row.status === 'completed' ? 'Concluído' : 'Falhou'
+          return (
+            <div className="w-full mt-2">
+              <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                <span>Export <code>{trackedExportId.slice(0, 8)}</code> · {label} — {row.total_exported} / {row.total_expected || '?'} · lote {row.batches_done}</span>
+                <div className="flex items-center gap-2">
+                  <span>{pct}%</span>
+                  <button type="button" className="underline" onClick={() => { setTrackedExportId(null); try { window.localStorage.removeItem(ACTIVE_EXPORT_KEY) } catch {} }}>dispensar</button>
+                </div>
+              </div>
+              <div className="w-full h-2 bg-muted rounded overflow-hidden">
+                <div className={`h-full ${tone} transition-all`} style={{ width: `${pct}%` }} />
+              </div>
+              {row.status === 'failed' && row.error_message && <div className="text-xs text-red-600 mt-1">{row.error_message}</div>}
+            </div>
+          )
+        })()}
       </Card>
 
       {isLoading ? (
