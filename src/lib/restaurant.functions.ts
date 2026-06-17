@@ -140,7 +140,7 @@ export const openTableSession = createServerFn({ method: "POST" })
       .from("sales_orders")
       .insert({
         company_id: companyId,
-        status: "aberto",
+        status: "draft",
         customer_name: data.customer_name ?? null,
         subtotal: 0,
         discount: 0,
