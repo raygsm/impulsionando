@@ -162,13 +162,16 @@ describe("listApprovalQueue — RLS isola por company_id (canApprove diferente, 
 describe("Notification preferences — opt-out por canal é gravado e respeitado por consultas", () => {
   it("usuário grava preferência email=false e in_app=true para realestate.approval.decision", async () => {
     const c = clients.reviewer;
-    const upserts = [
+    const rows = [
       { user_id: users.reviewer, company_id: null, category: "realestate.approval.decision", channel: "email", enabled: false },
       { user_id: users.reviewer, company_id: null, category: "realestate.approval.decision", channel: "in_app", enabled: true },
     ];
-    for (const row of upserts) {
-      const { error } = await c.from("notification_preferences")
-        .upsert(row, { onConflict: "user_id,category,channel" });
+    for (const row of rows) {
+      await c.from("notification_preferences")
+        .delete()
+        .eq("user_id", row.user_id).is("company_id", null)
+        .eq("category", row.category).eq("channel", row.channel);
+      const { error } = await c.from("notification_preferences").insert(row);
       expect(error).toBeNull();
     }
 
@@ -180,6 +183,7 @@ describe("Notification preferences — opt-out por canal é gravado e respeitado
     expect(map.email).toBe(false);
     expect(map.in_app).toBe(true);
   });
+
 
   it("usuário NÃO pode gravar preferências para outro usuário (RLS)", async () => {
     const { error } = await clients.reviewer.from("notification_preferences").insert({
