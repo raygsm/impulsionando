@@ -2600,6 +2600,45 @@ export type Database = {
           },
         ]
       }
+      clube_cron_log: {
+        Row: {
+          details: Json
+          enqueued: number
+          error_count: number
+          error_message: string | null
+          finished_at: string
+          id: string
+          job: string
+          skipped: number
+          started_at: string
+          status: string
+        }
+        Insert: {
+          details?: Json
+          enqueued?: number
+          error_count?: number
+          error_message?: string | null
+          finished_at?: string
+          id?: string
+          job?: string
+          skipped?: number
+          started_at?: string
+          status: string
+        }
+        Update: {
+          details?: Json
+          enqueued?: number
+          error_count?: number
+          error_message?: string | null
+          finished_at?: string
+          id?: string
+          job?: string
+          skipped?: number
+          started_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
       clube_journey_log: {
         Row: {
           enqueued_at: string
