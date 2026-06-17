@@ -591,3 +591,116 @@ function PlanTab({ membership, invoices, isPremium, onCancel }: { membership: an
     </Card>
   );
 }
+
+// ---------------------------------------------------------------
+function DiscoverTab({ defaultCity, fetchPartners }: {
+  defaultCity: string;
+  fetchPartners: (args: { city?: string; search?: string; limit?: number }) => Promise<any[]>;
+}) {
+  const [city, setCity] = useState(defaultCity ?? "");
+  const [search, setSearch] = useState("");
+  const partners = useQuery({
+    queryKey: ["clube-partners", city, search],
+    queryFn: () => fetchPartners({ city: city || undefined, search: search || undefined, limit: 60 }),
+  });
+
+  return (
+    <div className="space-y-4">
+      <Card className="p-4">
+        <div className="flex items-center gap-2 mb-3"><Compass className="w-4 h-4 text-primary" /><h2 className="font-semibold">Descobrir parceiros próximos</h2></div>
+        <div className="grid sm:grid-cols-[1fr_1fr_auto] gap-2">
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 absolute left-2.5 top-3 text-muted-foreground" />
+            <Input className="pl-8" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar (bar, café, restaurante...)" />
+          </div>
+          <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Cidade" />
+          <Button variant="outline" onClick={() => partners.refetch()}>Buscar</Button>
+        </div>
+      </Card>
+
+      {partners.isLoading ? (
+        <p className="text-sm text-muted-foreground p-4">Carregando…</p>
+      ) : (partners.data ?? []).length === 0 ? (
+        <Card className="p-6 text-center text-sm text-muted-foreground">Nenhum parceiro encontrado com esses filtros.</Card>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {(partners.data ?? []).map((p: any) => (
+            <Link key={p.id} to="/vitrine/$slug" params={{ slug: p.public_slug }}>
+              <Card className="p-4 hover:shadow-md transition">
+                <div className="flex items-center gap-3">
+                  {p.logo_url
+                    ? <img src={p.logo_url} alt={p.name} className="w-12 h-12 rounded-lg object-cover" />
+                    : <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center"><Building2 className="w-5 h-5 text-primary" /></div>}
+                  <div className="min-w-0 flex-1">
+                    <div className="font-medium text-sm truncate">{p.trade_name || p.name}</div>
+                    <div className="text-xs text-muted-foreground truncate">
+                      {p.segment ?? "Parceiro"} · {[p.address_city, p.address_state].filter(Boolean).join("/")}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------
+function HistoryTab({ isPremium, items, onAdd }: {
+  isPremium: boolean;
+  items: any[];
+  onAdd: (p: { total_cents: number; payment_method?: string; consumed_at?: string; company_id?: string }) => Promise<void>;
+}) {
+  const [valor, setValor] = useState("");
+  const [pagamento, setPagamento] = useState("");
+
+  if (!isPremium) {
+    return (
+      <Card className="p-6 text-center">
+        <History className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+        <h2 className="font-semibold mb-1">Histórico é exclusivo do Premium</h2>
+        <p className="text-sm text-muted-foreground mb-4">Assine o Clube Premium (R$ 9,99/mês) e tenha onde, quando, o que e quanto você consumiu — com biblioteca pessoal, alertas e cashback ampliado.</p>
+        <Button asChild className="bg-gradient-primary">
+          <Link to="/checkout/$plano" params={{ plano: "clube_premium" }}><Crown className="w-4 h-4 mr-1" /> Assinar Premium</Link>
+        </Button>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+      <Card className="p-5">
+        <h2 className="font-semibold mb-3 flex items-center gap-2"><History className="w-4 h-4" /> Meu histórico de consumo</h2>
+        {items.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhum consumo registrado ainda. Adicione manualmente ao lado ou aguarde a integração com o PDV dos parceiros.</p>
+        ) : (
+          <ul className="space-y-2">
+            {items.map((it) => (
+              <li key={it.id} className="flex items-center justify-between border rounded-lg p-3">
+                <div className="min-w-0">
+                  <div className="text-sm font-medium truncate">{it.companies?.trade_name || it.companies?.name || "Consumo"}</div>
+                  <div className="text-xs text-muted-foreground">{new Date(it.consumed_at).toLocaleString("pt-BR")} · {it.payment_method ?? "—"}</div>
+                </div>
+                <Badge variant="secondary">{BRL(it.total_cents)}</Badge>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+
+      <Card className="p-5">
+        <h2 className="font-semibold mb-3">Registrar consumo</h2>
+        <div className="space-y-3">
+          <div><Label>Valor (R$)</Label><Input type="number" min="0" step="0.01" value={valor} onChange={(e) => setValor(e.target.value)} placeholder="0,00" /></div>
+          <div><Label>Forma de pagamento</Label><Input value={pagamento} onChange={(e) => setPagamento(e.target.value)} placeholder="Pix, débito, dinheiro..." /></div>
+          <Button className="w-full" disabled={!valor} onClick={async () => {
+            await onAdd({ total_cents: Math.round(parseFloat(valor) * 100), payment_method: pagamento || undefined });
+            setValor(""); setPagamento("");
+          }}>Adicionar ao histórico</Button>
+        </div>
+      </Card>
+    </div>
+  );
+}
