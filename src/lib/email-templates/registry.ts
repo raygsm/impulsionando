@@ -14,6 +14,7 @@ import { template as realestateVitrineSearchCustomerTemplate } from './realestat
 import { template as realestateVitrineSearchAgencyTemplate } from './realestate-vitrine-search-agency'
 import { template as contractGeneratedTemplate } from './contract-generated'
 import { template as contractSignedTemplate } from './contract-signed'
+import { template as demoFeiraWelcomeTemplate } from './demo-feira-welcome'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -44,4 +45,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'realestate-vitrine-search-agency': realestateVitrineSearchAgencyTemplate,
   'contract-generated': contractGeneratedTemplate,
   'contract-signed': contractSignedTemplate,
+  'demo-feira-welcome': demoFeiraWelcomeTemplate,
 }
