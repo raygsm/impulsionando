@@ -181,6 +181,50 @@ export const closeTableSession = createServerFn({ method: "POST" })
       .eq("id", data.session_id)
       .eq("company_id", companyId);
     if (error) throw new Error(error.message);
+
+    // Envia recibo por e-mail ao cliente, se informou.
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: sess } = await supabaseAdmin
+        .from("restaurant_table_sessions")
+        .select(
+          `customer_email, customer_name, total, sales_order_id,
+           table:table_id ( number ),
+           company:company_id ( name, trade_name )`,
+        )
+        .eq("id", data.session_id)
+        .maybeSingle();
+      const email = (sess as any)?.customer_email as string | null;
+      if (email) {
+        const { data: items } = await supabaseAdmin
+          .from("sales_order_items")
+          .select("description, quantity, total, kitchen_status")
+          .eq("order_id", (sess as any).sales_order_id);
+        const billItems = (items ?? [])
+          .filter((i: any) => i.kitchen_status !== "cancelado")
+          .map((i: any) => ({
+            description: i.description,
+            quantity: Number(i.quantity),
+            total: Number(i.total),
+          }));
+        const { sendRestaurantEmail } = await import("@/lib/restaurant-notify.server");
+        await sendRestaurantEmail({
+          templateName: "restaurant-bill-closed",
+          to: email,
+          templateData: {
+            customerName: (sess as any)?.customer_name ?? undefined,
+            tableNumber: (sess as any)?.table?.number,
+            total: Number((sess as any)?.total ?? 0),
+            items: billItems,
+            companyName: (sess as any)?.company?.trade_name ?? (sess as any)?.company?.name,
+          },
+          idempotencyKey: `bill-closed:${data.session_id}`,
+        });
+      }
+    } catch (e) {
+      console.warn("notify bill-closed failed", e);
+    }
+
     return { ok: true };
   });
 
