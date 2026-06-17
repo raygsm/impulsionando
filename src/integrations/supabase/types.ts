@@ -2994,6 +2994,178 @@ export type Database = {
           },
         ]
       }
+      consumer_favorites: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consumer_favorites_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consumer_membership_invoices: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          due_date: string
+          id: string
+          membership_id: string
+          paid_at: string | null
+          period_end: string
+          period_start: string
+          pix_copy_paste: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          due_date: string
+          id?: string
+          membership_id: string
+          paid_at?: string | null
+          period_end: string
+          period_start: string
+          pix_copy_paste?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          due_date?: string
+          id?: string
+          membership_id?: string
+          paid_at?: string | null
+          period_end?: string
+          period_start?: string
+          pix_copy_paste?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consumer_membership_invoices_membership_id_fkey"
+            columns: ["membership_id"]
+            isOneToOne: false
+            referencedRelation: "consumer_memberships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consumer_memberships: {
+        Row: {
+          amount_cents: number
+          cancel_at_period_end: boolean
+          canceled_at: string | null
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          cycle: string
+          id: string
+          plan: string
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_cents?: number
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          cycle?: string
+          id?: string
+          plan?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          cycle?: string
+          id?: string
+          plan?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      consumer_profiles: {
+        Row: {
+          birthdate: string | null
+          city: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          marketing_optin: boolean
+          phone: string | null
+          state: string | null
+          updated_at: string
+          user_id: string
+          whatsapp: string | null
+        }
+        Insert: {
+          birthdate?: string | null
+          city?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          marketing_optin?: boolean
+          phone?: string | null
+          state?: string | null
+          updated_at?: string
+          user_id: string
+          whatsapp?: string | null
+        }
+        Update: {
+          birthdate?: string | null
+          city?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          marketing_optin?: boolean
+          phone?: string | null
+          state?: string | null
+          updated_at?: string
+          user_id?: string
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
       contract_documents: {
         Row: {
           billing_contract_id: string | null
@@ -9471,6 +9643,15 @@ export type Database = {
       }
       billing_run_cycle: { Args: never; Returns: Json }
       company_identity_payload: { Args: { _company_id: string }; Returns: Json }
+      consumer_premium_overview: { Args: never; Returns: Json }
+      consumer_upgrade_to_premium: {
+        Args: never
+        Returns: {
+          amount_cents: number
+          invoice_id: string
+          membership_id: string
+        }[]
+      }
       core_user_belongs_to_company: {
         Args: { _company_id: string; _uid: string }
         Returns: boolean
@@ -9609,6 +9790,19 @@ export type Database = {
           _user_id: string
         }
         Returns: string
+      }
+      public_vitrine_list: {
+        Args: { p_city?: string; p_limit?: number; p_segment?: string }
+        Returns: {
+          address_city: string
+          address_state: string
+          id: string
+          logo_url: string
+          name: string
+          public_slug: string
+          segment: string
+          trade_name: string
+        }[]
       }
       purge_smoke_runs: { Args: { days?: number }; Returns: number }
       purge_smoke_runs_detailed: {

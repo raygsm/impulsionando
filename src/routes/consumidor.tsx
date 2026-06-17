@@ -58,13 +58,13 @@ function ConsumidorPage() {
             </p>
             <div className="mt-8 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-center gap-3">
               <Button asChild size="lg" className="gap-2 bg-white text-primary hover:bg-white/90 w-full sm:w-auto">
-                <Link to="/auth">
-                  Quero acessar benefícios <ArrowRight className="w-4 h-4 shrink-0" />
+                <Link to="/vitrine">
+                  Explorar parceiros <ArrowRight className="w-4 h-4 shrink-0" />
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="gap-2 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white w-full sm:w-auto">
-                <Link to="/auth">
-                  <LogIn className="w-4 h-4" /> Entrar na minha área
+                <Link to="/clube">
+                  <LogIn className="w-4 h-4" /> Acessar minha área
                 </Link>
               </Button>
             </div>
