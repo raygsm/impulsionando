@@ -117,10 +117,10 @@ function VitrinePage() {
       </header>
 
       <section className="max-w-6xl mx-auto px-4 py-6">
-        <Card className="p-4 mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <Card className="p-4 mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
           <div>
             <Label className="text-xs">Operação</Label>
-            <Select value={operation} onValueChange={(v) => { setOperation(v); setPage(1) }}>
+            <Select value={operation} onValueChange={(v) => update({ operation: v as any, resetPage: true })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="venda_ou_locacao">Todos</SelectItem>
@@ -131,14 +131,33 @@ function VitrinePage() {
           </div>
           <div>
             <Label className="text-xs">Cidade</Label>
-            <Input value={city} onChange={(e) => { setCity(e.target.value); setPage(1) }} placeholder="Ex.: São Paulo" />
+            <Input defaultValue={city} onBlur={(e) => update({ city: e.target.value, resetPage: true })} placeholder="Ex.: São Paulo" />
           </div>
           <div className="lg:col-span-2">
             <Label className="text-xs">Buscar</Label>
-            <Input value={q} onChange={(e) => { setQ(e.target.value); setPage(1) }} placeholder="Título, bairro, código..." />
+            <Input defaultValue={q} onBlur={(e) => update({ q: e.target.value, resetPage: true })} placeholder="Título, bairro, código..." />
           </div>
-          <div className="flex items-end">
-            <Button className="w-full" onClick={() => setPage(1)}><Search className="h-4 w-4 mr-2" />Filtrar</Button>
+          <div>
+            <Label className="text-xs">Ordenar</Label>
+            <Select value={sort} onValueChange={(v) => update({ sort: v as any, resetPage: true })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="recent">Mais recentes</SelectItem>
+                <SelectItem value="price_asc">Menor preço</SelectItem>
+                <SelectItem value="price_desc">Maior preço</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label className="text-xs">Itens/pág.</Label>
+            <Select value={String(pageSize)} onValueChange={(v) => update({ pageSize: Number(v), resetPage: true })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="12">12</SelectItem>
+                <SelectItem value="24">24</SelectItem>
+                <SelectItem value="48">48</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </Card>
 
