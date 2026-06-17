@@ -8566,6 +8566,19 @@ export type Database = {
       }
     }
     Functions: {
+      _seed_menu_item: {
+        Args: {
+          _audience: string[]
+          _icon: string
+          _label: string
+          _niche_slugs: string[]
+          _route: string
+          _scope: string
+          _seed_key: string
+          _sort: number
+        }
+        Returns: undefined
+      }
       _trial_norm: { Args: { _v: string }; Returns: string }
       aff_payout_request: {
         Args: {
@@ -8660,6 +8673,17 @@ export type Database = {
             }
             Returns: string
           }
+      get_menu_for_audience: {
+        Args: { _audience: string; _niche_slug?: string }
+        Returns: {
+          icon: string
+          id: string
+          label: string
+          route: string
+          scope: string
+          sort_order: number
+        }[]
+      }
       get_niche_template: {
         Args: { p_niche_slug: string }
         Returns: {
