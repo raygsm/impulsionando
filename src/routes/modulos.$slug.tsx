@@ -15,6 +15,7 @@ import { MODULE_DETAILS } from "@/components/marketing/moduleDetails";
 import type { ModuleDetail } from "@/components/marketing/ModuleDetailDialog";
 import { MOTHER_MODULES, type MotherModule } from "@/data/motherModules";
 import { DemoContractCTA } from "@/components/demo/DemoContractCTA";
+import { getDeps, MODULE_EXTERNAL_REQUIREMENTS } from "@/data/moduleDependencies";
 
 /** Valor fictício de referência por slug (R$/mês) — usado apenas na tela demo. */
 const DEMO_REFERENCE_AMOUNT: Record<string, number> = {
