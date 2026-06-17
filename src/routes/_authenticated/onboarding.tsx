@@ -177,7 +177,6 @@ function OnboardingPage() {
   return (
     <div className="container mx-auto py-6 max-w-3xl">
       <PageHeader
-        icon={Sparkles}
         title="Como podemos te ajudar a melhorar?"
         description="5 perguntas rápidas pra montar seu plano de ação personalizado."
       />
