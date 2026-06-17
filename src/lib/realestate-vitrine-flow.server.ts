@@ -9,6 +9,45 @@
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
 import { notifyManagers, sendVitrineEmail, APP_BASE_URL } from '@/lib/realestate-vitrine-notify.server'
 
+/**
+ * Write a structured audit record. Best-effort: never throws.
+ *
+ * @param payload.action e.g. 'vitrine.interest.requested' | 'vitrine.interest.completed' | 'vitrine.interest.failed'
+ */
+async function writeFlowAudit(payload: {
+  action: string
+  entity: string
+  entityId?: string | null
+  companyId?: string | null
+  requestId: string
+  before?: Record<string, unknown> | null
+  after?: Record<string, unknown> | null
+}): Promise<void> {
+  try {
+    await supabaseAdmin.from('audit_logs').insert({
+      company_id: payload.companyId ?? null,
+      user_id: null,
+      action: payload.action,
+      entity: payload.entity,
+      entity_id: payload.entityId ?? null,
+      before: { request_id: payload.requestId, ...(payload.before ?? {}) } as any,
+      after: payload.after ? ({ request_id: payload.requestId, ...payload.after } as any) : null,
+    })
+  } catch (err) {
+    console.warn('writeFlowAudit failed', err)
+  }
+}
+
+/** Mask PII for audit "before" payload — keeps shape, drops sensitive values. */
+function maskContact(input: { contactEmail?: string | null; contactPhone?: string | null; contactWhatsapp?: string | null }) {
+  const mask = (v?: string | null) => (v ? `${v.slice(0, 2)}***` : null)
+  return {
+    contact_email: mask(input.contactEmail),
+    contact_phone: mask(input.contactPhone),
+    contact_whatsapp: mask(input.contactWhatsapp),
+  }
+}
+
 export type InterestKind = 'interesse' | 'visita' | 'avaliacao' | 'contato' | 'proposta'
 
 export interface ProcessInterestInput {
@@ -24,10 +63,12 @@ export interface ProcessInterestInput {
   utm?: Record<string, string>
   ip?: string | null
   userAgent?: string | null
+  requestId?: string
 }
 
 export interface ProcessInterestResult {
   ok: true
+  requestId: string
   interestId: string
   leadId: string
   messageId: string
@@ -36,15 +77,35 @@ export interface ProcessInterestResult {
 }
 
 export type ProcessInterestError =
-  | { ok: false; code: 'company_not_found' }
-  | { ok: false; code: 'property_unavailable' }
-  | { ok: false; code: 'contact_required' }
+  | { ok: false; requestId: string; code: 'company_not_found' }
+  | { ok: false; requestId: string; code: 'property_unavailable' }
+  | { ok: false; requestId: string; code: 'contact_required' }
+  | { ok: false; requestId: string; code: 'internal_error'; error: string }
 
 export async function processInterest(
   input: ProcessInterestInput,
 ): Promise<ProcessInterestResult | ProcessInterestError> {
+  const requestId = input.requestId ?? crypto.randomUUID()
+  await writeFlowAudit({
+    action: 'vitrine.interest.requested',
+    entity: 'realestate_interest',
+    requestId,
+    before: {
+      company_slug: input.companySlug,
+      property_id: input.propertyId,
+      kind: input.kind ?? 'interesse',
+      source: input.source ?? null,
+      utm: input.utm ?? {},
+      ip: input.ip ?? null,
+      user_agent: input.userAgent ?? null,
+      ...maskContact(input),
+    },
+  })
+
+  try {
   if (!input.contactEmail && !input.contactPhone && !input.contactWhatsapp) {
-    return { ok: false, code: 'contact_required' }
+    await writeFlowAudit({ action: 'vitrine.interest.failed', entity: 'realestate_interest', requestId, after: { code: 'contact_required' } })
+    return { ok: false, requestId, code: 'contact_required' }
   }
 
   const { data: company } = await supabaseAdmin
@@ -53,7 +114,10 @@ export async function processInterest(
     .eq('public_slug', input.companySlug)
     .eq('vitrine_enabled', true)
     .maybeSingle()
-  if (!company) return { ok: false, code: 'company_not_found' }
+  if (!company) {
+    await writeFlowAudit({ action: 'vitrine.interest.failed', entity: 'realestate_interest', requestId, after: { code: 'company_not_found' } })
+    return { ok: false, requestId, code: 'company_not_found' }
+  }
   const companyId = (company as any).id as string
   const companyName = (company as any).name as string
 
@@ -69,7 +133,8 @@ export async function processInterest(
     (property as any).status !== 'ativo' ||
     (property as any).approval_status !== 'approved'
   ) {
-    return { ok: false, code: 'property_unavailable' }
+    await writeFlowAudit({ action: 'vitrine.interest.failed', entity: 'realestate_interest', companyId, requestId, after: { code: 'property_unavailable', property_id: input.propertyId } })
+    return { ok: false, requestId, code: 'property_unavailable' }
   }
   const propertyTitle = (property as any).title as string
   const referenceCode = (property as any).reference_code as string | null
@@ -195,6 +260,8 @@ export async function processInterest(
         actionUrl, receivedAt: new Date().toISOString(),
       },
       idempotencyKey: `re-vitrine-interest-agency-${interestId}-${email}`,
+      requestId,
+      metadata: { company_id: companyId, interest_id: interestId, audience: 'agency' },
     })
     if (r.status === 'queued' || r.status === 'suppressed') emailsQueued.push(email)
   }
@@ -210,11 +277,31 @@ export async function processInterest(
         receivedAt: new Date().toISOString(),
       },
       idempotencyKey: `re-vitrine-interest-customer-${interestId}`,
+      requestId,
+      metadata: { company_id: companyId, interest_id: interestId, audience: 'customer' },
     })
     if (r.status === 'queued' || r.status === 'suppressed') emailsQueued.push(input.contactEmail)
   }
 
-  return { ok: true, interestId, leadId: leadId!, messageId, historyId: (hist as any).id as string, emailsQueued }
+  await writeFlowAudit({
+    action: 'vitrine.interest.completed',
+    entity: 'realestate_interest',
+    entityId: interestId,
+    companyId,
+    requestId,
+    after: { lead_id: leadId, message_id: messageId, history_id: (hist as any).id, emails_queued: emailsQueued.length },
+  })
+  return { ok: true, requestId, interestId, leadId: leadId!, messageId, historyId: (hist as any).id as string, emailsQueued }
+  } catch (err: any) {
+    console.error('processInterest internal error', { requestId, err })
+    await writeFlowAudit({
+      action: 'vitrine.interest.failed',
+      entity: 'realestate_interest',
+      requestId,
+      after: { code: 'internal_error', error: err?.message ?? 'unknown' },
+    })
+    return { ok: false, requestId, code: 'internal_error', error: err?.message ?? 'unknown' }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -240,10 +327,12 @@ export interface ProcessSavedSearchInput {
   utm?: Record<string, string>
   ip?: string | null
   userAgent?: string | null
+  requestId?: string
 }
 
 export interface ProcessSavedSearchResult {
   ok: true
+  requestId: string
   intentId: string
   leadId: string
   messageId: string
@@ -252,19 +341,45 @@ export interface ProcessSavedSearchResult {
 }
 
 export type ProcessSavedSearchError =
-  | { ok: false; code: 'company_not_found' }
-  | { ok: false; code: 'contact_required' }
+  | { ok: false; requestId: string; code: 'company_not_found' }
+  | { ok: false; requestId: string; code: 'contact_required' }
+  | { ok: false; requestId: string; code: 'internal_error'; error: string }
 
 export async function processSavedSearch(
   input: ProcessSavedSearchInput,
 ): Promise<ProcessSavedSearchResult | ProcessSavedSearchError> {
+  const requestId = input.requestId ?? crypto.randomUUID()
+  await writeFlowAudit({
+    action: 'vitrine.search.requested',
+    entity: 'realestate_search_intent',
+    requestId,
+    before: {
+      company_slug: input.companySlug,
+      operation: input.operation,
+      cities: input.cities,
+      neighborhoods: input.neighborhoods,
+      price_min: input.priceMin ?? null,
+      price_max: input.priceMax ?? null,
+      bedrooms_min: input.bedroomsMin,
+      property_types: input.propertyTypes,
+      source: input.source ?? null,
+      utm: input.utm ?? {},
+      ip: input.ip ?? null,
+      ...maskContact(input),
+    },
+  })
+  try {
   if (!input.contactEmail && !input.contactPhone && !input.contactWhatsapp) {
-    return { ok: false, code: 'contact_required' }
+    await writeFlowAudit({ action: 'vitrine.search.failed', entity: 'realestate_search_intent', requestId, after: { code: 'contact_required' } })
+    return { ok: false, requestId, code: 'contact_required' }
   }
   const { data: company } = await supabaseAdmin
     .from('companies').select('id, name')
     .eq('public_slug', input.companySlug).eq('vitrine_enabled', true).maybeSingle()
-  if (!company) return { ok: false, code: 'company_not_found' }
+  if (!company) {
+    await writeFlowAudit({ action: 'vitrine.search.failed', entity: 'realestate_search_intent', requestId, after: { code: 'company_not_found' } })
+    return { ok: false, requestId, code: 'company_not_found' }
+  }
   const companyId = (company as any).id as string
   const companyName = (company as any).name as string
   const phoneOrWA = input.contactWhatsapp || input.contactPhone || null
@@ -384,6 +499,8 @@ export async function processSavedSearch(
         receivedAt: new Date().toISOString(),
       },
       idempotencyKey: `re-vitrine-search-agency-${intentId}-${c.email}`,
+      requestId,
+      metadata: { company_id: companyId, intent_id: intentId, audience: 'agency' },
     })
     if (r.status === 'queued' || r.status === 'suppressed') emailsQueued.push(c.email)
   }
@@ -403,9 +520,29 @@ export async function processSavedSearch(
         receivedAt: new Date().toISOString(),
       },
       idempotencyKey: `re-vitrine-search-customer-${intentId}`,
+      requestId,
+      metadata: { company_id: companyId, intent_id: intentId, audience: 'customer' },
     })
     if (r.status === 'queued' || r.status === 'suppressed') emailsQueued.push(input.contactEmail)
   }
 
-  return { ok: true, intentId, leadId: leadId!, messageId, matchesCount, emailsQueued }
+  await writeFlowAudit({
+    action: 'vitrine.search.completed',
+    entity: 'realestate_search_intent',
+    entityId: intentId,
+    companyId,
+    requestId,
+    after: { lead_id: leadId, message_id: messageId, matches_count: matchesCount, emails_queued: emailsQueued.length },
+  })
+  return { ok: true, requestId, intentId, leadId: leadId!, messageId, matchesCount, emailsQueued }
+  } catch (err: any) {
+    console.error('processSavedSearch internal error', { requestId, err })
+    await writeFlowAudit({
+      action: 'vitrine.search.failed',
+      entity: 'realestate_search_intent',
+      requestId,
+      after: { code: 'internal_error', error: err?.message ?? 'unknown' },
+    })
+    return { ok: false, requestId, code: 'internal_error', error: err?.message ?? 'unknown' }
+  }
 }
