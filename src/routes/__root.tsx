@@ -20,7 +20,8 @@ function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <img src={logoAsset.url} alt="Impulsionando Tecnologia" className="mx-auto mb-8 h-20 md:h-24 w-auto object-contain" />
+        <div className="mb-8 flex justify-center"><LogoImpulsionando variant="light" size="lg" /></div>
+
         <h1 className="text-7xl font-bold text-foreground">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">Página não encontrada</h2>
         <p className="mt-2 text-sm text-muted-foreground">
