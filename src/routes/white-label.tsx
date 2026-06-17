@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, PlayCircle, MessageCircle, Globe, Palette, Wallet, Users, ShieldCheck, Layers, CheckCircle2 } from "lucide-react";
+import { ArrowRight, PlayCircle, MessageCircle, Globe, Palette, Wallet, Users, ShieldCheck, Layers, CheckCircle2, Rocket, TrendingUp, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -122,6 +122,83 @@ function WhiteLabelPage() {
             </ul>
           </div>
         </section>
+
+        {/* TIERS WHITE LABEL ----------------------------------------- */}
+        <section id="tiers" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 scroll-mt-24">
+          <div className="max-w-2xl mb-10">
+            <Badge variant="secondary" className="mb-3">Planos White Label</Badge>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Escolha por volume e maturidade</h2>
+            <p className="text-muted-foreground mt-3 leading-relaxed">
+              Você vende, atende, cobra e opera. A tecnologia é fornecida pela Impulsionando — sua marca na frente, nossa estrutura no backstage.
+            </p>
+          </div>
+          <div className="grid gap-5 md:grid-cols-3">
+            {/* Start */}
+            <Card className="p-6 flex flex-col">
+              <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary inline-flex items-center justify-center mb-4">
+                <Rocket className="w-5 h-5" />
+              </div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">Entrada</div>
+              <h3 className="text-xl font-semibold tracking-tight mt-1">White Label Start</h3>
+              <p className="text-sm text-muted-foreground mt-2">Mesmo valor do Plano Ideal (1 SM).</p>
+              <ul className="text-sm mt-4 space-y-2 flex-1">
+                <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Sua operação inclusa</li>
+                <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Até <strong>5 clientes no Essencial</strong></li>
+                <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Ou até <strong>2 clientes no Ideal</strong></li>
+                <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Sua marca, seu domínio, seus preços</li>
+              </ul>
+              <Button asChild className="mt-5 bg-gradient-primary">
+                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Contratar White Label Start</a>
+              </Button>
+            </Card>
+
+            {/* Growth (destaque) */}
+            <Card className="p-6 flex flex-col border-primary/60 ring-1 ring-primary/30 shadow-elegant">
+              <div className="w-11 h-11 rounded-xl bg-gradient-primary text-primary-foreground inline-flex items-center justify-center mb-4">
+                <TrendingUp className="w-5 h-5" />
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="text-xs uppercase tracking-wider text-primary">Recomendado</div>
+                <Badge variant="secondary">Popular</Badge>
+              </div>
+              <h3 className="text-xl font-semibold tracking-tight mt-1">White Label Growth</h3>
+              <p className="text-sm text-muted-foreground mt-2">Para quem já tem carteira e quer escalar.</p>
+              <ul className="text-sm mt-4 space-y-2 flex-1">
+                <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Limites ampliados de clientes</li>
+                <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Mais módulos por cliente</li>
+                <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Dashboards consolidados por carteira</li>
+                <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Onboarding guiado dos seus clientes</li>
+              </ul>
+              <Button asChild className="mt-5 bg-gradient-primary">
+                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Contratar White Label Growth</a>
+              </Button>
+            </Card>
+
+            {/* Enterprise */}
+            <Card className="p-6 flex flex-col">
+              <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary inline-flex items-center justify-center mb-4">
+                <Crown className="w-5 h-5" />
+              </div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">Sob consulta</div>
+              <h3 className="text-xl font-semibold tracking-tight mt-1">White Label Enterprise</h3>
+              <p className="text-sm text-muted-foreground mt-2">Sem limites práticos.</p>
+              <ul className="text-sm mt-4 space-y-2 flex-1">
+                <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Volume ilimitado de clientes</li>
+                <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Módulos sob medida</li>
+                <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> SLA dedicado e gerente de conta</li>
+                <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Infra isolada e gateway próprio</li>
+              </ul>
+              <Button asChild variant="outline" className="mt-5">
+                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Solicitar Apresentação</a>
+              </Button>
+            </Card>
+          </div>
+          <p className="text-xs text-muted-foreground mt-5 max-w-3xl">
+            Em todos os tiers: <strong>você vende, você atende, você cobra, você opera</strong>. A tecnologia é fornecida pela Impulsionando — atualizações automáticas, sem mensalidade extra de roadmap.
+          </p>
+        </section>
+
+
 
         {/* PLANOS / CTA */}
         <section className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20 text-center">

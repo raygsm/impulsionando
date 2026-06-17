@@ -27,9 +27,9 @@ import { ModulePicker } from "@/components/marketing/ModulePicker";
 import { ContractingSummaryDialog } from "@/components/marketing/ContractingSummaryDialog";
 
 const PLAN_QUOTA: Record<string, number> = {
-  Essencial: 1,
-  Integrado: 2,
-  Avançado: 3,
+  Essencial: 3,   // até 3 módulos
+  Integrado: 6,   // até 6 módulos (Ideal)
+  Avançado: 99,   // sem teto prático (Full)
 };
 
 /** Preço por módulo adicional além da quota do plano. */
@@ -54,6 +54,8 @@ export const Route = createFileRoute("/planos")({
 
 type Plan = {
   name: string;
+  /** Nome comercial mostrado ao usuário (sobrescreve `name`). */
+  displayName?: string;
   tagline: string;
   monthly: number | null; // null = sob consulta
   modulesLabel: string;
@@ -75,48 +77,51 @@ function buildPlans(wage: number): Plan[] {
       name: "Essencial",
       tagline: "Comece pelo módulo que mais dói hoje — sem peso desnecessário.",
       monthly: wage / 2,
-      modulesLabel: "1 módulo principal + base operacional",
+      modulesLabel: "Até 3 módulos + base operacional",
       features: [
-        "1 módulo principal à escolha: CRM, Agenda, EHR (prontuário), PDV, Vitrine Imobiliária, Área do Cliente ou Eventos",
+        "Até 3 módulos à escolha: CRM, Agenda, EHR (prontuário), PDV, Vitrine Imobiliária, Área do Cliente ou Eventos",
         "Base inclusa: dashboard, cadastros, perfis e permissões, auditoria",
         "Financeiro essencial (contas a receber + fluxo de caixa)",
         "Até 3 usuários · 1 unidade",
         "Suporte por e-mail e WhatsApp",
         "7 dias de Trial com tudo liberado, sem cartão",
       ],
-      cta: "Começar Trial de 7 dias",
+      cta: "Contratar Essencial",
     },
     {
       name: "Integrado",
-      tagline: "Dois módulos que se potencializam, com automação entre eles.",
+      displayName: "Ideal",
+      tagline: "Plano recomendado — dois módulos que se potencializam, com automação entre eles.",
       monthly: wage,
-      modulesLabel: "2 módulos principais integrados + automação",
+      modulesLabel: "Até 6 módulos integrados + automação",
       features: [
-        "Pares curados de alta sinergia: CRM + Agenda, PDV + Estoque, Commerce + Delivery, Vitrine + CRM Imobiliário, EHR + Agenda Clínica",
+        "Até 6 módulos (pares curados de alta sinergia: CRM + Agenda, PDV + Estoque, Commerce + Delivery, Vitrine + CRM Imobiliário, EHR + Agenda Clínica)",
         "Financeiro completo (contas a pagar/receber, conciliação, comissões)",
         "Automações cruzadas entre módulos (gatilhos e fluxos)",
+        "Mais dashboards e mais integrações nativas",
         "Central de mensagens (WhatsApp + E-mail transacional)",
         "Até 5 usuários · 1 unidade · API e webhooks",
         "Suporte prioritário",
       ],
       highlight: true,
-      cta: "Começar Trial de 7 dias",
+      cta: "Contratar Ideal",
     },
     {
       name: "Avançado",
-      tagline: "Operação digital ponta a ponta, com BI e multi-unidades.",
-      monthly: wage * 2,
-      modulesLabel: "3 módulos principais + BI & Dashboards",
+      displayName: "Full",
+      tagline: "Operações avançadas, multiunidade, customizações, IA avançada e White Label parcial.",
+      monthly: null, // sob consulta
+      modulesLabel: "Módulos ilimitados + BI consolidado + IA avançada",
       features: [
-        "3 módulos principais à escolha (ex.: ERP + CRM + Agenda, ou Commerce + PDV + Estoque)",
-        "BI & Dashboards consolidados com indicadores por unidade",
-        "Multi-unidades (até 3) e gestão por setores",
-        "Automação avançada multi-módulo + jornadas de CRM",
+        "Módulos ilimitados conforme o desenho da operação",
+        "Multi-unidade sem limite prático + gestão por setores",
+        "Customizações sob medida e integrações dedicadas",
+        "IA avançada (atendimento, recomendação, copilots internos)",
+        "White Label parcial (sua marca em áreas selecionadas)",
         "Governança LGPD, exportações e logs de auditoria expandidos",
-        "Até 10 usuários · API, webhooks e ambiente de homologação",
         "Suporte prioritário com acompanhamento técnico dedicado",
       ],
-      cta: "Começar Trial de 7 dias",
+      cta: "Solicitar Proposta",
     },
   ];
 }
@@ -397,7 +402,7 @@ function PlanosPage() {
                   </div>
                 )}
                 <div className="text-xs uppercase tracking-wider text-muted-foreground">{plan.modulesLabel}</div>
-                <div className="text-xl font-semibold tracking-tight mt-1">{plan.name}</div>
+                <div className="text-xl font-semibold tracking-tight mt-1">{plan.displayName ?? plan.name}</div>
                 <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{plan.tagline}</p>
 
                 <div className="mt-5 min-h-[68px]">
