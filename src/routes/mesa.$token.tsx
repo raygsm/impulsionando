@@ -110,7 +110,7 @@ function MesaPage() {
     try {
       const token = window.location.pathname.split("/").pop()!;
       const { data: r, error } = await supabase.rpc("add_table_order_item", {
-        _token: token, _item_id: itemId, _quantity: 1, _notes: null,
+        _token: token, _item_id: itemId, _quantity: 1,
       });
       if (error) throw error;
       if (!(r as any)?.ok) throw new Error((r as any)?.error ?? "Erro ao adicionar.");
