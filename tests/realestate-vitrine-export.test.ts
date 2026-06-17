@@ -56,20 +56,21 @@ describe('matchesEmailFilter', () => {
 describe('fetchEmailLogMap', () => {
   // Minimal mock that mimics the Supabase query builder used by fetchEmailLogMap.
   function makeMockSupabase(rows: any[]) {
+    const state: any = { gte: undefined, lte: undefined }
     const builder: any = {
       from() { return builder },
       select() { return builder },
       order() { return builder },
-      gte(_col: string, val: string) { builder._gte = val; return builder },
-      lte(_col: string, val: string) { builder._lte = val; return builder },
-      in(_field: string, _ids: string[]) {
-        // resolves immediately with filtered rows
+      gte(_col: string, val: string) { state.gte = val; return builder },
+      lte(_col: string, val: string) { state.lte = val; return builder },
+      in(_field: string, _ids: string[]) { return builder },
+      then(resolve: (v: any) => void) {
         const filtered = rows.filter((r) => {
-          if (builder._gte && r.created_at < builder._gte) return false
-          if (builder._lte && r.created_at > builder._lte) return false
+          if (state.gte && r.created_at < state.gte) return false
+          if (state.lte && r.created_at > state.lte) return false
           return true
         })
-        return Promise.resolve({ data: filtered, error: null })
+        resolve({ data: filtered, error: null })
       },
     }
     return builder
