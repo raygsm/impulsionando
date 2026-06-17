@@ -22,9 +22,9 @@ const SIZE: Record<Size, string> = {
   xs: 'h-10',
   sm: 'h-[3.125rem]',
   md: 'h-20',
-  lg: 'h-30',
+  lg: 'h-[7.5rem]',
   xl: 'h-40',
-  '2xl': 'h-50',
+  '2xl': 'h-[12.5rem]',
 }
 
 export interface LogoImpulsionandoProps {
