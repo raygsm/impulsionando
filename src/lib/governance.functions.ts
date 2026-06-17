@@ -437,50 +437,111 @@ export const getFinancialMasterOverview = createServerFn({ method: "GET" })
       { data: invoices },
       { data: companies },
       { data: subs },
-      { data: modules },
     ] = await Promise.all([
-      supabase.from("billing_contracts").select("id,company_id,status,recurring_amount,plan_id"),
-      supabase.from("billing_invoices").select("status,amount,due_date,paid_at,company_id"),
-      supabase.from("companies").select("id,is_active,is_master,segment"),
+      supabase
+        .from("billing_contracts")
+        .select("id,company_id,status,recurring_amount,setup_amount,next_due_date,setup_paid_at,last_paid_at,due_day,plan_id"),
+      supabase
+        .from("billing_invoices")
+        .select("id,status,amount,due_date,paid_at,company_id,contract_id,period_start,period_end")
+        .order("due_date", { ascending: true }),
+      supabase.from("companies").select("id,name,is_active,is_master,is_demo,segment,status"),
       supabase.from("subscriptions").select("status,current_period_end"),
-      supabase.from("company_modules").select("company_id,module_id,is_enabled"),
     ]);
 
+    const companyById = new Map((companies ?? []).map((c: any) => [c.id, c]));
+    const isDemoCompany = (id: string) => Boolean(companyById.get(id)?.is_demo);
+    const isMasterCompany = (id: string) => Boolean(companyById.get(id)?.is_master);
+    const isRealClient = (id: string) =>
+      Boolean(companyById.get(id)) && !isDemoCompany(id) && !isMasterCompany(id);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const daysBetween = (a: Date, b: Date) => Math.floor((+a - +b) / 86400000);
+
     const activeContracts = (contracts ?? []).filter((c: any) => c.status === "active");
+    const realActiveContracts = activeContracts.filter((c: any) => isRealClient(c.company_id));
+    const demoActiveContracts = activeContracts.filter((c: any) => isDemoCompany(c.company_id));
     const suspendedContracts = (contracts ?? []).filter((c: any) => c.status === "suspended");
-    const mrr = activeContracts.reduce((s: number, c: any) => s + Number(c.recurring_amount ?? 0), 0);
+
+    const mrr = realActiveContracts.reduce((s, c: any) => s + Number(c.recurring_amount ?? 0), 0);
+    const mrrDemo = demoActiveContracts.reduce((s, c: any) => s + Number(c.recurring_amount ?? 0), 0);
     const arr = mrr * 12;
 
-    const overdueAmount = (invoices ?? [])
-      .filter((i: any) => i.status === "overdue" || (i.status === "open" && new Date(i.due_date) < new Date()))
-      .reduce((s: number, i: any) => s + Number(i.amount ?? 0), 0);
+    const realInvoices = (invoices ?? []).filter((i: any) => isRealClient(i.company_id));
 
-    const paidLast90 = (invoices ?? []).filter(
-      (i: any) => i.status === "paid" && i.paid_at && new Date(i.paid_at) >= new Date(Date.now() - 90 * 86400000),
+    const aging = { d1_7: 0, d8_30: 0, d30plus: 0 };
+    let overdueAmount = 0;
+    realInvoices.forEach((i: any) => {
+      const isOverdue =
+        i.status === "overdue" || (i.status === "open" && new Date(i.due_date) < today);
+      if (!isOverdue) return;
+      const amount = Number(i.amount ?? 0);
+      overdueAmount += amount;
+      const days = daysBetween(today, new Date(i.due_date));
+      if (days <= 7) aging.d1_7 += amount;
+      else if (days <= 30) aging.d8_30 += amount;
+      else aging.d30plus += amount;
+    });
+
+    const since90 = new Date(Date.now() - 90 * 86400000);
+    const paid90 = realInvoices.filter(
+      (i: any) => i.status === "paid" && i.paid_at && new Date(i.paid_at) >= since90,
     );
-    const revenueLast90 = paidLast90.reduce((s: number, i: any) => s + Number(i.amount ?? 0), 0);
+    const revenueLast90 = paid90.reduce((s, i: any) => s + Number(i.amount ?? 0), 0);
+    const setupReceived = realInvoices
+      .filter((i: any) => i.status === "paid" && i.contract_id)
+      .reduce((s, i: any) => {
+        const c = (contracts ?? []).find((x: any) => x.id === i.contract_id);
+        return c && Number(i.amount) === Number(c.setup_amount) ? s + Number(i.amount) : s;
+      }, 0);
 
-    const totalClients = (companies ?? []).filter((c: any) => !c.is_master && c.is_active).length;
+    const horizon = new Date();
+    horizon.setDate(horizon.getDate() + 30);
+    const upcoming = realInvoices
+      .filter((i: any) => i.status === "open" && new Date(i.due_date) >= today && new Date(i.due_date) <= horizon)
+      .map((i: any) => ({
+        id: i.id,
+        company: companyById.get(i.company_id)?.name ?? "—",
+        due_date: i.due_date,
+        amount: Number(i.amount),
+      }));
+
+    const totalClients = (companies ?? []).filter((c: any) => !c.is_master && !c.is_demo && c.is_active).length;
     const churnEstimate = suspendedContracts.length;
     const ltvEstimate = totalClients > 0 ? mrr / Math.max(churnEstimate / 12, 0.01) : 0;
 
-    // Revenue por segmento
     const segmentMap = new Map<string, number>();
-    activeContracts.forEach((c: any) => {
-      const co = (companies ?? []).find((x: any) => x.id === c.company_id);
-      const seg = co?.segment ?? "—";
+    realActiveContracts.forEach((c: any) => {
+      const seg = companyById.get(c.company_id)?.segment ?? "—";
       segmentMap.set(seg, (segmentMap.get(seg) ?? 0) + Number(c.recurring_amount ?? 0));
     });
 
+    const contractList = realActiveContracts.map((c: any) => ({
+      id: c.id,
+      company: companyById.get(c.company_id)?.name ?? "—",
+      segment: companyById.get(c.company_id)?.segment ?? "—",
+      recurring_amount: Number(c.recurring_amount ?? 0),
+      setup_amount: Number(c.setup_amount ?? 0),
+      setup_paid_at: c.setup_paid_at,
+      next_due_date: c.next_due_date,
+      last_paid_at: c.last_paid_at,
+    }));
+
     return {
       mrr,
+      mrrDemo,
       arr,
       activeClients: totalClients,
       suspendedClients: suspendedContracts.length,
       overdueAmount,
       revenueLast90,
+      setupReceived,
       churnEstimate,
       ltvEstimate,
+      aging,
+      upcoming,
+      contractList,
       activeSubscriptions: (subs ?? []).filter((s: any) => s.status === "active").length,
       revenueBySegment: Array.from(segmentMap.entries()).map(([segment, amount]) => ({ segment, amount })),
     };
