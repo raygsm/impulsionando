@@ -236,6 +236,7 @@ import { Route as AuthenticatedCoreConfiguracoesRouteImport } from './routes/_au
 import { Route as AuthenticatedCoreClientesRouteImport } from './routes/_authenticated/core.clientes'
 import { Route as AuthenticatedCoreBriefingsRouteImport } from './routes/_authenticated/core.briefings'
 import { Route as AuthenticatedContratoIdRouteImport } from './routes/_authenticated/contrato.$id'
+import { Route as AuthenticatedContabilidadeCockpitRouteImport } from './routes/_authenticated/contabilidade.cockpit'
 import { Route as AuthenticatedConsumerUnifiedRouteImport } from './routes/_authenticated/consumer.unified'
 import { Route as AuthenticatedComunidadeIdRouteImport } from './routes/_authenticated/comunidade.$id'
 import { Route as AuthenticatedCommercialCockpitRouteImport } from './routes/_authenticated/commercial.cockpit'
@@ -1524,6 +1525,12 @@ const AuthenticatedContratoIdRoute = AuthenticatedContratoIdRouteImport.update({
   path: '/contrato/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedContabilidadeCockpitRoute =
+  AuthenticatedContabilidadeCockpitRouteImport.update({
+    id: '/contabilidade/cockpit',
+    path: '/contabilidade/cockpit',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedConsumerUnifiedRoute =
   AuthenticatedConsumerUnifiedRouteImport.update({
     id: '/consumer/unified',
@@ -2106,6 +2113,7 @@ export interface FileRoutesByFullPath {
   '/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
   '/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
   '/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
+  '/contabilidade/cockpit': typeof AuthenticatedContabilidadeCockpitRoute
   '/contrato/$id': typeof AuthenticatedContratoIdRoute
   '/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
@@ -2394,6 +2402,7 @@ export interface FileRoutesByTo {
   '/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
   '/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
   '/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
+  '/contabilidade/cockpit': typeof AuthenticatedContabilidadeCockpitRoute
   '/contrato/$id': typeof AuthenticatedContratoIdRoute
   '/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
@@ -2695,6 +2704,7 @@ export interface FileRoutesById {
   '/_authenticated/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
   '/_authenticated/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
   '/_authenticated/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
+  '/_authenticated/contabilidade/cockpit': typeof AuthenticatedContabilidadeCockpitRoute
   '/_authenticated/contrato/$id': typeof AuthenticatedContratoIdRoute
   '/_authenticated/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/_authenticated/core/clientes': typeof AuthenticatedCoreClientesRoute
@@ -2996,6 +3006,7 @@ export interface FileRouteTypes {
     | '/commercial/cockpit'
     | '/comunidade/$id'
     | '/consumer/unified'
+    | '/contabilidade/cockpit'
     | '/contrato/$id'
     | '/core/briefings'
     | '/core/clientes'
@@ -3284,6 +3295,7 @@ export interface FileRouteTypes {
     | '/commercial/cockpit'
     | '/comunidade/$id'
     | '/consumer/unified'
+    | '/contabilidade/cockpit'
     | '/contrato/$id'
     | '/core/briefings'
     | '/core/clientes'
@@ -3584,6 +3596,7 @@ export interface FileRouteTypes {
     | '/_authenticated/commercial/cockpit'
     | '/_authenticated/comunidade/$id'
     | '/_authenticated/consumer/unified'
+    | '/_authenticated/contabilidade/cockpit'
     | '/_authenticated/contrato/$id'
     | '/_authenticated/core/briefings'
     | '/_authenticated/core/clientes'
@@ -5433,6 +5446,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedContratoIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/contabilidade/cockpit': {
+      id: '/_authenticated/contabilidade/cockpit'
+      path: '/contabilidade/cockpit'
+      fullPath: '/contabilidade/cockpit'
+      preLoaderRoute: typeof AuthenticatedContabilidadeCockpitRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/consumer/unified': {
       id: '/_authenticated/consumer/unified'
       path: '/consumer/unified'
@@ -6394,6 +6414,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCommercialCockpitRoute: typeof AuthenticatedCommercialCockpitRoute
   AuthenticatedComunidadeIdRoute: typeof AuthenticatedComunidadeIdRoute
   AuthenticatedConsumerUnifiedRoute: typeof AuthenticatedConsumerUnifiedRoute
+  AuthenticatedContabilidadeCockpitRoute: typeof AuthenticatedContabilidadeCockpitRoute
   AuthenticatedContratoIdRoute: typeof AuthenticatedContratoIdRoute
   AuthenticatedEhrIdRoute: typeof AuthenticatedEhrIdRoute
   AuthenticatedEventosIdRoute: typeof AuthenticatedEventosIdRoute
@@ -6464,6 +6485,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCommercialCockpitRoute: AuthenticatedCommercialCockpitRoute,
   AuthenticatedComunidadeIdRoute: AuthenticatedComunidadeIdRoute,
   AuthenticatedConsumerUnifiedRoute: AuthenticatedConsumerUnifiedRoute,
+  AuthenticatedContabilidadeCockpitRoute:
+    AuthenticatedContabilidadeCockpitRoute,
   AuthenticatedContratoIdRoute: AuthenticatedContratoIdRoute,
   AuthenticatedEhrIdRoute: AuthenticatedEhrIdRoute,
   AuthenticatedEventosIdRoute: AuthenticatedEventosIdRoute,
