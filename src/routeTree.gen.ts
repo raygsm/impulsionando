@@ -148,6 +148,7 @@ import { Route as AuthenticatedEhrIndexRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedCrmIndexRouteImport } from './routes/_authenticated/crm.index'
 import { Route as AuthenticatedCoreIndexRouteImport } from './routes/_authenticated/core.index'
 import { Route as AuthenticatedComunidadeIndexRouteImport } from './routes/_authenticated/comunidade.index'
+import { Route as AuthenticatedCockpitsIndexRouteImport } from './routes/_authenticated/cockpits.index'
 import { Route as AuthenticatedBiIndexRouteImport } from './routes/_authenticated/bi.index'
 import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenticated/agenda.index'
 import { Route as AuthenticatedAffiliatesIndexRouteImport } from './routes/_authenticated/affiliates.index'
@@ -1011,6 +1012,12 @@ const AuthenticatedComunidadeIndexRoute =
   AuthenticatedComunidadeIndexRouteImport.update({
     id: '/comunidade/',
     path: '/comunidade/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedCockpitsIndexRoute =
+  AuthenticatedCockpitsIndexRouteImport.update({
+    id: '/cockpits/',
+    path: '/cockpits/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedBiIndexRoute = AuthenticatedBiIndexRouteImport.update({
@@ -2178,6 +2185,7 @@ export interface FileRoutesByFullPath {
   '/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/bi/': typeof AuthenticatedBiIndexRoute
+  '/cockpits/': typeof AuthenticatedCockpitsIndexRoute
   '/comunidade/': typeof AuthenticatedComunidadeIndexRoute
   '/core/': typeof AuthenticatedCoreIndexRoute
   '/crm/': typeof AuthenticatedCrmIndexRoute
@@ -2464,6 +2472,7 @@ export interface FileRoutesByTo {
   '/affiliates': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda': typeof AuthenticatedAgendaIndexRoute
   '/bi': typeof AuthenticatedBiIndexRoute
+  '/cockpits': typeof AuthenticatedCockpitsIndexRoute
   '/comunidade': typeof AuthenticatedComunidadeIndexRoute
   '/core': typeof AuthenticatedCoreIndexRoute
   '/crm': typeof AuthenticatedCrmIndexRoute
@@ -2763,6 +2772,7 @@ export interface FileRoutesById {
   '/_authenticated/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/_authenticated/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/_authenticated/bi/': typeof AuthenticatedBiIndexRoute
+  '/_authenticated/cockpits/': typeof AuthenticatedCockpitsIndexRoute
   '/_authenticated/comunidade/': typeof AuthenticatedComunidadeIndexRoute
   '/_authenticated/core/': typeof AuthenticatedCoreIndexRoute
   '/_authenticated/crm/': typeof AuthenticatedCrmIndexRoute
@@ -3062,6 +3072,7 @@ export interface FileRouteTypes {
     | '/affiliates/'
     | '/agenda/'
     | '/bi/'
+    | '/cockpits/'
     | '/comunidade/'
     | '/core/'
     | '/crm/'
@@ -3348,6 +3359,7 @@ export interface FileRouteTypes {
     | '/affiliates'
     | '/agenda'
     | '/bi'
+    | '/cockpits'
     | '/comunidade'
     | '/core'
     | '/crm'
@@ -3646,6 +3658,7 @@ export interface FileRouteTypes {
     | '/_authenticated/affiliates/'
     | '/_authenticated/agenda/'
     | '/_authenticated/bi/'
+    | '/_authenticated/cockpits/'
     | '/_authenticated/comunidade/'
     | '/_authenticated/core/'
     | '/_authenticated/crm/'
@@ -4789,6 +4802,13 @@ declare module '@tanstack/react-router' {
       path: '/comunidade'
       fullPath: '/comunidade/'
       preLoaderRoute: typeof AuthenticatedComunidadeIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/cockpits/': {
+      id: '/_authenticated/cockpits/'
+      path: '/cockpits'
+      fullPath: '/cockpits/'
+      preLoaderRoute: typeof AuthenticatedCockpitsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/bi/': {
@@ -6377,6 +6397,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRestauranteSalaoRoute: typeof AuthenticatedRestauranteSalaoRoute
   AuthenticatedSupportCockpitRoute: typeof AuthenticatedSupportCockpitRoute
   AuthenticatedWhiteLabelCockpitRoute: typeof AuthenticatedWhiteLabelCockpitRoute
+  AuthenticatedCockpitsIndexRoute: typeof AuthenticatedCockpitsIndexRoute
   AuthenticatedComunidadeIndexRoute: typeof AuthenticatedComunidadeIndexRoute
   AuthenticatedEhrIndexRoute: typeof AuthenticatedEhrIndexRoute
   AuthenticatedEventosIndexRoute: typeof AuthenticatedEventosIndexRoute
@@ -6450,6 +6471,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRestauranteSalaoRoute: AuthenticatedRestauranteSalaoRoute,
   AuthenticatedSupportCockpitRoute: AuthenticatedSupportCockpitRoute,
   AuthenticatedWhiteLabelCockpitRoute: AuthenticatedWhiteLabelCockpitRoute,
+  AuthenticatedCockpitsIndexRoute: AuthenticatedCockpitsIndexRoute,
   AuthenticatedComunidadeIndexRoute: AuthenticatedComunidadeIndexRoute,
   AuthenticatedEhrIndexRoute: AuthenticatedEhrIndexRoute,
   AuthenticatedEventosIndexRoute: AuthenticatedEventosIndexRoute,
