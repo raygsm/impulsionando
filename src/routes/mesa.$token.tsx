@@ -1,15 +1,17 @@
 /**
  * /mesa/$token — Página pública acessada pelo QR Code da mesa.
  *
- * Fluxo:
- * - Resolve a mesa via RPC pública resolve_table_qr(token).
- * - Se a comanda existir, mostra status (aberta), total parcial e CARDÁPIO DIGITAL.
- * - Cliente clica nos itens e o pedido é adicionado via add_table_order_item.
- * - Captura nome + WhatsApp + nº de pessoas e faz check-in.
+ * Recursos:
+ * - Resolve mesa via RPC pública resolve_table_qr(token).
+ * - Cardápio digital + check-in.
+ * - Pagamento PIX da conta (createTableInvoice) com:
+ *   - countdown de expiração do PIX (15 min);
+ *   - histórico de tentativas de cobrança (open/paid/failed/expired);
+ *   - botões "Atualizar QR" (re-poll) e "Gerar novo pagamento" (force).
  */
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,8 +19,27 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { createTableInvoice, getTableInvoiceStatus } from "@/lib/restaurant-table-pay.functions";
-import { UtensilsCrossed, CheckCircle2, Users, Receipt, Plus, QrCode, Copy, ExternalLink, Loader2 } from "lucide-react";
+import {
+  createTableInvoice,
+  getTableInvoiceStatus,
+  forceNewTableInvoice,
+  listTableInvoices,
+} from "@/lib/restaurant-table-pay.functions";
+import {
+  UtensilsCrossed,
+  CheckCircle2,
+  Users,
+  Receipt,
+  Plus,
+  QrCode,
+  Copy,
+  ExternalLink,
+  Loader2,
+  RefreshCw,
+  Plus as PlusIcon,
+  XCircle,
+  Clock as ClockIcon,
+} from "lucide-react";
 
 type Resolved = {
   ok: boolean;
@@ -28,6 +49,15 @@ type Resolved = {
   session?: null | { id: string; customer_name?: string; party_size: number; total: number; opened_at: string; status: string };
 };
 type MenuData = { ok: boolean; categories?: any[]; uncategorized?: any[] };
+type Bill = {
+  invoice_id: string;
+  amount_cents: number;
+  status: string;
+  pix_url: string | null;
+  pix_configured: boolean;
+  attempt_number?: number;
+  expires_at?: string | null;
+};
 
 export const Route = createFileRoute("/mesa/$token")({
   head: () => ({
@@ -67,6 +97,8 @@ export const Route = createFileRoute("/mesa/$token")({
 });
 
 const BRL = (cents: number) => (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const BRLnum = (value: number) =>
+  Number(value || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 function MesaPage() {
   const { resolved, menu } = Route.useLoaderData();
@@ -77,30 +109,60 @@ function MesaPage() {
   const [party, setParty] = useState("2");
   const [submitting, setSubmitting] = useState(false);
   const [adding, setAdding] = useState<string | null>(null);
-  const [bill, setBill] = useState<null | { invoice_id: string; amount_cents: number; status: string; pix_url: string | null; pix_configured: boolean }>(null);
+  const [bill, setBill] = useState<Bill | null>(null);
   const [billLoading, setBillLoading] = useState(false);
+  const [history, setHistory] = useState<any[]>([]);
+  const [now, setNow] = useState<number>(Date.now());
   const createBill = useServerFn(createTableInvoice);
+  const forceNewBill = useServerFn(forceNewTableInvoice);
   const checkBill = useServerFn(getTableInvoiceStatus);
+  const listHistory = useServerFn(listTableInvoices);
 
+  // Tick para countdown do PIX (1s).
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  // Polling principal: status da mesa + status da cobrança + histórico.
   useEffect(() => {
     const id = setInterval(async () => {
       const t = window.location.pathname.split("/").pop();
       if (!t) return;
       const { data: r } = await supabase.rpc("resolve_table_qr", { _token: t });
       if (r && (r as any).ok) setData(r as Resolved);
-      // Polling da fatura em aberto: detecta pagamento confirmado pelo webhook.
       if (bill && bill.status !== "paid") {
         try {
           const res = await checkBill({ data: { token: t, invoice_id: bill.invoice_id } });
           if (res.status === "paid") {
             setBill({ ...bill, status: "paid" });
             toast.success("Pagamento confirmado! Obrigado 💙");
+            void refreshHistory(t);
+          } else if (res.status === "failed" || res.status === "expired" || res.status === "cancelled") {
+            setBill({ ...bill, status: res.status });
+            void refreshHistory(t);
           }
         } catch { /* silencioso */ }
       }
     }, 5000);
     return () => clearInterval(id);
-  }, [bill, checkBill]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bill]);
+
+  async function refreshHistory(token: string) {
+    try {
+      const res = await listHistory({ data: { token } });
+      setHistory(res.invoices ?? []);
+    } catch { /* silencioso */ }
+  }
+
+  // Quando abrir uma sessão, busca histórico.
+  useEffect(() => {
+    if (!data.session) return;
+    const token = window.location.pathname.split("/").pop();
+    if (token) void refreshHistory(token);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.session?.id]);
 
   async function handlePay() {
     if (!data.session) return;
@@ -114,7 +176,10 @@ function MesaPage() {
         status: res.status,
         pix_url: res.pix_url,
         pix_configured: res.pix_configured,
+        attempt_number: res.attempt_number,
+        expires_at: res.expires_at,
       });
+      await refreshHistory(token);
       if (!res.pix_configured) {
         toast.warning("Cobrança gerada, mas o PIX automático ainda não está configurado.");
       }
@@ -122,6 +187,42 @@ function MesaPage() {
       toast.error(err?.message ?? "Erro ao gerar cobrança");
     } finally {
       setBillLoading(false);
+    }
+  }
+
+  async function handleForceNew() {
+    setBillLoading(true);
+    try {
+      const token = window.location.pathname.split("/").pop()!;
+      const res = await forceNewBill({ data: { token } });
+      setBill({
+        invoice_id: res.invoice_id,
+        amount_cents: res.amount_cents,
+        status: res.status,
+        pix_url: res.pix_url,
+        pix_configured: res.pix_configured,
+        attempt_number: res.attempt_number,
+        expires_at: res.expires_at,
+      });
+      await refreshHistory(token);
+      toast.success("Nova cobrança gerada — escaneie o novo QR.");
+    } catch (err: any) {
+      toast.error(err?.message ?? "Erro ao gerar nova cobrança");
+    } finally {
+      setBillLoading(false);
+    }
+  }
+
+  async function handleRefreshQR() {
+    if (!bill) return;
+    try {
+      const token = window.location.pathname.split("/").pop()!;
+      const res = await checkBill({ data: { token, invoice_id: bill.invoice_id } });
+      setBill({ ...bill, status: res.status });
+      await refreshHistory(token);
+      toast.success(`Status: ${res.status}`);
+    } catch (err: any) {
+      toast.error(err?.message ?? "Erro");
     }
   }
 
@@ -161,10 +262,22 @@ function MesaPage() {
     finally { setAdding(null); }
   }
 
+  // Countdown PIX (mm:ss)
+  const expiryInfo = useMemo(() => {
+    if (!bill?.expires_at) return null;
+    const ms = new Date(bill.expires_at).getTime() - now;
+    if (ms <= 0) return { expired: true, label: "00:00" };
+    const total = Math.floor(ms / 1000);
+    const m = Math.floor(total / 60);
+    const s = total % 60;
+    return { expired: false, label: `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}` };
+  }, [bill?.expires_at, now]);
+
   const primary = data.company?.primary_color ?? "#1e3a8a";
   const allCategories = menu.categories ?? [];
   const uncategorized = menu.uncategorized ?? [];
   const hasMenu = allCategories.length > 0 || uncategorized.length > 0;
+  const failedOrExpired = bill && (bill.status === "failed" || bill.status === "expired" || bill.status === "cancelled" || expiryInfo?.expired);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 px-4 py-8">
@@ -206,12 +319,23 @@ function MesaPage() {
                     <p className="text-sm font-medium text-green-700">Pagamento confirmado!</p>
                     <p className="text-xs text-muted-foreground">A mesa foi liberada. Obrigado pela visita.</p>
                   </div>
-                ) : bill ? (
+                ) : bill && !failedOrExpired ? (
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Loader2 className="w-4 h-4 animate-spin text-amber-600" />
-                      <span>Aguardando pagamento PIX de <strong>R$ {(bill.amount_cents/100).toFixed(2)}</strong>...</span>
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin text-amber-600" />
+                        <span>PIX de <strong>R$ {(bill.amount_cents/100).toFixed(2)}</strong></span>
+                      </div>
+                      {expiryInfo && (
+                        <span className={`text-xs font-mono px-2 py-0.5 rounded ${expiryInfo.expired ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-800"}`}>
+                          <ClockIcon className="w-3 h-3 inline mr-1" />
+                          {expiryInfo.expired ? "Expirado" : expiryInfo.label}
+                        </span>
+                      )}
                     </div>
+                    {bill.attempt_number && bill.attempt_number > 1 && (
+                      <p className="text-[10px] text-muted-foreground">Tentativa #{bill.attempt_number}</p>
+                    )}
                     {bill.pix_url && (
                       <div className="flex gap-2">
                         <Button asChild size="sm" className="flex-1" style={{ background: primary }}>
@@ -224,13 +348,60 @@ function MesaPage() {
                         </Button>
                       </div>
                     )}
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="ghost" className="flex-1" onClick={handleRefreshQR}>
+                        <RefreshCw className="w-3 h-3 mr-1" /> Atualizar status
+                      </Button>
+                      <Button size="sm" variant="ghost" className="flex-1" onClick={handleForceNew} disabled={billLoading}>
+                        <PlusIcon className="w-3 h-3 mr-1" /> Novo pagamento
+                      </Button>
+                    </div>
                     <p className="text-[10px] text-muted-foreground text-center">A mesa será liberada automaticamente quando o pagamento for confirmado.</p>
+                  </div>
+                ) : failedOrExpired ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded p-2">
+                      <XCircle className="w-4 h-4" />
+                      <span>
+                        {bill?.status === "expired" || expiryInfo?.expired
+                          ? "Cobrança expirada."
+                          : bill?.status === "cancelled"
+                          ? "Cobrança cancelada."
+                          : "Pagamento não concluído."}
+                      </span>
+                    </div>
+                    <Button onClick={handleForceNew} disabled={billLoading} className="w-full" style={{ background: primary }}>
+                      {billLoading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <PlusIcon className="w-4 h-4 mr-1" />}
+                      Gerar novo pagamento
+                    </Button>
                   </div>
                 ) : (
                   <Button onClick={handlePay} disabled={billLoading} className="w-full" style={{ background: primary }}>
                     {billLoading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <QrCode className="w-4 h-4 mr-1" />}
                     Pagar conta agora
                   </Button>
+                )}
+
+                {history.length > 0 && (
+                  <details className="mt-3">
+                    <summary className="text-xs text-muted-foreground cursor-pointer">
+                      Histórico de cobranças ({history.length})
+                    </summary>
+                    <div className="mt-2 space-y-1">
+                      {history.map((h: any) => (
+                        <div key={h.id} className="flex items-center justify-between text-xs border rounded px-2 py-1">
+                          <div className="flex items-center gap-2">
+                            <InvoiceStatusBadge status={h.status} />
+                            <span className="text-muted-foreground">#{h.attempt_number}</span>
+                            <span>{BRLnum(Number(h.amount_cents) / 100)}</span>
+                          </div>
+                          <span className="text-[10px] text-muted-foreground">
+                            {new Date(h.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
                 )}
               </div>
             )}
@@ -275,6 +446,18 @@ function MesaPage() {
       </div>
     </div>
   );
+}
+
+function InvoiceStatusBadge({ status }: { status: string }) {
+  const map: Record<string, { bg: string; label: string }> = {
+    paid: { bg: "bg-green-100 text-green-700", label: "Pago" },
+    open: { bg: "bg-amber-100 text-amber-700", label: "Aberta" },
+    failed: { bg: "bg-red-100 text-red-700", label: "Falhou" },
+    expired: { bg: "bg-red-100 text-red-700", label: "Expirada" },
+    cancelled: { bg: "bg-gray-100 text-gray-600", label: "Cancelada" },
+  };
+  const cfg = map[status] ?? { bg: "bg-gray-100 text-gray-600", label: status };
+  return <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${cfg.bg}`}>{cfg.label}</span>;
 }
 
 function CategoryBlock({ title, items, onAdd, adding, canOrder, primary }: any) {

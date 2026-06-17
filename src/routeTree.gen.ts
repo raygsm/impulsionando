@@ -179,6 +179,7 @@ import { Route as AuthenticatedImobiliariaInteressadosRouteImport } from './rout
 import { Route as AuthenticatedImobiliariaIntencoesRouteImport } from './routes/_authenticated/imobiliaria.intencoes'
 import { Route as AuthenticatedImobiliariaImoveisRouteImport } from './routes/_authenticated/imobiliaria.imoveis'
 import { Route as AuthenticatedImobiliariaAprovacoesRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes'
+import { Route as AuthenticatedFinanceWebhookLogRouteImport } from './routes/_authenticated/finance.webhook-log'
 import { Route as AuthenticatedFinanceTransactionsRouteImport } from './routes/_authenticated/finance.transactions'
 import { Route as AuthenticatedFinanceMethodsRouteImport } from './routes/_authenticated/finance.methods'
 import { Route as AuthenticatedFinanceCommissionsRouteImport } from './routes/_authenticated/finance.commissions'
@@ -1177,6 +1178,12 @@ const AuthenticatedImobiliariaAprovacoesRoute =
     path: '/imobiliaria/aprovacoes',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedFinanceWebhookLogRoute =
+  AuthenticatedFinanceWebhookLogRouteImport.update({
+    id: '/webhook-log',
+    path: '/webhook-log',
+    getParentRoute: () => AuthenticatedFinanceRoute,
+  } as any)
 const AuthenticatedFinanceTransactionsRoute =
   AuthenticatedFinanceTransactionsRouteImport.update({
     id: '/transactions',
@@ -2019,6 +2026,7 @@ export interface FileRoutesByFullPath {
   '/finance/commissions': typeof AuthenticatedFinanceCommissionsRoute
   '/finance/methods': typeof AuthenticatedFinanceMethodsRoute
   '/finance/transactions': typeof AuthenticatedFinanceTransactionsRoute
+  '/finance/webhook-log': typeof AuthenticatedFinanceWebhookLogRoute
   '/imobiliaria/aprovacoes': typeof AuthenticatedImobiliariaAprovacoesRouteWithChildren
   '/imobiliaria/imoveis': typeof AuthenticatedImobiliariaImoveisRoute
   '/imobiliaria/intencoes': typeof AuthenticatedImobiliariaIntencoesRoute
@@ -2289,6 +2297,7 @@ export interface FileRoutesByTo {
   '/finance/commissions': typeof AuthenticatedFinanceCommissionsRoute
   '/finance/methods': typeof AuthenticatedFinanceMethodsRoute
   '/finance/transactions': typeof AuthenticatedFinanceTransactionsRoute
+  '/finance/webhook-log': typeof AuthenticatedFinanceWebhookLogRoute
   '/imobiliaria/aprovacoes': typeof AuthenticatedImobiliariaAprovacoesRouteWithChildren
   '/imobiliaria/imoveis': typeof AuthenticatedImobiliariaImoveisRoute
   '/imobiliaria/intencoes': typeof AuthenticatedImobiliariaIntencoesRoute
@@ -2572,6 +2581,7 @@ export interface FileRoutesById {
   '/_authenticated/finance/commissions': typeof AuthenticatedFinanceCommissionsRoute
   '/_authenticated/finance/methods': typeof AuthenticatedFinanceMethodsRoute
   '/_authenticated/finance/transactions': typeof AuthenticatedFinanceTransactionsRoute
+  '/_authenticated/finance/webhook-log': typeof AuthenticatedFinanceWebhookLogRoute
   '/_authenticated/imobiliaria/aprovacoes': typeof AuthenticatedImobiliariaAprovacoesRouteWithChildren
   '/_authenticated/imobiliaria/imoveis': typeof AuthenticatedImobiliariaImoveisRoute
   '/_authenticated/imobiliaria/intencoes': typeof AuthenticatedImobiliariaIntencoesRoute
@@ -2855,6 +2865,7 @@ export interface FileRouteTypes {
     | '/finance/commissions'
     | '/finance/methods'
     | '/finance/transactions'
+    | '/finance/webhook-log'
     | '/imobiliaria/aprovacoes'
     | '/imobiliaria/imoveis'
     | '/imobiliaria/intencoes'
@@ -3125,6 +3136,7 @@ export interface FileRouteTypes {
     | '/finance/commissions'
     | '/finance/methods'
     | '/finance/transactions'
+    | '/finance/webhook-log'
     | '/imobiliaria/aprovacoes'
     | '/imobiliaria/imoveis'
     | '/imobiliaria/intencoes'
@@ -3407,6 +3419,7 @@ export interface FileRouteTypes {
     | '/_authenticated/finance/commissions'
     | '/_authenticated/finance/methods'
     | '/_authenticated/finance/transactions'
+    | '/_authenticated/finance/webhook-log'
     | '/_authenticated/imobiliaria/aprovacoes'
     | '/_authenticated/imobiliaria/imoveis'
     | '/_authenticated/imobiliaria/intencoes'
@@ -4800,6 +4813,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedImobiliariaAprovacoesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/finance/webhook-log': {
+      id: '/_authenticated/finance/webhook-log'
+      path: '/webhook-log'
+      fullPath: '/finance/webhook-log'
+      preLoaderRoute: typeof AuthenticatedFinanceWebhookLogRouteImport
+      parentRoute: typeof AuthenticatedFinanceRoute
+    }
     '/_authenticated/finance/transactions': {
       id: '/_authenticated/finance/transactions'
       path: '/transactions'
@@ -5832,6 +5852,7 @@ interface AuthenticatedFinanceRouteChildren {
   AuthenticatedFinanceCommissionsRoute: typeof AuthenticatedFinanceCommissionsRoute
   AuthenticatedFinanceMethodsRoute: typeof AuthenticatedFinanceMethodsRoute
   AuthenticatedFinanceTransactionsRoute: typeof AuthenticatedFinanceTransactionsRoute
+  AuthenticatedFinanceWebhookLogRoute: typeof AuthenticatedFinanceWebhookLogRoute
   AuthenticatedFinanceIndexRoute: typeof AuthenticatedFinanceIndexRoute
 }
 
@@ -5841,6 +5862,7 @@ const AuthenticatedFinanceRouteChildren: AuthenticatedFinanceRouteChildren = {
   AuthenticatedFinanceCommissionsRoute: AuthenticatedFinanceCommissionsRoute,
   AuthenticatedFinanceMethodsRoute: AuthenticatedFinanceMethodsRoute,
   AuthenticatedFinanceTransactionsRoute: AuthenticatedFinanceTransactionsRoute,
+  AuthenticatedFinanceWebhookLogRoute: AuthenticatedFinanceWebhookLogRoute,
   AuthenticatedFinanceIndexRoute: AuthenticatedFinanceIndexRoute,
 }
 
