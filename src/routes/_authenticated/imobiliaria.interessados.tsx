@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
-import { listVitrineInterests, updateVitrineInterest } from '@/lib/realestate-vitrine.functions'
+import { listVitrineInterests, updateVitrineInterest, exportVitrineDataset } from '@/lib/realestate-vitrine.functions'
 import { listVitrineEmailLog, resendVitrineEmail } from '@/lib/realestate-vitrine-resend.functions'
 import { useActiveCompany } from '@/hooks/use-active-company'
 import { PageHeader, EmptyState } from '@/components/app/PageElements'
@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog'
 import { toast } from 'sonner'
-import { Loader2, Phone, Mail, MessageSquare, Home, Send } from 'lucide-react'
+import { Loader2, Phone, Mail, MessageSquare, Home, Send, Download } from 'lucide-react'
 
 export const Route = createFileRoute('/_authenticated/imobiliaria/interessados')({
   head: () => ({ meta: [{ title: 'Interessados — Vitrine imobiliária' }] }),
@@ -53,10 +53,30 @@ function Page() {
   const qc = useQueryClient()
   const fetchList = useServerFn(listVitrineInterests)
   const fetchUpdate = useServerFn(updateVitrineInterest)
+  const fetchExport = useServerFn(exportVitrineDataset)
   const [status, setStatus] = useState('todos')
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
+  const [from, setFrom] = useState('')
+  const [to, setTo] = useState('')
+  const [exporting, setExporting] = useState(false)
   const pageSize = 25
+
+  async function handleExport() {
+    if (!companyId) return
+    setExporting(true)
+    try {
+      const r = await fetchExport({ data: { companyId, dataset: 'interests', status, search, from: from || undefined, to: to || undefined } })
+      const blob = new Blob([r.csv], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url; a.download = r.filename; a.click()
+      URL.revokeObjectURL(url)
+      toast.success(`${r.total} registro(s) exportado(s)`)
+    } catch (e: any) {
+      toast.error(e?.message ?? 'Falha ao exportar')
+    } finally { setExporting(false) }
+  }
 
   const { data, isLoading } = useQuery({
     queryKey: ['vitrine-interests', companyId, status, search, page],
@@ -101,7 +121,21 @@ function Page() {
             </SelectContent>
           </Select>
         </div>
-        <div className="text-sm text-muted-foreground ml-auto">{total} registro(s)</div>
+        <div className="min-w-[150px]">
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">De</label>
+          <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+        </div>
+        <div className="min-w-[150px]">
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Até</label>
+          <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+        </div>
+        <div className="flex items-center gap-3 ml-auto">
+          <span className="text-sm text-muted-foreground">{total} registro(s)</span>
+          <Button variant="outline" size="sm" onClick={handleExport} disabled={exporting}>
+            {exporting ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Download className="h-3 w-3 mr-1" />}
+            Exportar CSV
+          </Button>
+        </div>
       </Card>
 
       {isLoading ? (
