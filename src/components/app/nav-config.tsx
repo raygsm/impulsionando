@@ -50,6 +50,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Vendas",
     items: [
+      { to: "/operations/cockpit", label: "Cockpit de Operações", icon: TrendingUp, perm: "sales.order.read" },
       { to: "/sales", label: "Visão geral", icon: ShoppingCart, perm: "sales.order.read" },
       { to: "/sales/new", label: "Nova venda (PDV)", icon: Plus, perm: "sales.order.write" },
       { to: "/sales/orders", label: "Pedidos", icon: Receipt, perm: "sales.order.read" },
