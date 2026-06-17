@@ -41,6 +41,7 @@ import { Route as ModulosIndexRouteImport } from './routes/modulos.index'
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
 import { Route as TrialCadastroRouteImport } from './routes/trial_.cadastro'
 import { Route as TrabalheConoscoNichoRouteImport } from './routes/trabalhe-conosco.$nicho'
+import { Route as ShowroomRelatoriosRouteImport } from './routes/showroom.relatorios'
 import { Route as ShowroomFitnessRouteImport } from './routes/showroom.fitness'
 import { Route as ShowroomEventosRouteImport } from './routes/showroom.eventos'
 import { Route as ShowroomDashboardsRouteImport } from './routes/showroom.dashboards'
@@ -390,6 +391,11 @@ const TrialCadastroRoute = TrialCadastroRouteImport.update({
 const TrabalheConoscoNichoRoute = TrabalheConoscoNichoRouteImport.update({
   id: '/trabalhe-conosco/$nicho',
   path: '/trabalhe-conosco/$nicho',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShowroomRelatoriosRoute = ShowroomRelatoriosRouteImport.update({
+  id: '/showroom/relatorios',
+  path: '/showroom/relatorios',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShowroomFitnessRoute = ShowroomFitnessRouteImport.update({
@@ -1536,6 +1542,7 @@ export interface FileRoutesByFullPath {
   '/showroom/dashboards': typeof ShowroomDashboardsRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
+  '/showroom/relatorios': typeof ShowroomRelatoriosRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial/cadastro': typeof TrialCadastroRoute
   '/demo/': typeof DemoIndexRoute
@@ -1749,6 +1756,7 @@ export interface FileRoutesByTo {
   '/showroom/dashboards': typeof ShowroomDashboardsRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
+  '/showroom/relatorios': typeof ShowroomRelatoriosRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial/cadastro': typeof TrialCadastroRoute
   '/demo': typeof DemoIndexRoute
@@ -1975,6 +1983,7 @@ export interface FileRoutesById {
   '/showroom/dashboards': typeof ShowroomDashboardsRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
+  '/showroom/relatorios': typeof ShowroomRelatoriosRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial_/cadastro': typeof TrialCadastroRoute
   '/demo/': typeof DemoIndexRoute
@@ -2201,6 +2210,7 @@ export interface FileRouteTypes {
     | '/showroom/dashboards'
     | '/showroom/eventos'
     | '/showroom/fitness'
+    | '/showroom/relatorios'
     | '/trabalhe-conosco/$nicho'
     | '/trial/cadastro'
     | '/demo/'
@@ -2414,6 +2424,7 @@ export interface FileRouteTypes {
     | '/showroom/dashboards'
     | '/showroom/eventos'
     | '/showroom/fitness'
+    | '/showroom/relatorios'
     | '/trabalhe-conosco/$nicho'
     | '/trial/cadastro'
     | '/demo'
@@ -2639,6 +2650,7 @@ export interface FileRouteTypes {
     | '/showroom/dashboards'
     | '/showroom/eventos'
     | '/showroom/fitness'
+    | '/showroom/relatorios'
     | '/trabalhe-conosco/$nicho'
     | '/trial_/cadastro'
     | '/demo/'
@@ -2835,6 +2847,7 @@ export interface RootRouteChildren {
   ShowroomDashboardsRoute: typeof ShowroomDashboardsRoute
   ShowroomEventosRoute: typeof ShowroomEventosRoute
   ShowroomFitnessRoute: typeof ShowroomFitnessRoute
+  ShowroomRelatoriosRoute: typeof ShowroomRelatoriosRoute
   TrabalheConoscoNichoRoute: typeof TrabalheConoscoNichoRoute
   TrialCadastroRoute: typeof TrialCadastroRoute
   DemoIndexRoute: typeof DemoIndexRoute
@@ -3090,6 +3103,13 @@ declare module '@tanstack/react-router' {
       path: '/trabalhe-conosco/$nicho'
       fullPath: '/trabalhe-conosco/$nicho'
       preLoaderRoute: typeof TrabalheConoscoNichoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/showroom/relatorios': {
+      id: '/showroom/relatorios'
+      path: '/showroom/relatorios'
+      fullPath: '/showroom/relatorios'
+      preLoaderRoute: typeof ShowroomRelatoriosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/showroom/fitness': {
@@ -5006,6 +5026,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShowroomDashboardsRoute: ShowroomDashboardsRoute,
   ShowroomEventosRoute: ShowroomEventosRoute,
   ShowroomFitnessRoute: ShowroomFitnessRoute,
+  ShowroomRelatoriosRoute: ShowroomRelatoriosRoute,
   TrabalheConoscoNichoRoute: TrabalheConoscoNichoRoute,
   TrialCadastroRoute: TrialCadastroRoute,
   DemoIndexRoute: DemoIndexRoute,
