@@ -114,6 +114,24 @@ function DemoLanding() {
           ))}
         </div>
 
+        <div className="mt-10 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5 p-6 sm:p-8">
+          <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-center">
+            <div>
+              <Badge className="bg-gradient-primary mb-2">
+                <PlayCircle className="w-3 h-3 mr-1" /> Modo Feira
+              </Badge>
+              <h3 className="font-semibold text-lg tracking-tight">Está em uma feira ou reunião agora?</h3>
+              <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                Acesso imediato à demonstração no seu nicho com captura rápida (nome + WhatsApp + e-mail)
+                e disparo automático de e-mail de boas-vindas.
+              </p>
+            </div>
+            <Button asChild size="lg" className="bg-gradient-primary gap-2">
+              <Link to="/demo/feira"><PlayCircle className="w-4 h-4" /> Abrir demo de feira</Link>
+            </Button>
+          </div>
+        </div>
+
         <div className="mt-12 rounded-xl border border-dashed border-border bg-muted/30 p-6 sm:p-8">
           <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-center">
             <div>
