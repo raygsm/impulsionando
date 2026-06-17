@@ -27,9 +27,9 @@ import { ModulePicker } from "@/components/marketing/ModulePicker";
 import { ContractingSummaryDialog } from "@/components/marketing/ContractingSummaryDialog";
 
 const PLAN_QUOTA: Record<string, number> = {
-  Essencial: 1,
-  Integrado: 2,
-  Avançado: 3,
+  Essencial: 3,   // até 3 módulos
+  Integrado: 6,   // até 6 módulos (Ideal)
+  Avançado: 99,   // sem teto prático (Full)
 };
 
 /** Preço por módulo adicional além da quota do plano. */
@@ -402,7 +402,7 @@ function PlanosPage() {
                   </div>
                 )}
                 <div className="text-xs uppercase tracking-wider text-muted-foreground">{plan.modulesLabel}</div>
-                <div className="text-xl font-semibold tracking-tight mt-1">{plan.name}</div>
+                <div className="text-xl font-semibold tracking-tight mt-1">{plan.displayName ?? plan.name}</div>
                 <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{plan.tagline}</p>
 
                 <div className="mt-5 min-h-[68px]">
