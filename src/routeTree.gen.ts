@@ -45,6 +45,7 @@ import { Route as ShowroomWhatsappRouteImport } from './routes/showroom.whatsapp
 import { Route as ShowroomRelatoriosRouteImport } from './routes/showroom.relatorios'
 import { Route as ShowroomIntegracoesRouteImport } from './routes/showroom.integracoes'
 import { Route as ShowroomFitnessRouteImport } from './routes/showroom.fitness'
+import { Route as ShowroomFinanceiroRouteImport } from './routes/showroom.financeiro'
 import { Route as ShowroomEventosRouteImport } from './routes/showroom.eventos'
 import { Route as ShowroomDashboardsRouteImport } from './routes/showroom.dashboards'
 import { Route as ShowroomClinicasRouteImport } from './routes/showroom.clinicas'
@@ -417,6 +418,11 @@ const ShowroomIntegracoesRoute = ShowroomIntegracoesRouteImport.update({
 const ShowroomFitnessRoute = ShowroomFitnessRouteImport.update({
   id: '/showroom/fitness',
   path: '/showroom/fitness',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShowroomFinanceiroRoute = ShowroomFinanceiroRouteImport.update({
+  id: '/showroom/financeiro',
+  path: '/showroom/financeiro',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShowroomEventosRoute = ShowroomEventosRouteImport.update({
@@ -1581,6 +1587,7 @@ export interface FileRoutesByFullPath {
   '/showroom/clinicas': typeof ShowroomClinicasRoute
   '/showroom/dashboards': typeof ShowroomDashboardsRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
+  '/showroom/financeiro': typeof ShowroomFinanceiroRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/showroom/integracoes': typeof ShowroomIntegracoesRoute
   '/showroom/relatorios': typeof ShowroomRelatoriosRoute
@@ -1801,6 +1808,7 @@ export interface FileRoutesByTo {
   '/showroom/clinicas': typeof ShowroomClinicasRoute
   '/showroom/dashboards': typeof ShowroomDashboardsRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
+  '/showroom/financeiro': typeof ShowroomFinanceiroRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/showroom/integracoes': typeof ShowroomIntegracoesRoute
   '/showroom/relatorios': typeof ShowroomRelatoriosRoute
@@ -2034,6 +2042,7 @@ export interface FileRoutesById {
   '/showroom/clinicas': typeof ShowroomClinicasRoute
   '/showroom/dashboards': typeof ShowroomDashboardsRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
+  '/showroom/financeiro': typeof ShowroomFinanceiroRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/showroom/integracoes': typeof ShowroomIntegracoesRoute
   '/showroom/relatorios': typeof ShowroomRelatoriosRoute
@@ -2267,6 +2276,7 @@ export interface FileRouteTypes {
     | '/showroom/clinicas'
     | '/showroom/dashboards'
     | '/showroom/eventos'
+    | '/showroom/financeiro'
     | '/showroom/fitness'
     | '/showroom/integracoes'
     | '/showroom/relatorios'
@@ -2487,6 +2497,7 @@ export interface FileRouteTypes {
     | '/showroom/clinicas'
     | '/showroom/dashboards'
     | '/showroom/eventos'
+    | '/showroom/financeiro'
     | '/showroom/fitness'
     | '/showroom/integracoes'
     | '/showroom/relatorios'
@@ -2719,6 +2730,7 @@ export interface FileRouteTypes {
     | '/showroom/clinicas'
     | '/showroom/dashboards'
     | '/showroom/eventos'
+    | '/showroom/financeiro'
     | '/showroom/fitness'
     | '/showroom/integracoes'
     | '/showroom/relatorios'
@@ -2922,6 +2934,7 @@ export interface RootRouteChildren {
   ShowroomClinicasRoute: typeof ShowroomClinicasRoute
   ShowroomDashboardsRoute: typeof ShowroomDashboardsRoute
   ShowroomEventosRoute: typeof ShowroomEventosRoute
+  ShowroomFinanceiroRoute: typeof ShowroomFinanceiroRoute
   ShowroomFitnessRoute: typeof ShowroomFitnessRoute
   ShowroomIntegracoesRoute: typeof ShowroomIntegracoesRoute
   ShowroomRelatoriosRoute: typeof ShowroomRelatoriosRoute
@@ -3209,6 +3222,13 @@ declare module '@tanstack/react-router' {
       path: '/showroom/fitness'
       fullPath: '/showroom/fitness'
       preLoaderRoute: typeof ShowroomFitnessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/showroom/financeiro': {
+      id: '/showroom/financeiro'
+      path: '/showroom/financeiro'
+      fullPath: '/showroom/financeiro'
+      preLoaderRoute: typeof ShowroomFinanceiroRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/showroom/eventos': {
@@ -5162,6 +5182,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShowroomClinicasRoute: ShowroomClinicasRoute,
   ShowroomDashboardsRoute: ShowroomDashboardsRoute,
   ShowroomEventosRoute: ShowroomEventosRoute,
+  ShowroomFinanceiroRoute: ShowroomFinanceiroRoute,
   ShowroomFitnessRoute: ShowroomFitnessRoute,
   ShowroomIntegracoesRoute: ShowroomIntegracoesRoute,
   ShowroomRelatoriosRoute: ShowroomRelatoriosRoute,
