@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
@@ -10,6 +10,7 @@ import {
   fetchReguasMetrics,
   fetchReguasFailures,
 } from "@/lib/reguas-metrics.functions";
+import { checkCoreHealthAccess } from "@/lib/core-rbac.functions";
 
 export const Route = createFileRoute("/_authenticated/core/metricas-reguas")({
   head: () => ({
@@ -18,6 +19,11 @@ export const Route = createFileRoute("/_authenticated/core/metricas-reguas")({
       { name: "robots", content: "noindex" },
     ],
   }),
+  beforeLoad: async () => {
+    const r = await checkCoreHealthAccess();
+    if (!r.allowed) throw redirect({ to: "/core" as any });
+    return { coreAccess: r.level };
+  },
   component: MetricasReguasPage,
 });
 

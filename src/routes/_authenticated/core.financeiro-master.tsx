@@ -1,12 +1,18 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Card } from "@/components/ui/card";
 import { getFinancialMasterOverview } from "@/lib/governance.functions";
+import { checkCoreHealthAccess } from "@/lib/core-rbac.functions";
 import { TrendingUp, Users, AlertTriangle, DollarSign } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/core/financeiro-master")({
   head: () => ({ meta: [{ title: "Financeiro Master — Core" }, { name: "robots", content: "noindex" }] }),
+  beforeLoad: async () => {
+    const r = await checkCoreHealthAccess();
+    if (!r.allowed) throw redirect({ to: "/core" as any });
+    return { coreAccess: r.level };
+  },
   component: FinanceiroMasterPage,
 });
 
