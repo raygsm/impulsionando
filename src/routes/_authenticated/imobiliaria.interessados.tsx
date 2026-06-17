@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
 import { listVitrineInterests, updateVitrineInterest } from '@/lib/realestate-vitrine.functions'
+import { listVitrineEmailLog, resendVitrineEmail } from '@/lib/realestate-vitrine-resend.functions'
 import { useActiveCompany } from '@/hooks/use-active-company'
 import { PageHeader, EmptyState } from '@/components/app/PageElements'
 import { Card } from '@/components/ui/card'
@@ -10,8 +11,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog'
 import { toast } from 'sonner'
-import { Loader2, Phone, Mail, MessageSquare, Home } from 'lucide-react'
+import { Loader2, Phone, Mail, MessageSquare, Home, Send } from 'lucide-react'
 
 export const Route = createFileRoute('/_authenticated/imobiliaria/interessados')({
   head: () => ({ meta: [{ title: 'Interessados — Vitrine imobiliária' }] }),
