@@ -51,17 +51,18 @@ export async function seedHorizonteDemo(companyId: string) {
 
   // 2) Documentos (mistura de status)
   const docRows = ids.flatMap((id, i) => [
-    { company_id: companyId, client_id: id, name: `NF entrada ${i + 1}.pdf`, file_path: `${companyId}/demo/nf-${i}.pdf`, status: "pending", notes: DEMO_TAG, kind: "fiscal" },
-    { company_id: companyId, client_id: id, name: `Balancete ${i + 1}.pdf`, file_path: `${companyId}/demo/bal-${i}.pdf`, status: "received", notes: DEMO_TAG, kind: "contabil" },
+    { company_id: companyId, client_id: id, title: `NF entrada ${i + 1}`, doc_type: "nf", file_path: `${companyId}/demo/nf-${i}.pdf`, status: "pending", source: "upload", notes: DEMO_TAG },
+    { company_id: companyId, client_id: id, title: `Balancete ${i + 1}`, doc_type: "balancete", file_path: `${companyId}/demo/bal-${i}.pdf`, status: "received", source: "upload", notes: DEMO_TAG },
   ]);
   await supabase.from("contab_documents").insert(docRows);
 
   // 3) Obrigações (algumas atrasadas, próximas, futuras)
+  const competence = new Date().toISOString().slice(0, 10);
   const oblRows = ids.flatMap((id, i) => [
-    { company_id: companyId, client_id: id, title: `DAS ${i + 1}`, kind: "DAS", due_date: offset(-3 - i), amount: 320 + i * 50, status: "open", notes: DEMO_TAG },
-    { company_id: companyId, client_id: id, title: `DCTFWeb ${i + 1}`, kind: "DCTFWeb", due_date: offset(5 + i), amount: 180 + i * 30, status: "open", notes: DEMO_TAG },
-    { company_id: companyId, client_id: id, title: `INSS ${i + 1}`, kind: "INSS", due_date: offset(20 + i), amount: 850 + i * 80, status: "open", notes: DEMO_TAG },
-    { company_id: companyId, client_id: id, title: `ISS competência ${i + 1}`, kind: "ISS", due_date: offset(-15), amount: 220, status: "paid", notes: DEMO_TAG },
+    { company_id: companyId, client_id: id, title: `DAS ${i + 1}`, obligation_type: "DAS", competence, due_date: offset(-3 - i), amount: 320 + i * 50, status: "open", scope: "federal", notes: DEMO_TAG },
+    { company_id: companyId, client_id: id, title: `DCTFWeb ${i + 1}`, obligation_type: "DCTFWeb", competence, due_date: offset(5 + i), amount: 180 + i * 30, status: "open", scope: "federal", notes: DEMO_TAG },
+    { company_id: companyId, client_id: id, title: `INSS ${i + 1}`, obligation_type: "INSS", competence, due_date: offset(20 + i), amount: 850 + i * 80, status: "open", scope: "federal", notes: DEMO_TAG },
+    { company_id: companyId, client_id: id, title: `ISS ${i + 1}`, obligation_type: "ISS", competence, due_date: offset(-15), amount: 220, status: "paid", scope: "municipal", notes: DEMO_TAG },
   ]);
   await supabase.from("contab_obligations").insert(oblRows);
 
@@ -87,13 +88,20 @@ export async function seedHorizonteDemo(companyId: string) {
   await supabase.from("contab_irpf_journeys").insert(irpfRows);
 
   // 6) Financeiro do escritório
-  const finRows = ids.flatMap((id, i) => [
-    { company_id: companyId, client_id: id, kind: "receita", category: "Honorário", description: `Honorário ${DEMO_CLIENTS[i].trade_name}`, amount: DEMO_CLIENTS[i].monthly_fee, status: i % 2 ? "pago" : "pendente", due_date: offset(-5 + i * 3), paid_at: i % 2 ? new Date().toISOString() : null, notes: DEMO_TAG },
-  ]).concat([
-    { company_id: companyId, client_id: null, kind: "despesa", category: "Aluguel", description: "Aluguel sede", amount: 3200, status: "pago", due_date: offset(-10), paid_at: new Date().toISOString(), notes: DEMO_TAG },
-    { company_id: companyId, client_id: null, kind: "despesa", category: "Software", description: "Sistema contábil", amount: 890, status: "pendente", due_date: offset(8), paid_at: null, notes: DEMO_TAG },
-    { company_id: companyId, client_id: null, kind: "despesa", category: "Folha", description: "Folha equipe", amount: 12500, status: "pago", due_date: offset(-2), paid_at: new Date().toISOString(), notes: DEMO_TAG },
-  ]);
+  const finRows = [
+    ...ids.map((id, i) => ({
+      company_id: companyId, client_id: id, kind: "receita", category: "Honorário",
+      description: `Honorário ${DEMO_CLIENTS[i].trade_name}`,
+      amount: DEMO_CLIENTS[i].monthly_fee,
+      status: i % 2 ? "pago" : "pendente",
+      due_date: offset(-5 + i * 3),
+      paid_at: i % 2 ? new Date().toISOString() : null,
+      notes: DEMO_TAG,
+    })),
+    { company_id: companyId, client_id: null as string | null, kind: "despesa", category: "Aluguel", description: "Aluguel sede", amount: 3200, status: "pago", due_date: offset(-10), paid_at: new Date().toISOString(), notes: DEMO_TAG },
+    { company_id: companyId, client_id: null as string | null, kind: "despesa", category: "Software", description: "Sistema contábil", amount: 890, status: "pendente", due_date: offset(8), paid_at: null as string | null, notes: DEMO_TAG },
+    { company_id: companyId, client_id: null as string | null, kind: "despesa", category: "Folha", description: "Folha equipe", amount: 12500, status: "pago", due_date: offset(-2), paid_at: new Date().toISOString(), notes: DEMO_TAG },
+  ];
   await supabase.from("contab_office_finance").insert(finRows);
 
   // 7) Contratos
