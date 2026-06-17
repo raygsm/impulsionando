@@ -8258,8 +8258,63 @@ export type Database = {
           },
         ]
       }
+      restaurant_table_invoices: {
+        Row: {
+          amount_cents: number
+          company_id: string
+          created_at: string
+          id: string
+          order_nsu: string
+          paid_at: string | null
+          pix_copy_paste: string | null
+          pix_url: string | null
+          session_id: string
+          status: string
+        }
+        Insert: {
+          amount_cents: number
+          company_id: string
+          created_at?: string
+          id?: string
+          order_nsu: string
+          paid_at?: string | null
+          pix_copy_paste?: string | null
+          pix_url?: string | null
+          session_id: string
+          status?: string
+        }
+        Update: {
+          amount_cents?: number
+          company_id?: string
+          created_at?: string
+          id?: string
+          order_nsu?: string
+          paid_at?: string | null
+          pix_copy_paste?: string | null
+          pix_url?: string | null
+          session_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_table_invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restaurant_table_invoices_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "restaurant_table_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       restaurant_table_sessions: {
         Row: {
+          bill_notified_at: string | null
           closed_at: string | null
           company_id: string
           created_at: string
@@ -8278,6 +8333,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          bill_notified_at?: string | null
           closed_at?: string | null
           company_id: string
           created_at?: string
@@ -8296,6 +8352,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          bill_notified_at?: string | null
           closed_at?: string | null
           company_id?: string
           created_at?: string
@@ -8546,6 +8603,7 @@ export type Database = {
           id: string
           kitchen_status: string
           kitchen_updated_at: string
+          notified_ready_at: string | null
           order_id: string
           product_id: string | null
           quantity: number
@@ -8560,6 +8618,7 @@ export type Database = {
           id?: string
           kitchen_status?: string
           kitchen_updated_at?: string
+          notified_ready_at?: string | null
           order_id: string
           product_id?: string | null
           quantity: number
@@ -8574,6 +8633,7 @@ export type Database = {
           id?: string
           kitchen_status?: string
           kitchen_updated_at?: string
+          notified_ready_at?: string | null
           order_id?: string
           product_id?: string | null
           quantity?: number
@@ -9556,6 +9616,39 @@ export type Database = {
         }
         Relationships: []
       }
+      webhook_event_log: {
+        Row: {
+          event_id: string
+          id: string
+          payload: Json | null
+          processed_at: string
+          result: Json | null
+          source: string
+          target_id: string | null
+          target_kind: string | null
+        }
+        Insert: {
+          event_id: string
+          id?: string
+          payload?: Json | null
+          processed_at?: string
+          result?: Json | null
+          source: string
+          target_id?: string | null
+          target_kind?: string | null
+        }
+        Update: {
+          event_id?: string
+          id?: string
+          payload?: Json | null
+          processed_at?: string
+          result?: Json | null
+          source?: string
+          target_id?: string | null
+          target_kind?: string | null
+        }
+        Relationships: []
+      }
       webhook_runs: {
         Row: {
           attempts: number
@@ -9706,6 +9799,10 @@ export type Database = {
       }
     }
     Functions: {
+      _restaurant_session_total_cents: {
+        Args: { _session_id: string }
+        Returns: number
+      }
       _seed_menu_item: {
         Args: {
           _audience: string[]
@@ -9963,7 +10060,19 @@ export type Database = {
         Returns: string
       }
       resolve_table_qr: { Args: { _token: string }; Returns: Json }
+      restaurant_create_table_invoice: {
+        Args: { _token: string }
+        Returns: Json
+      }
+      restaurant_get_table_invoice: {
+        Args: { _invoice_id: string; _token: string }
+        Returns: Json
+      }
       restaurant_kitchen_board: { Args: never; Returns: Json }
+      restaurant_mark_table_invoice_paid: {
+        Args: { _invoice_id: string }
+        Returns: Json
+      }
       restaurant_set_item_status: {
         Args: { _item_id: string; _status: string }
         Returns: Json

@@ -8,6 +8,7 @@
  * - Captura nome + WhatsApp + nº de pessoas e faz check-in.
  */
 import { createFileRoute, notFound } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -16,7 +17,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { UtensilsCrossed, CheckCircle2, Users, Receipt, Plus } from "lucide-react";
+import { createTableInvoice, getTableInvoiceStatus } from "@/lib/restaurant-table-pay.functions";
+import { UtensilsCrossed, CheckCircle2, Users, Receipt, Plus, QrCode, Copy, ExternalLink, Loader2 } from "lucide-react";
 
 type Resolved = {
   ok: boolean;
@@ -75,6 +77,10 @@ function MesaPage() {
   const [party, setParty] = useState("2");
   const [submitting, setSubmitting] = useState(false);
   const [adding, setAdding] = useState<string | null>(null);
+  const [bill, setBill] = useState<null | { invoice_id: string; amount_cents: number; status: string; pix_url: string | null; pix_configured: boolean }>(null);
+  const [billLoading, setBillLoading] = useState(false);
+  const createBill = useServerFn(createTableInvoice);
+  const checkBill = useServerFn(getTableInvoiceStatus);
 
   useEffect(() => {
     const id = setInterval(async () => {
@@ -82,9 +88,42 @@ function MesaPage() {
       if (!t) return;
       const { data: r } = await supabase.rpc("resolve_table_qr", { _token: t });
       if (r && (r as any).ok) setData(r as Resolved);
-    }, 15000);
+      // Polling da fatura em aberto: detecta pagamento confirmado pelo webhook.
+      if (bill && bill.status !== "paid") {
+        try {
+          const res = await checkBill({ data: { token: t, invoice_id: bill.invoice_id } });
+          if (res.status === "paid") {
+            setBill({ ...bill, status: "paid" });
+            toast.success("Pagamento confirmado! Obrigado 💙");
+          }
+        } catch { /* silencioso */ }
+      }
+    }, 5000);
     return () => clearInterval(id);
-  }, []);
+  }, [bill, checkBill]);
+
+  async function handlePay() {
+    if (!data.session) return;
+    setBillLoading(true);
+    try {
+      const token = window.location.pathname.split("/").pop()!;
+      const res = await createBill({ data: { token } });
+      setBill({
+        invoice_id: res.invoice_id,
+        amount_cents: res.amount_cents,
+        status: res.status,
+        pix_url: res.pix_url,
+        pix_configured: res.pix_configured,
+      });
+      if (!res.pix_configured) {
+        toast.warning("Cobrança gerada, mas o PIX automático ainda não está configurado.");
+      }
+    } catch (err: any) {
+      toast.error(err?.message ?? "Erro ao gerar cobrança");
+    } finally {
+      setBillLoading(false);
+    }
+  }
 
   async function handleCheckin(e: React.FormEvent) {
     e.preventDefault();
@@ -159,6 +198,42 @@ function MesaPage() {
               <div className="text-xs text-muted-foreground"><Receipt className="w-3 h-3 inline mr-1" /> Total parcial</div>
               <div className="text-2xl font-bold">R$ {Number(data.session.total ?? 0).toFixed(2)}</div>
             </div>
+            {Number(data.session.total ?? 0) > 0 && (
+              <div className="mt-3 pt-3 border-t">
+                {bill?.status === "paid" ? (
+                  <div className="text-center py-2">
+                    <CheckCircle2 className="w-6 h-6 mx-auto text-green-600 mb-1" />
+                    <p className="text-sm font-medium text-green-700">Pagamento confirmado!</p>
+                    <p className="text-xs text-muted-foreground">A mesa foi liberada. Obrigado pela visita.</p>
+                  </div>
+                ) : bill ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Loader2 className="w-4 h-4 animate-spin text-amber-600" />
+                      <span>Aguardando pagamento PIX de <strong>R$ {(bill.amount_cents/100).toFixed(2)}</strong>...</span>
+                    </div>
+                    {bill.pix_url && (
+                      <div className="flex gap-2">
+                        <Button asChild size="sm" className="flex-1" style={{ background: primary }}>
+                          <a href={bill.pix_url} target="_blank" rel="noopener noreferrer">
+                            <ExternalLink className="w-4 h-4 mr-1" /> Abrir checkout PIX
+                          </a>
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(bill.pix_url!); toast.success("Link copiado"); }}>
+                          <Copy className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    )}
+                    <p className="text-[10px] text-muted-foreground text-center">A mesa será liberada automaticamente quando o pagamento for confirmado.</p>
+                  </div>
+                ) : (
+                  <Button onClick={handlePay} disabled={billLoading} className="w-full" style={{ background: primary }}>
+                    {billLoading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <QrCode className="w-4 h-4 mr-1" />}
+                    Pagar conta agora
+                  </Button>
+                )}
+              </div>
+            )}
           </Card>
         ) : (
           <Card className="p-5 mb-4">
