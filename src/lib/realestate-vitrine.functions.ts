@@ -464,12 +464,31 @@ export const listVitrineExportLogs = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: z.infer<typeof ListExportLogsInput>) => ListExportLogsInput.parse(d))
   .handler(async ({ data, context }) => {
+    // RLS já restringe a user_id = auth.uid(); reforçamos o filtro explicitamente
+    // para defesa em profundidade contra uma policy acidentalmente afrouxada.
     const { data: rows, error } = await context.supabase
       .from('vitrine_export_logs')
       .select('export_id, dataset, format, status, status_filter, total_exported, total_expected, batches_done, started_at, finished_at, error_message, date_from, date_to, email_from, email_to')
       .eq('company_id', data.companyId)
+      .eq('user_id', context.userId)
       .order('started_at', { ascending: false })
       .limit(data.limit)
     if (error) throw error
     return { rows: rows ?? [] }
+  })
+
+const GetExportLogInput = z.object({ exportId: z.string().uuid() })
+
+export const getVitrineExportLog = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: z.infer<typeof GetExportLogInput>) => GetExportLogInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: row, error } = await context.supabase
+      .from('vitrine_export_logs')
+      .select('export_id, dataset, format, status, status_filter, total_exported, total_expected, batches_done, started_at, finished_at, error_message, company_id, user_id')
+      .eq('export_id', data.exportId)
+      .eq('user_id', context.userId)
+      .maybeSingle()
+    if (error) throw error
+    return { row: row ?? null }
   })
