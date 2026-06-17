@@ -44,6 +44,71 @@ export const Route = createFileRoute("/api/public/payments/infinitepay/webhook")
           return jsonResp(400, { success: false, message: "order_nsu ausente" });
         }
 
+        // --- Pagamento de conta de mesa (QR Code) ----------------------------
+        // order_nsu = `table-<uuid_sem_hifens>` aponta para restaurant_table_invoices.
+        // Confirma via payment_check da InfinitePay, depois marca pago + fecha
+        // sessão + libera mesa (idempotente) e dispara notificações ao cliente.
+        if (order_nsu.startsWith("table-")) {
+          const { data: tinv, error: tinvErr } = await supabaseAdmin
+            .from("restaurant_table_invoices")
+            .select("id, status, amount_cents, session_id")
+            .eq("order_nsu", order_nsu)
+            .maybeSingle();
+          if (tinvErr) {
+            console.error("[infinitepay webhook] table lookup error", tinvErr);
+            return jsonResp(500, { success: false, message: "Erro interno" });
+          }
+          if (!tinv) {
+            return jsonResp(400, { success: false, message: "Cobrança de mesa não encontrada" });
+          }
+          if (tinv.status === "paid") {
+            return jsonResp(200, { success: true, message: null, duplicate: true });
+          }
+          const handleTable = (process.env.INFINITEPAY_HANDLE ?? "").replace(/^\$/, "");
+          let tableConfirmed = false;
+          let tableCheck: any = null;
+          if (handleTable) {
+            try {
+              const res = await fetch(`${API_BASE}/invoices/public/checkout/payment_check`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  handle: handleTable,
+                  order_nsu,
+                  transaction_nsu: payload?.transaction_nsu ?? "",
+                  slug: payload?.invoice_slug ?? payload?.slug ?? "",
+                }),
+              });
+              tableCheck = await res.json().catch(() => ({}));
+              tableConfirmed = tableCheck?.paid === true;
+            } catch (e) {
+              console.error("[infinitepay webhook] table payment_check failed", e);
+            }
+          }
+          if (!tableConfirmed) {
+            return jsonResp(200, { success: true, message: "Aguardando confirmação" });
+          }
+          const { data: rpcRes, error: rpcErr } = await supabaseAdmin.rpc(
+            "restaurant_mark_table_invoice_paid",
+            { _invoice_id: tinv.id },
+          );
+          if (rpcErr) {
+            console.error("[infinitepay webhook] table RPC failed", rpcErr);
+            return jsonResp(500, { success: false, message: "Erro ao fechar mesa" });
+          }
+          try {
+            const { notifyTableBillClosed } = await import(
+              "@/lib/restaurant-customer-notify.server"
+            );
+            const sid = (rpcRes as any)?.session_id ?? tinv.session_id;
+            if (sid) await notifyTableBillClosed(sid);
+          } catch (e) {
+            console.warn("[infinitepay webhook] table notify failed", e);
+          }
+          return jsonResp(200, { success: true, message: null });
+        }
+        // --- Fim do fluxo de mesa --------------------------------------------
+
         const { data: row, error } = await supabaseAdmin
           .from("infinitepay_payments")
           .select("*")
