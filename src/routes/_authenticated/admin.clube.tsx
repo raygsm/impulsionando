@@ -231,3 +231,85 @@ function StepRow({ step, onSave, onDelete }: { step: any; onSave: (s: any) => Pr
     </li>
   );
 }
+
+function statusBadge(status: string) {
+  if (status === "success") return <Badge className="bg-emerald-600"><CheckCircle2 className="w-3 h-3 mr-1" /> Sucesso</Badge>;
+  if (status === "partial") return <Badge className="bg-amber-600"><AlertTriangle className="w-3 h-3 mr-1" /> Parcial</Badge>;
+  return <Badge variant="destructive"><XCircle className="w-3 h-3 mr-1" /> Erro</Badge>;
+}
+
+function CronAuditPanel() {
+  const fetchRuns = useServerFn(listClubeCronRuns);
+  const fetchAudit = useServerFn(getJourneyLogAudit);
+  const runs = useQuery({ queryKey: ["admin-clube-cron-runs"], queryFn: () => fetchRuns() });
+  const audit = useQuery({ queryKey: ["admin-clube-journey-audit"], queryFn: () => fetchAudit() });
+
+  return (
+    <>
+      <Card className="p-5">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-semibold flex items-center gap-2"><Activity className="w-4 h-4" /> Últimas execuções do cron</h2>
+          <Button variant="outline" size="sm" onClick={() => { runs.refetch(); audit.refetch(); }}>
+            <RefreshCw className="w-3 h-3 mr-1" /> Atualizar
+          </Button>
+        </div>
+        {runs.isLoading ? <p className="text-sm text-muted-foreground">Carregando…</p> : !runs.data?.length ? (
+          <p className="text-sm text-muted-foreground">Nenhuma execução registrada ainda. O cron roda diariamente às 11h UTC.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-xs text-muted-foreground border-b">
+                <tr><th className="text-left py-2 pr-2">Quando</th><th className="text-left">Status</th><th className="text-right">Enfileiradas</th><th className="text-right">Puladas</th><th className="text-right">Erros</th><th className="text-left pl-3">Mensagem</th></tr>
+              </thead>
+              <tbody>
+                {(runs.data ?? []).map((r: any) => (
+                  <tr key={r.id} className="border-b last:border-0">
+                    <td className="py-2 pr-2 whitespace-nowrap">{new Date(r.started_at).toLocaleString("pt-BR")}</td>
+                    <td>{statusBadge(r.status)}</td>
+                    <td className="text-right">{r.enqueued}</td>
+                    <td className="text-right">{r.skipped}</td>
+                    <td className="text-right">{r.error_count}</td>
+                    <td className="pl-3 max-w-md truncate text-xs text-muted-foreground" title={r.error_message ?? ""}>{r.error_message ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
+
+      <Card className="p-5">
+        <h2 className="font-semibold mb-3 flex items-center gap-2"><CalendarDays className="w-4 h-4" /> clube_journey_log por passo</h2>
+        {audit.isLoading ? <p className="text-sm text-muted-foreground">Carregando…</p> : (
+          <>
+            <p className="text-xs text-muted-foreground mb-3">
+              Total de eventos registrados: <strong>{audit.data?.totals.events ?? 0}</strong> em <strong>{audit.data?.totals.steps ?? 0}</strong> passos.
+              Duplicados bloqueados pela unique constraint <code>(user_id, step_id)</code>.
+            </p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-xs text-muted-foreground border-b">
+                  <tr><th className="text-left py-2">Dia</th><th className="text-left">Canal</th><th className="text-left">Público</th><th className="text-left">Código</th><th className="text-right">Disparos</th><th className="text-right">Únicos</th><th className="text-right">Duplicados</th><th className="text-left pl-3">Último envio</th></tr>
+                </thead>
+                <tbody>
+                  {(audit.data?.perStep ?? []).map((s: any) => (
+                    <tr key={s.id} className="border-b last:border-0">
+                      <td className="py-2"><Badge variant="outline">D+{s.day_offset}</Badge></td>
+                      <td>{s.channel}</td>
+                      <td>{s.audience}</td>
+                      <td className="text-xs"><code>{s.event_code}</code>{!s.active && <Badge variant="secondary" className="ml-1 text-[10px]">off</Badge>}</td>
+                      <td className="text-right">{s.total}</td>
+                      <td className="text-right">{s.unique_users}</td>
+                      <td className={`text-right ${s.duplicates_blocked > 0 ? "text-amber-600 font-medium" : ""}`}>{s.duplicates_blocked}</td>
+                      <td className="pl-3 text-xs text-muted-foreground whitespace-nowrap">{s.last_enqueued_at ? new Date(s.last_enqueued_at).toLocaleString("pt-BR") : "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+      </Card>
+    </>
+  );
+}
