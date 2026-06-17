@@ -160,7 +160,7 @@ export const listContractSignatures = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: rows, error } = await context.supabase
       .from("contract_signatures")
-      .select("*")
+      .select("id, contract_document_id, company_id, signer_name, signer_email, signer_doc, signer_role, signed_at, signature_hash, status, created_at, user_agent, evidence")
       .eq("contract_document_id", data.contract_document_id)
       .order("signed_at", { ascending: false });
     if (error) throw error;
