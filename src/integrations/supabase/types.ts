@@ -3324,6 +3324,63 @@ export type Database = {
         }
         Relationships: []
       }
+      core_master_data: {
+        Row: {
+          active: boolean
+          company_id: string | null
+          created_at: string
+          domain: string
+          id: string
+          key: string
+          label: string
+          metadata: Json
+          parent_id: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          company_id?: string | null
+          created_at?: string
+          domain: string
+          id?: string
+          key: string
+          label: string
+          metadata?: Json
+          parent_id?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          company_id?: string | null
+          created_at?: string
+          domain?: string
+          id?: string
+          key?: string
+          label?: string
+          metadata?: Json
+          parent_id?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_master_data_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_master_data_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "core_master_data"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       core_menu_items: {
         Row: {
           audience: string[]
@@ -3392,6 +3449,60 @@ export type Database = {
           },
         ]
       }
+      core_module_catalog: {
+        Row: {
+          active: boolean
+          base_price_cents: number
+          category: string
+          created_at: string
+          features: Json
+          icon: string | null
+          id: string
+          long_description: string | null
+          name: string
+          niches: string[]
+          recommended_with: string[]
+          setup_price_cents: number
+          short_description: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          base_price_cents?: number
+          category: string
+          created_at?: string
+          features?: Json
+          icon?: string | null
+          id?: string
+          long_description?: string | null
+          name: string
+          niches?: string[]
+          recommended_with?: string[]
+          setup_price_cents?: number
+          short_description: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          base_price_cents?: number
+          category?: string
+          created_at?: string
+          features?: Json
+          icon?: string | null
+          id?: string
+          long_description?: string | null
+          name?: string
+          niches?: string[]
+          recommended_with?: string[]
+          setup_price_cents?: number
+          short_description?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       core_niche_modules: {
         Row: {
           created_at: string
@@ -3439,6 +3550,133 @@ export type Database = {
             columns: ["niche_id"]
             isOneToOne: false
             referencedRelation: "niches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      core_refund_rules: {
+        Row: {
+          accepted_reasons: string[]
+          allow_full: boolean
+          allow_partial: boolean
+          auto_refund: boolean
+          company_id: string
+          created_at: string
+          id: string
+          manual_refund: boolean
+          request_deadline_days: number
+          requires_audit_log: boolean
+          same_holder_required: boolean
+          updated_at: string
+          validate_card: boolean
+          validate_cpf_cnpj: boolean
+          validate_pix_payer: boolean
+        }
+        Insert: {
+          accepted_reasons?: string[]
+          allow_full?: boolean
+          allow_partial?: boolean
+          auto_refund?: boolean
+          company_id: string
+          created_at?: string
+          id?: string
+          manual_refund?: boolean
+          request_deadline_days?: number
+          requires_audit_log?: boolean
+          same_holder_required?: boolean
+          updated_at?: string
+          validate_card?: boolean
+          validate_cpf_cnpj?: boolean
+          validate_pix_payer?: boolean
+        }
+        Update: {
+          accepted_reasons?: string[]
+          allow_full?: boolean
+          allow_partial?: boolean
+          auto_refund?: boolean
+          company_id?: string
+          created_at?: string
+          id?: string
+          manual_refund?: boolean
+          request_deadline_days?: number
+          requires_audit_log?: boolean
+          same_holder_required?: boolean
+          updated_at?: string
+          validate_card?: boolean
+          validate_cpf_cnpj?: boolean
+          validate_pix_payer?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_refund_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      core_reschedule_rules: {
+        Row: {
+          auto_reschedule: boolean
+          block_slot_until_approval: boolean
+          company_id: string
+          created_at: string
+          fee_cents: number
+          fee_enabled: boolean
+          id: string
+          max_hours_before: number
+          max_reschedule_count: number
+          min_hours_before: number
+          notify_clinic: boolean
+          notify_patient: boolean
+          notify_professional: boolean
+          release_old_slot_immediately: boolean
+          requires_approval: boolean
+          updated_at: string
+        }
+        Insert: {
+          auto_reschedule?: boolean
+          block_slot_until_approval?: boolean
+          company_id: string
+          created_at?: string
+          fee_cents?: number
+          fee_enabled?: boolean
+          id?: string
+          max_hours_before?: number
+          max_reschedule_count?: number
+          min_hours_before?: number
+          notify_clinic?: boolean
+          notify_patient?: boolean
+          notify_professional?: boolean
+          release_old_slot_immediately?: boolean
+          requires_approval?: boolean
+          updated_at?: string
+        }
+        Update: {
+          auto_reschedule?: boolean
+          block_slot_until_approval?: boolean
+          company_id?: string
+          created_at?: string
+          fee_cents?: number
+          fee_enabled?: boolean
+          id?: string
+          max_hours_before?: number
+          max_reschedule_count?: number
+          min_hours_before?: number
+          notify_clinic?: boolean
+          notify_patient?: boolean
+          notify_professional?: boolean
+          release_old_slot_immediately?: boolean
+          requires_approval?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_reschedule_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -4078,6 +4316,132 @@ export type Database = {
           },
         ]
       }
+      demo_environments: {
+        Row: {
+          active: boolean
+          capture_lead_when: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          niche: string
+          seed_volume: string
+          template_company_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          capture_lead_when?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          niche: string
+          seed_volume?: string
+          template_company_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          capture_lead_when?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          niche?: string
+          seed_volume?: string
+          template_company_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demo_environments_template_company_id_fkey"
+            columns: ["template_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      demo_leads: {
+        Row: {
+          created_at: string
+          email: string
+          environment_id: string | null
+          id: string
+          marketing_lead_id: string | null
+          name: string
+          niche: string | null
+          notes: string | null
+          origin: string
+          phone: string
+          selected_modules: string[]
+          session_id: string | null
+          status: string
+          tags: string[]
+          updated_at: string
+          viewed_modules: string[]
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          environment_id?: string | null
+          id?: string
+          marketing_lead_id?: string | null
+          name: string
+          niche?: string | null
+          notes?: string | null
+          origin?: string
+          phone: string
+          selected_modules?: string[]
+          session_id?: string | null
+          status?: string
+          tags?: string[]
+          updated_at?: string
+          viewed_modules?: string[]
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          environment_id?: string | null
+          id?: string
+          marketing_lead_id?: string | null
+          name?: string
+          niche?: string | null
+          notes?: string | null
+          origin?: string
+          phone?: string
+          selected_modules?: string[]
+          session_id?: string | null
+          status?: string
+          tags?: string[]
+          updated_at?: string
+          viewed_modules?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demo_leads_environment_id_fkey"
+            columns: ["environment_id"]
+            isOneToOne: false
+            referencedRelation: "demo_environments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demo_leads_marketing_lead_id_fkey"
+            columns: ["marketing_lead_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demo_leads_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "demo_visit_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       demo_sessions: {
         Row: {
           company_id: string | null
@@ -4127,6 +4491,65 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      demo_visit_sessions: {
+        Row: {
+          abandoned: boolean
+          attempted_contract: boolean
+          converted_lead_id: string | null
+          created_at: string
+          duration_seconds: number | null
+          ended_at: string | null
+          environment_id: string | null
+          id: string
+          ip_hash: string | null
+          niche: string
+          selected_modules: string[]
+          started_at: string
+          user_agent: string | null
+          viewed_modules: string[]
+        }
+        Insert: {
+          abandoned?: boolean
+          attempted_contract?: boolean
+          converted_lead_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          environment_id?: string | null
+          id?: string
+          ip_hash?: string | null
+          niche: string
+          selected_modules?: string[]
+          started_at?: string
+          user_agent?: string | null
+          viewed_modules?: string[]
+        }
+        Update: {
+          abandoned?: boolean
+          attempted_contract?: boolean
+          converted_lead_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          environment_id?: string | null
+          id?: string
+          ip_hash?: string | null
+          niche?: string
+          selected_modules?: string[]
+          started_at?: string
+          user_agent?: string | null
+          viewed_modules?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demo_visit_sessions_environment_id_fkey"
+            columns: ["environment_id"]
+            isOneToOne: false
+            referencedRelation: "demo_environments"
             referencedColumns: ["id"]
           },
         ]
@@ -8413,6 +8836,38 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vitrine_export_logs: {
         Row: {
           batches_done: number
@@ -8699,6 +9154,13 @@ export type Database = {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_impulsionando_staff: { Args: { _user: string }; Returns: boolean }
       is_patient_of_record:
         | { Args: { _record: string; _user: string }; Returns: boolean }
@@ -8860,6 +9322,13 @@ export type Database = {
         | "estornado"
         | "chargeback"
         | "bloqueado"
+      app_role:
+        | "admin"
+        | "white_label"
+        | "gestor"
+        | "operador"
+        | "profissional"
+        | "consumidor"
       company_environment: "demo" | "teste" | "real"
       realestate_approval_status:
         | "pending"
@@ -9082,6 +9551,14 @@ export const Constants = {
         "estornado",
         "chargeback",
         "bloqueado",
+      ],
+      app_role: [
+        "admin",
+        "white_label",
+        "gestor",
+        "operador",
+        "profissional",
+        "consumidor",
       ],
       company_environment: ["demo", "teste", "real"],
       realestate_approval_status: [
