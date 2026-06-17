@@ -18,12 +18,21 @@ export type ContractInput = {
   minimum_term_days?: number;
   signer_name?: string;
   signer_email?: string;
+  version?: number;
 };
 
-const BRL = (n: number) =>
-  n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2 });
+export type SignatureStamp = {
+  signer_name: string;
+  signer_email: string;
+  signer_doc?: string;
+  signed_at: string;          // ISO
+  signature_hash: string;     // sha256 hex
+  original_file_hash: string; // sha256 hex
+  ip_address?: string;
+  user_agent?: string;
+};
 
-export function buildContractPdfBytes(c: ContractInput): { bytes: Uint8Array; pageCount: number } {
+export function buildContractPdfBytes(c: ContractInput, stamp?: SignatureStamp): { bytes: Uint8Array; pageCount: number } {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
   const margin = 48;
