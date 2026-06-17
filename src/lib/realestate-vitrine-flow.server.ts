@@ -63,10 +63,12 @@ export interface ProcessInterestInput {
   utm?: Record<string, string>
   ip?: string | null
   userAgent?: string | null
+  requestId?: string
 }
 
 export interface ProcessInterestResult {
   ok: true
+  requestId: string
   interestId: string
   leadId: string
   messageId: string
@@ -75,15 +77,35 @@ export interface ProcessInterestResult {
 }
 
 export type ProcessInterestError =
-  | { ok: false; code: 'company_not_found' }
-  | { ok: false; code: 'property_unavailable' }
-  | { ok: false; code: 'contact_required' }
+  | { ok: false; requestId: string; code: 'company_not_found' }
+  | { ok: false; requestId: string; code: 'property_unavailable' }
+  | { ok: false; requestId: string; code: 'contact_required' }
+  | { ok: false; requestId: string; code: 'internal_error'; error: string }
 
 export async function processInterest(
   input: ProcessInterestInput,
 ): Promise<ProcessInterestResult | ProcessInterestError> {
+  const requestId = input.requestId ?? crypto.randomUUID()
+  await writeFlowAudit({
+    action: 'vitrine.interest.requested',
+    entity: 'realestate_interest',
+    requestId,
+    before: {
+      company_slug: input.companySlug,
+      property_id: input.propertyId,
+      kind: input.kind ?? 'interesse',
+      source: input.source ?? null,
+      utm: input.utm ?? {},
+      ip: input.ip ?? null,
+      user_agent: input.userAgent ?? null,
+      ...maskContact(input),
+    },
+  })
+
+  try {
   if (!input.contactEmail && !input.contactPhone && !input.contactWhatsapp) {
-    return { ok: false, code: 'contact_required' }
+    await writeFlowAudit({ action: 'vitrine.interest.failed', entity: 'realestate_interest', requestId, after: { code: 'contact_required' } })
+    return { ok: false, requestId, code: 'contact_required' }
   }
 
   const { data: company } = await supabaseAdmin
@@ -92,7 +114,10 @@ export async function processInterest(
     .eq('public_slug', input.companySlug)
     .eq('vitrine_enabled', true)
     .maybeSingle()
-  if (!company) return { ok: false, code: 'company_not_found' }
+  if (!company) {
+    await writeFlowAudit({ action: 'vitrine.interest.failed', entity: 'realestate_interest', requestId, after: { code: 'company_not_found' } })
+    return { ok: false, requestId, code: 'company_not_found' }
+  }
   const companyId = (company as any).id as string
   const companyName = (company as any).name as string
 
