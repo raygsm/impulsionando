@@ -305,6 +305,7 @@ import { Route as ApiPublicHooksUptimeCheckRouteImport } from './routes/api/publ
 import { Route as ApiPublicHooksN8nLogRouteImport } from './routes/api/public/hooks/n8n-log'
 import { Route as ApiPublicHooksMarketingLeadNotifyRouteImport } from './routes/api/public/hooks/marketing-lead-notify'
 import { Route as ApiPublicHooksCommsSelfTestRouteImport } from './routes/api/public/hooks/comms-self-test'
+import { Route as ApiPublicHooksClubeJourneyTickRouteImport } from './routes/api/public/hooks/clube-journey-tick'
 import { Route as ApiPublicHooksBillingTickRouteImport } from './routes/api/public/hooks/billing-tick'
 import { Route as ApiPublicHooksAffAdvanceCommissionsRouteImport } from './routes/api/public/hooks/aff-advance-commissions'
 import { Route as ApiPublicDemoSendTestRouteImport } from './routes/api/public/demo/send-test'
@@ -1946,6 +1947,12 @@ const ApiPublicHooksCommsSelfTestRoute =
     path: '/api/public/hooks/comms-self-test',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksClubeJourneyTickRoute =
+  ApiPublicHooksClubeJourneyTickRouteImport.update({
+    id: '/api/public/hooks/clube-journey-tick',
+    path: '/api/public/hooks/clube-journey-tick',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksBillingTickRoute =
   ApiPublicHooksBillingTickRouteImport.update({
     id: '/api/public/hooks/billing-tick',
@@ -2359,6 +2366,7 @@ export interface FileRoutesByFullPath {
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
+  '/api/public/hooks/clube-journey-tick': typeof ApiPublicHooksClubeJourneyTickRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
@@ -2665,6 +2673,7 @@ export interface FileRoutesByTo {
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
+  '/api/public/hooks/clube-journey-tick': typeof ApiPublicHooksClubeJourneyTickRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
@@ -2984,6 +2993,7 @@ export interface FileRoutesById {
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
+  '/api/public/hooks/clube-journey-tick': typeof ApiPublicHooksClubeJourneyTickRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
@@ -3303,6 +3313,7 @@ export interface FileRouteTypes {
     | '/api/public/demo/send-test'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/billing-tick'
+    | '/api/public/hooks/clube-journey-tick'
     | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/n8n-log'
@@ -3609,6 +3620,7 @@ export interface FileRouteTypes {
     | '/api/public/demo/send-test'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/billing-tick'
+    | '/api/public/hooks/clube-journey-tick'
     | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/n8n-log'
@@ -3927,6 +3939,7 @@ export interface FileRouteTypes {
     | '/api/public/demo/send-test'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/billing-tick'
+    | '/api/public/hooks/clube-journey-tick'
     | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/n8n-log'
@@ -4056,6 +4069,7 @@ export interface RootRouteChildren {
   ApiPublicDemoSendTestRoute: typeof ApiPublicDemoSendTestRoute
   ApiPublicHooksAffAdvanceCommissionsRoute: typeof ApiPublicHooksAffAdvanceCommissionsRoute
   ApiPublicHooksBillingTickRoute: typeof ApiPublicHooksBillingTickRoute
+  ApiPublicHooksClubeJourneyTickRoute: typeof ApiPublicHooksClubeJourneyTickRoute
   ApiPublicHooksCommsSelfTestRoute: typeof ApiPublicHooksCommsSelfTestRoute
   ApiPublicHooksMarketingLeadNotifyRoute: typeof ApiPublicHooksMarketingLeadNotifyRoute
   ApiPublicHooksN8nLogRoute: typeof ApiPublicHooksN8nLogRoute
@@ -6149,6 +6163,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksCommsSelfTestRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/clube-journey-tick': {
+      id: '/api/public/hooks/clube-journey-tick'
+      path: '/api/public/hooks/clube-journey-tick'
+      fullPath: '/api/public/hooks/clube-journey-tick'
+      preLoaderRoute: typeof ApiPublicHooksClubeJourneyTickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/billing-tick': {
       id: '/api/public/hooks/billing-tick'
       path: '/api/public/hooks/billing-tick'
@@ -7102,6 +7123,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksAffAdvanceCommissionsRoute:
     ApiPublicHooksAffAdvanceCommissionsRoute,
   ApiPublicHooksBillingTickRoute: ApiPublicHooksBillingTickRoute,
+  ApiPublicHooksClubeJourneyTickRoute: ApiPublicHooksClubeJourneyTickRoute,
   ApiPublicHooksCommsSelfTestRoute: ApiPublicHooksCommsSelfTestRoute,
   ApiPublicHooksMarketingLeadNotifyRoute:
     ApiPublicHooksMarketingLeadNotifyRoute,
