@@ -43,6 +43,7 @@ import { Route as TrialCadastroRouteImport } from './routes/trial_.cadastro'
 import { Route as TrabalheConoscoNichoRouteImport } from './routes/trabalhe-conosco.$nicho'
 import { Route as ShowroomFitnessRouteImport } from './routes/showroom.fitness'
 import { Route as ShowroomEventosRouteImport } from './routes/showroom.eventos'
+import { Route as ShowroomClinicasRouteImport } from './routes/showroom.clinicas'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
 import { Route as PlanosTesteRouteImport } from './routes/planos.teste'
 import { Route as PacienteIdRouteImport } from './routes/paciente.$id'
@@ -398,6 +399,11 @@ const ShowroomFitnessRoute = ShowroomFitnessRouteImport.update({
 const ShowroomEventosRoute = ShowroomEventosRouteImport.update({
   id: '/showroom/eventos',
   path: '/showroom/eventos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShowroomClinicasRoute = ShowroomClinicasRouteImport.update({
+  id: '/showroom/clinicas',
+  path: '/showroom/clinicas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RSlugRoute = RSlugRouteImport.update({
@@ -1520,6 +1526,7 @@ export interface FileRoutesByFullPath {
   '/paciente/$id': typeof PacienteIdRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
+  '/showroom/clinicas': typeof ShowroomClinicasRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
@@ -1731,6 +1738,7 @@ export interface FileRoutesByTo {
   '/paciente/$id': typeof PacienteIdRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
+  '/showroom/clinicas': typeof ShowroomClinicasRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
@@ -1955,6 +1963,7 @@ export interface FileRoutesById {
   '/paciente/$id': typeof PacienteIdRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
+  '/showroom/clinicas': typeof ShowroomClinicasRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
@@ -2179,6 +2188,7 @@ export interface FileRouteTypes {
     | '/paciente/$id'
     | '/planos/teste'
     | '/r/$slug'
+    | '/showroom/clinicas'
     | '/showroom/eventos'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
@@ -2390,6 +2400,7 @@ export interface FileRouteTypes {
     | '/paciente/$id'
     | '/planos/teste'
     | '/r/$slug'
+    | '/showroom/clinicas'
     | '/showroom/eventos'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
@@ -2613,6 +2624,7 @@ export interface FileRouteTypes {
     | '/paciente/$id'
     | '/planos/teste'
     | '/r/$slug'
+    | '/showroom/clinicas'
     | '/showroom/eventos'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
@@ -2807,6 +2819,7 @@ export interface RootRouteChildren {
   ImoveisSlugRoute: typeof ImoveisSlugRouteWithChildren
   NichosSlugRoute: typeof NichosSlugRoute
   RSlugRoute: typeof RSlugRoute
+  ShowroomClinicasRoute: typeof ShowroomClinicasRoute
   ShowroomEventosRoute: typeof ShowroomEventosRoute
   ShowroomFitnessRoute: typeof ShowroomFitnessRoute
   TrabalheConoscoNichoRoute: typeof TrabalheConoscoNichoRoute
@@ -3078,6 +3091,13 @@ declare module '@tanstack/react-router' {
       path: '/showroom/eventos'
       fullPath: '/showroom/eventos'
       preLoaderRoute: typeof ShowroomEventosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/showroom/clinicas': {
+      id: '/showroom/clinicas'
+      path: '/showroom/clinicas'
+      fullPath: '/showroom/clinicas'
+      preLoaderRoute: typeof ShowroomClinicasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/r/$slug': {
@@ -4962,6 +4982,7 @@ const rootRouteChildren: RootRouteChildren = {
   ImoveisSlugRoute: ImoveisSlugRouteWithChildren,
   NichosSlugRoute: NichosSlugRoute,
   RSlugRoute: RSlugRoute,
+  ShowroomClinicasRoute: ShowroomClinicasRoute,
   ShowroomEventosRoute: ShowroomEventosRoute,
   ShowroomFitnessRoute: ShowroomFitnessRoute,
   TrabalheConoscoNichoRoute: TrabalheConoscoNichoRoute,
