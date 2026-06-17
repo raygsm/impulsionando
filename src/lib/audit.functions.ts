@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireAdminOrAudit } from "@/lib/security-audit.server";
 
 export const listAuditLogs = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -67,6 +68,11 @@ export const exportAuditLogsCsv = createServerFn({ method: "POST" })
     }).parse(d ?? {}),
   )
   .handler(async ({ data, context }) => {
+    await requireAdminOrAudit(context.supabase, context.userId, {
+      entity: "audit_logs",
+      companyId: data.company_id ?? null,
+      metadata: { route: "/admin", export_scope: "audit_logs_csv", filters: data },
+    });
     let q = context.supabase
       .from("audit_logs")
       .select("id, created_at, company_id, user_email, action, entity, entity_id, metadata, companies:company_id(name)")
