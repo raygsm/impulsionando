@@ -155,6 +155,17 @@ function ClubePage() {
           <FavoritesTab favorites={area.data?.favorites ?? []} />
         </TabsContent>
 
+        <TabsContent value="historico" className="mt-6">
+          <HistoryTab
+            isPremium={isPremium}
+            items={consumption.data ?? []}
+            onAdd={async (payload) => {
+              try { await recordFn({ data: payload }); toast.success("Consumo registrado"); qc.invalidateQueries({ queryKey: ["clube-consumption"] }); }
+              catch (e: any) { toast.error(e.message); }
+            }}
+          />
+
+
         <TabsContent value="plano" className="mt-6">
           <PlanTab
             membership={area.data?.membership}
