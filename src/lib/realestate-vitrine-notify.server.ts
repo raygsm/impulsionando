@@ -48,11 +48,14 @@ export async function sendVitrineEmail(args: {
   to: string
   templateData: Record<string, unknown>
   idempotencyKey: string
+  requestId?: string
+  metadata?: Record<string, unknown>
 }): Promise<{ status: 'queued' | 'suppressed' | 'no_template' | 'error'; messageId?: string; error?: string }> {
   const tpl = TEMPLATES[args.templateName]
   if (!tpl) return { status: 'no_template' }
   const recipient = args.to.trim()
   if (!recipient) return { status: 'error', error: 'recipient_missing' }
+  const baseMeta = { ...(args.metadata ?? {}), request_id: args.requestId ?? null, idempotency_key: args.idempotencyKey }
   try {
     const element = React.createElement(tpl.component as any, args.templateData)
     const [html, text] = await Promise.all([
@@ -75,6 +78,7 @@ export async function sendVitrineEmail(args: {
         template_name: args.templateName,
         recipient_email: recipient,
         status: 'suppressed',
+        metadata: baseMeta,
       })
       return { status: 'suppressed', messageId }
     }
@@ -85,6 +89,7 @@ export async function sendVitrineEmail(args: {
       template_name: args.templateName,
       recipient_email: recipient,
       status: 'pending',
+      metadata: baseMeta,
     })
     await supabaseAdmin.rpc('enqueue_email', {
       queue_name: 'transactional_emails',
@@ -99,13 +104,24 @@ export async function sendVitrineEmail(args: {
         purpose: 'transactional',
         label: args.templateName,
         idempotency_key: args.idempotencyKey,
+        request_id: args.requestId ?? null,
         unsubscribe_token,
         queued_at: new Date().toISOString(),
       },
     })
     return { status: 'queued', messageId }
   } catch (err: any) {
-    console.error('sendVitrineEmail failed', { template: args.templateName, err })
+    console.error('sendVitrineEmail failed', { template: args.templateName, requestId: args.requestId, err })
+    try {
+      await supabaseAdmin.from('email_send_log').insert({
+        message_id: crypto.randomUUID(),
+        template_name: args.templateName,
+        recipient_email: recipient,
+        status: 'failed',
+        error_message: err?.message ?? 'unknown',
+        metadata: baseMeta,
+      })
+    } catch {}
     return { status: 'error', error: err?.message ?? 'unknown' }
   }
 }
