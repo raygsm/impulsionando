@@ -55,27 +55,84 @@ function Page() {
   const fetchUpdate = useServerFn(updateVitrineInterest)
   const fetchExport = useServerFn(exportVitrineDataset)
   const [status, setStatus] = useState('todos')
+  const [exportStatus, setExportStatus] = useState('todos')
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
-  const [exporting, setExporting] = useState(false)
+  const [exporting, setExporting] = useState<null | 'csv' | 'pdf'>(null)
   const pageSize = 25
+  const EXPORT_CHUNK = 1000
+  const EXPORT_MAX_PAGES = 20 // até 20.000 registros por exportação
 
-  async function handleExport() {
-    if (!companyId) return
-    setExporting(true)
+  async function fetchAllForExport() {
+    if (!companyId) return null
+    const allRows: any[] = []
+    let columns: { key: string; label: string }[] = []
+    let total = 0
+    for (let p = 1; p <= EXPORT_MAX_PAGES; p++) {
+      const r = await fetchExport({
+        data: {
+          companyId, dataset: 'interests', status: exportStatus, search,
+          from: from || undefined, to: to || undefined, page: p, pageSize: EXPORT_CHUNK,
+        },
+      })
+      columns = r.columns
+      total = r.total
+      allRows.push(...r.rows)
+      if (r.rows.length < EXPORT_CHUNK) break
+    }
+    return { rows: allRows, columns, total }
+  }
+
+  async function handleExportCsv() {
+    setExporting('csv')
     try {
-      const r = await fetchExport({ data: { companyId, dataset: 'interests', status, search, from: from || undefined, to: to || undefined } })
-      const blob = new Blob([r.csv], { type: 'text/csv;charset=utf-8;' })
+      const r = await fetchAllForExport()
+      if (!r) return
+      const header = r.columns.map((c) => `"${c.label.replace(/"/g, '""')}"`).join(';')
+      const esc = (v: unknown) => { if (v == null) return ''; const s = String(v); return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s }
+      const body = r.rows.map((row: any) => r.columns.map((c) => esc(row[c.key])).join(';')).join('\n')
+      const csv = '\uFEFF' + header + '\n' + body
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
-      a.href = url; a.download = r.filename; a.click()
+      a.href = url; a.download = `interessados-${new Date().toISOString().slice(0, 10)}.csv`; a.click()
       URL.revokeObjectURL(url)
-      toast.success(`${r.total} registro(s) exportado(s)`)
+      toast.success(`${r.rows.length} de ${r.total} registro(s) exportado(s)`)
     } catch (e: any) {
       toast.error(e?.message ?? 'Falha ao exportar')
-    } finally { setExporting(false) }
+    } finally { setExporting(null) }
+  }
+
+  async function handleExportPdf() {
+    setExporting('pdf')
+    try {
+      const r = await fetchAllForExport()
+      if (!r) return
+      const [{ default: jsPDF }, autoTableMod] = await Promise.all([
+        import('jspdf'),
+        import('jspdf-autotable'),
+      ])
+      const autoTable = (autoTableMod as any).default ?? autoTableMod
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' })
+      doc.setFontSize(14)
+      doc.text('Interessados da vitrine', 40, 40)
+      doc.setFontSize(9)
+      doc.text(`Status: ${exportStatus} · Período: ${from || '—'} → ${to || '—'} · ${r.rows.length}/${r.total} registros`, 40, 56)
+      const head = [r.columns.map((c) => c.label)]
+      const body = r.rows.map((row: any) => r.columns.map((c) => {
+        const v = row[c.key]
+        if (v == null) return ''
+        const s = typeof v === 'string' ? v : String(v)
+        return s.length > 80 ? s.slice(0, 77) + '…' : s
+      }))
+      autoTable(doc, { head, body, startY: 70, styles: { fontSize: 7, cellPadding: 2, overflow: 'linebreak' }, headStyles: { fillColor: [30, 64, 175] } })
+      doc.save(`interessados-${new Date().toISOString().slice(0, 10)}.pdf`)
+      toast.success(`${r.rows.length} de ${r.total} registro(s) exportado(s) em PDF`)
+    } catch (e: any) {
+      toast.error(e?.message ?? 'Falha ao gerar PDF')
+    } finally { setExporting(null) }
   }
 
   const { data, isLoading } = useQuery({
