@@ -189,7 +189,7 @@ export function DemoShell({
                 </SheetTrigger>
                 <SheetContent side="left" className="p-0 w-72 bg-sidebar text-sidebar-foreground">
                   <div className="h-20 px-5 flex items-center gap-2 border-b border-sidebar-border">
-                    <img src={logoAsset.url} alt="Impulsionando" className="h-10 w-auto" />
+                    <LogoImpulsionando variant="dark" size="sm" />
                     <div className="text-sm font-semibold">Impulsionando DEMO</div>
                   </div>
                   {NavList}
