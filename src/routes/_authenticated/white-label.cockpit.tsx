@@ -31,7 +31,7 @@ function WLCockpit() {
       ]);
       return {
         whiteLabels: wlList.data ?? [],
-        mrrCents: (mrr.data ?? []).reduce((a, b: any) => a + (b.amount_cents ?? 0), 0),
+        mrrCents: Math.round((mrr.data ?? []).reduce((a, b: any) => a + Number(b.amount ?? 0), 0) * 100),
         openInvoices: invoicesOpen.count ?? 0,
         enabledModules: modules.count ?? 0,
       };
