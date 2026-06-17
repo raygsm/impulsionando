@@ -2765,6 +2765,7 @@ export type Database = {
           receipt_url: string | null
           reference_id: string | null
           reference_type: string | null
+          status: string
           title: string
           user_id: string
         }
@@ -2779,6 +2780,7 @@ export type Database = {
           receipt_url?: string | null
           reference_id?: string | null
           reference_type?: string | null
+          status?: string
           title: string
           user_id: string
         }
@@ -2793,6 +2795,7 @@ export type Database = {
           receipt_url?: string | null
           reference_id?: string | null
           reference_type?: string | null
+          status?: string
           title?: string
           user_id?: string
         }
