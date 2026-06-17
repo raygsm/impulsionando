@@ -275,10 +275,10 @@ export const listContractVersions = createServerFn({ method: "POST" })
     return rows ?? [];
   });
 
-/** Prepara payload de reemissão: retorna snapshot atual + próxima versão para o cliente gerar o novo PDF. */
+/** Prepara payload de reemissão: retorna snapshot atual + próxima versão. */
 export const prepareContractReissue = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { parent_id: string }) => d)
+  .inputValidator((d: { parent_id: string; reason?: string }) => d)
   .handler(async ({ data, context }) => {
     const { data: parent, error } = await context.supabase
       .from("contract_documents")
@@ -296,5 +296,27 @@ export const prepareContractReissue = createServerFn({ method: "POST" })
       .limit(1)
       .maybeSingle();
     const nextVersion = ((maxRow as any)?.version ?? parent.version ?? 1) + 1;
+
+    // Auditoria detalhada da preparação da reemissão
+    await context.supabase.from("audit_logs").insert({
+      company_id: (parent as any).company_id,
+      white_label_id: (parent as any).white_label_id ?? null,
+      user_id: context.userId,
+      action: "contract.reissue.prepared",
+      entity: "contract_documents",
+      entity_id: (parent as any).id,
+      before: {
+        contract_number: (parent as any).contract_number,
+        version: (parent as any).version,
+        status: (parent as any).status,
+      },
+      after: {
+        next_version: nextVersion,
+        parent_document_id: (parent as any).id,
+        signed_variant: "pending",
+      },
+      metadata: { reason: data.reason ?? null },
+    } as any);
+
     return { parent, nextVersion };
   });
