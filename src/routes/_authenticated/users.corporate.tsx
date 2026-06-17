@@ -59,7 +59,7 @@ function CorporatePage() {
         c("aff_affiliates"),
         c("aff_affiliates", (q) => q.eq("is_lifetime", true)),
         c("companies"),
-        c("companies", (q) => q.eq("is_white_label", true)),
+        c("companies", (q) => q.not("white_label_id", "is", null)),
         c("consumer_profiles"),
         c("aff_wallet_alerts", (q) => q.eq("status", "open")),
       ]);
