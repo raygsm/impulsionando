@@ -345,6 +345,8 @@ async function executeSmokeOnce(opts: {
         await supabaseAdmin.from("user_profiles").delete().eq("user_id", adminUserId).eq("company_id", companyId);
       }
       if (companyId) {
+        // Purge explícito: módulos antes da empresa (defensivo, mesmo com CASCADE)
+        await supabaseAdmin.from("company_modules").delete().eq("company_id", companyId);
         await supabaseAdmin.from("companies").delete().eq("id", companyId);
       }
       if (adminUserId) {
