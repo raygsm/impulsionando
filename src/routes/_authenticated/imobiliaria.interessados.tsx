@@ -186,11 +186,31 @@ function Page() {
           <label className="text-xs font-medium text-muted-foreground mb-1 block">Até</label>
           <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
         </div>
-        <div className="flex items-center gap-3 ml-auto">
+        <div className="min-w-[180px]">
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Exportar (filtro)</label>
+          <Select value={exportStatus} onValueChange={setExportStatus}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos</SelectItem>
+              <SelectItem value="novo">Novo</SelectItem>
+              <SelectItem value="em_atendimento">Em atendimento</SelectItem>
+              <SelectItem value="respondido">Respondido</SelectItem>
+              <SelectItem value="convertido">Convertido</SelectItem>
+              <SelectItem value="perdido">Perdido</SelectItem>
+              <SelectItem value="enviado">E-mail enviado</SelectItem>
+              <SelectItem value="falha">E-mail com falha</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center gap-2 ml-auto">
           <span className="text-sm text-muted-foreground">{total} registro(s)</span>
-          <Button variant="outline" size="sm" onClick={handleExport} disabled={exporting}>
-            {exporting ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Download className="h-3 w-3 mr-1" />}
-            Exportar CSV
+          <Button variant="outline" size="sm" onClick={handleExportCsv} disabled={!!exporting}>
+            {exporting === 'csv' ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Download className="h-3 w-3 mr-1" />}
+            CSV
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExportPdf} disabled={!!exporting}>
+            {exporting === 'pdf' ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <FileText className="h-3 w-3 mr-1" />}
+            PDF
           </Button>
         </div>
       </Card>
