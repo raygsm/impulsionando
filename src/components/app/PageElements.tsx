@@ -1,14 +1,33 @@
 import { ReactNode } from "react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { Star } from "lucide-react";
+import { useLocation } from "@tanstack/react-router";
+import { useFavorites } from "@/hooks/use-favorites";
+import { Button } from "@/components/ui/button";
 
 export function PageHeader({
   title, description, action,
 }: { title: string; description?: string; action?: ReactNode }) {
+  const { pathname } = useLocation();
+  const { isFavorite, toggle } = useFavorites();
+  const fav = isFavorite(pathname);
   return (
     <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => toggle(pathname, title)}
+            title={fav ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+            aria-label="Favoritar página"
+          >
+            <Star className={cn("size-4", fav ? "fill-amber-400 text-amber-400" : "text-muted-foreground")} />
+          </Button>
+        </div>
         {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
       </div>
       {action}
