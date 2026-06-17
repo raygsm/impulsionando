@@ -27,7 +27,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Check, X, AlertCircle, History, Download, Printer, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Check, X, AlertCircle, History, Download, Printer, Search, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/imobiliaria/aprovacoes")({
@@ -154,39 +154,73 @@ function Page() {
     qc.invalidateQueries({ queryKey: ["realestate-props", companyId] });
   };
 
+  // Atualização otimista: ajusta o badge/status no cache antes da resposta
+  const applyOptimistic = (id: string, next: Status, notesText: string | null) => {
+    qc.setQueryData(["realestate-approvals", queryArgs], (old: any) => {
+      if (!old?.items) return old;
+      return {
+        ...old,
+        items: old.items.map((it: QueueItem) =>
+          it.id === id
+            ? { ...it, approval_status: next, review_notes: notesText, reviewed_at: new Date().toISOString() }
+            : it,
+        ),
+      };
+    });
+  };
+
   const approve = useMutation({
     mutationFn: (id: string) => fetchApprove({ data: { propertyId: id, notes: null } }),
+    onMutate: (id) => { applyOptimistic(id, "approved", null); },
     onSuccess: () => { toast.success("Imóvel aprovado"); invalidate(); },
-    onError: (e: any) => toast.error(e.message ?? "Erro"),
+    onError: (e: any) => { toast.error(e.message ?? "Erro"); invalidate(); },
   });
   const submitAction = useMutation({
     mutationFn: ({ id, mode, n }: { id: string; mode: "reject" | "changes"; n: string }) =>
       mode === "reject"
         ? fetchReject({ data: { propertyId: id, notes: n } })
         : fetchChanges({ data: { propertyId: id, notes: n } }),
+    onMutate: (vars) => {
+      applyOptimistic(vars.id, vars.mode === "reject" ? "rejected" : "changes_requested", vars.n);
+    },
     onSuccess: () => {
       toast.success("Revisão registrada");
       invalidate();
       setActionFor(null);
       setNotes("");
     },
-    onError: (e: any) => toast.error(e.message ?? "Erro"),
+    onError: (e: any) => { toast.error(e.message ?? "Erro"); invalidate(); },
   });
 
   const exportCsv = useMutation({
     mutationFn: (propertyId: string) => fetchExport({ data: { propertyId } }),
-    onSuccess: (resp) => downloadFile(resp.filename, resp.csv),
+    onSuccess: (resp) => { downloadFile(resp.filename, resp.csv); toast.success("CSV gerado"); },
     onError: (e: any) => toast.error(e.message ?? "Erro ao exportar"),
   });
 
+  // pageSize do servidor é limitado a 1000; validar no cliente para erro amigável
   const batchExport = useMutation({
-    mutationFn: () => fetchBatchExport({ data: { ...queryArgs, pageSize: 500 } }),
+    mutationFn: () => {
+      const size = Math.min(Math.max(pageSize, 5), 1000);
+      if (size !== pageSize) {
+        toast.warning(`Tamanho de página ajustado para ${size} (limite do servidor)`);
+      }
+      return fetchBatchExport({ data: { ...queryArgs, pageSize: size } });
+    },
     onSuccess: (resp) => {
       downloadFile(resp.filename, resp.csv);
-      toast.success(`${resp.total} registro(s) exportado(s)`);
+      toast.success(`${resp.total} registro(s) exportado(s) — página ${resp.page}`);
     },
-    onError: (e: any) => toast.error(e.message ?? "Erro na exportação em lote"),
+    onError: (e: any) => {
+      const msg = String(e?.message ?? "");
+      if (/pageSize|page|range|out of/i.test(msg)) {
+        toast.error("Filtros ou paginação inválidos. Reduza o intervalo e tente de novo.");
+      } else {
+        toast.error(msg || "Erro na exportação em lote");
+      }
+    },
   });
+
 
 
   const toggleStatus = (s: Status) => {
@@ -212,8 +246,16 @@ function Page() {
             <Button variant="outline" size="sm" asChild>
               <Link to="/perfil/notificacoes">Preferências</Link>
             </Button>
-            <Button variant="outline" size="sm" onClick={() => batchExport.mutate()} disabled={batchExport.isPending}>
-              <Download className="w-4 h-4 mr-1" /> Exportar fila (CSV)
+            <Button
+              variant="outline" size="sm"
+              onClick={() => batchExport.mutate()}
+              disabled={batchExport.isPending || !companyId || items.length === 0}
+              aria-busy={batchExport.isPending}
+            >
+              {batchExport.isPending
+                ? <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                : <Download className="w-4 h-4 mr-1" />}
+              {batchExport.isPending ? "Gerando CSV…" : "Exportar fila (CSV)"}
             </Button>
             <Button variant="outline" size="sm" asChild>
               <Link
@@ -366,8 +408,16 @@ function Page() {
                       <Button size="sm" variant="ghost" onClick={() => setHistoryFor(p)}>
                         <History className="w-3 h-3 mr-1" /> Histórico
                       </Button>
-                      <Button size="sm" variant="ghost" onClick={() => exportCsv.mutate(p.id)} disabled={exportCsv.isPending}>
-                        <Download className="w-3 h-3 mr-1" /> CSV
+                      <Button
+                        size="sm" variant="ghost"
+                        onClick={() => exportCsv.mutate(p.id)}
+                        disabled={exportCsv.isPending && exportCsv.variables === p.id}
+                        aria-busy={exportCsv.isPending && exportCsv.variables === p.id}
+                      >
+                        {exportCsv.isPending && exportCsv.variables === p.id
+                          ? <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                          : <Download className="w-3 h-3 mr-1" />}
+                        {exportCsv.isPending && exportCsv.variables === p.id ? "Gerando…" : "CSV"}
                       </Button>
                       <Button size="sm" variant="ghost" asChild>
                         <Link to="/imobiliaria/aprovacoes/$id/imprimir" params={{ id: p.id }} target="_blank">

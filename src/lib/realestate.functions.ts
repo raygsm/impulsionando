@@ -557,10 +557,29 @@ export const exportApprovalQueueCsv = createServerFn({ method: "GET" })
       ].map(esc).join(",");
     });
 
+    // Cabeçalho com filtros + paginação atuais (linhas de meta começam com "#")
+    const reviewerName = data.reviewerId ? (actors[data.reviewerId] ?? data.reviewerId) : "Todos";
+    const submitterName = data.submitterId ? (actors[data.submitterId] ?? data.submitterId) : "Todos";
+    const meta = [
+      `# Fila de aprovação de imóveis`,
+      `# Gerado em,${esc(new Date().toLocaleString("pt-BR"))}`,
+      `# Página,${data.page}`,
+      `# Tamanho da página,${data.pageSize}`,
+      `# Registros nesta página,${rows?.length ?? 0}`,
+      `# Status,${esc(statuses.join(", "))}`,
+      `# Busca,${esc(data.search ?? "—")}`,
+      `# Revisor,${esc(reviewerName)}`,
+      `# Submetido por,${esc(submitterName)}`,
+      `# Data de,${esc(data.dateFrom ? new Date(data.dateFrom).toLocaleString("pt-BR") : "—")}`,
+      `# Data até,${esc(data.dateTo ? new Date(data.dateTo).toLocaleString("pt-BR") : "—")}`,
+    ].join("\n");
+
     return {
-      filename: `fila-aprovacao-${new Date().toISOString().slice(0, 10)}.csv`,
-      csv: [header, ...lines].join("\n"),
+      filename: `fila-aprovacao-p${data.page}-${new Date().toISOString().slice(0, 10)}.csv`,
+      csv: [meta, "", header, ...lines].join("\n"),
       total: rows?.length ?? 0,
+      page: data.page,
+      pageSize: data.pageSize,
     };
   });
 
