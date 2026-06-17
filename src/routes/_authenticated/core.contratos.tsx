@@ -293,6 +293,7 @@ function ContractsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Nº</TableHead>
+                <TableHead>v</TableHead>
                 <TableHead>Empresa</TableHead>
                 <TableHead>Plano</TableHead>
                 <TableHead>Status</TableHead>
@@ -301,11 +302,12 @@ function ContractsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {list.isLoading && <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Carregando…</TableCell></TableRow>}
-              {!list.isLoading && rows.length === 0 && <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Nenhum contrato gerado.</TableCell></TableRow>}
+              {list.isLoading && <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Carregando…</TableCell></TableRow>}
+              {!list.isLoading && rows.length === 0 && <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Nenhum contrato gerado.</TableCell></TableRow>}
               {rows.map((r: any) => (
                 <TableRow key={r.id}>
                   <TableCell className="font-mono text-xs">{r.contract_number}</TableCell>
+                  <TableCell className="text-xs">v{r.version ?? 1}</TableCell>
                   <TableCell className="text-sm">{r.companies?.name ?? "—"}</TableCell>
                   <TableCell className="text-sm">{(r.snapshot as any)?.plan ?? "—"}</TableCell>
                   <TableCell><Badge variant="outline" className={STATUS_COLOR[r.status] ?? ""}>{STATUS_LABEL[r.status] ?? r.status}</Badge></TableCell>
@@ -354,6 +356,17 @@ function ContractsPage() {
                     <Button size="sm" variant="outline" onClick={() => download.mutate(r.id)}>
                       <Download className="w-4 h-4 mr-1" /> PDF
                     </Button>
+                    {r.status !== "superseded" && (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => reissue.mutate(r.id)}
+                        disabled={reissue.isPending}
+                        title="Emite nova versão a partir do snapshot atual e marca esta como Substituída"
+                      >
+                        Reemitir
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
