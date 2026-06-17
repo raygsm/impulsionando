@@ -77,6 +77,9 @@ function ShowroomHub() {
               <Button asChild size="lg" variant="outline">
                 <Link to="/showroom/caixa-unificada">Caixa Unificada</Link>
               </Button>
+              <Button asChild size="lg" variant="outline">
+                <Link to="/showroom/agenda">Agenda</Link>
+              </Button>
               <Button asChild size="lg" variant="ghost">
                 <Link to="/solucoes">Ver todos os nichos</Link>
               </Button>
