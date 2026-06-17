@@ -409,32 +409,44 @@ export function HomePage() {
             </Badge>
 
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight max-w-4xl mx-auto">
-              Seu negócio perde dinheiro quando atendimento, vendas e operação não conversam.
+              Tecnologia que conecta atendimento, vendas e operação em um só ecossistema.
             </h1>
             <p className="mt-5 text-base sm:text-xl text-white/85 leading-relaxed max-w-3xl mx-auto">
-              A Impulsionando Tecnologia conecta <strong>CRM, automação, agenda, pagamentos, área do cliente, dashboards e comunicação</strong> em um ecossistema modular que se adapta ao seu nicho.
+              CRM, automação, agenda, pagamentos, área do cliente, dashboards e comunicação —
+              modular, por nicho, com White Label pronto para revender com a sua marca.
             </p>
 
-            <div className="mt-8 flex flex-col sm:flex-row flex-wrap items-stretch justify-center gap-3 max-w-3xl mx-auto">
-              <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 gap-2 flex-1 min-w-[180px]">
-                <a href="#diagnostico"><Search className="w-4 h-4" /> Descobrir módulos ideais</a>
+            <div className="mt-8 grid gap-3 sm:grid-cols-3 max-w-3xl mx-auto">
+              <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 gap-2 h-auto py-4 flex-col">
+                <Link to="/orcamento">
+                  <span className="flex items-center gap-2 font-semibold"><Sparkles className="w-4 h-4" /> Sou empresa</span>
+                  <span className="text-xs font-normal opacity-75">Quero usar na minha operação</span>
+                </Link>
               </Button>
-              <Button asChild size="lg" className="bg-gradient-primary gap-2 flex-1 min-w-[180px]">
-                <Link to="/demo"><PlayCircle className="w-4 h-4" /> Ver demonstração real</Link>
+              <Button asChild size="lg" className="bg-gradient-primary gap-2 h-auto py-4 flex-col">
+                <Link to="/nichos/white-label">
+                  <span className="flex items-center gap-2 font-semibold"><Rocket className="w-4 h-4" /> White Label</span>
+                  <span className="text-xs font-normal opacity-90">Revender com a minha marca</span>
+                </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="bg-transparent border-white/30 text-white hover:bg-white/10 gap-2 flex-1 min-w-[180px]">
-                <Link to="/orcamento"><Calculator className="w-4 h-4" /> Montar orçamento</Link>
-              </Button>
-              <Button asChild size="lg" className="btn-whatsapp gap-2 flex-1 min-w-[180px]">
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="w-4 h-4" /> Falar com Impulsionito
-                </a>
+              <Button asChild size="lg" variant="outline" className="bg-transparent border-white/30 text-white hover:bg-white/10 gap-2 h-auto py-4 flex-col">
+                <Link to="/demo">
+                  <span className="flex items-center gap-2 font-semibold"><PlayCircle className="w-4 h-4" /> Ver demos</span>
+                  <span className="text-xs font-normal opacity-75">Testar antes de contratar</span>
+                </Link>
               </Button>
             </div>
 
-            <p className="mt-6 text-sm text-white/75 max-w-2xl mx-auto">
-              Comece simples, com 1 módulo, ou monte uma operação completa com CRM, automações, BI, pagamentos e área do cliente.
-            </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm text-white/75">
+              <a href="#diagnostico" className="inline-flex items-center gap-1.5 hover:text-white underline-offset-4 hover:underline">
+                <Search className="w-4 h-4" /> Diagnóstico em 30s
+              </a>
+              <span className="opacity-40">•</span>
+              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 hover:text-white underline-offset-4 hover:underline">
+                <MessageCircle className="w-4 h-4" /> Falar com Impulsionito
+              </a>
+            </div>
+
           </div>
         </section>
 

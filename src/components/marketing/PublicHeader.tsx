@@ -44,11 +44,10 @@ const EXPERIMENTAR: SubItem[] = [
 const NAV: MenuGroup[] = [
   { label: "Início", to: "/" },
   { label: "Soluções", items: SOLUCOES },
-  { label: "Nichos", items: NICHOS },
-  { label: "Demos", items: EXPERIMENTAR },
+  { label: "Demonstrações", to: "/demo" },
   { label: "Planos", to: "/planos" },
-  { label: "Orçamento", to: "/orcamento" },
 ];
+
 
 function useActive(path: string, exact?: boolean) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -132,18 +131,18 @@ export function PublicHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button asChild size="sm" className="gap-2 bg-gradient-primary shadow-elegant hidden md:inline-flex">
-            <Link to="/demo"><PlayCircle className="w-4 h-4" /> Demo</Link>
-          </Button>
-          <Button asChild size="sm" className="btn-whatsapp gap-2 hidden md:inline-flex">
-            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-              <MessageCircle className="w-4 h-4" />
-              <span className="hidden xl:inline">Impulsionito</span>
-            </a>
-          </Button>
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex gap-1.5">
             <Link to="/auth"><LogIn className="w-4 h-4" /> Entrar</Link>
           </Button>
+          <Button asChild size="sm" className="gap-2 bg-gradient-primary shadow-elegant hidden md:inline-flex">
+            <Link to="/orcamento"><Sparkles className="w-4 h-4" /> Começar agora</Link>
+          </Button>
+          <Button asChild size="sm" className="btn-whatsapp gap-2 hidden xl:inline-flex">
+            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+              <MessageCircle className="w-4 h-4" /> Impulsionito
+            </a>
+          </Button>
+
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
