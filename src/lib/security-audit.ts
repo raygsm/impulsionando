@@ -17,8 +17,8 @@ export async function logSecurityEvent(evt: SecurityEvent): Promise<void> {
     const { error } = await supabase.rpc("log_security_event", {
       _entity: evt.entity,
       _action: evt.action,
-      _company: evt.companyId ?? null,
-      _entity_id: evt.entityId ?? null,
+      _company: evt.companyId ?? undefined,
+      _entity_id: evt.entityId ?? undefined,
       _metadata: (evt.metadata ?? {}) as never,
     });
     if (error) console.warn("[audit] log_security_event failed:", error.message);
