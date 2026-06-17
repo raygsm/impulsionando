@@ -327,10 +327,12 @@ export interface ProcessSavedSearchInput {
   utm?: Record<string, string>
   ip?: string | null
   userAgent?: string | null
+  requestId?: string
 }
 
 export interface ProcessSavedSearchResult {
   ok: true
+  requestId: string
   intentId: string
   leadId: string
   messageId: string
@@ -339,19 +341,45 @@ export interface ProcessSavedSearchResult {
 }
 
 export type ProcessSavedSearchError =
-  | { ok: false; code: 'company_not_found' }
-  | { ok: false; code: 'contact_required' }
+  | { ok: false; requestId: string; code: 'company_not_found' }
+  | { ok: false; requestId: string; code: 'contact_required' }
+  | { ok: false; requestId: string; code: 'internal_error'; error: string }
 
 export async function processSavedSearch(
   input: ProcessSavedSearchInput,
 ): Promise<ProcessSavedSearchResult | ProcessSavedSearchError> {
+  const requestId = input.requestId ?? crypto.randomUUID()
+  await writeFlowAudit({
+    action: 'vitrine.search.requested',
+    entity: 'realestate_search_intent',
+    requestId,
+    before: {
+      company_slug: input.companySlug,
+      operation: input.operation,
+      cities: input.cities,
+      neighborhoods: input.neighborhoods,
+      price_min: input.priceMin ?? null,
+      price_max: input.priceMax ?? null,
+      bedrooms_min: input.bedroomsMin,
+      property_types: input.propertyTypes,
+      source: input.source ?? null,
+      utm: input.utm ?? {},
+      ip: input.ip ?? null,
+      ...maskContact(input),
+    },
+  })
+  try {
   if (!input.contactEmail && !input.contactPhone && !input.contactWhatsapp) {
-    return { ok: false, code: 'contact_required' }
+    await writeFlowAudit({ action: 'vitrine.search.failed', entity: 'realestate_search_intent', requestId, after: { code: 'contact_required' } })
+    return { ok: false, requestId, code: 'contact_required' }
   }
   const { data: company } = await supabaseAdmin
     .from('companies').select('id, name')
     .eq('public_slug', input.companySlug).eq('vitrine_enabled', true).maybeSingle()
-  if (!company) return { ok: false, code: 'company_not_found' }
+  if (!company) {
+    await writeFlowAudit({ action: 'vitrine.search.failed', entity: 'realestate_search_intent', requestId, after: { code: 'company_not_found' } })
+    return { ok: false, requestId, code: 'company_not_found' }
+  }
   const companyId = (company as any).id as string
   const companyName = (company as any).name as string
   const phoneOrWA = input.contactWhatsapp || input.contactPhone || null
