@@ -58,6 +58,8 @@ function DashboardPage() {
         action={me?.isSuperAdmin && <Badge className="bg-gradient-primary">Super Admin</Badge>}
       />
 
+      <NicheOnboardingBanner companyId={me?.memberships?.[0]?.company_id} />
+
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
         <StatCard label="Empresas" value={stats?.companies ?? "—"} hint={`${stats?.activeCompanies ?? 0} ativas`} icon={Building2} accent />
         <StatCard label="Unidades" value={stats?.units ?? "—"} icon={MapPin} />
