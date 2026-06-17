@@ -26,6 +26,10 @@ import {
   listContractDocuments, createContractDocument, getContractSignedUrl, listContractSignatures,
   prepareContractReissue,
 } from "@/lib/contracts.functions";
+import {
+  listContractVersionsWithEvidence, listContractEmailLogs, resendContractEmail,
+} from "@/lib/contracts-admin.functions";
+import { Mail, History, RotateCw } from "lucide-react";
 import { generateAndUploadContract } from "@/lib/contractPdf";
 import { downloadCsv, downloadTablePdf } from "@/lib/exports";
 import { supabase } from "@/integrations/supabase/client";
@@ -57,6 +61,9 @@ function ContractsPage() {
   const urlFn = useServerFn(getContractSignedUrl);
   const sigsFn = useServerFn(listContractSignatures);
   const reissueFn = useServerFn(prepareContractReissue);
+  const versionsFn = useServerFn(listContractVersionsWithEvidence);
+  const emailLogsFn = useServerFn(listContractEmailLogs);
+  const resendFn = useServerFn(resendContractEmail);
 
   const list = useQuery({ queryKey: ["contracts"], queryFn: () => listFn() });
   const rows = list.data ?? [];
@@ -67,6 +74,27 @@ function ContractsPage() {
     queryFn: () => sigsFn({ data: { contract_document_id: selected!.id } }),
     enabled: !!selected,
   });
+  const versions = useQuery({
+    queryKey: ["contract-versions", selected?.id],
+    queryFn: () => versionsFn({ data: { contract_document_id: selected!.id } }),
+    enabled: !!selected,
+  });
+  const emailLogs = useQuery({
+    queryKey: ["contract-emails", selected?.id],
+    queryFn: () => emailLogsFn({ data: { contract_document_id: selected!.id } }),
+    enabled: !!selected,
+  });
+
+  const resend = useMutation({
+    mutationFn: (vars: { kind: "generated" | "signed"; to?: string }) =>
+      resendFn({ data: { contract_document_id: selected!.id, kind: vars.kind, to: vars.to } }),
+    onSuccess: (r: any) => {
+      toast.success(`E-mail ${r.status === "queued" ? "enfileirado" : r.status}`);
+      emailLogs.refetch();
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Falha ao reenviar"),
+  });
+
 
   // Geração de novo contrato
   const [open, setOpen] = useState(false);
@@ -342,6 +370,57 @@ function ContractsPage() {
                               ))}
                             </div>
                           </div>
+                          <div>
+                            <div className="font-medium mb-1 flex items-center gap-1"><History className="w-4 h-4" /> Versões do contrato</div>
+                            {versions.isLoading && <div className="text-xs text-muted-foreground">Carregando…</div>}
+                            <div className="space-y-1">
+                              {(versions.data ?? []).map((v: any) => (
+                                <div key={v.id} className="border rounded p-2 text-xs flex items-start justify-between gap-2">
+                                  <div>
+                                    <div><strong>v{v.version}</strong> · <span className={`px-1 rounded ${STATUS_COLOR[v.status] ?? ""}`}>{STATUS_LABEL[v.status] ?? v.status}</span></div>
+                                    <div className="text-muted-foreground">Gerado {new Date(v.generated_at).toLocaleString("pt-BR")} {v.signed_at && `· assinado ${new Date(v.signed_at).toLocaleString("pt-BR")}`}</div>
+                                    {v.signatures?.[0] && (
+                                      <div className="font-mono text-[10px] mt-1">evidência: {v.signatures[0].signature_hash?.slice(0,28)}… · {v.signatures[0].signer_email}</div>
+                                    )}
+                                  </div>
+                                  {v.signed_storage_path && <Badge variant="outline" className="bg-emerald-100 text-emerald-700">PDF carimbado</Badge>}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div>
+                            <div className="font-medium mb-1 flex items-center gap-1"><Mail className="w-4 h-4" /> E-mails enviados</div>
+                            <div className="flex gap-2 mb-2">
+                              <Button size="sm" variant="outline" onClick={() => resend.mutate({ kind: "generated" })} disabled={resend.isPending}>
+                                <RotateCw className="w-3 h-3 mr-1" /> Reenviar "contrato gerado"
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={() => resend.mutate({ kind: "signed" })} disabled={resend.isPending}>
+                                <RotateCw className="w-3 h-3 mr-1" /> Reenviar "contrato assinado"
+                              </Button>
+                            </div>
+                            {emailLogs.isLoading && <div className="text-xs text-muted-foreground">Carregando logs…</div>}
+                            {(emailLogs.data ?? []).length === 0 && !emailLogs.isLoading && <div className="text-xs text-muted-foreground">Nenhum envio registrado.</div>}
+                            <div className="space-y-1">
+                              {(emailLogs.data ?? []).map((l: any) => (
+                                <div key={l.id} className="border rounded p-2 text-xs">
+                                  <div className="flex justify-between gap-2">
+                                    <div><strong>{l.template_name}</strong> → {l.recipient_email}</div>
+                                    <Badge variant="outline" className={
+                                      l.status === "sent" ? "bg-emerald-100 text-emerald-700" :
+                                      l.status === "pending" ? "bg-sky-100 text-sky-700" :
+                                      l.status === "suppressed" ? "bg-amber-100 text-amber-700" :
+                                      "bg-red-100 text-red-700"
+                                    }>{l.status}</Badge>
+                                  </div>
+                                  <div className="text-muted-foreground">{new Date(l.created_at).toLocaleString("pt-BR")}</div>
+                                  {l.error_message && <div className="text-destructive mt-1">⚠ {l.error_message}</div>}
+                                  {l.metadata?.idempotency_key && <div className="font-mono text-[10px] text-muted-foreground">key: {l.metadata.idempotency_key}</div>}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
                           <div className="pt-2">
                             <Button size="sm" onClick={() => download.mutate(r.id)} disabled={download.isPending}>
                               <Download className="w-4 h-4 mr-1" /> Baixar PDF
@@ -350,6 +429,7 @@ function ContractsPage() {
                               Abrir link de assinatura do cliente
                             </a>
                           </div>
+
                         </div>
                       </SheetContent>
                     </Sheet>
