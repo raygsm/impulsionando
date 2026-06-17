@@ -60,35 +60,54 @@ function Page() {
   const [page, setPage] = useState(1)
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
+  const [emailFrom, setEmailFrom] = useState('')
+  const [emailTo, setEmailTo] = useState('')
   const [exporting, setExporting] = useState<null | 'csv' | 'pdf'>(null)
+  const [exportProgress, setExportProgress] = useState<{ done: number; total: number; exportId: string | null }>({ done: 0, total: 0, exportId: null })
   const pageSize = 25
   const EXPORT_CHUNK = 1000
-  const EXPORT_MAX_PAGES = 20 // até 20.000 registros por exportação
+  const EXPORT_MAX_PAGES = 20
 
-  async function fetchAllForExport() {
+  async function fetchAllForExport(format: 'csv' | 'pdf') {
     if (!companyId) return null
+    const exportId = (crypto.randomUUID?.() ?? Math.random().toString(36).slice(2)) as string
+    setExportProgress({ done: 0, total: 0, exportId })
     const allRows: any[] = []
     let columns: { key: string; label: string }[] = []
     let total = 0
-    for (let p = 1; p <= EXPORT_MAX_PAGES; p++) {
+    let finished = false
+    for (let p = 1; p <= EXPORT_MAX_PAGES && !finished; p++) {
+      const isLastPossible = p === EXPORT_MAX_PAGES
       const r = await fetchExport({
         data: {
           companyId, dataset: 'interests', status: exportStatus, search,
-          from: from || undefined, to: to || undefined, page: p, pageSize: EXPORT_CHUNK,
+          from: from || undefined, to: to || undefined,
+          emailFrom: emailFrom || undefined, emailTo: emailTo || undefined,
+          page: p, pageSize: EXPORT_CHUNK, exportId, format, isFinal: false,
         },
       })
       columns = r.columns
       total = r.total
       allRows.push(...r.rows)
-      if (r.rows.length < EXPORT_CHUNK) break
+      setExportProgress({ done: allRows.length, total: r.total, exportId })
+      if (r.rows.length < EXPORT_CHUNK || isLastPossible) finished = true
     }
-    return { rows: allRows, columns, total }
+    // finalize log
+    await fetchExport({
+      data: {
+        companyId, dataset: 'interests', status: exportStatus, search,
+        from: from || undefined, to: to || undefined,
+        emailFrom: emailFrom || undefined, emailTo: emailTo || undefined,
+        page: 1, pageSize: EXPORT_CHUNK, exportId, format, isFinal: true,
+      },
+    }).catch(() => {/* best-effort finalize */})
+    return { rows: allRows, columns, total, exportId }
   }
 
   async function handleExportCsv() {
     setExporting('csv')
     try {
-      const r = await fetchAllForExport()
+      const r = await fetchAllForExport('csv')
       if (!r) return
       const header = r.columns.map((c) => `"${c.label.replace(/"/g, '""')}"`).join(';')
       const esc = (v: unknown) => { if (v == null) return ''; const s = String(v); return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s }
@@ -97,29 +116,29 @@ function Page() {
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
-      a.href = url; a.download = `interessados-${new Date().toISOString().slice(0, 10)}.csv`; a.click()
+      a.href = url; a.download = `interessados-${r.exportId.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}.csv`; a.click()
       URL.revokeObjectURL(url)
-      toast.success(`${r.rows.length} de ${r.total} registro(s) exportado(s)`)
+      toast.success(`${r.rows.length} de ${r.total} registro(s) — export ${r.exportId.slice(0, 8)}`)
     } catch (e: any) {
       toast.error(e?.message ?? 'Falha ao exportar')
-    } finally { setExporting(null) }
+    } finally { setExporting(null); setExportProgress({ done: 0, total: 0, exportId: null }) }
   }
 
   async function handleExportPdf() {
     setExporting('pdf')
     try {
-      const r = await fetchAllForExport()
+      const r = await fetchAllForExport('pdf')
       if (!r) return
       const [{ default: jsPDF }, autoTableMod] = await Promise.all([
-        import('jspdf'),
-        import('jspdf-autotable'),
+        import('jspdf'), import('jspdf-autotable'),
       ])
       const autoTable = (autoTableMod as any).default ?? autoTableMod
       const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' })
       doc.setFontSize(14)
       doc.text('Interessados da vitrine', 40, 40)
-      doc.setFontSize(9)
-      doc.text(`Status: ${exportStatus} · Período: ${from || '—'} → ${to || '—'} · ${r.rows.length}/${r.total} registros`, 40, 56)
+      doc.setFontSize(8)
+      doc.text(`Export ID: ${r.exportId}`, 40, 54)
+      doc.text(`Status: ${exportStatus} · Criação: ${from || '—'} → ${to || '—'} · E-mail: ${emailFrom || '—'} → ${emailTo || '—'} · ${r.rows.length}/${r.total} registros`, 40, 66)
       const head = [r.columns.map((c) => c.label)]
       const body = r.rows.map((row: any) => r.columns.map((c) => {
         const v = row[c.key]
@@ -127,12 +146,12 @@ function Page() {
         const s = typeof v === 'string' ? v : String(v)
         return s.length > 80 ? s.slice(0, 77) + '…' : s
       }))
-      autoTable(doc, { head, body, startY: 70, styles: { fontSize: 7, cellPadding: 2, overflow: 'linebreak' }, headStyles: { fillColor: [30, 64, 175] } })
-      doc.save(`interessados-${new Date().toISOString().slice(0, 10)}.pdf`)
-      toast.success(`${r.rows.length} de ${r.total} registro(s) exportado(s) em PDF`)
+      autoTable(doc, { head, body, startY: 78, styles: { fontSize: 6, cellPadding: 2, overflow: 'linebreak' }, headStyles: { fillColor: [30, 64, 175] } })
+      doc.save(`interessados-${r.exportId.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}.pdf`)
+      toast.success(`PDF gerado — export ${r.exportId.slice(0, 8)}`)
     } catch (e: any) {
       toast.error(e?.message ?? 'Falha ao gerar PDF')
-    } finally { setExporting(null) }
+    } finally { setExporting(null); setExportProgress({ done: 0, total: 0, exportId: null }) }
   }
 
   const { data, isLoading } = useQuery({
