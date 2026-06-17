@@ -46,6 +46,7 @@ import { Route as ShowroomSiteRouteImport } from './routes/showroom.site'
 import { Route as ShowroomSegurancaRouteImport } from './routes/showroom.seguranca'
 import { Route as ShowroomRelatoriosAvancadosRouteImport } from './routes/showroom.relatorios-avancados'
 import { Route as ShowroomRelatoriosRouteImport } from './routes/showroom.relatorios'
+import { Route as ShowroomPrecificacaoRouteImport } from './routes/showroom.precificacao'
 import { Route as ShowroomPortalClienteRouteImport } from './routes/showroom.portal-cliente'
 import { Route as ShowroomPdvRouteImport } from './routes/showroom.pdv'
 import { Route as ShowroomParceirosRouteImport } from './routes/showroom.parceiros'
@@ -449,6 +450,11 @@ const ShowroomRelatoriosAvancadosRoute =
 const ShowroomRelatoriosRoute = ShowroomRelatoriosRouteImport.update({
   id: '/showroom/relatorios',
   path: '/showroom/relatorios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShowroomPrecificacaoRoute = ShowroomPrecificacaoRouteImport.update({
+  id: '/showroom/precificacao',
+  path: '/showroom/precificacao',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShowroomPortalClienteRoute = ShowroomPortalClienteRouteImport.update({
@@ -1765,6 +1771,7 @@ export interface FileRoutesByFullPath {
   '/showroom/parceiros': typeof ShowroomParceirosRoute
   '/showroom/pdv': typeof ShowroomPdvRoute
   '/showroom/portal-cliente': typeof ShowroomPortalClienteRoute
+  '/showroom/precificacao': typeof ShowroomPrecificacaoRoute
   '/showroom/relatorios': typeof ShowroomRelatoriosRoute
   '/showroom/relatorios-avancados': typeof ShowroomRelatoriosAvancadosRoute
   '/showroom/seguranca': typeof ShowroomSegurancaRoute
@@ -2011,6 +2018,7 @@ export interface FileRoutesByTo {
   '/showroom/parceiros': typeof ShowroomParceirosRoute
   '/showroom/pdv': typeof ShowroomPdvRoute
   '/showroom/portal-cliente': typeof ShowroomPortalClienteRoute
+  '/showroom/precificacao': typeof ShowroomPrecificacaoRoute
   '/showroom/relatorios': typeof ShowroomRelatoriosRoute
   '/showroom/relatorios-avancados': typeof ShowroomRelatoriosAvancadosRoute
   '/showroom/seguranca': typeof ShowroomSegurancaRoute
@@ -2270,6 +2278,7 @@ export interface FileRoutesById {
   '/showroom/parceiros': typeof ShowroomParceirosRoute
   '/showroom/pdv': typeof ShowroomPdvRoute
   '/showroom/portal-cliente': typeof ShowroomPortalClienteRoute
+  '/showroom/precificacao': typeof ShowroomPrecificacaoRoute
   '/showroom/relatorios': typeof ShowroomRelatoriosRoute
   '/showroom/relatorios-avancados': typeof ShowroomRelatoriosAvancadosRoute
   '/showroom/seguranca': typeof ShowroomSegurancaRoute
@@ -2529,6 +2538,7 @@ export interface FileRouteTypes {
     | '/showroom/parceiros'
     | '/showroom/pdv'
     | '/showroom/portal-cliente'
+    | '/showroom/precificacao'
     | '/showroom/relatorios'
     | '/showroom/relatorios-avancados'
     | '/showroom/seguranca'
@@ -2775,6 +2785,7 @@ export interface FileRouteTypes {
     | '/showroom/parceiros'
     | '/showroom/pdv'
     | '/showroom/portal-cliente'
+    | '/showroom/precificacao'
     | '/showroom/relatorios'
     | '/showroom/relatorios-avancados'
     | '/showroom/seguranca'
@@ -3033,6 +3044,7 @@ export interface FileRouteTypes {
     | '/showroom/parceiros'
     | '/showroom/pdv'
     | '/showroom/portal-cliente'
+    | '/showroom/precificacao'
     | '/showroom/relatorios'
     | '/showroom/relatorios-avancados'
     | '/showroom/seguranca'
@@ -3262,6 +3274,7 @@ export interface RootRouteChildren {
   ShowroomParceirosRoute: typeof ShowroomParceirosRoute
   ShowroomPdvRoute: typeof ShowroomPdvRoute
   ShowroomPortalClienteRoute: typeof ShowroomPortalClienteRoute
+  ShowroomPrecificacaoRoute: typeof ShowroomPrecificacaoRoute
   ShowroomRelatoriosRoute: typeof ShowroomRelatoriosRoute
   ShowroomRelatoriosAvancadosRoute: typeof ShowroomRelatoriosAvancadosRoute
   ShowroomSegurancaRoute: typeof ShowroomSegurancaRoute
@@ -3557,6 +3570,13 @@ declare module '@tanstack/react-router' {
       path: '/showroom/relatorios'
       fullPath: '/showroom/relatorios'
       preLoaderRoute: typeof ShowroomRelatoriosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/showroom/precificacao': {
+      id: '/showroom/precificacao'
+      path: '/showroom/precificacao'
+      fullPath: '/showroom/precificacao'
+      preLoaderRoute: typeof ShowroomPrecificacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/showroom/portal-cliente': {
@@ -5710,6 +5730,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShowroomParceirosRoute: ShowroomParceirosRoute,
   ShowroomPdvRoute: ShowroomPdvRoute,
   ShowroomPortalClienteRoute: ShowroomPortalClienteRoute,
+  ShowroomPrecificacaoRoute: ShowroomPrecificacaoRoute,
   ShowroomRelatoriosRoute: ShowroomRelatoriosRoute,
   ShowroomRelatoriosAvancadosRoute: ShowroomRelatoriosAvancadosRoute,
   ShowroomSegurancaRoute: ShowroomSegurancaRoute,
