@@ -94,10 +94,12 @@ function ClubePage() {
       <Tabs defaultValue="visao" className="w-full">
         <TabsList className="flex flex-wrap h-auto">
           <TabsTrigger value="visao">Visão geral</TabsTrigger>
+          <TabsTrigger value="descobrir">Descobrir</TabsTrigger>
           <TabsTrigger value="perfil">Perfil e localização</TabsTrigger>
           <TabsTrigger value="alertas">Alertas <Badge variant="secondary" className="ml-1 h-4 px-1 text-[10px]">{alerts.data?.length ?? 0}</Badge></TabsTrigger>
           <TabsTrigger value="indicacoes">Indicações</TabsTrigger>
           <TabsTrigger value="favoritos">Favoritos</TabsTrigger>
+          <TabsTrigger value="historico">Histórico {isPremium ? "" : "🔒"}</TabsTrigger>
           <TabsTrigger value="plano">Plano e faturas</TabsTrigger>
         </TabsList>
 
@@ -108,9 +110,21 @@ function ClubePage() {
               try { await checkinFn({ data: { source: "self_checkin" } as any }); toast.success("Check-in registrado! +10 pontos"); qc.invalidateQueries({ queryKey: ["clube-overview"] }); }
               catch (e: any) { toast.error(e.message); }
             }} />
-            <PollsCard polls={overview.data?.polls ?? []} />
+            <PollsCard polls={overview.data?.polls ?? []} onVote={async (poll_id, option_id) => {
+              try { await voteFn({ data: { poll_id, option_id } }); toast.success("Voto registrado"); qc.invalidateQueries({ queryKey: ["clube-overview"] }); }
+              catch (e: any) { toast.error(e.message); }
+            }} />
           </div>
         </TabsContent>
+
+        <TabsContent value="descobrir" className="mt-6">
+          <DiscoverTab
+            defaultCity={area.data?.profile?.city ?? ""}
+            fetchPartners={(args) => partnersFn({ data: args })}
+          />
+        </TabsContent>
+
+
 
         <TabsContent value="perfil" className="mt-6">
           <ProfileTab
