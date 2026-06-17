@@ -5,7 +5,7 @@ import {
   Wallet, ArrowLeftRight, FolderTree, CreditCard, Percent,
   Package, Truck, ArrowDownUp,
   ShoppingCart, Receipt, Plus, Wallet as WalletIcon,
-  Contact, BarChart3, ShieldCheck, Inbox, GraduationCap, Stethoscope, Sparkles,
+  Contact, BarChart3, ShieldCheck, Inbox, GraduationCap, Stethoscope, Sparkles, Crown,
   Handshake, Link2, Briefcase, BadgeDollarSign, TrendingUp, Banknote, Copy,
   Home, Search as SearchIcon, Zap, Bot, MessageSquare,
   History as HistoryIcon, Headphones, UserRound, Megaphone,
