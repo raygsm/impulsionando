@@ -9,6 +9,45 @@
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
 import { notifyManagers, sendVitrineEmail, APP_BASE_URL } from '@/lib/realestate-vitrine-notify.server'
 
+/**
+ * Write a structured audit record. Best-effort: never throws.
+ *
+ * @param payload.action e.g. 'vitrine.interest.requested' | 'vitrine.interest.completed' | 'vitrine.interest.failed'
+ */
+async function writeFlowAudit(payload: {
+  action: string
+  entity: string
+  entityId?: string | null
+  companyId?: string | null
+  requestId: string
+  before?: Record<string, unknown> | null
+  after?: Record<string, unknown> | null
+}): Promise<void> {
+  try {
+    await supabaseAdmin.from('audit_logs').insert({
+      company_id: payload.companyId ?? null,
+      user_id: null,
+      action: payload.action,
+      entity: payload.entity,
+      entity_id: payload.entityId ?? null,
+      before: { request_id: payload.requestId, ...(payload.before ?? {}) } as any,
+      after: payload.after ? ({ request_id: payload.requestId, ...payload.after } as any) : null,
+    })
+  } catch (err) {
+    console.warn('writeFlowAudit failed', err)
+  }
+}
+
+/** Mask PII for audit "before" payload — keeps shape, drops sensitive values. */
+function maskContact(input: { contactEmail?: string | null; contactPhone?: string | null; contactWhatsapp?: string | null }) {
+  const mask = (v?: string | null) => (v ? `${v.slice(0, 2)}***` : null)
+  return {
+    contact_email: mask(input.contactEmail),
+    contact_phone: mask(input.contactPhone),
+    contact_whatsapp: mask(input.contactWhatsapp),
+  }
+}
+
 export type InterestKind = 'interesse' | 'visita' | 'avaliacao' | 'contato' | 'proposta'
 
 export interface ProcessInterestInput {
