@@ -120,9 +120,10 @@ function ContabContratos() {
 
   const setStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const updates: Record<string, unknown> = { status };
-      if (status === "assinado") updates.signed_at = new Date().toISOString();
-      const { error } = await supabase.from("contab_contracts").update(updates).eq("id", id);
+      const { error } = await supabase.from("contab_contracts").update({
+        status,
+        signed_at: status === "assinado" ? new Date().toISOString() : null,
+      }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["contab-contracts"] }),
