@@ -156,6 +156,7 @@ import { Route as ImoveisSlugPropertyIdRouteImport } from './routes/imoveis.$slu
 import { Route as DemoNichoSlugRouteImport } from './routes/demo.nicho.$slug'
 import { Route as AuthenticatedWhiteLabelCockpitRouteImport } from './routes/_authenticated/white-label.cockpit'
 import { Route as AuthenticatedUsersCorporateRouteImport } from './routes/_authenticated/users.corporate'
+import { Route as AuthenticatedSupportCockpitRouteImport } from './routes/_authenticated/support.cockpit'
 import { Route as AuthenticatedSalesOrdersRouteImport } from './routes/_authenticated/sales.orders'
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
 import { Route as AuthenticatedSalesCashRouteImport } from './routes/_authenticated/sales.cash'
@@ -1048,6 +1049,12 @@ const AuthenticatedUsersCorporateRoute =
     id: '/corporate',
     path: '/corporate',
     getParentRoute: () => AuthenticatedUsersRoute,
+  } as any)
+const AuthenticatedSupportCockpitRoute =
+  AuthenticatedSupportCockpitRouteImport.update({
+    id: '/support/cockpit',
+    path: '/support/cockpit',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedSalesOrdersRoute =
   AuthenticatedSalesOrdersRouteImport.update({
@@ -2106,6 +2113,7 @@ export interface FileRoutesByFullPath {
   '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
+  '/support/cockpit': typeof AuthenticatedSupportCockpitRoute
   '/users/corporate': typeof AuthenticatedUsersCorporateRoute
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
@@ -2384,6 +2392,7 @@ export interface FileRoutesByTo {
   '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
+  '/support/cockpit': typeof AuthenticatedSupportCockpitRoute
   '/users/corporate': typeof AuthenticatedUsersCorporateRoute
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
@@ -2675,6 +2684,7 @@ export interface FileRoutesById {
   '/_authenticated/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
   '/_authenticated/sales/orders': typeof AuthenticatedSalesOrdersRoute
+  '/_authenticated/support/cockpit': typeof AuthenticatedSupportCockpitRoute
   '/_authenticated/users/corporate': typeof AuthenticatedUsersCorporateRoute
   '/_authenticated/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
@@ -2966,6 +2976,7 @@ export interface FileRouteTypes {
     | '/sales/cash'
     | '/sales/new'
     | '/sales/orders'
+    | '/support/cockpit'
     | '/users/corporate'
     | '/white-label/cockpit'
     | '/demo/nicho/$slug'
@@ -3244,6 +3255,7 @@ export interface FileRouteTypes {
     | '/sales/cash'
     | '/sales/new'
     | '/sales/orders'
+    | '/support/cockpit'
     | '/users/corporate'
     | '/white-label/cockpit'
     | '/demo/nicho/$slug'
@@ -3534,6 +3546,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sales/cash'
     | '/_authenticated/sales/new'
     | '/_authenticated/sales/orders'
+    | '/_authenticated/support/cockpit'
     | '/_authenticated/users/corporate'
     | '/_authenticated/white-label/cockpit'
     | '/demo/nicho/$slug'
@@ -4742,6 +4755,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/users/corporate'
       preLoaderRoute: typeof AuthenticatedUsersCorporateRouteImport
       parentRoute: typeof AuthenticatedUsersRoute
+    }
+    '/_authenticated/support/cockpit': {
+      id: '/_authenticated/support/cockpit'
+      path: '/support/cockpit'
+      fullPath: '/support/cockpit'
+      preLoaderRoute: typeof AuthenticatedSupportCockpitRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/sales/orders': {
       id: '/_authenticated/sales/orders'
@@ -6197,6 +6217,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRestauranteCardapioRoute: typeof AuthenticatedRestauranteCardapioRoute
   AuthenticatedRestauranteMesasRoute: typeof AuthenticatedRestauranteMesasRoute
   AuthenticatedRestauranteSalaoRoute: typeof AuthenticatedRestauranteSalaoRoute
+  AuthenticatedSupportCockpitRoute: typeof AuthenticatedSupportCockpitRoute
   AuthenticatedWhiteLabelCockpitRoute: typeof AuthenticatedWhiteLabelCockpitRoute
   AuthenticatedComunidadeIndexRoute: typeof AuthenticatedComunidadeIndexRoute
   AuthenticatedEhrIndexRoute: typeof AuthenticatedEhrIndexRoute
@@ -6264,6 +6285,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRestauranteCardapioRoute: AuthenticatedRestauranteCardapioRoute,
   AuthenticatedRestauranteMesasRoute: AuthenticatedRestauranteMesasRoute,
   AuthenticatedRestauranteSalaoRoute: AuthenticatedRestauranteSalaoRoute,
+  AuthenticatedSupportCockpitRoute: AuthenticatedSupportCockpitRoute,
   AuthenticatedWhiteLabelCockpitRoute: AuthenticatedWhiteLabelCockpitRoute,
   AuthenticatedComunidadeIndexRoute: AuthenticatedComunidadeIndexRoute,
   AuthenticatedEhrIndexRoute: AuthenticatedEhrIndexRoute,
