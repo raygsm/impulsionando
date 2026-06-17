@@ -7,7 +7,7 @@
  * - CTA "Tenho interesse" -> /api/public/realestate/interest
  * - Tela de sucesso / erro consistente
  */
-import { createFileRoute, Link, notFound } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
