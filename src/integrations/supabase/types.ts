@@ -2716,6 +2716,7 @@ export type Database = {
           address_state: string | null
           address_zip: string | null
           commercial_email: string | null
+          company_kind: string | null
           company_type: string | null
           created_at: string
           demo_expires_at: string | null
@@ -2742,6 +2743,9 @@ export type Database = {
           secondary_color: string | null
           segment: string | null
           status: string
+          status_commercial: string | null
+          status_financial: string | null
+          status_technical: string | null
           subdomain: string | null
           support_email: string | null
           trade_name: string | null
@@ -2756,6 +2760,7 @@ export type Database = {
           address_state?: string | null
           address_zip?: string | null
           commercial_email?: string | null
+          company_kind?: string | null
           company_type?: string | null
           created_at?: string
           demo_expires_at?: string | null
@@ -2782,6 +2787,9 @@ export type Database = {
           secondary_color?: string | null
           segment?: string | null
           status?: string
+          status_commercial?: string | null
+          status_financial?: string | null
+          status_technical?: string | null
           subdomain?: string | null
           support_email?: string | null
           trade_name?: string | null
@@ -2796,6 +2804,7 @@ export type Database = {
           address_state?: string | null
           address_zip?: string | null
           commercial_email?: string | null
+          company_kind?: string | null
           company_type?: string | null
           created_at?: string
           demo_expires_at?: string | null
@@ -2822,6 +2831,9 @@ export type Database = {
           secondary_color?: string | null
           segment?: string | null
           status?: string
+          status_commercial?: string | null
+          status_financial?: string | null
+          status_technical?: string | null
           subdomain?: string | null
           support_email?: string | null
           trade_name?: string | null
