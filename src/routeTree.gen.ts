@@ -240,7 +240,10 @@ import { Route as AuthenticatedContratoIdRouteImport } from './routes/_authentic
 import { Route as AuthenticatedContabilidadeTarefasRouteImport } from './routes/_authenticated/contabilidade.tarefas'
 import { Route as AuthenticatedContabilidadePortalRouteImport } from './routes/_authenticated/contabilidade.portal'
 import { Route as AuthenticatedContabilidadeObrigacoesRouteImport } from './routes/_authenticated/contabilidade.obrigacoes'
+import { Route as AuthenticatedContabilidadeIrpfRouteImport } from './routes/_authenticated/contabilidade.irpf'
+import { Route as AuthenticatedContabilidadeFinanceiroRouteImport } from './routes/_authenticated/contabilidade.financeiro'
 import { Route as AuthenticatedContabilidadeDocumentosRouteImport } from './routes/_authenticated/contabilidade.documentos'
+import { Route as AuthenticatedContabilidadeContratosRouteImport } from './routes/_authenticated/contabilidade.contratos'
 import { Route as AuthenticatedContabilidadeCockpitRouteImport } from './routes/_authenticated/contabilidade.cockpit'
 import { Route as AuthenticatedContabilidadeClientesRouteImport } from './routes/_authenticated/contabilidade.clientes'
 import { Route as AuthenticatedContabilidadeCalendarioRouteImport } from './routes/_authenticated/contabilidade.calendario'
@@ -1557,10 +1560,28 @@ const AuthenticatedContabilidadeObrigacoesRoute =
     path: '/contabilidade/obrigacoes',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedContabilidadeIrpfRoute =
+  AuthenticatedContabilidadeIrpfRouteImport.update({
+    id: '/contabilidade/irpf',
+    path: '/contabilidade/irpf',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedContabilidadeFinanceiroRoute =
+  AuthenticatedContabilidadeFinanceiroRouteImport.update({
+    id: '/contabilidade/financeiro',
+    path: '/contabilidade/financeiro',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedContabilidadeDocumentosRoute =
   AuthenticatedContabilidadeDocumentosRouteImport.update({
     id: '/contabilidade/documentos',
     path: '/contabilidade/documentos',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedContabilidadeContratosRoute =
+  AuthenticatedContabilidadeContratosRouteImport.update({
+    id: '/contabilidade/contratos',
+    path: '/contabilidade/contratos',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedContabilidadeCockpitRoute =
@@ -2173,7 +2194,10 @@ export interface FileRoutesByFullPath {
   '/contabilidade/calendario': typeof AuthenticatedContabilidadeCalendarioRoute
   '/contabilidade/clientes': typeof AuthenticatedContabilidadeClientesRoute
   '/contabilidade/cockpit': typeof AuthenticatedContabilidadeCockpitRoute
+  '/contabilidade/contratos': typeof AuthenticatedContabilidadeContratosRoute
   '/contabilidade/documentos': typeof AuthenticatedContabilidadeDocumentosRoute
+  '/contabilidade/financeiro': typeof AuthenticatedContabilidadeFinanceiroRoute
+  '/contabilidade/irpf': typeof AuthenticatedContabilidadeIrpfRoute
   '/contabilidade/obrigacoes': typeof AuthenticatedContabilidadeObrigacoesRoute
   '/contabilidade/portal': typeof AuthenticatedContabilidadePortalRoute
   '/contabilidade/tarefas': typeof AuthenticatedContabilidadeTarefasRoute
@@ -2470,7 +2494,10 @@ export interface FileRoutesByTo {
   '/contabilidade/calendario': typeof AuthenticatedContabilidadeCalendarioRoute
   '/contabilidade/clientes': typeof AuthenticatedContabilidadeClientesRoute
   '/contabilidade/cockpit': typeof AuthenticatedContabilidadeCockpitRoute
+  '/contabilidade/contratos': typeof AuthenticatedContabilidadeContratosRoute
   '/contabilidade/documentos': typeof AuthenticatedContabilidadeDocumentosRoute
+  '/contabilidade/financeiro': typeof AuthenticatedContabilidadeFinanceiroRoute
+  '/contabilidade/irpf': typeof AuthenticatedContabilidadeIrpfRoute
   '/contabilidade/obrigacoes': typeof AuthenticatedContabilidadeObrigacoesRoute
   '/contabilidade/portal': typeof AuthenticatedContabilidadePortalRoute
   '/contabilidade/tarefas': typeof AuthenticatedContabilidadeTarefasRoute
@@ -2780,7 +2807,10 @@ export interface FileRoutesById {
   '/_authenticated/contabilidade/calendario': typeof AuthenticatedContabilidadeCalendarioRoute
   '/_authenticated/contabilidade/clientes': typeof AuthenticatedContabilidadeClientesRoute
   '/_authenticated/contabilidade/cockpit': typeof AuthenticatedContabilidadeCockpitRoute
+  '/_authenticated/contabilidade/contratos': typeof AuthenticatedContabilidadeContratosRoute
   '/_authenticated/contabilidade/documentos': typeof AuthenticatedContabilidadeDocumentosRoute
+  '/_authenticated/contabilidade/financeiro': typeof AuthenticatedContabilidadeFinanceiroRoute
+  '/_authenticated/contabilidade/irpf': typeof AuthenticatedContabilidadeIrpfRoute
   '/_authenticated/contabilidade/obrigacoes': typeof AuthenticatedContabilidadeObrigacoesRoute
   '/_authenticated/contabilidade/portal': typeof AuthenticatedContabilidadePortalRoute
   '/_authenticated/contabilidade/tarefas': typeof AuthenticatedContabilidadeTarefasRoute
@@ -3090,7 +3120,10 @@ export interface FileRouteTypes {
     | '/contabilidade/calendario'
     | '/contabilidade/clientes'
     | '/contabilidade/cockpit'
+    | '/contabilidade/contratos'
     | '/contabilidade/documentos'
+    | '/contabilidade/financeiro'
+    | '/contabilidade/irpf'
     | '/contabilidade/obrigacoes'
     | '/contabilidade/portal'
     | '/contabilidade/tarefas'
@@ -3387,7 +3420,10 @@ export interface FileRouteTypes {
     | '/contabilidade/calendario'
     | '/contabilidade/clientes'
     | '/contabilidade/cockpit'
+    | '/contabilidade/contratos'
     | '/contabilidade/documentos'
+    | '/contabilidade/financeiro'
+    | '/contabilidade/irpf'
     | '/contabilidade/obrigacoes'
     | '/contabilidade/portal'
     | '/contabilidade/tarefas'
@@ -3696,7 +3732,10 @@ export interface FileRouteTypes {
     | '/_authenticated/contabilidade/calendario'
     | '/_authenticated/contabilidade/clientes'
     | '/_authenticated/contabilidade/cockpit'
+    | '/_authenticated/contabilidade/contratos'
     | '/_authenticated/contabilidade/documentos'
+    | '/_authenticated/contabilidade/financeiro'
+    | '/_authenticated/contabilidade/irpf'
     | '/_authenticated/contabilidade/obrigacoes'
     | '/_authenticated/contabilidade/portal'
     | '/_authenticated/contabilidade/tarefas'
@@ -5579,11 +5618,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedContabilidadeObrigacoesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/contabilidade/irpf': {
+      id: '/_authenticated/contabilidade/irpf'
+      path: '/contabilidade/irpf'
+      fullPath: '/contabilidade/irpf'
+      preLoaderRoute: typeof AuthenticatedContabilidadeIrpfRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/contabilidade/financeiro': {
+      id: '/_authenticated/contabilidade/financeiro'
+      path: '/contabilidade/financeiro'
+      fullPath: '/contabilidade/financeiro'
+      preLoaderRoute: typeof AuthenticatedContabilidadeFinanceiroRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/contabilidade/documentos': {
       id: '/_authenticated/contabilidade/documentos'
       path: '/contabilidade/documentos'
       fullPath: '/contabilidade/documentos'
       preLoaderRoute: typeof AuthenticatedContabilidadeDocumentosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/contabilidade/contratos': {
+      id: '/_authenticated/contabilidade/contratos'
+      path: '/contabilidade/contratos'
+      fullPath: '/contabilidade/contratos'
+      preLoaderRoute: typeof AuthenticatedContabilidadeContratosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/contabilidade/cockpit': {
@@ -6579,7 +6639,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedContabilidadeCalendarioRoute: typeof AuthenticatedContabilidadeCalendarioRoute
   AuthenticatedContabilidadeClientesRoute: typeof AuthenticatedContabilidadeClientesRoute
   AuthenticatedContabilidadeCockpitRoute: typeof AuthenticatedContabilidadeCockpitRoute
+  AuthenticatedContabilidadeContratosRoute: typeof AuthenticatedContabilidadeContratosRoute
   AuthenticatedContabilidadeDocumentosRoute: typeof AuthenticatedContabilidadeDocumentosRoute
+  AuthenticatedContabilidadeFinanceiroRoute: typeof AuthenticatedContabilidadeFinanceiroRoute
+  AuthenticatedContabilidadeIrpfRoute: typeof AuthenticatedContabilidadeIrpfRoute
   AuthenticatedContabilidadeObrigacoesRoute: typeof AuthenticatedContabilidadeObrigacoesRoute
   AuthenticatedContabilidadePortalRoute: typeof AuthenticatedContabilidadePortalRoute
   AuthenticatedContabilidadeTarefasRoute: typeof AuthenticatedContabilidadeTarefasRoute
@@ -6661,8 +6724,13 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedContabilidadeClientesRoute,
   AuthenticatedContabilidadeCockpitRoute:
     AuthenticatedContabilidadeCockpitRoute,
+  AuthenticatedContabilidadeContratosRoute:
+    AuthenticatedContabilidadeContratosRoute,
   AuthenticatedContabilidadeDocumentosRoute:
     AuthenticatedContabilidadeDocumentosRoute,
+  AuthenticatedContabilidadeFinanceiroRoute:
+    AuthenticatedContabilidadeFinanceiroRoute,
+  AuthenticatedContabilidadeIrpfRoute: AuthenticatedContabilidadeIrpfRoute,
   AuthenticatedContabilidadeObrigacoesRoute:
     AuthenticatedContabilidadeObrigacoesRoute,
   AuthenticatedContabilidadePortalRoute: AuthenticatedContabilidadePortalRoute,
