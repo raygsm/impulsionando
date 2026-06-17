@@ -72,11 +72,13 @@ function Group({
   pathname,
   filterItem,
   onNavigate,
+  pendingPix,
 }: {
   group: NavGroup;
   pathname: string;
   filterItem: (i: NavItem) => boolean;
   onNavigate?: () => void;
+  pendingPix: number;
 }) {
   const items = group.items.filter(filterItem);
   if (items.length === 0) return null;
@@ -104,6 +106,7 @@ function Group({
               item={it}
               active={isItemActive(pathname, it.to)}
               onNavigate={onNavigate}
+              badgeCount={pendingPix}
             />
           ))}
         </div>
@@ -124,6 +127,7 @@ export function SidebarNav({
   const isSuper = currentUser.isSuperAdmin && !isImpersonating;
   const { companyId } = useActiveCompany();
   const { data: perms, isLoading: permsLoading } = useUserPermissions(companyId);
+  const { data: pendingPix = 0 } = usePendingPixBadge(isSuper);
 
   // Super admin enxerga tudo. Em modo impersonação, comporta-se como o cliente:
   // esconde itens superOnly e libera os demais (o master tem acesso global).
@@ -135,6 +139,7 @@ export function SidebarNav({
     if (permsLoading || !perms) return false;
     return perms.has(i.perm);
   };
+
 
   return (
     <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-1">
