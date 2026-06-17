@@ -14,6 +14,7 @@ export function CommandPalette() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const { favorites } = useFavorites();
+  const recent = useRecentPages();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
