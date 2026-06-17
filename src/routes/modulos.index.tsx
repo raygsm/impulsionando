@@ -178,6 +178,37 @@ function ModulosPage() {
                       ))}
                     </div>
 
+                    {(() => {
+                      const d = getDeps(m.slug);
+                      if (!d.required.length && !d.recommended.length) return null;
+                      const labelOf = (s: string) =>
+                        MOTHER_MODULES.find((x) => x.slug === s)?.fullName ?? s;
+                      return (
+                        <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px]">
+                          {d.required.length > 0 && (
+                            <>
+                              <span className="text-rose-600 font-semibold uppercase tracking-wider">Requer</span>
+                              {d.required.map((r) => (
+                                <span key={r} className="px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/30">
+                                  {labelOf(r)}
+                                </span>
+                              ))}
+                            </>
+                          )}
+                          {d.recommended.length > 0 && (
+                            <>
+                              <span className="text-primary font-semibold uppercase tracking-wider ml-1">Combina com</span>
+                              {d.recommended.slice(0, 3).map((r) => (
+                                <span key={r} className="px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                                  {labelOf(r)}
+                                </span>
+                              ))}
+                            </>
+                          )}
+                        </div>
+                      );
+                    })()}
+
                     <div className="mt-5 grid grid-cols-2 gap-2">
                       <Button asChild size="sm" className="gap-2 bg-gradient-primary">
                         <Link to="/modulos/$slug" params={{ slug: m.slug }}>
