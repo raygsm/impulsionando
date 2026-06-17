@@ -45,18 +45,21 @@ beforeAll(async () => {
 
   // Seed: two receipts belonging to the "member" user; the "other" user must not see them.
   const ins = await admin.from("clube_receipts").insert([
-    { user_id: users.member, company_id: companyA, kind: "pix", status: "available", title: `Recibo Pix ${RUN}` },
-    { user_id: users.member, company_id: companyA, kind: "consumption", status: "available", title: `Recibo Consumo ${RUN}` },
+    { user_id: users.member, company_id: companyA, kind: "pix", status: "available", title: `Recibo Pix ${RUN}`, amount_cents: 1000, issued_at: new Date().toISOString() },
+    { user_id: users.member, company_id: companyA, kind: "consumption", status: "available", title: `Recibo Consumo ${RUN}`, amount_cents: 2000, issued_at: new Date().toISOString() },
   ]).select("id");
   receiptIds = (ins.data ?? []).map((r: { id: string }) => r.id);
 
-  // Seed: a journey log row to verify admin-only audit endpoint protects data
+  // Seed: a cron-log run to verify admin-only audit endpoint protects data
   await admin.from("clube_cron_log").insert({
+    job: "clube-journey-tick",
+    status: "ok",
+    enqueued: 1,
+    skipped: 0,
+    error_count: 0,
+    details: {},
     started_at: new Date().toISOString(),
     finished_at: new Date().toISOString(),
-    enqueued_count: 1,
-    error_count: 0,
-    status: "ok",
   });
 }, 180_000);
 
