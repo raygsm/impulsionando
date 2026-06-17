@@ -8,7 +8,7 @@
  * - CTA "Cadastrar minha busca" -> /api/public/realestate/saved-search
  * - Tela de sucesso / erro consistente após envio
  */
-import { createFileRoute, Link, useSearch } from '@tanstack/react-router'
+import { createFileRoute, Link, useSearch, useNavigate } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useQuery } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
