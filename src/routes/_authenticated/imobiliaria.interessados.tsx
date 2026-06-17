@@ -92,6 +92,8 @@ function Page() {
     if (!companyId) return null
     const exportId = (crypto.randomUUID?.() ?? Math.random().toString(36).slice(2)) as string
     setExportProgress({ done: 0, total: 0, exportId })
+    setTrackedExportId(exportId)
+    try { window.localStorage.setItem(ACTIVE_EXPORT_KEY, exportId) } catch {}
     const allRows: any[] = []
     let columns: { key: string; label: string }[] = []
     let total = 0
