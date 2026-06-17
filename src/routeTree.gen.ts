@@ -211,6 +211,7 @@ import { Route as ApiPublicDemoSendTestRouteImport } from './routes/api/public/d
 import { Route as ApiPaymentsInfinitepayCreateRouteImport } from './routes/api/payments/infinitepay.create'
 import { Route as ApiPaymentsInfinitepayCheckStatusRouteImport } from './routes/api/payments/infinitepay.check-status'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
+import { Route as AuthenticatedImobiliariaAprovacoesImprimirFilaRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes.imprimir-fila'
 import { Route as AuthenticatedCoreModulosSlugRouteImport } from './routes/_authenticated/core.modulos.$slug'
 import { Route as AuthenticatedCoreIntegracoesN8nRouteImport } from './routes/_authenticated/core.integracoes.n8n'
 import { Route as AuthenticatedCoreIntegracoesMercadopagoRouteImport } from './routes/_authenticated/core.integracoes.mercadopago'
@@ -1325,6 +1326,12 @@ const AuthenticatedSalesCashIdRoute =
     path: '/$id',
     getParentRoute: () => AuthenticatedSalesCashRoute,
   } as any)
+const AuthenticatedImobiliariaAprovacoesImprimirFilaRoute =
+  AuthenticatedImobiliariaAprovacoesImprimirFilaRouteImport.update({
+    id: '/imprimir-fila',
+    path: '/imprimir-fila',
+    getParentRoute: () => AuthenticatedImobiliariaAprovacoesRoute,
+  } as any)
 const AuthenticatedCoreModulosSlugRoute =
   AuthenticatedCoreModulosSlugRouteImport.update({
     id: '/$slug',
@@ -1574,6 +1581,7 @@ export interface FileRoutesByFullPath {
   '/core/integracoes/mercadopago': typeof AuthenticatedCoreIntegracoesMercadopagoRoute
   '/core/integracoes/n8n': typeof AuthenticatedCoreIntegracoesN8nRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
+  '/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
@@ -1776,6 +1784,7 @@ export interface FileRoutesByTo {
   '/core/integracoes/mercadopago': typeof AuthenticatedCoreIntegracoesMercadopagoRoute
   '/core/integracoes/n8n': typeof AuthenticatedCoreIntegracoesN8nRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
+  '/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
@@ -1991,6 +2000,7 @@ export interface FileRoutesById {
   '/_authenticated/core/integracoes/mercadopago': typeof AuthenticatedCoreIntegracoesMercadopagoRoute
   '/_authenticated/core/integracoes/n8n': typeof AuthenticatedCoreIntegracoesN8nRoute
   '/_authenticated/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
+  '/_authenticated/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
@@ -2206,6 +2216,7 @@ export interface FileRouteTypes {
     | '/core/integracoes/mercadopago'
     | '/core/integracoes/n8n'
     | '/core/modulos/$slug'
+    | '/imobiliaria/aprovacoes/imprimir-fila'
     | '/sales/cash/$id'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
@@ -2408,6 +2419,7 @@ export interface FileRouteTypes {
     | '/core/integracoes/mercadopago'
     | '/core/integracoes/n8n'
     | '/core/modulos/$slug'
+    | '/imobiliaria/aprovacoes/imprimir-fila'
     | '/sales/cash/$id'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
@@ -2622,6 +2634,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/integracoes/mercadopago'
     | '/_authenticated/core/integracoes/n8n'
     | '/_authenticated/core/modulos/$slug'
+    | '/_authenticated/imobiliaria/aprovacoes/imprimir-fila'
     | '/_authenticated/sales/cash/$id'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
@@ -4138,6 +4151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSalesCashIdRouteImport
       parentRoute: typeof AuthenticatedSalesCashRoute
     }
+    '/_authenticated/imobiliaria/aprovacoes/imprimir-fila': {
+      id: '/_authenticated/imobiliaria/aprovacoes/imprimir-fila'
+      path: '/imprimir-fila'
+      fullPath: '/imobiliaria/aprovacoes/imprimir-fila'
+      preLoaderRoute: typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRouteImport
+      parentRoute: typeof AuthenticatedImobiliariaAprovacoesRoute
+    }
     '/_authenticated/core/modulos/$slug': {
       id: '/_authenticated/core/modulos/$slug'
       path: '/$slug'
@@ -4546,11 +4566,14 @@ const AuthenticatedSalesRouteWithChildren =
   AuthenticatedSalesRoute._addFileChildren(AuthenticatedSalesRouteChildren)
 
 interface AuthenticatedImobiliariaAprovacoesRouteChildren {
+  AuthenticatedImobiliariaAprovacoesImprimirFilaRoute: typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
   AuthenticatedImobiliariaAprovacoesIdImprimirRoute: typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
 }
 
 const AuthenticatedImobiliariaAprovacoesRouteChildren: AuthenticatedImobiliariaAprovacoesRouteChildren =
   {
+    AuthenticatedImobiliariaAprovacoesImprimirFilaRoute:
+      AuthenticatedImobiliariaAprovacoesImprimirFilaRoute,
     AuthenticatedImobiliariaAprovacoesIdImprimirRoute:
       AuthenticatedImobiliariaAprovacoesIdImprimirRoute,
   }
