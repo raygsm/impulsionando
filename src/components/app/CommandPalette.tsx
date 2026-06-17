@@ -4,12 +4,15 @@ import {
   CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator,
 } from "@/components/ui/command";
 import { TOP_ITEMS, NAV_GROUPS, type NavItem } from "./nav-config";
+import { useFavorites } from "@/hooks/use-favorites";
+import { Star } from "lucide-react";
 
 type Entry = NavItem & { group: string };
 
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const { favorites } = useFavorites();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -45,6 +48,20 @@ export function CommandPalette() {
       <CommandInput placeholder="Buscar páginas, cockpits, módulos…" />
       <CommandList>
         <CommandEmpty>Nenhum resultado.</CommandEmpty>
+        {favorites.length > 0 && (
+          <>
+            <CommandGroup heading="Favoritos">
+              {favorites.map((f) => (
+                <CommandItem key={`fav-${f.to}`} value={`favorito ${f.label} ${f.to}`} onSelect={() => go(f.to)}>
+                  <Star className="mr-2 size-4 fill-amber-400 text-amber-400" />
+                  <span>{f.label}</span>
+                  <span className="ml-auto text-xs text-muted-foreground">{f.to}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+            <CommandSeparator />
+          </>
+        )}
         {cockpits.length > 0 && (
           <>
             <CommandGroup heading="Cockpits & KPIs">
