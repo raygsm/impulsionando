@@ -17,9 +17,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import {
   getAdminClubeOverview, listJourneySteps, upsertJourneyStep, deleteJourneyStep,
-  listAdminPolls, setPollActive,
+  listAdminPolls, setPollActive, listClubeCronRuns, getJourneyLogAudit,
 } from "@/lib/clube.functions";
-import { Users, Crown, MapPin, Share2, Bell, DollarSign, Trophy, RefreshCw, CalendarDays, Vote, Trash2, Plus, Save } from "lucide-react";
+import { Users, Crown, MapPin, Share2, Bell, DollarSign, Trophy, RefreshCw, CalendarDays, Vote, Trash2, Plus, Save, Activity, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/clube")({
   component: AdminClubePage,
