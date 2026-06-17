@@ -47,7 +47,7 @@ async function fetchOpportunities(): Promise<Opportunity[]> {
       .gte("created_at", new Date(Date.now() - 86400000).toISOString()),
     // Mensagens não respondidas (realestate)
     supabase.from("realestate_internal_messages").select("id", { count: "exact", head: true })
-      .eq("is_read", false),
+      .eq("status", "new"),
     // Faturas de mesa expiradas/falhas hoje
     supabase.from("restaurant_table_invoices").select("id", { count: "exact", head: true })
       .in("status", ["failed", "expired"])
