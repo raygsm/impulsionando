@@ -14,7 +14,7 @@ jobs:
   vitest-isolation:
     name: Tenant isolation + email delivery (vitest)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       CI: "true"
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -25,55 +25,86 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
       - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
+        with: { bun-version: latest }
 
       - name: Verify required secrets
         run: |
           missing=0
           for v in SUPABASE_URL SUPABASE_PUBLISHABLE_KEY SUPABASE_SERVICE_ROLE_KEY; do
-            if [ -z "${!v}" ]; then
-              echo "::error::Missing required secret: $v"
-              missing=1
-            fi
+            if [ -z "${!v}" ]; then echo "::error::Missing secret: $v"; missing=1; fi
           done
           test "$missing" = "0"
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Prepare results dir
+        run: mkdir -p test-results
+
       - name: Run tenant isolation E2E
         id: isolation
         run: |
           set -o pipefail
-          bunx vitest run tests/e2e/tenant-isolation.test.ts --reporter=verbose --reporter=junit --outputFile=test-results/isolation.junit.xml 2>&1 | tee test-results/isolation.log
+          bunx vitest run tests/e2e/tenant-isolation.test.ts \
+            --reporter=verbose --reporter=junit \
+            --outputFile=test-results/isolation.junit.xml 2>&1 | tee test-results/isolation.log
+
+      - name: Run CHRISMED isolation E2E
+        id: chrismed
+        if: always()
+        run: |
+          set -o pipefail
+          bunx vitest run tests/e2e/chrismed-isolation.test.ts \
+            --reporter=verbose --reporter=junit \
+            --outputFile=test-results/chrismed.junit.xml 2>&1 | tee test-results/chrismed.log
 
       - name: Run contract email delivery E2E
         id: email
         if: always()
         run: |
           set -o pipefail
-          bunx vitest run tests/e2e/contract-email-delivery.test.ts --reporter=verbose --reporter=junit --outputFile=test-results/email.junit.xml 2>&1 | tee test-results/email.log
+          bunx vitest run tests/e2e/contract-email-delivery.test.ts \
+            --reporter=verbose --reporter=junit \
+            --outputFile=test-results/email.junit.xml 2>&1 | tee test-results/email.log
+
+      - name: Snapshot email_send_log (last 50)
+        if: always()
+        env:
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          if [ -n "${{ secrets.SUPABASE_DB_HOST }}" ]; then
+            psql "postgres://postgres:${PGPASSWORD}@${{ secrets.SUPABASE_DB_HOST }}:5432/postgres" \
+              -c "SELECT created_at, template_name, recipient_email, status, left(coalesce(error_message,''),120) AS error FROM email_send_log ORDER BY created_at DESC LIMIT 50;" \
+              > test-results/email_send_log_tail.txt 2>&1 || echo "snapshot skipped" > test-results/email_send_log_tail.txt
+          else
+            echo "SUPABASE_DB_HOST not set — snapshot skipped" > test-results/email_send_log_tail.txt
+          fi
 
       - name: Publish summary
         if: always()
         run: |
-          echo "## Tenant isolation E2E" >> "$GITHUB_STEP_SUMMARY"
-          echo "- isolation status: ${{ steps.isolation.outcome }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- email delivery status: ${{ steps.email.outcome }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "### Isolation log (tail)" >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          tail -n 80 test-results/isolation.log 2>/dev/null || echo "no log"  >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          echo "### Email log (tail)" >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          tail -n 80 test-results/email.log 2>/dev/null || echo "no log" >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "## Tenant isolation + email delivery"
+            echo "| Suite | Outcome |"
+            echo "|---|---|"
+            echo "| tenant-isolation | ${{ steps.isolation.outcome }} |"
+            echo "| chrismed-isolation | ${{ steps.chrismed.outcome }} |"
+            echo "| contract-email-delivery | ${{ steps.email.outcome }} |"
+            echo ""
+            for f in isolation chrismed email; do
+              echo "### $f log (tail)"
+              echo '```'
+              tail -n 80 "test-results/$f.log" 2>/dev/null || echo "no log"
+              echo '```'
+            done
+            echo "### email_send_log (latest 50)"
+            echo '```'
+            cat test-results/email_send_log_tail.txt 2>/dev/null || echo "no snapshot"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Upload artifacts
+      - name: Upload all artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -82,10 +113,23 @@ jobs:
           retention-days: 30
           if-no-files-found: ignore
 
+      - name: Upload email artifacts (failure only)
+        if: failure() && steps.email.outcome != 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: email-delivery-failure
+          path: |
+            test-results/email.log
+            test-results/email.junit.xml
+            test-results/email_send_log_tail.txt
+          retention-days: 60
+          if-no-files-found: warn
+
       - name: Fail job if any suite failed
         if: always()
         run: |
-          if [ "${{ steps.isolation.outcome }}" != "success" ] || [ "${{ steps.email.outcome }}" != "success" ]; then
-            echo "::error::One or more isolation/email E2E suites failed"
-            exit 1
-          fi
+          fail=0
+          for o in "${{ steps.isolation.outcome }}" "${{ steps.chrismed.outcome }}" "${{ steps.email.outcome }}"; do
+            [ "$o" = "success" ] || fail=1
+          done
+          test "$fail" = "0" || { echo "::error::One or more E2E suites failed"; exit 1; }
