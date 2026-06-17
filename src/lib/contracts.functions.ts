@@ -127,13 +127,14 @@ export const signContractDocument = createServerFn({ method: "POST" })
         signer_role: data.signer_role ?? null,
         signed_at: signedAtIso,
         user_agent: data.user_agent ?? null,
-        evidence: data.evidence ?? {},
+        evidence: (data.evidence ?? {}) as never,
         signature_hash,
         status: "valid",
       })
-      .select()
+      .select("id, contract_document_id, company_id, signer_name, signer_email, signer_doc, signer_role, signed_at, signature_hash, status, created_at")
       .single();
     if (error) throw error;
+
 
     await context.supabase
       .from("contract_documents")
