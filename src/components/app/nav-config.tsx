@@ -128,6 +128,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/affiliates/sales", label: "Vendas", icon: ShoppingCart, perm: "aff.module.read" },
       { to: "/affiliates/commissions", label: "Comissões", icon: Percent, perm: "aff.module.read" },
       { to: "/affiliates/payouts", label: "Saques e Repasses", icon: Banknote, perm: "aff.module.read" },
+      { to: "/affiliates/wallet", label: "Carteira & Alertas", icon: Wallet, perm: "aff.module.read" },
       { to: "/affiliates/reports", label: "Relatórios de afiliados", icon: TrendingUp, perm: "aff.module.read" },
     ],
   },
