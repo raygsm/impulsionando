@@ -105,6 +105,7 @@ import { Route as AuthenticatedBiIndexRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenticated/agenda.index'
 import { Route as AuthenticatedAffiliatesIndexRouteImport } from './routes/_authenticated/affiliates.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as ImoveisSlugPropertyIdRouteImport } from './routes/imoveis.$slug.$propertyId'
 import { Route as DemoNichoSlugRouteImport } from './routes/demo.nicho.$slug'
 import { Route as AuthenticatedSalesOrdersRouteImport } from './routes/_authenticated/sales.orders'
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
@@ -717,6 +718,11 @@ const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ImoveisSlugPropertyIdRoute = ImoveisSlugPropertyIdRouteImport.update({
+  id: '/$propertyId',
+  path: '/$propertyId',
+  getParentRoute: () => ImoveisSlugRoute,
 } as any)
 const DemoNichoSlugRoute = DemoNichoSlugRouteImport.update({
   id: '/demo/nicho/$slug',
@@ -1502,7 +1508,7 @@ export interface FileRoutesByFullPath {
   '/demo/whatsapp': typeof DemoWhatsappRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
-  '/imoveis/$slug': typeof ImoveisSlugRoute
+  '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
@@ -1608,6 +1614,7 @@ export interface FileRoutesByFullPath {
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
+  '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda/': typeof AuthenticatedAgendaIndexRoute
@@ -1711,7 +1718,7 @@ export interface FileRoutesByTo {
   '/demo/whatsapp': typeof DemoWhatsappRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
-  '/imoveis/$slug': typeof ImoveisSlugRoute
+  '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
@@ -1817,6 +1824,7 @@ export interface FileRoutesByTo {
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
+  '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/affiliates': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda': typeof AuthenticatedAgendaIndexRoute
@@ -1933,7 +1941,7 @@ export interface FileRoutesById {
   '/demo/whatsapp': typeof DemoWhatsappRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
-  '/imoveis/$slug': typeof ImoveisSlugRoute
+  '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
@@ -2039,6 +2047,7 @@ export interface FileRoutesById {
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
   '/_authenticated/sales/orders': typeof AuthenticatedSalesOrdersRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
+  '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/_authenticated/agenda/': typeof AuthenticatedAgendaIndexRoute
@@ -2261,6 +2270,7 @@ export interface FileRouteTypes {
     | '/sales/new'
     | '/sales/orders'
     | '/demo/nicho/$slug'
+    | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
     | '/affiliates/'
     | '/agenda/'
@@ -2470,6 +2480,7 @@ export interface FileRouteTypes {
     | '/sales/new'
     | '/sales/orders'
     | '/demo/nicho/$slug'
+    | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
     | '/affiliates'
     | '/agenda'
@@ -2691,6 +2702,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sales/new'
     | '/_authenticated/sales/orders'
     | '/demo/nicho/$slug'
+    | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
     | '/_authenticated/affiliates/'
     | '/_authenticated/agenda/'
@@ -2780,7 +2792,7 @@ export interface RootRouteChildren {
   DemoWhatsappRoute: typeof DemoWhatsappRoute
   DemoWhiteLabelRoute: typeof DemoWhiteLabelRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
-  ImoveisSlugRoute: typeof ImoveisSlugRoute
+  ImoveisSlugRoute: typeof ImoveisSlugRouteWithChildren
   NichosSlugRoute: typeof NichosSlugRoute
   RSlugRoute: typeof RSlugRoute
   ShowroomEventosRoute: typeof ShowroomEventosRoute
@@ -3488,6 +3500,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/lovable/email/suppression'
       preLoaderRoute: typeof LovableEmailSuppressionRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/imoveis/$slug/$propertyId': {
+      id: '/imoveis/$slug/$propertyId'
+      path: '/$propertyId'
+      fullPath: '/imoveis/$slug/$propertyId'
+      preLoaderRoute: typeof ImoveisSlugPropertyIdRouteImport
+      parentRoute: typeof ImoveisSlugRoute
     }
     '/demo/nicho/$slug': {
       id: '/demo/nicho/$slug'
@@ -4866,6 +4885,18 @@ const PlanosRouteChildren: PlanosRouteChildren = {
 const PlanosRouteWithChildren =
   PlanosRoute._addFileChildren(PlanosRouteChildren)
 
+interface ImoveisSlugRouteChildren {
+  ImoveisSlugPropertyIdRoute: typeof ImoveisSlugPropertyIdRoute
+}
+
+const ImoveisSlugRouteChildren: ImoveisSlugRouteChildren = {
+  ImoveisSlugPropertyIdRoute: ImoveisSlugPropertyIdRoute,
+}
+
+const ImoveisSlugRouteWithChildren = ImoveisSlugRoute._addFileChildren(
+  ImoveisSlugRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -4908,7 +4939,7 @@ const rootRouteChildren: RootRouteChildren = {
   DemoWhatsappRoute: DemoWhatsappRoute,
   DemoWhiteLabelRoute: DemoWhiteLabelRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
-  ImoveisSlugRoute: ImoveisSlugRoute,
+  ImoveisSlugRoute: ImoveisSlugRouteWithChildren,
   NichosSlugRoute: NichosSlugRoute,
   RSlugRoute: RSlugRoute,
   ShowroomEventosRoute: ShowroomEventosRoute,
