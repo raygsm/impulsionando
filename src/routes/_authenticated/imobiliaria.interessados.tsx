@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog'
 import { toast } from 'sonner'
-import { Loader2, Phone, Mail, MessageSquare, Home, Send, Download } from 'lucide-react'
+import { Loader2, Phone, Mail, MessageSquare, Home, Send, Download, FileText } from 'lucide-react'
 
 export const Route = createFileRoute('/_authenticated/imobiliaria/interessados')({
   head: () => ({ meta: [{ title: 'Interessados — Vitrine imobiliária' }] }),
