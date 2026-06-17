@@ -120,6 +120,7 @@ import { Route as AuthenticatedReportsFinanceRouteImport } from './routes/_authe
 import { Route as AuthenticatedReportsCrmRouteImport } from './routes/_authenticated/reports.crm'
 import { Route as AuthenticatedReportsAgendaRouteImport } from './routes/_authenticated/reports.agenda'
 import { Route as AuthenticatedPerfilNotificacoesRouteImport } from './routes/_authenticated/perfil.notificacoes'
+import { Route as AuthenticatedOnboardingNichoRouteImport } from './routes/_authenticated/onboarding.nicho'
 import { Route as AuthenticatedMarketingLeadsRouteImport } from './routes/_authenticated/marketing.leads'
 import { Route as AuthenticatedInventorySuppliersRouteImport } from './routes/_authenticated/inventory.suppliers'
 import { Route as AuthenticatedInventoryProductsRouteImport } from './routes/_authenticated/inventory.products'
@@ -803,6 +804,12 @@ const AuthenticatedPerfilNotificacoesRoute =
     id: '/perfil/notificacoes',
     path: '/perfil/notificacoes',
     getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOnboardingNichoRoute =
+  AuthenticatedOnboardingNichoRouteImport.update({
+    id: '/nicho',
+    path: '/nicho',
+    getParentRoute: () => AuthenticatedOnboardingRoute,
   } as any)
 const AuthenticatedMarketingLeadsRoute =
   AuthenticatedMarketingLeadsRouteImport.update({
@@ -1504,7 +1511,7 @@ export interface FileRoutesByFullPath {
   '/minha-assinatura': typeof AuthenticatedMinhaAssinaturaRoute
   '/modules': typeof AuthenticatedModulesRoute
   '/niches': typeof AuthenticatedNichesRoute
-  '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/onboarding': typeof AuthenticatedOnboardingRouteWithChildren
   '/permissions': typeof AuthenticatedPermissionsRoute
   '/privacy': typeof AuthenticatedPrivacyRoute
   '/reports': typeof AuthenticatedReportsRouteWithChildren
@@ -1632,6 +1639,7 @@ export interface FileRoutesByFullPath {
   '/inventory/products': typeof AuthenticatedInventoryProductsRoute
   '/inventory/suppliers': typeof AuthenticatedInventorySuppliersRoute
   '/marketing/leads': typeof AuthenticatedMarketingLeadsRoute
+  '/onboarding/nicho': typeof AuthenticatedOnboardingNichoRoute
   '/perfil/notificacoes': typeof AuthenticatedPerfilNotificacoesRoute
   '/reports/agenda': typeof AuthenticatedReportsAgendaRoute
   '/reports/crm': typeof AuthenticatedReportsCrmRoute
@@ -1720,7 +1728,7 @@ export interface FileRoutesByTo {
   '/minha-assinatura': typeof AuthenticatedMinhaAssinaturaRoute
   '/modules': typeof AuthenticatedModulesRoute
   '/niches': typeof AuthenticatedNichesRoute
-  '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/onboarding': typeof AuthenticatedOnboardingRouteWithChildren
   '/permissions': typeof AuthenticatedPermissionsRoute
   '/privacy': typeof AuthenticatedPrivacyRoute
   '/sectors': typeof AuthenticatedSectorsRoute
@@ -1846,6 +1854,7 @@ export interface FileRoutesByTo {
   '/inventory/products': typeof AuthenticatedInventoryProductsRoute
   '/inventory/suppliers': typeof AuthenticatedInventorySuppliersRoute
   '/marketing/leads': typeof AuthenticatedMarketingLeadsRoute
+  '/onboarding/nicho': typeof AuthenticatedOnboardingNichoRoute
   '/perfil/notificacoes': typeof AuthenticatedPerfilNotificacoesRoute
   '/reports/agenda': typeof AuthenticatedReportsAgendaRoute
   '/reports/crm': typeof AuthenticatedReportsCrmRoute
@@ -1945,7 +1954,7 @@ export interface FileRoutesById {
   '/_authenticated/minha-assinatura': typeof AuthenticatedMinhaAssinaturaRoute
   '/_authenticated/modules': typeof AuthenticatedModulesRoute
   '/_authenticated/niches': typeof AuthenticatedNichesRoute
-  '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/onboarding': typeof AuthenticatedOnboardingRouteWithChildren
   '/_authenticated/permissions': typeof AuthenticatedPermissionsRoute
   '/_authenticated/privacy': typeof AuthenticatedPrivacyRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRouteWithChildren
@@ -2073,6 +2082,7 @@ export interface FileRoutesById {
   '/_authenticated/inventory/products': typeof AuthenticatedInventoryProductsRoute
   '/_authenticated/inventory/suppliers': typeof AuthenticatedInventorySuppliersRoute
   '/_authenticated/marketing/leads': typeof AuthenticatedMarketingLeadsRoute
+  '/_authenticated/onboarding/nicho': typeof AuthenticatedOnboardingNichoRoute
   '/_authenticated/perfil/notificacoes': typeof AuthenticatedPerfilNotificacoesRoute
   '/_authenticated/reports/agenda': typeof AuthenticatedReportsAgendaRoute
   '/_authenticated/reports/crm': typeof AuthenticatedReportsCrmRoute
@@ -2300,6 +2310,7 @@ export interface FileRouteTypes {
     | '/inventory/products'
     | '/inventory/suppliers'
     | '/marketing/leads'
+    | '/onboarding/nicho'
     | '/perfil/notificacoes'
     | '/reports/agenda'
     | '/reports/crm'
@@ -2514,6 +2525,7 @@ export interface FileRouteTypes {
     | '/inventory/products'
     | '/inventory/suppliers'
     | '/marketing/leads'
+    | '/onboarding/nicho'
     | '/perfil/notificacoes'
     | '/reports/agenda'
     | '/reports/crm'
@@ -2740,6 +2752,7 @@ export interface FileRouteTypes {
     | '/_authenticated/inventory/products'
     | '/_authenticated/inventory/suppliers'
     | '/_authenticated/marketing/leads'
+    | '/_authenticated/onboarding/nicho'
     | '/_authenticated/perfil/notificacoes'
     | '/_authenticated/reports/agenda'
     | '/_authenticated/reports/crm'
@@ -3657,6 +3670,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/perfil/notificacoes'
       preLoaderRoute: typeof AuthenticatedPerfilNotificacoesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/onboarding/nicho': {
+      id: '/_authenticated/onboarding/nicho'
+      path: '/nicho'
+      fullPath: '/onboarding/nicho'
+      preLoaderRoute: typeof AuthenticatedOnboardingNichoRouteImport
+      parentRoute: typeof AuthenticatedOnboardingRoute
     }
     '/_authenticated/marketing/leads': {
       id: '/_authenticated/marketing/leads'
@@ -4734,6 +4754,20 @@ const AuthenticatedInventoryRouteWithChildren =
     AuthenticatedInventoryRouteChildren,
   )
 
+interface AuthenticatedOnboardingRouteChildren {
+  AuthenticatedOnboardingNichoRoute: typeof AuthenticatedOnboardingNichoRoute
+}
+
+const AuthenticatedOnboardingRouteChildren: AuthenticatedOnboardingRouteChildren =
+  {
+    AuthenticatedOnboardingNichoRoute: AuthenticatedOnboardingNichoRoute,
+  }
+
+const AuthenticatedOnboardingRouteWithChildren =
+  AuthenticatedOnboardingRoute._addFileChildren(
+    AuthenticatedOnboardingRouteChildren,
+  )
+
 interface AuthenticatedReportsRouteChildren {
   AuthenticatedReportsAgendaRoute: typeof AuthenticatedReportsAgendaRoute
   AuthenticatedReportsCrmRoute: typeof AuthenticatedReportsCrmRoute
@@ -4821,7 +4855,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMinhaAssinaturaRoute: typeof AuthenticatedMinhaAssinaturaRoute
   AuthenticatedModulesRoute: typeof AuthenticatedModulesRoute
   AuthenticatedNichesRoute: typeof AuthenticatedNichesRoute
-  AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRouteWithChildren
   AuthenticatedPermissionsRoute: typeof AuthenticatedPermissionsRoute
   AuthenticatedPrivacyRoute: typeof AuthenticatedPrivacyRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRouteWithChildren
@@ -4872,7 +4906,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMinhaAssinaturaRoute: AuthenticatedMinhaAssinaturaRoute,
   AuthenticatedModulesRoute: AuthenticatedModulesRoute,
   AuthenticatedNichesRoute: AuthenticatedNichesRoute,
-  AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedOnboardingRoute: AuthenticatedOnboardingRouteWithChildren,
   AuthenticatedPermissionsRoute: AuthenticatedPermissionsRoute,
   AuthenticatedPrivacyRoute: AuthenticatedPrivacyRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRouteWithChildren,
