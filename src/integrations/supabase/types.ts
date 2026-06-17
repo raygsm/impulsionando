@@ -7988,6 +7988,155 @@ export type Database = {
           },
         ]
       }
+      restaurant_table_sessions: {
+        Row: {
+          closed_at: string | null
+          company_id: string
+          created_at: string
+          customer_name: string | null
+          customer_phone: string | null
+          id: string
+          notes: string | null
+          opened_at: string
+          opened_by: string | null
+          party_size: number
+          sales_order_id: string | null
+          status: string
+          table_id: string
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          closed_at?: string | null
+          company_id: string
+          created_at?: string
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          notes?: string | null
+          opened_at?: string
+          opened_by?: string | null
+          party_size?: number
+          sales_order_id?: string | null
+          status?: string
+          table_id: string
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          closed_at?: string | null
+          company_id?: string
+          created_at?: string
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          notes?: string | null
+          opened_at?: string
+          opened_by?: string | null
+          party_size?: number
+          sales_order_id?: string | null
+          status?: string
+          table_id?: string
+          total?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_table_sessions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restaurant_table_sessions_sales_order_id_fkey"
+            columns: ["sales_order_id"]
+            isOneToOne: false
+            referencedRelation: "sales_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restaurant_table_sessions_table_id_fkey"
+            columns: ["table_id"]
+            isOneToOne: false
+            referencedRelation: "restaurant_tables"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      restaurant_tables: {
+        Row: {
+          area: string | null
+          capacity: number
+          company_id: string
+          created_at: string
+          current_session_id: string | null
+          id: string
+          is_active: boolean
+          label: string | null
+          notes: string | null
+          number: number
+          qr_token: string
+          status: string
+          unit_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          area?: string | null
+          capacity?: number
+          company_id: string
+          created_at?: string
+          current_session_id?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string | null
+          notes?: string | null
+          number: number
+          qr_token?: string
+          status?: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          area?: string | null
+          capacity?: number
+          company_id?: string
+          created_at?: string
+          current_session_id?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string | null
+          notes?: string | null
+          number?: number
+          qr_token?: string
+          status?: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_tables_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restaurant_tables_session_fk"
+            columns: ["current_session_id"]
+            isOneToOne: false
+            referencedRelation: "restaurant_table_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restaurant_tables_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "company_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sales_cash_session_counts: {
         Row: {
           counted_amount: number
@@ -9489,6 +9638,11 @@ export type Database = {
       render_template: {
         Args: { _payload: Json; _template: string }
         Returns: string
+      }
+      resolve_table_qr: { Args: { _token: string }; Returns: Json }
+      restaurant_table_checkin: {
+        Args: { _name: string; _party?: number; _phone: string; _token: string }
+        Returns: Json
       }
       sales_cash_session_close: {
         Args: { _counts: Json; _notes?: string; _session_id: string }
