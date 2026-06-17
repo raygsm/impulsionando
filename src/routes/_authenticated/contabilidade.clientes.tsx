@@ -53,8 +53,13 @@ const STATUS = [
   { v: "churned", l: "Cancelado", c: "bg-red-500/15 text-red-700" },
 ];
 
-const empty = {
-  legal_name: "", trade_name: "", document: "", document_type: "CNPJ" as const,
+const empty: {
+  legal_name: string; trade_name: string; document: string;
+  document_type: "CNPJ" | "CPF"; tax_regime: string;
+  contact_name: string; contact_email: string; contact_phone: string;
+  monthly_fee: number; status: string; notes: string;
+} = {
+  legal_name: "", trade_name: "", document: "", document_type: "CNPJ",
   tax_regime: "simples", contact_name: "", contact_email: "", contact_phone: "",
   monthly_fee: 0, status: "active", notes: "",
 };
