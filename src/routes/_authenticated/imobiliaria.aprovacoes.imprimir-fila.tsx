@@ -54,21 +54,26 @@ function Page() {
     pageSize: search.pageSize ?? 500,
   };
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["realestate-approvals-print", args],
     enabled: !!companyId,
     queryFn: () => fetchExport({ data: args }),
+    retry: false,
   });
 
   const items = (data?.items ?? []) as Array<any>;
   const actors = (data?.actors ?? {}) as Record<string, string>;
+  const totalPages = data ? Math.max(1, Math.ceil((data.total ?? 0) / (data.pageSize ?? 1))) : 1;
+  const reviewerName = data?.filters?.reviewerId
+    ? (actors[data.filters.reviewerId] ?? data.filters.reviewerId)
+    : "Todos";
 
   useEffect(() => {
-    if (!isLoading && data) {
+    if (!isLoading && data && items.length > 0) {
       const t = setTimeout(() => window.print(), 500);
       return () => clearTimeout(t);
     }
-  }, [isLoading, data]);
+  }, [isLoading, data, items.length]);
 
   return (
     <div className="p-8 max-w-[1000px] mx-auto bg-white text-black print:p-0">
@@ -77,19 +82,28 @@ function Page() {
       <header className="mb-6 border-b pb-4">
         <h1 className="text-2xl font-semibold">Fila de aprovação de imóveis</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Gerado em {new Date().toLocaleString("pt-BR")} · {items.length} de {data?.total ?? 0} registro(s) · página {args.page}
+          Gerado em {new Date().toLocaleString("pt-BR")}
         </p>
-        <div className="text-xs mt-2 space-y-0.5">
-          {data?.filters?.status?.length ? (
-            <div><strong>Status:</strong> {data.filters.status.map((s: string) => STATUS_LABEL[s] ?? s).join(", ")}</div>
-          ) : null}
-          {data?.filters?.search ? <div><strong>Busca:</strong> {data.filters.search}</div> : null}
-          {data?.filters?.dateFrom ? <div><strong>De:</strong> {new Date(data.filters.dateFrom).toLocaleString("pt-BR")}</div> : null}
-          {data?.filters?.dateTo ? <div><strong>Até:</strong> {new Date(data.filters.dateTo).toLocaleString("pt-BR")}</div> : null}
-        </div>
+        <dl className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-1 text-xs mt-3">
+          <div><dt className="font-semibold inline">Página: </dt><dd className="inline">{args.page} de {totalPages}</dd></div>
+          <div><dt className="font-semibold inline">Por página: </dt><dd className="inline">{args.pageSize}</dd></div>
+          <div><dt className="font-semibold inline">Nesta página: </dt><dd className="inline">{items.length}</dd></div>
+          <div><dt className="font-semibold inline">Total: </dt><dd className="inline">{data?.total ?? 0}</dd></div>
+          <div className="col-span-2"><dt className="font-semibold inline">Status: </dt><dd className="inline">{data?.filters?.status?.length ? data.filters.status.map((s: string) => STATUS_LABEL[s] ?? s).join(", ") : "Todos"}</dd></div>
+          <div><dt className="font-semibold inline">Revisor: </dt><dd className="inline">{reviewerName}</dd></div>
+          <div><dt className="font-semibold inline">Busca: </dt><dd className="inline">{data?.filters?.search || "—"}</dd></div>
+          <div><dt className="font-semibold inline">De: </dt><dd className="inline">{data?.filters?.dateFrom ? new Date(data.filters.dateFrom).toLocaleString("pt-BR") : "—"}</dd></div>
+          <div><dt className="font-semibold inline">Até: </dt><dd className="inline">{data?.filters?.dateTo ? new Date(data.filters.dateTo).toLocaleString("pt-BR") : "—"}</dd></div>
+        </dl>
       </header>
 
-      {isLoading ? (
+      {error ? (
+        <div className="rounded border border-red-300 bg-red-50 p-4 text-sm text-red-800">
+          <strong>Não foi possível gerar o PDF.</strong>
+          <div className="mt-1">{(error as Error).message}</div>
+          <div className="mt-2 text-xs">Verifique se a paginação está dentro dos limites (página ≥ 1, tamanho entre 5 e 1000) e se você tem acesso a esta empresa.</div>
+        </div>
+      ) : isLoading ? (
         <p className="text-sm">Carregando…</p>
       ) : items.length === 0 ? (
         <p className="text-sm">Nenhum imóvel encontrado para os filtros atuais.</p>
