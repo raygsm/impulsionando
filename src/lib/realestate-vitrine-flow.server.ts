@@ -133,7 +133,8 @@ export async function processInterest(
     (property as any).status !== 'ativo' ||
     (property as any).approval_status !== 'approved'
   ) {
-    return { ok: false, code: 'property_unavailable' }
+    await writeFlowAudit({ action: 'vitrine.interest.failed', entity: 'realestate_interest', companyId, requestId, after: { code: 'property_unavailable', property_id: input.propertyId } })
+    return { ok: false, requestId, code: 'property_unavailable' }
   }
   const propertyTitle = (property as any).title as string
   const referenceCode = (property as any).reference_code as string | null
