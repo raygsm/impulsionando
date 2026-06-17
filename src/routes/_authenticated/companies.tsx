@@ -313,7 +313,6 @@ function CompaniesPage() {
                 status_commercial: editing.status_commercial,
                 status_financial: editing.status_financial,
                 status_technical: editing.status_technical,
-                is_active: editing.is_active,
               })}>{update.isPending ? "Salvando..." : "Salvar"}</Button>
             </DialogFooter>
           </DialogContent>
