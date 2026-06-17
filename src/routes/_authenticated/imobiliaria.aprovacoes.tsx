@@ -408,8 +408,16 @@ function Page() {
                       <Button size="sm" variant="ghost" onClick={() => setHistoryFor(p)}>
                         <History className="w-3 h-3 mr-1" /> Histórico
                       </Button>
-                      <Button size="sm" variant="ghost" onClick={() => exportCsv.mutate(p.id)} disabled={exportCsv.isPending}>
-                        <Download className="w-3 h-3 mr-1" /> CSV
+                      <Button
+                        size="sm" variant="ghost"
+                        onClick={() => exportCsv.mutate(p.id)}
+                        disabled={exportCsv.isPending && exportCsv.variables === p.id}
+                        aria-busy={exportCsv.isPending && exportCsv.variables === p.id}
+                      >
+                        {exportCsv.isPending && exportCsv.variables === p.id
+                          ? <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                          : <Download className="w-3 h-3 mr-1" />}
+                        {exportCsv.isPending && exportCsv.variables === p.id ? "Gerando…" : "CSV"}
                       </Button>
                       <Button size="sm" variant="ghost" asChild>
                         <Link to="/imobiliaria/aprovacoes/$id/imprimir" params={{ id: p.id }} target="_blank">
