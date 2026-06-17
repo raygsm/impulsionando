@@ -22,7 +22,7 @@ type FilterKind = "all" | "unread" | "journey" | "receipts";
 
 function ClubeNotificationsPage() {
   const { data: user } = useCurrentUser();
-  const { data, isLoading, refetch, isRefetching, unreadCount, markRead, markAllRead, remove } = useNotifications(user?.id);
+  const { data, isLoading, refetch, isRefetching, unreadCount, markRead, markAllRead, remove } = useNotifications(user?.user.id);
   const [tab, setTab] = useState<FilterKind>("all");
   const [search, setSearch] = useState("");
 
