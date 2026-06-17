@@ -61,6 +61,9 @@ type Review = {
   action: "submitted" | "approved" | "rejected" | "changes_requested";
   actor_id: string | null;
   notes: string | null;
+  previous_status: string | null;
+  new_status: string | null;
+  metadata: Record<string, unknown> | null;
   created_at: string;
 };
 
