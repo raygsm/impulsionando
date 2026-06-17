@@ -755,31 +755,135 @@ function RecommendationsTab({ data }: { data?: { interests: string[]; items: any
 }
 
 // ---------------------------------------------------------------
-function ReceiptsTab({ items }: { items: any[] }) {
+function ReceiptsTab({ fetchReceipts, isPremium }: {
+  fetchReceipts: (args: { kind?: string; status?: string; from?: string; to?: string; search?: string }) => Promise<any[]>;
+  isPremium: boolean;
+}) {
+  const [filters, setFilters] = useState<{ kind: string; status: string; from: string; to: string; search: string }>({
+    kind: "all", status: "all", from: "", to: "", search: "",
+  });
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  const q = useQuery({
+    queryKey: ["clube-receipts", filters],
+    queryFn: () => fetchReceipts({
+      kind: filters.kind,
+      status: filters.status,
+      from: filters.from || undefined,
+      to: filters.to || undefined,
+      search: filters.search || undefined,
+    }),
+  });
+
+  const items = q.data ?? [];
+
+  async function handleDownload(r: any) {
+    if (!r.receipt_url) {
+      toast.error("Comprovante ainda não disponível para download");
+      return;
+    }
+    setDownloadingId(r.id);
+    try {
+      const res = await fetch(r.receipt_url, { credentials: "omit" });
+      if (!res.ok) throw new Error("Falha ao baixar (" + res.status + ")");
+      const blob = await res.blob();
+      const ext = (r.receipt_url.split(".").pop() || "pdf").split("?")[0].slice(0, 4) || "pdf";
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `comprovante-${r.kind}-${r.id.slice(0, 8)}.${ext}`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+      toast.success("Comprovante baixado");
+    } catch (e: any) {
+      // Fallback: abre em nova aba
+      window.open(r.receipt_url, "_blank", "noopener,noreferrer");
+      toast.message("Abrindo comprovante em nova aba", { description: e.message });
+    } finally {
+      setDownloadingId(null);
+    }
+  }
+
+  const KIND_LABEL: Record<string, string> = { pix: "Pix", consumption: "Consumo", manual: "Manual" };
+  const STATUS_LABEL: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+    available: { label: "Disponível", variant: "default" },
+    pending_upload: { label: "Aguardando comprovante", variant: "secondary" },
+  };
+
   return (
-    <Card className="p-5">
-      <h2 className="font-semibold mb-3 flex items-center gap-2"><Receipt className="w-4 h-4" /> Comprovantes digitais</h2>
-      {!items.length && <p className="text-sm text-muted-foreground">Nenhum comprovante emitido ainda. Pagamentos Pix e consumos registrados aparecem aqui automaticamente.</p>}
-      <ul className="divide-y">
-        {items.map((r) => (
-          <li key={r.id} className="py-3 flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <div className="font-medium truncate">{r.title}</div>
-              <div className="text-xs text-muted-foreground">
-                {new Date(r.issued_at).toLocaleString("pt-BR")} · <Badge variant="outline" className="ml-1">{r.kind}</Badge>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="text-sm font-semibold">{BRL(r.amount_cents)}</span>
-              {r.receipt_url && (
-                <Button asChild size="sm" variant="outline">
-                  <a href={r.receipt_url} target="_blank" rel="noreferrer"><Download className="w-3 h-3 mr-1" /> Baixar</a>
-                </Button>
-              )}
-            </div>
-          </li>
-        ))}
-      </ul>
+    <Card className="p-5 space-y-4">
+      <div className="flex items-start justify-between flex-wrap gap-3">
+        <div>
+          <h2 className="font-semibold flex items-center gap-2"><Receipt className="w-4 h-4" /> Comprovantes digitais</h2>
+          <p className="text-xs text-muted-foreground">
+            Inclui pagamentos Pix da sua assinatura e comprovantes de consumo. {isPremium ? "Membros Premium têm acesso completo ao histórico." : "Membros Free veem apenas os últimos 30 dias."}
+          </p>
+        </div>
+        <Button size="sm" variant="ghost" onClick={() => q.refetch()} disabled={q.isFetching}>
+          <RefreshCw className={"w-3 h-3 mr-1" + (q.isFetching ? " animate-spin" : "")} /> Atualizar
+        </Button>
+      </div>
+
+      <div className="grid gap-2 sm:grid-cols-5">
+        <div>
+          <Label className="text-xs">Tipo</Label>
+          <select className="w-full h-9 border rounded px-2 text-sm bg-background" value={filters.kind} onChange={(e) => setFilters({ ...filters, kind: e.target.value })}>
+            <option value="all">Todos</option><option value="pix">Pix</option><option value="consumption">Consumo</option><option value="manual">Manual</option>
+          </select>
+        </div>
+        <div>
+          <Label className="text-xs">Status</Label>
+          <select className="w-full h-9 border rounded px-2 text-sm bg-background" value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })}>
+            <option value="all">Todos</option><option value="available">Disponível</option><option value="pending_upload">Pendente</option>
+          </select>
+        </div>
+        <div><Label className="text-xs">De</Label><Input type="date" value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })} /></div>
+        <div><Label className="text-xs">Até</Label><Input type="date" value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })} /></div>
+        <div><Label className="text-xs">Buscar</Label><Input placeholder="Plano, descrição…" value={filters.search} onChange={(e) => setFilters({ ...filters, search: e.target.value })} /></div>
+      </div>
+
+      {q.isLoading ? (
+        <div className="space-y-2">
+          {[0, 1, 2].map((i) => <div key={i} className="h-14 bg-muted/50 rounded animate-pulse" />)}
+        </div>
+      ) : q.error ? (
+        <p className="text-sm text-destructive">Não foi possível carregar: {(q.error as any).message}</p>
+      ) : !items.length ? (
+        <p className="text-sm text-muted-foreground py-6 text-center">
+          Nenhum comprovante encontrado para os filtros atuais.
+        </p>
+      ) : (
+        <ul className="divide-y">
+          {items.map((r) => {
+            const st = STATUS_LABEL[r.status as string] ?? { label: r.status, variant: "outline" as const };
+            return (
+              <li key={r.id} className="py-3 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="font-medium truncate">{r.title}</div>
+                  <div className="text-xs text-muted-foreground flex items-center gap-2 flex-wrap">
+                    <span>{new Date(r.issued_at).toLocaleString("pt-BR")}</span>
+                    <Badge variant="outline" className="text-[10px]">{KIND_LABEL[r.kind] ?? r.kind}</Badge>
+                    <Badge variant={st.variant} className="text-[10px]">{st.label}</Badge>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-sm font-semibold">{BRL(r.amount_cents)}</span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={!r.receipt_url || downloadingId === r.id}
+                    onClick={() => handleDownload(r)}
+                  >
+                    {downloadingId === r.id
+                      ? <><RefreshCw className="w-3 h-3 mr-1 animate-spin" /> Baixando…</>
+                      : <><Download className="w-3 h-3 mr-1" /> Baixar</>}
+                  </Button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </Card>
   );
 }
