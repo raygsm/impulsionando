@@ -26,7 +26,7 @@ import {
   CircleDot,
 } from "lucide-react";
 
-export const Route = createFileRoute("/showroom/marketing")<{}>({
+export const Route = createFileRoute("/showroom/marketing")({
   head: () => ({
     meta: [
       { title: "Showroom Marketing — Central de campanhas por nicho | Impulsionando" },
