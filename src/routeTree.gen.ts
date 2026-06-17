@@ -195,6 +195,7 @@ import { Route as AuthenticatedImobiliariaAprovacoesRouteImport } from './routes
 import { Route as AuthenticatedFinanceWebhookLogRouteImport } from './routes/_authenticated/finance.webhook-log'
 import { Route as AuthenticatedFinanceTransactionsRouteImport } from './routes/_authenticated/finance.transactions'
 import { Route as AuthenticatedFinanceMethodsRouteImport } from './routes/_authenticated/finance.methods'
+import { Route as AuthenticatedFinanceIntegracoesRouteImport } from './routes/_authenticated/finance.integracoes'
 import { Route as AuthenticatedFinanceCommissionsRouteImport } from './routes/_authenticated/finance.commissions'
 import { Route as AuthenticatedFinanceCockpitRouteImport } from './routes/_authenticated/finance.cockpit'
 import { Route as AuthenticatedFinanceCategoriesRouteImport } from './routes/_authenticated/finance.categories'
@@ -252,6 +253,7 @@ import { Route as AuthenticatedContabilidadeAtendimentoRouteImport } from './rou
 import { Route as AuthenticatedConsumerUnifiedRouteImport } from './routes/_authenticated/consumer.unified'
 import { Route as AuthenticatedComunidadeIdRouteImport } from './routes/_authenticated/comunidade.$id'
 import { Route as AuthenticatedCommercialCockpitRouteImport } from './routes/_authenticated/commercial.cockpit'
+import { Route as AuthenticatedCheckoutPlanoRouteImport } from './routes/_authenticated/checkout.$plano'
 import { Route as AuthenticatedBiNichesRouteImport } from './routes/_authenticated/bi.niches'
 import { Route as AuthenticatedBiMasterRouteImport } from './routes/_authenticated/bi.master'
 import { Route as AuthenticatedBiCompanyRouteImport } from './routes/_authenticated/bi.company'
@@ -1305,6 +1307,12 @@ const AuthenticatedFinanceMethodsRoute =
     path: '/methods',
     getParentRoute: () => AuthenticatedFinanceRoute,
   } as any)
+const AuthenticatedFinanceIntegracoesRoute =
+  AuthenticatedFinanceIntegracoesRouteImport.update({
+    id: '/integracoes',
+    path: '/integracoes',
+    getParentRoute: () => AuthenticatedFinanceRoute,
+  } as any)
 const AuthenticatedFinanceCommissionsRoute =
   AuthenticatedFinanceCommissionsRouteImport.update({
     id: '/commissions',
@@ -1633,6 +1641,12 @@ const AuthenticatedCommercialCockpitRoute =
   AuthenticatedCommercialCockpitRouteImport.update({
     id: '/commercial/cockpit',
     path: '/commercial/cockpit',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedCheckoutPlanoRoute =
+  AuthenticatedCheckoutPlanoRouteImport.update({
+    id: '/checkout/$plano',
+    path: '/checkout/$plano',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedBiNichesRoute = AuthenticatedBiNichesRouteImport.update({
@@ -2209,6 +2223,7 @@ export interface FileRoutesByFullPath {
   '/bi/company': typeof AuthenticatedBiCompanyRoute
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
+  '/checkout/$plano': typeof AuthenticatedCheckoutPlanoRoute
   '/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
   '/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
   '/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
@@ -2266,6 +2281,7 @@ export interface FileRoutesByFullPath {
   '/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
   '/finance/cockpit': typeof AuthenticatedFinanceCockpitRoute
   '/finance/commissions': typeof AuthenticatedFinanceCommissionsRoute
+  '/finance/integracoes': typeof AuthenticatedFinanceIntegracoesRoute
   '/finance/methods': typeof AuthenticatedFinanceMethodsRoute
   '/finance/transactions': typeof AuthenticatedFinanceTransactionsRoute
   '/finance/webhook-log': typeof AuthenticatedFinanceWebhookLogRoute
@@ -2512,6 +2528,7 @@ export interface FileRoutesByTo {
   '/bi/company': typeof AuthenticatedBiCompanyRoute
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
+  '/checkout/$plano': typeof AuthenticatedCheckoutPlanoRoute
   '/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
   '/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
   '/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
@@ -2569,6 +2586,7 @@ export interface FileRoutesByTo {
   '/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
   '/finance/cockpit': typeof AuthenticatedFinanceCockpitRoute
   '/finance/commissions': typeof AuthenticatedFinanceCommissionsRoute
+  '/finance/integracoes': typeof AuthenticatedFinanceIntegracoesRoute
   '/finance/methods': typeof AuthenticatedFinanceMethodsRoute
   '/finance/transactions': typeof AuthenticatedFinanceTransactionsRoute
   '/finance/webhook-log': typeof AuthenticatedFinanceWebhookLogRoute
@@ -2828,6 +2846,7 @@ export interface FileRoutesById {
   '/_authenticated/bi/company': typeof AuthenticatedBiCompanyRoute
   '/_authenticated/bi/master': typeof AuthenticatedBiMasterRoute
   '/_authenticated/bi/niches': typeof AuthenticatedBiNichesRoute
+  '/_authenticated/checkout/$plano': typeof AuthenticatedCheckoutPlanoRoute
   '/_authenticated/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
   '/_authenticated/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
   '/_authenticated/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
@@ -2885,6 +2904,7 @@ export interface FileRoutesById {
   '/_authenticated/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
   '/_authenticated/finance/cockpit': typeof AuthenticatedFinanceCockpitRoute
   '/_authenticated/finance/commissions': typeof AuthenticatedFinanceCommissionsRoute
+  '/_authenticated/finance/integracoes': typeof AuthenticatedFinanceIntegracoesRoute
   '/_authenticated/finance/methods': typeof AuthenticatedFinanceMethodsRoute
   '/_authenticated/finance/transactions': typeof AuthenticatedFinanceTransactionsRoute
   '/_authenticated/finance/webhook-log': typeof AuthenticatedFinanceWebhookLogRoute
@@ -3144,6 +3164,7 @@ export interface FileRouteTypes {
     | '/bi/company'
     | '/bi/master'
     | '/bi/niches'
+    | '/checkout/$plano'
     | '/commercial/cockpit'
     | '/comunidade/$id'
     | '/consumer/unified'
@@ -3201,6 +3222,7 @@ export interface FileRouteTypes {
     | '/finance/categories'
     | '/finance/cockpit'
     | '/finance/commissions'
+    | '/finance/integracoes'
     | '/finance/methods'
     | '/finance/transactions'
     | '/finance/webhook-log'
@@ -3447,6 +3469,7 @@ export interface FileRouteTypes {
     | '/bi/company'
     | '/bi/master'
     | '/bi/niches'
+    | '/checkout/$plano'
     | '/commercial/cockpit'
     | '/comunidade/$id'
     | '/consumer/unified'
@@ -3504,6 +3527,7 @@ export interface FileRouteTypes {
     | '/finance/categories'
     | '/finance/cockpit'
     | '/finance/commissions'
+    | '/finance/integracoes'
     | '/finance/methods'
     | '/finance/transactions'
     | '/finance/webhook-log'
@@ -3762,6 +3786,7 @@ export interface FileRouteTypes {
     | '/_authenticated/bi/company'
     | '/_authenticated/bi/master'
     | '/_authenticated/bi/niches'
+    | '/_authenticated/checkout/$plano'
     | '/_authenticated/commercial/cockpit'
     | '/_authenticated/comunidade/$id'
     | '/_authenticated/consumer/unified'
@@ -3819,6 +3844,7 @@ export interface FileRouteTypes {
     | '/_authenticated/finance/categories'
     | '/_authenticated/finance/cockpit'
     | '/_authenticated/finance/commissions'
+    | '/_authenticated/finance/integracoes'
     | '/_authenticated/finance/methods'
     | '/_authenticated/finance/transactions'
     | '/_authenticated/finance/webhook-log'
@@ -5341,6 +5367,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFinanceMethodsRouteImport
       parentRoute: typeof AuthenticatedFinanceRoute
     }
+    '/_authenticated/finance/integracoes': {
+      id: '/_authenticated/finance/integracoes'
+      path: '/integracoes'
+      fullPath: '/finance/integracoes'
+      preLoaderRoute: typeof AuthenticatedFinanceIntegracoesRouteImport
+      parentRoute: typeof AuthenticatedFinanceRoute
+    }
     '/_authenticated/finance/commissions': {
       id: '/_authenticated/finance/commissions'
       path: '/commissions'
@@ -5738,6 +5771,13 @@ declare module '@tanstack/react-router' {
       path: '/commercial/cockpit'
       fullPath: '/commercial/cockpit'
       preLoaderRoute: typeof AuthenticatedCommercialCockpitRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/checkout/$plano': {
+      id: '/_authenticated/checkout/$plano'
+      path: '/checkout/$plano'
+      fullPath: '/checkout/$plano'
+      preLoaderRoute: typeof AuthenticatedCheckoutPlanoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/bi/niches': {
@@ -6510,6 +6550,7 @@ interface AuthenticatedFinanceRouteChildren {
   AuthenticatedFinanceCategoriesRoute: typeof AuthenticatedFinanceCategoriesRoute
   AuthenticatedFinanceCockpitRoute: typeof AuthenticatedFinanceCockpitRoute
   AuthenticatedFinanceCommissionsRoute: typeof AuthenticatedFinanceCommissionsRoute
+  AuthenticatedFinanceIntegracoesRoute: typeof AuthenticatedFinanceIntegracoesRoute
   AuthenticatedFinanceMethodsRoute: typeof AuthenticatedFinanceMethodsRoute
   AuthenticatedFinanceTransactionsRoute: typeof AuthenticatedFinanceTransactionsRoute
   AuthenticatedFinanceWebhookLogRoute: typeof AuthenticatedFinanceWebhookLogRoute
@@ -6521,6 +6562,7 @@ const AuthenticatedFinanceRouteChildren: AuthenticatedFinanceRouteChildren = {
   AuthenticatedFinanceCategoriesRoute: AuthenticatedFinanceCategoriesRoute,
   AuthenticatedFinanceCockpitRoute: AuthenticatedFinanceCockpitRoute,
   AuthenticatedFinanceCommissionsRoute: AuthenticatedFinanceCommissionsRoute,
+  AuthenticatedFinanceIntegracoesRoute: AuthenticatedFinanceIntegracoesRoute,
   AuthenticatedFinanceMethodsRoute: AuthenticatedFinanceMethodsRoute,
   AuthenticatedFinanceTransactionsRoute: AuthenticatedFinanceTransactionsRoute,
   AuthenticatedFinanceWebhookLogRoute: AuthenticatedFinanceWebhookLogRoute,
@@ -6694,6 +6736,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminPixPendentesRoute: typeof AuthenticatedAdminPixPendentesRoute
   AuthenticatedAdminTrialsRoute: typeof AuthenticatedAdminTrialsRoute
   AuthenticatedAdminUptimeRoute: typeof AuthenticatedAdminUptimeRoute
+  AuthenticatedCheckoutPlanoRoute: typeof AuthenticatedCheckoutPlanoRoute
   AuthenticatedCommercialCockpitRoute: typeof AuthenticatedCommercialCockpitRoute
   AuthenticatedComunidadeIdRoute: typeof AuthenticatedComunidadeIdRoute
   AuthenticatedConsumerUnifiedRoute: typeof AuthenticatedConsumerUnifiedRoute
@@ -6777,6 +6820,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminPixPendentesRoute: AuthenticatedAdminPixPendentesRoute,
   AuthenticatedAdminTrialsRoute: AuthenticatedAdminTrialsRoute,
   AuthenticatedAdminUptimeRoute: AuthenticatedAdminUptimeRoute,
+  AuthenticatedCheckoutPlanoRoute: AuthenticatedCheckoutPlanoRoute,
   AuthenticatedCommercialCockpitRoute: AuthenticatedCommercialCockpitRoute,
   AuthenticatedComunidadeIdRoute: AuthenticatedComunidadeIdRoute,
   AuthenticatedConsumerUnifiedRoute: AuthenticatedConsumerUnifiedRoute,
