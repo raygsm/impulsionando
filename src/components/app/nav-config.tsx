@@ -78,8 +78,11 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Imobiliária",
     items: [
+      { to: "/imobiliaria/vitrine", label: "Painel da vitrine", icon: Home },
       { to: "/imobiliaria/imoveis", label: "Imóveis", icon: Home },
-      { to: "/imobiliaria/intencoes", label: "Intenções de busca", icon: SearchIcon },
+      { to: "/imobiliaria/interessados", label: "Interessados", icon: Users2, perm: "realestate.interest.read" },
+      { to: "/imobiliaria/mensagens", label: "Mensagens", icon: MessageSquare, perm: "realestate.message.read" },
+      { to: "/imobiliaria/intencoes", label: "Buscas salvas", icon: SearchIcon },
       { to: "/imobiliaria/matches", label: "Matches", icon: Zap },
       { to: "/imobiliaria/modulos", label: "Módulos do nicho", icon: Boxes },
     ],
