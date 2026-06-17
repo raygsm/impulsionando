@@ -304,6 +304,7 @@ function CompaniesPage() {
               <Button variant="ghost" onClick={() => setEditing(null)}>Cancelar</Button>
               <Button disabled={update.isPending} onClick={() => update.mutate({
                 id: editing.id,
+                is_active: editing.is_active ?? true,
                 name: editing.name,
                 legal_name: editing.legal_name,
                 document: editing.document,
