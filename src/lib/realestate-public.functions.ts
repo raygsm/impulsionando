@@ -47,6 +47,11 @@ export const listPublicProperties = createServerFn({ method: 'POST' })
 
     const from = (data.page - 1) * data.pageSize
     const to = from + data.pageSize - 1
+    const sortCol =
+      data.sort === 'price_asc' || data.sort === 'price_desc'
+        ? data.operation === 'locacao' ? 'rent_price' : 'sale_price'
+        : 'created_at'
+    const ascending = data.sort === 'price_asc'
     let q = supabase
       .from('realestate_properties')
       .select(
@@ -57,7 +62,7 @@ export const listPublicProperties = createServerFn({ method: 'POST' })
       .eq('is_published', true)
       .eq('status', 'ativo')
       .eq('approval_status', 'approved')
-      .order('created_at', { ascending: false })
+      .order(sortCol, { ascending, nullsFirst: false })
       .range(from, to)
 
     if (data.operation && data.operation !== 'venda_ou_locacao') q = q.eq('operation', data.operation)
