@@ -9,6 +9,7 @@ import {
   Handshake, Link2, Briefcase, BadgeDollarSign, TrendingUp, Banknote, Copy,
   Home, Search as SearchIcon, Zap, Bot, MessageSquare,
   History as HistoryIcon, Headphones, UserRound, Megaphone,
+  Calculator,
 } from "lucide-react";
 
 export interface NavItem {
@@ -30,6 +31,7 @@ export const TOP_ITEMS: NavItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, perm: "dashboard.read" },
   { to: "/cockpits", label: "Cockpits", icon: TrendingUp, superOnly: true },
   { to: "/notifications", label: "Notificações", icon: Inbox },
+  { to: "/contabilidade/cockpit", label: "Cockpit Contábil", icon: Calculator, superOnly: true },
   { to: "/onboarding", label: "Começar / Melhorar", icon: Sparkles },
   { to: "/adm", label: "/adm — Central Impulsionando", icon: ShieldCheck, superOnly: true },
   { to: "/adm/agentes", label: "Central de Agentes", icon: Bot, superOnly: true },
