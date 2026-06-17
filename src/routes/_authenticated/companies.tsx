@@ -119,9 +119,9 @@ function CompaniesPage() {
   });
 
   const update = useMutation({
-    mutationFn: async (patch: Partial<CompanyRow> & { id: string }) => {
+    mutationFn: async (patch: Record<string, unknown> & { id: string }) => {
       const { id, ...fields } = patch;
-      const { error } = await supabase.from("companies").update(fields).eq("id", id);
+      const { error } = await supabase.from("companies").update(fields as never).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Empresa atualizada"); setEditing(null); qc.invalidateQueries({ queryKey: ["companies"] }); },
