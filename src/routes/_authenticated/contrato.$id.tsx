@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   getContractSignedUrl, signContractDocument, listContractSignatures,
 } from "@/lib/contracts.functions";
+import { generateAndUploadSignedContract } from "@/lib/contractPdf";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/contrato/$id")({
@@ -31,7 +32,7 @@ function ContractSignPage() {
     queryFn: async () =>
       (await supabase
         .from("contract_documents")
-        .select("id, contract_number, status, snapshot, file_hash, generated_at, companies:company_id(name)")
+        .select("id, company_id, contract_number, version, status, snapshot, file_hash, signed_storage_path, signed_file_hash, generated_at, signed_at, companies:company_id(name)")
         .eq("id", id!)
         .maybeSingle()).data,
     enabled: !!id,
@@ -55,6 +56,43 @@ function ContractSignPage() {
     mutationFn: async () => {
       if (!form.agree) throw new Error("Confirme o aceite dos termos.");
       if (!form.signer_name || !form.signer_email) throw new Error("Informe nome e e-mail.");
+      const d = doc.data as any;
+      if (!d) throw new Error("Contrato não carregado.");
+      const signedAtIso = new Date().toISOString();
+
+      // Hash de assinatura (mesmo cálculo do servidor) para carimbar no PDF
+      const enc = new TextEncoder().encode(`${d.file_hash}|${form.signer_email.toLowerCase()}|${signedAtIso}`);
+      const digest = await crypto.subtle.digest("SHA-256", enc);
+      const signature_hash = Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
+
+      const snap = d.snapshot ?? {};
+      const stampPayload = await generateAndUploadSignedContract(
+        {
+          company_id: d.company_id,
+          company_name: snap.company_name ?? d.companies?.name ?? "",
+          company_doc: snap.company_doc,
+          contract_number: d.contract_number,
+          plan_name: snap.plan ?? "",
+          modules: snap.modules ?? [],
+          monthly_brl: snap.monthly_brl ?? 0,
+          setup_brl: snap.setup_brl ?? 0,
+          cycle: snap.cycle ?? "mensal",
+          minimum_term_days: snap.minimum_term_days,
+          signer_name: form.signer_name,
+          signer_email: form.signer_email,
+          version: d.version ?? 1,
+        },
+        {
+          signer_name: form.signer_name,
+          signer_email: form.signer_email,
+          signer_doc: form.signer_doc || undefined,
+          signed_at: signedAtIso,
+          signature_hash,
+          original_file_hash: d.file_hash,
+          user_agent: typeof navigator !== "undefined" ? navigator.userAgent : undefined,
+        },
+      );
+
       return signFn({
         data: {
           contract_document_id: id!,
@@ -62,10 +100,14 @@ function ContractSignPage() {
           signer_email: form.signer_email,
           signer_doc: form.signer_doc || undefined,
           user_agent: typeof navigator !== "undefined" ? navigator.userAgent : undefined,
+          signed_storage_path: stampPayload.signed_storage_path,
+          signed_file_hash: stampPayload.signed_file_hash,
           evidence: {
             timezone: typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : undefined,
             language: typeof navigator !== "undefined" ? navigator.language : undefined,
             screen: typeof window !== "undefined" ? `${window.innerWidth}x${window.innerHeight}` : undefined,
+            client_signature_hash: signature_hash,
+            signed_at_client: signedAtIso,
           },
         },
       });
