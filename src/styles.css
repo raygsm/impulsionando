@@ -220,3 +220,17 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
+
+/* Density (B20) */
+html[data-density="compact"] main {
+  padding: 1rem !important;
+}
+html[data-density="compact"] .card,
+html[data-density="compact"] [data-slot="card"] {
+  padding: 0.75rem;
+}
+html[data-density="compact"] table th,
+html[data-density="compact"] table td {
+  padding-top: 0.375rem;
+  padding-bottom: 0.375rem;
+}
