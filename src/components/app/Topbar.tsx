@@ -136,7 +136,7 @@ export function Topbar({ currentUser }: { currentUser: CurrentUser }) {
             else if (e.key === "Enter") { e.preventDefault(); go(results[activeIdx].to); }
             else if (e.key === "Escape") { setOpen(false); }
           }}
-          placeholder="Buscar módulos, telas... (Ctrl/⌘K)"
+          placeholder="Buscar telas rápidas..."
           className="pl-9 bg-background"
         />
         {open && query && (
