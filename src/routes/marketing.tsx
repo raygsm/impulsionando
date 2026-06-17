@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
-import { ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
+import { ArrowRight, CheckCircle2, Sparkles, Cpu, Megaphone, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import {
   fetchImpulsionandoBrasilPages,
