@@ -68,13 +68,16 @@ function MesaPage() {
   const [party, setParty] = useState("2");
   const [submitting, setSubmitting] = useState(false);
 
-  async function refresh() {
-    const token = Route.useParams ? null : null; // not used
-  }
-
   useEffect(() => {
     // Poll a cada 15s para atualizar o total da comanda
     const id = setInterval(async () => {
+      const t = window.location.pathname.split("/").pop();
+      if (!t) return;
+      const { data: r } = await supabase.rpc("resolve_table_qr", { _token: t });
+      if (r && (r as any).ok) setData(r as Resolved);
+    }, 15000);
+    return () => clearInterval(id);
+  }, []);
       const t = window.location.pathname.split("/").pop();
       if (!t) return;
       const { data: r } = await supabase.rpc("resolve_table_qr", { _token: t });

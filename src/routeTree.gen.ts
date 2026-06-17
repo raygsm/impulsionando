@@ -87,6 +87,7 @@ import { Route as PlanosTesteRouteImport } from './routes/planos.teste'
 import { Route as PacienteIdRouteImport } from './routes/paciente.$id'
 import { Route as NichosSlugRouteImport } from './routes/nichos.$slug'
 import { Route as ModulosSlugRouteImport } from './routes/modulos.$slug'
+import { Route as MesaTokenRouteImport } from './routes/mesa.$token'
 import { Route as ImoveisSlugRouteImport } from './routes/imoveis.$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as DemoWhiteLabelRouteImport } from './routes/demo.white-label'
@@ -152,6 +153,7 @@ import { Route as DemoNichoSlugRouteImport } from './routes/demo.nicho.$slug'
 import { Route as AuthenticatedSalesOrdersRouteImport } from './routes/_authenticated/sales.orders'
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
 import { Route as AuthenticatedSalesCashRouteImport } from './routes/_authenticated/sales.cash'
+import { Route as AuthenticatedRestauranteMesasRouteImport } from './routes/_authenticated/restaurante.mesas'
 import { Route as AuthenticatedReportsSalesRouteImport } from './routes/_authenticated/reports.sales'
 import { Route as AuthenticatedReportsInventoryRouteImport } from './routes/_authenticated/reports.inventory'
 import { Route as AuthenticatedReportsFinanceRouteImport } from './routes/_authenticated/reports.finance'
@@ -674,6 +676,11 @@ const ModulosSlugRoute = ModulosSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => ModulosRoute,
 } as any)
+const MesaTokenRoute = MesaTokenRouteImport.update({
+  id: '/mesa/$token',
+  path: '/mesa/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ImoveisSlugRoute = ImoveisSlugRouteImport.update({
   id: '/imoveis/$slug',
   path: '/imoveis/$slug',
@@ -1010,6 +1017,12 @@ const AuthenticatedSalesCashRoute = AuthenticatedSalesCashRouteImport.update({
   path: '/cash',
   getParentRoute: () => AuthenticatedSalesRoute,
 } as any)
+const AuthenticatedRestauranteMesasRoute =
+  AuthenticatedRestauranteMesasRouteImport.update({
+    id: '/restaurante/mesas',
+    path: '/restaurante/mesas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedReportsSalesRoute =
   AuthenticatedReportsSalesRouteImport.update({
     id: '/sales',
@@ -1821,6 +1834,7 @@ export interface FileRoutesByFullPath {
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
+  '/mesa/$token': typeof MesaTokenRoute
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
@@ -1968,6 +1982,7 @@ export interface FileRoutesByFullPath {
   '/reports/finance': typeof AuthenticatedReportsFinanceRoute
   '/reports/inventory': typeof AuthenticatedReportsInventoryRoute
   '/reports/sales': typeof AuthenticatedReportsSalesRoute
+  '/restaurante/mesas': typeof AuthenticatedRestauranteMesasRoute
   '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
@@ -2081,6 +2096,7 @@ export interface FileRoutesByTo {
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
+  '/mesa/$token': typeof MesaTokenRoute
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
@@ -2228,6 +2244,7 @@ export interface FileRoutesByTo {
   '/reports/finance': typeof AuthenticatedReportsFinanceRoute
   '/reports/inventory': typeof AuthenticatedReportsInventoryRoute
   '/reports/sales': typeof AuthenticatedReportsSalesRoute
+  '/restaurante/mesas': typeof AuthenticatedRestauranteMesasRoute
   '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
@@ -2354,6 +2371,7 @@ export interface FileRoutesById {
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
+  '/mesa/$token': typeof MesaTokenRoute
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
@@ -2501,6 +2519,7 @@ export interface FileRoutesById {
   '/_authenticated/reports/finance': typeof AuthenticatedReportsFinanceRoute
   '/_authenticated/reports/inventory': typeof AuthenticatedReportsInventoryRoute
   '/_authenticated/reports/sales': typeof AuthenticatedReportsSalesRoute
+  '/_authenticated/restaurante/mesas': typeof AuthenticatedRestauranteMesasRoute
   '/_authenticated/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
   '/_authenticated/sales/orders': typeof AuthenticatedSalesOrdersRoute
@@ -2627,6 +2646,7 @@ export interface FileRouteTypes {
     | '/demo/white-label'
     | '/email/unsubscribe'
     | '/imoveis/$slug'
+    | '/mesa/$token'
     | '/modulos/$slug'
     | '/nichos/$slug'
     | '/paciente/$id'
@@ -2774,6 +2794,7 @@ export interface FileRouteTypes {
     | '/reports/finance'
     | '/reports/inventory'
     | '/reports/sales'
+    | '/restaurante/mesas'
     | '/sales/cash'
     | '/sales/new'
     | '/sales/orders'
@@ -2887,6 +2908,7 @@ export interface FileRouteTypes {
     | '/demo/white-label'
     | '/email/unsubscribe'
     | '/imoveis/$slug'
+    | '/mesa/$token'
     | '/modulos/$slug'
     | '/nichos/$slug'
     | '/paciente/$id'
@@ -3034,6 +3056,7 @@ export interface FileRouteTypes {
     | '/reports/finance'
     | '/reports/inventory'
     | '/reports/sales'
+    | '/restaurante/mesas'
     | '/sales/cash'
     | '/sales/new'
     | '/sales/orders'
@@ -3159,6 +3182,7 @@ export interface FileRouteTypes {
     | '/demo/white-label'
     | '/email/unsubscribe'
     | '/imoveis/$slug'
+    | '/mesa/$token'
     | '/modulos/$slug'
     | '/nichos/$slug'
     | '/paciente/$id'
@@ -3306,6 +3330,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reports/finance'
     | '/_authenticated/reports/inventory'
     | '/_authenticated/reports/sales'
+    | '/_authenticated/restaurante/mesas'
     | '/_authenticated/sales/cash'
     | '/_authenticated/sales/new'
     | '/_authenticated/sales/orders'
@@ -3404,6 +3429,7 @@ export interface RootRouteChildren {
   DemoWhiteLabelRoute: typeof DemoWhiteLabelRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ImoveisSlugRoute: typeof ImoveisSlugRouteWithChildren
+  MesaTokenRoute: typeof MesaTokenRoute
   NichosSlugRoute: typeof NichosSlugRoute
   RSlugRoute: typeof RSlugRoute
   ShowroomAcademiaRoute: typeof ShowroomAcademiaRoute
@@ -4027,6 +4053,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ModulosSlugRouteImport
       parentRoute: typeof ModulosRoute
     }
+    '/mesa/$token': {
+      id: '/mesa/$token'
+      path: '/mesa/$token'
+      fullPath: '/mesa/$token'
+      preLoaderRoute: typeof MesaTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/imoveis/$slug': {
       id: '/imoveis/$slug'
       path: '/imoveis/$slug'
@@ -4481,6 +4514,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/sales/cash'
       preLoaderRoute: typeof AuthenticatedSalesCashRouteImport
       parentRoute: typeof AuthenticatedSalesRoute
+    }
+    '/_authenticated/restaurante/mesas': {
+      id: '/_authenticated/restaurante/mesas'
+      path: '/restaurante/mesas'
+      fullPath: '/restaurante/mesas'
+      preLoaderRoute: typeof AuthenticatedRestauranteMesasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/reports/sales': {
       id: '/_authenticated/reports/sales'
@@ -5799,6 +5839,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedImobiliariaVitrineRoute: typeof AuthenticatedImobiliariaVitrineRoute
   AuthenticatedMarketingLeadsRoute: typeof AuthenticatedMarketingLeadsRoute
   AuthenticatedPerfilNotificacoesRoute: typeof AuthenticatedPerfilNotificacoesRoute
+  AuthenticatedRestauranteMesasRoute: typeof AuthenticatedRestauranteMesasRoute
   AuthenticatedComunidadeIndexRoute: typeof AuthenticatedComunidadeIndexRoute
   AuthenticatedEhrIndexRoute: typeof AuthenticatedEhrIndexRoute
   AuthenticatedEventosIndexRoute: typeof AuthenticatedEventosIndexRoute
@@ -5857,6 +5898,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedImobiliariaVitrineRoute: AuthenticatedImobiliariaVitrineRoute,
   AuthenticatedMarketingLeadsRoute: AuthenticatedMarketingLeadsRoute,
   AuthenticatedPerfilNotificacoesRoute: AuthenticatedPerfilNotificacoesRoute,
+  AuthenticatedRestauranteMesasRoute: AuthenticatedRestauranteMesasRoute,
   AuthenticatedComunidadeIndexRoute: AuthenticatedComunidadeIndexRoute,
   AuthenticatedEhrIndexRoute: AuthenticatedEhrIndexRoute,
   AuthenticatedEventosIndexRoute: AuthenticatedEventosIndexRoute,
@@ -5973,6 +6015,7 @@ const rootRouteChildren: RootRouteChildren = {
   DemoWhiteLabelRoute: DemoWhiteLabelRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ImoveisSlugRoute: ImoveisSlugRouteWithChildren,
+  MesaTokenRoute: MesaTokenRoute,
   NichosSlugRoute: NichosSlugRoute,
   RSlugRoute: RSlugRoute,
   ShowroomAcademiaRoute: ShowroomAcademiaRoute,
