@@ -284,6 +284,7 @@ import { Route as AuthenticatedCoreIntegracoesDiagnosticoRouteImport } from './r
 import { Route as AuthenticatedCoreClienteIdRouteImport } from './routes/_authenticated/core.cliente.$id'
 import { Route as AuthenticatedAdminModulosClonagemRouteImport } from './routes/_authenticated/admin.modulos.clonagem'
 import { Route as ApiPublicPaymentsInfinitepayWebhookRouteImport } from './routes/api/public/payments/infinitepay.webhook'
+import { Route as ApiPublicPaymentsCloseInvoiceReplayRouteImport } from './routes/api/public/payments/close-invoice.replay'
 import { Route as AuthenticatedImobiliariaAprovacoesIdImprimirRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes.$id.imprimir'
 import { Route as AuthenticatedCoreClienteIdPaginasRouteImport } from './routes/_authenticated/core.cliente.$id.paginas'
 import { Route as AuthenticatedCoreClienteIdPaginasPageIdRouteImport } from './routes/_authenticated/core.cliente.$id.paginas.$pageId'
@@ -1784,6 +1785,12 @@ const ApiPublicPaymentsInfinitepayWebhookRoute =
     path: '/api/public/payments/infinitepay/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicPaymentsCloseInvoiceReplayRoute =
+  ApiPublicPaymentsCloseInvoiceReplayRouteImport.update({
+    id: '/replay',
+    path: '/replay',
+    getParentRoute: () => ApiPublicPaymentsCloseInvoiceRoute,
+  } as any)
 const AuthenticatedImobiliariaAprovacoesIdImprimirRoute =
   AuthenticatedImobiliariaAprovacoesIdImprimirRouteImport.update({
     id: '/$id/imprimir',
@@ -2074,7 +2081,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
   '/api/public/outbox/process': typeof ApiPublicOutboxProcessRoute
-  '/api/public/payments/close-invoice': typeof ApiPublicPaymentsCloseInvoiceRoute
+  '/api/public/payments/close-invoice': typeof ApiPublicPaymentsCloseInvoiceRouteWithChildren
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
@@ -2085,6 +2092,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
   '/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
+  '/api/public/payments/close-invoice/replay': typeof ApiPublicPaymentsCloseInvoiceReplayRoute
   '/api/public/payments/infinitepay/webhook': typeof ApiPublicPaymentsInfinitepayWebhookRoute
   '/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
@@ -2343,7 +2351,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
   '/api/public/outbox/process': typeof ApiPublicOutboxProcessRoute
-  '/api/public/payments/close-invoice': typeof ApiPublicPaymentsCloseInvoiceRoute
+  '/api/public/payments/close-invoice': typeof ApiPublicPaymentsCloseInvoiceRouteWithChildren
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
@@ -2354,6 +2362,7 @@ export interface FileRoutesByTo {
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
   '/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
+  '/api/public/payments/close-invoice/replay': typeof ApiPublicPaymentsCloseInvoiceReplayRoute
   '/api/public/payments/infinitepay/webhook': typeof ApiPublicPaymentsInfinitepayWebhookRoute
   '/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
@@ -2625,7 +2634,7 @@ export interface FileRoutesById {
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
   '/api/public/outbox/process': typeof ApiPublicOutboxProcessRoute
-  '/api/public/payments/close-invoice': typeof ApiPublicPaymentsCloseInvoiceRoute
+  '/api/public/payments/close-invoice': typeof ApiPublicPaymentsCloseInvoiceRouteWithChildren
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
@@ -2636,6 +2645,7 @@ export interface FileRoutesById {
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/_authenticated/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
   '/_authenticated/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
+  '/api/public/payments/close-invoice/replay': typeof ApiPublicPaymentsCloseInvoiceReplayRoute
   '/api/public/payments/infinitepay/webhook': typeof ApiPublicPaymentsInfinitepayWebhookRoute
   '/_authenticated/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/_authenticated/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
@@ -2918,6 +2928,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/send'
     | '/core/cliente/$id/paginas'
     | '/imobiliaria/aprovacoes/$id/imprimir'
+    | '/api/public/payments/close-invoice/replay'
     | '/api/public/payments/infinitepay/webhook'
     | '/core/cliente/$id/paginas/$pageId'
     | '/core/cliente/$id/modulo/$slug/configurar'
@@ -3187,6 +3198,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/send'
     | '/core/cliente/$id/paginas'
     | '/imobiliaria/aprovacoes/$id/imprimir'
+    | '/api/public/payments/close-invoice/replay'
     | '/api/public/payments/infinitepay/webhook'
     | '/core/cliente/$id/paginas/$pageId'
     | '/core/cliente/$id/modulo/$slug/configurar'
@@ -3468,6 +3480,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/send'
     | '/_authenticated/core/cliente/$id/paginas'
     | '/_authenticated/imobiliaria/aprovacoes/$id/imprimir'
+    | '/api/public/payments/close-invoice/replay'
     | '/api/public/payments/infinitepay/webhook'
     | '/_authenticated/core/cliente/$id/paginas/$pageId'
     | '/_authenticated/core/cliente/$id/modulo/$slug/configurar'
@@ -3583,7 +3596,7 @@ export interface RootRouteChildren {
   ApiPublicHooksUptimeWhatsappTestRoute: typeof ApiPublicHooksUptimeWhatsappTestRoute
   ApiPublicHooksZapiStatusRoute: typeof ApiPublicHooksZapiStatusRoute
   ApiPublicOutboxProcessRoute: typeof ApiPublicOutboxProcessRoute
-  ApiPublicPaymentsCloseInvoiceRoute: typeof ApiPublicPaymentsCloseInvoiceRoute
+  ApiPublicPaymentsCloseInvoiceRoute: typeof ApiPublicPaymentsCloseInvoiceRouteWithChildren
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   ApiPublicRealestateInterestRoute: typeof ApiPublicRealestateInterestRoute
   ApiPublicRealestateSavedSearchRoute: typeof ApiPublicRealestateSavedSearchRoute
@@ -5522,6 +5535,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsInfinitepayWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/payments/close-invoice/replay': {
+      id: '/api/public/payments/close-invoice/replay'
+      path: '/replay'
+      fullPath: '/api/public/payments/close-invoice/replay'
+      preLoaderRoute: typeof ApiPublicPaymentsCloseInvoiceReplayRouteImport
+      parentRoute: typeof ApiPublicPaymentsCloseInvoiceRoute
+    }
     '/_authenticated/imobiliaria/aprovacoes/$id/imprimir': {
       id: '/_authenticated/imobiliaria/aprovacoes/$id/imprimir'
       path: '/$id/imprimir'
@@ -6130,6 +6150,21 @@ const ImoveisSlugRouteWithChildren = ImoveisSlugRoute._addFileChildren(
   ImoveisSlugRouteChildren,
 )
 
+interface ApiPublicPaymentsCloseInvoiceRouteChildren {
+  ApiPublicPaymentsCloseInvoiceReplayRoute: typeof ApiPublicPaymentsCloseInvoiceReplayRoute
+}
+
+const ApiPublicPaymentsCloseInvoiceRouteChildren: ApiPublicPaymentsCloseInvoiceRouteChildren =
+  {
+    ApiPublicPaymentsCloseInvoiceReplayRoute:
+      ApiPublicPaymentsCloseInvoiceReplayRoute,
+  }
+
+const ApiPublicPaymentsCloseInvoiceRouteWithChildren =
+  ApiPublicPaymentsCloseInvoiceRoute._addFileChildren(
+    ApiPublicPaymentsCloseInvoiceRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -6243,7 +6278,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksUptimeWhatsappTestRoute: ApiPublicHooksUptimeWhatsappTestRoute,
   ApiPublicHooksZapiStatusRoute: ApiPublicHooksZapiStatusRoute,
   ApiPublicOutboxProcessRoute: ApiPublicOutboxProcessRoute,
-  ApiPublicPaymentsCloseInvoiceRoute: ApiPublicPaymentsCloseInvoiceRoute,
+  ApiPublicPaymentsCloseInvoiceRoute:
+    ApiPublicPaymentsCloseInvoiceRouteWithChildren,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   ApiPublicRealestateInterestRoute: ApiPublicRealestateInterestRoute,
   ApiPublicRealestateSavedSearchRoute: ApiPublicRealestateSavedSearchRoute,

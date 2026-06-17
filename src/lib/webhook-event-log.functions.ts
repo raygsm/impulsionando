@@ -114,7 +114,7 @@ export const replayWebhookEvent = createServerFn({ method: "POST" })
     if (!rpc) throw new Error(`Kind desconhecido: ${kind}`);
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rpcRes, error: rpcErr } = await supabaseAdmin.rpc(rpc, {
+    const { data: rpcRes, error: rpcErr } = await (supabaseAdmin as any).rpc(rpc, {
       _invoice_id: row.target_id,
     });
     if (rpcErr) {

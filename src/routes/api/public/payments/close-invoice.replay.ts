@@ -81,7 +81,7 @@ export const Route = createFileRoute("/api/public/payments/close-invoice/replay"
           })
           .eq("id", body.id);
 
-        const { data: rpcRes, error: rpcErr } = await supabaseAdmin.rpc(rpc, {
+        const { data: rpcRes, error: rpcErr } = await (supabaseAdmin as any).rpc(rpc, {
           _invoice_id: row.target_id,
         });
         if (rpcErr) {
