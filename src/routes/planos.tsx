@@ -54,6 +54,8 @@ export const Route = createFileRoute("/planos")({
 
 type Plan = {
   name: string;
+  /** Nome comercial mostrado ao usuário (sobrescreve `name`). */
+  displayName?: string;
   tagline: string;
   monthly: number | null; // null = sob consulta
   modulesLabel: string;
@@ -88,35 +90,38 @@ function buildPlans(wage: number): Plan[] {
     },
     {
       name: "Integrado",
-      tagline: "Dois módulos que se potencializam, com automação entre eles.",
+      displayName: "Ideal",
+      tagline: "Plano recomendado — dois módulos que se potencializam, com automação entre eles.",
       monthly: wage,
-      modulesLabel: "2 módulos principais integrados + automação",
+      modulesLabel: "Até 6 módulos integrados + automação",
       features: [
-        "Pares curados de alta sinergia: CRM + Agenda, PDV + Estoque, Commerce + Delivery, Vitrine + CRM Imobiliário, EHR + Agenda Clínica",
+        "Até 6 módulos (pares curados de alta sinergia: CRM + Agenda, PDV + Estoque, Commerce + Delivery, Vitrine + CRM Imobiliário, EHR + Agenda Clínica)",
         "Financeiro completo (contas a pagar/receber, conciliação, comissões)",
         "Automações cruzadas entre módulos (gatilhos e fluxos)",
+        "Mais dashboards e mais integrações nativas",
         "Central de mensagens (WhatsApp + E-mail transacional)",
         "Até 5 usuários · 1 unidade · API e webhooks",
         "Suporte prioritário",
       ],
       highlight: true,
-      cta: "Começar Trial de 7 dias",
+      cta: "Contratar Ideal",
     },
     {
       name: "Avançado",
-      tagline: "Operação digital ponta a ponta, com BI e multi-unidades.",
-      monthly: wage * 2,
-      modulesLabel: "3 módulos principais + BI & Dashboards",
+      displayName: "Full",
+      tagline: "Operações avançadas, multiunidade, customizações, IA avançada e White Label parcial.",
+      monthly: null, // sob consulta
+      modulesLabel: "Módulos ilimitados + BI consolidado + IA avançada",
       features: [
-        "3 módulos principais à escolha (ex.: ERP + CRM + Agenda, ou Commerce + PDV + Estoque)",
-        "BI & Dashboards consolidados com indicadores por unidade",
-        "Multi-unidades (até 3) e gestão por setores",
-        "Automação avançada multi-módulo + jornadas de CRM",
+        "Módulos ilimitados conforme o desenho da operação",
+        "Multi-unidade sem limite prático + gestão por setores",
+        "Customizações sob medida e integrações dedicadas",
+        "IA avançada (atendimento, recomendação, copilots internos)",
+        "White Label parcial (sua marca em áreas selecionadas)",
         "Governança LGPD, exportações e logs de auditoria expandidos",
-        "Até 10 usuários · API, webhooks e ambiente de homologação",
         "Suporte prioritário com acompanhamento técnico dedicado",
       ],
-      cta: "Começar Trial de 7 dias",
+      cta: "Solicitar Proposta",
     },
   ];
 }
