@@ -127,6 +127,7 @@ import { Route as AuthenticatedCrmRouteImport } from './routes/_authenticated/cr
 import { Route as AuthenticatedCoreRouteImport } from './routes/_authenticated/core'
 import { Route as AuthenticatedCompaniesRouteImport } from './routes/_authenticated/companies'
 import { Route as AuthenticatedBiRouteImport } from './routes/_authenticated/bi'
+import { Route as AuthenticatedAutomacoesRouteImport } from './routes/_authenticated/automacoes'
 import { Route as AuthenticatedAuditRouteImport } from './routes/_authenticated/audit'
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
 import { Route as AuthenticatedAffiliatesRouteImport } from './routes/_authenticated/affiliates'
@@ -204,9 +205,11 @@ import { Route as AuthenticatedCoreDemoInsightsRouteImport } from './routes/_aut
 import { Route as AuthenticatedCoreDashboardsRouteImport } from './routes/_authenticated/core.dashboards'
 import { Route as AuthenticatedCoreDashboardMacroRouteImport } from './routes/_authenticated/core.dashboard-macro'
 import { Route as AuthenticatedCoreCriarProjetoRouteImport } from './routes/_authenticated/core.criar-projeto'
+import { Route as AuthenticatedCoreContratosRouteImport } from './routes/_authenticated/core.contratos'
 import { Route as AuthenticatedCoreConfiguracoesRouteImport } from './routes/_authenticated/core.configuracoes'
 import { Route as AuthenticatedCoreClientesRouteImport } from './routes/_authenticated/core.clientes'
 import { Route as AuthenticatedCoreBriefingsRouteImport } from './routes/_authenticated/core.briefings'
+import { Route as AuthenticatedContratoIdRouteImport } from './routes/_authenticated/contrato.$id'
 import { Route as AuthenticatedComunidadeIdRouteImport } from './routes/_authenticated/comunidade.$id'
 import { Route as AuthenticatedBiNichesRouteImport } from './routes/_authenticated/bi.niches'
 import { Route as AuthenticatedBiMasterRouteImport } from './routes/_authenticated/bi.master'
@@ -867,6 +870,11 @@ const AuthenticatedBiRoute = AuthenticatedBiRouteImport.update({
   path: '/bi',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAutomacoesRoute = AuthenticatedAutomacoesRouteImport.update({
+  id: '/automacoes',
+  path: '/automacoes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAuditRoute = AuthenticatedAuditRouteImport.update({
   id: '/audit',
   path: '/audit',
@@ -1304,6 +1312,12 @@ const AuthenticatedCoreCriarProjetoRoute =
     path: '/criar-projeto',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreContratosRoute =
+  AuthenticatedCoreContratosRouteImport.update({
+    id: '/contratos',
+    path: '/contratos',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreConfiguracoesRoute =
   AuthenticatedCoreConfiguracoesRouteImport.update({
     id: '/configuracoes',
@@ -1322,6 +1336,11 @@ const AuthenticatedCoreBriefingsRoute =
     path: '/briefings',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedContratoIdRoute = AuthenticatedContratoIdRouteImport.update({
+  id: '/contrato/$id',
+  path: '/contrato/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedComunidadeIdRoute =
   AuthenticatedComunidadeIdRouteImport.update({
     id: '/comunidade/$id',
@@ -1721,6 +1740,7 @@ export interface FileRoutesByFullPath {
   '/affiliates': typeof AuthenticatedAffiliatesRouteWithChildren
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/audit': typeof AuthenticatedAuditRoute
+  '/automacoes': typeof AuthenticatedAutomacoesRoute
   '/bi': typeof AuthenticatedBiRouteWithChildren
   '/companies': typeof AuthenticatedCompaniesRoute
   '/core': typeof AuthenticatedCoreRouteWithChildren
@@ -1846,9 +1866,11 @@ export interface FileRoutesByFullPath {
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
   '/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
+  '/contrato/$id': typeof AuthenticatedContratoIdRoute
   '/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/core/configuracoes': typeof AuthenticatedCoreConfiguracoesRoute
+  '/core/contratos': typeof AuthenticatedCoreContratosRoute
   '/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
   '/core/dashboard-macro': typeof AuthenticatedCoreDashboardMacroRoute
   '/core/dashboards': typeof AuthenticatedCoreDashboardsRoute
@@ -1979,6 +2001,7 @@ export interface FileRoutesByTo {
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/adm': typeof AuthenticatedAdmRouteWithChildren
   '/audit': typeof AuthenticatedAuditRoute
+  '/automacoes': typeof AuthenticatedAutomacoesRoute
   '/companies': typeof AuthenticatedCompaniesRoute
   '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -2097,9 +2120,11 @@ export interface FileRoutesByTo {
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
   '/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
+  '/contrato/$id': typeof AuthenticatedContratoIdRoute
   '/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/core/configuracoes': typeof AuthenticatedCoreConfiguracoesRoute
+  '/core/contratos': typeof AuthenticatedCoreContratosRoute
   '/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
   '/core/dashboard-macro': typeof AuthenticatedCoreDashboardMacroRoute
   '/core/dashboards': typeof AuthenticatedCoreDashboardsRoute
@@ -2236,6 +2261,7 @@ export interface FileRoutesById {
   '/_authenticated/affiliates': typeof AuthenticatedAffiliatesRouteWithChildren
   '/_authenticated/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/_authenticated/audit': typeof AuthenticatedAuditRoute
+  '/_authenticated/automacoes': typeof AuthenticatedAutomacoesRoute
   '/_authenticated/bi': typeof AuthenticatedBiRouteWithChildren
   '/_authenticated/companies': typeof AuthenticatedCompaniesRoute
   '/_authenticated/core': typeof AuthenticatedCoreRouteWithChildren
@@ -2361,9 +2387,11 @@ export interface FileRoutesById {
   '/_authenticated/bi/master': typeof AuthenticatedBiMasterRoute
   '/_authenticated/bi/niches': typeof AuthenticatedBiNichesRoute
   '/_authenticated/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
+  '/_authenticated/contrato/$id': typeof AuthenticatedContratoIdRoute
   '/_authenticated/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/_authenticated/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/_authenticated/core/configuracoes': typeof AuthenticatedCoreConfiguracoesRoute
+  '/_authenticated/core/contratos': typeof AuthenticatedCoreContratosRoute
   '/_authenticated/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
   '/_authenticated/core/dashboard-macro': typeof AuthenticatedCoreDashboardMacroRoute
   '/_authenticated/core/dashboards': typeof AuthenticatedCoreDashboardsRoute
@@ -2500,6 +2528,7 @@ export interface FileRouteTypes {
     | '/affiliates'
     | '/agenda'
     | '/audit'
+    | '/automacoes'
     | '/bi'
     | '/companies'
     | '/core'
@@ -2625,9 +2654,11 @@ export interface FileRouteTypes {
     | '/bi/master'
     | '/bi/niches'
     | '/comunidade/$id'
+    | '/contrato/$id'
     | '/core/briefings'
     | '/core/clientes'
     | '/core/configuracoes'
+    | '/core/contratos'
     | '/core/criar-projeto'
     | '/core/dashboard-macro'
     | '/core/dashboards'
@@ -2758,6 +2789,7 @@ export interface FileRouteTypes {
     | '/access-profiles'
     | '/adm'
     | '/audit'
+    | '/automacoes'
     | '/companies'
     | '/customers'
     | '/dashboard'
@@ -2876,9 +2908,11 @@ export interface FileRouteTypes {
     | '/bi/master'
     | '/bi/niches'
     | '/comunidade/$id'
+    | '/contrato/$id'
     | '/core/briefings'
     | '/core/clientes'
     | '/core/configuracoes'
+    | '/core/contratos'
     | '/core/criar-projeto'
     | '/core/dashboard-macro'
     | '/core/dashboards'
@@ -3014,6 +3048,7 @@ export interface FileRouteTypes {
     | '/_authenticated/affiliates'
     | '/_authenticated/agenda'
     | '/_authenticated/audit'
+    | '/_authenticated/automacoes'
     | '/_authenticated/bi'
     | '/_authenticated/companies'
     | '/_authenticated/core'
@@ -3139,9 +3174,11 @@ export interface FileRouteTypes {
     | '/_authenticated/bi/master'
     | '/_authenticated/bi/niches'
     | '/_authenticated/comunidade/$id'
+    | '/_authenticated/contrato/$id'
     | '/_authenticated/core/briefings'
     | '/_authenticated/core/clientes'
     | '/_authenticated/core/configuracoes'
+    | '/_authenticated/core/contratos'
     | '/_authenticated/core/criar-projeto'
     | '/_authenticated/core/dashboard-macro'
     | '/_authenticated/core/dashboards'
@@ -4193,6 +4230,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBiRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/automacoes': {
+      id: '/_authenticated/automacoes'
+      path: '/automacoes'
+      fullPath: '/automacoes'
+      preLoaderRoute: typeof AuthenticatedAutomacoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/audit': {
       id: '/_authenticated/audit'
       path: '/audit'
@@ -4732,6 +4776,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreCriarProjetoRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/contratos': {
+      id: '/_authenticated/core/contratos'
+      path: '/contratos'
+      fullPath: '/core/contratos'
+      preLoaderRoute: typeof AuthenticatedCoreContratosRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/configuracoes': {
       id: '/_authenticated/core/configuracoes'
       path: '/configuracoes'
@@ -4752,6 +4803,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/core/briefings'
       preLoaderRoute: typeof AuthenticatedCoreBriefingsRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/contrato/$id': {
+      id: '/_authenticated/contrato/$id'
+      path: '/contrato/$id'
+      fullPath: '/contrato/$id'
+      preLoaderRoute: typeof AuthenticatedContratoIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/comunidade/$id': {
       id: '/_authenticated/comunidade/$id'
@@ -5348,6 +5406,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreBriefingsRoute: typeof AuthenticatedCoreBriefingsRoute
   AuthenticatedCoreClientesRoute: typeof AuthenticatedCoreClientesRoute
   AuthenticatedCoreConfiguracoesRoute: typeof AuthenticatedCoreConfiguracoesRoute
+  AuthenticatedCoreContratosRoute: typeof AuthenticatedCoreContratosRoute
   AuthenticatedCoreCriarProjetoRoute: typeof AuthenticatedCoreCriarProjetoRoute
   AuthenticatedCoreDashboardMacroRoute: typeof AuthenticatedCoreDashboardMacroRoute
   AuthenticatedCoreDashboardsRoute: typeof AuthenticatedCoreDashboardsRoute
@@ -5381,6 +5440,7 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreBriefingsRoute: AuthenticatedCoreBriefingsRoute,
   AuthenticatedCoreClientesRoute: AuthenticatedCoreClientesRoute,
   AuthenticatedCoreConfiguracoesRoute: AuthenticatedCoreConfiguracoesRoute,
+  AuthenticatedCoreContratosRoute: AuthenticatedCoreContratosRoute,
   AuthenticatedCoreCriarProjetoRoute: AuthenticatedCoreCriarProjetoRoute,
   AuthenticatedCoreDashboardMacroRoute: AuthenticatedCoreDashboardMacroRoute,
   AuthenticatedCoreDashboardsRoute: AuthenticatedCoreDashboardsRoute,
@@ -5569,6 +5629,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAffiliatesRoute: typeof AuthenticatedAffiliatesRouteWithChildren
   AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRouteWithChildren
   AuthenticatedAuditRoute: typeof AuthenticatedAuditRoute
+  AuthenticatedAutomacoesRoute: typeof AuthenticatedAutomacoesRoute
   AuthenticatedBiRoute: typeof AuthenticatedBiRouteWithChildren
   AuthenticatedCompaniesRoute: typeof AuthenticatedCompaniesRoute
   AuthenticatedCoreRoute: typeof AuthenticatedCoreRouteWithChildren
@@ -5596,6 +5657,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminTrialsRoute: typeof AuthenticatedAdminTrialsRoute
   AuthenticatedAdminUptimeRoute: typeof AuthenticatedAdminUptimeRoute
   AuthenticatedComunidadeIdRoute: typeof AuthenticatedComunidadeIdRoute
+  AuthenticatedContratoIdRoute: typeof AuthenticatedContratoIdRoute
   AuthenticatedEhrIdRoute: typeof AuthenticatedEhrIdRoute
   AuthenticatedEventosIdRoute: typeof AuthenticatedEventosIdRoute
   AuthenticatedImobiliariaAprovacoesRoute: typeof AuthenticatedImobiliariaAprovacoesRouteWithChildren
@@ -5620,6 +5682,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAffiliatesRoute: AuthenticatedAffiliatesRouteWithChildren,
   AuthenticatedAgendaRoute: AuthenticatedAgendaRouteWithChildren,
   AuthenticatedAuditRoute: AuthenticatedAuditRoute,
+  AuthenticatedAutomacoesRoute: AuthenticatedAutomacoesRoute,
   AuthenticatedBiRoute: AuthenticatedBiRouteWithChildren,
   AuthenticatedCompaniesRoute: AuthenticatedCompaniesRoute,
   AuthenticatedCoreRoute: AuthenticatedCoreRouteWithChildren,
@@ -5648,6 +5711,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminTrialsRoute: AuthenticatedAdminTrialsRoute,
   AuthenticatedAdminUptimeRoute: AuthenticatedAdminUptimeRoute,
   AuthenticatedComunidadeIdRoute: AuthenticatedComunidadeIdRoute,
+  AuthenticatedContratoIdRoute: AuthenticatedContratoIdRoute,
   AuthenticatedEhrIdRoute: AuthenticatedEhrIdRoute,
   AuthenticatedEventosIdRoute: AuthenticatedEventosIdRoute,
   AuthenticatedImobiliariaAprovacoesRoute:
