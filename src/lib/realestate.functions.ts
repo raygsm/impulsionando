@@ -445,7 +445,7 @@ export const exportPropertyApprovalCsv = createServerFn({ method: "GET" })
 
     const { data: rows, error: e2 } = await context.supabase
       .from("realestate_property_reviews")
-      .select("id, action, actor_id, notes, created_at")
+      .select("id, action, actor_id, notes, previous_status, new_status, metadata, created_at")
       .eq("property_id", data.propertyId)
       .order("created_at", { ascending: true });
     if (e2) throw new Error(e2.message);
@@ -466,13 +466,16 @@ export const exportPropertyApprovalCsv = createServerFn({ method: "GET" })
       const s = v == null ? "" : String(v);
       return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
-    const header = ["Data/Hora", "Ação", "Responsável", "Observações"].join(",");
+    const header = ["Data/Hora", "Ação", "De", "Para", "Responsável", "Observações", "Metadata"].join(",");
     const lines = (rows ?? []).map((r: any) =>
       [
         new Date(r.created_at).toLocaleString("pt-BR"),
         r.action,
+        r.previous_status ?? "",
+        r.new_status ?? "",
         actors[r.actor_id] ?? r.actor_id ?? "—",
         r.notes ?? "",
+        r.metadata ? JSON.stringify(r.metadata) : "",
       ].map(escape).join(","),
     );
     const meta = [
