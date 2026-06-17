@@ -103,18 +103,9 @@ export function Topbar({ currentUser }: { currentUser: CurrentUser }) {
     function onClick(e: MouseEvent) {
       if (!containerRef.current?.contains(e.target as Node)) setOpen(false);
     }
-    function onKey(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        containerRef.current?.querySelector("input")?.focus();
-        setOpen(true);
-      }
-    }
     document.addEventListener("mousedown", onClick);
-    document.addEventListener("keydown", onKey);
     return () => {
       document.removeEventListener("mousedown", onClick);
-      document.removeEventListener("keydown", onKey);
     };
   }, []);
 
@@ -145,7 +136,7 @@ export function Topbar({ currentUser }: { currentUser: CurrentUser }) {
             else if (e.key === "Enter") { e.preventDefault(); go(results[activeIdx].to); }
             else if (e.key === "Escape") { setOpen(false); }
           }}
-          placeholder="Buscar módulos, telas... (Ctrl/⌘K)"
+          placeholder="Buscar telas rápidas..."
           className="pl-9 bg-background"
         />
         {open && query && (
