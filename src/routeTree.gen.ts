@@ -168,6 +168,7 @@ import { Route as AuthenticatedReportsInventoryRouteImport } from './routes/_aut
 import { Route as AuthenticatedReportsFinanceRouteImport } from './routes/_authenticated/reports.finance'
 import { Route as AuthenticatedReportsCrmRouteImport } from './routes/_authenticated/reports.crm'
 import { Route as AuthenticatedReportsAgendaRouteImport } from './routes/_authenticated/reports.agenda'
+import { Route as AuthenticatedPrivacyCockpitRouteImport } from './routes/_authenticated/privacy.cockpit'
 import { Route as AuthenticatedPerfilNotificacoesRouteImport } from './routes/_authenticated/perfil.notificacoes'
 import { Route as AuthenticatedOperationsCockpitRouteImport } from './routes/_authenticated/operations.cockpit'
 import { Route as AuthenticatedOnboardingNichoRouteImport } from './routes/_authenticated/onboarding.nicho'
@@ -1124,6 +1125,12 @@ const AuthenticatedReportsAgendaRoute =
     path: '/agenda',
     getParentRoute: () => AuthenticatedReportsRoute,
   } as any)
+const AuthenticatedPrivacyCockpitRoute =
+  AuthenticatedPrivacyCockpitRouteImport.update({
+    id: '/cockpit',
+    path: '/cockpit',
+    getParentRoute: () => AuthenticatedPrivacyRoute,
+  } as any)
 const AuthenticatedPerfilNotificacoesRoute =
   AuthenticatedPerfilNotificacoesRouteImport.update({
     id: '/perfil/notificacoes',
@@ -1958,7 +1965,7 @@ export interface FileRoutesByFullPath {
   '/niches': typeof AuthenticatedNichesRoute
   '/onboarding': typeof AuthenticatedOnboardingRouteWithChildren
   '/permissions': typeof AuthenticatedPermissionsRoute
-  '/privacy': typeof AuthenticatedPrivacyRoute
+  '/privacy': typeof AuthenticatedPrivacyRouteWithChildren
   '/reports': typeof AuthenticatedReportsRouteWithChildren
   '/sales': typeof AuthenticatedSalesRouteWithChildren
   '/sectors': typeof AuthenticatedSectorsRoute
@@ -2142,6 +2149,7 @@ export interface FileRoutesByFullPath {
   '/onboarding/nicho': typeof AuthenticatedOnboardingNichoRoute
   '/operations/cockpit': typeof AuthenticatedOperationsCockpitRoute
   '/perfil/notificacoes': typeof AuthenticatedPerfilNotificacoesRoute
+  '/privacy/cockpit': typeof AuthenticatedPrivacyCockpitRoute
   '/reports/agenda': typeof AuthenticatedReportsAgendaRoute
   '/reports/crm': typeof AuthenticatedReportsCrmRoute
   '/reports/finance': typeof AuthenticatedReportsFinanceRoute
@@ -2244,7 +2252,7 @@ export interface FileRoutesByTo {
   '/niches': typeof AuthenticatedNichesRoute
   '/onboarding': typeof AuthenticatedOnboardingRouteWithChildren
   '/permissions': typeof AuthenticatedPermissionsRoute
-  '/privacy': typeof AuthenticatedPrivacyRoute
+  '/privacy': typeof AuthenticatedPrivacyRouteWithChildren
   '/sectors': typeof AuthenticatedSectorsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/talents': typeof AuthenticatedTalentsRoute
@@ -2426,6 +2434,7 @@ export interface FileRoutesByTo {
   '/onboarding/nicho': typeof AuthenticatedOnboardingNichoRoute
   '/operations/cockpit': typeof AuthenticatedOperationsCockpitRoute
   '/perfil/notificacoes': typeof AuthenticatedPerfilNotificacoesRoute
+  '/privacy/cockpit': typeof AuthenticatedPrivacyCockpitRoute
   '/reports/agenda': typeof AuthenticatedReportsAgendaRoute
   '/reports/crm': typeof AuthenticatedReportsCrmRoute
   '/reports/finance': typeof AuthenticatedReportsFinanceRoute
@@ -2539,7 +2548,7 @@ export interface FileRoutesById {
   '/_authenticated/niches': typeof AuthenticatedNichesRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRouteWithChildren
   '/_authenticated/permissions': typeof AuthenticatedPermissionsRoute
-  '/_authenticated/privacy': typeof AuthenticatedPrivacyRoute
+  '/_authenticated/privacy': typeof AuthenticatedPrivacyRouteWithChildren
   '/_authenticated/reports': typeof AuthenticatedReportsRouteWithChildren
   '/_authenticated/sales': typeof AuthenticatedSalesRouteWithChildren
   '/_authenticated/sectors': typeof AuthenticatedSectorsRoute
@@ -2723,6 +2732,7 @@ export interface FileRoutesById {
   '/_authenticated/onboarding/nicho': typeof AuthenticatedOnboardingNichoRoute
   '/_authenticated/operations/cockpit': typeof AuthenticatedOperationsCockpitRoute
   '/_authenticated/perfil/notificacoes': typeof AuthenticatedPerfilNotificacoesRoute
+  '/_authenticated/privacy/cockpit': typeof AuthenticatedPrivacyCockpitRoute
   '/_authenticated/reports/agenda': typeof AuthenticatedReportsAgendaRoute
   '/_authenticated/reports/crm': typeof AuthenticatedReportsCrmRoute
   '/_authenticated/reports/finance': typeof AuthenticatedReportsFinanceRoute
@@ -3020,6 +3030,7 @@ export interface FileRouteTypes {
     | '/onboarding/nicho'
     | '/operations/cockpit'
     | '/perfil/notificacoes'
+    | '/privacy/cockpit'
     | '/reports/agenda'
     | '/reports/crm'
     | '/reports/finance'
@@ -3304,6 +3315,7 @@ export interface FileRouteTypes {
     | '/onboarding/nicho'
     | '/operations/cockpit'
     | '/perfil/notificacoes'
+    | '/privacy/cockpit'
     | '/reports/agenda'
     | '/reports/crm'
     | '/reports/finance'
@@ -3600,6 +3612,7 @@ export interface FileRouteTypes {
     | '/_authenticated/onboarding/nicho'
     | '/_authenticated/operations/cockpit'
     | '/_authenticated/perfil/notificacoes'
+    | '/_authenticated/privacy/cockpit'
     | '/_authenticated/reports/agenda'
     | '/_authenticated/reports/crm'
     | '/_authenticated/reports/finance'
@@ -4905,6 +4918,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReportsAgendaRouteImport
       parentRoute: typeof AuthenticatedReportsRoute
     }
+    '/_authenticated/privacy/cockpit': {
+      id: '/_authenticated/privacy/cockpit'
+      path: '/cockpit'
+      fullPath: '/privacy/cockpit'
+      preLoaderRoute: typeof AuthenticatedPrivacyCockpitRouteImport
+      parentRoute: typeof AuthenticatedPrivacyRoute
+    }
     '/_authenticated/perfil/notificacoes': {
       id: '/_authenticated/perfil/notificacoes'
       path: '/perfil/notificacoes'
@@ -6185,6 +6205,17 @@ const AuthenticatedOnboardingRouteWithChildren =
     AuthenticatedOnboardingRouteChildren,
   )
 
+interface AuthenticatedPrivacyRouteChildren {
+  AuthenticatedPrivacyCockpitRoute: typeof AuthenticatedPrivacyCockpitRoute
+}
+
+const AuthenticatedPrivacyRouteChildren: AuthenticatedPrivacyRouteChildren = {
+  AuthenticatedPrivacyCockpitRoute: AuthenticatedPrivacyCockpitRoute,
+}
+
+const AuthenticatedPrivacyRouteWithChildren =
+  AuthenticatedPrivacyRoute._addFileChildren(AuthenticatedPrivacyRouteChildren)
+
 interface AuthenticatedReportsRouteChildren {
   AuthenticatedReportsAgendaRoute: typeof AuthenticatedReportsAgendaRoute
   AuthenticatedReportsCrmRoute: typeof AuthenticatedReportsCrmRoute
@@ -6287,7 +6318,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedNichesRoute: typeof AuthenticatedNichesRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRouteWithChildren
   AuthenticatedPermissionsRoute: typeof AuthenticatedPermissionsRoute
-  AuthenticatedPrivacyRoute: typeof AuthenticatedPrivacyRoute
+  AuthenticatedPrivacyRoute: typeof AuthenticatedPrivacyRouteWithChildren
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRouteWithChildren
   AuthenticatedSalesRoute: typeof AuthenticatedSalesRouteWithChildren
   AuthenticatedSectorsRoute: typeof AuthenticatedSectorsRoute
@@ -6353,7 +6384,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedNichesRoute: AuthenticatedNichesRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRouteWithChildren,
   AuthenticatedPermissionsRoute: AuthenticatedPermissionsRoute,
-  AuthenticatedPrivacyRoute: AuthenticatedPrivacyRoute,
+  AuthenticatedPrivacyRoute: AuthenticatedPrivacyRouteWithChildren,
   AuthenticatedReportsRoute: AuthenticatedReportsRouteWithChildren,
   AuthenticatedSalesRoute: AuthenticatedSalesRouteWithChildren,
   AuthenticatedSectorsRoute: AuthenticatedSectorsRoute,
