@@ -4,6 +4,8 @@ import {
   CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator,
 } from "@/components/ui/command";
 import { TOP_ITEMS, NAV_GROUPS, type NavItem } from "./nav-config";
+import { useFavorites } from "@/hooks/use-favorites";
+import { Star } from "lucide-react";
 
 type Entry = NavItem & { group: string };
 
