@@ -103,8 +103,8 @@ function FavoritesPanel() {
       ) : (
         <ul className="space-y-1.5">
           {favorites.slice(0, 8).map((f) => (
-            <li key={f.path}>
-              <Link to={f.path} className="text-sm hover:underline">{f.label}</Link>
+            <li key={f.to}>
+              <Link to={f.to as never} className="text-sm hover:underline">{f.label}</Link>
             </li>
           ))}
         </ul>
@@ -126,8 +126,8 @@ function RecentsPanel() {
       ) : (
         <ul className="space-y-1.5">
           {recent.slice(0, 8).map((r) => (
-            <li key={r.path}>
-              <Link to={r.path} className="text-sm hover:underline">{r.label}</Link>
+            <li key={r.to}>
+              <Link to={r.to as never} className="text-sm hover:underline">{r.label}</Link>
             </li>
           ))}
         </ul>
