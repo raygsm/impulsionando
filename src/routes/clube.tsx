@@ -23,6 +23,10 @@ export const Route = createFileRoute("/clube")({
     ],
     links: [{ rel: "canonical", href: "https://impulsionando.com.br/clube" }],
   }),
-  // Reaproveita o componente da rota /consumidor para não duplicar UI.
-  component: ConsumidorRoute.options.component!,
+  component: ClubeRoute,
 });
+
+function ClubeRoute() {
+  const Comp = ConsumidorRoute.options.component as React.ComponentType;
+  return <Comp />;
+}
