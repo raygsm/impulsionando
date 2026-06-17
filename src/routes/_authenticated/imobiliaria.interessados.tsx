@@ -140,6 +140,7 @@ function Page() {
                       {STATUS.filter((s) => s.value !== 'todos').map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
+                  <ResendEmailButton companyId={companyId!} contactEmail={r.contact_email} />
                 </div>
               </div>
             </Card>
@@ -155,5 +156,68 @@ function Page() {
         </div>
       )}
     </div>
+  )
+}
+
+function ResendEmailButton({ companyId, contactEmail }: { companyId: string; contactEmail?: string | null }) {
+  const [open, setOpen] = useState(false)
+  const fetchLogs = useServerFn(listVitrineEmailLog)
+  const fetchResend = useServerFn(resendVitrineEmail)
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ['vitrine-email-log', companyId, contactEmail, open],
+    enabled: open,
+    queryFn: () => fetchLogs({ data: { companyId, templatePrefix: 'realestate-vitrine-interest', limit: 20 } }),
+  })
+  const [busy, setBusy] = useState<string | null>(null)
+  async function resend(id: string) {
+    setBusy(id)
+    try {
+      const r = await fetchResend({ data: { companyId, emailLogId: id } })
+      if (r.status === 'queued') toast.success(`E-mail reenviado para ${r.recipient}`)
+      else if (r.status === 'suppressed') toast.warning(`Destinatário ${r.recipient} suprimido — registrado, não enviado.`)
+      else toast.error(`Falha: ${(r as any).error}`)
+      refetch()
+    } catch (e: any) { toast.error(e?.message ?? 'Erro ao reenviar') }
+    finally { setBusy(null) }
+  }
+  const filtered = contactEmail
+    ? (data?.rows ?? []).filter((r: any) => r.recipient_email === contactEmail)
+    : (data?.rows ?? [])
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm"><Send className="h-3 w-3 mr-1" />Reenviar e-mail</Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Histórico de e-mails da vitrine</DialogTitle>
+          <DialogDescription>Status, supressão e reenvio — tudo é registrado em <code>email_send_log</code>.</DialogDescription>
+        </DialogHeader>
+        {isLoading ? (
+          <div className="py-6 text-center text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin inline mr-2" />Carregando…</div>
+        ) : filtered.length === 0 ? (
+          <div className="py-6 text-center text-muted-foreground text-sm">Nenhum e-mail registrado para este interessado.</div>
+        ) : (
+          <div className="space-y-2 max-h-96 overflow-auto">
+            {filtered.map((row: any) => (
+              <div key={row.id} className="flex items-center justify-between border rounded p-2 text-sm">
+                <div className="min-w-0 flex-1">
+                  <div className="font-medium truncate">{row.template_name}</div>
+                  <div className="text-xs text-muted-foreground truncate">
+                    {row.recipient_email} · {new Date(row.created_at).toLocaleString('pt-BR')}
+                  </div>
+                  {row.error_message ? <div className="text-xs text-destructive truncate">{row.error_message}</div> : null}
+                </div>
+                <Badge variant="outline" className="mx-2">{row.status}</Badge>
+                <Button size="sm" variant="outline" disabled={busy === row.id} onClick={() => resend(row.id)}>
+                  {busy === row.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Reenviar'}
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   )
 }
