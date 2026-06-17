@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import {
   listContractDocuments, createContractDocument, getContractSignedUrl, listContractSignatures,
+  prepareContractReissue,
 } from "@/lib/contracts.functions";
 import { generateAndUploadContract } from "@/lib/contractPdf";
 import { downloadCsv, downloadTablePdf } from "@/lib/exports";
@@ -36,7 +37,7 @@ export const Route = createFileRoute("/_authenticated/core/contratos")({
 });
 
 const STATUS_LABEL: Record<string, string> = {
-  draft: "Rascunho", sent: "Enviado", signed: "Assinado", cancelled: "Cancelado", archived: "Arquivado",
+  draft: "Rascunho", sent: "Enviado", signed: "Assinado", cancelled: "Cancelado", archived: "Arquivado", superseded: "Substituído",
 };
 const STATUS_COLOR: Record<string, string> = {
   draft: "bg-slate-100 text-slate-700",
@@ -44,6 +45,7 @@ const STATUS_COLOR: Record<string, string> = {
   signed: "bg-emerald-100 text-emerald-700",
   cancelled: "bg-red-100 text-red-700",
   archived: "bg-zinc-100 text-zinc-700",
+  superseded: "bg-amber-100 text-amber-700",
 };
 
 function ContractsPage() {
@@ -54,6 +56,7 @@ function ContractsPage() {
   const createFn = useServerFn(createContractDocument);
   const urlFn = useServerFn(getContractSignedUrl);
   const sigsFn = useServerFn(listContractSignatures);
+  const reissueFn = useServerFn(prepareContractReissue);
 
   const list = useQuery({ queryKey: ["contracts"], queryFn: () => listFn() });
   const rows = list.data ?? [];
@@ -114,6 +117,8 @@ function ContractsPage() {
           file_hash: meta.file_hash,
           file_size_bytes: meta.file_size_bytes,
           snapshot: meta.snapshot,
+          notify_email: form.signer_email || null,
+          signer_name: form.signer_name || null,
         },
       });
     },
