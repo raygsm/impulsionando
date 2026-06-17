@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
-  CreditCard, CheckCircle2, AlertTriangle, XCircle, ExternalLink, Loader2,
+  CreditCard, CheckCircle2, AlertTriangle, XCircle, ExternalLink, Loader2, QrCode,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
