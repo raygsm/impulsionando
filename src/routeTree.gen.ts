@@ -95,6 +95,7 @@ import { Route as DemoTrialRouteImport } from './routes/demo.trial'
 import { Route as DemoSimuladorRouteImport } from './routes/demo.simulador'
 import { Route as DemoParceirosRouteImport } from './routes/demo.parceiros'
 import { Route as DemoModulosRouteImport } from './routes/demo.modulos'
+import { Route as DemoFeiraRouteImport } from './routes/demo.feira'
 import { Route as DemoEventosRouteImport } from './routes/demo.eventos'
 import { Route as DemoCrmRouteImport } from './routes/demo.crm'
 import { Route as DemoClienteFinalRouteImport } from './routes/demo.cliente-final'
@@ -200,6 +201,7 @@ import { Route as AuthenticatedCoreImplantacoesRouteImport } from './routes/_aut
 import { Route as AuthenticatedCoreFlagsRouteImport } from './routes/_authenticated/core.flags'
 import { Route as AuthenticatedCoreFinanceiroMasterRouteImport } from './routes/_authenticated/core.financeiro-master'
 import { Route as AuthenticatedCoreFinalizacaoComercialRouteImport } from './routes/_authenticated/core.finalizacao-comercial'
+import { Route as AuthenticatedCoreFeiraLeadsRouteImport } from './routes/_authenticated/core.feira-leads'
 import { Route as AuthenticatedCoreEventosRouteImport } from './routes/_authenticated/core.eventos'
 import { Route as AuthenticatedCoreDiagnosticoGeralRouteImport } from './routes/_authenticated/core.diagnostico-geral'
 import { Route as AuthenticatedCoreDemosRouteImport } from './routes/_authenticated/core.demos'
@@ -261,6 +263,7 @@ import { Route as ApiPublicHooksCommsSelfTestRouteImport } from './routes/api/pu
 import { Route as ApiPublicHooksBillingTickRouteImport } from './routes/api/public/hooks/billing-tick'
 import { Route as ApiPublicHooksAffAdvanceCommissionsRouteImport } from './routes/api/public/hooks/aff-advance-commissions'
 import { Route as ApiPublicDemoSendTestRouteImport } from './routes/api/public/demo/send-test'
+import { Route as ApiPublicDemoFeiraLeadRouteImport } from './routes/api/public/demo/feira-lead'
 import { Route as ApiPaymentsInfinitepayCreateRouteImport } from './routes/api/payments/infinitepay.create'
 import { Route as ApiPaymentsInfinitepayCheckStatusRouteImport } from './routes/api/payments/infinitepay.check-status'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
@@ -709,6 +712,11 @@ const DemoParceirosRoute = DemoParceirosRouteImport.update({
 const DemoModulosRoute = DemoModulosRouteImport.update({
   id: '/demo/modulos',
   path: '/demo/modulos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoFeiraRoute = DemoFeiraRouteImport.update({
+  id: '/demo/feira',
+  path: '/demo/feira',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoEventosRoute = DemoEventosRouteImport.update({
@@ -1285,6 +1293,12 @@ const AuthenticatedCoreFinalizacaoComercialRoute =
     path: '/finalizacao-comercial',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreFeiraLeadsRoute =
+  AuthenticatedCoreFeiraLeadsRouteImport.update({
+    id: '/feira-leads',
+    path: '/feira-leads',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreEventosRoute =
   AuthenticatedCoreEventosRouteImport.update({
     id: '/eventos',
@@ -1640,6 +1654,11 @@ const ApiPublicDemoSendTestRoute = ApiPublicDemoSendTestRouteImport.update({
   path: '/api/public/demo/send-test',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicDemoFeiraLeadRoute = ApiPublicDemoFeiraLeadRouteImport.update({
+  id: '/api/public/demo/feira-lead',
+  path: '/api/public/demo/feira-lead',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPaymentsInfinitepayCreateRoute =
   ApiPaymentsInfinitepayCreateRouteImport.update({
     id: '/api/payments/infinitepay/create',
@@ -1793,6 +1812,7 @@ export interface FileRoutesByFullPath {
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/crm': typeof DemoCrmRoute
   '/demo/eventos': typeof DemoEventosRoute
+  '/demo/feira': typeof DemoFeiraRoute
   '/demo/modulos': typeof DemoModulosRoute
   '/demo/parceiros': typeof DemoParceirosRoute
   '/demo/simulador': typeof DemoSimuladorRoute
@@ -1898,6 +1918,7 @@ export interface FileRoutesByFullPath {
   '/core/demos': typeof AuthenticatedCoreDemosRoute
   '/core/diagnostico-geral': typeof AuthenticatedCoreDiagnosticoGeralRoute
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
+  '/core/feira-leads': typeof AuthenticatedCoreFeiraLeadsRoute
   '/core/finalizacao-comercial': typeof AuthenticatedCoreFinalizacaoComercialRoute
   '/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/core/flags': typeof AuthenticatedCoreFlagsRoute
@@ -1975,6 +1996,7 @@ export interface FileRoutesByFullPath {
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
+  '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
@@ -2050,6 +2072,7 @@ export interface FileRoutesByTo {
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/crm': typeof DemoCrmRoute
   '/demo/eventos': typeof DemoEventosRoute
+  '/demo/feira': typeof DemoFeiraRoute
   '/demo/modulos': typeof DemoModulosRoute
   '/demo/parceiros': typeof DemoParceirosRoute
   '/demo/simulador': typeof DemoSimuladorRoute
@@ -2155,6 +2178,7 @@ export interface FileRoutesByTo {
   '/core/demos': typeof AuthenticatedCoreDemosRoute
   '/core/diagnostico-geral': typeof AuthenticatedCoreDiagnosticoGeralRoute
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
+  '/core/feira-leads': typeof AuthenticatedCoreFeiraLeadsRoute
   '/core/finalizacao-comercial': typeof AuthenticatedCoreFinalizacaoComercialRoute
   '/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/core/flags': typeof AuthenticatedCoreFlagsRoute
@@ -2232,6 +2256,7 @@ export interface FileRoutesByTo {
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
+  '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
@@ -2320,6 +2345,7 @@ export interface FileRoutesById {
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/crm': typeof DemoCrmRoute
   '/demo/eventos': typeof DemoEventosRoute
+  '/demo/feira': typeof DemoFeiraRoute
   '/demo/modulos': typeof DemoModulosRoute
   '/demo/parceiros': typeof DemoParceirosRoute
   '/demo/simulador': typeof DemoSimuladorRoute
@@ -2425,6 +2451,7 @@ export interface FileRoutesById {
   '/_authenticated/core/demos': typeof AuthenticatedCoreDemosRoute
   '/_authenticated/core/diagnostico-geral': typeof AuthenticatedCoreDiagnosticoGeralRoute
   '/_authenticated/core/eventos': typeof AuthenticatedCoreEventosRoute
+  '/_authenticated/core/feira-leads': typeof AuthenticatedCoreFeiraLeadsRoute
   '/_authenticated/core/finalizacao-comercial': typeof AuthenticatedCoreFinalizacaoComercialRoute
   '/_authenticated/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/_authenticated/core/flags': typeof AuthenticatedCoreFlagsRoute
@@ -2502,6 +2529,7 @@ export interface FileRoutesById {
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
+  '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
@@ -2590,6 +2618,7 @@ export interface FileRouteTypes {
     | '/demo/cliente-final'
     | '/demo/crm'
     | '/demo/eventos'
+    | '/demo/feira'
     | '/demo/modulos'
     | '/demo/parceiros'
     | '/demo/simulador'
@@ -2695,6 +2724,7 @@ export interface FileRouteTypes {
     | '/core/demos'
     | '/core/diagnostico-geral'
     | '/core/eventos'
+    | '/core/feira-leads'
     | '/core/finalizacao-comercial'
     | '/core/financeiro-master'
     | '/core/flags'
@@ -2772,6 +2802,7 @@ export interface FileRouteTypes {
     | '/sales/cash/$id'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
+    | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/billing-tick'
@@ -2847,6 +2878,7 @@ export interface FileRouteTypes {
     | '/demo/cliente-final'
     | '/demo/crm'
     | '/demo/eventos'
+    | '/demo/feira'
     | '/demo/modulos'
     | '/demo/parceiros'
     | '/demo/simulador'
@@ -2952,6 +2984,7 @@ export interface FileRouteTypes {
     | '/core/demos'
     | '/core/diagnostico-geral'
     | '/core/eventos'
+    | '/core/feira-leads'
     | '/core/finalizacao-comercial'
     | '/core/financeiro-master'
     | '/core/flags'
@@ -3029,6 +3062,7 @@ export interface FileRouteTypes {
     | '/sales/cash/$id'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
+    | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/billing-tick'
@@ -3116,6 +3150,7 @@ export interface FileRouteTypes {
     | '/demo/cliente-final'
     | '/demo/crm'
     | '/demo/eventos'
+    | '/demo/feira'
     | '/demo/modulos'
     | '/demo/parceiros'
     | '/demo/simulador'
@@ -3221,6 +3256,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/demos'
     | '/_authenticated/core/diagnostico-geral'
     | '/_authenticated/core/eventos'
+    | '/_authenticated/core/feira-leads'
     | '/_authenticated/core/finalizacao-comercial'
     | '/_authenticated/core/financeiro-master'
     | '/_authenticated/core/flags'
@@ -3298,6 +3334,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sales/cash/$id'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
+    | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/billing-tick'
@@ -3358,6 +3395,7 @@ export interface RootRouteChildren {
   DemoClienteFinalRoute: typeof DemoClienteFinalRoute
   DemoCrmRoute: typeof DemoCrmRoute
   DemoEventosRoute: typeof DemoEventosRoute
+  DemoFeiraRoute: typeof DemoFeiraRoute
   DemoModulosRoute: typeof DemoModulosRoute
   DemoParceirosRoute: typeof DemoParceirosRoute
   DemoSimuladorRoute: typeof DemoSimuladorRoute
@@ -3419,6 +3457,7 @@ export interface RootRouteChildren {
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPaymentsInfinitepayCheckStatusRoute: typeof ApiPaymentsInfinitepayCheckStatusRoute
   ApiPaymentsInfinitepayCreateRoute: typeof ApiPaymentsInfinitepayCreateRoute
+  ApiPublicDemoFeiraLeadRoute: typeof ApiPublicDemoFeiraLeadRoute
   ApiPublicDemoSendTestRoute: typeof ApiPublicDemoSendTestRoute
   ApiPublicHooksAffAdvanceCommissionsRoute: typeof ApiPublicHooksAffAdvanceCommissionsRoute
   ApiPublicHooksBillingTickRoute: typeof ApiPublicHooksBillingTickRoute
@@ -4042,6 +4081,13 @@ declare module '@tanstack/react-router' {
       path: '/demo/modulos'
       fullPath: '/demo/modulos'
       preLoaderRoute: typeof DemoModulosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo/feira': {
+      id: '/demo/feira'
+      path: '/demo/feira'
+      fullPath: '/demo/feira'
+      preLoaderRoute: typeof DemoFeiraRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo/eventos': {
@@ -4779,6 +4825,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreFinalizacaoComercialRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/feira-leads': {
+      id: '/_authenticated/core/feira-leads'
+      path: '/feira-leads'
+      fullPath: '/core/feira-leads'
+      preLoaderRoute: typeof AuthenticatedCoreFeiraLeadsRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/eventos': {
       id: '/_authenticated/core/eventos'
       path: '/eventos'
@@ -5206,6 +5259,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDemoSendTestRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/demo/feira-lead': {
+      id: '/api/public/demo/feira-lead'
+      path: '/api/public/demo/feira-lead'
+      fullPath: '/api/public/demo/feira-lead'
+      preLoaderRoute: typeof ApiPublicDemoFeiraLeadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/payments/infinitepay/create': {
       id: '/api/payments/infinitepay/create'
       path: '/api/payments/infinitepay/create'
@@ -5473,6 +5533,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreDemosRoute: typeof AuthenticatedCoreDemosRoute
   AuthenticatedCoreDiagnosticoGeralRoute: typeof AuthenticatedCoreDiagnosticoGeralRoute
   AuthenticatedCoreEventosRoute: typeof AuthenticatedCoreEventosRoute
+  AuthenticatedCoreFeiraLeadsRoute: typeof AuthenticatedCoreFeiraLeadsRoute
   AuthenticatedCoreFinalizacaoComercialRoute: typeof AuthenticatedCoreFinalizacaoComercialRoute
   AuthenticatedCoreFinanceiroMasterRoute: typeof AuthenticatedCoreFinanceiroMasterRoute
   AuthenticatedCoreFlagsRoute: typeof AuthenticatedCoreFlagsRoute
@@ -5511,6 +5572,7 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreDiagnosticoGeralRoute:
     AuthenticatedCoreDiagnosticoGeralRoute,
   AuthenticatedCoreEventosRoute: AuthenticatedCoreEventosRoute,
+  AuthenticatedCoreFeiraLeadsRoute: AuthenticatedCoreFeiraLeadsRoute,
   AuthenticatedCoreFinalizacaoComercialRoute:
     AuthenticatedCoreFinalizacaoComercialRoute,
   AuthenticatedCoreFinanceiroMasterRoute:
@@ -5902,6 +5964,7 @@ const rootRouteChildren: RootRouteChildren = {
   DemoClienteFinalRoute: DemoClienteFinalRoute,
   DemoCrmRoute: DemoCrmRoute,
   DemoEventosRoute: DemoEventosRoute,
+  DemoFeiraRoute: DemoFeiraRoute,
   DemoModulosRoute: DemoModulosRoute,
   DemoParceirosRoute: DemoParceirosRoute,
   DemoSimuladorRoute: DemoSimuladorRoute,
@@ -5964,6 +6027,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPaymentsInfinitepayCheckStatusRoute:
     ApiPaymentsInfinitepayCheckStatusRoute,
   ApiPaymentsInfinitepayCreateRoute: ApiPaymentsInfinitepayCreateRoute,
+  ApiPublicDemoFeiraLeadRoute: ApiPublicDemoFeiraLeadRoute,
   ApiPublicDemoSendTestRoute: ApiPublicDemoSendTestRoute,
   ApiPublicHooksAffAdvanceCommissionsRoute:
     ApiPublicHooksAffAdvanceCommissionsRoute,
