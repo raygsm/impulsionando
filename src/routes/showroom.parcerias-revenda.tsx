@@ -49,7 +49,7 @@ export const Route = createFileRoute("/showroom/parcerias-revenda")({
       },
     ],
   }),
-  component: ParceriasRevenda;
+  component: ParceriasRevenda,
 });
 
 interface Tier {
