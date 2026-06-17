@@ -8,6 +8,7 @@
  * - Captura nome + WhatsApp + nº de pessoas e faz check-in.
  */
 import { createFileRoute, notFound } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -16,7 +17,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { UtensilsCrossed, CheckCircle2, Users, Receipt, Plus } from "lucide-react";
+import { createTableInvoice, getTableInvoiceStatus } from "@/lib/restaurant-table-pay.functions";
+import { UtensilsCrossed, CheckCircle2, Users, Receipt, Plus, QrCode, Copy, ExternalLink, Loader2 } from "lucide-react";
 
 type Resolved = {
   ok: boolean;
@@ -75,6 +77,10 @@ function MesaPage() {
   const [party, setParty] = useState("2");
   const [submitting, setSubmitting] = useState(false);
   const [adding, setAdding] = useState<string | null>(null);
+  const [bill, setBill] = useState<null | { invoice_id: string; amount_cents: number; status: string; pix_url: string | null; pix_configured: boolean }>(null);
+  const [billLoading, setBillLoading] = useState(false);
+  const createBill = useServerFn(createTableInvoice);
+  const checkBill = useServerFn(getTableInvoiceStatus);
 
   useEffect(() => {
     const id = setInterval(async () => {
