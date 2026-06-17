@@ -136,6 +136,45 @@ function ContractsPage() {
     onError: (e: any) => toast.error(e?.message ?? "Falha ao baixar"),
   });
 
+  const reissue = useMutation({
+    mutationFn: async (parentId: string) => {
+      const { parent, nextVersion } = await reissueFn({ data: { parent_id: parentId } });
+      const snap = (parent.snapshot ?? {}) as any;
+      const meta = await generateAndUploadContract({
+        company_id: parent.company_id,
+        company_name: snap.company_name ?? "",
+        company_doc: snap.company_doc,
+        contract_number: parent.contract_number,
+        plan_name: snap.plan ?? "",
+        modules: snap.modules ?? [],
+        monthly_brl: snap.monthly_brl ?? 0,
+        setup_brl: snap.setup_brl ?? 0,
+        cycle: snap.cycle ?? "mensal",
+        minimum_term_days: snap.minimum_term_days ?? 90,
+        version: nextVersion,
+      });
+      return createFn({
+        data: {
+          company_id: parent.company_id,
+          white_label_id: parent.white_label_id,
+          billing_contract_id: parent.billing_contract_id,
+          contract_number: parent.contract_number,
+          storage_path: meta.storage_path,
+          file_hash: meta.file_hash,
+          file_size_bytes: meta.file_size_bytes,
+          snapshot: { ...meta.snapshot, version: nextVersion },
+          parent_document_id: parent.id,
+          version: nextVersion,
+        },
+      });
+    },
+    onSuccess: () => {
+      toast.success("Nova versão do contrato emitida");
+      qc.invalidateQueries({ queryKey: ["contracts"] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Falha na reemissão"),
+  });
+
   const exportRows = useMemo(
     () =>
       rows.map((r: any) => ({
