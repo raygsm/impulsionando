@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { MessageCircle, Mail } from "lucide-react";
-import logoAsset from "@/assets/logo-impulsionando.png.asset.json";
+import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 
 const WHATSAPP_URL = "https://wa.me/5521993075000";
 const EMAIL = "sac@impulsionando.com.br";
@@ -10,7 +10,7 @@ export function PublicFooter() {
     <footer className="border-t border-border bg-card/30 mt-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 grid gap-10 md:grid-cols-5">
         <div className="md:col-span-2 space-y-4 flex flex-col items-center text-center">
-          <img src={logoAsset.url} alt="Impulsionando Tecnologia" className="h-48 md:h-60 w-auto object-contain mx-auto" />
+          <LogoImpulsionando variant="light" size="2xl" />
           <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
             Tecnologia, automação, sistemas inteligentes e integrações digitais para empresas que precisam crescer com organização e eficiência.
           </p>

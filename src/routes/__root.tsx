@@ -14,13 +14,14 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { LGPDBanner } from "@/components/marketing/LGPDBanner";
-import logoAsset from "@/assets/logo-impulsionando.png.asset.json";
+import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <img src={logoAsset.url} alt="Impulsionando Tecnologia" className="mx-auto mb-8 h-20 md:h-24 w-auto object-contain" />
+        <div className="mb-8 flex justify-center"><LogoImpulsionando variant="light" size="lg" /></div>
+
         <h1 className="text-7xl font-bold text-foreground">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">Página não encontrada</h2>
         <p className="mt-2 text-sm text-muted-foreground">
@@ -49,7 +50,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <img src={logoAsset.url} alt="Impulsionando Tecnologia" className="mx-auto mb-8 h-20 md:h-24 w-auto object-contain" />
+        <div className="mb-8 flex justify-center"><LogoImpulsionando variant="light" size="lg" /></div>
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           Esta página não carregou
         </h1>
