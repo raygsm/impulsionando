@@ -130,7 +130,9 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/privacy/cockpit", label: "Cockpit LGPD", icon: ShieldCheck, superOnly: true },
       { to: "/white-label/cockpit", label: "White Label Cockpit", icon: Layers, superOnly: true },
       { to: "/support/cockpit", label: "Suporte — Cockpit", icon: Headphones, superOnly: true },
-      { to: "/consumer/unified", label: "Consumidor Unificado", icon: UserRound, perm: "users.read" },
+      { to: "/consumer/unified", label: "Clube — Membros", icon: UserRound, perm: "users.read" },
+      { to: "/clube", label: "Minha área Clube", icon: Sparkles },
+
     ],
   },
   {

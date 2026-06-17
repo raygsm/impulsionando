@@ -47,8 +47,9 @@ function Page() {
 
         <div>
           <Badge className="bg-gradient-primary mb-2"><Crown className="w-3 h-3 mr-1" /> Clube Premium</Badge>
-          <h1 className="text-2xl font-bold tracking-tight">Consumidor Final — Premium R$ 9,99</h1>
-          <p className="text-sm text-muted-foreground">Visão master da base de consumidores e do MRR do clube.</p>
+          <h1 className="text-2xl font-bold tracking-tight">Clube Impulsionando — Premium R$ 9,99</h1>
+          <p className="text-sm text-muted-foreground">Visão master da base de membros e do MRR do Clube.</p>
+
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline" size="sm"><Link to="/vitrine" target="_blank">Vitrine pública →</Link></Button>

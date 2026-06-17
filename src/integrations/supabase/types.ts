@@ -2511,6 +2511,303 @@ export type Database = {
           },
         ]
       }
+      clube_alerts: {
+        Row: {
+          active: boolean
+          channels: string[]
+          city: string | null
+          created_at: string
+          id: string
+          kind: string
+          radius_km: number
+          tag: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          channels?: string[]
+          city?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          radius_km?: number
+          tag: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          channels?: string[]
+          city?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          radius_km?: number
+          tag?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      clube_consumption: {
+        Row: {
+          company_id: string | null
+          consumed_at: string
+          created_at: string
+          id: string
+          items: Json
+          payment_method: string | null
+          receipt_url: string | null
+          source: string
+          total_cents: number
+          user_id: string
+          visibility: string
+        }
+        Insert: {
+          company_id?: string | null
+          consumed_at?: string
+          created_at?: string
+          id?: string
+          items?: Json
+          payment_method?: string | null
+          receipt_url?: string | null
+          source?: string
+          total_cents?: number
+          user_id: string
+          visibility?: string
+        }
+        Update: {
+          company_id?: string | null
+          consumed_at?: string
+          created_at?: string
+          id?: string
+          items?: Json
+          payment_method?: string | null
+          receipt_url?: string | null
+          source?: string
+          total_cents?: number
+          user_id?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clube_consumption_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clube_poll_votes: {
+        Row: {
+          created_at: string
+          id: string
+          option_id: string
+          poll_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          option_id: string
+          poll_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          option_id?: string
+          poll_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clube_poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "clube_polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clube_polls: {
+        Row: {
+          active: boolean
+          audience: string
+          city: string | null
+          closes_at: string | null
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          kind: string
+          opens_at: string
+          options: Json
+          question: string
+        }
+        Insert: {
+          active?: boolean
+          audience?: string
+          city?: string | null
+          closes_at?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          opens_at?: string
+          options: Json
+          question: string
+        }
+        Update: {
+          active?: boolean
+          audience?: string
+          city?: string | null
+          closes_at?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          opens_at?: string
+          options?: Json
+          question?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clube_polls_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clube_referrals: {
+        Row: {
+          converted_at: string | null
+          created_at: string
+          id: string
+          referred_email: string | null
+          referred_user_id: string | null
+          referrer_user_id: string
+          reward_cents: number
+          reward_points: number
+          source: string | null
+          status: string
+        }
+        Insert: {
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          referred_email?: string | null
+          referred_user_id?: string | null
+          referrer_user_id: string
+          reward_cents?: number
+          reward_points?: number
+          source?: string | null
+          status?: string
+        }
+        Update: {
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          referred_email?: string | null
+          referred_user_id?: string | null
+          referrer_user_id?: string
+          reward_cents?: number
+          reward_points?: number
+          source?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      clube_rewards_ledger: {
+        Row: {
+          created_at: string
+          delta: number
+          id: string
+          kind: string
+          metadata: Json
+          reason: string
+          reference_id: string | null
+          reference_type: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delta: number
+          id?: string
+          kind: string
+          metadata?: Json
+          reason: string
+          reference_id?: string | null
+          reference_type?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delta?: number
+          id?: string
+          kind?: string
+          metadata?: Json
+          reason?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      clube_visits: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          event_id: string | null
+          id: string
+          notes: string | null
+          rating: number | null
+          source: string
+          user_id: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          notes?: string | null
+          rating?: number | null
+          source?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          notes?: string | null
+          rating?: number | null
+          source?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clube_visits_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clube_visits_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "evt_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comm_attendance: {
         Row: {
           community_id: string
@@ -3288,39 +3585,72 @@ export type Database = {
       consumer_profiles: {
         Row: {
           birthdate: string | null
+          cep: string | null
           city: string | null
           created_at: string
+          current_level: string
+          default_radius_km: number
           full_name: string | null
           id: string
+          interests_tags: string[]
+          lat: number | null
+          lng: number | null
           marketing_optin: boolean
+          neighborhood: string | null
           phone: string | null
+          points_balance: number
+          referral_code: string | null
           state: string | null
+          total_savings_cents: number
+          total_visits: number
           updated_at: string
           user_id: string
           whatsapp: string | null
         }
         Insert: {
           birthdate?: string | null
+          cep?: string | null
           city?: string | null
           created_at?: string
+          current_level?: string
+          default_radius_km?: number
           full_name?: string | null
           id?: string
+          interests_tags?: string[]
+          lat?: number | null
+          lng?: number | null
           marketing_optin?: boolean
+          neighborhood?: string | null
           phone?: string | null
+          points_balance?: number
+          referral_code?: string | null
           state?: string | null
+          total_savings_cents?: number
+          total_visits?: number
           updated_at?: string
           user_id: string
           whatsapp?: string | null
         }
         Update: {
           birthdate?: string | null
+          cep?: string | null
           city?: string | null
           created_at?: string
+          current_level?: string
+          default_radius_km?: number
           full_name?: string | null
           id?: string
+          interests_tags?: string[]
+          lat?: number | null
+          lng?: number | null
           marketing_optin?: boolean
+          neighborhood?: string | null
           phone?: string | null
+          points_balance?: number
+          referral_code?: string | null
           state?: string | null
+          total_savings_cents?: number
+          total_visits?: number
           updated_at?: string
           user_id?: string
           whatsapp?: string | null
