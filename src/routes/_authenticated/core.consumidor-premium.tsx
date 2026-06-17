@@ -131,7 +131,7 @@ function Page() {
             </div>
             <p className="text-xs text-muted-foreground pt-2 border-t">
               Pagamentos via PIX/InfinitePay fecham automaticamente as faturas pelo webhook
-              <code className="mx-1">/api/public/payments/webhook</code>. Use o botão acima apenas para baixa manual.
+              <code className="mx-1">/api/public/payments/close-invoice</code>. Use o botão acima apenas para baixa manual.
             </p>
           </div>
         )}
