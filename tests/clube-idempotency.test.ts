@@ -66,10 +66,15 @@ describe("clube idempotência", () => {
     cleanup.push(async () => { await admin.from("consumer_memberships").delete().eq("id", mem!.id); });
 
     // 1ª charge sem receipt_url → pending_upload
+    const uniq = 100000 + Math.floor(Math.random() * 800000);
     const { data: charge, error: cErr } = await admin.from("billing_pix_charges").insert({
       contract_id: mem!.id,
       plan_code: "test-plan",
-      unique_amount_cents: 1990,
+      base_amount_cents: uniq,
+      unique_amount_cents: uniq,
+      pix_payload: "00020126test",
+      pix_key: "test@key",
+      txid: `idem${Date.now()}`,
       status: "pending",
     }).select("id").single();
     expect(cErr).toBeNull();
