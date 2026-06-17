@@ -12,6 +12,7 @@
  */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireAdminOrAudit } from "@/lib/security-audit.server";
 import { z } from "zod";
 
 type LevelDef = { code: string; label: string; min: number; next: number | null };
@@ -552,8 +553,10 @@ export const listAdminPolls = createServerFn({ method: "GET" })
 export const listClubeCronRuns = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
-    if (!isAdmin) throw new Error("Acesso restrito");
+    await requireAdminOrAudit(context.supabase, context.userId, {
+      entity: "clube_cron_log",
+      metadata: { route: "/admin/clube", export_scope: "clube_cron_log_audit" },
+    });
     const { data, error } = await context.supabase
       .from("clube_cron_log")
       .select("*")
@@ -577,8 +580,11 @@ export const getJourneyLogAudit = createServerFn({ method: "POST" })
     }).parse(d ?? {}),
   )
   .handler(async ({ data, context }) => {
-    const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
-    if (!isAdmin) throw new Error("Acesso restrito");
+    await requireAdminOrAudit(context.supabase, context.userId, {
+      entity: "clube_journey_log",
+      metadata: { route: "/admin/clube", export_scope: "journey_audit", filters: data },
+    });
+
 
     let stepQ = context.supabase
       .from("clube_journey_steps")
