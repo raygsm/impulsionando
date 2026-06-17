@@ -29,6 +29,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     if (!isLoading && !data && !error) navigate({ to: "/auth" });
   }, [data, isLoading, error, navigate]);
 
+  // Histórico recente (B19)
+  useEffect(() => {
+    const path = location.pathname;
+    if (path === "/" || path === "/auth" || path.startsWith("/auth/")) return;
+    const idx: Record<string, string> = {};
+    for (const it of TOP_ITEMS) idx[it.to] = it.label;
+    for (const g of NAV_GROUPS) for (const it of g.items) idx[it.to] = it.label;
+    const label = idx[path] ?? document.title.replace(" — Impulsionando", "") ?? path;
+    pushRecent(path, label);
+  }, [location.pathname]);
+
   // Gate de inadimplência (trial OU assinatura suspensa)
   const isSuspended = trialSuspended || subSuspended;
   useEffect(() => {
