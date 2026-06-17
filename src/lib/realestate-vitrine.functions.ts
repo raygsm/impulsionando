@@ -174,10 +174,12 @@ export const getVitrineCounters = createServerFn({ method: 'POST' })
 const ExportInput = z.object({
   companyId: z.string().uuid(),
   dataset: z.enum(['interests', 'searches', 'messages']),
-  status: z.string().optional(),
+  status: z.string().optional(), // 'todos' | record status | 'falha' | 'enviado'
   search: z.string().optional(),
   from: z.string().optional(),
   to: z.string().optional(),
+  page: z.number().int().min(1).default(1),
+  pageSize: z.number().int().min(50).max(5000).default(1000),
 })
 
 function csvEscape(v: unknown): string {
@@ -193,53 +195,131 @@ function toCsv(rows: Record<string, unknown>[], columns: { key: string; label: s
   return '\uFEFF' + [header, ...lines].join('\n')
 }
 
+const EMAIL_STATUS_FILTERS = new Set(['falha', 'enviado'])
+
+type EmailLogSummary = { requestId: string | null; lastStatus: string | null; lastError: string | null; lastAt: string | null }
+
+async function fetchEmailLogMap(
+  sb: any,
+  field: 'interest_id' | 'intent_id',
+  ids: string[],
+): Promise<Map<string, EmailLogSummary>> {
+  const map = new Map<string, EmailLogSummary>()
+  if (ids.length === 0) return map
+  const CHUNK = 200
+  for (let i = 0; i < ids.length; i += CHUNK) {
+    const slice = ids.slice(i, i + CHUNK)
+    const { data: logs, error } = await sb
+      .from('email_send_log')
+      .select('id, status, error_message, metadata, created_at')
+      .order('created_at', { ascending: false })
+      .in(`metadata->>${field}`, slice as any)
+    if (error) continue
+    for (const log of (logs ?? []) as any[]) {
+      const key = log.metadata?.[field] as string | undefined
+      if (!key || map.has(key)) continue
+      map.set(key, {
+        requestId: log.metadata?.request_id ?? null,
+        lastStatus: log.status ?? null,
+        lastError: log.error_message ?? null,
+        lastAt: log.created_at ?? null,
+      })
+    }
+  }
+  return map
+}
+
+function matchesEmailFilter(emailFilter: string | null, status: string | null): boolean {
+  if (!emailFilter) return true
+  if (emailFilter === 'falha') return status === 'failed'
+  if (emailFilter === 'enviado') return status === 'queued' || status === 'sent'
+  return true
+}
+
 export const exportVitrineDataset = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: z.infer<typeof ExportInput>) => ExportInput.parse(d))
   .handler(async ({ data, context }) => {
     const sb = context.supabase
-    const filters = (q: any) => {
+    const fromIdx = (data.page - 1) * data.pageSize
+    const toIdx = fromIdx + data.pageSize - 1
+
+    const applyStatus = data.status && data.status !== 'todos' && !EMAIL_STATUS_FILTERS.has(data.status)
+    const emailFilter = data.status && EMAIL_STATUS_FILTERS.has(data.status) ? data.status : null
+
+    const base = (q: any) => {
       let qq = q.eq('company_id', data.companyId)
-      if (data.status && data.status !== 'todos') qq = qq.eq('status', data.status)
+      if (applyStatus) qq = qq.eq('status', data.status)
       if (data.from) qq = qq.gte('created_at', data.from)
       if (data.to) qq = qq.lte('created_at', data.to)
       return qq
     }
 
     if (data.dataset === 'interests') {
-      let q = filters(sb.from('realestate_interests').select(`id, created_at, kind, status, contact_name, contact_email, contact_phone, contact_whatsapp, message, source, lead_id, property:property_id (title, reference_code)`).order('created_at', { ascending: false }).limit(10000))
+      let q = base(sb.from('realestate_interests').select(
+        `id, created_at, kind, status, contact_name, contact_email, contact_phone, contact_whatsapp, message, source, lead_id, property:property_id (title, reference_code)`,
+        { count: 'exact' },
+      )).order('created_at', { ascending: false }).range(fromIdx, toIdx)
       if (data.search?.trim()) {
         const s = `%${data.search.trim()}%`
         q = q.or(`contact_name.ilike.${s},contact_email.ilike.${s},contact_phone.ilike.${s}`)
       }
-      const { data: rows, error } = await q
+      const { data: rows, error, count } = await q
       if (error) throw error
-      const csv = toCsv(
-        (rows ?? []).map((r: any) => ({
+      const ids = (rows ?? []).map((r: any) => r.id)
+      const logMap = await fetchEmailLogMap(sb, 'interest_id', ids)
+      const mapped = (rows ?? []).map((r: any) => {
+        const log = logMap.get(r.id)
+        return {
           ...r,
           property_title: r.property?.title ?? '',
           property_ref: r.property?.reference_code ?? '',
-        })),
-        [
-          { key: 'created_at', label: 'Data' }, { key: 'kind', label: 'Tipo' }, { key: 'status', label: 'Status' },
-          { key: 'contact_name', label: 'Nome' }, { key: 'contact_email', label: 'E-mail' },
-          { key: 'contact_phone', label: 'Telefone' }, { key: 'contact_whatsapp', label: 'WhatsApp' },
-          { key: 'property_ref', label: 'Cód. imóvel' }, { key: 'property_title', label: 'Imóvel' },
-          { key: 'source', label: 'Origem' }, { key: 'lead_id', label: 'Lead ID' }, { key: 'message', label: 'Mensagem' },
-        ],
-      )
-      return { filename: `interessados-${new Date().toISOString().slice(0, 10)}.csv`, csv, total: rows?.length ?? 0 }
+          request_id: log?.requestId ?? '',
+          email_status: log?.lastStatus ?? '',
+          email_error: log?.lastError ?? '',
+          email_at: log?.lastAt ?? '',
+        }
+      }).filter((r: any) => matchesEmailFilter(emailFilter, r.email_status || null))
+      const columns = [
+        { key: 'created_at', label: 'Data' }, { key: 'kind', label: 'Tipo' }, { key: 'status', label: 'Status' },
+        { key: 'contact_name', label: 'Nome' }, { key: 'contact_email', label: 'E-mail' },
+        { key: 'contact_phone', label: 'Telefone' }, { key: 'contact_whatsapp', label: 'WhatsApp' },
+        { key: 'property_ref', label: 'Cód. imóvel' }, { key: 'property_title', label: 'Imóvel' },
+        { key: 'source', label: 'Origem' }, { key: 'lead_id', label: 'Lead ID' },
+        { key: 'request_id', label: 'Request ID' }, { key: 'email_status', label: 'E-mail status' },
+        { key: 'email_error', label: 'E-mail erro' }, { key: 'message', label: 'Mensagem' },
+      ]
+      return {
+        filename: `interessados-p${data.page}-${new Date().toISOString().slice(0, 10)}.csv`,
+        csv: toCsv(mapped, columns), rows: mapped, columns,
+        total: count ?? mapped.length, page: data.page, pageSize: data.pageSize,
+      }
     }
 
     if (data.dataset === 'searches') {
-      let q = filters(sb.from('realestate_search_intents').select(`id, created_at, status, contact_name, contact_email, contact_phone, operation, property_type, city, neighborhood, min_price, max_price, min_bedrooms, max_bedrooms, source, lead_id`).order('created_at', { ascending: false }).limit(10000))
+      let q = base(sb.from('realestate_search_intents').select(
+        `id, created_at, status, contact_name, contact_email, contact_phone, operation, property_type, city, neighborhood, min_price, max_price, min_bedrooms, max_bedrooms, source, lead_id`,
+        { count: 'exact' },
+      )).order('created_at', { ascending: false }).range(fromIdx, toIdx)
       if (data.search?.trim()) {
         const s = `%${data.search.trim()}%`
         q = q.or(`contact_name.ilike.${s},contact_email.ilike.${s}`)
       }
-      const { data: rows, error } = await q
+      const { data: rows, error, count } = await q
       if (error) throw error
-      const csv = toCsv((rows ?? []) as any, [
+      const ids = (rows ?? []).map((r: any) => r.id)
+      const logMap = await fetchEmailLogMap(sb, 'intent_id', ids)
+      const mapped = (rows ?? []).map((r: any) => {
+        const log = logMap.get(r.id)
+        return {
+          ...r,
+          request_id: log?.requestId ?? '',
+          email_status: log?.lastStatus ?? '',
+          email_error: log?.lastError ?? '',
+          email_at: log?.lastAt ?? '',
+        }
+      }).filter((r: any) => matchesEmailFilter(emailFilter, r.email_status || null))
+      const columns = [
         { key: 'created_at', label: 'Data' }, { key: 'status', label: 'Status' },
         { key: 'contact_name', label: 'Nome' }, { key: 'contact_email', label: 'E-mail' },
         { key: 'contact_phone', label: 'Telefone' },
@@ -248,24 +328,53 @@ export const exportVitrineDataset = createServerFn({ method: 'POST' })
         { key: 'min_price', label: 'Preço mín.' }, { key: 'max_price', label: 'Preço máx.' },
         { key: 'min_bedrooms', label: 'Dorms. mín.' }, { key: 'max_bedrooms', label: 'Dorms. máx.' },
         { key: 'source', label: 'Origem' }, { key: 'lead_id', label: 'Lead ID' },
-      ])
-      return { filename: `buscas-salvas-${new Date().toISOString().slice(0, 10)}.csv`, csv, total: rows?.length ?? 0 }
+        { key: 'request_id', label: 'Request ID' }, { key: 'email_status', label: 'E-mail status' },
+        { key: 'email_error', label: 'E-mail erro' },
+      ]
+      return {
+        filename: `buscas-salvas-p${data.page}-${new Date().toISOString().slice(0, 10)}.csv`,
+        csv: toCsv(mapped, columns), rows: mapped, columns,
+        total: count ?? mapped.length, page: data.page, pageSize: data.pageSize,
+      }
     }
 
-    let q = filters(sb.from('realestate_internal_messages').select(`id, created_at, channel, request_kind, status, subject, contact_name, contact_email, contact_phone, replies_count, last_reply_at, lead_id`).order('created_at', { ascending: false }).limit(10000))
+    let q = base(sb.from('realestate_internal_messages').select(
+      `id, created_at, channel, request_kind, status, subject, contact_name, contact_email, contact_phone, replies_count, last_reply_at, lead_id, interest_id, intent_id`,
+      { count: 'exact' },
+    )).order('created_at', { ascending: false }).range(fromIdx, toIdx)
     if (data.search?.trim()) {
       const s = `%${data.search.trim()}%`
       q = q.or(`subject.ilike.${s},contact_name.ilike.${s},contact_email.ilike.${s}`)
     }
-    const { data: rows, error } = await q
+    const { data: rows, error, count } = await q
     if (error) throw error
-    const csv = toCsv((rows ?? []) as any, [
+    const interestIds = (rows ?? []).map((r: any) => r.interest_id).filter(Boolean) as string[]
+    const intentIds = (rows ?? []).map((r: any) => r.intent_id).filter(Boolean) as string[]
+    const [interestLogs, intentLogs] = await Promise.all([
+      fetchEmailLogMap(sb, 'interest_id', interestIds),
+      fetchEmailLogMap(sb, 'intent_id', intentIds),
+    ])
+    const mapped = (rows ?? []).map((r: any) => {
+      const log = (r.interest_id && interestLogs.get(r.interest_id)) || (r.intent_id && intentLogs.get(r.intent_id)) || null
+      return {
+        ...r,
+        request_id: log?.requestId ?? '',
+        email_status: log?.lastStatus ?? '',
+        email_error: log?.lastError ?? '',
+      }
+    }).filter((r: any) => matchesEmailFilter(emailFilter, r.email_status || null))
+    const columns = [
       { key: 'created_at', label: 'Data' }, { key: 'channel', label: 'Canal' },
       { key: 'request_kind', label: 'Tipo' }, { key: 'status', label: 'Status' },
       { key: 'subject', label: 'Assunto' }, { key: 'contact_name', label: 'Nome' },
       { key: 'contact_email', label: 'E-mail' }, { key: 'contact_phone', label: 'Telefone' },
       { key: 'replies_count', label: 'Respostas' }, { key: 'last_reply_at', label: 'Última resposta' },
-      { key: 'lead_id', label: 'Lead ID' },
-    ])
-    return { filename: `mensagens-${new Date().toISOString().slice(0, 10)}.csv`, csv, total: rows?.length ?? 0 }
+      { key: 'lead_id', label: 'Lead ID' }, { key: 'request_id', label: 'Request ID' },
+      { key: 'email_status', label: 'E-mail status' }, { key: 'email_error', label: 'E-mail erro' },
+    ]
+    return {
+      filename: `mensagens-p${data.page}-${new Date().toISOString().slice(0, 10)}.csv`,
+      csv: toCsv(mapped, columns), rows: mapped, columns,
+      total: count ?? mapped.length, page: data.page, pageSize: data.pageSize,
+    }
   })
