@@ -205,6 +205,7 @@ import { Route as AuthenticatedCoreDemoInsightsRouteImport } from './routes/_aut
 import { Route as AuthenticatedCoreDashboardsRouteImport } from './routes/_authenticated/core.dashboards'
 import { Route as AuthenticatedCoreDashboardMacroRouteImport } from './routes/_authenticated/core.dashboard-macro'
 import { Route as AuthenticatedCoreCriarProjetoRouteImport } from './routes/_authenticated/core.criar-projeto'
+import { Route as AuthenticatedCoreContratosRouteImport } from './routes/_authenticated/core.contratos'
 import { Route as AuthenticatedCoreConfiguracoesRouteImport } from './routes/_authenticated/core.configuracoes'
 import { Route as AuthenticatedCoreClientesRouteImport } from './routes/_authenticated/core.clientes'
 import { Route as AuthenticatedCoreBriefingsRouteImport } from './routes/_authenticated/core.briefings'
@@ -1310,6 +1311,12 @@ const AuthenticatedCoreCriarProjetoRoute =
     path: '/criar-projeto',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreContratosRoute =
+  AuthenticatedCoreContratosRouteImport.update({
+    id: '/contratos',
+    path: '/contratos',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreConfiguracoesRoute =
   AuthenticatedCoreConfiguracoesRouteImport.update({
     id: '/configuracoes',
@@ -1856,6 +1863,7 @@ export interface FileRoutesByFullPath {
   '/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/core/configuracoes': typeof AuthenticatedCoreConfiguracoesRoute
+  '/core/contratos': typeof AuthenticatedCoreContratosRoute
   '/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
   '/core/dashboard-macro': typeof AuthenticatedCoreDashboardMacroRoute
   '/core/dashboards': typeof AuthenticatedCoreDashboardsRoute
@@ -2108,6 +2116,7 @@ export interface FileRoutesByTo {
   '/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/core/configuracoes': typeof AuthenticatedCoreConfiguracoesRoute
+  '/core/contratos': typeof AuthenticatedCoreContratosRoute
   '/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
   '/core/dashboard-macro': typeof AuthenticatedCoreDashboardMacroRoute
   '/core/dashboards': typeof AuthenticatedCoreDashboardsRoute
@@ -2373,6 +2382,7 @@ export interface FileRoutesById {
   '/_authenticated/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/_authenticated/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/_authenticated/core/configuracoes': typeof AuthenticatedCoreConfiguracoesRoute
+  '/_authenticated/core/contratos': typeof AuthenticatedCoreContratosRoute
   '/_authenticated/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
   '/_authenticated/core/dashboard-macro': typeof AuthenticatedCoreDashboardMacroRoute
   '/_authenticated/core/dashboards': typeof AuthenticatedCoreDashboardsRoute
@@ -2638,6 +2648,7 @@ export interface FileRouteTypes {
     | '/core/briefings'
     | '/core/clientes'
     | '/core/configuracoes'
+    | '/core/contratos'
     | '/core/criar-projeto'
     | '/core/dashboard-macro'
     | '/core/dashboards'
@@ -2890,6 +2901,7 @@ export interface FileRouteTypes {
     | '/core/briefings'
     | '/core/clientes'
     | '/core/configuracoes'
+    | '/core/contratos'
     | '/core/criar-projeto'
     | '/core/dashboard-macro'
     | '/core/dashboards'
@@ -3154,6 +3166,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/briefings'
     | '/_authenticated/core/clientes'
     | '/_authenticated/core/configuracoes'
+    | '/_authenticated/core/contratos'
     | '/_authenticated/core/criar-projeto'
     | '/_authenticated/core/dashboard-macro'
     | '/_authenticated/core/dashboards'
@@ -4751,6 +4764,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreCriarProjetoRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/contratos': {
+      id: '/_authenticated/core/contratos'
+      path: '/contratos'
+      fullPath: '/core/contratos'
+      preLoaderRoute: typeof AuthenticatedCoreContratosRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/configuracoes': {
       id: '/_authenticated/core/configuracoes'
       path: '/configuracoes'
@@ -5367,6 +5387,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreBriefingsRoute: typeof AuthenticatedCoreBriefingsRoute
   AuthenticatedCoreClientesRoute: typeof AuthenticatedCoreClientesRoute
   AuthenticatedCoreConfiguracoesRoute: typeof AuthenticatedCoreConfiguracoesRoute
+  AuthenticatedCoreContratosRoute: typeof AuthenticatedCoreContratosRoute
   AuthenticatedCoreCriarProjetoRoute: typeof AuthenticatedCoreCriarProjetoRoute
   AuthenticatedCoreDashboardMacroRoute: typeof AuthenticatedCoreDashboardMacroRoute
   AuthenticatedCoreDashboardsRoute: typeof AuthenticatedCoreDashboardsRoute
@@ -5400,6 +5421,7 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreBriefingsRoute: AuthenticatedCoreBriefingsRoute,
   AuthenticatedCoreClientesRoute: AuthenticatedCoreClientesRoute,
   AuthenticatedCoreConfiguracoesRoute: AuthenticatedCoreConfiguracoesRoute,
+  AuthenticatedCoreContratosRoute: AuthenticatedCoreContratosRoute,
   AuthenticatedCoreCriarProjetoRoute: AuthenticatedCoreCriarProjetoRoute,
   AuthenticatedCoreDashboardMacroRoute: AuthenticatedCoreDashboardMacroRoute,
   AuthenticatedCoreDashboardsRoute: AuthenticatedCoreDashboardsRoute,
