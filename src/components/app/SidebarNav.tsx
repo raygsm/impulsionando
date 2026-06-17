@@ -160,8 +160,10 @@ export function SidebarNav({
           pathname={location.pathname}
           filterItem={filterItem}
           onNavigate={onNavigate}
+          pendingPix={pendingPix}
         />
       ))}
+
     </nav>
   );
 }
