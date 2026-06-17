@@ -62,14 +62,16 @@ describe("clube idempotência", () => {
     const sharedId = crypto.randomUUID();
 
     // company + plan mínimos para o contrato
-    const { data: comp } = await admin.from("companies").insert({
-      name: `idem-${Date.now()}`, slug: `idem-${Date.now()}`,
+    const { data: comp, error: compErr } = await admin.from("companies").insert({
+      name: `idem-${Date.now()}`,
     }).select("id").single();
+    expect(compErr).toBeNull();
     cleanup.push(async () => { await admin.from("companies").delete().eq("id", comp!.id); });
 
-    const { data: plan } = await admin.from("billing_plans").insert({
-      code: `idem-${Date.now()}`, name: "idem", recurring_amount: 19.9, billing_cycle: "monthly",
+    const { data: plan, error: planErr } = await admin.from("billing_plans").insert({
+      code: `idem-${Date.now()}`, name: "idem", recurring_amount: 19.9, cycle: "monthly",
     }).select("id").single();
+    expect(planErr).toBeNull();
     cleanup.push(async () => { await admin.from("billing_plans").delete().eq("id", plan!.id); });
 
     const { error: ctErr } = await admin.from("billing_contracts").insert({
