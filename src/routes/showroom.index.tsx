@@ -136,7 +136,7 @@ function ShowroomHub() {
               <Link to="/contato">Falar com especialista</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/precos">Ver planos</Link>
+              <Link to="/planos">Ver planos</Link>
             </Button>
           </div>
         </div>
