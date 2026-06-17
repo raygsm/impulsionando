@@ -51,6 +51,7 @@ import { Route as ShowroomFitnessRouteImport } from './routes/showroom.fitness'
 import { Route as ShowroomFinanceiroRouteImport } from './routes/showroom.financeiro'
 import { Route as ShowroomEventosRouteImport } from './routes/showroom.eventos'
 import { Route as ShowroomEstoqueRouteImport } from './routes/showroom.estoque'
+import { Route as ShowroomEquipeRouteImport } from './routes/showroom.equipe'
 import { Route as ShowroomDashboardsRouteImport } from './routes/showroom.dashboards'
 import { Route as ShowroomCrmRouteImport } from './routes/showroom.crm'
 import { Route as ShowroomClinicasRouteImport } from './routes/showroom.clinicas'
@@ -455,6 +456,11 @@ const ShowroomEventosRoute = ShowroomEventosRouteImport.update({
 const ShowroomEstoqueRoute = ShowroomEstoqueRouteImport.update({
   id: '/showroom/estoque',
   path: '/showroom/estoque',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShowroomEquipeRoute = ShowroomEquipeRouteImport.update({
+  id: '/showroom/equipe',
+  path: '/showroom/equipe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShowroomDashboardsRoute = ShowroomDashboardsRouteImport.update({
@@ -1631,6 +1637,7 @@ export interface FileRoutesByFullPath {
   '/showroom/clinicas': typeof ShowroomClinicasRoute
   '/showroom/crm': typeof ShowroomCrmRoute
   '/showroom/dashboards': typeof ShowroomDashboardsRoute
+  '/showroom/equipe': typeof ShowroomEquipeRoute
   '/showroom/estoque': typeof ShowroomEstoqueRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/financeiro': typeof ShowroomFinanceiroRoute
@@ -1859,6 +1866,7 @@ export interface FileRoutesByTo {
   '/showroom/clinicas': typeof ShowroomClinicasRoute
   '/showroom/crm': typeof ShowroomCrmRoute
   '/showroom/dashboards': typeof ShowroomDashboardsRoute
+  '/showroom/equipe': typeof ShowroomEquipeRoute
   '/showroom/estoque': typeof ShowroomEstoqueRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/financeiro': typeof ShowroomFinanceiroRoute
@@ -2100,6 +2108,7 @@ export interface FileRoutesById {
   '/showroom/clinicas': typeof ShowroomClinicasRoute
   '/showroom/crm': typeof ShowroomCrmRoute
   '/showroom/dashboards': typeof ShowroomDashboardsRoute
+  '/showroom/equipe': typeof ShowroomEquipeRoute
   '/showroom/estoque': typeof ShowroomEstoqueRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/financeiro': typeof ShowroomFinanceiroRoute
@@ -2341,6 +2350,7 @@ export interface FileRouteTypes {
     | '/showroom/clinicas'
     | '/showroom/crm'
     | '/showroom/dashboards'
+    | '/showroom/equipe'
     | '/showroom/estoque'
     | '/showroom/eventos'
     | '/showroom/financeiro'
@@ -2569,6 +2579,7 @@ export interface FileRouteTypes {
     | '/showroom/clinicas'
     | '/showroom/crm'
     | '/showroom/dashboards'
+    | '/showroom/equipe'
     | '/showroom/estoque'
     | '/showroom/eventos'
     | '/showroom/financeiro'
@@ -2809,6 +2820,7 @@ export interface FileRouteTypes {
     | '/showroom/clinicas'
     | '/showroom/crm'
     | '/showroom/dashboards'
+    | '/showroom/equipe'
     | '/showroom/estoque'
     | '/showroom/eventos'
     | '/showroom/financeiro'
@@ -3020,6 +3032,7 @@ export interface RootRouteChildren {
   ShowroomClinicasRoute: typeof ShowroomClinicasRoute
   ShowroomCrmRoute: typeof ShowroomCrmRoute
   ShowroomDashboardsRoute: typeof ShowroomDashboardsRoute
+  ShowroomEquipeRoute: typeof ShowroomEquipeRoute
   ShowroomEstoqueRoute: typeof ShowroomEstoqueRoute
   ShowroomEventosRoute: typeof ShowroomEventosRoute
   ShowroomFinanceiroRoute: typeof ShowroomFinanceiroRoute
@@ -3355,6 +3368,13 @@ declare module '@tanstack/react-router' {
       path: '/showroom/estoque'
       fullPath: '/showroom/estoque'
       preLoaderRoute: typeof ShowroomEstoqueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/showroom/equipe': {
+      id: '/showroom/equipe'
+      path: '/showroom/equipe'
+      fullPath: '/showroom/equipe'
+      preLoaderRoute: typeof ShowroomEquipeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/showroom/dashboards': {
@@ -5324,6 +5344,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShowroomClinicasRoute: ShowroomClinicasRoute,
   ShowroomCrmRoute: ShowroomCrmRoute,
   ShowroomDashboardsRoute: ShowroomDashboardsRoute,
+  ShowroomEquipeRoute: ShowroomEquipeRoute,
   ShowroomEstoqueRoute: ShowroomEstoqueRoute,
   ShowroomEventosRoute: ShowroomEventosRoute,
   ShowroomFinanceiroRoute: ShowroomFinanceiroRoute,
