@@ -46,8 +46,8 @@ function formatBRL(cents: number) {
 
 function PixPendentesPage() {
   const fetchList = useServerFn(listPendingPixCharges)
-  const confirm = useServerFn(confirmPixCharge)
-  const cancel = useServerFn(cancelPixCharge)
+  const confirmFn = useServerFn(confirmPixCharge)
+  const cancelFn = useServerFn(cancelPixCharge)
   const qc = useQueryClient()
 
   const { data, isLoading } = useQuery({
