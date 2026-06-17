@@ -3,7 +3,7 @@ import { MessageCircle, PlayCircle, Menu, LogIn } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
-import logoAsset from "@/assets/logo-impulsionando.png.asset.json";
+import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 
 const WHATSAPP_URL =
   "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20falar%20com%20um%20especialista%20da%20Impulsionando.";
