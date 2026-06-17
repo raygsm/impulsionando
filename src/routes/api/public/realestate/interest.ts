@@ -25,20 +25,23 @@ const BodySchema = z.object({
 const corsHeaders: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, X-Request-Id',
 }
-const json = (d: unknown, s = 200) => new Response(JSON.stringify(d), { status: s, headers: { 'Content-Type': 'application/json', ...corsHeaders } })
+const json = (d: unknown, s = 200, extra: Record<string, string> = {}) =>
+  new Response(JSON.stringify(d), { status: s, headers: { 'Content-Type': 'application/json', ...corsHeaders, ...extra } })
 
 export const Route = createFileRoute('/api/public/realestate/interest')({
   server: {
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: corsHeaders }),
       POST: async ({ request }) => {
+        const requestId = request.headers.get('x-request-id') ?? crypto.randomUUID()
+        const reqIdHeader = { 'X-Request-Id': requestId }
         let parsed
-        try { parsed = BodySchema.safeParse(await request.json()) } catch { return json({ error: 'invalid_json' }, 400) }
-        if (!parsed.success) return json({ error: 'invalid_input', issues: parsed.error.format() }, 422)
+        try { parsed = BodySchema.safeParse(await request.json()) } catch { return json({ error: 'invalid_json', requestId }, 400, reqIdHeader) }
+        if (!parsed.success) return json({ error: 'invalid_input', requestId, issues: parsed.error.format() }, 422, reqIdHeader)
         const data = parsed.data
-        if (data.hp && data.hp.trim().length > 0) return json({ ok: true, interestId: null, leadId: null, ignored: true })
+        if (data.hp && data.hp.trim().length > 0) return json({ ok: true, requestId, interestId: null, leadId: null, ignored: true }, 200, reqIdHeader)
 
         try {
           const { processInterest } = await import('@/lib/realestate-vitrine-flow.server')
@@ -55,16 +58,18 @@ export const Route = createFileRoute('/api/public/realestate/interest')({
             utm: data.utm,
             ip: request.headers.get('cf-connecting-ip') ?? request.headers.get('x-forwarded-for'),
             userAgent: request.headers.get('user-agent'),
+            requestId,
           })
           if (!result.ok) {
-            if (result.code === 'company_not_found') return json({ error: 'company_not_found' }, 404)
-            if (result.code === 'property_unavailable') return json({ error: 'property_unavailable' }, 404)
-            if (result.code === 'contact_required') return json({ error: 'contact_required', message: 'Informe e-mail, telefone ou WhatsApp.' }, 422)
+            if (result.code === 'company_not_found') return json({ error: 'company_not_found', requestId }, 404, reqIdHeader)
+            if (result.code === 'property_unavailable') return json({ error: 'property_unavailable', requestId }, 404, reqIdHeader)
+            if (result.code === 'contact_required') return json({ error: 'contact_required', requestId, message: 'Informe e-mail, telefone ou WhatsApp.' }, 422, reqIdHeader)
+            if (result.code === 'internal_error') return json({ error: 'server_error', requestId, message: result.error }, 500, reqIdHeader)
           }
-          return json({ ok: true, interestId: (result as any).interestId, leadId: (result as any).leadId })
+          return json({ ok: true, requestId, interestId: (result as any).interestId, leadId: (result as any).leadId }, 200, reqIdHeader)
         } catch (err: any) {
-          console.error('[/api/public/realestate/interest] error', err)
-          return json({ error: 'server_error', message: err?.message ?? 'unknown' }, 500)
+          console.error('[/api/public/realestate/interest] error', { requestId, err })
+          return json({ error: 'server_error', requestId, message: err?.message ?? 'unknown' }, 500, reqIdHeader)
         }
       },
     },
