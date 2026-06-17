@@ -88,6 +88,9 @@ export type Database = {
           email: string | null
           id: string
           instagram: string | null
+          is_lifetime: boolean
+          lifetime_granted_at: string | null
+          lifetime_granted_by: string | null
           main_channel: string | null
           manager_id: string | null
           name: string
@@ -98,6 +101,9 @@ export type Database = {
           status: Database["public"]["Enums"]["aff_affiliate_status"]
           updated_at: string
           user_id: string | null
+          wallet_balance: number
+          wallet_last_movement_at: string | null
+          wallet_pending: number
           whatsapp: string | null
         }
         Insert: {
@@ -112,6 +118,9 @@ export type Database = {
           email?: string | null
           id?: string
           instagram?: string | null
+          is_lifetime?: boolean
+          lifetime_granted_at?: string | null
+          lifetime_granted_by?: string | null
           main_channel?: string | null
           manager_id?: string | null
           name: string
@@ -122,6 +131,9 @@ export type Database = {
           status?: Database["public"]["Enums"]["aff_affiliate_status"]
           updated_at?: string
           user_id?: string | null
+          wallet_balance?: number
+          wallet_last_movement_at?: string | null
+          wallet_pending?: number
           whatsapp?: string | null
         }
         Update: {
@@ -136,6 +148,9 @@ export type Database = {
           email?: string | null
           id?: string
           instagram?: string | null
+          is_lifetime?: boolean
+          lifetime_granted_at?: string | null
+          lifetime_granted_by?: string | null
           main_channel?: string | null
           manager_id?: string | null
           name?: string
@@ -146,6 +161,9 @@ export type Database = {
           status?: Database["public"]["Enums"]["aff_affiliate_status"]
           updated_at?: string
           user_id?: string | null
+          wallet_balance?: number
+          wallet_last_movement_at?: string | null
+          wallet_pending?: number
           whatsapp?: string | null
         }
         Relationships: [
@@ -1324,6 +1342,62 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "aff_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      aff_wallet_alerts: {
+        Row: {
+          affiliate_id: string
+          amount: number | null
+          company_id: string
+          created_at: string
+          id: string
+          is_read: boolean
+          kind: string
+          message: string | null
+          read_at: string | null
+          related_customer_id: string | null
+          related_sale_id: string | null
+          severity: string
+          title: string
+        }
+        Insert: {
+          affiliate_id: string
+          amount?: number | null
+          company_id: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          kind: string
+          message?: string | null
+          read_at?: string | null
+          related_customer_id?: string | null
+          related_sale_id?: string | null
+          severity?: string
+          title: string
+        }
+        Update: {
+          affiliate_id?: string
+          amount?: number | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          kind?: string
+          message?: string | null
+          read_at?: string | null
+          related_customer_id?: string | null
+          related_sale_id?: string | null
+          severity?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aff_wallet_alerts_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "aff_affiliates"
             referencedColumns: ["id"]
           },
         ]
@@ -10052,6 +10126,23 @@ export type Database = {
           _user_id: string
         }
         Returns: string
+      }
+      permission_matrix: {
+        Args: never
+        Returns: {
+          granted: boolean
+          is_master_profile: boolean
+          permission_code: string
+          permission_id: string
+          permission_module: string
+          profile_id: string
+          profile_name: string
+          profile_slug: string
+        }[]
+      }
+      permission_matrix_toggle: {
+        Args: { _granted: boolean; _permission_id: string; _profile_id: string }
+        Returns: undefined
       }
       public_vitrine_list: {
         Args: { p_city?: string; p_limit?: number; p_segment?: string }
