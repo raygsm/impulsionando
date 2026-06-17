@@ -261,6 +261,7 @@ import { Route as ApiPublicHooksCommsSelfTestRouteImport } from './routes/api/pu
 import { Route as ApiPublicHooksBillingTickRouteImport } from './routes/api/public/hooks/billing-tick'
 import { Route as ApiPublicHooksAffAdvanceCommissionsRouteImport } from './routes/api/public/hooks/aff-advance-commissions'
 import { Route as ApiPublicDemoSendTestRouteImport } from './routes/api/public/demo/send-test'
+import { Route as ApiPublicDemoFeiraLeadRouteImport } from './routes/api/public/demo/feira-lead'
 import { Route as ApiPaymentsInfinitepayCreateRouteImport } from './routes/api/payments/infinitepay.create'
 import { Route as ApiPaymentsInfinitepayCheckStatusRouteImport } from './routes/api/payments/infinitepay.check-status'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
@@ -1640,6 +1641,11 @@ const ApiPublicDemoSendTestRoute = ApiPublicDemoSendTestRouteImport.update({
   path: '/api/public/demo/send-test',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicDemoFeiraLeadRoute = ApiPublicDemoFeiraLeadRouteImport.update({
+  id: '/api/public/demo/feira-lead',
+  path: '/api/public/demo/feira-lead',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPaymentsInfinitepayCreateRoute =
   ApiPaymentsInfinitepayCreateRouteImport.update({
     id: '/api/payments/infinitepay/create',
@@ -1975,6 +1981,7 @@ export interface FileRoutesByFullPath {
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
+  '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
@@ -2232,6 +2239,7 @@ export interface FileRoutesByTo {
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
+  '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
@@ -2502,6 +2510,7 @@ export interface FileRoutesById {
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
+  '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
@@ -2772,6 +2781,7 @@ export interface FileRouteTypes {
     | '/sales/cash/$id'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
+    | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/billing-tick'
@@ -3029,6 +3039,7 @@ export interface FileRouteTypes {
     | '/sales/cash/$id'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
+    | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/billing-tick'
@@ -3298,6 +3309,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sales/cash/$id'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
+    | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/billing-tick'
@@ -3419,6 +3431,7 @@ export interface RootRouteChildren {
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPaymentsInfinitepayCheckStatusRoute: typeof ApiPaymentsInfinitepayCheckStatusRoute
   ApiPaymentsInfinitepayCreateRoute: typeof ApiPaymentsInfinitepayCreateRoute
+  ApiPublicDemoFeiraLeadRoute: typeof ApiPublicDemoFeiraLeadRoute
   ApiPublicDemoSendTestRoute: typeof ApiPublicDemoSendTestRoute
   ApiPublicHooksAffAdvanceCommissionsRoute: typeof ApiPublicHooksAffAdvanceCommissionsRoute
   ApiPublicHooksBillingTickRoute: typeof ApiPublicHooksBillingTickRoute
@@ -5206,6 +5219,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDemoSendTestRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/demo/feira-lead': {
+      id: '/api/public/demo/feira-lead'
+      path: '/api/public/demo/feira-lead'
+      fullPath: '/api/public/demo/feira-lead'
+      preLoaderRoute: typeof ApiPublicDemoFeiraLeadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/payments/infinitepay/create': {
       id: '/api/payments/infinitepay/create'
       path: '/api/payments/infinitepay/create'
@@ -5964,6 +5984,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPaymentsInfinitepayCheckStatusRoute:
     ApiPaymentsInfinitepayCheckStatusRoute,
   ApiPaymentsInfinitepayCreateRoute: ApiPaymentsInfinitepayCreateRoute,
+  ApiPublicDemoFeiraLeadRoute: ApiPublicDemoFeiraLeadRoute,
   ApiPublicDemoSendTestRoute: ApiPublicDemoSendTestRoute,
   ApiPublicHooksAffAdvanceCommissionsRoute:
     ApiPublicHooksAffAdvanceCommissionsRoute,
