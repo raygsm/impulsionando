@@ -53,6 +53,7 @@ import { Route as ShowroomOnboardingRouteImport } from './routes/showroom.onboar
 import { Route as ShowroomMultiUnidadesRouteImport } from './routes/showroom.multi-unidades'
 import { Route as ShowroomMobileRouteImport } from './routes/showroom.mobile'
 import { Route as ShowroomMigracaoRouteImport } from './routes/showroom.migracao'
+import { Route as ShowroomMarketplaceAppsRouteImport } from './routes/showroom.marketplace-apps'
 import { Route as ShowroomMarketingRouteImport } from './routes/showroom.marketing'
 import { Route as ShowroomIntegracoesPremiumRouteImport } from './routes/showroom.integracoes-premium'
 import { Route as ShowroomIntegracoesRouteImport } from './routes/showroom.integracoes'
@@ -483,6 +484,11 @@ const ShowroomMobileRoute = ShowroomMobileRouteImport.update({
 const ShowroomMigracaoRoute = ShowroomMigracaoRouteImport.update({
   id: '/showroom/migracao',
   path: '/showroom/migracao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShowroomMarketplaceAppsRoute = ShowroomMarketplaceAppsRouteImport.update({
+  id: '/showroom/marketplace-apps',
+  path: '/showroom/marketplace-apps',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShowroomMarketingRoute = ShowroomMarketingRouteImport.update({
@@ -1751,6 +1757,7 @@ export interface FileRoutesByFullPath {
   '/showroom/integracoes': typeof ShowroomIntegracoesRoute
   '/showroom/integracoes-premium': typeof ShowroomIntegracoesPremiumRoute
   '/showroom/marketing': typeof ShowroomMarketingRoute
+  '/showroom/marketplace-apps': typeof ShowroomMarketplaceAppsRoute
   '/showroom/migracao': typeof ShowroomMigracaoRoute
   '/showroom/mobile': typeof ShowroomMobileRoute
   '/showroom/multi-unidades': typeof ShowroomMultiUnidadesRoute
@@ -1996,6 +2003,7 @@ export interface FileRoutesByTo {
   '/showroom/integracoes': typeof ShowroomIntegracoesRoute
   '/showroom/integracoes-premium': typeof ShowroomIntegracoesPremiumRoute
   '/showroom/marketing': typeof ShowroomMarketingRoute
+  '/showroom/marketplace-apps': typeof ShowroomMarketplaceAppsRoute
   '/showroom/migracao': typeof ShowroomMigracaoRoute
   '/showroom/mobile': typeof ShowroomMobileRoute
   '/showroom/multi-unidades': typeof ShowroomMultiUnidadesRoute
@@ -2254,6 +2262,7 @@ export interface FileRoutesById {
   '/showroom/integracoes': typeof ShowroomIntegracoesRoute
   '/showroom/integracoes-premium': typeof ShowroomIntegracoesPremiumRoute
   '/showroom/marketing': typeof ShowroomMarketingRoute
+  '/showroom/marketplace-apps': typeof ShowroomMarketplaceAppsRoute
   '/showroom/migracao': typeof ShowroomMigracaoRoute
   '/showroom/mobile': typeof ShowroomMobileRoute
   '/showroom/multi-unidades': typeof ShowroomMultiUnidadesRoute
@@ -2512,6 +2521,7 @@ export interface FileRouteTypes {
     | '/showroom/integracoes'
     | '/showroom/integracoes-premium'
     | '/showroom/marketing'
+    | '/showroom/marketplace-apps'
     | '/showroom/migracao'
     | '/showroom/mobile'
     | '/showroom/multi-unidades'
@@ -2757,6 +2767,7 @@ export interface FileRouteTypes {
     | '/showroom/integracoes'
     | '/showroom/integracoes-premium'
     | '/showroom/marketing'
+    | '/showroom/marketplace-apps'
     | '/showroom/migracao'
     | '/showroom/mobile'
     | '/showroom/multi-unidades'
@@ -3014,6 +3025,7 @@ export interface FileRouteTypes {
     | '/showroom/integracoes'
     | '/showroom/integracoes-premium'
     | '/showroom/marketing'
+    | '/showroom/marketplace-apps'
     | '/showroom/migracao'
     | '/showroom/mobile'
     | '/showroom/multi-unidades'
@@ -3242,6 +3254,7 @@ export interface RootRouteChildren {
   ShowroomIntegracoesRoute: typeof ShowroomIntegracoesRoute
   ShowroomIntegracoesPremiumRoute: typeof ShowroomIntegracoesPremiumRoute
   ShowroomMarketingRoute: typeof ShowroomMarketingRoute
+  ShowroomMarketplaceAppsRoute: typeof ShowroomMarketplaceAppsRoute
   ShowroomMigracaoRoute: typeof ShowroomMigracaoRoute
   ShowroomMobileRoute: typeof ShowroomMobileRoute
   ShowroomMultiUnidadesRoute: typeof ShowroomMultiUnidadesRoute
@@ -3593,6 +3606,13 @@ declare module '@tanstack/react-router' {
       path: '/showroom/migracao'
       fullPath: '/showroom/migracao'
       preLoaderRoute: typeof ShowroomMigracaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/showroom/marketplace-apps': {
+      id: '/showroom/marketplace-apps'
+      path: '/showroom/marketplace-apps'
+      fullPath: '/showroom/marketplace-apps'
+      preLoaderRoute: typeof ShowroomMarketplaceAppsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/showroom/marketing': {
@@ -5682,6 +5702,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShowroomIntegracoesRoute: ShowroomIntegracoesRoute,
   ShowroomIntegracoesPremiumRoute: ShowroomIntegracoesPremiumRoute,
   ShowroomMarketingRoute: ShowroomMarketingRoute,
+  ShowroomMarketplaceAppsRoute: ShowroomMarketplaceAppsRoute,
   ShowroomMigracaoRoute: ShowroomMigracaoRoute,
   ShowroomMobileRoute: ShowroomMobileRoute,
   ShowroomMultiUnidadesRoute: ShowroomMultiUnidadesRoute,
