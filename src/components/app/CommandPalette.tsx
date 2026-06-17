@@ -64,6 +64,20 @@ export function CommandPalette() {
             <CommandSeparator />
           </>
         )}
+        {recent.length > 0 && (
+          <>
+            <CommandGroup heading="Recentes">
+              {recent.slice(0, 6).map((r) => (
+                <CommandItem key={`rec-${r.to}`} value={`recente ${r.label} ${r.to}`} onSelect={() => go(r.to)}>
+                  <Clock className="mr-2 size-4 text-muted-foreground" />
+                  <span>{r.label}</span>
+                  <span className="ml-auto text-xs text-muted-foreground">{r.to}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+            <CommandSeparator />
+          </>
+        )}
         {cockpits.length > 0 && (
           <>
             <CommandGroup heading="Cockpits & KPIs">
