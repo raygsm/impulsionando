@@ -6,6 +6,7 @@ import { TrialBanner } from "./TrialBanner";
 import { PastDueBanner } from "@/components/PastDueBanner";
 import { ImpersonationBanner } from "./ImpersonationBanner";
 import { CommandPalette } from "./CommandPalette";
+import { QuickActions } from "./QuickActions";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMyTrial } from "@/hooks/use-trial";
@@ -115,6 +116,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <main className="flex-1 p-6 lg:p-8 overflow-x-hidden">{children}</main>
       </div>
       <CommandPalette />
+      <QuickActions />
     </div>
   );
 }

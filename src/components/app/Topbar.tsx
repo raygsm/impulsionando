@@ -11,6 +11,7 @@ import { MobileSidebar } from "./MobileSidebar";
 import { NotificationsBell } from "./NotificationsBell";
 import { OnboardingStatusPill } from "./OnboardingStatusPill";
 import { AppearanceMenu } from "./AppearanceMenu";
+import { QuickActionsButton } from "./QuickActions";
 
 type NavItem = { label: string; to: string; group: string; keywords?: string };
 
@@ -168,6 +169,7 @@ export function Topbar({ currentUser }: { currentUser: CurrentUser }) {
         )}
       </div>
       <div className="flex items-center gap-2 sm:gap-3">
+        <QuickActionsButton />
         <OnboardingStatusPill companyId={currentUser.memberships?.[0]?.company_id} />
         <AppearanceMenu />
         <NotificationsBell userId={currentUser.user.id} />
