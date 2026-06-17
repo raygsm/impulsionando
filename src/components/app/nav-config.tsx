@@ -8,6 +8,7 @@ import {
   Contact, BarChart3, ShieldCheck, Inbox, GraduationCap, Stethoscope, Sparkles,
   Handshake, Link2, Ticket, Briefcase, BadgeDollarSign, TrendingUp, Banknote, Copy,
   Home, Search as SearchIcon, Zap, Bot, MessageSquare,
+  History as HistoryIcon,
 } from "lucide-react";
 
 
@@ -107,7 +108,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/finance/categories", label: "Categorias", icon: FolderTree, perm: "finance.category.write" },
       { to: "/finance/methods", label: "Métodos", icon: CreditCard, perm: "finance.method.write" },
       { to: "/finance/commissions", label: "Comissões", icon: Percent, perm: "finance.commission.read" },
-      { to: "/finance/webhook-log", label: "Log de Webhooks", icon: History, perm: "finance.transaction.read" },
+      { to: "/finance/webhook-log", label: "Log de Webhooks", icon: HistoryIcon, perm: "finance.transaction.read" },
     ],
   },
   {
