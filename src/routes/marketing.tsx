@@ -163,15 +163,82 @@ function MarketingPage() {
           </div>
         </section>
 
-        {/* Marketing + Tecnologia */}
-        <section className="py-20 bg-muted/30">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl font-bold">Marketing + Tecnologia, no mesmo time</h2>
-            <p className="mt-4 text-muted-foreground max-w-3xl mx-auto">
-              Diferente de agências tradicionais, nosso time une estratégia comercial,
-              criação de conteúdo, mídia, CRM e tecnologia em um único ponto de contato. Tudo
-              roda dentro do nosso Core, com leitura de funil e métricas atualizadas em tempo real.
+        {/* Tecnologia × Brasil — duas marcas, um time */}
+        <section id="tecnologia-brasil" className="py-20 bg-muted/30">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <Badge variant="outline" className="mb-3">Duas marcas, um time</Badge>
+              <h2 className="text-3xl font-bold">Impulsionando Tecnologia × Impulsionando Brasil</h2>
+              <p className="mt-3 text-muted-foreground max-w-3xl mx-auto">
+                Separamos o que é <strong>produto</strong> do que é <strong>serviço</strong> pra você entender o que está contratando — e poder usar um, outro ou os dois.
+              </p>
+            </div>
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card className="p-7 border-primary/30">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="rounded-md bg-primary/10 p-2"><Cpu className="h-5 w-5 text-primary" /></div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">PRODUTO · SaaS</div>
+                    <h3 className="text-xl font-semibold">Impulsionando Tecnologia</h3>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  A plataforma. CRM, agenda, financeiro, vendas, estoque, BI e módulos por nicho rodando no nosso Core multiempresa.
+                </p>
+                <ul className="space-y-1.5 text-sm">
+                  {["Assinatura mensal, sem fidelidade", "Trial de 7 dias", "Módulos por nicho ativáveis", "API e webhooks abertos"].map((b) => (
+                    <li key={b} className="flex gap-2"><CheckCircle2 className="w-4 h-4 mt-0.5 text-primary shrink-0" /><span>{b}</span></li>
+                  ))}
+                </ul>
+                <Button asChild variant="outline" className="mt-5 w-full">
+                  <a href="/empresas">Ver o produto <ArrowRight className="ml-2 w-4 h-4" /></a>
+                </Button>
+              </Card>
+              <Card className="p-7">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="rounded-md bg-primary/10 p-2"><Megaphone className="h-5 w-5 text-primary" /></div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">SERVIÇO · Agência</div>
+                    <h3 className="text-xl font-semibold">Impulsionando Brasil</h3>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  A operação. Marketing, mídia, conteúdo, agente virtual e assessoria 360 — feito por gente, medido com a Tecnologia.
+                </p>
+                <ul className="space-y-1.5 text-sm">
+                  {["Contratos de 90 dias", "Painel transparente de funil", "Time dedicado por cliente", "Integra direto no Core"].map((b) => (
+                    <li key={b} className="flex gap-2"><CheckCircle2 className="w-4 h-4 mt-0.5 text-primary shrink-0" /><span>{b}</span></li>
+                  ))}
+                </ul>
+                <Button asChild className="mt-5 w-full bg-gradient-primary">
+                  <a href="#servicos">Ver os serviços <ArrowRight className="ml-2 w-4 h-4" /></a>
+                </Button>
+              </Card>
+            </div>
+            <p className="text-center text-sm text-muted-foreground mt-8 max-w-2xl mx-auto">
+              Pode contratar só o produto, só o serviço, ou os dois juntos. Quando vêm juntos, o cliente acompanha em tempo real cada lead virar venda dentro do mesmo painel.
             </p>
+          </div>
+        </section>
+
+        {/* Marca · INPI */}
+        <section id="marca-inpi" className="py-16 border-t">
+          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            <Card className="p-7 md:p-9 flex flex-col md:flex-row gap-6 items-start md:items-center">
+              <div className="rounded-md bg-primary/10 p-3 shrink-0">
+                <ShieldCheck className="h-7 w-7 text-primary" />
+              </div>
+              <div className="flex-1">
+                <Badge variant="outline" className="mb-2">Marca registrada · INPI</Badge>
+                <h3 className="text-xl font-semibold">"Impulsionando" é marca depositada no INPI</h3>
+                <p className="text-sm text-muted-foreground mt-2">
+                  As marcas <strong>Impulsionando Tecnologia</strong> e <strong>Impulsionando Brasil</strong> foram depositadas no Instituto Nacional da Propriedade Industrial (INPI) nas classes de software e serviços de marketing. Uso comercial sem autorização sujeita o infrator às penalidades da Lei 9.279/96.
+                </p>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Para licenciamento, parceria white-label ou autorização de uso, fale com nosso jurídico em <a href="mailto:juridico@impulsionando.com.br" className="underline">juridico@impulsionando.com.br</a>.
+                </p>
+              </div>
+            </Card>
           </div>
         </section>
       </main>
