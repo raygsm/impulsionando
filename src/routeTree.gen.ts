@@ -232,6 +232,7 @@ import { Route as AuthenticatedCoreBriefingsRouteImport } from './routes/_authen
 import { Route as AuthenticatedContratoIdRouteImport } from './routes/_authenticated/contrato.$id'
 import { Route as AuthenticatedConsumerUnifiedRouteImport } from './routes/_authenticated/consumer.unified'
 import { Route as AuthenticatedComunidadeIdRouteImport } from './routes/_authenticated/comunidade.$id'
+import { Route as AuthenticatedCommercialCockpitRouteImport } from './routes/_authenticated/commercial.cockpit'
 import { Route as AuthenticatedBiNichesRouteImport } from './routes/_authenticated/bi.niches'
 import { Route as AuthenticatedBiMasterRouteImport } from './routes/_authenticated/bi.master'
 import { Route as AuthenticatedBiCompanyRouteImport } from './routes/_authenticated/bi.company'
@@ -1493,6 +1494,12 @@ const AuthenticatedComunidadeIdRoute =
     path: '/comunidade/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedCommercialCockpitRoute =
+  AuthenticatedCommercialCockpitRouteImport.update({
+    id: '/commercial/cockpit',
+    path: '/commercial/cockpit',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedBiNichesRoute = AuthenticatedBiNichesRouteImport.update({
   id: '/niches',
   path: '/niches',
@@ -2054,6 +2061,7 @@ export interface FileRoutesByFullPath {
   '/bi/company': typeof AuthenticatedBiCompanyRoute
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
+  '/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
   '/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
   '/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
   '/contrato/$id': typeof AuthenticatedContratoIdRoute
@@ -2335,6 +2343,7 @@ export interface FileRoutesByTo {
   '/bi/company': typeof AuthenticatedBiCompanyRoute
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
+  '/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
   '/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
   '/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
   '/contrato/$id': typeof AuthenticatedContratoIdRoute
@@ -2629,6 +2638,7 @@ export interface FileRoutesById {
   '/_authenticated/bi/company': typeof AuthenticatedBiCompanyRoute
   '/_authenticated/bi/master': typeof AuthenticatedBiMasterRoute
   '/_authenticated/bi/niches': typeof AuthenticatedBiNichesRoute
+  '/_authenticated/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
   '/_authenticated/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
   '/_authenticated/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
   '/_authenticated/contrato/$id': typeof AuthenticatedContratoIdRoute
@@ -2923,6 +2933,7 @@ export interface FileRouteTypes {
     | '/bi/company'
     | '/bi/master'
     | '/bi/niches'
+    | '/commercial/cockpit'
     | '/comunidade/$id'
     | '/consumer/unified'
     | '/contrato/$id'
@@ -3204,6 +3215,7 @@ export interface FileRouteTypes {
     | '/bi/company'
     | '/bi/master'
     | '/bi/niches'
+    | '/commercial/cockpit'
     | '/comunidade/$id'
     | '/consumer/unified'
     | '/contrato/$id'
@@ -3497,6 +3509,7 @@ export interface FileRouteTypes {
     | '/_authenticated/bi/company'
     | '/_authenticated/bi/master'
     | '/_authenticated/bi/niches'
+    | '/_authenticated/commercial/cockpit'
     | '/_authenticated/comunidade/$id'
     | '/_authenticated/consumer/unified'
     | '/_authenticated/contrato/$id'
@@ -5314,6 +5327,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedComunidadeIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/commercial/cockpit': {
+      id: '/_authenticated/commercial/cockpit'
+      path: '/commercial/cockpit'
+      fullPath: '/commercial/cockpit'
+      preLoaderRoute: typeof AuthenticatedCommercialCockpitRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/bi/niches': {
       id: '/_authenticated/bi/niches'
       path: '/niches'
@@ -6240,6 +6260,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminBillingPolicyRoute: typeof AuthenticatedAdminBillingPolicyRoute
   AuthenticatedAdminTrialsRoute: typeof AuthenticatedAdminTrialsRoute
   AuthenticatedAdminUptimeRoute: typeof AuthenticatedAdminUptimeRoute
+  AuthenticatedCommercialCockpitRoute: typeof AuthenticatedCommercialCockpitRoute
   AuthenticatedComunidadeIdRoute: typeof AuthenticatedComunidadeIdRoute
   AuthenticatedConsumerUnifiedRoute: typeof AuthenticatedConsumerUnifiedRoute
   AuthenticatedContratoIdRoute: typeof AuthenticatedContratoIdRoute
@@ -6304,6 +6325,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminBillingPolicyRoute: AuthenticatedAdminBillingPolicyRoute,
   AuthenticatedAdminTrialsRoute: AuthenticatedAdminTrialsRoute,
   AuthenticatedAdminUptimeRoute: AuthenticatedAdminUptimeRoute,
+  AuthenticatedCommercialCockpitRoute: AuthenticatedCommercialCockpitRoute,
   AuthenticatedComunidadeIdRoute: AuthenticatedComunidadeIdRoute,
   AuthenticatedConsumerUnifiedRoute: AuthenticatedConsumerUnifiedRoute,
   AuthenticatedContratoIdRoute: AuthenticatedContratoIdRoute,
