@@ -141,6 +141,7 @@ import { Route as AuthenticatedAdmRouteImport } from './routes/_authenticated/ad
 import { Route as AuthenticatedAccessProfilesRouteImport } from './routes/_authenticated/access-profiles'
 import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
 import { Route as AuthenticatedReportsIndexRouteImport } from './routes/_authenticated/reports.index'
+import { Route as AuthenticatedNotificationsIndexRouteImport } from './routes/_authenticated/notifications.index'
 import { Route as AuthenticatedInventoryIndexRouteImport } from './routes/_authenticated/inventory.index'
 import { Route as AuthenticatedFinanceIndexRouteImport } from './routes/_authenticated/finance.index'
 import { Route as AuthenticatedEventosIndexRouteImport } from './routes/_authenticated/eventos.index'
@@ -974,6 +975,12 @@ const AuthenticatedReportsIndexRoute =
     id: '/',
     path: '/',
     getParentRoute: () => AuthenticatedReportsRoute,
+  } as any)
+const AuthenticatedNotificationsIndexRoute =
+  AuthenticatedNotificationsIndexRouteImport.update({
+    id: '/notifications/',
+    path: '/notifications/',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedInventoryIndexRoute =
   AuthenticatedInventoryIndexRouteImport.update({
@@ -2193,6 +2200,7 @@ export interface FileRoutesByFullPath {
   '/eventos/': typeof AuthenticatedEventosIndexRoute
   '/finance/': typeof AuthenticatedFinanceIndexRoute
   '/inventory/': typeof AuthenticatedInventoryIndexRoute
+  '/notifications/': typeof AuthenticatedNotificationsIndexRoute
   '/reports/': typeof AuthenticatedReportsIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
@@ -2480,6 +2488,7 @@ export interface FileRoutesByTo {
   '/eventos': typeof AuthenticatedEventosIndexRoute
   '/finance': typeof AuthenticatedFinanceIndexRoute
   '/inventory': typeof AuthenticatedInventoryIndexRoute
+  '/notifications': typeof AuthenticatedNotificationsIndexRoute
   '/reports': typeof AuthenticatedReportsIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
@@ -2780,6 +2789,7 @@ export interface FileRoutesById {
   '/_authenticated/eventos/': typeof AuthenticatedEventosIndexRoute
   '/_authenticated/finance/': typeof AuthenticatedFinanceIndexRoute
   '/_authenticated/inventory/': typeof AuthenticatedInventoryIndexRoute
+  '/_authenticated/notifications/': typeof AuthenticatedNotificationsIndexRoute
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
   '/_authenticated/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
@@ -3080,6 +3090,7 @@ export interface FileRouteTypes {
     | '/eventos/'
     | '/finance/'
     | '/inventory/'
+    | '/notifications/'
     | '/reports/'
     | '/sales/'
     | '/admin/modulos/clonagem'
@@ -3367,6 +3378,7 @@ export interface FileRouteTypes {
     | '/eventos'
     | '/finance'
     | '/inventory'
+    | '/notifications'
     | '/reports'
     | '/sales'
     | '/admin/modulos/clonagem'
@@ -3666,6 +3678,7 @@ export interface FileRouteTypes {
     | '/_authenticated/eventos/'
     | '/_authenticated/finance/'
     | '/_authenticated/inventory/'
+    | '/_authenticated/notifications/'
     | '/_authenticated/reports/'
     | '/_authenticated/sales/'
     | '/_authenticated/admin/modulos/clonagem'
@@ -4754,6 +4767,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/reports/'
       preLoaderRoute: typeof AuthenticatedReportsIndexRouteImport
       parentRoute: typeof AuthenticatedReportsRoute
+    }
+    '/_authenticated/notifications/': {
+      id: '/_authenticated/notifications/'
+      path: '/notifications'
+      fullPath: '/notifications/'
+      preLoaderRoute: typeof AuthenticatedNotificationsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/inventory/': {
       id: '/_authenticated/inventory/'
@@ -6401,6 +6421,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedComunidadeIndexRoute: typeof AuthenticatedComunidadeIndexRoute
   AuthenticatedEhrIndexRoute: typeof AuthenticatedEhrIndexRoute
   AuthenticatedEventosIndexRoute: typeof AuthenticatedEventosIndexRoute
+  AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
   AuthenticatedAdminModulosClonagemRoute: typeof AuthenticatedAdminModulosClonagemRoute
 }
 
@@ -6475,6 +6496,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedComunidadeIndexRoute: AuthenticatedComunidadeIndexRoute,
   AuthenticatedEhrIndexRoute: AuthenticatedEhrIndexRoute,
   AuthenticatedEventosIndexRoute: AuthenticatedEventosIndexRoute,
+  AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
   AuthenticatedAdminModulosClonagemRoute:
     AuthenticatedAdminModulosClonagemRoute,
 }

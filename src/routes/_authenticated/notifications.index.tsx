@@ -51,7 +51,7 @@ function NotificationsCenter() {
       <PageHeader
         title="Central de Notificações"
         description={unreadCount > 0 ? `${unreadCount} não lida${unreadCount > 1 ? "s" : ""}` : "Tudo em dia"}
-        actions={
+        action={
           unreadCount > 0 ? (
             <Button onClick={() => markAllRead.mutate()} size="sm">
               <CheckCheck className="size-4 mr-2" /> Marcar todas como lidas
