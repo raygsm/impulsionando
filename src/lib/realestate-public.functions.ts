@@ -30,6 +30,7 @@ const ListInput = z.object({
   q: z.string().trim().max(120).optional(),
   page: z.number().int().min(1).default(1),
   pageSize: z.number().int().min(1).max(48).default(12),
+  sort: z.enum(['recent', 'price_asc', 'price_desc']).default('recent'),
 })
 
 export const listPublicProperties = createServerFn({ method: 'POST' })
