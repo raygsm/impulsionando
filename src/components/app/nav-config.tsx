@@ -107,6 +107,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/finance/categories", label: "Categorias", icon: FolderTree, perm: "finance.category.write" },
       { to: "/finance/methods", label: "Métodos", icon: CreditCard, perm: "finance.method.write" },
       { to: "/finance/commissions", label: "Comissões", icon: Percent, perm: "finance.commission.read" },
+      { to: "/finance/webhook-log", label: "Log de Webhooks", icon: History, perm: "finance.transaction.read" },
     ],
   },
   {
