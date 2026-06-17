@@ -8413,6 +8413,38 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vitrine_export_logs: {
         Row: {
           batches_done: number
@@ -8699,6 +8731,13 @@ export type Database = {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_impulsionando_staff: { Args: { _user: string }; Returns: boolean }
       is_patient_of_record:
         | { Args: { _record: string; _user: string }; Returns: boolean }
@@ -8860,6 +8899,13 @@ export type Database = {
         | "estornado"
         | "chargeback"
         | "bloqueado"
+      app_role:
+        | "admin"
+        | "white_label"
+        | "gestor"
+        | "operador"
+        | "profissional"
+        | "consumidor"
       company_environment: "demo" | "teste" | "real"
       realestate_approval_status:
         | "pending"
@@ -9082,6 +9128,14 @@ export const Constants = {
         "estornado",
         "chargeback",
         "bloqueado",
+      ],
+      app_role: [
+        "admin",
+        "white_label",
+        "gestor",
+        "operador",
+        "profissional",
+        "consumidor",
       ],
       company_environment: ["demo", "teste", "real"],
       realestate_approval_status: [
