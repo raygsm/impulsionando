@@ -30,13 +30,6 @@ const PLAN_QUOTA: Record<string, number> = {
   Avançado: 3,
 };
 
-/** Setup de implantação (1ª parcela) em reais — usado no resumo de contratação. */
-const PLAN_SETUP_BRL: Record<string, number> = {
-  Essencial: 297,
-  Integrado: 759,
-  Avançado: 1518,
-};
-
 /** Preço por módulo adicional além da quota do plano. */
 const EXTRA_MODULE_BRL = 497;
 
@@ -47,7 +40,7 @@ export const Route = createFileRoute("/planos")({
   head: () => ({
     meta: [
       { title: "Planos e Preços — Essencial, Integrado, Avançado e Sob Medida | Impulsionando Tecnologia" },
-      { name: "description", content: "Planos flexíveis a partir de R$ 297/mês. Essencial (1 módulo), Integrado (2), Avançado (3+) e Sob Medida. Mensal ou anual com 2 meses grátis." },
+      { name: "description", content: "Planos atrelados ao salário mínimo: Essencial (½ SM), Integrado (1 SM), Avançado (2 SM) e Sob Medida. Mensal ou anual com 2 meses grátis." },
       { property: "og:title", content: "Planos — Impulsionando Tecnologia" },
       { property: "og:description", content: "Do Essencial ao Sob Medida. Anual com 2 meses grátis. Sem fidelidade obrigatória." },
       { property: "og:url", content: "https://sistemas.impulsionando.com.br/planos" },
@@ -67,55 +60,65 @@ type Plan = {
   cta: string;
 };
 
-const PLANS: Plan[] = [
-  {
-    name: "Essencial",
-    tagline: "Comece pelo módulo que mais dói hoje — sem peso desnecessário.",
-    monthly: 759,
-    modulesLabel: "1 módulo principal + base operacional",
-    features: [
-      "1 módulo principal à escolha: CRM, Agenda, EHR (prontuário), PDV, Vitrine Imobiliária, Área do Cliente ou Eventos",
-      "Base inclusa: dashboard, cadastros, perfis e permissões, auditoria",
-      "Financeiro essencial (contas a receber + fluxo de caixa)",
-      "Até 3 usuários · 1 unidade",
-      "Suporte por e-mail e WhatsApp",
-      "7 dias de Trial com tudo liberado, sem cartão",
-    ],
-    cta: "Começar Trial de 7 dias",
-  },
-  {
-    name: "Integrado",
-    tagline: "Dois módulos que se potencializam, com automação entre eles.",
-    monthly: 1518,
-    modulesLabel: "2 módulos principais integrados + automação",
-    features: [
-      "Pares curados de alta sinergia: CRM + Agenda, PDV + Estoque, Commerce + Delivery, Vitrine + CRM Imobiliário, EHR + Agenda Clínica",
-      "Financeiro completo (contas a pagar/receber, conciliação, comissões)",
-      "Automações cruzadas entre módulos (gatilhos e fluxos)",
-      "Central de mensagens (WhatsApp + E-mail transacional)",
-      "Até 5 usuários · 1 unidade · API e webhooks",
-      "Suporte prioritário",
-    ],
-    highlight: true,
-    cta: "Começar Trial de 7 dias",
-  },
-  {
-    name: "Avançado",
-    tagline: "Operação digital ponta a ponta, com BI e multi-unidades.",
-    monthly: 3036,
-    modulesLabel: "3 módulos principais + BI & Dashboards",
-    features: [
-      "3 módulos principais à escolha (ex.: ERP + CRM + Agenda, ou Commerce + PDV + Estoque)",
-      "BI & Dashboards consolidados com indicadores por unidade",
-      "Multi-unidades (até 3) e gestão por setores",
-      "Automação avançada multi-módulo + jornadas de CRM",
-      "Governança LGPD, exportações e logs de auditoria expandidos",
-      "Até 10 usuários · API, webhooks e ambiente de homologação",
-      "Suporte prioritário com acompanhamento técnico dedicado",
-    ],
-    cta: "Começar Trial de 7 dias",
-  },
-];
+/**
+ * Constrói a lista de planos a partir do salário mínimo vigente.
+ *  - Essencial: ½ SM
+ *  - Integrado: 1 SM
+ *  - Avançado:  2 SM
+ * Setup (1ª parcela) = mensalidade do plano.
+ */
+function buildPlans(wage: number): Plan[] {
+  return [
+    {
+      name: "Essencial",
+      tagline: "Comece pelo módulo que mais dói hoje — sem peso desnecessário.",
+      monthly: wage / 2,
+      modulesLabel: "1 módulo principal + base operacional",
+      features: [
+        "1 módulo principal à escolha: CRM, Agenda, EHR (prontuário), PDV, Vitrine Imobiliária, Área do Cliente ou Eventos",
+        "Base inclusa: dashboard, cadastros, perfis e permissões, auditoria",
+        "Financeiro essencial (contas a receber + fluxo de caixa)",
+        "Até 3 usuários · 1 unidade",
+        "Suporte por e-mail e WhatsApp",
+        "7 dias de Trial com tudo liberado, sem cartão",
+      ],
+      cta: "Começar Trial de 7 dias",
+    },
+    {
+      name: "Integrado",
+      tagline: "Dois módulos que se potencializam, com automação entre eles.",
+      monthly: wage,
+      modulesLabel: "2 módulos principais integrados + automação",
+      features: [
+        "Pares curados de alta sinergia: CRM + Agenda, PDV + Estoque, Commerce + Delivery, Vitrine + CRM Imobiliário, EHR + Agenda Clínica",
+        "Financeiro completo (contas a pagar/receber, conciliação, comissões)",
+        "Automações cruzadas entre módulos (gatilhos e fluxos)",
+        "Central de mensagens (WhatsApp + E-mail transacional)",
+        "Até 5 usuários · 1 unidade · API e webhooks",
+        "Suporte prioritário",
+      ],
+      highlight: true,
+      cta: "Começar Trial de 7 dias",
+    },
+    {
+      name: "Avançado",
+      tagline: "Operação digital ponta a ponta, com BI e multi-unidades.",
+      monthly: wage * 2,
+      modulesLabel: "3 módulos principais + BI & Dashboards",
+      features: [
+        "3 módulos principais à escolha (ex.: ERP + CRM + Agenda, ou Commerce + PDV + Estoque)",
+        "BI & Dashboards consolidados com indicadores por unidade",
+        "Multi-unidades (até 3) e gestão por setores",
+        "Automação avançada multi-módulo + jornadas de CRM",
+        "Governança LGPD, exportações e logs de auditoria expandidos",
+        "Até 10 usuários · API, webhooks e ambiente de homologação",
+        "Suporte prioritário com acompanhamento técnico dedicado",
+      ],
+      cta: "Começar Trial de 7 dias",
+    },
+  ];
+}
+
 
 
 type Row = { feature: string; values: (boolean | string)[] };
