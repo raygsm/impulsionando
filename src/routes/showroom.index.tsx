@@ -122,6 +122,9 @@ function ShowroomHub() {
               <Button asChild size="lg" variant="outline">
                 <Link to="/showroom/agendamentos-online">Agendamento público</Link>
               </Button>
+              <Button asChild size="lg" variant="outline">
+                <Link to="/showroom/contratos">Contratos digitais</Link>
+              </Button>
 
 
 
