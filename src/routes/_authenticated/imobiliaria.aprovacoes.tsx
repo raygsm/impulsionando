@@ -452,6 +452,11 @@ function HistoryDialog({ item, onClose }: { item: QueueItem | null; onClose: () 
                   {new Date(r.created_at).toLocaleString("pt-BR")}
                   {r.actor_id && actors[r.actor_id] ? ` · ${actors[r.actor_id]}` : ""}
                 </div>
+                {(r.previous_status || r.new_status) && (
+                  <div className="text-[11px] text-muted-foreground mt-0.5">
+                    {(r.previous_status ?? "—")} → {(r.new_status ?? "—")}
+                  </div>
+                )}
                 {r.notes && <div className="text-sm mt-1">{r.notes}</div>}
               </li>
             ))}
