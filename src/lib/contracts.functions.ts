@@ -187,7 +187,7 @@ export const signContractDocument = createServerFn({ method: "POST" })
       updatePatch.signed_storage_path = data.signed_storage_path;
       updatePatch.signed_file_hash = data.signed_file_hash;
     }
-    await context.supabase.from("contract_documents").update(updatePatch).eq("id", doc.id);
+    await context.supabase.from("contract_documents").update(updatePatch as never).eq("id", doc.id);
 
     await context.supabase.from("audit_logs").insert({
       company_id: doc.company_id,
