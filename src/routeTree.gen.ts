@@ -48,6 +48,7 @@ import { Route as ShowroomFitnessRouteImport } from './routes/showroom.fitness'
 import { Route as ShowroomEventosRouteImport } from './routes/showroom.eventos'
 import { Route as ShowroomDashboardsRouteImport } from './routes/showroom.dashboards'
 import { Route as ShowroomClinicasRouteImport } from './routes/showroom.clinicas'
+import { Route as ShowroomCaixaUnificadaRouteImport } from './routes/showroom.caixa-unificada'
 import { Route as ShowroomAutomacoesRouteImport } from './routes/showroom.automacoes'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
 import { Route as PlanosTesteRouteImport } from './routes/planos.teste'
@@ -430,6 +431,11 @@ const ShowroomDashboardsRoute = ShowroomDashboardsRouteImport.update({
 const ShowroomClinicasRoute = ShowroomClinicasRouteImport.update({
   id: '/showroom/clinicas',
   path: '/showroom/clinicas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShowroomCaixaUnificadaRoute = ShowroomCaixaUnificadaRouteImport.update({
+  id: '/showroom/caixa-unificada',
+  path: '/showroom/caixa-unificada',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShowroomAutomacoesRoute = ShowroomAutomacoesRouteImport.update({
@@ -1564,6 +1570,7 @@ export interface FileRoutesByFullPath {
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
   '/showroom/automacoes': typeof ShowroomAutomacoesRoute
+  '/showroom/caixa-unificada': typeof ShowroomCaixaUnificadaRoute
   '/showroom/clinicas': typeof ShowroomClinicasRoute
   '/showroom/dashboards': typeof ShowroomDashboardsRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
@@ -1782,6 +1789,7 @@ export interface FileRoutesByTo {
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
   '/showroom/automacoes': typeof ShowroomAutomacoesRoute
+  '/showroom/caixa-unificada': typeof ShowroomCaixaUnificadaRoute
   '/showroom/clinicas': typeof ShowroomClinicasRoute
   '/showroom/dashboards': typeof ShowroomDashboardsRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
@@ -2013,6 +2021,7 @@ export interface FileRoutesById {
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
   '/showroom/automacoes': typeof ShowroomAutomacoesRoute
+  '/showroom/caixa-unificada': typeof ShowroomCaixaUnificadaRoute
   '/showroom/clinicas': typeof ShowroomClinicasRoute
   '/showroom/dashboards': typeof ShowroomDashboardsRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
@@ -2244,6 +2253,7 @@ export interface FileRouteTypes {
     | '/planos/teste'
     | '/r/$slug'
     | '/showroom/automacoes'
+    | '/showroom/caixa-unificada'
     | '/showroom/clinicas'
     | '/showroom/dashboards'
     | '/showroom/eventos'
@@ -2462,6 +2472,7 @@ export interface FileRouteTypes {
     | '/planos/teste'
     | '/r/$slug'
     | '/showroom/automacoes'
+    | '/showroom/caixa-unificada'
     | '/showroom/clinicas'
     | '/showroom/dashboards'
     | '/showroom/eventos'
@@ -2692,6 +2703,7 @@ export interface FileRouteTypes {
     | '/planos/teste'
     | '/r/$slug'
     | '/showroom/automacoes'
+    | '/showroom/caixa-unificada'
     | '/showroom/clinicas'
     | '/showroom/dashboards'
     | '/showroom/eventos'
@@ -2893,6 +2905,7 @@ export interface RootRouteChildren {
   NichosSlugRoute: typeof NichosSlugRoute
   RSlugRoute: typeof RSlugRoute
   ShowroomAutomacoesRoute: typeof ShowroomAutomacoesRoute
+  ShowroomCaixaUnificadaRoute: typeof ShowroomCaixaUnificadaRoute
   ShowroomClinicasRoute: typeof ShowroomClinicasRoute
   ShowroomDashboardsRoute: typeof ShowroomDashboardsRoute
   ShowroomEventosRoute: typeof ShowroomEventosRoute
@@ -3204,6 +3217,13 @@ declare module '@tanstack/react-router' {
       path: '/showroom/clinicas'
       fullPath: '/showroom/clinicas'
       preLoaderRoute: typeof ShowroomClinicasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/showroom/caixa-unificada': {
+      id: '/showroom/caixa-unificada'
+      path: '/showroom/caixa-unificada'
+      fullPath: '/showroom/caixa-unificada'
+      preLoaderRoute: typeof ShowroomCaixaUnificadaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/showroom/automacoes': {
@@ -5117,6 +5137,7 @@ const rootRouteChildren: RootRouteChildren = {
   NichosSlugRoute: NichosSlugRoute,
   RSlugRoute: RSlugRoute,
   ShowroomAutomacoesRoute: ShowroomAutomacoesRoute,
+  ShowroomCaixaUnificadaRoute: ShowroomCaixaUnificadaRoute,
   ShowroomClinicasRoute: ShowroomClinicasRoute,
   ShowroomDashboardsRoute: ShowroomDashboardsRoute,
   ShowroomEventosRoute: ShowroomEventosRoute,
