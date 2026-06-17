@@ -19,8 +19,8 @@ export function MobileSidebar({ currentUser }: { currentUser: CurrentUser }) {
         side="left"
         className="p-0 w-72 bg-sidebar text-sidebar-foreground border-sidebar-border flex flex-col"
       >
-        <div className="px-4 py-5 flex items-center justify-center border-b border-sidebar-border bg-white/95">
-          <img src={logoAsset.url} alt="Impulsionando Tecnologia" className="h-48 w-auto object-contain" />
+        <div className="px-4 py-5 flex items-center justify-center border-b border-sidebar-border" data-bg-tone="dark">
+          <LogoImpulsionando variant="dark" size="2xl" />
         </div>
         <SidebarNav currentUser={currentUser} onNavigate={() => setOpen(false)} />
         <div className="p-3 border-t border-sidebar-border text-xs text-sidebar-foreground/60">
