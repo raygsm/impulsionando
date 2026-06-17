@@ -29,7 +29,7 @@ function ContabBI() {
     enabled: !!companyId,
     queryFn: async () => {
       const [clients, docs, obls, tasks, irpf, finance, contracts] = await Promise.all([
-        supabase.from("contab_clients").select("status, regime, monthly_fee").eq("company_id", companyId!),
+        supabase.from("contab_clients").select("status, tax_regime, monthly_fee").eq("company_id", companyId!),
         supabase.from("contab_documents").select("status").eq("company_id", companyId!),
         supabase.from("contab_obligations").select("status, due_date, amount").eq("company_id", companyId!),
         supabase.from("contab_tasks").select("status, priority").eq("company_id", companyId!),
@@ -54,7 +54,7 @@ function ContabBI() {
     const active = data.clients.filter((c) => c.status === "active");
     const mrr = active.reduce((s, c) => s + (+(c.monthly_fee || 0)), 0);
     const byRegime = active.reduce((acc, c) => {
-      const k = c.regime || "—";
+      const k = c.tax_regime || "—";
       acc[k] = (acc[k] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
