@@ -13,6 +13,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { auditClinical } from "@/lib/clinical-audit.client";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { FileText, Plus, ChevronRight } from "lucide-react";
 
@@ -79,10 +80,16 @@ function EhrList() {
   const create = useMutation({
     mutationFn: async () => {
       if (!companyId || !selectedCustomer) throw new Error("Selecione um paciente");
-      const { error } = await supabase
+      const { data: ins, error } = await supabase
         .from("ehr_records")
-        .insert({ company_id: companyId, customer_id: selectedCustomer });
+        .insert({ company_id: companyId, customer_id: selectedCustomer })
+        .select("id")
+        .maybeSingle();
       if (error) throw error;
+      auditClinical({
+        company_id: companyId, action: "patient.create", entity: "ehr_records",
+        entity_id: ins?.id, after: { customer_id: selectedCustomer },
+      });
     },
     onSuccess: () => {
       toast.success("Prontuário criado");

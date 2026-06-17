@@ -78,5 +78,16 @@ export const invitePatient = createServerFn({ method: "POST" })
       .eq("id", customer.id);
     if (updErr) throw new Error(updErr.message);
 
+    // Audit: patient access granted (link to portal)
+    await context.supabase.from("audit_logs").insert({
+      company_id: (rec as any).company_id,
+      user_id: userId,
+      action: "permission.grant",
+      entity: "customers",
+      entity_id: customer.id,
+      after: { patient_user_id: targetUserId, email: data.email },
+      metadata: { domain: "clinical", source: "invitePatient" },
+    } as any);
+
     return { ok: true, alreadyLinked: false, userId: targetUserId, invitedBy: userId };
   });

@@ -23,6 +23,7 @@ import {
   ArrowLeft, Upload, FileText, FileImage, Activity, Stethoscope, Download, ShieldCheck, UserPlus,
 } from "lucide-react";
 import { invitePatient } from "@/lib/ehr-patient.functions";
+import { auditClinical } from "@/lib/clinical-audit.client";
 
 export const Route = createFileRoute("/_authenticated/ehr/$id")({
   head: () => ({ meta: [{ title: "Prontuário — Impulsionando" }] }),
@@ -259,7 +260,7 @@ function DocumentsTab({
         contentType: f.type || undefined,
       });
       if (up.error) throw up.error;
-      const { error } = await supabase.from("ehr_documents").insert({
+      const { data: ins, error } = await supabase.from("ehr_documents").insert({
         company_id: companyId,
         record_id: recordId,
         title,
@@ -269,8 +270,12 @@ function DocumentsTab({
         mime_type: f.type || null,
         size_bytes: f.size,
         visible_to_patient: visibleToPatient,
-      });
+      }).select("id").maybeSingle();
       if (error) throw error;
+      auditClinical({
+        company_id: companyId, action: "template.create", entity: "ehr_documents",
+        entity_id: ins?.id, after: { record_id: recordId, title, category, source, visible_to_patient: visibleToPatient },
+      });
       toast.success("Documento anexado");
       setOpen(false);
       setTitle("");
@@ -397,12 +402,16 @@ function EvolutionsTab({
 
   async function save() {
     if (!companyId) return toast.error("Selecione uma empresa");
-    const { error } = await supabase.from("ehr_evolutions").insert({
+    const { data: ins, error } = await supabase.from("ehr_evolutions").insert({
       company_id: companyId, record_id: recordId, ...form,
       released_to_patient: releaseToPatient,
       signed_at: new Date().toISOString(),
-    });
+    }).select("id").maybeSingle();
     if (error) return toast.error(error.message);
+    auditClinical({
+      company_id: companyId, action: "appointment.complete", entity: "ehr_evolutions",
+      entity_id: ins?.id, after: { record_id: recordId, released_to_patient: releaseToPatient, ...form },
+    });
     toast.success("Evolução registrada");
     setOpen(false);
     setReleaseToPatient(false);
@@ -495,13 +504,17 @@ function OpinionsTab({
 
   async function save(confirm: boolean) {
     if (!companyId) return toast.error("Selecione uma empresa");
-    const { error } = await supabase.from("ehr_opinions").insert({
+    const { data: ins, error } = await supabase.from("ehr_opinions").insert({
       company_id: companyId, record_id: recordId,
       document_id: docId || null,
       ...form,
       confirmed_at: confirm ? new Date().toISOString() : null,
-    });
+    }).select("id").maybeSingle();
     if (error) return toast.error(error.message);
+    auditClinical({
+      company_id: companyId, action: confirm ? "template.update" : "template.create", entity: "ehr_opinions",
+      entity_id: ins?.id, after: { record_id: recordId, document_id: docId || null, confirmed: confirm, ...form },
+    });
     toast.success(confirm ? "Parecer confirmado eletronicamente" : "Parecer salvo");
     setOpen(false);
     setDocId("");
@@ -519,6 +532,10 @@ function OpinionsTab({
       .update({ confirmed_at: new Date().toISOString() })
       .eq("id", o.id);
     if (error) return toast.error(error.message);
+    if (companyId) auditClinical({
+      company_id: companyId, action: "template.update", entity: "ehr_opinions",
+      entity_id: o.id, before: { confirmed_at: o.confirmed_at }, after: { confirmed_at: "now" },
+    });
     toast.success("Parecer confirmado eletronicamente");
     onChange();
   }
