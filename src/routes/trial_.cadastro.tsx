@@ -43,7 +43,9 @@ function TrialCadastro() {
   const fetcher = useServerFn(requestTrial);
   const [sentTo, setSentTo] = useState<string | null>(null);
 
+  const wage = useMinimumWage();
   const [form, setForm] = useState({
+
     contact_name: "",
     contact_company: "",
     contact_email: "",
