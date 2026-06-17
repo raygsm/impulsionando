@@ -3318,6 +3318,72 @@ export type Database = {
         }
         Relationships: []
       }
+      contab_contracts: {
+        Row: {
+          client_id: string | null
+          company_id: string
+          content: string | null
+          created_at: string
+          end_date: string | null
+          id: string
+          monthly_fee: number | null
+          notes: string | null
+          signature_url: string | null
+          signed_at: string | null
+          start_date: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          client_id?: string | null
+          company_id: string
+          content?: string | null
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          monthly_fee?: number | null
+          notes?: string | null
+          signature_url?: string | null
+          signed_at?: string | null
+          start_date?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string | null
+          company_id?: string
+          content?: string | null
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          monthly_fee?: number | null
+          notes?: string | null
+          signature_url?: string | null
+          signed_at?: string | null
+          start_date?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contab_contracts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "contab_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contab_contracts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contab_departments: {
         Row: {
           color: string | null
@@ -3491,6 +3557,122 @@ export type Database = {
         }
         Relationships: []
       }
+      contab_irpf_journeys: {
+        Row: {
+          base_year: number
+          client_id: string | null
+          company_id: string
+          created_at: string
+          current_step: number
+          fee_amount: number | null
+          fee_paid: boolean | null
+          id: string
+          notes: string | null
+          responsible_id: string | null
+          result_amount: number | null
+          result_type: string | null
+          status: string
+          taxpayer_cpf: string | null
+          taxpayer_name: string
+          updated_at: string
+        }
+        Insert: {
+          base_year: number
+          client_id?: string | null
+          company_id: string
+          created_at?: string
+          current_step?: number
+          fee_amount?: number | null
+          fee_paid?: boolean | null
+          id?: string
+          notes?: string | null
+          responsible_id?: string | null
+          result_amount?: number | null
+          result_type?: string | null
+          status?: string
+          taxpayer_cpf?: string | null
+          taxpayer_name: string
+          updated_at?: string
+        }
+        Update: {
+          base_year?: number
+          client_id?: string | null
+          company_id?: string
+          created_at?: string
+          current_step?: number
+          fee_amount?: number | null
+          fee_paid?: boolean | null
+          id?: string
+          notes?: string | null
+          responsible_id?: string | null
+          result_amount?: number | null
+          result_type?: string | null
+          status?: string
+          taxpayer_cpf?: string | null
+          taxpayer_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contab_irpf_journeys_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "contab_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contab_irpf_journeys_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contab_irpf_steps: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          journey_id: string
+          notes: string | null
+          status: string
+          step_name: string
+          step_number: number
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          journey_id: string
+          notes?: string | null
+          status?: string
+          step_name: string
+          step_number: number
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          journey_id?: string
+          notes?: string | null
+          status?: string
+          step_name?: string
+          step_number?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contab_irpf_steps_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "contab_irpf_journeys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contab_obligations: {
         Row: {
           amount: number | null
@@ -3561,6 +3743,126 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "contab_clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contab_office_finance: {
+        Row: {
+          amount: number
+          category: string | null
+          client_id: string | null
+          company_id: string
+          created_at: string
+          description: string
+          due_date: string | null
+          id: string
+          kind: string
+          notes: string | null
+          paid_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          category?: string | null
+          client_id?: string | null
+          company_id: string
+          created_at?: string
+          description: string
+          due_date?: string | null
+          id?: string
+          kind: string
+          notes?: string | null
+          paid_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category?: string | null
+          client_id?: string | null
+          company_id?: string
+          created_at?: string
+          description?: string
+          due_date?: string | null
+          id?: string
+          kind?: string
+          notes?: string | null
+          paid_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contab_office_finance_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "contab_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contab_office_finance_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contab_onboarding: {
+        Row: {
+          client_id: string | null
+          company_id: string
+          completed_at: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          responsible_id: string | null
+          status: string
+          step_name: string
+          step_order: number
+          updated_at: string
+        }
+        Insert: {
+          client_id?: string | null
+          company_id: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          responsible_id?: string | null
+          status?: string
+          step_name: string
+          step_order?: number
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string | null
+          company_id?: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          responsible_id?: string | null
+          status?: string
+          step_name?: string
+          step_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contab_onboarding_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "contab_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contab_onboarding_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
