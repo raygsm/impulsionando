@@ -88,9 +88,42 @@ function MesaPage() {
       if (!t) return;
       const { data: r } = await supabase.rpc("resolve_table_qr", { _token: t });
       if (r && (r as any).ok) setData(r as Resolved);
-    }, 15000);
+      // Polling da fatura em aberto: detecta pagamento confirmado pelo webhook.
+      if (bill && bill.status !== "paid") {
+        try {
+          const res = await checkBill({ data: { token: t, invoice_id: bill.invoice_id } });
+          if (res.status === "paid") {
+            setBill({ ...bill, status: "paid" });
+            toast.success("Pagamento confirmado! Obrigado 💙");
+          }
+        } catch { /* silencioso */ }
+      }
+    }, 5000);
     return () => clearInterval(id);
-  }, []);
+  }, [bill, checkBill]);
+
+  async function handlePay() {
+    if (!data.session) return;
+    setBillLoading(true);
+    try {
+      const token = window.location.pathname.split("/").pop()!;
+      const res = await createBill({ data: { token } });
+      setBill({
+        invoice_id: res.invoice_id,
+        amount_cents: res.amount_cents,
+        status: res.status,
+        pix_url: res.pix_url,
+        pix_configured: res.pix_configured,
+      });
+      if (!res.pix_configured) {
+        toast.warning("Cobrança gerada, mas o PIX automático ainda não está configurado.");
+      }
+    } catch (err: any) {
+      toast.error(err?.message ?? "Erro ao gerar cobrança");
+    } finally {
+      setBillLoading(false);
+    }
+  }
 
   async function handleCheckin(e: React.FormEvent) {
     e.preventDefault();
