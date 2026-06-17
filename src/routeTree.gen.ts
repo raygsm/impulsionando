@@ -119,8 +119,11 @@ import { Route as AuthenticatedInventorySuppliersRouteImport } from './routes/_a
 import { Route as AuthenticatedInventoryProductsRouteImport } from './routes/_authenticated/inventory.products'
 import { Route as AuthenticatedInventoryMovementsRouteImport } from './routes/_authenticated/inventory.movements'
 import { Route as AuthenticatedInventoryCategoriesRouteImport } from './routes/_authenticated/inventory.categories'
+import { Route as AuthenticatedImobiliariaVitrineRouteImport } from './routes/_authenticated/imobiliaria.vitrine'
 import { Route as AuthenticatedImobiliariaModulosRouteImport } from './routes/_authenticated/imobiliaria.modulos'
+import { Route as AuthenticatedImobiliariaMensagensRouteImport } from './routes/_authenticated/imobiliaria.mensagens'
 import { Route as AuthenticatedImobiliariaMatchesRouteImport } from './routes/_authenticated/imobiliaria.matches'
+import { Route as AuthenticatedImobiliariaInteressadosRouteImport } from './routes/_authenticated/imobiliaria.interessados'
 import { Route as AuthenticatedImobiliariaIntencoesRouteImport } from './routes/_authenticated/imobiliaria.intencoes'
 import { Route as AuthenticatedImobiliariaImoveisRouteImport } from './routes/_authenticated/imobiliaria.imoveis'
 import { Route as AuthenticatedImobiliariaAprovacoesRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes'
@@ -197,6 +200,8 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as ApiPublicRealestateSavedSearchRouteImport } from './routes/api/public/realestate/saved-search'
+import { Route as ApiPublicRealestateInterestRouteImport } from './routes/api/public/realestate/interest'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicOutboxProcessRouteImport } from './routes/api/public/outbox/process'
 import { Route as ApiPublicHooksZapiStatusRouteImport } from './routes/api/public/hooks/zapi-status'
@@ -793,16 +798,34 @@ const AuthenticatedInventoryCategoriesRoute =
     path: '/categories',
     getParentRoute: () => AuthenticatedInventoryRoute,
   } as any)
+const AuthenticatedImobiliariaVitrineRoute =
+  AuthenticatedImobiliariaVitrineRouteImport.update({
+    id: '/imobiliaria/vitrine',
+    path: '/imobiliaria/vitrine',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedImobiliariaModulosRoute =
   AuthenticatedImobiliariaModulosRouteImport.update({
     id: '/imobiliaria/modulos',
     path: '/imobiliaria/modulos',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedImobiliariaMensagensRoute =
+  AuthenticatedImobiliariaMensagensRouteImport.update({
+    id: '/imobiliaria/mensagens',
+    path: '/imobiliaria/mensagens',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedImobiliariaMatchesRoute =
   AuthenticatedImobiliariaMatchesRouteImport.update({
     id: '/imobiliaria/matches',
     path: '/imobiliaria/matches',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedImobiliariaInteressadosRoute =
+  AuthenticatedImobiliariaInteressadosRouteImport.update({
+    id: '/imobiliaria/interessados',
+    path: '/imobiliaria/interessados',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedImobiliariaIntencoesRoute =
@@ -1245,6 +1268,18 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   path: '/lovable/email/auth/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicRealestateSavedSearchRoute =
+  ApiPublicRealestateSavedSearchRouteImport.update({
+    id: '/api/public/realestate/saved-search',
+    path: '/api/public/realestate/saved-search',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicRealestateInterestRoute =
+  ApiPublicRealestateInterestRouteImport.update({
+    id: '/api/public/realestate/interest',
+    path: '/api/public/realestate/interest',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -1546,8 +1581,11 @@ export interface FileRoutesByFullPath {
   '/imobiliaria/aprovacoes': typeof AuthenticatedImobiliariaAprovacoesRouteWithChildren
   '/imobiliaria/imoveis': typeof AuthenticatedImobiliariaImoveisRoute
   '/imobiliaria/intencoes': typeof AuthenticatedImobiliariaIntencoesRoute
+  '/imobiliaria/interessados': typeof AuthenticatedImobiliariaInteressadosRoute
   '/imobiliaria/matches': typeof AuthenticatedImobiliariaMatchesRoute
+  '/imobiliaria/mensagens': typeof AuthenticatedImobiliariaMensagensRoute
   '/imobiliaria/modulos': typeof AuthenticatedImobiliariaModulosRoute
+  '/imobiliaria/vitrine': typeof AuthenticatedImobiliariaVitrineRoute
   '/inventory/categories': typeof AuthenticatedInventoryCategoriesRoute
   '/inventory/movements': typeof AuthenticatedInventoryMovementsRoute
   '/inventory/products': typeof AuthenticatedInventoryProductsRoute
@@ -1596,6 +1634,8 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
   '/api/public/outbox/process': typeof ApiPublicOutboxProcessRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
+  '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -1749,8 +1789,11 @@ export interface FileRoutesByTo {
   '/imobiliaria/aprovacoes': typeof AuthenticatedImobiliariaAprovacoesRouteWithChildren
   '/imobiliaria/imoveis': typeof AuthenticatedImobiliariaImoveisRoute
   '/imobiliaria/intencoes': typeof AuthenticatedImobiliariaIntencoesRoute
+  '/imobiliaria/interessados': typeof AuthenticatedImobiliariaInteressadosRoute
   '/imobiliaria/matches': typeof AuthenticatedImobiliariaMatchesRoute
+  '/imobiliaria/mensagens': typeof AuthenticatedImobiliariaMensagensRoute
   '/imobiliaria/modulos': typeof AuthenticatedImobiliariaModulosRoute
+  '/imobiliaria/vitrine': typeof AuthenticatedImobiliariaVitrineRoute
   '/inventory/categories': typeof AuthenticatedInventoryCategoriesRoute
   '/inventory/movements': typeof AuthenticatedInventoryMovementsRoute
   '/inventory/products': typeof AuthenticatedInventoryProductsRoute
@@ -1799,6 +1842,8 @@ export interface FileRoutesByTo {
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
   '/api/public/outbox/process': typeof ApiPublicOutboxProcessRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
+  '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -1965,8 +2010,11 @@ export interface FileRoutesById {
   '/_authenticated/imobiliaria/aprovacoes': typeof AuthenticatedImobiliariaAprovacoesRouteWithChildren
   '/_authenticated/imobiliaria/imoveis': typeof AuthenticatedImobiliariaImoveisRoute
   '/_authenticated/imobiliaria/intencoes': typeof AuthenticatedImobiliariaIntencoesRoute
+  '/_authenticated/imobiliaria/interessados': typeof AuthenticatedImobiliariaInteressadosRoute
   '/_authenticated/imobiliaria/matches': typeof AuthenticatedImobiliariaMatchesRoute
+  '/_authenticated/imobiliaria/mensagens': typeof AuthenticatedImobiliariaMensagensRoute
   '/_authenticated/imobiliaria/modulos': typeof AuthenticatedImobiliariaModulosRoute
+  '/_authenticated/imobiliaria/vitrine': typeof AuthenticatedImobiliariaVitrineRoute
   '/_authenticated/inventory/categories': typeof AuthenticatedInventoryCategoriesRoute
   '/_authenticated/inventory/movements': typeof AuthenticatedInventoryMovementsRoute
   '/_authenticated/inventory/products': typeof AuthenticatedInventoryProductsRoute
@@ -2015,6 +2063,8 @@ export interface FileRoutesById {
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
   '/api/public/outbox/process': typeof ApiPublicOutboxProcessRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
+  '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -2181,8 +2231,11 @@ export interface FileRouteTypes {
     | '/imobiliaria/aprovacoes'
     | '/imobiliaria/imoveis'
     | '/imobiliaria/intencoes'
+    | '/imobiliaria/interessados'
     | '/imobiliaria/matches'
+    | '/imobiliaria/mensagens'
     | '/imobiliaria/modulos'
+    | '/imobiliaria/vitrine'
     | '/inventory/categories'
     | '/inventory/movements'
     | '/inventory/products'
@@ -2231,6 +2284,8 @@ export interface FileRouteTypes {
     | '/api/public/hooks/zapi-status'
     | '/api/public/outbox/process'
     | '/api/public/payments/webhook'
+    | '/api/public/realestate/interest'
+    | '/api/public/realestate/saved-search'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -2384,8 +2439,11 @@ export interface FileRouteTypes {
     | '/imobiliaria/aprovacoes'
     | '/imobiliaria/imoveis'
     | '/imobiliaria/intencoes'
+    | '/imobiliaria/interessados'
     | '/imobiliaria/matches'
+    | '/imobiliaria/mensagens'
     | '/imobiliaria/modulos'
+    | '/imobiliaria/vitrine'
     | '/inventory/categories'
     | '/inventory/movements'
     | '/inventory/products'
@@ -2434,6 +2492,8 @@ export interface FileRouteTypes {
     | '/api/public/hooks/zapi-status'
     | '/api/public/outbox/process'
     | '/api/public/payments/webhook'
+    | '/api/public/realestate/interest'
+    | '/api/public/realestate/saved-search'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -2599,8 +2659,11 @@ export interface FileRouteTypes {
     | '/_authenticated/imobiliaria/aprovacoes'
     | '/_authenticated/imobiliaria/imoveis'
     | '/_authenticated/imobiliaria/intencoes'
+    | '/_authenticated/imobiliaria/interessados'
     | '/_authenticated/imobiliaria/matches'
+    | '/_authenticated/imobiliaria/mensagens'
     | '/_authenticated/imobiliaria/modulos'
+    | '/_authenticated/imobiliaria/vitrine'
     | '/_authenticated/inventory/categories'
     | '/_authenticated/inventory/movements'
     | '/_authenticated/inventory/products'
@@ -2649,6 +2712,8 @@ export interface FileRouteTypes {
     | '/api/public/hooks/zapi-status'
     | '/api/public/outbox/process'
     | '/api/public/payments/webhook'
+    | '/api/public/realestate/interest'
+    | '/api/public/realestate/saved-search'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -2727,6 +2792,8 @@ export interface RootRouteChildren {
   ApiPublicHooksZapiStatusRoute: typeof ApiPublicHooksZapiStatusRoute
   ApiPublicOutboxProcessRoute: typeof ApiPublicOutboxProcessRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
+  ApiPublicRealestateInterestRoute: typeof ApiPublicRealestateInterestRoute
+  ApiPublicRealestateSavedSearchRoute: typeof ApiPublicRealestateSavedSearchRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -3507,6 +3574,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInventoryCategoriesRouteImport
       parentRoute: typeof AuthenticatedInventoryRoute
     }
+    '/_authenticated/imobiliaria/vitrine': {
+      id: '/_authenticated/imobiliaria/vitrine'
+      path: '/imobiliaria/vitrine'
+      fullPath: '/imobiliaria/vitrine'
+      preLoaderRoute: typeof AuthenticatedImobiliariaVitrineRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/imobiliaria/modulos': {
       id: '/_authenticated/imobiliaria/modulos'
       path: '/imobiliaria/modulos'
@@ -3514,11 +3588,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedImobiliariaModulosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/imobiliaria/mensagens': {
+      id: '/_authenticated/imobiliaria/mensagens'
+      path: '/imobiliaria/mensagens'
+      fullPath: '/imobiliaria/mensagens'
+      preLoaderRoute: typeof AuthenticatedImobiliariaMensagensRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/imobiliaria/matches': {
       id: '/_authenticated/imobiliaria/matches'
       path: '/imobiliaria/matches'
       fullPath: '/imobiliaria/matches'
       preLoaderRoute: typeof AuthenticatedImobiliariaMatchesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/imobiliaria/interessados': {
+      id: '/_authenticated/imobiliaria/interessados'
+      path: '/imobiliaria/interessados'
+      fullPath: '/imobiliaria/interessados'
+      preLoaderRoute: typeof AuthenticatedImobiliariaInteressadosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/imobiliaria/intencoes': {
@@ -4051,6 +4139,20 @@ declare module '@tanstack/react-router' {
       path: '/lovable/email/auth/preview'
       fullPath: '/lovable/email/auth/preview'
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/realestate/saved-search': {
+      id: '/api/public/realestate/saved-search'
+      path: '/api/public/realestate/saved-search'
+      fullPath: '/api/public/realestate/saved-search'
+      preLoaderRoute: typeof ApiPublicRealestateSavedSearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/realestate/interest': {
+      id: '/api/public/realestate/interest'
+      path: '/api/public/realestate/interest'
+      fullPath: '/api/public/realestate/interest'
+      preLoaderRoute: typeof ApiPublicRealestateInterestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/payments/webhook': {
@@ -4621,8 +4723,11 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedImobiliariaAprovacoesRoute: typeof AuthenticatedImobiliariaAprovacoesRouteWithChildren
   AuthenticatedImobiliariaImoveisRoute: typeof AuthenticatedImobiliariaImoveisRoute
   AuthenticatedImobiliariaIntencoesRoute: typeof AuthenticatedImobiliariaIntencoesRoute
+  AuthenticatedImobiliariaInteressadosRoute: typeof AuthenticatedImobiliariaInteressadosRoute
   AuthenticatedImobiliariaMatchesRoute: typeof AuthenticatedImobiliariaMatchesRoute
+  AuthenticatedImobiliariaMensagensRoute: typeof AuthenticatedImobiliariaMensagensRoute
   AuthenticatedImobiliariaModulosRoute: typeof AuthenticatedImobiliariaModulosRoute
+  AuthenticatedImobiliariaVitrineRoute: typeof AuthenticatedImobiliariaVitrineRoute
   AuthenticatedMarketingLeadsRoute: typeof AuthenticatedMarketingLeadsRoute
   AuthenticatedPerfilNotificacoesRoute: typeof AuthenticatedPerfilNotificacoesRoute
   AuthenticatedComunidadeIndexRoute: typeof AuthenticatedComunidadeIndexRoute
@@ -4672,8 +4777,13 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedImobiliariaImoveisRoute: AuthenticatedImobiliariaImoveisRoute,
   AuthenticatedImobiliariaIntencoesRoute:
     AuthenticatedImobiliariaIntencoesRoute,
+  AuthenticatedImobiliariaInteressadosRoute:
+    AuthenticatedImobiliariaInteressadosRoute,
   AuthenticatedImobiliariaMatchesRoute: AuthenticatedImobiliariaMatchesRoute,
+  AuthenticatedImobiliariaMensagensRoute:
+    AuthenticatedImobiliariaMensagensRoute,
   AuthenticatedImobiliariaModulosRoute: AuthenticatedImobiliariaModulosRoute,
+  AuthenticatedImobiliariaVitrineRoute: AuthenticatedImobiliariaVitrineRoute,
   AuthenticatedMarketingLeadsRoute: AuthenticatedMarketingLeadsRoute,
   AuthenticatedPerfilNotificacoesRoute: AuthenticatedPerfilNotificacoesRoute,
   AuthenticatedComunidadeIndexRoute: AuthenticatedComunidadeIndexRoute,
@@ -4805,6 +4915,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksZapiStatusRoute: ApiPublicHooksZapiStatusRoute,
   ApiPublicOutboxProcessRoute: ApiPublicOutboxProcessRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
+  ApiPublicRealestateInterestRoute: ApiPublicRealestateInterestRoute,
+  ApiPublicRealestateSavedSearchRoute: ApiPublicRealestateSavedSearchRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
