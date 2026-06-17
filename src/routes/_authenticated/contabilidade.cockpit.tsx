@@ -9,7 +9,7 @@ import {
   BarChart3, Globe, AlertTriangle, ArrowRight,
 } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/contabilidade.cockpit")({
+export const Route = createFileRoute("/_authenticated/contabilidade/cockpit")({
   head: () => ({
     meta: [{ title: "Cockpit Contábil — Impulsionando" }],
   }),
