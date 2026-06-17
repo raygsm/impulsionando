@@ -68,11 +68,17 @@ function ClubePage() {
   const delAlert = useServerFn(deleteClubeAlert);
   const inviteFn = useServerFn(inviteReferral);
   const checkinFn = useServerFn(createClubeVisit);
+  const partnersFn = useServerFn(listClubePartners);
+  const consumptionFn = useServerFn(listMyClubeConsumption);
+  const recordFn = useServerFn(recordClubeConsumption);
+  const voteFn = useServerFn(votePoll);
 
   const area = useQuery({ queryKey: ["consumer-area"], queryFn: () => fetchArea() });
   const overview = useQuery({ queryKey: ["clube-overview"], queryFn: () => fetchOverview() });
   const alerts = useQuery({ queryKey: ["clube-alerts"], queryFn: () => fetchAlerts() });
   const referrals = useQuery({ queryKey: ["clube-referrals"], queryFn: () => fetchReferrals() });
+  const consumption = useQuery({ queryKey: ["clube-consumption"], queryFn: () => consumptionFn() });
+
 
   const isPremium = overview.data?.isPremium ?? false;
   const isPending = area.data?.membership?.plan === "premium" && area.data?.membership?.status === "pending";
