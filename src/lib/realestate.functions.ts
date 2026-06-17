@@ -284,7 +284,18 @@ async function performReview(
     .select("id, company_id, title, reference_code, submitted_by")
     .single();
   if (e1) throw new Error(e1.message);
-  await logReview(context.supabase, prop.id, prop.company_id, next, context.userId, data.notes);
+  const metadata: Record<string, unknown> = {
+    source: "performReview",
+    requires_notes: next === "rejected" || next === "changes_requested",
+    notes_length: data.notes ? data.notes.length : 0,
+  };
+  if (next === "rejected") metadata.rejection_reason = data.notes ?? null;
+  if (next === "changes_requested") metadata.requested_changes = data.notes ?? null;
+  await logReview(
+    context.supabase, prop.id, prop.company_id, next,
+    context.userId, data.notes,
+    meta.approval_status ?? null, next, metadata,
+  );
   await dispatchNotification({
     event: next,
     propertyId: prop.id,
