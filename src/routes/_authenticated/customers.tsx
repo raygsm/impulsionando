@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Plus, Trash2, Pencil, Search, Users, ShieldOff } from "lucide-react";
 import { toast } from "sonner";
+import { auditClinical } from "@/lib/clinical-audit.client";
 
 export const Route = createFileRoute("/_authenticated/customers")({
   head: () => ({ meta: [{ title: "Clientes" }] }),
@@ -111,9 +112,17 @@ function Page() {
       if (editing) {
         const { error } = await supabase.from("customers").update(payload).eq("id", editing.id);
         if (error) throw error;
+        if (companyId) auditClinical({
+          company_id: companyId, action: "patient.update", entity: "customers",
+          entity_id: editing.id, before: editing as unknown as Record<string, unknown>, after: payload as Record<string, unknown>,
+        });
       } else {
-        const { error } = await supabase.from("customers").insert({ ...payload, created_by: me?.user?.id });
+        const { data: ins, error } = await supabase.from("customers").insert({ ...payload, created_by: me?.user?.id }).select("id").maybeSingle();
         if (error) throw error;
+        if (companyId) auditClinical({
+          company_id: companyId, action: "patient.create", entity: "customers",
+          entity_id: ins?.id, after: payload as Record<string, unknown>,
+        });
       }
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["customers"] }); setOpen(false); toast.success(editing ? "Atualizado" : "Criado"); },
@@ -121,7 +130,11 @@ function Page() {
   });
 
   const del = useMutation({
-    mutationFn: async (id: string) => { const { error } = await supabase.from("customers").delete().eq("id", id); if (error) throw error; },
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("customers").delete().eq("id", id);
+      if (error) throw error;
+      if (companyId) auditClinical({ company_id: companyId, action: "patient.delete", entity: "customers", entity_id: id });
+    },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["customers"] }); toast.success("Excluído"); },
     onError: (e: Error) => toast.error(e.message),
   });
