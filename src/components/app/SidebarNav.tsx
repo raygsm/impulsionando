@@ -1,25 +1,51 @@
 import { useState } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { ChevronDown } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import type { CurrentUser } from "@/lib/auth";
 import { NAV_GROUPS, TOP_ITEMS, type NavItem, type NavGroup } from "./nav-config";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { useImpersonation } from "@/hooks/use-impersonation";
+import { countPendingPixCharges } from "@/lib/pix-charges.functions";
 
 function isItemActive(pathname: string, to: string) {
   return pathname === to || pathname.startsWith(to + "/");
+}
+
+function usePendingPixBadge(enabled: boolean) {
+  return useQuery({
+    queryKey: ["nav", "pending-pix-count"],
+    queryFn: async () => {
+      const res = await countPendingPixCharges();
+      return res?.count ?? 0;
+    },
+    enabled,
+    refetchInterval: 60_000,
+    staleTime: 30_000,
+  });
+}
+
+function NavBadge({ count }: { count: number }) {
+  if (!count) return null;
+  return (
+    <span className="ml-auto inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full text-[10px] font-semibold bg-destructive text-destructive-foreground">
+      {count > 99 ? "99+" : count}
+    </span>
+  );
 }
 
 function NavLinkRow({
   item,
   active,
   onNavigate,
+  badgeCount,
 }: {
   item: NavItem;
   active: boolean;
   onNavigate?: () => void;
+  badgeCount?: number;
 }) {
   const Icon = item.icon;
   return (
@@ -35,9 +61,11 @@ function NavLinkRow({
     >
       <Icon className="w-4 h-4 shrink-0" />
       <span className="truncate">{item.label}</span>
+      {item.badge === "pendingPix" && <NavBadge count={badgeCount ?? 0} />}
     </Link>
   );
 }
+
 
 function Group({
   group,
