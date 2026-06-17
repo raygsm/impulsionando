@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -6,9 +6,15 @@ import { Badge } from "@/components/ui/badge";
 import {
   Building2, AlertTriangle, MessageSquare, CreditCard, Boxes, ClipboardList,
 } from "lucide-react";
+import { checkCoreHealthAccess } from "@/lib/core-rbac.functions";
 
 export const Route = createFileRoute("/_authenticated/core/saude")({
   head: () => ({ meta: [{ title: "Saúde do Core — Impulsionando" }, { name: "robots", content: "noindex" }] }),
+  beforeLoad: async () => {
+    const r = await checkCoreHealthAccess();
+    if (!r.allowed) throw redirect({ to: "/core" as any });
+    return { coreAccess: r.level };
+  },
   component: SaudePage,
 });
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -9,9 +9,15 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { runFullDiagnostic, probeSingleIntegration } from "@/lib/integrations-diagnostic.functions";
+import { checkCoreHealthAccess } from "@/lib/core-rbac.functions";
 
 export const Route = createFileRoute("/_authenticated/core/integracoes/diagnostico")({
   head: () => ({ meta: [{ title: "Diagnóstico de Integrações — Core Impulsionando" }] }),
+  beforeLoad: async () => {
+    const r = await checkCoreHealthAccess();
+    if (!r.allowed) throw redirect({ to: "/core" as any });
+    return { coreAccess: r.level };
+  },
   component: DiagnosticPage,
 });
 
