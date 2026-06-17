@@ -266,6 +266,7 @@ import { Route as AuthenticatedImobiliariaAprovacoesImprimirFilaRouteImport } fr
 import { Route as AuthenticatedCoreModulosSlugRouteImport } from './routes/_authenticated/core.modulos.$slug'
 import { Route as AuthenticatedCoreIntegracoesN8nRouteImport } from './routes/_authenticated/core.integracoes.n8n'
 import { Route as AuthenticatedCoreIntegracoesMercadopagoRouteImport } from './routes/_authenticated/core.integracoes.mercadopago'
+import { Route as AuthenticatedCoreIntegracoesDiagnosticoRouteImport } from './routes/_authenticated/core.integracoes.diagnostico'
 import { Route as AuthenticatedCoreClienteIdRouteImport } from './routes/_authenticated/core.cliente.$id'
 import { Route as AuthenticatedAdminModulosClonagemRouteImport } from './routes/_authenticated/admin.modulos.clonagem'
 import { Route as ApiPublicPaymentsInfinitepayWebhookRouteImport } from './routes/api/public/payments/infinitepay.webhook'
@@ -1668,6 +1669,12 @@ const AuthenticatedCoreIntegracoesMercadopagoRoute =
     path: '/integracoes/mercadopago',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreIntegracoesDiagnosticoRoute =
+  AuthenticatedCoreIntegracoesDiagnosticoRouteImport.update({
+    id: '/integracoes/diagnostico',
+    path: '/integracoes/diagnostico',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreClienteIdRoute =
   AuthenticatedCoreClienteIdRouteImport.update({
     id: '/cliente/$id',
@@ -1945,6 +1952,7 @@ export interface FileRoutesByFullPath {
   '/sales/': typeof AuthenticatedSalesIndexRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
+  '/core/integracoes/diagnostico': typeof AuthenticatedCoreIntegracoesDiagnosticoRoute
   '/core/integracoes/mercadopago': typeof AuthenticatedCoreIntegracoesMercadopagoRoute
   '/core/integracoes/n8n': typeof AuthenticatedCoreIntegracoesN8nRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
@@ -2199,6 +2207,7 @@ export interface FileRoutesByTo {
   '/sales': typeof AuthenticatedSalesIndexRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
+  '/core/integracoes/diagnostico': typeof AuthenticatedCoreIntegracoesDiagnosticoRoute
   '/core/integracoes/mercadopago': typeof AuthenticatedCoreIntegracoesMercadopagoRoute
   '/core/integracoes/n8n': typeof AuthenticatedCoreIntegracoesN8nRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
@@ -2466,6 +2475,7 @@ export interface FileRoutesById {
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
   '/_authenticated/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/_authenticated/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
+  '/_authenticated/core/integracoes/diagnostico': typeof AuthenticatedCoreIntegracoesDiagnosticoRoute
   '/_authenticated/core/integracoes/mercadopago': typeof AuthenticatedCoreIntegracoesMercadopagoRoute
   '/_authenticated/core/integracoes/n8n': typeof AuthenticatedCoreIntegracoesN8nRoute
   '/_authenticated/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
@@ -2733,6 +2743,7 @@ export interface FileRouteTypes {
     | '/sales/'
     | '/admin/modulos/clonagem'
     | '/core/cliente/$id'
+    | '/core/integracoes/diagnostico'
     | '/core/integracoes/mercadopago'
     | '/core/integracoes/n8n'
     | '/core/modulos/$slug'
@@ -2987,6 +2998,7 @@ export interface FileRouteTypes {
     | '/sales'
     | '/admin/modulos/clonagem'
     | '/core/cliente/$id'
+    | '/core/integracoes/diagnostico'
     | '/core/integracoes/mercadopago'
     | '/core/integracoes/n8n'
     | '/core/modulos/$slug'
@@ -3253,6 +3265,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sales/'
     | '/_authenticated/admin/modulos/clonagem'
     | '/_authenticated/core/cliente/$id'
+    | '/_authenticated/core/integracoes/diagnostico'
     | '/_authenticated/core/integracoes/mercadopago'
     | '/_authenticated/core/integracoes/n8n'
     | '/_authenticated/core/modulos/$slug'
@@ -5203,6 +5216,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreIntegracoesMercadopagoRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/integracoes/diagnostico': {
+      id: '/_authenticated/core/integracoes/diagnostico'
+      path: '/integracoes/diagnostico'
+      fullPath: '/core/integracoes/diagnostico'
+      preLoaderRoute: typeof AuthenticatedCoreIntegracoesDiagnosticoRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/cliente/$id': {
       id: '/_authenticated/core/cliente/$id'
       path: '/cliente/$id'
@@ -5432,6 +5452,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreTestesRoute: typeof AuthenticatedCoreTestesRoute
   AuthenticatedCoreIndexRoute: typeof AuthenticatedCoreIndexRoute
   AuthenticatedCoreClienteIdRoute: typeof AuthenticatedCoreClienteIdRouteWithChildren
+  AuthenticatedCoreIntegracoesDiagnosticoRoute: typeof AuthenticatedCoreIntegracoesDiagnosticoRoute
   AuthenticatedCoreIntegracoesMercadopagoRoute: typeof AuthenticatedCoreIntegracoesMercadopagoRoute
   AuthenticatedCoreIntegracoesN8nRoute: typeof AuthenticatedCoreIntegracoesN8nRoute
 }
@@ -5468,6 +5489,8 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreTestesRoute: AuthenticatedCoreTestesRoute,
   AuthenticatedCoreIndexRoute: AuthenticatedCoreIndexRoute,
   AuthenticatedCoreClienteIdRoute: AuthenticatedCoreClienteIdRouteWithChildren,
+  AuthenticatedCoreIntegracoesDiagnosticoRoute:
+    AuthenticatedCoreIntegracoesDiagnosticoRoute,
   AuthenticatedCoreIntegracoesMercadopagoRoute:
     AuthenticatedCoreIntegracoesMercadopagoRoute,
   AuthenticatedCoreIntegracoesN8nRoute: AuthenticatedCoreIntegracoesN8nRoute,

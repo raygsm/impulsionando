@@ -13,8 +13,12 @@ import { Badge } from "@/components/ui/badge";
 import {
   getContractSignedUrl, signContractDocument, listContractSignatures,
 } from "@/lib/contracts.functions";
+import {
+  checkContractAccess, listContractVersionsWithEvidence,
+} from "@/lib/contracts-admin.functions";
 import { generateAndUploadSignedContract } from "@/lib/contractPdf";
 import { supabase } from "@/integrations/supabase/client";
+import { History } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/contrato/$id")({
   head: () => ({ meta: [{ title: "Assinatura de Contrato — Impulsionando" }] }),
@@ -27,6 +31,16 @@ function ContractSignPage() {
   const signFn = useServerFn(signContractDocument);
   const sigsFn = useServerFn(listContractSignatures);
 
+  const accessFn = useServerFn(checkContractAccess);
+  const versionsFn = useServerFn(listContractVersionsWithEvidence);
+
+  const access = useQuery({
+    queryKey: ["contract-access", id],
+    queryFn: () => accessFn({ data: { contract_document_id: id! } }),
+    enabled: !!id,
+    retry: false,
+  });
+
   const doc = useQuery({
     queryKey: ["contract-doc", id],
     queryFn: async () =>
@@ -35,20 +49,27 @@ function ContractSignPage() {
         .select("id, company_id, contract_number, version, status, snapshot, file_hash, signed_storage_path, signed_file_hash, generated_at, signed_at, companies:company_id(name)")
         .eq("id", id!)
         .maybeSingle()).data,
-    enabled: !!id,
+    enabled: !!id && access.data?.allowed === true,
   });
 
   const urlQ = useQuery({
     queryKey: ["contract-url", id],
     queryFn: () => urlFn({ data: { id: id! } }),
-    enabled: !!id,
+    enabled: !!id && access.data?.allowed === true,
   });
 
   const sigs = useQuery({
     queryKey: ["contract-sigs-public", id],
     queryFn: () => sigsFn({ data: { contract_document_id: id! } }),
-    enabled: !!id,
+    enabled: !!id && access.data?.allowed === true,
   });
+
+  const versions = useQuery({
+    queryKey: ["contract-versions-public", id],
+    queryFn: () => versionsFn({ data: { contract_document_id: id! } }),
+    enabled: !!id && access.data?.allowed === true,
+  });
+
 
   const [form, setForm] = useState({ signer_name: "", signer_email: "", signer_doc: "", agree: false });
 
@@ -121,6 +142,20 @@ function ContractSignPage() {
   });
 
   const signed = doc.data?.status === "signed" || (sigs.data ?? []).length > 0;
+
+  if (access.isLoading) {
+    return <div className="p-10 text-center text-muted-foreground">Verificando acesso…</div>;
+  }
+  if (access.isError || !access.data?.allowed) {
+    return (
+      <div className="max-w-md mx-auto p-10 text-center">
+        <h1 className="text-xl font-semibold mb-2">Acesso negado</h1>
+        <p className="text-sm text-muted-foreground">
+          Este contrato pertence a outra empresa ou seu perfil não tem permissão para visualizá-lo.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-4">
@@ -209,6 +244,31 @@ function ContractSignPage() {
               <div className="text-xs text-muted-foreground">
                 Assinado em {new Date(s.signed_at).toLocaleString("pt-BR")} · hash {s.signature_hash?.slice(0, 24)}…
               </div>
+            </div>
+          ))}
+        </Card>
+      )}
+
+      {(versions.data ?? []).length > 1 && (
+        <Card className="p-5 shadow-card space-y-2">
+          <div className="font-medium flex items-center gap-1"><History className="w-4 h-4" /> Histórico de versões</div>
+          {(versions.data ?? []).map((v: any) => (
+            <div key={v.id} className="border rounded p-2 text-sm flex items-center justify-between gap-2">
+              <div>
+                <div><strong>v{v.version}</strong> · status {v.status}</div>
+                <div className="text-xs text-muted-foreground">
+                  Gerado {new Date(v.generated_at).toLocaleString("pt-BR")}
+                  {v.signed_at && ` · assinado ${new Date(v.signed_at).toLocaleString("pt-BR")}`}
+                </div>
+                {v.signatures?.[0] && (
+                  <div className="font-mono text-[10px] mt-1">evidência: {v.signatures[0].signature_hash?.slice(0,32)}…</div>
+                )}
+              </div>
+              {v.id === id ? (
+                <Badge variant="outline" className="bg-sky-100 text-sky-700">Atual</Badge>
+              ) : (
+                <a className="text-xs underline" href={`/contrato/${v.id}`}>abrir</a>
+              )}
             </div>
           ))}
         </Card>
