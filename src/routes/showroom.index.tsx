@@ -68,6 +68,9 @@ function ShowroomHub() {
               <Button asChild size="lg" variant="outline">
                 <Link to="/showroom/integracoes">Integrações</Link>
               </Button>
+              <Button asChild size="lg" variant="outline">
+                <Link to="/showroom/automacoes">Automações</Link>
+              </Button>
               <Button asChild size="lg" variant="ghost">
                 <Link to="/solucoes">Ver todos os nichos</Link>
               </Button>
