@@ -172,6 +172,7 @@ import { Route as AuthenticatedPerfilNotificacoesRouteImport } from './routes/_a
 import { Route as AuthenticatedOperationsCockpitRouteImport } from './routes/_authenticated/operations.cockpit'
 import { Route as AuthenticatedOnboardingNichoRouteImport } from './routes/_authenticated/onboarding.nicho'
 import { Route as AuthenticatedMarketingLeadsRouteImport } from './routes/_authenticated/marketing.leads'
+import { Route as AuthenticatedMarketingCockpitRouteImport } from './routes/_authenticated/marketing.cockpit'
 import { Route as AuthenticatedInventorySuppliersRouteImport } from './routes/_authenticated/inventory.suppliers'
 import { Route as AuthenticatedInventoryProductsRouteImport } from './routes/_authenticated/inventory.products'
 import { Route as AuthenticatedInventoryMovementsRouteImport } from './routes/_authenticated/inventory.movements'
@@ -1145,6 +1146,12 @@ const AuthenticatedMarketingLeadsRoute =
   AuthenticatedMarketingLeadsRouteImport.update({
     id: '/marketing/leads',
     path: '/marketing/leads',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMarketingCockpitRoute =
+  AuthenticatedMarketingCockpitRouteImport.update({
+    id: '/marketing/cockpit',
+    path: '/marketing/cockpit',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedInventorySuppliersRoute =
@@ -2130,6 +2137,7 @@ export interface FileRoutesByFullPath {
   '/inventory/movements': typeof AuthenticatedInventoryMovementsRoute
   '/inventory/products': typeof AuthenticatedInventoryProductsRoute
   '/inventory/suppliers': typeof AuthenticatedInventorySuppliersRoute
+  '/marketing/cockpit': typeof AuthenticatedMarketingCockpitRoute
   '/marketing/leads': typeof AuthenticatedMarketingLeadsRoute
   '/onboarding/nicho': typeof AuthenticatedOnboardingNichoRoute
   '/operations/cockpit': typeof AuthenticatedOperationsCockpitRoute
@@ -2413,6 +2421,7 @@ export interface FileRoutesByTo {
   '/inventory/movements': typeof AuthenticatedInventoryMovementsRoute
   '/inventory/products': typeof AuthenticatedInventoryProductsRoute
   '/inventory/suppliers': typeof AuthenticatedInventorySuppliersRoute
+  '/marketing/cockpit': typeof AuthenticatedMarketingCockpitRoute
   '/marketing/leads': typeof AuthenticatedMarketingLeadsRoute
   '/onboarding/nicho': typeof AuthenticatedOnboardingNichoRoute
   '/operations/cockpit': typeof AuthenticatedOperationsCockpitRoute
@@ -2709,6 +2718,7 @@ export interface FileRoutesById {
   '/_authenticated/inventory/movements': typeof AuthenticatedInventoryMovementsRoute
   '/_authenticated/inventory/products': typeof AuthenticatedInventoryProductsRoute
   '/_authenticated/inventory/suppliers': typeof AuthenticatedInventorySuppliersRoute
+  '/_authenticated/marketing/cockpit': typeof AuthenticatedMarketingCockpitRoute
   '/_authenticated/marketing/leads': typeof AuthenticatedMarketingLeadsRoute
   '/_authenticated/onboarding/nicho': typeof AuthenticatedOnboardingNichoRoute
   '/_authenticated/operations/cockpit': typeof AuthenticatedOperationsCockpitRoute
@@ -3005,6 +3015,7 @@ export interface FileRouteTypes {
     | '/inventory/movements'
     | '/inventory/products'
     | '/inventory/suppliers'
+    | '/marketing/cockpit'
     | '/marketing/leads'
     | '/onboarding/nicho'
     | '/operations/cockpit'
@@ -3288,6 +3299,7 @@ export interface FileRouteTypes {
     | '/inventory/movements'
     | '/inventory/products'
     | '/inventory/suppliers'
+    | '/marketing/cockpit'
     | '/marketing/leads'
     | '/onboarding/nicho'
     | '/operations/cockpit'
@@ -3583,6 +3595,7 @@ export interface FileRouteTypes {
     | '/_authenticated/inventory/movements'
     | '/_authenticated/inventory/products'
     | '/_authenticated/inventory/suppliers'
+    | '/_authenticated/marketing/cockpit'
     | '/_authenticated/marketing/leads'
     | '/_authenticated/onboarding/nicho'
     | '/_authenticated/operations/cockpit'
@@ -4918,6 +4931,13 @@ declare module '@tanstack/react-router' {
       path: '/marketing/leads'
       fullPath: '/marketing/leads'
       preLoaderRoute: typeof AuthenticatedMarketingLeadsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/marketing/cockpit': {
+      id: '/_authenticated/marketing/cockpit'
+      path: '/marketing/cockpit'
+      fullPath: '/marketing/cockpit'
+      preLoaderRoute: typeof AuthenticatedMarketingCockpitRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/inventory/suppliers': {
@@ -6296,6 +6316,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedImobiliariaVitrineRoute: typeof AuthenticatedImobiliariaVitrineRoute
   AuthenticatedInsightsOportunidadesRoute: typeof AuthenticatedInsightsOportunidadesRoute
   AuthenticatedInsightsRespostasRoute: typeof AuthenticatedInsightsRespostasRoute
+  AuthenticatedMarketingCockpitRoute: typeof AuthenticatedMarketingCockpitRoute
   AuthenticatedMarketingLeadsRoute: typeof AuthenticatedMarketingLeadsRoute
   AuthenticatedOperationsCockpitRoute: typeof AuthenticatedOperationsCockpitRoute
   AuthenticatedPerfilNotificacoesRoute: typeof AuthenticatedPerfilNotificacoesRoute
@@ -6367,6 +6388,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInsightsOportunidadesRoute:
     AuthenticatedInsightsOportunidadesRoute,
   AuthenticatedInsightsRespostasRoute: AuthenticatedInsightsRespostasRoute,
+  AuthenticatedMarketingCockpitRoute: AuthenticatedMarketingCockpitRoute,
   AuthenticatedMarketingLeadsRoute: AuthenticatedMarketingLeadsRoute,
   AuthenticatedOperationsCockpitRoute: AuthenticatedOperationsCockpitRoute,
   AuthenticatedPerfilNotificacoesRoute: AuthenticatedPerfilNotificacoesRoute,

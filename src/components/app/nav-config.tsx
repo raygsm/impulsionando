@@ -8,7 +8,7 @@ import {
   Contact, BarChart3, ShieldCheck, Inbox, GraduationCap, Stethoscope, Sparkles,
   Handshake, Link2, Briefcase, BadgeDollarSign, TrendingUp, Banknote, Copy,
   Home, Search as SearchIcon, Zap, Bot, MessageSquare,
-  History as HistoryIcon, Headphones, UserRound,
+  History as HistoryIcon, Headphones, UserRound, Megaphone,
 } from "lucide-react";
 
 export interface NavItem {
@@ -42,6 +42,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/crm/board", label: "Kanban de oportunidades", icon: KanbanSquare, perm: "crm.opportunity.read" },
       { to: "/crm/leads", label: "Leads", icon: UserPlus, perm: "crm.lead.read" },
       { to: "/marketing/leads", label: "Leads do site", icon: Inbox, superOnly: true },
+      { to: "/marketing/cockpit", label: "Cockpit de Marketing", icon: Megaphone, superOnly: true },
       { to: "/crm/pipelines", label: "Funis", icon: GitBranch, perm: "crm.pipeline.read" },
       { to: "/crm/activities", label: "Atividades", icon: CalendarClock, perm: "crm.activity.read" },
       { to: "/talents", label: "Banco de Talentos", icon: GraduationCap, superOnly: true },
