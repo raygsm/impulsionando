@@ -6,6 +6,7 @@ import { Building2, Users, Boxes, Tags, FileSearch, MapPin } from "lucide-react"
 import { Card } from "@/components/ui/card";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Badge } from "@/components/ui/badge";
+import { NicheOnboardingBanner } from "@/components/app/NicheOnboardingBanner";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Impulsionando" }] }),
@@ -56,6 +57,8 @@ function DashboardPage() {
         description={me?.isSuperAdmin ? "Visão master consolidada de todos os clientes." : "Indicadores da sua empresa."}
         action={me?.isSuperAdmin && <Badge className="bg-gradient-primary">Super Admin</Badge>}
       />
+
+      <NicheOnboardingBanner companyId={me?.memberships?.[0]?.company_id} />
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
         <StatCard label="Empresas" value={stats?.companies ?? "—"} hint={`${stats?.activeCompanies ?? 0} ativas`} icon={Building2} accent />
