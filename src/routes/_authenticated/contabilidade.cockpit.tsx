@@ -17,6 +17,7 @@ export const Route = createFileRoute("/_authenticated/contabilidade/cockpit")({
 });
 
 const MODULES = [
+  { slug: "contab-clientes", name: "Clientes Contábeis", icon: Building2, route: "/contabilidade/clientes", required: true },
   { slug: "contab-crm", name: "CRM Contábil", icon: Users, route: "/crm/board", required: true },
   { slug: "contab-portal-cliente", name: "Portal do Cliente", icon: Globe, route: "/contabilidade/portal", required: true },
   { slug: "contab-documentos", name: "Documentos", icon: FolderOpen, route: "/contabilidade/documentos", required: true },
