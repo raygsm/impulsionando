@@ -229,6 +229,7 @@ import { Route as AuthenticatedCoreConfiguracoesRouteImport } from './routes/_au
 import { Route as AuthenticatedCoreClientesRouteImport } from './routes/_authenticated/core.clientes'
 import { Route as AuthenticatedCoreBriefingsRouteImport } from './routes/_authenticated/core.briefings'
 import { Route as AuthenticatedContratoIdRouteImport } from './routes/_authenticated/contrato.$id'
+import { Route as AuthenticatedConsumerUnifiedRouteImport } from './routes/_authenticated/consumer.unified'
 import { Route as AuthenticatedComunidadeIdRouteImport } from './routes/_authenticated/comunidade.$id'
 import { Route as AuthenticatedBiNichesRouteImport } from './routes/_authenticated/bi.niches'
 import { Route as AuthenticatedBiMasterRouteImport } from './routes/_authenticated/bi.master'
@@ -1473,6 +1474,12 @@ const AuthenticatedContratoIdRoute = AuthenticatedContratoIdRouteImport.update({
   path: '/contrato/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedConsumerUnifiedRoute =
+  AuthenticatedConsumerUnifiedRouteImport.update({
+    id: '/consumer/unified',
+    path: '/consumer/unified',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedComunidadeIdRoute =
   AuthenticatedComunidadeIdRouteImport.update({
     id: '/comunidade/$id',
@@ -2041,6 +2048,7 @@ export interface FileRoutesByFullPath {
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
   '/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
+  '/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
   '/contrato/$id': typeof AuthenticatedContratoIdRoute
   '/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
@@ -2320,6 +2328,7 @@ export interface FileRoutesByTo {
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
   '/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
+  '/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
   '/contrato/$id': typeof AuthenticatedContratoIdRoute
   '/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
@@ -2612,6 +2621,7 @@ export interface FileRoutesById {
   '/_authenticated/bi/master': typeof AuthenticatedBiMasterRoute
   '/_authenticated/bi/niches': typeof AuthenticatedBiNichesRoute
   '/_authenticated/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
+  '/_authenticated/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
   '/_authenticated/contrato/$id': typeof AuthenticatedContratoIdRoute
   '/_authenticated/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/_authenticated/core/clientes': typeof AuthenticatedCoreClientesRoute
@@ -2904,6 +2914,7 @@ export interface FileRouteTypes {
     | '/bi/master'
     | '/bi/niches'
     | '/comunidade/$id'
+    | '/consumer/unified'
     | '/contrato/$id'
     | '/core/briefings'
     | '/core/clientes'
@@ -3183,6 +3194,7 @@ export interface FileRouteTypes {
     | '/bi/master'
     | '/bi/niches'
     | '/comunidade/$id'
+    | '/consumer/unified'
     | '/contrato/$id'
     | '/core/briefings'
     | '/core/clientes'
@@ -3474,6 +3486,7 @@ export interface FileRouteTypes {
     | '/_authenticated/bi/master'
     | '/_authenticated/bi/niches'
     | '/_authenticated/comunidade/$id'
+    | '/_authenticated/consumer/unified'
     | '/_authenticated/contrato/$id'
     | '/_authenticated/core/briefings'
     | '/_authenticated/core/clientes'
@@ -5267,6 +5280,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedContratoIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/consumer/unified': {
+      id: '/_authenticated/consumer/unified'
+      path: '/consumer/unified'
+      fullPath: '/consumer/unified'
+      preLoaderRoute: typeof AuthenticatedConsumerUnifiedRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/comunidade/$id': {
       id: '/_authenticated/comunidade/$id'
       path: '/comunidade/$id'
@@ -6199,6 +6219,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminTrialsRoute: typeof AuthenticatedAdminTrialsRoute
   AuthenticatedAdminUptimeRoute: typeof AuthenticatedAdminUptimeRoute
   AuthenticatedComunidadeIdRoute: typeof AuthenticatedComunidadeIdRoute
+  AuthenticatedConsumerUnifiedRoute: typeof AuthenticatedConsumerUnifiedRoute
   AuthenticatedContratoIdRoute: typeof AuthenticatedContratoIdRoute
   AuthenticatedEhrIdRoute: typeof AuthenticatedEhrIdRoute
   AuthenticatedEventosIdRoute: typeof AuthenticatedEventosIdRoute
@@ -6262,6 +6283,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminTrialsRoute: AuthenticatedAdminTrialsRoute,
   AuthenticatedAdminUptimeRoute: AuthenticatedAdminUptimeRoute,
   AuthenticatedComunidadeIdRoute: AuthenticatedComunidadeIdRoute,
+  AuthenticatedConsumerUnifiedRoute: AuthenticatedConsumerUnifiedRoute,
   AuthenticatedContratoIdRoute: AuthenticatedContratoIdRoute,
   AuthenticatedEhrIdRoute: AuthenticatedEhrIdRoute,
   AuthenticatedEventosIdRoute: AuthenticatedEventosIdRoute,
