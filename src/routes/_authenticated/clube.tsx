@@ -75,11 +75,16 @@ function ClubePage() {
   const recordFn = useServerFn(recordClubeConsumption);
   const voteFn = useServerFn(votePoll);
 
+  const recsFn = useServerFn(getClubeRecommendations);
+  const receiptsFn = useServerFn(listMyClubeReceipts);
+
   const area = useQuery({ queryKey: ["consumer-area"], queryFn: () => fetchArea() });
   const overview = useQuery({ queryKey: ["clube-overview"], queryFn: () => fetchOverview() });
   const alerts = useQuery({ queryKey: ["clube-alerts"], queryFn: () => fetchAlerts() });
   const referrals = useQuery({ queryKey: ["clube-referrals"], queryFn: () => fetchReferrals() });
   const consumption = useQuery({ queryKey: ["clube-consumption"], queryFn: () => consumptionFn() });
+  const recommendations = useQuery({ queryKey: ["clube-recs"], queryFn: () => recsFn() });
+  const receipts = useQuery({ queryKey: ["clube-receipts"], queryFn: () => receiptsFn() });
 
 
   const isPremium = overview.data?.isPremium ?? false;
