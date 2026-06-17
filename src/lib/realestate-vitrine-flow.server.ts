@@ -499,6 +499,8 @@ export async function processSavedSearch(
         receivedAt: new Date().toISOString(),
       },
       idempotencyKey: `re-vitrine-search-agency-${intentId}-${c.email}`,
+      requestId,
+      metadata: { company_id: companyId, intent_id: intentId, audience: 'agency' },
     })
     if (r.status === 'queued' || r.status === 'suppressed') emailsQueued.push(c.email)
   }
@@ -518,9 +520,29 @@ export async function processSavedSearch(
         receivedAt: new Date().toISOString(),
       },
       idempotencyKey: `re-vitrine-search-customer-${intentId}`,
+      requestId,
+      metadata: { company_id: companyId, intent_id: intentId, audience: 'customer' },
     })
     if (r.status === 'queued' || r.status === 'suppressed') emailsQueued.push(input.contactEmail)
   }
 
-  return { ok: true, intentId, leadId: leadId!, messageId, matchesCount, emailsQueued }
+  await writeFlowAudit({
+    action: 'vitrine.search.completed',
+    entity: 'realestate_search_intent',
+    entityId: intentId,
+    companyId,
+    requestId,
+    after: { lead_id: leadId, message_id: messageId, matches_count: matchesCount, emails_queued: emailsQueued.length },
+  })
+  return { ok: true, requestId, intentId, leadId: leadId!, messageId, matchesCount, emailsQueued }
+  } catch (err: any) {
+    console.error('processSavedSearch internal error', { requestId, err })
+    await writeFlowAudit({
+      action: 'vitrine.search.failed',
+      entity: 'realestate_search_intent',
+      requestId,
+      after: { code: 'internal_error', error: err?.message ?? 'unknown' },
+    })
+    return { ok: false, requestId, code: 'internal_error', error: err?.message ?? 'unknown' }
+  }
 }
