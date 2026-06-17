@@ -138,7 +138,7 @@ function ContabObrigacoes() {
 
   const setStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const patch: Record<string, unknown> = { status };
+      const patch: { status: string; paid_at?: string } = { status };
       if (status === "paid") patch.paid_at = new Date().toISOString();
       const { error } = await supabase.from("contab_obligations").update(patch).eq("id", id);
       if (error) throw error;
