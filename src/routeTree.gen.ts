@@ -72,6 +72,7 @@ import { Route as ShowroomCaixaUnificadaRouteImport } from './routes/showroom.ca
 import { Route as ShowroomAutomacoesIaRouteImport } from './routes/showroom.automacoes-ia'
 import { Route as ShowroomAutomacoesRouteImport } from './routes/showroom.automacoes'
 import { Route as ShowroomAtendimentoRouteImport } from './routes/showroom.atendimento'
+import { Route as ShowroomApiPublicaRouteImport } from './routes/showroom.api-publica'
 import { Route as ShowroomAgendamentosOnlineRouteImport } from './routes/showroom.agendamentos-online'
 import { Route as ShowroomAgendaRouteImport } from './routes/showroom.agenda'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
@@ -577,6 +578,11 @@ const ShowroomAutomacoesRoute = ShowroomAutomacoesRouteImport.update({
 const ShowroomAtendimentoRoute = ShowroomAtendimentoRouteImport.update({
   id: '/showroom/atendimento',
   path: '/showroom/atendimento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShowroomApiPublicaRoute = ShowroomApiPublicaRouteImport.update({
+  id: '/showroom/api-publica',
+  path: '/showroom/api-publica',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShowroomAgendamentosOnlineRoute =
@@ -1718,6 +1724,7 @@ export interface FileRoutesByFullPath {
   '/r/$slug': typeof RSlugRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
   '/showroom/agendamentos-online': typeof ShowroomAgendamentosOnlineRoute
+  '/showroom/api-publica': typeof ShowroomApiPublicaRoute
   '/showroom/atendimento': typeof ShowroomAtendimentoRoute
   '/showroom/automacoes': typeof ShowroomAutomacoesRoute
   '/showroom/automacoes-ia': typeof ShowroomAutomacoesIaRoute
@@ -1961,6 +1968,7 @@ export interface FileRoutesByTo {
   '/r/$slug': typeof RSlugRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
   '/showroom/agendamentos-online': typeof ShowroomAgendamentosOnlineRoute
+  '/showroom/api-publica': typeof ShowroomApiPublicaRoute
   '/showroom/atendimento': typeof ShowroomAtendimentoRoute
   '/showroom/automacoes': typeof ShowroomAutomacoesRoute
   '/showroom/automacoes-ia': typeof ShowroomAutomacoesIaRoute
@@ -2217,6 +2225,7 @@ export interface FileRoutesById {
   '/r/$slug': typeof RSlugRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
   '/showroom/agendamentos-online': typeof ShowroomAgendamentosOnlineRoute
+  '/showroom/api-publica': typeof ShowroomApiPublicaRoute
   '/showroom/atendimento': typeof ShowroomAtendimentoRoute
   '/showroom/automacoes': typeof ShowroomAutomacoesRoute
   '/showroom/automacoes-ia': typeof ShowroomAutomacoesIaRoute
@@ -2473,6 +2482,7 @@ export interface FileRouteTypes {
     | '/r/$slug'
     | '/showroom/agenda'
     | '/showroom/agendamentos-online'
+    | '/showroom/api-publica'
     | '/showroom/atendimento'
     | '/showroom/automacoes'
     | '/showroom/automacoes-ia'
@@ -2716,6 +2726,7 @@ export interface FileRouteTypes {
     | '/r/$slug'
     | '/showroom/agenda'
     | '/showroom/agendamentos-online'
+    | '/showroom/api-publica'
     | '/showroom/atendimento'
     | '/showroom/automacoes'
     | '/showroom/automacoes-ia'
@@ -2971,6 +2982,7 @@ export interface FileRouteTypes {
     | '/r/$slug'
     | '/showroom/agenda'
     | '/showroom/agendamentos-online'
+    | '/showroom/api-publica'
     | '/showroom/atendimento'
     | '/showroom/automacoes'
     | '/showroom/automacoes-ia'
@@ -3197,6 +3209,7 @@ export interface RootRouteChildren {
   RSlugRoute: typeof RSlugRoute
   ShowroomAgendaRoute: typeof ShowroomAgendaRoute
   ShowroomAgendamentosOnlineRoute: typeof ShowroomAgendamentosOnlineRoute
+  ShowroomApiPublicaRoute: typeof ShowroomApiPublicaRoute
   ShowroomAtendimentoRoute: typeof ShowroomAtendimentoRoute
   ShowroomAutomacoesRoute: typeof ShowroomAutomacoesRoute
   ShowroomAutomacoesIaRoute: typeof ShowroomAutomacoesIaRoute
@@ -3700,6 +3713,13 @@ declare module '@tanstack/react-router' {
       path: '/showroom/atendimento'
       fullPath: '/showroom/atendimento'
       preLoaderRoute: typeof ShowroomAtendimentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/showroom/api-publica': {
+      id: '/showroom/api-publica'
+      path: '/showroom/api-publica'
+      fullPath: '/showroom/api-publica'
+      preLoaderRoute: typeof ShowroomApiPublicaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/showroom/agendamentos-online': {
@@ -5621,6 +5641,7 @@ const rootRouteChildren: RootRouteChildren = {
   RSlugRoute: RSlugRoute,
   ShowroomAgendaRoute: ShowroomAgendaRoute,
   ShowroomAgendamentosOnlineRoute: ShowroomAgendamentosOnlineRoute,
+  ShowroomApiPublicaRoute: ShowroomApiPublicaRoute,
   ShowroomAtendimentoRoute: ShowroomAtendimentoRoute,
   ShowroomAutomacoesRoute: ShowroomAutomacoesRoute,
   ShowroomAutomacoesIaRoute: ShowroomAutomacoesIaRoute,
