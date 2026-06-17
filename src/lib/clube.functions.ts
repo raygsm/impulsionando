@@ -377,17 +377,32 @@ export const getAdminClubeOverview = createServerFn({ method: "GET" })
 // -----------------------------------------------------------------
 // Comprovantes digitais (Pix, consumo, manual)
 // -----------------------------------------------------------------
-export const listMyClubeReceipts = createServerFn({ method: "GET" })
+export const listMyClubeReceipts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
+  .inputValidator((d: unknown) =>
+    z.object({
+      kind: z.enum(["pix", "consumption", "manual", "all"]).default("all"),
+      status: z.enum(["available", "pending_upload", "all"]).default("all"),
+      from: z.string().optional(),
+      to: z.string().optional(),
+      search: z.string().max(120).optional(),
+    }).parse(d ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    let q = context.supabase
       .from("clube_receipts")
       .select("*")
       .eq("user_id", context.userId)
       .order("issued_at", { ascending: false })
-      .limit(100);
+      .limit(200);
+    if (data.kind !== "all") q = q.eq("kind", data.kind);
+    if (data.status !== "all") q = q.eq("status", data.status);
+    if (data.from) q = q.gte("issued_at", data.from);
+    if (data.to) q = q.lte("issued_at", data.to);
+    if (data.search) q = q.ilike("title", `%${data.search}%`);
+    const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    return data ?? [];
+    return rows ?? [];
   });
 
 // -----------------------------------------------------------------
