@@ -8,7 +8,7 @@
  * - CTA "Cadastrar minha busca" -> /api/public/realestate/saved-search
  * - Tela de sucesso / erro consistente após envio
  */
-import { createFileRoute, Link, useSearch } from '@tanstack/react-router'
+import { createFileRoute, Link, useSearch, useNavigate } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useQuery } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
@@ -22,13 +22,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Loader2, Bed, Bath, Car, Ruler, MapPin, Search } from 'lucide-react'
+import { Loader2, Bed, Bath, Car, Ruler, MapPin } from 'lucide-react'
 
 const SearchSchema = z.object({
   operation: z.enum(['venda', 'locacao', 'venda_ou_locacao']).optional(),
   city: z.string().optional(),
   q: z.string().optional(),
   page: z.number().int().min(1).default(1),
+  pageSize: z.number().int().min(6).max(48).default(12),
+  sort: z.enum(['recent', 'price_asc', 'price_desc']).default('recent'),
 })
 
 export const Route = createFileRoute('/imoveis/$slug')({
@@ -60,23 +62,26 @@ function firstPhoto(photos: any): string | null {
 function VitrinePage() {
   const { slug } = Route.useParams()
   const search = useSearch({ from: '/imoveis/$slug' })
+  const navigate = useNavigate({ from: '/imoveis/$slug' })
   const fetchList = useServerFn(listPublicProperties)
-  const [operation, setOperation] = useState<string>(search.operation ?? 'venda_ou_locacao')
-  const [q, setQ] = useState<string>(search.q ?? '')
-  const [city, setCity] = useState<string>(search.city ?? '')
-  const [page, setPage] = useState<number>(search.page ?? 1)
-  const pageSize = 12
+  const operation = search.operation ?? 'venda_ou_locacao'
+  const q = search.q ?? ''
+  const city = search.city ?? ''
+  const page = search.page ?? 1
+  const pageSize = search.pageSize ?? 12
+  const sort = search.sort ?? 'recent'
+
+  function update(next: Partial<typeof search> & { resetPage?: boolean }) {
+    const { resetPage, ...patch } = next as any
+    navigate({
+      search: (prev: any) => ({ ...prev, ...patch, ...(resetPage ? { page: 1 } : {}) }),
+      replace: true,
+    })
+  }
 
   const queryArgs = useMemo(
-    () => ({
-      slug,
-      operation: operation as any,
-      city: city || undefined,
-      q: q || undefined,
-      page,
-      pageSize,
-    }),
-    [slug, operation, city, q, page],
+    () => ({ slug, operation: operation as any, city: city || undefined, q: q || undefined, page, pageSize, sort }),
+    [slug, operation, city, q, page, pageSize, sort],
   )
 
   const { data, isLoading, isError } = useQuery({
@@ -112,10 +117,10 @@ function VitrinePage() {
       </header>
 
       <section className="max-w-6xl mx-auto px-4 py-6">
-        <Card className="p-4 mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <Card className="p-4 mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
           <div>
             <Label className="text-xs">Operação</Label>
-            <Select value={operation} onValueChange={(v) => { setOperation(v); setPage(1) }}>
+            <Select value={operation} onValueChange={(v) => update({ operation: v as any, resetPage: true })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="venda_ou_locacao">Todos</SelectItem>
@@ -126,14 +131,33 @@ function VitrinePage() {
           </div>
           <div>
             <Label className="text-xs">Cidade</Label>
-            <Input value={city} onChange={(e) => { setCity(e.target.value); setPage(1) }} placeholder="Ex.: São Paulo" />
+            <Input defaultValue={city} onBlur={(e) => update({ city: e.target.value, resetPage: true })} placeholder="Ex.: São Paulo" />
           </div>
           <div className="lg:col-span-2">
             <Label className="text-xs">Buscar</Label>
-            <Input value={q} onChange={(e) => { setQ(e.target.value); setPage(1) }} placeholder="Título, bairro, código..." />
+            <Input defaultValue={q} onBlur={(e) => update({ q: e.target.value, resetPage: true })} placeholder="Título, bairro, código..." />
           </div>
-          <div className="flex items-end">
-            <Button className="w-full" onClick={() => setPage(1)}><Search className="h-4 w-4 mr-2" />Filtrar</Button>
+          <div>
+            <Label className="text-xs">Ordenar</Label>
+            <Select value={sort} onValueChange={(v) => update({ sort: v as any, resetPage: true })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="recent">Mais recentes</SelectItem>
+                <SelectItem value="price_asc">Menor preço</SelectItem>
+                <SelectItem value="price_desc">Maior preço</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label className="text-xs">Itens/pág.</Label>
+            <Select value={String(pageSize)} onValueChange={(v) => update({ pageSize: Number(v), resetPage: true })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="12">12</SelectItem>
+                <SelectItem value="24">24</SelectItem>
+                <SelectItem value="48">48</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </Card>
 
@@ -196,8 +220,8 @@ function VitrinePage() {
                 Mostrando {rows.length} de {total} imóveis · Página {page}/{totalPages}
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Anterior</Button>
-                <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>Próxima</Button>
+                <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => update({ page: page - 1 })}>Anterior</Button>
+                <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => update({ page: page + 1 })}>Próxima</Button>
               </div>
             </div>
           </>
@@ -212,15 +236,32 @@ function VitrinePage() {
 // ---------------------------------------------------------------------------
 
 function SavedSearchDialog({ slug, companyName }: { slug: string; companyName: string }) {
+  const storageKey = `vitrine:saved-search:${slug}`
   const [open, setOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState<{ matchesCount: number } | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [form, setForm] = useState({
+  const initialForm = {
     contactName: '', contactEmail: '', contactPhone: '',
     operation: 'venda' as 'venda' | 'locacao' | 'venda_ou_locacao',
     city: '', neighborhood: '', priceMax: '', bedroomsMin: '0', notes: '', hp: '',
+  }
+  const [form, setForm] = useState(() => {
+    if (typeof window === 'undefined') return initialForm
+    try {
+      const raw = window.localStorage.getItem(storageKey)
+      return raw ? { ...initialForm, ...JSON.parse(raw), hp: '' } : initialForm
+    } catch { return initialForm }
   })
+
+  // Persist as the user types (excluding honeypot)
+  useMemo(() => {
+    if (typeof window === 'undefined') return
+    try {
+      const { hp: _hp, ...persist } = form
+      window.localStorage.setItem(storageKey, JSON.stringify(persist))
+    } catch {}
+  }, [form, storageKey])
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()

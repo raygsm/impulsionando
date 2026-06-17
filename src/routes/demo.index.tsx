@@ -43,7 +43,7 @@ const AUDIENCES: AudienceCard[] = [
     title: "Demonstração para empresas",
     description: "Plataforma navegável com agenda, CRM, vendas, financeiro, WhatsApp e BI — pronta para operar no seu segmento.",
     cta: "Ver demonstração",
-    to: "/demo/cliente-final",
+    to: "/demo/modulos",
     implantationCta: { label: "Solicitar implantação", href: WHATSAPP_URL },
   },
   {
