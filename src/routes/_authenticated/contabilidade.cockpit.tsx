@@ -37,31 +37,59 @@ const MODULES = [
 ];
 
 function ContabCockpit() {
+  const { companyId } = useActiveCompany();
+  const today = new Date().toISOString().slice(0, 10);
+  const in7 = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+
+  const { data: stats } = useQuery({
+    queryKey: ["contab-cockpit-stats", companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      const [c, dp, ou, od] = await Promise.all([
+        supabase.from("contab_clients").select("id", { count: "exact", head: true }).eq("company_id", companyId!).eq("status", "active"),
+        supabase.from("contab_documents").select("id", { count: "exact", head: true }).eq("company_id", companyId!).eq("status", "pending"),
+        supabase.from("contab_obligations").select("id", { count: "exact", head: true }).eq("company_id", companyId!).neq("status", "paid").gte("due_date", today).lte("due_date", in7),
+        supabase.from("contab_obligations").select("id", { count: "exact", head: true }).eq("company_id", companyId!).neq("status", "paid").lt("due_date", today),
+      ]);
+      return {
+        clients: c.count ?? 0,
+        docsPending: dp.count ?? 0,
+        oblUpcoming: ou.count ?? 0,
+        oblOverdue: od.count ?? 0,
+      };
+    },
+  });
+
   return (
     <div>
       <PageHeader
         title="Cockpit Contábil"
         description="Camada inteligente para escritórios de contabilidade — relacionamento, documentos, prazos e atendimento. Complementar aos sistemas contábeis tradicionais."
-        action={<Badge className="gap-1"><Calculator className="w-3 h-3" /> Nicho · Contabilidade Inteligente</Badge>}
+        action={
+          <div className="flex gap-2 items-center">
+            <CompanyPicker />
+            <Badge className="gap-1"><Calculator className="w-3 h-3" /> Nicho · Contabilidade</Badge>
+          </div>
+        }
       />
 
       <Card className="p-4 mb-6 border-amber-200 bg-amber-50/50 dark:bg-amber-950/20">
         <div className="flex gap-3">
           <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <div className="text-sm">
-            <p className="font-medium text-amber-900 dark:text-amber-100">B23 — Fundação instalada</p>
+            <p className="font-medium text-amber-900 dark:text-amber-100">B25 — Operação ativa</p>
             <p className="text-amber-800/80 dark:text-amber-100/80 mt-1">
-              Nicho, 12 módulos e menus já estão cadastrados no Core. As páginas operacionais (documentos, obrigações, IRPF, portal) serão construídas nas fases B24–B27. Esta plataforma <strong>não substitui</strong> sistemas contábeis tradicionais (Domínio, Alterdata, Contmatic etc.) — é uma camada de relacionamento, gestão e experiência.
+              Clientes, documentos, obrigações e calendário fiscal já operacionais. Régua D-7/D-3/D-1/D0/D+5 gera lembretes automaticamente. Portal do cliente, IRPF, financeiro e demo virão nas próximas fases. <strong>Não substitui</strong> sistemas contábeis tradicionais (Domínio, Alterdata, Contmatic) — é a camada de relacionamento e experiência.
             </p>
           </div>
         </div>
       </Card>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <StatCard label="Clientes ativos" value="—" hint="Disponível na B24" icon={Users} accent />
-        <StatCard label="Documentos pendentes" value="—" hint="Disponível na B24" icon={FolderOpen} />
-        <StatCard label="Obrigações vencendo" value="—" hint="Disponível na B24" icon={ClipboardList} />
-        <StatCard label="Tarefas atrasadas" value="—" hint="Disponível na B25" icon={ListChecks} />
+        <StatCard label="Clientes ativos" value={stats?.clients ?? "—"} icon={Users} accent />
+        <StatCard label="Documentos pendentes" value={stats?.docsPending ?? "—"} icon={FolderOpen} />
+        <StatCard label="Obrigações (7d)" value={stats?.oblUpcoming ?? "—"} icon={ClipboardList} />
+        <StatCard label="Obrigações atrasadas" value={stats?.oblOverdue ?? "—"} hint={stats?.oblOverdue ? "Requer atenção" : undefined} icon={AlertTriangle} />
       </div>
 
       <h2 className="font-semibold mb-3">Módulos do nicho</h2>
