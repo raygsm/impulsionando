@@ -154,7 +154,9 @@ import { Route as AuthenticatedAffiliatesIndexRouteImport } from './routes/_auth
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ImoveisSlugPropertyIdRouteImport } from './routes/imoveis.$slug.$propertyId'
 import { Route as DemoNichoSlugRouteImport } from './routes/demo.nicho.$slug'
+import { Route as AuthenticatedWhiteLabelCockpitRouteImport } from './routes/_authenticated/white-label.cockpit'
 import { Route as AuthenticatedUsersCorporateRouteImport } from './routes/_authenticated/users.corporate'
+import { Route as AuthenticatedSupportCockpitRouteImport } from './routes/_authenticated/support.cockpit'
 import { Route as AuthenticatedSalesOrdersRouteImport } from './routes/_authenticated/sales.orders'
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
 import { Route as AuthenticatedSalesCashRouteImport } from './routes/_authenticated/sales.cash'
@@ -227,6 +229,7 @@ import { Route as AuthenticatedCoreConfiguracoesRouteImport } from './routes/_au
 import { Route as AuthenticatedCoreClientesRouteImport } from './routes/_authenticated/core.clientes'
 import { Route as AuthenticatedCoreBriefingsRouteImport } from './routes/_authenticated/core.briefings'
 import { Route as AuthenticatedContratoIdRouteImport } from './routes/_authenticated/contrato.$id'
+import { Route as AuthenticatedConsumerUnifiedRouteImport } from './routes/_authenticated/consumer.unified'
 import { Route as AuthenticatedComunidadeIdRouteImport } from './routes/_authenticated/comunidade.$id'
 import { Route as AuthenticatedBiNichesRouteImport } from './routes/_authenticated/bi.niches'
 import { Route as AuthenticatedBiMasterRouteImport } from './routes/_authenticated/bi.master'
@@ -1036,11 +1039,23 @@ const DemoNichoSlugRoute = DemoNichoSlugRouteImport.update({
   path: '/demo/nicho/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedWhiteLabelCockpitRoute =
+  AuthenticatedWhiteLabelCockpitRouteImport.update({
+    id: '/white-label/cockpit',
+    path: '/white-label/cockpit',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedUsersCorporateRoute =
   AuthenticatedUsersCorporateRouteImport.update({
     id: '/corporate',
     path: '/corporate',
     getParentRoute: () => AuthenticatedUsersRoute,
+  } as any)
+const AuthenticatedSupportCockpitRoute =
+  AuthenticatedSupportCockpitRouteImport.update({
+    id: '/support/cockpit',
+    path: '/support/cockpit',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedSalesOrdersRoute =
   AuthenticatedSalesOrdersRouteImport.update({
@@ -1459,6 +1474,12 @@ const AuthenticatedContratoIdRoute = AuthenticatedContratoIdRouteImport.update({
   path: '/contrato/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedConsumerUnifiedRoute =
+  AuthenticatedConsumerUnifiedRouteImport.update({
+    id: '/consumer/unified',
+    path: '/consumer/unified',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedComunidadeIdRoute =
   AuthenticatedComunidadeIdRouteImport.update({
     id: '/comunidade/$id',
@@ -2027,6 +2048,7 @@ export interface FileRoutesByFullPath {
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
   '/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
+  '/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
   '/contrato/$id': typeof AuthenticatedContratoIdRoute
   '/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
@@ -2099,7 +2121,9 @@ export interface FileRoutesByFullPath {
   '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
+  '/support/cockpit': typeof AuthenticatedSupportCockpitRoute
   '/users/corporate': typeof AuthenticatedUsersCorporateRoute
+  '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -2304,6 +2328,7 @@ export interface FileRoutesByTo {
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
   '/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
+  '/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
   '/contrato/$id': typeof AuthenticatedContratoIdRoute
   '/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
@@ -2376,7 +2401,9 @@ export interface FileRoutesByTo {
   '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
+  '/support/cockpit': typeof AuthenticatedSupportCockpitRoute
   '/users/corporate': typeof AuthenticatedUsersCorporateRoute
+  '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -2594,6 +2621,7 @@ export interface FileRoutesById {
   '/_authenticated/bi/master': typeof AuthenticatedBiMasterRoute
   '/_authenticated/bi/niches': typeof AuthenticatedBiNichesRoute
   '/_authenticated/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
+  '/_authenticated/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
   '/_authenticated/contrato/$id': typeof AuthenticatedContratoIdRoute
   '/_authenticated/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/_authenticated/core/clientes': typeof AuthenticatedCoreClientesRoute
@@ -2666,7 +2694,9 @@ export interface FileRoutesById {
   '/_authenticated/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
   '/_authenticated/sales/orders': typeof AuthenticatedSalesOrdersRoute
+  '/_authenticated/support/cockpit': typeof AuthenticatedSupportCockpitRoute
   '/_authenticated/users/corporate': typeof AuthenticatedUsersCorporateRoute
+  '/_authenticated/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -2884,6 +2914,7 @@ export interface FileRouteTypes {
     | '/bi/master'
     | '/bi/niches'
     | '/comunidade/$id'
+    | '/consumer/unified'
     | '/contrato/$id'
     | '/core/briefings'
     | '/core/clientes'
@@ -2956,7 +2987,9 @@ export interface FileRouteTypes {
     | '/sales/cash'
     | '/sales/new'
     | '/sales/orders'
+    | '/support/cockpit'
     | '/users/corporate'
+    | '/white-label/cockpit'
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
@@ -3161,6 +3194,7 @@ export interface FileRouteTypes {
     | '/bi/master'
     | '/bi/niches'
     | '/comunidade/$id'
+    | '/consumer/unified'
     | '/contrato/$id'
     | '/core/briefings'
     | '/core/clientes'
@@ -3233,7 +3267,9 @@ export interface FileRouteTypes {
     | '/sales/cash'
     | '/sales/new'
     | '/sales/orders'
+    | '/support/cockpit'
     | '/users/corporate'
+    | '/white-label/cockpit'
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
@@ -3450,6 +3486,7 @@ export interface FileRouteTypes {
     | '/_authenticated/bi/master'
     | '/_authenticated/bi/niches'
     | '/_authenticated/comunidade/$id'
+    | '/_authenticated/consumer/unified'
     | '/_authenticated/contrato/$id'
     | '/_authenticated/core/briefings'
     | '/_authenticated/core/clientes'
@@ -3522,7 +3559,9 @@ export interface FileRouteTypes {
     | '/_authenticated/sales/cash'
     | '/_authenticated/sales/new'
     | '/_authenticated/sales/orders'
+    | '/_authenticated/support/cockpit'
     | '/_authenticated/users/corporate'
+    | '/_authenticated/white-label/cockpit'
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
@@ -4716,12 +4755,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoNichoSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/white-label/cockpit': {
+      id: '/_authenticated/white-label/cockpit'
+      path: '/white-label/cockpit'
+      fullPath: '/white-label/cockpit'
+      preLoaderRoute: typeof AuthenticatedWhiteLabelCockpitRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/users/corporate': {
       id: '/_authenticated/users/corporate'
       path: '/corporate'
       fullPath: '/users/corporate'
       preLoaderRoute: typeof AuthenticatedUsersCorporateRouteImport
       parentRoute: typeof AuthenticatedUsersRoute
+    }
+    '/_authenticated/support/cockpit': {
+      id: '/_authenticated/support/cockpit'
+      path: '/support/cockpit'
+      fullPath: '/support/cockpit'
+      preLoaderRoute: typeof AuthenticatedSupportCockpitRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/sales/orders': {
       id: '/_authenticated/sales/orders'
@@ -5225,6 +5278,13 @@ declare module '@tanstack/react-router' {
       path: '/contrato/$id'
       fullPath: '/contrato/$id'
       preLoaderRoute: typeof AuthenticatedContratoIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/consumer/unified': {
+      id: '/_authenticated/consumer/unified'
+      path: '/consumer/unified'
+      fullPath: '/consumer/unified'
+      preLoaderRoute: typeof AuthenticatedConsumerUnifiedRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/comunidade/$id': {
@@ -6159,6 +6219,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminTrialsRoute: typeof AuthenticatedAdminTrialsRoute
   AuthenticatedAdminUptimeRoute: typeof AuthenticatedAdminUptimeRoute
   AuthenticatedComunidadeIdRoute: typeof AuthenticatedComunidadeIdRoute
+  AuthenticatedConsumerUnifiedRoute: typeof AuthenticatedConsumerUnifiedRoute
   AuthenticatedContratoIdRoute: typeof AuthenticatedContratoIdRoute
   AuthenticatedEhrIdRoute: typeof AuthenticatedEhrIdRoute
   AuthenticatedEventosIdRoute: typeof AuthenticatedEventosIdRoute
@@ -6177,6 +6238,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRestauranteCardapioRoute: typeof AuthenticatedRestauranteCardapioRoute
   AuthenticatedRestauranteMesasRoute: typeof AuthenticatedRestauranteMesasRoute
   AuthenticatedRestauranteSalaoRoute: typeof AuthenticatedRestauranteSalaoRoute
+  AuthenticatedSupportCockpitRoute: typeof AuthenticatedSupportCockpitRoute
+  AuthenticatedWhiteLabelCockpitRoute: typeof AuthenticatedWhiteLabelCockpitRoute
   AuthenticatedComunidadeIndexRoute: typeof AuthenticatedComunidadeIndexRoute
   AuthenticatedEhrIndexRoute: typeof AuthenticatedEhrIndexRoute
   AuthenticatedEventosIndexRoute: typeof AuthenticatedEventosIndexRoute
@@ -6220,6 +6283,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminTrialsRoute: AuthenticatedAdminTrialsRoute,
   AuthenticatedAdminUptimeRoute: AuthenticatedAdminUptimeRoute,
   AuthenticatedComunidadeIdRoute: AuthenticatedComunidadeIdRoute,
+  AuthenticatedConsumerUnifiedRoute: AuthenticatedConsumerUnifiedRoute,
   AuthenticatedContratoIdRoute: AuthenticatedContratoIdRoute,
   AuthenticatedEhrIdRoute: AuthenticatedEhrIdRoute,
   AuthenticatedEventosIdRoute: AuthenticatedEventosIdRoute,
@@ -6243,6 +6307,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRestauranteCardapioRoute: AuthenticatedRestauranteCardapioRoute,
   AuthenticatedRestauranteMesasRoute: AuthenticatedRestauranteMesasRoute,
   AuthenticatedRestauranteSalaoRoute: AuthenticatedRestauranteSalaoRoute,
+  AuthenticatedSupportCockpitRoute: AuthenticatedSupportCockpitRoute,
+  AuthenticatedWhiteLabelCockpitRoute: AuthenticatedWhiteLabelCockpitRoute,
   AuthenticatedComunidadeIndexRoute: AuthenticatedComunidadeIndexRoute,
   AuthenticatedEhrIndexRoute: AuthenticatedEhrIndexRoute,
   AuthenticatedEventosIndexRoute: AuthenticatedEventosIndexRoute,
