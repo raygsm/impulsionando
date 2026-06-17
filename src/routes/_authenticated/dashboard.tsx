@@ -6,6 +6,7 @@ import { Building2, Users, Boxes, Tags, FileSearch, MapPin } from "lucide-react"
 import { Card } from "@/components/ui/card";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Badge } from "@/components/ui/badge";
+import { NicheOnboardingBanner } from "@/components/app/NicheOnboardingBanner";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Impulsionando" }] }),
