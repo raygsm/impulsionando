@@ -123,7 +123,7 @@ export function buildContabReportPdf(input: ContabReportInput): Blob {
     ["Próximos 30 dias", `${input.oblUpcoming30} (${BRL(input.oblValueUpcoming)})`],
     ["Documentos pendentes", String(input.docsPending)],
     ["Tarefas em aberto", `${input.tasksOpen}${input.tasksUrgent ? ` (${input.tasksUrgent} urgentes)` : ""}`],
-  ]);
+  ] as [string, string][]);
   y += 12;
 
   // IRPF
@@ -133,7 +133,7 @@ export function buildContabReportPdf(input: ContabReportInput): Blob {
     ["Em andamento", String(input.irpfInProgress)],
     ["Concluídas", String(input.irpfDone)],
     ["Honorários pendentes", BRL(input.irpfFeesPending)],
-  ]);
+  ] as [string, string][]);
   y += 12;
 
   if (y > H - 180) { doc.addPage(); y = 60; }
@@ -148,7 +148,7 @@ export function buildContabReportPdf(input: ContabReportInput): Blob {
     ["A pagar", BRL(input.finPayable)],
     ["Pago", BRL(input.finPaid)],
     ["Saldo projetado", BRL(saldo)],
-  ]);
+  ] as [string, string][]);
 
   // Footer
   const total = doc.getNumberOfPages();
