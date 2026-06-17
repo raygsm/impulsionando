@@ -60,6 +60,7 @@ import { Route as ShowroomClientesRouteImport } from './routes/showroom.clientes
 import { Route as ShowroomCheckoutRouteImport } from './routes/showroom.checkout'
 import { Route as ShowroomCaixaUnificadaRouteImport } from './routes/showroom.caixa-unificada'
 import { Route as ShowroomAutomacoesRouteImport } from './routes/showroom.automacoes'
+import { Route as ShowroomAtendimentoRouteImport } from './routes/showroom.atendimento'
 import { Route as ShowroomAgendaRouteImport } from './routes/showroom.agenda'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
 import { Route as PlanosTesteRouteImport } from './routes/planos.teste'
@@ -503,6 +504,11 @@ const ShowroomCaixaUnificadaRoute = ShowroomCaixaUnificadaRouteImport.update({
 const ShowroomAutomacoesRoute = ShowroomAutomacoesRouteImport.update({
   id: '/showroom/automacoes',
   path: '/showroom/automacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShowroomAtendimentoRoute = ShowroomAtendimentoRouteImport.update({
+  id: '/showroom/atendimento',
+  path: '/showroom/atendimento',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShowroomAgendaRoute = ShowroomAgendaRouteImport.update({
@@ -1637,6 +1643,7 @@ export interface FileRoutesByFullPath {
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
+  '/showroom/atendimento': typeof ShowroomAtendimentoRoute
   '/showroom/automacoes': typeof ShowroomAutomacoesRoute
   '/showroom/caixa-unificada': typeof ShowroomCaixaUnificadaRoute
   '/showroom/checkout': typeof ShowroomCheckoutRoute
@@ -1867,6 +1874,7 @@ export interface FileRoutesByTo {
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
+  '/showroom/atendimento': typeof ShowroomAtendimentoRoute
   '/showroom/automacoes': typeof ShowroomAutomacoesRoute
   '/showroom/caixa-unificada': typeof ShowroomCaixaUnificadaRoute
   '/showroom/checkout': typeof ShowroomCheckoutRoute
@@ -2110,6 +2118,7 @@ export interface FileRoutesById {
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
+  '/showroom/atendimento': typeof ShowroomAtendimentoRoute
   '/showroom/automacoes': typeof ShowroomAutomacoesRoute
   '/showroom/caixa-unificada': typeof ShowroomCaixaUnificadaRoute
   '/showroom/checkout': typeof ShowroomCheckoutRoute
@@ -2353,6 +2362,7 @@ export interface FileRouteTypes {
     | '/planos/teste'
     | '/r/$slug'
     | '/showroom/agenda'
+    | '/showroom/atendimento'
     | '/showroom/automacoes'
     | '/showroom/caixa-unificada'
     | '/showroom/checkout'
@@ -2583,6 +2593,7 @@ export interface FileRouteTypes {
     | '/planos/teste'
     | '/r/$slug'
     | '/showroom/agenda'
+    | '/showroom/atendimento'
     | '/showroom/automacoes'
     | '/showroom/caixa-unificada'
     | '/showroom/checkout'
@@ -2825,6 +2836,7 @@ export interface FileRouteTypes {
     | '/planos/teste'
     | '/r/$slug'
     | '/showroom/agenda'
+    | '/showroom/atendimento'
     | '/showroom/automacoes'
     | '/showroom/caixa-unificada'
     | '/showroom/checkout'
@@ -3038,6 +3050,7 @@ export interface RootRouteChildren {
   NichosSlugRoute: typeof NichosSlugRoute
   RSlugRoute: typeof RSlugRoute
   ShowroomAgendaRoute: typeof ShowroomAgendaRoute
+  ShowroomAtendimentoRoute: typeof ShowroomAtendimentoRoute
   ShowroomAutomacoesRoute: typeof ShowroomAutomacoesRoute
   ShowroomCaixaUnificadaRoute: typeof ShowroomCaixaUnificadaRoute
   ShowroomCheckoutRoute: typeof ShowroomCheckoutRoute
@@ -3445,6 +3458,13 @@ declare module '@tanstack/react-router' {
       path: '/showroom/automacoes'
       fullPath: '/showroom/automacoes'
       preLoaderRoute: typeof ShowroomAutomacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/showroom/atendimento': {
+      id: '/showroom/atendimento'
+      path: '/showroom/atendimento'
+      fullPath: '/showroom/atendimento'
+      preLoaderRoute: typeof ShowroomAtendimentoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/showroom/agenda': {
@@ -5358,6 +5378,7 @@ const rootRouteChildren: RootRouteChildren = {
   NichosSlugRoute: NichosSlugRoute,
   RSlugRoute: RSlugRoute,
   ShowroomAgendaRoute: ShowroomAgendaRoute,
+  ShowroomAtendimentoRoute: ShowroomAtendimentoRoute,
   ShowroomAutomacoesRoute: ShowroomAutomacoesRoute,
   ShowroomCaixaUnificadaRoute: ShowroomCaixaUnificadaRoute,
   ShowroomCheckoutRoute: ShowroomCheckoutRoute,
