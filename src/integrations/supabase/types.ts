@@ -8413,6 +8413,78 @@ export type Database = {
           },
         ]
       }
+      vitrine_export_logs: {
+        Row: {
+          batches_done: number
+          company_id: string
+          created_at: string
+          dataset: string
+          date_from: string | null
+          date_to: string | null
+          email_from: string | null
+          email_to: string | null
+          error_message: string | null
+          export_id: string
+          finished_at: string | null
+          format: string
+          id: string
+          search_term: string | null
+          started_at: string
+          status: string
+          status_filter: string | null
+          total_expected: number | null
+          total_exported: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          batches_done?: number
+          company_id: string
+          created_at?: string
+          dataset: string
+          date_from?: string | null
+          date_to?: string | null
+          email_from?: string | null
+          email_to?: string | null
+          error_message?: string | null
+          export_id: string
+          finished_at?: string | null
+          format?: string
+          id?: string
+          search_term?: string | null
+          started_at?: string
+          status?: string
+          status_filter?: string | null
+          total_expected?: number | null
+          total_exported?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          batches_done?: number
+          company_id?: string
+          created_at?: string
+          dataset?: string
+          date_from?: string | null
+          date_to?: string | null
+          email_from?: string | null
+          email_to?: string | null
+          error_message?: string | null
+          export_id?: string
+          finished_at?: string | null
+          format?: string
+          id?: string
+          search_term?: string | null
+          started_at?: string
+          status?: string
+          status_filter?: string | null
+          total_expected?: number | null
+          total_exported?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       whatsapp_message_events: {
         Row: {
           error_code: string | null
