@@ -42,6 +42,7 @@ import { Route as DemoIndexRouteImport } from './routes/demo.index'
 import { Route as TrialCadastroRouteImport } from './routes/trial_.cadastro'
 import { Route as TrabalheConoscoNichoRouteImport } from './routes/trabalhe-conosco.$nicho'
 import { Route as ShowroomRelatoriosRouteImport } from './routes/showroom.relatorios'
+import { Route as ShowroomIntegracoesRouteImport } from './routes/showroom.integracoes'
 import { Route as ShowroomFitnessRouteImport } from './routes/showroom.fitness'
 import { Route as ShowroomEventosRouteImport } from './routes/showroom.eventos'
 import { Route as ShowroomDashboardsRouteImport } from './routes/showroom.dashboards'
@@ -397,6 +398,11 @@ const TrabalheConoscoNichoRoute = TrabalheConoscoNichoRouteImport.update({
 const ShowroomRelatoriosRoute = ShowroomRelatoriosRouteImport.update({
   id: '/showroom/relatorios',
   path: '/showroom/relatorios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShowroomIntegracoesRoute = ShowroomIntegracoesRouteImport.update({
+  id: '/showroom/integracoes',
+  path: '/showroom/integracoes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShowroomFitnessRoute = ShowroomFitnessRouteImport.update({
@@ -1549,6 +1555,7 @@ export interface FileRoutesByFullPath {
   '/showroom/dashboards': typeof ShowroomDashboardsRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
+  '/showroom/integracoes': typeof ShowroomIntegracoesRoute
   '/showroom/relatorios': typeof ShowroomRelatoriosRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial/cadastro': typeof TrialCadastroRoute
@@ -1764,6 +1771,7 @@ export interface FileRoutesByTo {
   '/showroom/dashboards': typeof ShowroomDashboardsRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
+  '/showroom/integracoes': typeof ShowroomIntegracoesRoute
   '/showroom/relatorios': typeof ShowroomRelatoriosRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial/cadastro': typeof TrialCadastroRoute
@@ -1992,6 +2000,7 @@ export interface FileRoutesById {
   '/showroom/dashboards': typeof ShowroomDashboardsRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
+  '/showroom/integracoes': typeof ShowroomIntegracoesRoute
   '/showroom/relatorios': typeof ShowroomRelatoriosRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial_/cadastro': typeof TrialCadastroRoute
@@ -2220,6 +2229,7 @@ export interface FileRouteTypes {
     | '/showroom/dashboards'
     | '/showroom/eventos'
     | '/showroom/fitness'
+    | '/showroom/integracoes'
     | '/showroom/relatorios'
     | '/trabalhe-conosco/$nicho'
     | '/trial/cadastro'
@@ -2435,6 +2445,7 @@ export interface FileRouteTypes {
     | '/showroom/dashboards'
     | '/showroom/eventos'
     | '/showroom/fitness'
+    | '/showroom/integracoes'
     | '/showroom/relatorios'
     | '/trabalhe-conosco/$nicho'
     | '/trial/cadastro'
@@ -2662,6 +2673,7 @@ export interface FileRouteTypes {
     | '/showroom/dashboards'
     | '/showroom/eventos'
     | '/showroom/fitness'
+    | '/showroom/integracoes'
     | '/showroom/relatorios'
     | '/trabalhe-conosco/$nicho'
     | '/trial_/cadastro'
@@ -2860,6 +2872,7 @@ export interface RootRouteChildren {
   ShowroomDashboardsRoute: typeof ShowroomDashboardsRoute
   ShowroomEventosRoute: typeof ShowroomEventosRoute
   ShowroomFitnessRoute: typeof ShowroomFitnessRoute
+  ShowroomIntegracoesRoute: typeof ShowroomIntegracoesRoute
   ShowroomRelatoriosRoute: typeof ShowroomRelatoriosRoute
   TrabalheConoscoNichoRoute: typeof TrabalheConoscoNichoRoute
   TrialCadastroRoute: typeof TrialCadastroRoute
@@ -3123,6 +3136,13 @@ declare module '@tanstack/react-router' {
       path: '/showroom/relatorios'
       fullPath: '/showroom/relatorios'
       preLoaderRoute: typeof ShowroomRelatoriosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/showroom/integracoes': {
+      id: '/showroom/integracoes'
+      path: '/showroom/integracoes'
+      fullPath: '/showroom/integracoes'
+      preLoaderRoute: typeof ShowroomIntegracoesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/showroom/fitness': {
@@ -5060,6 +5080,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShowroomDashboardsRoute: ShowroomDashboardsRoute,
   ShowroomEventosRoute: ShowroomEventosRoute,
   ShowroomFitnessRoute: ShowroomFitnessRoute,
+  ShowroomIntegracoesRoute: ShowroomIntegracoesRoute,
   ShowroomRelatoriosRoute: ShowroomRelatoriosRoute,
   TrabalheConoscoNichoRoute: TrabalheConoscoNichoRoute,
   TrialCadastroRoute: TrialCadastroRoute,
