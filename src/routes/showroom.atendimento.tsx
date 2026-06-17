@@ -909,5 +909,3 @@ function KpiCard({
 
 export default ShowroomAtendimento;
 
-// Lucide aliases
-export { Sparkles };
