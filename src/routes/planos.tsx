@@ -16,6 +16,8 @@ import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useMinimumWage } from "@/hooks/useCoreSetting";
+
 import { cn } from "@/lib/utils";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
