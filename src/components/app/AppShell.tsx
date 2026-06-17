@@ -5,6 +5,7 @@ import { Topbar } from "./Topbar";
 import { TrialBanner } from "./TrialBanner";
 import { PastDueBanner } from "@/components/PastDueBanner";
 import { ImpersonationBanner } from "./ImpersonationBanner";
+import { CommandPalette } from "./CommandPalette";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMyTrial } from "@/hooks/use-trial";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -96,6 +97,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <PastDueBanner />
         <main className="flex-1 p-6 lg:p-8 overflow-x-hidden">{children}</main>
       </div>
+      <CommandPalette />
     </div>
   );
 }
