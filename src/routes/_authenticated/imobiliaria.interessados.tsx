@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
-import { listVitrineInterests, updateVitrineInterest, exportVitrineDataset } from '@/lib/realestate-vitrine.functions'
+import { listVitrineInterests, updateVitrineInterest, exportVitrineDataset, getVitrineExportLog } from '@/lib/realestate-vitrine.functions'
 import { listVitrineEmailLog, resendVitrineEmail } from '@/lib/realestate-vitrine-resend.functions'
 import { useActiveCompany } from '@/hooks/use-active-company'
 import { PageHeader, EmptyState } from '@/components/app/PageElements'
@@ -48,12 +48,15 @@ function fmtDate(iso?: string | null) {
   return new Date(iso).toLocaleString('pt-BR')
 }
 
+const ACTIVE_EXPORT_KEY = 'vitrine.activeExportId'
+
 function Page() {
   const { companyId } = useActiveCompany()
   const qc = useQueryClient()
   const fetchList = useServerFn(listVitrineInterests)
   const fetchUpdate = useServerFn(updateVitrineInterest)
   const fetchExport = useServerFn(exportVitrineDataset)
+  const fetchExportLog = useServerFn(getVitrineExportLog)
   const [status, setStatus] = useState('todos')
   const [exportStatus, setExportStatus] = useState('todos')
   const [search, setSearch] = useState('')
@@ -64,14 +67,33 @@ function Page() {
   const [emailTo, setEmailTo] = useState('')
   const [exporting, setExporting] = useState<null | 'csv' | 'pdf'>(null)
   const [exportProgress, setExportProgress] = useState<{ done: number; total: number; exportId: string | null }>({ done: 0, total: 0, exportId: null })
+  // Persisted exportId — survives page reload so user pode acompanhar status
+  const [trackedExportId, setTrackedExportId] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null
+    return window.localStorage.getItem(ACTIVE_EXPORT_KEY)
+  })
   const pageSize = 25
   const EXPORT_CHUNK = 1000
   const EXPORT_MAX_PAGES = 20
+
+  // Polling do log de export por exportId — funciona mesmo após reload
+  const { data: trackedLog } = useQuery({
+    queryKey: ['vitrine-export-log', trackedExportId],
+    enabled: !!trackedExportId,
+    queryFn: () => fetchExportLog({ data: { exportId: trackedExportId! } }),
+    refetchInterval: (q) => {
+      const row = (q.state.data as any)?.row
+      if (!row) return 3000
+      return row.status === 'running' ? 2000 : false
+    },
+  })
 
   async function fetchAllForExport(format: 'csv' | 'pdf') {
     if (!companyId) return null
     const exportId = (crypto.randomUUID?.() ?? Math.random().toString(36).slice(2)) as string
     setExportProgress({ done: 0, total: 0, exportId })
+    setTrackedExportId(exportId)
+    try { window.localStorage.setItem(ACTIVE_EXPORT_KEY, exportId) } catch {}
     const allRows: any[] = []
     let columns: { key: string; label: string }[] = []
     let total = 0
@@ -121,7 +143,7 @@ function Page() {
       toast.success(`${r.rows.length} de ${r.total} registro(s) — export ${r.exportId.slice(0, 8)}`)
     } catch (e: any) {
       toast.error(e?.message ?? 'Falha ao exportar')
-    } finally { setExporting(null); setExportProgress({ done: 0, total: 0, exportId: null }) }
+    } finally { setExporting(null); setExportProgress({ done: 0, total: 0, exportId: null }); try { window.localStorage.removeItem(ACTIVE_EXPORT_KEY) } catch {} }
   }
 
   async function handleExportPdf() {
@@ -151,7 +173,7 @@ function Page() {
       toast.success(`PDF gerado — export ${r.exportId.slice(0, 8)}`)
     } catch (e: any) {
       toast.error(e?.message ?? 'Falha ao gerar PDF')
-    } finally { setExporting(null); setExportProgress({ done: 0, total: 0, exportId: null }) }
+    } finally { setExporting(null); setExportProgress({ done: 0, total: 0, exportId: null }); try { window.localStorage.removeItem(ACTIVE_EXPORT_KEY) } catch {} }
   }
 
   const { data, isLoading } = useQuery({
@@ -251,6 +273,27 @@ function Page() {
             </div>
           </div>
         )}
+        {!exporting && trackedExportId && trackedLog?.row && (() => {
+          const row = trackedLog.row as any
+          const pct = row.total_expected ? Math.min(100, Math.round((row.total_exported / row.total_expected) * 100)) : (row.status === 'completed' ? 100 : 0)
+          const tone = row.status === 'failed' ? 'bg-red-500' : row.status === 'completed' ? 'bg-emerald-500' : 'bg-primary'
+          const label = row.status === 'running' ? 'Em execução' : row.status === 'completed' ? 'Concluído' : 'Falhou'
+          return (
+            <div className="w-full mt-2">
+              <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                <span>Export <code>{trackedExportId.slice(0, 8)}</code> · {label} — {row.total_exported} / {row.total_expected || '?'} · lote {row.batches_done}</span>
+                <div className="flex items-center gap-2">
+                  <span>{pct}%</span>
+                  <button type="button" className="underline" onClick={() => { setTrackedExportId(null); try { window.localStorage.removeItem(ACTIVE_EXPORT_KEY) } catch {} }}>dispensar</button>
+                </div>
+              </div>
+              <div className="w-full h-2 bg-muted rounded overflow-hidden">
+                <div className={`h-full ${tone} transition-all`} style={{ width: `${pct}%` }} />
+              </div>
+              {row.status === 'failed' && row.error_message && <div className="text-xs text-red-600 mt-1">{row.error_message}</div>}
+            </div>
+          )
+        })()}
       </Card>
 
       {isLoading ? (
