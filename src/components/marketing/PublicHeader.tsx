@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { MessageCircle, PlayCircle, Menu, LogIn, ChevronDown, Sparkles, Boxes, Building2, Stethoscope, Calculator, UtensilsCrossed, CalendarDays, ShoppingBag, Wrench, Dumbbell, LayoutDashboard, MessagesSquare, CalendarRange, CreditCard, BarChart3 } from "lucide-react";
+import { MessageCircle, Menu, LogIn, ChevronDown, Sparkles, Boxes, MessagesSquare, CalendarRange, CreditCard, BarChart3, PlayCircle } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
@@ -10,7 +10,6 @@ import { cn } from "@/lib/utils";
 const WHATSAPP_URL =
   "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20falar%20com%20o%20Impulsionito.";
 
-type Item = { to: string; label: string; exact?: boolean };
 type SubItem = { to: string; label: string; desc?: string; icon?: React.ComponentType<{ className?: string }> };
 type MenuGroup = { label: string; to?: string; items?: SubItem[] };
 
@@ -20,25 +19,8 @@ const SOLUCOES: SubItem[] = [
   { to: "/modulos", label: "Agenda & Reservas", desc: "Agendamentos, mesas, salas", icon: CalendarRange },
   { to: "/modulos", label: "Pagamentos", desc: "Pix, cartão, recorrência", icon: CreditCard },
   { to: "/modulos", label: "BI & Dashboards", desc: "Métricas, MRR e gestão", icon: BarChart3 },
+  { to: "/nichos", label: "Por nicho", desc: "Imobiliária, clínica, restaurante e mais", icon: Boxes },
   { to: "/modulos", label: "Ver todos os módulos", desc: "Catálogo completo", icon: Boxes },
-];
-
-const NICHOS: SubItem[] = [
-  { to: "/nichos/imobiliaria", label: "Imobiliárias", icon: Building2 },
-  { to: "/nichos/saude", label: "Clínicas e Saúde", icon: Stethoscope },
-  { to: "/nichos/contabilidade", label: "Contabilidade", icon: Calculator },
-  { to: "/nichos/bares", label: "Bares e Restaurantes", icon: UtensilsCrossed },
-  { to: "/nichos/eventos", label: "Eventos", icon: CalendarDays },
-  { to: "/nichos/ecommerce", label: "E-commerce", icon: ShoppingBag },
-  { to: "/nichos/servicos", label: "Serviços", icon: Wrench },
-  { to: "/nichos/fitness", label: "Fitness", icon: Dumbbell },
-  { to: "/nichos", label: "Ver todos os nichos", icon: LayoutDashboard },
-];
-
-const EXPERIMENTAR: SubItem[] = [
-  { to: "/demo", label: "Demonstração geral", desc: "Veja a plataforma em ação" },
-  { to: "/demo", label: "Demo por nicho", desc: "Cenários reais do seu segmento" },
-  { to: "/demo/feira", label: "Demo feira", desc: "Captação rápida de leads" },
 ];
 
 const NAV: MenuGroup[] = [
@@ -47,6 +29,7 @@ const NAV: MenuGroup[] = [
   { label: "Demonstrações", to: "/demo" },
   { label: "Planos", to: "/planos" },
 ];
+
 
 
 function useActive(path: string, exact?: boolean) {
