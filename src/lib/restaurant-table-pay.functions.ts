@@ -43,7 +43,7 @@ export const createTableInvoice = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => CreateInput.parse(d))
   .handler(async ({ data }) => {
     const supabase = publicSupabase();
-    const { data: res, error } = await supabase.rpc("restaurant_create_table_invoice", {
+    const { data: res, error } = await (supabase as any).rpc("restaurant_create_table_invoice", {
       _token: data.token,
     });
     if (error) throw new Error(error.message);
@@ -54,6 +54,8 @@ export const createTableInvoice = createServerFn({ method: "POST" })
       order_nsu?: string;
       amount_cents?: number;
       status?: string;
+      attempt_number?: number;
+      expires_at?: string | null;
       pix_url?: string | null;
     };
     if (!r?.ok) throw new Error(r?.error ?? "fail");
@@ -71,6 +73,40 @@ export const createTableInvoice = createServerFn({ method: "POST" })
       amount_cents: r.amount_cents!,
       status: r.status!,
       order_nsu: r.order_nsu!,
+      attempt_number: r.attempt_number ?? 1,
+      expires_at: r.expires_at ?? null,
+      pix_url: pixUrl,
+      pix_configured: configured,
+    };
+  });
+
+/** Força nova cobrança PIX (usado quando a anterior expirou ou falhou). */
+export const forceNewTableInvoice = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => CreateInput.parse(d))
+  .handler(async ({ data }) => {
+    const supabase = publicSupabase();
+    const { data: res, error } = await (supabase as any).rpc(
+      "restaurant_force_new_table_invoice",
+      { _token: data.token },
+    );
+    if (error) throw new Error(error.message);
+    const r = res as any;
+    if (!r?.ok) throw new Error(r?.error ?? "fail");
+    let pixUrl = r.pix_url ?? null;
+    let configured = !!pixUrl;
+    if (!pixUrl && r.order_nsu && typeof r.amount_cents === "number") {
+      const built = buildPixUrl(r.order_nsu, r.amount_cents);
+      pixUrl = built.pix_url;
+      configured = built.configured;
+    }
+    return {
+      ok: true,
+      invoice_id: r.invoice_id,
+      amount_cents: r.amount_cents,
+      status: r.status,
+      order_nsu: r.order_nsu,
+      attempt_number: r.attempt_number ?? 1,
+      expires_at: r.expires_at ?? null,
       pix_url: pixUrl,
       pix_configured: configured,
     };
@@ -80,7 +116,7 @@ export const getTableInvoiceStatus = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => StatusInput.parse(d))
   .handler(async ({ data }) => {
     const supabase = publicSupabase();
-    const { data: res, error } = await supabase.rpc("restaurant_get_table_invoice", {
+    const { data: res, error } = await (supabase as any).rpc("restaurant_get_table_invoice", {
       _token: data.token,
       _invoice_id: data.invoice_id,
     });
@@ -100,3 +136,19 @@ export const getTableInvoiceStatus = createServerFn({ method: "POST" })
       paid_at: r.paid_at ?? null,
     };
   });
+
+/** Lista todo histórico de cobranças da sessão atual da mesa. */
+export const listTableInvoices = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => CreateInput.parse(d))
+  .handler(async ({ data }) => {
+    const supabase = publicSupabase();
+    const { data: res, error } = await (supabase as any).rpc(
+      "restaurant_list_table_invoices",
+      { _token: data.token },
+    );
+    if (error) throw new Error(error.message);
+    const r = res as { ok: boolean; error?: string; invoices?: any[] };
+    if (!r?.ok) throw new Error(r?.error ?? "fail");
+    return { ok: true, invoices: r.invoices ?? [] };
+  });
+
