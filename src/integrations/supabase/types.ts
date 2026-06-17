@@ -8991,6 +8991,7 @@ export type Database = {
           contact_phone: string | null
           contact_whatsapp: string | null
           created_at: string
+          created_by: string | null
           id: string
           ip: string | null
           kind: string
@@ -9013,6 +9014,7 @@ export type Database = {
           contact_phone?: string | null
           contact_whatsapp?: string | null
           created_at?: string
+          created_by?: string | null
           id?: string
           ip?: string | null
           kind?: string
@@ -9035,6 +9037,7 @@ export type Database = {
           contact_phone?: string | null
           contact_whatsapp?: string | null
           created_at?: string
+          created_by?: string | null
           id?: string
           ip?: string | null
           kind?: string
