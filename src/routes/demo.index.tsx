@@ -114,6 +114,22 @@ function DemoLanding() {
           ))}
         </div>
 
+        <div className="mt-10 rounded-xl border-2 border-amber-500/40 bg-gradient-to-br from-amber-500/10 to-primary/5 p-6 sm:p-8">
+          <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-center">
+            <div>
+              <Badge variant="outline" className="mb-2">🍺 Demo em forma de história</Badge>
+              <h3 className="font-semibold text-lg tracking-tight">Beer House: uma sexta-feira, do QR Code ao dashboard</h3>
+              <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                6 capítulos curtos mostram a operação real de uma cervejaria fictícia —
+                pedido, pagamento, notificação multi-canal e BI conversando entre si.
+              </p>
+            </div>
+            <Button asChild size="lg" variant="outline" className="gap-2">
+              <Link to="/demo/beer-house"><PlayCircle className="w-4 h-4" /> Ler a história</Link>
+            </Button>
+          </div>
+        </div>
+
         <div className="mt-10 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5 p-6 sm:p-8">
           <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-center">
             <div>
