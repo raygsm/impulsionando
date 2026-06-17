@@ -1,13 +1,21 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { runFullDiagnostic } from "@/lib/integrations-diagnostic.functions";
+import { checkDiagnosticAccess } from "@/lib/diagnostic-access.functions";
 import { AlertTriangle, CheckCircle2, Loader2, ShieldAlert, RefreshCcw, Download } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/core/diagnostico-geral")({
+  beforeLoad: async () => {
+    const res = await checkDiagnosticAccess();
+    if (!res.allowed) {
+      throw redirect({ to: "/core" as any });
+    }
+    return { diagLevel: res.level };
+  },
   component: DiagnosticoGeralPage,
 });
 

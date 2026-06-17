@@ -120,7 +120,7 @@ export const resendContractEmail = createServerFn({ method: "POST" })
 
     const { data: doc, error } = await context.supabase
       .from("contract_documents")
-      .select("id, company_id, contract_number, snapshot, file_hash")
+      .select("id, company_id, white_label_id, contract_number, version, parent_document_id, snapshot, file_hash, signed_storage_path")
       .eq("id", data.contract_document_id)
       .single();
     if (error || !doc) throw new Error(error?.message ?? "Contrato não encontrado");
@@ -158,12 +158,22 @@ export const resendContractEmail = createServerFn({ method: "POST" })
       });
       await context.supabase.from("audit_logs").insert({
         company_id: doc.company_id,
+        white_label_id: (doc as any).white_label_id ?? null,
         user_id: context.userId,
         action: "contract.email.resend",
         entity: "contract_documents",
         entity_id: doc.id,
-        after: { kind: "signed", to, result: r },
-      });
+        metadata: {
+          kind: "signed",
+          to,
+          contract_number: doc.contract_number,
+          version: (doc as any).version,
+          parent_document_id: (doc as any).parent_document_id ?? null,
+          signed_variant: (doc as any).signed_storage_path ? "signed_stamped" : "original",
+          idempotency_key: `contract-signed:${doc.id}:resend:${stamp}`,
+          result: r,
+        },
+      } as any);
       return r;
     }
 
@@ -202,12 +212,22 @@ export const resendContractEmail = createServerFn({ method: "POST" })
     });
     await context.supabase.from("audit_logs").insert({
       company_id: doc.company_id,
+      white_label_id: (doc as any).white_label_id ?? null,
       user_id: context.userId,
       action: "contract.email.resend",
       entity: "contract_documents",
       entity_id: doc.id,
-      after: { kind: "generated", to, result: r },
-    });
+      metadata: {
+        kind: "generated",
+        to,
+        contract_number: doc.contract_number,
+        version: (doc as any).version,
+        parent_document_id: (doc as any).parent_document_id ?? null,
+        signed_variant: (doc as any).signed_storage_path ? "signed_stamped" : "original",
+        idempotency_key: `contract-generated:${doc.id}:resend:${stamp}`,
+        result: r,
+      },
+    } as any);
     return r;
   });
 
