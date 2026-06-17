@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import {
   listContractDocuments, createContractDocument, getContractSignedUrl, listContractSignatures,
+  prepareContractReissue,
 } from "@/lib/contracts.functions";
 import { generateAndUploadContract } from "@/lib/contractPdf";
 import { downloadCsv, downloadTablePdf } from "@/lib/exports";
@@ -36,7 +37,7 @@ export const Route = createFileRoute("/_authenticated/core/contratos")({
 });
 
 const STATUS_LABEL: Record<string, string> = {
-  draft: "Rascunho", sent: "Enviado", signed: "Assinado", cancelled: "Cancelado", archived: "Arquivado",
+  draft: "Rascunho", sent: "Enviado", signed: "Assinado", cancelled: "Cancelado", archived: "Arquivado", superseded: "Substituído",
 };
 const STATUS_COLOR: Record<string, string> = {
   draft: "bg-slate-100 text-slate-700",
@@ -44,6 +45,7 @@ const STATUS_COLOR: Record<string, string> = {
   signed: "bg-emerald-100 text-emerald-700",
   cancelled: "bg-red-100 text-red-700",
   archived: "bg-zinc-100 text-zinc-700",
+  superseded: "bg-amber-100 text-amber-700",
 };
 
 function ContractsPage() {
@@ -54,6 +56,7 @@ function ContractsPage() {
   const createFn = useServerFn(createContractDocument);
   const urlFn = useServerFn(getContractSignedUrl);
   const sigsFn = useServerFn(listContractSignatures);
+  const reissueFn = useServerFn(prepareContractReissue);
 
   const list = useQuery({ queryKey: ["contracts"], queryFn: () => listFn() });
   const rows = list.data ?? [];
@@ -114,6 +117,8 @@ function ContractsPage() {
           file_hash: meta.file_hash,
           file_size_bytes: meta.file_size_bytes,
           snapshot: meta.snapshot,
+          notify_email: form.signer_email || null,
+          signer_name: form.signer_name || null,
         },
       });
     },
@@ -129,6 +134,45 @@ function ContractsPage() {
     mutationFn: (id: string) => urlFn({ data: { id } }),
     onSuccess: (r) => window.open(r.url, "_blank"),
     onError: (e: any) => toast.error(e?.message ?? "Falha ao baixar"),
+  });
+
+  const reissue = useMutation({
+    mutationFn: async (parentId: string) => {
+      const { parent, nextVersion } = await reissueFn({ data: { parent_id: parentId } });
+      const snap = (parent.snapshot ?? {}) as any;
+      const meta = await generateAndUploadContract({
+        company_id: parent.company_id,
+        company_name: snap.company_name ?? "",
+        company_doc: snap.company_doc,
+        contract_number: parent.contract_number,
+        plan_name: snap.plan ?? "",
+        modules: snap.modules ?? [],
+        monthly_brl: snap.monthly_brl ?? 0,
+        setup_brl: snap.setup_brl ?? 0,
+        cycle: snap.cycle ?? "mensal",
+        minimum_term_days: snap.minimum_term_days ?? 90,
+        version: nextVersion,
+      });
+      return createFn({
+        data: {
+          company_id: parent.company_id,
+          white_label_id: parent.white_label_id,
+          billing_contract_id: parent.billing_contract_id,
+          contract_number: parent.contract_number,
+          storage_path: meta.storage_path,
+          file_hash: meta.file_hash,
+          file_size_bytes: meta.file_size_bytes,
+          snapshot: { ...meta.snapshot, version: nextVersion },
+          parent_document_id: parent.id,
+          version: nextVersion,
+        },
+      });
+    },
+    onSuccess: () => {
+      toast.success("Nova versão do contrato emitida");
+      qc.invalidateQueries({ queryKey: ["contracts"] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Falha na reemissão"),
   });
 
   const exportRows = useMemo(
@@ -249,6 +293,7 @@ function ContractsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Nº</TableHead>
+                <TableHead>v</TableHead>
                 <TableHead>Empresa</TableHead>
                 <TableHead>Plano</TableHead>
                 <TableHead>Status</TableHead>
@@ -257,11 +302,12 @@ function ContractsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {list.isLoading && <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Carregando…</TableCell></TableRow>}
-              {!list.isLoading && rows.length === 0 && <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Nenhum contrato gerado.</TableCell></TableRow>}
+              {list.isLoading && <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Carregando…</TableCell></TableRow>}
+              {!list.isLoading && rows.length === 0 && <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Nenhum contrato gerado.</TableCell></TableRow>}
               {rows.map((r: any) => (
                 <TableRow key={r.id}>
                   <TableCell className="font-mono text-xs">{r.contract_number}</TableCell>
+                  <TableCell className="text-xs">v{r.version ?? 1}</TableCell>
                   <TableCell className="text-sm">{r.companies?.name ?? "—"}</TableCell>
                   <TableCell className="text-sm">{(r.snapshot as any)?.plan ?? "—"}</TableCell>
                   <TableCell><Badge variant="outline" className={STATUS_COLOR[r.status] ?? ""}>{STATUS_LABEL[r.status] ?? r.status}</Badge></TableCell>
@@ -310,6 +356,17 @@ function ContractsPage() {
                     <Button size="sm" variant="outline" onClick={() => download.mutate(r.id)}>
                       <Download className="w-4 h-4 mr-1" /> PDF
                     </Button>
+                    {r.status !== "superseded" && (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => reissue.mutate(r.id)}
+                        disabled={reissue.isPending}
+                        title="Emite nova versão a partir do snapshot atual e marca esta como Substituída"
+                      >
+                        Reemitir
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

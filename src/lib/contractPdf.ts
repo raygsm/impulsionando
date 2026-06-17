@@ -18,12 +18,24 @@ export type ContractInput = {
   minimum_term_days?: number;
   signer_name?: string;
   signer_email?: string;
+  version?: number;
+};
+
+export type SignatureStamp = {
+  signer_name: string;
+  signer_email: string;
+  signer_doc?: string;
+  signed_at: string;          // ISO
+  signature_hash: string;     // sha256 hex
+  original_file_hash: string; // sha256 hex
+  ip_address?: string;
+  user_agent?: string;
 };
 
 const BRL = (n: number) =>
   n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2 });
 
-export function buildContractPdfBytes(c: ContractInput): { bytes: Uint8Array; pageCount: number } {
+export function buildContractPdfBytes(c: ContractInput, stamp?: SignatureStamp): { bytes: Uint8Array; pageCount: number } {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
   const margin = 48;
@@ -99,18 +111,52 @@ export function buildContractPdfBytes(c: ContractInput): { bytes: Uint8Array; pa
   if (c.signer_name)  { doc.text(`Responsável: ${c.signer_name}`, margin, y); y += 14; }
   if (c.signer_email) { doc.text(`E-mail: ${c.signer_email}`, margin, y); y += 14; }
 
+  // ===== Carimbo de assinatura (após aceite) =====
+  if (stamp) {
+    doc.addPage();
+    let sy = margin;
+    doc.setFont("helvetica", "bold").setFontSize(14).setTextColor(6, 95, 70);
+    doc.text("✓ Contrato assinado eletronicamente", margin, sy); sy += 22;
+    doc.setFont("helvetica", "normal").setFontSize(10).setTextColor(0, 0, 0);
+    const lines = [
+      `Responsável: ${stamp.signer_name}`,
+      `E-mail: ${stamp.signer_email}`,
+      stamp.signer_doc ? `Documento: ${stamp.signer_doc}` : null,
+      `Data/hora da assinatura: ${new Date(stamp.signed_at).toLocaleString("pt-BR")}`,
+      stamp.ip_address ? `IP: ${stamp.ip_address}` : null,
+      stamp.user_agent ? `User-Agent: ${stamp.user_agent}` : null,
+    ].filter(Boolean) as string[];
+    lines.forEach((ln) => { doc.text(ln, margin, sy); sy += 14; });
+    sy += 8;
+    doc.setFont("helvetica", "bold").setFontSize(10);
+    doc.text("Hashes de integridade (SHA-256)", margin, sy); sy += 14;
+    doc.setFont("courier", "normal").setFontSize(9);
+    const wrap = (s: string) => doc.splitTextToSize(s, pageW - margin * 2);
+    doc.text("Documento original:", margin, sy); sy += 12;
+    wrap(stamp.original_file_hash).forEach((ln: string) => { doc.text(ln, margin, sy); sy += 11; });
+    sy += 6;
+    doc.text("Assinatura eletrônica:", margin, sy); sy += 12;
+    wrap(stamp.signature_hash).forEach((ln: string) => { doc.text(ln, margin, sy); sy += 11; });
+    sy += 10;
+    doc.setFont("helvetica", "italic").setFontSize(9).setTextColor(90, 90, 90);
+    doc.text(
+      "O hash original preserva a integridade do documento antes do carimbo. O hash de assinatura combina documento + assinante + data/hora, garantindo não-repúdio.",
+      margin, sy, { maxWidth: pageW - margin * 2 } as never,
+    );
+  }
+
   const pageCount = doc.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     doc.setFontSize(8).setTextColor(140, 140, 140);
-    doc.text(`Página ${i} de ${pageCount} · Impulsionando Tecnologia`, margin, 820);
+    doc.text(`Página ${i} de ${pageCount} · Impulsionando Tecnologia${c.version ? ` · v${c.version}` : ""}`, margin, 820);
   }
 
   const arrayBuf = doc.output("arraybuffer");
   return { bytes: new Uint8Array(arrayBuf), pageCount };
 }
 
-async function sha256Hex(bytes: Uint8Array): Promise<string> {
+export async function sha256Hex(bytes: Uint8Array): Promise<string> {
   const buf = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
   const digest = await crypto.subtle.digest("SHA-256", buf);
   return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
@@ -121,7 +167,7 @@ async function sha256Hex(bytes: Uint8Array): Promise<string> {
 export async function generateAndUploadContract(c: ContractInput) {
   const { bytes } = buildContractPdfBytes(c);
   const file_hash = await sha256Hex(bytes);
-  const storage_path = `${c.company_id}/${c.contract_number}-${file_hash.slice(0, 10)}.pdf`;
+  const storage_path = `${c.company_id}/${c.contract_number}-v${c.version ?? 1}-${file_hash.slice(0, 10)}.pdf`;
   const { error } = await supabase.storage.from("contracts").upload(storage_path, bytes, {
     contentType: "application/pdf",
     upsert: true,
@@ -140,6 +186,20 @@ export async function generateAndUploadContract(c: ContractInput) {
       setup_brl: c.setup_brl,
       modules: c.modules,
       minimum_term_days: c.minimum_term_days ?? 90,
+      version: c.version ?? 1,
     },
   };
+}
+
+/** Re-gera PDF com carimbo de assinatura e faz upload em path separado preservando o original. */
+export async function generateAndUploadSignedContract(c: ContractInput, stamp: SignatureStamp) {
+  const { bytes } = buildContractPdfBytes(c, stamp);
+  const signed_file_hash = await sha256Hex(bytes);
+  const signed_storage_path = `${c.company_id}/${c.contract_number}-v${c.version ?? 1}-signed-${signed_file_hash.slice(0, 10)}.pdf`;
+  const { error } = await supabase.storage.from("contracts").upload(signed_storage_path, bytes, {
+    contentType: "application/pdf",
+    upsert: true,
+  });
+  if (error) throw error;
+  return { signed_storage_path, signed_file_hash, signed_size_bytes: bytes.byteLength };
 }
