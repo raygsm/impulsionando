@@ -564,7 +564,69 @@ export const exportApprovalQueueCsv = createServerFn({ method: "GET" })
     };
   });
 
-// ============ Notification preferences ============
+// Structured queue export — same validator/filters as listApprovalQueue,
+// returned as typed rows so the print/PDF page does not have to parse CSV.
+export const getApprovalQueueForExport = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => BatchExportInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const from = (data.page - 1) * data.pageSize;
+    const to = from + data.pageSize - 1;
+    const statuses: Array<"pending" | "changes_requested" | "rejected" | "approved"> =
+      data.status?.length ? data.status : ["pending", "changes_requested", "rejected"];
+
+    let q = context.supabase
+      .from("realestate_properties")
+      .select(
+        "id, reference_code, title, operation, property_type, sale_price, rent_price, neighborhood, city, approval_status, submitted_for_review_at, submitted_by, reviewed_by, reviewed_at, review_notes",
+        { count: "exact" },
+      )
+      .eq("company_id", data.companyId)
+      .in("approval_status", statuses);
+
+    if (data.search?.trim()) {
+      const s = data.search.trim().replace(/[%,]/g, "");
+      q = q.or(`title.ilike.%${s}%,reference_code.ilike.%${s}%,neighborhood.ilike.%${s}%,city.ilike.%${s}%`);
+    }
+    if (data.reviewerId) q = q.eq("reviewed_by", data.reviewerId);
+    if (data.submitterId) q = q.eq("submitted_by", data.submitterId);
+    if (data.dateFrom) q = q.gte("submitted_for_review_at", data.dateFrom);
+    if (data.dateTo) q = q.lte("submitted_for_review_at", data.dateTo);
+
+    const { data: rows, error, count } = await q
+      .order("submitted_for_review_at", { ascending: false, nullsFirst: false })
+      .range(from, to);
+    if (error) throw new Error(error.message);
+
+    const userIds = Array.from(new Set((rows ?? []).flatMap((r: any) => [r.reviewed_by, r.submitted_by]).filter(Boolean) as string[]));
+    let actors: Record<string, string> = {};
+    if (userIds.length) {
+      const { data: profiles } = await context.supabase
+        .from("user_profiles").select("user_id, display_name, email").in("user_id", userIds);
+      for (const p of (profiles ?? []) as any[]) {
+        actors[p.user_id] = p.display_name || p.email || "Usuário";
+      }
+    }
+
+    return {
+      items: rows ?? [],
+      actors,
+      total: count ?? 0,
+      page: data.page,
+      pageSize: data.pageSize,
+      filters: {
+        status: statuses,
+        search: data.search ?? null,
+        reviewerId: data.reviewerId ?? null,
+        submitterId: data.submitterId ?? null,
+        dateFrom: data.dateFrom ?? null,
+        dateTo: data.dateTo ?? null,
+      },
+      generatedAt: new Date().toISOString(),
+    };
+  });
+
+
 const APPROVAL_CATEGORIES = ["realestate.approval.submitted", "realestate.approval.decision"] as const;
 const PREF_CHANNELS = ["in_app", "email"] as const;
 
