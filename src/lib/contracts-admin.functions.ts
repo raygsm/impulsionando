@@ -120,7 +120,7 @@ export const resendContractEmail = createServerFn({ method: "POST" })
 
     const { data: doc, error } = await context.supabase
       .from("contract_documents")
-      .select("id, company_id, contract_number, snapshot, file_hash")
+      .select("id, company_id, white_label_id, contract_number, version, parent_document_id, snapshot, file_hash, signed_storage_path")
       .eq("id", data.contract_document_id)
       .single();
     if (error || !doc) throw new Error(error?.message ?? "Contrato não encontrado");
