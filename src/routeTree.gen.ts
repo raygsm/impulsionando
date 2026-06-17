@@ -156,6 +156,7 @@ import { Route as DemoNichoSlugRouteImport } from './routes/demo.nicho.$slug'
 import { Route as AuthenticatedSalesOrdersRouteImport } from './routes/_authenticated/sales.orders'
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
 import { Route as AuthenticatedSalesCashRouteImport } from './routes/_authenticated/sales.cash'
+import { Route as AuthenticatedRestauranteSalaoRouteImport } from './routes/_authenticated/restaurante.salao'
 import { Route as AuthenticatedRestauranteMesasRouteImport } from './routes/_authenticated/restaurante.mesas'
 import { Route as AuthenticatedRestauranteCardapioRouteImport } from './routes/_authenticated/restaurante.cardapio'
 import { Route as AuthenticatedReportsSalesRouteImport } from './routes/_authenticated/reports.sales'
@@ -1037,6 +1038,12 @@ const AuthenticatedSalesCashRoute = AuthenticatedSalesCashRouteImport.update({
   path: '/cash',
   getParentRoute: () => AuthenticatedSalesRoute,
 } as any)
+const AuthenticatedRestauranteSalaoRoute =
+  AuthenticatedRestauranteSalaoRouteImport.update({
+    id: '/restaurante/salao',
+    path: '/restaurante/salao',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedRestauranteMesasRoute =
   AuthenticatedRestauranteMesasRouteImport.update({
     id: '/restaurante/mesas',
@@ -2020,6 +2027,7 @@ export interface FileRoutesByFullPath {
   '/reports/sales': typeof AuthenticatedReportsSalesRoute
   '/restaurante/cardapio': typeof AuthenticatedRestauranteCardapioRoute
   '/restaurante/mesas': typeof AuthenticatedRestauranteMesasRoute
+  '/restaurante/salao': typeof AuthenticatedRestauranteSalaoRoute
   '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
@@ -2287,6 +2295,7 @@ export interface FileRoutesByTo {
   '/reports/sales': typeof AuthenticatedReportsSalesRoute
   '/restaurante/cardapio': typeof AuthenticatedRestauranteCardapioRoute
   '/restaurante/mesas': typeof AuthenticatedRestauranteMesasRoute
+  '/restaurante/salao': typeof AuthenticatedRestauranteSalaoRoute
   '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
@@ -2567,6 +2576,7 @@ export interface FileRoutesById {
   '/_authenticated/reports/sales': typeof AuthenticatedReportsSalesRoute
   '/_authenticated/restaurante/cardapio': typeof AuthenticatedRestauranteCardapioRoute
   '/_authenticated/restaurante/mesas': typeof AuthenticatedRestauranteMesasRoute
+  '/_authenticated/restaurante/salao': typeof AuthenticatedRestauranteSalaoRoute
   '/_authenticated/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
   '/_authenticated/sales/orders': typeof AuthenticatedSalesOrdersRoute
@@ -2847,6 +2857,7 @@ export interface FileRouteTypes {
     | '/reports/sales'
     | '/restaurante/cardapio'
     | '/restaurante/mesas'
+    | '/restaurante/salao'
     | '/sales/cash'
     | '/sales/new'
     | '/sales/orders'
@@ -3114,6 +3125,7 @@ export interface FileRouteTypes {
     | '/reports/sales'
     | '/restaurante/cardapio'
     | '/restaurante/mesas'
+    | '/restaurante/salao'
     | '/sales/cash'
     | '/sales/new'
     | '/sales/orders'
@@ -3393,6 +3405,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reports/sales'
     | '/_authenticated/restaurante/cardapio'
     | '/_authenticated/restaurante/mesas'
+    | '/_authenticated/restaurante/salao'
     | '/_authenticated/sales/cash'
     | '/_authenticated/sales/new'
     | '/_authenticated/sales/orders'
@@ -4598,6 +4611,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/sales/cash'
       preLoaderRoute: typeof AuthenticatedSalesCashRouteImport
       parentRoute: typeof AuthenticatedSalesRoute
+    }
+    '/_authenticated/restaurante/salao': {
+      id: '/_authenticated/restaurante/salao'
+      path: '/restaurante/salao'
+      fullPath: '/restaurante/salao'
+      preLoaderRoute: typeof AuthenticatedRestauranteSalaoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/restaurante/mesas': {
       id: '/_authenticated/restaurante/mesas'
@@ -5943,6 +5963,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPerfilNotificacoesRoute: typeof AuthenticatedPerfilNotificacoesRoute
   AuthenticatedRestauranteCardapioRoute: typeof AuthenticatedRestauranteCardapioRoute
   AuthenticatedRestauranteMesasRoute: typeof AuthenticatedRestauranteMesasRoute
+  AuthenticatedRestauranteSalaoRoute: typeof AuthenticatedRestauranteSalaoRoute
   AuthenticatedComunidadeIndexRoute: typeof AuthenticatedComunidadeIndexRoute
   AuthenticatedEhrIndexRoute: typeof AuthenticatedEhrIndexRoute
   AuthenticatedEventosIndexRoute: typeof AuthenticatedEventosIndexRoute
@@ -6004,6 +6025,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPerfilNotificacoesRoute: AuthenticatedPerfilNotificacoesRoute,
   AuthenticatedRestauranteCardapioRoute: AuthenticatedRestauranteCardapioRoute,
   AuthenticatedRestauranteMesasRoute: AuthenticatedRestauranteMesasRoute,
+  AuthenticatedRestauranteSalaoRoute: AuthenticatedRestauranteSalaoRoute,
   AuthenticatedComunidadeIndexRoute: AuthenticatedComunidadeIndexRoute,
   AuthenticatedEhrIndexRoute: AuthenticatedEhrIndexRoute,
   AuthenticatedEventosIndexRoute: AuthenticatedEventosIndexRoute,

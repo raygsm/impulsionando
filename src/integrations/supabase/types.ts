@@ -8541,6 +8541,8 @@ export type Database = {
           description: string
           discount: number
           id: string
+          kitchen_status: string
+          kitchen_updated_at: string
           order_id: string
           product_id: string | null
           quantity: number
@@ -8553,6 +8555,8 @@ export type Database = {
           description: string
           discount?: number
           id?: string
+          kitchen_status?: string
+          kitchen_updated_at?: string
           order_id: string
           product_id?: string | null
           quantity: number
@@ -8565,6 +8569,8 @@ export type Database = {
           description?: string
           discount?: number
           id?: string
+          kitchen_status?: string
+          kitchen_updated_at?: string
           order_id?: string
           product_id?: string | null
           quantity?: number
@@ -9942,6 +9948,11 @@ export type Database = {
         Returns: string
       }
       resolve_table_qr: { Args: { _token: string }; Returns: Json }
+      restaurant_kitchen_board: { Args: never; Returns: Json }
+      restaurant_set_item_status: {
+        Args: { _item_id: string; _status: string }
+        Returns: Json
+      }
       restaurant_table_checkin: {
         Args: { _name: string; _party?: number; _phone: string; _token: string }
         Returns: Json
