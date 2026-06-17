@@ -131,6 +131,9 @@ function ShowroomHub() {
               <Button asChild size="lg" variant="outline">
                 <Link to="/showroom/multi-unidades">Multi-unidades</Link>
               </Button>
+              <Button asChild size="lg" variant="outline">
+                <Link to="/showroom/franquias">Franquias</Link>
+              </Button>
 
 
 
