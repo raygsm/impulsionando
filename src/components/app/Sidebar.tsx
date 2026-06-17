@@ -1,5 +1,5 @@
 import type { CurrentUser } from "@/lib/auth";
-import logoAsset from "@/assets/logo-impulsionando.png.asset.json";
+import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 import { SidebarNav } from "./SidebarNav";
 import { useImpersonation } from "@/hooks/use-impersonation";
 
