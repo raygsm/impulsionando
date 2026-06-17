@@ -282,6 +282,7 @@ import { Route as AuthenticatedAdminTrialsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminBillingPolicyRouteImport } from './routes/_authenticated/admin.billing-policy'
 import { Route as AuthenticatedAdminBillingContractsRouteImport } from './routes/_authenticated/admin.billing-contracts'
 import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authenticated/admin.billing'
+import { Route as AuthenticatedAdmMasterRouteImport } from './routes/_authenticated/adm.master'
 import { Route as AuthenticatedAdmAgentesRouteImport } from './routes/_authenticated/adm.agentes'
 import { Route as AuthenticatedAccessProfilesMatrixRouteImport } from './routes/_authenticated/access-profiles.matrix'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
@@ -1810,6 +1811,11 @@ const AuthenticatedAdminBillingRoute =
     path: '/admin/billing',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdmMasterRoute = AuthenticatedAdmMasterRouteImport.update({
+  id: '/master',
+  path: '/master',
+  getParentRoute: () => AuthenticatedAdmRoute,
+} as any)
 const AuthenticatedAdmAgentesRoute = AuthenticatedAdmAgentesRouteImport.update({
   id: '/agentes',
   path: '/agentes',
@@ -2164,6 +2170,7 @@ export interface FileRoutesByFullPath {
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/access-profiles/matrix': typeof AuthenticatedAccessProfilesMatrixRoute
   '/adm/agentes': typeof AuthenticatedAdmAgentesRoute
+  '/adm/master': typeof AuthenticatedAdmMasterRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/admin/billing-contracts': typeof AuthenticatedAdminBillingContractsRoute
   '/admin/billing-policy': typeof AuthenticatedAdminBillingPolicyRoute
@@ -2465,6 +2472,7 @@ export interface FileRoutesByTo {
   '/trabalhe-conosco': typeof TrabalheConoscoIndexRoute
   '/access-profiles/matrix': typeof AuthenticatedAccessProfilesMatrixRoute
   '/adm/agentes': typeof AuthenticatedAdmAgentesRoute
+  '/adm/master': typeof AuthenticatedAdmMasterRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/admin/billing-contracts': typeof AuthenticatedAdminBillingContractsRoute
   '/admin/billing-policy': typeof AuthenticatedAdminBillingPolicyRoute
@@ -2779,6 +2787,7 @@ export interface FileRoutesById {
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/_authenticated/access-profiles/matrix': typeof AuthenticatedAccessProfilesMatrixRoute
   '/_authenticated/adm/agentes': typeof AuthenticatedAdmAgentesRoute
+  '/_authenticated/adm/master': typeof AuthenticatedAdmMasterRoute
   '/_authenticated/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/_authenticated/admin/billing-contracts': typeof AuthenticatedAdminBillingContractsRoute
   '/_authenticated/admin/billing-policy': typeof AuthenticatedAdminBillingPolicyRoute
@@ -3093,6 +3102,7 @@ export interface FileRouteTypes {
     | '/trabalhe-conosco/'
     | '/access-profiles/matrix'
     | '/adm/agentes'
+    | '/adm/master'
     | '/admin/billing'
     | '/admin/billing-contracts'
     | '/admin/billing-policy'
@@ -3394,6 +3404,7 @@ export interface FileRouteTypes {
     | '/trabalhe-conosco'
     | '/access-profiles/matrix'
     | '/adm/agentes'
+    | '/adm/master'
     | '/admin/billing'
     | '/admin/billing-contracts'
     | '/admin/billing-policy'
@@ -3707,6 +3718,7 @@ export interface FileRouteTypes {
     | '/trabalhe-conosco/'
     | '/_authenticated/access-profiles/matrix'
     | '/_authenticated/adm/agentes'
+    | '/_authenticated/adm/master'
     | '/_authenticated/admin/billing'
     | '/_authenticated/admin/billing-contracts'
     | '/_authenticated/admin/billing-policy'
@@ -5925,6 +5937,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminBillingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/adm/master': {
+      id: '/_authenticated/adm/master'
+      path: '/master'
+      fullPath: '/adm/master'
+      preLoaderRoute: typeof AuthenticatedAdmMasterRouteImport
+      parentRoute: typeof AuthenticatedAdmRoute
+    }
     '/_authenticated/adm/agentes': {
       id: '/_authenticated/adm/agentes'
       path: '/agentes'
@@ -6211,10 +6230,12 @@ const AuthenticatedAccessProfilesRouteWithChildren =
 
 interface AuthenticatedAdmRouteChildren {
   AuthenticatedAdmAgentesRoute: typeof AuthenticatedAdmAgentesRoute
+  AuthenticatedAdmMasterRoute: typeof AuthenticatedAdmMasterRoute
 }
 
 const AuthenticatedAdmRouteChildren: AuthenticatedAdmRouteChildren = {
   AuthenticatedAdmAgentesRoute: AuthenticatedAdmAgentesRoute,
+  AuthenticatedAdmMasterRoute: AuthenticatedAdmMasterRoute,
 }
 
 const AuthenticatedAdmRouteWithChildren =
