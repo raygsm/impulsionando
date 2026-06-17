@@ -25,7 +25,7 @@ function REOpsCockpit() {
       const [pubProps, draftProps, intents, interests, openMsgs, matches30, recentInterests, topProps] = await Promise.all([
         supabase.from("realestate_properties").select("id", { count: "exact", head: true }).eq("is_published", true),
         supabase.from("realestate_properties").select("id", { count: "exact", head: true }).eq("is_published", false),
-        supabase.from("realestate_search_intents").select("id", { count: "exact", head: true }).eq("status", "active"),
+        supabase.from("realestate_search_intents").select("id", { count: "exact", head: true }).eq("status", "ativo"),
         supabase.from("realestate_interests").select("id", { count: "exact", head: true }).gte("created_at", last30),
         supabase.from("realestate_internal_messages").select("id", { count: "exact", head: true }).eq("status", "open"),
         supabase.from("realestate_property_matches").select("id", { count: "exact", head: true }).gte("created_at", last30),
