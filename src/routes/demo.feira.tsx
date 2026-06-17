@@ -9,7 +9,7 @@
  *
  * Toda a captura passa pelo endpoint público /api/public/demo/feira-lead.
  */
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
@@ -19,12 +19,14 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import {
   Sparkles, ShieldCheck, Mail, MessageSquare, ArrowRight, CheckCircle2,
   UtensilsCrossed, Stethoscope, Home as HomeIcon, CalendarDays, Store,
-  Wrench, Users, Beer, ShoppingBag, Megaphone,
+  Wrench, Users, Beer, ShoppingBag, Megaphone, AlertCircle,
 } from "lucide-react";
+import { isValidEmail, isValidPhoneBR, maskPhone } from "@/lib/validators";
 
 type NicheCard = { slug: string; name: string; icon: React.ElementType; tagline: string };
 
@@ -65,6 +67,8 @@ function FeiraLanding() {
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<{ leadId: string; demoUrl: string } | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [consent, setConsent] = useState(false);
 
   const selectedNiche = useMemo(() => NICHES.find((n) => n.slug === nicheSlug), [nicheSlug]);
 
@@ -81,17 +85,27 @@ function FeiraLanding() {
   }, []);
 
   useEffect(() => {
-    // se vier ?n=slug, pré-seleciona
     if (typeof window === "undefined") return;
     const n = new URL(window.location.href).searchParams.get("n");
     if (n && NICHES.some((x) => x.slug === n)) setNicheSlug(n);
   }, []);
 
+  function validate(): boolean {
+    const errs: Record<string, string> = {};
+    if (!nicheSlug) errs.niche = "Escolha o nicho da sua empresa.";
+    if (!name.trim() || name.trim().length < 3) errs.name = "Informe seu nome completo.";
+    if (!isValidEmail(email)) errs.email = "E-mail inválido.";
+    if (!isValidPhoneBR(phone)) errs.phone = "WhatsApp inválido. Use (DDD) + número.";
+    if (!consent) errs.consent = "Você precisa aceitar o contato para liberar a demo.";
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!nicheSlug) return toast.error("Escolha o nicho da sua empresa.");
-    if (!name.trim() || !email.trim() || phone.replace(/\D/g, "").length < 10) {
-      return toast.error("Preencha nome, e-mail e WhatsApp para continuar.");
+    if (!validate()) {
+      toast.error("Verifique os campos destacados.");
+      return;
     }
     setSubmitting(true);
     try {
@@ -173,19 +187,22 @@ function FeiraLanding() {
                 <h2 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wide">
                   2. Seus dados (acesso imediato)
                 </h2>
-                <form onSubmit={handleSubmit} className="space-y-3">
+                <form onSubmit={handleSubmit} className="space-y-3" noValidate>
                   <div>
                     <Label htmlFor="name">Nome completo *</Label>
-                    <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Seu nome" required />
+                    <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Seu nome" aria-invalid={!!errors.name} className={errors.name ? "border-destructive" : ""} />
+                    {errors.name && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.name}</p>}
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <Label htmlFor="email">E-mail *</Label>
-                      <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@empresa.com" required />
+                      <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@empresa.com" aria-invalid={!!errors.email} className={errors.email ? "border-destructive" : ""} />
+                      {errors.email && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.email}</p>}
                     </div>
                     <div>
                       <Label htmlFor="phone">WhatsApp *</Label>
-                      <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="(21) 99999-9999" required />
+                      <Input id="phone" value={phone} onChange={(e) => setPhone(maskPhone(e.target.value))} placeholder="(21) 99999-9999" aria-invalid={!!errors.phone} className={errors.phone ? "border-destructive" : ""} />
+                      {errors.phone && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.phone}</p>}
                     </div>
                   </div>
                   <div>
@@ -197,19 +214,26 @@ function FeiraLanding() {
                     <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} placeholder="Ex.: integrar agenda com WhatsApp" />
                   </div>
 
+                  <label className="flex items-start gap-2 text-xs text-muted-foreground pt-1 cursor-pointer">
+                    <Checkbox checked={consent} onCheckedChange={(v) => setConsent(!!v)} className="mt-0.5" />
+                    <span>
+                      Aceito receber o link da demonstração e contato comercial da Impulsionando.{" "}
+                      <Link to="/privacidade" className="underline">LGPD</Link>.
+                    </span>
+                  </label>
+                  {errors.consent && <p className="text-xs text-destructive flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.consent}</p>}
+
                   <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
                     <ShieldCheck className="w-4 h-4" />
-                    Seus dados são usados apenas para liberar a demo e o contato comercial.
+                    Validamos CPF/CNPJ/CEP em formulários completos. Aqui só pedimos o essencial.
                   </div>
 
-                  <Button type="submit" size="lg" className="w-full bg-gradient-primary" disabled={submitting || !nicheSlug}>
+                  <Button type="submit" size="lg" className="w-full bg-gradient-primary" disabled={submitting}>
                     {submitting ? "Liberando acesso..." : (
                       <>Abrir demonstração {selectedNiche ? `· ${selectedNiche.name}` : ""} <ArrowRight className="w-4 h-4 ml-1" /></>
                     )}
                   </Button>
-                  {!nicheSlug && (
-                    <p className="text-xs text-amber-600 text-center">Escolha um nicho acima para liberar.</p>
-                  )}
+                  {errors.niche && <p className="text-xs text-amber-600 text-center flex items-center justify-center gap-1"><AlertCircle className="w-3 h-3" />{errors.niche}</p>}
                 </form>
               </Card>
               <ul className="mt-4 text-xs text-muted-foreground space-y-1">
