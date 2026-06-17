@@ -69,7 +69,7 @@ function FinanceIntegrationsPage() {
 
   const { data: pixCharges } = useQuery({
     queryKey: ['admin-pix-pending'],
-    queryFn: () => fetchPix(),
+    queryFn: () => fetchPix({ data: { statuses: ['pending', 'paid'], limit: 100 } }),
     refetchInterval: 60_000,
   })
   const { data: mp } = useQuery({
