@@ -43,7 +43,7 @@ export const Route = createFileRoute("/showroom/onboarding")({
       },
     ],
   }),
-  component: ShowroomOnboarding;
+  component: ShowroomOnboarding,
 });
 
 type NicheSlug = "clinicas" | "bares" | "cervejarias" | "servicos" | "ecommerce";
