@@ -43,6 +43,7 @@ import { Route as TrialCadastroRouteImport } from './routes/trial_.cadastro'
 import { Route as TrabalheConoscoNichoRouteImport } from './routes/trabalhe-conosco.$nicho'
 import { Route as ShowroomWhatsappRouteImport } from './routes/showroom.whatsapp'
 import { Route as ShowroomSiteRouteImport } from './routes/showroom.site'
+import { Route as ShowroomSegurancaRouteImport } from './routes/showroom.seguranca'
 import { Route as ShowroomRelatoriosAvancadosRouteImport } from './routes/showroom.relatorios-avancados'
 import { Route as ShowroomRelatoriosRouteImport } from './routes/showroom.relatorios'
 import { Route as ShowroomPortalClienteRouteImport } from './routes/showroom.portal-cliente'
@@ -428,6 +429,11 @@ const ShowroomWhatsappRoute = ShowroomWhatsappRouteImport.update({
 const ShowroomSiteRoute = ShowroomSiteRouteImport.update({
   id: '/showroom/site',
   path: '/showroom/site',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShowroomSegurancaRoute = ShowroomSegurancaRouteImport.update({
+  id: '/showroom/seguranca',
+  path: '/showroom/seguranca',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShowroomRelatoriosAvancadosRoute =
@@ -1732,6 +1738,7 @@ export interface FileRoutesByFullPath {
   '/showroom/portal-cliente': typeof ShowroomPortalClienteRoute
   '/showroom/relatorios': typeof ShowroomRelatoriosRoute
   '/showroom/relatorios-avancados': typeof ShowroomRelatoriosAvancadosRoute
+  '/showroom/seguranca': typeof ShowroomSegurancaRoute
   '/showroom/site': typeof ShowroomSiteRoute
   '/showroom/whatsapp': typeof ShowroomWhatsappRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
@@ -1973,6 +1980,7 @@ export interface FileRoutesByTo {
   '/showroom/portal-cliente': typeof ShowroomPortalClienteRoute
   '/showroom/relatorios': typeof ShowroomRelatoriosRoute
   '/showroom/relatorios-avancados': typeof ShowroomRelatoriosAvancadosRoute
+  '/showroom/seguranca': typeof ShowroomSegurancaRoute
   '/showroom/site': typeof ShowroomSiteRoute
   '/showroom/whatsapp': typeof ShowroomWhatsappRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
@@ -2227,6 +2235,7 @@ export interface FileRoutesById {
   '/showroom/portal-cliente': typeof ShowroomPortalClienteRoute
   '/showroom/relatorios': typeof ShowroomRelatoriosRoute
   '/showroom/relatorios-avancados': typeof ShowroomRelatoriosAvancadosRoute
+  '/showroom/seguranca': typeof ShowroomSegurancaRoute
   '/showroom/site': typeof ShowroomSiteRoute
   '/showroom/whatsapp': typeof ShowroomWhatsappRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
@@ -2481,6 +2490,7 @@ export interface FileRouteTypes {
     | '/showroom/portal-cliente'
     | '/showroom/relatorios'
     | '/showroom/relatorios-avancados'
+    | '/showroom/seguranca'
     | '/showroom/site'
     | '/showroom/whatsapp'
     | '/trabalhe-conosco/$nicho'
@@ -2722,6 +2732,7 @@ export interface FileRouteTypes {
     | '/showroom/portal-cliente'
     | '/showroom/relatorios'
     | '/showroom/relatorios-avancados'
+    | '/showroom/seguranca'
     | '/showroom/site'
     | '/showroom/whatsapp'
     | '/trabalhe-conosco/$nicho'
@@ -2975,6 +2986,7 @@ export interface FileRouteTypes {
     | '/showroom/portal-cliente'
     | '/showroom/relatorios'
     | '/showroom/relatorios-avancados'
+    | '/showroom/seguranca'
     | '/showroom/site'
     | '/showroom/whatsapp'
     | '/trabalhe-conosco/$nicho'
@@ -3199,6 +3211,7 @@ export interface RootRouteChildren {
   ShowroomPortalClienteRoute: typeof ShowroomPortalClienteRoute
   ShowroomRelatoriosRoute: typeof ShowroomRelatoriosRoute
   ShowroomRelatoriosAvancadosRoute: typeof ShowroomRelatoriosAvancadosRoute
+  ShowroomSegurancaRoute: typeof ShowroomSegurancaRoute
   ShowroomSiteRoute: typeof ShowroomSiteRoute
   ShowroomWhatsappRoute: typeof ShowroomWhatsappRoute
   TrabalheConoscoNichoRoute: typeof TrabalheConoscoNichoRoute
@@ -3470,6 +3483,13 @@ declare module '@tanstack/react-router' {
       path: '/showroom/site'
       fullPath: '/showroom/site'
       preLoaderRoute: typeof ShowroomSiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/showroom/seguranca': {
+      id: '/showroom/seguranca'
+      path: '/showroom/seguranca'
+      fullPath: '/showroom/seguranca'
+      preLoaderRoute: typeof ShowroomSegurancaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/showroom/relatorios-avancados': {
@@ -5607,6 +5627,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShowroomPortalClienteRoute: ShowroomPortalClienteRoute,
   ShowroomRelatoriosRoute: ShowroomRelatoriosRoute,
   ShowroomRelatoriosAvancadosRoute: ShowroomRelatoriosAvancadosRoute,
+  ShowroomSegurancaRoute: ShowroomSegurancaRoute,
   ShowroomSiteRoute: ShowroomSiteRoute,
   ShowroomWhatsappRoute: ShowroomWhatsappRoute,
   TrabalheConoscoNichoRoute: TrabalheConoscoNichoRoute,
