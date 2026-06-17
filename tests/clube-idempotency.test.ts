@@ -58,17 +58,39 @@ describe("clube idempotência", () => {
   });
 
   it("trigger Pix cria 1 comprovante e promove pending_upload → available", async () => {
-    // membership
-    const { data: mem, error: mErr } = await admin.from("consumer_memberships").insert({
-      user_id: userId, plan: "premium", status: "active",
+    // ID compartilhado: billing_contracts (FK do charge) + consumer_memberships (lookup do trigger)
+    const sharedId = crypto.randomUUID();
+
+    // company + plan mínimos para o contrato
+    const { data: comp } = await admin.from("companies").insert({
+      name: `idem-${Date.now()}`, slug: `idem-${Date.now()}`,
     }).select("id").single();
+    cleanup.push(async () => { await admin.from("companies").delete().eq("id", comp!.id); });
+
+    const { data: plan } = await admin.from("billing_plans").insert({
+      code: `idem-${Date.now()}`, name: "idem", recurring_amount: 19.9, billing_cycle: "monthly",
+    }).select("id").single();
+    cleanup.push(async () => { await admin.from("billing_plans").delete().eq("id", plan!.id); });
+
+    const { error: ctErr } = await admin.from("billing_contracts").insert({
+      id: sharedId, company_id: comp!.id, plan_id: plan!.id,
+      start_date: new Date().toISOString().slice(0, 10),
+      next_due_date: new Date().toISOString().slice(0, 10),
+      recurring_amount: 19.9, status: "active",
+    });
+    expect(ctErr).toBeNull();
+    cleanup.push(async () => { await admin.from("billing_contracts").delete().eq("id", sharedId); });
+
+    const { error: mErr } = await admin.from("consumer_memberships").insert({
+      id: sharedId, user_id: userId, plan: "premium", status: "active",
+    });
     expect(mErr).toBeNull();
-    cleanup.push(async () => { await admin.from("consumer_memberships").delete().eq("id", mem!.id); });
+    cleanup.push(async () => { await admin.from("consumer_memberships").delete().eq("id", sharedId); });
 
     // 1ª charge sem receipt_url → pending_upload
     const uniq = 100000 + Math.floor(Math.random() * 800000);
     const { data: charge, error: cErr } = await admin.from("billing_pix_charges").insert({
-      contract_id: mem!.id,
+      contract_id: sharedId,
       plan_code: "test-plan",
       base_amount_cents: uniq,
       unique_amount_cents: uniq,
