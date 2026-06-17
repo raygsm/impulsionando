@@ -200,6 +200,7 @@ import { Route as AuthenticatedCoreFlagsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedCoreFinanceiroMasterRouteImport } from './routes/_authenticated/core.financeiro-master'
 import { Route as AuthenticatedCoreFinalizacaoComercialRouteImport } from './routes/_authenticated/core.finalizacao-comercial'
 import { Route as AuthenticatedCoreEventosRouteImport } from './routes/_authenticated/core.eventos'
+import { Route as AuthenticatedCoreDiagnosticoGeralRouteImport } from './routes/_authenticated/core.diagnostico-geral'
 import { Route as AuthenticatedCoreDemosRouteImport } from './routes/_authenticated/core.demos'
 import { Route as AuthenticatedCoreDemoInsightsRouteImport } from './routes/_authenticated/core.demo-insights'
 import { Route as AuthenticatedCoreDashboardsRouteImport } from './routes/_authenticated/core.dashboards'
@@ -1284,6 +1285,12 @@ const AuthenticatedCoreEventosRoute =
     path: '/eventos',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreDiagnosticoGeralRoute =
+  AuthenticatedCoreDiagnosticoGeralRouteImport.update({
+    id: '/diagnostico-geral',
+    path: '/diagnostico-geral',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreDemosRoute = AuthenticatedCoreDemosRouteImport.update({
   id: '/demos',
   path: '/demos',
@@ -1883,6 +1890,7 @@ export interface FileRoutesByFullPath {
   '/core/dashboards': typeof AuthenticatedCoreDashboardsRoute
   '/core/demo-insights': typeof AuthenticatedCoreDemoInsightsRoute
   '/core/demos': typeof AuthenticatedCoreDemosRoute
+  '/core/diagnostico-geral': typeof AuthenticatedCoreDiagnosticoGeralRoute
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/core/finalizacao-comercial': typeof AuthenticatedCoreFinalizacaoComercialRoute
   '/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
@@ -2138,6 +2146,7 @@ export interface FileRoutesByTo {
   '/core/dashboards': typeof AuthenticatedCoreDashboardsRoute
   '/core/demo-insights': typeof AuthenticatedCoreDemoInsightsRoute
   '/core/demos': typeof AuthenticatedCoreDemosRoute
+  '/core/diagnostico-geral': typeof AuthenticatedCoreDiagnosticoGeralRoute
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/core/finalizacao-comercial': typeof AuthenticatedCoreFinalizacaoComercialRoute
   '/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
@@ -2406,6 +2415,7 @@ export interface FileRoutesById {
   '/_authenticated/core/dashboards': typeof AuthenticatedCoreDashboardsRoute
   '/_authenticated/core/demo-insights': typeof AuthenticatedCoreDemoInsightsRoute
   '/_authenticated/core/demos': typeof AuthenticatedCoreDemosRoute
+  '/_authenticated/core/diagnostico-geral': typeof AuthenticatedCoreDiagnosticoGeralRoute
   '/_authenticated/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/_authenticated/core/finalizacao-comercial': typeof AuthenticatedCoreFinalizacaoComercialRoute
   '/_authenticated/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
@@ -2674,6 +2684,7 @@ export interface FileRouteTypes {
     | '/core/dashboards'
     | '/core/demo-insights'
     | '/core/demos'
+    | '/core/diagnostico-geral'
     | '/core/eventos'
     | '/core/finalizacao-comercial'
     | '/core/financeiro-master'
@@ -2929,6 +2940,7 @@ export interface FileRouteTypes {
     | '/core/dashboards'
     | '/core/demo-insights'
     | '/core/demos'
+    | '/core/diagnostico-geral'
     | '/core/eventos'
     | '/core/finalizacao-comercial'
     | '/core/financeiro-master'
@@ -3196,6 +3208,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/dashboards'
     | '/_authenticated/core/demo-insights'
     | '/_authenticated/core/demos'
+    | '/_authenticated/core/diagnostico-geral'
     | '/_authenticated/core/eventos'
     | '/_authenticated/core/finalizacao-comercial'
     | '/_authenticated/core/financeiro-master'
@@ -4754,6 +4767,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreEventosRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/diagnostico-geral': {
+      id: '/_authenticated/core/diagnostico-geral'
+      path: '/diagnostico-geral'
+      fullPath: '/core/diagnostico-geral'
+      preLoaderRoute: typeof AuthenticatedCoreDiagnosticoGeralRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/demos': {
       id: '/_authenticated/core/demos'
       path: '/demos'
@@ -5432,6 +5452,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreDashboardsRoute: typeof AuthenticatedCoreDashboardsRoute
   AuthenticatedCoreDemoInsightsRoute: typeof AuthenticatedCoreDemoInsightsRoute
   AuthenticatedCoreDemosRoute: typeof AuthenticatedCoreDemosRoute
+  AuthenticatedCoreDiagnosticoGeralRoute: typeof AuthenticatedCoreDiagnosticoGeralRoute
   AuthenticatedCoreEventosRoute: typeof AuthenticatedCoreEventosRoute
   AuthenticatedCoreFinalizacaoComercialRoute: typeof AuthenticatedCoreFinalizacaoComercialRoute
   AuthenticatedCoreFinanceiroMasterRoute: typeof AuthenticatedCoreFinanceiroMasterRoute
@@ -5467,6 +5488,8 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreDashboardsRoute: AuthenticatedCoreDashboardsRoute,
   AuthenticatedCoreDemoInsightsRoute: AuthenticatedCoreDemoInsightsRoute,
   AuthenticatedCoreDemosRoute: AuthenticatedCoreDemosRoute,
+  AuthenticatedCoreDiagnosticoGeralRoute:
+    AuthenticatedCoreDiagnosticoGeralRoute,
   AuthenticatedCoreEventosRoute: AuthenticatedCoreEventosRoute,
   AuthenticatedCoreFinalizacaoComercialRoute:
     AuthenticatedCoreFinalizacaoComercialRoute,

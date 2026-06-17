@@ -102,27 +102,51 @@ export const createContractDocument = createServerFn({ method: "POST" })
     return row;
   });
 
-/** Gera URL assinada de download do PDF original (60 min). */
+/** Gera URL assinada de download (60 min) + audita download por company/version. */
 export const getContractSignedUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string; signed?: boolean }) => d)
   .handler(async ({ data, context }) => {
     const { data: doc, error: e1 } = await context.supabase
       .from("contract_documents")
-      .select("storage_path, signed_storage_path")
+      .select("id, company_id, white_label_id, contract_number, version, storage_path, signed_storage_path, parent_document_id")
       .eq("id", data.id)
       .single();
     if (e1 || !doc) throw e1 ?? new Error("Contrato não encontrado");
 
-    const path = data.signed && (doc as any).signed_storage_path
-      ? (doc as any).signed_storage_path
-      : (doc as any).storage_path;
+    const wantSigned = !!(data.signed && (doc as any).signed_storage_path);
+    const path = wantSigned ? (doc as any).signed_storage_path : (doc as any).storage_path;
 
     const { data: signed, error } = await context.supabase
       .storage.from("contracts")
       .createSignedUrl(path, 60 * 60);
     if (error || !signed) throw error ?? new Error("Falha ao gerar URL");
-    return { url: signed.signedUrl };
+
+    try {
+      const { data: prof } = await context.supabase
+        .from("user_profiles").select("email").eq("user_id", context.userId).maybeSingle();
+      await context.supabase.from("audit_logs").insert({
+        company_id: (doc as any).company_id,
+        white_label_id: (doc as any).white_label_id ?? null,
+        user_id: context.userId,
+        user_email: prof?.email ?? null,
+        action: wantSigned ? "contract.download.signed" : "contract.download.original",
+        entity: "contract_documents",
+        entity_id: (doc as any).id,
+        metadata: {
+          contract_number: (doc as any).contract_number,
+          version: (doc as any).version,
+          parent_document_id: (doc as any).parent_document_id ?? null,
+          reissued: !!(doc as any).parent_document_id,
+          variant: wantSigned ? "signed_stamped" : "original",
+          storage_path: path,
+        },
+      } as any);
+    } catch (auditErr) {
+      console.error("audit contract.download failed", auditErr);
+    }
+
+    return { url: signed.signedUrl, signed: wantSigned, version: (doc as any).version };
   });
 
 /** Registra assinatura eletrônica, atualiza documento com carimbo, dispara e-mail. */
