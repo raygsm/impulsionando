@@ -156,7 +156,7 @@ export function buildContractPdfBytes(c: ContractInput, stamp?: SignatureStamp):
   return { bytes: new Uint8Array(arrayBuf), pageCount };
 }
 
-async function sha256Hex(bytes: Uint8Array): Promise<string> {
+export async function sha256Hex(bytes: Uint8Array): Promise<string> {
   const buf = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
   const digest = await crypto.subtle.digest("SHA-256", buf);
   return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
@@ -167,7 +167,7 @@ async function sha256Hex(bytes: Uint8Array): Promise<string> {
 export async function generateAndUploadContract(c: ContractInput) {
   const { bytes } = buildContractPdfBytes(c);
   const file_hash = await sha256Hex(bytes);
-  const storage_path = `${c.company_id}/${c.contract_number}-${file_hash.slice(0, 10)}.pdf`;
+  const storage_path = `${c.company_id}/${c.contract_number}-v${c.version ?? 1}-${file_hash.slice(0, 10)}.pdf`;
   const { error } = await supabase.storage.from("contracts").upload(storage_path, bytes, {
     contentType: "application/pdf",
     upsert: true,
@@ -186,6 +186,20 @@ export async function generateAndUploadContract(c: ContractInput) {
       setup_brl: c.setup_brl,
       modules: c.modules,
       minimum_term_days: c.minimum_term_days ?? 90,
+      version: c.version ?? 1,
     },
   };
+}
+
+/** Re-gera PDF com carimbo de assinatura e faz upload em path separado preservando o original. */
+export async function generateAndUploadSignedContract(c: ContractInput, stamp: SignatureStamp) {
+  const { bytes } = buildContractPdfBytes(c, stamp);
+  const signed_file_hash = await sha256Hex(bytes);
+  const signed_storage_path = `${c.company_id}/${c.contract_number}-v${c.version ?? 1}-signed-${signed_file_hash.slice(0, 10)}.pdf`;
+  const { error } = await supabase.storage.from("contracts").upload(signed_storage_path, bytes, {
+    contentType: "application/pdf",
+    upsert: true,
+  });
+  if (error) throw error;
+  return { signed_storage_path, signed_file_hash, signed_size_bytes: bytes.byteLength };
 }
