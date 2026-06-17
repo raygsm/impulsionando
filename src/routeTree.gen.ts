@@ -51,6 +51,7 @@ import { Route as ShowroomPdvRouteImport } from './routes/showroom.pdv'
 import { Route as ShowroomParceirosRouteImport } from './routes/showroom.parceiros'
 import { Route as ShowroomOnboardingRouteImport } from './routes/showroom.onboarding'
 import { Route as ShowroomMultiUnidadesRouteImport } from './routes/showroom.multi-unidades'
+import { Route as ShowroomMobileRouteImport } from './routes/showroom.mobile'
 import { Route as ShowroomMigracaoRouteImport } from './routes/showroom.migracao'
 import { Route as ShowroomMarketingRouteImport } from './routes/showroom.marketing'
 import { Route as ShowroomIntegracoesPremiumRouteImport } from './routes/showroom.integracoes-premium'
@@ -472,6 +473,11 @@ const ShowroomOnboardingRoute = ShowroomOnboardingRouteImport.update({
 const ShowroomMultiUnidadesRoute = ShowroomMultiUnidadesRouteImport.update({
   id: '/showroom/multi-unidades',
   path: '/showroom/multi-unidades',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShowroomMobileRoute = ShowroomMobileRouteImport.update({
+  id: '/showroom/mobile',
+  path: '/showroom/mobile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShowroomMigracaoRoute = ShowroomMigracaoRouteImport.update({
@@ -1746,6 +1752,7 @@ export interface FileRoutesByFullPath {
   '/showroom/integracoes-premium': typeof ShowroomIntegracoesPremiumRoute
   '/showroom/marketing': typeof ShowroomMarketingRoute
   '/showroom/migracao': typeof ShowroomMigracaoRoute
+  '/showroom/mobile': typeof ShowroomMobileRoute
   '/showroom/multi-unidades': typeof ShowroomMultiUnidadesRoute
   '/showroom/onboarding': typeof ShowroomOnboardingRoute
   '/showroom/parceiros': typeof ShowroomParceirosRoute
@@ -1990,6 +1997,7 @@ export interface FileRoutesByTo {
   '/showroom/integracoes-premium': typeof ShowroomIntegracoesPremiumRoute
   '/showroom/marketing': typeof ShowroomMarketingRoute
   '/showroom/migracao': typeof ShowroomMigracaoRoute
+  '/showroom/mobile': typeof ShowroomMobileRoute
   '/showroom/multi-unidades': typeof ShowroomMultiUnidadesRoute
   '/showroom/onboarding': typeof ShowroomOnboardingRoute
   '/showroom/parceiros': typeof ShowroomParceirosRoute
@@ -2247,6 +2255,7 @@ export interface FileRoutesById {
   '/showroom/integracoes-premium': typeof ShowroomIntegracoesPremiumRoute
   '/showroom/marketing': typeof ShowroomMarketingRoute
   '/showroom/migracao': typeof ShowroomMigracaoRoute
+  '/showroom/mobile': typeof ShowroomMobileRoute
   '/showroom/multi-unidades': typeof ShowroomMultiUnidadesRoute
   '/showroom/onboarding': typeof ShowroomOnboardingRoute
   '/showroom/parceiros': typeof ShowroomParceirosRoute
@@ -2504,6 +2513,7 @@ export interface FileRouteTypes {
     | '/showroom/integracoes-premium'
     | '/showroom/marketing'
     | '/showroom/migracao'
+    | '/showroom/mobile'
     | '/showroom/multi-unidades'
     | '/showroom/onboarding'
     | '/showroom/parceiros'
@@ -2748,6 +2758,7 @@ export interface FileRouteTypes {
     | '/showroom/integracoes-premium'
     | '/showroom/marketing'
     | '/showroom/migracao'
+    | '/showroom/mobile'
     | '/showroom/multi-unidades'
     | '/showroom/onboarding'
     | '/showroom/parceiros'
@@ -3004,6 +3015,7 @@ export interface FileRouteTypes {
     | '/showroom/integracoes-premium'
     | '/showroom/marketing'
     | '/showroom/migracao'
+    | '/showroom/mobile'
     | '/showroom/multi-unidades'
     | '/showroom/onboarding'
     | '/showroom/parceiros'
@@ -3231,6 +3243,7 @@ export interface RootRouteChildren {
   ShowroomIntegracoesPremiumRoute: typeof ShowroomIntegracoesPremiumRoute
   ShowroomMarketingRoute: typeof ShowroomMarketingRoute
   ShowroomMigracaoRoute: typeof ShowroomMigracaoRoute
+  ShowroomMobileRoute: typeof ShowroomMobileRoute
   ShowroomMultiUnidadesRoute: typeof ShowroomMultiUnidadesRoute
   ShowroomOnboardingRoute: typeof ShowroomOnboardingRoute
   ShowroomParceirosRoute: typeof ShowroomParceirosRoute
@@ -3566,6 +3579,13 @@ declare module '@tanstack/react-router' {
       path: '/showroom/multi-unidades'
       fullPath: '/showroom/multi-unidades'
       preLoaderRoute: typeof ShowroomMultiUnidadesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/showroom/mobile': {
+      id: '/showroom/mobile'
+      path: '/showroom/mobile'
+      fullPath: '/showroom/mobile'
+      preLoaderRoute: typeof ShowroomMobileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/showroom/migracao': {
@@ -5663,6 +5683,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShowroomIntegracoesPremiumRoute: ShowroomIntegracoesPremiumRoute,
   ShowroomMarketingRoute: ShowroomMarketingRoute,
   ShowroomMigracaoRoute: ShowroomMigracaoRoute,
+  ShowroomMobileRoute: ShowroomMobileRoute,
   ShowroomMultiUnidadesRoute: ShowroomMultiUnidadesRoute,
   ShowroomOnboardingRoute: ShowroomOnboardingRoute,
   ShowroomParceirosRoute: ShowroomParceirosRoute,
