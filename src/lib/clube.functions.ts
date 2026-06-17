@@ -272,3 +272,104 @@ export const votePoll = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// -----------------------------------------------------------------
+// Descobrir parceiros (públicos) com filtros simples
+// -----------------------------------------------------------------
+export const listClubePartners = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      city: z.string().optional(),
+      segment: z.string().optional(),
+      search: z.string().optional(),
+      limit: z.number().int().min(1).max(120).default(60),
+    }).parse(d ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    let q = context.supabase
+      .from("companies")
+      .select("id, name, trade_name, segment, logo_url, public_slug, address_city, address_state")
+      .eq("vitrine_enabled", true)
+      .limit(data.limit);
+    if (data.city) q = q.ilike("address_city", `%${data.city}%`);
+    if (data.segment) q = q.eq("segment", data.segment);
+    if (data.search) q = q.or(`name.ilike.%${data.search}%,trade_name.ilike.%${data.search}%`);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+// -----------------------------------------------------------------
+// Registrar consumo (Premium)
+// -----------------------------------------------------------------
+export const recordClubeConsumption = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      company_id: z.string().uuid().optional(),
+      consumed_at: z.string().optional(),
+      total_cents: z.number().int().min(0),
+      payment_method: z.string().max(40).optional(),
+      receipt_url: z.string().url().optional(),
+      items: z.array(z.object({
+        name: z.string().min(1).max(120),
+        qty: z.number().int().min(1).default(1),
+        unit_cents: z.number().int().min(0).default(0),
+      })).default([]),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("clube_consumption").insert({
+      user_id: context.userId,
+      ...data,
+      items: data.items as any,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// -----------------------------------------------------------------
+// Admin: overview do Clube
+// -----------------------------------------------------------------
+export const getAdminClubeOverview = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const sb = context.supabase;
+    const { data: isAdmin } = await sb.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Acesso restrito");
+
+    const [members, premium, visits30d, refs, alerts, topVisits, recentSignups] = await Promise.all([
+      sb.from("consumer_profiles").select("user_id", { count: "exact", head: true }),
+      sb.from("consumer_memberships").select("user_id", { count: "exact", head: true }).eq("plan", "premium").eq("status", "active"),
+      sb.from("clube_visits").select("id", { count: "exact", head: true }).gte("created_at", new Date(Date.now() - 30 * 86400_000).toISOString()),
+      sb.from("clube_referrals").select("id", { count: "exact", head: true }),
+      sb.from("clube_alerts").select("id", { count: "exact", head: true }).eq("active", true),
+      sb.from("clube_visits").select("company_id, companies(trade_name, name)").not("company_id", "is", null).limit(500),
+      sb.from("consumer_profiles").select("user_id, full_name, city, state, current_level, created_at").order("created_at", { ascending: false }).limit(8),
+    ]);
+
+    // agrega top parceiros do mês
+    const counts = new Map<string, { name: string; total: number }>();
+    for (const v of (topVisits.data ?? []) as any[]) {
+      const key = v.company_id;
+      const name = v.companies?.trade_name || v.companies?.name || "Parceiro";
+      const cur = counts.get(key) ?? { name, total: 0 };
+      cur.total += 1;
+      counts.set(key, cur);
+    }
+    const topPartners = [...counts.values()].sort((a, b) => b.total - a.total).slice(0, 8);
+
+    return {
+      kpis: {
+        totalMembers: members.count ?? 0,
+        premiumActive: premium.count ?? 0,
+        visits30d: visits30d.count ?? 0,
+        referrals: refs.count ?? 0,
+        activeAlerts: alerts.count ?? 0,
+        mrrCents: (premium.count ?? 0) * 999,
+      },
+      topPartners,
+      recentSignups: recentSignups.data ?? [],
+    };
+  });
