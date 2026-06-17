@@ -22,7 +22,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Loader2, Bed, Bath, Car, Ruler, MapPin, Search } from 'lucide-react'
+import { Loader2, Bed, Bath, Car, Ruler, MapPin } from 'lucide-react'
 
 const SearchSchema = z.object({
   operation: z.enum(['venda', 'locacao', 'venda_ou_locacao']).optional(),
