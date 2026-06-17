@@ -32,6 +32,9 @@ export type SignatureStamp = {
   user_agent?: string;
 };
 
+const BRL = (n: number) =>
+  n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2 });
+
 export function buildContractPdfBytes(c: ContractInput, stamp?: SignatureStamp): { bytes: Uint8Array; pageCount: number } {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
