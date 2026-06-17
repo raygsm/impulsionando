@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Plus, Trash2, Pencil, Search, Users, ShieldOff } from "lucide-react";
 import { toast } from "sonner";
-import { auditClinical } from "@/lib/clinical-audit.client";
+import { auditClinical } from "@/lib/clinical-audit-log";
 
 export const Route = createFileRoute("/_authenticated/customers")({
   head: () => ({ meta: [{ title: "Clientes" }] }),

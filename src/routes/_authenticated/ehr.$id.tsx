@@ -23,7 +23,7 @@ import {
   ArrowLeft, Upload, FileText, FileImage, Activity, Stethoscope, Download, ShieldCheck, UserPlus,
 } from "lucide-react";
 import { invitePatient } from "@/lib/ehr-patient.functions";
-import { auditClinical } from "@/lib/clinical-audit.client";
+import { auditClinical } from "@/lib/clinical-audit-log";
 
 export const Route = createFileRoute("/_authenticated/ehr/$id")({
   head: () => ({ meta: [{ title: "Prontuário — Impulsionando" }] }),

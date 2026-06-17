@@ -13,7 +13,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { auditClinical } from "@/lib/clinical-audit.client";
+import { auditClinical } from "@/lib/clinical-audit-log";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { FileText, Plus, ChevronRight } from "lucide-react";
 

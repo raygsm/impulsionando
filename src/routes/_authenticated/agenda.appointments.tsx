@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { auditClinical } from "@/lib/clinical-audit.client";
+import { auditClinical } from "@/lib/clinical-audit-log";
 import { Plus, X, Check } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/agenda/appointments")({
