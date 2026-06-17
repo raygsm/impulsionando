@@ -84,7 +84,6 @@ function ClubePage() {
   const referrals = useQuery({ queryKey: ["clube-referrals"], queryFn: () => fetchReferrals() });
   const consumption = useQuery({ queryKey: ["clube-consumption"], queryFn: () => consumptionFn() });
   const recommendations = useQuery({ queryKey: ["clube-recs"], queryFn: () => recsFn() });
-  const receipts = useQuery({ queryKey: ["clube-receipts"], queryFn: () => receiptsFn() });
 
 
   const isPremium = overview.data?.isPremium ?? false;
