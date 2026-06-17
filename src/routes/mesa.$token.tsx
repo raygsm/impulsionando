@@ -78,13 +78,8 @@ function MesaPage() {
     }, 15000);
     return () => clearInterval(id);
   }, []);
-      const t = window.location.pathname.split("/").pop();
-      if (!t) return;
-      const { data: r } = await supabase.rpc("resolve_table_qr", { _token: t });
-      if (r && (r as any).ok) setData(r as Resolved);
-    }, 15000);
-    return () => clearInterval(id);
-  }, []);
+
+
 
   async function handleCheckin(e: React.FormEvent) {
     e.preventDefault();
