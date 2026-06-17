@@ -566,7 +566,7 @@ function ShowroomAgendamentos() {
               <div className="mt-6 flex items-center justify-between">
                 <Button
                   variant="ghost"
-                  onClick={() => setStep((s) => Math.max(1, (s - 1) as Step))}
+                  onClick={() => setStep((s) => (Math.max(1, s - 1) as Step))}
                   disabled={step === 1}
                   className="gap-1"
                 >
@@ -574,7 +574,7 @@ function ShowroomAgendamentos() {
                 </Button>
                 <Button
                   disabled={!canNext}
-                  onClick={() => setStep((s) => Math.min(4, (s + 1) as Step))}
+                  onClick={() => setStep((s) => (Math.min(4, s + 1) as Step))}
                   className="gap-1"
                 >
                   {step === 3 ? cfg.ctaLabel : "Continuar"}
