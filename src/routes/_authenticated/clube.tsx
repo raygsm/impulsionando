@@ -32,10 +32,12 @@ import {
   listMyClubeAlerts, upsertClubeAlert, deleteClubeAlert,
   getMyReferralInfo, inviteReferral, createClubeVisit,
   listClubePartners, listMyClubeConsumption, recordClubeConsumption, votePoll,
+  listMyClubeReceipts, getClubeRecommendations,
 } from "@/lib/clube.functions";
 import {
   Crown, Sparkles, Heart, Receipt, Copy, AlertCircle, Building2,
   MapPin, Bell, Trophy, Gift, Plus, Trash2, Share2, Send, BellRing, Compass, History, Search,
+  Download, Star,
 } from "lucide-react";
 
 
