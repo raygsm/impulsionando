@@ -8263,6 +8263,7 @@ export type Database = {
           closed_at: string | null
           company_id: string
           created_at: string
+          customer_email: string | null
           customer_name: string | null
           customer_phone: string | null
           id: string
@@ -8280,6 +8281,7 @@ export type Database = {
           closed_at?: string | null
           company_id: string
           created_at?: string
+          customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
           id?: string
@@ -8297,6 +8299,7 @@ export type Database = {
           closed_at?: string | null
           company_id?: string
           created_at?: string
+          customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
           id?: string
@@ -9726,6 +9729,10 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_mark_invoice_paid: {
+        Args: { _invoice_id: string; _kind: string }
+        Returns: Json
+      }
       aff_payout_request: {
         Args: {
           _amount: number
@@ -9882,6 +9889,14 @@ export type Database = {
             Returns: boolean
           }
       is_super_admin: { Args: { _user: string }; Returns: boolean }
+      mark_billing_invoice_paid: {
+        Args: { _invoice_id: string }
+        Returns: Json
+      }
+      mark_membership_invoice_paid: {
+        Args: { _invoice_id: string }
+        Returns: Json
+      }
       master_company_id: { Args: never; Returns: string }
       move_to_dlq: {
         Args: {
@@ -9954,7 +9969,13 @@ export type Database = {
         Returns: Json
       }
       restaurant_table_checkin: {
-        Args: { _name: string; _party?: number; _phone: string; _token: string }
+        Args: {
+          _email?: string
+          _name: string
+          _party_size?: number
+          _phone?: string
+          _token: string
+        }
         Returns: Json
       }
       sales_cash_session_close: {

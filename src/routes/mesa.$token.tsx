@@ -71,6 +71,7 @@ function MesaPage() {
   const [data, setData] = useState<Resolved>(resolved);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [party, setParty] = useState("2");
   const [submitting, setSubmitting] = useState(false);
   const [adding, setAdding] = useState<string | null>(null);
@@ -93,7 +94,7 @@ function MesaPage() {
     try {
       const token = window.location.pathname.split("/").pop()!;
       const { data: r, error } = await supabase.rpc("restaurant_table_checkin", {
-        _token: token, _name: name, _phone: phone, _party: Number(party) || 1,
+        _token: token, _name: name, _phone: phone, _party_size: Number(party) || 1, _email: email || undefined,
       });
       if (error) throw error;
       if (!(r as any)?.ok) throw new Error((r as any)?.error ?? "Falha no check-in.");
@@ -172,6 +173,7 @@ function MesaPage() {
             <form onSubmit={handleCheckin} className="space-y-3">
               <div><Label htmlFor="m-name">Seu nome *</Label><Input id="m-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Como podemos te chamar?" /></div>
               <div><Label htmlFor="m-phone">WhatsApp *</Label><Input id="m-phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="(21) 99999-9999" /></div>
+              <div><Label htmlFor="m-email">E-mail (para receber o aviso do pedido e a conta)</Label><Input id="m-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" /></div>
               <div><Label htmlFor="m-party">Quantas pessoas?</Label><Input id="m-party" type="number" min={1} max={50} value={party} onChange={(e) => setParty(e.target.value)} /></div>
               <Button type="submit" className="w-full" disabled={submitting} style={{ background: primary }}>
                 {submitting ? "Enviando..." : "Confirmar check-in"}

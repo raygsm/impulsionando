@@ -5,13 +5,16 @@
  * MRR consumidor, faturas em aberto, faturamento últimos 30 dias.
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { getConsumerPremiumOverview } from "@/lib/consumer.functions";
-import { Crown, Users, DollarSign, AlertTriangle, Receipt, TrendingUp, RefreshCw } from "lucide-react";
+import { listOpenInvoices } from "@/lib/admin-invoices.functions";
+import { adminMarkInvoicePaid } from "@/lib/admin-billing.functions";
+import { Crown, Users, DollarSign, AlertTriangle, Receipt, TrendingUp, RefreshCw, CheckCircle2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/core/consumidor-premium")({
   component: Page,
@@ -20,13 +23,28 @@ export const Route = createFileRoute("/_authenticated/core/consumidor-premium")(
 const BRL = (cents: number) => (Number(cents || 0) / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 function Page() {
+  const qc = useQueryClient();
   const fn = useServerFn(getConsumerPremiumOverview);
+  const fnInv = useServerFn(listOpenInvoices);
+  const markPaid = useServerFn(adminMarkInvoicePaid);
   const q = useQuery({ queryKey: ["consumer-premium-overview"], queryFn: () => fn() });
+  const inv = useQuery({ queryKey: ["admin-open-invoices"], queryFn: () => fnInv() });
   const d = q.data ?? {};
+
+  const mut = useMutation({
+    mutationFn: (v: { kind: "consumer" | "erp"; invoice_id: string }) => markPaid({ data: v }),
+    onSuccess: () => {
+      toast.success("Fatura baixada");
+      qc.invalidateQueries({ queryKey: ["admin-open-invoices"] });
+      qc.invalidateQueries({ queryKey: ["consumer-premium-overview"] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Falha"),
+  });
 
   return (
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
       <header className="flex items-center justify-between">
+
         <div>
           <Badge className="bg-gradient-primary mb-2"><Crown className="w-3 h-3 mr-1" /> Clube Premium</Badge>
           <h1 className="text-2xl font-bold tracking-tight">Consumidor Final — Premium R$ 9,99</h1>
@@ -61,9 +79,67 @@ function Page() {
           <li>Confirmação de pagamento move para <em>active</em> e entra no MRR Premium acima.</li>
         </ul>
       </Card>
+
+      <Card className="p-5">
+        <h2 className="font-semibold mb-3 flex items-center gap-2">
+          <Receipt className="w-4 h-4" /> Faturas em aberto
+          <Badge variant="outline" className="ml-auto">{(inv.data?.consumer.length ?? 0) + (inv.data?.erp.length ?? 0)}</Badge>
+        </h2>
+        {inv.isLoading ? (
+          <p className="text-sm text-muted-foreground">Carregando…</p>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Clube Premium (R$ 9,99)</h3>
+              {(inv.data?.consumer ?? []).length === 0 ? (
+                <p className="text-sm text-muted-foreground">Nenhuma fatura em aberto.</p>
+              ) : (
+                <div className="space-y-1">
+                  {inv.data!.consumer.map((i: any) => (
+                    <div key={i.id} className="flex items-center justify-between gap-2 border rounded-md p-2 text-sm">
+                      <div className="font-mono text-xs">{i.id.slice(0, 8)}</div>
+                      <div>{BRL(i.amount_cents)}</div>
+                      <Badge variant={i.status === "overdue" ? "destructive" : "secondary"}>{i.status}</Badge>
+                      <div className="text-xs text-muted-foreground">{new Date(i.due_date).toLocaleDateString("pt-BR")}</div>
+                      <Button size="sm" disabled={mut.isPending} onClick={() => mut.mutate({ kind: "consumer", invoice_id: i.id })}>
+                        <CheckCircle2 className="w-4 h-4 mr-1" /> Marcar pago
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div>
+              <h3 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Contratos ERP</h3>
+              {(inv.data?.erp ?? []).length === 0 ? (
+                <p className="text-sm text-muted-foreground">Nenhuma fatura em aberto.</p>
+              ) : (
+                <div className="space-y-1">
+                  {inv.data!.erp.map((i: any) => (
+                    <div key={i.id} className="flex items-center justify-between gap-2 border rounded-md p-2 text-sm">
+                      <div className="font-mono text-xs">{i.id.slice(0, 8)}</div>
+                      <div>R$ {Number(i.amount).toFixed(2)}</div>
+                      <Badge variant={i.status === "overdue" ? "destructive" : "secondary"}>{i.status}</Badge>
+                      <div className="text-xs text-muted-foreground">{i.due_date ? new Date(i.due_date).toLocaleDateString("pt-BR") : "—"}</div>
+                      <Button size="sm" disabled={mut.isPending} onClick={() => mut.mutate({ kind: "erp", invoice_id: i.id })}>
+                        <CheckCircle2 className="w-4 h-4 mr-1" /> Marcar pago
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground pt-2 border-t">
+              Pagamentos via PIX/InfinitePay fecham automaticamente as faturas pelo webhook
+              <code className="mx-1">/api/public/payments/webhook</code>. Use o botão acima apenas para baixa manual.
+            </p>
+          </div>
+        )}
+      </Card>
     </div>
   );
 }
+
 
 function Kpi({ icon: Icon, label, value, accent }: { icon: React.ElementType; label: string; value: string | number; accent?: boolean }) {
   return (
