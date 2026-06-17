@@ -48,12 +48,15 @@ function fmtDate(iso?: string | null) {
   return new Date(iso).toLocaleString('pt-BR')
 }
 
+const ACTIVE_EXPORT_KEY = 'vitrine.activeExportId'
+
 function Page() {
   const { companyId } = useActiveCompany()
   const qc = useQueryClient()
   const fetchList = useServerFn(listVitrineInterests)
   const fetchUpdate = useServerFn(updateVitrineInterest)
   const fetchExport = useServerFn(exportVitrineDataset)
+  const fetchExportLog = useServerFn(getVitrineExportLog)
   const [status, setStatus] = useState('todos')
   const [exportStatus, setExportStatus] = useState('todos')
   const [search, setSearch] = useState('')
@@ -64,9 +67,26 @@ function Page() {
   const [emailTo, setEmailTo] = useState('')
   const [exporting, setExporting] = useState<null | 'csv' | 'pdf'>(null)
   const [exportProgress, setExportProgress] = useState<{ done: number; total: number; exportId: string | null }>({ done: 0, total: 0, exportId: null })
+  // Persisted exportId — survives page reload so user pode acompanhar status
+  const [trackedExportId, setTrackedExportId] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null
+    return window.localStorage.getItem(ACTIVE_EXPORT_KEY)
+  })
   const pageSize = 25
   const EXPORT_CHUNK = 1000
   const EXPORT_MAX_PAGES = 20
+
+  // Polling do log de export por exportId — funciona mesmo após reload
+  const { data: trackedLog } = useQuery({
+    queryKey: ['vitrine-export-log', trackedExportId],
+    enabled: !!trackedExportId,
+    queryFn: () => fetchExportLog({ data: { exportId: trackedExportId! } }),
+    refetchInterval: (q) => {
+      const row = (q.state.data as any)?.row
+      if (!row) return 3000
+      return row.status === 'running' ? 2000 : false
+    },
+  })
 
   async function fetchAllForExport(format: 'csv' | 'pdf') {
     if (!companyId) return null
