@@ -8576,6 +8576,10 @@ export type Database = {
         }
         Returns: string
       }
+      apply_niche_template: {
+        Args: { p_company_id: string; p_niche_slug: string }
+        Returns: Json
+      }
       assert_billing_finance_rls: { Args: never; Returns: undefined }
       assert_quotes_no_anon_update: { Args: never; Returns: undefined }
       billing_check_company_status: {
@@ -8656,6 +8660,16 @@ export type Database = {
             }
             Returns: string
           }
+      get_niche_template: {
+        Args: { p_niche_slug: string }
+        Returns: {
+          is_optional: boolean
+          is_recommended: boolean
+          module_name: string
+          module_slug: string
+          sort_order: number
+        }[]
+      }
       get_smoke_retention_info: { Args: never; Returns: Json }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
