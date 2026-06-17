@@ -6,6 +6,7 @@ import { TrialBanner } from "./TrialBanner";
 import { PastDueBanner } from "@/components/PastDueBanner";
 import { ImpersonationBanner } from "./ImpersonationBanner";
 import { CommandPalette } from "./CommandPalette";
+import { Breadcrumbs } from "./Breadcrumbs";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMyTrial } from "@/hooks/use-trial";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -13,6 +14,8 @@ import { useCompanyModules, requiredModuleFor } from "@/hooks/useCompanyModules"
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { pushRecent } from "@/hooks/use-recent-pages";
+import { TOP_ITEMS, NAV_GROUPS } from "./nav-config";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
