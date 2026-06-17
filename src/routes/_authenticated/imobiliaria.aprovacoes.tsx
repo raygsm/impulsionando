@@ -154,39 +154,73 @@ function Page() {
     qc.invalidateQueries({ queryKey: ["realestate-props", companyId] });
   };
 
+  // Atualização otimista: ajusta o badge/status no cache antes da resposta
+  const applyOptimistic = (id: string, next: Status, notesText: string | null) => {
+    qc.setQueryData(["realestate-approvals", queryArgs], (old: any) => {
+      if (!old?.items) return old;
+      return {
+        ...old,
+        items: old.items.map((it: QueueItem) =>
+          it.id === id
+            ? { ...it, approval_status: next, review_notes: notesText, reviewed_at: new Date().toISOString() }
+            : it,
+        ),
+      };
+    });
+  };
+
   const approve = useMutation({
     mutationFn: (id: string) => fetchApprove({ data: { propertyId: id, notes: null } }),
+    onMutate: (id) => { applyOptimistic(id, "approved", null); },
     onSuccess: () => { toast.success("Imóvel aprovado"); invalidate(); },
-    onError: (e: any) => toast.error(e.message ?? "Erro"),
+    onError: (e: any) => { toast.error(e.message ?? "Erro"); invalidate(); },
   });
   const submitAction = useMutation({
     mutationFn: ({ id, mode, n }: { id: string; mode: "reject" | "changes"; n: string }) =>
       mode === "reject"
         ? fetchReject({ data: { propertyId: id, notes: n } })
         : fetchChanges({ data: { propertyId: id, notes: n } }),
+    onMutate: (vars) => {
+      applyOptimistic(vars.id, vars.mode === "reject" ? "rejected" : "changes_requested", vars.n);
+    },
     onSuccess: () => {
       toast.success("Revisão registrada");
       invalidate();
       setActionFor(null);
       setNotes("");
     },
-    onError: (e: any) => toast.error(e.message ?? "Erro"),
+    onError: (e: any) => { toast.error(e.message ?? "Erro"); invalidate(); },
   });
 
   const exportCsv = useMutation({
     mutationFn: (propertyId: string) => fetchExport({ data: { propertyId } }),
-    onSuccess: (resp) => downloadFile(resp.filename, resp.csv),
+    onSuccess: (resp) => { downloadFile(resp.filename, resp.csv); toast.success("CSV gerado"); },
     onError: (e: any) => toast.error(e.message ?? "Erro ao exportar"),
   });
 
+  // pageSize do servidor é limitado a 1000; validar no cliente para erro amigável
   const batchExport = useMutation({
-    mutationFn: () => fetchBatchExport({ data: { ...queryArgs, pageSize: 500 } }),
+    mutationFn: () => {
+      const size = Math.min(Math.max(pageSize, 5), 1000);
+      if (size !== pageSize) {
+        toast.warning(`Tamanho de página ajustado para ${size} (limite do servidor)`);
+      }
+      return fetchBatchExport({ data: { ...queryArgs, pageSize: size } });
+    },
     onSuccess: (resp) => {
       downloadFile(resp.filename, resp.csv);
-      toast.success(`${resp.total} registro(s) exportado(s)`);
+      toast.success(`${resp.total} registro(s) exportado(s) — página ${resp.page}`);
     },
-    onError: (e: any) => toast.error(e.message ?? "Erro na exportação em lote"),
+    onError: (e: any) => {
+      const msg = String(e?.message ?? "");
+      if (/pageSize|page|range|out of/i.test(msg)) {
+        toast.error("Filtros ou paginação inválidos. Reduza o intervalo e tente de novo.");
+      } else {
+        toast.error(msg || "Erro na exportação em lote");
+      }
+    },
   });
+
 
 
   const toggleStatus = (s: Status) => {
