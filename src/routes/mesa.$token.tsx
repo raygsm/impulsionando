@@ -198,6 +198,42 @@ function MesaPage() {
               <div className="text-xs text-muted-foreground"><Receipt className="w-3 h-3 inline mr-1" /> Total parcial</div>
               <div className="text-2xl font-bold">R$ {Number(data.session.total ?? 0).toFixed(2)}</div>
             </div>
+            {Number(data.session.total ?? 0) > 0 && (
+              <div className="mt-3 pt-3 border-t">
+                {bill?.status === "paid" ? (
+                  <div className="text-center py-2">
+                    <CheckCircle2 className="w-6 h-6 mx-auto text-green-600 mb-1" />
+                    <p className="text-sm font-medium text-green-700">Pagamento confirmado!</p>
+                    <p className="text-xs text-muted-foreground">A mesa foi liberada. Obrigado pela visita.</p>
+                  </div>
+                ) : bill ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Loader2 className="w-4 h-4 animate-spin text-amber-600" />
+                      <span>Aguardando pagamento PIX de <strong>R$ {(bill.amount_cents/100).toFixed(2)}</strong>...</span>
+                    </div>
+                    {bill.pix_url && (
+                      <div className="flex gap-2">
+                        <Button asChild size="sm" className="flex-1" style={{ background: primary }}>
+                          <a href={bill.pix_url} target="_blank" rel="noopener noreferrer">
+                            <ExternalLink className="w-4 h-4 mr-1" /> Abrir checkout PIX
+                          </a>
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(bill.pix_url!); toast.success("Link copiado"); }}>
+                          <Copy className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    )}
+                    <p className="text-[10px] text-muted-foreground text-center">A mesa será liberada automaticamente quando o pagamento for confirmado.</p>
+                  </div>
+                ) : (
+                  <Button onClick={handlePay} disabled={billLoading} className="w-full" style={{ background: primary }}>
+                    {billLoading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <QrCode className="w-4 h-4 mr-1" />}
+                    Pagar conta agora
+                  </Button>
+                )}
+              </div>
+            )}
           </Card>
         ) : (
           <Card className="p-5 mb-4">
