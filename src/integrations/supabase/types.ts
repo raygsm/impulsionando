@@ -9335,6 +9335,18 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      demo_feira_overview: {
+        Args: never
+        Returns: {
+          avg_modules_viewed: number
+          by_niche: Json
+          leads_24h: number
+          leads_7d: number
+          sessions_converted: number
+          total_leads: number
+          total_sessions: number
+        }[]
+      }
       demo_score: { Args: { _session_id: string }; Returns: number }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
