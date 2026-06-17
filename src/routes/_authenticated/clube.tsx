@@ -37,7 +37,7 @@ import {
 import {
   Crown, Sparkles, Heart, Receipt, Copy, AlertCircle, Building2,
   MapPin, Bell, Trophy, Gift, Plus, Trash2, Share2, Send, BellRing, Compass, History, Search,
-  Download, Star,
+  Download, Star, RefreshCw,
 } from "lucide-react";
 
 
