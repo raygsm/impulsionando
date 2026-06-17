@@ -2276,6 +2276,93 @@ export type Database = {
           },
         ]
       }
+      billing_pix_charges: {
+        Row: {
+          base_amount_cents: number
+          company_id: string | null
+          confirmed_by: string | null
+          contract_id: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          notes: string | null
+          paid_at: string | null
+          payer_doc: string | null
+          payer_email: string | null
+          payer_name: string | null
+          payer_whatsapp: string | null
+          pix_key: string
+          pix_payload: string
+          plan_code: string | null
+          receipt_url: string | null
+          status: string
+          txid: string
+          unique_amount_cents: number
+          updated_at: string
+        }
+        Insert: {
+          base_amount_cents: number
+          company_id?: string | null
+          confirmed_by?: string | null
+          contract_id?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          payer_doc?: string | null
+          payer_email?: string | null
+          payer_name?: string | null
+          payer_whatsapp?: string | null
+          pix_key: string
+          pix_payload: string
+          plan_code?: string | null
+          receipt_url?: string | null
+          status?: string
+          txid: string
+          unique_amount_cents: number
+          updated_at?: string
+        }
+        Update: {
+          base_amount_cents?: number
+          company_id?: string | null
+          confirmed_by?: string | null
+          contract_id?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          payer_doc?: string | null
+          payer_email?: string | null
+          payer_name?: string | null
+          payer_whatsapp?: string | null
+          pix_key?: string
+          pix_payload?: string
+          plan_code?: string | null
+          receipt_url?: string | null
+          status?: string
+          txid?: string
+          unique_amount_cents?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_pix_charges_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_pix_charges_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "billing_contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billing_plans: {
         Row: {
           allow_direct_checkout: boolean
