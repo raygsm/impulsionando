@@ -565,3 +565,92 @@ function WhatsAppConnectionSection() {
     </section>
   );
 }
+
+function depLabel(slug: string): string {
+  const m = MOTHER_MODULES.find((x) => x.slug === slug);
+  return m?.fullName ?? slug;
+}
+
+function ModuleDependenciesCard({ slug }: { slug: string }) {
+  const deps = getDeps(slug);
+  const external = MODULE_EXTERNAL_REQUIREMENTS[slug] ?? [];
+  const hasAny =
+    deps.required.length + deps.recommended.length + deps.optional.length + external.length > 0;
+  if (!hasAny) return null;
+  return (
+    <section>
+      <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2 mb-5">
+        <Layers className="w-5 h-5 text-primary" /> Dependências e combinações
+      </h2>
+      <div className="grid md:grid-cols-3 gap-4">
+        <Card className="p-5 border-rose-300/40 bg-rose-50/40 dark:bg-rose-500/5">
+          <div className="text-[11px] uppercase tracking-wider text-rose-600 font-semibold mb-2">
+            Obrigatórios
+          </div>
+          {deps.required.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhum — opera de forma independente.</p>
+          ) : (
+            <ul className="space-y-1.5 text-sm">
+              {deps.required.map((d) => (
+                <li key={d}>
+                  <Link to="/modulos/$slug" params={{ slug: d }} className="text-rose-700 dark:text-rose-300 hover:underline">
+                    {depLabel(d)}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+        <Card className="p-5 border-primary/30 bg-primary/5">
+          <div className="text-[11px] uppercase tracking-wider text-primary font-semibold mb-2">
+            Recomendados
+          </div>
+          {deps.recommended.length === 0 ? (
+            <p className="text-sm text-muted-foreground">—</p>
+          ) : (
+            <ul className="space-y-1.5 text-sm">
+              {deps.recommended.map((d) => (
+                <li key={d}>
+                  <Link to="/modulos/$slug" params={{ slug: d }} className="hover:underline">
+                    {depLabel(d)}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+        <Card className="p-5 bg-muted/40">
+          <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">
+            Opcionais
+          </div>
+          {deps.optional.length === 0 ? (
+            <p className="text-sm text-muted-foreground">—</p>
+          ) : (
+            <ul className="space-y-1.5 text-sm">
+              {deps.optional.map((d) => (
+                <li key={d}>
+                  <Link to="/modulos/$slug" params={{ slug: d }} className="hover:underline">
+                    {depLabel(d)}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+      </div>
+      {external.length > 0 && (
+        <Card className="p-5 mt-4 border-amber-300/40 bg-amber-50/40 dark:bg-amber-500/5">
+          <div className="flex items-start gap-2 text-sm">
+            <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <div className="font-semibold mb-1">Requer credenciais ou serviços externos</div>
+              <ul className="text-muted-foreground list-disc list-inside space-y-0.5">
+                {external.map((e) => <li key={e}>{e}</li>)}
+              </ul>
+            </div>
+          </div>
+        </Card>
+      )}
+    </section>
+  );
+}
