@@ -84,10 +84,10 @@ function MasterDashboard() {
     return {
       totalReal: real.length, totalDemo: demo.length,
       active: active.length, implant: implant.length, inadimp: inadimp.length,
-      mrrCents: Math.round(mrr),
+      mrrCents,
       byNiche: Array.from(byNiche.values()).sort((a, b) => b.total - a.total),
     };
-  }, [companies, subs]);
+  }, [companies, contracts]);
 
   if (isLoading) return <Card className="p-6">Carregando…</Card>;
 
