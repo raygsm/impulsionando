@@ -141,6 +141,10 @@ function ShowroomHub() {
                 <Link to="/showroom/onboarding">Onboarding</Link>
               </Button>
               <Button asChild size="lg" variant="outline">
+                <Link to="/showroom/marketplace-apps">Marketplace Apps</Link>
+              </Button>
+
+              <Button asChild size="lg" variant="outline">
                 <Link to="/showroom/mobile">Apps mobile</Link>
               </Button>
 
