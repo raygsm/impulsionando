@@ -34,6 +34,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TrabalheConoscoIndexRouteImport } from './routes/trabalhe-conosco.index'
+import { Route as ShowroomIndexRouteImport } from './routes/showroom.index'
 import { Route as PacienteIndexRouteImport } from './routes/paciente.index'
 import { Route as NichosIndexRouteImport } from './routes/nichos.index'
 import { Route as ModulosIndexRouteImport } from './routes/modulos.index'
@@ -42,6 +43,7 @@ import { Route as TrialCadastroRouteImport } from './routes/trial_.cadastro'
 import { Route as TrabalheConoscoNichoRouteImport } from './routes/trabalhe-conosco.$nicho'
 import { Route as ShowroomFitnessRouteImport } from './routes/showroom.fitness'
 import { Route as ShowroomEventosRouteImport } from './routes/showroom.eventos'
+import { Route as ShowroomClinicasRouteImport } from './routes/showroom.clinicas'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
 import { Route as PlanosTesteRouteImport } from './routes/planos.teste'
 import { Route as PacienteIdRouteImport } from './routes/paciente.$id'
@@ -354,6 +356,11 @@ const TrabalheConoscoIndexRoute = TrabalheConoscoIndexRouteImport.update({
   path: '/trabalhe-conosco/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShowroomIndexRoute = ShowroomIndexRouteImport.update({
+  id: '/showroom/',
+  path: '/showroom/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PacienteIndexRoute = PacienteIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -392,6 +399,11 @@ const ShowroomFitnessRoute = ShowroomFitnessRouteImport.update({
 const ShowroomEventosRoute = ShowroomEventosRouteImport.update({
   id: '/showroom/eventos',
   path: '/showroom/eventos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShowroomClinicasRoute = ShowroomClinicasRouteImport.update({
+  id: '/showroom/clinicas',
+  path: '/showroom/clinicas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RSlugRoute = RSlugRouteImport.update({
@@ -1514,6 +1526,7 @@ export interface FileRoutesByFullPath {
   '/paciente/$id': typeof PacienteIdRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
+  '/showroom/clinicas': typeof ShowroomClinicasRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
@@ -1522,6 +1535,7 @@ export interface FileRoutesByFullPath {
   '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
   '/paciente/': typeof PacienteIndexRoute
+  '/showroom/': typeof ShowroomIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/adm/agentes': typeof AuthenticatedAdmAgentesRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
@@ -1724,6 +1738,7 @@ export interface FileRoutesByTo {
   '/paciente/$id': typeof PacienteIdRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
+  '/showroom/clinicas': typeof ShowroomClinicasRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
@@ -1732,6 +1747,7 @@ export interface FileRoutesByTo {
   '/modulos': typeof ModulosIndexRoute
   '/nichos': typeof NichosIndexRoute
   '/paciente': typeof PacienteIndexRoute
+  '/showroom': typeof ShowroomIndexRoute
   '/trabalhe-conosco': typeof TrabalheConoscoIndexRoute
   '/adm/agentes': typeof AuthenticatedAdmAgentesRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
@@ -1947,6 +1963,7 @@ export interface FileRoutesById {
   '/paciente/$id': typeof PacienteIdRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
+  '/showroom/clinicas': typeof ShowroomClinicasRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
@@ -1955,6 +1972,7 @@ export interface FileRoutesById {
   '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
   '/paciente/': typeof PacienteIndexRoute
+  '/showroom/': typeof ShowroomIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/_authenticated/adm/agentes': typeof AuthenticatedAdmAgentesRoute
   '/_authenticated/admin/billing': typeof AuthenticatedAdminBillingRoute
@@ -2170,6 +2188,7 @@ export interface FileRouteTypes {
     | '/paciente/$id'
     | '/planos/teste'
     | '/r/$slug'
+    | '/showroom/clinicas'
     | '/showroom/eventos'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
@@ -2178,6 +2197,7 @@ export interface FileRouteTypes {
     | '/modulos/'
     | '/nichos/'
     | '/paciente/'
+    | '/showroom/'
     | '/trabalhe-conosco/'
     | '/adm/agentes'
     | '/admin/billing'
@@ -2380,6 +2400,7 @@ export interface FileRouteTypes {
     | '/paciente/$id'
     | '/planos/teste'
     | '/r/$slug'
+    | '/showroom/clinicas'
     | '/showroom/eventos'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
@@ -2388,6 +2409,7 @@ export interface FileRouteTypes {
     | '/modulos'
     | '/nichos'
     | '/paciente'
+    | '/showroom'
     | '/trabalhe-conosco'
     | '/adm/agentes'
     | '/admin/billing'
@@ -2602,6 +2624,7 @@ export interface FileRouteTypes {
     | '/paciente/$id'
     | '/planos/teste'
     | '/r/$slug'
+    | '/showroom/clinicas'
     | '/showroom/eventos'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
@@ -2610,6 +2633,7 @@ export interface FileRouteTypes {
     | '/modulos/'
     | '/nichos/'
     | '/paciente/'
+    | '/showroom/'
     | '/trabalhe-conosco/'
     | '/_authenticated/adm/agentes'
     | '/_authenticated/admin/billing'
@@ -2795,12 +2819,14 @@ export interface RootRouteChildren {
   ImoveisSlugRoute: typeof ImoveisSlugRouteWithChildren
   NichosSlugRoute: typeof NichosSlugRoute
   RSlugRoute: typeof RSlugRoute
+  ShowroomClinicasRoute: typeof ShowroomClinicasRoute
   ShowroomEventosRoute: typeof ShowroomEventosRoute
   ShowroomFitnessRoute: typeof ShowroomFitnessRoute
   TrabalheConoscoNichoRoute: typeof TrabalheConoscoNichoRoute
   TrialCadastroRoute: typeof TrialCadastroRoute
   DemoIndexRoute: typeof DemoIndexRoute
   NichosIndexRoute: typeof NichosIndexRoute
+  ShowroomIndexRoute: typeof ShowroomIndexRoute
   TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
   DemoNichoSlugRoute: typeof DemoNichoSlugRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
@@ -3004,6 +3030,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrabalheConoscoIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/showroom/': {
+      id: '/showroom/'
+      path: '/showroom'
+      fullPath: '/showroom/'
+      preLoaderRoute: typeof ShowroomIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/paciente/': {
       id: '/paciente/'
       path: '/'
@@ -3058,6 +3091,13 @@ declare module '@tanstack/react-router' {
       path: '/showroom/eventos'
       fullPath: '/showroom/eventos'
       preLoaderRoute: typeof ShowroomEventosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/showroom/clinicas': {
+      id: '/showroom/clinicas'
+      path: '/showroom/clinicas'
+      fullPath: '/showroom/clinicas'
+      preLoaderRoute: typeof ShowroomClinicasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/r/$slug': {
@@ -4942,12 +4982,14 @@ const rootRouteChildren: RootRouteChildren = {
   ImoveisSlugRoute: ImoveisSlugRouteWithChildren,
   NichosSlugRoute: NichosSlugRoute,
   RSlugRoute: RSlugRoute,
+  ShowroomClinicasRoute: ShowroomClinicasRoute,
   ShowroomEventosRoute: ShowroomEventosRoute,
   ShowroomFitnessRoute: ShowroomFitnessRoute,
   TrabalheConoscoNichoRoute: TrabalheConoscoNichoRoute,
   TrialCadastroRoute: TrialCadastroRoute,
   DemoIndexRoute: DemoIndexRoute,
   NichosIndexRoute: NichosIndexRoute,
+  ShowroomIndexRoute: ShowroomIndexRoute,
   TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
   DemoNichoSlugRoute: DemoNichoSlugRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
