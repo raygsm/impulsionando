@@ -19,7 +19,10 @@ export interface NavItem {
   superOnly?: boolean;
   /** Código de permissão necessário. Se ausente, o item é visível por padrão. */
   perm?: string;
+  /** Renderiza um contador dinâmico ao lado do label. */
+  badge?: "pendingPix";
 }
+
 
 export interface NavGroup {
   label: string;
