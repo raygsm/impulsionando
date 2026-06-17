@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WhiteLabelRouteImport } from './routes/white-label'
+import { Route as VitrineRouteImport } from './routes/vitrine'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TrialRouteImport } from './routes/trial'
 import { Route as TesteRouteImport } from './routes/teste'
@@ -39,6 +40,7 @@ import { Route as PacienteIndexRouteImport } from './routes/paciente.index'
 import { Route as NichosIndexRouteImport } from './routes/nichos.index'
 import { Route as ModulosIndexRouteImport } from './routes/modulos.index'
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
+import { Route as VitrineSlugRouteImport } from './routes/vitrine.$slug'
 import { Route as TrialCadastroRouteImport } from './routes/trial_.cadastro'
 import { Route as TrabalheConoscoNichoRouteImport } from './routes/trabalhe-conosco.$nicho'
 import { Route as ShowroomWhatsappRouteImport } from './routes/showroom.whatsapp'
@@ -128,6 +130,7 @@ import { Route as AuthenticatedCustomersRouteImport } from './routes/_authentica
 import { Route as AuthenticatedCrmRouteImport } from './routes/_authenticated/crm'
 import { Route as AuthenticatedCoreRouteImport } from './routes/_authenticated/core'
 import { Route as AuthenticatedCompaniesRouteImport } from './routes/_authenticated/companies'
+import { Route as AuthenticatedClubeRouteImport } from './routes/_authenticated/clube'
 import { Route as AuthenticatedBiRouteImport } from './routes/_authenticated/bi'
 import { Route as AuthenticatedAutomacoesRouteImport } from './routes/_authenticated/automacoes'
 import { Route as AuthenticatedAuditRouteImport } from './routes/_authenticated/audit'
@@ -212,6 +215,7 @@ import { Route as AuthenticatedCoreDashboardsRouteImport } from './routes/_authe
 import { Route as AuthenticatedCoreDashboardMacroRouteImport } from './routes/_authenticated/core.dashboard-macro'
 import { Route as AuthenticatedCoreCriarProjetoRouteImport } from './routes/_authenticated/core.criar-projeto'
 import { Route as AuthenticatedCoreContratosRouteImport } from './routes/_authenticated/core.contratos'
+import { Route as AuthenticatedCoreConsumidorPremiumRouteImport } from './routes/_authenticated/core.consumidor-premium'
 import { Route as AuthenticatedCoreConfiguracoesRouteImport } from './routes/_authenticated/core.configuracoes'
 import { Route as AuthenticatedCoreClientesRouteImport } from './routes/_authenticated/core.clientes'
 import { Route as AuthenticatedCoreBriefingsRouteImport } from './routes/_authenticated/core.briefings'
@@ -285,6 +289,11 @@ import { Route as AuthenticatedCoreClienteIdModuloSlugConfigurarRouteImport } fr
 const WhiteLabelRoute = WhiteLabelRouteImport.update({
   id: '/white-label',
   path: '/white-label',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VitrineRoute = VitrineRouteImport.update({
+  id: '/vitrine',
+  path: '/vitrine',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
@@ -430,6 +439,11 @@ const DemoIndexRoute = DemoIndexRouteImport.update({
   id: '/demo/',
   path: '/demo/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const VitrineSlugRoute = VitrineSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => VitrineRoute,
 } as any)
 const TrialCadastroRoute = TrialCadastroRouteImport.update({
   id: '/trial_/cadastro',
@@ -881,6 +895,11 @@ const AuthenticatedCoreRoute = AuthenticatedCoreRouteImport.update({
 const AuthenticatedCompaniesRoute = AuthenticatedCompaniesRouteImport.update({
   id: '/companies',
   path: '/companies',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedClubeRoute = AuthenticatedClubeRouteImport.update({
+  id: '/clube',
+  path: '/clube',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedBiRoute = AuthenticatedBiRouteImport.update({
@@ -1359,6 +1378,12 @@ const AuthenticatedCoreContratosRoute =
     path: '/contratos',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreConsumidorPremiumRoute =
+  AuthenticatedCoreConsumidorPremiumRouteImport.update({
+    id: '/consumidor-premium',
+    path: '/consumidor-premium',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreConfiguracoesRoute =
   AuthenticatedCoreConfiguracoesRouteImport.update({
     id: '/configuracoes',
@@ -1786,6 +1811,7 @@ export interface FileRoutesByFullPath {
   '/teste': typeof TesteRoute
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/vitrine': typeof VitrineRouteWithChildren
   '/white-label': typeof WhiteLabelRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/adm': typeof AuthenticatedAdmRouteWithChildren
@@ -1794,6 +1820,7 @@ export interface FileRoutesByFullPath {
   '/audit': typeof AuthenticatedAuditRoute
   '/automacoes': typeof AuthenticatedAutomacoesRoute
   '/bi': typeof AuthenticatedBiRouteWithChildren
+  '/clube': typeof AuthenticatedClubeRoute
   '/companies': typeof AuthenticatedCompaniesRoute
   '/core': typeof AuthenticatedCoreRouteWithChildren
   '/crm': typeof AuthenticatedCrmRouteWithChildren
@@ -1883,6 +1910,7 @@ export interface FileRoutesByFullPath {
   '/showroom/whatsapp': typeof ShowroomWhatsappRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial/cadastro': typeof TrialCadastroRoute
+  '/vitrine/$slug': typeof VitrineSlugRoute
   '/demo/': typeof DemoIndexRoute
   '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
@@ -1924,6 +1952,7 @@ export interface FileRoutesByFullPath {
   '/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/core/configuracoes': typeof AuthenticatedCoreConfiguracoesRoute
+  '/core/consumidor-premium': typeof AuthenticatedCoreConsumidorPremiumRoute
   '/core/contratos': typeof AuthenticatedCoreContratosRoute
   '/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
   '/core/dashboard-macro': typeof AuthenticatedCoreDashboardMacroRoute
@@ -2057,11 +2086,13 @@ export interface FileRoutesByTo {
   '/teste': typeof TesteRoute
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/vitrine': typeof VitrineRouteWithChildren
   '/white-label': typeof WhiteLabelRoute
   '/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/adm': typeof AuthenticatedAdmRouteWithChildren
   '/audit': typeof AuthenticatedAuditRoute
   '/automacoes': typeof AuthenticatedAutomacoesRoute
+  '/clube': typeof AuthenticatedClubeRoute
   '/companies': typeof AuthenticatedCompaniesRoute
   '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -2145,6 +2176,7 @@ export interface FileRoutesByTo {
   '/showroom/whatsapp': typeof ShowroomWhatsappRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial/cadastro': typeof TrialCadastroRoute
+  '/vitrine/$slug': typeof VitrineSlugRoute
   '/demo': typeof DemoIndexRoute
   '/modulos': typeof ModulosIndexRoute
   '/nichos': typeof NichosIndexRoute
@@ -2186,6 +2218,7 @@ export interface FileRoutesByTo {
   '/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/core/configuracoes': typeof AuthenticatedCoreConfiguracoesRoute
+  '/core/consumidor-premium': typeof AuthenticatedCoreConsumidorPremiumRoute
   '/core/contratos': typeof AuthenticatedCoreContratosRoute
   '/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
   '/core/dashboard-macro': typeof AuthenticatedCoreDashboardMacroRoute
@@ -2323,6 +2356,7 @@ export interface FileRoutesById {
   '/teste': typeof TesteRoute
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/vitrine': typeof VitrineRouteWithChildren
   '/white-label': typeof WhiteLabelRoute
   '/_authenticated/access-profiles': typeof AuthenticatedAccessProfilesRoute
   '/_authenticated/adm': typeof AuthenticatedAdmRouteWithChildren
@@ -2331,6 +2365,7 @@ export interface FileRoutesById {
   '/_authenticated/audit': typeof AuthenticatedAuditRoute
   '/_authenticated/automacoes': typeof AuthenticatedAutomacoesRoute
   '/_authenticated/bi': typeof AuthenticatedBiRouteWithChildren
+  '/_authenticated/clube': typeof AuthenticatedClubeRoute
   '/_authenticated/companies': typeof AuthenticatedCompaniesRoute
   '/_authenticated/core': typeof AuthenticatedCoreRouteWithChildren
   '/_authenticated/crm': typeof AuthenticatedCrmRouteWithChildren
@@ -2420,6 +2455,7 @@ export interface FileRoutesById {
   '/showroom/whatsapp': typeof ShowroomWhatsappRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial_/cadastro': typeof TrialCadastroRoute
+  '/vitrine/$slug': typeof VitrineSlugRoute
   '/demo/': typeof DemoIndexRoute
   '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
@@ -2461,6 +2497,7 @@ export interface FileRoutesById {
   '/_authenticated/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/_authenticated/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/_authenticated/core/configuracoes': typeof AuthenticatedCoreConfiguracoesRoute
+  '/_authenticated/core/consumidor-premium': typeof AuthenticatedCoreConsumidorPremiumRoute
   '/_authenticated/core/contratos': typeof AuthenticatedCoreContratosRoute
   '/_authenticated/core/criar-projeto': typeof AuthenticatedCoreCriarProjetoRoute
   '/_authenticated/core/dashboard-macro': typeof AuthenticatedCoreDashboardMacroRoute
@@ -2598,6 +2635,7 @@ export interface FileRouteTypes {
     | '/teste'
     | '/trial'
     | '/unsubscribe'
+    | '/vitrine'
     | '/white-label'
     | '/access-profiles'
     | '/adm'
@@ -2606,6 +2644,7 @@ export interface FileRouteTypes {
     | '/audit'
     | '/automacoes'
     | '/bi'
+    | '/clube'
     | '/companies'
     | '/core'
     | '/crm'
@@ -2695,6 +2734,7 @@ export interface FileRouteTypes {
     | '/showroom/whatsapp'
     | '/trabalhe-conosco/$nicho'
     | '/trial/cadastro'
+    | '/vitrine/$slug'
     | '/demo/'
     | '/modulos/'
     | '/nichos/'
@@ -2736,6 +2776,7 @@ export interface FileRouteTypes {
     | '/core/briefings'
     | '/core/clientes'
     | '/core/configuracoes'
+    | '/core/consumidor-premium'
     | '/core/contratos'
     | '/core/criar-projeto'
     | '/core/dashboard-macro'
@@ -2869,11 +2910,13 @@ export interface FileRouteTypes {
     | '/teste'
     | '/trial'
     | '/unsubscribe'
+    | '/vitrine'
     | '/white-label'
     | '/access-profiles'
     | '/adm'
     | '/audit'
     | '/automacoes'
+    | '/clube'
     | '/companies'
     | '/customers'
     | '/dashboard'
@@ -2957,6 +3000,7 @@ export interface FileRouteTypes {
     | '/showroom/whatsapp'
     | '/trabalhe-conosco/$nicho'
     | '/trial/cadastro'
+    | '/vitrine/$slug'
     | '/demo'
     | '/modulos'
     | '/nichos'
@@ -2998,6 +3042,7 @@ export interface FileRouteTypes {
     | '/core/briefings'
     | '/core/clientes'
     | '/core/configuracoes'
+    | '/core/consumidor-premium'
     | '/core/contratos'
     | '/core/criar-projeto'
     | '/core/dashboard-macro'
@@ -3134,6 +3179,7 @@ export interface FileRouteTypes {
     | '/teste'
     | '/trial'
     | '/unsubscribe'
+    | '/vitrine'
     | '/white-label'
     | '/_authenticated/access-profiles'
     | '/_authenticated/adm'
@@ -3142,6 +3188,7 @@ export interface FileRouteTypes {
     | '/_authenticated/audit'
     | '/_authenticated/automacoes'
     | '/_authenticated/bi'
+    | '/_authenticated/clube'
     | '/_authenticated/companies'
     | '/_authenticated/core'
     | '/_authenticated/crm'
@@ -3231,6 +3278,7 @@ export interface FileRouteTypes {
     | '/showroom/whatsapp'
     | '/trabalhe-conosco/$nicho'
     | '/trial_/cadastro'
+    | '/vitrine/$slug'
     | '/demo/'
     | '/modulos/'
     | '/nichos/'
@@ -3272,6 +3320,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/briefings'
     | '/_authenticated/core/clientes'
     | '/_authenticated/core/configuracoes'
+    | '/_authenticated/core/consumidor-premium'
     | '/_authenticated/core/contratos'
     | '/_authenticated/core/criar-projeto'
     | '/_authenticated/core/dashboard-macro'
@@ -3409,6 +3458,7 @@ export interface RootRouteChildren {
   TesteRoute: typeof TesteRoute
   TrialRoute: typeof TrialRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
+  VitrineRoute: typeof VitrineRouteWithChildren
   WhiteLabelRoute: typeof WhiteLabelRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   ComoFuncionaFitnessRoute: typeof ComoFuncionaFitnessRoute
@@ -3512,6 +3562,13 @@ declare module '@tanstack/react-router' {
       path: '/white-label'
       fullPath: '/white-label'
       preLoaderRoute: typeof WhiteLabelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vitrine': {
+      id: '/vitrine'
+      path: '/vitrine'
+      fullPath: '/vitrine'
+      preLoaderRoute: typeof VitrineRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/unsubscribe': {
@@ -3716,6 +3773,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/demo/'
       preLoaderRoute: typeof DemoIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/vitrine/$slug': {
+      id: '/vitrine/$slug'
+      path: '/$slug'
+      fullPath: '/vitrine/$slug'
+      preLoaderRoute: typeof VitrineSlugRouteImport
+      parentRoute: typeof VitrineRoute
     }
     '/trial_/cadastro': {
       id: '/trial_/cadastro'
@@ -4340,6 +4404,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCompaniesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/clube': {
+      id: '/_authenticated/clube'
+      path: '/clube'
+      fullPath: '/clube'
+      preLoaderRoute: typeof AuthenticatedClubeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/bi': {
       id: '/_authenticated/bi'
       path: '/bi'
@@ -4926,6 +4997,13 @@ declare module '@tanstack/react-router' {
       path: '/contratos'
       fullPath: '/core/contratos'
       preLoaderRoute: typeof AuthenticatedCoreContratosRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/core/consumidor-premium': {
+      id: '/_authenticated/core/consumidor-premium'
+      path: '/consumidor-premium'
+      fullPath: '/core/consumidor-premium'
+      preLoaderRoute: typeof AuthenticatedCoreConsumidorPremiumRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
     '/_authenticated/core/configuracoes': {
@@ -5565,6 +5643,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreBriefingsRoute: typeof AuthenticatedCoreBriefingsRoute
   AuthenticatedCoreClientesRoute: typeof AuthenticatedCoreClientesRoute
   AuthenticatedCoreConfiguracoesRoute: typeof AuthenticatedCoreConfiguracoesRoute
+  AuthenticatedCoreConsumidorPremiumRoute: typeof AuthenticatedCoreConsumidorPremiumRoute
   AuthenticatedCoreContratosRoute: typeof AuthenticatedCoreContratosRoute
   AuthenticatedCoreCriarProjetoRoute: typeof AuthenticatedCoreCriarProjetoRoute
   AuthenticatedCoreDashboardMacroRoute: typeof AuthenticatedCoreDashboardMacroRoute
@@ -5603,6 +5682,8 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreBriefingsRoute: AuthenticatedCoreBriefingsRoute,
   AuthenticatedCoreClientesRoute: AuthenticatedCoreClientesRoute,
   AuthenticatedCoreConfiguracoesRoute: AuthenticatedCoreConfiguracoesRoute,
+  AuthenticatedCoreConsumidorPremiumRoute:
+    AuthenticatedCoreConsumidorPremiumRoute,
   AuthenticatedCoreContratosRoute: AuthenticatedCoreContratosRoute,
   AuthenticatedCoreCriarProjetoRoute: AuthenticatedCoreCriarProjetoRoute,
   AuthenticatedCoreDashboardMacroRoute: AuthenticatedCoreDashboardMacroRoute,
@@ -5800,6 +5881,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAuditRoute: typeof AuthenticatedAuditRoute
   AuthenticatedAutomacoesRoute: typeof AuthenticatedAutomacoesRoute
   AuthenticatedBiRoute: typeof AuthenticatedBiRouteWithChildren
+  AuthenticatedClubeRoute: typeof AuthenticatedClubeRoute
   AuthenticatedCompaniesRoute: typeof AuthenticatedCompaniesRoute
   AuthenticatedCoreRoute: typeof AuthenticatedCoreRouteWithChildren
   AuthenticatedCrmRoute: typeof AuthenticatedCrmRouteWithChildren
@@ -5854,6 +5936,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAuditRoute: AuthenticatedAuditRoute,
   AuthenticatedAutomacoesRoute: AuthenticatedAutomacoesRoute,
   AuthenticatedBiRoute: AuthenticatedBiRouteWithChildren,
+  AuthenticatedClubeRoute: AuthenticatedClubeRoute,
   AuthenticatedCompaniesRoute: AuthenticatedCompaniesRoute,
   AuthenticatedCoreRoute: AuthenticatedCoreRouteWithChildren,
   AuthenticatedCrmRoute: AuthenticatedCrmRouteWithChildren,
@@ -5959,6 +6042,17 @@ const PlanosRouteChildren: PlanosRouteChildren = {
 const PlanosRouteWithChildren =
   PlanosRoute._addFileChildren(PlanosRouteChildren)
 
+interface VitrineRouteChildren {
+  VitrineSlugRoute: typeof VitrineSlugRoute
+}
+
+const VitrineRouteChildren: VitrineRouteChildren = {
+  VitrineSlugRoute: VitrineSlugRoute,
+}
+
+const VitrineRouteWithChildren =
+  VitrineRoute._addFileChildren(VitrineRouteChildren)
+
 interface ImoveisSlugRouteChildren {
   ImoveisSlugPropertyIdRoute: typeof ImoveisSlugPropertyIdRoute
 }
@@ -5995,6 +6089,7 @@ const rootRouteChildren: RootRouteChildren = {
   TesteRoute: TesteRoute,
   TrialRoute: TrialRoute,
   UnsubscribeRoute: UnsubscribeRoute,
+  VitrineRoute: VitrineRouteWithChildren,
   WhiteLabelRoute: WhiteLabelRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
   ComoFuncionaFitnessRoute: ComoFuncionaFitnessRoute,
