@@ -166,6 +166,9 @@ async function logReview(
   action: "submitted" | "approved" | "rejected" | "changes_requested",
   actorId: string | null,
   notes: string | null | undefined,
+  previousStatus: string | null,
+  newStatus: string | null,
+  metadata: Record<string, unknown> = {},
 ) {
   await supabase.from("realestate_property_reviews").insert({
     property_id: propertyId,
@@ -173,6 +176,9 @@ async function logReview(
     action,
     actor_id: actorId,
     notes: notes ?? null,
+    previous_status: previousStatus,
+    new_status: newStatus,
+    metadata,
   });
 }
 
@@ -187,11 +193,11 @@ async function ensureApprover(supabase: any, userId: string, companyId: string) 
 async function loadPropertyMeta(supabase: any, propertyId: string) {
   const { data, error } = await supabase
     .from("realestate_properties")
-    .select("id, company_id, title, reference_code, submitted_by")
+    .select("id, company_id, title, reference_code, submitted_by, approval_status")
     .eq("id", propertyId)
     .single();
   if (error) throw new Error(error.message);
-  return data as { id: string; company_id: string; title: string; reference_code: string | null; submitted_by: string | null };
+  return data as { id: string; company_id: string; title: string; reference_code: string | null; submitted_by: string | null; approval_status: string | null };
 }
 
 async function dispatchNotification(args: {
