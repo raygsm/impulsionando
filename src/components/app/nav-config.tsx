@@ -38,6 +38,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Crescimento",
     defaultOpen: true,
     items: [
+      { to: "/commercial/cockpit", label: "Cockpit Comercial", icon: TrendingUp, perm: "crm.opportunity.read" },
       { to: "/crm/board", label: "Kanban de oportunidades", icon: KanbanSquare, perm: "crm.opportunity.read" },
       { to: "/crm/leads", label: "Leads", icon: UserPlus, perm: "crm.lead.read" },
       { to: "/marketing/leads", label: "Leads do site", icon: Inbox, superOnly: true },
