@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { SidebarNav } from "./SidebarNav";
 import type { CurrentUser } from "@/lib/auth";
-import logoAsset from "@/assets/logo-impulsionando.png.asset.json";
+import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 
 export function MobileSidebar({ currentUser }: { currentUser: CurrentUser }) {
   const [open, setOpen] = useState(false);
