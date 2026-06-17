@@ -581,14 +581,27 @@ export const updateNotificationPreference = createServerFn({ method: "POST" })
     enabled: z.boolean(),
   }).parse(d))
   .handler(async ({ data, context }) => {
+    // partial unique index (where company_id IS NULL) doesn't work with PostgREST onConflict —
+    // do a manual delete+insert instead
+    await context.supabase
+      .from("notification_preferences")
+      .delete()
+      .eq("user_id", context.userId)
+      .is("company_id", null)
+      .eq("category", data.category)
+      .eq("channel", data.channel);
     const { error } = await context.supabase
       .from("notification_preferences")
-      .upsert(
-        { user_id: context.userId, company_id: null, category: data.category, channel: data.channel, enabled: data.enabled },
-        { onConflict: "user_id,category,channel" } as any,
-      );
+      .insert({
+        user_id: context.userId,
+        company_id: null,
+        category: data.category,
+        channel: data.channel,
+        enabled: data.enabled,
+      });
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
 
 
