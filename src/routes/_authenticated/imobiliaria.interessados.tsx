@@ -121,7 +121,21 @@ function Page() {
             </SelectContent>
           </Select>
         </div>
-        <div className="text-sm text-muted-foreground ml-auto">{total} registro(s)</div>
+        <div className="min-w-[150px]">
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">De</label>
+          <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+        </div>
+        <div className="min-w-[150px]">
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Até</label>
+          <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+        </div>
+        <div className="flex items-center gap-3 ml-auto">
+          <span className="text-sm text-muted-foreground">{total} registro(s)</span>
+          <Button variant="outline" size="sm" onClick={handleExport} disabled={exporting}>
+            {exporting ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Download className="h-3 w-3 mr-1" />}
+            Exportar CSV
+          </Button>
+        </div>
       </Card>
 
       {isLoading ? (
