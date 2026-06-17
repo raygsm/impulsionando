@@ -1,4 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useActiveCompany } from "@/hooks/use-active-company";
+import { CompanyPicker } from "@/components/app/CompanyPicker";
 import { PageHeader, StatCard } from "@/components/app/PageElements";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
