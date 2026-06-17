@@ -11,22 +11,28 @@
  * Quando um gateway é habilitado aqui, ele aparece no /checkout/$plano.
  */
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
-import { listPendingPixCharges } from '@/lib/pix-charges.functions'
+import { useState } from 'react'
+import {
+  listPendingPixCharges,
+  updatePixReceipt,
+} from '@/lib/pix-charges.functions'
 import { getIntegration } from '@/lib/core-integrations.functions'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
-  QrCode,
-  CreditCard,
-  Wallet,
-  ArrowRight,
-  CheckCircle2,
-  Clock3,
-  Settings2,
-  ExternalLink,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from '@/components/ui/table'
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from '@/components/ui/dialog'
+import { toast } from 'sonner'
+import {
+  QrCode, CreditCard, Wallet, ArrowRight, CheckCircle2, Clock3, Settings2,
+  ExternalLink, Receipt, Download, Pencil, Printer,
 } from 'lucide-react'
 
 export const Route = createFileRoute('/_authenticated/finance/integracoes')({
@@ -63,7 +69,7 @@ function FinanceIntegrationsPage() {
 
   const { data: pixCharges } = useQuery({
     queryKey: ['admin-pix-pending'],
-    queryFn: () => fetchPix(),
+    queryFn: () => fetchPix({ data: { statuses: ['pending', 'paid'], limit: 100 } }),
     refetchInterval: 60_000,
   })
   const { data: mp } = useQuery({
@@ -255,6 +261,8 @@ function FinanceIntegrationsPage() {
         </Card>
       </div>
 
+      <ReceiptsSection charges={pixCharges ?? []} />
+
       <Card className="bg-muted/40">
         <CardContent className="py-4 text-xs text-muted-foreground">
           <strong>Como funciona a identificação automática:</strong> cada cobrança Pix
@@ -265,5 +273,170 @@ function FinanceIntegrationsPage() {
         </CardContent>
       </Card>
     </main>
+  )
+}
+
+function formatBRL(cents: number) {
+  return (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+
+function ReceiptsSection({ charges }: { charges: any[] }) {
+  const qc = useQueryClient()
+  const updateFn = useServerFn(updatePixReceipt)
+  const paid = charges.filter((c) => c.status === 'paid')
+  const [editing, setEditing] = useState<any>(null)
+  const [url, setUrl] = useState('')
+
+  const save = useMutation({
+    mutationFn: () =>
+      updateFn({
+        data: { id: editing.id, receiptUrl: url.trim() || null },
+      }),
+    onSuccess: () => {
+      toast.success('Comprovante atualizado.')
+      setEditing(null); setUrl('')
+      qc.invalidateQueries({ queryKey: ['admin-pix-pending'] })
+    },
+    onError: (e: any) => toast.error(e?.message ?? 'Falha ao salvar.'),
+  })
+
+  const printReceipt = (c: any) => {
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>Recibo ${c.txid}</title>
+      <style>body{font-family:system-ui;max-width:560px;margin:40px auto;padding:24px;color:#111}
+      h1{font-size:18px;margin:0 0 4px}.muted{color:#666;font-size:12px}
+      table{width:100%;border-collapse:collapse;margin-top:16px}
+      td{padding:8px 0;border-bottom:1px solid #eee;font-size:14px}
+      td.k{color:#666;width:160px}.total{font-size:22px;font-weight:700;color:#0a7a3b}
+      .stamp{margin-top:24px;padding:12px;border:2px dashed #0a7a3b;color:#0a7a3b;text-align:center;font-weight:600;border-radius:8px}
+      </style></head><body>
+      <h1>Recibo de pagamento — Impulsionando Tecnologia LTDA</h1>
+      <div class="muted">CNPJ 54.295.500/0001-27</div>
+      <table>
+        <tr><td class="k">Identificador</td><td>${c.txid}</td></tr>
+        <tr><td class="k">Plano</td><td>${c.plan_code ?? '—'}</td></tr>
+        <tr><td class="k">Pagador</td><td>${c.payer_name ?? '—'}</td></tr>
+        <tr><td class="k">E-mail</td><td>${c.payer_email ?? '—'}</td></tr>
+        <tr><td class="k">Confirmado em</td><td>${c.paid_at ? new Date(c.paid_at).toLocaleString('pt-BR') : '—'}</td></tr>
+        <tr><td class="k">Valor pago</td><td class="total">${formatBRL(c.unique_amount_cents)}</td></tr>
+      </table>
+      <div class="stamp">PAGO via Pix</div>
+      <p class="muted" style="margin-top:24px">Documento gerado eletronicamente para fins de comprovação interna.</p>
+      <script>window.onload=()=>window.print()</script></body></html>`
+    const w = window.open('', '_blank')
+    if (!w) return toast.error('Permita pop-ups para imprimir.')
+    w.document.write(html); w.document.close()
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Receipt className="w-5 h-5 text-primary" /> Comprovantes
+            </CardTitle>
+            <CardDescription>
+              Pagamentos confirmados via Pix. Anexe o link do comprovante (Drive, S3,
+              etc.) e gere um recibo imprimível.
+            </CardDescription>
+          </div>
+          <Badge variant="secondary">{paid.length} confirmados</Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {paid.length === 0 ? (
+          <p className="text-sm text-muted-foreground py-6 text-center">
+            Nenhum pagamento confirmado ainda.
+          </p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Data</TableHead>
+                <TableHead>Pagador</TableHead>
+                <TableHead>Plano</TableHead>
+                <TableHead className="text-right">Valor</TableHead>
+                <TableHead>Comprovante</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paid.map((c: any) => (
+                <TableRow key={c.id}>
+                  <TableCell className="text-xs text-muted-foreground">
+                    {c.paid_at ? new Date(c.paid_at).toLocaleString('pt-BR') : '—'}
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">{c.payer_name ?? '—'}</div>
+                    <div className="text-xs text-muted-foreground">{c.payer_email ?? ''}</div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{c.plan_code}</Badge>
+                  </TableCell>
+                  <TableCell className="text-right font-mono">
+                    {formatBRL(c.unique_amount_cents)}
+                  </TableCell>
+                  <TableCell>
+                    {c.receipt_url ? (
+                      <a
+                        href={c.receipt_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-primary hover:underline text-xs inline-flex items-center gap-1"
+                      >
+                        <Download className="w-3 h-3" /> Baixar
+                      </a>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right space-x-1">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      title={c.receipt_url ? 'Editar link' : 'Anexar comprovante'}
+                      onClick={() => { setEditing(c); setUrl(c.receipt_url ?? '') }}
+                    >
+                      <Pencil className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      title="Imprimir recibo"
+                      onClick={() => printReceipt(c)}
+                    >
+                      <Printer className="w-3 h-3" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+
+      <Dialog open={!!editing} onOpenChange={(v) => !v && setEditing(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Comprovante do pagamento</DialogTitle>
+            <DialogDescription>
+              Cole o link do comprovante (Drive, S3, PDF público). Deixe em branco para
+              remover.
+            </DialogDescription>
+          </DialogHeader>
+          <Input
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="https://…"
+          />
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setEditing(null)}>Cancelar</Button>
+            <Button onClick={() => save.mutate()} disabled={save.isPending}>
+              {save.isPending ? 'Salvando…' : 'Salvar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </Card>
   )
 }

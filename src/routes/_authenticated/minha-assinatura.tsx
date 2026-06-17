@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
-  CreditCard, CheckCircle2, AlertTriangle, XCircle, ExternalLink, Loader2,
+  CreditCard, CheckCircle2, AlertTriangle, XCircle, ExternalLink, Loader2, QrCode,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -36,6 +36,13 @@ const PRICE_ID: Record<string, { monthly: string; annual: string }> = {
   essencial_plan: { monthly: "essencial_monthly", annual: "essencial_annual" },
   integrado_plan: { monthly: "integrado_monthly", annual: "integrado_annual" },
   avancado_plan: { monthly: "avancado_monthly", annual: "avancado_annual" },
+};
+
+/** Map subscription product to the billing_plans.code used by /checkout/$plano. */
+const PRODUCT_TO_PLAN_CODE: Record<string, string> = {
+  essencial_plan: "essencial-mensal",
+  integrado_plan: "completo-mensal",
+  avancado_plan: "completo-mensal",
 };
 
 function formatBRL(v: number) {
@@ -181,6 +188,16 @@ function MinhaAssinaturaPage() {
             ) : (
               <Button onClick={() => setChangeOpen(true)} disabled={!isActive}>
                 Trocar de plano
+              </Button>
+            )}
+            {PRODUCT_TO_PLAN_CODE[subscription.product_id] && (
+              <Button asChild variant="default" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                <Link
+                  to="/checkout/$plano"
+                  params={{ plano: PRODUCT_TO_PLAN_CODE[subscription.product_id] }}
+                >
+                  <QrCode className="w-4 h-4 mr-2" /> Pagar agora via Pix
+                </Link>
               </Button>
             )}
             <Button variant="outline" onClick={() => mPortal.mutate()} disabled={mPortal.isPending}>

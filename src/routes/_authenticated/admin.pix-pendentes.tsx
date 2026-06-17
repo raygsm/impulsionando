@@ -12,6 +12,9 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select'
+import {
   Table,
   TableBody,
   TableCell,
@@ -50,9 +53,27 @@ function PixPendentesPage() {
   const cancelFn = useServerFn(cancelPixCharge)
   const qc = useQueryClient()
 
+  const [filter, setFilter] = useState('')
+  const [planFilter, setPlanFilter] = useState<string>('all')
+  const [fromDate, setFromDate] = useState<string>('') // yyyy-mm-dd
+  const [toDate, setToDate] = useState<string>('')
+
+  const fromISO = fromDate ? new Date(fromDate + 'T00:00:00').toISOString() : undefined
+  const toISO = toDate ? new Date(toDate + 'T23:59:59').toISOString() : undefined
+
   const { data, isLoading } = useQuery({
-    queryKey: ['admin-pix-pending'],
-    queryFn: () => fetchList(),
+    queryKey: ['admin-pix-pending', { filter, planFilter, fromISO, toISO }],
+    queryFn: () =>
+      fetchList({
+        data: {
+          search: filter || undefined,
+          planCode: planFilter !== 'all' ? planFilter : undefined,
+          fromISO,
+          toISO,
+          statuses: ['pending', 'paid'],
+          limit: 300,
+        },
+      }),
     refetchInterval: 30_000,
   })
 
@@ -62,7 +83,6 @@ function PixPendentesPage() {
     payer: string | null
   } | null>(null)
   const [receiptUrl, setReceiptUrl] = useState('')
-  const [filter, setFilter] = useState('')
 
   const confirmMut = useMutation({
     mutationFn: (input: { id: string; receiptUrl?: string }) => confirmFn({ data: input }),
@@ -84,19 +104,14 @@ function PixPendentesPage() {
     onError: (e: any) => toast.error(e?.message ?? 'Falha ao cancelar.'),
   })
 
-  const filtered = (data ?? []).filter((c: any) => {
-    if (!filter) return true
-    const q = filter.toLowerCase()
-    return (
-      c.payer_name?.toLowerCase().includes(q) ||
-      c.payer_email?.toLowerCase().includes(q) ||
-      c.plan_code?.toLowerCase().includes(q) ||
-      String(c.unique_amount_cents).includes(q)
-    )
-  })
+  const rows = data ?? []
+  const planOptions = Array.from(new Set(rows.map((c: any) => c.plan_code).filter(Boolean)))
+  const pending = rows.filter((c: any) => c.status === 'pending')
+  const recent = rows.filter((c: any) => c.status === 'paid').slice(0, 20)
 
-  const pending = filtered.filter((c: any) => c.status === 'pending')
-  const recent = filtered.filter((c: any) => c.status === 'paid').slice(0, 20)
+  function clearFilters() {
+    setFilter(''); setPlanFilter('all'); setFromDate(''); setToDate('')
+  }
 
   return (
     <main className="container max-w-6xl mx-auto py-8 px-4 space-y-6">
@@ -111,17 +126,45 @@ function PixPendentesPage() {
         </p>
       </header>
 
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            placeholder="Nome, e-mail, plano ou valor em centavos"
-            className="pl-9"
-          />
-        </div>
-      </div>
+      <Card>
+        <CardContent className="py-4 grid gap-3 md:grid-cols-[1fr_180px_160px_160px_auto] items-end">
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground">Busca</label>
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                placeholder="Nome, e-mail, WhatsApp, txid ou valor em centavos"
+                className="pl-9"
+              />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground">Plano</label>
+            <Select value={planFilter} onValueChange={setPlanFilter}>
+              <SelectTrigger><SelectValue placeholder="Todos" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os planos</SelectItem>
+                {planOptions.map((p: any) => (
+                  <SelectItem key={p} value={p}>{p}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground">De</label>
+            <Input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground">Até</label>
+            <Input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
+          </div>
+          <Button variant="ghost" onClick={clearFilters} disabled={!filter && planFilter === 'all' && !fromDate && !toDate}>
+            Limpar
+          </Button>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
