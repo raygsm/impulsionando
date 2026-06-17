@@ -114,7 +114,7 @@ function CheckoutPage() {
             baseAmountCents={baseCents}
             description={`Impulsionando ${plan.code}`}
             initialPayer={{
-              name: user?.profile?.display_name ?? user?.user?.email ?? '',
+              name: user?.user?.email ?? '',
               email: user?.user?.email ?? '',
             }}
           />
