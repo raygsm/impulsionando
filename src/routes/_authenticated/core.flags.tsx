@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Card } from "@/components/ui/card";
@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { PageHeader } from "@/components/app/PageElements";
 import { toast } from "sonner";
 import { listCoreFlags, updateCoreFlag } from "@/lib/core-admin.functions";
+import { checkCoreHealthAccess } from "@/lib/core-rbac.functions";
 
 export const Route = createFileRoute("/_authenticated/core/flags")({
   head: () => ({
@@ -15,6 +16,11 @@ export const Route = createFileRoute("/_authenticated/core/flags")({
       { name: "robots", content: "noindex" },
     ],
   }),
+  beforeLoad: async () => {
+    const r = await checkCoreHealthAccess();
+    if (!r.allowed) throw redirect({ to: "/core" as any });
+    return { coreAccess: r.level };
+  },
   component: FlagsPage,
 });
 

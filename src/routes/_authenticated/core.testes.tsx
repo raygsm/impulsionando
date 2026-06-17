@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
@@ -7,10 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { runClientHealthCheck, listClientsForGovernance } from "@/lib/governance.functions";
+import { checkCoreHealthAccess } from "@/lib/core-rbac.functions";
 import { CheckCircle2, XCircle, AlertCircle, FlaskConical, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/core/testes")({
   head: () => ({ meta: [{ title: "Central de Testes — Core" }, { name: "robots", content: "noindex" }] }),
+  beforeLoad: async () => {
+    const r = await checkCoreHealthAccess();
+    if (!r.allowed) throw redirect({ to: "/core" as any });
+    return { coreAccess: r.level };
+  },
   component: TestesPage,
 });
 

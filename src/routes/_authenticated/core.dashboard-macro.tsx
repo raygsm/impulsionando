@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Card } from "@/components/ui/card";
@@ -9,10 +9,16 @@ import { useMemo, useState } from "react";
 import { fetchMacroDashboard, fetchMacroFiltersMeta } from "@/lib/core-dashboard.functions";
 import { downloadCsv, downloadTablePdf, fmtBRLCents } from "@/lib/exports";
 import { logExport } from "@/lib/core-export-logs.functions";
+import { checkCoreHealthAccess } from "@/lib/core-rbac.functions";
 import { LayoutDashboard, TrendingUp, Users, Activity, Download, FileText, Filter } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/core/dashboard-macro")({
   head: () => ({ meta: [{ title: "Dashboard Macro Cross-Nicho — Core" }, { name: "robots", content: "noindex" }] }),
+  beforeLoad: async () => {
+    const r = await checkCoreHealthAccess();
+    if (!r.allowed) throw redirect({ to: "/core" as any });
+    return { coreAccess: r.level };
+  },
   component: MacroDashboard,
 });
 
