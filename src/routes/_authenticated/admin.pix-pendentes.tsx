@@ -126,17 +126,45 @@ function PixPendentesPage() {
         </p>
       </header>
 
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            placeholder="Nome, e-mail, plano ou valor em centavos"
-            className="pl-9"
-          />
-        </div>
-      </div>
+      <Card>
+        <CardContent className="py-4 grid gap-3 md:grid-cols-[1fr_180px_160px_160px_auto] items-end">
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground">Busca</label>
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                placeholder="Nome, e-mail, WhatsApp, txid ou valor em centavos"
+                className="pl-9"
+              />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground">Plano</label>
+            <Select value={planFilter} onValueChange={setPlanFilter}>
+              <SelectTrigger><SelectValue placeholder="Todos" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os planos</SelectItem>
+                {planOptions.map((p: any) => (
+                  <SelectItem key={p} value={p}>{p}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground">De</label>
+            <Input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground">Até</label>
+            <Input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
+          </div>
+          <Button variant="ghost" onClick={clearFilters} disabled={!filter && planFilter === 'all' && !fromDate && !toDate}>
+            Limpar
+          </Button>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
