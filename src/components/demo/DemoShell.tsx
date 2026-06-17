@@ -8,7 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { HelpCircle, RotateCcw, LogOut, Info, Menu } from "lucide-react";
 import { toast } from "sonner";
-import logoAsset from "@/assets/logo-impulsionando.png.asset.json";
+import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 import { DemoTestContactPanel } from "@/components/demo/DemoTestContactPanel";
 import { DemoModuleSwitcher } from "@/components/demo/DemoModuleSwitcher";
 import type { DemoModuleKey } from "@/lib/demoModules";
