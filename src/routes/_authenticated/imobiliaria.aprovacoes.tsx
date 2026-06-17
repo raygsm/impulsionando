@@ -221,7 +221,8 @@ function Page() {
                   reviewerId: reviewerId || undefined,
                   dateFrom: dateFrom ? new Date(dateFrom).toISOString() : undefined,
                   dateTo: dateTo ? new Date(dateTo + "T23:59:59").toISOString() : undefined,
-                  pageSize: 500,
+                  page,
+                  pageSize,
                 }}
                 target="_blank"
               >
