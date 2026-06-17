@@ -50,7 +50,7 @@ function OnboardingMasterPage() {
       if (!companyId) return null;
       const [company, modules, members, domain, email] = await Promise.all([
         supabase.from("companies").select("id, niche_id").eq("id", companyId).maybeSingle(),
-        supabase.from("company_modules").select("id", { count: "exact", head: true }).eq("company_id", companyId).eq("is_active", true),
+        supabase.from("company_modules").select("id", { count: "exact", head: true }).eq("company_id", companyId).eq("is_enabled", true),
         supabase.from("user_profiles").select("id", { count: "exact", head: true }).eq("company_id", companyId).eq("is_active", true),
         supabase.from("onboarding_domain_requests").select("id", { count: "exact", head: true }).eq("company_id", companyId),
         supabase.from("onboarding_email_requests").select("id", { count: "exact", head: true }).eq("company_id", companyId),
