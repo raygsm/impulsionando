@@ -246,8 +246,16 @@ function Page() {
             <Button variant="outline" size="sm" asChild>
               <Link to="/perfil/notificacoes">Preferências</Link>
             </Button>
-            <Button variant="outline" size="sm" onClick={() => batchExport.mutate()} disabled={batchExport.isPending}>
-              <Download className="w-4 h-4 mr-1" /> Exportar fila (CSV)
+            <Button
+              variant="outline" size="sm"
+              onClick={() => batchExport.mutate()}
+              disabled={batchExport.isPending || !companyId || items.length === 0}
+              aria-busy={batchExport.isPending}
+            >
+              {batchExport.isPending
+                ? <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                : <Download className="w-4 h-4 mr-1" />}
+              {batchExport.isPending ? "Gerando CSV…" : "Exportar fila (CSV)"}
             </Button>
             <Button variant="outline" size="sm" asChild>
               <Link
