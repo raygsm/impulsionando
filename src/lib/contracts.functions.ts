@@ -40,8 +40,9 @@ export const createContractDocument = createServerFn({ method: "POST" })
         storage_path: data.storage_path,
         file_hash: data.file_hash,
         file_size_bytes: data.file_size_bytes,
-        snapshot: data.snapshot,
+        snapshot: data.snapshot as never,
         status: "sent",
+
         generated_by: context.userId,
         sent_at: new Date().toISOString(),
       })
