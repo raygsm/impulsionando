@@ -62,6 +62,9 @@ function ShowroomHub() {
               <Button asChild size="lg" variant="outline">
                 <Link to="/showroom/dashboards">Ver dashboards simulados</Link>
               </Button>
+              <Button asChild size="lg" variant="outline">
+                <Link to="/showroom/relatorios">Relatórios prontos</Link>
+              </Button>
               <Button asChild size="lg" variant="ghost">
                 <Link to="/solucoes">Ver todos os nichos</Link>
               </Button>
