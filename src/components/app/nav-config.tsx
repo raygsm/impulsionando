@@ -7,7 +7,7 @@ import {
   ShoppingCart, Receipt, Plus, Wallet as WalletIcon,
   Contact, BarChart3, ShieldCheck, Inbox, GraduationCap, Stethoscope, Sparkles,
   Handshake, Link2, Ticket, Briefcase, BadgeDollarSign, TrendingUp, Banknote, Copy,
-  Home, Search as SearchIcon, Zap, Bot,
+  Home, Search as SearchIcon, Zap, Bot, MessageSquare,
 } from "lucide-react";
 
 
