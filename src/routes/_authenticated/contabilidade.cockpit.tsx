@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   Calculator, Users, FolderOpen, ClipboardList, CalendarClock, BellRing,
   FileText, MessageCircle, ListChecks, Wallet, FileSignature, Megaphone,
-  BarChart3, Globe, AlertTriangle, ArrowRight,
+  BarChart3, Globe, AlertTriangle, ArrowRight, Building2,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/contabilidade/cockpit")({
