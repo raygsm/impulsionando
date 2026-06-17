@@ -43,6 +43,7 @@ import { Route as TrialCadastroRouteImport } from './routes/trial_.cadastro'
 import { Route as TrabalheConoscoNichoRouteImport } from './routes/trabalhe-conosco.$nicho'
 import { Route as ShowroomFitnessRouteImport } from './routes/showroom.fitness'
 import { Route as ShowroomEventosRouteImport } from './routes/showroom.eventos'
+import { Route as ShowroomDashboardsRouteImport } from './routes/showroom.dashboards'
 import { Route as ShowroomClinicasRouteImport } from './routes/showroom.clinicas'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
 import { Route as PlanosTesteRouteImport } from './routes/planos.teste'
@@ -399,6 +400,11 @@ const ShowroomFitnessRoute = ShowroomFitnessRouteImport.update({
 const ShowroomEventosRoute = ShowroomEventosRouteImport.update({
   id: '/showroom/eventos',
   path: '/showroom/eventos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShowroomDashboardsRoute = ShowroomDashboardsRouteImport.update({
+  id: '/showroom/dashboards',
+  path: '/showroom/dashboards',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShowroomClinicasRoute = ShowroomClinicasRouteImport.update({
@@ -1527,6 +1533,7 @@ export interface FileRoutesByFullPath {
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
   '/showroom/clinicas': typeof ShowroomClinicasRoute
+  '/showroom/dashboards': typeof ShowroomDashboardsRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
@@ -1739,6 +1746,7 @@ export interface FileRoutesByTo {
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
   '/showroom/clinicas': typeof ShowroomClinicasRoute
+  '/showroom/dashboards': typeof ShowroomDashboardsRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
@@ -1964,6 +1972,7 @@ export interface FileRoutesById {
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
   '/showroom/clinicas': typeof ShowroomClinicasRoute
+  '/showroom/dashboards': typeof ShowroomDashboardsRoute
   '/showroom/eventos': typeof ShowroomEventosRoute
   '/showroom/fitness': typeof ShowroomFitnessRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
@@ -2189,6 +2198,7 @@ export interface FileRouteTypes {
     | '/planos/teste'
     | '/r/$slug'
     | '/showroom/clinicas'
+    | '/showroom/dashboards'
     | '/showroom/eventos'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
@@ -2401,6 +2411,7 @@ export interface FileRouteTypes {
     | '/planos/teste'
     | '/r/$slug'
     | '/showroom/clinicas'
+    | '/showroom/dashboards'
     | '/showroom/eventos'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
@@ -2625,6 +2636,7 @@ export interface FileRouteTypes {
     | '/planos/teste'
     | '/r/$slug'
     | '/showroom/clinicas'
+    | '/showroom/dashboards'
     | '/showroom/eventos'
     | '/showroom/fitness'
     | '/trabalhe-conosco/$nicho'
@@ -2820,6 +2832,7 @@ export interface RootRouteChildren {
   NichosSlugRoute: typeof NichosSlugRoute
   RSlugRoute: typeof RSlugRoute
   ShowroomClinicasRoute: typeof ShowroomClinicasRoute
+  ShowroomDashboardsRoute: typeof ShowroomDashboardsRoute
   ShowroomEventosRoute: typeof ShowroomEventosRoute
   ShowroomFitnessRoute: typeof ShowroomFitnessRoute
   TrabalheConoscoNichoRoute: typeof TrabalheConoscoNichoRoute
@@ -3091,6 +3104,13 @@ declare module '@tanstack/react-router' {
       path: '/showroom/eventos'
       fullPath: '/showroom/eventos'
       preLoaderRoute: typeof ShowroomEventosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/showroom/dashboards': {
+      id: '/showroom/dashboards'
+      path: '/showroom/dashboards'
+      fullPath: '/showroom/dashboards'
+      preLoaderRoute: typeof ShowroomDashboardsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/showroom/clinicas': {
@@ -4983,6 +5003,7 @@ const rootRouteChildren: RootRouteChildren = {
   NichosSlugRoute: NichosSlugRoute,
   RSlugRoute: RSlugRoute,
   ShowroomClinicasRoute: ShowroomClinicasRoute,
+  ShowroomDashboardsRoute: ShowroomDashboardsRoute,
   ShowroomEventosRoute: ShowroomEventosRoute,
   ShowroomFitnessRoute: ShowroomFitnessRoute,
   TrabalheConoscoNichoRoute: TrabalheConoscoNichoRoute,
