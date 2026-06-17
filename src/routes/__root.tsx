@@ -14,7 +14,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { LGPDBanner } from "@/components/marketing/LGPDBanner";
-import logoAsset from "@/assets/logo-impulsionando.png.asset.json";
+import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 
 function NotFoundComponent() {
   return (
