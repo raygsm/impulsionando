@@ -139,6 +139,10 @@ function AdminClubePage() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="cron" className="mt-6 space-y-4">
+          <CronAuditPanel />
+        </TabsContent>
+
         <TabsContent value="enquetes" className="mt-6">
           <Card className="p-5">
             <h2 className="font-semibold mb-3 flex items-center gap-2"><Vote className="w-4 h-4" /> Moderação de enquetes</h2>
