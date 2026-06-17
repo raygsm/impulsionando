@@ -102,11 +102,13 @@ function ClubePage() {
         <TabsList className="flex flex-wrap h-auto">
           <TabsTrigger value="visao">Visão geral</TabsTrigger>
           <TabsTrigger value="descobrir">Descobrir</TabsTrigger>
+          <TabsTrigger value="recomendacoes">Para você</TabsTrigger>
           <TabsTrigger value="perfil">Perfil e localização</TabsTrigger>
           <TabsTrigger value="alertas">Alertas <Badge variant="secondary" className="ml-1 h-4 px-1 text-[10px]">{alerts.data?.length ?? 0}</Badge></TabsTrigger>
           <TabsTrigger value="indicacoes">Indicações</TabsTrigger>
           <TabsTrigger value="favoritos">Favoritos</TabsTrigger>
           <TabsTrigger value="historico">Histórico {isPremium ? "" : "🔒"}</TabsTrigger>
+          <TabsTrigger value="comprovantes">Comprovantes</TabsTrigger>
           <TabsTrigger value="plano">Plano e faturas</TabsTrigger>
         </TabsList>
 
