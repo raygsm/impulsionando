@@ -48,13 +48,13 @@ function MasterDashboard() {
     },
   });
 
-  const { data: subs } = useQuery({
-    queryKey: ["core-master-subs"],
+  const { data: contracts } = useQuery({
+    queryKey: ["core-master-contracts"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("subscriptions")
-        .select("company_id, status, amount_cents, period")
-        .in("status", ["active", "trialing"]);
+        .from("billing_contracts")
+        .select("company_id, recurring_amount, status")
+        .eq("status", "active");
       if (error) return [];
       return data ?? [];
     },
@@ -67,12 +67,10 @@ function MasterDashboard() {
     const active = real.filter((c) => c.is_active);
     const implant = real.filter((c) => c.status_commercial === "implantacao" || c.status_technical === "configuracao");
     const inadimp = real.filter((c) => c.status_financial === "inadimplente" || c.status_financial === "suspensa");
-    const mrr = (subs ?? []).reduce((acc, s) => {
-      const realCompany = real.find((r) => r.id === s.company_id);
-      if (!realCompany) return acc;
-      const amt = Number(s.amount_cents ?? 0);
-      const monthly = s.period === "yearly" ? amt / 12 : amt;
-      return acc + monthly;
+    const realIds = new Set(real.map((r) => r.id));
+    const mrrCents = (contracts ?? []).reduce((acc, c) => {
+      if (!realIds.has(c.company_id)) return acc;
+      return acc + Math.round(Number(c.recurring_amount ?? 0) * 100);
     }, 0);
     const byNiche = new Map<string, { name: string; total: number; real: number; demo: number }>();
     for (const c of cs) {
