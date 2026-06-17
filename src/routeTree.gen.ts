@@ -168,6 +168,7 @@ import { Route as AuthenticatedReportsInventoryRouteImport } from './routes/_aut
 import { Route as AuthenticatedReportsFinanceRouteImport } from './routes/_authenticated/reports.finance'
 import { Route as AuthenticatedReportsCrmRouteImport } from './routes/_authenticated/reports.crm'
 import { Route as AuthenticatedReportsAgendaRouteImport } from './routes/_authenticated/reports.agenda'
+import { Route as AuthenticatedRealestateCockpitRouteImport } from './routes/_authenticated/realestate.cockpit'
 import { Route as AuthenticatedPrivacyCockpitRouteImport } from './routes/_authenticated/privacy.cockpit'
 import { Route as AuthenticatedPerfilNotificacoesRouteImport } from './routes/_authenticated/perfil.notificacoes'
 import { Route as AuthenticatedOperationsCockpitRouteImport } from './routes/_authenticated/operations.cockpit'
@@ -1124,6 +1125,12 @@ const AuthenticatedReportsAgendaRoute =
     id: '/agenda',
     path: '/agenda',
     getParentRoute: () => AuthenticatedReportsRoute,
+  } as any)
+const AuthenticatedRealestateCockpitRoute =
+  AuthenticatedRealestateCockpitRouteImport.update({
+    id: '/realestate/cockpit',
+    path: '/realestate/cockpit',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedPrivacyCockpitRoute =
   AuthenticatedPrivacyCockpitRouteImport.update({
@@ -2150,6 +2157,7 @@ export interface FileRoutesByFullPath {
   '/operations/cockpit': typeof AuthenticatedOperationsCockpitRoute
   '/perfil/notificacoes': typeof AuthenticatedPerfilNotificacoesRoute
   '/privacy/cockpit': typeof AuthenticatedPrivacyCockpitRoute
+  '/realestate/cockpit': typeof AuthenticatedRealestateCockpitRoute
   '/reports/agenda': typeof AuthenticatedReportsAgendaRoute
   '/reports/crm': typeof AuthenticatedReportsCrmRoute
   '/reports/finance': typeof AuthenticatedReportsFinanceRoute
@@ -2435,6 +2443,7 @@ export interface FileRoutesByTo {
   '/operations/cockpit': typeof AuthenticatedOperationsCockpitRoute
   '/perfil/notificacoes': typeof AuthenticatedPerfilNotificacoesRoute
   '/privacy/cockpit': typeof AuthenticatedPrivacyCockpitRoute
+  '/realestate/cockpit': typeof AuthenticatedRealestateCockpitRoute
   '/reports/agenda': typeof AuthenticatedReportsAgendaRoute
   '/reports/crm': typeof AuthenticatedReportsCrmRoute
   '/reports/finance': typeof AuthenticatedReportsFinanceRoute
@@ -2733,6 +2742,7 @@ export interface FileRoutesById {
   '/_authenticated/operations/cockpit': typeof AuthenticatedOperationsCockpitRoute
   '/_authenticated/perfil/notificacoes': typeof AuthenticatedPerfilNotificacoesRoute
   '/_authenticated/privacy/cockpit': typeof AuthenticatedPrivacyCockpitRoute
+  '/_authenticated/realestate/cockpit': typeof AuthenticatedRealestateCockpitRoute
   '/_authenticated/reports/agenda': typeof AuthenticatedReportsAgendaRoute
   '/_authenticated/reports/crm': typeof AuthenticatedReportsCrmRoute
   '/_authenticated/reports/finance': typeof AuthenticatedReportsFinanceRoute
@@ -3031,6 +3041,7 @@ export interface FileRouteTypes {
     | '/operations/cockpit'
     | '/perfil/notificacoes'
     | '/privacy/cockpit'
+    | '/realestate/cockpit'
     | '/reports/agenda'
     | '/reports/crm'
     | '/reports/finance'
@@ -3316,6 +3327,7 @@ export interface FileRouteTypes {
     | '/operations/cockpit'
     | '/perfil/notificacoes'
     | '/privacy/cockpit'
+    | '/realestate/cockpit'
     | '/reports/agenda'
     | '/reports/crm'
     | '/reports/finance'
@@ -3613,6 +3625,7 @@ export interface FileRouteTypes {
     | '/_authenticated/operations/cockpit'
     | '/_authenticated/perfil/notificacoes'
     | '/_authenticated/privacy/cockpit'
+    | '/_authenticated/realestate/cockpit'
     | '/_authenticated/reports/agenda'
     | '/_authenticated/reports/crm'
     | '/_authenticated/reports/finance'
@@ -4917,6 +4930,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/reports/agenda'
       preLoaderRoute: typeof AuthenticatedReportsAgendaRouteImport
       parentRoute: typeof AuthenticatedReportsRoute
+    }
+    '/_authenticated/realestate/cockpit': {
+      id: '/_authenticated/realestate/cockpit'
+      path: '/realestate/cockpit'
+      fullPath: '/realestate/cockpit'
+      preLoaderRoute: typeof AuthenticatedRealestateCockpitRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/privacy/cockpit': {
       id: '/_authenticated/privacy/cockpit'
@@ -6351,6 +6371,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMarketingLeadsRoute: typeof AuthenticatedMarketingLeadsRoute
   AuthenticatedOperationsCockpitRoute: typeof AuthenticatedOperationsCockpitRoute
   AuthenticatedPerfilNotificacoesRoute: typeof AuthenticatedPerfilNotificacoesRoute
+  AuthenticatedRealestateCockpitRoute: typeof AuthenticatedRealestateCockpitRoute
   AuthenticatedRestauranteCardapioRoute: typeof AuthenticatedRestauranteCardapioRoute
   AuthenticatedRestauranteMesasRoute: typeof AuthenticatedRestauranteMesasRoute
   AuthenticatedRestauranteSalaoRoute: typeof AuthenticatedRestauranteSalaoRoute
@@ -6423,6 +6444,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMarketingLeadsRoute: AuthenticatedMarketingLeadsRoute,
   AuthenticatedOperationsCockpitRoute: AuthenticatedOperationsCockpitRoute,
   AuthenticatedPerfilNotificacoesRoute: AuthenticatedPerfilNotificacoesRoute,
+  AuthenticatedRealestateCockpitRoute: AuthenticatedRealestateCockpitRoute,
   AuthenticatedRestauranteCardapioRoute: AuthenticatedRestauranteCardapioRoute,
   AuthenticatedRestauranteMesasRoute: AuthenticatedRestauranteMesasRoute,
   AuthenticatedRestauranteSalaoRoute: AuthenticatedRestauranteSalaoRoute,
