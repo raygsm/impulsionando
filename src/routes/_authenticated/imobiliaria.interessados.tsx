@@ -143,7 +143,7 @@ function Page() {
       toast.success(`${r.rows.length} de ${r.total} registro(s) — export ${r.exportId.slice(0, 8)}`)
     } catch (e: any) {
       toast.error(e?.message ?? 'Falha ao exportar')
-    } finally { setExporting(null); setExportProgress({ done: 0, total: 0, exportId: null }) }
+    } finally { setExporting(null); setExportProgress({ done: 0, total: 0, exportId: null }); try { window.localStorage.removeItem(ACTIVE_EXPORT_KEY) } catch {} }
   }
 
   async function handleExportPdf() {
