@@ -151,11 +151,22 @@ function ContractSignPage() {
           />
         )}
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {urlQ.data?.url && (
             <a href={urlQ.data.url} target="_blank" rel="noreferrer">
-              <Button size="sm" variant="outline"><Download className="w-4 h-4 mr-1" /> Baixar PDF</Button>
+              <Button size="sm" variant="outline"><Download className="w-4 h-4 mr-1" /> Baixar PDF original</Button>
             </a>
+          )}
+          {(doc.data as any)?.signed_storage_path && (
+            <Button
+              size="sm"
+              onClick={async () => {
+                const r = await urlFn({ data: { id: id!, signed: true } });
+                if (r?.url) window.open(r.url, "_blank");
+              }}
+            >
+              <Download className="w-4 h-4 mr-1" /> Baixar PDF assinado (carimbado)
+            </Button>
           )}
         </div>
       </Card>
