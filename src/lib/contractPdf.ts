@@ -111,9 +111,11 @@ export function buildContractPdfBytes(c: ContractInput): { bytes: Uint8Array; pa
 }
 
 async function sha256Hex(bytes: Uint8Array): Promise<string> {
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  const buf = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+  const digest = await crypto.subtle.digest("SHA-256", buf);
   return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
+
 
 /** Gera o PDF, faz upload no bucket "contracts" e retorna metadados para criar a linha em contract_documents. */
 export async function generateAndUploadContract(c: ContractInput) {
