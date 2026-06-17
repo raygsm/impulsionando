@@ -141,7 +141,7 @@ export const getContractSignedUrl = createServerFn({ method: "POST" })
           variant: wantSigned ? "signed_stamped" : "original",
           storage_path: path,
         },
-      });
+      } as any);
     } catch (auditErr) {
       console.error("audit contract.download failed", auditErr);
     }
