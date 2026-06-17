@@ -34,41 +34,14 @@ export const setItemStatus = createServerFn({ method: "POST" })
     const r = res as { ok: boolean; error?: string };
     if (!r?.ok) throw new Error(r?.error ?? "fail");
 
-    // Notifica o cliente quando o item fica pronto (entregue).
+    // Notifica o cliente quando o item fica pronto (e-mail + WhatsApp).
+    // Idempotente via `sales_order_items.notified_ready_at`.
     if (data.status === "entregue") {
       try {
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { data: row } = await supabaseAdmin
-          .from("sales_order_items")
-          .select(
-            `description, quantity, order_id, company_id,
-             order:order_id ( id ),
-             company:company_id ( name, trade_name )`,
-          )
-          .eq("id", data.item_id)
-          .maybeSingle();
-        if (row) {
-          const { data: sess } = await supabaseAdmin
-            .from("restaurant_table_sessions")
-            .select("customer_email, customer_name, table:table_id ( number )")
-            .eq("sales_order_id", (row as any).order_id)
-            .maybeSingle();
-          const email = (sess as any)?.customer_email as string | null;
-          if (email) {
-            const { sendRestaurantEmail } = await import("@/lib/restaurant-notify.server");
-            await sendRestaurantEmail({
-              templateName: "restaurant-order-ready",
-              to: email,
-              templateData: {
-                customerName: (sess as any)?.customer_name ?? undefined,
-                itemDescription: `${Number((row as any).quantity)}× ${(row as any).description}`,
-                tableNumber: (sess as any)?.table?.number,
-                companyName: (row as any).company?.trade_name ?? (row as any).company?.name,
-              },
-              idempotencyKey: `order-ready:${data.item_id}`,
-            });
-          }
-        }
+        const { notifyItemReady } = await import(
+          "@/lib/restaurant-customer-notify.server"
+        );
+        await notifyItemReady(data.item_id);
       } catch (e) {
         console.warn("notify order-ready failed", e);
       }
