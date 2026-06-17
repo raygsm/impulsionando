@@ -240,6 +240,7 @@ import { Route as AuthenticatedContabilidadeObrigacoesRouteImport } from './rout
 import { Route as AuthenticatedContabilidadeDocumentosRouteImport } from './routes/_authenticated/contabilidade.documentos'
 import { Route as AuthenticatedContabilidadeCockpitRouteImport } from './routes/_authenticated/contabilidade.cockpit'
 import { Route as AuthenticatedContabilidadeClientesRouteImport } from './routes/_authenticated/contabilidade.clientes'
+import { Route as AuthenticatedContabilidadeCalendarioRouteImport } from './routes/_authenticated/contabilidade.calendario'
 import { Route as AuthenticatedConsumerUnifiedRouteImport } from './routes/_authenticated/consumer.unified'
 import { Route as AuthenticatedComunidadeIdRouteImport } from './routes/_authenticated/comunidade.$id'
 import { Route as AuthenticatedCommercialCockpitRouteImport } from './routes/_authenticated/commercial.cockpit'
@@ -1552,6 +1553,12 @@ const AuthenticatedContabilidadeClientesRoute =
     path: '/contabilidade/clientes',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedContabilidadeCalendarioRoute =
+  AuthenticatedContabilidadeCalendarioRouteImport.update({
+    id: '/contabilidade/calendario',
+    path: '/contabilidade/calendario',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedConsumerUnifiedRoute =
   AuthenticatedConsumerUnifiedRouteImport.update({
     id: '/consumer/unified',
@@ -2134,6 +2141,7 @@ export interface FileRoutesByFullPath {
   '/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
   '/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
   '/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
+  '/contabilidade/calendario': typeof AuthenticatedContabilidadeCalendarioRoute
   '/contabilidade/clientes': typeof AuthenticatedContabilidadeClientesRoute
   '/contabilidade/cockpit': typeof AuthenticatedContabilidadeCockpitRoute
   '/contabilidade/documentos': typeof AuthenticatedContabilidadeDocumentosRoute
@@ -2426,6 +2434,7 @@ export interface FileRoutesByTo {
   '/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
   '/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
   '/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
+  '/contabilidade/calendario': typeof AuthenticatedContabilidadeCalendarioRoute
   '/contabilidade/clientes': typeof AuthenticatedContabilidadeClientesRoute
   '/contabilidade/cockpit': typeof AuthenticatedContabilidadeCockpitRoute
   '/contabilidade/documentos': typeof AuthenticatedContabilidadeDocumentosRoute
@@ -2731,6 +2740,7 @@ export interface FileRoutesById {
   '/_authenticated/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
   '/_authenticated/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
   '/_authenticated/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
+  '/_authenticated/contabilidade/calendario': typeof AuthenticatedContabilidadeCalendarioRoute
   '/_authenticated/contabilidade/clientes': typeof AuthenticatedContabilidadeClientesRoute
   '/_authenticated/contabilidade/cockpit': typeof AuthenticatedContabilidadeCockpitRoute
   '/_authenticated/contabilidade/documentos': typeof AuthenticatedContabilidadeDocumentosRoute
@@ -3036,6 +3046,7 @@ export interface FileRouteTypes {
     | '/commercial/cockpit'
     | '/comunidade/$id'
     | '/consumer/unified'
+    | '/contabilidade/calendario'
     | '/contabilidade/clientes'
     | '/contabilidade/cockpit'
     | '/contabilidade/documentos'
@@ -3328,6 +3339,7 @@ export interface FileRouteTypes {
     | '/commercial/cockpit'
     | '/comunidade/$id'
     | '/consumer/unified'
+    | '/contabilidade/calendario'
     | '/contabilidade/clientes'
     | '/contabilidade/cockpit'
     | '/contabilidade/documentos'
@@ -3632,6 +3644,7 @@ export interface FileRouteTypes {
     | '/_authenticated/commercial/cockpit'
     | '/_authenticated/comunidade/$id'
     | '/_authenticated/consumer/unified'
+    | '/_authenticated/contabilidade/calendario'
     | '/_authenticated/contabilidade/clientes'
     | '/_authenticated/contabilidade/cockpit'
     | '/_authenticated/contabilidade/documentos'
@@ -5513,6 +5526,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedContabilidadeClientesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/contabilidade/calendario': {
+      id: '/_authenticated/contabilidade/calendario'
+      path: '/contabilidade/calendario'
+      fullPath: '/contabilidade/calendario'
+      preLoaderRoute: typeof AuthenticatedContabilidadeCalendarioRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/consumer/unified': {
       id: '/_authenticated/consumer/unified'
       path: '/consumer/unified'
@@ -6474,6 +6494,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCommercialCockpitRoute: typeof AuthenticatedCommercialCockpitRoute
   AuthenticatedComunidadeIdRoute: typeof AuthenticatedComunidadeIdRoute
   AuthenticatedConsumerUnifiedRoute: typeof AuthenticatedConsumerUnifiedRoute
+  AuthenticatedContabilidadeCalendarioRoute: typeof AuthenticatedContabilidadeCalendarioRoute
   AuthenticatedContabilidadeClientesRoute: typeof AuthenticatedContabilidadeClientesRoute
   AuthenticatedContabilidadeCockpitRoute: typeof AuthenticatedContabilidadeCockpitRoute
   AuthenticatedContabilidadeDocumentosRoute: typeof AuthenticatedContabilidadeDocumentosRoute
@@ -6548,6 +6569,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCommercialCockpitRoute: AuthenticatedCommercialCockpitRoute,
   AuthenticatedComunidadeIdRoute: AuthenticatedComunidadeIdRoute,
   AuthenticatedConsumerUnifiedRoute: AuthenticatedConsumerUnifiedRoute,
+  AuthenticatedContabilidadeCalendarioRoute:
+    AuthenticatedContabilidadeCalendarioRoute,
   AuthenticatedContabilidadeClientesRoute:
     AuthenticatedContabilidadeClientesRoute,
   AuthenticatedContabilidadeCockpitRoute:
