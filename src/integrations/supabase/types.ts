@@ -3240,6 +3240,343 @@ export type Database = {
         }
         Relationships: []
       }
+      contab_clients: {
+        Row: {
+          cnae: string | null
+          company_id: string
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          created_by: string | null
+          document: string
+          document_type: string
+          id: string
+          legal_name: string
+          metadata: Json
+          monthly_fee: number | null
+          municipal_registration: string | null
+          notes: string | null
+          onboarding_step: number | null
+          responsible_user_id: string | null
+          state_registration: string | null
+          status: string
+          tax_regime: string | null
+          trade_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          cnae?: string | null
+          company_id: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          document: string
+          document_type?: string
+          id?: string
+          legal_name: string
+          metadata?: Json
+          monthly_fee?: number | null
+          municipal_registration?: string | null
+          notes?: string | null
+          onboarding_step?: number | null
+          responsible_user_id?: string | null
+          state_registration?: string | null
+          status?: string
+          tax_regime?: string | null
+          trade_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cnae?: string | null
+          company_id?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          document?: string
+          document_type?: string
+          id?: string
+          legal_name?: string
+          metadata?: Json
+          monthly_fee?: number | null
+          municipal_registration?: string | null
+          notes?: string | null
+          onboarding_step?: number | null
+          responsible_user_id?: string | null
+          state_registration?: string | null
+          status?: string
+          tax_regime?: string | null
+          trade_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      contab_documents: {
+        Row: {
+          client_id: string
+          company_id: string
+          competence: string | null
+          created_at: string
+          doc_type: string
+          file_path: string | null
+          file_size: number | null
+          id: string
+          metadata: Json
+          mime_type: string | null
+          notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source: string
+          status: string
+          title: string
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          client_id: string
+          company_id: string
+          competence?: string | null
+          created_at?: string
+          doc_type: string
+          file_path?: string | null
+          file_size?: number | null
+          id?: string
+          metadata?: Json
+          mime_type?: string | null
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source?: string
+          status?: string
+          title: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          client_id?: string
+          company_id?: string
+          competence?: string | null
+          created_at?: string
+          doc_type?: string
+          file_path?: string | null
+          file_size?: number | null
+          id?: string
+          metadata?: Json
+          mime_type?: string | null
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contab_documents_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "contab_clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contab_fiscal_calendar: {
+        Row: {
+          applies_to_regime: string[] | null
+          city_code: string | null
+          company_id: string
+          created_at: string
+          day_of_month: number | null
+          description: string | null
+          id: string
+          is_active: boolean
+          metadata: Json
+          obligation_type: string
+          recurrence: string
+          scope: string
+          state_code: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          applies_to_regime?: string[] | null
+          city_code?: string | null
+          company_id: string
+          created_at?: string
+          day_of_month?: number | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json
+          obligation_type: string
+          recurrence?: string
+          scope?: string
+          state_code?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          applies_to_regime?: string[] | null
+          city_code?: string | null
+          company_id?: string
+          created_at?: string
+          day_of_month?: number | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json
+          obligation_type?: string
+          recurrence?: string
+          scope?: string
+          state_code?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      contab_obligations: {
+        Row: {
+          amount: number | null
+          client_id: string
+          company_id: string
+          competence: string
+          created_at: string
+          due_date: string
+          generated_at: string | null
+          id: string
+          metadata: Json
+          notes: string | null
+          obligation_type: string
+          paid_at: string | null
+          receipt_path: string | null
+          responsible_user_id: string | null
+          scope: string
+          sent_at: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number | null
+          client_id: string
+          company_id: string
+          competence: string
+          created_at?: string
+          due_date: string
+          generated_at?: string | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          obligation_type: string
+          paid_at?: string | null
+          receipt_path?: string | null
+          responsible_user_id?: string | null
+          scope?: string
+          sent_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number | null
+          client_id?: string
+          company_id?: string
+          competence?: string
+          created_at?: string
+          due_date?: string
+          generated_at?: string | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          obligation_type?: string
+          paid_at?: string | null
+          receipt_path?: string | null
+          responsible_user_id?: string | null
+          scope?: string
+          sent_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contab_obligations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "contab_clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contab_reminders: {
+        Row: {
+          channel: string
+          client_id: string
+          company_id: string
+          created_at: string
+          error_message: string | null
+          id: string
+          metadata: Json
+          obligation_id: string
+          offset_days: number
+          scheduled_for: string
+          sent_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          channel?: string
+          client_id: string
+          company_id: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json
+          obligation_id: string
+          offset_days: number
+          scheduled_for: string
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          channel?: string
+          client_id?: string
+          company_id?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json
+          obligation_id?: string
+          offset_days?: number
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contab_reminders_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "contab_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contab_reminders_obligation_id_fkey"
+            columns: ["obligation_id"]
+            isOneToOne: false
+            referencedRelation: "contab_obligations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contract_documents: {
         Row: {
           billing_contract_id: string | null
