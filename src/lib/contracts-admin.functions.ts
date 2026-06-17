@@ -158,12 +158,22 @@ export const resendContractEmail = createServerFn({ method: "POST" })
       });
       await context.supabase.from("audit_logs").insert({
         company_id: doc.company_id,
+        white_label_id: (doc as any).white_label_id ?? null,
         user_id: context.userId,
         action: "contract.email.resend",
         entity: "contract_documents",
         entity_id: doc.id,
-        after: { kind: "signed", to, result: r },
-      });
+        metadata: {
+          kind: "signed",
+          to,
+          contract_number: doc.contract_number,
+          version: (doc as any).version,
+          parent_document_id: (doc as any).parent_document_id ?? null,
+          signed_variant: (doc as any).signed_storage_path ? "signed_stamped" : "original",
+          idempotency_key: `contract-signed:${doc.id}:resend:${stamp}`,
+          result: r,
+        },
+      } as any);
       return r;
     }
 
