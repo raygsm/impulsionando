@@ -545,3 +545,69 @@ export const listAdminPolls = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return data ?? [];
   });
+
+// -----------------------------------------------------------------
+// Admin: auditoria do cron da jornada
+// -----------------------------------------------------------------
+export const listClubeCronRuns = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Acesso restrito");
+    const { data, error } = await context.supabase
+      .from("clube_cron_log")
+      .select("*")
+      .order("started_at", { ascending: false })
+      .limit(60);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+export const getJourneyLogAudit = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Acesso restrito");
+
+    const [stepsRes, logRes] = await Promise.all([
+      context.supabase
+        .from("clube_journey_steps")
+        .select("id, day_offset, channel, audience, event_code, subject, active")
+        .order("day_offset", { ascending: true }),
+      context.supabase
+        .from("clube_journey_log")
+        .select("step_id, user_id, enqueued_at")
+        .order("enqueued_at", { ascending: false })
+        .limit(2000),
+    ]);
+    if (stepsRes.error) throw new Error(stepsRes.error.message);
+    if (logRes.error) throw new Error(logRes.error.message);
+
+    const byStep = new Map<string, { total: number; uniqueUsers: Set<string>; last: string | null }>();
+    for (const row of (logRes.data ?? []) as any[]) {
+      const cur = byStep.get(row.step_id) ?? { total: 0, uniqueUsers: new Set<string>(), last: null };
+      cur.total += 1;
+      cur.uniqueUsers.add(row.user_id);
+      if (!cur.last || row.enqueued_at > cur.last) cur.last = row.enqueued_at;
+      byStep.set(row.step_id, cur);
+    }
+
+    const perStep = (stepsRes.data ?? []).map((s: any) => {
+      const agg = byStep.get(s.id);
+      const total = agg?.total ?? 0;
+      const unique = agg?.uniqueUsers.size ?? 0;
+      return {
+        ...s,
+        total,
+        unique_users: unique,
+        duplicates_blocked: Math.max(0, total - unique),
+        last_enqueued_at: agg?.last ?? null,
+      };
+    });
+
+    return {
+      perStep,
+      totals: { steps: stepsRes.data?.length ?? 0, events: logRes.data?.length ?? 0 },
+      recent: (logRes.data ?? []).slice(0, 30),
+    };
+  });
