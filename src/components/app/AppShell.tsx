@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { pushRecent } from "@/hooks/use-recent-pages";
+import { useAppearance } from "@/hooks/use-appearance";
 import { TOP_ITEMS, NAV_GROUPS } from "./nav-config";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -24,6 +25,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { isSuspended: trialSuspended } = useMyTrial();
   const { isSuspended: subSuspended, isActive: subActive } = useSubscription();
   const { hasModule, bypass, isLoading: modulesLoading } = useCompanyModules();
+  useAppearance();
 
   useEffect(() => {
     if (!isLoading && !data && !error) navigate({ to: "/auth" });
