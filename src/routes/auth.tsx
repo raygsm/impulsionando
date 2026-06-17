@@ -149,7 +149,7 @@ function AuthPage() {
       <div className="flex items-center justify-center p-6 sm:p-12 bg-background">
         <Card className="w-full max-w-md p-8 shadow-elegant">
           <div className="flex items-center justify-center mb-6 lg:hidden">
-            <img src={logoAsset.url} alt="Impulsionando Tecnologia" className="h-16 sm:h-20 w-auto object-contain" />
+            <LogoImpulsionando variant="light" size="md" />
           </div>
           <h2 className="text-2xl font-semibold tracking-tight">Acesse sua conta</h2>
           <p className="text-sm text-muted-foreground mt-1">Use seu e-mail corporativo para continuar.</p>
