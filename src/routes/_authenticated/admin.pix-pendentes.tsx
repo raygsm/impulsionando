@@ -188,7 +188,7 @@ function PixPendentesPage() {
                         size="sm"
                         variant="ghost"
                         onClick={() => {
-                          if (confirm('Cancelar essa cobrança?')) cancelMut.mutate(c.id)
+                          if (window.confirm('Cancelar essa cobrança?')) cancelMut.mutate(c.id)
                         }}
                       >
                         <XCircle className="w-3 h-3" />
