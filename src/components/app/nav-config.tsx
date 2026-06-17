@@ -5,7 +5,7 @@ import {
   Wallet, ArrowLeftRight, FolderTree, CreditCard, Percent,
   Package, Truck, ArrowDownUp,
   ShoppingCart, Receipt, Plus, Wallet as WalletIcon,
-  Contact, BarChart3, ShieldCheck, Inbox, GraduationCap, Stethoscope, Sparkles,
+  Contact, BarChart3, ShieldCheck, Inbox, GraduationCap, Stethoscope, Sparkles, Crown,
   Handshake, Link2, Briefcase, BadgeDollarSign, TrendingUp, Banknote, Copy,
   Home, Search as SearchIcon, Zap, Bot, MessageSquare,
   History as HistoryIcon, Headphones, UserRound, Megaphone,
@@ -119,6 +119,8 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/permissions", label: "Permissões", icon: KeyRound, superOnly: true },
       { to: "/modules", label: "Módulos", icon: Boxes, perm: "modules.read" },
       { to: "/admin/trials", label: "Trials (7 dias)", icon: Sparkles, superOnly: true },
+      { to: "/admin/clube", label: "Clube — Cockpit", icon: Crown, superOnly: true },
+
       { to: "/admin/billing", label: "Billing", icon: CreditCard, superOnly: true },
       { to: "/admin/billing-contracts", label: "Contratos recorrentes", icon: CreditCard, superOnly: true },
       { to: "/admin/billing-policy", label: "Régua de cobrança", icon: CreditCard, superOnly: true },
