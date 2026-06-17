@@ -413,7 +413,7 @@ export const listPropertyReviewHistory = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     const { data: rows, error } = await context.supabase
       .from("realestate_property_reviews")
-      .select("id, action, actor_id, notes, created_at")
+      .select("id, action, actor_id, notes, previous_status, new_status, metadata, created_at")
       .eq("property_id", data.propertyId)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
