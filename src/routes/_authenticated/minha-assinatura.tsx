@@ -38,6 +38,13 @@ const PRICE_ID: Record<string, { monthly: string; annual: string }> = {
   avancado_plan: { monthly: "avancado_monthly", annual: "avancado_annual" },
 };
 
+/** Map subscription product to the billing_plans.code used by /checkout/$plano. */
+const PRODUCT_TO_PLAN_CODE: Record<string, string> = {
+  essencial_plan: "essencial-mensal",
+  integrado_plan: "completo-mensal",
+  avancado_plan: "completo-mensal",
+};
+
 function formatBRL(v: number) {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2 });
 }
