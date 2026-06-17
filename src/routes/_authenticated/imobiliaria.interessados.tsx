@@ -173,7 +173,7 @@ function Page() {
       toast.success(`PDF gerado — export ${r.exportId.slice(0, 8)}`)
     } catch (e: any) {
       toast.error(e?.message ?? 'Falha ao gerar PDF')
-    } finally { setExporting(null); setExportProgress({ done: 0, total: 0, exportId: null }) }
+    } finally { setExporting(null); setExportProgress({ done: 0, total: 0, exportId: null }); try { window.localStorage.removeItem(ACTIVE_EXPORT_KEY) } catch {} }
   }
 
   const { data, isLoading } = useQuery({
