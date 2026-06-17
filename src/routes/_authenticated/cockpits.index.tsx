@@ -52,7 +52,7 @@ const COCKPITS: CockpitCard[] = [
   { to: "/support/cockpit", label: "Suporte", description: "Atendimentos, SLA e satisfação.", icon: Headphones, group: "Relacionamento" },
   { to: "/comunidade", label: "Comunidade", description: "Grupos, posts, eventos e moderação.", icon: MessagesSquare, group: "Relacionamento" },
   { to: "/clube", label: "Fidelização & Clube", description: "Pontos, cashback, recompensas e cupons.", icon: Sparkles, group: "Relacionamento", module: "fidelizacao" },
-  { to: "/consumer/unified", label: "Consumidor Unificado", description: "Perfis, assinaturas e favoritos do consumidor final.", icon: UserRound, group: "Relacionamento", module: "area_cliente" },
+  { to: "/consumer/unified", label: "Clube — Membros", description: "Perfis, assinaturas, favoritos e gamificação dos membros do Clube Impulsionando.", icon: UserRound, group: "Relacionamento", module: "area_cliente" },
 
   // Plataforma
   { to: "/white-label/cockpit", label: "White Label", description: "Parceiros revendedores e contratos.", icon: Layers, group: "Plataforma", module: "white_label" },
