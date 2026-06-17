@@ -97,6 +97,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <PastDueBanner />
         <main className="flex-1 p-6 lg:p-8 overflow-x-hidden">{children}</main>
       </div>
+      <CommandPalette />
     </div>
   );
 }
