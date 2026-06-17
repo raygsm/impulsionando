@@ -261,6 +261,7 @@ import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/em
 import { Route as ApiPublicRealestateSavedSearchRouteImport } from './routes/api/public/realestate/saved-search'
 import { Route as ApiPublicRealestateInterestRouteImport } from './routes/api/public/realestate/interest'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicPaymentsCloseInvoiceRouteImport } from './routes/api/public/payments/close-invoice'
 import { Route as ApiPublicOutboxProcessRouteImport } from './routes/api/public/outbox/process'
 import { Route as ApiPublicHooksZapiStatusRouteImport } from './routes/api/public/hooks/zapi-status'
 import { Route as ApiPublicHooksUptimeWhatsappTestRouteImport } from './routes/api/public/hooks/uptime-whatsapp-test'
@@ -1649,6 +1650,12 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicPaymentsCloseInvoiceRoute =
+  ApiPublicPaymentsCloseInvoiceRouteImport.update({
+    id: '/api/public/payments/close-invoice',
+    path: '/api/public/payments/close-invoice',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicOutboxProcessRoute = ApiPublicOutboxProcessRouteImport.update({
   id: '/api/public/outbox/process',
   path: '/api/public/outbox/process',
@@ -2067,6 +2074,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
   '/api/public/outbox/process': typeof ApiPublicOutboxProcessRoute
+  '/api/public/payments/close-invoice': typeof ApiPublicPaymentsCloseInvoiceRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
@@ -2335,6 +2343,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
   '/api/public/outbox/process': typeof ApiPublicOutboxProcessRoute
+  '/api/public/payments/close-invoice': typeof ApiPublicPaymentsCloseInvoiceRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
@@ -2616,6 +2625,7 @@ export interface FileRoutesById {
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
   '/api/public/outbox/process': typeof ApiPublicOutboxProcessRoute
+  '/api/public/payments/close-invoice': typeof ApiPublicPaymentsCloseInvoiceRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
@@ -2897,6 +2907,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/uptime-whatsapp-test'
     | '/api/public/hooks/zapi-status'
     | '/api/public/outbox/process'
+    | '/api/public/payments/close-invoice'
     | '/api/public/payments/webhook'
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
@@ -3165,6 +3176,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/uptime-whatsapp-test'
     | '/api/public/hooks/zapi-status'
     | '/api/public/outbox/process'
+    | '/api/public/payments/close-invoice'
     | '/api/public/payments/webhook'
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
@@ -3445,6 +3457,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/uptime-whatsapp-test'
     | '/api/public/hooks/zapi-status'
     | '/api/public/outbox/process'
+    | '/api/public/payments/close-invoice'
     | '/api/public/payments/webhook'
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
@@ -3570,6 +3583,7 @@ export interface RootRouteChildren {
   ApiPublicHooksUptimeWhatsappTestRoute: typeof ApiPublicHooksUptimeWhatsappTestRoute
   ApiPublicHooksZapiStatusRoute: typeof ApiPublicHooksZapiStatusRoute
   ApiPublicOutboxProcessRoute: typeof ApiPublicOutboxProcessRoute
+  ApiPublicPaymentsCloseInvoiceRoute: typeof ApiPublicPaymentsCloseInvoiceRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   ApiPublicRealestateInterestRoute: typeof ApiPublicRealestateInterestRoute
   ApiPublicRealestateSavedSearchRoute: typeof ApiPublicRealestateSavedSearchRoute
@@ -5347,6 +5361,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/payments/close-invoice': {
+      id: '/api/public/payments/close-invoice'
+      path: '/api/public/payments/close-invoice'
+      fullPath: '/api/public/payments/close-invoice'
+      preLoaderRoute: typeof ApiPublicPaymentsCloseInvoiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/outbox/process': {
       id: '/api/public/outbox/process'
       path: '/api/public/outbox/process'
@@ -6222,6 +6243,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksUptimeWhatsappTestRoute: ApiPublicHooksUptimeWhatsappTestRoute,
   ApiPublicHooksZapiStatusRoute: ApiPublicHooksZapiStatusRoute,
   ApiPublicOutboxProcessRoute: ApiPublicOutboxProcessRoute,
+  ApiPublicPaymentsCloseInvoiceRoute: ApiPublicPaymentsCloseInvoiceRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   ApiPublicRealestateInterestRoute: ApiPublicRealestateInterestRoute,
   ApiPublicRealestateSavedSearchRoute: ApiPublicRealestateSavedSearchRoute,
@@ -6236,13 +6258,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
