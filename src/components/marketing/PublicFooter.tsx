@@ -1,81 +1,111 @@
 import { Link } from "@tanstack/react-router";
-import { MessageCircle, Mail } from "lucide-react";
+import { MessageCircle, Mail, ExternalLink } from "lucide-react";
 import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 
 const WHATSAPP_URL = "https://wa.me/5521993075000";
 const EMAIL = "sac@impulsionando.com.br";
 
+const COLS = [
+  {
+    title: "Impulsionando Tecnologia",
+    links: [
+      { to: "/", label: "Início" },
+      { to: "/modulos", label: "Soluções" },
+      { to: "/modulos", label: "Módulos" },
+      { to: "/nichos", label: "Nichos" },
+      { to: "/demo", label: "Demonstrações" },
+      { to: "/planos", label: "Planos" },
+      { to: "/orcamento", label: "Orçamento automático" },
+    ],
+  },
+  {
+    title: "Produtos",
+    links: [
+      { to: "/modulos", label: "CRM e Atendimento" },
+      { to: "/modulos", label: "Automação e Comunicação" },
+      { to: "/modulos", label: "Agenda e Reservas" },
+      { to: "/modulos", label: "Pagamentos" },
+      { to: "/modulos", label: "BI e Dashboards" },
+      { to: "/auth", label: "Área do Cliente" },
+      { to: "/orcamento", label: "White Label" },
+    ],
+  },
+  {
+    title: "Nichos",
+    links: [
+      { to: "/nichos/imobiliaria", label: "Imobiliárias" },
+      { to: "/nichos/saude", label: "Clínicas" },
+      { to: "/nichos/contabilidade", label: "Contabilidade" },
+      { to: "/nichos/bares", label: "Bares e Restaurantes" },
+      { to: "/nichos/eventos", label: "Eventos" },
+      { to: "/nichos/ecommerce", label: "E-commerce" },
+      { to: "/nichos/servicos", label: "Serviços" },
+      { to: "/nichos/fitness", label: "Fitness" },
+      { to: "/nichos", label: "Educação" },
+      { to: "/nichos", label: "White Label" },
+    ],
+  },
+  {
+    title: "Experimente",
+    links: [
+      { to: "/demo", label: "Demo geral" },
+      { to: "/demo", label: "Demo por nicho" },
+      { to: "/demo/feira", label: "Demo feira" },
+      { to: "/auth", label: "Área do cliente" },
+      { to: "/orcamento", label: "Solicitar implantação" },
+    ],
+  },
+  {
+    title: "Institucional",
+    links: [
+      { to: "/sobre", label: "Sobre" },
+      { to: "/contato", label: "Contato" },
+      { to: "/trabalhe-conosco", label: "Trabalhe Conosco" },
+      { to: "/termos", label: "Termos de Uso" },
+      { to: "/privacidade", label: "Política de Privacidade" },
+      { to: "/reembolso", label: "Política de Reembolso" },
+    ],
+  },
+];
+
 export function PublicFooter() {
   return (
-    <footer className="border-t border-border bg-card/30 mt-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 grid gap-10 md:grid-cols-5">
-        <div className="md:col-span-2 space-y-4 flex flex-col items-center text-center">
-          <LogoImpulsionando variant="light" size="2xl" />
-          <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
-            Tecnologia, automação, sistemas inteligentes e integrações digitais para empresas que precisam crescer com organização e eficiência.
-          </p>
-          <div className="space-y-2 text-sm">
-            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
-              <MessageCircle className="w-4 h-4" /> +55 21 99307-5000
-            </a>
-            <a href={`mailto:${EMAIL}`} className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
-              <Mail className="w-4 h-4" /> {EMAIL}
-            </a>
-          </div>
-        </div>
-
-        <div>
-          <div className="text-sm font-semibold mb-3">Tecnologia</div>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/solucoes" className="hover:text-foreground">Soluções</Link></li>
-            <li><Link to="/modulos" className="hover:text-foreground">Módulos</Link></li>
-            <li><Link to="/nichos" className="hover:text-foreground">Nichos</Link></li>
-            <li><Link to="/planos" className="hover:text-foreground">Planos</Link></li>
-            <li><Link to="/orcamento" className="hover:text-foreground">Orçamento automático</Link></li>
-          </ul>
-        </div>
-
-        <div>
-          <div className="text-sm font-semibold mb-3">Experimente</div>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li>
-              <Link to="/demo" className="inline-flex items-center gap-1 text-primary hover:underline font-medium">
-                ▶ Acessar Sistema DEMO
-              </Link>
-            </li>
-            <li><Link to="/showroom/fitness" className="hover:text-foreground">Showroom Fitness</Link></li>
-            <li><Link to="/showroom/eventos" className="hover:text-foreground">Showroom Eventos</Link></li>
-            <li><Link to="/como-funciona/fitness" className="hover:text-foreground">Como funciona (Fitness)</Link></li>
-            <li><Link to="/auth" className="hover:text-foreground">Área do cliente</Link></li>
-          </ul>
-        </div>
-
-        <div>
-          <div className="text-sm font-semibold mb-3">Impulsionando Tecnologia</div>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/sobre" className="hover:text-foreground">Sobre a empresa</Link></li>
-            <li><Link to="/contato" className="hover:text-foreground">Contato</Link></li>
-            <li><Link to="/trabalhe-conosco" className="hover:text-foreground">Trabalhe conosco</Link></li>
-            <li>
-              <a
-                href="https://impulsionandobrasil.com.br"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-foreground inline-flex items-center gap-1"
-              >
-                Impulsionando Brasil — estratégia e marketing ↗
+    <footer className="border-t border-border bg-card/30 mt-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-6 mb-10">
+          <div className="lg:col-span-1 space-y-3">
+            <LogoImpulsionando variant="light" size="xl" />
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Sistemas modulares, automação e comunicação para empresas que precisam crescer com organização.
+            </p>
+            <div className="space-y-1.5 text-xs">
+              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
+                <MessageCircle className="w-3.5 h-3.5" /> +55 21 99307-5000
               </a>
-            </li>
-            <li><Link to="/termos" className="hover:text-foreground">Termos de Uso</Link></li>
-            <li><Link to="/reembolso" className="hover:text-foreground">Política de Reembolso</Link></li>
-            <li><Link to="/privacidade" className="hover:text-foreground">Política de Privacidade (LGPD)</Link></li>
-          </ul>
+              <a href={`mailto:${EMAIL}`} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
+                <Mail className="w-3.5 h-3.5" /> {EMAIL}
+              </a>
+              <a href="https://impulsionandobrasil.com.br" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
+                <ExternalLink className="w-3.5 h-3.5" /> Impulsionando Brasil
+              </a>
+            </div>
+          </div>
+
+          {COLS.map((col) => (
+            <div key={col.title}>
+              <div className="text-xs font-semibold mb-3 text-foreground">{col.title}</div>
+              <ul className="space-y-1.5 text-xs text-muted-foreground">
+                {col.links.map((l, i) => (
+                  <li key={`${col.title}-${i}`}>
+                    <Link to={l.to} className="hover:text-foreground">{l.label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
-      </div>
-
-      <div className="border-t border-border">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 text-xs text-muted-foreground flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="border-t border-border pt-6 text-xs text-muted-foreground flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>© {new Date().getFullYear()} Impulsionando Tecnologia. Todos os direitos reservados.</span>
           <span className="font-medium text-foreground">O limite é onde você quiser chegar.</span>
         </div>
