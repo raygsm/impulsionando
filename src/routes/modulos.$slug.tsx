@@ -323,15 +323,17 @@ function ModulePage() {
             </section>
           )}
 
-          {/* Regras / dependências */}
+          {/* Dependências entre módulos */}
+          <ModuleDependenciesCard slug={slugParam} />
+
+          {/* Regras gerais */}
           <Card className="p-6 border-amber-300/40 bg-amber-50/40 dark:bg-amber-500/5">
             <h3 className="font-semibold mb-2 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-amber-600" /> Regras, limites e dependências
+              <ShieldCheck className="w-4 h-4 text-amber-600" /> Regras e limites
             </h3>
             <ul className="text-sm text-muted-foreground leading-relaxed space-y-1.5 list-disc list-inside">
               <li>Na demonstração, os recursos rodam com <strong>dados fictícios</strong> — nenhuma cobrança ou comunicação real é disparada.</li>
               <li>Em ambiente real, o módulo só fica ativo após contratação e aprovação do pagamento.</li>
-              <li>Recursos que dependem de WhatsApp, gateway de pagamento, e-mail transacional ou domínio próprio exigem credenciais externas.</li>
               <li>Limites de uso (usuários, mensagens, transações) seguem o plano contratado.</li>
             </ul>
           </Card>
