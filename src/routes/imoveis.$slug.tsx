@@ -29,6 +29,8 @@ const SearchSchema = z.object({
   city: z.string().optional(),
   q: z.string().optional(),
   page: z.number().int().min(1).default(1),
+  pageSize: z.number().int().min(6).max(48).default(12),
+  sort: z.enum(['recent', 'price_asc', 'price_desc']).default('recent'),
 })
 
 export const Route = createFileRoute('/imoveis/$slug')({
