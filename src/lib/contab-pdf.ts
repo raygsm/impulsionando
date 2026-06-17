@@ -77,7 +77,7 @@ export function buildContabReportPdf(input: ContabReportInput): Blob {
   // Section: Resumo executivo
   drawSection(doc, M, y, W - 2 * M, "Resumo Executivo", pr, pg, pb);
   y += 28;
-  const summary = [
+  const summary: [string, string][] = [
     ["MRR (honorários recorrentes)", BRL(input.mrr)],
     ["Clientes ativos", String(input.active)],
     ["Ticket médio", BRL(input.avgTicket)],
