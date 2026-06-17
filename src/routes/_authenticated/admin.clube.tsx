@@ -80,6 +80,7 @@ function AdminClubePage() {
         <TabsList>
           <TabsTrigger value="overview">Visão geral</TabsTrigger>
           <TabsTrigger value="jornada"><CalendarDays className="w-3.5 h-3.5 mr-1" /> Jornada 21 dias</TabsTrigger>
+          <TabsTrigger value="cron"><Activity className="w-3.5 h-3.5 mr-1" /> Auditoria do cron</TabsTrigger>
           <TabsTrigger value="enquetes"><Vote className="w-3.5 h-3.5 mr-1" /> Enquetes</TabsTrigger>
         </TabsList>
 
