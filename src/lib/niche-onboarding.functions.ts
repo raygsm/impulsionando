@@ -33,8 +33,8 @@ export const applyNicheOnboarding = createServerFn({ method: "POST" })
       throw new Error(error.message ?? "Falha ao aplicar template do nicho");
     }
     return {
-      ok: true,
+      ok: true as const,
       nicheSlug: data.nicheSlug,
-      result: result as Record<string, unknown> | null,
+      installedCount: Number((result as { installed?: number } | null)?.installed ?? 0),
     };
   });
