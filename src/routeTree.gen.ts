@@ -256,6 +256,7 @@ import { Route as AuthenticatedAdminBillingPolicyRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminBillingContractsRouteImport } from './routes/_authenticated/admin.billing-contracts'
 import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authenticated/admin.billing'
 import { Route as AuthenticatedAdmAgentesRouteImport } from './routes/_authenticated/adm.agentes'
+import { Route as AuthenticatedAccessProfilesMatrixRouteImport } from './routes/_authenticated/access-profiles.matrix'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -1626,6 +1627,12 @@ const AuthenticatedAdmAgentesRoute = AuthenticatedAdmAgentesRouteImport.update({
   path: '/agentes',
   getParentRoute: () => AuthenticatedAdmRoute,
 } as any)
+const AuthenticatedAccessProfilesMatrixRoute =
+  AuthenticatedAccessProfilesMatrixRouteImport.update({
+    id: '/matrix',
+    path: '/matrix',
+    getParentRoute: () => AuthenticatedAccessProfilesRoute,
+  } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -1862,7 +1869,7 @@ export interface FileRoutesByFullPath {
   '/unsubscribe': typeof UnsubscribeRoute
   '/vitrine': typeof VitrineRouteWithChildren
   '/white-label': typeof WhiteLabelRoute
-  '/access-profiles': typeof AuthenticatedAccessProfilesRoute
+  '/access-profiles': typeof AuthenticatedAccessProfilesRouteWithChildren
   '/adm': typeof AuthenticatedAdmRouteWithChildren
   '/affiliates': typeof AuthenticatedAffiliatesRouteWithChildren
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
@@ -1966,6 +1973,7 @@ export interface FileRoutesByFullPath {
   '/paciente/': typeof PacienteIndexRoute
   '/showroom/': typeof ShowroomIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
+  '/access-profiles/matrix': typeof AuthenticatedAccessProfilesMatrixRoute
   '/adm/agentes': typeof AuthenticatedAdmAgentesRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/admin/billing-contracts': typeof AuthenticatedAdminBillingContractsRoute
@@ -2144,7 +2152,7 @@ export interface FileRoutesByTo {
   '/unsubscribe': typeof UnsubscribeRoute
   '/vitrine': typeof VitrineRouteWithChildren
   '/white-label': typeof WhiteLabelRoute
-  '/access-profiles': typeof AuthenticatedAccessProfilesRoute
+  '/access-profiles': typeof AuthenticatedAccessProfilesRouteWithChildren
   '/adm': typeof AuthenticatedAdmRouteWithChildren
   '/audit': typeof AuthenticatedAuditRoute
   '/automacoes': typeof AuthenticatedAutomacoesRoute
@@ -2239,6 +2247,7 @@ export interface FileRoutesByTo {
   '/paciente': typeof PacienteIndexRoute
   '/showroom': typeof ShowroomIndexRoute
   '/trabalhe-conosco': typeof TrabalheConoscoIndexRoute
+  '/access-profiles/matrix': typeof AuthenticatedAccessProfilesMatrixRoute
   '/adm/agentes': typeof AuthenticatedAdmAgentesRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/admin/billing-contracts': typeof AuthenticatedAdminBillingContractsRoute
@@ -2421,7 +2430,7 @@ export interface FileRoutesById {
   '/unsubscribe': typeof UnsubscribeRoute
   '/vitrine': typeof VitrineRouteWithChildren
   '/white-label': typeof WhiteLabelRoute
-  '/_authenticated/access-profiles': typeof AuthenticatedAccessProfilesRoute
+  '/_authenticated/access-profiles': typeof AuthenticatedAccessProfilesRouteWithChildren
   '/_authenticated/adm': typeof AuthenticatedAdmRouteWithChildren
   '/_authenticated/affiliates': typeof AuthenticatedAffiliatesRouteWithChildren
   '/_authenticated/agenda': typeof AuthenticatedAgendaRouteWithChildren
@@ -2525,6 +2534,7 @@ export interface FileRoutesById {
   '/paciente/': typeof PacienteIndexRoute
   '/showroom/': typeof ShowroomIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
+  '/_authenticated/access-profiles/matrix': typeof AuthenticatedAccessProfilesMatrixRoute
   '/_authenticated/adm/agentes': typeof AuthenticatedAdmAgentesRoute
   '/_authenticated/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/_authenticated/admin/billing-contracts': typeof AuthenticatedAdminBillingContractsRoute
@@ -2811,6 +2821,7 @@ export interface FileRouteTypes {
     | '/paciente/'
     | '/showroom/'
     | '/trabalhe-conosco/'
+    | '/access-profiles/matrix'
     | '/adm/agentes'
     | '/admin/billing'
     | '/admin/billing-contracts'
@@ -3084,6 +3095,7 @@ export interface FileRouteTypes {
     | '/paciente'
     | '/showroom'
     | '/trabalhe-conosco'
+    | '/access-profiles/matrix'
     | '/adm/agentes'
     | '/admin/billing'
     | '/admin/billing-contracts'
@@ -3369,6 +3381,7 @@ export interface FileRouteTypes {
     | '/paciente/'
     | '/showroom/'
     | '/trabalhe-conosco/'
+    | '/_authenticated/access-profiles/matrix'
     | '/_authenticated/adm/agentes'
     | '/_authenticated/admin/billing'
     | '/_authenticated/admin/billing-contracts'
@@ -5378,6 +5391,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdmAgentesRouteImport
       parentRoute: typeof AuthenticatedAdmRoute
     }
+    '/_authenticated/access-profiles/matrix': {
+      id: '/_authenticated/access-profiles/matrix'
+      path: '/matrix'
+      fullPath: '/access-profiles/matrix'
+      preLoaderRoute: typeof AuthenticatedAccessProfilesMatrixRouteImport
+      parentRoute: typeof AuthenticatedAccessProfilesRoute
+    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -5632,6 +5652,21 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AuthenticatedAccessProfilesRouteChildren {
+  AuthenticatedAccessProfilesMatrixRoute: typeof AuthenticatedAccessProfilesMatrixRoute
+}
+
+const AuthenticatedAccessProfilesRouteChildren: AuthenticatedAccessProfilesRouteChildren =
+  {
+    AuthenticatedAccessProfilesMatrixRoute:
+      AuthenticatedAccessProfilesMatrixRoute,
+  }
+
+const AuthenticatedAccessProfilesRouteWithChildren =
+  AuthenticatedAccessProfilesRoute._addFileChildren(
+    AuthenticatedAccessProfilesRouteChildren,
+  )
 
 interface AuthenticatedAdmRouteChildren {
   AuthenticatedAdmAgentesRoute: typeof AuthenticatedAdmAgentesRoute
@@ -6017,7 +6052,7 @@ const AuthenticatedImobiliariaAprovacoesRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAccessProfilesRoute: typeof AuthenticatedAccessProfilesRoute
+  AuthenticatedAccessProfilesRoute: typeof AuthenticatedAccessProfilesRouteWithChildren
   AuthenticatedAdmRoute: typeof AuthenticatedAdmRouteWithChildren
   AuthenticatedAffiliatesRoute: typeof AuthenticatedAffiliatesRouteWithChildren
   AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRouteWithChildren
@@ -6076,7 +6111,8 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAccessProfilesRoute: AuthenticatedAccessProfilesRoute,
+  AuthenticatedAccessProfilesRoute:
+    AuthenticatedAccessProfilesRouteWithChildren,
   AuthenticatedAdmRoute: AuthenticatedAdmRouteWithChildren,
   AuthenticatedAffiliatesRoute: AuthenticatedAffiliatesRouteWithChildren,
   AuthenticatedAgendaRoute: AuthenticatedAgendaRouteWithChildren,
