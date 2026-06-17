@@ -11,22 +11,28 @@
  * Quando um gateway é habilitado aqui, ele aparece no /checkout/$plano.
  */
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
-import { listPendingPixCharges } from '@/lib/pix-charges.functions'
+import { useState } from 'react'
+import {
+  listPendingPixCharges,
+  updatePixReceipt,
+} from '@/lib/pix-charges.functions'
 import { getIntegration } from '@/lib/core-integrations.functions'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
-  QrCode,
-  CreditCard,
-  Wallet,
-  ArrowRight,
-  CheckCircle2,
-  Clock3,
-  Settings2,
-  ExternalLink,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from '@/components/ui/table'
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from '@/components/ui/dialog'
+import { toast } from 'sonner'
+import {
+  QrCode, CreditCard, Wallet, ArrowRight, CheckCircle2, Clock3, Settings2,
+  ExternalLink, Receipt, Download, Pencil, Printer,
 } from 'lucide-react'
 
 export const Route = createFileRoute('/_authenticated/finance/integracoes')({
