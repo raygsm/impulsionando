@@ -62,9 +62,10 @@ export function LogoImpulsionando({
       const bg = getComputedStyle(el).backgroundColor
       const m = bg.match(/rgba?\(([^)]+)\)/)
       if (m) {
-        const [r, g, b, a = '1'] = m[1].split(',').map((v) => parseFloat(v.trim()))
+        const parts = m[1].split(',').map((v) => parseFloat(v.trim()))
+        const r = parts[0] ?? 255, g = parts[1] ?? 255, b = parts[2] ?? 255
+        const a = parts[3] ?? 1
         if (a > 0.1) {
-          // luminância perceptual
           const L = (0.299 * r + 0.587 * g + 0.114 * b) / 255
           setDetected(L < 0.55 ? 'dark' : 'light')
           return
