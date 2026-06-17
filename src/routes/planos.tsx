@@ -210,6 +210,17 @@ function PlanosPage() {
     staleTime: 60_000,
   });
 
+  // Preços derivados do salário mínimo nacional (Decreto 12.797/2025, R$ 1.621,00 a partir de 01/01/2026).
+  const wage = useMinimumWage();
+  const PLANS = buildPlans(wage);
+  // Setup (1ª parcela) acompanha a mensalidade do plano.
+  const PLAN_SETUP_BRL: Record<string, number> = {
+    Essencial: wage / 2,
+    Integrado: wage,
+    Avançado: wage * 2,
+  };
+
+
   const [pixState, setPixState] = useState<{
     open: boolean;
     amountCents: number;
