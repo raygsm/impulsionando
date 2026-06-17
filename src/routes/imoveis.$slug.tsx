@@ -220,8 +220,8 @@ function VitrinePage() {
                 Mostrando {rows.length} de {total} imóveis · Página {page}/{totalPages}
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Anterior</Button>
-                <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>Próxima</Button>
+                <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => update({ page: page - 1 })}>Anterior</Button>
+                <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => update({ page: page + 1 })}>Próxima</Button>
               </div>
             </div>
           </>
