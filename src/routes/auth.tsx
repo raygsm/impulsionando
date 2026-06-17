@@ -115,7 +115,7 @@ function AuthPage() {
       <div className="relative hidden lg:flex flex-col justify-between p-12 bg-gradient-hero text-primary-foreground overflow-hidden">
         <div className="relative z-10">
           <div className="flex items-center gap-3 text-lg font-semibold tracking-tight">
-            <img src={logoAsset.url} alt="Impulsionando Tecnologia" className="h-20 md:h-24 lg:h-32 w-auto object-contain drop-shadow-md" />
+            <LogoImpulsionando variant="dark" size="xl" />
           </div>
         </div>
         <div className="relative z-10 max-w-md space-y-6">
