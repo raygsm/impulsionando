@@ -91,13 +91,21 @@ function ClubeLanding() {
                   Entrar gratuitamente <ArrowRight className="w-4 h-4" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="gap-2 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white w-full sm:w-auto">
+              <Button asChild size="lg" className="gap-2 bg-gradient-primary text-primary-foreground shadow-elegant hover:brightness-110 w-full sm:w-auto">
                 <Link to="/checkout/$plano" params={{ plano: "clube_premium" }}>
                   <Crown className="w-4 h-4" /> Assinar Premium · R$ 9,99/mês
                 </Link>
               </Button>
+              <Button asChild size="lg" variant="outline" className="gap-2 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white w-full sm:w-auto">
+                <Link to="/checkout/$plano" params={{ plano: "clube_premium_anual" }}>
+                  Assinar Plano Anual · 17% off
+                </Link>
+              </Button>
             </div>
-            <p className="mt-4 text-xs text-white/70">Sem cobrança no plano grátis. Cancele o Premium quando quiser.</p>
+            <p className="mt-4 text-xs text-white/70">
+              Sem cobrança no plano grátis. Premium R$ 9,99/mês ou R$ 99,90/ano (economia de 17%, cobrança única). Cancele quando quiser.
+            </p>
+
           </div>
         </section>
 
