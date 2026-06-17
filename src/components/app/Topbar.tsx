@@ -9,6 +9,7 @@ import type { CurrentUser } from "@/lib/auth";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { MobileSidebar } from "./MobileSidebar";
 import { NotificationsBell } from "./NotificationsBell";
+import { OnboardingStatusPill } from "./OnboardingStatusPill";
 
 type NavItem = { label: string; to: string; group: string; keywords?: string };
 
