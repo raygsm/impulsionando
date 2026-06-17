@@ -651,6 +651,9 @@ export const triggerSmokePurge = createServerFn({ method: "POST" })
       trigger: string;
       ranAt: string;
     };
+  });
+
+
 
 /**
  * Smoke batch específico de templates por nicho: para cada nicho premium,
