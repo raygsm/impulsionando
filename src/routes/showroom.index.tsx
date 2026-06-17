@@ -172,6 +172,10 @@ function ShowroomHub() {
                 <Link to="/showroom/migracao">Migração</Link>
               </Button>
 
+              <Button asChild size="lg" variant="outline">
+                <Link to="/showroom/comparativo-concorrentes">Comparativo concorrentes</Link>
+              </Button>
+
 
 
 
