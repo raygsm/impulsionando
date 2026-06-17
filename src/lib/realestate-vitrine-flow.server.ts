@@ -303,7 +303,7 @@ export async function processSavedSearch(
     contact_phone: phoneOrWA,
     whatsapp: input.contactWhatsapp ?? null,
     operation: input.operation,
-    property_types: input.propertyTypes,
+    property_types: input.propertyTypes as any,
     price_min: input.priceMin ?? null,
     price_max: input.priceMax ?? null,
     area_min: input.areaMin ?? null,
