@@ -11299,18 +11299,6 @@ export type Database = {
       }
       assert_billing_finance_rls: { Args: never; Returns: undefined }
       assert_quotes_no_anon_update: { Args: never; Returns: undefined }
-      audit_log_autonomous: {
-        Args: {
-          _action: string
-          _company_id: string
-          _entity: string
-          _entity_id: string
-          _metadata: Json
-          _user_email: string
-          _user_id: string
-        }
-        Returns: undefined
-      }
       billing_check_company_status: {
         Args: { _company: string }
         Returns: {
@@ -11582,6 +11570,17 @@ export type Database = {
       realestate_run_match_for_property: {
         Args: { _property_id: string }
         Returns: number
+      }
+      record_realestate_rate_limit_event: {
+        Args: {
+          _company_id: string
+          _contact_email?: string
+          _ip?: string
+          _limit: number
+          _observed_count: number
+          _reason: string
+        }
+        Returns: string
       }
       render_template: {
         Args: { _payload: Json; _template: string }
