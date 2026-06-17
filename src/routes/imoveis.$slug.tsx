@@ -236,15 +236,32 @@ function VitrinePage() {
 // ---------------------------------------------------------------------------
 
 function SavedSearchDialog({ slug, companyName }: { slug: string; companyName: string }) {
+  const storageKey = `vitrine:saved-search:${slug}`
   const [open, setOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState<{ matchesCount: number } | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [form, setForm] = useState({
+  const initialForm = {
     contactName: '', contactEmail: '', contactPhone: '',
     operation: 'venda' as 'venda' | 'locacao' | 'venda_ou_locacao',
     city: '', neighborhood: '', priceMax: '', bedroomsMin: '0', notes: '', hp: '',
+  }
+  const [form, setForm] = useState(() => {
+    if (typeof window === 'undefined') return initialForm
+    try {
+      const raw = window.localStorage.getItem(storageKey)
+      return raw ? { ...initialForm, ...JSON.parse(raw), hp: '' } : initialForm
+    } catch { return initialForm }
   })
+
+  // Persist as the user types (excluding honeypot)
+  useMemo(() => {
+    if (typeof window === 'undefined') return
+    try {
+      const { hp: _hp, ...persist } = form
+      window.localStorage.setItem(storageKey, JSON.stringify(persist))
+    } catch {}
+  }, [form, storageKey])
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
