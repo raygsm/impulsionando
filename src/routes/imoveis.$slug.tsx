@@ -62,23 +62,26 @@ function firstPhoto(photos: any): string | null {
 function VitrinePage() {
   const { slug } = Route.useParams()
   const search = useSearch({ from: '/imoveis/$slug' })
+  const navigate = useNavigate({ from: '/imoveis/$slug' })
   const fetchList = useServerFn(listPublicProperties)
-  const [operation, setOperation] = useState<string>(search.operation ?? 'venda_ou_locacao')
-  const [q, setQ] = useState<string>(search.q ?? '')
-  const [city, setCity] = useState<string>(search.city ?? '')
-  const [page, setPage] = useState<number>(search.page ?? 1)
-  const pageSize = 12
+  const operation = search.operation ?? 'venda_ou_locacao'
+  const q = search.q ?? ''
+  const city = search.city ?? ''
+  const page = search.page ?? 1
+  const pageSize = search.pageSize ?? 12
+  const sort = search.sort ?? 'recent'
+
+  function update(next: Partial<typeof search> & { resetPage?: boolean }) {
+    const { resetPage, ...patch } = next as any
+    navigate({
+      search: (prev: any) => ({ ...prev, ...patch, ...(resetPage ? { page: 1 } : {}) }),
+      replace: true,
+    })
+  }
 
   const queryArgs = useMemo(
-    () => ({
-      slug,
-      operation: operation as any,
-      city: city || undefined,
-      q: q || undefined,
-      page,
-      pageSize,
-    }),
-    [slug, operation, city, q, page],
+    () => ({ slug, operation: operation as any, city: city || undefined, q: q || undefined, page, pageSize, sort }),
+    [slug, operation, city, q, page, pageSize, sort],
   )
 
   const { data, isLoading, isError } = useQuery({
