@@ -51,7 +51,7 @@ async function loadMetrics(): Promise<Metrics> {
     supabase.from("niches").select("*", { count: "exact", head: true }),
     supabase.from("modules").select("*", { count: "exact", head: true }),
     supabase.from("billing_plans").select("*", { count: "exact", head: true }),
-    supabase.from("customers").select("*", { count: "exact", head: true }).eq("status", "active"),
+    supabase.from("customers").select("*", { count: "exact", head: true }),
     supabase.from("marketing_leads").select("niche").not("niche", "is", null).limit(500),
     supabase.from("marketing_leads").select("origin").not("origin", "is", null).limit(500),
   ]);
