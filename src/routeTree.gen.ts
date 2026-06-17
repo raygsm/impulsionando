@@ -34,6 +34,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TrabalheConoscoIndexRouteImport } from './routes/trabalhe-conosco.index'
+import { Route as ShowroomIndexRouteImport } from './routes/showroom.index'
 import { Route as PacienteIndexRouteImport } from './routes/paciente.index'
 import { Route as NichosIndexRouteImport } from './routes/nichos.index'
 import { Route as ModulosIndexRouteImport } from './routes/modulos.index'
@@ -352,6 +353,11 @@ const IndexRoute = IndexRouteImport.update({
 const TrabalheConoscoIndexRoute = TrabalheConoscoIndexRouteImport.update({
   id: '/trabalhe-conosco/',
   path: '/trabalhe-conosco/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShowroomIndexRoute = ShowroomIndexRouteImport.update({
+  id: '/showroom/',
+  path: '/showroom/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PacienteIndexRoute = PacienteIndexRouteImport.update({
@@ -1522,6 +1528,7 @@ export interface FileRoutesByFullPath {
   '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
   '/paciente/': typeof PacienteIndexRoute
+  '/showroom/': typeof ShowroomIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/adm/agentes': typeof AuthenticatedAdmAgentesRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
@@ -1732,6 +1739,7 @@ export interface FileRoutesByTo {
   '/modulos': typeof ModulosIndexRoute
   '/nichos': typeof NichosIndexRoute
   '/paciente': typeof PacienteIndexRoute
+  '/showroom': typeof ShowroomIndexRoute
   '/trabalhe-conosco': typeof TrabalheConoscoIndexRoute
   '/adm/agentes': typeof AuthenticatedAdmAgentesRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
@@ -1955,6 +1963,7 @@ export interface FileRoutesById {
   '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
   '/paciente/': typeof PacienteIndexRoute
+  '/showroom/': typeof ShowroomIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/_authenticated/adm/agentes': typeof AuthenticatedAdmAgentesRoute
   '/_authenticated/admin/billing': typeof AuthenticatedAdminBillingRoute
@@ -2178,6 +2187,7 @@ export interface FileRouteTypes {
     | '/modulos/'
     | '/nichos/'
     | '/paciente/'
+    | '/showroom/'
     | '/trabalhe-conosco/'
     | '/adm/agentes'
     | '/admin/billing'
@@ -2388,6 +2398,7 @@ export interface FileRouteTypes {
     | '/modulos'
     | '/nichos'
     | '/paciente'
+    | '/showroom'
     | '/trabalhe-conosco'
     | '/adm/agentes'
     | '/admin/billing'
@@ -2610,6 +2621,7 @@ export interface FileRouteTypes {
     | '/modulos/'
     | '/nichos/'
     | '/paciente/'
+    | '/showroom/'
     | '/trabalhe-conosco/'
     | '/_authenticated/adm/agentes'
     | '/_authenticated/admin/billing'
@@ -2801,6 +2813,7 @@ export interface RootRouteChildren {
   TrialCadastroRoute: typeof TrialCadastroRoute
   DemoIndexRoute: typeof DemoIndexRoute
   NichosIndexRoute: typeof NichosIndexRoute
+  ShowroomIndexRoute: typeof ShowroomIndexRoute
   TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
   DemoNichoSlugRoute: typeof DemoNichoSlugRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
@@ -3002,6 +3015,13 @@ declare module '@tanstack/react-router' {
       path: '/trabalhe-conosco'
       fullPath: '/trabalhe-conosco/'
       preLoaderRoute: typeof TrabalheConoscoIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/showroom/': {
+      id: '/showroom/'
+      path: '/showroom'
+      fullPath: '/showroom/'
+      preLoaderRoute: typeof ShowroomIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/paciente/': {
@@ -4948,6 +4968,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrialCadastroRoute: TrialCadastroRoute,
   DemoIndexRoute: DemoIndexRoute,
   NichosIndexRoute: NichosIndexRoute,
+  ShowroomIndexRoute: ShowroomIndexRoute,
   TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
   DemoNichoSlugRoute: DemoNichoSlugRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,

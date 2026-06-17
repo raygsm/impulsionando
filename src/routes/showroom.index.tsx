@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { NICHO_DETAILS } from "@/components/marketing/nichoDetails";
 import { ArrowRight, Sparkles, PlayCircle, Clock } from "lucide-react";
 
-export const Route = createFileRoute("/showroom")({
+export const Route = createFileRoute("/showroom/")({
   head: () => ({
     meta: [
       { title: "Showrooms por nicho — Demonstrações navegáveis | Impulsionando" },
