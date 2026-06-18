@@ -29,7 +29,6 @@ function VersoesPage() {
       </Link>
 
       <PageHeader
-        icon={<RefreshCw className="h-5 w-5" />}
         title="Versões & Atualizações"
         description="Como evoluímos os módulos sem quebrar sua operação."
       />

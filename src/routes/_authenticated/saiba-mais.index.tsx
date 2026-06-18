@@ -63,7 +63,6 @@ function SaibaMaisHub() {
   return (
     <div className="space-y-6">
       <PageHeader
-        icon={<BookOpen className="h-5 w-5" />}
         title="Saiba Mais"
         description="Conheça em profundidade o que a Impulsionando entrega: planos, módulos, nichos, inteligência e novidades."
       />

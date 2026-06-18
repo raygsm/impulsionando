@@ -31,7 +31,6 @@ function SaudeContaPage() {
       </Link>
 
       <PageHeader
-        icon={<Activity className="h-5 w-5" />}
         title="Saúde da Conta"
         description="Um único score contínuo (0 a 100) que mostra se sua conta está bem ou precisa de atenção."
       />
