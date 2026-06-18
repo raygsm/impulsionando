@@ -90,9 +90,9 @@ function DemoQrShell() {
   }, [scenarioQ.data, currentQr, tenant, qr, recordScan]);
 
   const fireEvent = useCallback(
-    (actionKey: Parameters<typeof sendEvent>[0]["data"]["actionKey"], payload: Record<string, unknown> = {}) => {
+    (actionKey: string, payload: Record<string, unknown> = {}) => {
       if (!sessionId) return;
-      sendEvent({ data: { scenarioSlug: tenant, qrSlug: qr, sessionId, actionKey, payload } }).catch(() => {});
+      sendEvent({ data: { scenarioSlug: tenant, qrSlug: qr, sessionId, actionKey: actionKey as never, payload: payload as never } }).catch(() => {});
     },
     [sendEvent, sessionId, tenant, qr],
   );
