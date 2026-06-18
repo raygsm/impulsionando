@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import { KpiCard } from "@/components/insights/KpiCard";
 import { PercebidoSection } from "@/components/insights/PercebidoSection";
 import { fetchConsumidorDashboard } from "@/lib/audience-dashboards.functions";
-import { Loader2, Heart, MapPin, Receipt, Sparkles, Gift, FileText, Ticket, TicketCheck, CalendarDays, Star, Lock, Crown } from "lucide-react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Loader2, Heart, MapPin, Receipt, Sparkles, Gift, FileText, Ticket, TicketCheck, CalendarDays, Star, Lock, Crown, ChevronLeft, ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 export const Route = createFileRoute("/_authenticated/dashboards/consumidor")({
   head: () => ({
@@ -38,6 +38,8 @@ const SECTIONS: Array<{ id: string; label: string }> = [
   { id: "creditos", label: "Meus créditos" },
 ];
 
+const STORAGE_KEY = "dashboards:consumidor:section";
+
 function ConsumidorDashboardPage() {
   const fn = useServerFn(fetchConsumidorDashboard);
   const { data, isLoading, error } = useQuery({
@@ -46,22 +48,80 @@ function ConsumidorDashboardPage() {
     staleTime: 60_000,
   });
 
+  const navRef = useRef<HTMLDivElement>(null);
+  const [headerOffset, setHeaderOffset] = useState(72);
   const [activeId, setActiveId] = useState<string>(() => {
     if (typeof window === "undefined") return "";
-    return window.location.hash.replace("#", "");
+    const hash = window.location.hash.replace("#", "");
+    if (hash && SECTIONS.some((s) => s.id === hash)) return hash;
+    try {
+      const saved = sessionStorage.getItem(STORAGE_KEY) ?? "";
+      if (saved && SECTIONS.some((s) => s.id === saved)) return saved;
+    } catch {}
+    return "";
   });
 
-  // Restore scroll on initial load with hash
+  // Measure real header (sticky sub-nav) height — recompute on resize
   useEffect(() => {
-    if (typeof window === "undefined" || isLoading) return;
+    if (!navRef.current) return;
+    const measure = () => {
+      if (!navRef.current) return;
+      const h = navRef.current.getBoundingClientRect().height;
+      setHeaderOffset(Math.round(h + 8));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(navRef.current);
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
+
+  const scrollToId = useCallback(
+    (id: string) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const top = el.getBoundingClientRect().top + window.scrollY - headerOffset;
+      window.scrollTo({ top, behavior: "smooth" });
+    },
+    [headerOffset],
+  );
+
+  const handleSelect = useCallback(
+    (id: string, scroll = false) => {
+      setActiveId(id);
+      try {
+        const newUrl = `${window.location.pathname}${window.location.search}#${id}`;
+        window.history.replaceState(null, "", newUrl);
+        sessionStorage.setItem(STORAGE_KEY, id);
+      } catch {}
+      if (scroll) scrollToId(id);
+    },
+    [scrollToId],
+  );
+
+  // Restore scroll on initial load (hash > sessionStorage)
+  const restoredRef = useRef(false);
+  useEffect(() => {
+    if (typeof window === "undefined" || isLoading || restoredRef.current) return;
     const hash = window.location.hash.replace("#", "");
-    if (hash && SECTIONS.some((s) => s.id === hash)) {
-      requestAnimationFrame(() => {
-        const el = document.getElementById(hash);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
+    const target =
+      (hash && SECTIONS.some((s) => s.id === hash) && hash) ||
+      (() => {
+        try {
+          const s = sessionStorage.getItem(STORAGE_KEY) ?? "";
+          return SECTIONS.some((x) => x.id === s) ? s : "";
+        } catch {
+          return "";
+        }
+      })();
+    if (target) {
+      restoredRef.current = true;
+      requestAnimationFrame(() => scrollToId(target));
     }
-  }, [isLoading]);
+  }, [isLoading, scrollToId]);
 
   // Scroll-spy: mark active chip while scrolling
   useEffect(() => {
@@ -79,39 +139,80 @@ function ConsumidorDashboardPage() {
         if (visible[0]?.target?.id) {
           const id = visible[0].target.id;
           setActiveId(id);
-          // Update URL hash without scroll jump
-          const newUrl = `${window.location.pathname}${window.location.search}#${id}`;
-          window.history.replaceState(null, "", newUrl);
+          try {
+            const newUrl = `${window.location.pathname}${window.location.search}#${id}`;
+            window.history.replaceState(null, "", newUrl);
+            sessionStorage.setItem(STORAGE_KEY, id);
+          } catch {}
         }
       },
-      { rootMargin: "-30% 0px -55% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] }
+      { rootMargin: `-${headerOffset}px 0px -55% 0px`, threshold: [0, 0.25, 0.5, 0.75, 1] },
     );
     elements.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, [data]);
+  }, [data, headerOffset]);
+
+  // Global keyboard shortcuts: Alt+Left/Right to move between sections
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.isContentEditable) return;
+      e.preventDefault();
+      const idx = Math.max(0, SECTIONS.findIndex((s) => s.id === activeId));
+      const next =
+        e.key === "ArrowRight"
+          ? Math.min(SECTIONS.length - 1, idx + 1)
+          : Math.max(0, idx - 1);
+      handleSelect(SECTIONS[next].id, true);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [activeId, handleSelect]);
 
   const activeLabel = SECTIONS.find((s) => s.id === activeId)?.label;
 
   return (
-    <div className="space-y-6">
-      <nav aria-label="Trilha" className="flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap">
-        <Link to="/dashboard" className="hover:text-foreground transition-colors">Início</Link>
-        <span className="opacity-50">›</span>
-        <Link to="/clube" className="hover:text-foreground transition-colors">Clube</Link>
-        <span className="opacity-50">›</span>
+    <div
+      className="space-y-6"
+      style={{ ["--sec-offset" as never]: `${headerOffset}px` }}
+    >
+      <nav
+        aria-label="Trilha"
+        className="flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap"
+      >
+        <Link
+          to="/dashboard"
+          className="rounded hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background px-1"
+        >
+          Início
+        </Link>
+        <span className="opacity-50" aria-hidden="true">›</span>
+        <Link
+          to="/clube"
+          className="rounded hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background px-1"
+        >
+          Clube
+        </Link>
+        <span className="opacity-50" aria-hidden="true">›</span>
         {activeLabel ? (
           <>
             <Link
               to="/dashboards/consumidor"
-              className="hover:text-foreground transition-colors"
+              className="rounded hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background px-1"
             >
               Minha área
             </Link>
-            <span className="opacity-50">›</span>
-            <span className="text-foreground font-medium">{activeLabel}</span>
+            <span className="opacity-50" aria-hidden="true">›</span>
+            <span className="text-foreground font-medium px-1" aria-current="page">
+              {activeLabel}
+            </span>
           </>
         ) : (
-          <span className="text-foreground font-medium">Minha área</span>
+          <span className="text-foreground font-medium px-1" aria-current="page">
+            Minha área
+          </span>
         )}
       </nav>
 
@@ -120,7 +221,9 @@ function ConsumidorDashboardPage() {
         description="Tudo o que você curte, consome e economiza num só lugar."
       />
 
-      <SectionNav activeId={activeId} onSelect={setActiveId} />
+      <SectionNav ref={navRef} activeId={activeId} onSelect={handleSelect} />
+
+
 
 
 
@@ -416,7 +519,7 @@ function PremiumSection<T extends { id: string }>({
   const id = anchor;
   if (!isPremium) {
     return (
-      <Card id={id} className={`p-4 relative overflow-hidden scroll-mt-24 ${className ?? ""}`}>
+      <Card id={id} className={`p-4 relative overflow-hidden scroll-mt-[var(--sec-offset,6rem)] ${className ?? ""}`}>
         <div className="flex items-center gap-2 mb-2 text-sm font-semibold">
           {icon} {title}
           <Badge variant="outline" className="ml-auto gap-1 text-[10px]">
@@ -431,7 +534,7 @@ function PremiumSection<T extends { id: string }>({
     );
   }
   return (
-    <Card id={id} className={`p-4 scroll-mt-24 ${className ?? ""}`}>
+    <Card id={id} className={`p-4 scroll-mt-[var(--sec-offset,6rem)] ${className ?? ""}`}>
       <div className="flex items-center gap-2 mb-3 text-sm font-semibold">{icon} {title}</div>
       {items.length === 0 ? (
         <EmptyHint text={empty} />
@@ -448,51 +551,114 @@ function PremiumSection<T extends { id: string }>({
   );
 }
 
-function SectionNav({ activeId, onSelect }: { activeId: string; onSelect: (id: string) => void }) {
-  const containerRef = useRef<HTMLDivElement>(null);
+type SectionNavProps = {
+  activeId: string;
+  onSelect: (id: string, scroll?: boolean) => void;
+  ref?: React.Ref<HTMLDivElement>;
+};
+
+function SectionNav({ activeId, onSelect, ref }: SectionNavProps) {
+  const chipsRef = useRef<HTMLDivElement>(null);
 
   // Keep active chip visible when it changes
   useEffect(() => {
-    if (!activeId || !containerRef.current) return;
-    const chip = containerRef.current.querySelector<HTMLElement>(`[data-chip="${activeId}"]`);
+    if (!activeId || !chipsRef.current) return;
+    const chip = chipsRef.current.querySelector<HTMLElement>(`[data-chip="${activeId}"]`);
     if (chip) chip.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
   }, [activeId]);
 
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
-    e.preventDefault();
-    onSelect(id);
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-    const newUrl = `${window.location.pathname}${window.location.search}#${id}`;
-    window.history.replaceState(null, "", newUrl);
+  const focusChip = (id: string) => {
+    chipsRef.current?.querySelector<HTMLElement>(`[data-chip="${id}"]`)?.focus();
   };
 
+  const handleKey = (e: React.KeyboardEvent<HTMLAnchorElement>, idx: number) => {
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      const next = SECTIONS[(idx + 1) % SECTIONS.length];
+      focusChip(next.id);
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      const prev = SECTIONS[(idx - 1 + SECTIONS.length) % SECTIONS.length];
+      focusChip(prev.id);
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      focusChip(SECTIONS[0].id);
+    } else if (e.key === "End") {
+      e.preventDefault();
+      focusChip(SECTIONS[SECTIONS.length - 1].id);
+    } else if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onSelect(SECTIONS[idx].id, true);
+    }
+  };
+
+  const currentIdx = Math.max(0, SECTIONS.findIndex((s) => s.id === activeId));
+  const goPrev = () => onSelect(SECTIONS[Math.max(0, currentIdx - 1)].id, true);
+  const goNext = () => onSelect(SECTIONS[Math.min(SECTIONS.length - 1, currentIdx + 1)].id, true);
+
   return (
-    <div className="sticky top-0 z-10 py-2 bg-background/85 backdrop-blur border-b border-border/60">
-      <div
-        ref={containerRef}
-        className="flex gap-1.5 overflow-x-auto scrollbar-none snap-x snap-mandatory px-1 -mx-1"
-      >
-        {SECTIONS.map((s) => {
-          const active = s.id === activeId;
-          return (
-            <a
-              key={s.id}
-              data-chip={s.id}
-              href={`#${s.id}`}
-              onClick={(e) => handleClick(e, s.id)}
-              aria-current={active ? "true" : undefined}
-              className={`shrink-0 snap-start text-xs px-3 py-1.5 rounded-full border transition-colors ${
-                active
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "border-border/60 bg-card hover:bg-accent hover:text-accent-foreground"
-              }`}
-            >
-              {s.label}
-            </a>
-          );
-        })}
+    <div
+      ref={ref}
+      className="sticky top-0 z-10 py-2 bg-background/85 backdrop-blur border-b border-border/60"
+    >
+      <div className="flex items-center gap-1">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label="Seção anterior"
+          onClick={goPrev}
+          disabled={currentIdx <= 0}
+          className="md:hidden h-8 w-8 shrink-0"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <div
+          ref={chipsRef}
+          role="tablist"
+          aria-label="Seções da Minha área"
+          className="flex gap-1.5 overflow-x-auto scrollbar-none snap-x snap-mandatory px-1 flex-1"
+        >
+          {SECTIONS.map((s, idx) => {
+            const active = s.id === activeId;
+            return (
+              <a
+                key={s.id}
+                data-chip={s.id}
+                href={`#${s.id}`}
+                role="tab"
+                aria-selected={active}
+                aria-current={active ? "true" : undefined}
+                tabIndex={active || (!activeId && idx === 0) ? 0 : -1}
+                onClick={(e) => {
+                  e.preventDefault();
+                  onSelect(s.id, true);
+                }}
+                onKeyDown={(e) => handleKey(e, idx)}
+                className={`shrink-0 snap-start text-xs px-3 py-1.5 rounded-full border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                  active
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "border-border/60 bg-card hover:bg-accent hover:text-accent-foreground"
+                }`}
+              >
+                {s.label}
+              </a>
+            );
+          })}
+        </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label="Próxima seção"
+          onClick={goNext}
+          disabled={currentIdx >= SECTIONS.length - 1}
+          className="md:hidden h-8 w-8 shrink-0"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   );
 }
+
