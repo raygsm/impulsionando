@@ -95,11 +95,11 @@ export const fetchVoiceOfCustomer = createServerFn({ method: "POST" })
     // Demandas/feedback de agentes (proxies de VoC enquanto não há tabela dedicada)
     let demandsQ = supabase
       .from("agent_demands")
-      .select("id, title, status, created_at, company_id, priority")
+      .select("id, title, status, created_at, created_by, tipo_entrega")
       .gte("created_at", from)
       .order("created_at", { ascending: false })
       .limit(200);
-    if (companyId) demandsQ = demandsQ.eq("company_id", companyId);
+    if (!staff) demandsQ = demandsQ.eq("created_by", userId);
 
     let pollsQ = supabase
       .from("clube_polls")
