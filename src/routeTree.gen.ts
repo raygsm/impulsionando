@@ -170,6 +170,7 @@ import { Route as ImoveisSlugPropertyIdRouteImport } from './routes/imoveis.$slu
 import { Route as DemoNichoSlugRouteImport } from './routes/demo.nicho.$slug'
 import { Route as AuthenticatedWhiteLabelCockpitRouteImport } from './routes/_authenticated/white-label.cockpit'
 import { Route as AuthenticatedUsersCorporateRouteImport } from './routes/_authenticated/users.corporate'
+import { Route as AuthenticatedTorreConsumidoresRouteImport } from './routes/_authenticated/torre.consumidores'
 import { Route as AuthenticatedSupportCockpitRouteImport } from './routes/_authenticated/support.cockpit'
 import { Route as AuthenticatedSalesOrdersRouteImport } from './routes/_authenticated/sales.orders'
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
@@ -1176,6 +1177,12 @@ const AuthenticatedUsersCorporateRoute =
     id: '/corporate',
     path: '/corporate',
     getParentRoute: () => AuthenticatedUsersRoute,
+  } as any)
+const AuthenticatedTorreConsumidoresRoute =
+  AuthenticatedTorreConsumidoresRouteImport.update({
+    id: '/torre/consumidores',
+    path: '/torre/consumidores',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedSupportCockpitRoute =
   AuthenticatedSupportCockpitRouteImport.update({
@@ -2510,6 +2517,7 @@ export interface FileRoutesByFullPath {
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
   '/support/cockpit': typeof AuthenticatedSupportCockpitRoute
+  '/torre/consumidores': typeof AuthenticatedTorreConsumidoresRoute
   '/users/corporate': typeof AuthenticatedUsersCorporateRoute
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
@@ -2840,6 +2848,7 @@ export interface FileRoutesByTo {
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
   '/support/cockpit': typeof AuthenticatedSupportCockpitRoute
+  '/torre/consumidores': typeof AuthenticatedTorreConsumidoresRoute
   '/users/corporate': typeof AuthenticatedUsersCorporateRoute
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
@@ -3184,6 +3193,7 @@ export interface FileRoutesById {
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
   '/_authenticated/sales/orders': typeof AuthenticatedSalesOrdersRoute
   '/_authenticated/support/cockpit': typeof AuthenticatedSupportCockpitRoute
+  '/_authenticated/torre/consumidores': typeof AuthenticatedTorreConsumidoresRoute
   '/_authenticated/users/corporate': typeof AuthenticatedUsersCorporateRoute
   '/_authenticated/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
@@ -3527,6 +3537,7 @@ export interface FileRouteTypes {
     | '/sales/new'
     | '/sales/orders'
     | '/support/cockpit'
+    | '/torre/consumidores'
     | '/users/corporate'
     | '/white-label/cockpit'
     | '/demo/nicho/$slug'
@@ -3857,6 +3868,7 @@ export interface FileRouteTypes {
     | '/sales/new'
     | '/sales/orders'
     | '/support/cockpit'
+    | '/torre/consumidores'
     | '/users/corporate'
     | '/white-label/cockpit'
     | '/demo/nicho/$slug'
@@ -4200,6 +4212,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sales/new'
     | '/_authenticated/sales/orders'
     | '/_authenticated/support/cockpit'
+    | '/_authenticated/torre/consumidores'
     | '/_authenticated/users/corporate'
     | '/_authenticated/white-label/cockpit'
     | '/demo/nicho/$slug'
@@ -5519,6 +5532,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/users/corporate'
       preLoaderRoute: typeof AuthenticatedUsersCorporateRouteImport
       parentRoute: typeof AuthenticatedUsersRoute
+    }
+    '/_authenticated/torre/consumidores': {
+      id: '/_authenticated/torre/consumidores'
+      path: '/torre/consumidores'
+      fullPath: '/torre/consumidores'
+      preLoaderRoute: typeof AuthenticatedTorreConsumidoresRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/support/cockpit': {
       id: '/_authenticated/support/cockpit'
@@ -7309,6 +7329,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSaibaMaisSaudeRoute: typeof AuthenticatedSaibaMaisSaudeRoute
   AuthenticatedSaibaMaisVersoesRoute: typeof AuthenticatedSaibaMaisVersoesRoute
   AuthenticatedSupportCockpitRoute: typeof AuthenticatedSupportCockpitRoute
+  AuthenticatedTorreConsumidoresRoute: typeof AuthenticatedTorreConsumidoresRoute
   AuthenticatedWhiteLabelCockpitRoute: typeof AuthenticatedWhiteLabelCockpitRoute
   AuthenticatedCockpitsIndexRoute: typeof AuthenticatedCockpitsIndexRoute
   AuthenticatedComunidadeIndexRoute: typeof AuthenticatedComunidadeIndexRoute
@@ -7427,6 +7448,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSaibaMaisSaudeRoute: AuthenticatedSaibaMaisSaudeRoute,
   AuthenticatedSaibaMaisVersoesRoute: AuthenticatedSaibaMaisVersoesRoute,
   AuthenticatedSupportCockpitRoute: AuthenticatedSupportCockpitRoute,
+  AuthenticatedTorreConsumidoresRoute: AuthenticatedTorreConsumidoresRoute,
   AuthenticatedWhiteLabelCockpitRoute: AuthenticatedWhiteLabelCockpitRoute,
   AuthenticatedCockpitsIndexRoute: AuthenticatedCockpitsIndexRoute,
   AuthenticatedComunidadeIndexRoute: AuthenticatedComunidadeIndexRoute,

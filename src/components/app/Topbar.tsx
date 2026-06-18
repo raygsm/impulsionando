@@ -1,6 +1,8 @@
 import { useNavigate } from "@tanstack/react-router";
-import { Search, LogOut, ArrowRight } from "lucide-react";
+import { Search, LogOut, ArrowRight, User, Building2, UserPlus, Handshake } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -13,8 +15,10 @@ import { OnboardingStatusPill } from "./OnboardingStatusPill";
 import { AppearanceMenu } from "./AppearanceMenu";
 import { QuickActionsButton } from "./QuickActions";
 import { AudienceBadge } from "./AudienceBadge";
+import { globalEntitySearch, type GlobalEntityHit } from "@/lib/core-consumidores.functions";
 
 type NavItem = { label: string; to: string; group: string; keywords?: string };
+
 
 const NAV: NavItem[] = [
   { group: "Geral", label: "Dashboard", to: "/dashboard" },
