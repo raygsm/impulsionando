@@ -355,21 +355,23 @@ function WhatsAppMetricsPage() {
     return history
       .filter((e) => e.ts >= from && e.ts <= to)
       .filter((e) => hCta === "__all" || (e.ctaHash ?? "") === hCta)
+      .filter((e) => hStatus === "__all" || (e.status ?? "sent") === hStatus)
       .sort((a, b) => b.ts - a.ts);
-  }, [history, hFrom, hTo, hCta]);
+  }, [history, hFrom, hTo, hCta, hStatus]);
 
   function exportHistoryCSV() {
     const head = [
-      "ts", "iso", "ctr", "sendRate", "impressions", "clicks", "sends",
-      "ctrBelow", "sendBelow", "minCtr", "minSendRate", "windowHours",
-      "ctaHash", "notified",
+      "ts", "iso", "scope", "status", "error", "ctr", "sendRate",
+      "impressions", "clicks", "sends", "ctrBelow", "sendBelow",
+      "minCtr", "minSendRate", "windowHours", "ctaHash", "notified",
     ];
     const esc = (v: unknown) => {
       const s = v == null ? "" : String(v);
       return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
     const lines = historyFiltered.map((e) =>
-      [e.ts, new Date(e.ts).toISOString(), e.ctr.toFixed(2), e.sendRate.toFixed(2),
+      [e.ts, new Date(e.ts).toISOString(), e.scope ?? "global", e.status ?? "sent",
+       e.error ?? "", e.ctr.toFixed(2), e.sendRate.toFixed(2),
        e.impressions, e.clicks, e.sends, e.ctrBelow, e.sendBelow,
        e.minCtr, e.minSendRate, e.windowHours, e.ctaHash ?? "",
        (e.notified ?? []).join("|")].map(esc).join(","),
