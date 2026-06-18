@@ -98,7 +98,8 @@ function pick(ctx: any): Row | undefined {
 const supabaseAdminMock = {
   from: (table: string) => makeQuery(table),
   rpc: async (_name: string, payload: any) => {
-    state.enqueued.push(payload)
+    // capturamos o payload interno (que tem `label`, `to`, etc.)
+    state.enqueued.push(payload?.payload ?? payload)
     return { data: null, error: null }
   },
 }
