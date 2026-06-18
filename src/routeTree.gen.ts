@@ -115,6 +115,7 @@ import { Route as DemoAfiliadosRouteImport } from './routes/demo.afiliados'
 import { Route as DemoAdvogadosRouteImport } from './routes/demo.advogados'
 import { Route as ContratarSobMedidaRouteImport } from './routes/contratar.sob-medida'
 import { Route as ComoFuncionaFitnessRouteImport } from './routes/como-funciona.fitness'
+import { Route as ClubeLoginRouteImport } from './routes/clube.login'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
@@ -882,6 +883,11 @@ const ComoFuncionaFitnessRoute = ComoFuncionaFitnessRouteImport.update({
   id: '/como-funciona/fitness',
   path: '/como-funciona/fitness',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ClubeLoginRoute = ClubeLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => ClubeRoute,
 } as any)
 const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
   id: '/checkout/success',
@@ -2275,6 +2281,7 @@ export interface FileRoutesByFullPath {
   '/users': typeof AuthenticatedUsersRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/clube/login': typeof ClubeLoginRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/contratar/sob-medida': typeof ContratarSobMedidaRoute
   '/demo/advogados': typeof DemoAdvogadosRoute
@@ -2603,6 +2610,7 @@ export interface FileRoutesByTo {
   '/users': typeof AuthenticatedUsersRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/clube/login': typeof ClubeLoginRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/contratar/sob-medida': typeof ContratarSobMedidaRoute
   '/demo/advogados': typeof DemoAdvogadosRoute
@@ -2890,7 +2898,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/canal-oficial': typeof CanalOficialRoute
-  '/clube': typeof ClubeRoute
+  '/clube': typeof ClubeRouteWithChildren
   '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
@@ -2945,6 +2953,7 @@ export interface FileRoutesById {
   '/_authenticated/users': typeof AuthenticatedUsersRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/clube/login': typeof ClubeLoginRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/contratar/sob-medida': typeof ContratarSobMedidaRoute
   '/demo/advogados': typeof DemoAdvogadosRoute
@@ -3286,6 +3295,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/admin/login'
     | '/checkout/success'
+    | '/clube/login'
     | '/como-funciona/fitness'
     | '/contratar/sob-medida'
     | '/demo/advogados'
@@ -3614,6 +3624,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/admin/login'
     | '/checkout/success'
+    | '/clube/login'
     | '/como-funciona/fitness'
     | '/contratar/sob-medida'
     | '/demo/advogados'
@@ -3955,6 +3966,7 @@ export interface FileRouteTypes {
     | '/_authenticated/users'
     | '/admin/login'
     | '/checkout/success'
+    | '/clube/login'
     | '/como-funciona/fitness'
     | '/contratar/sob-medida'
     | '/demo/advogados'
@@ -4242,7 +4254,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   CanalOficialRoute: typeof CanalOficialRoute
-  ClubeRoute: typeof ClubeRoute
+  ClubeRoute: typeof ClubeRouteWithChildren
   ConsumidorRoute: typeof ConsumidorRoute
   ContaSuspensaRoute: typeof ContaSuspensaRoute
   ContatoRoute: typeof ContatoRoute
@@ -5110,6 +5122,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/como-funciona/fitness'
       preLoaderRoute: typeof ComoFuncionaFitnessRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/clube/login': {
+      id: '/clube/login'
+      path: '/login'
+      fullPath: '/clube/login'
+      preLoaderRoute: typeof ClubeLoginRouteImport
+      parentRoute: typeof ClubeRoute
     }
     '/checkout/success': {
       id: '/checkout/success'
@@ -7404,6 +7423,16 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface ClubeRouteChildren {
+  ClubeLoginRoute: typeof ClubeLoginRoute
+}
+
+const ClubeRouteChildren: ClubeRouteChildren = {
+  ClubeLoginRoute: ClubeLoginRoute,
+}
+
+const ClubeRouteWithChildren = ClubeRoute._addFileChildren(ClubeRouteChildren)
+
 interface ContratarRouteChildren {
   ContratarSobMedidaRoute: typeof ContratarSobMedidaRoute
 }
@@ -7509,7 +7538,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   CanalOficialRoute: CanalOficialRoute,
-  ClubeRoute: ClubeRoute,
+  ClubeRoute: ClubeRouteWithChildren,
   ConsumidorRoute: ConsumidorRoute,
   ContaSuspensaRoute: ContaSuspensaRoute,
   ContatoRoute: ContatoRoute,
