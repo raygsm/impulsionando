@@ -19,10 +19,13 @@ import {
   getDemoScenario,
   recordDemoScan,
   recordDemoEvent,
+  submitDemoSurvey,
 } from "@/lib/demo-restaurante.functions";
 import { DemoMenu, type DemoMenuItem } from "@/components/demo/DemoMenu";
 import { DemoCart } from "@/components/demo/DemoCart";
 import { DemoCheckout, type DemoPaymentMethod } from "@/components/demo/DemoCheckout";
+import { DemoSurvey, type SurveyValues } from "@/components/demo/DemoSurvey";
+import { DemoVoucherCard, DemoJourney, type DemoVoucher } from "@/components/demo/DemoVoucher";
 import { useDemoCart } from "@/hooks/useDemoCart";
 
 export const Route = createFileRoute("/demo/restaurante/$tenant/$qr")({
