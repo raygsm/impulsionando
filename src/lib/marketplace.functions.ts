@@ -329,24 +329,6 @@ export const updateMarketplaceOrderStatus = createServerFn({ method: "POST" })
       .single();
     if (error) throw error;
 
-    // Notificações para o comprador
-    if (order && (data.status === "approved" || data.status === "rejected" || data.status === "invoiced" || data.status === "completed")) {
-      const labelMap: Record<string, { title: string; sev: string }> = {
-        approved: { title: "Pedido aprovado pelo fornecedor", sev: "success" },
-        rejected: { title: "Pedido recusado pelo fornecedor", sev: "error" },
-        invoiced: { title: "Pedido faturado", sev: "info" },
-        completed: { title: "Pedido concluído", sev: "success" },
-      };
-      const l = labelMap[data.status];
-      await notify(context.supabase, {
-        company_id: order.buyer?.company_id ?? null,
-        category: "marketplace",
-        severity: l.sev,
-        title: l.title,
-        message: `Pedido #${order.order_number} de ${order.supplier?.display_name}. ${data.decision_notes ?? ""}`.trim(),
-        action_url: "/bar/marketplace",
-      });
-    }
 
     // Notificações para AMBAS as partes (comprador + fornecedor)
     if (order && ["approved", "rejected", "in_production", "in_delivery", "invoiced", "completed", "canceled"].includes(data.status)) {
