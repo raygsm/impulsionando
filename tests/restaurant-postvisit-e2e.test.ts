@@ -34,27 +34,28 @@ function resetState() {
 
 function makeQuery(table: string) {
   const ctx: any = { table, filters: [] as Array<[string, any]>, isNullCol: null as string | null }
-  const api: any = {
-    select: () => api,
+  const chain: any = {
+    select: () => chain,
     eq: (col: string, val: any) => {
       ctx.filters.push([col, val])
-      return api
+      return chain
     },
     is: (col: string, val: any) => {
       if (val === null) ctx.isNullCol = col
-      return api
+      return chain
     },
     maybeSingle: async () => ({ data: pick(ctx), error: null }),
     update: (patch: Row) => {
-      // Apply patch to first match honoring `.is(col, null)`
       const row = pick(ctx)
-      if (!row) return { error: null }
-      if (ctx.isNullCol && row[ctx.isNullCol] != null) return { error: null }
-      Object.assign(row, patch)
-      return {
-        eq: () => ({ is: () => ({ error: null }), error: null }),
-        error: null,
+      const apply = () => {
+        if (!row) return
+        if (ctx.isNullCol && row[ctx.isNullCol] != null) return
+        Object.assign(row, patch)
       }
+      // Some callers do .update(p) and stop; others chain .eq().is(). Defer apply
+      // to .is()/.eq() terminal or apply synchronously since chain is awaitable.
+      apply()
+      return chain
     },
     insert: (rows: Row | Row[]) => {
       const arr = Array.isArray(rows) ? rows : [rows]
@@ -62,7 +63,7 @@ function makeQuery(table: string) {
       return { error: null }
     },
   }
-  return api
+  return chain
 }
 
 function pick(ctx: any): Row | undefined {
