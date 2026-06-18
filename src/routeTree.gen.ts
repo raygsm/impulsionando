@@ -360,6 +360,7 @@ import { Route as ApiPaymentsInfinitepayCreateRouteImport } from './routes/api/p
 import { Route as ApiPaymentsInfinitepayCheckStatusRouteImport } from './routes/api/payments/infinitepay.check-status'
 import { Route as AuthenticatedTorreRestaurantesDemoAuditoriaRouteImport } from './routes/_authenticated/torre.restaurantes-demo.auditoria'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
+import { Route as AuthenticatedRestauranteSalaoNotificacoesRouteImport } from './routes/_authenticated/restaurante.salao.notificacoes'
 import { Route as AuthenticatedImobiliariaAprovacoesImprimirFilaRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes.imprimir-fila'
 import { Route as AuthenticatedCoreModulosSlugRouteImport } from './routes/_authenticated/core.modulos.$slug'
 import { Route as AuthenticatedCoreMarketplacePedidosRouteImport } from './routes/_authenticated/core.marketplace.pedidos'
@@ -2308,6 +2309,12 @@ const AuthenticatedSalesCashIdRoute =
     path: '/$id',
     getParentRoute: () => AuthenticatedSalesCashRoute,
   } as any)
+const AuthenticatedRestauranteSalaoNotificacoesRoute =
+  AuthenticatedRestauranteSalaoNotificacoesRouteImport.update({
+    id: '/notificacoes',
+    path: '/notificacoes',
+    getParentRoute: () => AuthenticatedRestauranteSalaoRoute,
+  } as any)
 const AuthenticatedImobiliariaAprovacoesImprimirFilaRoute =
   AuthenticatedImobiliariaAprovacoesImprimirFilaRouteImport.update({
     id: '/imprimir-fila',
@@ -2713,7 +2720,7 @@ export interface FileRoutesByFullPath {
   '/reports/sales': typeof AuthenticatedReportsSalesRoute
   '/restaurante/cardapio': typeof AuthenticatedRestauranteCardapioRoute
   '/restaurante/mesas': typeof AuthenticatedRestauranteMesasRoute
-  '/restaurante/salao': typeof AuthenticatedRestauranteSalaoRoute
+  '/restaurante/salao': typeof AuthenticatedRestauranteSalaoRouteWithChildren
   '/saiba-mais/saude': typeof AuthenticatedSaibaMaisSaudeRoute
   '/saiba-mais/versoes': typeof AuthenticatedSaibaMaisVersoesRoute
   '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
@@ -2759,6 +2766,7 @@ export interface FileRoutesByFullPath {
   '/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
+  '/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
@@ -3072,7 +3080,7 @@ export interface FileRoutesByTo {
   '/reports/sales': typeof AuthenticatedReportsSalesRoute
   '/restaurante/cardapio': typeof AuthenticatedRestauranteCardapioRoute
   '/restaurante/mesas': typeof AuthenticatedRestauranteMesasRoute
-  '/restaurante/salao': typeof AuthenticatedRestauranteSalaoRoute
+  '/restaurante/salao': typeof AuthenticatedRestauranteSalaoRouteWithChildren
   '/saiba-mais/saude': typeof AuthenticatedSaibaMaisSaudeRoute
   '/saiba-mais/versoes': typeof AuthenticatedSaibaMaisVersoesRoute
   '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
@@ -3118,6 +3126,7 @@ export interface FileRoutesByTo {
   '/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
+  '/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
@@ -3445,7 +3454,7 @@ export interface FileRoutesById {
   '/_authenticated/reports/sales': typeof AuthenticatedReportsSalesRoute
   '/_authenticated/restaurante/cardapio': typeof AuthenticatedRestauranteCardapioRoute
   '/_authenticated/restaurante/mesas': typeof AuthenticatedRestauranteMesasRoute
-  '/_authenticated/restaurante/salao': typeof AuthenticatedRestauranteSalaoRoute
+  '/_authenticated/restaurante/salao': typeof AuthenticatedRestauranteSalaoRouteWithChildren
   '/_authenticated/saiba-mais/saude': typeof AuthenticatedSaibaMaisSaudeRoute
   '/_authenticated/saiba-mais/versoes': typeof AuthenticatedSaibaMaisVersoesRoute
   '/_authenticated/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
@@ -3491,6 +3500,7 @@ export interface FileRoutesById {
   '/_authenticated/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/_authenticated/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/_authenticated/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
+  '/_authenticated/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/_authenticated/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
@@ -3863,6 +3873,7 @@ export interface FileRouteTypes {
     | '/core/marketplace/pedidos'
     | '/core/modulos/$slug'
     | '/imobiliaria/aprovacoes/imprimir-fila'
+    | '/restaurante/salao/notificacoes'
     | '/sales/cash/$id'
     | '/torre/restaurantes-demo/auditoria'
     | '/api/payments/infinitepay/check-status'
@@ -4222,6 +4233,7 @@ export interface FileRouteTypes {
     | '/core/marketplace/pedidos'
     | '/core/modulos/$slug'
     | '/imobiliaria/aprovacoes/imprimir-fila'
+    | '/restaurante/salao/notificacoes'
     | '/sales/cash/$id'
     | '/torre/restaurantes-demo/auditoria'
     | '/api/payments/infinitepay/check-status'
@@ -4594,6 +4606,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/marketplace/pedidos'
     | '/_authenticated/core/modulos/$slug'
     | '/_authenticated/imobiliaria/aprovacoes/imprimir-fila'
+    | '/_authenticated/restaurante/salao/notificacoes'
     | '/_authenticated/sales/cash/$id'
     | '/_authenticated/torre/restaurantes-demo/auditoria'
     | '/api/payments/infinitepay/check-status'
@@ -7227,6 +7240,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSalesCashIdRouteImport
       parentRoute: typeof AuthenticatedSalesCashRoute
     }
+    '/_authenticated/restaurante/salao/notificacoes': {
+      id: '/_authenticated/restaurante/salao/notificacoes'
+      path: '/notificacoes'
+      fullPath: '/restaurante/salao/notificacoes'
+      preLoaderRoute: typeof AuthenticatedRestauranteSalaoNotificacoesRouteImport
+      parentRoute: typeof AuthenticatedRestauranteSalaoRoute
+    }
     '/_authenticated/imobiliaria/aprovacoes/imprimir-fila': {
       id: '/_authenticated/imobiliaria/aprovacoes/imprimir-fila'
       path: '/imprimir-fila'
@@ -7868,6 +7888,21 @@ const AuthenticatedImobiliariaAprovacoesRouteWithChildren =
     AuthenticatedImobiliariaAprovacoesRouteChildren,
   )
 
+interface AuthenticatedRestauranteSalaoRouteChildren {
+  AuthenticatedRestauranteSalaoNotificacoesRoute: typeof AuthenticatedRestauranteSalaoNotificacoesRoute
+}
+
+const AuthenticatedRestauranteSalaoRouteChildren: AuthenticatedRestauranteSalaoRouteChildren =
+  {
+    AuthenticatedRestauranteSalaoNotificacoesRoute:
+      AuthenticatedRestauranteSalaoNotificacoesRoute,
+  }
+
+const AuthenticatedRestauranteSalaoRouteWithChildren =
+  AuthenticatedRestauranteSalaoRoute._addFileChildren(
+    AuthenticatedRestauranteSalaoRouteChildren,
+  )
+
 interface AuthenticatedTorreRestaurantesDemoRouteChildren {
   AuthenticatedTorreRestaurantesDemoAuditoriaRoute: typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
 }
@@ -7970,7 +8005,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRealestateCockpitRoute: typeof AuthenticatedRealestateCockpitRoute
   AuthenticatedRestauranteCardapioRoute: typeof AuthenticatedRestauranteCardapioRoute
   AuthenticatedRestauranteMesasRoute: typeof AuthenticatedRestauranteMesasRoute
-  AuthenticatedRestauranteSalaoRoute: typeof AuthenticatedRestauranteSalaoRoute
+  AuthenticatedRestauranteSalaoRoute: typeof AuthenticatedRestauranteSalaoRouteWithChildren
   AuthenticatedSaibaMaisSaudeRoute: typeof AuthenticatedSaibaMaisSaudeRoute
   AuthenticatedSaibaMaisVersoesRoute: typeof AuthenticatedSaibaMaisVersoesRoute
   AuthenticatedShowroomRestauranteRoute: typeof AuthenticatedShowroomRestauranteRoute
@@ -8099,7 +8134,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRealestateCockpitRoute: AuthenticatedRealestateCockpitRoute,
   AuthenticatedRestauranteCardapioRoute: AuthenticatedRestauranteCardapioRoute,
   AuthenticatedRestauranteMesasRoute: AuthenticatedRestauranteMesasRoute,
-  AuthenticatedRestauranteSalaoRoute: AuthenticatedRestauranteSalaoRoute,
+  AuthenticatedRestauranteSalaoRoute:
+    AuthenticatedRestauranteSalaoRouteWithChildren,
   AuthenticatedSaibaMaisSaudeRoute: AuthenticatedSaibaMaisSaudeRoute,
   AuthenticatedSaibaMaisVersoesRoute: AuthenticatedSaibaMaisVersoesRoute,
   AuthenticatedShowroomRestauranteRoute: AuthenticatedShowroomRestauranteRoute,

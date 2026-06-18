@@ -27,6 +27,40 @@ export interface TemplateEntry {
   previewData?: Record<string, any>
   /** Fixed recipient — overrides caller-provided recipientEmail when set. */
   to?: string
+  /**
+   * Marca o template como SINAL INTERNO (badge "USO INTERNO"). Qualquer
+   * tentativa de enviar via canais ao cliente final DEVE ser rejeitada
+   * em runtime — ver assertTemplateAllowedForCustomerChannel.
+   */
+  internal?: boolean
+  /** Whitelist de canais permitidos. Default: ['customer']. */
+  allowedChannels?: Array<'customer' | 'internal' | 'staff'>
+}
+
+export class InternalTemplateLeakError extends Error {
+  constructor(templateName: string, channel: string) {
+    super(
+      `Template "${templateName}" é USO INTERNO e não pode ser enviado pelo canal "${channel}". ` +
+        `Use canais internos (painel do salão, e-mail à equipe, log de auditoria).`,
+    )
+    this.name = 'InternalTemplateLeakError'
+  }
+}
+
+/**
+ * Asserção compartilhada — chame antes de enfileirar QUALQUER comunicação
+ * ao cliente final (e-mail/WhatsApp/SMS/push). Falha rápido em runtime.
+ */
+export function assertTemplateAllowedForCustomerChannel(
+  templateName: string,
+  channel: 'customer-email' | 'customer-whatsapp' | 'customer-sms' | 'customer-push',
+): void {
+  const tpl = TEMPLATES[templateName]
+  if (!tpl) return
+  if (tpl.internal === true) throw new InternalTemplateLeakError(templateName, channel)
+  if (tpl.allowedChannels && !tpl.allowedChannels.includes('customer')) {
+    throw new InternalTemplateLeakError(templateName, channel)
+  }
 }
 
 /**
@@ -55,3 +89,30 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'restaurant-postvisit-thanks': restaurantPostvisitThanksTemplate,
 }
 
+
+/**
+ * BUILD-TIME / MODULE-LOAD VALIDATION
+ *
+ * Roda na primeira importação do registry — se algum template marcado como
+ * `internal: true` for acidentalmente reassociado a um canal de cliente
+ * (ex.: alguém adicionar 'customer' ao allowedChannels), a aplicação falha
+ * imediatamente em vez de só vazar em produção.
+ */
+;(function validateTemplateChannelInvariants() {
+  const errors: string[] = []
+  for (const [name, entry] of Object.entries(TEMPLATES)) {
+    const channels = entry.allowedChannels
+    if (entry.internal === true) {
+      if (channels && channels.includes('customer')) {
+        errors.push(
+          `Template "${name}" é internal:true mas declara 'customer' em allowedChannels — proibido.`,
+        )
+      }
+    }
+  }
+  if (errors.length) {
+    throw new Error(
+      `[email-templates/registry] Invariante de canal violado:\n  - ${errors.join('\n  - ')}`,
+    )
+  }
+})()
