@@ -1,10 +1,16 @@
+import { useState } from "react";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "@/components/app/PageElements";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { fetchVoiceOfCustomer } from "@/lib/ops-cockpits.functions";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { fetchVoiceInsights } from "@/lib/ops-cockpits.functions";
+import { Megaphone } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/ops/voz-cliente")({
   head: () => ({
@@ -29,69 +35,109 @@ export const Route = createFileRoute("/_authenticated/ops/voz-cliente")({
 });
 
 function VozClientePage() {
-  const fn = useServerFn(fetchVoiceOfCustomer);
+  const [days, setDays] = useState(60);
+  const [channel, setChannel] = useState<"all" | "agent_demand" | "poll">("all");
+  const [audience, setAudience] = useState<"all" | "empresa" | "consumidor">("all");
+  const [search, setSearch] = useState("");
+
+  const fn = useServerFn(fetchVoiceInsights);
   const { data, isLoading } = useQuery({
-    queryKey: ["ops", "voc"],
-    queryFn: () => fn({ data: { days: 30 } }),
+    queryKey: ["ops", "voc", "insights", days, channel, audience],
+    queryFn: () => fn({ data: { days, channel, audience } }),
   });
+
+  const visible = (data?.insights ?? []).filter((i) =>
+    search.trim() === "" ? true : i.title.toLowerCase().includes(search.toLowerCase()),
+  );
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Voz do Cliente" description="Demandas, enquetes e feedback consolidados (30d)" />
+      <PageHeader
+        title="Voz do Cliente — Banco de Insights"
+        description="Filtre por canal, período e audiência para agir rápido."
+      />
 
-      {isLoading ? (
-        <p className="text-sm text-muted-foreground">Carregando…</p>
-      ) : (
-        <>
-          <div className="grid gap-3 md:grid-cols-3">
-            <Card className="p-4">
-              <p className="text-xs text-muted-foreground">Demandas totais</p>
-              <p className="mt-1 text-2xl font-semibold">{data?.summary.totalDemands ?? 0}</p>
-            </Card>
-            <Card className="p-4">
-              <p className="text-xs text-muted-foreground">Demandas abertas</p>
-              <p className="mt-1 text-2xl font-semibold">{data?.summary.openDemands ?? 0}</p>
-            </Card>
-            <Card className="p-4">
-              <p className="text-xs text-muted-foreground">Enquetes ativas</p>
-              <p className="mt-1 text-2xl font-semibold">{data?.summary.activePolls ?? 0}</p>
-            </Card>
-          </div>
+      <Card className="p-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <Select value={String(days)} onValueChange={(v) => setDays(Number(v))}>
+            <SelectTrigger className="h-9 w-32 text-xs"><SelectValue placeholder="Período" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7">7 dias</SelectItem>
+              <SelectItem value="30">30 dias</SelectItem>
+              <SelectItem value="60">60 dias</SelectItem>
+              <SelectItem value="90">90 dias</SelectItem>
+              <SelectItem value="180">180 dias</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={channel} onValueChange={(v: any) => setChannel(v)}>
+            <SelectTrigger className="h-9 w-44 text-xs"><SelectValue placeholder="Canal" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os canais</SelectItem>
+              <SelectItem value="agent_demand">Demandas de agentes</SelectItem>
+              <SelectItem value="poll">Enquetes</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={audience} onValueChange={(v: any) => setAudience(v)}>
+            <SelectTrigger className="h-9 w-40 text-xs"><SelectValue placeholder="Audiência" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas audiências</SelectItem>
+              <SelectItem value="empresa">Empresa</SelectItem>
+              <SelectItem value="consumidor">Consumidor</SelectItem>
+            </SelectContent>
+          </Select>
+          <Input
+            placeholder="Buscar no título…"
+            className="h-9 max-w-xs text-xs"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <span className="ml-auto text-xs text-muted-foreground">
+            {visible.length} / {data?.total ?? 0} insights
+          </span>
+        </div>
+      </Card>
 
-          <Card className="p-4">
-            <h2 className="mb-2 text-sm font-semibold">Demandas recentes</h2>
-            {data?.demands.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Nenhuma demanda no período.</p>
-            ) : (
-              <ul className="divide-y">
-                {data?.demands.slice(0, 20).map((d: any) => (
-                  <li key={d.id} className="flex items-center gap-3 py-2 text-sm">
-                    <span className="flex-1 truncate">{d.title}</span>
-                    <Badge variant="outline">{d.status}</Badge>
-                    <span className="text-xs text-muted-foreground">{new Date(d.created_at).toLocaleDateString("pt-BR")}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
+      <div className="grid gap-3 md:grid-cols-3">
+        {(data?.facets.bySource ?? []).map((f) => (
+          <Card key={`s-${f.key}`} className="p-3">
+            <p className="text-xs text-muted-foreground">Canal</p>
+            <p className="text-sm font-medium capitalize">{f.key.replace("_", " ")}</p>
+            <p className="mt-1 text-xl font-semibold">{f.count}</p>
           </Card>
+        ))}
+      </div>
 
-          <Card className="p-4">
-            <h2 className="mb-2 text-sm font-semibold">Enquetes</h2>
-            {data?.polls.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Sem enquetes no período.</p>
-            ) : (
-              <ul className="divide-y">
-                {data?.polls.slice(0, 10).map((p: any) => (
-                  <li key={p.id} className="flex items-center gap-3 py-2 text-sm">
-                    <span className="flex-1 truncate">{p.question}</span>
-                    <Badge variant="outline">{p.status}</Badge>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Card>
-        </>
-      )}
+      <Card className="p-4">
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+          <Megaphone className="h-4 w-4" /> Insights
+        </h2>
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Carregando…</p>
+        ) : visible.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhum insight para os filtros aplicados.</p>
+        ) : (
+          <ul className="divide-y">
+            {visible.map((i) => (
+              <li key={`${i.source}-${i.id}`} className="flex items-start gap-3 py-2 text-sm">
+                <div className="flex-1">
+                  <p className="font-medium">{i.title}</p>
+                  <div className="mt-1 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+                    <Badge variant="outline" className="text-[10px] capitalize">
+                      {i.source === "agent_demand" ? "Demanda" : "Enquete"}
+                    </Badge>
+                    <Badge variant="outline" className="text-[10px] capitalize">{i.audience}</Badge>
+                    <Badge variant="outline" className="text-[10px] capitalize">{i.status}</Badge>
+                    {i.meta?.tipo && (
+                      <Badge variant="outline" className="text-[10px]">{i.meta.tipo}</Badge>
+                    )}
+                    <span className="ml-2">{new Date(i.createdAt).toLocaleString("pt-BR")}</span>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
     </div>
   );
 }
