@@ -53,23 +53,63 @@ bunx playwright show-report
 ## Visual regression (E2E_VISUAL)
 
 Os testes de snapshot do sub-nav da Minha área são pulados por padrão no CI para
-não falhar em runs sem baseline. Para gerar os baselines iniciais (incluindo as
-variações com `reducedMotion: reduce`):
+não falhar em runs sem baseline. Habilite-os com `E2E_VISUAL=1`.
+
+### Gerar/atualizar todos os baselines (inclui reducedMotion + RTL)
 
 ```bash
-# 1) Local: gerar/atualizar todos os PNGs de referência
 export E2E_EMAIL=...
 export E2E_PASSWORD=...
-E2E_VISUAL=1 bunx playwright test tests/e2e/dashboards-consumidor-subnav.spec.ts \
-  --update-snapshots
-
-# 2) Commitar os arquivos sob tests/e2e/__snapshots__/ e
-#    tests/e2e/dashboards-consumidor-subnav.spec.ts-snapshots/
-git add tests/e2e/**/*.png
+bun run test:e2e:visual:update
 ```
 
-No CI, defina a variable `E2E_VISUAL=1` (Settings → Variables) para que os testes
-visuais rodem contra os baselines commitados. O primeiro run deve passar logo
-após o commit dos PNGs; mudanças intencionais de UI exigem `--update-snapshots`
-local e novo commit. Sem `E2E_VISUAL=1` o CI continua pulando esses cenários.
+### Regenerar somente os baselines RTL + reducedMotion (portrait e landscape)
+
+Os PNGs ficam em `tests/e2e/dashboards-consumidor-subnav.spec.ts-snapshots/`
+com prefixo `rm-rtl-mobile-`. Para regerá-los isoladamente:
+
+```bash
+# Portrait (390x844) + landscape (844x390) — o teste alterna os dois viewports
+E2E_VISUAL=1 bunx playwright test \
+  tests/e2e/dashboards-consumidor-subnav.spec.ts \
+  -g "visual regression \(RTL \+ reduced motion\)" \
+  --update-snapshots
+
+# Commitar os novos PNGs
+git add tests/e2e/dashboards-consumidor-subnav.spec.ts-snapshots/rm-rtl-mobile-*.png
+```
+
+Os arquivos esperados após a regeneração:
+
+- `rm-rtl-mobile-portrait-subnav-default.png`
+- `rm-rtl-mobile-portrait-subnav-focus-cupons.png`
+- `rm-rtl-mobile-portrait-tabpanel-cupons.png`
+- `rm-rtl-mobile-landscape-subnav-focus-cupons.png`
+- `rm-rtl-mobile-landscape-tabpanel-cupons.png`
+
+No CI, defina a variable `E2E_VISUAL=1` (Settings → Variables) para rodar os
+visuais contra os baselines commitados. Sem ela o CI continua pulando esses
+cenários.
+
+### Interpretando os artifacts do CI quando falha
+
+Quando um teste visual falha, o workflow `.github/workflows/e2e.yml` faz upload
+de dois artifacts (e posta um comentário no PR com links diretos):
+
+| Artifact | Contém | Como abrir |
+| --- | --- | --- |
+| `playwright-visual-diffs` | `*-expected.png`, `*-actual.png`, `*-diff.png` por teste | Baixe e compare visualmente |
+| `playwright-traces` | `trace.zip`, `video.webm` | `bunx playwright show-trace trace.zip` |
+
+Como ler os PNGs:
+
+- **`*-expected.png`** — baseline atualmente commitado no repo. É o que o teste esperava ver.
+- **`*-actual.png`** — captura real desta run. É o que o teste viu.
+- **`*-diff.png`** — destaque dos pixels divergentes (vermelho/transparente).
+  Pequenos diffs em anti-aliasing são tolerados via `maxDiffPixelRatio: 0.02`.
+  Se a mudança for **intencional** (ex.: ajuste de cor/spacing), rode
+  `bun run test:e2e:visual:update` localmente e commite os novos baselines.
+  Se for **regressão**, corrija o componente e refaça o run.
+
+
 
