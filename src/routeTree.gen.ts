@@ -116,6 +116,7 @@ import { Route as DemoAdvogadosRouteImport } from './routes/demo.advogados'
 import { Route as ContratarSobMedidaRouteImport } from './routes/contratar.sob-medida'
 import { Route as ComoFuncionaFitnessRouteImport } from './routes/como-funciona.fitness'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
 import { Route as AuthenticatedUnitsRouteImport } from './routes/_authenticated/units'
 import { Route as AuthenticatedTalentsRouteImport } from './routes/_authenticated/talents'
@@ -885,6 +886,11 @@ const ComoFuncionaFitnessRoute = ComoFuncionaFitnessRouteImport.update({
 const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
   id: '/checkout/success',
   path: '/checkout/success',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
@@ -2267,6 +2273,7 @@ export interface FileRoutesByFullPath {
   '/talents': typeof AuthenticatedTalentsRoute
   '/units': typeof AuthenticatedUnitsRoute
   '/users': typeof AuthenticatedUsersRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/contratar/sob-medida': typeof ContratarSobMedidaRoute
@@ -2594,6 +2601,7 @@ export interface FileRoutesByTo {
   '/talents': typeof AuthenticatedTalentsRoute
   '/units': typeof AuthenticatedUnitsRoute
   '/users': typeof AuthenticatedUsersRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/contratar/sob-medida': typeof ContratarSobMedidaRoute
@@ -2935,6 +2943,7 @@ export interface FileRoutesById {
   '/_authenticated/talents': typeof AuthenticatedTalentsRoute
   '/_authenticated/units': typeof AuthenticatedUnitsRoute
   '/_authenticated/users': typeof AuthenticatedUsersRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/contratar/sob-medida': typeof ContratarSobMedidaRoute
@@ -3275,6 +3284,7 @@ export interface FileRouteTypes {
     | '/talents'
     | '/units'
     | '/users'
+    | '/admin/login'
     | '/checkout/success'
     | '/como-funciona/fitness'
     | '/contratar/sob-medida'
@@ -3602,6 +3612,7 @@ export interface FileRouteTypes {
     | '/talents'
     | '/units'
     | '/users'
+    | '/admin/login'
     | '/checkout/success'
     | '/como-funciona/fitness'
     | '/contratar/sob-medida'
@@ -3942,6 +3953,7 @@ export interface FileRouteTypes {
     | '/_authenticated/talents'
     | '/_authenticated/units'
     | '/_authenticated/users'
+    | '/admin/login'
     | '/checkout/success'
     | '/como-funciona/fitness'
     | '/contratar/sob-medida'
@@ -4254,6 +4266,7 @@ export interface RootRouteChildren {
   UnsubscribeRoute: typeof UnsubscribeRoute
   VitrineRoute: typeof VitrineRouteWithChildren
   WhiteLabelRoute: typeof WhiteLabelRouteWithChildren
+  AdminLoginRoute: typeof AdminLoginRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   ComoFuncionaFitnessRoute: typeof ComoFuncionaFitnessRoute
   DemoAdvogadosRoute: typeof DemoAdvogadosRoute
@@ -5103,6 +5116,13 @@ declare module '@tanstack/react-router' {
       path: '/checkout/success'
       fullPath: '/checkout/success'
       preLoaderRoute: typeof CheckoutSuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/users': {
@@ -7513,6 +7533,7 @@ const rootRouteChildren: RootRouteChildren = {
   UnsubscribeRoute: UnsubscribeRoute,
   VitrineRoute: VitrineRouteWithChildren,
   WhiteLabelRoute: WhiteLabelRouteWithChildren,
+  AdminLoginRoute: AdminLoginRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
   ComoFuncionaFitnessRoute: ComoFuncionaFitnessRoute,
   DemoAdvogadosRoute: DemoAdvogadosRoute,
