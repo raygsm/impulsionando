@@ -2511,6 +2511,453 @@ export type Database = {
           },
         ]
       }
+      brewery_brands: {
+        Row: {
+          bio: string | null
+          brewer_name: string | null
+          city: string | null
+          cnpj: string | null
+          company_id: string | null
+          cover_url: string | null
+          created_at: string
+          founded_year: number | null
+          id: string
+          instagram: string | null
+          is_active: boolean
+          is_demo: boolean
+          logo_url: string | null
+          name: string
+          owner_user_id: string | null
+          slug: string
+          state: string | null
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          bio?: string | null
+          brewer_name?: string | null
+          city?: string | null
+          cnpj?: string | null
+          company_id?: string | null
+          cover_url?: string | null
+          created_at?: string
+          founded_year?: number | null
+          id?: string
+          instagram?: string | null
+          is_active?: boolean
+          is_demo?: boolean
+          logo_url?: string | null
+          name: string
+          owner_user_id?: string | null
+          slug: string
+          state?: string | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          bio?: string | null
+          brewer_name?: string | null
+          city?: string | null
+          cnpj?: string | null
+          company_id?: string | null
+          cover_url?: string | null
+          created_at?: string
+          founded_year?: number | null
+          id?: string
+          instagram?: string | null
+          is_active?: boolean
+          is_demo?: boolean
+          logo_url?: string | null
+          name?: string
+          owner_user_id?: string | null
+          slug?: string
+          state?: string | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brewery_brands_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      brewery_campaigns: {
+        Row: {
+          brand_id: string
+          created_at: string
+          ends_at: string
+          goal: string | null
+          id: string
+          kpi_target_leads: number | null
+          kpi_target_units: number | null
+          name: string
+          starts_at: string
+          status: string
+          target_pdv_ids: string[]
+          updated_at: string
+          voucher_code: string | null
+        }
+        Insert: {
+          brand_id: string
+          created_at?: string
+          ends_at: string
+          goal?: string | null
+          id?: string
+          kpi_target_leads?: number | null
+          kpi_target_units?: number | null
+          name: string
+          starts_at: string
+          status?: string
+          target_pdv_ids?: string[]
+          updated_at?: string
+          voucher_code?: string | null
+        }
+        Update: {
+          brand_id?: string
+          created_at?: string
+          ends_at?: string
+          goal?: string | null
+          id?: string
+          kpi_target_leads?: number | null
+          kpi_target_units?: number | null
+          name?: string
+          starts_at?: string
+          status?: string
+          target_pdv_ids?: string[]
+          updated_at?: string
+          voucher_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brewery_campaigns_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brewery_brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      brewery_lead_preferences: {
+        Row: {
+          brand_id: string | null
+          consent_at: string | null
+          consent_marketing: boolean
+          consumer_user_id: string | null
+          created_at: string
+          favorite_brand_ids: string[]
+          favorite_styles: string[]
+          frequency: string | null
+          id: string
+          interests: string[]
+          masked_name: string | null
+          masked_whatsapp: string | null
+          source: string | null
+          updated_at: string
+        }
+        Insert: {
+          brand_id?: string | null
+          consent_at?: string | null
+          consent_marketing?: boolean
+          consumer_user_id?: string | null
+          created_at?: string
+          favorite_brand_ids?: string[]
+          favorite_styles?: string[]
+          frequency?: string | null
+          id?: string
+          interests?: string[]
+          masked_name?: string | null
+          masked_whatsapp?: string | null
+          source?: string | null
+          updated_at?: string
+        }
+        Update: {
+          brand_id?: string | null
+          consent_at?: string | null
+          consent_marketing?: boolean
+          consumer_user_id?: string | null
+          created_at?: string
+          favorite_brand_ids?: string[]
+          favorite_styles?: string[]
+          frequency?: string | null
+          id?: string
+          interests?: string[]
+          masked_name?: string | null
+          masked_whatsapp?: string | null
+          source?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brewery_lead_preferences_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brewery_brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      brewery_pdv_links: {
+        Row: {
+          brand_id: string
+          contact_name: string | null
+          contact_phone: string | null
+          contract_ended_at: string | null
+          contract_started_at: string | null
+          contract_status: string
+          created_at: string
+          id: string
+          notes: string | null
+          pdv_city: string | null
+          pdv_company_id: string | null
+          pdv_name: string
+          pdv_state: string | null
+          updated_at: string
+        }
+        Insert: {
+          brand_id: string
+          contact_name?: string | null
+          contact_phone?: string | null
+          contract_ended_at?: string | null
+          contract_started_at?: string | null
+          contract_status?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          pdv_city?: string | null
+          pdv_company_id?: string | null
+          pdv_name: string
+          pdv_state?: string | null
+          updated_at?: string
+        }
+        Update: {
+          brand_id?: string
+          contact_name?: string | null
+          contact_phone?: string | null
+          contract_ended_at?: string | null
+          contract_started_at?: string | null
+          contract_status?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          pdv_city?: string | null
+          pdv_company_id?: string | null
+          pdv_name?: string
+          pdv_state?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brewery_pdv_links_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brewery_brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brewery_pdv_links_pdv_company_id_fkey"
+            columns: ["pdv_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      brewery_products: {
+        Row: {
+          abv: number | null
+          brand_id: string
+          created_at: string
+          description: string | null
+          ibu: number | null
+          id: string
+          is_active: boolean
+          is_seasonal: boolean
+          name: string
+          package_type: string | null
+          photo_url: string | null
+          sku: string | null
+          style: string
+          updated_at: string
+          volume_ml: number | null
+        }
+        Insert: {
+          abv?: number | null
+          brand_id: string
+          created_at?: string
+          description?: string | null
+          ibu?: number | null
+          id?: string
+          is_active?: boolean
+          is_seasonal?: boolean
+          name: string
+          package_type?: string | null
+          photo_url?: string | null
+          sku?: string | null
+          style: string
+          updated_at?: string
+          volume_ml?: number | null
+        }
+        Update: {
+          abv?: number | null
+          brand_id?: string
+          created_at?: string
+          description?: string | null
+          ibu?: number | null
+          id?: string
+          is_active?: boolean
+          is_seasonal?: boolean
+          name?: string
+          package_type?: string | null
+          photo_url?: string | null
+          sku?: string | null
+          style?: string
+          updated_at?: string
+          volume_ml?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brewery_products_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brewery_brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      brewery_sellouts: {
+        Row: {
+          avg_ticket_cents: number | null
+          brand_id: string
+          created_at: string
+          gross_revenue_cents: number
+          id: string
+          notes: string | null
+          pdv_link_id: string | null
+          period_end: string
+          period_start: string
+          product_id: string
+          source: string
+          units: number
+          updated_at: string
+        }
+        Insert: {
+          avg_ticket_cents?: number | null
+          brand_id: string
+          created_at?: string
+          gross_revenue_cents?: number
+          id?: string
+          notes?: string | null
+          pdv_link_id?: string | null
+          period_end: string
+          period_start: string
+          product_id: string
+          source?: string
+          units?: number
+          updated_at?: string
+        }
+        Update: {
+          avg_ticket_cents?: number | null
+          brand_id?: string
+          created_at?: string
+          gross_revenue_cents?: number
+          id?: string
+          notes?: string | null
+          pdv_link_id?: string | null
+          period_end?: string
+          period_start?: string
+          product_id?: string
+          source?: string
+          units?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brewery_sellouts_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brewery_brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brewery_sellouts_pdv_link_id_fkey"
+            columns: ["pdv_link_id"]
+            isOneToOne: false
+            referencedRelation: "brewery_pdv_links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brewery_sellouts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "brewery_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      brewery_tastings: {
+        Row: {
+          brand_id: string
+          created_at: string
+          duration_minutes: number | null
+          event_at: string
+          id: string
+          leads_captured: number
+          notes: string | null
+          participants: number
+          pdv_link_id: string | null
+          products_showcased: string[]
+          units_sold: number
+          updated_at: string
+        }
+        Insert: {
+          brand_id: string
+          created_at?: string
+          duration_minutes?: number | null
+          event_at: string
+          id?: string
+          leads_captured?: number
+          notes?: string | null
+          participants?: number
+          pdv_link_id?: string | null
+          products_showcased?: string[]
+          units_sold?: number
+          updated_at?: string
+        }
+        Update: {
+          brand_id?: string
+          created_at?: string
+          duration_minutes?: number | null
+          event_at?: string
+          id?: string
+          leads_captured?: number
+          notes?: string | null
+          participants?: number
+          pdv_link_id?: string | null
+          products_showcased?: string[]
+          units_sold?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brewery_tastings_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brewery_brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brewery_tastings_pdv_link_id_fkey"
+            columns: ["pdv_link_id"]
+            isOneToOne: false
+            referencedRelation: "brewery_pdv_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clube_alerts: {
         Row: {
           active: boolean
@@ -11771,6 +12218,10 @@ export type Database = {
       get_table_menu: { Args: { _token: string }; Returns: Json }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
+        Returns: boolean
+      }
+      has_brewery_access: {
+        Args: { _brand_id: string; _user_id: string }
         Returns: boolean
       }
       has_role: {
