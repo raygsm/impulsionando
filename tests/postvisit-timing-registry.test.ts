@@ -86,7 +86,7 @@ describe('mudanças no registry preservam idempotência da pós-visita', () => {
     }
     vi.doMock('@/integrations/supabase/client.server', () => ({
       supabaseAdmin: {
-        from: () => chain(),
+        from: (t: string) => chain(t),
         rpc: async (_n: string, p: any) => { state.enqueued.push(p?.payload ?? p); return { data: null, error: null } },
       },
     }))
