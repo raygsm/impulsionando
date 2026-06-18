@@ -374,9 +374,13 @@ export function installGlobalWhatsAppClickTracking() {
       if (!anchor) return;
       const cta = anchor.dataset.cta || "anchor";
       const variant = anchor.dataset.variant;
+      const campaign = anchor.dataset.campaign;
+      const ctaText = anchor.dataset.ctaText || (anchor.textContent || "").trim().slice(0, 120);
       trackWhatsAppCTA("whatsapp_cta_click", {
         origin: cta,
         variant,
+        campaign,
+        ctaText,
         path: window.location.pathname,
         href: anchor.href,
       });
