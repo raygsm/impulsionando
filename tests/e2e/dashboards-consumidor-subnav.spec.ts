@@ -1624,6 +1624,42 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
     const page = await context.newPage();
     await login(page);
 
+    // Helpers — wait until layout, focus, ring tokens and CSS offset all settle
+    const waitSettled = async (chipId: string) => {
+      // 1) Web fonts loaded so glyph widths don't shift the snapshot
+      await page.evaluate(() => (document as Document & { fonts?: { ready: Promise<unknown> } }).fonts?.ready);
+      // 2) --sec-offset has been measured (>0) by the ResizeObserver
+      await page.waitForFunction(() => {
+        const el = document.querySelector('[role="tabpanel"]') as HTMLElement | null;
+        if (!el) return false;
+        const v = getComputedStyle(el).getPropertyValue("--sec-offset").trim();
+        return !!v && parseFloat(v) > 0;
+      });
+      // 3) The chip we expect to be focused is actually the active element
+      await page.waitForFunction(
+        (id) => (document.activeElement as HTMLElement | null)?.id === id,
+        `tab-${chipId}`,
+      );
+      // 4) Focus-ring tokens present on the focused chip class list
+      await page.waitForFunction((id) => {
+        const el = document.getElementById(`tab-${id}`);
+        if (!el) return false;
+        const cls = el.className;
+        return (
+          cls.includes("focus-visible:ring-2") &&
+          cls.includes("focus-visible:ring-ring") &&
+          cls.includes("focus-visible:ring-offset-2")
+        );
+      }, chipId);
+      // 5) Two animation frames so any final reflow paints before screenshot
+      await page.evaluate(
+        () =>
+          new Promise<void>((r) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => r())),
+          ),
+      );
+    };
+
     // Portrait
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(ROUTE);
@@ -1634,7 +1670,8 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
     });
     await page.reload();
     await page.waitForLoadState("networkidle");
-    await page.waitForTimeout(500);
+    await page.locator("#tab-favoritos").focus();
+    await waitSettled("favoritos");
 
     const tablistP = page.getByRole("tablist", { name: /Seções da Minha área/i });
     await expect(tablistP).toHaveScreenshot(
@@ -1643,12 +1680,13 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
     );
 
     // Activate cupons via keyboard and snapshot the focused chip + tabpanel
-    await page.locator("#tab-favoritos").focus();
     await page.keyboard.press("ArrowRight");
     await page.keyboard.press("ArrowRight");
     await page.keyboard.press("Enter");
-    await page.waitForTimeout(400);
+    // After Enter the component focuses the tabpanel; refocus the chip to
+    // capture the focus-ring on the chip in a deterministic state.
     await page.locator("#tab-cupons").focus();
+    await waitSettled("cupons");
     await expect(tablistP).toHaveScreenshot(
       "rm-rtl-mobile-portrait-subnav-focus-cupons.png",
       { maxDiffPixelRatio: 0.02, animations: "disabled" },
@@ -1658,11 +1696,11 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
       { maxDiffPixelRatio: 0.03, animations: "disabled" },
     );
 
-    // Landscape — rotate, re-measure, snapshot again
+    // Landscape — rotate, re-measure, wait until offset re-stabilizes
     await page.setViewportSize({ width: 844, height: 390 });
     await page.evaluate(() => window.dispatchEvent(new Event("orientationchange")));
-    await page.waitForTimeout(600);
     await page.locator("#tab-cupons").focus();
+    await waitSettled("cupons");
 
     const tablistL = page.getByRole("tablist", { name: /Seções da Minha área/i });
     await expect(tablistL).toHaveScreenshot(
