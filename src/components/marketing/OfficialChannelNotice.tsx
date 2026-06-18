@@ -1,8 +1,11 @@
 import { MessageCircle, ShieldAlert } from "lucide-react";
+import {
+  buildOfficialWhatsAppUrl,
+  OFFICIAL_WHATSAPP_PHONE_DISPLAY,
+  trackWhatsAppCTA,
+} from "@/lib/whatsapp-cta";
 
-const WHATSAPP_URL =
-  "https://wa.me/5521993075000?text=" +
-  encodeURIComponent("Olá! Vim pelo site oficial da Impulsionando.");
+const WHATSAPP_URL = buildOfficialWhatsAppUrl();
 
 type Variant = "info" | "warning";
 
@@ -12,9 +15,11 @@ type Variant = "info" | "warning";
  */
 export function OfficialChannelNotice({
   variant = "warning",
+  origin = "form",
   className = "",
 }: {
   variant?: Variant;
+  origin?: string;
   className?: string;
 }) {
   const styles =
@@ -30,22 +35,34 @@ export function OfficialChannelNotice({
     >
       <ShieldAlert className="w-4 h-4 mt-0.5 shrink-0" aria-hidden="true" />
       <div className="space-y-1">
-        <strong className="block">Canal oficial único — WhatsApp (21) 99307-5000</strong>
+        <strong className="block">
+          Canal oficial único — WhatsApp {OFFICIAL_WHATSAPP_PHONE_DISPLAY}
+        </strong>
         <p>
           Documentos, comprovantes de pagamento, solicitações e qualquer
           comunicação devem ser enviados <strong>exclusivamente</strong> pelo
           WhatsApp oficial. <strong>Não envie</strong> arquivos sensíveis,
-          dados bancários ou comprovantes por este formulário, e-mails de
-          terceiros, DM em redes sociais ou outros números.{" "}
+          dados bancários, comprovantes, e-mails de terceiros ou números
+          alternativos por este formulário ou por DM em redes sociais.{" "}
           <a
             href={WHATSAPP_URL}
             target="_blank"
             rel="noopener noreferrer"
-            data-cta="official-notice-whatsapp"
+            data-cta={`notice:${origin}`}
+            onClick={() =>
+              trackWhatsAppCTA("whatsapp_notice_click", { origin })
+            }
             className="inline-flex items-center gap-1 underline underline-offset-2 font-semibold"
           >
             <MessageCircle className="w-3.5 h-3.5" aria-hidden="true" />
             Abrir WhatsApp oficial
+          </a>{" "}
+          ·{" "}
+          <a
+            href="/canal-oficial"
+            className="underline underline-offset-2"
+          >
+            Como identificar mensagens oficiais
           </a>
           .
         </p>

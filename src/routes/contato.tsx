@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { OfficialChannelNotice } from "@/components/marketing/OfficialChannelNotice";
+import { validateOfficialChannelMessage, trackWhatsAppCTA } from "@/lib/whatsapp-cta";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -59,32 +60,15 @@ function ContatoPage() {
       return;
     }
 
-    // Bloqueia tentativas de redirecionar a conversa para canais não oficiais
-    // (outros números de WhatsApp, links, redes sociais, telegram, e-mails de terceiros).
-    const lower = trimmedMessage.toLowerCase();
-    const OFFICIAL_DIGITS = "5521993075000";
-    const phoneMatches = lower.match(/(?:\+?\d[\s\-().]*){10,}/g) ?? [];
-    const hasForeignPhone = phoneMatches.some((m) => {
-      const digits = m.replace(/\D/g, "");
-      return digits.length >= 10 && !digits.endsWith("993075000");
-    });
-    const forbidden = [
-      "t.me/", "telegram", "instagram.com/", "facebook.com/", "fb.me/",
-      "tiktok.com/", "discord.gg/", "skype:", "viber",
-    ];
-    const hasForbiddenChannel = forbidden.some((p) => lower.includes(p));
-    const hasForeignWhatsapp =
-      (lower.includes("wa.me/") || lower.includes("whatsapp")) &&
-      !lower.includes(OFFICIAL_DIGITS) &&
-      !lower.includes("99307-5000") &&
-      !lower.includes("993075000");
-
-    if (hasForeignPhone || hasForbiddenChannel || hasForeignWhatsapp) {
-      toast.error(
-        "Para sua segurança, o canal oficial único é o WhatsApp (21) 99307-5000. Remova outros números, links ou redes sociais da mensagem.",
-      );
+    // Validador compartilhado: bloqueia outros telefones, e-mails de
+    // terceiros, links/handles de redes sociais e WhatsApps alternativos.
+    const channelError = validateOfficialChannelMessage(trimmedMessage);
+    if (channelError) {
+      toast.error(channelError);
       return;
     }
+    trackWhatsAppCTA("whatsapp_form_submit", { origin: "contato-form" });
+
 
     setLoading(true);
     const leadId =

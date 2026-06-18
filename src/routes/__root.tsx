@@ -175,6 +175,10 @@ function AnalyticsTracker() {
       });
       (window as unknown as { __unsubAnalytics?: () => void }).__unsubAnalytics = unsub;
     });
+    // Rastreio global de cliques no WhatsApp oficial (cobre landings antigas)
+    import("@/lib/whatsapp-cta").then(({ installGlobalWhatsAppClickTracking }) => {
+      installGlobalWhatsAppClickTracking();
+    });
     return () => {
       const w = window as unknown as { __unsubAnalytics?: () => void };
       w.__unsubAnalytics?.();

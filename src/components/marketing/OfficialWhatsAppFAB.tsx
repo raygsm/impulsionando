@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { MessageCircle, X } from "lucide-react";
+import {
+  buildOfficialWhatsAppUrl,
+  OFFICIAL_WHATSAPP_PHONE_DISPLAY,
+  trackWhatsAppCTA,
+} from "@/lib/whatsapp-cta";
 
-const PHONE_DISPLAY = "(21) 99307-5000";
-const WHATSAPP_URL =
-  "https://wa.me/5521993075000?text=" +
-  encodeURIComponent(
-    "Olá! Vim pelo site oficial da Impulsionando e gostaria de atendimento pelo canal oficial.",
-  );
+const WHATSAPP_URL = buildOfficialWhatsAppUrl(
+  "Olá! Vim pelo site oficial da Impulsionando e gostaria de atendimento pelo canal oficial.",
+);
 
 // Não exibir o FAB em áreas autenticadas / login / checkout interno.
 const HIDDEN_PREFIXES = [
@@ -25,7 +27,6 @@ export function OfficialWhatsAppFAB() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
 
-  // Esconde em áreas internas/autenticadas
   if (
     pathname.startsWith("/_authenticated") ||
     HIDDEN_PREFIXES.some((p) => pathname.startsWith(p))
@@ -55,8 +56,15 @@ export function OfficialWhatsAppFAB() {
           <p className="text-muted-foreground">
             Toda informação, envio de documentos, comprovantes e solicitações deve
             ser feita <strong className="text-foreground">apenas</strong> pelo WhatsApp
-            oficial <strong className="text-foreground">{PHONE_DISPLAY}</strong>.
-            Contatos por outros canais não serão considerados.
+            oficial <strong className="text-foreground">{OFFICIAL_WHATSAPP_PHONE_DISPLAY}</strong>.
+            Contatos por outros canais não serão considerados.{" "}
+            <a
+              href="/canal-oficial"
+              className="text-primary underline underline-offset-2"
+            >
+              Saiba mais
+            </a>
+            .
           </p>
         </div>
       )}
@@ -76,12 +84,20 @@ export function OfficialWhatsAppFAB() {
           href={WHATSAPP_URL}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label={`Falar com a Impulsionando no WhatsApp oficial ${PHONE_DISPLAY}`}
+          aria-label={`Falar com a Impulsionando no WhatsApp oficial ${OFFICIAL_WHATSAPP_PHONE_DISPLAY}`}
           data-cta="whatsapp-fab"
+          onClick={() =>
+            trackWhatsAppCTA("whatsapp_fab_click", {
+              origin: "fab",
+              path: typeof window !== "undefined" ? window.location.pathname : "",
+            })
+          }
           className="inline-flex items-center gap-2 rounded-full bg-[#25D366] text-white px-4 py-3 shadow-elegant hover:brightness-110 transition-all font-medium text-sm"
         >
           <MessageCircle className="w-5 h-5" aria-hidden="true" />
-          <span className="hidden sm:inline">WhatsApp oficial · {PHONE_DISPLAY}</span>
+          <span className="hidden sm:inline">
+            WhatsApp oficial · {OFFICIAL_WHATSAPP_PHONE_DISPLAY}
+          </span>
         </a>
       </div>
     </div>
