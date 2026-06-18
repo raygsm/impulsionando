@@ -40,6 +40,8 @@ import {
   WifiOff,
   Save,
   Clock,
+  History,
+  FileDown,
 } from 'lucide-react'
 import {
   listAttemptLogs,
@@ -48,6 +50,8 @@ import {
   getAttemptLogDetails,
   getRetentionSettings,
   setRetentionSettings,
+  listRetentionAudit,
+  exportAttemptLogsCsv,
 } from '@/lib/salao-attempt-logs.functions'
 
 export const Route = createFileRoute('/_authenticated/restaurante/salao/logs')({
@@ -110,6 +114,7 @@ function SalaoLogsPage() {
   const queryClient = useQueryClient()
   const fetcher = useServerFn(listAttemptLogs)
   const exportFn = useServerFn(exportNotificationsCsv)
+  const exportAttemptsFn = useServerFn(exportAttemptLogsCsv)
   const simFn = useServerFn(simulatePostvisitWindow)
 
   const queryKey = ['salao-attempt-logs', filters, page, pageSize, sortBy, sortDir] as const
@@ -152,17 +157,28 @@ function SalaoLogsPage() {
     return Array.from(map.entries())
   }, [data])
 
+  const downloadCsv = (csv: string, filename: string) => {
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   const onExport = async () => {
     const res = await exportFn({
       data: { niche: filters.niche, from: filters.from, to: filters.to } as any,
     })
-    const blob = new Blob([res.csv], { type: 'text/csv;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = res.filename
-    a.click()
-    URL.revokeObjectURL(url)
+    downloadCsv(res.csv, res.filename)
+  }
+
+  const onExportAttempts = async () => {
+    const res = await exportAttemptsFn({
+      data: { ...filters, sortBy, sortDir } as any,
+    })
+    downloadCsv(res.csv, res.filename)
   }
 
   const totalPages = data?.totalPages ?? 1
@@ -203,8 +219,16 @@ function SalaoLogsPage() {
             <RefreshCw className={`h-4 w-4 mr-2 ${isRefetching ? 'animate-spin' : ''}`} />
             Atualizar
           </Button>
-          <Button size="sm" onClick={onExport} aria-label="Exportar CSV">
-            <Download className="h-4 w-4 mr-2" /> Exportar CSV
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onExportAttempts}
+            aria-label="Exportar logs filtrados em CSV"
+          >
+            <FileDown className="h-4 w-4 mr-2" /> Exportar logs (filtros)
+          </Button>
+          <Button size="sm" onClick={onExport} aria-label="Exportar CSV consolidado">
+            <Download className="h-4 w-4 mr-2" /> CSV consolidado
           </Button>
         </div>
       </header>
@@ -213,6 +237,8 @@ function SalaoLogsPage() {
         <Simulator simFn={simFn} />
         <RetentionCard />
       </div>
+
+      <RetentionHistoryCard />
 
       <Card className="p-4">
         <h2 className="text-sm font-semibold flex items-center gap-2 mb-3">
@@ -548,11 +574,13 @@ function DetailsSheet({
 function RetentionCard() {
   const getFn = useServerFn(getRetentionSettings)
   const setFn = useServerFn(setRetentionSettings)
+  const queryClient = useQueryClient()
   const { data, refetch } = useQuery({
     queryKey: ['notification-log-retention'],
     queryFn: () => getFn({}),
   })
   const [days, setDays] = useState<number>(90)
+  const [reason, setReason] = useState<string>('')
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -562,8 +590,10 @@ function RetentionCard() {
   const save = async () => {
     setSaving(true)
     try {
-      await setFn({ data: { days } })
+      await setFn({ data: { days, reason: reason || undefined } })
+      setReason('')
       await refetch()
+      queryClient.invalidateQueries({ queryKey: ['notification-retention-audit'] })
     } finally {
       setSaving(false)
     }
@@ -576,12 +606,15 @@ function RetentionCard() {
       </h2>
       <p className="text-xs text-muted-foreground mb-3">
         Registros mais antigos que esse limite são removidos pelo job diário automático.
-        Mínimo 7 dias, máximo 365.
+        Mínimo 7 dias, máximo 365. Cada alteração fica registrada no histórico abaixo.
       </p>
-      <div className="flex items-end gap-2">
-        <div className="flex-1">
-          <label className="text-xs text-muted-foreground">Dias mantidos</label>
+      <div className="grid grid-cols-[1fr_auto] gap-2 items-end">
+        <div>
+          <label htmlFor="retention-days" className="text-xs text-muted-foreground">
+            Dias mantidos
+          </label>
           <Input
+            id="retention-days"
             type="number"
             min={7}
             max={365}
@@ -589,16 +622,77 @@ function RetentionCard() {
             onChange={(e) => setDays(Number(e.target.value) || 90)}
           />
         </div>
-        <Button onClick={save} disabled={saving || days === data?.days} size="sm">
+        <Button
+          onClick={save}
+          disabled={saving || days === data?.days}
+          size="sm"
+          aria-label="Salvar nova retenção"
+        >
           <Save className="h-4 w-4 mr-2" />
           {saving ? 'Salvando…' : 'Salvar'}
         </Button>
+      </div>
+      <div className="mt-2">
+        <label htmlFor="retention-reason" className="text-xs text-muted-foreground">
+          Motivo da alteração (opcional, vai para o histórico)
+        </label>
+        <Input
+          id="retention-reason"
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          placeholder="Ex.: ajuste para compliance/LGPD"
+        />
       </div>
       {data?.updated_at ? (
         <div className="mt-2 text-[11px] text-muted-foreground">
           Última atualização: {fmt(data.updated_at)}
         </div>
       ) : null}
+    </Card>
+  )
+}
+
+function RetentionHistoryCard() {
+  const fetcher = useServerFn(listRetentionAudit)
+  const { data, isLoading } = useQuery({
+    queryKey: ['notification-retention-audit'],
+    queryFn: () => fetcher({}),
+  })
+  const rows = data?.rows ?? []
+
+  return (
+    <Card className="p-4">
+      <h2 className="text-sm font-semibold flex items-center gap-2 mb-3">
+        <History className="h-4 w-4" /> Histórico de alterações da retenção
+      </h2>
+      {isLoading ? (
+        <div className="text-xs text-muted-foreground">Carregando…</div>
+      ) : rows.length === 0 ? (
+        <div className="text-xs text-muted-foreground">
+          Nenhuma alteração registrada ainda.
+        </div>
+      ) : (
+        <ol className="text-sm divide-y divide-border/60">
+          {rows.map((r: any) => (
+            <li key={r.id} className="py-2 grid grid-cols-[auto_1fr_auto] items-center gap-3">
+              <Badge variant="outline" className="font-mono">
+                {r.previous_days ?? '—'} → {r.new_days}d
+              </Badge>
+              <div className="min-w-0">
+                <div className="text-xs truncate">
+                  {r.changed_by_email ?? <span className="text-muted-foreground">(sistema)</span>}
+                </div>
+                {r.reason ? (
+                  <div className="text-[11px] text-muted-foreground truncate">{r.reason}</div>
+                ) : null}
+              </div>
+              <span className="text-[11px] text-muted-foreground tabular-nums">
+                {fmt(r.created_at)}
+              </span>
+            </li>
+          ))}
+        </ol>
+      )}
     </Card>
   )
 }

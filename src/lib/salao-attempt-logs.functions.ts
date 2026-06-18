@@ -270,17 +270,142 @@ export const getRetentionSettings = createServerFn({ method: 'GET' })
     return { days, updated_at: (data as any)?.updated_at ?? null }
   })
 
-const SetRetentionInput = z.object({ days: z.number().int().min(7).max(365) })
+const SetRetentionInput = z.object({
+  days: z.number().int().min(7).max(365),
+  reason: z.string().max(500).optional(),
+})
 
 export const setRetentionSettings = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => SetRetentionInput.parse(d))
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context
+    const { supabase, userId, claims } = context
+
+    // Lê valor anterior para o histórico
+    const { data: prev } = await supabase
+      .from('core_settings' as any)
+      .select('value')
+      .eq('key', 'notification_log_retention_days')
+      .maybeSingle()
+    const prevRaw = (prev as any)?.value
+    const previousDays = typeof prevRaw === 'number' ? prevRaw : Number(prevRaw) || null
+
     const { error } = await supabase
       .from('core_settings' as any)
       .update({ value: data.days, updated_by: userId, updated_at: new Date().toISOString() })
       .eq('key', 'notification_log_retention_days')
     if (error) throw new Error(error.message)
-    return { ok: true, days: data.days }
+
+    // Audit (best-effort — não quebra o fluxo)
+    try {
+      const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+      await supabaseAdmin.from('notification_retention_audit' as any).insert({
+        changed_by: userId,
+        changed_by_email: (claims as any)?.email ?? null,
+        previous_days: previousDays,
+        new_days: data.days,
+        reason: data.reason ?? null,
+        metadata: {},
+      })
+    } catch (e) {
+      console.warn('[retention-audit] insert failed', e)
+    }
+
+    return { ok: true, days: data.days, previous_days: previousDays }
+  })
+
+export const listRetentionAudit = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase } = context
+    const { data, error } = await supabase
+      .from('notification_retention_audit' as any)
+      .select('id, changed_by_email, previous_days, new_days, reason, created_at')
+      .order('created_at', { ascending: false })
+      .limit(50)
+    if (error) throw new Error(error.message)
+    return { rows: (data ?? []) as any[] }
+  })
+
+// ----- Export CSV completo dos logs filtrados/ordenados (com timeline detalhada) -----
+
+const AttemptsCsvInput = ListInput
+export const exportAttemptLogsCsv = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => AttemptsCsvInput.parse(d ?? {}))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context
+    let q = supabase
+      .from('notification_attempt_log' as any)
+      .select(
+        'id, request_id, company_id, channel, event, niche, recipient, status, reason, idempotency_key, metadata, created_at',
+      )
+      .order(data.sortBy ?? 'created_at', { ascending: (data.sortDir ?? 'desc') === 'asc' })
+      .limit(5000)
+    if (data.company_id) q = q.eq('company_id', data.company_id)
+    if (data.niche) q = q.eq('niche', data.niche)
+    if (data.channel) q = q.eq('channel', data.channel)
+    if (data.status) q = q.eq('status', data.status)
+    if (data.reason) q = q.eq('reason', data.reason)
+    if (data.request_id) q = q.eq('request_id', data.request_id)
+    if (data.from) q = q.gte('created_at', data.from)
+    if (data.to) q = q.lte('created_at', data.to)
+    if (data.q && data.q.trim()) {
+      const term = data.q.trim().replace(/[%,]/g, '')
+      q = q.or(
+        `event.ilike.%${term}%,recipient.ilike.%${term}%,reason.ilike.%${term}%,request_id.ilike.%${term}%,idempotency_key.ilike.%${term}%`,
+      )
+    }
+    const { data: rows, error } = await q
+    if (error) throw new Error(error.message)
+
+    // Numera a sequência dentro de cada request_id (timeline)
+    const seqMap = new Map<string, number>()
+    const enriched = (rows ?? []).map((r: any) => {
+      const key = r.request_id ?? `__${r.id}`
+      const next = (seqMap.get(key) ?? 0) + 1
+      seqMap.set(key, next)
+      return { ...r, sequence: next }
+    })
+
+    const header = [
+      'created_at',
+      'request_id',
+      'sequence',
+      'status',
+      'channel',
+      'event',
+      'niche',
+      'recipient',
+      'reason',
+      'idempotency_key',
+      'company_id',
+      'metadata_json',
+    ]
+    const lines: string[] = [header.join(',')]
+    for (const r of enriched) {
+      lines.push(
+        [
+          r.created_at,
+          r.request_id ?? '',
+          r.sequence,
+          r.status,
+          r.channel,
+          r.event,
+          r.niche ?? '',
+          r.recipient ?? '',
+          r.reason ?? '',
+          r.idempotency_key ?? '',
+          r.company_id ?? '',
+          JSON.stringify(r.metadata ?? {}),
+        ]
+          .map(csvEscape)
+          .join(','),
+      )
+    }
+    return {
+      filename: `attempt-logs-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.csv`,
+      csv: lines.join('\n'),
+      count: enriched.length,
+    }
   })

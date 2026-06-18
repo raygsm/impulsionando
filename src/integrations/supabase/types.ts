@@ -10107,6 +10107,39 @@ export type Database = {
           },
         ]
       }
+      notification_retention_audit: {
+        Row: {
+          changed_by: string | null
+          changed_by_email: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          new_days: number
+          previous_days: number | null
+          reason: string | null
+        }
+        Insert: {
+          changed_by?: string | null
+          changed_by_email?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          new_days: number
+          previous_days?: number | null
+          reason?: string | null
+        }
+        Update: {
+          changed_by?: string | null
+          changed_by_email?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          new_days?: number
+          previous_days?: number | null
+          reason?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           action_label: string | null
