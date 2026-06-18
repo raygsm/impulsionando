@@ -490,3 +490,84 @@ export function installGlobalWhatsAppClickTracking() {
     { capture: true },
   );
 }
+
+// ============ Template de mensagem para alertas ============
+const ALERT_TEMPLATE_KEY = "wa_official_alert_template_v1";
+
+export interface AlertTemplate {
+  title: string;
+  body: string;
+}
+
+export const DEFAULT_ALERT_TEMPLATE: AlertTemplate = {
+  title: "⚠️ WhatsApp Oficial — performance abaixo do limite",
+  body:
+    "Motivo: {reason}\n" +
+    "Janela: {windowHours}h\n" +
+    "CTR: {ctr}% (mínimo {minCtr}%)\n" +
+    "Taxa de envio: {sendRate}% (mínimo {minSendRate}%)\n" +
+    "Volume: {impressions} impr · {clicks} cliques · {sends} envios\n" +
+    "CTA hash: {ctaHash}\n" +
+    "Rota: {path}",
+};
+
+export function readAlertTemplate(): AlertTemplate {
+  if (typeof window === "undefined") return DEFAULT_ALERT_TEMPLATE;
+  try {
+    const raw = window.localStorage.getItem(ALERT_TEMPLATE_KEY);
+    return raw ? { ...DEFAULT_ALERT_TEMPLATE, ...JSON.parse(raw) } : DEFAULT_ALERT_TEMPLATE;
+  } catch {
+    return DEFAULT_ALERT_TEMPLATE;
+  }
+}
+
+export function saveAlertTemplate(tpl: AlertTemplate) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(ALERT_TEMPLATE_KEY, JSON.stringify(tpl));
+  } catch {
+    /* noop */
+  }
+}
+
+export interface AlertTemplateVars {
+  ctr: number;
+  sendRate: number;
+  impressions: number;
+  clicks: number;
+  sends: number;
+  minCtr: number;
+  minSendRate: number;
+  windowHours: number;
+  ctrBelow: boolean;
+  sendBelow: boolean;
+  ctaHash?: string;
+  origin?: string;
+  path?: string;
+}
+
+export function renderAlertTemplate(
+  tpl: AlertTemplate,
+  v: AlertTemplateVars,
+): AlertTemplate {
+  const reasons: string[] = [];
+  if (v.ctrBelow) reasons.push(`CTR ${v.ctr.toFixed(1)}% < ${v.minCtr}%`);
+  if (v.sendBelow) reasons.push(`Envio ${v.sendRate.toFixed(1)}% < ${v.minSendRate}%`);
+  const dict: Record<string, string> = {
+    ctr: v.ctr.toFixed(1),
+    sendRate: v.sendRate.toFixed(1),
+    impressions: String(v.impressions),
+    clicks: String(v.clicks),
+    sends: String(v.sends),
+    minCtr: String(v.minCtr),
+    minSendRate: String(v.minSendRate),
+    windowHours: String(v.windowHours),
+    ctaHash: v.ctaHash ?? "—",
+    origin: v.origin ?? "—",
+    path: v.path ?? "—",
+    reason: reasons.join(" | ") || "—",
+  };
+  const apply = (s: string) =>
+    s.replace(/\{(\w+)\}/g, (_, k: string) => (k in dict ? dict[k] : `{${k}}`));
+  return { title: apply(tpl.title), body: apply(tpl.body) };
+}

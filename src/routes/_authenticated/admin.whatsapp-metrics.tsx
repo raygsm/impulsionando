@@ -11,10 +11,15 @@ import {
   readAlertHistory,
   clearAlertHistory,
   shouldNotifyAlertNow,
+  readAlertTemplate,
+  saveAlertTemplate,
+  renderAlertTemplate,
   DEFAULT_ALERT_CONFIG,
+  DEFAULT_ALERT_TEMPLATE,
   type BufferedEvent,
   type AlertConfig,
   type AlertHistoryEntry,
+  type AlertTemplate,
 } from "@/lib/whatsapp-cta";
 import { notifyWhatsAppAlert } from "@/lib/whatsapp-alerts.functions";
 import { PageHeader, StatCard } from "@/components/app/PageElements";
@@ -72,6 +77,7 @@ function WhatsAppMetricsPage() {
   const [history, setHistory] = useState<AlertHistoryEntry[]>([]);
   const [tick, setTick] = useState(0);
   const [cfg, setCfg] = useState<AlertConfig>(DEFAULT_ALERT_CONFIG);
+  const [tpl, setTpl] = useState<AlertTemplate>(DEFAULT_ALERT_TEMPLATE);
   const notify = useServerFn(notifyWhatsAppAlert);
 
   // filtros do dashboard
@@ -84,11 +90,13 @@ function WhatsAppMetricsPage() {
   const today = new Date().toISOString().slice(0, 10);
   const [hFrom, setHFrom] = useState("");
   const [hTo, setHTo] = useState("");
+  const [hCta, setHCta] = useState("__all");
 
   useEffect(() => {
     setAll(readWhatsAppLocalMetrics());
     setCfg(readAlertConfig());
     setHistory(readAlertHistory());
+    setTpl(readAlertTemplate());
   }, [tick]);
 
   const filtered = useMemo(() => {
@@ -140,81 +148,90 @@ function WhatsAppMetricsPage() {
   // Quando dispara, grava no histórico + tenta notificar (cooldown 1h).
   useEffect(() => {
     if (!alertEval.triggered) return;
+    const baseEntry: Omit<AlertHistoryEntry, "notified"> = {
+      ts: Date.now(),
+      ctr: alertEval.ctr,
+      sendRate: alertEval.sendRate,
+      impressions: alertEval.impressions,
+      clicks: alertEval.clicks,
+      sends: alertEval.sends,
+      ctrBelow: alertEval.ctrBelow,
+      sendBelow: alertEval.sendBelow,
+      windowHours: cfg.windowHours,
+      minCtr: cfg.minCtr,
+      minSendRate: cfg.minSendRate,
+      ctaHash: cta !== "__all" ? cta : undefined,
+    };
     if (!shouldNotifyAlertNow()) {
-      recordAlertHistory({
-        ts: Date.now(),
-        ctr: alertEval.ctr,
-        sendRate: alertEval.sendRate,
-        impressions: alertEval.impressions,
-        clicks: alertEval.clicks,
-        sends: alertEval.sends,
-        ctrBelow: alertEval.ctrBelow,
-        sendBelow: alertEval.sendBelow,
-        windowHours: cfg.windowHours,
-        minCtr: cfg.minCtr,
-        minSendRate: cfg.minSendRate,
-        notified: [],
-      });
+      recordAlertHistory({ ...baseEntry, notified: [] });
       return;
     }
+    const rendered = renderAlertTemplate(tpl, {
+      ctr: alertEval.ctr,
+      sendRate: alertEval.sendRate,
+      impressions: alertEval.impressions,
+      clicks: alertEval.clicks,
+      sends: alertEval.sends,
+      ctrBelow: alertEval.ctrBelow,
+      sendBelow: alertEval.sendBelow,
+      minCtr: cfg.minCtr,
+      minSendRate: cfg.minSendRate,
+      windowHours: cfg.windowHours,
+      ctaHash: baseEntry.ctaHash,
+      origin: origin !== "__all" ? origin : undefined,
+    });
     notify({
       data: {
-        ctr: alertEval.ctr,
-        sendRate: alertEval.sendRate,
-        impressions: alertEval.impressions,
-        clicks: alertEval.clicks,
-        sends: alertEval.sends,
-        ctrBelow: alertEval.ctrBelow,
-        sendBelow: alertEval.sendBelow,
-        minCtr: cfg.minCtr,
-        minSendRate: cfg.minSendRate,
-        windowHours: cfg.windowHours,
+        ...baseEntry,
+        title: rendered.title,
+        body: rendered.body,
+        origin: origin !== "__all" ? origin : undefined,
       },
     })
       .then((res) => {
-        recordAlertHistory({
-          ts: Date.now(),
-          ctr: alertEval.ctr,
-          sendRate: alertEval.sendRate,
-          impressions: alertEval.impressions,
-          clicks: alertEval.clicks,
-          sends: alertEval.sends,
-          ctrBelow: alertEval.ctrBelow,
-          sendBelow: alertEval.sendBelow,
-          windowHours: cfg.windowHours,
-          minCtr: cfg.minCtr,
-          minSendRate: cfg.minSendRate,
-          notified: res?.channels ?? [],
-        });
+        recordAlertHistory({ ...baseEntry, notified: res?.channels ?? [] });
         setTick((t) => t + 1);
       })
       .catch(() => {
-        recordAlertHistory({
-          ts: Date.now(),
-          ctr: alertEval.ctr,
-          sendRate: alertEval.sendRate,
-          impressions: alertEval.impressions,
-          clicks: alertEval.clicks,
-          sends: alertEval.sends,
-          ctrBelow: alertEval.ctrBelow,
-          sendBelow: alertEval.sendBelow,
-          windowHours: cfg.windowHours,
-          minCtr: cfg.minCtr,
-          minSendRate: cfg.minSendRate,
-          notified: [],
-        });
+        recordAlertHistory({ ...baseEntry, notified: [] });
         setTick((t) => t + 1);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alertEval.triggered]);
+
+  const historyCtaOptions = useMemo(() => {
+    const s = new Set<string>();
+    for (const e of history) if (e.ctaHash) s.add(e.ctaHash);
+    return Array.from(s).sort();
+  }, [history]);
 
   const historyFiltered = useMemo(() => {
     const from = hFrom ? new Date(hFrom + "T00:00:00").getTime() : 0;
     const to = hTo ? new Date(hTo + "T23:59:59").getTime() : Number.POSITIVE_INFINITY;
     return history
       .filter((e) => e.ts >= from && e.ts <= to)
+      .filter((e) => hCta === "__all" || (e.ctaHash ?? "") === hCta)
       .sort((a, b) => b.ts - a.ts);
-  }, [history, hFrom, hTo]);
+  }, [history, hFrom, hTo, hCta]);
+
+  function exportHistoryCSV() {
+    const head = [
+      "ts", "iso", "ctr", "sendRate", "impressions", "clicks", "sends",
+      "ctrBelow", "sendBelow", "minCtr", "minSendRate", "windowHours",
+      "ctaHash", "notified",
+    ];
+    const esc = (v: unknown) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const lines = historyFiltered.map((e) =>
+      [e.ts, new Date(e.ts).toISOString(), e.ctr.toFixed(2), e.sendRate.toFixed(2),
+       e.impressions, e.clicks, e.sends, e.ctrBelow, e.sendBelow,
+       e.minCtr, e.minSendRate, e.windowHours, e.ctaHash ?? "",
+       (e.notified ?? []).join("|")].map(esc).join(","),
+    );
+    download(`wa-alert-history-${Date.now()}.csv`, [head.join(","), ...lines].join("\n"));
+  }
 
   return (
     <div className="space-y-6 p-6">
@@ -343,7 +360,7 @@ function WhatsAppMetricsPage() {
         </TabsContent>
 
         <TabsContent value="history" className="space-y-4 mt-4">
-          <Card className="p-4 grid gap-3 md:grid-cols-4 items-end">
+          <Card className="p-4 grid gap-3 md:grid-cols-5 items-end">
             <div>
               <Label className="text-xs">De</Label>
               <Input type="date" value={hFrom} max={today}
@@ -354,9 +371,14 @@ function WhatsAppMetricsPage() {
               <Input type="date" value={hTo} max={today}
                 onChange={(e) => setHTo(e.target.value)} />
             </div>
+            <FilterSelect label="CTA hash" value={hCta} setValue={setHCta} options={historyCtaOptions} />
             <div className="flex gap-2 md:col-span-2">
-              <Button size="sm" variant="outline" onClick={() => { setHFrom(""); setHTo(""); }}>
+              <Button size="sm" variant="outline"
+                onClick={() => { setHFrom(""); setHTo(""); setHCta("__all"); }}>
                 Limpar filtro
+              </Button>
+              <Button size="sm" onClick={exportHistoryCSV} disabled={historyFiltered.length === 0}>
+                <Download className="w-4 h-4 mr-1" /> CSV
               </Button>
               <Button size="sm" variant="ghost"
                 onClick={() => { clearAlertHistory(); setTick((t) => t + 1); }}>
@@ -364,6 +386,59 @@ function WhatsAppMetricsPage() {
               </Button>
             </div>
           </Card>
+
+          {/* Editor do template de mensagem */}
+          <Card className="p-6 space-y-3">
+            <h2 className="text-lg font-semibold">Template de mensagem (Slack / e-mail)</h2>
+            <p className="text-xs text-muted-foreground">
+              Placeholders disponíveis:{" "}
+              <code>{"{ctr} {sendRate} {impressions} {clicks} {sends} {minCtr} {minSendRate} {windowHours} {ctaHash} {origin} {path} {reason}"}</code>
+            </p>
+            <div className="space-y-2">
+              <Label className="text-xs">Título</Label>
+              <Input value={tpl.title} onChange={(e) => setTpl({ ...tpl, title: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs">Corpo</Label>
+              <textarea
+                className="w-full min-h-[140px] rounded-md border bg-background p-2 text-sm font-mono"
+                value={tpl.body}
+                onChange={(e) => setTpl({ ...tpl, body: e.target.value })}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" onClick={() => { saveAlertTemplate(tpl); setTick((t) => t + 1); }}>
+                Salvar template
+              </Button>
+              <Button size="sm" variant="ghost"
+                onClick={() => { saveAlertTemplate(DEFAULT_ALERT_TEMPLATE); setTpl(DEFAULT_ALERT_TEMPLATE); }}>
+                Restaurar padrão
+              </Button>
+            </div>
+            <details className="text-xs">
+              <summary className="cursor-pointer text-muted-foreground">Pré-visualização com a janela atual</summary>
+              <pre className="mt-2 whitespace-pre-wrap rounded bg-muted p-2">
+{(() => {
+  const r = renderAlertTemplate(tpl, {
+    ctr: alertEval.ctr,
+    sendRate: alertEval.sendRate,
+    impressions: alertEval.impressions,
+    clicks: alertEval.clicks,
+    sends: alertEval.sends,
+    ctrBelow: alertEval.ctrBelow || true,
+    sendBelow: alertEval.sendBelow || true,
+    minCtr: cfg.minCtr,
+    minSendRate: cfg.minSendRate,
+    windowHours: cfg.windowHours,
+    ctaHash: hCta !== "__all" ? hCta : undefined,
+    origin: origin !== "__all" ? origin : undefined,
+  });
+  return `${r.title}\n\n${r.body}`;
+})()}
+              </pre>
+            </details>
+          </Card>
+
 
           <Card className="p-6">
             {historyFiltered.length === 0 ? (
