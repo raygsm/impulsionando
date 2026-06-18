@@ -103,8 +103,8 @@ export const fetchEmpresaDashboard = createServerFn({ method: "POST" })
     const w = windowFrom(data.days);
 
     const [orders, ordersPrev, customers, leads, leadsPrev, agenda, invoices] = await Promise.all([
-      supabase.from("sales_orders").select("id,total_amount,status,created_at").eq("company_id", data.companyId).gte("created_at", w.from).lte("created_at", w.to),
-      supabase.from("sales_orders").select("id,total_amount,status,created_at").eq("company_id", data.companyId).gte("created_at", w.prevFrom).lt("created_at", w.prevTo),
+      supabase.from("sales_orders").select("id,total,status,created_at").eq("company_id", data.companyId).gte("created_at", w.from).lte("created_at", w.to),
+      supabase.from("sales_orders").select("id,total,status,created_at").eq("company_id", data.companyId).gte("created_at", w.prevFrom).lt("created_at", w.prevTo),
       supabase.from("customers").select("id,created_at").eq("company_id", data.companyId),
       supabase.from("crm_leads").select("id,created_at").eq("company_id", data.companyId).gte("created_at", w.from).lte("created_at", w.to),
       supabase.from("crm_leads").select("id,created_at").eq("company_id", data.companyId).gte("created_at", w.prevFrom).lt("created_at", w.prevTo),
@@ -112,8 +112,8 @@ export const fetchEmpresaDashboard = createServerFn({ method: "POST" })
       supabase.from("billing_invoices").select("amount,status,due_date,paid_at").eq("company_id", data.companyId).gte("created_at", w.from).lte("created_at", w.to),
     ]);
 
-    const revCurr = (orders.data ?? []).reduce((a, o) => a + Number(o.total_amount ?? 0), 0);
-    const revPrev = (ordersPrev.data ?? []).reduce((a, o) => a + Number(o.total_amount ?? 0), 0);
+    const revCurr = (orders.data ?? []).reduce((a, o) => a + Number(o.total ?? 0), 0);
+    const revPrev = (ordersPrev.data ?? []).reduce((a, o) => a + Number(o.total ?? 0), 0);
     const newCustomers = (customers.data ?? []).filter((c) => c.created_at >= w.from).length;
     const totalCustomers = (customers.data ?? []).length;
     const leadsN = (leads.data ?? []).length;
@@ -268,7 +268,7 @@ export const fetchNicheRadar = createServerFn({ method: "POST" })
         const rev = (invoices.data ?? [])
           .filter((i) => i.status === "paid" && idSet.has(i.company_id as string))
           .reduce((a, i) => a + Number(i.amount ?? 0), 0);
-        const ld = (leads.data ?? []).filter((l) => (l.niche ?? "") === n.slug).length;
+        const ld = (leads.data ?? []).filter((l) => (l.source ?? "") === n.slug).length;
         const anonymized = ids.length < N_MIN;
         const avg = ids.length > 0 ? rev / ids.length : 0;
 
