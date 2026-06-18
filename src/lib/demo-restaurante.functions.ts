@@ -172,6 +172,112 @@ export const recordDemoEvent = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// ───────────────── SUBMIT SURVEY + EMIT VOUCHER (público) ─────────────────
+// Coleta preferências da demo e atribui automaticamente um voucher do cenário.
+// PII é mínima: aceitamos nome curto e WhatsApp, mas mascaramos antes de salvar
+// (apenas iniciais + últimos 4 dígitos). Tudo marcado como is_demo=true.
+
+const SurveyInput = z.object({
+  scenarioSlug: z.string().trim().min(2).max(60),
+  qrSlug: z.string().trim().min(1).max(60).optional(),
+  sessionId: z.string().uuid(),
+  displayName: z.string().trim().min(1).max(60).optional(),
+  whatsappLast4: z.string().trim().regex(/^\d{0,4}$/).optional(),
+  favoriteCategory: z.enum(["chopp", "petiscos", "drinks", "massas", "sobremesas"]),
+  visitFrequency: z.enum(["primeira", "mensal", "quinzenal", "semanal"]),
+  comesWith: z.enum(["sozinho", "casal", "amigos", "familia", "trabalho"]),
+  interestedIn: z.array(z.enum(["eventos", "clube", "delivery", "happy_hour", "private"])).max(5),
+});
+
+function maskName(input?: string): string {
+  if (!input) return "Convidado da demo";
+  const parts = input.split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "Convidado da demo";
+  const first = parts[0].slice(0, 12);
+  const initial = parts[1]?.[0]?.toUpperCase();
+  return initial ? `${first} ${initial}.` : first;
+}
+
+export const submitDemoSurvey = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => SurveyInput.parse(d ?? {}))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: scenario } = await supabaseAdmin
+      .from("demo_resto_scenarios").select("id,slug").eq("slug", data.scenarioSlug).maybeSingle();
+    if (!scenario) throw new Error("Cenário inexistente.");
+
+    const { data: session } = await supabaseAdmin
+      .from("demo_sessions").select("id").eq("id", data.sessionId).maybeSingle();
+    if (!session) throw new Error("Sessão inexistente.");
+
+    // Escolhe voucher por afinidade (audience) + fallback no primeiro ativo.
+    const audienceMap: Record<string, string[]> = {
+      chopp: ["chopp", "happy_hour", "geral"],
+      petiscos: ["happy_hour", "geral"],
+      drinks: ["drinks", "happy_hour", "geral"],
+      massas: ["massas", "casal", "geral"],
+      sobremesas: ["casal", "geral"],
+    };
+    const preferredAudiences = audienceMap[data.favoriteCategory] ?? ["geral"];
+
+    const { data: vouchers } = await supabaseAdmin
+      .from("demo_resto_vouchers")
+      .select("code,name,rule,validity_label,audience,channel,status")
+      .eq("scenario_id", scenario.id)
+      .eq("status", "active");
+
+    const pool = vouchers ?? [];
+    const picked =
+      preferredAudiences
+        .map((a) => pool.find((v) => v.audience === a))
+        .find(Boolean) ?? pool[0] ?? null;
+
+    const maskedName = maskName(data.displayName);
+    const maskedWhats = data.whatsappLast4 ? `(••) •••••-${data.whatsappLast4}` : "(••) •••••-••••";
+
+    const preferences = {
+      favoriteCategory: data.favoriteCategory,
+      visitFrequency: data.visitFrequency,
+      comesWith: data.comesWith,
+      interestedIn: data.interestedIn,
+      voucher_emitted: picked?.code ?? null,
+    };
+
+    const { error: leadErr } = await supabaseAdmin.from("demo_resto_leads").insert({
+      session_id: data.sessionId,
+      scenario_id: scenario.id,
+      name: maskedName,
+      whatsapp: maskedWhats,
+      preferences,
+      is_demo: true,
+    });
+    if (leadErr) throw new Error(leadErr.message);
+
+    await supabaseAdmin.from("demo_actions").insert({
+      session_id: data.sessionId,
+      niche_slug: NICHE,
+      module: "restaurante",
+      action_key: "survey.submit",
+      payload: {
+        scenario_slug: scenario.slug,
+        qr_slug: data.qrSlug,
+        is_demo: true,
+        favoriteCategory: data.favoriteCategory,
+        visitFrequency: data.visitFrequency,
+        comesWith: data.comesWith,
+        interestedIn: data.interestedIn,
+        voucher_code: picked?.code ?? null,
+      },
+    });
+
+    return {
+      ok: true,
+      voucher: picked,
+      maskedName,
+    };
+  });
+
 // ───────────────── LIVE ACTIVITY (Super Admin) ─────────────────
 
 const LiveInput = z.object({
