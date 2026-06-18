@@ -158,6 +158,7 @@ function RootComponent() {
       <Outlet />
       <LGPDBanner />
       <OfficialWhatsAppFAB />
+      <DemoAccessGate />
     </QueryClientProvider>
   );
 }
