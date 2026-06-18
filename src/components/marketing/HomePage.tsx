@@ -395,7 +395,40 @@ function CanaisComunicacao() {
 }
 
 // ============== HOMEPAGE ==============
+
+/**
+ * Hero CTA tracking — emite eventos para GA4 (gtag) e dataLayer (GTM) quando
+ * presentes; em ambientes sem analytics, vira no-op silencioso. Use o mesmo
+ * `id` no `data-analytics` do elemento para auditoria via DevTools.
+ */
+type HeroCtaId =
+  | "sou_empresa"
+  | "white_label"
+  | "clube"
+  | "diagnostico_30s"
+  | "falar_impulsionito"
+  | "ver_demonstracoes";
+
+function trackHeroCta(id: HeroCtaId) {
+  if (typeof window === "undefined") return;
+  try {
+    const w = window as unknown as {
+      gtag?: (...args: unknown[]) => void;
+      dataLayer?: Array<Record<string, unknown>>;
+    };
+    w.gtag?.("event", "hero_cta_click", {
+      event_category: "hero",
+      event_label: id,
+      cta_id: id,
+    });
+    w.dataLayer?.push({ event: "hero_cta_click", cta_id: id });
+  } catch {
+    /* analytics indisponível — silencioso */
+  }
+}
+
 export function HomePage() {
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <PublicHeader />
