@@ -89,3 +89,30 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'restaurant-postvisit-thanks': restaurantPostvisitThanksTemplate,
 }
 
+
+/**
+ * BUILD-TIME / MODULE-LOAD VALIDATION
+ *
+ * Roda na primeira importação do registry — se algum template marcado como
+ * `internal: true` for acidentalmente reassociado a um canal de cliente
+ * (ex.: alguém adicionar 'customer' ao allowedChannels), a aplicação falha
+ * imediatamente em vez de só vazar em produção.
+ */
+;(function validateTemplateChannelInvariants() {
+  const errors: string[] = []
+  for (const [name, entry] of Object.entries(TEMPLATES)) {
+    const channels = entry.allowedChannels
+    if (entry.internal === true) {
+      if (channels && channels.includes('customer')) {
+        errors.push(
+          `Template "${name}" é internal:true mas declara 'customer' em allowedChannels — proibido.`,
+        )
+      }
+    }
+  }
+  if (errors.length) {
+    throw new Error(
+      `[email-templates/registry] Invariante de canal violado:\n  - ${errors.join('\n  - ')}`,
+    )
+  }
+})()
