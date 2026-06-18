@@ -80,106 +80,111 @@ function ConsumidorDashboardPage() {
             <KpiCard label="Créditos" value={data.kpis.credits.value} />
           </div>
 
+          {data.kpis.activeMemberships.value === 0 ? (
+            <PaywallHero />
+          ) : null}
+
           <div className="grid gap-4 lg:grid-cols-2">
-            <Card className="p-4">
-              <div className="flex items-center gap-2 mb-3 text-sm font-semibold">
-                <Heart className="h-4 w-4 text-rose-500" /> Meus favoritos
-              </div>
-              {data.lists.favorites.length === 0 ? (
-                <EmptyHint text="Você ainda não favoritou nenhum lugar. Explore o Clube perto de você." />
-              ) : (
-                <ul className="space-y-2 text-sm">
-                  {data.lists.favorites.slice(0, 6).map((f) => (
-                    <li key={f.id} className="flex justify-between border-b border-border/40 pb-1.5">
-                      <span className="truncate">{f.company_id ?? "—"}</span>
-                      <span className="text-muted-foreground text-xs">{dt(f.created_at)}</span>
-                    </li>
-                  ))}
-                </ul>
+            <PremiumSection
+              isPremium={data.kpis.activeMemberships.value > 0}
+              icon={<Heart className="h-4 w-4 text-rose-500" />}
+              title="Meus favoritos"
+              teaser="Salve restaurantes, clínicas, eventos e lugares para acessar com um toque."
+              empty="Você ainda não favoritou nenhum lugar. Explore o Clube perto de você."
+              items={data.lists.favorites}
+              render={(f) => (
+                <>
+                  <span className="truncate">{f.company_id ?? "—"}</span>
+                  <span className="text-muted-foreground text-xs">{dt(f.created_at)}</span>
+                </>
               )}
-            </Card>
+            />
 
-            <Card className="p-4">
-              <div className="flex items-center gap-2 mb-3 text-sm font-semibold">
-                <MapPin className="h-4 w-4 text-blue-500" /> Histórico de visitas
-              </div>
-              {data.lists.visits.length === 0 ? (
-                <EmptyHint text="Suas visitas e check-ins aparecerão aqui." />
-              ) : (
-                <ul className="space-y-2 text-sm">
-                  {data.lists.visits.slice(0, 6).map((v) => (
-                    <li key={v.id} className="flex justify-between border-b border-border/40 pb-1.5">
-                      <span className="truncate">{v.company_id ?? "Visita"}</span>
-                      <span className="text-muted-foreground text-xs">{dt(v.created_at)}</span>
-                    </li>
-                  ))}
-                </ul>
+            <PremiumSection
+              isPremium={data.kpis.activeMemberships.value > 0}
+              icon={<MapPin className="h-4 w-4 text-blue-500" />}
+              title="Histórico de visitas"
+              teaser="Veja tudo o que você consumiu, quando e onde — organizado por mês."
+              empty="Suas visitas e check-ins aparecerão aqui."
+              items={data.lists.visits}
+              render={(v) => (
+                <>
+                  <span className="truncate">{v.company_id ?? "Visita"}</span>
+                  <span className="text-muted-foreground text-xs">{dt(v.created_at)}</span>
+                </>
               )}
-            </Card>
+            />
 
-            <Card className="p-4">
-              <div className="flex items-center gap-2 mb-3 text-sm font-semibold">
-                <Receipt className="h-4 w-4 text-emerald-500" /> Comprovantes e recibos
-              </div>
-              {data.lists.receipts.length === 0 ? (
-                <EmptyHint text="Quando você consumir benefícios, seus comprovantes ficam aqui." />
-              ) : (
-                <ul className="space-y-2 text-sm">
-                  {data.lists.receipts.slice(0, 6).map((r) => (
-                    <li key={r.id} className="flex justify-between border-b border-border/40 pb-1.5">
-                      <span className="truncate">{r.title}</span>
-                      <span className="text-muted-foreground text-xs">{brl(r.amount_cents ?? 0)} · {dt(r.issued_at)}</span>
-                    </li>
-                  ))}
-                </ul>
+            <PremiumSection
+              isPremium={data.kpis.activeMemberships.value > 0}
+              icon={<Ticket className="h-4 w-4 text-pink-500" />}
+              title="Meus cupons e vouchers"
+              teaser="Cupons exclusivos, vouchers e benefícios resgatáveis perto de você."
+              empty="Quando você resgatar um cupom ou voucher, ele aparecerá aqui."
+              items={data.lists.receipts.filter((r) => r.kind === "voucher" || r.kind === "coupon")}
+              render={(r) => (
+                <>
+                  <span className="truncate">{r.title}</span>
+                  <span className="text-muted-foreground text-xs">{dt(r.issued_at)}</span>
+                </>
               )}
-            </Card>
+            />
 
-            <Card className="p-4">
-              <div className="flex items-center gap-2 mb-3 text-sm font-semibold">
-                <FileText className="h-4 w-4 text-violet-500" /> Notas e cobranças
-              </div>
-              {data.lists.invoices.length === 0 ? (
-                <EmptyHint text="Suas faturas e notas fiscais aparecerão aqui." />
-              ) : (
-                <ul className="space-y-2 text-sm">
-                  {data.lists.invoices.slice(0, 6).map((i) => (
-                    <li key={i.id} className="flex justify-between border-b border-border/40 pb-1.5">
-                      <span className="truncate">
-                        {brl(i.amount_cents ?? 0)}{" "}
-                        <Badge variant={i.status === "paid" ? "secondary" : "outline"} className="ml-1">
-                          {i.status}
-                        </Badge>
-                      </span>
-                      <span className="text-muted-foreground text-xs">venc. {dt(i.due_date)}</span>
-                    </li>
-                  ))}
-                </ul>
+            <PremiumSection
+              isPremium={data.kpis.activeMemberships.value > 0}
+              icon={<Receipt className="h-4 w-4 text-emerald-500" />}
+              title="Comprovantes e recibos"
+              teaser="Centralize comprovantes de compras, reservas e atendimentos num só lugar."
+              empty="Quando você consumir benefícios, seus comprovantes ficam aqui."
+              items={data.lists.receipts}
+              render={(r) => (
+                <>
+                  <span className="truncate">{r.title}</span>
+                  <span className="text-muted-foreground text-xs">{brl(r.amount_cents ?? 0)} · {dt(r.issued_at)}</span>
+                </>
               )}
-            </Card>
+            />
 
-            <Card className="p-4 lg:col-span-2">
-              <div className="flex items-center gap-2 mb-3 text-sm font-semibold">
-                <Gift className="h-4 w-4 text-amber-500" /> Movimentação de créditos
-              </div>
-              {data.lists.rewards.length === 0 ? (
-                <EmptyHint text="Acumule créditos visitando, indicando e participando." />
-              ) : (
-                <ul className="space-y-2 text-sm">
-                  {data.lists.rewards.slice(0, 8).map((r) => (
-                    <li key={r.id} className="flex justify-between border-b border-border/40 pb-1.5">
-                      <span className="truncate">
-                        <Badge variant="outline" className="mr-2 capitalize">{r.kind}</Badge>
-                        {r.reason}
-                      </span>
-                      <span className={`text-xs font-mono ${Number(r.delta) >= 0 ? "text-emerald-600" : "text-rose-600"}`}>
-                        {Number(r.delta) >= 0 ? "+" : ""}{r.delta}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+            <PremiumSection
+              isPremium={data.kpis.activeMemberships.value > 0}
+              icon={<FileText className="h-4 w-4 text-violet-500" />}
+              title="Notas e cobranças"
+              teaser="Acompanhe suas faturas e notas fiscais da sua assinatura."
+              empty="Suas faturas e notas fiscais aparecerão aqui."
+              items={data.lists.invoices}
+              render={(i) => (
+                <>
+                  <span className="truncate">
+                    {brl(i.amount_cents ?? 0)}{" "}
+                    <Badge variant={i.status === "paid" ? "secondary" : "outline"} className="ml-1">
+                      {i.status}
+                    </Badge>
+                  </span>
+                  <span className="text-muted-foreground text-xs">venc. {dt(i.due_date)}</span>
+                </>
               )}
-            </Card>
+            />
+
+            <PremiumSection
+              isPremium={data.kpis.activeMemberships.value > 0}
+              icon={<Gift className="h-4 w-4 text-amber-500" />}
+              title="Movimentação de créditos"
+              teaser="Acumule créditos e cashback toda vez que consumir ou indicar."
+              empty="Acumule créditos visitando, indicando e participando."
+              items={data.lists.rewards}
+              className="lg:col-span-2"
+              render={(r) => (
+                <>
+                  <span className="truncate">
+                    <Badge variant="outline" className="mr-2 capitalize">{r.kind}</Badge>
+                    {r.reason}
+                  </span>
+                  <span className={`text-xs font-mono ${Number(r.delta) >= 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                    {Number(r.delta) >= 0 ? "+" : ""}{r.delta}
+                  </span>
+                </>
+              )}
+            />
           </div>
 
           <Card className="p-4 bg-gradient-to-br from-fuchsia-50 to-rose-50 border-fuchsia-200">
