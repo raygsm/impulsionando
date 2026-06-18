@@ -199,10 +199,10 @@ function AuthPage() {
           <div className="flex items-center justify-center mb-6 lg:hidden">
             <LogoImpulsionando variant="light" size="md" />
           </div>
-          <h2 className="text-2xl font-semibold tracking-tight">Acesse sua conta</h2>
-          <p className="text-sm text-muted-foreground mt-1">Use seu e-mail corporativo para continuar.</p>
+          <h2 className="text-2xl font-semibold tracking-tight">{copy.rightTitle}</h2>
+          <p className="text-sm text-muted-foreground mt-1">{copy.rightSub}</p>
 
-          <Tabs defaultValue="login" className="mt-6">
+          <Tabs defaultValue={mode === "signup" ? "signup" : "login"} className="mt-6">
             <TabsList className="grid grid-cols-2 w-full">
               <TabsTrigger value="login">Entrar</TabsTrigger>
               <TabsTrigger value="signup">Criar conta</TabsTrigger>
