@@ -281,6 +281,23 @@ async function notify(
   if (rows.length) await supabase.from("notifications").insert(rows);
 }
 
+async function audit(
+  supabase: any,
+  userId: string,
+  args: { order_id: string; event_type: string; notes?: string | null; role?: string },
+) {
+  const { data: profile } = await supabase
+    .from("user_profiles").select("display_name,email").eq("user_id", userId).maybeSingle();
+  await supabase.from("mp_order_events").insert({
+    order_id: args.order_id,
+    event_type: args.event_type,
+    notes: args.notes ?? null,
+    actor_user_id: userId,
+    actor_display_name: profile?.display_name ?? profile?.email ?? null,
+    actor_role: args.role ?? null,
+  });
+}
+
 export const updateMarketplaceOrderStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => UpdateOrderStatusInput.parse(d))
