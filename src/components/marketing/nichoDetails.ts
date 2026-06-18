@@ -1039,3 +1039,5 @@ export const NICHO_DETAILS: NichoDetail[] = [
   },
 ];
 
+
+export const findNicho = (slug: string) => NICHO_DETAILS.find((n) => n.slug === slug);
