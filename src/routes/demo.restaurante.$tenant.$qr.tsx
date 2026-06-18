@@ -219,15 +219,25 @@ function DemoQrShell() {
       </section>
 
       {showMenu && (
-        <DemoCart
-          items={cart.items}
-          count={cart.count}
-          totalCents={cart.totalCents}
-          onRemove={handleRemove}
-          onClear={() => { cart.clear(); fireEvent("cart.remove", {}); }}
-          onCheckout={handleCheckout}
-          onOpen={() => fireEvent("cart.open", { qty: cart.count, totalCents: cart.totalCents })}
-        />
+        <>
+          <DemoCart
+            items={cart.items}
+            count={cart.count}
+            totalCents={cart.totalCents}
+            onRemove={handleRemove}
+            onClear={() => { cart.clear(); fireEvent("cart.remove", {}); }}
+            onCheckout={handleCheckout}
+            onOpen={() => fireEvent("cart.open", { qty: cart.count, totalCents: cart.totalCents })}
+          />
+          <DemoCheckout
+            open={checkoutOpen}
+            onOpenChange={setCheckoutOpen}
+            items={cart.items}
+            totalCents={cart.totalCents}
+            onSimulate={handleSimulatePayment}
+            onAfterSuccess={handleAfterSuccess}
+          />
+        </>
       )}
     </main>
   );
