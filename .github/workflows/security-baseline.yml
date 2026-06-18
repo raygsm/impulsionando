@@ -53,13 +53,21 @@ jobs:
       - name: Install psql client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
-      - name: Security baseline check
+      - name: Generate full findings report (artifact + job summary)
+        id: report
+        env:
+          OUT_DIR: ${{ github.workspace }}/security-report
+        run: |
+          mkdir -p "$OUT_DIR"
+          node scripts/security-report.mjs
+
+      - name: Security baseline check (fails on regression)
         id: baseline
-        run: bun run security:check | tee security-baseline.txt
+        run: bun run security:check 2>&1 | tee security-baseline.txt
 
       - name: Storage bucket RLS regression tests
         if: env.SUPABASE_SERVICE_ROLE_KEY != ''
-        run: bunx vitest run tests/storage-buckets-access.test.ts --reporter=verbose 2>&1 | tee storage-rls-report.txt
+        run: bunx vitest run tests/storage-buckets-access.test.ts tests/storage-signed-urls.test.ts tests/storage-cross-tenant.test.ts --reporter=verbose 2>&1 | tee storage-rls-report.txt
 
       - name: Upload reports
         if: always()
@@ -69,10 +77,12 @@ jobs:
           path: |
             security-baseline.txt
             storage-rls-report.txt
+            security-report/security-report.json
+            security-report/security-report.md
           retention-days: 30
 
       - name: Fail PR if any check failed
         if: failure()
         run: |
-          echo "::error::Security baseline regressed or storage RLS tests failed. Review findings before merging."
+          echo "::error::Security baseline regressed or storage RLS tests failed. See the 'security-baseline-reports' artifact (security-report.md) for the full findings diff."
           exit 1
