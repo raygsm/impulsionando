@@ -1373,6 +1373,32 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
     const page = await context.newPage();
     await login(page);
 
+    // Capture every distinct live-region text from page open onward
+    await page.addInitScript(() => {
+      (window as unknown as { __liveAnnounces: string[] }).__liveAnnounces = [];
+      const start = () => {
+        const live = document.querySelector('[role="status"][aria-live="polite"]');
+        if (!live) return false;
+        const log = (window as unknown as { __liveAnnounces: string[] }).__liveAnnounces;
+        const push = () => {
+          const txt = (live.textContent ?? "").trim();
+          if (txt && log[log.length - 1] !== txt) log.push(txt);
+        };
+        push();
+        new MutationObserver(push).observe(live, {
+          childList: true,
+          characterData: true,
+          subtree: true,
+        });
+        return true;
+      };
+      if (!start()) {
+        const i = setInterval(() => {
+          if (start()) clearInterval(i);
+        }, 50);
+      }
+    });
+
     await page.goto(ROUTE);
     await page.evaluate(() => {
       document.documentElement.setAttribute("dir", "rtl");
@@ -1383,6 +1409,18 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(500);
 
+    const liveCount = async () =>
+      (await page.evaluate(
+        () => (window as unknown as { __liveAnnounces: string[] }).__liveAnnounces.length,
+      )) as number;
+    const liveLog = async () =>
+      (await page.evaluate(
+        () => (window as unknown as { __liveAnnounces: string[] }).__liveAnnounces,
+      )) as string[];
+
+    // Snapshot the baseline announcement count (after initial render)
+    const baseline = await liveCount();
+
     // Tab into the chip with tabindex=0 (default = favoritos)
     await page.locator(`#tab-favoritos`).focus();
     let focusedId = await page.evaluate(
@@ -1390,12 +1428,20 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
     );
     expect(focusedId).toBe("tab-favoritos");
 
-    // ArrowRight inside tablist → tab-historico (DOM order)
+    // Hover should NOT push a new announcement
+    await page.locator("#tab-cupons").hover();
+    await page.waitForTimeout(200);
+    expect(await liveCount()).toBe(baseline);
+
+    // ArrowRight (focus-only, no activation) must NOT push an announcement
+    await page.locator(`#tab-favoritos`).focus();
     await page.keyboard.press("ArrowRight");
     focusedId = await page.evaluate(
       () => (document.activeElement as HTMLElement | null)?.id ?? "",
     );
     expect(focusedId).toBe("tab-historico");
+    await page.waitForTimeout(200);
+    expect(await liveCount()).toBe(baseline);
 
     // Enter activates → ARIA flips, roving moves, tabpanel focused, ring tokens stay
     await page.keyboard.press("Enter");
@@ -1426,13 +1472,19 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
     });
     expect(ringTokens).toBe(true);
 
-    // Move focus to next chip via ArrowRight, activate with Space
+    // Activation MUST add exactly one new live-region announcement: Histórico
+    let log = await liveLog();
+    expect(log.length).toBe(baseline + 1);
+    expect(log[log.length - 1]).toContain("Histórico de visitas");
+
+    // Move focus to next chip via ArrowRight (no announcement), activate with Space
     await page.locator(`#tab-historico`).focus();
     await page.keyboard.press("ArrowRight");
     focusedId = await page.evaluate(
       () => (document.activeElement as HTMLElement | null)?.id ?? "",
     );
     expect(focusedId).toBe("tab-cupons");
+    expect(await liveCount()).toBe(baseline + 1); // still no announcement on focus
     await page.keyboard.press(" ");
     await page.waitForTimeout(300);
     await expect(page.locator(`#tab-cupons`)).toHaveAttribute("aria-selected", "true");
@@ -1444,6 +1496,17 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
       () => (document.activeElement as HTMLElement | null)?.id ?? "",
     );
     expect(panelFocused).toBe("cupons");
+    log = await liveLog();
+    expect(log.length).toBe(baseline + 2);
+    expect(log[log.length - 1]).toContain("Meus cupons");
+
+    // Tab order: after the tabpanel, Shift+Tab returns to the active chip
+    // (the only chip in the tablist with tabindex=0).
+    await page.keyboard.press("Shift+Tab");
+    focusedId = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(focusedId).toBe("tab-cupons");
 
     // Reduced motion: tablist still has no scroll-snap
     const snap = await page
@@ -1624,6 +1687,42 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
     const page = await context.newPage();
     await login(page);
 
+    // Helpers — wait until layout, focus, ring tokens and CSS offset all settle
+    const waitSettled = async (chipId: string) => {
+      // 1) Web fonts loaded so glyph widths don't shift the snapshot
+      await page.evaluate(() => (document as Document & { fonts?: { ready: Promise<unknown> } }).fonts?.ready);
+      // 2) --sec-offset has been measured (>0) by the ResizeObserver
+      await page.waitForFunction(() => {
+        const el = document.querySelector('[role="tabpanel"]') as HTMLElement | null;
+        if (!el) return false;
+        const v = getComputedStyle(el).getPropertyValue("--sec-offset").trim();
+        return !!v && parseFloat(v) > 0;
+      });
+      // 3) The chip we expect to be focused is actually the active element
+      await page.waitForFunction(
+        (id) => (document.activeElement as HTMLElement | null)?.id === id,
+        `tab-${chipId}`,
+      );
+      // 4) Focus-ring tokens present on the focused chip class list
+      await page.waitForFunction((id) => {
+        const el = document.getElementById(`tab-${id}`);
+        if (!el) return false;
+        const cls = el.className;
+        return (
+          cls.includes("focus-visible:ring-2") &&
+          cls.includes("focus-visible:ring-ring") &&
+          cls.includes("focus-visible:ring-offset-2")
+        );
+      }, chipId);
+      // 5) Two animation frames so any final reflow paints before screenshot
+      await page.evaluate(
+        () =>
+          new Promise<void>((r) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => r())),
+          ),
+      );
+    };
+
     // Portrait
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(ROUTE);
@@ -1634,7 +1733,8 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
     });
     await page.reload();
     await page.waitForLoadState("networkidle");
-    await page.waitForTimeout(500);
+    await page.locator("#tab-favoritos").focus();
+    await waitSettled("favoritos");
 
     const tablistP = page.getByRole("tablist", { name: /Seções da Minha área/i });
     await expect(tablistP).toHaveScreenshot(
@@ -1643,12 +1743,13 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
     );
 
     // Activate cupons via keyboard and snapshot the focused chip + tabpanel
-    await page.locator("#tab-favoritos").focus();
     await page.keyboard.press("ArrowRight");
     await page.keyboard.press("ArrowRight");
     await page.keyboard.press("Enter");
-    await page.waitForTimeout(400);
+    // After Enter the component focuses the tabpanel; refocus the chip to
+    // capture the focus-ring on the chip in a deterministic state.
     await page.locator("#tab-cupons").focus();
+    await waitSettled("cupons");
     await expect(tablistP).toHaveScreenshot(
       "rm-rtl-mobile-portrait-subnav-focus-cupons.png",
       { maxDiffPixelRatio: 0.02, animations: "disabled" },
@@ -1658,11 +1759,11 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
       { maxDiffPixelRatio: 0.03, animations: "disabled" },
     );
 
-    // Landscape — rotate, re-measure, snapshot again
+    // Landscape — rotate, re-measure, wait until offset re-stabilizes
     await page.setViewportSize({ width: 844, height: 390 });
     await page.evaluate(() => window.dispatchEvent(new Event("orientationchange")));
-    await page.waitForTimeout(600);
     await page.locator("#tab-cupons").focus();
+    await waitSettled("cupons");
 
     const tablistL = page.getByRole("tablist", { name: /Seções da Minha área/i });
     await expect(tablistL).toHaveScreenshot(

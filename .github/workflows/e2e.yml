@@ -16,6 +16,9 @@ jobs:
     name: Playwright (admin logo audit)
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: write
     env:
       CI: "true"
       # --- Build-time (Vite client bundle) ---
@@ -93,6 +96,7 @@ jobs:
       # diffs are one click away from the failed run.
       - name: Upload visual-diff PNGs (on failure)
         if: failure()
+        id: upload-visual-diffs
         uses: actions/upload-artifact@v4
         with:
           name: playwright-visual-diffs
@@ -105,6 +109,7 @@ jobs:
 
       - name: Upload Playwright traces (on failure)
         if: failure()
+        id: upload-traces
         uses: actions/upload-artifact@v4
         with:
           name: playwright-traces
@@ -113,3 +118,49 @@ jobs:
             test-results/**/video.webm
           retention-days: 14
           if-no-files-found: ignore
+
+      # Comment on the PR with direct links to the uploaded artifacts so
+      # reviewers can fetch expected/actual/diff PNGs and traces in one click.
+      # Only runs on pull_request events and only when something failed.
+      - name: Comment PR with visual diff + trace links
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          DIFF_URL: ${{ steps.upload-visual-diffs.outputs.artifact-url }}
+          TRACE_URL: ${{ steps.upload-traces.outputs.artifact-url }}
+          REPORT_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          VISUAL_ENABLED: ${{ vars.E2E_VISUAL }}
+        with:
+          script: |
+            const { DIFF_URL, TRACE_URL, REPORT_URL, VISUAL_ENABLED } = process.env;
+            const lines = [
+              "### ❌ Playwright E2E falhou",
+              "",
+              `- 📄 [Run completo](${REPORT_URL})`,
+            ];
+            if (DIFF_URL) {
+              lines.push(`- 🖼️ [Visual diffs (expected / actual / diff PNGs)](${DIFF_URL})`);
+            }
+            if (TRACE_URL) {
+              lines.push(`- 🎞️ [Traces & vídeos](${TRACE_URL}) — abra com \`bunx playwright show-trace trace.zip\``);
+            }
+            if (VISUAL_ENABLED === "1" && !DIFF_URL) {
+              lines.push("- ℹ️ Nenhum PNG de diff foi gerado — provável falha não-visual.");
+            }
+            if (VISUAL_ENABLED !== "1") {
+              lines.push("");
+              lines.push("> 💡 Os cenários de visual regression só rodam com `E2E_VISUAL=1` (Settings → Variables).");
+            }
+            lines.push("");
+            lines.push("Como interpretar os PNGs em `playwright-visual-diffs`:");
+            lines.push("");
+            lines.push("- `*-expected.png` — baseline commitado no repo.");
+            lines.push("- `*-actual.png` — o que o teste capturou nesta run.");
+            lines.push("- `*-diff.png` — pixels divergentes em vermelho. Se a mudança for intencional, regenere os baselines (ver `tests/e2e/README.md`).");
+            const body = lines.join("\n");
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
