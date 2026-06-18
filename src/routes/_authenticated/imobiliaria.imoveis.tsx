@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listProperties, upsertProperty, deleteProperty, submitPropertyForReview } from "@/lib/realestate.functions";
+import { listProperties, upsertProperty, deleteProperty, submitPropertyForReview, seedRealestateDemo, removeRealestateDemo } from "@/lib/realestate.functions";
 import { Link } from "@tanstack/react-router";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { PageHeader, EmptyState } from "@/components/app/PageElements";
@@ -196,7 +196,7 @@ function Page() {
       ) : isLoading ? (
         <Card className="p-6"><p className="text-sm text-muted-foreground">Carregando…</p></Card>
       ) : properties.length === 0 ? (
-        <EmptyState title="Nenhum imóvel" description="Comece cadastrando o primeiro imóvel." />
+        <DemoSeedCard companyId={companyId} onSeeded={() => qc.invalidateQueries({ queryKey: ["realestate-properties"] })} />
       ) : (
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {properties.map((p) => {
