@@ -636,7 +636,11 @@ function PremiumSection<T extends { id: string }>({
 
 type SectionNavProps = {
   activeId: string;
-  onSelect: (id: string, scroll?: boolean) => void;
+  onSelect: (
+    id: string,
+    scroll?: boolean,
+    opts?: { pushState?: boolean; focusPanel?: boolean },
+  ) => void;
   reducedMotion?: boolean;
   ref?: React.Ref<HTMLDivElement>;
 };
