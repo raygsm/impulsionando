@@ -277,7 +277,7 @@ export const updateBreweryPdvStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => UpdatePdvStatusInput.parse(d))
   .handler(async ({ context, data }) => {
-    const patch: Record<string, unknown> = { contract_status: data.contractStatus };
+    const patch: { contract_status: "pending" | "active" | "paused" | "ended"; contract_started_at?: string; contract_ended_at?: string } = { contract_status: data.contractStatus };
     if (data.contractStatus === "active") patch.contract_started_at = new Date().toISOString();
     if (data.contractStatus === "ended") patch.contract_ended_at = new Date().toISOString();
     const { error } = await context.supabase
