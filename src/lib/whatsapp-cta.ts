@@ -68,17 +68,48 @@ export type WhatsAppCTAEvent =
   | "whatsapp_form_submit"
   | "whatsapp_fab_click"
   | "whatsapp_notice_click"
-  | "whatsapp_cta_impression";
+  | "whatsapp_cta_impression"
+  | "whatsapp_cta_sent"; // retorno do WhatsApp (presumido envio)
 
 const METRICS_KEY = "wa_official_metrics_v1";
-const MAX_BUFFER = 500;
+const ALERTS_KEY = "wa_official_alerts_v1";
+const PENDING_KEY = "wa_official_pending_v1";
+const MAX_BUFFER = 1000;
 
-interface BufferedEvent {
+export interface BufferedEvent {
   ts: number;
   event: WhatsAppCTAEvent;
   origin: string;
   path: string;
   variant?: string;
+  campaign?: string;
+  ctaText?: string;
+  ctaHash?: string;
+}
+
+export interface AlertConfig {
+  /** CTR mínimo (%). 0 desativa. */
+  minCtr: number;
+  /** Taxa de envio mínima (%). 0 desativa. */
+  minSendRate: number;
+  /** Janela em horas para o cálculo. */
+  windowHours: number;
+  /** Mínimo de amostras antes de validar. */
+  minSamples: number;
+}
+
+export const DEFAULT_ALERT_CONFIG: AlertConfig = {
+  minCtr: 5,
+  minSendRate: 30,
+  windowHours: 24,
+  minSamples: 20,
+};
+
+/** Hash curto e determinístico do texto do CTA (versionamento automático). */
+export function hashCtaText(text: string): string {
+  let h = 5381;
+  for (let i = 0; i < text.length; i++) h = ((h << 5) + h + text.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(36).slice(0, 8);
 }
 
 function pushLocalBuffer(entry: BufferedEvent) {
@@ -108,27 +139,87 @@ export function clearWhatsAppLocalMetrics() {
   if (typeof window === "undefined") return;
   try {
     window.localStorage.removeItem(METRICS_KEY);
+    window.localStorage.removeItem(PENDING_KEY);
   } catch {
     /* noop */
   }
 }
 
+export function readAlertConfig(): AlertConfig {
+  if (typeof window === "undefined") return DEFAULT_ALERT_CONFIG;
+  try {
+    const raw = window.localStorage.getItem(ALERTS_KEY);
+    return raw ? { ...DEFAULT_ALERT_CONFIG, ...JSON.parse(raw) } : DEFAULT_ALERT_CONFIG;
+  } catch {
+    return DEFAULT_ALERT_CONFIG;
+  }
+}
+
+export function saveAlertConfig(cfg: AlertConfig) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(ALERTS_KEY, JSON.stringify(cfg));
+  } catch {
+    /* noop */
+  }
+}
+
+export interface AlertEval {
+  ctr: number;
+  sendRate: number;
+  impressions: number;
+  clicks: number;
+  sends: number;
+  ctrBelow: boolean;
+  sendBelow: boolean;
+  triggered: boolean;
+}
+
+export function evaluateAlerts(
+  rows: BufferedEvent[],
+  cfg: AlertConfig = readAlertConfig(),
+): AlertEval {
+  const since = Date.now() - cfg.windowHours * 3_600_000;
+  const win = rows.filter((r) => r.ts >= since);
+  const impressions = win.filter((r) => r.event === "whatsapp_cta_impression").length;
+  const clicks = win.filter((r) =>
+    ["whatsapp_cta_click", "whatsapp_fab_click", "whatsapp_notice_click"].includes(r.event),
+  ).length;
+  const sends = win.filter(
+    (r) => r.event === "whatsapp_form_submit" || r.event === "whatsapp_cta_sent",
+  ).length;
+  const ctr = impressions ? (clicks / impressions) * 100 : 0;
+  const sendRate = clicks ? (sends / clicks) * 100 : 0;
+  const ctrBelow = cfg.minCtr > 0 && impressions >= cfg.minSamples && ctr < cfg.minCtr;
+  const sendBelow = cfg.minSendRate > 0 && clicks >= cfg.minSamples && sendRate < cfg.minSendRate;
+  return { ctr, sendRate, impressions, clicks, sends, ctrBelow, sendBelow, triggered: ctrBelow || sendBelow };
+}
+
 export function trackWhatsAppCTA(
   event: WhatsAppCTAEvent,
-  params: { origin: string; variant?: WhatsAppCTAVariant; [key: string]: unknown } = {
-    origin: "unknown",
-  },
+  params: {
+    origin: string;
+    variant?: WhatsAppCTAVariant;
+    campaign?: string;
+    ctaText?: string;
+    [key: string]: unknown;
+  } = { origin: "unknown" },
 ) {
   const path =
     (params.path as string | undefined) ??
     (typeof window !== "undefined" ? window.location.pathname : "ssr");
   const variant = params.variant as string | undefined;
+  const campaign = params.campaign as string | undefined;
+  const ctaText = params.ctaText as string | undefined;
+  const ctaHash = ctaText ? hashCtaText(ctaText) : (params.ctaHash as string | undefined);
   try {
     trackEvent(event, {
       channel: "whatsapp_official",
       phone: OFFICIAL_WHATSAPP_PHONE_DISPLAY,
       path,
       variant,
+      campaign,
+      cta_hash: ctaHash,
       ...params,
     });
   } catch {
@@ -140,6 +231,76 @@ export function trackWhatsAppCTA(
     origin: String(params.origin ?? "unknown"),
     path,
     variant,
+    campaign,
+    ctaText,
+    ctaHash,
+  });
+  // Marca cliques como pendentes p/ confirmar envio quando o usuário voltar.
+  if (
+    event === "whatsapp_cta_click" ||
+    event === "whatsapp_fab_click" ||
+    event === "whatsapp_notice_click"
+  ) {
+    markPendingSend({ origin: String(params.origin ?? "unknown"), path, variant, campaign, ctaText, ctaHash });
+  }
+}
+
+function markPendingSend(meta: Omit<BufferedEvent, "ts" | "event">) {
+  if (typeof window === "undefined") return;
+  try {
+    const raw = window.localStorage.getItem(PENDING_KEY);
+    const arr: Array<Omit<BufferedEvent, "event">> = raw ? JSON.parse(raw) : [];
+    arr.push({ ts: Date.now(), ...meta });
+    if (arr.length > 20) arr.splice(0, arr.length - 20);
+    window.localStorage.setItem(PENDING_KEY, JSON.stringify(arr));
+  } catch {
+    /* noop */
+  }
+}
+
+/**
+ * Listener global de visibilidade: se o usuário sai da aba logo após clicar
+ * no link oficial e demora >= 8s para voltar, presumimos que enviou e
+ * registramos `whatsapp_cta_sent` no GA4 e no buffer local.
+ */
+export function installWhatsAppReturnTracking() {
+  if (typeof window === "undefined") return;
+  const w = window as unknown as { __waReturnInstalled?: boolean };
+  if (w.__waReturnInstalled) return;
+  w.__waReturnInstalled = true;
+
+  let hiddenAt: number | null = null;
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+      hiddenAt = Date.now();
+      return;
+    }
+    const away = hiddenAt ? Date.now() - hiddenAt : 0;
+    hiddenAt = null;
+    if (away < 8_000) return;
+    try {
+      const raw = window.localStorage.getItem(PENDING_KEY);
+      if (!raw) return;
+      const pending: Array<Omit<BufferedEvent, "event">> = JSON.parse(raw);
+      const fresh = pending.filter((p) => Date.now() - p.ts < 30 * 60_000);
+      if (fresh.length === 0) {
+        window.localStorage.setItem(PENDING_KEY, JSON.stringify([]));
+        return;
+      }
+      const last = fresh[fresh.length - 1];
+      trackWhatsAppCTA("whatsapp_cta_sent", {
+        origin: last.origin,
+        path: last.path,
+        variant: last.variant,
+        campaign: last.campaign,
+        ctaText: last.ctaText,
+        ctaHash: last.ctaHash,
+        away_ms: away,
+      });
+      window.localStorage.setItem(PENDING_KEY, JSON.stringify([]));
+    } catch {
+      /* noop */
+    }
   });
 }
 
