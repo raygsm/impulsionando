@@ -10,8 +10,8 @@ export const Route = createFileRoute("/_authenticated/empresa/talentos/dashboard
 });
 
 type Stat = { label: string; value: number | string; hint?: string; icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }> };
-type MatchRow = { stage: string; created_at: string; candidato_id: string };
-type CandRow = { cidade: string | null; cargo_desejado: string; faixa_etaria: string | null };
+type MatchRow = { stage: string; created_at: string; candidato_id: string; contratado_em: string | null; desligado_em: string | null };
+type CandRow = { cidade: string | null; cargo_desejado: string; faixa_etaria: string | null; escolaridade: string | null; nicho: string | null };
 
 function TalentosDashboard() {
   const [matches, setMatches] = useState<MatchRow[]>([]);
@@ -24,10 +24,10 @@ function TalentosDashboard() {
       if (!u.user) { setLoading(false); return; }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const m = await (supabase as any).from("talentos_matches")
-        .select("stage,created_at,candidato_id").eq("company_id", u.user.id);
+        .select("stage,created_at,candidato_id,contratado_em,desligado_em").eq("company_id", u.user.id);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const c = await (supabase as any).from("talentos_candidatos")
-        .select("cidade,cargo_desejado,faixa_etaria").eq("ativo", true).eq("visivel_rede", true).limit(500);
+        .select("cidade,cargo_desejado,faixa_etaria,escolaridade,nicho").eq("ativo", true).eq("visivel_rede", true).limit(500);
       setMatches((m.data ?? []) as MatchRow[]);
       setCands((c.data ?? []) as CandRow[]);
       setLoading(false);
@@ -37,17 +37,29 @@ function TalentosDashboard() {
 
   const stats: Stat[] = useMemo(() => {
     const byStage = (s: string) => matches.filter((m) => m.stage === s).length;
+    const contratados = matches.filter((m) => m.stage === "contratado").length;
+    const entrev = byStage("entrevista");
+    const sucesso = entrev > 0 ? Math.round((contratados / entrev) * 100) : 0;
+    const dias90 = Date.now() - 90 * 86400_000;
+    const cont90 = matches.filter((m) => m.contratado_em && new Date(m.contratado_em).getTime() <= dias90);
+    const ret90 = cont90.length > 0
+      ? Math.round((cont90.filter((m) => !m.desligado_em).length / cont90.length) * 100)
+      : 0;
     return [
       { label: "Candidatos na rede", value: cands.length, icon: Users, hint: "Disponíveis para a sua empresa" },
       { label: "Favoritos", value: byStage("favorito"), icon: Heart },
-      { label: "Em entrevista", value: byStage("entrevista"), icon: Briefcase },
-      { label: "Contratados", value: byStage("contratado"), icon: UserCheck, hint: "Acumulado" },
+      { label: "Em entrevista", value: entrev, icon: Briefcase },
+      { label: "Contratados", value: contratados, icon: UserCheck, hint: "Acumulado" },
+      { label: "Taxa de sucesso", value: `${sucesso}%`, icon: UserCheck, hint: "Contratados / Entrevistados" },
+      { label: "Retenção 90 dias", value: `${ret90}%`, icon: Users, hint: "Continuam ativos após 90d" },
     ];
   }, [matches, cands]);
 
   const porCidade = useMemo(() => topCount(cands.map((c) => c.cidade ?? "—")), [cands]);
   const porCargo = useMemo(() => topCount(cands.map((c) => c.cargo_desejado)), [cands]);
   const porFaixa = useMemo(() => topCount(cands.map((c) => c.faixa_etaria ?? "—")), [cands]);
+  const porEsc = useMemo(() => topCount(cands.map((c) => c.escolaridade ?? "—")), [cands]);
+  const porNicho = useMemo(() => topCount(cands.map((c) => c.nicho ?? "—")), [cands]);
 
   return (
     <main className="min-h-dvh bg-background py-8">
@@ -59,7 +71,7 @@ function TalentosDashboard() {
           </p>
         </header>
 
-        <section aria-label="Indicadores" className="grid gap-4 md:grid-cols-4">
+        <section aria-label="Indicadores" className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
           {stats.map((s) => (
             <Card key={s.label}>
               <CardContent className="p-4">
@@ -67,17 +79,19 @@ function TalentosDashboard() {
                   <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{s.label}</span>
                   <s.icon aria-hidden className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <p className="mt-2 text-3xl font-bold">{loading ? "—" : s.value}</p>
+                <p className="mt-2 text-2xl font-bold">{loading ? "—" : s.value}</p>
                 {s.hint ? <p className="mt-1 text-xs text-muted-foreground">{s.hint}</p> : null}
               </CardContent>
             </Card>
           ))}
         </section>
 
-        <section className="mt-8 grid gap-4 md:grid-cols-3">
+        <section className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <BreakdownCard title="Por cidade" items={porCidade} />
           <BreakdownCard title="Por cargo" items={porCargo} />
           <BreakdownCard title="Por faixa etária" items={porFaixa} />
+          <BreakdownCard title="Por escolaridade" items={porEsc} />
+          <BreakdownCard title="Por nicho" items={porNicho} />
         </section>
       </div>
     </main>
