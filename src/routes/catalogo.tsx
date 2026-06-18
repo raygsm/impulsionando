@@ -173,9 +173,20 @@ function CatalogoPage() {
         toast.warning(`Você já escolheu ${limit} módulo${limit > 1 ? 's' : ''} neste plano.`)
         return prev
       }
+      trackEvent('select_module', { planTier: tier, selectedModules: [module] })
       return { ...prev, [tier]: [...current, module] }
     })
   }
+
+  // Fire view_plans once per (macro,sub) pairing
+  useEffect(() => {
+    if (!selectedMacro || !selectedSub) return
+    const key = `${selectedMacro.slug}|${selectedSub.slug}`
+    if (lastViewedMacroRef.current === key) return
+    lastViewedMacroRef.current = key
+    trackEvent('view_plans')
+     
+  }, [selectedMacro, selectedSub])
 
   async function handleContract(tier: PlanTier) {
     if (!selectedMacro || !selectedSub) return
@@ -188,6 +199,7 @@ function CatalogoPage() {
     }
     setSubmitting(tier)
     try {
+      trackEvent('contract_click', { planTier: tier, selectedModules: picked })
       const res = await saveIntent({
         data: {
           macroSlug: selectedMacro.slug,
@@ -197,12 +209,14 @@ function CatalogoPage() {
           source: 'catalogo',
         },
       })
+      trackEvent('intent_saved', { planTier: tier, selectedModules: picked, intentId: res.id })
       window.location.href = `/onboarding?intent=${encodeURIComponent(res.id)}`
     } catch (e: unknown) {
       toast.error((e as Error)?.message ?? 'Não foi possível salvar sua seleção.')
       setSubmitting(null)
     }
   }
+
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
