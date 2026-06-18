@@ -519,7 +519,7 @@ function PremiumSection<T extends { id: string }>({
   const id = anchor;
   if (!isPremium) {
     return (
-      <Card id={id} className={`p-4 relative overflow-hidden scroll-mt-24 ${className ?? ""}`}>
+      <Card id={id} className={`p-4 relative overflow-hidden scroll-mt-[var(--sec-offset,6rem)] ${className ?? ""}`}>
         <div className="flex items-center gap-2 mb-2 text-sm font-semibold">
           {icon} {title}
           <Badge variant="outline" className="ml-auto gap-1 text-[10px]">
