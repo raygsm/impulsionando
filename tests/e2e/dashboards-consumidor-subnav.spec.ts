@@ -23,6 +23,18 @@ const SECTIONS = [
   "creditos",
 ] as const;
 
+const SECTIONS_LABELS: Record<(typeof SECTIONS)[number], string> = {
+  favoritos: "Meus favoritos",
+  historico: "Histórico de visitas",
+  cupons: "Meus cupons",
+  vouchers: "Meus vouchers",
+  reservas: "Minhas reservas",
+  avaliacoes: "Minhas avaliações",
+  comprovantes: "Comprovantes",
+  notas: "Minhas notas",
+  creditos: "Meus créditos",
+};
+
 async function login(page: Page) {
   await page.goto("/auth");
   await page.getByLabel(/e-?mail/i).first().fill(EMAIL!);
