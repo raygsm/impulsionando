@@ -107,8 +107,8 @@ export async function sendCustomerPush(args: {
 
   // (3) Segmentação por nicho
   if (args.niche) {
-    const allowed = NICHE_EVENT_MAP[args.niche]
-    if (allowed && !allowed.includes(args.event as AllowedPushEvent)) {
+    const allowed = pushEventsForNiche(args.niche)
+    if (allowed && !allowed.includes(args.event)) {
       return { skipped: 'event_not_in_niche_segment' }
     }
   }
