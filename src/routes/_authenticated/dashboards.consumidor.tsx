@@ -207,3 +207,85 @@ function ConsumidorDashboardPage() {
 function EmptyHint({ text }: { text: string }) {
   return <div className="text-sm text-muted-foreground py-4 text-center">{text}</div>;
 }
+
+function PaywallHero() {
+  return (
+    <Card className="p-5 border-amber-300 bg-gradient-to-br from-amber-50 via-rose-50 to-fuchsia-50">
+      <div className="flex flex-col md:flex-row md:items-center gap-4 justify-between">
+        <div className="flex items-start gap-3">
+          <div className="rounded-full bg-amber-500/20 p-2.5">
+            <Crown className="h-5 w-5 text-amber-600" />
+          </div>
+          <div>
+            <div className="text-base font-semibold text-amber-900">Assine o Clube e desbloqueie tudo</div>
+            <p className="text-sm text-amber-900/80 mt-0.5 max-w-xl">
+              Versão gratuita mostra o guia perto de você. Assinantes acessam histórico
+              completo, créditos, cupons, vouchers e benefícios exclusivos por R$ 9,99/mês.
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-2 shrink-0">
+          <Button asChild>
+            <Link to="/minha-assinatura">Assinar Clube</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/clube">Continuar gratuito</Link>
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function PremiumSection<T extends { id: string }>({
+  isPremium,
+  icon,
+  title,
+  teaser,
+  empty,
+  items,
+  render,
+  className,
+}: {
+  isPremium: boolean;
+  icon: ReactNode;
+  title: string;
+  teaser: string;
+  empty: string;
+  items: T[];
+  render: (item: T) => ReactNode;
+  className?: string;
+}) {
+  if (!isPremium) {
+    return (
+      <Card className={`p-4 relative overflow-hidden ${className ?? ""}`}>
+        <div className="flex items-center gap-2 mb-2 text-sm font-semibold">
+          {icon} {title}
+          <Badge variant="outline" className="ml-auto gap-1 text-[10px]">
+            <Lock className="h-3 w-3" /> Premium
+          </Badge>
+        </div>
+        <p className="text-sm text-muted-foreground mb-3">{teaser}</p>
+        <Button asChild size="sm" variant="secondary" className="w-full">
+          <Link to="/minha-assinatura">Desbloquear com assinatura</Link>
+        </Button>
+      </Card>
+    );
+  }
+  return (
+    <Card className={`p-4 ${className ?? ""}`}>
+      <div className="flex items-center gap-2 mb-3 text-sm font-semibold">{icon} {title}</div>
+      {items.length === 0 ? (
+        <EmptyHint text={empty} />
+      ) : (
+        <ul className="space-y-2 text-sm">
+          {items.slice(0, 6).map((it) => (
+            <li key={it.id} className="flex justify-between border-b border-border/40 pb-1.5">
+              {render(it)}
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
+  );
+}
