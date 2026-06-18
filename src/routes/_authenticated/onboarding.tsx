@@ -146,13 +146,79 @@ function loadState(): State {
   }
 }
 
+// Map catalog macro_slug → onboarding Niche id
+const MACRO_TO_NICHE: Record<string, Niche> = {
+  saude: "saude",
+  psicologia: "saude",
+  clinicas: "saude",
+  laboratorios: "saude",
+  juridico: "servicos",
+  contabilidade: "servicos",
+  imobiliarias: "imobiliaria",
+  restaurantes: "restaurante",
+  bares: "restaurante",
+  eventos: "servicos",
+  veiculos: "servicos",
+  comercio: "varejo",
+  industrias: "servicos",
+  educacao: "educacao",
+};
+
+type CatalogIntentSnapshot = {
+  id: string;
+  macro_slug: string;
+  subnicho_slug: string;
+  plan_tier: string;
+  selected_modules: string[];
+};
+
 function OnboardingPage() {
   const navigate = useNavigate();
+  const search = useSearch({ from: "/_authenticated/onboarding" });
+  const fetchIntent = useServerFn(getCatalogIntent);
+  const consumeIntent = useServerFn(consumeCatalogIntent);
+  const track = useServerFn(trackCatalogEvent);
   const [state, setState] = useState<State>(DEFAULT_STATE);
+  const [intent, setIntent] = useState<CatalogIntentSnapshot | null>(null);
 
   useEffect(() => {
     setState(loadState());
   }, []);
+
+  // If ?intent=<uuid>, ALWAYS reload from server and pre-select niche/modules.
+  // The server is the source of truth — local state never overrides it.
+  useEffect(() => {
+    if (!search.intent) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const row = await fetchIntent({ data: { id: search.intent! } });
+        if (cancelled || !row) return;
+        setIntent(row as CatalogIntentSnapshot);
+        const mappedNiche = MACRO_TO_NICHE[row.macro_slug] ?? "outro";
+        setState((s) => ({
+          ...s,
+          niche: mappedNiche,
+          nicheDetail: row.subnicho_slug,
+          step: Math.max(s.step, 1),
+        }));
+        track({
+          data: {
+            eventName: "onboarding_opened",
+            macroSlug: row.macro_slug,
+            subnichoSlug: row.subnicho_slug,
+            planTier: row.plan_tier,
+            selectedModules: row.selected_modules,
+            intentId: row.id,
+          },
+        }).catch(() => {});
+        consumeIntent({ data: { id: row.id } }).catch(() => {});
+      } catch {
+        /* silent */
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [search.intent, fetchIntent, consumeIntent, track]);
 
   useEffect(() => {
     if (typeof window !== "undefined") localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -188,12 +254,36 @@ function OnboardingPage() {
         description="5 perguntas rápidas pra montar seu plano de ação personalizado."
       />
 
+      {intent && (
+        <Card className="mb-6 p-4 border-primary/30 bg-primary/5">
+          <div className="flex items-start gap-3">
+            <Link2 className="h-5 w-5 text-primary mt-0.5 shrink-0" aria-hidden />
+            <div className="flex-1 text-sm">
+              <div className="font-semibold">Sua intenção do catálogo foi restaurada</div>
+              <div className="mt-1 text-muted-foreground">
+                Nicho <strong className="text-foreground">{intent.macro_slug}</strong> ·
+                Subnicho <strong className="text-foreground">{intent.subnicho_slug}</strong> ·
+                Plano <strong className="text-foreground capitalize">{intent.plan_tier}</strong>
+              </div>
+              {intent.selected_modules.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {intent.selected_modules.map((m) => (
+                    <Badge key={m} variant="secondary" className="text-[11px] font-normal">{m}</Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </Card>
+      )}
+
       <div className="mb-6 flex items-center gap-3">
         <Progress value={progress} className="flex-1" />
         <Badge variant="outline">{state.step + 1} de {totalSteps}</Badge>
       </div>
 
       <Card className="p-6">
+
         {state.step === 0 && (
           <Step
             badge="Camada 1 — Melhorar"
