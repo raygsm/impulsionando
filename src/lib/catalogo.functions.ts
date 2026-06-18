@@ -95,7 +95,7 @@ export const upsertNichePlanModules = createServerFn({ method: 'POST' })
   .handler(async ({ data, context }) => {
     const { data: isStaff, error: roleErr } = await context.supabase.rpc(
       'is_impulsionando_staff',
-      { _uid: context.userId },
+      { _user: context.userId },
     )
     if (roleErr) throw roleErr
     if (!isStaff) throw new Error('Forbidden')
