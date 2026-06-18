@@ -169,9 +169,10 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Melhorar",
     items: [
       { to: "/onboarding", label: "Onboarding / Melhorar", icon: Sparkles },
+      { to: "/ops/saude", label: "Saúde da Conta", icon: Activity },
       { to: "/saiba-mais", label: "Saiba Mais (planos, módulos, nichos)", icon: BookOpen },
-      { to: "/saiba-mais/saude", label: "Saúde da Conta", icon: Activity },
-      { to: "/saiba-mais/versoes", label: "Versões & Atualizações", icon: RefreshCw },
+      { to: "/saiba-mais/saude", label: "Saúde — Metodologia", icon: BookOpen },
+      { to: "/saiba-mais/versoes", label: "Versões — Pipeline", icon: RefreshCw },
     ],
   },
   {
