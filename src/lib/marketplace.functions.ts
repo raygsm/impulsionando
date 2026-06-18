@@ -544,12 +544,15 @@ export const getMarketplaceOrderEvents = createServerFn({ method: "POST" })
     return rows ?? [];
   });
 
-/** Busca paginada de pedidos (com filtros + texto). */
+/** Busca paginada de pedidos (com filtros avançados + texto). */
 const SearchOrdersInput = z.object({
   status: z.string().optional(),
   supplierId: z.string().uuid().optional(),
   buyerId: z.string().uuid().optional(),
   sinceDays: z.number().int().min(1).max(365).optional(),
+  dateFrom: z.string().optional(),
+  dateTo: z.string().optional(),
+  supplierName: z.string().optional(),
   query: z.string().optional(),
   page: z.number().int().min(1).default(1),
   pageSize: z.number().int().min(1).max(100).default(20),
@@ -575,9 +578,18 @@ export const searchMarketplaceOrders = createServerFn({ method: "POST" })
     if (data.status) q = q.eq("status", data.status);
     if (data.supplierId) q = q.eq("supplier_id", data.supplierId);
     if (data.buyerId) q = q.eq("buyer_id", data.buyerId);
-    if (data.sinceDays) {
+    if (data.sinceDays && !data.dateFrom && !data.dateTo) {
       const since = new Date(Date.now() - data.sinceDays * 86400_000).toISOString();
       q = q.gte("placed_at", since);
+    }
+    if (data.dateFrom) q = q.gte("placed_at", new Date(data.dateFrom).toISOString());
+    if (data.dateTo) {
+      const end = new Date(data.dateTo);
+      end.setHours(23, 59, 59, 999);
+      q = q.lte("placed_at", end.toISOString());
+    }
+    if (data.supplierName && data.supplierName.trim()) {
+      q = q.ilike("supplier.display_name", `%${data.supplierName.trim()}%`);
     }
     if (data.query && data.query.trim()) {
       const term = data.query.trim();
