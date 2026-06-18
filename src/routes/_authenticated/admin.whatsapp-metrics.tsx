@@ -11,10 +11,15 @@ import {
   readAlertHistory,
   clearAlertHistory,
   shouldNotifyAlertNow,
+  readAlertTemplate,
+  saveAlertTemplate,
+  renderAlertTemplate,
   DEFAULT_ALERT_CONFIG,
+  DEFAULT_ALERT_TEMPLATE,
   type BufferedEvent,
   type AlertConfig,
   type AlertHistoryEntry,
+  type AlertTemplate,
 } from "@/lib/whatsapp-cta";
 import { notifyWhatsAppAlert } from "@/lib/whatsapp-alerts.functions";
 import { PageHeader, StatCard } from "@/components/app/PageElements";
