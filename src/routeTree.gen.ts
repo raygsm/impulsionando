@@ -43,6 +43,7 @@ import { Route as PacienteIndexRouteImport } from './routes/paciente.index'
 import { Route as NichosIndexRouteImport } from './routes/nichos.index'
 import { Route as ModulosIndexRouteImport } from './routes/modulos.index'
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
+import { Route as CheckoutIndexRouteImport } from './routes/checkout.index'
 import { Route as WhiteLabelLoginRouteImport } from './routes/white-label.login'
 import { Route as VitrineSlugRouteImport } from './routes/vitrine.$slug'
 import { Route as TrialCadastroRouteImport } from './routes/trial_.cadastro'
@@ -542,6 +543,11 @@ const ModulosIndexRoute = ModulosIndexRouteImport.update({
 const DemoIndexRoute = DemoIndexRouteImport.update({
   id: '/demo/',
   path: '/demo/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutIndexRoute = CheckoutIndexRouteImport.update({
+  id: '/checkout/',
+  path: '/checkout/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WhiteLabelLoginRoute = WhiteLabelLoginRouteImport.update({
@@ -2527,6 +2533,7 @@ export interface FileRoutesByFullPath {
   '/trial/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
   '/white-label/login': typeof WhiteLabelLoginRoute
+  '/checkout/': typeof CheckoutIndexRoute
   '/demo/': typeof DemoIndexRoute
   '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
@@ -2881,6 +2888,7 @@ export interface FileRoutesByTo {
   '/trial/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
   '/white-label/login': typeof WhiteLabelLoginRoute
+  '/checkout': typeof CheckoutIndexRoute
   '/demo': typeof DemoIndexRoute
   '/modulos': typeof ModulosIndexRoute
   '/nichos': typeof NichosIndexRoute
@@ -3249,6 +3257,7 @@ export interface FileRoutesById {
   '/trial_/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
   '/white-label/login': typeof WhiteLabelLoginRoute
+  '/checkout/': typeof CheckoutIndexRoute
   '/demo/': typeof DemoIndexRoute
   '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
@@ -3616,6 +3625,7 @@ export interface FileRouteTypes {
     | '/trial/cadastro'
     | '/vitrine/$slug'
     | '/white-label/login'
+    | '/checkout/'
     | '/demo/'
     | '/modulos/'
     | '/nichos/'
@@ -3970,6 +3980,7 @@ export interface FileRouteTypes {
     | '/trial/cadastro'
     | '/vitrine/$slug'
     | '/white-label/login'
+    | '/checkout'
     | '/demo'
     | '/modulos'
     | '/nichos'
@@ -4337,6 +4348,7 @@ export interface FileRouteTypes {
     | '/trial_/cadastro'
     | '/vitrine/$slug'
     | '/white-label/login'
+    | '/checkout/'
     | '/demo/'
     | '/modulos/'
     | '/nichos/'
@@ -4667,6 +4679,7 @@ export interface RootRouteChildren {
   ShowroomWhatsappRoute: typeof ShowroomWhatsappRoute
   TrabalheConoscoNichoRoute: typeof TrabalheConoscoNichoRoute
   TrialCadastroRoute: typeof TrialCadastroRoute
+  CheckoutIndexRoute: typeof CheckoutIndexRoute
   DemoIndexRoute: typeof DemoIndexRoute
   NichosIndexRoute: typeof NichosIndexRoute
   ShowroomIndexRoute: typeof ShowroomIndexRoute
@@ -4941,6 +4954,13 @@ declare module '@tanstack/react-router' {
       path: '/demo'
       fullPath: '/demo/'
       preLoaderRoute: typeof DemoIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout/': {
+      id: '/checkout/'
+      path: '/checkout'
+      fullPath: '/checkout/'
+      preLoaderRoute: typeof CheckoutIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/white-label/login': {
@@ -8232,6 +8252,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShowroomWhatsappRoute: ShowroomWhatsappRoute,
   TrabalheConoscoNichoRoute: TrabalheConoscoNichoRoute,
   TrialCadastroRoute: TrialCadastroRoute,
+  CheckoutIndexRoute: CheckoutIndexRoute,
   DemoIndexRoute: DemoIndexRoute,
   NichosIndexRoute: NichosIndexRoute,
   ShowroomIndexRoute: ShowroomIndexRoute,
