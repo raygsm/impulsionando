@@ -97,18 +97,39 @@ export async function sendCustomerPush(args: {
   niche?: string
   category?: 'postvisit' | 'clube' | 'transactional'
   payload: PushPayload
+  /** Correlação ponta-a-ponta (mesma jornada → mesmo request_id). */
+  requestId?: string
+  companyId?: string
 }): Promise<{ ok: true; provider?: string } | { skipped: string }> {
+  const { logNotificationAttempt } = await import('@/lib/notification-attempt-log.server')
+  const baseLog = {
+    request_id: args.requestId ?? null,
+    company_id: args.companyId ?? null,
+    channel: 'push' as const,
+    event: args.event,
+    niche: args.niche ?? null,
+    recipient: args.userId,
+    idempotency_key: `push:${args.event}:${args.userId}`,
+  }
+
   // (1) Whitelist
   if (!(ALLOWED_PUSH_EVENTS as readonly string[]).includes(args.event)) {
+    await logNotificationAttempt({ ...baseLog, status: 'blocked', reason: 'event_not_whitelisted' })
     return { skipped: 'event_not_whitelisted' }
   }
   // (2) Guard template interno — lança para fail-fast em dev
-  assertTemplateAllowedForCustomerChannel(args.event, 'customer-push')
+  try {
+    assertTemplateAllowedForCustomerChannel(args.event, 'customer-push')
+  } catch (err) {
+    await logNotificationAttempt({ ...baseLog, status: 'blocked', reason: 'internal_template' })
+    throw err
+  }
 
   // (3) Segmentação por nicho
   if (args.niche) {
     const allowed = pushEventsForNiche(args.niche)
     if (allowed && !allowed.includes(args.event)) {
+      await logNotificationAttempt({ ...baseLog, status: 'blocked', reason: 'event_not_in_niche_segment' })
       return { skipped: 'event_not_in_niche_segment' }
     }
   }
@@ -116,9 +137,25 @@ export async function sendCustomerPush(args: {
   // (4) Opt-in explícito
   const category = args.category ?? 'postvisit'
   const optedIn = await userHasPushOptIn({ userId: args.userId, category })
-  if (!optedIn) return { skipped: 'no_opt_in' }
+  if (!optedIn) {
+    await logNotificationAttempt({ ...baseLog, status: 'blocked', reason: 'opt_in_missing' })
+    return { skipped: 'no_opt_in' }
+  }
 
   const res = await _transport.send({ userId: args.userId, payload: args.payload })
-  if (!res.ok) return { skipped: `transport_failed:${res.error ?? 'unknown'}` }
+  if (!res.ok) {
+    await logNotificationAttempt({
+      ...baseLog,
+      status: 'error',
+      reason: 'transport_failed',
+      metadata: { error: res.error },
+    })
+    return { skipped: `transport_failed:${res.error ?? 'unknown'}` }
+  }
+  await logNotificationAttempt({
+    ...baseLog,
+    status: 'sent',
+    metadata: { provider: res.provider },
+  })
   return { ok: true, provider: res.provider }
 }
