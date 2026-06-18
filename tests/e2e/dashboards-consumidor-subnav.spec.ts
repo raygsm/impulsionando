@@ -307,4 +307,142 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
     expect(top).toBeLessThan(Math.max(initialOffset, newOffset) + 40);
     expect(top).toBeGreaterThan(-50);
   });
+
+  test("mouse: clicar em chip atualiza hash, ARIA, live region e rola com offset", async ({
+    page,
+  }) => {
+    const live = page.locator('[role="status"][aria-live="polite"]');
+    const tab = page.getByRole("tab", { name: /Minhas reservas/i });
+    await tab.click();
+
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#reservas");
+    await expect(tab).toHaveAttribute("aria-selected", "true");
+    await expect(tab).toHaveAttribute("aria-current", "true");
+
+    // Other chips lose selection
+    await expect(page.locator('#tab-favoritos')).toHaveAttribute("aria-selected", "false");
+
+    // Live region announces the active label
+    await expect(live).toContainText(/Minhas reservas/i);
+
+    // Section is docked under the sticky header (uses the measured offset)
+    const offset = await page.evaluate(() =>
+      Number(
+        getComputedStyle(document.getElementById("reservas")!)
+          .getPropertyValue("--sec-offset")
+          .replace("px", "")
+          .trim() || "0",
+      ),
+    );
+    expect(offset).toBeGreaterThan(0);
+    const top = await page
+      .locator("#reservas")
+      .evaluate((el) => el.getBoundingClientRect().top);
+    expect(top).toBeLessThan(offset + 40);
+    expect(top).toBeGreaterThan(-50);
+
+    // Back/forward keeps the active section in sync with the hash
+    await page.getByRole("tab", { name: /Meus cupons/i }).click();
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#cupons");
+
+    await page.goBack();
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#reservas");
+    await expect(page.locator('#tab-reservas')).toHaveAttribute("aria-selected", "true");
+    await expect(live).toContainText(/Minhas reservas/i);
+
+    await page.goForward();
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#cupons");
+    await expect(page.locator('#tab-cupons')).toHaveAttribute("aria-selected", "true");
+    await expect(live).toContainText(/Meus cupons/i);
+  });
+
+  test("mouse: breadcrumb 'Minha área' volta para a página sem hash e limpa a trilha", async ({
+    page,
+  }) => {
+    await page.getByRole("tab", { name: /Meus vouchers/i }).click();
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#vouchers");
+
+    const trail = page.getByRole("navigation", { name: /Trilha/i });
+    await trail.getByRole("link", { name: /^Minha área$/i }).click();
+
+    // Pathname remains the dashboard, hash is cleared by the router link
+    await expect
+      .poll(() => page.evaluate(() => location.pathname))
+      .toBe(ROUTE);
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("");
+  });
+
+  test("sem hash: foco inicial via Tab cai na chip padrão; Enter foca o tabpanel", async ({
+    page,
+  }) => {
+    // Fresh navigation without hash and without restored sessionStorage
+    await page.evaluate(() => sessionStorage.removeItem("dashboards:consumidor:section"));
+    await page.goto(ROUTE);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(400);
+
+    // The first chip is the only one with tabIndex=0 (roving tabindex baseline)
+    const firstChip = page.locator('#tab-favoritos');
+    await expect(firstChip).toHaveAttribute("tabindex", "0");
+
+    // Other chips are -1 until activated
+    await expect(page.locator('#tab-historico')).toHaveAttribute("tabindex", "-1");
+
+    await firstChip.focus();
+    const focusedId = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(focusedId).toBe("tab-favoritos");
+
+    // Enter activates and moves focus to the matching tabpanel
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(450);
+    const panelFocused = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(panelFocused).toBe("favoritos");
+    await expect(page.locator('#tab-favoritos')).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator('#tab-favoritos')).toHaveAttribute("aria-current", "true");
+  });
+
+  test("live region: Alt+Arrow, Enter e Space anunciam exatamente o nome da seção", async ({
+    page,
+  }) => {
+    const live = page.locator('[role="status"][aria-live="polite"]');
+
+    // Start from #favoritos so transitions are predictable
+    await page.goto(`${ROUTE}#favoritos`);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(400);
+    await expect(live).toContainText(/Meus favoritos/i);
+
+    // Alt+ArrowRight → historico
+    await page.locator("body").focus();
+    await page.keyboard.press("Alt+ArrowRight");
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#historico");
+    await expect(live).toContainText(/Histórico de visitas/i);
+
+    // Alt+ArrowLeft → favoritos
+    await page.keyboard.press("Alt+ArrowLeft");
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#favoritos");
+    await expect(live).toContainText(/Meus favoritos/i);
+
+    // Focus a non-active chip and activate with Space
+    const cupons = page.locator('#tab-cupons');
+    await page.locator('#tab-favoritos').focus();
+    // ArrowRight twice in the tablist (favoritos → historico → cupons)
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press(" ");
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#cupons");
+    await expect(cupons).toHaveAttribute("aria-selected", "true");
+    await expect(live).toContainText(/Meus cupons/i);
+
+    // Move focus back and activate with Enter
+    await cupons.focus();
+    await page.keyboard.press("ArrowLeft");
+    await page.keyboard.press("Enter");
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#historico");
+    await expect(live).toContainText(/Histórico de visitas/i);
+  });
 });
