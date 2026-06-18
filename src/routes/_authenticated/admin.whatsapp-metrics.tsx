@@ -558,17 +558,21 @@ function WhatsAppMetricsPage() {
       )}
 
       <Tabs defaultValue="dashboard">
-        <TabsList>
+        <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="rules">
             <ShieldAlert className="w-4 h-4 mr-1" /> Regras + Resumo diário
             {rules.length > 0 && <Badge variant="secondary" className="ml-2">{rules.length}</Badge>}
           </TabsTrigger>
+          <TabsTrigger value="audit">
+            <Eye className="w-4 h-4 mr-1" /> Auditoria por regra
+          </TabsTrigger>
+          <TabsTrigger value="simulation">
+            <FlaskConical className="w-4 h-4 mr-1" /> Simulação
+          </TabsTrigger>
           <TabsTrigger value="history">
-            <History className="w-4 h-4 mr-1" /> Histórico de alertas
-            {history.length > 0 && (
-              <Badge variant="secondary" className="ml-2">{history.length}</Badge>
-            )}
+            <History className="w-4 h-4 mr-1" /> Histórico
+            {history.length > 0 && <Badge variant="secondary" className="ml-2">{history.length}</Badge>}
           </TabsTrigger>
         </TabsList>
 
