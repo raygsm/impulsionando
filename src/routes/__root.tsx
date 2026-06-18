@@ -16,6 +16,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { LGPDBanner } from "@/components/marketing/LGPDBanner";
 import { OfficialWhatsAppFAB } from "@/components/marketing/OfficialWhatsAppFAB";
 import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
+import { DemoAccessGate } from "@/components/demo/DemoAccessGate";
 
 function NotFoundComponent() {
   return (
@@ -157,6 +158,7 @@ function RootComponent() {
       <Outlet />
       <LGPDBanner />
       <OfficialWhatsAppFAB />
+      <DemoAccessGate />
     </QueryClientProvider>
   );
 }
