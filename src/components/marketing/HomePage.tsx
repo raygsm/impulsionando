@@ -439,19 +439,45 @@ export function HomePage() {
               </Button>
             </div>
 
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm text-white/75">
-              <a href="#diagnostico" className="inline-flex items-center gap-1.5 hover:text-white underline-offset-4 hover:underline">
-                <Search className="w-4 h-4" /> Diagnóstico em 30s
-              </a>
-              <span className="opacity-40">•</span>
-              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 hover:text-white underline-offset-4 hover:underline">
-                <MessageCircle className="w-4 h-4" /> Falar com Impulsionito
-              </a>
-              <span className="opacity-40">•</span>
-              <Link to="/demo" className="inline-flex items-center gap-1.5 hover:text-white underline-offset-4 hover:underline">
-                <PlayCircle className="w-4 h-4" /> Ver demonstrações
-              </Link>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+              <Button
+                asChild
+                size="sm"
+                className="bg-white text-primary border border-primary hover:bg-primary/10 hover:text-primary gap-1.5"
+                onClick={() => trackHeroCta("diagnostico_30s")}
+              >
+                <a href="#diagnostico" data-analytics="hero-diagnostico-30s">
+                  <Search className="w-4 h-4" /> Diagnóstico em 30 segundos
+                </a>
+              </Button>
+              <Button
+                asChild
+                size="sm"
+                variant="outline"
+                className="bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white gap-1.5"
+                onClick={() => trackHeroCta("falar_impulsionito")}
+              >
+                <a
+                  href={WHATSAPP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-analytics="hero-whatsapp"
+                >
+                  <MessageCircle className="w-4 h-4" /> Falar com Impulsionito
+                </a>
+              </Button>
+              <Button
+                asChild
+                size="sm"
+                className="bg-white text-primary border border-primary hover:bg-primary/10 hover:text-primary gap-1.5"
+                onClick={() => trackHeroCta("ver_demonstracoes")}
+              >
+                <Link to="/demo" data-analytics="hero-ver-demos">
+                  <PlayCircle className="w-4 h-4" /> Ver demonstrações
+                </Link>
+              </Button>
             </div>
+
 
 
           </div>
