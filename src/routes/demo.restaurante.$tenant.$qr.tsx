@@ -121,12 +121,30 @@ function DemoQrShell() {
     [cart, fireEvent],
   );
 
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+
   const handleCheckout = useCallback(() => {
     fireEvent("cart.checkout_attempt", { totalCents: cart.totalCents, qty: cart.count });
-    toast.message("Checkout simulado", {
-      description: "Pix, cartão e pagamento na entrega entram na próxima fase da demonstração.",
-    });
+    setCheckoutOpen(true);
   }, [cart.totalCents, cart.count, fireEvent]);
+
+  const handleSimulatePayment = useCallback(
+    (paymentMethod: DemoPaymentMethod) => {
+      fireEvent("cart.checkout_simulated", {
+        paymentMethod,
+        totalCents: cart.totalCents,
+        qty: cart.count,
+      });
+      toast.success("Pagamento simulado", {
+        description: `Método: ${paymentMethod === "pix" ? "Pix" : paymentMethod === "card" ? "Cartão" : "Na entrega"}.`,
+      });
+    },
+    [cart.totalCents, cart.count, fireEvent],
+  );
+
+  const handleAfterSuccess = useCallback(() => {
+    cart.clear();
+  }, [cart]);
 
   if (scenarioQ.isLoading) {
     return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Carregando demonstração…</div>;
