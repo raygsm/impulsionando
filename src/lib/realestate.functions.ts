@@ -710,4 +710,284 @@ export const updateNotificationPreference = createServerFn({ method: "POST" })
   });
 
 
+// ============ Phase A: Campanhas & Disparo ============
+const BlastFilter = z.object({
+  operation: OperationEnum.optional(),
+  cities: z.array(z.string().max(120)).max(20).default([]),
+  neighborhoods: z.array(z.string().max(120)).max(40).default([]),
+  property_types: z.array(PropertyTypeEnum).max(13).default([]),
+  price_max: z.number().nonnegative().nullable().optional(),
+  price_min: z.number().nonnegative().nullable().optional(),
+  bedrooms_min: z.number().int().min(0).max(20).default(0),
+});
+
+const DispatchBlastInput = z.object({
+  companyId: z.string().uuid(),
+  title: z.string().min(1).max(200),
+  channel: z.enum(["whatsapp", "email"]),
+  filter: BlastFilter,
+  body: z.string().min(1).max(4000),
+  subject: z.string().max(200).optional(),
+  propertyId: z.string().uuid().optional().nullable(),
+});
+
+function intentMatchesFilter(intent: any, f: z.infer<typeof BlastFilter>): boolean {
+  if (f.operation && intent.operation && intent.operation !== f.operation && intent.operation !== "venda_ou_locacao") return false;
+  if (f.property_types.length > 0) {
+    const it = intent.property_types ?? [];
+    if (it.length > 0 && !f.property_types.some((t) => it.includes(t))) return false;
+  }
+  if (f.cities.length > 0) {
+    const ic = intent.cities ?? [];
+    if (ic.length > 0 && !f.cities.some((c) => ic.includes(c))) return false;
+  }
+  if (f.neighborhoods.length > 0) {
+    const inb = intent.neighborhoods ?? [];
+    if (inb.length > 0 && !f.neighborhoods.some((n) => inb.includes(n))) return false;
+  }
+  if (f.price_max != null && intent.price_min != null && intent.price_min > f.price_max) return false;
+  if (f.price_min != null && intent.price_max != null && intent.price_max < f.price_min) return false;
+  if (f.bedrooms_min > 0 && intent.bedrooms_min != null && intent.bedrooms_min > 0 && intent.bedrooms_min < f.bedrooms_min) return false;
+  return true;
+}
+
+export const previewRealestateBlast = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ companyId: z.string().uuid(), filter: BlastFilter, channel: z.enum(["whatsapp", "email"]) }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: intents, error } = await context.supabase
+      .from("realestate_search_intents")
+      .select("id,contact_name,contact_email,contact_phone,whatsapp,operation,property_types,cities,neighborhoods,price_min,price_max,bedrooms_min,consent_marketing,status")
+      .eq("company_id", data.companyId)
+      .eq("status", "ativo")
+      .eq("consent_marketing", true);
+    if (error) throw new Error(error.message);
+    const matches = (intents ?? []).filter((i: any) => intentMatchesFilter(i, data.filter));
+    const eligible = matches.filter((i: any) =>
+      data.channel === "whatsapp" ? !!(i.whatsapp || i.contact_phone) : !!i.contact_email,
+    );
+    return { total: intents?.length ?? 0, matched: matches.length, eligible: eligible.length };
+  });
+
+export const dispatchRealestateBlast = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => DispatchBlastInput.parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: blast, error: bErr } = await context.supabase
+      .from("realestate_blasts")
+      .insert({
+        company_id: data.companyId,
+        property_id: data.propertyId ?? null,
+        title: data.title,
+        channel: data.channel,
+        filter: data.filter as any,
+        body: data.body,
+        status: "queued",
+        created_by: context.userId,
+      })
+      .select("id")
+      .single();
+    if (bErr || !blast) throw new Error(bErr?.message ?? "Falha ao registrar disparo");
+
+    const { data: intents, error: iErr } = await context.supabase
+      .from("realestate_search_intents")
+      .select("id,contact_name,contact_email,contact_phone,whatsapp,operation,property_types,cities,neighborhoods,price_min,price_max,bedrooms_min,consent_marketing,status")
+      .eq("company_id", data.companyId)
+      .eq("status", "ativo")
+      .eq("consent_marketing", true);
+    if (iErr) throw new Error(iErr.message);
+
+    const matches = (intents ?? []).filter((i: any) => intentMatchesFilter(i, data.filter));
+    const eligible = matches.filter((i: any) =>
+      data.channel === "whatsapp" ? !!(i.whatsapp || i.contact_phone) : !!i.contact_email,
+    );
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const rows = eligible.slice(0, 500).map((i: any) => ({
+      channel: data.channel,
+      event_code: "realestate.blast",
+      company_id: data.companyId,
+      reference_type: "realestate_blast",
+      reference_id: blast.id,
+      recipient_phone: data.channel === "whatsapp" ? (i.whatsapp || i.contact_phone) : null,
+      recipient_email: data.channel === "email" ? i.contact_email : null,
+      recipient_name: i.contact_name,
+      subject: data.subject ?? null,
+      body: data.body,
+      status: "queued",
+      payload: { intent_id: i.id, property_id: data.propertyId ?? null },
+    }));
+
+    let enqueued = 0;
+    if (rows.length > 0) {
+      const { error: oErr, count } = await supabaseAdmin
+        .from("message_outbox")
+        .insert(rows, { count: "exact" });
+      if (oErr) {
+        await context.supabase.from("realestate_blasts")
+          .update({ status: "failed", audience_count: matches.length })
+          .eq("id", blast.id);
+        throw new Error(oErr.message);
+      }
+      enqueued = count ?? rows.length;
+      const intentIds = eligible.slice(0, 500).map((i: any) => i.id);
+      if (intentIds.length > 0) {
+        await context.supabase.from("realestate_search_intents")
+          .update({ last_blast_at: new Date().toISOString() })
+          .in("id", intentIds);
+      }
+    }
+
+    await context.supabase.from("realestate_blasts")
+      .update({
+        audience_count: matches.length,
+        enqueued_count: enqueued,
+        status: enqueued > 0 ? "completed" : "queued",
+      })
+      .eq("id", blast.id);
+
+    return { blastId: blast.id, matched: matches.length, eligible: eligible.length, enqueued };
+  });
+
+export const listRealestateBlasts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ companyId: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: rows, error } = await context.supabase
+      .from("realestate_blasts")
+      .select("id,title,channel,property_id,filter,audience_count,enqueued_count,sent_count,failed_count,status,created_at")
+      .eq("company_id", data.companyId)
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) throw new Error(error.message);
+    return { blasts: rows ?? [] };
+  });
+
+export const fetchRealestateReturnReport = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ companyId: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const [{ data: blasts }, { data: interests }] = await Promise.all([
+      context.supabase.from("realestate_blasts")
+        .select("id,enqueued_count,channel,created_at,property_id,title")
+        .eq("company_id", data.companyId)
+        .order("created_at", { ascending: false })
+        .limit(50),
+      context.supabase.from("realestate_interests")
+        .select("id,source,property_id,created_at,status")
+        .eq("company_id", data.companyId)
+        .gte("created_at", new Date(Date.now() - 1000 * 60 * 60 * 24 * 60).toISOString()),
+    ]);
+
+    const ids = (blasts ?? []).map((b: any) => b.id);
+    const outboxStats: Record<string, { sent: number; failed: number; queued: number }> = {};
+    if (ids.length > 0) {
+      const { data: outRows } = await supabaseAdmin
+        .from("message_outbox")
+        .select("reference_id,status")
+        .eq("reference_type", "realestate_blast")
+        .in("reference_id", ids);
+      for (const r of outRows ?? []) {
+        const k = r.reference_id as string;
+        outboxStats[k] ||= { sent: 0, failed: 0, queued: 0 };
+        if (r.status === "sent") outboxStats[k].sent++;
+        else if (r.status === "failed") outboxStats[k].failed++;
+        else outboxStats[k].queued++;
+      }
+    }
+
+    const totalEnqueued = (blasts ?? []).reduce((s: number, b: any) => s + (b.enqueued_count ?? 0), 0);
+    const totalSent = Object.values(outboxStats).reduce((s, v) => s + v.sent, 0);
+    const totalFailed = Object.values(outboxStats).reduce((s, v) => s + v.failed, 0);
+    const newInterests = (interests ?? []).length;
+
+    return {
+      kpis: {
+        blasts: blasts?.length ?? 0,
+        enqueued: totalEnqueued,
+        delivered: totalSent,
+        failed: totalFailed,
+        newInterests,
+        conversionPct: totalSent > 0 ? Math.round((newInterests / totalSent) * 1000) / 10 : 0,
+      },
+      blasts: (blasts ?? []).map((b: any) => ({
+        ...b,
+        delivered: outboxStats[b.id]?.sent ?? 0,
+        failedReal: outboxStats[b.id]?.failed ?? 0,
+        queued: outboxStats[b.id]?.queued ?? 0,
+      })),
+    };
+  });
+
+
+// ============ Phase C: Demo seed ============
+export const seedRealestateDemo = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ companyId: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const sb = context.supabase;
+    const DEMO_TAG = "DEMO-IMOB";
+
+    // Properties (6)
+    const props = [
+      { title: "Apto 2 dorm · Vila Mariana", reference_code: `${DEMO_TAG}-001`, operation: "venda", property_type: "apartamento", sale_price: 680000, bedrooms: 2, bathrooms: 1, parking_spots: 1, area_useful: 62, city: "São Paulo", neighborhood: "Vila Mariana", state: "SP" },
+      { title: "Casa 3 dorm · Tatuapé", reference_code: `${DEMO_TAG}-002`, operation: "venda", property_type: "casa", sale_price: 1200000, bedrooms: 3, suites: 1, bathrooms: 2, parking_spots: 2, area_useful: 140, city: "São Paulo", neighborhood: "Tatuapé", state: "SP" },
+      { title: "Studio mobiliado · Pinheiros", reference_code: `${DEMO_TAG}-003`, operation: "locacao", property_type: "studio", rent_price: 3200, condo_fee: 600, bedrooms: 1, bathrooms: 1, area_useful: 32, city: "São Paulo", neighborhood: "Pinheiros", state: "SP" },
+      { title: "Cobertura · Moema", reference_code: `${DEMO_TAG}-004`, operation: "venda_ou_locacao", property_type: "cobertura", sale_price: 2400000, rent_price: 12000, bedrooms: 3, suites: 2, bathrooms: 3, parking_spots: 3, area_useful: 220, city: "São Paulo", neighborhood: "Moema", state: "SP" },
+      { title: "Sala comercial · Berrini", reference_code: `${DEMO_TAG}-005`, operation: "locacao", property_type: "sala_comercial", rent_price: 5500, area_useful: 48, city: "São Paulo", neighborhood: "Brooklin", state: "SP" },
+      { title: "Casa em condomínio · Alphaville", reference_code: `${DEMO_TAG}-006`, operation: "venda", property_type: "casa_condominio", sale_price: 2800000, bedrooms: 4, suites: 3, bathrooms: 4, parking_spots: 4, area_useful: 320, city: "Barueri", neighborhood: "Alphaville", state: "SP" },
+    ];
+    await sb.from("realestate_properties").insert(
+      props.map((p) => ({
+        ...p,
+        company_id: data.companyId,
+        status: "ativo",
+        is_published: true,
+        approval_status: "approved",
+        features: [],
+        photos: [],
+        created_by: context.userId,
+      })) as any,
+    );
+
+    // Search intents (4)
+    const intents = [
+      { contact_name: "Demo · Família Silva", contact_email: "silva.demo@example.com", whatsapp: "11999990001", operation: "venda", property_types: ["apartamento", "cobertura"], price_max: 800000, bedrooms_min: 2, cities: ["São Paulo"], neighborhoods: ["Vila Mariana", "Moema"] },
+      { contact_name: "Demo · João Investidor", contact_email: "joao.demo@example.com", whatsapp: "11999990002", operation: "venda", property_types: ["sala_comercial"], price_max: 1500000, cities: ["São Paulo"] },
+      { contact_name: "Demo · Maria Aluguel", contact_email: "maria.demo@example.com", whatsapp: "11999990003", operation: "locacao", property_types: ["studio", "apartamento"], price_max: 4000, cities: ["São Paulo"], neighborhoods: ["Pinheiros"] },
+      { contact_name: "Demo · Casal Costa", contact_email: "costa.demo@example.com", whatsapp: "11999990004", operation: "venda", property_types: ["casa", "casa_condominio"], price_max: 3000000, bedrooms_min: 3, cities: ["São Paulo", "Barueri"] },
+    ];
+    await sb.from("realestate_search_intents").insert(
+      intents.map((i) => ({
+        ...i,
+        company_id: data.companyId,
+        status: "ativo",
+        consent_marketing: true,
+        channel: "whatsapp",
+        notes: DEMO_TAG,
+        created_by: context.userId,
+      })) as any,
+    );
+
+    // Partner brokers (2)
+    await sb.from("realestate_partner_brokers").insert([
+      { company_id: data.companyId, broker_name: "Demo · Corretor Ana", email: "ana.demo@example.com", phone: "11988880001", status: "active", contract_started_at: new Date().toISOString(), notes: DEMO_TAG, created_by: context.userId },
+      { company_id: data.companyId, broker_name: "Demo · Corretor Bruno", email: "bruno.demo@example.com", phone: "11988880002", status: "pending", notes: DEMO_TAG, created_by: context.userId },
+    ] as any);
+
+    return { ok: true, properties: props.length, intents: intents.length, brokers: 2 };
+  });
+
+export const removeRealestateDemo = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ companyId: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const sb = context.supabase;
+    await sb.from("realestate_properties").delete().eq("company_id", data.companyId).like("reference_code", "DEMO-IMOB-%");
+    await sb.from("realestate_search_intents").delete().eq("company_id", data.companyId).eq("notes", "DEMO-IMOB");
+    await sb.from("realestate_partner_brokers").delete().eq("company_id", data.companyId).eq("notes", "DEMO-IMOB");
+    return { ok: true };
+  });
 

@@ -91,6 +91,7 @@ import { Route as ShowroomAcademiaRouteImport } from './routes/showroom.academia
 import { Route as RSlugRouteImport } from './routes/r.$slug'
 import { Route as PlanosTesteRouteImport } from './routes/planos.teste'
 import { Route as ParceiroTokenRouteImport } from './routes/parceiro.$token'
+import { Route as ParceiroCorretorTokenRouteImport } from './routes/parceiro-corretor.$token'
 import { Route as PacienteIdRouteImport } from './routes/paciente.$id'
 import { Route as NichosSlugRouteImport } from './routes/nichos.$slug'
 import { Route as ModulosSlugRouteImport } from './routes/modulos.$slug'
@@ -208,12 +209,14 @@ import { Route as AuthenticatedInsightsRespostasRouteImport } from './routes/_au
 import { Route as AuthenticatedInsightsPercebidoRouteImport } from './routes/_authenticated/insights.percebido'
 import { Route as AuthenticatedInsightsOportunidadesRouteImport } from './routes/_authenticated/insights.oportunidades'
 import { Route as AuthenticatedImobiliariaVitrineRouteImport } from './routes/_authenticated/imobiliaria.vitrine'
+import { Route as AuthenticatedImobiliariaParceirosRouteImport } from './routes/_authenticated/imobiliaria.parceiros'
 import { Route as AuthenticatedImobiliariaModulosRouteImport } from './routes/_authenticated/imobiliaria.modulos'
 import { Route as AuthenticatedImobiliariaMensagensRouteImport } from './routes/_authenticated/imobiliaria.mensagens'
 import { Route as AuthenticatedImobiliariaMatchesRouteImport } from './routes/_authenticated/imobiliaria.matches'
 import { Route as AuthenticatedImobiliariaInteressadosRouteImport } from './routes/_authenticated/imobiliaria.interessados'
 import { Route as AuthenticatedImobiliariaIntencoesRouteImport } from './routes/_authenticated/imobiliaria.intencoes'
 import { Route as AuthenticatedImobiliariaImoveisRouteImport } from './routes/_authenticated/imobiliaria.imoveis'
+import { Route as AuthenticatedImobiliariaCampanhasRouteImport } from './routes/_authenticated/imobiliaria.campanhas'
 import { Route as AuthenticatedImobiliariaAprovacoesRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes'
 import { Route as AuthenticatedFinanceWebhookLogRouteImport } from './routes/_authenticated/finance.webhook-log'
 import { Route as AuthenticatedFinanceTransactionsRouteImport } from './routes/_authenticated/finance.transactions'
@@ -774,6 +777,11 @@ const PlanosTesteRoute = PlanosTesteRouteImport.update({
 const ParceiroTokenRoute = ParceiroTokenRouteImport.update({
   id: '/parceiro/$token',
   path: '/parceiro/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParceiroCorretorTokenRoute = ParceiroCorretorTokenRouteImport.update({
+  id: '/parceiro-corretor/$token',
+  path: '/parceiro-corretor/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PacienteIdRoute = PacienteIdRouteImport.update({
@@ -1409,6 +1417,12 @@ const AuthenticatedImobiliariaVitrineRoute =
     path: '/imobiliaria/vitrine',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedImobiliariaParceirosRoute =
+  AuthenticatedImobiliariaParceirosRouteImport.update({
+    id: '/imobiliaria/parceiros',
+    path: '/imobiliaria/parceiros',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedImobiliariaModulosRoute =
   AuthenticatedImobiliariaModulosRouteImport.update({
     id: '/imobiliaria/modulos',
@@ -1443,6 +1457,12 @@ const AuthenticatedImobiliariaImoveisRoute =
   AuthenticatedImobiliariaImoveisRouteImport.update({
     id: '/imobiliaria/imoveis',
     path: '/imobiliaria/imoveis',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedImobiliariaCampanhasRoute =
+  AuthenticatedImobiliariaCampanhasRouteImport.update({
+    id: '/imobiliaria/campanhas',
+    path: '/imobiliaria/campanhas',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedImobiliariaAprovacoesRoute =
@@ -2389,6 +2409,7 @@ export interface FileRoutesByFullPath {
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
+  '/parceiro-corretor/$token': typeof ParceiroCorretorTokenRoute
   '/parceiro/$token': typeof ParceiroTokenRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
@@ -2551,12 +2572,14 @@ export interface FileRoutesByFullPath {
   '/finance/transactions': typeof AuthenticatedFinanceTransactionsRoute
   '/finance/webhook-log': typeof AuthenticatedFinanceWebhookLogRoute
   '/imobiliaria/aprovacoes': typeof AuthenticatedImobiliariaAprovacoesRouteWithChildren
+  '/imobiliaria/campanhas': typeof AuthenticatedImobiliariaCampanhasRoute
   '/imobiliaria/imoveis': typeof AuthenticatedImobiliariaImoveisRoute
   '/imobiliaria/intencoes': typeof AuthenticatedImobiliariaIntencoesRoute
   '/imobiliaria/interessados': typeof AuthenticatedImobiliariaInteressadosRoute
   '/imobiliaria/matches': typeof AuthenticatedImobiliariaMatchesRoute
   '/imobiliaria/mensagens': typeof AuthenticatedImobiliariaMensagensRoute
   '/imobiliaria/modulos': typeof AuthenticatedImobiliariaModulosRoute
+  '/imobiliaria/parceiros': typeof AuthenticatedImobiliariaParceirosRoute
   '/imobiliaria/vitrine': typeof AuthenticatedImobiliariaVitrineRoute
   '/insights/oportunidades': typeof AuthenticatedInsightsOportunidadesRoute
   '/insights/percebido': typeof AuthenticatedInsightsPercebidoRoute
@@ -2730,6 +2753,7 @@ export interface FileRoutesByTo {
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
+  '/parceiro-corretor/$token': typeof ParceiroCorretorTokenRoute
   '/parceiro/$token': typeof ParceiroTokenRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
@@ -2892,12 +2916,14 @@ export interface FileRoutesByTo {
   '/finance/transactions': typeof AuthenticatedFinanceTransactionsRoute
   '/finance/webhook-log': typeof AuthenticatedFinanceWebhookLogRoute
   '/imobiliaria/aprovacoes': typeof AuthenticatedImobiliariaAprovacoesRouteWithChildren
+  '/imobiliaria/campanhas': typeof AuthenticatedImobiliariaCampanhasRoute
   '/imobiliaria/imoveis': typeof AuthenticatedImobiliariaImoveisRoute
   '/imobiliaria/intencoes': typeof AuthenticatedImobiliariaIntencoesRoute
   '/imobiliaria/interessados': typeof AuthenticatedImobiliariaInteressadosRoute
   '/imobiliaria/matches': typeof AuthenticatedImobiliariaMatchesRoute
   '/imobiliaria/mensagens': typeof AuthenticatedImobiliariaMensagensRoute
   '/imobiliaria/modulos': typeof AuthenticatedImobiliariaModulosRoute
+  '/imobiliaria/parceiros': typeof AuthenticatedImobiliariaParceirosRoute
   '/imobiliaria/vitrine': typeof AuthenticatedImobiliariaVitrineRoute
   '/insights/oportunidades': typeof AuthenticatedInsightsOportunidadesRoute
   '/insights/percebido': typeof AuthenticatedInsightsPercebidoRoute
@@ -3085,6 +3111,7 @@ export interface FileRoutesById {
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
+  '/parceiro-corretor/$token': typeof ParceiroCorretorTokenRoute
   '/parceiro/$token': typeof ParceiroTokenRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
@@ -3247,12 +3274,14 @@ export interface FileRoutesById {
   '/_authenticated/finance/transactions': typeof AuthenticatedFinanceTransactionsRoute
   '/_authenticated/finance/webhook-log': typeof AuthenticatedFinanceWebhookLogRoute
   '/_authenticated/imobiliaria/aprovacoes': typeof AuthenticatedImobiliariaAprovacoesRouteWithChildren
+  '/_authenticated/imobiliaria/campanhas': typeof AuthenticatedImobiliariaCampanhasRoute
   '/_authenticated/imobiliaria/imoveis': typeof AuthenticatedImobiliariaImoveisRoute
   '/_authenticated/imobiliaria/intencoes': typeof AuthenticatedImobiliariaIntencoesRoute
   '/_authenticated/imobiliaria/interessados': typeof AuthenticatedImobiliariaInteressadosRoute
   '/_authenticated/imobiliaria/matches': typeof AuthenticatedImobiliariaMatchesRoute
   '/_authenticated/imobiliaria/mensagens': typeof AuthenticatedImobiliariaMensagensRoute
   '/_authenticated/imobiliaria/modulos': typeof AuthenticatedImobiliariaModulosRoute
+  '/_authenticated/imobiliaria/parceiros': typeof AuthenticatedImobiliariaParceirosRoute
   '/_authenticated/imobiliaria/vitrine': typeof AuthenticatedImobiliariaVitrineRoute
   '/_authenticated/insights/oportunidades': typeof AuthenticatedInsightsOportunidadesRoute
   '/_authenticated/insights/percebido': typeof AuthenticatedInsightsPercebidoRoute
@@ -3439,6 +3468,7 @@ export interface FileRouteTypes {
     | '/modulos/$slug'
     | '/nichos/$slug'
     | '/paciente/$id'
+    | '/parceiro-corretor/$token'
     | '/parceiro/$token'
     | '/planos/teste'
     | '/r/$slug'
@@ -3601,12 +3631,14 @@ export interface FileRouteTypes {
     | '/finance/transactions'
     | '/finance/webhook-log'
     | '/imobiliaria/aprovacoes'
+    | '/imobiliaria/campanhas'
     | '/imobiliaria/imoveis'
     | '/imobiliaria/intencoes'
     | '/imobiliaria/interessados'
     | '/imobiliaria/matches'
     | '/imobiliaria/mensagens'
     | '/imobiliaria/modulos'
+    | '/imobiliaria/parceiros'
     | '/imobiliaria/vitrine'
     | '/insights/oportunidades'
     | '/insights/percebido'
@@ -3780,6 +3812,7 @@ export interface FileRouteTypes {
     | '/modulos/$slug'
     | '/nichos/$slug'
     | '/paciente/$id'
+    | '/parceiro-corretor/$token'
     | '/parceiro/$token'
     | '/planos/teste'
     | '/r/$slug'
@@ -3942,12 +3975,14 @@ export interface FileRouteTypes {
     | '/finance/transactions'
     | '/finance/webhook-log'
     | '/imobiliaria/aprovacoes'
+    | '/imobiliaria/campanhas'
     | '/imobiliaria/imoveis'
     | '/imobiliaria/intencoes'
     | '/imobiliaria/interessados'
     | '/imobiliaria/matches'
     | '/imobiliaria/mensagens'
     | '/imobiliaria/modulos'
+    | '/imobiliaria/parceiros'
     | '/imobiliaria/vitrine'
     | '/insights/oportunidades'
     | '/insights/percebido'
@@ -4134,6 +4169,7 @@ export interface FileRouteTypes {
     | '/modulos/$slug'
     | '/nichos/$slug'
     | '/paciente/$id'
+    | '/parceiro-corretor/$token'
     | '/parceiro/$token'
     | '/planos/teste'
     | '/r/$slug'
@@ -4296,12 +4332,14 @@ export interface FileRouteTypes {
     | '/_authenticated/finance/transactions'
     | '/_authenticated/finance/webhook-log'
     | '/_authenticated/imobiliaria/aprovacoes'
+    | '/_authenticated/imobiliaria/campanhas'
     | '/_authenticated/imobiliaria/imoveis'
     | '/_authenticated/imobiliaria/intencoes'
     | '/_authenticated/imobiliaria/interessados'
     | '/_authenticated/imobiliaria/matches'
     | '/_authenticated/imobiliaria/mensagens'
     | '/_authenticated/imobiliaria/modulos'
+    | '/_authenticated/imobiliaria/parceiros'
     | '/_authenticated/imobiliaria/vitrine'
     | '/_authenticated/insights/oportunidades'
     | '/_authenticated/insights/percebido'
@@ -4454,6 +4492,7 @@ export interface RootRouteChildren {
   ImoveisSlugRoute: typeof ImoveisSlugRouteWithChildren
   MesaTokenRoute: typeof MesaTokenRoute
   NichosSlugRoute: typeof NichosSlugRoute
+  ParceiroCorretorTokenRoute: typeof ParceiroCorretorTokenRoute
   ParceiroTokenRoute: typeof ParceiroTokenRoute
   RSlugRoute: typeof RSlugRoute
   ShowroomAcademiaRoute: typeof ShowroomAcademiaRoute
@@ -5107,6 +5146,13 @@ declare module '@tanstack/react-router' {
       path: '/parceiro/$token'
       fullPath: '/parceiro/$token'
       preLoaderRoute: typeof ParceiroTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parceiro-corretor/$token': {
+      id: '/parceiro-corretor/$token'
+      path: '/parceiro-corretor/$token'
+      fullPath: '/parceiro-corretor/$token'
+      preLoaderRoute: typeof ParceiroCorretorTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/paciente/$id': {
@@ -5928,6 +5974,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedImobiliariaVitrineRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/imobiliaria/parceiros': {
+      id: '/_authenticated/imobiliaria/parceiros'
+      path: '/imobiliaria/parceiros'
+      fullPath: '/imobiliaria/parceiros'
+      preLoaderRoute: typeof AuthenticatedImobiliariaParceirosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/imobiliaria/modulos': {
       id: '/_authenticated/imobiliaria/modulos'
       path: '/imobiliaria/modulos'
@@ -5968,6 +6021,13 @@ declare module '@tanstack/react-router' {
       path: '/imobiliaria/imoveis'
       fullPath: '/imobiliaria/imoveis'
       preLoaderRoute: typeof AuthenticatedImobiliariaImoveisRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/imobiliaria/campanhas': {
+      id: '/_authenticated/imobiliaria/campanhas'
+      path: '/imobiliaria/campanhas'
+      fullPath: '/imobiliaria/campanhas'
+      preLoaderRoute: typeof AuthenticatedImobiliariaCampanhasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/imobiliaria/aprovacoes': {
@@ -7540,12 +7600,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEhrIdRoute: typeof AuthenticatedEhrIdRoute
   AuthenticatedEventosIdRoute: typeof AuthenticatedEventosIdRoute
   AuthenticatedImobiliariaAprovacoesRoute: typeof AuthenticatedImobiliariaAprovacoesRouteWithChildren
+  AuthenticatedImobiliariaCampanhasRoute: typeof AuthenticatedImobiliariaCampanhasRoute
   AuthenticatedImobiliariaImoveisRoute: typeof AuthenticatedImobiliariaImoveisRoute
   AuthenticatedImobiliariaIntencoesRoute: typeof AuthenticatedImobiliariaIntencoesRoute
   AuthenticatedImobiliariaInteressadosRoute: typeof AuthenticatedImobiliariaInteressadosRoute
   AuthenticatedImobiliariaMatchesRoute: typeof AuthenticatedImobiliariaMatchesRoute
   AuthenticatedImobiliariaMensagensRoute: typeof AuthenticatedImobiliariaMensagensRoute
   AuthenticatedImobiliariaModulosRoute: typeof AuthenticatedImobiliariaModulosRoute
+  AuthenticatedImobiliariaParceirosRoute: typeof AuthenticatedImobiliariaParceirosRoute
   AuthenticatedImobiliariaVitrineRoute: typeof AuthenticatedImobiliariaVitrineRoute
   AuthenticatedInsightsOportunidadesRoute: typeof AuthenticatedInsightsOportunidadesRoute
   AuthenticatedInsightsPercebidoRoute: typeof AuthenticatedInsightsPercebidoRoute
@@ -7658,6 +7720,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEventosIdRoute: AuthenticatedEventosIdRoute,
   AuthenticatedImobiliariaAprovacoesRoute:
     AuthenticatedImobiliariaAprovacoesRouteWithChildren,
+  AuthenticatedImobiliariaCampanhasRoute:
+    AuthenticatedImobiliariaCampanhasRoute,
   AuthenticatedImobiliariaImoveisRoute: AuthenticatedImobiliariaImoveisRoute,
   AuthenticatedImobiliariaIntencoesRoute:
     AuthenticatedImobiliariaIntencoesRoute,
@@ -7667,6 +7731,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedImobiliariaMensagensRoute:
     AuthenticatedImobiliariaMensagensRoute,
   AuthenticatedImobiliariaModulosRoute: AuthenticatedImobiliariaModulosRoute,
+  AuthenticatedImobiliariaParceirosRoute:
+    AuthenticatedImobiliariaParceirosRoute,
   AuthenticatedImobiliariaVitrineRoute: AuthenticatedImobiliariaVitrineRoute,
   AuthenticatedInsightsOportunidadesRoute:
     AuthenticatedInsightsOportunidadesRoute,
@@ -7871,6 +7937,7 @@ const rootRouteChildren: RootRouteChildren = {
   ImoveisSlugRoute: ImoveisSlugRouteWithChildren,
   MesaTokenRoute: MesaTokenRoute,
   NichosSlugRoute: NichosSlugRoute,
+  ParceiroCorretorTokenRoute: ParceiroCorretorTokenRoute,
   ParceiroTokenRoute: ParceiroTokenRoute,
   RSlugRoute: RSlugRoute,
   ShowroomAcademiaRoute: ShowroomAcademiaRoute,

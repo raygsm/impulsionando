@@ -9833,6 +9833,75 @@ export type Database = {
         }
         Relationships: []
       }
+      realestate_blasts: {
+        Row: {
+          audience_count: number
+          body: string
+          channel: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          enqueued_count: number
+          failed_count: number
+          filter: Json
+          id: string
+          property_id: string | null
+          sent_count: number
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          audience_count?: number
+          body: string
+          channel: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          enqueued_count?: number
+          failed_count?: number
+          filter?: Json
+          id?: string
+          property_id?: string | null
+          sent_count?: number
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          audience_count?: number
+          body?: string
+          channel?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          enqueued_count?: number
+          failed_count?: number
+          filter?: Json
+          id?: string
+          property_id?: string | null
+          sent_count?: number
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "realestate_blasts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "realestate_blasts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "realestate_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       realestate_interests: {
         Row: {
           broker_user_id: string | null
@@ -10025,6 +10094,59 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "realestate_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      realestate_partner_brokers: {
+        Row: {
+          broker_name: string
+          company_id: string
+          contract_started_at: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          id: string
+          notes: string | null
+          phone: string | null
+          portal_token: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          broker_name: string
+          company_id: string
+          contract_started_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          portal_token?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          broker_name?: string
+          company_id?: string
+          contract_started_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          portal_token?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "realestate_partner_brokers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -10324,6 +10446,7 @@ export type Database = {
           bedrooms_min: number
           cities: string[]
           company_id: string
+          consent_marketing: boolean
           contact_email: string | null
           contact_name: string | null
           contact_phone: string | null
@@ -10332,6 +10455,7 @@ export type Database = {
           customer_id: string | null
           id: string
           ip: string | null
+          last_blast_at: string | null
           lead_id: string | null
           neighborhoods: string[]
           notes: string | null
@@ -10353,6 +10477,7 @@ export type Database = {
           bedrooms_min?: number
           cities?: string[]
           company_id: string
+          consent_marketing?: boolean
           contact_email?: string | null
           contact_name?: string | null
           contact_phone?: string | null
@@ -10361,6 +10486,7 @@ export type Database = {
           customer_id?: string | null
           id?: string
           ip?: string | null
+          last_blast_at?: string | null
           lead_id?: string | null
           neighborhoods?: string[]
           notes?: string | null
@@ -10382,6 +10508,7 @@ export type Database = {
           bedrooms_min?: number
           cities?: string[]
           company_id?: string
+          consent_marketing?: boolean
           contact_email?: string | null
           contact_name?: string | null
           contact_phone?: string | null
@@ -10390,6 +10517,7 @@ export type Database = {
           customer_id?: string | null
           id?: string
           ip?: string | null
+          last_blast_at?: string | null
           lead_id?: string | null
           neighborhoods?: string[]
           notes?: string | null
@@ -12455,6 +12583,10 @@ export type Database = {
           pdv_name: string
           pdv_state: string
         }[]
+      }
+      resolve_realestate_partner_token: {
+        Args: { _token: string }
+        Returns: Json
       }
       resolve_table_qr: { Args: { _token: string }; Returns: Json }
       restaurant_create_table_invoice: {
