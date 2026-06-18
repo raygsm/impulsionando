@@ -145,9 +145,47 @@ function DemoQrShell() {
     [cart.totalCents, cart.count, fireEvent],
   );
 
+  const [checkoutDone, setCheckoutDone] = useState(false);
   const handleAfterSuccess = useCallback(() => {
     cart.clear();
+    setCheckoutDone(true);
   }, [cart]);
+
+  // ─── Survey + Voucher (Fase 4) ───
+  const sendSurvey = useServerFn(submitDemoSurvey);
+  const [voucher, setVoucher] = useState<DemoVoucher | null>(null);
+  const [maskedName, setMaskedName] = useState<string | undefined>(undefined);
+  const [surveyLoading, setSurveyLoading] = useState(false);
+
+  const handleSurveySubmit = useCallback(
+    (values: SurveyValues) => {
+      if (!sessionId) {
+        toast.error("Aguarde o registro da sessão para enviar a pesquisa.");
+        return;
+      }
+      setSurveyLoading(true);
+      sendSurvey({
+        data: {
+          scenarioSlug: tenant,
+          qrSlug: qr,
+          sessionId,
+          ...values,
+        },
+      })
+        .then((res) => {
+          if (res.voucher) {
+            setVoucher(res.voucher as DemoVoucher);
+            setMaskedName(res.maskedName);
+            toast.success("Voucher liberado!", { description: res.voucher.code });
+          } else {
+            toast.message("Pesquisa registrada", { description: "Sem voucher disponível agora." });
+          }
+        })
+        .catch((e) => toast.error("Falhou ao enviar pesquisa", { description: String(e?.message ?? e) }))
+        .finally(() => setSurveyLoading(false));
+    },
+    [sendSurvey, sessionId, tenant, qr],
+  );
 
   if (scenarioQ.isLoading) {
     return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Carregando demonstração…</div>;
