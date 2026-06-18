@@ -237,7 +237,19 @@ function ConsumidorDashboardPage() {
         description="Tudo o que você curte, consome e economiza num só lugar."
       />
 
-      <SectionNav ref={navRef} activeId={activeId} onSelect={handleSelect} />
+      <SectionNav
+        ref={navRef}
+        activeId={activeId}
+        onSelect={handleSelect}
+        reducedMotion={reducedMotion}
+      />
+
+      {/* Live region announces active section to assistive tech */}
+      <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {activeLabel ? `Seção ativa: ${activeLabel}` : ""}
+      </div>
+
+
 
 
 
