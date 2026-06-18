@@ -276,7 +276,7 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
 
     const initialOffset = await page.evaluate(() =>
       Number(
-        getComputedStyle(document.documentElement)
+        getComputedStyle(document.getElementById("vouchers") || document.documentElement)
           .getPropertyValue("--sec-offset")
           .replace("px", "")
           .trim() || "0",
@@ -291,7 +291,7 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
 
     const newOffset = await page.evaluate(() =>
       Number(
-        getComputedStyle(document.documentElement)
+        getComputedStyle(document.getElementById("vouchers") || document.documentElement)
           .getPropertyValue("--sec-offset")
           .replace("px", "")
           .trim() || "0",
