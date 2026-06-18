@@ -39,6 +39,7 @@ function KpiCard({ icon: Icon, label, value, sub }: { icon: any; label: string; 
 }
 
 function BreweryDashboard() {
+  const qc = useQueryClient();
   const [brandId, setBrandId] = useState<string | undefined>(undefined);
   const [sinceDays, setSinceDays] = useState<number>(30);
 
@@ -48,12 +49,28 @@ function BreweryDashboard() {
     queryFn: () => brandsFn(),
     staleTime: 60_000,
   });
+  const hasBrands = brands.length > 0;
+  const demoBrand = (brands as any[]).find((b) => b.is_demo);
+
+  const seedFn = useServerFn(seedBreweryDemo);
+  const removeFn = useServerFn(removeBreweryDemo);
+  const seedMut = useMutation({
+    mutationFn: () => seedFn(),
+    onSuccess: (r: any) => { toast.success("Marca demo criada!"); setBrandId(r.brandId); qc.invalidateQueries({ queryKey: ["brewery"] }); },
+    onError: (e: any) => toast.error(e?.message ?? "Erro"),
+  });
+  const removeMut = useMutation({
+    mutationFn: (id: string) => removeFn({ data: { brandId: id } }),
+    onSuccess: () => { toast.success("Marca demo removida"); setBrandId(undefined); qc.invalidateQueries({ queryKey: ["brewery"] }); },
+    onError: (e: any) => toast.error(e?.message ?? "Erro"),
+  });
 
   const dashFn = useServerFn(fetchBreweryDashboard);
   const { data, isLoading } = useQuery({
     queryKey: ["brewery", "dashboard", brandId ?? "all", sinceDays],
     queryFn: () => dashFn({ data: { brandId, sinceDays } }),
     refetchInterval: 60_000,
+    enabled: hasBrands,
   });
 
   const kpi = data?.kpis;
