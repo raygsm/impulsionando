@@ -116,6 +116,7 @@ import { Route as DemoAdvogadosRouteImport } from './routes/demo.advogados'
 import { Route as ContratarSobMedidaRouteImport } from './routes/contratar.sob-medida'
 import { Route as ComoFuncionaFitnessRouteImport } from './routes/como-funciona.fitness'
 import { Route as ClubeLoginRouteImport } from './routes/clube.login'
+import { Route as ClubeCadastroRouteImport } from './routes/clube.cadastro'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
@@ -887,6 +888,11 @@ const ComoFuncionaFitnessRoute = ComoFuncionaFitnessRouteImport.update({
 const ClubeLoginRoute = ClubeLoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => ClubeRoute,
+} as any)
+const ClubeCadastroRoute = ClubeCadastroRouteImport.update({
+  id: '/cadastro',
+  path: '/cadastro',
   getParentRoute: () => ClubeRoute,
 } as any)
 const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
@@ -2281,6 +2287,7 @@ export interface FileRoutesByFullPath {
   '/users': typeof AuthenticatedUsersRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/clube/cadastro': typeof ClubeCadastroRoute
   '/clube/login': typeof ClubeLoginRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/contratar/sob-medida': typeof ContratarSobMedidaRoute
@@ -2610,6 +2617,7 @@ export interface FileRoutesByTo {
   '/users': typeof AuthenticatedUsersRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/clube/cadastro': typeof ClubeCadastroRoute
   '/clube/login': typeof ClubeLoginRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/contratar/sob-medida': typeof ContratarSobMedidaRoute
@@ -2953,6 +2961,7 @@ export interface FileRoutesById {
   '/_authenticated/users': typeof AuthenticatedUsersRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/clube/cadastro': typeof ClubeCadastroRoute
   '/clube/login': typeof ClubeLoginRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/contratar/sob-medida': typeof ContratarSobMedidaRoute
@@ -3295,6 +3304,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/admin/login'
     | '/checkout/success'
+    | '/clube/cadastro'
     | '/clube/login'
     | '/como-funciona/fitness'
     | '/contratar/sob-medida'
@@ -3624,6 +3634,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/admin/login'
     | '/checkout/success'
+    | '/clube/cadastro'
     | '/clube/login'
     | '/como-funciona/fitness'
     | '/contratar/sob-medida'
@@ -3966,6 +3977,7 @@ export interface FileRouteTypes {
     | '/_authenticated/users'
     | '/admin/login'
     | '/checkout/success'
+    | '/clube/cadastro'
     | '/clube/login'
     | '/como-funciona/fitness'
     | '/contratar/sob-medida'
@@ -5128,6 +5140,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/clube/login'
       preLoaderRoute: typeof ClubeLoginRouteImport
+      parentRoute: typeof ClubeRoute
+    }
+    '/clube/cadastro': {
+      id: '/clube/cadastro'
+      path: '/cadastro'
+      fullPath: '/clube/cadastro'
+      preLoaderRoute: typeof ClubeCadastroRouteImport
       parentRoute: typeof ClubeRoute
     }
     '/checkout/success': {
@@ -7424,10 +7443,12 @@ const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface ClubeRouteChildren {
+  ClubeCadastroRoute: typeof ClubeCadastroRoute
   ClubeLoginRoute: typeof ClubeLoginRoute
 }
 
 const ClubeRouteChildren: ClubeRouteChildren = {
+  ClubeCadastroRoute: ClubeCadastroRoute,
   ClubeLoginRoute: ClubeLoginRoute,
 }
 
