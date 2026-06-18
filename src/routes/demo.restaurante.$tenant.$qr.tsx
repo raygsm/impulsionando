@@ -19,10 +19,13 @@ import {
   getDemoScenario,
   recordDemoScan,
   recordDemoEvent,
+  submitDemoSurvey,
 } from "@/lib/demo-restaurante.functions";
 import { DemoMenu, type DemoMenuItem } from "@/components/demo/DemoMenu";
 import { DemoCart } from "@/components/demo/DemoCart";
 import { DemoCheckout, type DemoPaymentMethod } from "@/components/demo/DemoCheckout";
+import { DemoSurvey, type SurveyValues } from "@/components/demo/DemoSurvey";
+import { DemoVoucherCard, DemoJourney, type DemoVoucher } from "@/components/demo/DemoVoucher";
 import { useDemoCart } from "@/hooks/useDemoCart";
 
 export const Route = createFileRoute("/demo/restaurante/$tenant/$qr")({
@@ -142,9 +145,47 @@ function DemoQrShell() {
     [cart.totalCents, cart.count, fireEvent],
   );
 
+  const [checkoutDone, setCheckoutDone] = useState(false);
   const handleAfterSuccess = useCallback(() => {
     cart.clear();
+    setCheckoutDone(true);
   }, [cart]);
+
+  // ─── Survey + Voucher (Fase 4) ───
+  const sendSurvey = useServerFn(submitDemoSurvey);
+  const [voucher, setVoucher] = useState<DemoVoucher | null>(null);
+  const [maskedName, setMaskedName] = useState<string | undefined>(undefined);
+  const [surveyLoading, setSurveyLoading] = useState(false);
+
+  const handleSurveySubmit = useCallback(
+    (values: SurveyValues) => {
+      if (!sessionId) {
+        toast.error("Aguarde o registro da sessão para enviar a pesquisa.");
+        return;
+      }
+      setSurveyLoading(true);
+      sendSurvey({
+        data: {
+          scenarioSlug: tenant,
+          qrSlug: qr,
+          sessionId,
+          ...values,
+        },
+      })
+        .then((res) => {
+          if (res.voucher) {
+            setVoucher(res.voucher as DemoVoucher);
+            setMaskedName(res.maskedName);
+            toast.success("Voucher liberado!", { description: res.voucher.code });
+          } else {
+            toast.message("Pesquisa registrada", { description: "Sem voucher disponível agora." });
+          }
+        })
+        .catch((e) => toast.error("Falhou ao enviar pesquisa", { description: String(e?.message ?? e) }))
+        .finally(() => setSurveyLoading(false));
+    },
+    [sendSurvey, sessionId, tenant, qr],
+  );
 
   if (scenarioQ.isLoading) {
     return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Carregando demonstração…</div>;
@@ -166,6 +207,17 @@ function DemoQrShell() {
 
   const { scenario, items } = scenarioQ.data;
   const showMenu = MENU_KINDS.has(currentQr.kind);
+  const SURVEY_KINDS = new Set(["pesquisa", "clube"]);
+  const showSurvey = SURVEY_KINDS.has(currentQr.kind) || (showMenu && checkoutDone);
+
+  // Jornada: 0 scan · 1 cardápio · 2 checkout · 3 voucher · 4 retorno
+  const journeyIndex = voucher
+    ? 3
+    : checkoutDone
+    ? 2
+    : cart.count > 0
+    ? 1
+    : 0;
 
   return (
     <main
@@ -203,20 +255,38 @@ function DemoQrShell() {
           </p>
         </Card>
 
-        {showMenu ? (
-          <DemoMenu items={items as DemoMenuItem[]} onAdd={handleAdd} />
-        ) : (
+        {showMenu && <DemoMenu items={items as DemoMenuItem[]} onAdd={handleAdd} />}
+
+        {checkoutDone && showMenu && !voucher && (
+          <Card className="p-4 space-y-1 border-primary/30 bg-primary/5">
+            <p className="text-sm font-semibold">Quer voltar com 10% de desconto?</p>
+            <p className="text-xs text-muted-foreground">
+              Responda a pesquisa abaixo e o Boteco libera um voucher personalizado pelo perfil do seu pedido.
+            </p>
+          </Card>
+        )}
+
+        {voucher && <DemoVoucherCard voucher={voucher} maskedName={maskedName} />}
+
+        {showSurvey && !voucher && (
+          <DemoSurvey loading={surveyLoading} onSubmit={handleSurveySubmit} />
+        )}
+
+        {!showMenu && !SURVEY_KINDS.has(currentQr.kind) && (
           <Card className="p-4 space-y-2">
             <div className="flex items-center gap-2 text-sm font-semibold">
               <Sparkles className="w-4 h-4" /> Próxima etapa
             </div>
             <p className="text-xs text-muted-foreground">
               Este QR é do tipo <strong>{KIND_LABEL[currentQr.kind] ?? currentQr.kind}</strong>. A jornada
-              dedicada (pesquisa, evento ou Clube) entra na próxima fase da demonstração.
+              dedicada entra nas próximas iterações da demonstração.
             </p>
           </Card>
         )}
+
+        <DemoJourney activeIndex={journeyIndex} />
       </section>
+
 
       {showMenu && (
         <>
