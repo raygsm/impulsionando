@@ -91,6 +91,7 @@ import { Route as ShowroomAgendaRouteImport } from './routes/showroom.agenda'
 import { Route as ShowroomAcademiaRouteImport } from './routes/showroom.academia'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
 import { Route as PlanosTesteRouteImport } from './routes/planos.teste'
+import { Route as PlanosComecarRouteImport } from './routes/planos.comecar'
 import { Route as ParceiroTokenRouteImport } from './routes/parceiro.$token'
 import { Route as ParceiroCorretorTokenRouteImport } from './routes/parceiro-corretor.$token'
 import { Route as PacienteIdRouteImport } from './routes/paciente.$id'
@@ -790,6 +791,11 @@ const RSlugRoute = RSlugRouteImport.update({
 const PlanosTesteRoute = PlanosTesteRouteImport.update({
   id: '/teste',
   path: '/teste',
+  getParentRoute: () => PlanosRoute,
+} as any)
+const PlanosComecarRoute = PlanosComecarRouteImport.update({
+  id: '/comecar',
+  path: '/comecar',
   getParentRoute: () => PlanosRoute,
 } as any)
 const ParceiroTokenRoute = ParceiroTokenRouteImport.update({
@@ -2500,6 +2506,7 @@ export interface FileRoutesByFullPath {
   '/paciente/$id': typeof PacienteIdRoute
   '/parceiro-corretor/$token': typeof ParceiroCorretorTokenRoute
   '/parceiro/$token': typeof ParceiroTokenRoute
+  '/planos/comecar': typeof PlanosComecarRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
@@ -2857,6 +2864,7 @@ export interface FileRoutesByTo {
   '/paciente/$id': typeof PacienteIdRoute
   '/parceiro-corretor/$token': typeof ParceiroCorretorTokenRoute
   '/parceiro/$token': typeof ParceiroTokenRoute
+  '/planos/comecar': typeof PlanosComecarRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
@@ -3228,6 +3236,7 @@ export interface FileRoutesById {
   '/paciente/$id': typeof PacienteIdRoute
   '/parceiro-corretor/$token': typeof ParceiroCorretorTokenRoute
   '/parceiro/$token': typeof ParceiroTokenRoute
+  '/planos/comecar': typeof PlanosComecarRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
@@ -3598,6 +3607,7 @@ export interface FileRouteTypes {
     | '/paciente/$id'
     | '/parceiro-corretor/$token'
     | '/parceiro/$token'
+    | '/planos/comecar'
     | '/planos/teste'
     | '/r/$slug'
     | '/showroom/academia'
@@ -3955,6 +3965,7 @@ export interface FileRouteTypes {
     | '/paciente/$id'
     | '/parceiro-corretor/$token'
     | '/parceiro/$token'
+    | '/planos/comecar'
     | '/planos/teste'
     | '/r/$slug'
     | '/showroom/academia'
@@ -4325,6 +4336,7 @@ export interface FileRouteTypes {
     | '/paciente/$id'
     | '/parceiro-corretor/$token'
     | '/parceiro/$token'
+    | '/planos/comecar'
     | '/planos/teste'
     | '/r/$slug'
     | '/showroom/academia'
@@ -5316,6 +5328,13 @@ declare module '@tanstack/react-router' {
       path: '/teste'
       fullPath: '/planos/teste'
       preLoaderRoute: typeof PlanosTesteRouteImport
+      parentRoute: typeof PlanosRoute
+    }
+    '/planos/comecar': {
+      id: '/planos/comecar'
+      path: '/comecar'
+      fullPath: '/planos/comecar'
+      preLoaderRoute: typeof PlanosComecarRouteImport
       parentRoute: typeof PlanosRoute
     }
     '/parceiro/$token': {
@@ -8136,10 +8155,12 @@ const PacienteRouteWithChildren = PacienteRoute._addFileChildren(
 )
 
 interface PlanosRouteChildren {
+  PlanosComecarRoute: typeof PlanosComecarRoute
   PlanosTesteRoute: typeof PlanosTesteRoute
 }
 
 const PlanosRouteChildren: PlanosRouteChildren = {
+  PlanosComecarRoute: PlanosComecarRoute,
   PlanosTesteRoute: PlanosTesteRoute,
 }
 
