@@ -171,6 +171,7 @@ import { Route as PortalContabilidadeTokenRouteImport } from './routes/portal.co
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ImoveisSlugPropertyIdRouteImport } from './routes/imoveis.$slug.$propertyId'
 import { Route as DemoNichoSlugRouteImport } from './routes/demo.nicho.$slug'
+import { Route as ApiMercadopagoWebhookRouteImport } from './routes/api/mercadopago/webhook'
 import { Route as AuthenticatedWhiteLabelCockpitRouteImport } from './routes/_authenticated/white-label.cockpit'
 import { Route as AuthenticatedUsersCorporateRouteImport } from './routes/_authenticated/users.corporate'
 import { Route as AuthenticatedTorreRestaurantesDemoRouteImport } from './routes/_authenticated/torre.restaurantes-demo'
@@ -1201,6 +1202,11 @@ const ImoveisSlugPropertyIdRoute = ImoveisSlugPropertyIdRouteImport.update({
 const DemoNichoSlugRoute = DemoNichoSlugRouteImport.update({
   id: '/demo/nicho/$slug',
   path: '/demo/nicho/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMercadopagoWebhookRoute = ApiMercadopagoWebhookRouteImport.update({
+  id: '/api/mercadopago/webhook',
+  path: '/api/mercadopago/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedWhiteLabelCockpitRoute =
@@ -2684,6 +2690,7 @@ export interface FileRoutesByFullPath {
   '/torre/restaurantes-demo': typeof AuthenticatedTorreRestaurantesDemoRouteWithChildren
   '/users/corporate': typeof AuthenticatedUsersCorporateRoute
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
+  '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -3037,6 +3044,7 @@ export interface FileRoutesByTo {
   '/torre/restaurantes-demo': typeof AuthenticatedTorreRestaurantesDemoRouteWithChildren
   '/users/corporate': typeof AuthenticatedUsersCorporateRoute
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
+  '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -3404,6 +3412,7 @@ export interface FileRoutesById {
   '/_authenticated/torre/restaurantes-demo': typeof AuthenticatedTorreRestaurantesDemoRouteWithChildren
   '/_authenticated/users/corporate': typeof AuthenticatedUsersCorporateRoute
   '/_authenticated/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
+  '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -3770,6 +3779,7 @@ export interface FileRouteTypes {
     | '/torre/restaurantes-demo'
     | '/users/corporate'
     | '/white-label/cockpit'
+    | '/api/mercadopago/webhook'
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
@@ -4123,6 +4133,7 @@ export interface FileRouteTypes {
     | '/torre/restaurantes-demo'
     | '/users/corporate'
     | '/white-label/cockpit'
+    | '/api/mercadopago/webhook'
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
@@ -4489,6 +4500,7 @@ export interface FileRouteTypes {
     | '/_authenticated/torre/restaurantes-demo'
     | '/_authenticated/users/corporate'
     | '/_authenticated/white-label/cockpit'
+    | '/api/mercadopago/webhook'
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
@@ -4659,6 +4671,7 @@ export interface RootRouteChildren {
   NichosIndexRoute: typeof NichosIndexRoute
   ShowroomIndexRoute: typeof ShowroomIndexRoute
   TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
+  ApiMercadopagoWebhookRoute: typeof ApiMercadopagoWebhookRoute
   DemoNichoSlugRoute: typeof DemoNichoSlugRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   PortalContabilidadeTokenRoute: typeof PortalContabilidadeTokenRoute
@@ -5824,6 +5837,13 @@ declare module '@tanstack/react-router' {
       path: '/demo/nicho/$slug'
       fullPath: '/demo/nicho/$slug'
       preLoaderRoute: typeof DemoNichoSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/mercadopago/webhook': {
+      id: '/api/mercadopago/webhook'
+      path: '/api/mercadopago/webhook'
+      fullPath: '/api/mercadopago/webhook'
+      preLoaderRoute: typeof ApiMercadopagoWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/white-label/cockpit': {
@@ -8216,6 +8236,7 @@ const rootRouteChildren: RootRouteChildren = {
   NichosIndexRoute: NichosIndexRoute,
   ShowroomIndexRoute: ShowroomIndexRoute,
   TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
+  ApiMercadopagoWebhookRoute: ApiMercadopagoWebhookRoute,
   DemoNichoSlugRoute: DemoNichoSlugRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   PortalContabilidadeTokenRoute: PortalContabilidadeTokenRoute,
