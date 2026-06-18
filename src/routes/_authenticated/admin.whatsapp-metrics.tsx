@@ -1111,6 +1111,65 @@ function WhatsAppMetricsPage() {
   );
 }
 
+function SimStatusBadge({ status }: { status: SimulationDispatch["status"] }) {
+  const map: Record<SimulationDispatch["status"], { v: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
+    fired: { v: "destructive", label: "Disparou" },
+    suppressed_cooldown: { v: "secondary", label: "Cooldown" },
+    suppressed_thresholds: { v: "outline", label: "Limite OK" },
+    below_samples: { v: "outline", label: "Amostra baixa" },
+    disabled: { v: "outline", label: "Desativado" },
+  };
+  const c = map[status];
+  return <Badge variant={c.v}>{c.label}</Badge>;
+}
+
+function DeliveryBadge({ d }: { d: ChannelDelivery }) {
+  const variant: "default" | "secondary" | "destructive" | "outline" =
+    d.status === "sent" ? "default"
+    : d.status === "failed" ? "destructive"
+    : "outline";
+  const icon = d.channel === "slack" ? "💬" : "✉️";
+  return (
+    <Badge variant={variant} title={d.error ?? d.status}>
+      {icon} {d.channel}: {d.status}
+    </Badge>
+  );
+}
+
+function DecisionRow({ d, scope }: { d: ChannelDecision; scope: string }) {
+  const fmtCooldown = (until?: number) => {
+    if (!until) return "";
+    const left = Math.max(0, until - Date.now());
+    const m = Math.ceil(left / 60_000);
+    return `${m}min`;
+  };
+  return (
+    <div className="flex items-center gap-2 text-xs">
+      <Badge variant="outline" className="min-w-[60px] justify-center">
+        {d.channel}
+      </Badge>
+      {d.willFire ? (
+        <Badge variant="destructive">Vai disparar</Badge>
+      ) : (
+        <Badge variant="secondary">Bloqueado</Badge>
+      )}
+      <span className="text-muted-foreground">
+        limite CTR {d.effectiveMinCtr}% · envio {d.effectiveMinSendRate}% ·
+        cooldown {Math.round(d.cooldownMs / 60_000)}min
+      </span>
+      {d.reason && (
+        <span className="ml-auto text-muted-foreground">
+          motivo: <strong>{d.reason}</strong>
+          {d.reason === "cooldown" && d.cooldownUntil && (
+            <> — libera em {fmtCooldown(d.cooldownUntil)}</>
+          )}
+        </span>
+      )}
+      <code className="text-[10px] text-muted-foreground">{scope}</code>
+    </div>
+  );
+}
+
 function StatusBadge({ status }: { status: AlertHistoryEntry["status"] }) {
   const cfg: Record<string, { v: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
     sent: { v: "default", label: "Enviado" },
