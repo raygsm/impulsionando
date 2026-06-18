@@ -727,3 +727,190 @@ export const previewBreweryBlast = createServerFn({ method: "POST" })
       campaignId: data.campaignId ?? null,
     };
   });
+
+/* ============ Fase 6 — Disparo real (message_outbox) ============ */
+
+const DispatchBlastInput = z.object({
+  brandId: z.string().uuid(),
+  campaignId: z.string().uuid().optional(),
+  channel: z.enum(["whatsapp", "email"]),
+  styles: z.array(z.string()).default([]),
+  interests: z.array(z.string()).default([]),
+  voucherCode: z.string().max(40).optional(),
+  subject: z.string().max(140).optional(),
+  body: z.string().min(5).max(1000),
+});
+
+export const dispatchBreweryBlast = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => DispatchBlastInput.parse(d))
+  .handler(async ({ context, data }) => {
+    // RLS valida acesso via insert em brewery_blasts (has_brewery_access).
+    const { data: blast, error: bErr } = await (context.supabase as any)
+      .from("brewery_blasts")
+      .insert({
+        brand_id: data.brandId,
+        campaign_id: data.campaignId ?? null,
+        channel: data.channel,
+        audience_filter: { styles: data.styles, interests: data.interests },
+        voucher_code: data.voucherCode ?? null,
+        subject: data.subject ?? null,
+        body: data.body,
+        status: "queued",
+        created_by: context.userId,
+      })
+      .select("id")
+      .single();
+    if (bErr || !blast) throw bErr ?? new Error("Falha ao registrar disparo");
+
+    // Carrega leads elegíveis (escopo já restrito por RLS à marca acessível).
+    const { data: leads, error: lErr } = await context.supabase
+      .from("brewery_lead_preferences")
+      .select("id,masked_whatsapp,masked_name,favorite_styles,interests,consent_marketing")
+      .eq("brand_id", data.brandId)
+      .eq("consent_marketing", true);
+    if (lErr) throw lErr;
+
+    const matches = (leads ?? []).filter((l: any) => {
+      const okS = data.styles.length === 0 || data.styles.some((s) => l.favorite_styles?.includes(s));
+      const okI = data.interests.length === 0 || data.interests.some((i) => l.interests?.includes(i));
+      return okS && okI;
+    });
+
+    // Enfileira na outbox via service role (company_id=null, referenciando o blast).
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const rows = matches.slice(0, 500).map((l: any) => ({
+      channel: data.channel,
+      event_code: "brewery.blast",
+      company_id: null,
+      reference_type: "brewery_blast",
+      reference_id: blast.id,
+      recipient_phone: data.channel === "whatsapp" ? l.masked_whatsapp : null,
+      recipient_email: null,
+      recipient_name: l.masked_name,
+      subject: data.subject ?? null,
+      body: data.body,
+      status: "queued",
+      payload: { brand_id: data.brandId, campaign_id: data.campaignId ?? null, voucher_code: data.voucherCode ?? null, lead_id: l.id },
+    }));
+
+    let enqueued = 0;
+    if (rows.length > 0) {
+      const { error: oErr, count } = await supabaseAdmin
+        .from("message_outbox")
+        .insert(rows, { count: "exact" });
+      if (oErr) {
+        await (context.supabase as any).from("brewery_blasts")
+          .update({ status: "failed", last_error: oErr.message, audience_count: matches.length })
+          .eq("id", blast.id);
+        throw oErr;
+      }
+      enqueued = count ?? rows.length;
+    }
+
+    await (context.supabase as any).from("brewery_blasts")
+      .update({
+        audience_count: matches.length,
+        enqueued_count: enqueued,
+        status: enqueued === matches.length && enqueued > 0 ? "sent" : (enqueued > 0 ? "partial" : "queued"),
+        sent_at: enqueued > 0 ? new Date().toISOString() : null,
+      })
+      .eq("id", blast.id);
+
+    return { blastId: blast.id, eligible: matches.length, enqueued };
+  });
+
+export const listBreweryBlasts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ brandId: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: rows, error } = await (context.supabase as any)
+      .from("brewery_blasts")
+      .select("id,channel,audience_count,enqueued_count,voucher_code,subject,body,status,sent_at,created_at,campaign_id,audience_filter,last_error")
+      .eq("brand_id", data.brandId)
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) throw error;
+    return rows ?? [];
+  });
+
+/* ============ Fase 6 — Relatório de retorno (PDV / Cupom) ============ */
+
+const ReturnReportInput = z.object({
+  brandId: z.string().uuid(),
+  campaignId: z.string().uuid().optional(),
+  sinceDays: z.number().int().min(1).max(365).default(90),
+});
+
+export const fetchBreweryReturnReport = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => ReturnReportInput.parse(d))
+  .handler(async ({ context, data }) => {
+    const since = new Date(Date.now() - data.sinceDays * 86400_000).toISOString().slice(0, 10);
+
+    let soQ = (context.supabase as any)
+      .from("brewery_sellouts")
+      .select("pdv_link_id,units,gross_revenue_cents,coupon_redemptions,voucher_code,campaign_id,period_end")
+      .eq("brand_id", data.brandId)
+      .gte("period_end", since);
+    if (data.campaignId) soQ = soQ.eq("campaign_id", data.campaignId);
+    const { data: sellouts, error: sErr } = await soQ;
+    if (sErr) throw sErr;
+
+    const { data: pdvs } = await context.supabase
+      .from("brewery_pdv_links").select("id,pdv_name,pdv_city,pdv_state").eq("brand_id", data.brandId);
+    const pdvMap = new Map((pdvs ?? []).map((p: any) => [p.id, p]));
+
+    const byPdv = new Map<string, { pdv_link_id: string; pdv_name: string; pdv_city: string | null; units: number; revenue_cents: number; redemptions: number }>();
+    const byVoucher = new Map<string, { voucher_code: string; units: number; revenue_cents: number; redemptions: number }>();
+    let totalUnits = 0, totalRevenue = 0, totalRedemptions = 0;
+
+    for (const s of (sellouts ?? []) as any[]) {
+      totalUnits += s.units ?? 0;
+      totalRevenue += Number(s.gross_revenue_cents ?? 0);
+      totalRedemptions += s.coupon_redemptions ?? 0;
+      if (s.pdv_link_id) {
+        const p: any = pdvMap.get(s.pdv_link_id);
+        const cur = byPdv.get(s.pdv_link_id) ?? {
+          pdv_link_id: s.pdv_link_id,
+          pdv_name: p?.pdv_name ?? "PDV",
+          pdv_city: p?.pdv_city ?? null,
+          units: 0, revenue_cents: 0, redemptions: 0,
+        };
+        cur.units += s.units ?? 0;
+        cur.revenue_cents += Number(s.gross_revenue_cents ?? 0);
+        cur.redemptions += s.coupon_redemptions ?? 0;
+        byPdv.set(s.pdv_link_id, cur);
+      }
+      if (s.voucher_code) {
+        const cur = byVoucher.get(s.voucher_code) ?? { voucher_code: s.voucher_code, units: 0, revenue_cents: 0, redemptions: 0 };
+        cur.units += s.units ?? 0;
+        cur.revenue_cents += Number(s.gross_revenue_cents ?? 0);
+        cur.redemptions += s.coupon_redemptions ?? 0;
+        byVoucher.set(s.voucher_code, cur);
+      }
+    }
+
+    // Blasts no período (para cruzar audiência x retorno)
+    const { data: blasts } = await (context.supabase as any)
+      .from("brewery_blasts")
+      .select("id,channel,enqueued_count,voucher_code,sent_at,campaign_id")
+      .eq("brand_id", data.brandId)
+      .gte("created_at", since);
+
+    const totalEnqueued = (blasts ?? []).reduce((a: number, b: any) => a + (b.enqueued_count ?? 0), 0);
+    const conversion = totalEnqueued > 0 ? Math.round((totalRedemptions / totalEnqueued) * 1000) / 10 : null;
+
+    return {
+      kpis: {
+        units: totalUnits,
+        revenue_cents: totalRevenue,
+        redemptions: totalRedemptions,
+        enqueued: totalEnqueued,
+        conversionPct: conversion,
+      },
+      byPdv: Array.from(byPdv.values()).sort((a, b) => b.revenue_cents - a.revenue_cents),
+      byVoucher: Array.from(byVoucher.values()).sort((a, b) => b.redemptions - a.redemptions),
+      blasts: blasts ?? [],
+    };
+  });
