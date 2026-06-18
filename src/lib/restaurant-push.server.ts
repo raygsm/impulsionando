@@ -18,6 +18,8 @@
  */
 import { assertTemplateAllowedForCustomerChannel } from '@/lib/email-templates/registry'
 
+import { pushEventsForNiche } from '@/lib/postvisit-timing-registry'
+
 /** Whitelist absoluta de eventos que podem virar push ao cliente. */
 export const ALLOWED_PUSH_EVENTS = [
   'restaurant-postvisit-thanks',
@@ -26,14 +28,6 @@ export const ALLOWED_PUSH_EVENTS = [
   'clube-poll-open',
 ] as const
 export type AllowedPushEvent = (typeof ALLOWED_PUSH_EVENTS)[number]
-
-/** Segmentação por nicho — quais eventos cada nicho pode receber. */
-const NICHE_EVENT_MAP: Record<string, AllowedPushEvent[]> = {
-  'bares-restaurantes': ['restaurant-postvisit-thanks', 'restaurant-bill-closed', 'clube-voucher-issued'],
-  'cervejaria': ['restaurant-postvisit-thanks', 'restaurant-bill-closed', 'clube-voucher-issued', 'clube-poll-open'],
-  'cafe-confeitaria': ['restaurant-postvisit-thanks', 'restaurant-bill-closed', 'clube-voucher-issued'],
-  'eventos-casas-show': ['restaurant-postvisit-thanks', 'clube-voucher-issued'],
-}
 
 export class PushNotAllowedError extends Error {
   constructor(reason: string) {
