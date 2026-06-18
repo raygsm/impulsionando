@@ -611,6 +611,46 @@ function PlanosPage() {
         </div>
       </section>
 
+      {/* Banner contexto vindo do nicho */}
+      {cameFromNiche && (
+        <section className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 mt-8">
+          <div className="rounded-lg border-2 border-primary/30 bg-primary/5 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+            <Sparkles className="w-5 h-5 text-primary shrink-0" />
+            <div className="flex-1 min-w-0 text-sm">
+              <strong>Plano {PLAN_NAME_BY_LEVEL[recomendado as RecLevel]}</strong> recomendado para o nicho
+              <strong> {nicho}</strong> — abrimos a seleção de módulos pré-marcados para você revisar.
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <Button asChild variant="outline" size="sm">
+                <Link to="/recomendacao/$nicho" params={{ nicho: nicho! }}>← Voltar à recomendação</Link>
+              </Button>
+              <Button variant="ghost" size="sm" onClick={clearNicheContext}>
+                Ver todos os planos
+              </Button>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Botão de expandir lista longa — escondida por padrão para não poluir antes da escolha */}
+      <section className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 mt-10 flex justify-center">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowComparison((v) => !v)}
+          aria-expanded={showComparison}
+          aria-controls="planos-detalhes"
+          data-testid="toggle-comparativo"
+        >
+          {showComparison ? (
+            <><ChevronUp className="w-4 h-4" /> Ocultar comparativo detalhado</>
+          ) : (
+            <><ChevronDown className="w-4 h-4" /> Ver módulos e comparativo completo</>
+          )}
+        </Button>
+      </section>
+
+      <div id="planos-detalhes" hidden={!showComparison}>
       {/* MÓDULOS POR PLANO + SINERGIAS */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
         <div className="max-w-3xl mb-8">
