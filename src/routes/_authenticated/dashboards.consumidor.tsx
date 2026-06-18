@@ -743,7 +743,7 @@ function SectionNav({ activeId, onSelect, reducedMotion = false, ref }: SectionN
                 tabIndex={active || (!activeId && idx === 0) ? 0 : -1}
                 onClick={(e) => {
                   e.preventDefault();
-                  onSelect(s.id, true);
+                  onSelect(s.id, true, { pushState: true });
                 }}
                 onKeyDown={(e) => handleKey(e, idx)}
                 className={`shrink-0 ${
