@@ -54,6 +54,7 @@ export const TOP_ITEMS: NavItem[] = [
 export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Captar",
+    audiences: ["core", "white-label", "empresa"],
     defaultOpen: true,
     items: [
       { to: "/commercial/cockpit", label: "Cockpit Comercial", icon: TrendingUp, perm: "crm.opportunity.read" },
@@ -84,6 +85,7 @@ export const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: "Operar",
+    audiences: ["core", "white-label", "empresa"],
     items: [
       { to: "/operations/cockpit", label: "Cockpit de Operações", icon: TrendingUp, perm: "sales.order.read" },
       { to: "/sales", label: "Vendas — visão geral", icon: ShoppingCart, perm: "sales.order.read" },
@@ -105,6 +107,7 @@ export const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: "Cobrar",
+    audiences: ["core", "white-label", "empresa"],
     items: [
       { to: "/finance/cockpit", label: "Cockpit Financeiro", icon: TrendingUp, perm: "finance.transaction.read" },
       { to: "/finance", label: "Financeiro — visão geral", icon: Wallet, perm: "finance.transaction.read" },
@@ -130,6 +133,7 @@ export const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: "Comunicar",
+    audiences: ["core", "white-label", "empresa"],
     items: [
       { to: "/ops/mensageria", label: "Mensageria (WhatsApp/E-mail)", icon: MessageSquare },
       { to: "/ops/voz-cliente", label: "Voz do Cliente", icon: Megaphone },
@@ -140,6 +144,7 @@ export const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: "Automatizar",
+    audiences: ["core", "white-label", "empresa"],
     items: [
       { to: "/ops/versoes", label: "Versões & Atualizações", icon: RefreshCw },
       { to: "/adm/agentes", label: "Central de Agentes", icon: Bot, superOnly: true },
@@ -148,6 +153,7 @@ export const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: "Analisar",
+    audiences: ["core", "white-label", "empresa"],
     items: [
       { to: "/insights/percebido", label: "O que a Impulsionando percebeu", icon: Sparkles },
       { to: "/radar", label: "Radar do Nicho", icon: TrendingUp, superOnly: true },
