@@ -21,9 +21,15 @@ export const Route = createFileRoute("/_authenticated/dashboards/core")({
 
 function CoreDashboardPage() {
   const fn = useServerFn(fetchCoreAudienceDashboard);
+  const mpFn = useServerFn(fetchMarketplaceKPIs);
   const { data, isLoading, error } = useQuery({
     queryKey: ["dashboards", "core", 30],
     queryFn: () => fn({ data: { days: 30 } }),
+    staleTime: 60_000,
+  });
+  const { data: mp } = useQuery({
+    queryKey: ["dashboards", "core", "mp", 30],
+    queryFn: () => mpFn({ data: { sinceDays: 30 } }),
     staleTime: 60_000,
   });
 
