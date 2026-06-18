@@ -18,6 +18,7 @@ import { Loader2 } from "lucide-react";
 import { pushRecent } from "@/hooks/use-recent-pages";
 import { useAppearance } from "@/hooks/use-appearance";
 import { TOP_ITEMS, NAV_GROUPS } from "./nav-config";
+import { CheckoutShell, isCheckoutPath } from "./CheckoutShell";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
