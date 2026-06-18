@@ -27,6 +27,7 @@ import { Route as PacienteRouteImport } from './routes/paciente'
 import { Route as OrcamentoRouteImport } from './routes/orcamento'
 import { Route as ModulosRouteImport } from './routes/modulos'
 import { Route as MarketingRouteImport } from './routes/marketing'
+import { Route as EscolherNichoRouteImport } from './routes/escolher-nicho'
 import { Route as EmpresasRouteImport } from './routes/empresas'
 import { Route as ContratarRouteImport } from './routes/contratar'
 import { Route as ContatoRouteImport } from './routes/contato'
@@ -89,9 +90,9 @@ import { Route as ShowroomApiPublicaRouteImport } from './routes/showroom.api-pu
 import { Route as ShowroomAgendamentosOnlineRouteImport } from './routes/showroom.agendamentos-online'
 import { Route as ShowroomAgendaRouteImport } from './routes/showroom.agenda'
 import { Route as ShowroomAcademiaRouteImport } from './routes/showroom.academia'
+import { Route as RecomendacaoNichoRouteImport } from './routes/recomendacao.$nicho'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
 import { Route as PlanosTesteRouteImport } from './routes/planos.teste'
-import { Route as PlanosComecarRouteImport } from './routes/planos.comecar'
 import { Route as ParceiroTokenRouteImport } from './routes/parceiro.$token'
 import { Route as ParceiroCorretorTokenRouteImport } from './routes/parceiro-corretor.$token'
 import { Route as PacienteIdRouteImport } from './routes/paciente.$id'
@@ -171,7 +172,6 @@ import { Route as AuthenticatedBiIndexRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenticated/agenda.index'
 import { Route as AuthenticatedAffiliatesIndexRouteImport } from './routes/_authenticated/affiliates.index'
 import { Route as PortalContabilidadeTokenRouteImport } from './routes/portal.contabilidade.$token'
-import { Route as PlanosRecomendacaoNichoRouteImport } from './routes/planos.recomendacao.$nicho'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ImoveisSlugPropertyIdRouteImport } from './routes/imoveis.$slug.$propertyId'
 import { Route as DemoNichoSlugRouteImport } from './routes/demo.nicho.$slug'
@@ -468,6 +468,11 @@ const ModulosRoute = ModulosRouteImport.update({
 const MarketingRoute = MarketingRouteImport.update({
   id: '/marketing',
   path: '/marketing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EscolherNichoRoute = EscolherNichoRouteImport.update({
+  id: '/escolher-nicho',
+  path: '/escolher-nicho',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmpresasRoute = EmpresasRouteImport.update({
@@ -784,6 +789,11 @@ const ShowroomAcademiaRoute = ShowroomAcademiaRouteImport.update({
   path: '/showroom/academia',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RecomendacaoNichoRoute = RecomendacaoNichoRouteImport.update({
+  id: '/recomendacao/$nicho',
+  path: '/recomendacao/$nicho',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RSlugRoute = RSlugRouteImport.update({
   id: '/r/$slug',
   path: '/r/$slug',
@@ -792,11 +802,6 @@ const RSlugRoute = RSlugRouteImport.update({
 const PlanosTesteRoute = PlanosTesteRouteImport.update({
   id: '/teste',
   path: '/teste',
-  getParentRoute: () => PlanosRoute,
-} as any)
-const PlanosComecarRoute = PlanosComecarRouteImport.update({
-  id: '/comecar',
-  path: '/comecar',
   getParentRoute: () => PlanosRoute,
 } as any)
 const ParceiroTokenRoute = ParceiroTokenRouteImport.update({
@@ -1209,11 +1214,6 @@ const PortalContabilidadeTokenRoute =
     path: '/portal/contabilidade/$token',
     getParentRoute: () => rootRouteImport,
   } as any)
-const PlanosRecomendacaoNichoRoute = PlanosRecomendacaoNichoRouteImport.update({
-  id: '/recomendacao/$nicho',
-  path: '/recomendacao/$nicho',
-  getParentRoute: () => PlanosRoute,
-} as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
@@ -2433,6 +2433,7 @@ export interface FileRoutesByFullPath {
   '/contato': typeof ContatoRoute
   '/contratar': typeof ContratarRouteWithChildren
   '/empresas': typeof EmpresasRoute
+  '/escolher-nicho': typeof EscolherNichoRoute
   '/marketing': typeof MarketingRoute
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
@@ -2512,9 +2513,9 @@ export interface FileRoutesByFullPath {
   '/paciente/$id': typeof PacienteIdRoute
   '/parceiro-corretor/$token': typeof ParceiroCorretorTokenRoute
   '/parceiro/$token': typeof ParceiroTokenRoute
-  '/planos/comecar': typeof PlanosComecarRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
+  '/recomendacao/$nicho': typeof RecomendacaoNichoRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
   '/showroom/agendamentos-online': typeof ShowroomAgendamentosOnlineRoute
@@ -2728,7 +2729,6 @@ export interface FileRoutesByFullPath {
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
-  '/planos/recomendacao/$nicho': typeof PlanosRecomendacaoNichoRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda/': typeof AuthenticatedAgendaIndexRoute
@@ -2803,6 +2803,7 @@ export interface FileRoutesByTo {
   '/contato': typeof ContatoRoute
   '/contratar': typeof ContratarRouteWithChildren
   '/empresas': typeof EmpresasRoute
+  '/escolher-nicho': typeof EscolherNichoRoute
   '/marketing': typeof MarketingRoute
   '/orcamento': typeof OrcamentoRoute
   '/pesquisa': typeof PesquisaRoute
@@ -2871,9 +2872,9 @@ export interface FileRoutesByTo {
   '/paciente/$id': typeof PacienteIdRoute
   '/parceiro-corretor/$token': typeof ParceiroCorretorTokenRoute
   '/parceiro/$token': typeof ParceiroTokenRoute
-  '/planos/comecar': typeof PlanosComecarRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
+  '/recomendacao/$nicho': typeof RecomendacaoNichoRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
   '/showroom/agendamentos-online': typeof ShowroomAgendamentosOnlineRoute
@@ -3087,7 +3088,6 @@ export interface FileRoutesByTo {
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
-  '/planos/recomendacao/$nicho': typeof PlanosRecomendacaoNichoRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/affiliates': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda': typeof AuthenticatedAgendaIndexRoute
@@ -3164,6 +3164,7 @@ export interface FileRoutesById {
   '/contato': typeof ContatoRoute
   '/contratar': typeof ContratarRouteWithChildren
   '/empresas': typeof EmpresasRoute
+  '/escolher-nicho': typeof EscolherNichoRoute
   '/marketing': typeof MarketingRoute
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
@@ -3244,9 +3245,9 @@ export interface FileRoutesById {
   '/paciente/$id': typeof PacienteIdRoute
   '/parceiro-corretor/$token': typeof ParceiroCorretorTokenRoute
   '/parceiro/$token': typeof ParceiroTokenRoute
-  '/planos/comecar': typeof PlanosComecarRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
+  '/recomendacao/$nicho': typeof RecomendacaoNichoRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
   '/showroom/agendamentos-online': typeof ShowroomAgendamentosOnlineRoute
@@ -3460,7 +3461,6 @@ export interface FileRoutesById {
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
-  '/planos/recomendacao/$nicho': typeof PlanosRecomendacaoNichoRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/_authenticated/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/_authenticated/agenda/': typeof AuthenticatedAgendaIndexRoute
@@ -3537,6 +3537,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/contratar'
     | '/empresas'
+    | '/escolher-nicho'
     | '/marketing'
     | '/modulos'
     | '/orcamento'
@@ -3616,9 +3617,9 @@ export interface FileRouteTypes {
     | '/paciente/$id'
     | '/parceiro-corretor/$token'
     | '/parceiro/$token'
-    | '/planos/comecar'
     | '/planos/teste'
     | '/r/$slug'
+    | '/recomendacao/$nicho'
     | '/showroom/academia'
     | '/showroom/agenda'
     | '/showroom/agendamentos-online'
@@ -3832,7 +3833,6 @@ export interface FileRouteTypes {
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
-    | '/planos/recomendacao/$nicho'
     | '/portal/contabilidade/$token'
     | '/affiliates/'
     | '/agenda/'
@@ -3907,6 +3907,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/contratar'
     | '/empresas'
+    | '/escolher-nicho'
     | '/marketing'
     | '/orcamento'
     | '/pesquisa'
@@ -3975,9 +3976,9 @@ export interface FileRouteTypes {
     | '/paciente/$id'
     | '/parceiro-corretor/$token'
     | '/parceiro/$token'
-    | '/planos/comecar'
     | '/planos/teste'
     | '/r/$slug'
+    | '/recomendacao/$nicho'
     | '/showroom/academia'
     | '/showroom/agenda'
     | '/showroom/agendamentos-online'
@@ -4191,7 +4192,6 @@ export interface FileRouteTypes {
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
-    | '/planos/recomendacao/$nicho'
     | '/portal/contabilidade/$token'
     | '/affiliates'
     | '/agenda'
@@ -4267,6 +4267,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/contratar'
     | '/empresas'
+    | '/escolher-nicho'
     | '/marketing'
     | '/modulos'
     | '/orcamento'
@@ -4347,9 +4348,9 @@ export interface FileRouteTypes {
     | '/paciente/$id'
     | '/parceiro-corretor/$token'
     | '/parceiro/$token'
-    | '/planos/comecar'
     | '/planos/teste'
     | '/r/$slug'
+    | '/recomendacao/$nicho'
     | '/showroom/academia'
     | '/showroom/agenda'
     | '/showroom/agendamentos-online'
@@ -4563,7 +4564,6 @@ export interface FileRouteTypes {
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
-    | '/planos/recomendacao/$nicho'
     | '/portal/contabilidade/$token'
     | '/_authenticated/affiliates/'
     | '/_authenticated/agenda/'
@@ -4640,6 +4640,7 @@ export interface RootRouteChildren {
   ContatoRoute: typeof ContatoRoute
   ContratarRoute: typeof ContratarRouteWithChildren
   EmpresasRoute: typeof EmpresasRoute
+  EscolherNichoRoute: typeof EscolherNichoRoute
   MarketingRoute: typeof MarketingRoute
   ModulosRoute: typeof ModulosRouteWithChildren
   OrcamentoRoute: typeof OrcamentoRoute
@@ -4686,6 +4687,7 @@ export interface RootRouteChildren {
   ParceiroCorretorTokenRoute: typeof ParceiroCorretorTokenRoute
   ParceiroTokenRoute: typeof ParceiroTokenRoute
   RSlugRoute: typeof RSlugRoute
+  RecomendacaoNichoRoute: typeof RecomendacaoNichoRoute
   ShowroomAcademiaRoute: typeof ShowroomAcademiaRoute
   ShowroomAgendaRoute: typeof ShowroomAgendaRoute
   ShowroomAgendamentosOnlineRoute: typeof ShowroomAgendamentosOnlineRoute
@@ -4892,6 +4894,13 @@ declare module '@tanstack/react-router' {
       path: '/marketing'
       fullPath: '/marketing'
       preLoaderRoute: typeof MarketingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/escolher-nicho': {
+      id: '/escolher-nicho'
+      path: '/escolher-nicho'
+      fullPath: '/escolher-nicho'
+      preLoaderRoute: typeof EscolherNichoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/empresas': {
@@ -5328,6 +5337,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShowroomAcademiaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/recomendacao/$nicho': {
+      id: '/recomendacao/$nicho'
+      path: '/recomendacao/$nicho'
+      fullPath: '/recomendacao/$nicho'
+      preLoaderRoute: typeof RecomendacaoNichoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/r/$slug': {
       id: '/r/$slug'
       path: '/r/$slug'
@@ -5340,13 +5356,6 @@ declare module '@tanstack/react-router' {
       path: '/teste'
       fullPath: '/planos/teste'
       preLoaderRoute: typeof PlanosTesteRouteImport
-      parentRoute: typeof PlanosRoute
-    }
-    '/planos/comecar': {
-      id: '/planos/comecar'
-      path: '/comecar'
-      fullPath: '/planos/comecar'
-      preLoaderRoute: typeof PlanosComecarRouteImport
       parentRoute: typeof PlanosRoute
     }
     '/parceiro/$token': {
@@ -5901,13 +5910,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/portal/contabilidade/$token'
       preLoaderRoute: typeof PortalContabilidadeTokenRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/planos/recomendacao/$nicho': {
-      id: '/planos/recomendacao/$nicho'
-      path: '/recomendacao/$nicho'
-      fullPath: '/planos/recomendacao/$nicho'
-      preLoaderRoute: typeof PlanosRecomendacaoNichoRouteImport
-      parentRoute: typeof PlanosRoute
     }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
@@ -8174,15 +8176,11 @@ const PacienteRouteWithChildren = PacienteRoute._addFileChildren(
 )
 
 interface PlanosRouteChildren {
-  PlanosComecarRoute: typeof PlanosComecarRoute
   PlanosTesteRoute: typeof PlanosTesteRoute
-  PlanosRecomendacaoNichoRoute: typeof PlanosRecomendacaoNichoRoute
 }
 
 const PlanosRouteChildren: PlanosRouteChildren = {
-  PlanosComecarRoute: PlanosComecarRoute,
   PlanosTesteRoute: PlanosTesteRoute,
-  PlanosRecomendacaoNichoRoute: PlanosRecomendacaoNichoRoute,
 }
 
 const PlanosRouteWithChildren =
@@ -8249,6 +8247,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContatoRoute: ContatoRoute,
   ContratarRoute: ContratarRouteWithChildren,
   EmpresasRoute: EmpresasRoute,
+  EscolherNichoRoute: EscolherNichoRoute,
   MarketingRoute: MarketingRoute,
   ModulosRoute: ModulosRouteWithChildren,
   OrcamentoRoute: OrcamentoRoute,
@@ -8295,6 +8294,7 @@ const rootRouteChildren: RootRouteChildren = {
   ParceiroCorretorTokenRoute: ParceiroCorretorTokenRoute,
   ParceiroTokenRoute: ParceiroTokenRoute,
   RSlugRoute: RSlugRoute,
+  RecomendacaoNichoRoute: RecomendacaoNichoRoute,
   ShowroomAcademiaRoute: ShowroomAcademiaRoute,
   ShowroomAgendaRoute: ShowroomAgendaRoute,
   ShowroomAgendamentosOnlineRoute: ShowroomAgendamentosOnlineRoute,

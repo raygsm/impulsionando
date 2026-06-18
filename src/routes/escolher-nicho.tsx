@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 
-export const Route = createFileRoute("/planos/comecar")({
+export const Route = createFileRoute("/escolher-nicho")({
   head: () => ({
     meta: [
       { title: "Escolha seu nicho — Impulsionando Tecnologia" },
@@ -47,7 +47,7 @@ function PlanosComecarPage() {
   const navigate = useNavigate();
 
   function pick(slug: string) {
-    navigate({ to: "/planos/recomendacao/$nicho", params: { nicho: slug } });
+    navigate({ to: "/recomendacao/$nicho", params: { nicho: slug } });
   }
 
   return (

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 
-export const Route = createFileRoute("/planos/recomendacao/$nicho")({
+export const Route = createFileRoute("/recomendacao/$nicho")({
   head: ({ params }) => {
     const r = RECOMENDACOES[params.nicho];
     const title = r ? `${r.nicheLabel} — Recomendação Impulsionando` : "Recomendação por nicho";
@@ -25,7 +25,7 @@ export const Route = createFileRoute("/planos/recomendacao/$nicho")({
     <div className="min-h-screen grid place-items-center p-6 text-center">
       <div>
         <p className="text-lg font-semibold mb-2">Nicho não encontrado</p>
-        <Button asChild><Link to="/planos/comecar">Escolher nicho</Link></Button>
+        <Button asChild><Link to="/escolher-nicho">Escolher nicho</Link></Button>
       </div>
     </div>
   ),
@@ -402,7 +402,7 @@ function RecomendacaoPage() {
         {/* Navegação */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t">
           <Button asChild variant="ghost" size="sm">
-            <Link to="/planos/comecar">← Trocar de nicho</Link>
+            <Link to="/escolher-nicho">← Trocar de nicho</Link>
           </Button>
           <Button asChild variant="outline" size="sm">
             <Link to="/planos">Ver todos os planos</Link>
