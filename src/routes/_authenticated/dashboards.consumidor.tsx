@@ -496,5 +496,3 @@ function SectionNav({ activeId, onSelect }: { activeId: string; onSelect: (id: s
     </div>
   );
 }
-
-}
