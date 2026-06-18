@@ -246,8 +246,14 @@ function formatBRL(v: number) {
 type Audience = "empresas" | "white-label" | "consumidor";
 
 function PlanosPage() {
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const { nicho, recomendado } = search;
+  const cameFromNiche = Boolean(nicho && recomendado);
+
   const [audience, setAudience] = useState<Audience>("empresas");
   const [annual, setAnnual] = useState(false);
+  const [showComparison, setShowComparison] = useState<boolean>(false);
   const { openCheckout, loading: checkoutLoading } = usePaddleCheckout();
   const { data: user } = useCurrentUser();
   const fetchAvailability = useServerFn(getCommercialAvailability);
@@ -283,6 +289,32 @@ function PlanosPage() {
     plan: null,
   });
   const [pickedModules, setPickedModules] = useState<Record<string, string[]>>({});
+
+  // Pré-seleção recomendada por nicho — recalcula quando os query params mudam.
+  const recommendedSlugs = useMemo(
+    () => getRecommendedSlugs(nicho, recomendado),
+    [nicho, recomendado],
+  );
+
+  // Quando vier de /recomendacao com ?nicho=&recomendado=, popula a seleção do plano
+  // recomendado e abre automaticamente o ModulePicker para o usuário confirmar.
+  useEffect(() => {
+    if (!cameFromNiche || !recomendado) return;
+    const planName = PLAN_NAME_BY_LEVEL[recomendado];
+    const plan = PLANS.find((p) => p.name === planName);
+    if (!plan) return;
+    setAudience("empresas");
+    setPickedModules((prev) =>
+      prev[planName]?.length ? prev : { ...prev, [planName]: recommendedSlugs },
+    );
+    setPicker((prev) => (prev.open ? prev : { open: true, plan }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cameFromNiche, recomendado, recommendedSlugs.join(",")]);
+
+  function clearNicheContext() {
+    navigate({ search: { nicho: undefined, recomendado: undefined, trial: undefined } as never, replace: true });
+  }
+
 
   async function runCheckout(plan: Plan, modules: string[]) {
     const quota = PLAN_QUOTA[plan.name] ?? 1;
