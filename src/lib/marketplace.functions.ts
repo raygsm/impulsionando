@@ -233,20 +233,24 @@ export const placeMarketplaceOrder = createServerFn({ method: "POST" })
     const { error: iErr } = await context.supabase.from("mp_order_items").insert(items);
     if (iErr) throw iErr;
 
-    // Notifica fornecedor do novo pedido
+    // Notifica fornecedor do novo pedido (todos os usuários ativos da empresa)
     const { data: sup } = await context.supabase
       .from("mp_suppliers").select("company_id, display_name").eq("id", data.supplier_id).maybeSingle();
     const { data: buy } = await context.supabase
       .from("mp_buyers").select("display_name").eq("id", data.buyer_id).maybeSingle();
     if (sup?.company_id) {
-      await context.supabase.from("notifications").insert({
+      const { data: users } = await context.supabase
+        .from("user_profiles").select("user_id").eq("company_id", sup.company_id).eq("is_active", true);
+      const rows = (users ?? []).map((u: any) => ({
+        user_id: u.user_id,
         company_id: sup.company_id,
         category: "marketplace",
         severity: "info",
         title: "Novo pedido recebido",
         message: `Pedido #${order.order_number} de ${buy?.display_name ?? "comprador"} — ${(subtotal/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}`,
         action_url: "/cervejaria/marketplace",
-      });
+      }));
+      if (rows.length) await context.supabase.from("notifications").insert(rows);
     }
 
     return order;
