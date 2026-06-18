@@ -38,6 +38,8 @@ const SECTIONS: Array<{ id: string; label: string }> = [
   { id: "creditos", label: "Meus créditos" },
 ];
 
+const STORAGE_KEY = "dashboards:consumidor:section";
+
 function ConsumidorDashboardPage() {
   const fn = useServerFn(fetchConsumidorDashboard);
   const { data, isLoading, error } = useQuery({
@@ -46,22 +48,80 @@ function ConsumidorDashboardPage() {
     staleTime: 60_000,
   });
 
+  const navRef = useRef<HTMLDivElement>(null);
+  const [headerOffset, setHeaderOffset] = useState(72);
   const [activeId, setActiveId] = useState<string>(() => {
     if (typeof window === "undefined") return "";
-    return window.location.hash.replace("#", "");
+    const hash = window.location.hash.replace("#", "");
+    if (hash && SECTIONS.some((s) => s.id === hash)) return hash;
+    try {
+      const saved = sessionStorage.getItem(STORAGE_KEY) ?? "";
+      if (saved && SECTIONS.some((s) => s.id === saved)) return saved;
+    } catch {}
+    return "";
   });
 
-  // Restore scroll on initial load with hash
+  // Measure real header (sticky sub-nav) height — recompute on resize
   useEffect(() => {
-    if (typeof window === "undefined" || isLoading) return;
+    if (!navRef.current) return;
+    const measure = () => {
+      if (!navRef.current) return;
+      const h = navRef.current.getBoundingClientRect().height;
+      setHeaderOffset(Math.round(h + 8));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(navRef.current);
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
+
+  const scrollToId = useCallback(
+    (id: string) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const top = el.getBoundingClientRect().top + window.scrollY - headerOffset;
+      window.scrollTo({ top, behavior: "smooth" });
+    },
+    [headerOffset],
+  );
+
+  const handleSelect = useCallback(
+    (id: string, scroll = false) => {
+      setActiveId(id);
+      try {
+        const newUrl = `${window.location.pathname}${window.location.search}#${id}`;
+        window.history.replaceState(null, "", newUrl);
+        sessionStorage.setItem(STORAGE_KEY, id);
+      } catch {}
+      if (scroll) scrollToId(id);
+    },
+    [scrollToId],
+  );
+
+  // Restore scroll on initial load (hash > sessionStorage)
+  const restoredRef = useRef(false);
+  useEffect(() => {
+    if (typeof window === "undefined" || isLoading || restoredRef.current) return;
     const hash = window.location.hash.replace("#", "");
-    if (hash && SECTIONS.some((s) => s.id === hash)) {
-      requestAnimationFrame(() => {
-        const el = document.getElementById(hash);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
+    const target =
+      (hash && SECTIONS.some((s) => s.id === hash) && hash) ||
+      (() => {
+        try {
+          const s = sessionStorage.getItem(STORAGE_KEY) ?? "";
+          return SECTIONS.some((x) => x.id === s) ? s : "";
+        } catch {
+          return "";
+        }
+      })();
+    if (target) {
+      restoredRef.current = true;
+      requestAnimationFrame(() => scrollToId(target));
     }
-  }, [isLoading]);
+  }, [isLoading, scrollToId]);
 
   // Scroll-spy: mark active chip while scrolling
   useEffect(() => {
@@ -79,39 +139,80 @@ function ConsumidorDashboardPage() {
         if (visible[0]?.target?.id) {
           const id = visible[0].target.id;
           setActiveId(id);
-          // Update URL hash without scroll jump
-          const newUrl = `${window.location.pathname}${window.location.search}#${id}`;
-          window.history.replaceState(null, "", newUrl);
+          try {
+            const newUrl = `${window.location.pathname}${window.location.search}#${id}`;
+            window.history.replaceState(null, "", newUrl);
+            sessionStorage.setItem(STORAGE_KEY, id);
+          } catch {}
         }
       },
-      { rootMargin: "-30% 0px -55% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] }
+      { rootMargin: `-${headerOffset}px 0px -55% 0px`, threshold: [0, 0.25, 0.5, 0.75, 1] },
     );
     elements.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, [data]);
+  }, [data, headerOffset]);
+
+  // Global keyboard shortcuts: Alt+Left/Right to move between sections
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.isContentEditable) return;
+      e.preventDefault();
+      const idx = Math.max(0, SECTIONS.findIndex((s) => s.id === activeId));
+      const next =
+        e.key === "ArrowRight"
+          ? Math.min(SECTIONS.length - 1, idx + 1)
+          : Math.max(0, idx - 1);
+      handleSelect(SECTIONS[next].id, true);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [activeId, handleSelect]);
 
   const activeLabel = SECTIONS.find((s) => s.id === activeId)?.label;
 
   return (
-    <div className="space-y-6">
-      <nav aria-label="Trilha" className="flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap">
-        <Link to="/dashboard" className="hover:text-foreground transition-colors">Início</Link>
-        <span className="opacity-50">›</span>
-        <Link to="/clube" className="hover:text-foreground transition-colors">Clube</Link>
-        <span className="opacity-50">›</span>
+    <div
+      className="space-y-6"
+      style={{ ["--sec-offset" as never]: `${headerOffset}px` }}
+    >
+      <nav
+        aria-label="Trilha"
+        className="flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap"
+      >
+        <Link
+          to="/dashboard"
+          className="rounded hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background px-1"
+        >
+          Início
+        </Link>
+        <span className="opacity-50" aria-hidden="true">›</span>
+        <Link
+          to="/clube"
+          className="rounded hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background px-1"
+        >
+          Clube
+        </Link>
+        <span className="opacity-50" aria-hidden="true">›</span>
         {activeLabel ? (
           <>
             <Link
               to="/dashboards/consumidor"
-              className="hover:text-foreground transition-colors"
+              className="rounded hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background px-1"
             >
               Minha área
             </Link>
-            <span className="opacity-50">›</span>
-            <span className="text-foreground font-medium">{activeLabel}</span>
+            <span className="opacity-50" aria-hidden="true">›</span>
+            <span className="text-foreground font-medium px-1" aria-current="page">
+              {activeLabel}
+            </span>
           </>
         ) : (
-          <span className="text-foreground font-medium">Minha área</span>
+          <span className="text-foreground font-medium px-1" aria-current="page">
+            Minha área
+          </span>
         )}
       </nav>
 
@@ -120,7 +221,9 @@ function ConsumidorDashboardPage() {
         description="Tudo o que você curte, consome e economiza num só lugar."
       />
 
-      <SectionNav activeId={activeId} onSelect={setActiveId} />
+      <SectionNav ref={navRef} activeId={activeId} onSelect={handleSelect} />
+
+
 
 
 
