@@ -110,7 +110,7 @@ function buildPlans(wage: number): Plan[] {
       name: "Avançado",
       displayName: "Full",
       tagline: "Operações avançadas, multiunidade, customizações, IA avançada e White Label parcial.",
-      monthly: null, // sob consulta
+      monthly: wage * 2, // 2 SM
       modulesLabel: "Módulos ilimitados + BI consolidado + IA avançada",
       features: [
         "Módulos ilimitados conforme o desenho da operação",
