@@ -115,7 +115,20 @@ const CHAPTERS: Chapter[] = [
     ],
     modules: ["BI", "Insights", "Financeiro"],
   },
-];
+  {
+    number: "07",
+    time: "Terça-feira, 11h00",
+    icon: MessageCircle,
+    title: "Pós-visita: o convite para voltar",
+    story: "Agora sim entra a comunicação com o cliente — não na operação, mas no relacionamento. Os 4 amigos recebem um WhatsApp curto agradecendo a visita, com um voucher para a próxima IPA e o convite para entrar no Clube Impulsionando. Quem aceita vira recorrência; quem não aceita, segue no CRM para reativação futura.",
+    what: [
+      "Régua pós-visita (24h–72h) por nicho",
+      "Voucher pessoal + entrada opcional no Clube",
+      "Reativação automática de quem não voltou em 30/60/90 dias",
+    ],
+    modules: ["CRM", "Clube Impulsionando", "Fidelização"],
+  },
+
 
 function BeerHouseDemo() {
   return (
