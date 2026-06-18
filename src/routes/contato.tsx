@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { OfficialChannelNotice } from "@/components/marketing/OfficialChannelNotice";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -112,6 +113,7 @@ function ContatoPage() {
               </div>
             ) : (
               <form onSubmit={onSubmit} className="space-y-4">
+                <OfficialChannelNotice />
                 <div className="grid sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <Label htmlFor="c-name">Nome *</Label>
@@ -132,11 +134,23 @@ function ContatoPage() {
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="c-msg">Como podemos ajudar? *</Label>
-                  <Textarea id="c-msg" rows={5} value={message} onChange={(e) => setMessage(e.target.value)} />
+                  <Textarea
+                    id="c-msg"
+                    rows={5}
+                    value={message}
+                    maxLength={1000}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Descreva sua dúvida em até 1000 caracteres. NÃO inclua senhas, dados bancários, comprovantes ou documentos — envie esses arquivos apenas pelo WhatsApp oficial (21) 99307-5000."
+                  />
+                  <p className="text-[10px] text-muted-foreground">
+                    Não inclua senhas, dados bancários, anexos ou comprovantes nesta mensagem. {message.length}/1000
+                  </p>
                 </div>
                 <p className="text-[11px] text-muted-foreground">
                   Ao enviar você concorda com nossa{" "}
-                  <Link to="/privacidade" className="underline">Política de Privacidade</Link>.
+                  <Link to="/privacidade" className="underline">Política de Privacidade</Link>{" "}
+                  e confirma que documentos e comprovantes serão enviados apenas pelo WhatsApp oficial{" "}
+                  <strong>(21) 99307-5000</strong>.
                 </p>
                 <Button type="submit" disabled={loading} className="gap-2 bg-gradient-primary shadow-elegant">
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
