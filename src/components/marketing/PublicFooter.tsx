@@ -14,7 +14,7 @@ const COLS = [
       { to: "/modulos", label: "Módulos" },
       { to: "/nichos", label: "Nichos" },
       { to: "/demo", label: "Demonstrações" },
-      { to: "/planos", label: "Planos" },
+      { to: "/escolher-nicho", label: "Planos" },
       { to: "/orcamento", label: "Orçamento automático" },
     ],
   },

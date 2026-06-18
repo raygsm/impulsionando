@@ -27,6 +27,7 @@ import { Route as PacienteRouteImport } from './routes/paciente'
 import { Route as OrcamentoRouteImport } from './routes/orcamento'
 import { Route as ModulosRouteImport } from './routes/modulos'
 import { Route as MarketingRouteImport } from './routes/marketing'
+import { Route as EscolherNichoRouteImport } from './routes/escolher-nicho'
 import { Route as EmpresasRouteImport } from './routes/empresas'
 import { Route as ContratarRouteImport } from './routes/contratar'
 import { Route as ContatoRouteImport } from './routes/contato'
@@ -89,6 +90,7 @@ import { Route as ShowroomApiPublicaRouteImport } from './routes/showroom.api-pu
 import { Route as ShowroomAgendamentosOnlineRouteImport } from './routes/showroom.agendamentos-online'
 import { Route as ShowroomAgendaRouteImport } from './routes/showroom.agenda'
 import { Route as ShowroomAcademiaRouteImport } from './routes/showroom.academia'
+import { Route as RecomendacaoNichoRouteImport } from './routes/recomendacao.$nicho'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
 import { Route as PlanosTesteRouteImport } from './routes/planos.teste'
 import { Route as ParceiroTokenRouteImport } from './routes/parceiro.$token'
@@ -468,6 +470,11 @@ const MarketingRoute = MarketingRouteImport.update({
   path: '/marketing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EscolherNichoRoute = EscolherNichoRouteImport.update({
+  id: '/escolher-nicho',
+  path: '/escolher-nicho',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EmpresasRoute = EmpresasRouteImport.update({
   id: '/empresas',
   path: '/empresas',
@@ -780,6 +787,11 @@ const ShowroomAgendaRoute = ShowroomAgendaRouteImport.update({
 const ShowroomAcademiaRoute = ShowroomAcademiaRouteImport.update({
   id: '/showroom/academia',
   path: '/showroom/academia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecomendacaoNichoRoute = RecomendacaoNichoRouteImport.update({
+  id: '/recomendacao/$nicho',
+  path: '/recomendacao/$nicho',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RSlugRoute = RSlugRouteImport.update({
@@ -2421,6 +2433,7 @@ export interface FileRoutesByFullPath {
   '/contato': typeof ContatoRoute
   '/contratar': typeof ContratarRouteWithChildren
   '/empresas': typeof EmpresasRoute
+  '/escolher-nicho': typeof EscolherNichoRoute
   '/marketing': typeof MarketingRoute
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
@@ -2502,6 +2515,7 @@ export interface FileRoutesByFullPath {
   '/parceiro/$token': typeof ParceiroTokenRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
+  '/recomendacao/$nicho': typeof RecomendacaoNichoRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
   '/showroom/agendamentos-online': typeof ShowroomAgendamentosOnlineRoute
@@ -2789,6 +2803,7 @@ export interface FileRoutesByTo {
   '/contato': typeof ContatoRoute
   '/contratar': typeof ContratarRouteWithChildren
   '/empresas': typeof EmpresasRoute
+  '/escolher-nicho': typeof EscolherNichoRoute
   '/marketing': typeof MarketingRoute
   '/orcamento': typeof OrcamentoRoute
   '/pesquisa': typeof PesquisaRoute
@@ -2859,6 +2874,7 @@ export interface FileRoutesByTo {
   '/parceiro/$token': typeof ParceiroTokenRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
+  '/recomendacao/$nicho': typeof RecomendacaoNichoRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
   '/showroom/agendamentos-online': typeof ShowroomAgendamentosOnlineRoute
@@ -3148,6 +3164,7 @@ export interface FileRoutesById {
   '/contato': typeof ContatoRoute
   '/contratar': typeof ContratarRouteWithChildren
   '/empresas': typeof EmpresasRoute
+  '/escolher-nicho': typeof EscolherNichoRoute
   '/marketing': typeof MarketingRoute
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
@@ -3230,6 +3247,7 @@ export interface FileRoutesById {
   '/parceiro/$token': typeof ParceiroTokenRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
+  '/recomendacao/$nicho': typeof RecomendacaoNichoRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
   '/showroom/agendamentos-online': typeof ShowroomAgendamentosOnlineRoute
@@ -3519,6 +3537,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/contratar'
     | '/empresas'
+    | '/escolher-nicho'
     | '/marketing'
     | '/modulos'
     | '/orcamento'
@@ -3600,6 +3619,7 @@ export interface FileRouteTypes {
     | '/parceiro/$token'
     | '/planos/teste'
     | '/r/$slug'
+    | '/recomendacao/$nicho'
     | '/showroom/academia'
     | '/showroom/agenda'
     | '/showroom/agendamentos-online'
@@ -3887,6 +3907,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/contratar'
     | '/empresas'
+    | '/escolher-nicho'
     | '/marketing'
     | '/orcamento'
     | '/pesquisa'
@@ -3957,6 +3978,7 @@ export interface FileRouteTypes {
     | '/parceiro/$token'
     | '/planos/teste'
     | '/r/$slug'
+    | '/recomendacao/$nicho'
     | '/showroom/academia'
     | '/showroom/agenda'
     | '/showroom/agendamentos-online'
@@ -4245,6 +4267,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/contratar'
     | '/empresas'
+    | '/escolher-nicho'
     | '/marketing'
     | '/modulos'
     | '/orcamento'
@@ -4327,6 +4350,7 @@ export interface FileRouteTypes {
     | '/parceiro/$token'
     | '/planos/teste'
     | '/r/$slug'
+    | '/recomendacao/$nicho'
     | '/showroom/academia'
     | '/showroom/agenda'
     | '/showroom/agendamentos-online'
@@ -4616,6 +4640,7 @@ export interface RootRouteChildren {
   ContatoRoute: typeof ContatoRoute
   ContratarRoute: typeof ContratarRouteWithChildren
   EmpresasRoute: typeof EmpresasRoute
+  EscolherNichoRoute: typeof EscolherNichoRoute
   MarketingRoute: typeof MarketingRoute
   ModulosRoute: typeof ModulosRouteWithChildren
   OrcamentoRoute: typeof OrcamentoRoute
@@ -4662,6 +4687,7 @@ export interface RootRouteChildren {
   ParceiroCorretorTokenRoute: typeof ParceiroCorretorTokenRoute
   ParceiroTokenRoute: typeof ParceiroTokenRoute
   RSlugRoute: typeof RSlugRoute
+  RecomendacaoNichoRoute: typeof RecomendacaoNichoRoute
   ShowroomAcademiaRoute: typeof ShowroomAcademiaRoute
   ShowroomAgendaRoute: typeof ShowroomAgendaRoute
   ShowroomAgendamentosOnlineRoute: typeof ShowroomAgendamentosOnlineRoute
@@ -4868,6 +4894,13 @@ declare module '@tanstack/react-router' {
       path: '/marketing'
       fullPath: '/marketing'
       preLoaderRoute: typeof MarketingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/escolher-nicho': {
+      id: '/escolher-nicho'
+      path: '/escolher-nicho'
+      fullPath: '/escolher-nicho'
+      preLoaderRoute: typeof EscolherNichoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/empresas': {
@@ -5302,6 +5335,13 @@ declare module '@tanstack/react-router' {
       path: '/showroom/academia'
       fullPath: '/showroom/academia'
       preLoaderRoute: typeof ShowroomAcademiaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recomendacao/$nicho': {
+      id: '/recomendacao/$nicho'
+      path: '/recomendacao/$nicho'
+      fullPath: '/recomendacao/$nicho'
+      preLoaderRoute: typeof RecomendacaoNichoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/r/$slug': {
@@ -8207,6 +8247,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContatoRoute: ContatoRoute,
   ContratarRoute: ContratarRouteWithChildren,
   EmpresasRoute: EmpresasRoute,
+  EscolherNichoRoute: EscolherNichoRoute,
   MarketingRoute: MarketingRoute,
   ModulosRoute: ModulosRouteWithChildren,
   OrcamentoRoute: OrcamentoRoute,
@@ -8253,6 +8294,7 @@ const rootRouteChildren: RootRouteChildren = {
   ParceiroCorretorTokenRoute: ParceiroCorretorTokenRoute,
   ParceiroTokenRoute: ParceiroTokenRoute,
   RSlugRoute: RSlugRoute,
+  RecomendacaoNichoRoute: RecomendacaoNichoRoute,
   ShowroomAcademiaRoute: ShowroomAcademiaRoute,
   ShowroomAgendaRoute: ShowroomAgendaRoute,
   ShowroomAgendamentosOnlineRoute: ShowroomAgendamentosOnlineRoute,
