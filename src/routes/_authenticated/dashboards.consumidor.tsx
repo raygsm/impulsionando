@@ -545,13 +545,20 @@ function PremiumSection<T extends { id: string }>({
   anchor?: string;
 }) {
   const id = anchor;
+  const regionProps = id
+    ? { role: "tabpanel" as const, "aria-labelledby": `tab-${id}`, tabIndex: -1 }
+    : {};
   if (!isPremium) {
     return (
-      <Card id={id} className={`p-4 relative overflow-hidden scroll-mt-[var(--sec-offset,6rem)] ${className ?? ""}`}>
+      <Card
+        id={id}
+        {...regionProps}
+        className={`p-4 relative overflow-hidden scroll-mt-[var(--sec-offset,6rem)] ${className ?? ""}`}
+      >
         <div className="flex items-center gap-2 mb-2 text-sm font-semibold">
           {icon} {title}
           <Badge variant="outline" className="ml-auto gap-1 text-[10px]">
-            <Lock className="h-3 w-3" /> Premium
+            <Lock className="h-3 w-3" aria-hidden="true" /> Premium
           </Badge>
         </div>
         <p className="text-sm text-muted-foreground mb-3">{teaser}</p>
@@ -562,7 +569,11 @@ function PremiumSection<T extends { id: string }>({
     );
   }
   return (
-    <Card id={id} className={`p-4 scroll-mt-[var(--sec-offset,6rem)] ${className ?? ""}`}>
+    <Card
+      id={id}
+      {...regionProps}
+      className={`p-4 scroll-mt-[var(--sec-offset,6rem)] ${className ?? ""}`}
+    >
       <div className="flex items-center gap-2 mb-3 text-sm font-semibold">{icon} {title}</div>
       {items.length === 0 ? (
         <EmptyHint text={empty} />
