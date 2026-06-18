@@ -36,10 +36,19 @@ function ConsumidorDashboardPage() {
 
   return (
     <div className="space-y-6">
+      <nav aria-label="Trilha" className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <Link to="/clube" className="hover:text-foreground transition-colors">Clube</Link>
+        <span className="opacity-50">›</span>
+        <span className="text-foreground font-medium">Minha área</span>
+      </nav>
+
       <PageHeader
         title="Minha área"
         description="Tudo o que você curte, consome e economiza num só lugar."
       />
+
+      <SectionNav />
+
 
       {error && (
         <Card className="p-4 border-rose-200 bg-rose-50 text-rose-900 text-sm">
@@ -89,6 +98,7 @@ function ConsumidorDashboardPage() {
             <PremiumSection
               isPremium={data.kpis.activeMemberships.value > 0}
               icon={<Heart className="h-4 w-4 text-rose-500" />}
+              anchor="favoritos"
               title="Meus favoritos"
               teaser="Salve restaurantes, clínicas, eventos e lugares para acessar com um toque."
               empty="Você ainda não favoritou nenhum lugar. Explore o Clube perto de você."
@@ -104,6 +114,7 @@ function ConsumidorDashboardPage() {
             <PremiumSection
               isPremium={data.kpis.activeMemberships.value > 0}
               icon={<MapPin className="h-4 w-4 text-blue-500" />}
+              anchor="historico"
               title="Histórico de visitas"
               teaser="Veja tudo o que você consumiu, quando e onde — organizado por mês."
               empty="Suas visitas e check-ins aparecerão aqui."
@@ -119,6 +130,7 @@ function ConsumidorDashboardPage() {
             <PremiumSection
               isPremium={data.kpis.activeMemberships.value > 0}
               icon={<Ticket className="h-4 w-4 text-pink-500" />}
+              anchor="cupons"
               title="Meus cupons"
               teaser="Descontos personalizados para você usar nas marcas e lugares que você ama."
               empty="Você ainda não resgatou nenhum cupom. Explore o Clube e pegue o próximo."
@@ -139,6 +151,7 @@ function ConsumidorDashboardPage() {
             <PremiumSection
               isPremium={data.kpis.activeMemberships.value > 0}
               icon={<TicketCheck className="h-4 w-4 text-fuchsia-500" />}
+              anchor="vouchers"
               title="Meus vouchers"
               teaser="Vouchers e brindes para resgatar quando e onde você quiser."
               empty="Seus vouchers de benefícios aparecerão aqui assim que você resgatar."
@@ -156,6 +169,7 @@ function ConsumidorDashboardPage() {
             <PremiumSection
               isPremium={data.kpis.activeMemberships.value > 0}
               icon={<CalendarDays className="h-4 w-4 text-blue-600" />}
+              anchor="reservas"
               title="Minhas reservas e ingressos"
               teaser="Reservas, agendamentos e ingressos centralizados — com QR Code e lembretes."
               empty="Você ainda não tem reservas. Encontre eventos e experiências no Clube."
@@ -178,6 +192,7 @@ function ConsumidorDashboardPage() {
             <PremiumSection
               isPremium={data.kpis.activeMemberships.value > 0}
               icon={<Star className="h-4 w-4 text-amber-500" />}
+              anchor="avaliacoes"
               title="Minhas avaliações"
               teaser="Suas notas e comentários sobre lugares e experiências que você viveu."
               empty="Depois de visitar um lugar, você poderá avaliar e ajudar outras pessoas."
@@ -196,6 +211,7 @@ function ConsumidorDashboardPage() {
             <PremiumSection
               isPremium={data.kpis.activeMemberships.value > 0}
               icon={<Receipt className="h-4 w-4 text-emerald-500" />}
+              anchor="comprovantes"
               title="Comprovantes de consumo"
               teaser="Tudo o que você consumiu organizado por data, valor e estabelecimento."
               empty="Seus comprovantes de consumo aparecerão aqui."
@@ -211,6 +227,7 @@ function ConsumidorDashboardPage() {
             <PremiumSection
               isPremium={data.kpis.activeMemberships.value > 0}
               icon={<FileText className="h-4 w-4 text-violet-500" />}
+              anchor="notas"
               title="Minhas notas e cobranças"
               teaser="Faturas e notas fiscais da sua assinatura do Clube, sempre à mão."
               empty="Suas faturas e notas fiscais aparecerão aqui assim que houver cobranças."
@@ -231,6 +248,7 @@ function ConsumidorDashboardPage() {
             <PremiumSection
               isPremium={data.kpis.activeMemberships.value > 0}
               icon={<Gift className="h-4 w-4 text-amber-500" />}
+              anchor="creditos"
               title="Movimentação de créditos"
               teaser="Acumule créditos e cashback toda vez que consumir ou indicar."
               empty="Acumule créditos visitando, indicando e participando."
@@ -308,6 +326,7 @@ function PremiumSection<T extends { id: string }>({
   items,
   render,
   className,
+  anchor,
 }: {
   isPremium: boolean;
   icon: ReactNode;
@@ -317,10 +336,12 @@ function PremiumSection<T extends { id: string }>({
   items: T[];
   render: (item: T) => ReactNode;
   className?: string;
+  anchor?: string;
 }) {
+  const id = anchor;
   if (!isPremium) {
     return (
-      <Card className={`p-4 relative overflow-hidden ${className ?? ""}`}>
+      <Card id={id} className={`p-4 relative overflow-hidden scroll-mt-24 ${className ?? ""}`}>
         <div className="flex items-center gap-2 mb-2 text-sm font-semibold">
           {icon} {title}
           <Badge variant="outline" className="ml-auto gap-1 text-[10px]">
@@ -335,7 +356,7 @@ function PremiumSection<T extends { id: string }>({
     );
   }
   return (
-    <Card className={`p-4 ${className ?? ""}`}>
+    <Card id={id} className={`p-4 scroll-mt-24 ${className ?? ""}`}>
       <div className="flex items-center gap-2 mb-3 text-sm font-semibold">{icon} {title}</div>
       {items.length === 0 ? (
         <EmptyHint text={empty} />
@@ -349,5 +370,35 @@ function PremiumSection<T extends { id: string }>({
         </ul>
       )}
     </Card>
+  );
+}
+
+const SECTIONS: Array<{ id: string; label: string }> = [
+  { id: "favoritos", label: "Meus favoritos" },
+  { id: "historico", label: "Histórico de visitas" },
+  { id: "cupons", label: "Meus cupons" },
+  { id: "vouchers", label: "Meus vouchers" },
+  { id: "reservas", label: "Minhas reservas" },
+  { id: "avaliacoes", label: "Minhas avaliações" },
+  { id: "comprovantes", label: "Comprovantes" },
+  { id: "notas", label: "Minhas notas" },
+  { id: "creditos", label: "Meus créditos" },
+];
+
+function SectionNav() {
+  return (
+    <div className="sticky top-0 z-10 -mx-1 px-1 py-2 bg-background/85 backdrop-blur border-b border-border/60">
+      <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
+        {SECTIONS.map((s) => (
+          <a
+            key={s.id}
+            href={`#${s.id}`}
+            className="shrink-0 text-xs px-3 py-1.5 rounded-full border border-border/60 bg-card hover:bg-accent hover:text-accent-foreground transition-colors"
+          >
+            {s.label}
+          </a>
+        ))}
+      </div>
+    </div>
   );
 }
