@@ -191,7 +191,7 @@ export const listBreweryPdvs = createServerFn({ method: "POST" })
     let q = context.supabase
       .from("brewery_pdv_links")
       .select(
-        "id,brand_id,pdv_name,pdv_city,pdv_state,contact_name,contact_phone,contract_status,contract_started_at,contract_ended_at,notes,created_at",
+        "id,brand_id,pdv_name,pdv_city,pdv_state,contact_name,contact_phone,contract_status,contract_started_at,contract_ended_at,notes,created_at,portal_token",
       )
       .order("created_at", { ascending: false });
     if (data.brandId) q = q.eq("brand_id", data.brandId);
