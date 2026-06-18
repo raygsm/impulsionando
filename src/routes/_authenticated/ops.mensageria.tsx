@@ -39,7 +39,7 @@ function MensageriaPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Mensageria" subtitle="WhatsApp · E-mail · In-app — últimas 30 dias" icon={MessageSquare} />
+      <PageHeader title="Mensageria" description="WhatsApp · E-mail · In-app — últimas 30 dias" />
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Carregando…</p>
