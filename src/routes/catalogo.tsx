@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
-import { ArrowRight, Check, Layers, Workflow, Sparkles, Lock, Receipt } from 'lucide-react'
+import { ArrowRight, Check, Layers, Workflow, Sparkles, Lock, Receipt, RotateCcw } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -11,8 +11,34 @@ import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { PublicHeader } from '@/components/marketing/PublicHeader'
 import { PublicFooter } from '@/components/marketing/PublicFooter'
-import { getCatalog, saveCatalogIntent } from '@/lib/catalogo.functions'
+import { getCatalog, saveCatalogIntent, trackCatalogEvent } from '@/lib/catalogo.functions'
 import { CORE_BASE, PLAN_TIERS, type PlanTier } from '@/lib/niche-plans'
+
+const STORAGE_KEY = 'impulsionando.catalogo.selection.v1'
+type Persisted = {
+  macroSlug: string | null
+  subId: string | null
+  selectionByTier: Record<PlanTier, string[]>
+}
+function loadPersisted(): Persisted | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw ? (JSON.parse(raw) as Persisted) : null
+  } catch {
+    return null
+  }
+}
+function sessionToken(): string {
+  if (typeof window === 'undefined') return 'ssr'
+  const k = 'impulsionando.session.token'
+  let t = localStorage.getItem(k)
+  if (!t) {
+    t = crypto.randomUUID()
+    localStorage.setItem(k, t)
+  }
+  return t
+}
 
 const catalogQuery = queryOptions({
   queryKey: ['catalogo', 'v3'],
