@@ -14,25 +14,13 @@
  * que varre sessões fechadas há N horas, ou manualmente passando session_id.
  */
 import { sendRestaurantEmail } from "@/lib/restaurant-notify.server";
+import {
+  postVisitDelayHours,
+  voucherLabelForNiche,
+} from "@/lib/postvisit-timing-registry";
 
-/** Janela ideal de disparo, por nicho. Default = 24h. */
-const POSTVISIT_DELAY_HOURS: Record<string, number> = {
-  "bares-restaurantes": 24,
-  "cervejaria": 36,
-  "cafe-confeitaria": 18,
-  "eventos-casas-show": 48,
-};
-
-const VOUCHER_LABEL: Record<string, string> = {
-  "bares-restaurantes": "10% off no próximo couvert",
-  "cervejaria": "15% off na próxima IPA",
-  "cafe-confeitaria": "Café duplo no próximo combo",
-};
-
-export function postVisitDelayHours(niche?: string): number {
-  if (!niche) return 24;
-  return POSTVISIT_DELAY_HOURS[niche] ?? 24;
-}
+// Re-export para retrocompatibilidade com callers/testes existentes.
+export { postVisitDelayHours } from "@/lib/postvisit-timing-registry";
 
 function makeVoucherCode(companySlug: string, niche?: string): string {
   const tag = (niche ?? "POS").split("-")[0].toUpperCase();
