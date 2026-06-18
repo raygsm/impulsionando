@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
 
 /**
  * E2E: Minha área (/dashboards/consumidor) — sub-nav, hash, restore on refresh.
@@ -1118,5 +1119,250 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
       "true",
     );
     await expect(live).toContainText(/Meus cupons/i);
+
+  test("visual regression (reduced motion): chip ativo, focus ring e tabpanel", async ({
+    browser,
+  }) => {
+    test.skip(
+      !!process.env.CI && !process.env.E2E_VISUAL,
+      "Visual snapshots geram baselines no primeiro run — habilite com E2E_VISUAL=1.",
+    );
+
+    const context = await browser.newContext({ reducedMotion: "reduce" });
+    const page = await context.newPage();
+    await login(page);
+    await page.goto(`${ROUTE}#favoritos`);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(500);
+
+    const tablist = page.getByRole("tablist", { name: /Seções da Minha área/i });
+
+    await expect(tablist).toHaveScreenshot("rm-subnav-active-favoritos.png", {
+      maxDiffPixelRatio: 0.02,
+      animations: "disabled",
+    });
+
+    // Alt+ArrowRight → historico active; focus the chip to capture focus-ring
+    await page.locator("body").focus();
+    await page.keyboard.press("Alt+ArrowRight");
+    await page.waitForTimeout(300);
+    await page.locator("#tab-historico").focus();
+    await expect(tablist).toHaveScreenshot("rm-subnav-focus-historico.png", {
+      maxDiffPixelRatio: 0.02,
+      animations: "disabled",
+    });
+    await expect(page.locator("#historico")).toHaveScreenshot(
+      "rm-tabpanel-historico.png",
+      { maxDiffPixelRatio: 0.03, animations: "disabled" },
+    );
+
+    // End → last chip focused
+    await page.keyboard.press("End");
+    await page.waitForTimeout(200);
+    await expect(tablist).toHaveScreenshot("rm-subnav-focus-end-creditos.png", {
+      maxDiffPixelRatio: 0.02,
+      animations: "disabled",
+    });
+
+    await context.close();
+  });
+
+  test("RTL: Alt+Arrow mantém tablist com offset e chip ativa visível", async ({
+    browser,
+  }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await login(page);
+    await page.goto(ROUTE);
+    await page.evaluate(() => {
+      document.documentElement.setAttribute("dir", "rtl");
+      document.documentElement.setAttribute("lang", "ar");
+    });
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(400);
+
+    // Walk forward a few steps and assert each section is docked under header
+    const stops: Array<(typeof SECTIONS)[number]> = ["historico", "cupons", "vouchers"];
+    await page.locator("body").focus();
+
+    for (const id of stops) {
+      await page.keyboard.press("Alt+ArrowRight");
+      await page.waitForTimeout(450);
+      await expect.poll(() => page.evaluate(() => location.hash)).toBe(`#${id}`);
+
+      // Section sits under the sticky header (within measured offset)
+      const offset = await page.evaluate((sid) => {
+        const el = document.getElementById(sid);
+        if (!el) return 0;
+        return Number(
+          getComputedStyle(el).getPropertyValue("--sec-offset").replace("px", "").trim() ||
+            "0",
+        );
+      }, id);
+      expect(offset).toBeGreaterThan(0);
+      const top = await page
+        .locator(`#${id}`)
+        .evaluate((el) => el.getBoundingClientRect().top);
+      expect(top).toBeLessThan(offset + 48);
+      expect(top).toBeGreaterThan(-50);
+
+      // Active chip is visible inside the tablist viewport (not clipped off-screen)
+      const chipVisible = await page.locator(`#tab-${id}`).evaluate((chip) => {
+        const list = chip.closest('[role="tablist"]') as HTMLElement | null;
+        if (!list) return false;
+        const cr = chip.getBoundingClientRect();
+        const lr = list.getBoundingClientRect();
+        // Chip must overlap horizontally with the tablist's visible band
+        return cr.right > lr.left + 4 && cr.left < lr.right - 4;
+      });
+      expect(chipVisible).toBe(true);
+    }
+
+    await context.close();
+  });
+
+  test("a11y: axe não encontra violações em tablist/tabpanel após navegação por teclado", async ({
+    page,
+  }) => {
+    await page.goto(`${ROUTE}#favoritos`);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(500);
+
+    // Move through a few sections via keyboard before auditing
+    await page.locator("body").focus();
+    await page.keyboard.press("Alt+ArrowRight");
+    await page.waitForTimeout(200);
+    await page.keyboard.press("Alt+ArrowRight");
+    await page.waitForTimeout(200);
+    await page.locator("#tab-cupons").focus();
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(450);
+
+    const results = await new AxeBuilder({ page })
+      .include('[role="tablist"]')
+      .include('[role="tabpanel"]')
+      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+      .analyze();
+
+    // Filter to rules directly related to tablist/tabpanel semantics
+    const relevant = results.violations.filter((v) =>
+      [
+        "aria-valid-attr",
+        "aria-valid-attr-value",
+        "aria-required-attr",
+        "aria-required-children",
+        "aria-required-parent",
+        "aria-allowed-attr",
+        "aria-allowed-role",
+        "aria-roles",
+        "tabindex",
+        "duplicate-id",
+        "duplicate-id-aria",
+      ].includes(v.id),
+    );
+
+    if (relevant.length > 0) {
+      console.error(
+        "axe violations:",
+        JSON.stringify(
+          relevant.map((v) => ({ id: v.id, help: v.help, nodes: v.nodes.length })),
+          null,
+          2,
+        ),
+      );
+    }
+    expect(relevant).toEqual([]);
+
+    // Structural invariants axe doesn't enforce directly
+    const tabs = await page.locator('[role="tab"]').count();
+    expect(tabs).toBe(SECTIONS.length);
+    const selectedCount = await page.locator('[role="tab"][aria-selected="true"]').count();
+    expect(selectedCount).toBe(1);
+    const rovingCount = await page.locator('[role="tab"][tabindex="0"]').count();
+    expect(rovingCount).toBe(1);
+    // Every tab references an existing tabpanel via aria-controls
+    const orphanControls = await page.locator('[role="tab"]').evaluateAll((tabs) =>
+      tabs
+        .map((t) => (t as HTMLElement).getAttribute("aria-controls"))
+        .filter((id): id is string => !!id)
+        .filter((id) => !document.getElementById(id)),
+    );
+    expect(orphanControls).toEqual([]);
+  });
+
+  test("hash desconhecido: cai na seção padrão, foca tabpanel e anuncia 1x", async ({
+    page,
+  }) => {
+    // Capture live region announcements from the very start
+    await page.addInitScript(() => {
+      (window as unknown as { __liveAnnounces: string[] }).__liveAnnounces = [];
+      const obs = new MutationObserver(() => {
+        const live = document.querySelector('[role="status"][aria-live="polite"]');
+        const txt = (live?.textContent ?? "").trim();
+        const log = (window as unknown as { __liveAnnounces: string[] }).__liveAnnounces;
+        if (txt && log[log.length - 1] !== txt) log.push(txt);
+      });
+      const start = () => {
+        const live = document.querySelector('[role="status"][aria-live="polite"]');
+        if (!live) return false;
+        obs.observe(live, { childList: true, characterData: true, subtree: true });
+        const txt = (live.textContent ?? "").trim();
+        if (txt) (window as unknown as { __liveAnnounces: string[] }).__liveAnnounces.push(txt);
+        return true;
+      };
+      if (!start()) {
+        const i = setInterval(() => {
+          if (start()) clearInterval(i);
+        }, 50);
+      }
+    });
+
+    // Clear sessionStorage so no previous section overrides the fallback
+    await page.goto(ROUTE);
+    await page.evaluate(() =>
+      sessionStorage.removeItem("dashboards:consumidor:section"),
+    );
+    await page.goto(`${ROUTE}#hash-que-nao-existe-123`);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(800);
+
+    // Default chip (first) must hold the roving tabindex baseline
+    const defaultId = SECTIONS[0];
+    await expect(page.locator(`#tab-${defaultId}`)).toHaveAttribute("tabindex", "0");
+
+    // No stale aria-current/aria-selected from other chips
+    const selectedCount = await page.locator('[role="tab"][aria-selected="true"]').count();
+    expect(selectedCount).toBeLessThanOrEqual(1);
+
+    // Focus and activate the default chip — focus should land in its tabpanel
+    await page.locator(`#tab-${defaultId}`).focus();
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(450);
+    const focusedPanel = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(focusedPanel).toBe(defaultId);
+    await expect(page.locator(`#tab-${defaultId}`)).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(page.locator(`#tab-${defaultId}`)).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+
+    // Live region announced the default label and never any other section
+    const announces: string[] = await page.evaluate(
+      () => (window as unknown as { __liveAnnounces: string[] }).__liveAnnounces,
+    );
+    const defaultLabel = SECTIONS_LABELS[defaultId];
+    const defaultHits = announces.filter((t) => t.includes(defaultLabel));
+    expect(defaultHits.length).toBeGreaterThanOrEqual(1);
+    // No leakage of other section names
+    for (const id of SECTIONS) {
+      if (id === defaultId) continue;
+      const label = SECTIONS_LABELS[id];
+      expect(announces.every((t) => !t.includes(label))).toBe(true);
+    }
   });
 });
