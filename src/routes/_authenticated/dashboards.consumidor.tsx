@@ -317,6 +317,7 @@ function PremiumSection<T extends { id: string }>({
   items,
   render,
   className,
+  anchor,
 }: {
   isPremium: boolean;
   icon: ReactNode;
