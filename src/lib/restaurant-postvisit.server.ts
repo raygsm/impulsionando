@@ -14,25 +14,13 @@
  * que varre sessões fechadas há N horas, ou manualmente passando session_id.
  */
 import { sendRestaurantEmail } from "@/lib/restaurant-notify.server";
+import {
+  postVisitDelayHours,
+  voucherLabelForNiche,
+} from "@/lib/postvisit-timing-registry";
 
-/** Janela ideal de disparo, por nicho. Default = 24h. */
-const POSTVISIT_DELAY_HOURS: Record<string, number> = {
-  "bares-restaurantes": 24,
-  "cervejaria": 36,
-  "cafe-confeitaria": 18,
-  "eventos-casas-show": 48,
-};
-
-const VOUCHER_LABEL: Record<string, string> = {
-  "bares-restaurantes": "10% off no próximo couvert",
-  "cervejaria": "15% off na próxima IPA",
-  "cafe-confeitaria": "Café duplo no próximo combo",
-};
-
-export function postVisitDelayHours(niche?: string): number {
-  if (!niche) return 24;
-  return POSTVISIT_DELAY_HOURS[niche] ?? 24;
-}
+// Re-export para retrocompatibilidade com callers/testes existentes.
+export { postVisitDelayHours } from "@/lib/postvisit-timing-registry";
 
 function makeVoucherCode(companySlug: string, niche?: string): string {
   const tag = (niche ?? "POS").split("-")[0].toUpperCase();
@@ -42,45 +30,71 @@ function makeVoucherCode(companySlug: string, niche?: string): string {
 
 export async function notifyPostVisitThanks(args: {
   session_id: string;
-  /** Nicho para escolher copy/voucher; se omitido, usa `companies.niche_slug`. */
   niche?: string;
-  /** Força reenvio (ignora dedupe). Usar apenas em replay manual. */
   force?: boolean;
+  /** Correlação ponta-a-ponta (cron/webhook → log). */
+  requestId?: string;
 }): Promise<{
   email?: unknown;
   skipped?: string;
   scheduledFor?: string;
 }> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { logNotificationAttempt } = await import("@/lib/notification-attempt-log.server");
 
   const { data: sess } = await supabaseAdmin
     .from("restaurant_table_sessions")
     .select(
-      `id, customer_email, customer_name, bill_notified_at, postvisit_notified_at,
+      `id, customer_email, customer_name, bill_notified_at, postvisit_notified_at, company_id,
        company:company_id ( id, name, trade_name, niche_slug, slug )`,
     )
     .eq("id", args.session_id)
     .maybeSingle();
 
-  if (!sess) return { skipped: "session_not_found" };
+  const niche = args.niche ?? (sess as any)?.company?.niche_slug ?? undefined;
+  const companyId = (sess as any)?.company_id ?? null;
+  const baseLog = {
+    request_id: args.requestId ?? null,
+    company_id: companyId,
+    channel: 'email' as const,
+    event: 'restaurant-postvisit-thanks',
+    niche: niche ?? null,
+    idempotency_key: `postvisit:${args.session_id}`,
+  };
+
+  if (!sess) {
+    await logNotificationAttempt({ ...baseLog, status: 'skipped', reason: 'session_not_found' });
+    return { skipped: "session_not_found" };
+  }
 
   const email = ((sess as any).customer_email ?? "").trim();
-  if (!email) return { skipped: "no_customer_email" };
+  if (!email) {
+    await logNotificationAttempt({ ...baseLog, status: 'skipped', reason: 'no_customer_email' });
+    return { skipped: "no_customer_email" };
+  }
 
   if (!(sess as any).bill_notified_at) {
+    await logNotificationAttempt({ ...baseLog, recipient: email, status: 'skipped', reason: 'bill_not_closed_yet' });
     return { skipped: "bill_not_closed_yet" };
   }
 
   if (!args.force && (sess as any).postvisit_notified_at) {
+    await logNotificationAttempt({ ...baseLog, recipient: email, status: 'blocked', reason: 'idempotent_dup' });
     return { skipped: "already_notified" };
   }
 
   // Janela mínima após o fechamento — protege contra disparo na mesma noite.
   const closedAt = new Date((sess as any).bill_notified_at).getTime();
-  const niche = args.niche ?? (sess as any).company?.niche_slug ?? undefined;
   const minHours = postVisitDelayHours(niche);
   const earliest = closedAt + minHours * 3600 * 1000;
   if (!args.force && Date.now() < earliest) {
+    await logNotificationAttempt({
+      ...baseLog,
+      recipient: email,
+      status: 'blocked',
+      reason: 'timing_window',
+      metadata: { earliest: new Date(earliest).toISOString(), delayHours: minHours },
+    });
     return { skipped: "too_early", scheduledFor: new Date(earliest).toISOString() };
   }
 
@@ -97,14 +111,13 @@ export async function notifyPostVisitThanks(args: {
       companyName,
       niche,
       voucherCode,
-      voucherLabel: niche ? VOUCHER_LABEL[niche] : undefined,
+      voucherLabel: voucherLabelForNiche(niche),
       clubeUrl: "https://impulsionando.com.br/clube",
       ctaUrl: `https://impulsionando.com.br/r/${companySlug}`,
     },
     idempotencyKey: `postvisit:${args.session_id}`,
   });
 
-  // Marca dedupe — coluna opcional; ignora erro se ainda não existir no schema.
   try {
     await supabaseAdmin
       .from("restaurant_table_sessions")
@@ -113,6 +126,13 @@ export async function notifyPostVisitThanks(args: {
   } catch {
     /* tabela ainda não tem a coluna — pós-visita já foi enviada via idempotencyKey */
   }
+
+  await logNotificationAttempt({
+    ...baseLog,
+    recipient: email,
+    status: 'queued',
+    metadata: { voucherCode },
+  });
 
   return { email: emailRes };
 }

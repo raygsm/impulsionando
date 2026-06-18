@@ -10013,6 +10013,59 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_attempt_log: {
+        Row: {
+          channel: string
+          company_id: string | null
+          created_at: string
+          event: string
+          id: string
+          idempotency_key: string | null
+          metadata: Json
+          niche: string | null
+          reason: string | null
+          recipient: string | null
+          request_id: string | null
+          status: string
+        }
+        Insert: {
+          channel: string
+          company_id?: string | null
+          created_at?: string
+          event: string
+          id?: string
+          idempotency_key?: string | null
+          metadata?: Json
+          niche?: string | null
+          reason?: string | null
+          recipient?: string | null
+          request_id?: string | null
+          status: string
+        }
+        Update: {
+          channel?: string
+          company_id?: string | null
+          created_at?: string
+          event?: string
+          id?: string
+          idempotency_key?: string | null
+          metadata?: Json
+          niche?: string | null
+          reason?: string | null
+          recipient?: string | null
+          request_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_attempt_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_preferences: {
         Row: {
           category: string

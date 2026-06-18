@@ -14,7 +14,8 @@ import { useServerFn } from '@tanstack/react-start'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Bell, Mail, RefreshCw, ShieldCheck } from 'lucide-react'
+import { Bell, Mail, RefreshCw, ShieldCheck, ScrollText } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 import { getInternalSalaoNotifications } from '@/lib/restaurant-salao-notifications.functions'
 
 export const Route = createFileRoute('/_authenticated/restaurante/salao/notificacoes')({
@@ -47,9 +48,16 @@ function NotificacoesSalaoPage() {
             e na régua pós-visita (24h–72h depois).
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isRefetching}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${isRefetching ? 'animate-spin' : ''}`} /> Atualizar
-        </Button>
+        <div className="flex gap-2">
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/restaurante/salao/logs">
+              <ScrollText className="h-4 w-4 mr-2" /> Ver logs
+            </Link>
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isRefetching}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefetching ? 'animate-spin' : ''}`} /> Atualizar
+          </Button>
+        </div>
       </header>
 
       <section>

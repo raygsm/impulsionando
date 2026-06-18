@@ -350,6 +350,7 @@ import { Route as ApiPublicHooksUptimeCheckRouteImport } from './routes/api/publ
 import { Route as ApiPublicHooksN8nLogRouteImport } from './routes/api/public/hooks/n8n-log'
 import { Route as ApiPublicHooksMpPendingRemindersRouteImport } from './routes/api/public/hooks/mp-pending-reminders'
 import { Route as ApiPublicHooksMarketingLeadNotifyRouteImport } from './routes/api/public/hooks/marketing-lead-notify'
+import { Route as ApiPublicHooksCoreNotificationEventRouteImport } from './routes/api/public/hooks/core-notification-event'
 import { Route as ApiPublicHooksCommsSelfTestRouteImport } from './routes/api/public/hooks/comms-self-test'
 import { Route as ApiPublicHooksClubeJourneyTickRouteImport } from './routes/api/public/hooks/clube-journey-tick'
 import { Route as ApiPublicHooksBillingTickRouteImport } from './routes/api/public/hooks/billing-tick'
@@ -361,6 +362,7 @@ import { Route as ApiPaymentsInfinitepayCheckStatusRouteImport } from './routes/
 import { Route as AuthenticatedTorreRestaurantesDemoAuditoriaRouteImport } from './routes/_authenticated/torre.restaurantes-demo.auditoria'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
 import { Route as AuthenticatedRestauranteSalaoNotificacoesRouteImport } from './routes/_authenticated/restaurante.salao.notificacoes'
+import { Route as AuthenticatedRestauranteSalaoLogsRouteImport } from './routes/_authenticated/restaurante.salao.logs'
 import { Route as AuthenticatedImobiliariaAprovacoesImprimirFilaRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes.imprimir-fila'
 import { Route as AuthenticatedCoreModulosSlugRouteImport } from './routes/_authenticated/core.modulos.$slug'
 import { Route as AuthenticatedCoreMarketplacePedidosRouteImport } from './routes/_authenticated/core.marketplace.pedidos'
@@ -2251,6 +2253,12 @@ const ApiPublicHooksMarketingLeadNotifyRoute =
     path: '/api/public/hooks/marketing-lead-notify',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksCoreNotificationEventRoute =
+  ApiPublicHooksCoreNotificationEventRouteImport.update({
+    id: '/api/public/hooks/core-notification-event',
+    path: '/api/public/hooks/core-notification-event',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksCommsSelfTestRoute =
   ApiPublicHooksCommsSelfTestRouteImport.update({
     id: '/api/public/hooks/comms-self-test',
@@ -2313,6 +2321,12 @@ const AuthenticatedRestauranteSalaoNotificacoesRoute =
   AuthenticatedRestauranteSalaoNotificacoesRouteImport.update({
     id: '/notificacoes',
     path: '/notificacoes',
+    getParentRoute: () => AuthenticatedRestauranteSalaoRoute,
+  } as any)
+const AuthenticatedRestauranteSalaoLogsRoute =
+  AuthenticatedRestauranteSalaoLogsRouteImport.update({
+    id: '/logs',
+    path: '/logs',
     getParentRoute: () => AuthenticatedRestauranteSalaoRoute,
   } as any)
 const AuthenticatedImobiliariaAprovacoesImprimirFilaRoute =
@@ -2766,6 +2780,7 @@ export interface FileRoutesByFullPath {
   '/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
+  '/restaurante/salao/logs': typeof AuthenticatedRestauranteSalaoLogsRoute
   '/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
@@ -2777,6 +2792,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
   '/api/public/hooks/clube-journey-tick': typeof ApiPublicHooksClubeJourneyTickRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
+  '/api/public/hooks/core-notification-event': typeof ApiPublicHooksCoreNotificationEventRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/mp-pending-reminders': typeof ApiPublicHooksMpPendingRemindersRoute
   '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
@@ -3126,6 +3142,7 @@ export interface FileRoutesByTo {
   '/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
+  '/restaurante/salao/logs': typeof AuthenticatedRestauranteSalaoLogsRoute
   '/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
@@ -3137,6 +3154,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
   '/api/public/hooks/clube-journey-tick': typeof ApiPublicHooksClubeJourneyTickRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
+  '/api/public/hooks/core-notification-event': typeof ApiPublicHooksCoreNotificationEventRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/mp-pending-reminders': typeof ApiPublicHooksMpPendingRemindersRoute
   '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
@@ -3500,6 +3518,7 @@ export interface FileRoutesById {
   '/_authenticated/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/_authenticated/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/_authenticated/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
+  '/_authenticated/restaurante/salao/logs': typeof AuthenticatedRestauranteSalaoLogsRoute
   '/_authenticated/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/_authenticated/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
@@ -3511,6 +3530,7 @@ export interface FileRoutesById {
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
   '/api/public/hooks/clube-journey-tick': typeof ApiPublicHooksClubeJourneyTickRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
+  '/api/public/hooks/core-notification-event': typeof ApiPublicHooksCoreNotificationEventRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/mp-pending-reminders': typeof ApiPublicHooksMpPendingRemindersRoute
   '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
@@ -3873,6 +3893,7 @@ export interface FileRouteTypes {
     | '/core/marketplace/pedidos'
     | '/core/modulos/$slug'
     | '/imobiliaria/aprovacoes/imprimir-fila'
+    | '/restaurante/salao/logs'
     | '/restaurante/salao/notificacoes'
     | '/sales/cash/$id'
     | '/torre/restaurantes-demo/auditoria'
@@ -3884,6 +3905,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/billing-tick'
     | '/api/public/hooks/clube-journey-tick'
     | '/api/public/hooks/comms-self-test'
+    | '/api/public/hooks/core-notification-event'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/mp-pending-reminders'
     | '/api/public/hooks/n8n-log'
@@ -4233,6 +4255,7 @@ export interface FileRouteTypes {
     | '/core/marketplace/pedidos'
     | '/core/modulos/$slug'
     | '/imobiliaria/aprovacoes/imprimir-fila'
+    | '/restaurante/salao/logs'
     | '/restaurante/salao/notificacoes'
     | '/sales/cash/$id'
     | '/torre/restaurantes-demo/auditoria'
@@ -4244,6 +4267,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/billing-tick'
     | '/api/public/hooks/clube-journey-tick'
     | '/api/public/hooks/comms-self-test'
+    | '/api/public/hooks/core-notification-event'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/mp-pending-reminders'
     | '/api/public/hooks/n8n-log'
@@ -4606,6 +4630,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/marketplace/pedidos'
     | '/_authenticated/core/modulos/$slug'
     | '/_authenticated/imobiliaria/aprovacoes/imprimir-fila'
+    | '/_authenticated/restaurante/salao/logs'
     | '/_authenticated/restaurante/salao/notificacoes'
     | '/_authenticated/sales/cash/$id'
     | '/_authenticated/torre/restaurantes-demo/auditoria'
@@ -4617,6 +4642,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/billing-tick'
     | '/api/public/hooks/clube-journey-tick'
     | '/api/public/hooks/comms-self-test'
+    | '/api/public/hooks/core-notification-event'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/mp-pending-reminders'
     | '/api/public/hooks/n8n-log'
@@ -4761,6 +4787,7 @@ export interface RootRouteChildren {
   ApiPublicHooksBillingTickRoute: typeof ApiPublicHooksBillingTickRoute
   ApiPublicHooksClubeJourneyTickRoute: typeof ApiPublicHooksClubeJourneyTickRoute
   ApiPublicHooksCommsSelfTestRoute: typeof ApiPublicHooksCommsSelfTestRoute
+  ApiPublicHooksCoreNotificationEventRoute: typeof ApiPublicHooksCoreNotificationEventRoute
   ApiPublicHooksMarketingLeadNotifyRoute: typeof ApiPublicHooksMarketingLeadNotifyRoute
   ApiPublicHooksMpPendingRemindersRoute: typeof ApiPublicHooksMpPendingRemindersRoute
   ApiPublicHooksN8nLogRoute: typeof ApiPublicHooksN8nLogRoute
@@ -7170,6 +7197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksMarketingLeadNotifyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/core-notification-event': {
+      id: '/api/public/hooks/core-notification-event'
+      path: '/api/public/hooks/core-notification-event'
+      fullPath: '/api/public/hooks/core-notification-event'
+      preLoaderRoute: typeof ApiPublicHooksCoreNotificationEventRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/comms-self-test': {
       id: '/api/public/hooks/comms-self-test'
       path: '/api/public/hooks/comms-self-test'
@@ -7245,6 +7279,13 @@ declare module '@tanstack/react-router' {
       path: '/notificacoes'
       fullPath: '/restaurante/salao/notificacoes'
       preLoaderRoute: typeof AuthenticatedRestauranteSalaoNotificacoesRouteImport
+      parentRoute: typeof AuthenticatedRestauranteSalaoRoute
+    }
+    '/_authenticated/restaurante/salao/logs': {
+      id: '/_authenticated/restaurante/salao/logs'
+      path: '/logs'
+      fullPath: '/restaurante/salao/logs'
+      preLoaderRoute: typeof AuthenticatedRestauranteSalaoLogsRouteImport
       parentRoute: typeof AuthenticatedRestauranteSalaoRoute
     }
     '/_authenticated/imobiliaria/aprovacoes/imprimir-fila': {
@@ -7889,11 +7930,14 @@ const AuthenticatedImobiliariaAprovacoesRouteWithChildren =
   )
 
 interface AuthenticatedRestauranteSalaoRouteChildren {
+  AuthenticatedRestauranteSalaoLogsRoute: typeof AuthenticatedRestauranteSalaoLogsRoute
   AuthenticatedRestauranteSalaoNotificacoesRoute: typeof AuthenticatedRestauranteSalaoNotificacoesRoute
 }
 
 const AuthenticatedRestauranteSalaoRouteChildren: AuthenticatedRestauranteSalaoRouteChildren =
   {
+    AuthenticatedRestauranteSalaoLogsRoute:
+      AuthenticatedRestauranteSalaoLogsRoute,
     AuthenticatedRestauranteSalaoNotificacoesRoute:
       AuthenticatedRestauranteSalaoNotificacoesRoute,
   }
@@ -8393,6 +8437,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksBillingTickRoute: ApiPublicHooksBillingTickRoute,
   ApiPublicHooksClubeJourneyTickRoute: ApiPublicHooksClubeJourneyTickRoute,
   ApiPublicHooksCommsSelfTestRoute: ApiPublicHooksCommsSelfTestRoute,
+  ApiPublicHooksCoreNotificationEventRoute:
+    ApiPublicHooksCoreNotificationEventRoute,
   ApiPublicHooksMarketingLeadNotifyRoute:
     ApiPublicHooksMarketingLeadNotifyRoute,
   ApiPublicHooksMpPendingRemindersRoute: ApiPublicHooksMpPendingRemindersRoute,
