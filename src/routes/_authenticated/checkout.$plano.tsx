@@ -120,8 +120,12 @@ function CheckoutPage() {
           />
 
           <p className="text-center text-xs text-muted-foreground">
-            Cartão / parcelado entrará em breve via Mercado Pago. Para habilitá-lo,
-            acesse <Link to="/finance/integracoes" className="underline">Financeiro › Integrações</Link>.
+            Pagamentos processados via <strong>Mercado Pago</strong> — PIX, cartão e boleto.
+            Configurações em{" "}
+            <Link to="/finance/integracoes" className="underline">
+              Financeiro › Integrações
+            </Link>
+            .
           </p>
         </>
       )}
