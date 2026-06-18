@@ -46,7 +46,7 @@ function Page() {
       <PageHeader
         title="Corretores parceiros"
         description="Cadastre corretores externos e compartilhe um link público para que indiquem interessados nos seus imóveis."
-        actions={<NewBrokerDialog companyId={companyId} onCreated={() => qc.invalidateQueries({ queryKey: ["re-partners"] })} />}
+        action={<NewBrokerDialog companyId={companyId} onCreated={() => qc.invalidateQueries({ queryKey: ["re-partners"] })} />}
       />
       <Card>
         <CardContent className="p-0">
