@@ -48,9 +48,16 @@ function NotificacoesSalaoPage() {
             e na régua pós-visita (24h–72h depois).
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isRefetching}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${isRefetching ? 'animate-spin' : ''}`} /> Atualizar
-        </Button>
+        <div className="flex gap-2">
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/restaurante/salao/logs">
+              <ScrollText className="h-4 w-4 mr-2" /> Ver logs
+            </Link>
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isRefetching}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefetching ? 'animate-spin' : ''}`} /> Atualizar
+          </Button>
+        </div>
       </header>
 
       <section>
