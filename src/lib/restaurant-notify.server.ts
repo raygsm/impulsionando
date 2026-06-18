@@ -4,6 +4,7 @@
  */
 import * as React from 'react'
 import { render as renderAsync } from '@react-email/components'
+import { supabaseAdmin } from '@/integrations/supabase/client.server'
 import { TEMPLATES, assertTemplateAllowedForCustomerChannel } from '@/lib/email-templates/registry'
 
 const SENDER_DOMAIN = 'notify.www.impulsionando.com.br'
