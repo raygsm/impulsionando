@@ -340,6 +340,7 @@ import { Route as ApiPublicDemoSendTestRouteImport } from './routes/api/public/d
 import { Route as ApiPublicDemoFeiraLeadRouteImport } from './routes/api/public/demo/feira-lead'
 import { Route as ApiPaymentsInfinitepayCreateRouteImport } from './routes/api/payments/infinitepay.create'
 import { Route as ApiPaymentsInfinitepayCheckStatusRouteImport } from './routes/api/payments/infinitepay.check-status'
+import { Route as AuthenticatedTorreRestaurantesDemoAuditoriaRouteImport } from './routes/_authenticated/torre.restaurantes-demo.auditoria'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
 import { Route as AuthenticatedImobiliariaAprovacoesImprimirFilaRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes.imprimir-fila'
 import { Route as AuthenticatedCoreModulosSlugRouteImport } from './routes/_authenticated/core.modulos.$slug'
@@ -2171,6 +2172,12 @@ const ApiPaymentsInfinitepayCheckStatusRoute =
     path: '/api/payments/infinitepay/check-status',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedTorreRestaurantesDemoAuditoriaRoute =
+  AuthenticatedTorreRestaurantesDemoAuditoriaRouteImport.update({
+    id: '/auditoria',
+    path: '/auditoria',
+    getParentRoute: () => AuthenticatedTorreRestaurantesDemoRoute,
+  } as any)
 const AuthenticatedSalesCashIdRoute =
   AuthenticatedSalesCashIdRouteImport.update({
     id: '/$id',
@@ -2539,7 +2546,7 @@ export interface FileRoutesByFullPath {
   '/showroom/restaurante': typeof AuthenticatedShowroomRestauranteRoute
   '/support/cockpit': typeof AuthenticatedSupportCockpitRoute
   '/torre/consumidores': typeof AuthenticatedTorreConsumidoresRoute
-  '/torre/restaurantes-demo': typeof AuthenticatedTorreRestaurantesDemoRoute
+  '/torre/restaurantes-demo': typeof AuthenticatedTorreRestaurantesDemoRouteWithChildren
   '/users/corporate': typeof AuthenticatedUsersCorporateRoute
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
@@ -2570,6 +2577,7 @@ export interface FileRoutesByFullPath {
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
+  '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
@@ -2873,7 +2881,7 @@ export interface FileRoutesByTo {
   '/showroom/restaurante': typeof AuthenticatedShowroomRestauranteRoute
   '/support/cockpit': typeof AuthenticatedSupportCockpitRoute
   '/torre/consumidores': typeof AuthenticatedTorreConsumidoresRoute
-  '/torre/restaurantes-demo': typeof AuthenticatedTorreRestaurantesDemoRoute
+  '/torre/restaurantes-demo': typeof AuthenticatedTorreRestaurantesDemoRouteWithChildren
   '/users/corporate': typeof AuthenticatedUsersCorporateRoute
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
@@ -2904,6 +2912,7 @@ export interface FileRoutesByTo {
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
+  '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
@@ -3221,7 +3230,7 @@ export interface FileRoutesById {
   '/_authenticated/showroom/restaurante': typeof AuthenticatedShowroomRestauranteRoute
   '/_authenticated/support/cockpit': typeof AuthenticatedSupportCockpitRoute
   '/_authenticated/torre/consumidores': typeof AuthenticatedTorreConsumidoresRoute
-  '/_authenticated/torre/restaurantes-demo': typeof AuthenticatedTorreRestaurantesDemoRoute
+  '/_authenticated/torre/restaurantes-demo': typeof AuthenticatedTorreRestaurantesDemoRouteWithChildren
   '/_authenticated/users/corporate': typeof AuthenticatedUsersCorporateRoute
   '/_authenticated/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
@@ -3252,6 +3261,7 @@ export interface FileRoutesById {
   '/_authenticated/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/_authenticated/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
+  '/_authenticated/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
@@ -3599,6 +3609,7 @@ export interface FileRouteTypes {
     | '/core/modulos/$slug'
     | '/imobiliaria/aprovacoes/imprimir-fila'
     | '/sales/cash/$id'
+    | '/torre/restaurantes-demo/auditoria'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
     | '/api/public/demo/feira-lead'
@@ -3933,6 +3944,7 @@ export interface FileRouteTypes {
     | '/core/modulos/$slug'
     | '/imobiliaria/aprovacoes/imprimir-fila'
     | '/sales/cash/$id'
+    | '/torre/restaurantes-demo/auditoria'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
     | '/api/public/demo/feira-lead'
@@ -4280,6 +4292,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/modulos/$slug'
     | '/_authenticated/imobiliaria/aprovacoes/imprimir-fila'
     | '/_authenticated/sales/cash/$id'
+    | '/_authenticated/torre/restaurantes-demo/auditoria'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
     | '/api/public/demo/feira-lead'
@@ -6762,6 +6775,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPaymentsInfinitepayCheckStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/torre/restaurantes-demo/auditoria': {
+      id: '/_authenticated/torre/restaurantes-demo/auditoria'
+      path: '/auditoria'
+      fullPath: '/torre/restaurantes-demo/auditoria'
+      preLoaderRoute: typeof AuthenticatedTorreRestaurantesDemoAuditoriaRouteImport
+      parentRoute: typeof AuthenticatedTorreRestaurantesDemoRoute
+    }
     '/_authenticated/sales/cash/$id': {
       id: '/_authenticated/sales/cash/$id'
       path: '/$id'
@@ -7302,6 +7322,21 @@ const AuthenticatedImobiliariaAprovacoesRouteWithChildren =
     AuthenticatedImobiliariaAprovacoesRouteChildren,
   )
 
+interface AuthenticatedTorreRestaurantesDemoRouteChildren {
+  AuthenticatedTorreRestaurantesDemoAuditoriaRoute: typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
+}
+
+const AuthenticatedTorreRestaurantesDemoRouteChildren: AuthenticatedTorreRestaurantesDemoRouteChildren =
+  {
+    AuthenticatedTorreRestaurantesDemoAuditoriaRoute:
+      AuthenticatedTorreRestaurantesDemoAuditoriaRoute,
+  }
+
+const AuthenticatedTorreRestaurantesDemoRouteWithChildren =
+  AuthenticatedTorreRestaurantesDemoRoute._addFileChildren(
+    AuthenticatedTorreRestaurantesDemoRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccessProfilesRoute: typeof AuthenticatedAccessProfilesRouteWithChildren
   AuthenticatedAdmRoute: typeof AuthenticatedAdmRouteWithChildren
@@ -7391,7 +7426,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedShowroomRestauranteRoute: typeof AuthenticatedShowroomRestauranteRoute
   AuthenticatedSupportCockpitRoute: typeof AuthenticatedSupportCockpitRoute
   AuthenticatedTorreConsumidoresRoute: typeof AuthenticatedTorreConsumidoresRoute
-  AuthenticatedTorreRestaurantesDemoRoute: typeof AuthenticatedTorreRestaurantesDemoRoute
+  AuthenticatedTorreRestaurantesDemoRoute: typeof AuthenticatedTorreRestaurantesDemoRouteWithChildren
   AuthenticatedWhiteLabelCockpitRoute: typeof AuthenticatedWhiteLabelCockpitRoute
   AuthenticatedCockpitsIndexRoute: typeof AuthenticatedCockpitsIndexRoute
   AuthenticatedComunidadeIndexRoute: typeof AuthenticatedComunidadeIndexRoute
@@ -7513,7 +7548,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSupportCockpitRoute: AuthenticatedSupportCockpitRoute,
   AuthenticatedTorreConsumidoresRoute: AuthenticatedTorreConsumidoresRoute,
   AuthenticatedTorreRestaurantesDemoRoute:
-    AuthenticatedTorreRestaurantesDemoRoute,
+    AuthenticatedTorreRestaurantesDemoRouteWithChildren,
   AuthenticatedWhiteLabelCockpitRoute: AuthenticatedWhiteLabelCockpitRoute,
   AuthenticatedCockpitsIndexRoute: AuthenticatedCockpitsIndexRoute,
   AuthenticatedComunidadeIndexRoute: AuthenticatedComunidadeIndexRoute,
