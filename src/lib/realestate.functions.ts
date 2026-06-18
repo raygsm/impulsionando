@@ -922,5 +922,72 @@ export const fetchRealestateReturnReport = createServerFn({ method: "POST" })
   });
 
 
+// ============ Phase C: Demo seed ============
+export const seedRealestateDemo = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ companyId: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const sb = context.supabase;
+    const DEMO_TAG = "DEMO-IMOB";
 
+    // Properties (6)
+    const props = [
+      { title: "Apto 2 dorm · Vila Mariana", reference_code: `${DEMO_TAG}-001`, operation: "venda", property_type: "apartamento", sale_price: 680000, bedrooms: 2, bathrooms: 1, parking_spots: 1, area_useful: 62, city: "São Paulo", neighborhood: "Vila Mariana", state: "SP" },
+      { title: "Casa 3 dorm · Tatuapé", reference_code: `${DEMO_TAG}-002`, operation: "venda", property_type: "casa", sale_price: 1200000, bedrooms: 3, suites: 1, bathrooms: 2, parking_spots: 2, area_useful: 140, city: "São Paulo", neighborhood: "Tatuapé", state: "SP" },
+      { title: "Studio mobiliado · Pinheiros", reference_code: `${DEMO_TAG}-003`, operation: "locacao", property_type: "studio", rent_price: 3200, condo_fee: 600, bedrooms: 1, bathrooms: 1, area_useful: 32, city: "São Paulo", neighborhood: "Pinheiros", state: "SP" },
+      { title: "Cobertura · Moema", reference_code: `${DEMO_TAG}-004`, operation: "venda_ou_locacao", property_type: "cobertura", sale_price: 2400000, rent_price: 12000, bedrooms: 3, suites: 2, bathrooms: 3, parking_spots: 3, area_useful: 220, city: "São Paulo", neighborhood: "Moema", state: "SP" },
+      { title: "Sala comercial · Berrini", reference_code: `${DEMO_TAG}-005`, operation: "locacao", property_type: "sala_comercial", rent_price: 5500, area_useful: 48, city: "São Paulo", neighborhood: "Brooklin", state: "SP" },
+      { title: "Casa em condomínio · Alphaville", reference_code: `${DEMO_TAG}-006`, operation: "venda", property_type: "casa_condominio", sale_price: 2800000, bedrooms: 4, suites: 3, bathrooms: 4, parking_spots: 4, area_useful: 320, city: "Barueri", neighborhood: "Alphaville", state: "SP" },
+    ];
+    await sb.from("realestate_properties").insert(
+      props.map((p) => ({
+        ...p,
+        company_id: data.companyId,
+        status: "ativo",
+        is_published: true,
+        approval_status: "approved",
+        features: [],
+        photos: [],
+        created_by: context.userId,
+      })) as any,
+    );
+
+    // Search intents (4)
+    const intents = [
+      { contact_name: "Demo · Família Silva", contact_email: "silva.demo@example.com", whatsapp: "11999990001", operation: "venda", property_types: ["apartamento", "cobertura"], price_max: 800000, bedrooms_min: 2, cities: ["São Paulo"], neighborhoods: ["Vila Mariana", "Moema"] },
+      { contact_name: "Demo · João Investidor", contact_email: "joao.demo@example.com", whatsapp: "11999990002", operation: "venda", property_types: ["sala_comercial"], price_max: 1500000, cities: ["São Paulo"] },
+      { contact_name: "Demo · Maria Aluguel", contact_email: "maria.demo@example.com", whatsapp: "11999990003", operation: "locacao", property_types: ["studio", "apartamento"], price_max: 4000, cities: ["São Paulo"], neighborhoods: ["Pinheiros"] },
+      { contact_name: "Demo · Casal Costa", contact_email: "costa.demo@example.com", whatsapp: "11999990004", operation: "venda", property_types: ["casa", "casa_condominio"], price_max: 3000000, bedrooms_min: 3, cities: ["São Paulo", "Barueri"] },
+    ];
+    await sb.from("realestate_search_intents").insert(
+      intents.map((i) => ({
+        ...i,
+        company_id: data.companyId,
+        status: "ativo",
+        consent_marketing: true,
+        channel: "whatsapp",
+        notes: DEMO_TAG,
+        created_by: context.userId,
+      })) as any,
+    );
+
+    // Partner brokers (2)
+    await sb.from("realestate_partner_brokers").insert([
+      { company_id: data.companyId, broker_name: "Demo · Corretor Ana", email: "ana.demo@example.com", phone: "11988880001", status: "active", contract_started_at: new Date().toISOString(), notes: DEMO_TAG, created_by: context.userId },
+      { company_id: data.companyId, broker_name: "Demo · Corretor Bruno", email: "bruno.demo@example.com", phone: "11988880002", status: "pending", notes: DEMO_TAG, created_by: context.userId },
+    ] as any);
+
+    return { ok: true, properties: props.length, intents: intents.length, brokers: 2 };
+  });
+
+export const removeRealestateDemo = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ companyId: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const sb = context.supabase;
+    await sb.from("realestate_properties").delete().eq("company_id", data.companyId).like("reference_code", "DEMO-IMOB-%");
+    await sb.from("realestate_search_intents").delete().eq("company_id", data.companyId).eq("notes", "DEMO-IMOB");
+    await sb.from("realestate_partner_brokers").delete().eq("company_id", data.companyId).eq("notes", "DEMO-IMOB");
+    return { ok: true };
+  });
 
