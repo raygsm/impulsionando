@@ -5,8 +5,15 @@ import { PageHeader } from "@/components/app/PageElements";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { fetchAccountHealth } from "@/lib/ops-cockpits.functions";
-import { Activity } from "lucide-react";
+import {
+  Alert, AlertDescription, AlertTitle,
+} from "@/components/ui/alert";
+import {
+  fetchAccountHealth,
+  computeHealthRecommendations,
+  type HealthRecommendation,
+} from "@/lib/ops-cockpits.functions";
+import { Activity, AlertTriangle, ArrowRight, Info, ShieldAlert } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/ops/saude")({
   head: () => ({
@@ -37,6 +44,16 @@ function scoreColor(score: number | null) {
   return "bg-destructive";
 }
 
+function severityIcon(s: HealthRecommendation["severity"]) {
+  if (s === "critical") return <ShieldAlert className="h-4 w-4" />;
+  if (s === "warning") return <AlertTriangle className="h-4 w-4" />;
+  return <Info className="h-4 w-4" />;
+}
+
+function severityVariant(s: HealthRecommendation["severity"]): "default" | "destructive" {
+  return s === "critical" ? "destructive" : "default";
+}
+
 function SaudePage() {
   const fn = useServerFn(fetchAccountHealth);
   const { data, isLoading } = useQuery({
@@ -44,11 +61,19 @@ function SaudePage() {
     queryFn: () => fn({ data: {} }),
   });
 
+  const recs = data
+    ? computeHealthRecommendations({
+        score: data.score,
+        dimensions: data.dimensions ?? [],
+        signals: data.signals ?? [],
+      })
+    : [];
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Saúde da Conta"
-        description="Score consolidado por 5 dimensões. Veja a metodologia em Saiba Mais."
+        description="Score consolidado, alertas e recomendações. Veja a metodologia em Saiba Mais."
       />
 
       {isLoading ? (
@@ -76,6 +101,37 @@ function SaudePage() {
             </div>
           </Card>
 
+          {recs.length > 0 && (
+            <Card className="p-4 space-y-3">
+              <h2 className="flex items-center gap-2 text-sm font-semibold">
+                <ShieldAlert className="h-4 w-4 text-destructive" />
+                Alertas e recomendações ({recs.length})
+              </h2>
+              <div className="space-y-2">
+                {recs.map((r, idx) => (
+                  <Alert key={idx} variant={severityVariant(r.severity)}>
+                    {severityIcon(r.severity)}
+                    <AlertTitle className="flex items-center gap-2">
+                      {r.title}
+                      <Badge variant="outline" className="text-[10px] capitalize">{r.dimension}</Badge>
+                    </AlertTitle>
+                    <AlertDescription className="space-y-1">
+                      <p>{r.action}</p>
+                      {r.link && (
+                        <Link
+                          to={r.link.to}
+                          className="inline-flex items-center gap-1 text-xs underline"
+                        >
+                          {r.link.label} <ArrowRight className="h-3 w-3" />
+                        </Link>
+                      )}
+                    </AlertDescription>
+                  </Alert>
+                ))}
+              </div>
+            </Card>
+          )}
+
           <Card className="p-4">
             <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold">
               <Activity className="h-4 w-4" /> Dimensões
@@ -84,7 +140,10 @@ function SaudePage() {
               {data.dimensions.map((d) => (
                 <li key={d.key}>
                   <div className="mb-1 flex items-center justify-between text-xs">
-                    <span>{d.label} <span className="text-muted-foreground">({Math.round(d.weight * 100)}%)</span></span>
+                    <span>
+                      {d.label}{" "}
+                      <span className="text-muted-foreground">({Math.round(d.weight * 100)}%)</span>
+                    </span>
                     <span className="font-medium">{d.value}/100</span>
                   </div>
                   <Progress value={d.value} className="h-2" />
