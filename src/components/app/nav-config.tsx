@@ -38,6 +38,10 @@ export interface NavGroup {
 
 export const TOP_ITEMS: NavItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, perm: "dashboard.read" },
+  { to: "/dashboards/core", label: "Dashboard Core", icon: LayoutDashboard, audiences: ["core"] },
+  { to: "/dashboards/white-label", label: "Dashboard WL", icon: LayoutDashboard, audiences: ["white-label", "core"] },
+  { to: "/dashboards/empresa", label: "Dashboard Empresa", icon: LayoutDashboard, audiences: ["empresa"] },
+  { to: "/dashboards/consumidor", label: "Minha área (Consumidor)", icon: LayoutDashboard, audiences: ["consumidor"] },
   { to: "/cockpits", label: "Cockpits", icon: TrendingUp, superOnly: true },
   { to: "/notifications", label: "Notificações", icon: Inbox },
   { to: "/contabilidade/cockpit", label: "Cockpit Contábil", icon: Calculator, superOnly: true },
