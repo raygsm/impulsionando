@@ -40,6 +40,21 @@ const SECTIONS: Array<{ id: string; label: string }> = [
 
 const STORAGE_KEY = "dashboards:consumidor:section";
 
+function usePrefersReducedMotion(): boolean {
+  const [reduced, setReduced] = useState<boolean>(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return false;
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  });
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const handler = (e: MediaQueryListEvent) => setReduced(e.matches);
+    mq.addEventListener?.("change", handler);
+    return () => mq.removeEventListener?.("change", handler);
+  }, []);
+  return reduced;
+}
+
 function ConsumidorDashboardPage() {
   const fn = useServerFn(fetchConsumidorDashboard);
   const { data, isLoading, error } = useQuery({
@@ -48,6 +63,7 @@ function ConsumidorDashboardPage() {
     staleTime: 60_000,
   });
 
+  const reducedMotion = usePrefersReducedMotion();
   const navRef = useRef<HTMLDivElement>(null);
   const [headerOffset, setHeaderOffset] = useState(72);
   const [activeId, setActiveId] = useState<string>(() => {
@@ -84,9 +100,9 @@ function ConsumidorDashboardPage() {
       const el = document.getElementById(id);
       if (!el) return;
       const top = el.getBoundingClientRect().top + window.scrollY - headerOffset;
-      window.scrollTo({ top, behavior: "smooth" });
+      window.scrollTo({ top, behavior: reducedMotion ? "auto" : "smooth" });
     },
-    [headerOffset],
+    [headerOffset, reducedMotion],
   );
 
   const handleSelect = useCallback(
@@ -221,7 +237,19 @@ function ConsumidorDashboardPage() {
         description="Tudo o que você curte, consome e economiza num só lugar."
       />
 
-      <SectionNav ref={navRef} activeId={activeId} onSelect={handleSelect} />
+      <SectionNav
+        ref={navRef}
+        activeId={activeId}
+        onSelect={handleSelect}
+        reducedMotion={reducedMotion}
+      />
+
+      {/* Live region announces active section to assistive tech */}
+      <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {activeLabel ? `Seção ativa: ${activeLabel}` : ""}
+      </div>
+
+
 
 
 
@@ -517,13 +545,20 @@ function PremiumSection<T extends { id: string }>({
   anchor?: string;
 }) {
   const id = anchor;
+  const regionProps = id
+    ? { role: "tabpanel" as const, "aria-labelledby": `tab-${id}`, tabIndex: -1 }
+    : {};
   if (!isPremium) {
     return (
-      <Card id={id} className={`p-4 relative overflow-hidden scroll-mt-[var(--sec-offset,6rem)] ${className ?? ""}`}>
+      <Card
+        id={id}
+        {...regionProps}
+        className={`p-4 relative overflow-hidden scroll-mt-[var(--sec-offset,6rem)] ${className ?? ""}`}
+      >
         <div className="flex items-center gap-2 mb-2 text-sm font-semibold">
           {icon} {title}
           <Badge variant="outline" className="ml-auto gap-1 text-[10px]">
-            <Lock className="h-3 w-3" /> Premium
+            <Lock className="h-3 w-3" aria-hidden="true" /> Premium
           </Badge>
         </div>
         <p className="text-sm text-muted-foreground mb-3">{teaser}</p>
@@ -534,7 +569,11 @@ function PremiumSection<T extends { id: string }>({
     );
   }
   return (
-    <Card id={id} className={`p-4 scroll-mt-[var(--sec-offset,6rem)] ${className ?? ""}`}>
+    <Card
+      id={id}
+      {...regionProps}
+      className={`p-4 scroll-mt-[var(--sec-offset,6rem)] ${className ?? ""}`}
+    >
       <div className="flex items-center gap-2 mb-3 text-sm font-semibold">{icon} {title}</div>
       {items.length === 0 ? (
         <EmptyHint text={empty} />
@@ -554,18 +593,24 @@ function PremiumSection<T extends { id: string }>({
 type SectionNavProps = {
   activeId: string;
   onSelect: (id: string, scroll?: boolean) => void;
+  reducedMotion?: boolean;
   ref?: React.Ref<HTMLDivElement>;
 };
 
-function SectionNav({ activeId, onSelect, ref }: SectionNavProps) {
+function SectionNav({ activeId, onSelect, reducedMotion = false, ref }: SectionNavProps) {
   const chipsRef = useRef<HTMLDivElement>(null);
 
   // Keep active chip visible when it changes
   useEffect(() => {
     if (!activeId || !chipsRef.current) return;
     const chip = chipsRef.current.querySelector<HTMLElement>(`[data-chip="${activeId}"]`);
-    if (chip) chip.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-  }, [activeId]);
+    if (chip)
+      chip.scrollIntoView({
+        behavior: reducedMotion ? "auto" : "smooth",
+        block: "nearest",
+        inline: "center",
+      });
+  }, [activeId, reducedMotion]);
 
   const focusChip = (id: string) => {
     chipsRef.current?.querySelector<HTMLElement>(`[data-chip="${id}"]`)?.focus();
@@ -593,8 +638,16 @@ function SectionNav({ activeId, onSelect, ref }: SectionNavProps) {
   };
 
   const currentIdx = Math.max(0, SECTIONS.findIndex((s) => s.id === activeId));
-  const goPrev = () => onSelect(SECTIONS[Math.max(0, currentIdx - 1)].id, true);
-  const goNext = () => onSelect(SECTIONS[Math.min(SECTIONS.length - 1, currentIdx + 1)].id, true);
+  const prevSec = currentIdx > 0 ? SECTIONS[currentIdx - 1] : null;
+  const nextSec = currentIdx < SECTIONS.length - 1 ? SECTIONS[currentIdx + 1] : null;
+  const goPrev = () => prevSec && onSelect(prevSec.id, true);
+  const goNext = () => nextSec && onSelect(nextSec.id, true);
+
+  // Disable scroll-snap when user prefers reduced motion (snap can cause
+  // sudden jumps that feel like motion). Keeps horizontal scrolling usable.
+  const chipsClass = `flex gap-1.5 overflow-x-auto scrollbar-none px-1 flex-1 ${
+    reducedMotion ? "" : "snap-x snap-mandatory"
+  }`;
 
   return (
     <div
@@ -606,18 +659,23 @@ function SectionNav({ activeId, onSelect, ref }: SectionNavProps) {
           type="button"
           variant="ghost"
           size="icon"
-          aria-label="Seção anterior"
+          aria-label={
+            prevSec ? `Seção anterior: ${prevSec.label}` : "Seção anterior"
+          }
+          aria-keyshortcuts="Alt+ArrowLeft"
           onClick={goPrev}
-          disabled={currentIdx <= 0}
+          disabled={!prevSec}
           className="md:hidden h-8 w-8 shrink-0"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-4 w-4" aria-hidden="true" />
         </Button>
         <div
           ref={chipsRef}
           role="tablist"
           aria-label="Seções da Minha área"
-          className="flex gap-1.5 overflow-x-auto scrollbar-none snap-x snap-mandatory px-1 flex-1"
+          aria-orientation="horizontal"
+          aria-keyshortcuts="Alt+ArrowLeft Alt+ArrowRight"
+          className={chipsClass}
         >
           {SECTIONS.map((s, idx) => {
             const active = s.id === activeId;
@@ -627,15 +685,22 @@ function SectionNav({ activeId, onSelect, ref }: SectionNavProps) {
                 data-chip={s.id}
                 href={`#${s.id}`}
                 role="tab"
+                id={`tab-${s.id}`}
+                aria-controls={s.id}
                 aria-selected={active}
                 aria-current={active ? "true" : undefined}
+                aria-label={
+                  active ? `${s.label} (seção atual)` : s.label
+                }
                 tabIndex={active || (!activeId && idx === 0) ? 0 : -1}
                 onClick={(e) => {
                   e.preventDefault();
                   onSelect(s.id, true);
                 }}
                 onKeyDown={(e) => handleKey(e, idx)}
-                className={`shrink-0 snap-start text-xs px-3 py-1.5 rounded-full border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                className={`shrink-0 ${
+                  reducedMotion ? "" : "snap-start"
+                } text-xs px-3 py-1.5 rounded-full border transition-colors motion-reduce:transition-none focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                   active
                     ? "bg-primary text-primary-foreground border-primary"
                     : "border-border/60 bg-card hover:bg-accent hover:text-accent-foreground"
@@ -650,12 +715,16 @@ function SectionNav({ activeId, onSelect, ref }: SectionNavProps) {
           type="button"
           variant="ghost"
           size="icon"
-          aria-label="Próxima seção"
+          aria-label={
+            nextSec ? `Próxima seção: ${nextSec.label}` : "Próxima seção"
+          }
+          aria-keyshortcuts="Alt+ArrowRight"
           onClick={goNext}
-          disabled={currentIdx >= SECTIONS.length - 1}
+          disabled={!nextSec}
           className="md:hidden h-8 w-8 shrink-0"
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-4 w-4" aria-hidden="true" />
+
         </Button>
       </div>
     </div>
