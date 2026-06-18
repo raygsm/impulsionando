@@ -72,10 +72,9 @@ SELECT
 `;
 
 function runQuery() {
-  const json = execSync(
-    `psql -At -F$'\\t' -c "SELECT row_to_json(t) FROM (${SQL.replace(/\n/g, " ")}) t"`,
-    { encoding: "utf8" }
-  ).trim();
+  const inner = SQL.replace(/;\s*$/, "").replace(/\n/g, " ");
+  const sql = `SELECT row_to_json(t) FROM (${inner}) t`;
+  const json = execSync(`psql -At -c ${JSON.stringify(sql)}`, { encoding: "utf8" }).trim();
   return JSON.parse(json);
 }
 
