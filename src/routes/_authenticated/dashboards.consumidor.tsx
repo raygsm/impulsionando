@@ -712,8 +712,8 @@ function SectionNav({ activeId, onSelect, reducedMotion = false, ref }: SectionN
           disabled={!nextSec}
           className="md:hidden h-8 w-8 shrink-0"
         >
+          <ChevronRight className="h-4 w-4" aria-hidden="true" />
 
-          <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
     </div>
