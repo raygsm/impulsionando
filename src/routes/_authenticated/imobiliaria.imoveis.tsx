@@ -368,3 +368,34 @@ function Page() {
     </div>
   );
 }
+
+function DemoSeedCard({ companyId, onSeeded }: { companyId: string; onSeeded: () => void }) {
+  const seedFn = useServerFn(seedRealestateDemo);
+  const removeFn = useServerFn(removeRealestateDemo);
+  const seed = useMutation({
+    mutationFn: () => seedFn({ data: { companyId } }),
+    onSuccess: (r) => { toast.success(`Dados demo criados: ${r.properties} imóveis, ${r.intents} intenções, ${r.brokers} parceiros`); onSeeded(); },
+    onError: (e: any) => toast.error(e?.message ?? "Erro"),
+  });
+  const remove = useMutation({
+    mutationFn: () => removeFn({ data: { companyId } }),
+    onSuccess: () => { toast.success("Dados demo removidos"); onSeeded(); },
+    onError: (e: any) => toast.error(e?.message ?? "Erro"),
+  });
+  return (
+    <Card className="p-8 text-center space-y-4">
+      <div className="space-y-1">
+        <h3 className="text-lg font-semibold">Comece com dados demo</h3>
+        <p className="text-sm text-muted-foreground">Crie 6 imóveis, 4 intenções de busca e 2 corretores parceiros para explorar todas as funcionalidades.</p>
+      </div>
+      <div className="flex gap-2 justify-center">
+        <Button onClick={() => seed.mutate()} disabled={seed.isPending}>{seed.isPending ? "Criando…" : "Criar dados demo"}</Button>
+        <Button variant="outline" onClick={() => remove.mutate()} disabled={remove.isPending}>Remover demo</Button>
+        <Button variant="ghost" onClick={() => document.querySelector<HTMLButtonElement>('button[data-new-property]')?.click()}>
+          <Plus className="w-4 h-4 mr-1" />Cadastrar do zero
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
