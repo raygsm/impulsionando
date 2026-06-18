@@ -86,3 +86,30 @@ jobs:
             test-results
           retention-days: 14
           if-no-files-found: ignore
+
+      # When a visual-regression test fails, Playwright writes
+      # `*-expected.png`, `*-actual.png`, and `*-diff.png` into
+      # `test-results/<test>/`. Upload them as a dedicated artifact so
+      # diffs are one click away from the failed run.
+      - name: Upload visual-diff PNGs (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-visual-diffs
+          path: |
+            test-results/**/*-expected.png
+            test-results/**/*-actual.png
+            test-results/**/*-diff.png
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Upload Playwright traces (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: |
+            test-results/**/trace.zip
+            test-results/**/video.webm
+          retention-days: 14
+          if-no-files-found: ignore
