@@ -35,7 +35,7 @@ export function useAudience(): AudienceState {
   const { isImpersonating } = useImpersonation();
 
   return useMemo<AudienceState>(() => {
-    if (!user) return { audience: "empresa", label: LABELS.empresa, isViewingAs: false };
+    if (!user) return { audience: "consumidor", label: LABELS.consumidor, isViewingAs: false };
 
     if (user.isSuperAdmin && !isImpersonating) {
       return { audience: "core", label: LABELS.core, isViewingAs: false };
@@ -43,6 +43,18 @@ export function useAudience(): AudienceState {
     if (user.isSuperAdmin && isImpersonating) {
       return { audience: "empresa", label: LABELS.empresa, isViewingAs: true };
     }
+
+    // Sem memberships ativas → consumidor (acesso apenas à área Clube/usuário)
+    if (!user.memberships?.length) {
+      return { audience: "consumidor", label: LABELS.consumidor, isViewingAs: false };
+    }
+
+    // Heurística inicial White Label (Fase 3 substitui por flag `companies.is_white_label`)
+    const hasMasterCompany = user.memberships.some((m) => m.companies?.is_master);
+    if (hasMasterCompany && user.isImpulsionandoStaff) {
+      return { audience: "white-label", label: LABELS["white-label"], isViewingAs: false };
+    }
+
     return { audience: "empresa", label: LABELS.empresa, isViewingAs: false };
   }, [user, isImpersonating]);
 }
