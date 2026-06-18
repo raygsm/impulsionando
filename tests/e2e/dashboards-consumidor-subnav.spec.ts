@@ -445,4 +445,200 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
     await expect.poll(() => page.evaluate(() => location.hash)).toBe("#historico");
     await expect(live).toContainText(/Histórico de visitas/i);
   });
+
+  test("hash inválido: fallback para a seção padrão sem inconsistências de ARIA", async ({
+    page,
+  }) => {
+    await page.evaluate(() => sessionStorage.removeItem("dashboards:consumidor:section"));
+    await page.goto(`${ROUTE}#secao-que-nao-existe`);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(500);
+
+    // Exactly one chip can be aria-selected=true
+    const selectedCount = await page.locator('[role="tab"][aria-selected="true"]').count();
+    expect(selectedCount).toBeLessThanOrEqual(1);
+
+    // Exactly one chip must hold the roving tabIndex=0
+    const tabbables = await page.locator('[role="tab"][tabindex="0"]').count();
+    expect(tabbables).toBe(1);
+
+    // The first chip is the default-focusable baseline
+    await expect(page.locator('#tab-favoritos')).toHaveAttribute("tabindex", "0");
+
+    // Live region must either be empty (no active) or match an existing label
+    const liveText = (await page.locator('[role="status"][aria-live="polite"]').textContent()) ?? "";
+    if (liveText.trim().length > 0) {
+      expect(liveText).toMatch(
+        /(Meus favoritos|Histórico de visitas|Meus cupons|Meus vouchers|Minhas reservas|Minhas avaliações|Comprovantes|Minhas notas|Meus créditos)/i,
+      );
+    }
+
+    // The invalid hash should not match any tab id — no stale aria-current
+    const ariaCurrents = await page.locator('[role="tab"][aria-current="true"]').count();
+    expect(ariaCurrents).toBeLessThanOrEqual(1);
+  });
+
+  test("mobile: cliques em chip e breadcrumb mantêm alinhamento com o offset", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(ROUTE);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(500);
+
+    const checkAligned = async (id: string) => {
+      const offset = await page.evaluate((sid) => {
+        const el = document.getElementById(sid);
+        if (!el) return 0;
+        return Number(
+          getComputedStyle(el).getPropertyValue("--sec-offset").replace("px", "").trim() ||
+            "0",
+        );
+      }, id);
+      expect(offset).toBeGreaterThan(0);
+      const top = await page
+        .locator(`#${id}`)
+        .evaluate((el) => el.getBoundingClientRect().top);
+      // Section docked beneath the sticky nav (within tolerance)
+      expect(top).toBeLessThan(offset + 48);
+      expect(top).toBeGreaterThan(-50);
+    };
+
+    // 1) Click a chip
+    await page.getByRole("tab", { name: /Meus cupons/i }).click();
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#cupons");
+    await page.waitForTimeout(500);
+    await checkAligned("cupons");
+
+    // 2) Click another chip
+    await page.getByRole("tab", { name: /Minhas reservas/i }).click();
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#reservas");
+    await page.waitForTimeout(500);
+    await checkAligned("reservas");
+
+    // 3) Breadcrumb "Minha área" clears hash; clicking a chip again re-aligns
+    const trail = page.getByRole("navigation", { name: /Trilha/i });
+    await trail.getByRole("link", { name: /^Minha área$/i }).click();
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("");
+
+    await page.getByRole("tab", { name: /Meus vouchers/i }).click();
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#vouchers");
+    await page.waitForTimeout(500);
+    await checkAligned("vouchers");
+  });
+
+  test("histórico: back/forward nunca pula nem dessincroniza aria-selected", async ({
+    page,
+  }) => {
+    const trail: string[] = ["cupons", "vouchers", "reservas", "avaliacoes"];
+
+    for (const id of trail) {
+      await page.locator(`#tab-${id}`).click();
+      await expect.poll(() => page.evaluate(() => location.hash)).toBe(`#${id}`);
+      await expect(page.locator(`#tab-${id}`)).toHaveAttribute("aria-selected", "true");
+      // Only one selected at a time
+      const selectedCount = await page.locator('[role="tab"][aria-selected="true"]').count();
+      expect(selectedCount).toBe(1);
+    }
+
+    // Walk back through the trail in reverse — must hit each exact entry
+    for (let i = trail.length - 2; i >= 0; i--) {
+      await page.goBack();
+      const id = trail[i];
+      await expect.poll(() => page.evaluate(() => location.hash)).toBe(`#${id}`);
+      await expect(page.locator(`#tab-${id}`)).toHaveAttribute("aria-selected", "true");
+      const others = await page
+        .locator('[role="tab"][aria-selected="true"]')
+        .count();
+      expect(others).toBe(1);
+    }
+
+    // Walk forward — must hit each forward entry in order
+    for (let i = 1; i < trail.length; i++) {
+      await page.goForward();
+      const id = trail[i];
+      await expect.poll(() => page.evaluate(() => location.hash)).toBe(`#${id}`);
+      await expect(page.locator(`#tab-${id}`)).toHaveAttribute("aria-selected", "true");
+    }
+  });
+
+  test("a11y: roving tabindex, foco visível e tabpanel após Alt+Arrow/Enter/Space", async ({
+    page,
+  }) => {
+    await page.goto(`${ROUTE}#favoritos`);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(400);
+
+    const rovingActive = async () => {
+      const ids = await page.locator('[role="tab"][tabindex="0"]').evaluateAll((els) =>
+        els.map((e) => (e as HTMLElement).id),
+      );
+      return ids;
+    };
+
+    // Roving baseline: exactly one chip with tabIndex=0 — the active one
+    let active = await rovingActive();
+    expect(active).toEqual(["tab-favoritos"]);
+
+    // Alt+ArrowRight changes the active section AND the roving tabindex
+    await page.locator("body").focus();
+    await page.keyboard.press("Alt+ArrowRight");
+    await page.waitForTimeout(300);
+    active = await rovingActive();
+    expect(active.length).toBe(1);
+    expect(active[0]).toBe("tab-historico");
+
+    // Focus the new active chip and confirm focus-visible ring tokens are set
+    await page.locator("#tab-historico").focus();
+    const focusRing = await page.locator("#tab-historico").evaluate((el) => {
+      const cls = (el as HTMLElement).className;
+      return {
+        hasFocusVisible: cls.includes("focus-visible:ring-2"),
+        hasFocusOffset: cls.includes("focus-visible:ring-offset-2"),
+        hasRingToken: cls.includes("focus-visible:ring-ring"),
+      };
+    });
+    expect(focusRing.hasFocusVisible).toBe(true);
+    expect(focusRing.hasFocusOffset).toBe(true);
+    expect(focusRing.hasRingToken).toBe(true);
+
+    // Enter on the focused chip activates AND moves focus into the tabpanel
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(450);
+    let panelId = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(panelId).toBe("historico");
+    await expect(page.locator("#historico")).toHaveAttribute("role", "tabpanel");
+    await expect(page.locator("#historico")).toHaveAttribute("tabindex", "-1");
+
+    // After activation the roving tabindex follows the active chip
+    active = await rovingActive();
+    expect(active).toEqual(["tab-historico"]);
+
+    // Focus the next chip via ArrowRight, then activate with Space
+    await page.locator("#tab-historico").focus();
+    await page.keyboard.press("ArrowRight");
+    const focusedAfterArrow = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(focusedAfterArrow).toBe("tab-cupons");
+
+    await page.keyboard.press(" ");
+    await page.waitForTimeout(450);
+    panelId = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(panelId).toBe("cupons");
+
+    // Roving tabindex moved with activation, focus-ring tokens still present
+    active = await rovingActive();
+    expect(active).toEqual(["tab-cupons"]);
+    const stillHasRing = await page
+      .locator("#tab-cupons")
+      .evaluate((el) =>
+        (el as HTMLElement).className.includes("focus-visible:ring-ring"),
+      );
+    expect(stillHasRing).toBe(true);
+  });
 });
