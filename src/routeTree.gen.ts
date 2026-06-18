@@ -90,6 +90,7 @@ import { Route as ShowroomAgendaRouteImport } from './routes/showroom.agenda'
 import { Route as ShowroomAcademiaRouteImport } from './routes/showroom.academia'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
 import { Route as PlanosTesteRouteImport } from './routes/planos.teste'
+import { Route as ParceiroTokenRouteImport } from './routes/parceiro.$token'
 import { Route as PacienteIdRouteImport } from './routes/paciente.$id'
 import { Route as NichosSlugRouteImport } from './routes/nichos.$slug'
 import { Route as ModulosSlugRouteImport } from './routes/modulos.$slug'
@@ -769,6 +770,11 @@ const PlanosTesteRoute = PlanosTesteRouteImport.update({
   id: '/teste',
   path: '/teste',
   getParentRoute: () => PlanosRoute,
+} as any)
+const ParceiroTokenRoute = ParceiroTokenRouteImport.update({
+  id: '/parceiro/$token',
+  path: '/parceiro/$token',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PacienteIdRoute = PacienteIdRouteImport.update({
   id: '/$id',
@@ -2383,6 +2389,7 @@ export interface FileRoutesByFullPath {
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
+  '/parceiro/$token': typeof ParceiroTokenRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
@@ -2723,6 +2730,7 @@ export interface FileRoutesByTo {
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
+  '/parceiro/$token': typeof ParceiroTokenRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
@@ -3077,6 +3085,7 @@ export interface FileRoutesById {
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
+  '/parceiro/$token': typeof ParceiroTokenRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
@@ -3430,6 +3439,7 @@ export interface FileRouteTypes {
     | '/modulos/$slug'
     | '/nichos/$slug'
     | '/paciente/$id'
+    | '/parceiro/$token'
     | '/planos/teste'
     | '/r/$slug'
     | '/showroom/academia'
@@ -3770,6 +3780,7 @@ export interface FileRouteTypes {
     | '/modulos/$slug'
     | '/nichos/$slug'
     | '/paciente/$id'
+    | '/parceiro/$token'
     | '/planos/teste'
     | '/r/$slug'
     | '/showroom/academia'
@@ -4123,6 +4134,7 @@ export interface FileRouteTypes {
     | '/modulos/$slug'
     | '/nichos/$slug'
     | '/paciente/$id'
+    | '/parceiro/$token'
     | '/planos/teste'
     | '/r/$slug'
     | '/showroom/academia'
@@ -4442,6 +4454,7 @@ export interface RootRouteChildren {
   ImoveisSlugRoute: typeof ImoveisSlugRouteWithChildren
   MesaTokenRoute: typeof MesaTokenRoute
   NichosSlugRoute: typeof NichosSlugRoute
+  ParceiroTokenRoute: typeof ParceiroTokenRoute
   RSlugRoute: typeof RSlugRoute
   ShowroomAcademiaRoute: typeof ShowroomAcademiaRoute
   ShowroomAgendaRoute: typeof ShowroomAgendaRoute
@@ -5088,6 +5101,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/planos/teste'
       preLoaderRoute: typeof PlanosTesteRouteImport
       parentRoute: typeof PlanosRoute
+    }
+    '/parceiro/$token': {
+      id: '/parceiro/$token'
+      path: '/parceiro/$token'
+      fullPath: '/parceiro/$token'
+      preLoaderRoute: typeof ParceiroTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/paciente/$id': {
       id: '/paciente/$id'
@@ -7851,6 +7871,7 @@ const rootRouteChildren: RootRouteChildren = {
   ImoveisSlugRoute: ImoveisSlugRouteWithChildren,
   MesaTokenRoute: MesaTokenRoute,
   NichosSlugRoute: NichosSlugRoute,
+  ParceiroTokenRoute: ParceiroTokenRoute,
   RSlugRoute: RSlugRoute,
   ShowroomAcademiaRoute: ShowroomAcademiaRoute,
   ShowroomAgendaRoute: ShowroomAgendaRoute,
