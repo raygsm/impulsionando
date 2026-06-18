@@ -348,6 +348,42 @@ export const updateMarketplaceOrderStatus = createServerFn({ method: "POST" })
       });
     }
 
+    // Notificações para AMBAS as partes (comprador + fornecedor)
+    if (order && ["approved", "rejected", "in_production", "in_delivery", "invoiced", "completed", "canceled"].includes(data.status)) {
+      const labelMap: Record<string, { title: string; sev: string }> = {
+        approved: { title: "Pedido aprovado pelo fornecedor", sev: "success" },
+        rejected: { title: "Pedido recusado pelo fornecedor", sev: "error" },
+        in_production: { title: "Pedido em produção", sev: "info" },
+        in_delivery: { title: "Pedido em entrega", sev: "info" },
+        invoiced: { title: "Pedido faturado", sev: "info" },
+        completed: { title: "Pedido concluído", sev: "success" },
+        canceled: { title: "Pedido cancelado", sev: "warning" },
+      };
+      const l = labelMap[data.status];
+      const msgBase = `Pedido #${order.order_number} · ${order.supplier?.display_name} ↔ ${order.buyer?.display_name}.`;
+      const msg = `${msgBase} ${data.decision_notes ?? ""}`.trim();
+      // Comprador
+      await notify(context.supabase, {
+        company_id: order.buyer?.company_id ?? null,
+        category: "marketplace", severity: l.sev, title: l.title, message: msg,
+        action_url: `/bar/marketplace?order=${order.id}`,
+      });
+      // Fornecedor (confirmação interna p/ equipe)
+      await notify(context.supabase, {
+        company_id: order.supplier?.company_id ?? null,
+        category: "marketplace", severity: l.sev, title: l.title, message: msg,
+        action_url: `/cervejaria/marketplace?order=${order.id}`,
+      });
+    }
+
+    // Audit: registra o evento com o usuário responsável
+    await audit(context.supabase, context.userId, {
+      order_id: order.id,
+      event_type: data.status,
+      notes: data.decision_notes ?? null,
+      role: "supplier",
+    });
+
     // Ledger ao concluir
     if (data.status === "completed" && order) {
       const period = new Date(order.completed_at ?? order.placed_at);
