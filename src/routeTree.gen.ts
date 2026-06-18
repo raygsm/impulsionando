@@ -91,6 +91,7 @@ import { Route as ShowroomAcademiaRouteImport } from './routes/showroom.academia
 import { Route as RSlugRouteImport } from './routes/r.$slug'
 import { Route as PlanosTesteRouteImport } from './routes/planos.teste'
 import { Route as ParceiroTokenRouteImport } from './routes/parceiro.$token'
+import { Route as ParceiroCorretorTokenRouteImport } from './routes/parceiro-corretor.$token'
 import { Route as PacienteIdRouteImport } from './routes/paciente.$id'
 import { Route as NichosSlugRouteImport } from './routes/nichos.$slug'
 import { Route as ModulosSlugRouteImport } from './routes/modulos.$slug'
@@ -775,6 +776,11 @@ const PlanosTesteRoute = PlanosTesteRouteImport.update({
 const ParceiroTokenRoute = ParceiroTokenRouteImport.update({
   id: '/parceiro/$token',
   path: '/parceiro/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParceiroCorretorTokenRoute = ParceiroCorretorTokenRouteImport.update({
+  id: '/parceiro-corretor/$token',
+  path: '/parceiro-corretor/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PacienteIdRoute = PacienteIdRouteImport.update({
@@ -2396,6 +2402,7 @@ export interface FileRoutesByFullPath {
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
+  '/parceiro-corretor/$token': typeof ParceiroCorretorTokenRoute
   '/parceiro/$token': typeof ParceiroTokenRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
@@ -2738,6 +2745,7 @@ export interface FileRoutesByTo {
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
+  '/parceiro-corretor/$token': typeof ParceiroCorretorTokenRoute
   '/parceiro/$token': typeof ParceiroTokenRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
@@ -3094,6 +3102,7 @@ export interface FileRoutesById {
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
+  '/parceiro-corretor/$token': typeof ParceiroCorretorTokenRoute
   '/parceiro/$token': typeof ParceiroTokenRoute
   '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
@@ -3449,6 +3458,7 @@ export interface FileRouteTypes {
     | '/modulos/$slug'
     | '/nichos/$slug'
     | '/paciente/$id'
+    | '/parceiro-corretor/$token'
     | '/parceiro/$token'
     | '/planos/teste'
     | '/r/$slug'
@@ -3791,6 +3801,7 @@ export interface FileRouteTypes {
     | '/modulos/$slug'
     | '/nichos/$slug'
     | '/paciente/$id'
+    | '/parceiro-corretor/$token'
     | '/parceiro/$token'
     | '/planos/teste'
     | '/r/$slug'
@@ -4146,6 +4157,7 @@ export interface FileRouteTypes {
     | '/modulos/$slug'
     | '/nichos/$slug'
     | '/paciente/$id'
+    | '/parceiro-corretor/$token'
     | '/parceiro/$token'
     | '/planos/teste'
     | '/r/$slug'
@@ -4467,6 +4479,7 @@ export interface RootRouteChildren {
   ImoveisSlugRoute: typeof ImoveisSlugRouteWithChildren
   MesaTokenRoute: typeof MesaTokenRoute
   NichosSlugRoute: typeof NichosSlugRoute
+  ParceiroCorretorTokenRoute: typeof ParceiroCorretorTokenRoute
   ParceiroTokenRoute: typeof ParceiroTokenRoute
   RSlugRoute: typeof RSlugRoute
   ShowroomAcademiaRoute: typeof ShowroomAcademiaRoute
@@ -5120,6 +5133,13 @@ declare module '@tanstack/react-router' {
       path: '/parceiro/$token'
       fullPath: '/parceiro/$token'
       preLoaderRoute: typeof ParceiroTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parceiro-corretor/$token': {
+      id: '/parceiro-corretor/$token'
+      path: '/parceiro-corretor/$token'
+      fullPath: '/parceiro-corretor/$token'
+      preLoaderRoute: typeof ParceiroCorretorTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/paciente/$id': {
@@ -7894,6 +7914,7 @@ const rootRouteChildren: RootRouteChildren = {
   ImoveisSlugRoute: ImoveisSlugRouteWithChildren,
   MesaTokenRoute: MesaTokenRoute,
   NichosSlugRoute: NichosSlugRoute,
+  ParceiroCorretorTokenRoute: ParceiroCorretorTokenRoute,
   ParceiroTokenRoute: ParceiroTokenRoute,
   RSlugRoute: RSlugRoute,
   ShowroomAcademiaRoute: ShowroomAcademiaRoute,

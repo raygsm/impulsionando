@@ -150,6 +150,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/imobiliaria/intencoes", label: "Buscas salvas", icon: SearchIcon },
       { to: "/imobiliaria/matches", label: "Matches", icon: Zap },
       { to: "/imobiliaria/campanhas", label: "Campanhas & Disparo", icon: Send, perm: "realestate.property.write" },
+      { to: "/imobiliaria/parceiros", label: "Corretores parceiros", icon: Handshake, perm: "realestate.property.write" },
       { to: "/imobiliaria/modulos", label: "Módulos do nicho (imob.)", icon: Boxes },
     ],
   },
