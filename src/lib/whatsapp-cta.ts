@@ -74,6 +74,13 @@ export type WhatsAppCTAEvent =
 const METRICS_KEY = "wa_official_metrics_v1";
 const ALERTS_KEY = "wa_official_alerts_v1";
 const PENDING_KEY = "wa_official_pending_v1";
+const ALERT_HISTORY_KEY = "wa_official_alert_history_v1";
+const LAST_CLICK_KEY = "wa_official_last_click_v1";
+const LAST_SENT_KEY = "wa_official_last_sent_v1";
+const LAST_ALERT_KEY = "wa_official_last_alert_notify_v1";
+const CLICK_DEDUP_MS = 2_000;
+const SENT_DEDUP_MS = 30_000;
+const ALERT_NOTIFY_COOLDOWN_MS = 60 * 60_000;
 const MAX_BUFFER = 1000;
 
 export interface BufferedEvent {
@@ -212,6 +219,38 @@ export function trackWhatsAppCTA(
   const campaign = params.campaign as string | undefined;
   const ctaText = params.ctaText as string | undefined;
   const ctaHash = ctaText ? hashCtaText(ctaText) : (params.ctaHash as string | undefined);
+
+  // Dedup de cliques repetidos (mesma origem/rota/cta em < 2s) — evita
+  // contagem dupla quando o link dispara click + auxlistener, ou quando o
+  // usuário clica freneticamente no mesmo CTA.
+  const isClick =
+    event === "whatsapp_cta_click" ||
+    event === "whatsapp_fab_click" ||
+    event === "whatsapp_notice_click";
+  if (isClick && typeof window !== "undefined") {
+    try {
+      const raw = window.localStorage.getItem(LAST_CLICK_KEY);
+      const last = raw ? (JSON.parse(raw) as { ts: number; key: string }) : null;
+      const key = `${event}|${params.origin}|${path}|${ctaHash ?? ""}`;
+      if (last && last.key === key && Date.now() - last.ts < CLICK_DEDUP_MS) return;
+      window.localStorage.setItem(LAST_CLICK_KEY, JSON.stringify({ ts: Date.now(), key }));
+    } catch {
+      /* noop */
+    }
+  }
+
+  // Dedup do envio presumido: só permite 1 `whatsapp_cta_sent` a cada 30s.
+  if (event === "whatsapp_cta_sent" && typeof window !== "undefined") {
+    try {
+      const raw = window.localStorage.getItem(LAST_SENT_KEY);
+      const lastTs = raw ? Number(raw) : 0;
+      if (lastTs && Date.now() - lastTs < SENT_DEDUP_MS) return;
+      window.localStorage.setItem(LAST_SENT_KEY, String(Date.now()));
+    } catch {
+      /* noop */
+    }
+  }
+
   try {
     trackEvent(event, {
       channel: "whatsapp_official",
@@ -236,11 +275,7 @@ export function trackWhatsAppCTA(
     ctaHash,
   });
   // Marca cliques como pendentes p/ confirmar envio quando o usuário voltar.
-  if (
-    event === "whatsapp_cta_click" ||
-    event === "whatsapp_fab_click" ||
-    event === "whatsapp_notice_click"
-  ) {
+  if (isClick) {
     markPendingSend({ origin: String(params.origin ?? "unknown"), path, variant, campaign, ctaText, ctaHash });
   }
 }
@@ -261,7 +296,8 @@ function markPendingSend(meta: Omit<BufferedEvent, "ts" | "event">) {
 /**
  * Listener global de visibilidade: se o usuário sai da aba logo após clicar
  * no link oficial e demora >= 8s para voltar, presumimos que enviou e
- * registramos `whatsapp_cta_sent` no GA4 e no buffer local.
+ * registramos `whatsapp_cta_sent` no GA4 e no buffer local — uma única vez
+ * por clique (o `pending` é consumido após o primeiro retorno qualificado).
  */
 export function installWhatsAppReturnTracking() {
   if (typeof window === "undefined") return;
@@ -282,12 +318,16 @@ export function installWhatsAppReturnTracking() {
       const raw = window.localStorage.getItem(PENDING_KEY);
       if (!raw) return;
       const pending: Array<Omit<BufferedEvent, "event">> = JSON.parse(raw);
+      // Apenas pendências frescas (<30min) que ainda não foram consumidas.
       const fresh = pending.filter((p) => Date.now() - p.ts < 30 * 60_000);
       if (fresh.length === 0) {
         window.localStorage.setItem(PENDING_KEY, JSON.stringify([]));
         return;
       }
       const last = fresh[fresh.length - 1];
+      // CONSUMIR ANTES de disparar — garante 1 sent por clique mesmo que o
+      // usuário alterne de aba várias vezes em sequência.
+      window.localStorage.setItem(PENDING_KEY, JSON.stringify([]));
       trackWhatsAppCTA("whatsapp_cta_sent", {
         origin: last.origin,
         path: last.path,
@@ -297,11 +337,73 @@ export function installWhatsAppReturnTracking() {
         ctaHash: last.ctaHash,
         away_ms: away,
       });
-      window.localStorage.setItem(PENDING_KEY, JSON.stringify([]));
     } catch {
       /* noop */
     }
   });
+}
+
+// ============ Histórico de alertas ============
+export interface AlertHistoryEntry {
+  ts: number;
+  ctr: number;
+  sendRate: number;
+  impressions: number;
+  clicks: number;
+  sends: number;
+  ctrBelow: boolean;
+  sendBelow: boolean;
+  windowHours: number;
+  minCtr: number;
+  minSendRate: number;
+  ctaHash?: string;
+  notified?: string[]; // canais que receberam (slack, email)
+}
+
+export function recordAlertHistory(entry: AlertHistoryEntry) {
+  if (typeof window === "undefined") return;
+  try {
+    const raw = window.localStorage.getItem(ALERT_HISTORY_KEY);
+    const arr: AlertHistoryEntry[] = raw ? JSON.parse(raw) : [];
+    arr.push(entry);
+    if (arr.length > 500) arr.splice(0, arr.length - 500);
+    window.localStorage.setItem(ALERT_HISTORY_KEY, JSON.stringify(arr));
+  } catch {
+    /* noop */
+  }
+}
+
+export function readAlertHistory(): AlertHistoryEntry[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(ALERT_HISTORY_KEY);
+    return raw ? (JSON.parse(raw) as AlertHistoryEntry[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function clearAlertHistory() {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(ALERT_HISTORY_KEY);
+  } catch {
+    /* noop */
+  }
+}
+
+/** Cooldown para não floodar Slack/e-mail com o mesmo alerta. */
+export function shouldNotifyAlertNow(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const raw = window.localStorage.getItem(LAST_ALERT_KEY);
+    const last = raw ? Number(raw) : 0;
+    if (last && Date.now() - last < ALERT_NOTIFY_COOLDOWN_MS) return false;
+    window.localStorage.setItem(LAST_ALERT_KEY, String(Date.now()));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**
