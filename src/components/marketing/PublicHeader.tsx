@@ -248,15 +248,17 @@ export function PublicHeader() {
                   type="button"
                   onClick={() => setNichosOpen((v) => !v)}
                   className={cn(
-                    "flex items-center justify-between px-3 py-1.5 text-sm rounded-md transition-colors text-left",
+                    "flex items-center justify-between px-3 py-1.5 text-sm rounded-md transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                     nichosOpen
                       ? "text-foreground font-semibold bg-accent"
                       : "text-muted-foreground hover:text-foreground hover:bg-accent/60",
                   )}
                   aria-expanded={nichosOpen}
+                  aria-controls="nichos-mobile-submenu"
                 >
                   Empresas
                   <ChevronDown
+                    aria-hidden="true"
                     className={cn(
                       "h-4 w-4 transition-transform",
                       nichosOpen && "rotate-180",
@@ -264,40 +266,46 @@ export function PublicHeader() {
                   />
                 </button>
                 {nichosOpen ? (
-                  <div className="ml-2 pl-3 border-l border-border/60 flex flex-col gap-0.5">
+                  <div
+                    id="nichos-mobile-submenu"
+                    role="region"
+                    aria-label="Submenu de nichos"
+                    className="ml-2 pl-3 border-l border-border/60 flex flex-col gap-0.5"
+                  >
                     <Link
                       to="/empresas"
                       onClick={() => setOpen(false)}
-                      className="px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground rounded-md hover:bg-accent/60"
+                      className="px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground rounded-md hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       Visão geral
                     </Link>
-                    <div className="px-3 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    <h3 className="px-3 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                       Nichos
-                    </div>
+                    </h3>
                     {NICHO_DETAILS.map((n) => (
                       <Link
                         key={n.slug}
                         to="/nichos/$slug"
                         params={{ slug: n.slug }}
                         onClick={() => setOpen(false)}
-                        className="px-3 py-1.5 text-sm rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/60 flex items-center gap-2"
+                        aria-label={n.shortLabel}
+                        className="px-3 py-1.5 text-sm rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/60 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       >
-                        <n.icon className="h-3.5 w-3.5 shrink-0" />
+                        <n.icon aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
                         <span className="truncate">{n.shortLabel}</span>
                       </Link>
                     ))}
                     <Link
                       to="/demo"
                       onClick={() => setOpen(false)}
-                      className="px-3 py-1.5 mt-1 text-xs text-muted-foreground hover:text-foreground rounded-md hover:bg-accent/60"
+                      className="px-3 py-1.5 mt-1 text-xs text-muted-foreground hover:text-foreground rounded-md hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       Demonstrações
                     </Link>
                     <Link
                       to="/escolher-nicho"
                       onClick={() => setOpen(false)}
-                      className="px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground rounded-md hover:bg-accent/60"
+                      className="px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground rounded-md hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       Planos
                     </Link>
