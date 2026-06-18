@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { getCommercialAvailability } from "@/lib/commercial.functions";
 import {
   ArrowRight, MessageCircle, Sparkles, CheckCircle2, Minus, HelpCircle, Star,
-  Building2, Layers, UserRound, PlayCircle, Gauge, Wrench, Clock,
+  Building2, Layers, UserRound, PlayCircle, Gauge, Wrench, Clock, ChevronDown, ChevronUp,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +25,11 @@ import {
 import { PixFallbackDialog } from "@/components/payments/PixFallbackDialog";
 import { ModulePicker } from "@/components/marketing/ModulePicker";
 import { ContractingSummaryDialog } from "@/components/marketing/ContractingSummaryDialog";
+import {
+  getRecommendedSlugs,
+  PLAN_NAME_BY_LEVEL,
+  type RecLevel,
+} from "@/data/nicheRecommendations";
 
 const PLAN_QUOTA: Record<string, number> = {
   Essencial: 3,   // até 3 módulos
