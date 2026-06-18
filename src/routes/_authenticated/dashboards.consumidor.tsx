@@ -100,9 +100,9 @@ function ConsumidorDashboardPage() {
       const el = document.getElementById(id);
       if (!el) return;
       const top = el.getBoundingClientRect().top + window.scrollY - headerOffset;
-      window.scrollTo({ top, behavior: "smooth" });
+      window.scrollTo({ top, behavior: reducedMotion ? "auto" : "smooth" });
     },
-    [headerOffset],
+    [headerOffset, reducedMotion],
   );
 
   const handleSelect = useCallback(
