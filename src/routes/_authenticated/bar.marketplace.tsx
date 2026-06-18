@@ -32,7 +32,7 @@ function BarMarketplacePage() {
           </p>
         </div>
         <Button asChild>
-          <Link to="/core/marketplace/fornecedores"><Plus className="w-4 h-4 mr-1" /> Descobrir fornecedores</Link>
+          <Link to="/bar/marketplace/novo-pedido"><Plus className="w-4 h-4 mr-1" /> Gerar novo pedido</Link>
         </Button>
       </header>
 

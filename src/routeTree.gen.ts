@@ -364,6 +364,7 @@ import { Route as AuthenticatedCoreIntegracoesN8nRouteImport } from './routes/_a
 import { Route as AuthenticatedCoreIntegracoesMercadopagoRouteImport } from './routes/_authenticated/core.integracoes.mercadopago'
 import { Route as AuthenticatedCoreIntegracoesDiagnosticoRouteImport } from './routes/_authenticated/core.integracoes.diagnostico'
 import { Route as AuthenticatedCoreClienteIdRouteImport } from './routes/_authenticated/core.cliente.$id'
+import { Route as AuthenticatedBarMarketplaceNovoPedidoRouteImport } from './routes/_authenticated/bar.marketplace.novo-pedido'
 import { Route as AuthenticatedAdminModulosClonagemRouteImport } from './routes/_authenticated/admin.modulos.clonagem'
 import { Route as ApiPublicPaymentsInfinitepayWebhookRouteImport } from './routes/api/public/payments/infinitepay.webhook'
 import { Route as ApiPublicPaymentsCloseInvoiceReplayRouteImport } from './routes/api/public/payments/close-invoice.replay'
@@ -2329,6 +2330,12 @@ const AuthenticatedCoreClienteIdRoute =
     path: '/cliente/$id',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedBarMarketplaceNovoPedidoRoute =
+  AuthenticatedBarMarketplaceNovoPedidoRouteImport.update({
+    id: '/novo-pedido',
+    path: '/novo-pedido',
+    getParentRoute: () => AuthenticatedBarMarketplaceRoute,
+  } as any)
 const AuthenticatedAdminModulosClonagemRoute =
   AuthenticatedAdminModulosClonagemRouteImport.update({
     id: '/admin/modulos/clonagem',
@@ -2546,7 +2553,7 @@ export interface FileRoutesByFullPath {
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
   '/agenda/services': typeof AuthenticatedAgendaServicesRoute
   '/agenda/waitlist': typeof AuthenticatedAgendaWaitlistRoute
-  '/bar/marketplace': typeof AuthenticatedBarMarketplaceRoute
+  '/bar/marketplace': typeof AuthenticatedBarMarketplaceRouteWithChildren
   '/bi/company': typeof AuthenticatedBiCompanyRoute
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
@@ -2691,6 +2698,7 @@ export interface FileRoutesByFullPath {
   '/saiba-mais/': typeof AuthenticatedSaibaMaisIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
+  '/bar/marketplace/novo-pedido': typeof AuthenticatedBarMarketplaceNovoPedidoRoute
   '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
   '/core/integracoes/diagnostico': typeof AuthenticatedCoreIntegracoesDiagnosticoRoute
   '/core/integracoes/mercadopago': typeof AuthenticatedCoreIntegracoesMercadopagoRoute
@@ -2897,7 +2905,7 @@ export interface FileRoutesByTo {
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
   '/agenda/services': typeof AuthenticatedAgendaServicesRoute
   '/agenda/waitlist': typeof AuthenticatedAgendaWaitlistRoute
-  '/bar/marketplace': typeof AuthenticatedBarMarketplaceRoute
+  '/bar/marketplace': typeof AuthenticatedBarMarketplaceRouteWithChildren
   '/bi/company': typeof AuthenticatedBiCompanyRoute
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
@@ -3042,6 +3050,7 @@ export interface FileRoutesByTo {
   '/saiba-mais': typeof AuthenticatedSaibaMaisIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
+  '/bar/marketplace/novo-pedido': typeof AuthenticatedBarMarketplaceNovoPedidoRoute
   '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
   '/core/integracoes/diagnostico': typeof AuthenticatedCoreIntegracoesDiagnosticoRoute
   '/core/integracoes/mercadopago': typeof AuthenticatedCoreIntegracoesMercadopagoRoute
@@ -3262,7 +3271,7 @@ export interface FileRoutesById {
   '/_authenticated/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
   '/_authenticated/agenda/services': typeof AuthenticatedAgendaServicesRoute
   '/_authenticated/agenda/waitlist': typeof AuthenticatedAgendaWaitlistRoute
-  '/_authenticated/bar/marketplace': typeof AuthenticatedBarMarketplaceRoute
+  '/_authenticated/bar/marketplace': typeof AuthenticatedBarMarketplaceRouteWithChildren
   '/_authenticated/bi/company': typeof AuthenticatedBiCompanyRoute
   '/_authenticated/bi/master': typeof AuthenticatedBiMasterRoute
   '/_authenticated/bi/niches': typeof AuthenticatedBiNichesRoute
@@ -3407,6 +3416,7 @@ export interface FileRoutesById {
   '/_authenticated/saiba-mais/': typeof AuthenticatedSaibaMaisIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
   '/_authenticated/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
+  '/_authenticated/bar/marketplace/novo-pedido': typeof AuthenticatedBarMarketplaceNovoPedidoRoute
   '/_authenticated/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
   '/_authenticated/core/integracoes/diagnostico': typeof AuthenticatedCoreIntegracoesDiagnosticoRoute
   '/_authenticated/core/integracoes/mercadopago': typeof AuthenticatedCoreIntegracoesMercadopagoRoute
@@ -3771,6 +3781,7 @@ export interface FileRouteTypes {
     | '/saiba-mais/'
     | '/sales/'
     | '/admin/modulos/clonagem'
+    | '/bar/marketplace/novo-pedido'
     | '/core/cliente/$id'
     | '/core/integracoes/diagnostico'
     | '/core/integracoes/mercadopago'
@@ -4122,6 +4133,7 @@ export interface FileRouteTypes {
     | '/saiba-mais'
     | '/sales'
     | '/admin/modulos/clonagem'
+    | '/bar/marketplace/novo-pedido'
     | '/core/cliente/$id'
     | '/core/integracoes/diagnostico'
     | '/core/integracoes/mercadopago'
@@ -4486,6 +4498,7 @@ export interface FileRouteTypes {
     | '/_authenticated/saiba-mais/'
     | '/_authenticated/sales/'
     | '/_authenticated/admin/modulos/clonagem'
+    | '/_authenticated/bar/marketplace/novo-pedido'
     | '/_authenticated/core/cliente/$id'
     | '/_authenticated/core/integracoes/diagnostico'
     | '/_authenticated/core/integracoes/mercadopago'
@@ -7150,6 +7163,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreClienteIdRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/bar/marketplace/novo-pedido': {
+      id: '/_authenticated/bar/marketplace/novo-pedido'
+      path: '/novo-pedido'
+      fullPath: '/bar/marketplace/novo-pedido'
+      preLoaderRoute: typeof AuthenticatedBarMarketplaceNovoPedidoRouteImport
+      parentRoute: typeof AuthenticatedBarMarketplaceRoute
+    }
     '/_authenticated/admin/modulos/clonagem': {
       id: '/_authenticated/admin/modulos/clonagem'
       path: '/admin/modulos/clonagem'
@@ -7674,6 +7694,21 @@ const AuthenticatedUsersRouteChildren: AuthenticatedUsersRouteChildren = {
 const AuthenticatedUsersRouteWithChildren =
   AuthenticatedUsersRoute._addFileChildren(AuthenticatedUsersRouteChildren)
 
+interface AuthenticatedBarMarketplaceRouteChildren {
+  AuthenticatedBarMarketplaceNovoPedidoRoute: typeof AuthenticatedBarMarketplaceNovoPedidoRoute
+}
+
+const AuthenticatedBarMarketplaceRouteChildren: AuthenticatedBarMarketplaceRouteChildren =
+  {
+    AuthenticatedBarMarketplaceNovoPedidoRoute:
+      AuthenticatedBarMarketplaceNovoPedidoRoute,
+  }
+
+const AuthenticatedBarMarketplaceRouteWithChildren =
+  AuthenticatedBarMarketplaceRoute._addFileChildren(
+    AuthenticatedBarMarketplaceRouteChildren,
+  )
+
 interface AuthenticatedImobiliariaAprovacoesRouteChildren {
   AuthenticatedImobiliariaAprovacoesImprimirFilaRoute: typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
   AuthenticatedImobiliariaAprovacoesIdImprimirRoute: typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
@@ -7746,7 +7781,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminTrialsRoute: typeof AuthenticatedAdminTrialsRoute
   AuthenticatedAdminUptimeRoute: typeof AuthenticatedAdminUptimeRoute
   AuthenticatedAdminWhatsappMetricsRoute: typeof AuthenticatedAdminWhatsappMetricsRoute
-  AuthenticatedBarMarketplaceRoute: typeof AuthenticatedBarMarketplaceRoute
+  AuthenticatedBarMarketplaceRoute: typeof AuthenticatedBarMarketplaceRouteWithChildren
   AuthenticatedCheckoutPlanoRoute: typeof AuthenticatedCheckoutPlanoRoute
   AuthenticatedCommercialCockpitRoute: typeof AuthenticatedCommercialCockpitRoute
   AuthenticatedComunidadeIdRoute: typeof AuthenticatedComunidadeIdRoute
@@ -7854,7 +7889,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminUptimeRoute: AuthenticatedAdminUptimeRoute,
   AuthenticatedAdminWhatsappMetricsRoute:
     AuthenticatedAdminWhatsappMetricsRoute,
-  AuthenticatedBarMarketplaceRoute: AuthenticatedBarMarketplaceRoute,
+  AuthenticatedBarMarketplaceRoute:
+    AuthenticatedBarMarketplaceRouteWithChildren,
   AuthenticatedCheckoutPlanoRoute: AuthenticatedCheckoutPlanoRoute,
   AuthenticatedCommercialCockpitRoute: AuthenticatedCommercialCockpitRoute,
   AuthenticatedComunidadeIdRoute: AuthenticatedComunidadeIdRoute,

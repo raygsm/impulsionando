@@ -365,3 +365,33 @@ export const listFeePolicies = createServerFn({ method: "GET" })
     if (error) throw error;
     return data ?? [];
   });
+
+// ============================================================================
+// Buyer self-service
+// ============================================================================
+
+/** Retorna o perfil de comprador (mp_buyers) das empresas do usuário logado. */
+export const getMyBuyerProfile = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("mp_buyers")
+      .select("id,company_id,buyer_type,display_name,delivery_address,status")
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+    return data;
+  });
+
+/** Lista fornecedores ativos visíveis no marketplace (sem exigir Core). */
+export const listActiveSuppliersPublic = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("mp_suppliers")
+      .select("id,supplier_type,display_name,description,regions_served,status")
+      .eq("status", "active")
+      .order("display_name", { ascending: true });
+    if (error) throw error;
+    return data ?? [];
+  });
