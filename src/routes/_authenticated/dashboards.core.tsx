@@ -81,6 +81,37 @@ function CoreDashboardPage() {
         </>
       )}
 
+      {/* Marketplace B2B — GMV + receita de Taxa de Intermediação Digital */}
+      <Card className="p-5">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold uppercase tracking-wide flex items-center gap-2">
+            <TrendingUp className="w-4 h-4" /> Marketplace B2B (30 dias)
+          </h2>
+          <Link to="/core/marketplace" className="text-xs text-primary inline-flex items-center gap-1">
+            Abrir <ArrowRight className="w-3 h-3" />
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+          <div>
+            <div className="text-[10px] uppercase text-muted-foreground">Volume transacionado (GMV)</div>
+            <div className="text-xl font-bold">{brl(mp?.gmv_cents ?? 0)}</div>
+          </div>
+          <div>
+            <div className="text-[10px] uppercase text-muted-foreground">Receita Marketplace</div>
+            <div className="text-xl font-bold">{brl(mp?.fee_cents ?? 0)}</div>
+            <div className="text-[10px] text-muted-foreground">Taxa de Intermediação Digital</div>
+          </div>
+          <div>
+            <div className="text-[10px] uppercase text-muted-foreground">Pedidos concluídos</div>
+            <div className="text-xl font-bold">{mp?.orders ?? 0}</div>
+          </div>
+          <div>
+            <div className="text-[10px] uppercase text-muted-foreground">Líquido a fornecedores</div>
+            <div className="text-xl font-bold">{brl(mp?.supplier_net_cents ?? 0)}</div>
+          </div>
+        </div>
+      </Card>
+
       <PercebidoSection audience="core" days={30} />
     </div>
   );
