@@ -191,14 +191,16 @@ export const fetchConsumidorDashboard = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const w = windowFrom(data.days);
 
-    const [profile, memberships, invoices, visits, favorites, rewards, receipts] = await Promise.all([
+    const [profile, memberships, invoices, visits, favorites, rewards, receipts, tickets, ratings] = await Promise.all([
       supabase.from("consumer_profiles").select("id,full_name,created_at").eq("user_id", userId).maybeSingle(),
       supabase.from("consumer_memberships").select("id,plan,status,amount_cents,current_period_end").eq("user_id", userId),
       supabase.from("consumer_membership_invoices").select("id,amount_cents,status,due_date,paid_at,created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(20),
-      supabase.from("clube_visits").select("id,created_at,company_id").eq("user_id", userId).order("created_at", { ascending: false }).limit(20),
+      supabase.from("clube_visits").select("id,created_at,company_id,rating,notes").eq("user_id", userId).order("created_at", { ascending: false }).limit(30),
       supabase.from("consumer_favorites").select("id,company_id,created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(20),
       supabase.from("clube_rewards_ledger").select("id,delta,reason,kind,created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(20),
-      supabase.from("clube_receipts").select("id,amount_cents,issued_at,company_id,title,kind").eq("user_id", userId).order("issued_at", { ascending: false }).limit(20),
+      supabase.from("clube_receipts").select("id,amount_cents,issued_at,company_id,title,kind,status").eq("user_id", userId).order("issued_at", { ascending: false }).limit(40),
+      supabase.from("evt_tickets").select("id,code,event_id,company_id,created_at,cancelled_at").eq("holder_user_id", userId).order("created_at", { ascending: false }).limit(20),
+      supabase.from("clube_visits").select("id,company_id,rating,notes,created_at").eq("user_id", userId).not("rating", "is", null).order("created_at", { ascending: false }).limit(20),
     ]);
 
     const activeMemberships = (memberships.data ?? []).filter((m) => m.status === "active").length;
@@ -206,6 +208,11 @@ export const fetchConsumidorDashboard = createServerFn({ method: "POST" })
     const visitsInWindow = (visits.data ?? []).filter((v) => v.created_at >= w.from).length;
     const nextDue = (memberships.data ?? []).map((m) => m.current_period_end).filter(Boolean).sort()[0] ?? null;
     const creditsBalance = (rewards.data ?? []).reduce((a, r) => a + Number(r.delta ?? 0), 0);
+
+    const allReceipts = receipts.data ?? [];
+    const coupons = allReceipts.filter((r) => r.kind === "coupon" || r.kind === "cupom");
+    const vouchers = allReceipts.filter((r) => r.kind === "voucher");
+    const personalInvoices = allReceipts.filter((r) => r.kind === "invoice" || r.kind === "nfse" || r.kind === "nf");
 
     return {
       window: w,
@@ -223,8 +230,13 @@ export const fetchConsumidorDashboard = createServerFn({ method: "POST" })
         visits: visits.data ?? [],
         favorites: favorites.data ?? [],
         rewards: rewards.data ?? [],
-        receipts: receipts.data ?? [],
+        receipts: allReceipts,
         memberships: memberships.data ?? [],
+        coupons,
+        vouchers,
+        personalInvoices,
+        tickets: tickets.data ?? [],
+        ratings: ratings.data ?? [],
       },
     };
   });
