@@ -538,8 +538,11 @@ export const fetchDemoRestauranteDashboard = createServerFn({ method: "POST" })
         avgTicketCents,
       },
       conversion,
+      qrKind: data.qrKind ?? null,
       scanByKind: Array.from(scanByKind.entries()).map(([key, count]) => ({ key, count })),
       topQrs, topItems, paymentMix,
+      funnelByKind, funnelByQr,
+
       preferences: {
         interests: sortMap(interestCount),
         favorites: sortMap(favoriteCount),
