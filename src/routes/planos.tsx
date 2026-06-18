@@ -127,7 +127,7 @@ function buildPlans(wage: number): Plan[] {
 }
 
 /** Sinais operacionais por plano: complexidade de setup, manutenção semanal estimada, time-to-value. */
-const PLAN_OPS: Record<string, { setup: "Baixa" | "Média" | "Alta"; maintenance: string; ttv: string; suggested: string[] }> = {
+const PLAN_OPS: Record<string, { setup: string; maintenance: string; ttv: string; suggested: string[] }> = {
   Essencial: {
     setup: "Baixa",
     maintenance: "~1h/semana",
