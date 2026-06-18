@@ -8,18 +8,29 @@ import {
   saveAlertConfig,
   evaluateAlerts,
   recordAlertHistory,
+  updateAlertHistory,
   readAlertHistory,
   clearAlertHistory,
   shouldNotifyAlertNow,
   readAlertTemplate,
   saveAlertTemplate,
   renderAlertTemplate,
+  readAlertRules,
+  saveAlertRules,
+  evaluateAlertRules,
+  ruleScope,
+  buildDailySummary,
+  renderDailySummary,
+  dailySummaryAlreadySent,
+  markDailySummarySent,
   DEFAULT_ALERT_CONFIG,
   DEFAULT_ALERT_TEMPLATE,
   type BufferedEvent,
   type AlertConfig,
   type AlertHistoryEntry,
   type AlertTemplate,
+  type AlertRule,
+  type AlertPayload,
 } from "@/lib/whatsapp-cta";
 import { notifyWhatsAppAlert } from "@/lib/whatsapp-alerts.functions";
 import { PageHeader, StatCard } from "@/components/app/PageElements";
@@ -28,6 +39,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -35,6 +47,7 @@ import {
 import {
   MessageCircle, MousePointerClick, Send, Trash2, RefreshCw,
   Download, AlertTriangle, CheckCircle2, BellRing, History,
+  Plus, RotateCcw, Mail, ShieldAlert, ShieldCheck,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/whatsapp-metrics")({
