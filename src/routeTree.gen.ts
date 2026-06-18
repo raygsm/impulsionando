@@ -178,6 +178,7 @@ import { Route as ImoveisSlugPropertyIdRouteImport } from './routes/imoveis.$slu
 import { Route as DemoNichoSlugRouteImport } from './routes/demo.nicho.$slug'
 import { Route as ApiMercadopagoWebhookRouteImport } from './routes/api/mercadopago/webhook'
 import { Route as AuthenticatedWhiteLabelCockpitRouteImport } from './routes/_authenticated/white-label.cockpit'
+import { Route as AuthenticatedWhiteLabelCapacidadeRouteImport } from './routes/_authenticated/white-label.capacidade'
 import { Route as AuthenticatedUsersCorporateRouteImport } from './routes/_authenticated/users.corporate'
 import { Route as AuthenticatedTorreRestaurantesDemoRouteImport } from './routes/_authenticated/torre.restaurantes-demo'
 import { Route as AuthenticatedTorreConsumidoresRouteImport } from './routes/_authenticated/torre.consumidores'
@@ -373,6 +374,7 @@ import { Route as AuthenticatedRestauranteSalaoLogsRouteImport } from './routes/
 import { Route as AuthenticatedImobiliariaAprovacoesImprimirFilaRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes.imprimir-fila'
 import { Route as AuthenticatedEmpresaTalentosRedeRouteImport } from './routes/_authenticated/empresa.talentos.rede'
 import { Route as AuthenticatedEmpresaTalentosDashboardRouteImport } from './routes/_authenticated/empresa.talentos.dashboard'
+import { Route as AuthenticatedEmpresaTalentosCandidatosRouteImport } from './routes/_authenticated/empresa.talentos.candidatos'
 import { Route as AuthenticatedCoreModulosSlugRouteImport } from './routes/_authenticated/core.modulos.$slug'
 import { Route as AuthenticatedCoreMarketplacePedidosRouteImport } from './routes/_authenticated/core.marketplace.pedidos'
 import { Route as AuthenticatedCoreMarketplaceFornecedoresRouteImport } from './routes/_authenticated/core.marketplace.fornecedores'
@@ -1255,6 +1257,12 @@ const AuthenticatedWhiteLabelCockpitRoute =
   AuthenticatedWhiteLabelCockpitRouteImport.update({
     id: '/white-label/cockpit',
     path: '/white-label/cockpit',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedWhiteLabelCapacidadeRoute =
+  AuthenticatedWhiteLabelCapacidadeRouteImport.update({
+    id: '/white-label/capacidade',
+    path: '/white-label/capacidade',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedUsersCorporateRoute =
@@ -2397,6 +2405,12 @@ const AuthenticatedEmpresaTalentosDashboardRoute =
     path: '/dashboard',
     getParentRoute: () => AuthenticatedEmpresaTalentosRoute,
   } as any)
+const AuthenticatedEmpresaTalentosCandidatosRoute =
+  AuthenticatedEmpresaTalentosCandidatosRouteImport.update({
+    id: '/candidatos',
+    path: '/candidatos',
+    getParentRoute: () => AuthenticatedEmpresaTalentosRoute,
+  } as any)
 const AuthenticatedCoreModulosSlugRoute =
   AuthenticatedCoreModulosSlugRouteImport.update({
     id: '/$slug',
@@ -2813,6 +2827,7 @@ export interface FileRoutesByFullPath {
   '/torre/consumidores': typeof AuthenticatedTorreConsumidoresRoute
   '/torre/restaurantes-demo': typeof AuthenticatedTorreRestaurantesDemoRouteWithChildren
   '/users/corporate': typeof AuthenticatedUsersCorporateRoute
+  '/white-label/capacidade': typeof AuthenticatedWhiteLabelCapacidadeRoute
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
@@ -2847,6 +2862,7 @@ export interface FileRoutesByFullPath {
   '/core/marketplace/fornecedores': typeof AuthenticatedCoreMarketplaceFornecedoresRoute
   '/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
+  '/empresa/talentos/candidatos': typeof AuthenticatedEmpresaTalentosCandidatosRoute
   '/empresa/talentos/dashboard': typeof AuthenticatedEmpresaTalentosDashboardRoute
   '/empresa/talentos/rede': typeof AuthenticatedEmpresaTalentosRedeRoute
   '/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
@@ -3184,6 +3200,7 @@ export interface FileRoutesByTo {
   '/torre/consumidores': typeof AuthenticatedTorreConsumidoresRoute
   '/torre/restaurantes-demo': typeof AuthenticatedTorreRestaurantesDemoRouteWithChildren
   '/users/corporate': typeof AuthenticatedUsersCorporateRoute
+  '/white-label/capacidade': typeof AuthenticatedWhiteLabelCapacidadeRoute
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
@@ -3218,6 +3235,7 @@ export interface FileRoutesByTo {
   '/core/marketplace/fornecedores': typeof AuthenticatedCoreMarketplaceFornecedoresRoute
   '/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
+  '/empresa/talentos/candidatos': typeof AuthenticatedEmpresaTalentosCandidatosRoute
   '/empresa/talentos/dashboard': typeof AuthenticatedEmpresaTalentosDashboardRoute
   '/empresa/talentos/rede': typeof AuthenticatedEmpresaTalentosRedeRoute
   '/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
@@ -3569,6 +3587,7 @@ export interface FileRoutesById {
   '/_authenticated/torre/consumidores': typeof AuthenticatedTorreConsumidoresRoute
   '/_authenticated/torre/restaurantes-demo': typeof AuthenticatedTorreRestaurantesDemoRouteWithChildren
   '/_authenticated/users/corporate': typeof AuthenticatedUsersCorporateRoute
+  '/_authenticated/white-label/capacidade': typeof AuthenticatedWhiteLabelCapacidadeRoute
   '/_authenticated/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
@@ -3603,6 +3622,7 @@ export interface FileRoutesById {
   '/_authenticated/core/marketplace/fornecedores': typeof AuthenticatedCoreMarketplaceFornecedoresRoute
   '/_authenticated/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/_authenticated/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
+  '/_authenticated/empresa/talentos/candidatos': typeof AuthenticatedEmpresaTalentosCandidatosRoute
   '/_authenticated/empresa/talentos/dashboard': typeof AuthenticatedEmpresaTalentosDashboardRoute
   '/_authenticated/empresa/talentos/rede': typeof AuthenticatedEmpresaTalentosRedeRoute
   '/_authenticated/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
@@ -3953,6 +3973,7 @@ export interface FileRouteTypes {
     | '/torre/consumidores'
     | '/torre/restaurantes-demo'
     | '/users/corporate'
+    | '/white-label/capacidade'
     | '/white-label/cockpit'
     | '/api/mercadopago/webhook'
     | '/demo/nicho/$slug'
@@ -3987,6 +4008,7 @@ export interface FileRouteTypes {
     | '/core/marketplace/fornecedores'
     | '/core/marketplace/pedidos'
     | '/core/modulos/$slug'
+    | '/empresa/talentos/candidatos'
     | '/empresa/talentos/dashboard'
     | '/empresa/talentos/rede'
     | '/imobiliaria/aprovacoes/imprimir-fila'
@@ -4324,6 +4346,7 @@ export interface FileRouteTypes {
     | '/torre/consumidores'
     | '/torre/restaurantes-demo'
     | '/users/corporate'
+    | '/white-label/capacidade'
     | '/white-label/cockpit'
     | '/api/mercadopago/webhook'
     | '/demo/nicho/$slug'
@@ -4358,6 +4381,7 @@ export interface FileRouteTypes {
     | '/core/marketplace/fornecedores'
     | '/core/marketplace/pedidos'
     | '/core/modulos/$slug'
+    | '/empresa/talentos/candidatos'
     | '/empresa/talentos/dashboard'
     | '/empresa/talentos/rede'
     | '/imobiliaria/aprovacoes/imprimir-fila'
@@ -4708,6 +4732,7 @@ export interface FileRouteTypes {
     | '/_authenticated/torre/consumidores'
     | '/_authenticated/torre/restaurantes-demo'
     | '/_authenticated/users/corporate'
+    | '/_authenticated/white-label/capacidade'
     | '/_authenticated/white-label/cockpit'
     | '/api/mercadopago/webhook'
     | '/demo/nicho/$slug'
@@ -4742,6 +4767,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/marketplace/fornecedores'
     | '/_authenticated/core/marketplace/pedidos'
     | '/_authenticated/core/modulos/$slug'
+    | '/_authenticated/empresa/talentos/candidatos'
     | '/_authenticated/empresa/talentos/dashboard'
     | '/_authenticated/empresa/talentos/rede'
     | '/_authenticated/imobiliaria/aprovacoes/imprimir-fila'
@@ -6111,6 +6137,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWhiteLabelCockpitRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/white-label/capacidade': {
+      id: '/_authenticated/white-label/capacidade'
+      path: '/white-label/capacidade'
+      fullPath: '/white-label/capacidade'
+      preLoaderRoute: typeof AuthenticatedWhiteLabelCapacidadeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/users/corporate': {
       id: '/_authenticated/users/corporate'
       path: '/corporate'
@@ -7476,6 +7509,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEmpresaTalentosDashboardRouteImport
       parentRoute: typeof AuthenticatedEmpresaTalentosRoute
     }
+    '/_authenticated/empresa/talentos/candidatos': {
+      id: '/_authenticated/empresa/talentos/candidatos'
+      path: '/candidatos'
+      fullPath: '/empresa/talentos/candidatos'
+      preLoaderRoute: typeof AuthenticatedEmpresaTalentosCandidatosRouteImport
+      parentRoute: typeof AuthenticatedEmpresaTalentosRoute
+    }
     '/_authenticated/core/modulos/$slug': {
       id: '/_authenticated/core/modulos/$slug'
       path: '/$slug'
@@ -8093,12 +8133,15 @@ const AuthenticatedBarMarketplaceRouteWithChildren =
   )
 
 interface AuthenticatedEmpresaTalentosRouteChildren {
+  AuthenticatedEmpresaTalentosCandidatosRoute: typeof AuthenticatedEmpresaTalentosCandidatosRoute
   AuthenticatedEmpresaTalentosDashboardRoute: typeof AuthenticatedEmpresaTalentosDashboardRoute
   AuthenticatedEmpresaTalentosRedeRoute: typeof AuthenticatedEmpresaTalentosRedeRoute
 }
 
 const AuthenticatedEmpresaTalentosRouteChildren: AuthenticatedEmpresaTalentosRouteChildren =
   {
+    AuthenticatedEmpresaTalentosCandidatosRoute:
+      AuthenticatedEmpresaTalentosCandidatosRoute,
     AuthenticatedEmpresaTalentosDashboardRoute:
       AuthenticatedEmpresaTalentosDashboardRoute,
     AuthenticatedEmpresaTalentosRedeRoute:
@@ -8260,6 +8303,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTalentosCadastroRoute: typeof AuthenticatedTalentosCadastroRoute
   AuthenticatedTorreConsumidoresRoute: typeof AuthenticatedTorreConsumidoresRoute
   AuthenticatedTorreRestaurantesDemoRoute: typeof AuthenticatedTorreRestaurantesDemoRouteWithChildren
+  AuthenticatedWhiteLabelCapacidadeRoute: typeof AuthenticatedWhiteLabelCapacidadeRoute
   AuthenticatedWhiteLabelCockpitRoute: typeof AuthenticatedWhiteLabelCockpitRoute
   AuthenticatedCockpitsIndexRoute: typeof AuthenticatedCockpitsIndexRoute
   AuthenticatedComunidadeIndexRoute: typeof AuthenticatedComunidadeIndexRoute
@@ -8397,6 +8441,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedTorreConsumidoresRoute: AuthenticatedTorreConsumidoresRoute,
   AuthenticatedTorreRestaurantesDemoRoute:
     AuthenticatedTorreRestaurantesDemoRouteWithChildren,
+  AuthenticatedWhiteLabelCapacidadeRoute:
+    AuthenticatedWhiteLabelCapacidadeRoute,
   AuthenticatedWhiteLabelCockpitRoute: AuthenticatedWhiteLabelCockpitRoute,
   AuthenticatedCockpitsIndexRoute: AuthenticatedCockpitsIndexRoute,
   AuthenticatedComunidadeIndexRoute: AuthenticatedComunidadeIndexRoute,
