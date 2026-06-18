@@ -552,3 +552,110 @@ export const fetchDemoRestauranteDashboard = createServerFn({ method: "POST" })
       vouchers, recentLeads,
     };
   });
+
+// ───────────────── LIST SCENARIOS (Super Admin) ─────────────────
+// Para drill-down por restaurante.
+
+export const listDemoRestauranteScenarios = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc(
+      "is_super_admin" as never,
+      { _user: userId } as never,
+    );
+    if (!isAdmin) throw new Error("Acesso restrito ao Super Admin");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("demo_resto_scenarios")
+      .select("slug,name,tagline")
+      .order("name");
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+// ───────────────── AUDIT (Super Admin) ─────────────────
+// Lista paginada de ações da demo com filtros (action_key, sessão, janela).
+
+const AUDIT_ACTIONS = [
+  "qr.scan", "menu.open", "cart.add", "cart.remove", "cart.checkout_attempt",
+  "cart.checkout_simulated", "survey.submit", "voucher.apply",
+] as const;
+
+const AuditInput = z.object({
+  scenarioSlug: z.string().trim().min(2).max(60).optional(),
+  sinceHours: z.number().int().min(1).max(24 * 30).default(24 * 7),
+  actionKey: z.enum(AUDIT_ACTIONS).optional(),
+  sessionId: z.string().uuid().optional(),
+  leadName: z.string().trim().max(60).optional(),
+  limit: z.number().int().min(1).max(500).default(100),
+  offset: z.number().int().min(0).max(10_000).default(0),
+});
+
+export const fetchDemoRestauranteAudit = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => AuditInput.parse(d ?? {}))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc(
+      "is_super_admin" as never,
+      { _user: userId } as never,
+    );
+    if (!isAdmin) throw new Error("Acesso restrito ao Super Admin");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const sinceIso = new Date(Date.now() - data.sinceHours * 3_600_000).toISOString();
+
+    let q = supabaseAdmin
+      .from("demo_actions")
+      .select("id,session_id,action_key,payload,created_at", { count: "exact" })
+      .eq("niche_slug", NICHE)
+      .gte("created_at", sinceIso)
+      .order("created_at", { ascending: false })
+      .range(data.offset, data.offset + data.limit - 1);
+
+    if (data.actionKey) q = q.eq("action_key", data.actionKey);
+    if (data.sessionId) q = q.eq("session_id", data.sessionId);
+
+    const { data: rows, error, count } = await q;
+    if (error) throw new Error(error.message);
+
+    let filtered = (rows ?? []) as Array<{
+      id: string; session_id: string; action_key: string;
+      payload: Record<string, unknown> | null; created_at: string;
+    }>;
+
+    if (data.scenarioSlug) {
+      filtered = filtered.filter((r) => {
+        const p = r.payload as { scenario_slug?: string } | null;
+        return p?.scenario_slug === data.scenarioSlug;
+      });
+    }
+
+    // Anexa nome mascarado do lead quando houver, e contagem total.
+    const sessionIds = Array.from(new Set(filtered.map((r) => r.session_id)));
+    let leadsBySession = new Map<string, { name: string; whatsapp: string }>();
+    if (sessionIds.length) {
+      const { data: leads } = await supabaseAdmin
+        .from("demo_resto_leads")
+        .select("session_id,name,whatsapp")
+        .in("session_id", sessionIds);
+      for (const l of leads ?? []) leadsBySession.set(l.session_id, { name: l.name, whatsapp: l.whatsapp });
+    }
+
+    let final = filtered.map((r) => ({
+      ...r,
+      lead: leadsBySession.get(r.session_id) ?? null,
+    }));
+
+    if (data.leadName) {
+      const needle = data.leadName.toLowerCase();
+      final = final.filter((r) => r.lead?.name?.toLowerCase().includes(needle));
+    }
+
+    return {
+      total: count ?? final.length,
+      rows: final,
+      since: sinceIso,
+    };
+  });
