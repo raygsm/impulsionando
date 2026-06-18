@@ -365,6 +365,13 @@ export interface AlertPayload {
   path?: string;
 }
 
+export interface ChannelDelivery {
+  channel: AlertChannel;
+  status: "sent" | "failed" | "skipped" | "cooldown" | "disabled";
+  error?: string;
+  ts?: number;
+}
+
 export interface AlertHistoryEntry {
   id?: string;
   ts: number;
@@ -383,9 +390,11 @@ export interface AlertHistoryEntry {
   // Auditoria
   status?: AlertDispatchStatus;
   error?: string;
-  scope?: string;  // "global" | "route:/x" | "variant:A" | "route:/x|variant:B" | "daily_summary"
+  scope?: string;
   ruleId?: string;
-  payload?: AlertPayload; // permite reenvio manual em caso de falha
+  payload?: AlertPayload;
+  /** Entrega individual por canal (auditoria + retry seletivo). */
+  deliveries?: ChannelDelivery[];
 }
 
 function uid() {
