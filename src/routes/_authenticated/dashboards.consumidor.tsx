@@ -36,10 +36,19 @@ function ConsumidorDashboardPage() {
 
   return (
     <div className="space-y-6">
+      <nav aria-label="Trilha" className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <Link to="/clube" className="hover:text-foreground transition-colors">Clube</Link>
+        <span className="opacity-50">›</span>
+        <span className="text-foreground font-medium">Minha área</span>
+      </nav>
+
       <PageHeader
         title="Minha área"
         description="Tudo o que você curte, consome e economiza num só lugar."
       />
+
+      <SectionNav />
+
 
       {error && (
         <Card className="p-4 border-rose-200 bg-rose-50 text-rose-900 text-sm">
