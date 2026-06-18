@@ -116,7 +116,44 @@ function BreweryDashboard() {
         </div>
       </div>
 
-      {isLoading && (
+      {!hasBrands && (
+        <Card className="border-primary">
+          <CardContent className="p-6 flex items-center justify-between gap-4 flex-wrap">
+            <div className="space-y-1">
+              <div className="font-semibold flex items-center gap-2"><Wand2 className="w-4 h-4 text-primary" />Comece com uma marca demo</div>
+              <p className="text-sm text-muted-foreground max-w-xl">
+                Crie uma cervejaria fictícia já populada com PDVs, rótulos, campanha ativa, sell-out histórico e leads — ideal para explorar todos os fluxos antes de cadastrar dados reais.
+              </p>
+            </div>
+            <Button onClick={() => seedMut.mutate()} disabled={seedMut.isPending}>
+              <Wand2 className="w-4 h-4 mr-2" />{seedMut.isPending ? "Criando…" : "Criar marca demo"}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {hasBrands && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div className="text-sm font-medium">Tour rápido</div>
+              {demoBrand && (
+                <Button size="sm" variant="ghost" onClick={() => removeMut.mutate(demoBrand.id)} disabled={removeMut.isPending}>
+                  <Trash2 className="w-3.5 h-3.5 mr-1" />Remover marca demo
+                </Button>
+              )}
+            </div>
+            <div className="grid gap-2 md:grid-cols-4 mt-3">
+              <TourStep to="/cervejaria/pdvs" icon={Store} title="1. PDVs parceiros" desc="Cadastre bares ou compartilhe o link do portal para que aceitem a parceria." />
+              <TourStep to="/cervejaria/catalogo" icon={Megaphone} title="2. Catálogo & campanhas" desc="Cadastre rótulos e crie uma campanha com cupom e meta de unidades." />
+              <TourStep to="/cervejaria/relacionamento" icon={Send} title="3. Disparo segmentado" desc="Capture leads, segmente por estilo e envie WhatsApp/E-mail." />
+              <TourStep to="/cervejaria/retorno" icon={BarChart3} title="4. Retorno por PDV/Cupom" desc="Acompanhe ROI por bar, resgates de cupom e conversão do disparo." />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {isLoading && hasBrands && (
         <Card><CardContent className="py-8 text-center text-muted-foreground">Carregando…</CardContent></Card>
       )}
 
