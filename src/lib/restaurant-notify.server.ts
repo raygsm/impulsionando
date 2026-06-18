@@ -4,8 +4,7 @@
  */
 import * as React from 'react'
 import { render as renderAsync } from '@react-email/components'
-import { supabaseAdmin } from '@/integrations/supabase/client.server'
-import { TEMPLATES } from '@/lib/email-templates/registry'
+import { TEMPLATES, assertTemplateAllowedForCustomerChannel } from '@/lib/email-templates/registry'
 
 const SENDER_DOMAIN = 'notify.www.impulsionando.com.br'
 const FROM_DOMAIN = 'www.impulsionando.com.br'
@@ -17,6 +16,10 @@ export async function sendRestaurantEmail(args: {
   templateData: Record<string, unknown>
   idempotencyKey: string
 }) {
+  // Guard: nunca envie um template INTERNO por canal ao cliente.
+  // Lança InternalTemplateLeakError se a regra for violada.
+  assertTemplateAllowedForCustomerChannel(args.templateName, 'customer-email')
+
   const tpl = TEMPLATES[args.templateName]
   if (!tpl) return { status: 'no_template' as const }
   const recipient = (args.to || '').trim().toLowerCase()
