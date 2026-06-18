@@ -20,9 +20,15 @@ import {
   evaluateAlertRules,
   ruleScope,
   buildDailySummary,
+  buildDailySummaryRange,
   renderDailySummary,
   dailySummaryAlreadySent,
   markDailySummarySent,
+  planChannelDispatch,
+  markChannelDispatched,
+  readChannelCooldown,
+  simulateAlertRules,
+  ALERT_CHANNELS,
   DEFAULT_ALERT_CONFIG,
   DEFAULT_ALERT_TEMPLATE,
   type BufferedEvent,
@@ -31,6 +37,10 @@ import {
   type AlertTemplate,
   type AlertRule,
   type AlertPayload,
+  type AlertChannel,
+  type ChannelDelivery,
+  type ChannelDecision,
+  type SimulationDispatch,
 } from "@/lib/whatsapp-cta";
 import { notifyWhatsAppAlert } from "@/lib/whatsapp-alerts.functions";
 import { PageHeader, StatCard } from "@/components/app/PageElements";
@@ -47,7 +57,7 @@ import {
 import {
   MessageCircle, MousePointerClick, Send, Trash2, RefreshCw,
   Download, AlertTriangle, CheckCircle2, BellRing, History,
-  Plus, RotateCcw, Mail, ShieldAlert, ShieldCheck,
+  Plus, RotateCcw, Mail, ShieldAlert, ShieldCheck, FlaskConical, Eye,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/whatsapp-metrics")({
