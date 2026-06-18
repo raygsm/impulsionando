@@ -117,6 +117,17 @@ function WhatsAppMetricsPage() {
   const [hCta, setHCta] = useState("__all");
   const [hStatus, setHStatus] = useState<"__all" | "sent" | "failed" | "cooldown" | "no_channels" | "partial">("__all");
 
+  // simulação
+  const [simDays, setSimDays] = useState(7);
+  const [simStep, setSimStep] = useState(60); // minutos
+  const [simResult, setSimResult] = useState<SimulationDispatch[]>([]);
+  const [simIncludeSuppressed, setSimIncludeSuppressed] = useState(true);
+
+  // resumo diário (CSV)
+  const [dsFrom, setDsFrom] = useState("");
+  const [dsTo, setDsTo] = useState("");
+  const [dsRule, setDsRule] = useState("__all");
+
   useEffect(() => {
     setAll(readWhatsAppLocalMetrics());
     setCfg(readAlertConfig());
