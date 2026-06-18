@@ -224,6 +224,7 @@ function Empty({ children }: { children: React.ReactNode }) {
 
 function OrderRow({ o, children }: { o: any; children?: React.ReactNode }) {
   const meta = STATUS_LABEL[o.status] ?? { label: o.status, variant: "outline" };
+  const [showTrail, setShowTrail] = useState(false);
   return (
     <div className="border rounded-lg p-3 space-y-2">
       <div className="flex items-start justify-between gap-2 flex-wrap">
@@ -235,6 +236,9 @@ function OrderRow({ o, children }: { o: any; children?: React.ReactNode }) {
           <span className="text-sm">{brl(o.subtotal_cents)}</span>
           <Badge variant="outline" className="text-xs">Líquido {brl(o.supplier_net_cents)}</Badge>
           <Badge variant={meta.variant}>{meta.label}</Badge>
+          <Button variant="ghost" size="sm" onClick={() => setShowTrail((v) => !v)}>
+            <History className="w-3 h-3 mr-1" /> Trilha
+          </Button>
         </div>
       </div>
       {o.items?.length > 0 && (
@@ -247,6 +251,7 @@ function OrderRow({ o, children }: { o: any; children?: React.ReactNode }) {
       {o.notes && <p className="text-xs"><b>Obs. comprador:</b> {o.notes}</p>}
       {o.decision_notes && <p className="text-xs"><b>Decisão:</b> {o.decision_notes}</p>}
       {children && <div className="flex gap-2 flex-wrap pt-1">{children}</div>}
+      {showTrail && <AuditTrail orderId={o.id} />}
     </div>
   );
 }
