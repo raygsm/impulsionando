@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import { CheckCircle2, Sparkles } from 'lucide-react'
+import { OfficialChannelNotice } from '@/components/marketing/OfficialChannelNotice'
 
 export const Route = createFileRoute('/contratar')({
   component: ContratarPage,
@@ -147,6 +148,7 @@ function ContratarPage() {
             <DialogDescription>Crie sua conta para acessar o ambiente. Sem cartão.</DialogDescription>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
+            <OfficialChannelNotice origin="contratar" />
             <div className="space-y-2">
               <Label htmlFor="name">Seu nome</Label>
               <Input id="name" required value={form.contact_name} onChange={(e) => setForm({ ...form, contact_name: e.target.value })} />
