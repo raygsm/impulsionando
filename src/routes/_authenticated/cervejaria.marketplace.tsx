@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Beer, Check, X, Truck, FileText, History } from "lucide-react";
-import { AuditTrail } from "./bar.marketplace";
+import { AuditTrail } from "@/components/marketplace/AuditTrail";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/cervejaria/marketplace")({
