@@ -1,12 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Beer, Store, TrendingUp, Users, Sparkles, Wine } from "lucide-react";
-import { fetchBreweryDashboard, listMyBreweryBrands } from "@/lib/brewery.functions";
+import { toast } from "sonner";
+import { Beer, Store, TrendingUp, Users, Sparkles, Wine, Megaphone, BarChart3, Send, Wand2, Trash2 } from "lucide-react";
+import { fetchBreweryDashboard, listMyBreweryBrands, seedBreweryDemo, removeBreweryDemo } from "@/lib/brewery.functions";
 
 export const Route = createFileRoute("/_authenticated/cervejaria")({
   component: BreweryDashboard,
