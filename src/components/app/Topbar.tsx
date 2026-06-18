@@ -12,6 +12,7 @@ import { NotificationsBell } from "./NotificationsBell";
 import { OnboardingStatusPill } from "./OnboardingStatusPill";
 import { AppearanceMenu } from "./AppearanceMenu";
 import { QuickActionsButton } from "./QuickActions";
+import { AudienceBadge } from "./AudienceBadge";
 
 type NavItem = { label: string; to: string; group: string; keywords?: string };
 
@@ -169,6 +170,7 @@ export function Topbar({ currentUser }: { currentUser: CurrentUser }) {
         )}
       </div>
       <div className="flex items-center gap-2 sm:gap-3">
+        <AudienceBadge />
         <QuickActionsButton />
         <OnboardingStatusPill companyId={currentUser.memberships?.[0]?.company_id} />
         <AppearanceMenu />
