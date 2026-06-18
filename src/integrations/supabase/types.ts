@@ -10098,6 +10098,59 @@ export type Database = {
           },
         ]
       }
+      realestate_partner_brokers: {
+        Row: {
+          broker_name: string
+          company_id: string
+          contract_started_at: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          id: string
+          notes: string | null
+          phone: string | null
+          portal_token: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          broker_name: string
+          company_id: string
+          contract_started_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          portal_token?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          broker_name?: string
+          company_id?: string
+          contract_started_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          portal_token?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "realestate_partner_brokers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       realestate_properties: {
         Row: {
           address_line: string | null
@@ -12530,6 +12583,10 @@ export type Database = {
           pdv_name: string
           pdv_state: string
         }[]
+      }
+      resolve_realestate_partner_token: {
+        Args: { _token: string }
+        Returns: Json
       }
       resolve_table_qr: { Args: { _token: string }; Returns: Json }
       restaurant_create_table_invoice: {
