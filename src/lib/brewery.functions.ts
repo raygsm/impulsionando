@@ -914,3 +914,123 @@ export const fetchBreweryReturnReport = createServerFn({ method: "POST" })
       blasts: blasts ?? [],
     };
   });
+
+/* ============ Fase 7 — Portal público do PDV parceiro (sem auth) ============ */
+
+const PortalTokenInput = z.object({ token: z.string().uuid() });
+
+export const fetchPartnerPortal = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => PortalTokenInput.parse(d))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: resolved, error } = await (supabaseAdmin as any)
+      .rpc("resolve_brewery_portal_token", { _token: data.token })
+      .maybeSingle();
+    if (error) throw error;
+    if (!resolved) return { ok: false as const };
+
+    const today = new Date().toISOString().slice(0, 10);
+    const [{ data: campaigns }, { data: sellouts }] = await Promise.all([
+      (supabaseAdmin as any)
+        .from("brewery_campaigns")
+        .select("id,name,goal,voucher_code,starts_at,ends_at,kpi_target_units,status,target_pdv_ids")
+        .eq("brand_id", resolved.brand_id)
+        .in("status", ["running", "scheduled"])
+        .gte("ends_at", today)
+        .order("starts_at", { ascending: true }),
+      (supabaseAdmin as any)
+        .from("brewery_sellouts")
+        .select("id,period_start,period_end,units,gross_revenue_cents,voucher_code,coupon_redemptions")
+        .eq("pdv_link_id", resolved.pdv_link_id)
+        .order("period_end", { ascending: false })
+        .limit(12),
+    ]);
+
+    const targeted = (campaigns ?? []).filter((c: any) =>
+      !c.target_pdv_ids || c.target_pdv_ids.length === 0 || c.target_pdv_ids.includes(resolved.pdv_link_id),
+    );
+
+    return {
+      ok: true as const,
+      pdv: {
+        id: resolved.pdv_link_id,
+        name: resolved.pdv_name,
+        city: resolved.pdv_city,
+        state: resolved.pdv_state,
+        contactName: resolved.contact_name,
+        contractStatus: resolved.contract_status,
+      },
+      brand: {
+        id: resolved.brand_id,
+        name: resolved.brand_name,
+        slug: resolved.brand_slug,
+        logoUrl: resolved.brand_logo_url,
+      },
+      campaigns: targeted,
+      recentSellouts: sellouts ?? [],
+    };
+  });
+
+export const acceptPartnerInvite = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => PortalTokenInput.parse(d))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: resolved } = await (supabaseAdmin as any)
+      .rpc("resolve_brewery_portal_token", { _token: data.token })
+      .maybeSingle();
+    if (!resolved) throw new Error("Convite inválido ou expirado");
+
+    const { error } = await (supabaseAdmin as any)
+      .from("brewery_pdv_links")
+      .update({
+        contract_status: "active",
+        contract_started_at: new Date().toISOString().slice(0, 10),
+      })
+      .eq("id", resolved.pdv_link_id)
+      .in("contract_status", ["pending", "paused"]);
+    if (error) throw error;
+    return { ok: true };
+  });
+
+const SubmitSelloutInput = z.object({
+  token: z.string().uuid(),
+  periodStart: z.string(),
+  periodEnd: z.string(),
+  units: z.number().int().min(0).max(100000),
+  grossRevenueCents: z.number().int().min(0).max(1_000_000_00),
+  voucherCode: z.string().max(40).optional(),
+  couponRedemptions: z.number().int().min(0).max(100000).default(0),
+  campaignId: z.string().uuid().optional(),
+  notes: z.string().max(500).optional(),
+});
+
+export const submitPartnerSellout = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => SubmitSelloutInput.parse(d))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: resolved } = await (supabaseAdmin as any)
+      .rpc("resolve_brewery_portal_token", { _token: data.token })
+      .maybeSingle();
+    if (!resolved) throw new Error("Link inválido");
+    if (resolved.contract_status !== "active") throw new Error("Contrato precisa estar ativo para enviar sell-out");
+
+    const avg = data.units > 0 ? Math.round(data.grossRevenueCents / data.units) : 0;
+    const { error } = await (supabaseAdmin as any)
+      .from("brewery_sellouts")
+      .insert({
+        brand_id: resolved.brand_id,
+        pdv_link_id: resolved.pdv_link_id,
+        period_start: data.periodStart,
+        period_end: data.periodEnd,
+        units: data.units,
+        gross_revenue_cents: data.grossRevenueCents,
+        avg_ticket_cents: avg,
+        voucher_code: data.voucherCode ?? null,
+        coupon_redemptions: data.couponRedemptions,
+        campaign_id: data.campaignId ?? null,
+        source: "partner_portal",
+        notes: data.notes ?? null,
+      });
+    if (error) throw error;
+    return { ok: true };
+  });
