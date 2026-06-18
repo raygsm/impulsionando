@@ -5470,6 +5470,45 @@ export type Database = {
           },
         ]
       }
+      core_company_plans: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          features: Json
+          id: string
+          max_modulos: number | null
+          nome: string
+          ordem: number
+          pontos_consumo: number
+          preco_sm: number
+          slug: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          features?: Json
+          id?: string
+          max_modulos?: number | null
+          nome: string
+          ordem?: number
+          pontos_consumo: number
+          preco_sm: number
+          slug: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          features?: Json
+          id?: string
+          max_modulos?: number | null
+          nome?: string
+          ordem?: number
+          pontos_consumo?: number
+          preco_sm?: number
+          slug?: string
+        }
+        Relationships: []
+      }
       core_dashboard_widgets: {
         Row: {
           audience: string[]
@@ -5696,6 +5735,30 @@ export type Database = {
           slug?: string
           status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      core_macro_nichos: {
+        Row: {
+          created_at: string
+          id: string
+          nome: string
+          ordem: number
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nome: string
+          ordem?: number
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome?: string
+          ordem?: number
+          slug?: string
         }
         Relationships: []
       }
@@ -6180,6 +6243,82 @@ export type Database = {
             columns: ["replay_of"]
             isOneToOne: false
             referencedRelation: "core_smoke_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      core_subnichos: {
+        Row: {
+          created_at: string
+          id: string
+          macro_id: string
+          nome: string
+          ordem: number
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          macro_id: string
+          nome: string
+          ordem?: number
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          macro_id?: string
+          nome?: string
+          ordem?: number
+          slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_subnichos_macro_id_fkey"
+            columns: ["macro_id"]
+            isOneToOne: false
+            referencedRelation: "core_macro_nichos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      core_templates: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          destaque: boolean
+          id: string
+          modulos: string[]
+          nome: string
+          slug: string
+          subnicho_id: string
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          destaque?: boolean
+          id?: string
+          modulos?: string[]
+          nome: string
+          slug: string
+          subnicho_id: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          destaque?: boolean
+          id?: string
+          modulos?: string[]
+          nome?: string
+          slug?: string
+          subnicho_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_templates_subnicho_id_fkey"
+            columns: ["subnicho_id"]
+            isOneToOne: false
+            referencedRelation: "core_subnichos"
             referencedColumns: ["id"]
           },
         ]
@@ -12712,7 +12851,9 @@ export type Database = {
         Row: {
           candidato_id: string
           company_id: string
+          contratado_em: string | null
           created_at: string
+          desligado_em: string | null
           id: string
           motivos: string[]
           observacoes: string | null
@@ -12724,7 +12865,9 @@ export type Database = {
         Insert: {
           candidato_id: string
           company_id: string
+          contratado_em?: string | null
           created_at?: string
+          desligado_em?: string | null
           id?: string
           motivos?: string[]
           observacoes?: string | null
@@ -12736,7 +12879,9 @@ export type Database = {
         Update: {
           candidato_id?: string
           company_id?: string
+          contratado_em?: string | null
           created_at?: string
+          desligado_em?: string | null
           id?: string
           motivos?: string[]
           observacoes?: string | null
@@ -13526,6 +13671,121 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "message_outbox"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      wl_company_links: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          plan_slug: string
+          pontos_consumidos: number
+          status: string
+          wl_owner_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          plan_slug: string
+          pontos_consumidos: number
+          status?: string
+          wl_owner_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          plan_slug?: string
+          pontos_consumidos?: number
+          status?: string
+          wl_owner_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wl_company_links_plan_slug_fkey"
+            columns: ["plan_slug"]
+            isOneToOne: false
+            referencedRelation: "core_company_plans"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
+      wl_plans: {
+        Row: {
+          created_at: string
+          id: string
+          mensalidade_sm: number
+          nome: string
+          ordem: number
+          pontos_adicionais: number
+          pontos_capacidade: number
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mensalidade_sm: number
+          nome: string
+          ordem?: number
+          pontos_adicionais: number
+          pontos_capacidade: number
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mensalidade_sm?: number
+          nome?: string
+          ordem?: number
+          pontos_adicionais?: number
+          pontos_capacidade?: number
+          slug?: string
+        }
+        Relationships: []
+      }
+      wl_subscriptions: {
+        Row: {
+          auto_downgrade: boolean
+          auto_upgrade: boolean
+          capacidade_pontos: number
+          created_at: string
+          id: string
+          owner_id: string
+          plan_slug: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          auto_downgrade?: boolean
+          auto_upgrade?: boolean
+          capacidade_pontos: number
+          created_at?: string
+          id?: string
+          owner_id: string
+          plan_slug: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          auto_downgrade?: boolean
+          auto_upgrade?: boolean
+          capacidade_pontos?: number
+          created_at?: string
+          id?: string
+          owner_id?: string
+          plan_slug?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wl_subscriptions_plan_slug_fkey"
+            columns: ["plan_slug"]
+            isOneToOne: false
+            referencedRelation: "wl_plans"
+            referencedColumns: ["slug"]
           },
         ]
       }
