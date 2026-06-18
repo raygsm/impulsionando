@@ -1,5 +1,7 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { PageHeader } from "@/components/app/PageElements";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,13 +14,18 @@ import { Progress } from "@/components/ui/progress";
 import {
   Sparkles, Target, Building2, Stethoscope, Home as HomeIcon, Calendar as CalendarIcon,
   ShoppingCart, GraduationCap, Briefcase, ArrowRight, ArrowLeft, CheckCircle2,
-  AlertTriangle, Lightbulb, Rocket,
+  AlertTriangle, Lightbulb, Rocket, Link2,
 } from "lucide-react";
+import { getCatalogIntent, consumeCatalogIntent, trackCatalogEvent } from "@/lib/catalogo.functions";
+
+const onboardingSearchSchema = z.object({ intent: z.string().uuid().optional() });
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({ meta: [{ title: "Onboarding — Impulsionando" }] }),
+  validateSearch: (search) => onboardingSearchSchema.parse(search),
   component: OnboardingPage,
 });
+
 
 // ────────────────────────────────────────────────────────────────────────────
 // 5 camadas: melhorar → nicho → diagnóstico → resultado → como
