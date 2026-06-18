@@ -239,19 +239,23 @@ export const placeMarketplaceOrder = createServerFn({ method: "POST" })
     const { data: buy } = await context.supabase
       .from("mp_buyers").select("display_name").eq("id", data.buyer_id).maybeSingle();
     if (sup?.company_id) {
-      const { data: users } = await context.supabase
-        .from("user_profiles").select("user_id").eq("company_id", sup.company_id).eq("is_active", true);
-      const rows = (users ?? []).map((u: any) => ({
-        user_id: u.user_id,
+      await notify(context.supabase, {
         company_id: sup.company_id,
         category: "marketplace",
         severity: "info",
         title: "Novo pedido recebido",
         message: `Pedido #${order.order_number} de ${buy?.display_name ?? "comprador"} — ${(subtotal/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}`,
-        action_url: "/cervejaria/marketplace",
-      }));
-      if (rows.length) await context.supabase.from("notifications").insert(rows);
+        action_url: `/cervejaria/marketplace?order=${order.id}`,
+      });
     }
+
+    // Audit: pedido enviado
+    await audit(context.supabase, context.userId, {
+      order_id: order.id,
+      event_type: "placed",
+      notes: data.notes ?? null,
+      role: "buyer",
+    });
 
     return order;
   });
@@ -281,6 +285,23 @@ async function notify(
   if (rows.length) await supabase.from("notifications").insert(rows);
 }
 
+async function audit(
+  supabase: any,
+  userId: string,
+  args: { order_id: string; event_type: string; notes?: string | null; role?: string },
+) {
+  const { data: profile } = await supabase
+    .from("user_profiles").select("display_name,email").eq("user_id", userId).maybeSingle();
+  await supabase.from("mp_order_events").insert({
+    order_id: args.order_id,
+    event_type: args.event_type,
+    notes: args.notes ?? null,
+    actor_user_id: userId,
+    actor_display_name: profile?.display_name ?? profile?.email ?? null,
+    actor_role: args.role ?? null,
+  });
+}
+
 export const updateMarketplaceOrderStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => UpdateOrderStatusInput.parse(d))
@@ -308,24 +329,42 @@ export const updateMarketplaceOrderStatus = createServerFn({ method: "POST" })
       .single();
     if (error) throw error;
 
-    // Notificações para o comprador
-    if (order && (data.status === "approved" || data.status === "rejected" || data.status === "invoiced" || data.status === "completed")) {
+
+    // Notificações para AMBAS as partes (comprador + fornecedor)
+    if (order && ["approved", "rejected", "in_production", "in_delivery", "invoiced", "completed", "canceled"].includes(data.status)) {
       const labelMap: Record<string, { title: string; sev: string }> = {
         approved: { title: "Pedido aprovado pelo fornecedor", sev: "success" },
         rejected: { title: "Pedido recusado pelo fornecedor", sev: "error" },
+        in_production: { title: "Pedido em produção", sev: "info" },
+        in_delivery: { title: "Pedido em entrega", sev: "info" },
         invoiced: { title: "Pedido faturado", sev: "info" },
         completed: { title: "Pedido concluído", sev: "success" },
+        canceled: { title: "Pedido cancelado", sev: "warning" },
       };
       const l = labelMap[data.status];
+      const msgBase = `Pedido #${order.order_number} · ${order.supplier?.display_name} ↔ ${order.buyer?.display_name}.`;
+      const msg = `${msgBase} ${data.decision_notes ?? ""}`.trim();
+      // Comprador
       await notify(context.supabase, {
         company_id: order.buyer?.company_id ?? null,
-        category: "marketplace",
-        severity: l.sev,
-        title: l.title,
-        message: `Pedido #${order.order_number} de ${order.supplier?.display_name}. ${data.decision_notes ?? ""}`.trim(),
-        action_url: "/bar/marketplace",
+        category: "marketplace", severity: l.sev, title: l.title, message: msg,
+        action_url: `/bar/marketplace?order=${order.id}`,
+      });
+      // Fornecedor (confirmação interna p/ equipe)
+      await notify(context.supabase, {
+        company_id: order.supplier?.company_id ?? null,
+        category: "marketplace", severity: l.sev, title: l.title, message: msg,
+        action_url: `/cervejaria/marketplace?order=${order.id}`,
       });
     }
+
+    // Audit: registra o evento com o usuário responsável
+    await audit(context.supabase, context.userId, {
+      order_id: order.id,
+      event_type: data.status,
+      notes: data.decision_notes ?? null,
+      role: "supplier",
+    });
 
     // Ledger ao concluir
     if (data.status === "completed" && order) {
@@ -486,3 +525,147 @@ export const listActiveSuppliersPublic = createServerFn({ method: "GET" })
     if (error) throw error;
     return data ?? [];
   });
+
+// ============================================================================
+// Audit trail / paginated search / CSV export
+// ============================================================================
+
+/** Eventos da trilha de auditoria de um pedido. */
+export const getMarketplaceOrderEvents = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ order_id: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: rows, error } = await context.supabase
+      .from("mp_order_events")
+      .select("id,event_type,notes,actor_display_name,actor_role,created_at")
+      .eq("order_id", data.order_id)
+      .order("created_at", { ascending: true });
+    if (error) throw error;
+    return rows ?? [];
+  });
+
+/** Busca paginada de pedidos (com filtros + texto). */
+const SearchOrdersInput = z.object({
+  status: z.string().optional(),
+  supplierId: z.string().uuid().optional(),
+  buyerId: z.string().uuid().optional(),
+  sinceDays: z.number().int().min(1).max(365).optional(),
+  query: z.string().optional(),
+  page: z.number().int().min(1).default(1),
+  pageSize: z.number().int().min(1).max(100).default(20),
+});
+export const searchMarketplaceOrders = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => SearchOrdersInput.parse(d))
+  .handler(async ({ context, data }) => {
+    const from = (data.page - 1) * data.pageSize;
+    const to = from + data.pageSize - 1;
+    let q = context.supabase
+      .from("mp_orders")
+      .select(`
+        id, order_number, status, subtotal_cents, fee_pct, fee_cents, total_cents,
+        supplier_net_cents, placed_at, approved_at, rejected_at, invoiced_at, completed_at,
+        notes, decision_notes,
+        supplier:mp_suppliers!inner(id, display_name, supplier_type, company_id),
+        buyer:mp_buyers(id, display_name, buyer_type, company_id),
+        items:mp_order_items(id, name_snapshot, unit, unit_price_cents, qty, line_total_cents)
+      `, { count: "exact" })
+      .order("placed_at", { ascending: false })
+      .range(from, to);
+    if (data.status) q = q.eq("status", data.status);
+    if (data.supplierId) q = q.eq("supplier_id", data.supplierId);
+    if (data.buyerId) q = q.eq("buyer_id", data.buyerId);
+    if (data.sinceDays) {
+      const since = new Date(Date.now() - data.sinceDays * 86400_000).toISOString();
+      q = q.gte("placed_at", since);
+    }
+    if (data.query && data.query.trim()) {
+      const term = data.query.trim();
+      const asNum = Number(term.replace(/[^0-9]/g, ""));
+      if (Number.isFinite(asNum) && asNum > 0) {
+        q = q.or(`order_number.eq.${asNum},supplier.display_name.ilike.%${term}%`);
+      } else {
+        q = q.ilike("supplier.display_name", `%${term}%`);
+      }
+    }
+    const { data: rows, error, count } = await q;
+    if (error) throw error;
+    return {
+      rows: rows ?? [],
+      total: count ?? 0,
+      page: data.page,
+      pageSize: data.pageSize,
+      totalPages: Math.max(1, Math.ceil((count ?? 0) / data.pageSize)),
+    };
+  });
+
+/** Exporta pedidos filtrados em CSV (string). */
+export const exportMarketplaceOrdersCsv = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      status: z.string().optional(),
+      supplierId: z.string().uuid().optional(),
+      buyerId: z.string().uuid().optional(),
+      sinceDays: z.number().int().min(1).max(365).optional(),
+      query: z.string().optional(),
+    }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    let q = context.supabase
+      .from("mp_orders")
+      .select(`
+        order_number, status, subtotal_cents, fee_pct, fee_cents, supplier_net_cents,
+        placed_at, approved_at, rejected_at, invoiced_at, completed_at, decision_notes,
+        supplier:mp_suppliers!inner(display_name, supplier_type),
+        buyer:mp_buyers(display_name)
+      `)
+      .order("placed_at", { ascending: false })
+      .limit(5000);
+    if (data.status) q = q.eq("status", data.status);
+    if (data.supplierId) q = q.eq("supplier_id", data.supplierId);
+    if (data.buyerId) q = q.eq("buyer_id", data.buyerId);
+    if (data.sinceDays) {
+      const since = new Date(Date.now() - data.sinceDays * 86400_000).toISOString();
+      q = q.gte("placed_at", since);
+    }
+    if (data.query && data.query.trim()) {
+      const term = data.query.trim();
+      const asNum = Number(term.replace(/[^0-9]/g, ""));
+      if (Number.isFinite(asNum) && asNum > 0) {
+        q = q.or(`order_number.eq.${asNum},supplier.display_name.ilike.%${term}%`);
+      } else {
+        q = q.ilike("supplier.display_name", `%${term}%`);
+      }
+    }
+    const { data: rows, error } = await q;
+    if (error) throw error;
+
+    const headers = [
+      "pedido","status","fornecedor","tipo_fornecedor","comprador",
+      "bruto_brl","taxa_pct","taxa_brl","liquido_fornecedor_brl",
+      "enviado_em","aprovado_em","recusado_em","faturado_em","concluido_em","decisao",
+    ];
+    const fmtBRL = (c: number) => (c / 100).toFixed(2).replace(".", ",");
+    const fmtPct = (n: number) => (n * 100).toFixed(2).replace(".", ",");
+    const fmtDate = (s: string | null) => (s ? new Date(s).toLocaleString("pt-BR") : "");
+    const escape = (v: any) => {
+      const s = v == null ? "" : String(v);
+      return /[",;\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const lines = [headers.join(";")];
+    (rows ?? []).forEach((o: any) => {
+      lines.push([
+        o.order_number, o.status,
+        o.supplier?.display_name, o.supplier?.supplier_type,
+        o.buyer?.display_name,
+        fmtBRL(o.subtotal_cents), fmtPct(Number(o.fee_pct)),
+        fmtBRL(o.fee_cents), fmtBRL(o.supplier_net_cents),
+        fmtDate(o.placed_at), fmtDate(o.approved_at), fmtDate(o.rejected_at),
+        fmtDate(o.invoiced_at), fmtDate(o.completed_at),
+        o.decision_notes ?? "",
+      ].map(escape).join(";"));
+    });
+    return { csv: "\uFEFF" + lines.join("\n"), count: rows?.length ?? 0 };
+  });
+
