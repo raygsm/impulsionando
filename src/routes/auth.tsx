@@ -71,7 +71,9 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
-  const { persona = "core", mode } = Route.useSearch();
+  const search = Route.useSearch();
+  const persona: AuthPersona = search.persona ?? "core";
+  const mode = search.mode;
   const copy = PERSONA_COPY[persona];
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
