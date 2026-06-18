@@ -1,12 +1,11 @@
 /**
  * Server fns para o painel do salão:
- *  - listAttemptLogs: filtros por nicho, canal, status, motivo, intervalo.
- *  - exportNotificationsCsv: CSV de notificações internas + pós-visita
- *    filtrado por nicho e intervalo de datas (download client-side).
- *  - simulatePostvisitWindow: dado bill_notified_at + nicho, devolve
- *    quando a pós-visita seria liberada (modo simulação no painel).
- *  - emitInternalEvent: webhook interno do CORE — registra um evento
- *    (notifyItemReady / pós-visita) na tabela attempt log, em tempo real.
+ *  - listAttemptLogs: filtros + paginação + ordenação + busca textual rápida.
+ *  - getAttemptLogDetails: detalhe completo de um request_id (sequência + payload).
+ *  - exportNotificationsCsv: CSV (internos + pós-visita) filtrado por nicho/data.
+ *  - simulatePostvisitWindow: janela liberada por nicho (modo simulação).
+ *  - emitInternalEvent: webhook interno do CORE.
+ *  - getRetentionSettings/setRetentionSettings: retenção configurável do log.
  */
 import { createServerFn } from '@tanstack/react-start'
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
@@ -18,6 +17,8 @@ import {
   REGISTRY_VERSION,
 } from '@/lib/postvisit-timing-registry'
 
+const SortField = z.enum(['created_at', 'status', 'channel', 'event', 'niche'])
+
 const ListInput = z
   .object({
     company_id: z.string().uuid().optional(),
@@ -26,24 +27,35 @@ const ListInput = z
     status: z.string().optional(),
     reason: z.string().optional(),
     request_id: z.string().optional(),
+    q: z.string().optional(),
     from: z.string().optional(),
     to: z.string().optional(),
-    limit: z.number().int().min(1).max(500).optional(),
+    page: z.number().int().min(1).optional().default(1),
+    pageSize: z.number().int().min(10).max(200).optional().default(50),
+    sortBy: SortField.optional().default('created_at'),
+    sortDir: z.enum(['asc', 'desc']).optional().default('desc'),
   })
-  .default({})
+  .default({} as any)
 
 export const listAttemptLogs = createServerFn({ method: 'GET' })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => ListInput.parse(d ?? {}))
   .handler(async ({ data, context }) => {
     const { supabase } = context
+    const page = data.page ?? 1
+    const pageSize = data.pageSize ?? 50
+    const from = (page - 1) * pageSize
+    const to = from + pageSize - 1
+
     let q = supabase
       .from('notification_attempt_log' as any)
       .select(
         'id, request_id, company_id, channel, event, niche, recipient, status, reason, idempotency_key, metadata, created_at',
+        { count: 'exact' },
       )
-      .order('created_at', { ascending: false })
-      .limit(data.limit ?? 100)
+      .order(data.sortBy ?? 'created_at', { ascending: (data.sortDir ?? 'desc') === 'asc' })
+      .range(from, to)
+
     if (data.company_id) q = q.eq('company_id', data.company_id)
     if (data.niche) q = q.eq('niche', data.niche)
     if (data.channel) q = q.eq('channel', data.channel)
@@ -52,7 +64,38 @@ export const listAttemptLogs = createServerFn({ method: 'GET' })
     if (data.request_id) q = q.eq('request_id', data.request_id)
     if (data.from) q = q.gte('created_at', data.from)
     if (data.to) q = q.lte('created_at', data.to)
-    const { data: rows, error } = await q
+    if (data.q && data.q.trim()) {
+      const term = data.q.trim().replace(/[%,]/g, '')
+      q = q.or(
+        `event.ilike.%${term}%,recipient.ilike.%${term}%,reason.ilike.%${term}%,request_id.ilike.%${term}%,idempotency_key.ilike.%${term}%`,
+      )
+    }
+
+    const { data: rows, error, count } = await q
+    if (error) throw new Error(error.message)
+    return {
+      rows: (rows ?? []) as any[],
+      total: count ?? 0,
+      page,
+      pageSize,
+      totalPages: Math.max(1, Math.ceil((count ?? 0) / pageSize)),
+    }
+  })
+
+const DetailsInput = z.object({ request_id: z.string().min(1) })
+
+export const getAttemptLogDetails = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => DetailsInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context
+    const { data: rows, error } = await supabase
+      .from('notification_attempt_log' as any)
+      .select(
+        'id, request_id, company_id, channel, event, niche, recipient, status, reason, idempotency_key, metadata, created_at',
+      )
+      .eq('request_id', data.request_id)
+      .order('created_at', { ascending: true })
     if (error) throw new Error(error.message)
     return { rows: (rows ?? []) as any[] }
   })
@@ -77,7 +120,6 @@ export const exportNotificationsCsv = createServerFn({ method: 'POST' })
   .handler(async ({ data, context }) => {
     const { supabase } = context
 
-    // Internos (item pronto)
     let iq = supabase
       .from('sales_order_items')
       .select(
@@ -91,7 +133,6 @@ export const exportNotificationsCsv = createServerFn({ method: 'POST' })
     if (data.to) iq = iq.lte('notified_ready_at', data.to)
     const { data: items } = await iq
 
-    // Pós-visita
     let pq = supabase
       .from('restaurant_table_sessions')
       .select(
@@ -211,4 +252,35 @@ export const emitInternalEvent = createServerFn({ method: 'POST' })
       metadata: data.payload ?? {},
     })
     return { ok: true }
+  })
+
+// ----- Retenção configurável -----
+
+export const getRetentionSettings = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase } = context
+    const { data } = await supabase
+      .from('core_settings' as any)
+      .select('value, updated_at')
+      .eq('key', 'notification_log_retention_days')
+      .maybeSingle()
+    const raw = (data as any)?.value
+    const days = typeof raw === 'number' ? raw : Number(raw) || 90
+    return { days, updated_at: (data as any)?.updated_at ?? null }
+  })
+
+const SetRetentionInput = z.object({ days: z.number().int().min(7).max(365) })
+
+export const setRetentionSettings = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => SetRetentionInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context
+    const { error } = await supabase
+      .from('core_settings' as any)
+      .update({ value: data.days, updated_by: userId, updated_at: new Date().toISOString() })
+      .eq('key', 'notification_log_retention_days')
+    if (error) throw new Error(error.message)
+    return { ok: true, days: data.days }
   })
