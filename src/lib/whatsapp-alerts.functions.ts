@@ -29,6 +29,14 @@ export interface WhatsAppAlertInput {
   title?: string;
   /** Corpo já renderizado a partir do template do admin. */
   body?: string;
+  /** Quais canais despachar. Default: ambos se configurados. */
+  channels?: { slack?: boolean; email?: boolean };
+}
+
+export interface ChannelResult {
+  channel: "slack" | "email";
+  status: "sent" | "failed" | "skipped";
+  error?: string;
 }
 
 function validate(input: unknown): WhatsAppAlertInput {
@@ -53,18 +61,19 @@ function buildMessage(d: WhatsAppAlertInput) {
 }
 
 async function sendSlack(webhook: string, title: string, body: string) {
-  await fetch(webhook, {
+  const r = await fetch(webhook, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ text: `*${title}*\n${body}` }),
   });
+  if (!r.ok) throw new Error(`slack http ${r.status}`);
 }
 
 async function sendEmail(to: string, from: string, title: string, body: string) {
   const lovableKey = process.env.LOVABLE_API_KEY;
   const resendKey = process.env.RESEND_API_KEY;
-  if (!lovableKey || !resendKey) return;
-  await fetch("https://connector-gateway.lovable.dev/resend/emails", {
+  if (!lovableKey || !resendKey) throw new Error("RESEND not configured");
+  const r = await fetch("https://connector-gateway.lovable.dev/resend/emails", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -72,13 +81,11 @@ async function sendEmail(to: string, from: string, title: string, body: string) 
       "X-Connection-Api-Key": resendKey,
     },
     body: JSON.stringify({
-      from,
-      to: [to],
-      subject: title,
-      text: body,
+      from, to: [to], subject: title, text: body,
       html: `<p><strong>${title}</strong></p><pre>${body}</pre>`,
     }),
   });
+  if (!r.ok) throw new Error(`resend http ${r.status}`);
 }
 
 export const notifyWhatsAppAlert = createServerFn({ method: "POST" })
@@ -88,22 +95,28 @@ export const notifyWhatsAppAlert = createServerFn({ method: "POST" })
     const slack = process.env.SLACK_ALERT_WEBHOOK_URL;
     const emailTo = process.env.ALERT_EMAIL_TO;
     const emailFrom = process.env.ALERT_EMAIL_FROM || "alertas@impulsionando.com.br";
-    const channels: string[] = [];
-    try {
-      if (slack) {
-        await sendSlack(slack, title, body);
-        channels.push("slack");
+    const wantSlack = data.channels?.slack ?? true;
+    const wantEmail = data.channels?.email ?? true;
+    const results: ChannelResult[] = [];
+
+    if (wantSlack) {
+      if (!slack) results.push({ channel: "slack", status: "skipped", error: "SLACK_ALERT_WEBHOOK_URL ausente" });
+      else {
+        try { await sendSlack(slack, title, body); results.push({ channel: "slack", status: "sent" }); }
+        catch (err) { results.push({ channel: "slack", status: "failed", error: err instanceof Error ? err.message : "unknown" }); }
       }
-      if (emailTo) {
-        await sendEmail(emailTo, emailFrom, title, body);
-        channels.push("email");
-      }
-    } catch (err) {
-      return {
-        ok: false,
-        channels,
-        error: err instanceof Error ? err.message : "unknown",
-      };
     }
-    return { ok: true, channels, configured: channels.length > 0 };
+    if (wantEmail) {
+      if (!emailTo) results.push({ channel: "email", status: "skipped", error: "ALERT_EMAIL_TO ausente" });
+      else {
+        try { await sendEmail(emailTo, emailFrom, title, body); results.push({ channel: "email", status: "sent" }); }
+        catch (err) { results.push({ channel: "email", status: "failed", error: err instanceof Error ? err.message : "unknown" }); }
+      }
+    }
+
+    const channels = results.filter((r) => r.status === "sent").map((r) => r.channel);
+    const anyFailed = results.some((r) => r.status === "failed");
+    const ok = !anyFailed && channels.length > 0;
+    const firstError = results.find((r) => r.error)?.error;
+    return { ok, channels, results, error: firstError };
   });
