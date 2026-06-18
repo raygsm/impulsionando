@@ -191,7 +191,7 @@ export const listBreweryPdvs = createServerFn({ method: "POST" })
     let q = context.supabase
       .from("brewery_pdv_links")
       .select(
-        "id,brand_id,pdv_name,pdv_city,pdv_state,contact_name,contact_phone,contract_status,contract_started_at,contract_ended_at,notes,created_at",
+        "id,brand_id,pdv_name,pdv_city,pdv_state,contact_name,contact_phone,contract_status,contract_started_at,contract_ended_at,notes,created_at,portal_token",
       )
       .order("created_at", { ascending: false });
     if (data.brandId) q = q.eq("brand_id", data.brandId);
@@ -1031,6 +1031,127 @@ export const submitPartnerSellout = createServerFn({ method: "POST" })
         source: "partner_portal",
         notes: data.notes ?? null,
       });
+    if (error) throw error;
+    return { ok: true };
+  });
+
+/* ============ Fase 8 — Demo seed da microcervejaria ============ */
+
+export const seedBreweryDemo = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const userId = context.userId;
+    const slug = `demo-${userId.slice(0, 6)}-${Date.now().toString(36).slice(-4)}`;
+
+    const { data: brand, error: bErr } = await context.supabase
+      .from("brewery_brands")
+      .insert({
+        owner_user_id: userId,
+        name: "Cervejaria Demo (Lúpulo & Cia)",
+        slug,
+        city: "Florianópolis",
+        state: "SC",
+        founded_year: 2018,
+        brewer_name: "Mestre Cervejeiro Demo",
+        bio: "Marca de demonstração para experimentar todos os fluxos do módulo de microcervejarias.",
+        is_active: true,
+        is_demo: true,
+      })
+      .select("id")
+      .single();
+    if (bErr || !brand) throw bErr ?? new Error("Falha ao criar marca demo");
+    const brandId = brand.id;
+
+    // Produtos demo
+    const products = [
+      { sku: "DEMO-IPA-473", name: "Lúpulo IPA", style: "IPA", abv: 6.2, ibu: 55, volume_ml: 473 },
+      { sku: "DEMO-PIL-355", name: "Sol Pilsen", style: "Pilsen", abv: 4.6, ibu: 18, volume_ml: 355 },
+      { sku: "DEMO-STO-473", name: "Noite Stout", style: "Stout", abv: 7.0, ibu: 35, volume_ml: 473 },
+    ];
+    const { data: insertedProducts } = await context.supabase
+      .from("brewery_products")
+      .insert(products.map((p) => ({ ...p, brand_id: brandId, is_active: true })))
+      .select("id,sku");
+
+    // PDVs demo
+    const pdvSeed = [
+      { pdv_name: "Bar do Centro Demo", pdv_city: "Florianópolis", pdv_state: "SC", contact_name: "João Demo", contact_phone: "(48) 99999-1111", contract_status: "active" },
+      { pdv_name: "Bistrô Praia Demo", pdv_city: "Itajaí", pdv_state: "SC", contact_name: "Maria Demo", contact_phone: "(47) 99999-2222", contract_status: "active" },
+      { pdv_name: "Pub Universitário Demo", pdv_city: "Joinville", pdv_state: "SC", contact_name: "Pedro Demo", contact_phone: "(47) 99999-3333", contract_status: "pending" },
+    ];
+    const { data: insertedPdvs } = await context.supabase
+      .from("brewery_pdv_links")
+      .insert(pdvSeed.map((p) => ({ ...p, brand_id: brandId, contract_started_at: p.contract_status === "active" ? new Date().toISOString().slice(0, 10) : null })))
+      .select("id,pdv_name");
+
+    // Sell-outs últimos 60 dias (3 períodos quinzenais x PDVs ativos x produtos)
+    const activePdvs = (insertedPdvs ?? []).filter((p: any) => p.pdv_name !== "Pub Universitário Demo");
+    const periods = [60, 45, 30, 15, 0].map((daysAgo, i, arr) => {
+      const end = new Date(Date.now() - daysAgo * 86400_000);
+      const start = i > 0 ? new Date(Date.now() - arr[i - 1] * 86400_000 + 86400_000) : new Date(Date.now() - (daysAgo + 14) * 86400_000);
+      return { start: start.toISOString().slice(0, 10), end: end.toISOString().slice(0, 10) };
+    });
+    const sellouts: any[] = [];
+    for (const pdv of activePdvs) {
+      for (const prod of insertedProducts ?? []) {
+        for (const per of periods) {
+          const units = 20 + Math.floor(Math.random() * 60);
+          const unit_price = 18 + Math.floor(Math.random() * 8);
+          sellouts.push({
+            brand_id: brandId,
+            product_id: prod.id,
+            pdv_link_id: pdv.id,
+            period_start: per.start,
+            period_end: per.end,
+            units,
+            gross_revenue_cents: units * unit_price * 100,
+            avg_ticket_cents: unit_price * 100,
+            source: "demo_seed",
+          });
+        }
+      }
+    }
+    if (sellouts.length > 0) {
+      await context.supabase.from("brewery_sellouts").insert(sellouts);
+    }
+
+    // Campanha demo
+    const today = new Date().toISOString().slice(0, 10);
+    const ends = new Date(Date.now() + 30 * 86400_000).toISOString().slice(0, 10);
+    await context.supabase.from("brewery_campaigns").insert({
+      brand_id: brandId,
+      name: "Lançamento IPA Verão (Demo)",
+      goal: "Aumentar giro da IPA nos bares parceiros",
+      voucher_code: "IPA20",
+      starts_at: today,
+      ends_at: ends,
+      kpi_target_units: 500,
+      kpi_target_leads: 100,
+      status: "running",
+      target_pdv_ids: (insertedPdvs ?? []).map((p: any) => p.id),
+    });
+
+    // Leads demo
+    const leadsSeed = [
+      { masked_name: "Lucas M.", masked_whatsapp: "(48) ****-1234", favorite_styles: ["IPA", "Stout"], interests: ["Lançamentos", "Cupons"], frequency: "weekly", consent_marketing: true, source: "demo_seed" },
+      { masked_name: "Ana C.", masked_whatsapp: "(48) ****-5678", favorite_styles: ["Pilsen", "Weiss"], interests: ["Eventos/Degustações"], frequency: "biweekly", consent_marketing: true, source: "demo_seed" },
+      { masked_name: "Bruno S.", masked_whatsapp: "(48) ****-9012", favorite_styles: ["IPA"], interests: ["Receitas/Harmonização"], frequency: "monthly", consent_marketing: true, source: "demo_seed" },
+      { masked_name: "Clara R.", masked_whatsapp: "(48) ****-3456", favorite_styles: ["Stout", "Porter"], interests: ["Visita à fábrica"], frequency: "rarely", consent_marketing: false, source: "demo_seed" },
+    ];
+    await context.supabase.from("brewery_lead_preferences").insert(leadsSeed.map((l) => ({ ...l, brand_id: brandId })));
+
+    return { brandId, slug };
+  });
+
+export const removeBreweryDemo = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ brandId: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { error } = await context.supabase
+      .from("brewery_brands")
+      .delete()
+      .eq("id", data.brandId)
+      .eq("is_demo", true);
     if (error) throw error;
     return { ok: true };
   });

@@ -1,12 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Beer, Store, TrendingUp, Users, Sparkles, Wine } from "lucide-react";
-import { fetchBreweryDashboard, listMyBreweryBrands } from "@/lib/brewery.functions";
+import { toast } from "sonner";
+import { Beer, Store, TrendingUp, Users, Sparkles, Wine, Megaphone, BarChart3, Send, Wand2, Trash2 } from "lucide-react";
+import { fetchBreweryDashboard, listMyBreweryBrands, seedBreweryDemo, removeBreweryDemo } from "@/lib/brewery.functions";
 
 export const Route = createFileRoute("/_authenticated/cervejaria")({
   component: BreweryDashboard,
@@ -36,7 +38,18 @@ function KpiCard({ icon: Icon, label, value, sub }: { icon: any; label: string; 
   );
 }
 
+function TourStep({ to, icon: Icon, title, desc }: { to: string; icon: any; title: string; desc: string }) {
+  return (
+    <Link to={to} className="block border rounded p-3 hover:bg-muted/50 transition-colors">
+      <div className="flex items-center gap-2 text-sm font-medium"><Icon className="w-4 h-4 text-primary" />{title}</div>
+      <div className="text-xs text-muted-foreground mt-1">{desc}</div>
+    </Link>
+  );
+}
+
+
 function BreweryDashboard() {
+  const qc = useQueryClient();
   const [brandId, setBrandId] = useState<string | undefined>(undefined);
   const [sinceDays, setSinceDays] = useState<number>(30);
 
@@ -46,12 +59,28 @@ function BreweryDashboard() {
     queryFn: () => brandsFn(),
     staleTime: 60_000,
   });
+  const hasBrands = brands.length > 0;
+  const demoBrand = (brands as any[]).find((b) => b.is_demo);
+
+  const seedFn = useServerFn(seedBreweryDemo);
+  const removeFn = useServerFn(removeBreweryDemo);
+  const seedMut = useMutation({
+    mutationFn: () => seedFn(),
+    onSuccess: (r: any) => { toast.success("Marca demo criada!"); setBrandId(r.brandId); qc.invalidateQueries({ queryKey: ["brewery"] }); },
+    onError: (e: any) => toast.error(e?.message ?? "Erro"),
+  });
+  const removeMut = useMutation({
+    mutationFn: (id: string) => removeFn({ data: { brandId: id } }),
+    onSuccess: () => { toast.success("Marca demo removida"); setBrandId(undefined); qc.invalidateQueries({ queryKey: ["brewery"] }); },
+    onError: (e: any) => toast.error(e?.message ?? "Erro"),
+  });
 
   const dashFn = useServerFn(fetchBreweryDashboard);
   const { data, isLoading } = useQuery({
     queryKey: ["brewery", "dashboard", brandId ?? "all", sinceDays],
     queryFn: () => dashFn({ data: { brandId, sinceDays } }),
     refetchInterval: 60_000,
+    enabled: hasBrands,
   });
 
   const kpi = data?.kpis;
@@ -97,7 +126,44 @@ function BreweryDashboard() {
         </div>
       </div>
 
-      {isLoading && (
+      {!hasBrands && (
+        <Card className="border-primary">
+          <CardContent className="p-6 flex items-center justify-between gap-4 flex-wrap">
+            <div className="space-y-1">
+              <div className="font-semibold flex items-center gap-2"><Wand2 className="w-4 h-4 text-primary" />Comece com uma marca demo</div>
+              <p className="text-sm text-muted-foreground max-w-xl">
+                Crie uma cervejaria fictícia já populada com PDVs, rótulos, campanha ativa, sell-out histórico e leads — ideal para explorar todos os fluxos antes de cadastrar dados reais.
+              </p>
+            </div>
+            <Button onClick={() => seedMut.mutate()} disabled={seedMut.isPending}>
+              <Wand2 className="w-4 h-4 mr-2" />{seedMut.isPending ? "Criando…" : "Criar marca demo"}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {hasBrands && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div className="text-sm font-medium">Tour rápido</div>
+              {demoBrand && (
+                <Button size="sm" variant="ghost" onClick={() => removeMut.mutate(demoBrand.id)} disabled={removeMut.isPending}>
+                  <Trash2 className="w-3.5 h-3.5 mr-1" />Remover marca demo
+                </Button>
+              )}
+            </div>
+            <div className="grid gap-2 md:grid-cols-4 mt-3">
+              <TourStep to="/cervejaria/pdvs" icon={Store} title="1. PDVs parceiros" desc="Cadastre bares ou compartilhe o link do portal para que aceitem a parceria." />
+              <TourStep to="/cervejaria/catalogo" icon={Megaphone} title="2. Catálogo & campanhas" desc="Cadastre rótulos e crie uma campanha com cupom e meta de unidades." />
+              <TourStep to="/cervejaria/relacionamento" icon={Send} title="3. Disparo segmentado" desc="Capture leads, segmente por estilo e envie WhatsApp/E-mail." />
+              <TourStep to="/cervejaria/retorno" icon={BarChart3} title="4. Retorno por PDV/Cupom" desc="Acompanhe ROI por bar, resgates de cupom e conversão do disparo." />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {isLoading && hasBrands && (
         <Card><CardContent className="py-8 text-center text-muted-foreground">Carregando…</CardContent></Card>
       )}
 
