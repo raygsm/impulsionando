@@ -193,19 +193,19 @@ export const globalEntitySearch = createServerFn({ method: "POST" })
         .limit(5),
       supabaseAdmin
         .from("companies")
-        .select("id,name,trade_name,cnpj,city,state")
-        .or([`name.ilike.${like}`, `trade_name.ilike.${like}`, digits ? `cnpj.ilike.%${digits}%` : null].filter(Boolean).join(","))
+        .select("id,name,trade_name,document,address_city,address_state")
+        .or([`name.ilike.${like}`, `trade_name.ilike.${like}`, digits ? `document.ilike.%${digits}%` : null].filter(Boolean).join(","))
         .limit(5),
       supabaseAdmin
         .from("marketing_leads")
-        .select("id,name,email,company_name,created_at")
-        .or([`name.ilike.${like}`, `email.ilike.${like}`, `company_name.ilike.${like}`].join(","))
+        .select("id,name,email,company,created_at")
+        .or([`name.ilike.${like}`, `email.ilike.${like}`, `company.ilike.${like}`].join(","))
         .order("created_at", { ascending: false })
         .limit(5),
       supabaseAdmin
         .from("aff_affiliates")
-        .select("id,full_name,email,phone")
-        .or([`full_name.ilike.${like}`, `email.ilike.${like}`, digits ? `phone.ilike.%${digits}%` : null].filter(Boolean).join(","))
+        .select("id,name,email,whatsapp")
+        .or([`name.ilike.${like}`, `email.ilike.${like}`, digits ? `whatsapp.ilike.%${digits}%` : null].filter(Boolean).join(","))
         .limit(5),
     ]);
 
@@ -224,7 +224,7 @@ export const globalEntitySearch = createServerFn({ method: "POST" })
         type: "empresa",
         id: e.id,
         label: (e.trade_name ?? e.name) as string,
-        sublabel: [e.cnpj, e.city, e.state].filter(Boolean).join(" · ") || null,
+        sublabel: [e.document, e.address_city, e.address_state].filter(Boolean).join(" · ") || null,
         to: `/companies?focus=${e.id}`,
       });
     }
@@ -233,7 +233,7 @@ export const globalEntitySearch = createServerFn({ method: "POST" })
         type: "lead",
         id: l.id,
         label: (l.name ?? l.email ?? "Lead") as string,
-        sublabel: [l.company_name, l.email].filter(Boolean).join(" · ") || null,
+        sublabel: [l.company, l.email].filter(Boolean).join(" · ") || null,
         to: `/marketing/leads?focus=${l.id}`,
       });
     }
@@ -241,7 +241,7 @@ export const globalEntitySearch = createServerFn({ method: "POST" })
       hits.push({
         type: "afiliado",
         id: a.id,
-        label: (a.full_name ?? a.email ?? "Afiliado") as string,
+        label: (a.name ?? a.email ?? "Afiliado") as string,
         sublabel: a.email ?? null,
         to: `/affiliates/affiliates?focus=${a.id}`,
       });
