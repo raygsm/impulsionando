@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { KpiCard } from "@/components/insights/KpiCard";
 import { PercebidoSection } from "@/components/insights/PercebidoSection";
 import { fetchConsumidorDashboard } from "@/lib/audience-dashboards.functions";
-import { Loader2, Heart, MapPin, Receipt, Sparkles, Gift, FileText } from "lucide-react";
+import { Loader2, Heart, MapPin, Receipt, Sparkles, Gift, FileText, Ticket, Lock, Crown } from "lucide-react";
+import type { ReactNode } from "react";
 
 export const Route = createFileRoute("/_authenticated/dashboards/consumidor")({
   head: () => ({
@@ -80,106 +81,111 @@ function ConsumidorDashboardPage() {
             <KpiCard label="Créditos" value={data.kpis.credits.value} />
           </div>
 
+          {data.kpis.activeMemberships.value === 0 ? (
+            <PaywallHero />
+          ) : null}
+
           <div className="grid gap-4 lg:grid-cols-2">
-            <Card className="p-4">
-              <div className="flex items-center gap-2 mb-3 text-sm font-semibold">
-                <Heart className="h-4 w-4 text-rose-500" /> Meus favoritos
-              </div>
-              {data.lists.favorites.length === 0 ? (
-                <EmptyHint text="Você ainda não favoritou nenhum lugar. Explore o Clube perto de você." />
-              ) : (
-                <ul className="space-y-2 text-sm">
-                  {data.lists.favorites.slice(0, 6).map((f) => (
-                    <li key={f.id} className="flex justify-between border-b border-border/40 pb-1.5">
-                      <span className="truncate">{f.company_id ?? "—"}</span>
-                      <span className="text-muted-foreground text-xs">{dt(f.created_at)}</span>
-                    </li>
-                  ))}
-                </ul>
+            <PremiumSection
+              isPremium={data.kpis.activeMemberships.value > 0}
+              icon={<Heart className="h-4 w-4 text-rose-500" />}
+              title="Meus favoritos"
+              teaser="Salve restaurantes, clínicas, eventos e lugares para acessar com um toque."
+              empty="Você ainda não favoritou nenhum lugar. Explore o Clube perto de você."
+              items={data.lists.favorites}
+              render={(f) => (
+                <>
+                  <span className="truncate">{f.company_id ?? "—"}</span>
+                  <span className="text-muted-foreground text-xs">{dt(f.created_at)}</span>
+                </>
               )}
-            </Card>
+            />
 
-            <Card className="p-4">
-              <div className="flex items-center gap-2 mb-3 text-sm font-semibold">
-                <MapPin className="h-4 w-4 text-blue-500" /> Histórico de visitas
-              </div>
-              {data.lists.visits.length === 0 ? (
-                <EmptyHint text="Suas visitas e check-ins aparecerão aqui." />
-              ) : (
-                <ul className="space-y-2 text-sm">
-                  {data.lists.visits.slice(0, 6).map((v) => (
-                    <li key={v.id} className="flex justify-between border-b border-border/40 pb-1.5">
-                      <span className="truncate">{v.company_id ?? "Visita"}</span>
-                      <span className="text-muted-foreground text-xs">{dt(v.created_at)}</span>
-                    </li>
-                  ))}
-                </ul>
+            <PremiumSection
+              isPremium={data.kpis.activeMemberships.value > 0}
+              icon={<MapPin className="h-4 w-4 text-blue-500" />}
+              title="Histórico de visitas"
+              teaser="Veja tudo o que você consumiu, quando e onde — organizado por mês."
+              empty="Suas visitas e check-ins aparecerão aqui."
+              items={data.lists.visits}
+              render={(v) => (
+                <>
+                  <span className="truncate">{v.company_id ?? "Visita"}</span>
+                  <span className="text-muted-foreground text-xs">{dt(v.created_at)}</span>
+                </>
               )}
-            </Card>
+            />
 
-            <Card className="p-4">
-              <div className="flex items-center gap-2 mb-3 text-sm font-semibold">
-                <Receipt className="h-4 w-4 text-emerald-500" /> Comprovantes e recibos
-              </div>
-              {data.lists.receipts.length === 0 ? (
-                <EmptyHint text="Quando você consumir benefícios, seus comprovantes ficam aqui." />
-              ) : (
-                <ul className="space-y-2 text-sm">
-                  {data.lists.receipts.slice(0, 6).map((r) => (
-                    <li key={r.id} className="flex justify-between border-b border-border/40 pb-1.5">
-                      <span className="truncate">{r.title}</span>
-                      <span className="text-muted-foreground text-xs">{brl(r.amount_cents ?? 0)} · {dt(r.issued_at)}</span>
-                    </li>
-                  ))}
-                </ul>
+            <PremiumSection
+              isPremium={data.kpis.activeMemberships.value > 0}
+              icon={<Ticket className="h-4 w-4 text-pink-500" />}
+              title="Meus cupons e vouchers"
+              teaser="Cupons exclusivos, vouchers e benefícios resgatáveis perto de você."
+              empty="Quando você resgatar um cupom ou voucher, ele aparecerá aqui."
+              items={data.lists.receipts.filter((r) => r.kind === "voucher" || r.kind === "coupon")}
+              render={(r) => (
+                <>
+                  <span className="truncate">{r.title}</span>
+                  <span className="text-muted-foreground text-xs">{dt(r.issued_at)}</span>
+                </>
               )}
-            </Card>
+            />
 
-            <Card className="p-4">
-              <div className="flex items-center gap-2 mb-3 text-sm font-semibold">
-                <FileText className="h-4 w-4 text-violet-500" /> Notas e cobranças
-              </div>
-              {data.lists.invoices.length === 0 ? (
-                <EmptyHint text="Suas faturas e notas fiscais aparecerão aqui." />
-              ) : (
-                <ul className="space-y-2 text-sm">
-                  {data.lists.invoices.slice(0, 6).map((i) => (
-                    <li key={i.id} className="flex justify-between border-b border-border/40 pb-1.5">
-                      <span className="truncate">
-                        {brl(i.amount_cents ?? 0)}{" "}
-                        <Badge variant={i.status === "paid" ? "secondary" : "outline"} className="ml-1">
-                          {i.status}
-                        </Badge>
-                      </span>
-                      <span className="text-muted-foreground text-xs">venc. {dt(i.due_date)}</span>
-                    </li>
-                  ))}
-                </ul>
+            <PremiumSection
+              isPremium={data.kpis.activeMemberships.value > 0}
+              icon={<Receipt className="h-4 w-4 text-emerald-500" />}
+              title="Comprovantes e recibos"
+              teaser="Centralize comprovantes de compras, reservas e atendimentos num só lugar."
+              empty="Quando você consumir benefícios, seus comprovantes ficam aqui."
+              items={data.lists.receipts}
+              render={(r) => (
+                <>
+                  <span className="truncate">{r.title}</span>
+                  <span className="text-muted-foreground text-xs">{brl(r.amount_cents ?? 0)} · {dt(r.issued_at)}</span>
+                </>
               )}
-            </Card>
+            />
 
-            <Card className="p-4 lg:col-span-2">
-              <div className="flex items-center gap-2 mb-3 text-sm font-semibold">
-                <Gift className="h-4 w-4 text-amber-500" /> Movimentação de créditos
-              </div>
-              {data.lists.rewards.length === 0 ? (
-                <EmptyHint text="Acumule créditos visitando, indicando e participando." />
-              ) : (
-                <ul className="space-y-2 text-sm">
-                  {data.lists.rewards.slice(0, 8).map((r) => (
-                    <li key={r.id} className="flex justify-between border-b border-border/40 pb-1.5">
-                      <span className="truncate">
-                        <Badge variant="outline" className="mr-2 capitalize">{r.kind}</Badge>
-                        {r.reason}
-                      </span>
-                      <span className={`text-xs font-mono ${Number(r.delta) >= 0 ? "text-emerald-600" : "text-rose-600"}`}>
-                        {Number(r.delta) >= 0 ? "+" : ""}{r.delta}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+            <PremiumSection
+              isPremium={data.kpis.activeMemberships.value > 0}
+              icon={<FileText className="h-4 w-4 text-violet-500" />}
+              title="Notas e cobranças"
+              teaser="Acompanhe suas faturas e notas fiscais da sua assinatura."
+              empty="Suas faturas e notas fiscais aparecerão aqui."
+              items={data.lists.invoices}
+              render={(i) => (
+                <>
+                  <span className="truncate">
+                    {brl(i.amount_cents ?? 0)}{" "}
+                    <Badge variant={i.status === "paid" ? "secondary" : "outline"} className="ml-1">
+                      {i.status}
+                    </Badge>
+                  </span>
+                  <span className="text-muted-foreground text-xs">venc. {dt(i.due_date)}</span>
+                </>
               )}
-            </Card>
+            />
+
+            <PremiumSection
+              isPremium={data.kpis.activeMemberships.value > 0}
+              icon={<Gift className="h-4 w-4 text-amber-500" />}
+              title="Movimentação de créditos"
+              teaser="Acumule créditos e cashback toda vez que consumir ou indicar."
+              empty="Acumule créditos visitando, indicando e participando."
+              items={data.lists.rewards}
+              className="lg:col-span-2"
+              render={(r) => (
+                <>
+                  <span className="truncate">
+                    <Badge variant="outline" className="mr-2 capitalize">{r.kind}</Badge>
+                    {r.reason}
+                  </span>
+                  <span className={`text-xs font-mono ${Number(r.delta) >= 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                    {Number(r.delta) >= 0 ? "+" : ""}{r.delta}
+                  </span>
+                </>
+              )}
+            />
           </div>
 
           <Card className="p-4 bg-gradient-to-br from-fuchsia-50 to-rose-50 border-fuchsia-200">
@@ -200,4 +206,86 @@ function ConsumidorDashboardPage() {
 
 function EmptyHint({ text }: { text: string }) {
   return <div className="text-sm text-muted-foreground py-4 text-center">{text}</div>;
+}
+
+function PaywallHero() {
+  return (
+    <Card className="p-5 border-amber-300 bg-gradient-to-br from-amber-50 via-rose-50 to-fuchsia-50">
+      <div className="flex flex-col md:flex-row md:items-center gap-4 justify-between">
+        <div className="flex items-start gap-3">
+          <div className="rounded-full bg-amber-500/20 p-2.5">
+            <Crown className="h-5 w-5 text-amber-600" />
+          </div>
+          <div>
+            <div className="text-base font-semibold text-amber-900">Assine o Clube e desbloqueie tudo</div>
+            <p className="text-sm text-amber-900/80 mt-0.5 max-w-xl">
+              Versão gratuita mostra o guia perto de você. Assinantes acessam histórico
+              completo, créditos, cupons, vouchers e benefícios exclusivos por R$ 9,99/mês.
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-2 shrink-0">
+          <Button asChild>
+            <Link to="/minha-assinatura">Assinar Clube</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/clube">Continuar gratuito</Link>
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function PremiumSection<T extends { id: string }>({
+  isPremium,
+  icon,
+  title,
+  teaser,
+  empty,
+  items,
+  render,
+  className,
+}: {
+  isPremium: boolean;
+  icon: ReactNode;
+  title: string;
+  teaser: string;
+  empty: string;
+  items: T[];
+  render: (item: T) => ReactNode;
+  className?: string;
+}) {
+  if (!isPremium) {
+    return (
+      <Card className={`p-4 relative overflow-hidden ${className ?? ""}`}>
+        <div className="flex items-center gap-2 mb-2 text-sm font-semibold">
+          {icon} {title}
+          <Badge variant="outline" className="ml-auto gap-1 text-[10px]">
+            <Lock className="h-3 w-3" /> Premium
+          </Badge>
+        </div>
+        <p className="text-sm text-muted-foreground mb-3">{teaser}</p>
+        <Button asChild size="sm" variant="secondary" className="w-full">
+          <Link to="/minha-assinatura">Desbloquear com assinatura</Link>
+        </Button>
+      </Card>
+    );
+  }
+  return (
+    <Card className={`p-4 ${className ?? ""}`}>
+      <div className="flex items-center gap-2 mb-3 text-sm font-semibold">{icon} {title}</div>
+      {items.length === 0 ? (
+        <EmptyHint text={empty} />
+      ) : (
+        <ul className="space-y-2 text-sm">
+          {items.slice(0, 6).map((it) => (
+            <li key={it.id} className="flex justify-between border-b border-border/40 pb-1.5">
+              {render(it)}
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
+  );
 }

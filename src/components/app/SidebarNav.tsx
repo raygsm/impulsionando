@@ -10,6 +10,17 @@ import { useActiveCompany } from "@/hooks/use-active-company";
 import { useImpersonation } from "@/hooks/use-impersonation";
 import { useAudience } from "@/hooks/use-audience";
 import { countPendingPixCharges } from "@/lib/pix-charges.functions";
+import { fetchUserPlanContext } from "@/lib/plan-context.functions";
+import { useServerFn } from "@tanstack/react-start";
+
+function classifyPlanTier(code: string | null | undefined, name: string | null | undefined):
+  "essencial" | "profissional" | "completo" | null {
+  const blob = `${code ?? ""} ${name ?? ""}`.toLowerCase();
+  if (blob.includes("complet")) return "completo";
+  if (blob.includes("profission") || blob.includes("integrad") || blob.includes("avanc")) return "profissional";
+  if (blob.includes("essencial") || blob.includes("basic") || blob.includes("starter")) return "essencial";
+  return null;
+}
 
 function isItemActive(pathname: string, to: string) {
   return pathname === to || pathname.startsWith(to + "/");
@@ -131,6 +142,14 @@ export function SidebarNav({
   const { data: perms, isLoading: permsLoading } = useUserPermissions(companyId);
   const { data: pendingPix = 0 } = usePendingPixBadge(isSuper);
 
+  const planFn = useServerFn(fetchUserPlanContext);
+  const { data: planCtx } = useQuery({
+    queryKey: ["plan-context"],
+    queryFn: () => planFn({ data: {} }),
+    staleTime: 60_000,
+  });
+  const planTier = classifyPlanTier(planCtx?.planCode, planCtx?.planName);
+
   const matchesAudience = (audiences: NavAudience[] | undefined): boolean => {
     if (!audiences || audiences.length === 0) return true;
     return audiences.includes(audience);
@@ -143,6 +162,13 @@ export function SidebarNav({
     const effective = i.audiences ?? groupAudiences;
     if (!matchesAudience(effective)) return false;
     if (i.superOnly) return isSuper;
+    // Gate por plano: staff/super sempre passa; demais precisam estar no tier.
+    if (i.requiresPlanTier && i.requiresPlanTier.length > 0) {
+      const bypass = isSuper || planCtx?.isStaff;
+      if (!bypass) {
+        if (!planTier || !i.requiresPlanTier.includes(planTier)) return false;
+      }
+    }
     if (isImpersonating) return true;
     if (currentUser.isSuperAdmin) return true;
     if (!i.perm) return true;

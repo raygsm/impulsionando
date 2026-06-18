@@ -25,6 +25,8 @@ export interface NavItem {
   badge?: "pendingPix";
   /** Audiências para as quais este item é relevante. Se ausente = todas. */
   audiences?: NavAudience[];
+  /** Tiers de plano que liberam este item. Se ausente = todos. Staff sempre vê. */
+  requiresPlanTier?: Array<"essencial" | "profissional" | "completo">;
 }
 
 
@@ -118,17 +120,17 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/finance/integracoes", label: "Integrações de pagamento", icon: Wallet, perm: "finance.method.write", badge: "pendingPix" },
       { to: "/finance/commissions", label: "Comissões", icon: Percent, perm: "finance.commission.read" },
       { to: "/minha-assinatura", label: "Minha Assinatura", icon: CreditCard },
-      { to: "/affiliates", label: "Afiliados — Dashboard", icon: LayoutDashboard, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"] },
-      { to: "/affiliates/sales", label: "Afiliados — Vendas", icon: ShoppingCart, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"] },
-      { to: "/affiliates/commissions", label: "Afiliados — Comissões", icon: Percent, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"] },
-      { to: "/affiliates/payouts", label: "Saques e Repasses", icon: Banknote, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"] },
-      { to: "/affiliates/wallet", label: "Carteira & Alertas", icon: Wallet, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"] },
-      { to: "/affiliates/links", label: "Links / Cupons / QR", icon: Link2, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"] },
-      { to: "/affiliates/affiliates", label: "Afiliados (cadastro)", icon: Handshake, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"] },
-      { to: "/affiliates/coproducers", label: "Coprodutores", icon: Users2, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"] },
-      { to: "/affiliates/managers", label: "Gerentes", icon: Briefcase, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"] },
-      { to: "/affiliates/products", label: "Produtos (afiliados)", icon: Boxes, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"] },
-      { to: "/affiliates/offers", label: "Ofertas", icon: BadgeDollarSign, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"] },
+      { to: "/affiliates", label: "Afiliados — Dashboard", icon: LayoutDashboard, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"], requiresPlanTier: ["profissional", "completo"] },
+      { to: "/affiliates/sales", label: "Afiliados — Vendas", icon: ShoppingCart, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"], requiresPlanTier: ["profissional", "completo"] },
+      { to: "/affiliates/commissions", label: "Afiliados — Comissões", icon: Percent, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"], requiresPlanTier: ["profissional", "completo"] },
+      { to: "/affiliates/payouts", label: "Saques e Repasses", icon: Banknote, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"], requiresPlanTier: ["profissional", "completo"] },
+      { to: "/affiliates/wallet", label: "Carteira & Alertas", icon: Wallet, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"], requiresPlanTier: ["profissional", "completo"] },
+      { to: "/affiliates/links", label: "Links / Cupons / QR", icon: Link2, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"], requiresPlanTier: ["profissional", "completo"] },
+      { to: "/affiliates/affiliates", label: "Afiliados (cadastro)", icon: Handshake, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"], requiresPlanTier: ["profissional", "completo"] },
+      { to: "/affiliates/coproducers", label: "Coprodutores", icon: Users2, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"], requiresPlanTier: ["profissional", "completo"] },
+      { to: "/affiliates/managers", label: "Gerentes", icon: Briefcase, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"], requiresPlanTier: ["profissional", "completo"] },
+      { to: "/affiliates/products", label: "Produtos (afiliados)", icon: Boxes, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"], requiresPlanTier: ["profissional", "completo"] },
+      { to: "/affiliates/offers", label: "Ofertas", icon: BadgeDollarSign, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"], requiresPlanTier: ["profissional", "completo"] },
     ],
   },
   {
@@ -206,7 +208,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/admin/modulos/clonagem", label: "Clonagem de Módulos", icon: Copy, superOnly: true },
       { to: "/white-label/cockpit", label: "White Label Cockpit", icon: Layers, superOnly: true },
       { to: "/support/cockpit", label: "Suporte — Cockpit", icon: Headphones, superOnly: true },
-      { to: "/affiliates/reports", label: "Relatórios de afiliados", icon: TrendingUp, perm: "aff.module.read" },
+      { to: "/affiliates/reports", label: "Relatórios de afiliados", icon: TrendingUp, perm: "aff.module.read", requiresPlanTier: ["profissional", "completo"] },
     ],
   },
 ];
