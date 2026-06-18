@@ -115,10 +115,16 @@ function EmpresasMenu() {
               </div>
 
               <div className="p-3 max-h-[420px] overflow-y-auto">
-                <div className="px-2 pb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <h2
+                  id="nichos-submenu-heading"
+                  className="px-2 pb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+                >
                   Nichos
-                </div>
-                <ul className="grid grid-cols-1 gap-1">
+                </h2>
+                <ul
+                  className="grid grid-cols-1 gap-1"
+                  aria-labelledby="nichos-submenu-heading"
+                >
                   {NICHO_DETAILS.map((n) => {
                     const Icon = n.icon;
                     return (
@@ -127,9 +133,13 @@ function EmpresasMenu() {
                           <Link
                             to="/nichos/$slug"
                             params={{ slug: n.slug }}
-                            className="flex items-start gap-3 rounded-md p-2 text-sm hover:bg-accent focus-visible:bg-accent focus-visible:outline-none transition-colors"
+                            aria-label={`${n.shortLabel}: ${n.cardDesc}`}
+                            className="flex items-start gap-3 rounded-md p-2 text-sm hover:bg-accent focus-visible:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-colors"
                           >
-                            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-primary/10 text-primary">
+                            <span
+                              aria-hidden="true"
+                              className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-primary/10 text-primary"
+                            >
                               <Icon className="h-4 w-4" />
                             </span>
                             <span className="min-w-0">
