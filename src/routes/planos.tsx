@@ -5,7 +5,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { getCommercialAvailability } from "@/lib/commercial.functions";
 import {
   ArrowRight, MessageCircle, Sparkles, CheckCircle2, Minus, HelpCircle, Star,
-  Building2, Layers, UserRound, PlayCircle,
+  Building2, Layers, UserRound, PlayCircle, Gauge, Wrench, Clock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -125,6 +125,28 @@ function buildPlans(wage: number): Plan[] {
     },
   ];
 }
+
+/** Sinais operacionais por plano: complexidade de setup, manutenção semanal estimada, time-to-value. */
+const PLAN_OPS: Record<string, { setup: string; maintenance: string; ttv: string; suggested: string[] }> = {
+  Essencial: {
+    setup: "Baixa",
+    maintenance: "~1h/semana",
+    ttv: "1ª venda em 48h",
+    suggested: ["Agenda", "CRM Leve", "Financeiro Essencial"],
+  },
+  Integrado: {
+    setup: "Média",
+    maintenance: "~3h/semana",
+    ttv: "ROI mensurável em 30 dias",
+    suggested: ["CRM + Agenda", "PDV + Estoque", "WhatsApp + IA básica"],
+  },
+  Avançado: {
+    setup: "Alta (assistida)",
+    maintenance: "Time dedicado / CSM",
+    ttv: "Rollout em 30–60 dias",
+    suggested: ["Multi-unidade", "Contratos + Affiliates", "IA avançada + n8n"],
+  },
+};
 
 
 
@@ -405,6 +427,20 @@ function PlanosPage() {
                 <div className="text-xl font-semibold tracking-tight mt-1">{plan.displayName ?? plan.name}</div>
                 <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{plan.tagline}</p>
 
+                {PLAN_OPS[plan.name] && (
+                  <div className="mt-3 flex flex-wrap gap-1.5" aria-label="Sinais operacionais">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[10px] font-medium">
+                      <Gauge className="w-3 h-3" /> Setup {PLAN_OPS[plan.name].setup}
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[10px] font-medium">
+                      <Wrench className="w-3 h-3" /> {PLAN_OPS[plan.name].maintenance}
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[10px] font-medium">
+                      <Clock className="w-3 h-3" /> {PLAN_OPS[plan.name].ttv}
+                    </span>
+                  </div>
+                )}
+
                 <div className="mt-5 min-h-[68px]">
                   {monthlyEffective !== null ? (
                     <>
@@ -439,6 +475,22 @@ function PlanosPage() {
                     </li>
                   ))}
                 </ul>
+
+                {PLAN_OPS[plan.name]?.suggested?.length ? (
+                  <div className="mt-4 rounded-md border border-dashed border-border bg-muted/30 p-2.5">
+                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
+                      Combinação inteligente recomendada
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {PLAN_OPS[plan.name].suggested.map((s) => (
+                        <span key={s} className="inline-flex items-center rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[10px] font-medium">
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
 
                 {plan.monthly !== null && PRICE_IDS[plan.name] ? (
                   <div className="mt-6 space-y-2">
