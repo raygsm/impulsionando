@@ -119,14 +119,76 @@ function ConsumidorDashboardPage() {
             <PremiumSection
               isPremium={data.kpis.activeMemberships.value > 0}
               icon={<Ticket className="h-4 w-4 text-pink-500" />}
-              title="Meus cupons e vouchers"
-              teaser="Cupons exclusivos, vouchers e benefícios resgatáveis perto de você."
-              empty="Quando você resgatar um cupom ou voucher, ele aparecerá aqui."
-              items={data.lists.receipts.filter((r) => r.kind === "voucher" || r.kind === "coupon")}
+              title="Meus cupons"
+              teaser="Descontos personalizados para você usar nas marcas e lugares que você ama."
+              empty="Você ainda não resgatou nenhum cupom. Explore o Clube e pegue o próximo."
+              items={data.lists.coupons}
               render={(r) => (
                 <>
                   <span className="truncate">{r.title}</span>
-                  <span className="text-muted-foreground text-xs">{dt(r.issued_at)}</span>
+                  <span className="text-muted-foreground text-xs">
+                    <Badge variant={r.status === "used" ? "secondary" : "outline"} className="mr-2">
+                      {r.status === "used" ? "usado" : "disponível"}
+                    </Badge>
+                    {dt(r.issued_at)}
+                  </span>
+                </>
+              )}
+            />
+
+            <PremiumSection
+              isPremium={data.kpis.activeMemberships.value > 0}
+              icon={<TicketCheck className="h-4 w-4 text-fuchsia-500" />}
+              title="Meus vouchers"
+              teaser="Vouchers e brindes para resgatar quando e onde você quiser."
+              empty="Seus vouchers de benefícios aparecerão aqui assim que você resgatar."
+              items={data.lists.vouchers}
+              render={(r) => (
+                <>
+                  <span className="truncate">{r.title}</span>
+                  <span className="text-muted-foreground text-xs">
+                    {brl(r.amount_cents ?? 0)} · {dt(r.issued_at)}
+                  </span>
+                </>
+              )}
+            />
+
+            <PremiumSection
+              isPremium={data.kpis.activeMemberships.value > 0}
+              icon={<CalendarDays className="h-4 w-4 text-blue-600" />}
+              title="Minhas reservas e ingressos"
+              teaser="Reservas, agendamentos e ingressos centralizados — com QR Code e lembretes."
+              empty="Você ainda não tem reservas. Encontre eventos e experiências no Clube."
+              items={data.lists.tickets}
+              render={(t) => (
+                <>
+                  <span className="truncate font-mono text-xs">{t.code}</span>
+                  <span className="text-muted-foreground text-xs">
+                    {t.cancelled_at ? (
+                      <Badge variant="destructive" className="mr-2">cancelado</Badge>
+                    ) : (
+                      <Badge variant="secondary" className="mr-2">ativo</Badge>
+                    )}
+                    {dt(t.created_at)}
+                  </span>
+                </>
+              )}
+            />
+
+            <PremiumSection
+              isPremium={data.kpis.activeMemberships.value > 0}
+              icon={<Star className="h-4 w-4 text-amber-500" />}
+              title="Minhas avaliações"
+              teaser="Suas notas e comentários sobre lugares e experiências que você viveu."
+              empty="Depois de visitar um lugar, você poderá avaliar e ajudar outras pessoas."
+              items={data.lists.ratings}
+              render={(v) => (
+                <>
+                  <span className="truncate">
+                    <span className="text-amber-500 mr-2">{"★".repeat(Math.max(1, Math.min(5, v.rating ?? 0)))}</span>
+                    {v.notes ?? "Sem comentário"}
+                  </span>
+                  <span className="text-muted-foreground text-xs">{dt(v.created_at)}</span>
                 </>
               )}
             />
@@ -134,10 +196,10 @@ function ConsumidorDashboardPage() {
             <PremiumSection
               isPremium={data.kpis.activeMemberships.value > 0}
               icon={<Receipt className="h-4 w-4 text-emerald-500" />}
-              title="Comprovantes e recibos"
-              teaser="Centralize comprovantes de compras, reservas e atendimentos num só lugar."
-              empty="Quando você consumir benefícios, seus comprovantes ficam aqui."
-              items={data.lists.receipts}
+              title="Comprovantes de consumo"
+              teaser="Tudo o que você consumiu organizado por data, valor e estabelecimento."
+              empty="Seus comprovantes de consumo aparecerão aqui."
+              items={data.lists.receipts.filter((r) => r.kind !== "coupon" && r.kind !== "cupom" && r.kind !== "voucher")}
               render={(r) => (
                 <>
                   <span className="truncate">{r.title}</span>
@@ -149,16 +211,16 @@ function ConsumidorDashboardPage() {
             <PremiumSection
               isPremium={data.kpis.activeMemberships.value > 0}
               icon={<FileText className="h-4 w-4 text-violet-500" />}
-              title="Notas e cobranças"
-              teaser="Acompanhe suas faturas e notas fiscais da sua assinatura."
-              empty="Suas faturas e notas fiscais aparecerão aqui."
+              title="Minhas notas e cobranças"
+              teaser="Faturas e notas fiscais da sua assinatura do Clube, sempre à mão."
+              empty="Suas faturas e notas fiscais aparecerão aqui assim que houver cobranças."
               items={data.lists.invoices}
               render={(i) => (
                 <>
                   <span className="truncate">
                     {brl(i.amount_cents ?? 0)}{" "}
                     <Badge variant={i.status === "paid" ? "secondary" : "outline"} className="ml-1">
-                      {i.status}
+                      {i.status === "paid" ? "pago" : i.status}
                     </Badge>
                   </span>
                   <span className="text-muted-foreground text-xs">venc. {dt(i.due_date)}</span>
