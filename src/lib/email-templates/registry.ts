@@ -52,4 +52,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'demo-feira-welcome': demoFeiraWelcomeTemplate,
   'restaurant-order-ready': restaurantOrderReadyTemplate,
   'restaurant-bill-closed': restaurantBillClosedTemplate,
+  'restaurant-postvisit-thanks': restaurantPostvisitThanksTemplate,
 }
+
