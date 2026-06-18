@@ -28,7 +28,7 @@ const NAV: NavItem[] = [
   { to: "/white-label", label: "White Label" },
   { to: "/clube",       label: "Clube" },
   { to: "/demo",        label: "Demonstrações" },
-  { to: "/planos",      label: "Planos" },
+  { to: "/planos/comecar", label: "Planos" },
 ];
 
 function useActive(path: string, exact?: boolean) {
