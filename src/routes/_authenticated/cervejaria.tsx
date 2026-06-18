@@ -38,6 +38,14 @@ function KpiCard({ icon: Icon, label, value, sub }: { icon: any; label: string; 
   );
 }
 
+function TourStep({ to, icon: Icon, title, desc }: { to: string; icon: any; title: string; desc: string }) {
+  return (
+    <Link to={to} className="block border rounded p-3 hover:bg-muted/50 transition-colors">
+      <div className="flex items-center gap-2 text-sm font-medium"><Icon className="w-4 h-4 text-primary" />{title}</div>
+      <div className="text-xs text-muted-foreground mt-1">{desc}</div>
+    </Link>
+  );
+
 function BreweryDashboard() {
   const qc = useQueryClient();
   const [brandId, setBrandId] = useState<string | undefined>(undefined);
