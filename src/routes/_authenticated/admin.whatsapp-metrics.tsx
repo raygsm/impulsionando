@@ -177,7 +177,10 @@ function WhatsAppMetricsPage() {
   const alertEval = useMemo(() => evaluateAlerts(all, cfg), [all, cfg]);
   const ruleEvals = useMemo(() => evaluateAlertRules(all, rules), [all, rules]);
 
-  /** Cria payload + dispara notify + persiste auditoria. */
+  /**
+   * Dispatch global (não-regra): canais agem em paralelo, ambos com cooldown
+   * de escopo `global`. Mantido por compatibilidade.
+   */
   async function dispatchAlert(
     scope: string,
     payload: AlertPayload,
@@ -207,25 +210,125 @@ function WhatsAppMetricsPage() {
     try {
       const res = await notify({ data: { ...payload } });
       const channels = res?.channels ?? [];
+      const deliveries: ChannelDelivery[] = (res?.results ?? []).map((r) => ({
+        channel: r.channel as AlertChannel,
+        status: r.status as ChannelDelivery["status"],
+        error: r.error,
+        ts: Date.now(),
+      }));
       const status: AlertHistoryEntry["status"] =
-        res?.ok === false ? "failed"
+        res?.ok === false ? (channels.length > 0 ? "partial" : "failed")
         : channels.length === 0 ? "no_channels"
         : "sent";
-      recordAlertHistory({
-        ...baseEntry,
-        notified: channels,
-        status,
-        error: res?.error,
-      });
+      recordAlertHistory({ ...baseEntry, notified: channels, status, error: res?.error, deliveries });
       return baseEntry;
     } catch (err) {
       recordAlertHistory({
-        ...baseEntry,
-        notified: [],
-        status: "failed",
+        ...baseEntry, notified: [], status: "failed",
         error: err instanceof Error ? err.message : String(err),
       });
       return baseEntry;
+    } finally {
+      setTick((t) => t + 1);
+    }
+  }
+
+  /**
+   * Dispatch baseado em regra: usa `planChannelDispatch` para decidir
+   * por canal (com limites + cooldown próprios). Cada canal é marcado
+   * individualmente e o status agregado da entrada reflete o resultado.
+   */
+  async function dispatchRuleAlert(
+    rule: AlertRule,
+    ev: ReturnType<typeof evaluateAlertRules>[number],
+    rendered: { title: string; body: string },
+  ): Promise<void> {
+    const scope = ruleScope(rule);
+    const decisions = planChannelDispatch(ev, rule);
+    const willFire = decisions.filter((d) => d.willFire);
+    const basePayload: AlertPayload = {
+      title: rendered.title, body: rendered.body,
+      ctr: ev.ctr, sendRate: ev.sendRate,
+      impressions: ev.impressions, clicks: ev.clicks, sends: ev.sends,
+      ctrBelow: ev.ctrBelow, sendBelow: ev.sendBelow,
+      minCtr: rule.minCtr, minSendRate: rule.minSendRate,
+      windowHours: rule.windowHours, path: rule.route,
+    };
+    const baseEntry: AlertHistoryEntry = {
+      ts: Date.now(),
+      ctr: ev.ctr, sendRate: ev.sendRate,
+      impressions: ev.impressions, clicks: ev.clicks, sends: ev.sends,
+      ctrBelow: ev.ctrBelow, sendBelow: ev.sendBelow,
+      windowHours: rule.windowHours, minCtr: rule.minCtr, minSendRate: rule.minSendRate,
+      scope, ruleId: rule.id, payload: basePayload,
+    };
+
+    if (willFire.length === 0) {
+      const allCooldown = decisions.every((d) => d.reason === "cooldown");
+      recordAlertHistory({
+        ...baseEntry,
+        notified: [],
+        status: allCooldown ? "cooldown" : "no_channels",
+        deliveries: decisions.map((d) => ({
+          channel: d.channel,
+          status: d.reason === "cooldown" ? "cooldown"
+                : d.reason === "disabled" ? "disabled" : "skipped",
+          error: d.reason,
+        })),
+      });
+      setTick((t) => t + 1);
+      return;
+    }
+
+    try {
+      const res = await notify({
+        data: {
+          ...basePayload,
+          channels: {
+            slack: willFire.some((d) => d.channel === "slack"),
+            email: willFire.some((d) => d.channel === "email"),
+          },
+        },
+      });
+      const sentChannels = new Set(res?.channels ?? []);
+      const serverResults = new Map((res?.results ?? []).map((r) => [r.channel, r]));
+      const deliveries: ChannelDelivery[] = decisions.map((d) => {
+        if (!d.willFire) {
+          return {
+            channel: d.channel,
+            status: d.reason === "cooldown" ? "cooldown"
+                  : d.reason === "disabled" ? "disabled" : "skipped",
+            error: d.reason,
+          };
+        }
+        const r = serverResults.get(d.channel);
+        if (r?.status === "sent") {
+          markChannelDispatched(scope, d.channel);
+          return { channel: d.channel, status: "sent", ts: Date.now() };
+        }
+        return { channel: d.channel, status: "failed", error: r?.error ?? "no response" };
+      });
+      const sentCount = deliveries.filter((d) => d.status === "sent").length;
+      const failedCount = deliveries.filter((d) => d.status === "failed").length;
+      const status: AlertHistoryEntry["status"] =
+        sentCount > 0 && failedCount > 0 ? "partial"
+        : sentCount > 0 ? "sent"
+        : failedCount > 0 ? "failed"
+        : "no_channels";
+      recordAlertHistory({
+        ...baseEntry,
+        notified: Array.from(sentChannels),
+        status, error: res?.error, deliveries,
+      });
+    } catch (err) {
+      recordAlertHistory({
+        ...baseEntry, notified: [], status: "failed",
+        error: err instanceof Error ? err.message : String(err),
+        deliveries: willFire.map((d) => ({
+          channel: d.channel, status: "failed" as const,
+          error: err instanceof Error ? err.message : String(err),
+        })),
+      });
     } finally {
       setTick((t) => t + 1);
     }
@@ -247,57 +350,29 @@ function WhatsAppMetricsPage() {
     dispatchAlert(
       "global",
       {
-        title: rendered.title,
-        body: rendered.body,
-        ctr: alertEval.ctr,
-        sendRate: alertEval.sendRate,
-        impressions: alertEval.impressions,
-        clicks: alertEval.clicks,
-        sends: alertEval.sends,
-        ctrBelow: alertEval.ctrBelow,
-        sendBelow: alertEval.sendBelow,
-        minCtr: cfg.minCtr,
-        minSendRate: cfg.minSendRate,
-        windowHours: cfg.windowHours,
-        ctaHash,
-        origin: originVal,
+        title: rendered.title, body: rendered.body,
+        ctr: alertEval.ctr, sendRate: alertEval.sendRate,
+        impressions: alertEval.impressions, clicks: alertEval.clicks, sends: alertEval.sends,
+        ctrBelow: alertEval.ctrBelow, sendBelow: alertEval.sendBelow,
+        minCtr: cfg.minCtr, minSendRate: cfg.minSendRate, windowHours: cfg.windowHours,
+        ctaHash, origin: originVal,
       },
       { ctaHash },
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alertEval.triggered]);
 
-  // Alertas por regra (route / variant)
+  // Alertas por regra (route / variant) — dispatch por canal
   useEffect(() => {
     for (const ev of ruleEvals) {
       if (!ev.triggered) continue;
       const rendered = renderAlertTemplate(tpl, {
         ...ev,
-        minCtr: ev.rule.minCtr,
-        minSendRate: ev.rule.minSendRate,
-        windowHours: ev.rule.windowHours,
-        path: ev.rule.route,
+        minCtr: ev.rule.minCtr, minSendRate: ev.rule.minSendRate,
+        windowHours: ev.rule.windowHours, path: ev.rule.route,
       });
       const title = `[${ev.rule.label || ev.scope}] ${rendered.title}`;
-      dispatchAlert(
-        ev.scope,
-        {
-          title,
-          body: rendered.body,
-          ctr: ev.ctr,
-          sendRate: ev.sendRate,
-          impressions: ev.impressions,
-          clicks: ev.clicks,
-          sends: ev.sends,
-          ctrBelow: ev.ctrBelow,
-          sendBelow: ev.sendBelow,
-          minCtr: ev.rule.minCtr,
-          minSendRate: ev.rule.minSendRate,
-          windowHours: ev.rule.windowHours,
-          path: ev.rule.route,
-        },
-        { ruleId: ev.rule.id },
-      );
+      dispatchRuleAlert(ev.rule, ev, { title, body: rendered.body });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ruleEvals.map((e) => `${e.rule.id}:${e.triggered}`).join("|")]);
@@ -309,16 +384,11 @@ function WhatsAppMetricsPage() {
     const { title, body } = renderDailySummary(summary);
     const payload: AlertPayload = {
       title, body,
-      ctr: summary.totals.ctr,
-      sendRate: summary.totals.sendRate,
-      impressions: summary.totals.impressions,
-      clicks: summary.totals.clicks,
+      ctr: summary.totals.ctr, sendRate: summary.totals.sendRate,
+      impressions: summary.totals.impressions, clicks: summary.totals.clicks,
       sends: summary.totals.sends,
-      ctrBelow: false,
-      sendBelow: false,
-      minCtr: 0,
-      minSendRate: 0,
-      windowHours: 24,
+      ctrBelow: false, sendBelow: false,
+      minCtr: 0, minSendRate: 0, windowHours: 24,
     };
     await dispatchAlert("daily_summary", payload, {});
     markDailySummarySent();
@@ -327,29 +397,43 @@ function WhatsAppMetricsPage() {
   /** Reenvio manual a partir de uma entrada com falha. */
   async function retryEntry(entry: AlertHistoryEntry) {
     if (!entry.payload || !entry.id) return;
+    const failedChannels = (entry.deliveries ?? []).filter((d) => d.status === "failed");
+    const channels = failedChannels.length > 0
+      ? { slack: failedChannels.some((d) => d.channel === "slack"),
+          email: failedChannels.some((d) => d.channel === "email") }
+      : undefined;
     try {
-      const res = await notify({ data: entry.payload });
-      const channels = res?.channels ?? [];
+      const res = await notify({ data: { ...entry.payload, channels } });
+      const sentChannels = new Set(res?.channels ?? []);
+      const serverResults = new Map((res?.results ?? []).map((r) => [r.channel, r]));
+      const merged: ChannelDelivery[] = (entry.deliveries ?? []).map((d) => {
+        if (channels && !channels[d.channel as "slack" | "email"]) return d;
+        const r = serverResults.get(d.channel);
+        if (r?.status === "sent") return { ...d, status: "sent", error: undefined, ts: Date.now() };
+        if (r?.status === "failed") return { ...d, status: "failed", error: r.error, ts: Date.now() };
+        return d;
+      });
+      const sentCount = merged.filter((d) => d.status === "sent").length;
+      const failedCount = merged.filter((d) => d.status === "failed").length;
       const status: AlertHistoryEntry["status"] =
-        res?.ok === false ? "failed"
-        : channels.length === 0 ? "no_channels"
-        : "sent";
+        sentCount > 0 && failedCount > 0 ? "partial"
+        : sentCount > 0 ? "sent"
+        : failedCount > 0 ? "failed"
+        : "no_channels";
       updateAlertHistory(entry.id, {
-        notified: channels,
-        status,
-        error: res?.error,
-        ts: Date.now(),
+        notified: Array.from(sentChannels), status,
+        error: res?.error, deliveries: merged, ts: Date.now(),
       });
     } catch (err) {
       updateAlertHistory(entry.id, {
-        notified: [],
-        status: "failed",
+        notified: [], status: "failed",
         error: err instanceof Error ? err.message : String(err),
         ts: Date.now(),
       });
     }
     setTick((t) => t + 1);
   }
+
 
 
 
