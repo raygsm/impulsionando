@@ -681,15 +681,15 @@ function SectionNav({ activeId, onSelect, reducedMotion = false, ref }: SectionN
       focusChip(SECTIONS[SECTIONS.length - 1].id);
     } else if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      onSelect(SECTIONS[idx].id, true);
+      onSelect(SECTIONS[idx].id, true, { pushState: true, focusPanel: true });
     }
   };
 
   const currentIdx = Math.max(0, SECTIONS.findIndex((s) => s.id === activeId));
   const prevSec = currentIdx > 0 ? SECTIONS[currentIdx - 1] : null;
   const nextSec = currentIdx < SECTIONS.length - 1 ? SECTIONS[currentIdx + 1] : null;
-  const goPrev = () => prevSec && onSelect(prevSec.id, true);
-  const goNext = () => nextSec && onSelect(nextSec.id, true);
+  const goPrev = () => prevSec && onSelect(prevSec.id, true, { pushState: true });
+  const goNext = () => nextSec && onSelect(nextSec.id, true, { pushState: true });
 
   // Disable scroll-snap when user prefers reduced motion (snap can cause
   // sudden jumps that feel like motion). Keeps horizontal scrolling usable.
