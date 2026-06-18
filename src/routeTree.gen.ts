@@ -15,6 +15,7 @@ import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TrialRouteImport } from './routes/trial'
 import { Route as TesteRouteImport } from './routes/teste'
 import { Route as TermosRouteImport } from './routes/termos'
+import { Route as TalentosRouteImport } from './routes/talentos'
 import { Route as SolucoesRouteImport } from './routes/solucoes'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as ResetPasswordSentRouteImport } from './routes/reset-password-sent'
@@ -180,6 +181,7 @@ import { Route as AuthenticatedWhiteLabelCockpitRouteImport } from './routes/_au
 import { Route as AuthenticatedUsersCorporateRouteImport } from './routes/_authenticated/users.corporate'
 import { Route as AuthenticatedTorreRestaurantesDemoRouteImport } from './routes/_authenticated/torre.restaurantes-demo'
 import { Route as AuthenticatedTorreConsumidoresRouteImport } from './routes/_authenticated/torre.consumidores'
+import { Route as AuthenticatedTalentosCadastroRouteImport } from './routes/_authenticated/talentos.cadastro'
 import { Route as AuthenticatedSupportCockpitRouteImport } from './routes/_authenticated/support.cockpit'
 import { Route as AuthenticatedShowroomRestauranteRouteImport } from './routes/_authenticated/showroom.restaurante'
 import { Route as AuthenticatedSalesOrdersRouteImport } from './routes/_authenticated/sales.orders'
@@ -414,6 +416,11 @@ const TesteRoute = TesteRouteImport.update({
 const TermosRoute = TermosRouteImport.update({
   id: '/termos',
   path: '/termos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TalentosRoute = TalentosRouteImport.update({
+  id: '/talentos',
+  path: '/talentos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SolucoesRoute = SolucoesRouteImport.update({
@@ -1262,6 +1269,12 @@ const AuthenticatedTorreConsumidoresRoute =
   AuthenticatedTorreConsumidoresRouteImport.update({
     id: '/torre/consumidores',
     path: '/torre/consumidores',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedTalentosCadastroRoute =
+  AuthenticatedTalentosCadastroRouteImport.update({
+    id: '/talentos/cadastro',
+    path: '/talentos/cadastro',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedSupportCockpitRoute =
@@ -2488,6 +2501,7 @@ export interface FileRoutesByFullPath {
   '/reset-password-sent': typeof ResetPasswordSentRoute
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
+  '/talentos': typeof TalentosRoute
   '/termos': typeof TermosRoute
   '/teste': typeof TesteRoute
   '/trial': typeof TrialRoute
@@ -2765,6 +2779,7 @@ export interface FileRoutesByFullPath {
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
   '/showroom/restaurante': typeof AuthenticatedShowroomRestauranteRoute
   '/support/cockpit': typeof AuthenticatedSupportCockpitRoute
+  '/talentos/cadastro': typeof AuthenticatedTalentosCadastroRoute
   '/torre/consumidores': typeof AuthenticatedTorreConsumidoresRoute
   '/torre/restaurantes-demo': typeof AuthenticatedTorreRestaurantesDemoRouteWithChildren
   '/users/corporate': typeof AuthenticatedUsersCorporateRoute
@@ -2862,6 +2877,7 @@ export interface FileRoutesByTo {
   '/reset-password-sent': typeof ResetPasswordSentRoute
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
+  '/talentos': typeof TalentosRoute
   '/termos': typeof TermosRoute
   '/teste': typeof TesteRoute
   '/trial': typeof TrialRoute
@@ -3130,6 +3146,7 @@ export interface FileRoutesByTo {
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
   '/showroom/restaurante': typeof AuthenticatedShowroomRestauranteRoute
   '/support/cockpit': typeof AuthenticatedSupportCockpitRoute
+  '/talentos/cadastro': typeof AuthenticatedTalentosCadastroRoute
   '/torre/consumidores': typeof AuthenticatedTorreConsumidoresRoute
   '/torre/restaurantes-demo': typeof AuthenticatedTorreRestaurantesDemoRouteWithChildren
   '/users/corporate': typeof AuthenticatedUsersCorporateRoute
@@ -3231,6 +3248,7 @@ export interface FileRoutesById {
   '/reset-password-sent': typeof ResetPasswordSentRoute
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
+  '/talentos': typeof TalentosRoute
   '/termos': typeof TermosRoute
   '/teste': typeof TesteRoute
   '/trial': typeof TrialRoute
@@ -3509,6 +3527,7 @@ export interface FileRoutesById {
   '/_authenticated/sales/orders': typeof AuthenticatedSalesOrdersRoute
   '/_authenticated/showroom/restaurante': typeof AuthenticatedShowroomRestauranteRoute
   '/_authenticated/support/cockpit': typeof AuthenticatedSupportCockpitRoute
+  '/_authenticated/talentos/cadastro': typeof AuthenticatedTalentosCadastroRoute
   '/_authenticated/torre/consumidores': typeof AuthenticatedTorreConsumidoresRoute
   '/_authenticated/torre/restaurantes-demo': typeof AuthenticatedTorreRestaurantesDemoRouteWithChildren
   '/_authenticated/users/corporate': typeof AuthenticatedUsersCorporateRoute
@@ -3610,6 +3629,7 @@ export interface FileRouteTypes {
     | '/reset-password-sent'
     | '/sobre'
     | '/solucoes'
+    | '/talentos'
     | '/termos'
     | '/teste'
     | '/trial'
@@ -3887,6 +3907,7 @@ export interface FileRouteTypes {
     | '/sales/orders'
     | '/showroom/restaurante'
     | '/support/cockpit'
+    | '/talentos/cadastro'
     | '/torre/consumidores'
     | '/torre/restaurantes-demo'
     | '/users/corporate'
@@ -3984,6 +4005,7 @@ export interface FileRouteTypes {
     | '/reset-password-sent'
     | '/sobre'
     | '/solucoes'
+    | '/talentos'
     | '/termos'
     | '/teste'
     | '/trial'
@@ -4252,6 +4274,7 @@ export interface FileRouteTypes {
     | '/sales/orders'
     | '/showroom/restaurante'
     | '/support/cockpit'
+    | '/talentos/cadastro'
     | '/torre/consumidores'
     | '/torre/restaurantes-demo'
     | '/users/corporate'
@@ -4352,6 +4375,7 @@ export interface FileRouteTypes {
     | '/reset-password-sent'
     | '/sobre'
     | '/solucoes'
+    | '/talentos'
     | '/termos'
     | '/teste'
     | '/trial'
@@ -4630,6 +4654,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sales/orders'
     | '/_authenticated/showroom/restaurante'
     | '/_authenticated/support/cockpit'
+    | '/_authenticated/talentos/cadastro'
     | '/_authenticated/torre/consumidores'
     | '/_authenticated/torre/restaurantes-demo'
     | '/_authenticated/users/corporate'
@@ -4731,6 +4756,7 @@ export interface RootRouteChildren {
   ResetPasswordSentRoute: typeof ResetPasswordSentRoute
   SobreRoute: typeof SobreRoute
   SolucoesRoute: typeof SolucoesRoute
+  TalentosRoute: typeof TalentosRoute
   TermosRoute: typeof TermosRoute
   TesteRoute: typeof TesteRoute
   TrialRoute: typeof TrialRoute
@@ -4890,6 +4916,13 @@ declare module '@tanstack/react-router' {
       path: '/termos'
       fullPath: '/termos'
       preLoaderRoute: typeof TermosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/talentos': {
+      id: '/talentos'
+      path: '/talentos'
+      fullPath: '/talentos'
+      preLoaderRoute: typeof TalentosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/solucoes': {
@@ -6045,6 +6078,13 @@ declare module '@tanstack/react-router' {
       path: '/torre/consumidores'
       fullPath: '/torre/consumidores'
       preLoaderRoute: typeof AuthenticatedTorreConsumidoresRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/talentos/cadastro': {
+      id: '/_authenticated/talentos/cadastro'
+      path: '/talentos/cadastro'
+      fullPath: '/talentos/cadastro'
+      preLoaderRoute: typeof AuthenticatedTalentosCadastroRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/support/cockpit': {
@@ -8117,6 +8157,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSaibaMaisVersoesRoute: typeof AuthenticatedSaibaMaisVersoesRoute
   AuthenticatedShowroomRestauranteRoute: typeof AuthenticatedShowroomRestauranteRoute
   AuthenticatedSupportCockpitRoute: typeof AuthenticatedSupportCockpitRoute
+  AuthenticatedTalentosCadastroRoute: typeof AuthenticatedTalentosCadastroRoute
   AuthenticatedTorreConsumidoresRoute: typeof AuthenticatedTorreConsumidoresRoute
   AuthenticatedTorreRestaurantesDemoRoute: typeof AuthenticatedTorreRestaurantesDemoRouteWithChildren
   AuthenticatedWhiteLabelCockpitRoute: typeof AuthenticatedWhiteLabelCockpitRoute
@@ -8249,6 +8290,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSaibaMaisVersoesRoute: AuthenticatedSaibaMaisVersoesRoute,
   AuthenticatedShowroomRestauranteRoute: AuthenticatedShowroomRestauranteRoute,
   AuthenticatedSupportCockpitRoute: AuthenticatedSupportCockpitRoute,
+  AuthenticatedTalentosCadastroRoute: AuthenticatedTalentosCadastroRoute,
   AuthenticatedTorreConsumidoresRoute: AuthenticatedTorreConsumidoresRoute,
   AuthenticatedTorreRestaurantesDemoRoute:
     AuthenticatedTorreRestaurantesDemoRouteWithChildren,
@@ -8405,6 +8447,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordSentRoute: ResetPasswordSentRoute,
   SobreRoute: SobreRoute,
   SolucoesRoute: SolucoesRoute,
+  TalentosRoute: TalentosRoute,
   TermosRoute: TermosRoute,
   TesteRoute: TesteRoute,
   TrialRoute: TrialRoute,
