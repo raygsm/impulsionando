@@ -109,17 +109,58 @@ function ConsumidorDashboardPage() {
   );
 
   const handleSelect = useCallback(
-    (id: string, scroll = false) => {
+    (id: string, scroll = false, opts?: { pushState?: boolean; focusPanel?: boolean }) => {
       setActiveId(id);
       try {
         const newUrl = `${window.location.pathname}${window.location.search}#${id}`;
-        window.history.replaceState(null, "", newUrl);
+        if (opts?.pushState) window.history.pushState(null, "", newUrl);
+        else window.history.replaceState(null, "", newUrl);
         sessionStorage.setItem(STORAGE_KEY, id);
       } catch {}
       if (scroll) scrollToId(id);
+      if (opts?.focusPanel) {
+        // Move focus to the tabpanel so screen readers land on the content
+        window.setTimeout(() => {
+          const panel = document.getElementById(id);
+          if (panel) (panel as HTMLElement).focus({ preventScroll: true });
+        }, reducedMotion ? 0 : 350);
+      }
     },
-    [scrollToId],
+    [scrollToId, reducedMotion],
   );
+
+  // Browser back/forward: react to hash changes and re-align the section.
+  useEffect(() => {
+    const onPop = () => {
+      const hash = window.location.hash.replace("#", "");
+      if (hash && SECTIONS.some((s) => s.id === hash)) {
+        setActiveId(hash);
+        try {
+          sessionStorage.setItem(STORAGE_KEY, hash);
+        } catch {}
+        requestAnimationFrame(() => scrollToId(hash));
+      }
+    };
+    window.addEventListener("popstate", onPop);
+    window.addEventListener("hashchange", onPop);
+    return () => {
+      window.removeEventListener("popstate", onPop);
+      window.removeEventListener("hashchange", onPop);
+    };
+  }, [scrollToId]);
+
+  // After header height changes (orientation change), re-align active section.
+  useEffect(() => {
+    if (!activeId) return;
+    const t = window.setTimeout(() => {
+      const el = document.getElementById(activeId);
+      if (!el) return;
+      const top = el.getBoundingClientRect().top;
+      if (top < 0 || top > headerOffset + 24) scrollToId(activeId);
+    }, 50);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [headerOffset]);
 
   // Restore scroll on initial load (hash > sessionStorage)
   const restoredRef = useRef(false);
