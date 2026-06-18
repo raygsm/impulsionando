@@ -97,7 +97,7 @@ export const getCatalogIntent = createServerFn({ method: 'GET' })
     return row
   })
 
-// --------- Tracking ---------
+// --------- Tracking (single + batch) ---------
 
 const TrackInput = z.object({
   eventName: z.string().trim().min(1).max(60),
@@ -126,6 +126,27 @@ export const trackCatalogEvent = createServerFn({ method: 'POST' })
     })
     if (error) throw error
     return { ok: true }
+  })
+
+export const trackCatalogEventsBatch = createServerFn({ method: 'POST' })
+  .inputValidator((data: unknown) =>
+    z.object({ events: z.array(TrackInput).min(1).max(50) }).parse(data),
+  )
+  .handler(async ({ data }) => {
+    const sb = publicClient()
+    const rows = data.events.map((e) => ({
+      event_name: e.eventName,
+      macro_slug: e.macroSlug ?? null,
+      subnicho_slug: e.subnichoSlug ?? null,
+      plan_tier: e.planTier ?? null,
+      selected_modules: e.selectedModules ?? [],
+      intent_id: e.intentId ?? null,
+      session_token: e.sessionToken ?? null,
+      metadata: e.metadata ?? {},
+    }))
+    const { error } = await sb.from('catalog_events').insert(rows)
+    if (error) throw error
+    return { ok: true, inserted: rows.length }
   })
 
 // --------- Conversion analytics (staff) ---------
