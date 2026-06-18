@@ -197,7 +197,7 @@ export const fetchConsumidorDashboard = createServerFn({ method: "POST" })
       supabase.from("consumer_membership_invoices").select("id,amount_cents,status,due_date,paid_at,created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(20),
       supabase.from("clube_visits").select("id,created_at,company_id").eq("user_id", userId).order("created_at", { ascending: false }).limit(20),
       supabase.from("consumer_favorites").select("id,company_id,created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(20),
-      supabase.from("clube_rewards_ledger").select("id,points,reason,created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(20),
+      supabase.from("clube_rewards_ledger").select("id,delta,reason,kind,created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(20),
       supabase.from("clube_receipts").select("id,total_cents,issued_at,company_id").eq("user_id", userId).order("issued_at", { ascending: false }).limit(20),
     ]);
 
@@ -205,7 +205,7 @@ export const fetchConsumidorDashboard = createServerFn({ method: "POST" })
     const totalSpent = (invoices.data ?? []).filter((i) => i.status === "paid").reduce((a, i) => a + Number(i.amount_cents ?? 0), 0) / 100;
     const visitsInWindow = (visits.data ?? []).filter((v) => v.created_at >= w.from).length;
     const nextDue = (memberships.data ?? []).map((m) => m.current_period_end).filter(Boolean).sort()[0] ?? null;
-    const creditsBalance = (rewards.data ?? []).reduce((a, r) => a + Number(r.points ?? 0), 0);
+    const creditsBalance = (rewards.data ?? []).reduce((a, r) => a + Number(r.delta ?? 0), 0);
 
     return {
       window: w,
