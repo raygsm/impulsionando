@@ -32,6 +32,10 @@ jobs:
       # Optional override: point at an external preview deploy instead of
       # building locally. When set, Playwright skips its own webServer.
       E2E_BASE_URL: ${{ vars.E2E_BASE_URL }}
+      # Enable visual-regression snapshots when the repo variable is set.
+      # The reducedMotion / RTL snapshot scenarios skip themselves on CI unless
+      # this is "1" so the first run can produce baselines without failing.
+      E2E_VISUAL: ${{ vars.E2E_VISUAL }}
 
     steps:
       - uses: actions/checkout@v4
