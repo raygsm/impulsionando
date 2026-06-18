@@ -282,6 +282,7 @@ import { Route as AuthenticatedAffiliatesCoproducersRouteImport } from './routes
 import { Route as AuthenticatedAffiliatesCommissionsRouteImport } from './routes/_authenticated/affiliates.commissions'
 import { Route as AuthenticatedAffiliatesBumpsRouteImport } from './routes/_authenticated/affiliates.bumps'
 import { Route as AuthenticatedAffiliatesAffiliatesRouteImport } from './routes/_authenticated/affiliates.affiliates'
+import { Route as AuthenticatedAdminWhatsappMetricsRouteImport } from './routes/_authenticated/admin.whatsapp-metrics'
 import { Route as AuthenticatedAdminUptimeRouteImport } from './routes/_authenticated/admin.uptime'
 import { Route as AuthenticatedAdminTrialsRouteImport } from './routes/_authenticated/admin.trials'
 import { Route as AuthenticatedAdminPixPendentesRouteImport } from './routes/_authenticated/admin.pix-pendentes'
@@ -1817,6 +1818,12 @@ const AuthenticatedAffiliatesAffiliatesRoute =
     path: '/affiliates',
     getParentRoute: () => AuthenticatedAffiliatesRoute,
   } as any)
+const AuthenticatedAdminWhatsappMetricsRoute =
+  AuthenticatedAdminWhatsappMetricsRouteImport.update({
+    id: '/admin/whatsapp-metrics',
+    path: '/admin/whatsapp-metrics',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminUptimeRoute =
   AuthenticatedAdminUptimeRouteImport.update({
     id: '/admin/uptime',
@@ -2232,6 +2239,7 @@ export interface FileRoutesByFullPath {
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
+  '/admin/whatsapp-metrics': typeof AuthenticatedAdminWhatsappMetricsRoute
   '/affiliates/affiliates': typeof AuthenticatedAffiliatesAffiliatesRoute
   '/affiliates/bumps': typeof AuthenticatedAffiliatesBumpsRoute
   '/affiliates/commissions': typeof AuthenticatedAffiliatesCommissionsRoute
@@ -2541,6 +2549,7 @@ export interface FileRoutesByTo {
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
+  '/admin/whatsapp-metrics': typeof AuthenticatedAdminWhatsappMetricsRoute
   '/affiliates/affiliates': typeof AuthenticatedAffiliatesAffiliatesRoute
   '/affiliates/bumps': typeof AuthenticatedAffiliatesBumpsRoute
   '/affiliates/commissions': typeof AuthenticatedAffiliatesCommissionsRoute
@@ -2864,6 +2873,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
   '/_authenticated/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/_authenticated/admin/uptime': typeof AuthenticatedAdminUptimeRoute
+  '/_authenticated/admin/whatsapp-metrics': typeof AuthenticatedAdminWhatsappMetricsRoute
   '/_authenticated/affiliates/affiliates': typeof AuthenticatedAffiliatesAffiliatesRoute
   '/_authenticated/affiliates/bumps': typeof AuthenticatedAffiliatesBumpsRoute
   '/_authenticated/affiliates/commissions': typeof AuthenticatedAffiliatesCommissionsRoute
@@ -3186,6 +3196,7 @@ export interface FileRouteTypes {
     | '/admin/pix-pendentes'
     | '/admin/trials'
     | '/admin/uptime'
+    | '/admin/whatsapp-metrics'
     | '/affiliates/affiliates'
     | '/affiliates/bumps'
     | '/affiliates/commissions'
@@ -3495,6 +3506,7 @@ export interface FileRouteTypes {
     | '/admin/pix-pendentes'
     | '/admin/trials'
     | '/admin/uptime'
+    | '/admin/whatsapp-metrics'
     | '/affiliates/affiliates'
     | '/affiliates/bumps'
     | '/affiliates/commissions'
@@ -3817,6 +3829,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/pix-pendentes'
     | '/_authenticated/admin/trials'
     | '/_authenticated/admin/uptime'
+    | '/_authenticated/admin/whatsapp-metrics'
     | '/_authenticated/affiliates/affiliates'
     | '/_authenticated/affiliates/bumps'
     | '/_authenticated/affiliates/commissions'
@@ -6037,6 +6050,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAffiliatesAffiliatesRouteImport
       parentRoute: typeof AuthenticatedAffiliatesRoute
     }
+    '/_authenticated/admin/whatsapp-metrics': {
+      id: '/_authenticated/admin/whatsapp-metrics'
+      path: '/admin/whatsapp-metrics'
+      fullPath: '/admin/whatsapp-metrics'
+      preLoaderRoute: typeof AuthenticatedAdminWhatsappMetricsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/uptime': {
       id: '/_authenticated/admin/uptime'
       path: '/admin/uptime'
@@ -6844,6 +6864,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminPixPendentesRoute: typeof AuthenticatedAdminPixPendentesRoute
   AuthenticatedAdminTrialsRoute: typeof AuthenticatedAdminTrialsRoute
   AuthenticatedAdminUptimeRoute: typeof AuthenticatedAdminUptimeRoute
+  AuthenticatedAdminWhatsappMetricsRoute: typeof AuthenticatedAdminWhatsappMetricsRoute
   AuthenticatedCheckoutPlanoRoute: typeof AuthenticatedCheckoutPlanoRoute
   AuthenticatedCommercialCockpitRoute: typeof AuthenticatedCommercialCockpitRoute
   AuthenticatedComunidadeIdRoute: typeof AuthenticatedComunidadeIdRoute
@@ -6929,6 +6950,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminPixPendentesRoute: AuthenticatedAdminPixPendentesRoute,
   AuthenticatedAdminTrialsRoute: AuthenticatedAdminTrialsRoute,
   AuthenticatedAdminUptimeRoute: AuthenticatedAdminUptimeRoute,
+  AuthenticatedAdminWhatsappMetricsRoute:
+    AuthenticatedAdminWhatsappMetricsRoute,
   AuthenticatedCheckoutPlanoRoute: AuthenticatedCheckoutPlanoRoute,
   AuthenticatedCommercialCockpitRoute: AuthenticatedCommercialCockpitRoute,
   AuthenticatedComunidadeIdRoute: AuthenticatedComunidadeIdRoute,
