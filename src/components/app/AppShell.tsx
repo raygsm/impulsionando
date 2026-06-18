@@ -105,6 +105,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
+  // Jornada de contratação/assinatura: shell limpo, sem sidebar administrativa.
+  if (isCheckoutPath(location.pathname)) {
+    return <CheckoutShell>{children}</CheckoutShell>;
+  }
+
   return (
     <div className="min-h-screen flex bg-background">
       <Sidebar currentUser={data} />
