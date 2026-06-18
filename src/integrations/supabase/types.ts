@@ -6270,6 +6270,47 @@ export type Database = {
           },
         ]
       }
+      demo_survey_responses: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          lead_id: string | null
+          message: string
+          name: string
+          plan_interest: string | null
+          source_path: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          lead_id?: string | null
+          message: string
+          name: string
+          plan_interest?: string | null
+          source_path?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          lead_id?: string | null
+          message?: string
+          name?: string
+          plan_interest?: string | null
+          source_path?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demo_survey_responses_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "demo_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       demo_visit_sessions: {
         Row: {
           abandoned: boolean
