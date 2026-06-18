@@ -105,6 +105,14 @@ export function PublicFooter() {
           ))}
         </div>
 
+        <div className="rounded-md border border-amber-300/70 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800/60 p-3 text-[11px] leading-snug text-amber-900 dark:text-amber-100 mb-6">
+          <strong>Canal oficial único.</strong> Toda e qualquer informação, envio de documentos, comprovantes de pagamento, solicitações e comunicações deve ser realizada exclusivamente pelo WhatsApp oficial da Impulsionando:{" "}
+          <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="font-semibold underline underline-offset-2">
+            (21) 99307-5000
+          </a>
+          . Para sua segurança e melhor acompanhamento, contatos por outros canais não oficiais não serão considerados.
+        </div>
+
         <div className="border-t border-border pt-6 text-xs text-muted-foreground flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>© {new Date().getFullYear()} Impulsionando Tecnologia. Todos os direitos reservados.</span>
           <span className="font-medium text-foreground">O limite é onde você quiser chegar.</span>
