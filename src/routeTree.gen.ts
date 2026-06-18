@@ -143,6 +143,7 @@ import { Route as AuthenticatedAffiliatesRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdmRouteImport } from './routes/_authenticated/adm'
 import { Route as AuthenticatedAccessProfilesRouteImport } from './routes/_authenticated/access-profiles'
 import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
+import { Route as AuthenticatedSaibaMaisIndexRouteImport } from './routes/_authenticated/saiba-mais.index'
 import { Route as AuthenticatedReportsIndexRouteImport } from './routes/_authenticated/reports.index'
 import { Route as AuthenticatedNotificationsIndexRouteImport } from './routes/_authenticated/notifications.index'
 import { Route as AuthenticatedInventoryIndexRouteImport } from './routes/_authenticated/inventory.index'
@@ -166,6 +167,8 @@ import { Route as AuthenticatedSupportCockpitRouteImport } from './routes/_authe
 import { Route as AuthenticatedSalesOrdersRouteImport } from './routes/_authenticated/sales.orders'
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
 import { Route as AuthenticatedSalesCashRouteImport } from './routes/_authenticated/sales.cash'
+import { Route as AuthenticatedSaibaMaisVersoesRouteImport } from './routes/_authenticated/saiba-mais.versoes'
+import { Route as AuthenticatedSaibaMaisSaudeRouteImport } from './routes/_authenticated/saiba-mais.saude'
 import { Route as AuthenticatedRestauranteSalaoRouteImport } from './routes/_authenticated/restaurante.salao'
 import { Route as AuthenticatedRestauranteMesasRouteImport } from './routes/_authenticated/restaurante.mesas'
 import { Route as AuthenticatedRestauranteCardapioRouteImport } from './routes/_authenticated/restaurante.cardapio'
@@ -1009,6 +1012,12 @@ const AuthenticatedSalesIndexRoute = AuthenticatedSalesIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedSalesRoute,
 } as any)
+const AuthenticatedSaibaMaisIndexRoute =
+  AuthenticatedSaibaMaisIndexRouteImport.update({
+    id: '/saiba-mais/',
+    path: '/saiba-mais/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedReportsIndexRoute =
   AuthenticatedReportsIndexRouteImport.update({
     id: '/',
@@ -1138,6 +1147,18 @@ const AuthenticatedSalesCashRoute = AuthenticatedSalesCashRouteImport.update({
   path: '/cash',
   getParentRoute: () => AuthenticatedSalesRoute,
 } as any)
+const AuthenticatedSaibaMaisVersoesRoute =
+  AuthenticatedSaibaMaisVersoesRouteImport.update({
+    id: '/saiba-mais/versoes',
+    path: '/saiba-mais/versoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSaibaMaisSaudeRoute =
+  AuthenticatedSaibaMaisSaudeRouteImport.update({
+    id: '/saiba-mais/saude',
+    path: '/saiba-mais/saude',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedRestauranteSalaoRoute =
   AuthenticatedRestauranteSalaoRouteImport.update({
     id: '/restaurante/salao',
@@ -2364,6 +2385,8 @@ export interface FileRoutesByFullPath {
   '/restaurante/cardapio': typeof AuthenticatedRestauranteCardapioRoute
   '/restaurante/mesas': typeof AuthenticatedRestauranteMesasRoute
   '/restaurante/salao': typeof AuthenticatedRestauranteSalaoRoute
+  '/saiba-mais/saude': typeof AuthenticatedSaibaMaisSaudeRoute
+  '/saiba-mais/versoes': typeof AuthenticatedSaibaMaisVersoesRoute
   '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
@@ -2387,6 +2410,7 @@ export interface FileRoutesByFullPath {
   '/inventory/': typeof AuthenticatedInventoryIndexRoute
   '/notifications/': typeof AuthenticatedNotificationsIndexRoute
   '/reports/': typeof AuthenticatedReportsIndexRoute
+  '/saiba-mais/': typeof AuthenticatedSaibaMaisIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
@@ -2675,6 +2699,8 @@ export interface FileRoutesByTo {
   '/restaurante/cardapio': typeof AuthenticatedRestauranteCardapioRoute
   '/restaurante/mesas': typeof AuthenticatedRestauranteMesasRoute
   '/restaurante/salao': typeof AuthenticatedRestauranteSalaoRoute
+  '/saiba-mais/saude': typeof AuthenticatedSaibaMaisSaudeRoute
+  '/saiba-mais/versoes': typeof AuthenticatedSaibaMaisVersoesRoute
   '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
@@ -2698,6 +2724,7 @@ export interface FileRoutesByTo {
   '/inventory': typeof AuthenticatedInventoryIndexRoute
   '/notifications': typeof AuthenticatedNotificationsIndexRoute
   '/reports': typeof AuthenticatedReportsIndexRoute
+  '/saiba-mais': typeof AuthenticatedSaibaMaisIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
@@ -3000,6 +3027,8 @@ export interface FileRoutesById {
   '/_authenticated/restaurante/cardapio': typeof AuthenticatedRestauranteCardapioRoute
   '/_authenticated/restaurante/mesas': typeof AuthenticatedRestauranteMesasRoute
   '/_authenticated/restaurante/salao': typeof AuthenticatedRestauranteSalaoRoute
+  '/_authenticated/saiba-mais/saude': typeof AuthenticatedSaibaMaisSaudeRoute
+  '/_authenticated/saiba-mais/versoes': typeof AuthenticatedSaibaMaisVersoesRoute
   '/_authenticated/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
   '/_authenticated/sales/orders': typeof AuthenticatedSalesOrdersRoute
@@ -3023,6 +3052,7 @@ export interface FileRoutesById {
   '/_authenticated/inventory/': typeof AuthenticatedInventoryIndexRoute
   '/_authenticated/notifications/': typeof AuthenticatedNotificationsIndexRoute
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
+  '/_authenticated/saiba-mais/': typeof AuthenticatedSaibaMaisIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
   '/_authenticated/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/_authenticated/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
@@ -3324,6 +3354,8 @@ export interface FileRouteTypes {
     | '/restaurante/cardapio'
     | '/restaurante/mesas'
     | '/restaurante/salao'
+    | '/saiba-mais/saude'
+    | '/saiba-mais/versoes'
     | '/sales/cash'
     | '/sales/new'
     | '/sales/orders'
@@ -3347,6 +3379,7 @@ export interface FileRouteTypes {
     | '/inventory/'
     | '/notifications/'
     | '/reports/'
+    | '/saiba-mais/'
     | '/sales/'
     | '/admin/modulos/clonagem'
     | '/core/cliente/$id'
@@ -3635,6 +3668,8 @@ export interface FileRouteTypes {
     | '/restaurante/cardapio'
     | '/restaurante/mesas'
     | '/restaurante/salao'
+    | '/saiba-mais/saude'
+    | '/saiba-mais/versoes'
     | '/sales/cash'
     | '/sales/new'
     | '/sales/orders'
@@ -3658,6 +3693,7 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/notifications'
     | '/reports'
+    | '/saiba-mais'
     | '/sales'
     | '/admin/modulos/clonagem'
     | '/core/cliente/$id'
@@ -3959,6 +3995,8 @@ export interface FileRouteTypes {
     | '/_authenticated/restaurante/cardapio'
     | '/_authenticated/restaurante/mesas'
     | '/_authenticated/restaurante/salao'
+    | '/_authenticated/saiba-mais/saude'
+    | '/_authenticated/saiba-mais/versoes'
     | '/_authenticated/sales/cash'
     | '/_authenticated/sales/new'
     | '/_authenticated/sales/orders'
@@ -3982,6 +4020,7 @@ export interface FileRouteTypes {
     | '/_authenticated/inventory/'
     | '/_authenticated/notifications/'
     | '/_authenticated/reports/'
+    | '/_authenticated/saiba-mais/'
     | '/_authenticated/sales/'
     | '/_authenticated/admin/modulos/clonagem'
     | '/_authenticated/core/cliente/$id'
@@ -5090,6 +5129,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSalesIndexRouteImport
       parentRoute: typeof AuthenticatedSalesRoute
     }
+    '/_authenticated/saiba-mais/': {
+      id: '/_authenticated/saiba-mais/'
+      path: '/saiba-mais'
+      fullPath: '/saiba-mais/'
+      preLoaderRoute: typeof AuthenticatedSaibaMaisIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/reports/': {
       id: '/_authenticated/reports/'
       path: '/'
@@ -5250,6 +5296,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/sales/cash'
       preLoaderRoute: typeof AuthenticatedSalesCashRouteImport
       parentRoute: typeof AuthenticatedSalesRoute
+    }
+    '/_authenticated/saiba-mais/versoes': {
+      id: '/_authenticated/saiba-mais/versoes'
+      path: '/saiba-mais/versoes'
+      fullPath: '/saiba-mais/versoes'
+      preLoaderRoute: typeof AuthenticatedSaibaMaisVersoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/saiba-mais/saude': {
+      id: '/_authenticated/saiba-mais/saude'
+      path: '/saiba-mais/saude'
+      fullPath: '/saiba-mais/saude'
+      preLoaderRoute: typeof AuthenticatedSaibaMaisSaudeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/restaurante/salao': {
       id: '/_authenticated/restaurante/salao'
@@ -6922,6 +6982,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRestauranteCardapioRoute: typeof AuthenticatedRestauranteCardapioRoute
   AuthenticatedRestauranteMesasRoute: typeof AuthenticatedRestauranteMesasRoute
   AuthenticatedRestauranteSalaoRoute: typeof AuthenticatedRestauranteSalaoRoute
+  AuthenticatedSaibaMaisSaudeRoute: typeof AuthenticatedSaibaMaisSaudeRoute
+  AuthenticatedSaibaMaisVersoesRoute: typeof AuthenticatedSaibaMaisVersoesRoute
   AuthenticatedSupportCockpitRoute: typeof AuthenticatedSupportCockpitRoute
   AuthenticatedWhiteLabelCockpitRoute: typeof AuthenticatedWhiteLabelCockpitRoute
   AuthenticatedCockpitsIndexRoute: typeof AuthenticatedCockpitsIndexRoute
@@ -6929,6 +6991,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEhrIndexRoute: typeof AuthenticatedEhrIndexRoute
   AuthenticatedEventosIndexRoute: typeof AuthenticatedEventosIndexRoute
   AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
+  AuthenticatedSaibaMaisIndexRoute: typeof AuthenticatedSaibaMaisIndexRoute
   AuthenticatedAdminModulosClonagemRoute: typeof AuthenticatedAdminModulosClonagemRoute
 }
 
@@ -7024,6 +7087,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRestauranteCardapioRoute: AuthenticatedRestauranteCardapioRoute,
   AuthenticatedRestauranteMesasRoute: AuthenticatedRestauranteMesasRoute,
   AuthenticatedRestauranteSalaoRoute: AuthenticatedRestauranteSalaoRoute,
+  AuthenticatedSaibaMaisSaudeRoute: AuthenticatedSaibaMaisSaudeRoute,
+  AuthenticatedSaibaMaisVersoesRoute: AuthenticatedSaibaMaisVersoesRoute,
   AuthenticatedSupportCockpitRoute: AuthenticatedSupportCockpitRoute,
   AuthenticatedWhiteLabelCockpitRoute: AuthenticatedWhiteLabelCockpitRoute,
   AuthenticatedCockpitsIndexRoute: AuthenticatedCockpitsIndexRoute,
@@ -7031,6 +7096,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEhrIndexRoute: AuthenticatedEhrIndexRoute,
   AuthenticatedEventosIndexRoute: AuthenticatedEventosIndexRoute,
   AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
+  AuthenticatedSaibaMaisIndexRoute: AuthenticatedSaibaMaisIndexRoute,
   AuthenticatedAdminModulosClonagemRoute:
     AuthenticatedAdminModulosClonagemRoute,
 }
