@@ -22,6 +22,7 @@ import {
 } from "@/lib/demo-restaurante.functions";
 import { DemoMenu, type DemoMenuItem } from "@/components/demo/DemoMenu";
 import { DemoCart } from "@/components/demo/DemoCart";
+import { DemoCheckout, type DemoPaymentMethod } from "@/components/demo/DemoCheckout";
 import { useDemoCart } from "@/hooks/useDemoCart";
 
 export const Route = createFileRoute("/demo/restaurante/$tenant/$qr")({
