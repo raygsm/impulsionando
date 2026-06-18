@@ -225,7 +225,7 @@ function ConsumidorDashboardPage() {
         e.key === "ArrowRight"
           ? Math.min(SECTIONS.length - 1, idx + 1)
           : Math.max(0, idx - 1);
-      handleSelect(SECTIONS[next].id, true);
+      handleSelect(SECTIONS[next].id, true, { pushState: true, focusPanel: true });
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
