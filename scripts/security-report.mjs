@@ -28,7 +28,8 @@ const PII_NAMES = [
 ];
 
 function q(sql) {
-  return execSync(`psql -At -F '|' -c ${JSON.stringify(sql)}`, { encoding: "utf8" }).trim();
+  const oneLine = sql.replace(/\s+/g, " ").trim();
+  return execSync(`psql -At -F '|' -c ${JSON.stringify(oneLine)}`, { encoding: "utf8" }).trim();
 }
 
 function rows(sql) {
