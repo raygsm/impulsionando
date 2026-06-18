@@ -39,7 +39,7 @@ function ConsumidorDashboardPage() {
           {data.profile && (
             <Card className="p-4">
               <div className="text-xs uppercase tracking-wide text-muted-foreground">Bem-vindo(a)</div>
-              <div className="text-lg font-semibold">{data.profile.display_name ?? data.profile.email}</div>
+              <div className="text-lg font-semibold">{data.profile.full_name ?? "Você"}</div>
               {data.nextDue && (
                 <Badge variant="secondary" className="mt-2">
                   Próximo vencimento: {new Date(data.nextDue).toLocaleDateString("pt-BR")}

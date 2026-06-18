@@ -192,7 +192,7 @@ export const fetchConsumidorDashboard = createServerFn({ method: "POST" })
     const w = windowFrom(data.days);
 
     const [profile, memberships, invoices, visits, favorites] = await Promise.all([
-      supabase.from("consumer_profiles").select("id,display_name,email,created_at").eq("user_id", userId).maybeSingle(),
+      supabase.from("consumer_profiles").select("id,full_name,created_at").eq("user_id", userId).maybeSingle(),
       supabase.from("consumer_memberships").select("id,plan,status,amount_cents,current_period_end").eq("user_id", userId),
       supabase.from("consumer_membership_invoices").select("amount_cents,status,due_date,paid_at").eq("user_id", userId).gte("created_at", w.from).lte("created_at", w.to),
       supabase.from("clube_visits").select("id,created_at").eq("user_id", userId).gte("created_at", w.from).lte("created_at", w.to),
