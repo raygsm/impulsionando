@@ -128,6 +128,8 @@ const CHAPTERS: Chapter[] = [
     ],
     modules: ["CRM", "Clube Impulsionando", "Fidelização"],
   },
+];
+
 
 
 function BeerHouseDemo() {
