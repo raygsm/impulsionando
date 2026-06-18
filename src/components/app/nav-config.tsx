@@ -98,6 +98,22 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
 
+  {
+    label: "Marketplace B2B",
+    audiences: ["core", "white-label", "empresa"],
+    defaultOpen: true,
+    items: [
+      { to: "/core/marketplace", label: "Visão geral", icon: TrendingUp, superOnly: true },
+      { to: "/core/marketplace/fornecedores", label: "Fornecedores", icon: Store, superOnly: true },
+      { to: "/core/marketplace/compradores", label: "Compradores", icon: Users2, superOnly: true },
+      { to: "/core/marketplace/pedidos", label: "Pedidos", icon: Receipt, superOnly: true },
+      { to: "/core/marketplace/financeiro", label: "Financeiro B2B", icon: Banknote, superOnly: true },
+      { to: "/cervejaria/marketplace", label: "Meu Marketplace (Cervejaria)", icon: Beer },
+      { to: "/bar/marketplace", label: "Comprar do Marketplace (Bar)", icon: ShoppingCart },
+    ],
+  },
+
+
 
   {
     label: "Captar",

@@ -247,6 +247,7 @@ import { Route as AuthenticatedCoreModulosRouteImport } from './routes/_authenti
 import { Route as AuthenticatedCoreMetricasReguasRouteImport } from './routes/_authenticated/core.metricas-reguas'
 import { Route as AuthenticatedCoreMenusRouteImport } from './routes/_authenticated/core.menus'
 import { Route as AuthenticatedCoreMasterRouteImport } from './routes/_authenticated/core.master'
+import { Route as AuthenticatedCoreMarketplaceRouteImport } from './routes/_authenticated/core.marketplace'
 import { Route as AuthenticatedCoreMarketingPagesRouteImport } from './routes/_authenticated/core.marketing-pages'
 import { Route as AuthenticatedCoreMarketingLeadsRouteImport } from './routes/_authenticated/core.marketing-leads'
 import { Route as AuthenticatedCoreInstalarModuloRouteImport } from './routes/_authenticated/core.instalar-modulo'
@@ -288,10 +289,12 @@ import { Route as AuthenticatedCheckoutPlanoRouteImport } from './routes/_authen
 import { Route as AuthenticatedCervejariaRetornoRouteImport } from './routes/_authenticated/cervejaria.retorno'
 import { Route as AuthenticatedCervejariaRelacionamentoRouteImport } from './routes/_authenticated/cervejaria.relacionamento'
 import { Route as AuthenticatedCervejariaPdvsRouteImport } from './routes/_authenticated/cervejaria.pdvs'
+import { Route as AuthenticatedCervejariaMarketplaceRouteImport } from './routes/_authenticated/cervejaria.marketplace'
 import { Route as AuthenticatedCervejariaCatalogoRouteImport } from './routes/_authenticated/cervejaria.catalogo'
 import { Route as AuthenticatedBiNichesRouteImport } from './routes/_authenticated/bi.niches'
 import { Route as AuthenticatedBiMasterRouteImport } from './routes/_authenticated/bi.master'
 import { Route as AuthenticatedBiCompanyRouteImport } from './routes/_authenticated/bi.company'
+import { Route as AuthenticatedBarMarketplaceRouteImport } from './routes/_authenticated/bar.marketplace'
 import { Route as AuthenticatedAgendaWaitlistRouteImport } from './routes/_authenticated/agenda.waitlist'
 import { Route as AuthenticatedAgendaServicesRouteImport } from './routes/_authenticated/agenda.services'
 import { Route as AuthenticatedAgendaSchedulesRouteImport } from './routes/_authenticated/agenda.schedules'
@@ -353,6 +356,10 @@ import { Route as AuthenticatedTorreRestaurantesDemoAuditoriaRouteImport } from 
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
 import { Route as AuthenticatedImobiliariaAprovacoesImprimirFilaRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes.imprimir-fila'
 import { Route as AuthenticatedCoreModulosSlugRouteImport } from './routes/_authenticated/core.modulos.$slug'
+import { Route as AuthenticatedCoreMarketplacePedidosRouteImport } from './routes/_authenticated/core.marketplace.pedidos'
+import { Route as AuthenticatedCoreMarketplaceFornecedoresRouteImport } from './routes/_authenticated/core.marketplace.fornecedores'
+import { Route as AuthenticatedCoreMarketplaceFinanceiroRouteImport } from './routes/_authenticated/core.marketplace.financeiro'
+import { Route as AuthenticatedCoreMarketplaceCompradoresRouteImport } from './routes/_authenticated/core.marketplace.compradores'
 import { Route as AuthenticatedCoreIntegracoesN8nRouteImport } from './routes/_authenticated/core.integracoes.n8n'
 import { Route as AuthenticatedCoreIntegracoesMercadopagoRouteImport } from './routes/_authenticated/core.integracoes.mercadopago'
 import { Route as AuthenticatedCoreIntegracoesDiagnosticoRouteImport } from './routes/_authenticated/core.integracoes.diagnostico'
@@ -1636,6 +1643,12 @@ const AuthenticatedCoreMasterRoute = AuthenticatedCoreMasterRouteImport.update({
   path: '/master',
   getParentRoute: () => AuthenticatedCoreRoute,
 } as any)
+const AuthenticatedCoreMarketplaceRoute =
+  AuthenticatedCoreMarketplaceRouteImport.update({
+    id: '/marketplace',
+    path: '/marketplace',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreMarketingPagesRoute =
   AuthenticatedCoreMarketingPagesRouteImport.update({
     id: '/marketing-pages',
@@ -1879,6 +1892,12 @@ const AuthenticatedCervejariaPdvsRoute =
     path: '/pdvs',
     getParentRoute: () => AuthenticatedCervejariaRoute,
   } as any)
+const AuthenticatedCervejariaMarketplaceRoute =
+  AuthenticatedCervejariaMarketplaceRouteImport.update({
+    id: '/marketplace',
+    path: '/marketplace',
+    getParentRoute: () => AuthenticatedCervejariaRoute,
+  } as any)
 const AuthenticatedCervejariaCatalogoRoute =
   AuthenticatedCervejariaCatalogoRouteImport.update({
     id: '/catalogo',
@@ -1900,6 +1919,12 @@ const AuthenticatedBiCompanyRoute = AuthenticatedBiCompanyRouteImport.update({
   path: '/company',
   getParentRoute: () => AuthenticatedBiRoute,
 } as any)
+const AuthenticatedBarMarketplaceRoute =
+  AuthenticatedBarMarketplaceRouteImport.update({
+    id: '/bar/marketplace',
+    path: '/bar/marketplace',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAgendaWaitlistRoute =
   AuthenticatedAgendaWaitlistRouteImport.update({
     id: '/waitlist',
@@ -2256,6 +2281,30 @@ const AuthenticatedCoreModulosSlugRoute =
     path: '/$slug',
     getParentRoute: () => AuthenticatedCoreModulosRoute,
   } as any)
+const AuthenticatedCoreMarketplacePedidosRoute =
+  AuthenticatedCoreMarketplacePedidosRouteImport.update({
+    id: '/pedidos',
+    path: '/pedidos',
+    getParentRoute: () => AuthenticatedCoreMarketplaceRoute,
+  } as any)
+const AuthenticatedCoreMarketplaceFornecedoresRoute =
+  AuthenticatedCoreMarketplaceFornecedoresRouteImport.update({
+    id: '/fornecedores',
+    path: '/fornecedores',
+    getParentRoute: () => AuthenticatedCoreMarketplaceRoute,
+  } as any)
+const AuthenticatedCoreMarketplaceFinanceiroRoute =
+  AuthenticatedCoreMarketplaceFinanceiroRouteImport.update({
+    id: '/financeiro',
+    path: '/financeiro',
+    getParentRoute: () => AuthenticatedCoreMarketplaceRoute,
+  } as any)
+const AuthenticatedCoreMarketplaceCompradoresRoute =
+  AuthenticatedCoreMarketplaceCompradoresRouteImport.update({
+    id: '/compradores',
+    path: '/compradores',
+    getParentRoute: () => AuthenticatedCoreMarketplaceRoute,
+  } as any)
 const AuthenticatedCoreIntegracoesN8nRoute =
   AuthenticatedCoreIntegracoesN8nRouteImport.update({
     id: '/integracoes/n8n',
@@ -2497,10 +2546,12 @@ export interface FileRoutesByFullPath {
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
   '/agenda/services': typeof AuthenticatedAgendaServicesRoute
   '/agenda/waitlist': typeof AuthenticatedAgendaWaitlistRoute
+  '/bar/marketplace': typeof AuthenticatedBarMarketplaceRoute
   '/bi/company': typeof AuthenticatedBiCompanyRoute
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
   '/cervejaria/catalogo': typeof AuthenticatedCervejariaCatalogoRoute
+  '/cervejaria/marketplace': typeof AuthenticatedCervejariaMarketplaceRoute
   '/cervejaria/pdvs': typeof AuthenticatedCervejariaPdvsRoute
   '/cervejaria/relacionamento': typeof AuthenticatedCervejariaRelacionamentoRoute
   '/cervejaria/retorno': typeof AuthenticatedCervejariaRetornoRoute
@@ -2542,6 +2593,7 @@ export interface FileRoutesByFullPath {
   '/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
   '/core/marketing-leads': typeof AuthenticatedCoreMarketingLeadsRoute
   '/core/marketing-pages': typeof AuthenticatedCoreMarketingPagesRoute
+  '/core/marketplace': typeof AuthenticatedCoreMarketplaceRouteWithChildren
   '/core/master': typeof AuthenticatedCoreMasterRoute
   '/core/menus': typeof AuthenticatedCoreMenusRoute
   '/core/metricas-reguas': typeof AuthenticatedCoreMetricasReguasRoute
@@ -2643,6 +2695,10 @@ export interface FileRoutesByFullPath {
   '/core/integracoes/diagnostico': typeof AuthenticatedCoreIntegracoesDiagnosticoRoute
   '/core/integracoes/mercadopago': typeof AuthenticatedCoreIntegracoesMercadopagoRoute
   '/core/integracoes/n8n': typeof AuthenticatedCoreIntegracoesN8nRoute
+  '/core/marketplace/compradores': typeof AuthenticatedCoreMarketplaceCompradoresRoute
+  '/core/marketplace/financeiro': typeof AuthenticatedCoreMarketplaceFinanceiroRoute
+  '/core/marketplace/fornecedores': typeof AuthenticatedCoreMarketplaceFornecedoresRoute
+  '/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
@@ -2841,10 +2897,12 @@ export interface FileRoutesByTo {
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
   '/agenda/services': typeof AuthenticatedAgendaServicesRoute
   '/agenda/waitlist': typeof AuthenticatedAgendaWaitlistRoute
+  '/bar/marketplace': typeof AuthenticatedBarMarketplaceRoute
   '/bi/company': typeof AuthenticatedBiCompanyRoute
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
   '/cervejaria/catalogo': typeof AuthenticatedCervejariaCatalogoRoute
+  '/cervejaria/marketplace': typeof AuthenticatedCervejariaMarketplaceRoute
   '/cervejaria/pdvs': typeof AuthenticatedCervejariaPdvsRoute
   '/cervejaria/relacionamento': typeof AuthenticatedCervejariaRelacionamentoRoute
   '/cervejaria/retorno': typeof AuthenticatedCervejariaRetornoRoute
@@ -2886,6 +2944,7 @@ export interface FileRoutesByTo {
   '/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
   '/core/marketing-leads': typeof AuthenticatedCoreMarketingLeadsRoute
   '/core/marketing-pages': typeof AuthenticatedCoreMarketingPagesRoute
+  '/core/marketplace': typeof AuthenticatedCoreMarketplaceRouteWithChildren
   '/core/master': typeof AuthenticatedCoreMasterRoute
   '/core/menus': typeof AuthenticatedCoreMenusRoute
   '/core/metricas-reguas': typeof AuthenticatedCoreMetricasReguasRoute
@@ -2987,6 +3046,10 @@ export interface FileRoutesByTo {
   '/core/integracoes/diagnostico': typeof AuthenticatedCoreIntegracoesDiagnosticoRoute
   '/core/integracoes/mercadopago': typeof AuthenticatedCoreIntegracoesMercadopagoRoute
   '/core/integracoes/n8n': typeof AuthenticatedCoreIntegracoesN8nRoute
+  '/core/marketplace/compradores': typeof AuthenticatedCoreMarketplaceCompradoresRoute
+  '/core/marketplace/financeiro': typeof AuthenticatedCoreMarketplaceFinanceiroRoute
+  '/core/marketplace/fornecedores': typeof AuthenticatedCoreMarketplaceFornecedoresRoute
+  '/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
@@ -3199,10 +3262,12 @@ export interface FileRoutesById {
   '/_authenticated/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
   '/_authenticated/agenda/services': typeof AuthenticatedAgendaServicesRoute
   '/_authenticated/agenda/waitlist': typeof AuthenticatedAgendaWaitlistRoute
+  '/_authenticated/bar/marketplace': typeof AuthenticatedBarMarketplaceRoute
   '/_authenticated/bi/company': typeof AuthenticatedBiCompanyRoute
   '/_authenticated/bi/master': typeof AuthenticatedBiMasterRoute
   '/_authenticated/bi/niches': typeof AuthenticatedBiNichesRoute
   '/_authenticated/cervejaria/catalogo': typeof AuthenticatedCervejariaCatalogoRoute
+  '/_authenticated/cervejaria/marketplace': typeof AuthenticatedCervejariaMarketplaceRoute
   '/_authenticated/cervejaria/pdvs': typeof AuthenticatedCervejariaPdvsRoute
   '/_authenticated/cervejaria/relacionamento': typeof AuthenticatedCervejariaRelacionamentoRoute
   '/_authenticated/cervejaria/retorno': typeof AuthenticatedCervejariaRetornoRoute
@@ -3244,6 +3309,7 @@ export interface FileRoutesById {
   '/_authenticated/core/instalar-modulo': typeof AuthenticatedCoreInstalarModuloRoute
   '/_authenticated/core/marketing-leads': typeof AuthenticatedCoreMarketingLeadsRoute
   '/_authenticated/core/marketing-pages': typeof AuthenticatedCoreMarketingPagesRoute
+  '/_authenticated/core/marketplace': typeof AuthenticatedCoreMarketplaceRouteWithChildren
   '/_authenticated/core/master': typeof AuthenticatedCoreMasterRoute
   '/_authenticated/core/menus': typeof AuthenticatedCoreMenusRoute
   '/_authenticated/core/metricas-reguas': typeof AuthenticatedCoreMetricasReguasRoute
@@ -3345,6 +3411,10 @@ export interface FileRoutesById {
   '/_authenticated/core/integracoes/diagnostico': typeof AuthenticatedCoreIntegracoesDiagnosticoRoute
   '/_authenticated/core/integracoes/mercadopago': typeof AuthenticatedCoreIntegracoesMercadopagoRoute
   '/_authenticated/core/integracoes/n8n': typeof AuthenticatedCoreIntegracoesN8nRoute
+  '/_authenticated/core/marketplace/compradores': typeof AuthenticatedCoreMarketplaceCompradoresRoute
+  '/_authenticated/core/marketplace/financeiro': typeof AuthenticatedCoreMarketplaceFinanceiroRoute
+  '/_authenticated/core/marketplace/fornecedores': typeof AuthenticatedCoreMarketplaceFornecedoresRoute
+  '/_authenticated/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/_authenticated/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/_authenticated/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
@@ -3556,10 +3626,12 @@ export interface FileRouteTypes {
     | '/agenda/schedules'
     | '/agenda/services'
     | '/agenda/waitlist'
+    | '/bar/marketplace'
     | '/bi/company'
     | '/bi/master'
     | '/bi/niches'
     | '/cervejaria/catalogo'
+    | '/cervejaria/marketplace'
     | '/cervejaria/pdvs'
     | '/cervejaria/relacionamento'
     | '/cervejaria/retorno'
@@ -3601,6 +3673,7 @@ export interface FileRouteTypes {
     | '/core/instalar-modulo'
     | '/core/marketing-leads'
     | '/core/marketing-pages'
+    | '/core/marketplace'
     | '/core/master'
     | '/core/menus'
     | '/core/metricas-reguas'
@@ -3702,6 +3775,10 @@ export interface FileRouteTypes {
     | '/core/integracoes/diagnostico'
     | '/core/integracoes/mercadopago'
     | '/core/integracoes/n8n'
+    | '/core/marketplace/compradores'
+    | '/core/marketplace/financeiro'
+    | '/core/marketplace/fornecedores'
+    | '/core/marketplace/pedidos'
     | '/core/modulos/$slug'
     | '/imobiliaria/aprovacoes/imprimir-fila'
     | '/sales/cash/$id'
@@ -3900,10 +3977,12 @@ export interface FileRouteTypes {
     | '/agenda/schedules'
     | '/agenda/services'
     | '/agenda/waitlist'
+    | '/bar/marketplace'
     | '/bi/company'
     | '/bi/master'
     | '/bi/niches'
     | '/cervejaria/catalogo'
+    | '/cervejaria/marketplace'
     | '/cervejaria/pdvs'
     | '/cervejaria/relacionamento'
     | '/cervejaria/retorno'
@@ -3945,6 +4024,7 @@ export interface FileRouteTypes {
     | '/core/instalar-modulo'
     | '/core/marketing-leads'
     | '/core/marketing-pages'
+    | '/core/marketplace'
     | '/core/master'
     | '/core/menus'
     | '/core/metricas-reguas'
@@ -4046,6 +4126,10 @@ export interface FileRouteTypes {
     | '/core/integracoes/diagnostico'
     | '/core/integracoes/mercadopago'
     | '/core/integracoes/n8n'
+    | '/core/marketplace/compradores'
+    | '/core/marketplace/financeiro'
+    | '/core/marketplace/fornecedores'
+    | '/core/marketplace/pedidos'
     | '/core/modulos/$slug'
     | '/imobiliaria/aprovacoes/imprimir-fila'
     | '/sales/cash/$id'
@@ -4257,10 +4341,12 @@ export interface FileRouteTypes {
     | '/_authenticated/agenda/schedules'
     | '/_authenticated/agenda/services'
     | '/_authenticated/agenda/waitlist'
+    | '/_authenticated/bar/marketplace'
     | '/_authenticated/bi/company'
     | '/_authenticated/bi/master'
     | '/_authenticated/bi/niches'
     | '/_authenticated/cervejaria/catalogo'
+    | '/_authenticated/cervejaria/marketplace'
     | '/_authenticated/cervejaria/pdvs'
     | '/_authenticated/cervejaria/relacionamento'
     | '/_authenticated/cervejaria/retorno'
@@ -4302,6 +4388,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/instalar-modulo'
     | '/_authenticated/core/marketing-leads'
     | '/_authenticated/core/marketing-pages'
+    | '/_authenticated/core/marketplace'
     | '/_authenticated/core/master'
     | '/_authenticated/core/menus'
     | '/_authenticated/core/metricas-reguas'
@@ -4403,6 +4490,10 @@ export interface FileRouteTypes {
     | '/_authenticated/core/integracoes/diagnostico'
     | '/_authenticated/core/integracoes/mercadopago'
     | '/_authenticated/core/integracoes/n8n'
+    | '/_authenticated/core/marketplace/compradores'
+    | '/_authenticated/core/marketplace/financeiro'
+    | '/_authenticated/core/marketplace/fornecedores'
+    | '/_authenticated/core/marketplace/pedidos'
     | '/_authenticated/core/modulos/$slug'
     | '/_authenticated/imobiliaria/aprovacoes/imprimir-fila'
     | '/_authenticated/sales/cash/$id'
@@ -6240,6 +6331,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreMasterRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/marketplace': {
+      id: '/_authenticated/core/marketplace'
+      path: '/marketplace'
+      fullPath: '/core/marketplace'
+      preLoaderRoute: typeof AuthenticatedCoreMarketplaceRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/marketing-pages': {
       id: '/_authenticated/core/marketing-pages'
       path: '/marketing-pages'
@@ -6527,6 +6625,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCervejariaPdvsRouteImport
       parentRoute: typeof AuthenticatedCervejariaRoute
     }
+    '/_authenticated/cervejaria/marketplace': {
+      id: '/_authenticated/cervejaria/marketplace'
+      path: '/marketplace'
+      fullPath: '/cervejaria/marketplace'
+      preLoaderRoute: typeof AuthenticatedCervejariaMarketplaceRouteImport
+      parentRoute: typeof AuthenticatedCervejariaRoute
+    }
     '/_authenticated/cervejaria/catalogo': {
       id: '/_authenticated/cervejaria/catalogo'
       path: '/catalogo'
@@ -6554,6 +6659,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/bi/company'
       preLoaderRoute: typeof AuthenticatedBiCompanyRouteImport
       parentRoute: typeof AuthenticatedBiRoute
+    }
+    '/_authenticated/bar/marketplace': {
+      id: '/_authenticated/bar/marketplace'
+      path: '/bar/marketplace'
+      fullPath: '/bar/marketplace'
+      preLoaderRoute: typeof AuthenticatedBarMarketplaceRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/agenda/waitlist': {
       id: '/_authenticated/agenda/waitlist'
@@ -6982,6 +7094,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreModulosSlugRouteImport
       parentRoute: typeof AuthenticatedCoreModulosRoute
     }
+    '/_authenticated/core/marketplace/pedidos': {
+      id: '/_authenticated/core/marketplace/pedidos'
+      path: '/pedidos'
+      fullPath: '/core/marketplace/pedidos'
+      preLoaderRoute: typeof AuthenticatedCoreMarketplacePedidosRouteImport
+      parentRoute: typeof AuthenticatedCoreMarketplaceRoute
+    }
+    '/_authenticated/core/marketplace/fornecedores': {
+      id: '/_authenticated/core/marketplace/fornecedores'
+      path: '/fornecedores'
+      fullPath: '/core/marketplace/fornecedores'
+      preLoaderRoute: typeof AuthenticatedCoreMarketplaceFornecedoresRouteImport
+      parentRoute: typeof AuthenticatedCoreMarketplaceRoute
+    }
+    '/_authenticated/core/marketplace/financeiro': {
+      id: '/_authenticated/core/marketplace/financeiro'
+      path: '/financeiro'
+      fullPath: '/core/marketplace/financeiro'
+      preLoaderRoute: typeof AuthenticatedCoreMarketplaceFinanceiroRouteImport
+      parentRoute: typeof AuthenticatedCoreMarketplaceRoute
+    }
+    '/_authenticated/core/marketplace/compradores': {
+      id: '/_authenticated/core/marketplace/compradores'
+      path: '/compradores'
+      fullPath: '/core/marketplace/compradores'
+      preLoaderRoute: typeof AuthenticatedCoreMarketplaceCompradoresRouteImport
+      parentRoute: typeof AuthenticatedCoreMarketplaceRoute
+    }
     '/_authenticated/core/integracoes/n8n': {
       id: '/_authenticated/core/integracoes/n8n'
       path: '/integracoes/n8n'
@@ -7183,6 +7323,7 @@ const AuthenticatedBiRouteWithChildren = AuthenticatedBiRoute._addFileChildren(
 
 interface AuthenticatedCervejariaRouteChildren {
   AuthenticatedCervejariaCatalogoRoute: typeof AuthenticatedCervejariaCatalogoRoute
+  AuthenticatedCervejariaMarketplaceRoute: typeof AuthenticatedCervejariaMarketplaceRoute
   AuthenticatedCervejariaPdvsRoute: typeof AuthenticatedCervejariaPdvsRoute
   AuthenticatedCervejariaRelacionamentoRoute: typeof AuthenticatedCervejariaRelacionamentoRoute
   AuthenticatedCervejariaRetornoRoute: typeof AuthenticatedCervejariaRetornoRoute
@@ -7191,6 +7332,8 @@ interface AuthenticatedCervejariaRouteChildren {
 const AuthenticatedCervejariaRouteChildren: AuthenticatedCervejariaRouteChildren =
   {
     AuthenticatedCervejariaCatalogoRoute: AuthenticatedCervejariaCatalogoRoute,
+    AuthenticatedCervejariaMarketplaceRoute:
+      AuthenticatedCervejariaMarketplaceRoute,
     AuthenticatedCervejariaPdvsRoute: AuthenticatedCervejariaPdvsRoute,
     AuthenticatedCervejariaRelacionamentoRoute:
       AuthenticatedCervejariaRelacionamentoRoute,
@@ -7212,6 +7355,30 @@ const AuthenticatedClubeRouteChildren: AuthenticatedClubeRouteChildren = {
 
 const AuthenticatedClubeRouteWithChildren =
   AuthenticatedClubeRoute._addFileChildren(AuthenticatedClubeRouteChildren)
+
+interface AuthenticatedCoreMarketplaceRouteChildren {
+  AuthenticatedCoreMarketplaceCompradoresRoute: typeof AuthenticatedCoreMarketplaceCompradoresRoute
+  AuthenticatedCoreMarketplaceFinanceiroRoute: typeof AuthenticatedCoreMarketplaceFinanceiroRoute
+  AuthenticatedCoreMarketplaceFornecedoresRoute: typeof AuthenticatedCoreMarketplaceFornecedoresRoute
+  AuthenticatedCoreMarketplacePedidosRoute: typeof AuthenticatedCoreMarketplacePedidosRoute
+}
+
+const AuthenticatedCoreMarketplaceRouteChildren: AuthenticatedCoreMarketplaceRouteChildren =
+  {
+    AuthenticatedCoreMarketplaceCompradoresRoute:
+      AuthenticatedCoreMarketplaceCompradoresRoute,
+    AuthenticatedCoreMarketplaceFinanceiroRoute:
+      AuthenticatedCoreMarketplaceFinanceiroRoute,
+    AuthenticatedCoreMarketplaceFornecedoresRoute:
+      AuthenticatedCoreMarketplaceFornecedoresRoute,
+    AuthenticatedCoreMarketplacePedidosRoute:
+      AuthenticatedCoreMarketplacePedidosRoute,
+  }
+
+const AuthenticatedCoreMarketplaceRouteWithChildren =
+  AuthenticatedCoreMarketplaceRoute._addFileChildren(
+    AuthenticatedCoreMarketplaceRouteChildren,
+  )
 
 interface AuthenticatedCoreModulosRouteChildren {
   AuthenticatedCoreModulosSlugRoute: typeof AuthenticatedCoreModulosSlugRoute
@@ -7281,6 +7448,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreInstalarModuloRoute: typeof AuthenticatedCoreInstalarModuloRoute
   AuthenticatedCoreMarketingLeadsRoute: typeof AuthenticatedCoreMarketingLeadsRoute
   AuthenticatedCoreMarketingPagesRoute: typeof AuthenticatedCoreMarketingPagesRoute
+  AuthenticatedCoreMarketplaceRoute: typeof AuthenticatedCoreMarketplaceRouteWithChildren
   AuthenticatedCoreMasterRoute: typeof AuthenticatedCoreMasterRoute
   AuthenticatedCoreMenusRoute: typeof AuthenticatedCoreMenusRoute
   AuthenticatedCoreMetricasReguasRoute: typeof AuthenticatedCoreMetricasReguasRoute
@@ -7324,6 +7492,8 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreInstalarModuloRoute: AuthenticatedCoreInstalarModuloRoute,
   AuthenticatedCoreMarketingLeadsRoute: AuthenticatedCoreMarketingLeadsRoute,
   AuthenticatedCoreMarketingPagesRoute: AuthenticatedCoreMarketingPagesRoute,
+  AuthenticatedCoreMarketplaceRoute:
+    AuthenticatedCoreMarketplaceRouteWithChildren,
   AuthenticatedCoreMasterRoute: AuthenticatedCoreMasterRoute,
   AuthenticatedCoreMenusRoute: AuthenticatedCoreMenusRoute,
   AuthenticatedCoreMetricasReguasRoute: AuthenticatedCoreMetricasReguasRoute,
@@ -7576,6 +7746,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminTrialsRoute: typeof AuthenticatedAdminTrialsRoute
   AuthenticatedAdminUptimeRoute: typeof AuthenticatedAdminUptimeRoute
   AuthenticatedAdminWhatsappMetricsRoute: typeof AuthenticatedAdminWhatsappMetricsRoute
+  AuthenticatedBarMarketplaceRoute: typeof AuthenticatedBarMarketplaceRoute
   AuthenticatedCheckoutPlanoRoute: typeof AuthenticatedCheckoutPlanoRoute
   AuthenticatedCommercialCockpitRoute: typeof AuthenticatedCommercialCockpitRoute
   AuthenticatedComunidadeIdRoute: typeof AuthenticatedComunidadeIdRoute
@@ -7683,6 +7854,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminUptimeRoute: AuthenticatedAdminUptimeRoute,
   AuthenticatedAdminWhatsappMetricsRoute:
     AuthenticatedAdminWhatsappMetricsRoute,
+  AuthenticatedBarMarketplaceRoute: AuthenticatedBarMarketplaceRoute,
   AuthenticatedCheckoutPlanoRoute: AuthenticatedCheckoutPlanoRoute,
   AuthenticatedCommercialCockpitRoute: AuthenticatedCommercialCockpitRoute,
   AuthenticatedComunidadeIdRoute: AuthenticatedComunidadeIdRoute,

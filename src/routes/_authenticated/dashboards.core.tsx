@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { PageHeader } from "@/components/app/PageElements";
@@ -7,7 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { KpiCard } from "@/components/insights/KpiCard";
 import { PercebidoSection } from "@/components/insights/PercebidoSection";
 import { fetchCoreAudienceDashboard } from "@/lib/audience-dashboards.functions";
-import { Loader2 } from "lucide-react";
+import { fetchMarketplaceKPIs } from "@/lib/marketplace.functions";
+import { Loader2, TrendingUp, ArrowRight } from "lucide-react";
+
+function brl(c: number) {
+  return (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
 
 export const Route = createFileRoute("/_authenticated/dashboards/core")({
   head: () => ({ meta: [{ title: "Dashboard Core — Impulsionando" }, { name: "robots", content: "noindex,nofollow" }] }),
@@ -16,9 +21,15 @@ export const Route = createFileRoute("/_authenticated/dashboards/core")({
 
 function CoreDashboardPage() {
   const fn = useServerFn(fetchCoreAudienceDashboard);
+  const mpFn = useServerFn(fetchMarketplaceKPIs);
   const { data, isLoading, error } = useQuery({
     queryKey: ["dashboards", "core", 30],
     queryFn: () => fn({ data: { days: 30 } }),
+    staleTime: 60_000,
+  });
+  const { data: mp } = useQuery({
+    queryKey: ["dashboards", "core", "mp", 30],
+    queryFn: () => mpFn({ data: { sinceDays: 30 } }),
     staleTime: 60_000,
   });
 
@@ -69,6 +80,37 @@ function CoreDashboardPage() {
           </Card>
         </>
       )}
+
+      {/* Marketplace B2B — GMV + receita de Taxa de Intermediação Digital */}
+      <Card className="p-5">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold uppercase tracking-wide flex items-center gap-2">
+            <TrendingUp className="w-4 h-4" /> Marketplace B2B (30 dias)
+          </h2>
+          <Link to="/core/marketplace" className="text-xs text-primary inline-flex items-center gap-1">
+            Abrir <ArrowRight className="w-3 h-3" />
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+          <div>
+            <div className="text-[10px] uppercase text-muted-foreground">Volume transacionado (GMV)</div>
+            <div className="text-xl font-bold">{brl(mp?.gmv_cents ?? 0)}</div>
+          </div>
+          <div>
+            <div className="text-[10px] uppercase text-muted-foreground">Receita Marketplace</div>
+            <div className="text-xl font-bold">{brl(mp?.fee_cents ?? 0)}</div>
+            <div className="text-[10px] text-muted-foreground">Taxa de Intermediação Digital</div>
+          </div>
+          <div>
+            <div className="text-[10px] uppercase text-muted-foreground">Pedidos concluídos</div>
+            <div className="text-xl font-bold">{mp?.orders ?? 0}</div>
+          </div>
+          <div>
+            <div className="text-[10px] uppercase text-muted-foreground">Líquido a fornecedores</div>
+            <div className="text-xl font-bold">{brl(mp?.supplier_net_cents ?? 0)}</div>
+          </div>
+        </div>
+      </Card>
 
       <PercebidoSection audience="core" days={30} />
     </div>
