@@ -3099,11 +3099,15 @@ export type Database = {
       catalog_intents: {
         Row: {
           consumed_at: string | null
+          conversion_kind: string | null
+          converted_at: string | null
           created_at: string
           expires_at: string
           id: string
+          last_reuse_attempt_at: string | null
           macro_slug: string
           plan_tier: string
+          reuse_attempts: number
           selected_modules: string[]
           session_token: string | null
           source: string
@@ -3112,11 +3116,15 @@ export type Database = {
         }
         Insert: {
           consumed_at?: string | null
+          conversion_kind?: string | null
+          converted_at?: string | null
           created_at?: string
           expires_at?: string
           id?: string
+          last_reuse_attempt_at?: string | null
           macro_slug: string
           plan_tier: string
+          reuse_attempts?: number
           selected_modules?: string[]
           session_token?: string | null
           source?: string
@@ -3125,11 +3133,15 @@ export type Database = {
         }
         Update: {
           consumed_at?: string | null
+          conversion_kind?: string | null
+          converted_at?: string | null
           created_at?: string
           expires_at?: string
           id?: string
+          last_reuse_attempt_at?: string | null
           macro_slug?: string
           plan_tier?: string
+          reuse_attempts?: number
           selected_modules?: string[]
           session_token?: string | null
           source?: string
