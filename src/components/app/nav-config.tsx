@@ -7,7 +7,7 @@ import {
   ShoppingCart, Receipt, Plus, Wallet as WalletIcon,
   Contact, BarChart3, ShieldCheck, Inbox, GraduationCap, Stethoscope, Sparkles, Crown,
   Handshake, Link2, Briefcase, BadgeDollarSign, TrendingUp, Banknote, Copy,
-  Home, Search as SearchIcon, Zap, Bot, MessageSquare,
+  Home, Search as SearchIcon, Zap, Bot, MessageSquare, QrCode,
   History as HistoryIcon, Headphones, UserRound, Megaphone,
   Calculator, Activity, RefreshCw, BookOpen,
 } from "lucide-react";
@@ -41,6 +41,7 @@ export interface NavGroup {
 export const TOP_ITEMS: NavItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, perm: "dashboard.read" },
   { to: "/torre/consumidores", label: "Torre · Consumidor Final", icon: UserRound, superOnly: true },
+  { to: "/showroom/restaurante", label: "Showroom · Bar & Restaurante", icon: QrCode, superOnly: true },
   { to: "/dashboards/core", label: "Dashboard Core", icon: LayoutDashboard, audiences: ["core"] },
   { to: "/dashboards/white-label", label: "Dashboard WL", icon: LayoutDashboard, audiences: ["white-label", "core"] },
   { to: "/dashboards/empresa", label: "Dashboard Empresa", icon: LayoutDashboard, audiences: ["empresa"] },

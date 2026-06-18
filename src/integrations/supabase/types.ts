@@ -6279,6 +6279,216 @@ export type Database = {
           },
         ]
       }
+      demo_resto_leads: {
+        Row: {
+          birthdate: string | null
+          created_at: string
+          id: string
+          is_demo: boolean
+          name: string
+          preferences: Json
+          scenario_id: string
+          session_id: string | null
+          whatsapp: string
+        }
+        Insert: {
+          birthdate?: string | null
+          created_at?: string
+          id?: string
+          is_demo?: boolean
+          name: string
+          preferences?: Json
+          scenario_id: string
+          session_id?: string | null
+          whatsapp: string
+        }
+        Update: {
+          birthdate?: string | null
+          created_at?: string
+          id?: string
+          is_demo?: boolean
+          name?: string
+          preferences?: Json
+          scenario_id?: string
+          session_id?: string | null
+          whatsapp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demo_resto_leads_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "demo_resto_scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demo_resto_leads_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "demo_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      demo_resto_menu_items: {
+        Row: {
+          category: string
+          description: string | null
+          harmony: string | null
+          id: string
+          is_bestseller: boolean
+          name: string
+          price_cents: number
+          scenario_id: string
+          sort_order: number
+          tags: string[]
+        }
+        Insert: {
+          category: string
+          description?: string | null
+          harmony?: string | null
+          id?: string
+          is_bestseller?: boolean
+          name: string
+          price_cents: number
+          scenario_id: string
+          sort_order?: number
+          tags?: string[]
+        }
+        Update: {
+          category?: string
+          description?: string | null
+          harmony?: string | null
+          id?: string
+          is_bestseller?: boolean
+          name?: string
+          price_cents?: number
+          scenario_id?: string
+          sort_order?: number
+          tags?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demo_resto_menu_items_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "demo_resto_scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      demo_resto_qr_codes: {
+        Row: {
+          id: string
+          instruction: string
+          kind: string
+          scenario_id: string
+          slug: string
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          id?: string
+          instruction: string
+          kind: string
+          scenario_id: string
+          slug: string
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          id?: string
+          instruction?: string
+          kind?: string
+          scenario_id?: string
+          slug?: string
+          sort_order?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demo_resto_qr_codes_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "demo_resto_scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      demo_resto_scenarios: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          primary_color: string
+          seed_version: number
+          slug: string
+          tagline: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          primary_color?: string
+          seed_version?: number
+          slug: string
+          tagline?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          primary_color?: string
+          seed_version?: number
+          slug?: string
+          tagline?: string | null
+        }
+        Relationships: []
+      }
+      demo_resto_vouchers: {
+        Row: {
+          audience: string | null
+          channel: string | null
+          code: string
+          id: string
+          name: string
+          rule: string
+          scenario_id: string
+          status: string
+          validity_label: string | null
+        }
+        Insert: {
+          audience?: string | null
+          channel?: string | null
+          code: string
+          id?: string
+          name: string
+          rule: string
+          scenario_id: string
+          status?: string
+          validity_label?: string | null
+        }
+        Update: {
+          audience?: string | null
+          channel?: string | null
+          code?: string
+          id?: string
+          name?: string
+          rule?: string
+          scenario_id?: string
+          status?: string
+          validity_label?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demo_resto_vouchers_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "demo_resto_scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       demo_sessions: {
         Row: {
           company_id: string | null

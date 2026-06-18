@@ -172,6 +172,7 @@ import { Route as AuthenticatedWhiteLabelCockpitRouteImport } from './routes/_au
 import { Route as AuthenticatedUsersCorporateRouteImport } from './routes/_authenticated/users.corporate'
 import { Route as AuthenticatedTorreConsumidoresRouteImport } from './routes/_authenticated/torre.consumidores'
 import { Route as AuthenticatedSupportCockpitRouteImport } from './routes/_authenticated/support.cockpit'
+import { Route as AuthenticatedShowroomRestauranteRouteImport } from './routes/_authenticated/showroom.restaurante'
 import { Route as AuthenticatedSalesOrdersRouteImport } from './routes/_authenticated/sales.orders'
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
 import { Route as AuthenticatedSalesCashRouteImport } from './routes/_authenticated/sales.cash'
@@ -319,6 +320,7 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as DemoRestauranteTenantQrRouteImport } from './routes/demo.restaurante.$tenant.$qr'
 import { Route as ApiPublicRealestateSavedSearchRouteImport } from './routes/api/public/realestate/saved-search'
 import { Route as ApiPublicRealestateInterestRouteImport } from './routes/api/public/realestate/interest'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
@@ -1190,6 +1192,12 @@ const AuthenticatedSupportCockpitRoute =
     path: '/support/cockpit',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedShowroomRestauranteRoute =
+  AuthenticatedShowroomRestauranteRouteImport.update({
+    id: '/showroom/restaurante',
+    path: '/showroom/restaurante',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSalesOrdersRoute =
   AuthenticatedSalesOrdersRouteImport.update({
     id: '/orders',
@@ -2047,6 +2055,11 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   path: '/lovable/email/auth/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DemoRestauranteTenantQrRoute = DemoRestauranteTenantQrRouteImport.update({
+  id: '/demo/restaurante/$tenant/$qr',
+  path: '/demo/restaurante/$tenant/$qr',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicRealestateSavedSearchRoute =
   ApiPublicRealestateSavedSearchRouteImport.update({
     id: '/api/public/realestate/saved-search',
@@ -2516,6 +2529,7 @@ export interface FileRoutesByFullPath {
   '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
+  '/showroom/restaurante': typeof AuthenticatedShowroomRestauranteRoute
   '/support/cockpit': typeof AuthenticatedSupportCockpitRoute
   '/torre/consumidores': typeof AuthenticatedTorreConsumidoresRoute
   '/users/corporate': typeof AuthenticatedUsersCorporateRoute
@@ -2566,6 +2580,7 @@ export interface FileRoutesByFullPath {
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
+  '/demo/restaurante/$tenant/$qr': typeof DemoRestauranteTenantQrRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -2847,6 +2862,7 @@ export interface FileRoutesByTo {
   '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/sales/orders': typeof AuthenticatedSalesOrdersRoute
+  '/showroom/restaurante': typeof AuthenticatedShowroomRestauranteRoute
   '/support/cockpit': typeof AuthenticatedSupportCockpitRoute
   '/torre/consumidores': typeof AuthenticatedTorreConsumidoresRoute
   '/users/corporate': typeof AuthenticatedUsersCorporateRoute
@@ -2897,6 +2913,7 @@ export interface FileRoutesByTo {
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
+  '/demo/restaurante/$tenant/$qr': typeof DemoRestauranteTenantQrRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -3192,6 +3209,7 @@ export interface FileRoutesById {
   '/_authenticated/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
   '/_authenticated/sales/orders': typeof AuthenticatedSalesOrdersRoute
+  '/_authenticated/showroom/restaurante': typeof AuthenticatedShowroomRestauranteRoute
   '/_authenticated/support/cockpit': typeof AuthenticatedSupportCockpitRoute
   '/_authenticated/torre/consumidores': typeof AuthenticatedTorreConsumidoresRoute
   '/_authenticated/users/corporate': typeof AuthenticatedUsersCorporateRoute
@@ -3242,6 +3260,7 @@ export interface FileRoutesById {
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
+  '/demo/restaurante/$tenant/$qr': typeof DemoRestauranteTenantQrRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -3536,6 +3555,7 @@ export interface FileRouteTypes {
     | '/sales/cash'
     | '/sales/new'
     | '/sales/orders'
+    | '/showroom/restaurante'
     | '/support/cockpit'
     | '/torre/consumidores'
     | '/users/corporate'
@@ -3586,6 +3606,7 @@ export interface FileRouteTypes {
     | '/api/public/payments/webhook'
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
+    | '/demo/restaurante/$tenant/$qr'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -3867,6 +3888,7 @@ export interface FileRouteTypes {
     | '/sales/cash'
     | '/sales/new'
     | '/sales/orders'
+    | '/showroom/restaurante'
     | '/support/cockpit'
     | '/torre/consumidores'
     | '/users/corporate'
@@ -3917,6 +3939,7 @@ export interface FileRouteTypes {
     | '/api/public/payments/webhook'
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
+    | '/demo/restaurante/$tenant/$qr'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -4211,6 +4234,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sales/cash'
     | '/_authenticated/sales/new'
     | '/_authenticated/sales/orders'
+    | '/_authenticated/showroom/restaurante'
     | '/_authenticated/support/cockpit'
     | '/_authenticated/torre/consumidores'
     | '/_authenticated/users/corporate'
@@ -4261,6 +4285,7 @@ export interface FileRouteTypes {
     | '/api/public/payments/webhook'
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
+    | '/demo/restaurante/$tenant/$qr'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -4396,6 +4421,7 @@ export interface RootRouteChildren {
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   ApiPublicRealestateInterestRoute: typeof ApiPublicRealestateInterestRoute
   ApiPublicRealestateSavedSearchRoute: typeof ApiPublicRealestateSavedSearchRoute
+  DemoRestauranteTenantQrRoute: typeof DemoRestauranteTenantQrRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -5547,6 +5573,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSupportCockpitRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/showroom/restaurante': {
+      id: '/_authenticated/showroom/restaurante'
+      path: '/showroom/restaurante'
+      fullPath: '/showroom/restaurante'
+      preLoaderRoute: typeof AuthenticatedShowroomRestauranteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/sales/orders': {
       id: '/_authenticated/sales/orders'
       path: '/orders'
@@ -6576,6 +6609,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/demo/restaurante/$tenant/$qr': {
+      id: '/demo/restaurante/$tenant/$qr'
+      path: '/demo/restaurante/$tenant/$qr'
+      fullPath: '/demo/restaurante/$tenant/$qr'
+      preLoaderRoute: typeof DemoRestauranteTenantQrRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/realestate/saved-search': {
       id: '/api/public/realestate/saved-search'
       path: '/api/public/realestate/saved-search'
@@ -7328,6 +7368,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRestauranteSalaoRoute: typeof AuthenticatedRestauranteSalaoRoute
   AuthenticatedSaibaMaisSaudeRoute: typeof AuthenticatedSaibaMaisSaudeRoute
   AuthenticatedSaibaMaisVersoesRoute: typeof AuthenticatedSaibaMaisVersoesRoute
+  AuthenticatedShowroomRestauranteRoute: typeof AuthenticatedShowroomRestauranteRoute
   AuthenticatedSupportCockpitRoute: typeof AuthenticatedSupportCockpitRoute
   AuthenticatedTorreConsumidoresRoute: typeof AuthenticatedTorreConsumidoresRoute
   AuthenticatedWhiteLabelCockpitRoute: typeof AuthenticatedWhiteLabelCockpitRoute
@@ -7447,6 +7488,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRestauranteSalaoRoute: AuthenticatedRestauranteSalaoRoute,
   AuthenticatedSaibaMaisSaudeRoute: AuthenticatedSaibaMaisSaudeRoute,
   AuthenticatedSaibaMaisVersoesRoute: AuthenticatedSaibaMaisVersoesRoute,
+  AuthenticatedShowroomRestauranteRoute: AuthenticatedShowroomRestauranteRoute,
   AuthenticatedSupportCockpitRoute: AuthenticatedSupportCockpitRoute,
   AuthenticatedTorreConsumidoresRoute: AuthenticatedTorreConsumidoresRoute,
   AuthenticatedWhiteLabelCockpitRoute: AuthenticatedWhiteLabelCockpitRoute,
@@ -7702,6 +7744,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   ApiPublicRealestateInterestRoute: ApiPublicRealestateInterestRoute,
   ApiPublicRealestateSavedSearchRoute: ApiPublicRealestateSavedSearchRoute,
+  DemoRestauranteTenantQrRoute: DemoRestauranteTenantQrRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
