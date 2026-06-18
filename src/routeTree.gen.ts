@@ -171,6 +171,7 @@ import { Route as AuthenticatedBiIndexRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenticated/agenda.index'
 import { Route as AuthenticatedAffiliatesIndexRouteImport } from './routes/_authenticated/affiliates.index'
 import { Route as PortalContabilidadeTokenRouteImport } from './routes/portal.contabilidade.$token'
+import { Route as PlanosRecomendacaoNichoRouteImport } from './routes/planos.recomendacao.$nicho'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ImoveisSlugPropertyIdRouteImport } from './routes/imoveis.$slug.$propertyId'
 import { Route as DemoNichoSlugRouteImport } from './routes/demo.nicho.$slug'
@@ -1208,6 +1209,11 @@ const PortalContabilidadeTokenRoute =
     path: '/portal/contabilidade/$token',
     getParentRoute: () => rootRouteImport,
   } as any)
+const PlanosRecomendacaoNichoRoute = PlanosRecomendacaoNichoRouteImport.update({
+  id: '/recomendacao/$nicho',
+  path: '/recomendacao/$nicho',
+  getParentRoute: () => PlanosRoute,
+} as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
@@ -2722,6 +2728,7 @@ export interface FileRoutesByFullPath {
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/planos/recomendacao/$nicho': typeof PlanosRecomendacaoNichoRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda/': typeof AuthenticatedAgendaIndexRoute
@@ -3080,6 +3087,7 @@ export interface FileRoutesByTo {
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/planos/recomendacao/$nicho': typeof PlanosRecomendacaoNichoRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/affiliates': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda': typeof AuthenticatedAgendaIndexRoute
@@ -3452,6 +3460,7 @@ export interface FileRoutesById {
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/planos/recomendacao/$nicho': typeof PlanosRecomendacaoNichoRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/_authenticated/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/_authenticated/agenda/': typeof AuthenticatedAgendaIndexRoute
@@ -3823,6 +3832,7 @@ export interface FileRouteTypes {
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
+    | '/planos/recomendacao/$nicho'
     | '/portal/contabilidade/$token'
     | '/affiliates/'
     | '/agenda/'
@@ -4181,6 +4191,7 @@ export interface FileRouteTypes {
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
+    | '/planos/recomendacao/$nicho'
     | '/portal/contabilidade/$token'
     | '/affiliates'
     | '/agenda'
@@ -4552,6 +4563,7 @@ export interface FileRouteTypes {
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
+    | '/planos/recomendacao/$nicho'
     | '/portal/contabilidade/$token'
     | '/_authenticated/affiliates/'
     | '/_authenticated/agenda/'
@@ -5889,6 +5901,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/portal/contabilidade/$token'
       preLoaderRoute: typeof PortalContabilidadeTokenRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/planos/recomendacao/$nicho': {
+      id: '/planos/recomendacao/$nicho'
+      path: '/recomendacao/$nicho'
+      fullPath: '/planos/recomendacao/$nicho'
+      preLoaderRoute: typeof PlanosRecomendacaoNichoRouteImport
+      parentRoute: typeof PlanosRoute
     }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
@@ -8157,11 +8176,13 @@ const PacienteRouteWithChildren = PacienteRoute._addFileChildren(
 interface PlanosRouteChildren {
   PlanosComecarRoute: typeof PlanosComecarRoute
   PlanosTesteRoute: typeof PlanosTesteRoute
+  PlanosRecomendacaoNichoRoute: typeof PlanosRecomendacaoNichoRoute
 }
 
 const PlanosRouteChildren: PlanosRouteChildren = {
   PlanosComecarRoute: PlanosComecarRoute,
   PlanosTesteRoute: PlanosTesteRoute,
+  PlanosRecomendacaoNichoRoute: PlanosRecomendacaoNichoRoute,
 }
 
 const PlanosRouteWithChildren =
