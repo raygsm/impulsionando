@@ -8,7 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Heart, MapPin, Briefcase, GraduationCap, Calendar, Search } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Heart, MapPin, Briefcase, GraduationCap, Calendar, Search, Settings } from "lucide-react";
+import { compatibilityScore, type EmpresaConfig } from "@/lib/talentos-score";
 
 export const Route = createFileRoute("/_authenticated/empresa/talentos")({
   component: EmpresaTalentos,
@@ -43,6 +45,7 @@ function EmpresaTalentos() {
   const [dispo, setDispo] = useState("Qualquer");
   const [modelo, setModelo] = useState("Qualquer");
   const [list, setList] = useState<Candidato[]>([]);
+  const [empresaCfg, setEmpresaCfg] = useState<EmpresaConfig>({});
   const [loading, setLoading] = useState(false);
 
   async function carregar() {
@@ -67,7 +70,20 @@ function EmpresaTalentos() {
     setList((data ?? []) as Candidato[]);
   }
 
-  useEffect(() => { carregar(); /* primeira carga */ // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    carregar();
+    (async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sb = supabase as any;
+      const { data: comp } = await sb.from("companies").select("id, niche").eq("owner_id", u.user.id).maybeSingle();
+      if (!comp) return;
+      const { data: cfg } = await sb.from("talentos_company_settings")
+        .select("cidades_interesse, bairros_interesse, nicho").eq("company_id", comp.id).maybeSingle();
+      setEmpresaCfg({ ...(cfg ?? {}), nicho: cfg?.nicho ?? comp.niche });
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filtrados = useMemo(() => {
@@ -98,11 +114,16 @@ function EmpresaTalentos() {
   return (
     <main className="min-h-dvh bg-background py-8">
       <div className="mx-auto max-w-6xl px-4">
-        <header className="mb-6">
-          <h1 className="text-3xl font-bold">Rede de Talentos</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Encontre profissionais da sua região cadastrados no ecossistema Impulsionando.
-          </p>
+        <header className="mb-6 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">Rede de Talentos</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Encontre profissionais da sua região cadastrados no ecossistema Impulsionando.
+            </p>
+          </div>
+          <Button asChild variant="outline" size="sm">
+            <Link to="/empresa/talentos/rede"><Settings className="mr-2 h-4 w-4" aria-hidden="true" />Configurar rede</Link>
+          </Button>
         </header>
 
         <Card className="mb-6">
@@ -176,6 +197,15 @@ function EmpresaTalentos() {
                       <Row icon={GraduationCap} label="Escolaridade" value={c.escolaridade ?? "—"} />
                       <Row icon={Calendar} label="Disponibilidade" value={c.disponibilidade ?? "—"} />
                     </dl>
+                    {(() => {
+                      const { score, motivos } = compatibilityScore(c as unknown as Parameters<typeof compatibilityScore>[0], empresaCfg);
+                      return (
+                        <div className="mt-3 flex items-center justify-between rounded-md bg-muted/40 px-2 py-1.5 text-xs">
+                          <span className="font-medium">Compatibilidade <span className="text-primary">{score}%</span></span>
+                          <span className="truncate text-muted-foreground" title={motivos.join(" · ")}>{motivos[0] ?? ""}</span>
+                        </div>
+                      );
+                    })()}
                     {c.tags?.length ? (
                       <div className="mt-3 flex flex-wrap gap-1">
                         {c.tags.slice(0, 5).map((t) => <Badge key={t} variant="secondary">{t}</Badge>)}
