@@ -370,6 +370,7 @@ import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenti
 import { Route as AuthenticatedRestauranteSalaoNotificacoesRouteImport } from './routes/_authenticated/restaurante.salao.notificacoes'
 import { Route as AuthenticatedRestauranteSalaoLogsRouteImport } from './routes/_authenticated/restaurante.salao.logs'
 import { Route as AuthenticatedImobiliariaAprovacoesImprimirFilaRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes.imprimir-fila'
+import { Route as AuthenticatedEmpresaTalentosDashboardRouteImport } from './routes/_authenticated/empresa.talentos.dashboard'
 import { Route as AuthenticatedCoreModulosSlugRouteImport } from './routes/_authenticated/core.modulos.$slug'
 import { Route as AuthenticatedCoreMarketplacePedidosRouteImport } from './routes/_authenticated/core.marketplace.pedidos'
 import { Route as AuthenticatedCoreMarketplaceFornecedoresRouteImport } from './routes/_authenticated/core.marketplace.fornecedores'
@@ -2376,6 +2377,12 @@ const AuthenticatedImobiliariaAprovacoesImprimirFilaRoute =
     path: '/imprimir-fila',
     getParentRoute: () => AuthenticatedImobiliariaAprovacoesRoute,
   } as any)
+const AuthenticatedEmpresaTalentosDashboardRoute =
+  AuthenticatedEmpresaTalentosDashboardRouteImport.update({
+    id: '/dashboard',
+    path: '/dashboard',
+    getParentRoute: () => AuthenticatedEmpresaTalentosRoute,
+  } as any)
 const AuthenticatedCoreModulosSlugRoute =
   AuthenticatedCoreModulosSlugRouteImport.update({
     id: '/$slug',
@@ -2734,7 +2741,7 @@ export interface FileRoutesByFullPath {
   '/educacao/dashboard': typeof AuthenticatedEducacaoDashboardRoute
   '/educacao/polos': typeof AuthenticatedEducacaoPolosRoute
   '/ehr/$id': typeof AuthenticatedEhrIdRoute
-  '/empresa/talentos': typeof AuthenticatedEmpresaTalentosRoute
+  '/empresa/talentos': typeof AuthenticatedEmpresaTalentosRouteWithChildren
   '/eventos/$id': typeof AuthenticatedEventosIdRoute
   '/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
   '/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
@@ -2825,6 +2832,7 @@ export interface FileRoutesByFullPath {
   '/core/marketplace/fornecedores': typeof AuthenticatedCoreMarketplaceFornecedoresRoute
   '/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
+  '/empresa/talentos/dashboard': typeof AuthenticatedEmpresaTalentosDashboardRoute
   '/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
   '/restaurante/salao/logs': typeof AuthenticatedRestauranteSalaoLogsRoute
   '/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
@@ -3102,7 +3110,7 @@ export interface FileRoutesByTo {
   '/educacao/dashboard': typeof AuthenticatedEducacaoDashboardRoute
   '/educacao/polos': typeof AuthenticatedEducacaoPolosRoute
   '/ehr/$id': typeof AuthenticatedEhrIdRoute
-  '/empresa/talentos': typeof AuthenticatedEmpresaTalentosRoute
+  '/empresa/talentos': typeof AuthenticatedEmpresaTalentosRouteWithChildren
   '/eventos/$id': typeof AuthenticatedEventosIdRoute
   '/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
   '/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
@@ -3193,6 +3201,7 @@ export interface FileRoutesByTo {
   '/core/marketplace/fornecedores': typeof AuthenticatedCoreMarketplaceFornecedoresRoute
   '/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
+  '/empresa/talentos/dashboard': typeof AuthenticatedEmpresaTalentosDashboardRoute
   '/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
   '/restaurante/salao/logs': typeof AuthenticatedRestauranteSalaoLogsRoute
   '/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
@@ -3484,7 +3493,7 @@ export interface FileRoutesById {
   '/_authenticated/educacao/dashboard': typeof AuthenticatedEducacaoDashboardRoute
   '/_authenticated/educacao/polos': typeof AuthenticatedEducacaoPolosRoute
   '/_authenticated/ehr/$id': typeof AuthenticatedEhrIdRoute
-  '/_authenticated/empresa/talentos': typeof AuthenticatedEmpresaTalentosRoute
+  '/_authenticated/empresa/talentos': typeof AuthenticatedEmpresaTalentosRouteWithChildren
   '/_authenticated/eventos/$id': typeof AuthenticatedEventosIdRoute
   '/_authenticated/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
   '/_authenticated/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
@@ -3575,6 +3584,7 @@ export interface FileRoutesById {
   '/_authenticated/core/marketplace/fornecedores': typeof AuthenticatedCoreMarketplaceFornecedoresRoute
   '/_authenticated/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/_authenticated/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
+  '/_authenticated/empresa/talentos/dashboard': typeof AuthenticatedEmpresaTalentosDashboardRoute
   '/_authenticated/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
   '/_authenticated/restaurante/salao/logs': typeof AuthenticatedRestauranteSalaoLogsRoute
   '/_authenticated/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
@@ -3956,6 +3966,7 @@ export interface FileRouteTypes {
     | '/core/marketplace/fornecedores'
     | '/core/marketplace/pedidos'
     | '/core/modulos/$slug'
+    | '/empresa/talentos/dashboard'
     | '/imobiliaria/aprovacoes/imprimir-fila'
     | '/restaurante/salao/logs'
     | '/restaurante/salao/notificacoes'
@@ -4324,6 +4335,7 @@ export interface FileRouteTypes {
     | '/core/marketplace/fornecedores'
     | '/core/marketplace/pedidos'
     | '/core/modulos/$slug'
+    | '/empresa/talentos/dashboard'
     | '/imobiliaria/aprovacoes/imprimir-fila'
     | '/restaurante/salao/logs'
     | '/restaurante/salao/notificacoes'
@@ -4705,6 +4717,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/marketplace/fornecedores'
     | '/_authenticated/core/marketplace/pedidos'
     | '/_authenticated/core/modulos/$slug'
+    | '/_authenticated/empresa/talentos/dashboard'
     | '/_authenticated/imobiliaria/aprovacoes/imprimir-fila'
     | '/_authenticated/restaurante/salao/logs'
     | '/_authenticated/restaurante/salao/notificacoes'
@@ -7416,6 +7429,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRouteImport
       parentRoute: typeof AuthenticatedImobiliariaAprovacoesRoute
     }
+    '/_authenticated/empresa/talentos/dashboard': {
+      id: '/_authenticated/empresa/talentos/dashboard'
+      path: '/dashboard'
+      fullPath: '/empresa/talentos/dashboard'
+      preLoaderRoute: typeof AuthenticatedEmpresaTalentosDashboardRouteImport
+      parentRoute: typeof AuthenticatedEmpresaTalentosRoute
+    }
     '/_authenticated/core/modulos/$slug': {
       id: '/_authenticated/core/modulos/$slug'
       path: '/$slug'
@@ -8032,6 +8052,21 @@ const AuthenticatedBarMarketplaceRouteWithChildren =
     AuthenticatedBarMarketplaceRouteChildren,
   )
 
+interface AuthenticatedEmpresaTalentosRouteChildren {
+  AuthenticatedEmpresaTalentosDashboardRoute: typeof AuthenticatedEmpresaTalentosDashboardRoute
+}
+
+const AuthenticatedEmpresaTalentosRouteChildren: AuthenticatedEmpresaTalentosRouteChildren =
+  {
+    AuthenticatedEmpresaTalentosDashboardRoute:
+      AuthenticatedEmpresaTalentosDashboardRoute,
+  }
+
+const AuthenticatedEmpresaTalentosRouteWithChildren =
+  AuthenticatedEmpresaTalentosRoute._addFileChildren(
+    AuthenticatedEmpresaTalentosRouteChildren,
+  )
+
 interface AuthenticatedImobiliariaAprovacoesRouteChildren {
   AuthenticatedImobiliariaAprovacoesImprimirFilaRoute: typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
   AuthenticatedImobiliariaAprovacoesIdImprimirRoute: typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
@@ -8147,7 +8182,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEducacaoDashboardRoute: typeof AuthenticatedEducacaoDashboardRoute
   AuthenticatedEducacaoPolosRoute: typeof AuthenticatedEducacaoPolosRoute
   AuthenticatedEhrIdRoute: typeof AuthenticatedEhrIdRoute
-  AuthenticatedEmpresaTalentosRoute: typeof AuthenticatedEmpresaTalentosRoute
+  AuthenticatedEmpresaTalentosRoute: typeof AuthenticatedEmpresaTalentosRouteWithChildren
   AuthenticatedEventosIdRoute: typeof AuthenticatedEventosIdRoute
   AuthenticatedImobiliariaAprovacoesRoute: typeof AuthenticatedImobiliariaAprovacoesRouteWithChildren
   AuthenticatedImobiliariaCampanhasRoute: typeof AuthenticatedImobiliariaCampanhasRoute
@@ -8273,7 +8308,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEducacaoDashboardRoute: AuthenticatedEducacaoDashboardRoute,
   AuthenticatedEducacaoPolosRoute: AuthenticatedEducacaoPolosRoute,
   AuthenticatedEhrIdRoute: AuthenticatedEhrIdRoute,
-  AuthenticatedEmpresaTalentosRoute: AuthenticatedEmpresaTalentosRoute,
+  AuthenticatedEmpresaTalentosRoute:
+    AuthenticatedEmpresaTalentosRouteWithChildren,
   AuthenticatedEventosIdRoute: AuthenticatedEventosIdRoute,
   AuthenticatedImobiliariaAprovacoesRoute:
     AuthenticatedImobiliariaAprovacoesRouteWithChildren,
