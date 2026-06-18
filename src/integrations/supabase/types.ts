@@ -11733,6 +11733,8 @@ export type Database = {
         Args: { _counts: Json; _notes?: string; _session_id: string }
         Returns: string
       }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
       subscription_suspend_overdue: { Args: never; Returns: number }
       trial_advance_status: { Args: never; Returns: number }
       trial_cancel: {
