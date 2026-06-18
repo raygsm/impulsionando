@@ -198,7 +198,7 @@ export const fetchConsumidorDashboard = createServerFn({ method: "POST" })
       supabase.from("clube_visits").select("id,created_at,company_id").eq("user_id", userId).order("created_at", { ascending: false }).limit(20),
       supabase.from("consumer_favorites").select("id,company_id,created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(20),
       supabase.from("clube_rewards_ledger").select("id,delta,reason,kind,created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(20),
-      supabase.from("clube_receipts").select("id,total_cents,issued_at,company_id").eq("user_id", userId).order("issued_at", { ascending: false }).limit(20),
+      supabase.from("clube_receipts").select("id,amount_cents,issued_at,company_id,title,kind").eq("user_id", userId).order("issued_at", { ascending: false }).limit(20),
     ]);
 
     const activeMemberships = (memberships.data ?? []).filter((m) => m.status === "active").length;
