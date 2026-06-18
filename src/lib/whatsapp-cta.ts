@@ -3,7 +3,8 @@
  *
  * Mantém em um único lugar:
  *  - número/URL oficial do WhatsApp (21) 99307-5000
- *  - rastreamento de cliques e submissões (GA + console.debug)
+ *  - construção de links com UTM + origem + variante (A/B) para rastreio
+ *  - rastreamento de cliques e submissões (GA + buffer local p/ painel)
  *  - validação de mensagens que tentem desviar a conversa para canais
  *    não oficiais (outros telefones, e-mails, redes sociais).
  */
@@ -14,30 +15,132 @@ export const OFFICIAL_WHATSAPP_PHONE_E164 = "+5521993075000";
 export const OFFICIAL_WHATSAPP_DIGITS = "5521993075000";
 export const OFFICIAL_EMAIL_DOMAIN = "impulsionando.com.br";
 
-export function buildOfficialWhatsAppUrl(message?: string): string {
-  const text = message?.trim() || "Olá! Vim pelo site oficial da Impulsionando.";
-  return `https://wa.me/${OFFICIAL_WHATSAPP_DIGITS}?text=${encodeURIComponent(text)}`;
+export type WhatsAppCTAVariant = "A" | "B" | "control" | string;
+
+export interface WhatsAppLinkOptions {
+  /** Onde o link aparece — usado em data-cta, GA e utm_content. */
+  origin?: string;
+  /** Rota/página onde o CTA está sendo renderizado. */
+  path?: string;
+  /** Variante para experimentos A/B. */
+  variant?: WhatsAppCTAVariant;
+  /** Campanha de marketing (utm_campaign). */
+  campaign?: string;
+  /** Mídia (utm_medium). Default: "whatsapp". */
+  medium?: string;
+  /** Fonte (utm_source). Default: "site_oficial". */
+  source?: string;
+}
+
+function appendUTM(message: string, opts: WhatsAppLinkOptions): string {
+  const utm = [
+    `utm_source=${opts.source ?? "site_oficial"}`,
+    `utm_medium=${opts.medium ?? "whatsapp"}`,
+    opts.campaign ? `utm_campaign=${encodeURIComponent(opts.campaign)}` : `utm_campaign=canal_oficial`,
+    opts.origin ? `utm_content=${encodeURIComponent(opts.origin)}` : undefined,
+    opts.variant ? `utm_term=${encodeURIComponent(`v_${opts.variant}`)}` : undefined,
+    opts.path ? `utm_path=${encodeURIComponent(opts.path)}` : undefined,
+  ]
+    .filter(Boolean)
+    .join(" | ");
+  return `${message}\n\n— ${utm}`;
+}
+
+export function buildOfficialWhatsAppUrl(
+  message?: string,
+  opts: WhatsAppLinkOptions = {},
+): string {
+  const base = message?.trim() || "Olá! Vim pelo site oficial da Impulsionando.";
+  const withUtm = appendUTM(base, opts);
+  const url = new URL(`https://wa.me/${OFFICIAL_WHATSAPP_DIGITS}`);
+  url.searchParams.set("text", withUtm);
+  // UTM também como query no link (alguns trackers leem só da URL).
+  url.searchParams.set("utm_source", opts.source ?? "site_oficial");
+  url.searchParams.set("utm_medium", opts.medium ?? "whatsapp");
+  url.searchParams.set("utm_campaign", opts.campaign ?? "canal_oficial");
+  if (opts.origin) url.searchParams.set("utm_content", opts.origin);
+  if (opts.variant) url.searchParams.set("utm_term", `v_${opts.variant}`);
+  return url.toString();
 }
 
 export type WhatsAppCTAEvent =
   | "whatsapp_cta_click"
   | "whatsapp_form_submit"
   | "whatsapp_fab_click"
-  | "whatsapp_notice_click";
+  | "whatsapp_notice_click"
+  | "whatsapp_cta_impression";
+
+const METRICS_KEY = "wa_official_metrics_v1";
+const MAX_BUFFER = 500;
+
+interface BufferedEvent {
+  ts: number;
+  event: WhatsAppCTAEvent;
+  origin: string;
+  path: string;
+  variant?: string;
+}
+
+function pushLocalBuffer(entry: BufferedEvent) {
+  if (typeof window === "undefined") return;
+  try {
+    const raw = window.localStorage.getItem(METRICS_KEY);
+    const arr: BufferedEvent[] = raw ? JSON.parse(raw) : [];
+    arr.push(entry);
+    if (arr.length > MAX_BUFFER) arr.splice(0, arr.length - MAX_BUFFER);
+    window.localStorage.setItem(METRICS_KEY, JSON.stringify(arr));
+  } catch {
+    /* quota / privado — ignorar */
+  }
+}
+
+export function readWhatsAppLocalMetrics(): BufferedEvent[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(METRICS_KEY);
+    return raw ? (JSON.parse(raw) as BufferedEvent[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function clearWhatsAppLocalMetrics() {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(METRICS_KEY);
+  } catch {
+    /* noop */
+  }
+}
 
 export function trackWhatsAppCTA(
   event: WhatsAppCTAEvent,
-  params: { origin: string; [key: string]: unknown } = { origin: "unknown" },
+  params: { origin: string; variant?: WhatsAppCTAVariant; [key: string]: unknown } = {
+    origin: "unknown",
+  },
 ) {
+  const path =
+    (params.path as string | undefined) ??
+    (typeof window !== "undefined" ? window.location.pathname : "ssr");
+  const variant = params.variant as string | undefined;
   try {
     trackEvent(event, {
       channel: "whatsapp_official",
       phone: OFFICIAL_WHATSAPP_PHONE_DISPLAY,
+      path,
+      variant,
       ...params,
     });
   } catch {
     /* analytics opt-out ou falha — silencioso */
   }
+  pushLocalBuffer({
+    ts: Date.now(),
+    event,
+    origin: String(params.origin ?? "unknown"),
+    path,
+    variant,
+  });
 }
 
 /**
@@ -47,8 +150,7 @@ export function trackWhatsAppCTA(
 export function validateOfficialChannelMessage(text: string): string | null {
   const lower = text.toLowerCase();
 
-  // 1) telefones alternativos (qualquer número longo que não termine
-  //    nos 9 últimos dígitos do oficial — 993075000)
+  // 1) telefones alternativos
   const phoneMatches = lower.match(/(?:\+?\d[\s\-().]*){10,}/g) ?? [];
   const hasForeignPhone = phoneMatches.some((m) => {
     const digits = m.replace(/\D/g, "");
@@ -92,10 +194,7 @@ export function validateOfficialChannelMessage(text: string): string | null {
 
 /**
  * Instala um listener global delegado que registra TODO clique em qualquer
- * link/elemento apontando para o WhatsApp oficial — útil para cobrir landings
- * antigas sem precisar refatorar uma a uma.
- *
- * Deve ser chamado apenas no cliente, uma única vez.
+ * link/elemento apontando para o WhatsApp oficial.
  */
 export function installGlobalWhatsAppClickTracking() {
   if (typeof window === "undefined") return;
@@ -113,8 +212,10 @@ export function installGlobalWhatsAppClickTracking() {
       );
       if (!anchor) return;
       const cta = anchor.dataset.cta || "anchor";
+      const variant = anchor.dataset.variant;
       trackWhatsAppCTA("whatsapp_cta_click", {
         origin: cta,
+        variant,
         path: window.location.pathname,
         href: anchor.href,
       });
