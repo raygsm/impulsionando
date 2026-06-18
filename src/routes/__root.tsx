@@ -98,10 +98,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:description", content: "SaaS multiempresa modular para gestão, atendimento e automação." },
     ],
     links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
+      { rel: "stylesheet", href: appCss },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "icon", type: "image/png", sizes: "192x192", href: "/pwa-icon-192.png" },
+      { rel: "icon", type: "image/png", sizes: "512x512", href: "/pwa-icon-512.png" },
+      { rel: "apple-touch-icon", sizes: "192x192", href: "/pwa-icon-192.png" },
     ],
     scripts: [
       {
