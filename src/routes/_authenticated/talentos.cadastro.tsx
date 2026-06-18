@@ -75,8 +75,8 @@ function CadastroTalento() {
     const user_id = userRes.user?.id;
     if (!user_id) { toast.error("Faça login para continuar"); setLoading(false); return; }
 
-    const { error } = await (supabase.from("talentos_candidatos" as never) as never)
-      .insert({ ...form, user_id });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any).from("talentos_candidatos").insert({ ...form, user_id });
 
     setLoading(false);
     if (error) { toast.error(error.message); return; }
