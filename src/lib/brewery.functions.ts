@@ -377,3 +377,171 @@ export const importBrewerySellouts = createServerFn({ method: "POST" })
     }
     return { inserted, skipped: errors.length, errors };
   });
+
+/* ============ Catálogo de rótulos ============ */
+
+const ListProductsInput = z.object({ brandId: z.string().uuid(), includeInactive: z.boolean().default(false) });
+export const listBreweryProducts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => ListProductsInput.parse(d))
+  .handler(async ({ context, data }) => {
+    let q = context.supabase
+      .from("brewery_products")
+      .select("id,brand_id,name,style,abv,ibu,volume_ml,package_type,sku,is_active,is_seasonal,photo_url,description,created_at")
+      .eq("brand_id", data.brandId)
+      .order("name", { ascending: true });
+    if (!data.includeInactive) q = q.eq("is_active", true);
+    const { data: rows, error } = await q;
+    if (error) throw error;
+    return rows ?? [];
+  });
+
+const UpsertProductInput = z.object({
+  id: z.string().uuid().optional(),
+  brandId: z.string().uuid(),
+  name: z.string().min(1).max(120),
+  style: z.string().min(1).max(60),
+  sku: z.string().max(40).optional().nullable(),
+  abv: z.number().min(0).max(20).optional().nullable(),
+  ibu: z.number().int().min(0).max(200).optional().nullable(),
+  volumeMl: z.number().int().min(0).max(10000).optional().nullable(),
+  packageType: z.string().max(40).optional().nullable(),
+  description: z.string().max(600).optional().nullable(),
+  photoUrl: z.string().url().max(500).optional().nullable(),
+  isActive: z.boolean().default(true),
+  isSeasonal: z.boolean().default(false),
+});
+export const upsertBreweryProduct = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => UpsertProductInput.parse(d))
+  .handler(async ({ context, data }) => {
+    const payload = {
+      brand_id: data.brandId,
+      name: data.name,
+      style: data.style,
+      sku: data.sku ?? null,
+      abv: data.abv ?? null,
+      ibu: data.ibu ?? null,
+      volume_ml: data.volumeMl ?? null,
+      package_type: data.packageType ?? null,
+      description: data.description ?? null,
+      photo_url: data.photoUrl ?? null,
+      is_active: data.isActive,
+      is_seasonal: data.isSeasonal,
+    };
+    if (data.id) {
+      const { data: row, error } = await context.supabase
+        .from("brewery_products").update(payload).eq("id", data.id).select().single();
+      if (error) throw error;
+      return row;
+    }
+    const { data: row, error } = await context.supabase
+      .from("brewery_products").insert(payload).select().single();
+    if (error) throw error;
+    return row;
+  });
+
+const ToggleProductInput = z.object({ id: z.string().uuid(), isActive: z.boolean() });
+export const toggleBreweryProductActive = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => ToggleProductInput.parse(d))
+  .handler(async ({ context, data }) => {
+    const { error } = await context.supabase
+      .from("brewery_products").update({ is_active: data.isActive }).eq("id", data.id);
+    if (error) throw error;
+    return { ok: true };
+  });
+
+/* ============ Campanhas coordenadas ============ */
+
+const ListCampaignsInput = z.object({ brandId: z.string().uuid().optional() });
+export const listBreweryCampaigns = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => ListCampaignsInput.parse(d))
+  .handler(async ({ context, data }) => {
+    let q = context.supabase
+      .from("brewery_campaigns")
+      .select("id,brand_id,name,goal,status,starts_at,ends_at,kpi_target_units,kpi_target_leads,target_pdv_ids,voucher_code,created_at")
+      .order("starts_at", { ascending: false });
+    if (data.brandId) q = q.eq("brand_id", data.brandId);
+    const { data: campaigns, error } = await q;
+    if (error) throw error;
+
+    // Progresso: somar units (sellouts) e leads no intervalo, restritos aos PDVs alvo
+    const result = [] as any[];
+    for (const c of campaigns ?? []) {
+      const targetIds: string[] = c.target_pdv_ids ?? [];
+      const [sellRes, leadRes] = await Promise.all([
+        context.supabase
+          .from("brewery_sellouts")
+          .select("units,gross_revenue_cents,pdv_link_id")
+          .eq("brand_id", c.brand_id)
+          .gte("period_start", c.starts_at.slice(0, 10))
+          .lte("period_end", c.ends_at.slice(0, 10)),
+        context.supabase
+          .from("brewery_lead_preferences")
+          .select("id")
+          .eq("brand_id", c.brand_id)
+          .gte("created_at", c.starts_at)
+          .lte("created_at", c.ends_at),
+      ]);
+      const sells = (sellRes.data ?? []).filter(
+        (s) => targetIds.length === 0 || (s.pdv_link_id && targetIds.includes(s.pdv_link_id)),
+      );
+      const units = sells.reduce((s, r) => s + (r.units ?? 0), 0);
+      const revenue = sells.reduce((s, r) => s + Number(r.gross_revenue_cents ?? 0), 0);
+      const leads = (leadRes.data ?? []).length;
+      result.push({
+        ...c,
+        progress: {
+          units,
+          revenueCents: revenue,
+          leads,
+          unitsPct: c.kpi_target_units ? Math.min(100, Math.round((units / c.kpi_target_units) * 100)) : null,
+          leadsPct: c.kpi_target_leads ? Math.min(100, Math.round((leads / c.kpi_target_leads) * 100)) : null,
+        },
+      });
+    }
+    return result;
+  });
+
+const UpsertCampaignInput = z.object({
+  id: z.string().uuid().optional(),
+  brandId: z.string().uuid(),
+  name: z.string().min(2).max(120),
+  goal: z.string().max(280).optional().nullable(),
+  status: z.enum(["draft", "scheduled", "running", "completed", "cancelled"]).default("draft"),
+  startsAt: z.string(),
+  endsAt: z.string(),
+  kpiTargetUnits: z.number().int().min(0).optional().nullable(),
+  kpiTargetLeads: z.number().int().min(0).optional().nullable(),
+  targetPdvIds: z.array(z.string().uuid()).default([]),
+  voucherCode: z.string().max(40).optional().nullable(),
+});
+export const upsertBreweryCampaign = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => UpsertCampaignInput.parse(d))
+  .handler(async ({ context, data }) => {
+    const payload = {
+      brand_id: data.brandId,
+      name: data.name,
+      goal: data.goal ?? null,
+      status: data.status,
+      starts_at: data.startsAt,
+      ends_at: data.endsAt,
+      kpi_target_units: data.kpiTargetUnits ?? null,
+      kpi_target_leads: data.kpiTargetLeads ?? null,
+      target_pdv_ids: data.targetPdvIds,
+      voucher_code: data.voucherCode ?? null,
+    };
+    if (data.id) {
+      const { data: row, error } = await context.supabase
+        .from("brewery_campaigns").update(payload).eq("id", data.id).select().single();
+      if (error) throw error;
+      return row;
+    }
+    const { data: row, error } = await context.supabase
+      .from("brewery_campaigns").insert(payload).select().single();
+    if (error) throw error;
+    return row;
+  });
