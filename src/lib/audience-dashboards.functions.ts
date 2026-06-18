@@ -238,7 +238,7 @@ export const fetchNicheRadar = createServerFn({ method: "POST" })
     const niches = await supabaseAdmin.from("niches").select("id,name,slug,is_active");
     const companies = await supabaseAdmin.from("companies").select("id,niche_id,is_active");
     const invoices = await supabaseAdmin.from("billing_invoices").select("amount,status,company_id,created_at").gte("created_at", w.from).lte("created_at", w.to);
-    const leads = await supabaseAdmin.from("marketing_leads").select("id,niche,created_at").gte("created_at", w.from).lte("created_at", w.to);
+    const leads = await supabaseAdmin.from("marketing_leads").select("id,source,created_at").gte("created_at", w.from).lte("created_at", w.to);
 
     const nichesArr = (niches.data ?? []).filter((n) => n.is_active);
     const companiesByNiche = new Map<string, string[]>();
