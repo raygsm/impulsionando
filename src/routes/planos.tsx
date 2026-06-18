@@ -759,6 +759,7 @@ function PlanosPage() {
           </table>
         </div>
       </section>
+      </div>
 
       {/* GUARANTEES */}
       <section className="bg-muted/30 border-y border-border">
