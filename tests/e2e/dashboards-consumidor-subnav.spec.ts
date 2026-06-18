@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
 
 /**
  * E2E: Minha área (/dashboards/consumidor) — sub-nav, hash, restore on refresh.
