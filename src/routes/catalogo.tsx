@@ -79,16 +79,61 @@ function CatalogoPage() {
   const { macros, subs, mappings, mappedMacros } = data
   const mappedSet = useMemo(() => new Set(mappedMacros), [mappedMacros])
   const saveIntent = useServerFn(saveCatalogIntent)
+  const track = useServerFn(trackCatalogEvent)
 
   const [macroSlug, setMacroSlug] = useState<string | null>(null)
   const [subId, setSubId] = useState<string | null>(null)
-  /** Module selection per tier — independent picks per plan card. */
   const [selectionByTier, setSelectionByTier] = useState<Record<PlanTier, string[]>>({
     essencial: [],
     ideal: [],
     full: [],
   })
   const [submitting, setSubmitting] = useState<PlanTier | null>(null)
+  const restoredRef = useRef(false)
+  const lastViewedMacroRef = useRef<string | null>(null)
+
+  // Restore persisted selection once
+  useEffect(() => {
+    if (restoredRef.current) return
+    restoredRef.current = true
+    const p = loadPersisted()
+    if (!p) return
+    if (p.macroSlug && mappedSet.has(p.macroSlug)) {
+      setMacroSlug(p.macroSlug)
+      if (p.subId && subs.some((s) => s.id === p.subId)) setSubId(p.subId)
+      if (p.selectionByTier) setSelectionByTier(p.selectionByTier)
+      toast.success('Suas escolhas anteriores foram restauradas.', { duration: 2500 })
+    }
+  }, [mappedSet, subs])
+
+  // Persist on every change
+  useEffect(() => {
+    if (!restoredRef.current || typeof window === 'undefined') return
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ macroSlug, subId, selectionByTier }),
+    )
+  }, [macroSlug, subId, selectionByTier])
+
+  function trackEvent(eventName: string, extra: Record<string, unknown> = {}) {
+    track({
+      data: {
+        eventName,
+        macroSlug: macroSlug ?? null,
+        subnichoSlug: subs.find((s) => s.id === subId)?.slug ?? null,
+        sessionToken: sessionToken(),
+        ...extra,
+      },
+    }).catch(() => {})
+  }
+
+  function clearSelection() {
+    setMacroSlug(null)
+    setSubId(null)
+    setSelectionByTier({ essencial: [], ideal: [], full: [] })
+    if (typeof window !== 'undefined') localStorage.removeItem(STORAGE_KEY)
+  }
+
 
   const selectedMacro = useMemo(
     () => macros.find((m) => m.slug === macroSlug) ?? null,
