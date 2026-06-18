@@ -55,10 +55,10 @@ export const fetchConsumidorDashboard = createServerFn({ method: "POST" })
       supabaseAdmin.from("consumer_memberships").select("user_id,plan,status,amount_cents,started_at"),
       supabaseAdmin.from("clube_visits").select("id,user_id,company_id,rating,created_at").gte("created_at", w.from).lte("created_at", w.to),
       supabaseAdmin.from("clube_visits").select("id,created_at").gte("created_at", w.prevFrom).lt("created_at", w.prevTo),
-      supabaseAdmin.from("clube_consumption").select("id,user_id,company_id,kind,amount_cents,created_at").gte("created_at", w.from).lte("created_at", w.to),
+      supabaseAdmin.from("clube_consumption").select("id,user_id,company_id,total_cents,source,consumed_at").gte("consumed_at", w.from).lte("consumed_at", w.to),
       supabaseAdmin.from("clube_receipts").select("id,user_id,amount_cents,status,created_at").gte("created_at", w.from).lte("created_at", w.to),
-      supabaseAdmin.from("clube_journey_log").select("user_id,step_order,created_at").gte("created_at", w.from).lte("created_at", w.to),
-      supabaseAdmin.from("clube_journey_log").select("user_id,created_at").gte("created_at", w.prevFrom).lt("created_at", w.prevTo),
+      supabaseAdmin.from("clube_journey_log").select("user_id,step_id,enqueued_at").gte("enqueued_at", w.from).lte("enqueued_at", w.to),
+      supabaseAdmin.from("clube_journey_log").select("user_id,enqueued_at").gte("enqueued_at", w.prevFrom).lt("enqueued_at", w.prevTo),
       supabaseAdmin.from("clube_referrals").select("id,referrer_user_id,status,created_at").gte("created_at", w.from).lte("created_at", w.to),
     ]);
 
