@@ -298,7 +298,11 @@ function CatalogoPage() {
                 <button
                   key={s.id}
                   type="button"
-                  onClick={() => setSubId(s.id)}
+                  onClick={() => {
+                    setSubId(s.id)
+                    trackEvent('select_sub', { subnichoSlug: s.slug })
+                  }}
+
                   aria-pressed={subId === s.id}
                   className={`text-left p-3 rounded-lg border text-sm transition ${
                     subId === s.id
