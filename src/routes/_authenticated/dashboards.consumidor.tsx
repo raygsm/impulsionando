@@ -448,32 +448,53 @@ function PremiumSection<T extends { id: string }>({
   );
 }
 
-const SECTIONS: Array<{ id: string; label: string }> = [
-  { id: "favoritos", label: "Meus favoritos" },
-  { id: "historico", label: "Histórico de visitas" },
-  { id: "cupons", label: "Meus cupons" },
-  { id: "vouchers", label: "Meus vouchers" },
-  { id: "reservas", label: "Minhas reservas" },
-  { id: "avaliacoes", label: "Minhas avaliações" },
-  { id: "comprovantes", label: "Comprovantes" },
-  { id: "notas", label: "Minhas notas" },
-  { id: "creditos", label: "Meus créditos" },
-];
+function SectionNav({ activeId, onSelect }: { activeId: string; onSelect: (id: string) => void }) {
+  const containerRef = useRef<HTMLDivElement>(null);
 
-function SectionNav() {
+  // Keep active chip visible when it changes
+  useEffect(() => {
+    if (!activeId || !containerRef.current) return;
+    const chip = containerRef.current.querySelector<HTMLElement>(`[data-chip="${activeId}"]`);
+    if (chip) chip.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  }, [activeId]);
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault();
+    onSelect(id);
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    const newUrl = `${window.location.pathname}${window.location.search}#${id}`;
+    window.history.replaceState(null, "", newUrl);
+  };
+
   return (
-    <div className="sticky top-0 z-10 -mx-1 px-1 py-2 bg-background/85 backdrop-blur border-b border-border/60">
-      <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
-        {SECTIONS.map((s) => (
-          <a
-            key={s.id}
-            href={`#${s.id}`}
-            className="shrink-0 text-xs px-3 py-1.5 rounded-full border border-border/60 bg-card hover:bg-accent hover:text-accent-foreground transition-colors"
-          >
-            {s.label}
-          </a>
-        ))}
+    <div className="sticky top-0 z-10 py-2 bg-background/85 backdrop-blur border-b border-border/60">
+      <div
+        ref={containerRef}
+        className="flex gap-1.5 overflow-x-auto scrollbar-none snap-x snap-mandatory px-1 -mx-1"
+      >
+        {SECTIONS.map((s) => {
+          const active = s.id === activeId;
+          return (
+            <a
+              key={s.id}
+              data-chip={s.id}
+              href={`#${s.id}`}
+              onClick={(e) => handleClick(e, s.id)}
+              aria-current={active ? "true" : undefined}
+              className={`shrink-0 snap-start text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                active
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "border-border/60 bg-card hover:bg-accent hover:text-accent-foreground"
+              }`}
+            >
+              {s.label}
+            </a>
+          );
+        })}
       </div>
     </div>
   );
+}
+
 }
