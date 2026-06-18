@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
+import { extractCurriculoFromFile } from "@/lib/talentos-ai.functions";
 
 export const Route = createFileRoute("/_authenticated/talentos/cadastro")({
   component: CadastroTalento,
@@ -125,6 +126,15 @@ function CadastroTalento() {
           candidato_id: cand.id, arquivo_url: path,
           formato: cvFile.name.toLowerCase().endsWith(".pdf") ? "pdf" : "docx",
         });
+        // Auto-extração via IA (não-bloqueante)
+        try {
+          const dataUrl = await fileToDataUrl(cvFile);
+          await extractCurriculoFromFile({ data: { file_data_url: dataUrl, filename: cvFile.name, candidato_id: cand.id } });
+          toast.success("Currículo analisado — tags e habilidades extraídas");
+        } catch (err) {
+          toast.info("Currículo salvo. Análise por IA será concluída em segundo plano.");
+          console.warn("[talentos] extract failed", err);
+        }
       } catch (err) { toast.warning("Perfil criado, mas falha no currículo: " + (err as Error).message); }
     }
 
@@ -248,4 +258,13 @@ function Field({ label, id, value, options, onChange }: {
       </Select>
     </div>
   );
+}
+
+function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result as string);
+    r.onerror = () => reject(r.error);
+    r.readAsDataURL(file);
+  });
 }
