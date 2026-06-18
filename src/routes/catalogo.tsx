@@ -238,8 +238,23 @@ function CatalogoPage() {
       </section>
 
       <main className="mx-auto max-w-6xl w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-12 space-y-10">
+        {(macroSlug || subId) && (
+          <div className="flex items-center justify-end -mb-6">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={clearSelection}
+              className="text-muted-foreground"
+            >
+              <RotateCcw className="w-3.5 h-3.5 mr-1.5" /> Limpar seleções
+            </Button>
+          </div>
+        )}
+
         {/* STEP 1 — MACRO */}
         <Step n={1} title="Escolha o macro nicho" icon={Layers} done={!!macroSlug}>
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {macros.map((m) => {
               const active = macroSlug === m.slug
