@@ -268,7 +268,9 @@ function CatalogoPage() {
                     setMacroSlug(m.slug)
                     setSubId(null)
                     setSelectionByTier({ essencial: [], ideal: [], full: [] })
+                    trackEvent('select_macro', { macroSlug: m.slug })
                   }}
+
                   aria-pressed={active}
                   className={`text-left p-4 rounded-lg border transition ${
                     active
