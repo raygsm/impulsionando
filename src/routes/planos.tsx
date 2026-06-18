@@ -476,6 +476,22 @@ function PlanosPage() {
                   ))}
                 </ul>
 
+                {PLAN_OPS[plan.name]?.suggested?.length ? (
+                  <div className="mt-4 rounded-md border border-dashed border-border bg-muted/30 p-2.5">
+                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
+                      Combinação inteligente recomendada
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {PLAN_OPS[plan.name].suggested.map((s) => (
+                        <span key={s} className="inline-flex items-center rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[10px] font-medium">
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
+
                 {plan.monthly !== null && PRICE_IDS[plan.name] ? (
                   <div className="mt-6 space-y-2">
                     <div className="rounded-md border border-amber-300/70 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800/60 p-2.5 text-[11px] leading-snug text-amber-900 dark:text-amber-100">
