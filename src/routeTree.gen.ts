@@ -282,6 +282,7 @@ import { Route as AuthenticatedCommercialCockpitRouteImport } from './routes/_au
 import { Route as AuthenticatedClubeNotificacoesRouteImport } from './routes/_authenticated/clube.notificacoes'
 import { Route as AuthenticatedCheckoutPlanoRouteImport } from './routes/_authenticated/checkout.$plano'
 import { Route as AuthenticatedCervejariaPdvsRouteImport } from './routes/_authenticated/cervejaria.pdvs'
+import { Route as AuthenticatedCervejariaCatalogoRouteImport } from './routes/_authenticated/cervejaria.catalogo'
 import { Route as AuthenticatedBiNichesRouteImport } from './routes/_authenticated/bi.niches'
 import { Route as AuthenticatedBiMasterRouteImport } from './routes/_authenticated/bi.master'
 import { Route as AuthenticatedBiCompanyRouteImport } from './routes/_authenticated/bi.company'
@@ -1838,6 +1839,12 @@ const AuthenticatedCervejariaPdvsRoute =
     path: '/pdvs',
     getParentRoute: () => AuthenticatedCervejariaRoute,
   } as any)
+const AuthenticatedCervejariaCatalogoRoute =
+  AuthenticatedCervejariaCatalogoRouteImport.update({
+    id: '/catalogo',
+    path: '/catalogo',
+    getParentRoute: () => AuthenticatedCervejariaRoute,
+  } as any)
 const AuthenticatedBiNichesRoute = AuthenticatedBiNichesRouteImport.update({
   id: '/niches',
   path: '/niches',
@@ -2451,6 +2458,7 @@ export interface FileRoutesByFullPath {
   '/bi/company': typeof AuthenticatedBiCompanyRoute
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
+  '/cervejaria/catalogo': typeof AuthenticatedCervejariaCatalogoRoute
   '/cervejaria/pdvs': typeof AuthenticatedCervejariaPdvsRoute
   '/checkout/$plano': typeof AuthenticatedCheckoutPlanoRoute
   '/clube/notificacoes': typeof AuthenticatedClubeNotificacoesRoute
@@ -2788,6 +2796,7 @@ export interface FileRoutesByTo {
   '/bi/company': typeof AuthenticatedBiCompanyRoute
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
+  '/cervejaria/catalogo': typeof AuthenticatedCervejariaCatalogoRoute
   '/cervejaria/pdvs': typeof AuthenticatedCervejariaPdvsRoute
   '/checkout/$plano': typeof AuthenticatedCheckoutPlanoRoute
   '/clube/notificacoes': typeof AuthenticatedClubeNotificacoesRoute
@@ -3139,6 +3148,7 @@ export interface FileRoutesById {
   '/_authenticated/bi/company': typeof AuthenticatedBiCompanyRoute
   '/_authenticated/bi/master': typeof AuthenticatedBiMasterRoute
   '/_authenticated/bi/niches': typeof AuthenticatedBiNichesRoute
+  '/_authenticated/cervejaria/catalogo': typeof AuthenticatedCervejariaCatalogoRoute
   '/_authenticated/cervejaria/pdvs': typeof AuthenticatedCervejariaPdvsRoute
   '/_authenticated/checkout/$plano': typeof AuthenticatedCheckoutPlanoRoute
   '/_authenticated/clube/notificacoes': typeof AuthenticatedClubeNotificacoesRoute
@@ -3489,6 +3499,7 @@ export interface FileRouteTypes {
     | '/bi/company'
     | '/bi/master'
     | '/bi/niches'
+    | '/cervejaria/catalogo'
     | '/cervejaria/pdvs'
     | '/checkout/$plano'
     | '/clube/notificacoes'
@@ -3826,6 +3837,7 @@ export interface FileRouteTypes {
     | '/bi/company'
     | '/bi/master'
     | '/bi/niches'
+    | '/cervejaria/catalogo'
     | '/cervejaria/pdvs'
     | '/checkout/$plano'
     | '/clube/notificacoes'
@@ -4176,6 +4188,7 @@ export interface FileRouteTypes {
     | '/_authenticated/bi/company'
     | '/_authenticated/bi/master'
     | '/_authenticated/bi/niches'
+    | '/_authenticated/cervejaria/catalogo'
     | '/_authenticated/cervejaria/pdvs'
     | '/_authenticated/checkout/$plano'
     | '/_authenticated/clube/notificacoes'
@@ -6394,6 +6407,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCervejariaPdvsRouteImport
       parentRoute: typeof AuthenticatedCervejariaRoute
     }
+    '/_authenticated/cervejaria/catalogo': {
+      id: '/_authenticated/cervejaria/catalogo'
+      path: '/catalogo'
+      fullPath: '/cervejaria/catalogo'
+      preLoaderRoute: typeof AuthenticatedCervejariaCatalogoRouteImport
+      parentRoute: typeof AuthenticatedCervejariaRoute
+    }
     '/_authenticated/bi/niches': {
       id: '/_authenticated/bi/niches'
       path: '/niches'
@@ -7042,11 +7062,13 @@ const AuthenticatedBiRouteWithChildren = AuthenticatedBiRoute._addFileChildren(
 )
 
 interface AuthenticatedCervejariaRouteChildren {
+  AuthenticatedCervejariaCatalogoRoute: typeof AuthenticatedCervejariaCatalogoRoute
   AuthenticatedCervejariaPdvsRoute: typeof AuthenticatedCervejariaPdvsRoute
 }
 
 const AuthenticatedCervejariaRouteChildren: AuthenticatedCervejariaRouteChildren =
   {
+    AuthenticatedCervejariaCatalogoRoute: AuthenticatedCervejariaCatalogoRoute,
     AuthenticatedCervejariaPdvsRoute: AuthenticatedCervejariaPdvsRoute,
   }
 
