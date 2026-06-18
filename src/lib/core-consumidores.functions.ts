@@ -84,8 +84,8 @@ export const fetchConsumidorDashboard = createServerFn({ method: "POST" })
     const ratingMedia = ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0;
 
     const cons = consumption.data ?? [];
-    const cuponsUsados = cons.filter((c) => c.kind === "coupon").length;
-    const economiaCents = cons.reduce((sum, c) => sum + (c.amount_cents ?? 0), 0);
+    const cuponsUsados = cons.filter((c) => c.source === "coupon").length;
+    const economiaCents = cons.reduce((sum, c) => sum + (c.total_cents ?? 0), 0);
     const totalEconomiaAllTime = allProfiles.reduce((sum, p) => sum + (p.total_savings_cents ?? 0), 0);
 
     // Top nichos (interests_tags), CEPs, parceiros
