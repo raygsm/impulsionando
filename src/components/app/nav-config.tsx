@@ -146,6 +146,8 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Analisar",
     items: [
+      { to: "/insights/percebido", label: "O que a Impulsionando percebeu", icon: Sparkles },
+      { to: "/radar", label: "Radar do Nicho", icon: TrendingUp, superOnly: true },
       { to: "/insights/respostas", label: "Dashboard de Respostas", icon: Sparkles },
       { to: "/insights/oportunidades", label: "Central de Oportunidades", icon: Zap },
       { to: "/reports", label: "Relatórios — visão geral", icon: BarChart3, perm: "report.read" },
