@@ -183,6 +183,7 @@ import { Route as AuthenticatedRealestateCockpitRouteImport } from './routes/_au
 import { Route as AuthenticatedPrivacyCockpitRouteImport } from './routes/_authenticated/privacy.cockpit'
 import { Route as AuthenticatedPerfilNotificacoesRouteImport } from './routes/_authenticated/perfil.notificacoes'
 import { Route as AuthenticatedOpsVozClienteRouteImport } from './routes/_authenticated/ops.voz-cliente'
+import { Route as AuthenticatedOpsVersoesRouteImport } from './routes/_authenticated/ops.versoes'
 import { Route as AuthenticatedOpsSaudeRouteImport } from './routes/_authenticated/ops.saude'
 import { Route as AuthenticatedOpsMensageriaRouteImport } from './routes/_authenticated/ops.mensageria'
 import { Route as AuthenticatedOperationsCockpitRouteImport } from './routes/_authenticated/operations.cockpit'
@@ -1251,6 +1252,11 @@ const AuthenticatedOpsVozClienteRoute =
     path: '/ops/voz-cliente',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedOpsVersoesRoute = AuthenticatedOpsVersoesRouteImport.update({
+  id: '/ops/versoes',
+  path: '/ops/versoes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedOpsSaudeRoute = AuthenticatedOpsSaudeRouteImport.update({
   id: '/ops/saude',
   path: '/ops/saude',
@@ -2450,6 +2456,7 @@ export interface FileRoutesByFullPath {
   '/operations/cockpit': typeof AuthenticatedOperationsCockpitRoute
   '/ops/mensageria': typeof AuthenticatedOpsMensageriaRoute
   '/ops/saude': typeof AuthenticatedOpsSaudeRoute
+  '/ops/versoes': typeof AuthenticatedOpsVersoesRoute
   '/ops/voz-cliente': typeof AuthenticatedOpsVozClienteRoute
   '/perfil/notificacoes': typeof AuthenticatedPerfilNotificacoesRoute
   '/privacy/cockpit': typeof AuthenticatedPrivacyCockpitRoute
@@ -2774,6 +2781,7 @@ export interface FileRoutesByTo {
   '/operations/cockpit': typeof AuthenticatedOperationsCockpitRoute
   '/ops/mensageria': typeof AuthenticatedOpsMensageriaRoute
   '/ops/saude': typeof AuthenticatedOpsSaudeRoute
+  '/ops/versoes': typeof AuthenticatedOpsVersoesRoute
   '/ops/voz-cliente': typeof AuthenticatedOpsVozClienteRoute
   '/perfil/notificacoes': typeof AuthenticatedPerfilNotificacoesRoute
   '/privacy/cockpit': typeof AuthenticatedPrivacyCockpitRoute
@@ -3112,6 +3120,7 @@ export interface FileRoutesById {
   '/_authenticated/operations/cockpit': typeof AuthenticatedOperationsCockpitRoute
   '/_authenticated/ops/mensageria': typeof AuthenticatedOpsMensageriaRoute
   '/_authenticated/ops/saude': typeof AuthenticatedOpsSaudeRoute
+  '/_authenticated/ops/versoes': typeof AuthenticatedOpsVersoesRoute
   '/_authenticated/ops/voz-cliente': typeof AuthenticatedOpsVozClienteRoute
   '/_authenticated/perfil/notificacoes': typeof AuthenticatedPerfilNotificacoesRoute
   '/_authenticated/privacy/cockpit': typeof AuthenticatedPrivacyCockpitRoute
@@ -3449,6 +3458,7 @@ export interface FileRouteTypes {
     | '/operations/cockpit'
     | '/ops/mensageria'
     | '/ops/saude'
+    | '/ops/versoes'
     | '/ops/voz-cliente'
     | '/perfil/notificacoes'
     | '/privacy/cockpit'
@@ -3773,6 +3783,7 @@ export interface FileRouteTypes {
     | '/operations/cockpit'
     | '/ops/mensageria'
     | '/ops/saude'
+    | '/ops/versoes'
     | '/ops/voz-cliente'
     | '/perfil/notificacoes'
     | '/privacy/cockpit'
@@ -4110,6 +4121,7 @@ export interface FileRouteTypes {
     | '/_authenticated/operations/cockpit'
     | '/_authenticated/ops/mensageria'
     | '/_authenticated/ops/saude'
+    | '/_authenticated/ops/versoes'
     | '/_authenticated/ops/voz-cliente'
     | '/_authenticated/perfil/notificacoes'
     | '/_authenticated/privacy/cockpit'
@@ -5535,6 +5547,13 @@ declare module '@tanstack/react-router' {
       path: '/ops/voz-cliente'
       fullPath: '/ops/voz-cliente'
       preLoaderRoute: typeof AuthenticatedOpsVozClienteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ops/versoes': {
+      id: '/_authenticated/ops/versoes'
+      path: '/ops/versoes'
+      fullPath: '/ops/versoes'
+      preLoaderRoute: typeof AuthenticatedOpsVersoesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/ops/saude': {
@@ -7183,6 +7202,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOperationsCockpitRoute: typeof AuthenticatedOperationsCockpitRoute
   AuthenticatedOpsMensageriaRoute: typeof AuthenticatedOpsMensageriaRoute
   AuthenticatedOpsSaudeRoute: typeof AuthenticatedOpsSaudeRoute
+  AuthenticatedOpsVersoesRoute: typeof AuthenticatedOpsVersoesRoute
   AuthenticatedOpsVozClienteRoute: typeof AuthenticatedOpsVozClienteRoute
   AuthenticatedPerfilNotificacoesRoute: typeof AuthenticatedPerfilNotificacoesRoute
   AuthenticatedRealestateCockpitRoute: typeof AuthenticatedRealestateCockpitRoute
@@ -7300,6 +7320,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOperationsCockpitRoute: AuthenticatedOperationsCockpitRoute,
   AuthenticatedOpsMensageriaRoute: AuthenticatedOpsMensageriaRoute,
   AuthenticatedOpsSaudeRoute: AuthenticatedOpsSaudeRoute,
+  AuthenticatedOpsVersoesRoute: AuthenticatedOpsVersoesRoute,
   AuthenticatedOpsVozClienteRoute: AuthenticatedOpsVozClienteRoute,
   AuthenticatedPerfilNotificacoesRoute: AuthenticatedPerfilNotificacoesRoute,
   AuthenticatedRealestateCockpitRoute: AuthenticatedRealestateCockpitRoute,
