@@ -41,10 +41,51 @@ function ContatoPage() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim() || (!email.trim() && !phone.trim()) || !message.trim()) {
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+    const trimmedPhone = phone.trim();
+    const trimmedMessage = message.trim();
+
+    if (!trimmedName || (!trimmedEmail && !trimmedPhone) || !trimmedMessage) {
       toast.error("Preencha nome, e-mail ou WhatsApp e a mensagem.");
       return;
     }
+    if (trimmedName.length > 100 || trimmedEmail.length > 255 || trimmedMessage.length > 1000) {
+      toast.error("Algum campo ultrapassou o limite permitido.");
+      return;
+    }
+    if (trimmedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      toast.error("E-mail inválido.");
+      return;
+    }
+
+    // Bloqueia tentativas de redirecionar a conversa para canais não oficiais
+    // (outros números de WhatsApp, links, redes sociais, telegram, e-mails de terceiros).
+    const lower = trimmedMessage.toLowerCase();
+    const OFFICIAL_DIGITS = "5521993075000";
+    const phoneMatches = lower.match(/(?:\+?\d[\s\-().]*){10,}/g) ?? [];
+    const hasForeignPhone = phoneMatches.some((m) => {
+      const digits = m.replace(/\D/g, "");
+      return digits.length >= 10 && !digits.endsWith("993075000");
+    });
+    const forbidden = [
+      "t.me/", "telegram", "instagram.com/", "facebook.com/", "fb.me/",
+      "tiktok.com/", "discord.gg/", "skype:", "viber",
+    ];
+    const hasForbiddenChannel = forbidden.some((p) => lower.includes(p));
+    const hasForeignWhatsapp =
+      (lower.includes("wa.me/") || lower.includes("whatsapp")) &&
+      !lower.includes(OFFICIAL_DIGITS) &&
+      !lower.includes("99307-5000") &&
+      !lower.includes("993075000");
+
+    if (hasForeignPhone || hasForbiddenChannel || hasForeignWhatsapp) {
+      toast.error(
+        "Para sua segurança, o canal oficial único é o WhatsApp (21) 99307-5000. Remova outros números, links ou redes sociais da mensagem.",
+      );
+      return;
+    }
+
     setLoading(true);
     const leadId =
       typeof crypto !== "undefined" && "randomUUID" in crypto
