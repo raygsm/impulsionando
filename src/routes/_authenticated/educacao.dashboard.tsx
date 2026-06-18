@@ -29,6 +29,7 @@ const pct = (n: number) => `${(n * 100).toFixed(1)}%`
 
 function EducDashboardPage() {
   const fetcher = useServerFn(educDashboard)
+  const { branding } = useEducBranding()
   const { data, isLoading } = useQuery({
     queryKey: ['educ-dashboard'],
     queryFn: () => fetcher({}),
@@ -48,14 +49,18 @@ function EducDashboardPage() {
   return (
     <div className="container max-w-6xl py-6 space-y-6">
       <header className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4">
-        <div className="min-w-0">
-          <h1 className="text-2xl font-bold flex items-center gap-2 truncate">
-            <GraduationCap className="h-6 w-6 shrink-0" aria-hidden="true" /> Dashboard Educação
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
-            Indicadores consolidados da rede educacional — leads, matrículas, conversão,
-            evasão, receita, inadimplência e ranking de polos.
-          </p>
+        <div className="min-w-0 flex items-start gap-3">
+          {branding.logo_url ? (
+            <img src={branding.logo_url} alt={`Logo ${branding.nome_exibicao}`} className="h-10 w-10 rounded object-contain" />
+          ) : null}
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold flex items-center gap-2 truncate">
+              <GraduationCap className="h-6 w-6 shrink-0" aria-hidden="true" /> {branding.nome_exibicao}
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
+              {branding.hero_subtitulo ?? 'Indicadores consolidados da rede educacional.'}
+            </p>
+          </div>
         </div>
         <Button asChild variant="outline" size="sm">
           <Link to="/educacao/polos">Gerir polos</Link>
