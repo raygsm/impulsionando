@@ -1611,4 +1611,165 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
       expect(announces.every((t) => !t.includes(label))).toBe(true);
     }
   });
+
+  test("visual regression (RTL + reduced motion): portrait e landscape mobile", async ({
+    browser,
+  }) => {
+    test.skip(
+      !!process.env.CI && !process.env.E2E_VISUAL,
+      "Visual snapshots geram baselines no primeiro run — habilite com E2E_VISUAL=1.",
+    );
+
+    const context = await browser.newContext({ reducedMotion: "reduce" });
+    const page = await context.newPage();
+    await login(page);
+
+    // Portrait
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(ROUTE);
+    await page.evaluate(() => {
+      document.documentElement.setAttribute("dir", "rtl");
+      document.documentElement.setAttribute("lang", "ar");
+      sessionStorage.removeItem("dashboards:consumidor:section");
+    });
+    await page.reload();
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(500);
+
+    const tablistP = page.getByRole("tablist", { name: /Seções da Minha área/i });
+    await expect(tablistP).toHaveScreenshot(
+      "rm-rtl-mobile-portrait-subnav-default.png",
+      { maxDiffPixelRatio: 0.02, animations: "disabled" },
+    );
+
+    // Activate cupons via keyboard and snapshot the focused chip + tabpanel
+    await page.locator("#tab-favoritos").focus();
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(400);
+    await page.locator("#tab-cupons").focus();
+    await expect(tablistP).toHaveScreenshot(
+      "rm-rtl-mobile-portrait-subnav-focus-cupons.png",
+      { maxDiffPixelRatio: 0.02, animations: "disabled" },
+    );
+    await expect(page.locator("#cupons")).toHaveScreenshot(
+      "rm-rtl-mobile-portrait-tabpanel-cupons.png",
+      { maxDiffPixelRatio: 0.03, animations: "disabled" },
+    );
+
+    // Landscape — rotate, re-measure, snapshot again
+    await page.setViewportSize({ width: 844, height: 390 });
+    await page.evaluate(() => window.dispatchEvent(new Event("orientationchange")));
+    await page.waitForTimeout(600);
+    await page.locator("#tab-cupons").focus();
+
+    const tablistL = page.getByRole("tablist", { name: /Seções da Minha área/i });
+    await expect(tablistL).toHaveScreenshot(
+      "rm-rtl-mobile-landscape-subnav-focus-cupons.png",
+      { maxDiffPixelRatio: 0.02, animations: "disabled" },
+    );
+    await expect(page.locator("#cupons")).toHaveScreenshot(
+      "rm-rtl-mobile-landscape-tabpanel-cupons.png",
+      { maxDiffPixelRatio: 0.03, animations: "disabled" },
+    );
+
+    await context.close();
+  });
+
+  test("hash desconhecido + back/forward: foco roving e tokens de ring por etapa", async ({
+    page,
+  }) => {
+    const ringTokens = (id: string) =>
+      page.locator(`#tab-${id}`).evaluate((el) => {
+        const cls = (el as HTMLElement).className;
+        return (
+          cls.includes("focus-visible:ring-2") &&
+          cls.includes("focus-visible:ring-ring") &&
+          cls.includes("focus-visible:ring-offset-2")
+        );
+      });
+
+    const rovingIds = () =>
+      page
+        .locator('[role="tab"][tabindex="0"]')
+        .evaluateAll((els) => els.map((e) => (e as HTMLElement).id));
+
+    // Fresh session, unknown hash → fallback to default chip baseline
+    await page.goto(ROUTE);
+    await page.evaluate(() =>
+      sessionStorage.removeItem("dashboards:consumidor:section"),
+    );
+    await page.goto(`${ROUTE}#hash-invalido-abc`);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(600);
+
+    const defaultId = SECTIONS[0]; // favoritos
+    expect(await rovingIds()).toEqual([`tab-${defaultId}`]);
+    expect(await ringTokens(defaultId)).toBe(true);
+
+    // Step 1: activate cupons → roving + ring on cupons, focus in tabpanel
+    await page.locator("#tab-cupons").click();
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#cupons");
+    await page.waitForTimeout(400);
+    expect(await rovingIds()).toEqual(["tab-cupons"]);
+    expect(await ringTokens("cupons")).toBe(true);
+
+    // Step 2: activate reservas via keyboard from the focused tabpanel
+    await page.locator("#tab-cupons").focus();
+    await page.keyboard.press("ArrowRight"); // → vouchers
+    await page.keyboard.press("ArrowRight"); // → reservas
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(400);
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#reservas");
+    expect(await rovingIds()).toEqual(["tab-reservas"]);
+    expect(await ringTokens("reservas")).toBe(true);
+    let focused = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(focused).toBe("reservas");
+
+    // Step 3: back → cupons
+    await page.goBack();
+    await page.waitForTimeout(500);
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#cupons");
+    expect(await rovingIds()).toEqual(["tab-cupons"]);
+    expect(await ringTokens("cupons")).toBe(true);
+    await expect(page.locator("#tab-cupons")).toHaveAttribute("aria-selected", "true");
+
+    // Step 4: back again → unknown hash. Default chip must hold the roving
+    // baseline and its ring tokens, no stale selection from cupons/reservas.
+    await page.goBack();
+    await page.waitForTimeout(500);
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe(
+      "#hash-invalido-abc",
+    );
+    expect(await rovingIds()).toEqual([`tab-${defaultId}`]);
+    expect(await ringTokens(defaultId)).toBe(true);
+    const stillSelected = await page
+      .locator('[role="tab"][aria-selected="true"]')
+      .count();
+    expect(stillSelected).toBeLessThanOrEqual(1);
+
+    // Focus must be reachable on the default chip after the back navigation
+    await page.locator(`#tab-${defaultId}`).focus();
+    focused = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(focused).toBe(`tab-${defaultId}`);
+
+    // Step 5: forward → cupons (rings/roving must follow forward too)
+    await page.goForward();
+    await page.waitForTimeout(500);
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#cupons");
+    expect(await rovingIds()).toEqual(["tab-cupons"]);
+    expect(await ringTokens("cupons")).toBe(true);
+
+    // Step 6: forward → reservas
+    await page.goForward();
+    await page.waitForTimeout(500);
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#reservas");
+    expect(await rovingIds()).toEqual(["tab-reservas"]);
+    expect(await ringTokens("reservas")).toBe(true);
+  });
 });
