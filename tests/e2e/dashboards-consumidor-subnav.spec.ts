@@ -1373,6 +1373,32 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
     const page = await context.newPage();
     await login(page);
 
+    // Capture every distinct live-region text from page open onward
+    await page.addInitScript(() => {
+      (window as unknown as { __liveAnnounces: string[] }).__liveAnnounces = [];
+      const start = () => {
+        const live = document.querySelector('[role="status"][aria-live="polite"]');
+        if (!live) return false;
+        const log = (window as unknown as { __liveAnnounces: string[] }).__liveAnnounces;
+        const push = () => {
+          const txt = (live.textContent ?? "").trim();
+          if (txt && log[log.length - 1] !== txt) log.push(txt);
+        };
+        push();
+        new MutationObserver(push).observe(live, {
+          childList: true,
+          characterData: true,
+          subtree: true,
+        });
+        return true;
+      };
+      if (!start()) {
+        const i = setInterval(() => {
+          if (start()) clearInterval(i);
+        }, 50);
+      }
+    });
+
     await page.goto(ROUTE);
     await page.evaluate(() => {
       document.documentElement.setAttribute("dir", "rtl");
@@ -1383,6 +1409,18 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(500);
 
+    const liveCount = async () =>
+      (await page.evaluate(
+        () => (window as unknown as { __liveAnnounces: string[] }).__liveAnnounces.length,
+      )) as number;
+    const liveLog = async () =>
+      (await page.evaluate(
+        () => (window as unknown as { __liveAnnounces: string[] }).__liveAnnounces,
+      )) as string[];
+
+    // Snapshot the baseline announcement count (after initial render)
+    const baseline = await liveCount();
+
     // Tab into the chip with tabindex=0 (default = favoritos)
     await page.locator(`#tab-favoritos`).focus();
     let focusedId = await page.evaluate(
@@ -1390,12 +1428,20 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
     );
     expect(focusedId).toBe("tab-favoritos");
 
-    // ArrowRight inside tablist → tab-historico (DOM order)
+    // Hover should NOT push a new announcement
+    await page.locator("#tab-cupons").hover();
+    await page.waitForTimeout(200);
+    expect(await liveCount()).toBe(baseline);
+
+    // ArrowRight (focus-only, no activation) must NOT push an announcement
+    await page.locator(`#tab-favoritos`).focus();
     await page.keyboard.press("ArrowRight");
     focusedId = await page.evaluate(
       () => (document.activeElement as HTMLElement | null)?.id ?? "",
     );
     expect(focusedId).toBe("tab-historico");
+    await page.waitForTimeout(200);
+    expect(await liveCount()).toBe(baseline);
 
     // Enter activates → ARIA flips, roving moves, tabpanel focused, ring tokens stay
     await page.keyboard.press("Enter");
@@ -1426,13 +1472,19 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
     });
     expect(ringTokens).toBe(true);
 
-    // Move focus to next chip via ArrowRight, activate with Space
+    // Activation MUST add exactly one new live-region announcement: Histórico
+    let log = await liveLog();
+    expect(log.length).toBe(baseline + 1);
+    expect(log[log.length - 1]).toContain("Histórico de visitas");
+
+    // Move focus to next chip via ArrowRight (no announcement), activate with Space
     await page.locator(`#tab-historico`).focus();
     await page.keyboard.press("ArrowRight");
     focusedId = await page.evaluate(
       () => (document.activeElement as HTMLElement | null)?.id ?? "",
     );
     expect(focusedId).toBe("tab-cupons");
+    expect(await liveCount()).toBe(baseline + 1); // still no announcement on focus
     await page.keyboard.press(" ");
     await page.waitForTimeout(300);
     await expect(page.locator(`#tab-cupons`)).toHaveAttribute("aria-selected", "true");
@@ -1444,6 +1496,17 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
       () => (document.activeElement as HTMLElement | null)?.id ?? "",
     );
     expect(panelFocused).toBe("cupons");
+    log = await liveLog();
+    expect(log.length).toBe(baseline + 2);
+    expect(log[log.length - 1]).toContain("Meus cupons");
+
+    // Tab order: after the tabpanel, Shift+Tab returns to the active chip
+    // (the only chip in the tablist with tabindex=0).
+    await page.keyboard.press("Shift+Tab");
+    focusedId = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(focusedId).toBe("tab-cupons");
 
     // Reduced motion: tablist still has no scroll-snap
     const snap = await page
