@@ -211,12 +211,45 @@ function TermosPage() {
             </p>
           </Section>
 
-          <Section title="15. Contato">
+          <Section title="15. Canal oficial único de comunicação">
+            <p>
+              <strong>O único canal oficial</strong> para envio de documentos,
+              comprovantes de pagamento, solicitações, suporte e qualquer
+              comunicação contratual com a Impulsionando Tecnologia é o
+              WhatsApp <strong>+55 (21) 99307-5000</strong>. Para sua
+              segurança e melhor acompanhamento,{" "}
+              <strong>
+                contatos realizados por outros canais não serão considerados
+              </strong>{" "}
+              para fins contratuais, de suporte ou de comprovação de pagamento.
+            </p>
+            <p>
+              Em especial, <strong>não reconhecemos</strong> como comunicação
+              oficial: mensagens de outros números de telefone ou WhatsApp,
+              perfis ou DMs em redes sociais (Instagram, Facebook, TikTok,
+              LinkedIn, Telegram, Discord, etc.), e-mails enviados por
+              domínios diferentes de <code>@impulsionando.com.br</code>,
+              ligações de terceiros que se apresentem como parceiros e
+              links de pagamento que não tenham sido confirmados pelo
+              WhatsApp oficial. Em caso de dúvida sobre a autenticidade de
+              qualquer contato, confirme antes pelo WhatsApp oficial.
+            </p>
+            <p>
+              A Impulsionando Tecnologia <strong>não se responsabiliza</strong>{" "}
+              por prejuízos decorrentes de comunicações, instruções de
+              pagamento ou envio de documentos realizados por canais não
+              oficiais.
+            </p>
+          </Section>
+
+          <Section title="16. Contato">
             <p>
               Dúvidas sobre estes Termos:{" "}
               <a href="mailto:sac@impulsionando.com.br" className="text-primary underline">sac@impulsionando.com.br</a>{" "}
               ou pelo nosso{" "}
               <Link to="/contato" className="text-primary underline">formulário de contato</Link>.
+              Para tratativas contratuais, utilize sempre o WhatsApp oficial{" "}
+              <strong>(21) 99307-5000</strong>.
             </p>
           </Section>
         </Card>

@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { OfficialChannelNotice } from "@/components/marketing/OfficialChannelNotice";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -40,10 +41,51 @@ function ContatoPage() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim() || (!email.trim() && !phone.trim()) || !message.trim()) {
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+    const trimmedPhone = phone.trim();
+    const trimmedMessage = message.trim();
+
+    if (!trimmedName || (!trimmedEmail && !trimmedPhone) || !trimmedMessage) {
       toast.error("Preencha nome, e-mail ou WhatsApp e a mensagem.");
       return;
     }
+    if (trimmedName.length > 100 || trimmedEmail.length > 255 || trimmedMessage.length > 1000) {
+      toast.error("Algum campo ultrapassou o limite permitido.");
+      return;
+    }
+    if (trimmedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      toast.error("E-mail inválido.");
+      return;
+    }
+
+    // Bloqueia tentativas de redirecionar a conversa para canais não oficiais
+    // (outros números de WhatsApp, links, redes sociais, telegram, e-mails de terceiros).
+    const lower = trimmedMessage.toLowerCase();
+    const OFFICIAL_DIGITS = "5521993075000";
+    const phoneMatches = lower.match(/(?:\+?\d[\s\-().]*){10,}/g) ?? [];
+    const hasForeignPhone = phoneMatches.some((m) => {
+      const digits = m.replace(/\D/g, "");
+      return digits.length >= 10 && !digits.endsWith("993075000");
+    });
+    const forbidden = [
+      "t.me/", "telegram", "instagram.com/", "facebook.com/", "fb.me/",
+      "tiktok.com/", "discord.gg/", "skype:", "viber",
+    ];
+    const hasForbiddenChannel = forbidden.some((p) => lower.includes(p));
+    const hasForeignWhatsapp =
+      (lower.includes("wa.me/") || lower.includes("whatsapp")) &&
+      !lower.includes(OFFICIAL_DIGITS) &&
+      !lower.includes("99307-5000") &&
+      !lower.includes("993075000");
+
+    if (hasForeignPhone || hasForbiddenChannel || hasForeignWhatsapp) {
+      toast.error(
+        "Para sua segurança, o canal oficial único é o WhatsApp (21) 99307-5000. Remova outros números, links ou redes sociais da mensagem.",
+      );
+      return;
+    }
+
     setLoading(true);
     const leadId =
       typeof crypto !== "undefined" && "randomUUID" in crypto
@@ -112,6 +154,7 @@ function ContatoPage() {
               </div>
             ) : (
               <form onSubmit={onSubmit} className="space-y-4">
+                <OfficialChannelNotice />
                 <div className="grid sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <Label htmlFor="c-name">Nome *</Label>
@@ -132,11 +175,23 @@ function ContatoPage() {
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="c-msg">Como podemos ajudar? *</Label>
-                  <Textarea id="c-msg" rows={5} value={message} onChange={(e) => setMessage(e.target.value)} />
+                  <Textarea
+                    id="c-msg"
+                    rows={5}
+                    value={message}
+                    maxLength={1000}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Descreva sua dúvida em até 1000 caracteres. NÃO inclua senhas, dados bancários, comprovantes ou documentos — envie esses arquivos apenas pelo WhatsApp oficial (21) 99307-5000."
+                  />
+                  <p className="text-[10px] text-muted-foreground">
+                    Não inclua senhas, dados bancários, anexos ou comprovantes nesta mensagem. {message.length}/1000
+                  </p>
                 </div>
                 <p className="text-[11px] text-muted-foreground">
                   Ao enviar você concorda com nossa{" "}
-                  <Link to="/privacidade" className="underline">Política de Privacidade</Link>.
+                  <Link to="/privacidade" className="underline">Política de Privacidade</Link>{" "}
+                  e confirma que documentos e comprovantes serão enviados apenas pelo WhatsApp oficial{" "}
+                  <strong>(21) 99307-5000</strong>.
                 </p>
                 <Button type="submit" disabled={loading} className="gap-2 bg-gradient-primary shadow-elegant">
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}

@@ -14,6 +14,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { LGPDBanner } from "@/components/marketing/LGPDBanner";
+import { OfficialWhatsAppFAB } from "@/components/marketing/OfficialWhatsAppFAB";
 import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 
 function NotFoundComponent() {
@@ -155,6 +156,7 @@ function RootComponent() {
       <Toaster richColors position="top-right" />
       <Outlet />
       <LGPDBanner />
+      <OfficialWhatsAppFAB />
     </QueryClientProvider>
   );
 }

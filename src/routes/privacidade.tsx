@@ -152,7 +152,39 @@ function PrivacidadePage() {
             </p>
           </Section>
 
-          <Section title="11. Encarregado de dados (DPO) e contato">
+          <Section title="11. Canal oficial único de comunicação">
+            <p>
+              Para sua segurança e em conformidade com nossas práticas de
+              proteção de dados, o <strong>único canal oficial</strong> para
+              envio de documentos, comprovantes de pagamento, solicitações
+              relacionadas a dados pessoais (acesso, correção, portabilidade,
+              eliminação — art. 18 da LGPD), exercício de direitos do titular
+              e qualquer comunicação sensível é o WhatsApp{" "}
+              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                +55 (21) 99307-5000
+              </a>{" "}
+              e/ou o e-mail{" "}
+              <a href={`mailto:${EMAIL_DPO}`} className="text-primary underline">{EMAIL_DPO}</a>.
+            </p>
+            <p>
+              Comunicações por outros canais (outros números de telefone,
+              perfis ou mensagens em redes sociais, e-mails de domínios
+              distintos de <code>@impulsionando.com.br</code>, links de
+              pagamento não confirmados) <strong>não serão consideradas</strong>{" "}
+              válidas para fins contratuais nem para tratamento de dados
+              pessoais, e devem ser ignoradas. Em caso de dúvida sobre a
+              autenticidade de um contato, confirme antes pelo WhatsApp
+              oficial acima.
+            </p>
+            <p>
+              <strong>Nunca solicitamos</strong> senhas, dados completos de
+              cartão de crédito ou códigos de verificação por nenhum canal.
+              Suspeitas de fraude ou de uso indevido da nossa marca devem ser
+              reportadas imediatamente pelo WhatsApp oficial.
+            </p>
+          </Section>
+
+          <Section title="12. Encarregado de dados (DPO) e contato">
             <p className="flex items-center gap-2">
               <Mail className="w-4 h-4 text-primary" />
               <a href={`mailto:${EMAIL_DPO}`} className="text-primary underline">{EMAIL_DPO}</a>
@@ -165,7 +197,9 @@ function PrivacidadePage() {
             </p>
             <p className="pt-2">
               Caso prefira, utilize nosso{" "}
-              <Link to="/contato" className="text-primary underline">formulário de contato</Link>.
+              <Link to="/contato" className="text-primary underline">formulário de contato</Link>{" "}
+              — lembrando que documentos e comprovantes devem ser enviados
+              apenas pelo WhatsApp oficial.
             </p>
           </Section>
         </Card>
