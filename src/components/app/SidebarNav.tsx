@@ -151,7 +151,13 @@ export function SidebarNav({
   const planTier = classifyPlanTier(planCtx?.planCode, planCtx?.planName);
 
   const matchesAudience = (audiences: NavAudience[] | undefined): boolean => {
-    if (!audiences || audiences.length === 0) return true;
+    if (!audiences || audiences.length === 0) {
+      // Default-deny para consumidor: itens administrativos (sem audience declarada)
+      // jamais aparecem para o consumidor final. Para vê-los, é preciso declarar
+      // explicitamente `audiences: ["consumidor", ...]`.
+      if (audience === "consumidor") return false;
+      return true;
+    }
     return audiences.includes(audience);
   };
 

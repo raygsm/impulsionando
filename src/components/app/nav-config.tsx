@@ -46,7 +46,7 @@ export const TOP_ITEMS: NavItem[] = [
   { to: "/dashboards/core", label: "Dashboard Core", icon: LayoutDashboard, audiences: ["core"] },
   { to: "/dashboards/white-label", label: "Dashboard WL", icon: LayoutDashboard, audiences: ["white-label", "core"] },
   { to: "/dashboards/empresa", label: "Dashboard Empresa", icon: LayoutDashboard, audiences: ["empresa"] },
-  { to: "/dashboards/consumidor", label: "Minha área (Consumidor)", icon: LayoutDashboard, audiences: ["consumidor"] },
+  // Consumidor: a "Minha Área" é o grupo lateral; nada no topo evita duplicidade.
   { to: "/cockpits", label: "Cockpits", icon: TrendingUp, superOnly: true },
   { to: "/notifications", label: "Notificações", icon: Inbox },
   { to: "/contabilidade/cockpit", label: "Cockpit Contábil", icon: Calculator, superOnly: true },
@@ -57,6 +57,34 @@ export const TOP_ITEMS: NavItem[] = [
 ];
 
 export const NAV_GROUPS: NavGroup[] = [
+  {
+    label: "Minha Área",
+    audiences: ["consumidor"],
+    defaultOpen: true,
+    items: [
+      { to: "/dashboards/consumidor", label: "Início", icon: Home, audiences: ["consumidor"] },
+      { to: "/clube", label: "Clube — Benefícios", icon: Sparkles, audiences: ["consumidor"] },
+      { to: "/clube/notificacoes", label: "Notificações do Clube", icon: Inbox, audiences: ["consumidor"] },
+      { to: "/minha-assinatura", label: "Minha Assinatura", icon: CreditCard, audiences: ["consumidor"] },
+    ],
+  },
+  {
+    label: "Descobrir",
+    audiences: ["consumidor"],
+    defaultOpen: true,
+    items: [
+      { to: "/vitrine", label: "Restaurantes & Parceiros", icon: SearchIcon, audiences: ["consumidor"] },
+      { to: "/saiba-mais", label: "Conheça os planos", icon: BookOpen, audiences: ["consumidor"] },
+    ],
+  },
+  {
+    label: "Configurações",
+    audiences: ["consumidor"],
+    items: [
+      { to: "/privacy", label: "Privacidade & Notificações", icon: ShieldCheck, audiences: ["consumidor"] },
+    ],
+  },
+
   {
     label: "Captar",
     audiences: ["core", "white-label", "empresa"],

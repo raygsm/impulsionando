@@ -18,6 +18,7 @@ import { Loader2 } from "lucide-react";
 import { pushRecent } from "@/hooks/use-recent-pages";
 import { useAppearance } from "@/hooks/use-appearance";
 import { TOP_ITEMS, NAV_GROUPS } from "./nav-config";
+import { CheckoutShell, isCheckoutPath } from "./CheckoutShell";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
@@ -102,6 +103,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
       </div>
     );
+  }
+
+  // Jornada de contratação/assinatura: shell limpo, sem sidebar administrativa.
+  if (isCheckoutPath(location.pathname)) {
+    return <CheckoutShell>{children}</CheckoutShell>;
   }
 
   return (
