@@ -22,6 +22,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ReembolsoRouteImport } from './routes/reembolso'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PlanosRouteImport } from './routes/planos'
+import { Route as PesquisaRouteImport } from './routes/pesquisa'
 import { Route as PacienteRouteImport } from './routes/paciente'
 import { Route as OrcamentoRouteImport } from './routes/orcamento'
 import { Route as ModulosRouteImport } from './routes/modulos'
@@ -394,6 +395,11 @@ const PrivacidadeRoute = PrivacidadeRouteImport.update({
 const PlanosRoute = PlanosRouteImport.update({
   id: '/planos',
   path: '/planos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PesquisaRoute = PesquisaRouteImport.update({
+  id: '/pesquisa',
+  path: '/pesquisa',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PacienteRoute = PacienteRouteImport.update({
@@ -2112,6 +2118,7 @@ export interface FileRoutesByFullPath {
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
   '/paciente': typeof PacienteRouteWithChildren
+  '/pesquisa': typeof PesquisaRoute
   '/planos': typeof PlanosRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/reembolso': typeof ReembolsoRoute
@@ -2431,6 +2438,7 @@ export interface FileRoutesByTo {
   '/empresas': typeof EmpresasRoute
   '/marketing': typeof MarketingRoute
   '/orcamento': typeof OrcamentoRoute
+  '/pesquisa': typeof PesquisaRoute
   '/planos': typeof PlanosRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/reembolso': typeof ReembolsoRoute
@@ -2745,6 +2753,7 @@ export interface FileRoutesById {
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
   '/paciente': typeof PacienteRouteWithChildren
+  '/pesquisa': typeof PesquisaRoute
   '/planos': typeof PlanosRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/reembolso': typeof ReembolsoRoute
@@ -3069,6 +3078,7 @@ export interface FileRouteTypes {
     | '/modulos'
     | '/orcamento'
     | '/paciente'
+    | '/pesquisa'
     | '/planos'
     | '/privacidade'
     | '/reembolso'
@@ -3388,6 +3398,7 @@ export interface FileRouteTypes {
     | '/empresas'
     | '/marketing'
     | '/orcamento'
+    | '/pesquisa'
     | '/planos'
     | '/privacidade'
     | '/reembolso'
@@ -3701,6 +3712,7 @@ export interface FileRouteTypes {
     | '/modulos'
     | '/orcamento'
     | '/paciente'
+    | '/pesquisa'
     | '/planos'
     | '/privacidade'
     | '/reembolso'
@@ -4025,6 +4037,7 @@ export interface RootRouteChildren {
   ModulosRoute: typeof ModulosRouteWithChildren
   OrcamentoRoute: typeof OrcamentoRoute
   PacienteRoute: typeof PacienteRouteWithChildren
+  PesquisaRoute: typeof PesquisaRoute
   PlanosRoute: typeof PlanosRouteWithChildren
   PrivacidadeRoute: typeof PrivacidadeRoute
   ReembolsoRoute: typeof ReembolsoRoute
@@ -4228,6 +4241,13 @@ declare module '@tanstack/react-router' {
       path: '/planos'
       fullPath: '/planos'
       preLoaderRoute: typeof PlanosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pesquisa': {
+      id: '/pesquisa'
+      path: '/pesquisa'
+      fullPath: '/pesquisa'
+      preLoaderRoute: typeof PesquisaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/paciente': {
@@ -7121,6 +7141,7 @@ const rootRouteChildren: RootRouteChildren = {
   ModulosRoute: ModulosRouteWithChildren,
   OrcamentoRoute: OrcamentoRoute,
   PacienteRoute: PacienteRouteWithChildren,
+  PesquisaRoute: PesquisaRoute,
   PlanosRoute: PlanosRouteWithChildren,
   PrivacidadeRoute: PrivacidadeRoute,
   ReembolsoRoute: ReembolsoRoute,
