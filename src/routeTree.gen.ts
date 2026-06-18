@@ -43,6 +43,7 @@ import { Route as PacienteIndexRouteImport } from './routes/paciente.index'
 import { Route as NichosIndexRouteImport } from './routes/nichos.index'
 import { Route as ModulosIndexRouteImport } from './routes/modulos.index'
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
+import { Route as WhiteLabelLoginRouteImport } from './routes/white-label.login'
 import { Route as VitrineSlugRouteImport } from './routes/vitrine.$slug'
 import { Route as TrialCadastroRouteImport } from './routes/trial_.cadastro'
 import { Route as TrabalheConoscoNichoRouteImport } from './routes/trabalhe-conosco.$nicho'
@@ -515,6 +516,11 @@ const DemoIndexRoute = DemoIndexRouteImport.update({
   id: '/demo/',
   path: '/demo/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const WhiteLabelLoginRoute = WhiteLabelLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => WhiteLabelRoute,
 } as any)
 const VitrineSlugRoute = VitrineSlugRouteImport.update({
   id: '/$slug',
@@ -2232,7 +2238,7 @@ export interface FileRoutesByFullPath {
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/vitrine': typeof VitrineRouteWithChildren
-  '/white-label': typeof WhiteLabelRoute
+  '/white-label': typeof WhiteLabelRouteWithChildren
   '/access-profiles': typeof AuthenticatedAccessProfilesRouteWithChildren
   '/adm': typeof AuthenticatedAdmRouteWithChildren
   '/affiliates': typeof AuthenticatedAffiliatesRouteWithChildren
@@ -2333,6 +2339,7 @@ export interface FileRoutesByFullPath {
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
+  '/white-label/login': typeof WhiteLabelLoginRoute
   '/demo/': typeof DemoIndexRoute
   '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
@@ -2567,7 +2574,7 @@ export interface FileRoutesByTo {
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/vitrine': typeof VitrineRouteWithChildren
-  '/white-label': typeof WhiteLabelRoute
+  '/white-label': typeof WhiteLabelRouteWithChildren
   '/access-profiles': typeof AuthenticatedAccessProfilesRouteWithChildren
   '/adm': typeof AuthenticatedAdmRouteWithChildren
   '/audit': typeof AuthenticatedAuditRoute
@@ -2659,6 +2666,7 @@ export interface FileRoutesByTo {
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
+  '/white-label/login': typeof WhiteLabelLoginRoute
   '/demo': typeof DemoIndexRoute
   '/modulos': typeof ModulosIndexRoute
   '/nichos': typeof NichosIndexRoute
@@ -2897,7 +2905,7 @@ export interface FileRoutesById {
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/vitrine': typeof VitrineRouteWithChildren
-  '/white-label': typeof WhiteLabelRoute
+  '/white-label': typeof WhiteLabelRouteWithChildren
   '/_authenticated/access-profiles': typeof AuthenticatedAccessProfilesRouteWithChildren
   '/_authenticated/adm': typeof AuthenticatedAdmRouteWithChildren
   '/_authenticated/affiliates': typeof AuthenticatedAffiliatesRouteWithChildren
@@ -2999,6 +3007,7 @@ export interface FileRoutesById {
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial_/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
+  '/white-label/login': typeof WhiteLabelLoginRoute
   '/demo/': typeof DemoIndexRoute
   '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
@@ -3338,6 +3347,7 @@ export interface FileRouteTypes {
     | '/trabalhe-conosco/$nicho'
     | '/trial/cadastro'
     | '/vitrine/$slug'
+    | '/white-label/login'
     | '/demo/'
     | '/modulos/'
     | '/nichos/'
@@ -3664,6 +3674,7 @@ export interface FileRouteTypes {
     | '/trabalhe-conosco/$nicho'
     | '/trial/cadastro'
     | '/vitrine/$slug'
+    | '/white-label/login'
     | '/demo'
     | '/modulos'
     | '/nichos'
@@ -4003,6 +4014,7 @@ export interface FileRouteTypes {
     | '/trabalhe-conosco/$nicho'
     | '/trial_/cadastro'
     | '/vitrine/$slug'
+    | '/white-label/login'
     | '/demo/'
     | '/modulos/'
     | '/nichos/'
@@ -4241,7 +4253,7 @@ export interface RootRouteChildren {
   TrialRoute: typeof TrialRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   VitrineRoute: typeof VitrineRouteWithChildren
-  WhiteLabelRoute: typeof WhiteLabelRoute
+  WhiteLabelRoute: typeof WhiteLabelRouteWithChildren
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   ComoFuncionaFitnessRoute: typeof ComoFuncionaFitnessRoute
   DemoAdvogadosRoute: typeof DemoAdvogadosRoute
@@ -4581,6 +4593,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/demo/'
       preLoaderRoute: typeof DemoIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/white-label/login': {
+      id: '/white-label/login'
+      path: '/login'
+      fullPath: '/white-label/login'
+      preLoaderRoute: typeof WhiteLabelLoginRouteImport
+      parentRoute: typeof WhiteLabelRoute
     }
     '/vitrine/$slug': {
       id: '/vitrine/$slug'
@@ -7426,6 +7445,18 @@ const VitrineRouteChildren: VitrineRouteChildren = {
 const VitrineRouteWithChildren =
   VitrineRoute._addFileChildren(VitrineRouteChildren)
 
+interface WhiteLabelRouteChildren {
+  WhiteLabelLoginRoute: typeof WhiteLabelLoginRoute
+}
+
+const WhiteLabelRouteChildren: WhiteLabelRouteChildren = {
+  WhiteLabelLoginRoute: WhiteLabelLoginRoute,
+}
+
+const WhiteLabelRouteWithChildren = WhiteLabelRoute._addFileChildren(
+  WhiteLabelRouteChildren,
+)
+
 interface ImoveisSlugRouteChildren {
   ImoveisSlugPropertyIdRoute: typeof ImoveisSlugPropertyIdRoute
 }
@@ -7481,7 +7512,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrialRoute: TrialRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   VitrineRoute: VitrineRouteWithChildren,
-  WhiteLabelRoute: WhiteLabelRoute,
+  WhiteLabelRoute: WhiteLabelRouteWithChildren,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
   ComoFuncionaFitnessRoute: ComoFuncionaFitnessRoute,
   DemoAdvogadosRoute: DemoAdvogadosRoute,
