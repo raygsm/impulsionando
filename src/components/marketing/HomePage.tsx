@@ -462,7 +462,7 @@ export function HomePage() {
             >
               <article aria-labelledby="hero-perfil-empresa">
                 <h3 id="hero-perfil-empresa" className="sr-only">
-                  Sou empresa — usar a Impulsionando na minha operação
+                  Sou empresa — usar a plataforma na minha operação
                 </h3>
                 <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 gap-2 h-auto py-4 flex-col w-full" onClick={() => trackHeroCta("sou_empresa")}>
                   <Link to="/orcamento" data-analytics="hero-sou-empresa">
@@ -484,7 +484,7 @@ export function HomePage() {
               </article>
               <article aria-labelledby="hero-perfil-clube">
                 <h3 id="hero-perfil-clube" className="sr-only">
-                  Clube Impulsionando — descontos e benefícios para consumidores
+                  Clube de Vantagens — descontos e benefícios para consumidores
                 </h3>
                 <Button
                   asChild
@@ -494,7 +494,7 @@ export function HomePage() {
                   onClick={() => trackHeroCta("clube")}
                 >
                   <Link to="/clube" data-analytics="hero-clube">
-                    <span className="flex items-center gap-2 font-semibold"><Gift className="w-4 h-4" /> Clube Impulsionando</span>
+                    <span className="flex items-center gap-2 font-semibold"><Gift className="w-4 h-4" /> Clube de Vantagens</span>
                     <span className="text-xs font-normal opacity-90">Quero descontos e benefícios</span>
                   </Link>
                 </Button>
