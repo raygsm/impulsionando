@@ -1,20 +1,28 @@
 /**
  * /demo/restaurante/$tenant/$qr — Shell mobile-first do QR Code de demonstração.
  *
- * Fase 1: registra a leitura via server fn e mostra cabeçalho com a identidade do
- * cenário, o tipo de QR (mesa/delivery/evento/etc) e o aviso obrigatório de demo.
- * O cardápio interativo, carrinho e checkout simulado entram na Fase 2.
+ * Fase 1: registra a leitura via server fn.
+ * Fase 2: cardápio interativo + carrinho local com telemetria, exibido para QRs do
+ *         tipo "mesa" e "delivery". Outros kinds mantêm o shell informativo.
  *
  * Rota PÚBLICA — não exige login. Toda escrita é via server fn validada com Zod.
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ShieldAlert, ShieldCheck, Smartphone, Sparkles } from "lucide-react";
-import { getDemoScenario, recordDemoScan } from "@/lib/demo-restaurante.functions";
+import { toast } from "sonner";
+import {
+  getDemoScenario,
+  recordDemoScan,
+  recordDemoEvent,
+} from "@/lib/demo-restaurante.functions";
+import { DemoMenu, type DemoMenuItem } from "@/components/demo/DemoMenu";
+import { DemoCart } from "@/components/demo/DemoCart";
+import { useDemoCart } from "@/hooks/useDemoCart";
 
 export const Route = createFileRoute("/demo/restaurante/$tenant/$qr")({
   head: ({ params }) => ({
@@ -40,11 +48,15 @@ const KIND_LABEL: Record<string, string> = {
   clube: "Clube",
 };
 
+const MENU_KINDS = new Set(["mesa", "delivery"]);
+
 function DemoQrShell() {
   const { tenant, qr } = Route.useParams();
   const fetchScenario = useServerFn(getDemoScenario);
   const recordScan = useServerFn(recordDemoScan);
+  const sendEvent = useServerFn(recordDemoEvent);
   const scanFired = useRef(false);
+  const [sessionId, setSessionId] = useState<string | undefined>(undefined);
 
   const scenarioQ = useQuery({
     queryKey: ["demo-resto-scenario-public", tenant],
@@ -53,6 +65,7 @@ function DemoQrShell() {
   });
 
   const currentQr = scenarioQ.data?.qrs.find((q) => q.slug === qr);
+  const cart = useDemoCart(tenant);
 
   // Dispara o scan exatamente uma vez por montagem, após o cenário carregar.
   useEffect(() => {
@@ -70,10 +83,49 @@ function DemoQrShell() {
       },
     })
       .then((r) => {
+        setSessionId(r.sessionId);
         try { localStorage.setItem(`demo-resto-session:${tenant}`, r.sessionId); } catch { /* ignore */ }
       })
       .catch(() => { /* silencioso na demo */ });
   }, [scenarioQ.data, currentQr, tenant, qr, recordScan]);
+
+  const fireEvent = useCallback(
+    (actionKey: string, payload: Record<string, unknown> = {}) => {
+      if (!sessionId) return;
+      sendEvent({ data: { scenarioSlug: tenant, qrSlug: qr, sessionId, actionKey: actionKey as never, payload: payload as never } }).catch(() => {});
+    },
+    [sendEvent, sessionId, tenant, qr],
+  );
+
+  const handleAdd = useCallback(
+    (item: DemoMenuItem) => {
+      cart.add({ id: item.id, name: item.name, category: item.category, priceCents: item.price_cents });
+      fireEvent("cart.add", {
+        itemId: item.id,
+        itemName: item.name,
+        category: item.category,
+        priceCents: item.price_cents,
+        qty: 1,
+      });
+      toast.success(`${item.name} adicionado`);
+    },
+    [cart, fireEvent],
+  );
+
+  const handleRemove = useCallback(
+    (id: string) => {
+      cart.remove(id);
+      fireEvent("cart.remove", { itemId: id });
+    },
+    [cart, fireEvent],
+  );
+
+  const handleCheckout = useCallback(() => {
+    fireEvent("cart.checkout_attempt", { totalCents: cart.totalCents, qty: cart.count });
+    toast.message("Checkout simulado", {
+      description: "Pix, cartão e pagamento na entrega entram na próxima fase da demonstração.",
+    });
+  }, [cart.totalCents, cart.count, fireEvent]);
 
   if (scenarioQ.isLoading) {
     return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Carregando demonstração…</div>;
@@ -93,11 +145,12 @@ function DemoQrShell() {
     );
   }
 
-  const { scenario } = scenarioQ.data;
+  const { scenario, items } = scenarioQ.data;
+  const showMenu = MENU_KINDS.has(currentQr.kind);
 
   return (
     <main
-      className="min-h-screen pb-16"
+      className="min-h-screen pb-28"
       style={{ background: `linear-gradient(180deg, ${scenario.primary_color}14, transparent 220px)` }}
     >
       {/* Banner obrigatório de demo */}
@@ -131,22 +184,32 @@ function DemoQrShell() {
           </p>
         </Card>
 
-        <Card className="p-4 space-y-2">
-          <div className="flex items-center gap-2 text-sm font-semibold">
-            <Sparkles className="w-4 h-4" /> Próximas etapas da demo
-          </div>
-          <ul className="text-xs text-muted-foreground space-y-1 list-disc pl-4">
-            <li>Cardápio digital com IPAs, massas e harmonizações sugeridas</li>
-            <li>Carrinho com taxa, voucher e total simulado</li>
-            <li>Checkout com Pix, cartão e pagamento na entrega — tudo bloqueado para dados reais</li>
-            <li>Captura de nome e WhatsApp para o CRM do restaurante</li>
-            <li>Pesquisa de preferências, vouchers e jornada pós-consumo</li>
-          </ul>
-          <p className="text-[11px] text-muted-foreground pt-2 border-t">
-            Esta etapa é a fundação da demo (Fase 1). As demais entram nas próximas iterações.
-          </p>
-        </Card>
+        {showMenu ? (
+          <DemoMenu items={items as DemoMenuItem[]} onAdd={handleAdd} />
+        ) : (
+          <Card className="p-4 space-y-2">
+            <div className="flex items-center gap-2 text-sm font-semibold">
+              <Sparkles className="w-4 h-4" /> Próxima etapa
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Este QR é do tipo <strong>{KIND_LABEL[currentQr.kind] ?? currentQr.kind}</strong>. A jornada
+              dedicada (pesquisa, evento ou Clube) entra na próxima fase da demonstração.
+            </p>
+          </Card>
+        )}
       </section>
+
+      {showMenu && (
+        <DemoCart
+          items={cart.items}
+          count={cart.count}
+          totalCents={cart.totalCents}
+          onRemove={handleRemove}
+          onClear={() => { cart.clear(); fireEvent("cart.remove", {}); }}
+          onCheckout={handleCheckout}
+          onOpen={() => fireEvent("cart.open", { qty: cart.count, totalCents: cart.totalCents })}
+        />
+      )}
     </main>
   );
 }

@@ -112,6 +112,66 @@ export const recordDemoScan = createServerFn({ method: "POST" })
     return { sessionId: sessionId!, scenarioSlug: scenario.slug, qrSlug: qr.slug, kind: qr.kind };
   });
 
+// ───────────────── RECORD GENERIC DEMO EVENT (público) ─────────────────
+// Telemetria de interações na demo (abrir cardápio, adicionar item, checkout simulado, etc).
+// Nunca aceita PII; payload é restrito a chaves seguras.
+
+const ALLOWED_ACTIONS = [
+  "menu.open",
+  "menu.category.view",
+  "cart.add",
+  "cart.remove",
+  "cart.open",
+  "cart.checkout_attempt",
+  "cart.checkout_simulated",
+  "voucher.apply",
+  "survey.submit",
+] as const;
+
+const EventInput = z.object({
+  scenarioSlug: z.string().trim().min(2).max(60),
+  qrSlug: z.string().trim().min(1).max(60).optional(),
+  sessionId: z.string().uuid(),
+  actionKey: z.enum(ALLOWED_ACTIONS),
+  payload: z
+    .object({
+      itemId: z.string().uuid().optional(),
+      itemName: z.string().max(120).optional(),
+      category: z.string().max(60).optional(),
+      qty: z.number().int().min(1).max(50).optional(),
+      priceCents: z.number().int().min(0).max(1_000_000).optional(),
+      totalCents: z.number().int().min(0).max(10_000_000).optional(),
+      voucherCode: z.string().max(40).optional(),
+      paymentMethod: z.enum(["pix", "card", "on_delivery"]).optional(),
+    })
+    .partial()
+    .default({}),
+});
+
+export const recordDemoEvent = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => EventInput.parse(d ?? {}))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: scenario } = await supabaseAdmin
+      .from("demo_resto_scenarios").select("id,slug").eq("slug", data.scenarioSlug).maybeSingle();
+    if (!scenario) throw new Error("Cenário inexistente.");
+
+    const { data: session } = await supabaseAdmin
+      .from("demo_sessions").select("id").eq("id", data.sessionId).maybeSingle();
+    if (!session) throw new Error("Sessão inexistente.");
+
+    const { error } = await supabaseAdmin.from("demo_actions").insert({
+      session_id: data.sessionId,
+      niche_slug: NICHE,
+      module: "restaurante",
+      action_key: data.actionKey,
+      payload: { ...data.payload, scenario_slug: scenario.slug, qr_slug: data.qrSlug, is_demo: true },
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 // ───────────────── LIVE ACTIVITY (Super Admin) ─────────────────
 
 const LiveInput = z.object({
