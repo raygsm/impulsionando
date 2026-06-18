@@ -9304,6 +9304,375 @@ export type Database = {
         }
         Relationships: []
       }
+      mp_buyers: {
+        Row: {
+          buyer_type: string
+          company_id: string
+          created_at: string
+          delivery_address: Json | null
+          display_name: string
+          id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          buyer_type: string
+          company_id: string
+          created_at?: string
+          delivery_address?: Json | null
+          display_name: string
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          buyer_type?: string
+          company_id?: string
+          created_at?: string
+          delivery_address?: Json | null
+          display_name?: string
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mp_buyers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mp_catalog_items: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          id: string
+          min_order_qty: number
+          name: string
+          price_cents: number
+          sku: string | null
+          stock_qty: number | null
+          supplier_id: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          min_order_qty?: number
+          name: string
+          price_cents: number
+          sku?: string | null
+          stock_qty?: number | null
+          supplier_id: string
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          min_order_qty?: number
+          name?: string
+          price_cents?: number
+          sku?: string | null
+          stock_qty?: number | null
+          supplier_id?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mp_catalog_items_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "mp_suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mp_fee_policies: {
+        Row: {
+          active: boolean
+          created_at: string
+          fee_pct: number
+          id: string
+          label: string
+          niche_slug: string | null
+          scope: string
+          supplier_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          fee_pct: number
+          id?: string
+          label: string
+          niche_slug?: string | null
+          scope: string
+          supplier_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          fee_pct?: number
+          id?: string
+          label?: string
+          niche_slug?: string | null
+          scope?: string
+          supplier_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mp_fee_policies_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "mp_suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mp_order_items: {
+        Row: {
+          catalog_item_id: string | null
+          created_at: string
+          id: string
+          line_total_cents: number
+          name_snapshot: string
+          order_id: string
+          qty: number
+          unit: string
+          unit_price_cents: number
+        }
+        Insert: {
+          catalog_item_id?: string | null
+          created_at?: string
+          id?: string
+          line_total_cents: number
+          name_snapshot: string
+          order_id: string
+          qty: number
+          unit?: string
+          unit_price_cents: number
+        }
+        Update: {
+          catalog_item_id?: string | null
+          created_at?: string
+          id?: string
+          line_total_cents?: number
+          name_snapshot?: string
+          order_id?: string
+          qty?: number
+          unit?: string
+          unit_price_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mp_order_items_catalog_item_id_fkey"
+            columns: ["catalog_item_id"]
+            isOneToOne: false
+            referencedRelation: "mp_catalog_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mp_order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "mp_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mp_orders: {
+        Row: {
+          approved_at: string | null
+          buyer_id: string
+          completed_at: string | null
+          created_at: string
+          fee_cents: number
+          fee_pct: number
+          id: string
+          notes: string | null
+          order_number: number
+          placed_at: string
+          status: string
+          subtotal_cents: number
+          supplier_id: string
+          supplier_net_cents: number
+          total_cents: number
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          buyer_id: string
+          completed_at?: string | null
+          created_at?: string
+          fee_cents?: number
+          fee_pct?: number
+          id?: string
+          notes?: string | null
+          order_number?: number
+          placed_at?: string
+          status?: string
+          subtotal_cents?: number
+          supplier_id: string
+          supplier_net_cents?: number
+          total_cents?: number
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          buyer_id?: string
+          completed_at?: string | null
+          created_at?: string
+          fee_cents?: number
+          fee_pct?: number
+          id?: string
+          notes?: string | null
+          order_number?: number
+          placed_at?: string
+          status?: string
+          subtotal_cents?: number
+          supplier_id?: string
+          supplier_net_cents?: number
+          total_cents?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mp_orders_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "mp_buyers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mp_orders_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "mp_suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mp_suppliers: {
+        Row: {
+          company_id: string
+          created_at: string
+          custom_fee_pct: number | null
+          description: string | null
+          display_name: string
+          id: string
+          regions_served: string[]
+          status: string
+          supplier_type: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          custom_fee_pct?: number | null
+          description?: string | null
+          display_name: string
+          id?: string
+          regions_served?: string[]
+          status?: string
+          supplier_type: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          custom_fee_pct?: number | null
+          description?: string | null
+          display_name?: string
+          id?: string
+          regions_served?: string[]
+          status?: string
+          supplier_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mp_suppliers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mp_transactions_ledger: {
+        Row: {
+          buyer_id: string
+          fee_cents: number
+          fee_pct: number
+          gmv_cents: number
+          id: string
+          order_id: string
+          period_month: string
+          recorded_at: string
+          supplier_id: string
+          supplier_net_cents: number
+        }
+        Insert: {
+          buyer_id: string
+          fee_cents: number
+          fee_pct: number
+          gmv_cents: number
+          id?: string
+          order_id: string
+          period_month: string
+          recorded_at?: string
+          supplier_id: string
+          supplier_net_cents: number
+        }
+        Update: {
+          buyer_id?: string
+          fee_cents?: number
+          fee_pct?: number
+          gmv_cents?: number
+          id?: string
+          order_id?: string
+          period_month?: string
+          recorded_at?: string
+          supplier_id?: string
+          supplier_net_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mp_transactions_ledger_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "mp_buyers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mp_transactions_ledger_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "mp_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mp_transactions_ledger_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "mp_suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       n8n_workflow_runs: {
         Row: {
           channel: string | null
@@ -12485,6 +12854,10 @@ export type Database = {
           source_queue: string
         }
         Returns: number
+      }
+      mp_user_in_company: {
+        Args: { _company_id: string; _user_id: string }
+        Returns: boolean
       }
       notify_user: {
         Args: {
