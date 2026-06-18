@@ -710,4 +710,217 @@ export const updateNotificationPreference = createServerFn({ method: "POST" })
   });
 
 
+// ============ Phase A: Campanhas & Disparo ============
+const BlastFilter = z.object({
+  operation: OperationEnum.optional(),
+  cities: z.array(z.string().max(120)).max(20).default([]),
+  neighborhoods: z.array(z.string().max(120)).max(40).default([]),
+  property_types: z.array(PropertyTypeEnum).max(13).default([]),
+  price_max: z.number().nonnegative().nullable().optional(),
+  price_min: z.number().nonnegative().nullable().optional(),
+  bedrooms_min: z.number().int().min(0).max(20).default(0),
+});
+
+const DispatchBlastInput = z.object({
+  companyId: z.string().uuid(),
+  title: z.string().min(1).max(200),
+  channel: z.enum(["whatsapp", "email"]),
+  filter: BlastFilter,
+  body: z.string().min(1).max(4000),
+  subject: z.string().max(200).optional(),
+  propertyId: z.string().uuid().optional().nullable(),
+});
+
+function intentMatchesFilter(intent: any, f: z.infer<typeof BlastFilter>): boolean {
+  if (f.operation && intent.operation && intent.operation !== f.operation && intent.operation !== "venda_ou_locacao") return false;
+  if (f.property_types.length > 0) {
+    const it = intent.property_types ?? [];
+    if (it.length > 0 && !f.property_types.some((t) => it.includes(t))) return false;
+  }
+  if (f.cities.length > 0) {
+    const ic = intent.cities ?? [];
+    if (ic.length > 0 && !f.cities.some((c) => ic.includes(c))) return false;
+  }
+  if (f.neighborhoods.length > 0) {
+    const inb = intent.neighborhoods ?? [];
+    if (inb.length > 0 && !f.neighborhoods.some((n) => inb.includes(n))) return false;
+  }
+  if (f.price_max != null && intent.price_min != null && intent.price_min > f.price_max) return false;
+  if (f.price_min != null && intent.price_max != null && intent.price_max < f.price_min) return false;
+  if (f.bedrooms_min > 0 && intent.bedrooms_min != null && intent.bedrooms_min > 0 && intent.bedrooms_min < f.bedrooms_min) return false;
+  return true;
+}
+
+export const previewRealestateBlast = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ companyId: z.string().uuid(), filter: BlastFilter, channel: z.enum(["whatsapp", "email"]) }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: intents, error } = await context.supabase
+      .from("realestate_search_intents")
+      .select("id,contact_name,contact_email,contact_phone,whatsapp,operation,property_types,cities,neighborhoods,price_min,price_max,bedrooms_min,consent_marketing,status")
+      .eq("company_id", data.companyId)
+      .eq("status", "ativo")
+      .eq("consent_marketing", true);
+    if (error) throw new Error(error.message);
+    const matches = (intents ?? []).filter((i: any) => intentMatchesFilter(i, data.filter));
+    const eligible = matches.filter((i: any) =>
+      data.channel === "whatsapp" ? !!(i.whatsapp || i.contact_phone) : !!i.contact_email,
+    );
+    return { total: intents?.length ?? 0, matched: matches.length, eligible: eligible.length };
+  });
+
+export const dispatchRealestateBlast = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => DispatchBlastInput.parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: blast, error: bErr } = await context.supabase
+      .from("realestate_blasts")
+      .insert({
+        company_id: data.companyId,
+        property_id: data.propertyId ?? null,
+        title: data.title,
+        channel: data.channel,
+        filter: data.filter as any,
+        body: data.body,
+        status: "queued",
+        created_by: context.userId,
+      })
+      .select("id")
+      .single();
+    if (bErr || !blast) throw new Error(bErr?.message ?? "Falha ao registrar disparo");
+
+    const { data: intents, error: iErr } = await context.supabase
+      .from("realestate_search_intents")
+      .select("id,contact_name,contact_email,contact_phone,whatsapp,operation,property_types,cities,neighborhoods,price_min,price_max,bedrooms_min,consent_marketing,status")
+      .eq("company_id", data.companyId)
+      .eq("status", "ativo")
+      .eq("consent_marketing", true);
+    if (iErr) throw new Error(iErr.message);
+
+    const matches = (intents ?? []).filter((i: any) => intentMatchesFilter(i, data.filter));
+    const eligible = matches.filter((i: any) =>
+      data.channel === "whatsapp" ? !!(i.whatsapp || i.contact_phone) : !!i.contact_email,
+    );
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const rows = eligible.slice(0, 500).map((i: any) => ({
+      channel: data.channel,
+      event_code: "realestate.blast",
+      company_id: data.companyId,
+      reference_type: "realestate_blast",
+      reference_id: blast.id,
+      recipient_phone: data.channel === "whatsapp" ? (i.whatsapp || i.contact_phone) : null,
+      recipient_email: data.channel === "email" ? i.contact_email : null,
+      recipient_name: i.contact_name,
+      subject: data.subject ?? null,
+      body: data.body,
+      status: "queued",
+      payload: { intent_id: i.id, property_id: data.propertyId ?? null },
+    }));
+
+    let enqueued = 0;
+    if (rows.length > 0) {
+      const { error: oErr, count } = await supabaseAdmin
+        .from("message_outbox")
+        .insert(rows, { count: "exact" });
+      if (oErr) {
+        await context.supabase.from("realestate_blasts")
+          .update({ status: "failed", audience_count: matches.length })
+          .eq("id", blast.id);
+        throw new Error(oErr.message);
+      }
+      enqueued = count ?? rows.length;
+      const intentIds = eligible.slice(0, 500).map((i: any) => i.id);
+      if (intentIds.length > 0) {
+        await context.supabase.from("realestate_search_intents")
+          .update({ last_blast_at: new Date().toISOString() })
+          .in("id", intentIds);
+      }
+    }
+
+    await context.supabase.from("realestate_blasts")
+      .update({
+        audience_count: matches.length,
+        enqueued_count: enqueued,
+        status: enqueued > 0 ? "completed" : "queued",
+      })
+      .eq("id", blast.id);
+
+    return { blastId: blast.id, matched: matches.length, eligible: eligible.length, enqueued };
+  });
+
+export const listRealestateBlasts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ companyId: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: rows, error } = await context.supabase
+      .from("realestate_blasts")
+      .select("id,title,channel,property_id,filter,audience_count,enqueued_count,sent_count,failed_count,status,created_at")
+      .eq("company_id", data.companyId)
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) throw new Error(error.message);
+    return { blasts: rows ?? [] };
+  });
+
+export const fetchRealestateReturnReport = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ companyId: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const [{ data: blasts }, { data: interests }] = await Promise.all([
+      context.supabase.from("realestate_blasts")
+        .select("id,enqueued_count,channel,created_at,property_id,title")
+        .eq("company_id", data.companyId)
+        .order("created_at", { ascending: false })
+        .limit(50),
+      context.supabase.from("realestate_interests")
+        .select("id,source,property_id,created_at,status")
+        .eq("company_id", data.companyId)
+        .gte("created_at", new Date(Date.now() - 1000 * 60 * 60 * 24 * 60).toISOString()),
+    ]);
+
+    const ids = (blasts ?? []).map((b: any) => b.id);
+    const outboxStats: Record<string, { sent: number; failed: number; queued: number }> = {};
+    if (ids.length > 0) {
+      const { data: outRows } = await supabaseAdmin
+        .from("message_outbox")
+        .select("reference_id,status")
+        .eq("reference_type", "realestate_blast")
+        .in("reference_id", ids);
+      for (const r of outRows ?? []) {
+        const k = r.reference_id as string;
+        outboxStats[k] ||= { sent: 0, failed: 0, queued: 0 };
+        if (r.status === "sent") outboxStats[k].sent++;
+        else if (r.status === "failed") outboxStats[k].failed++;
+        else outboxStats[k].queued++;
+      }
+    }
+
+    const totalEnqueued = (blasts ?? []).reduce((s: number, b: any) => s + (b.enqueued_count ?? 0), 0);
+    const totalSent = Object.values(outboxStats).reduce((s, v) => s + v.sent, 0);
+    const totalFailed = Object.values(outboxStats).reduce((s, v) => s + v.failed, 0);
+    const newInterests = (interests ?? []).length;
+
+    return {
+      kpis: {
+        blasts: blasts?.length ?? 0,
+        enqueued: totalEnqueued,
+        delivered: totalSent,
+        failed: totalFailed,
+        newInterests,
+        conversionPct: totalSent > 0 ? Math.round((newInterests / totalSent) * 1000) / 10 : 0,
+      },
+      blasts: (blasts ?? []).map((b: any) => ({
+        ...b,
+        delivered: outboxStats[b.id]?.sent ?? 0,
+        failedReal: outboxStats[b.id]?.failed ?? 0,
+        queued: outboxStats[b.id]?.queued ?? 0,
+      })),
+    };
+  });
+
+
+
 
