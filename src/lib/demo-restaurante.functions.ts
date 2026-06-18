@@ -387,10 +387,24 @@ export const fetchDemoRestauranteDashboard = createServerFn({ method: "POST" })
     ]);
 
     const rawActions = (actionsRes.data ?? []) as DemoActionRow[];
-    const actions = rawActions.filter((a) => {
+    let actions = rawActions.filter((a) => {
       const p = a.payload as { scenario_slug?: string } | null;
       return p?.scenario_slug === scenario.slug;
     });
+
+    // Index session → kind (do primeiro scan da sessão) para permitir filtros drill-down.
+    const sessionKind = new Map<string, string>();
+    const sessionQrSlug = new Map<string, string>();
+    for (const a of actions) {
+      if (a.action_key !== "qr.scan") continue;
+      const p = a.payload as { kind?: string; qr_slug?: string } | null;
+      if (p?.kind && !sessionKind.has(a.session_id)) sessionKind.set(a.session_id, p.kind);
+      if (p?.qr_slug && !sessionQrSlug.has(a.session_id)) sessionQrSlug.set(a.session_id, p.qr_slug);
+    }
+
+    if (data.qrKind) {
+      actions = actions.filter((a) => sessionKind.get(a.session_id) === data.qrKind);
+    }
 
     const byKey = (k: string) => actions.filter((a) => a.action_key === k);
     const scans = byKey("qr.scan");
@@ -408,6 +422,32 @@ export const fetchDemoRestauranteDashboard = createServerFn({ method: "POST" })
       checkoutDone: new Set(checkoutSimulated.map((a) => a.session_id)).size,
       surveysSubmitted: surveys.length,
     };
+
+    // Drill-down: funil por tipo de QR e por QR específico.
+    const buildFunnel = (sessionFilter: (sid: string) => boolean) => {
+      const sf = (rows: DemoActionRow[]) => rows.filter((a) => sessionFilter(a.session_id));
+      return {
+        scans: sf(scans).length,
+        menuActive: new Set(sf(adds).map((a) => a.session_id)).size,
+        checkoutAttempts: new Set(sf(checkoutAttempts).map((a) => a.session_id)).size,
+        checkoutDone: new Set(sf(checkoutSimulated).map((a) => a.session_id)).size,
+        surveysSubmitted: sf(surveys).length,
+      };
+    };
+
+    const kinds = Array.from(new Set(Array.from(sessionKind.values())));
+    const funnelByKind = kinds.map((kind) => ({
+      kind,
+      ...buildFunnel((sid) => sessionKind.get(sid) === kind),
+    })).sort((a, b) => b.scans - a.scans);
+
+    const qrSlugs = Array.from(new Set(Array.from(sessionQrSlug.values())));
+    const funnelByQr = qrSlugs.map((slug) => ({
+      slug,
+      ...buildFunnel((sid) => sessionQrSlug.get(sid) === slug),
+    })).sort((a, b) => b.scans - a.scans);
+
+
 
     const scanByKind = new Map<string, number>();
     for (const a of scans) {
