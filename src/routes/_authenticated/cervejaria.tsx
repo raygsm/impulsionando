@@ -45,6 +45,8 @@ function TourStep({ to, icon: Icon, title, desc }: { to: string; icon: any; titl
       <div className="text-xs text-muted-foreground mt-1">{desc}</div>
     </Link>
   );
+}
+
 
 function BreweryDashboard() {
   const qc = useQueryClient();
