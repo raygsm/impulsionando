@@ -92,17 +92,42 @@ export function Topbar({ currentUser }: { currentUser: CurrentUser }) {
   const roleLabel = activeMembership?.profiles?.name ?? "Usuário";
 
   const [query, setQuery] = useState("");
+  const [debounced, setDebounced] = useState("");
   const [open, setOpen] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const runSearch = useServerFn(globalEntitySearch);
 
-  const results = useMemo(() => {
+  // Debounce the entity search call to avoid hammering the server on each keystroke.
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(query.trim()), 220);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  const navResults = useMemo(() => {
     const q = normalize(query.trim());
     if (!q) return [];
     return NAV.filter((n) =>
       normalize(`${n.label} ${n.group} ${n.keywords ?? ""}`).includes(q),
-    ).slice(0, 8);
+    ).slice(0, 6);
   }, [query]);
+
+  const entityQuery = useQuery({
+    queryKey: ["global-entity-search", debounced],
+    enabled: debounced.length >= 2,
+    queryFn: () => runSearch({ data: { q: debounced } }).catch(() => ({ hits: [] as GlobalEntityHit[] })),
+    staleTime: 30_000,
+  });
+
+  // Flatten into a single list so arrow-keys work across entities + nav items.
+  type Row =
+    | { kind: "entity"; hit: GlobalEntityHit }
+    | { kind: "nav"; item: NavItem };
+  const rows: Row[] = useMemo(() => {
+    const entities = (entityQuery.data?.hits ?? []).map<Row>((hit) => ({ kind: "entity", hit }));
+    const nav = navResults.map<Row>((item) => ({ kind: "nav", item }));
+    return [...entities, ...nav];
+  }, [entityQuery.data, navResults]);
 
   useEffect(() => setActiveIdx(0), [query]);
 
@@ -127,6 +152,21 @@ export function Topbar({ currentUser }: { currentUser: CurrentUser }) {
     navigate({ to: "/auth" });
   }
 
+  const ENTITY_ICON: Record<GlobalEntityHit["type"], typeof User> = {
+    consumidor: User,
+    empresa: Building2,
+    lead: UserPlus,
+    afiliado: Handshake,
+    usuario: User,
+  };
+  const ENTITY_LABEL: Record<GlobalEntityHit["type"], string> = {
+    consumidor: "Consumidor",
+    empresa: "Empresa",
+    lead: "Lead",
+    afiliado: "Afiliado",
+    usuario: "Usuário",
+  };
+
   return (
     <header className="h-16 border-b border-border bg-card/50 backdrop-blur sticky top-0 z-10 flex items-center px-4 lg:px-6 gap-3 lg:gap-4">
       <MobileSidebar currentUser={currentUser} />
@@ -137,42 +177,75 @@ export function Topbar({ currentUser }: { currentUser: CurrentUser }) {
           onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
           onKeyDown={(e) => {
-            if (!open || results.length === 0) return;
-            if (e.key === "ArrowDown") { e.preventDefault(); setActiveIdx((i) => Math.min(i + 1, results.length - 1)); }
+            if (!open || rows.length === 0) return;
+            if (e.key === "ArrowDown") { e.preventDefault(); setActiveIdx((i) => Math.min(i + 1, rows.length - 1)); }
             else if (e.key === "ArrowUp") { e.preventDefault(); setActiveIdx((i) => Math.max(i - 1, 0)); }
-            else if (e.key === "Enter") { e.preventDefault(); go(results[activeIdx].to); }
+            else if (e.key === "Enter") {
+              e.preventDefault();
+              const r = rows[activeIdx];
+              if (r.kind === "entity") go(r.hit.to);
+              else go(r.item.to);
+            }
             else if (e.key === "Escape") { setOpen(false); }
           }}
-          placeholder="Buscar telas rápidas..."
+          placeholder="Buscar pessoa, empresa, lead ou tela…"
           className="pl-9 bg-background"
         />
         {open && query && (
           <div className="absolute left-0 right-0 mt-2 rounded-md border border-border bg-popover shadow-lg overflow-hidden z-50">
-            {results.length === 0 ? (
-              <div className="px-3 py-4 text-sm text-muted-foreground">Nenhum resultado para "{query}"</div>
+            {rows.length === 0 ? (
+              <div className="px-3 py-4 text-sm text-muted-foreground">
+                {entityQuery.isFetching ? "Buscando…" : `Nenhum resultado para "${query}"`}
+              </div>
             ) : (
-              <ul className="max-h-80 overflow-auto py-1">
-                {results.map((r, i) => (
-                  <li key={r.to}>
-                    <button
-                      type="button"
-                      onMouseEnter={() => setActiveIdx(i)}
-                      onClick={() => go(r.to)}
-                      className={`w-full text-left px-3 py-2 flex items-center justify-between gap-3 text-sm ${i === activeIdx ? "bg-accent text-accent-foreground" : "hover:bg-accent/50"}`}
-                    >
-                      <span className="flex flex-col">
-                        <span className="font-medium">{r.label}</span>
-                        <span className="text-xs text-muted-foreground">{r.group} · {r.to}</span>
-                      </span>
-                      <ArrowRight className="w-3.5 h-3.5 opacity-60" />
-                    </button>
-                  </li>
-                ))}
+              <ul className="max-h-96 overflow-auto py-1">
+                {rows.map((r, i) => {
+                  const active = i === activeIdx;
+                  if (r.kind === "entity") {
+                    const Icon = ENTITY_ICON[r.hit.type];
+                    return (
+                      <li key={`e-${r.hit.type}-${r.hit.id}`}>
+                        <button
+                          type="button"
+                          onMouseEnter={() => setActiveIdx(i)}
+                          onClick={() => go(r.hit.to)}
+                          className={`w-full text-left px-3 py-2 flex items-center gap-3 text-sm ${active ? "bg-accent text-accent-foreground" : "hover:bg-accent/50"}`}
+                        >
+                          <Icon className="w-4 h-4 text-muted-foreground shrink-0" />
+                          <span className="flex flex-col min-w-0 flex-1">
+                            <span className="font-medium truncate">{r.hit.label}</span>
+                            <span className="text-xs text-muted-foreground truncate">
+                              {ENTITY_LABEL[r.hit.type]}{r.hit.sublabel ? ` · ${r.hit.sublabel}` : ""}
+                            </span>
+                          </span>
+                          <ArrowRight className="w-3.5 h-3.5 opacity-60 shrink-0" />
+                        </button>
+                      </li>
+                    );
+                  }
+                  return (
+                    <li key={`n-${r.item.to}`}>
+                      <button
+                        type="button"
+                        onMouseEnter={() => setActiveIdx(i)}
+                        onClick={() => go(r.item.to)}
+                        className={`w-full text-left px-3 py-2 flex items-center justify-between gap-3 text-sm ${active ? "bg-accent text-accent-foreground" : "hover:bg-accent/50"}`}
+                      >
+                        <span className="flex flex-col">
+                          <span className="font-medium">{r.item.label}</span>
+                          <span className="text-xs text-muted-foreground">{r.item.group} · {r.item.to}</span>
+                        </span>
+                        <ArrowRight className="w-3.5 h-3.5 opacity-60" />
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </div>
         )}
       </div>
+
       <div className="flex items-center gap-2 sm:gap-3">
         <AudienceBadge />
         <QuickActionsButton />
