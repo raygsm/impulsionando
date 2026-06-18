@@ -452,25 +452,26 @@ export function HomePage() {
             </p>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-3 max-w-3xl mx-auto">
-              <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 gap-2 h-auto py-4 flex-col">
-                <Link to="/orcamento">
+              <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 gap-2 h-auto py-4 flex-col" onClick={() => trackHeroCta("sou_empresa")}>
+                <Link to="/orcamento" data-analytics="hero-sou-empresa">
                   <span className="flex items-center gap-2 font-semibold"><Building2 className="w-4 h-4" /> Sou empresa</span>
                   <span className="text-xs font-normal opacity-75">Quero usar na minha operação</span>
                 </Link>
               </Button>
-              <Button asChild size="lg" className="bg-gradient-primary gap-2 h-auto py-4 flex-col">
-                <Link to="/nichos/white-label">
+              <Button asChild size="lg" className="bg-gradient-primary gap-2 h-auto py-4 flex-col" onClick={() => trackHeroCta("white_label")}>
+                <Link to="/nichos/white-label" data-analytics="hero-white-label">
                   <span className="flex items-center gap-2 font-semibold"><Rocket className="w-4 h-4" /> White Label</span>
                   <span className="text-xs font-normal opacity-90">Quero revender com a minha marca</span>
                 </Link>
               </Button>
-              <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 gap-2 h-auto py-4 flex-col">
-                <Link to="/clube">
+              <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 gap-2 h-auto py-4 flex-col" onClick={() => trackHeroCta("clube")}>
+                <Link to="/clube" data-analytics="hero-clube">
                   <span className="flex items-center gap-2 font-semibold"><Gift className="w-4 h-4" /> Clube Impulsionando</span>
                   <span className="text-xs font-normal opacity-90">Quero descontos e benefícios</span>
                 </Link>
               </Button>
             </div>
+
 
             <div className="mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
               <Button
