@@ -61,6 +61,12 @@ function NewOrderPage() {
     [cart],
   );
 
+  const { data: feePreview } = useQuery({
+    queryKey: ["mp-fee-preview", supplierId, subtotal],
+    queryFn: () => feeFn({ data: { supplier_id: supplierId!, subtotal_cents: subtotal } }),
+    enabled: !!supplierId && subtotal > 0,
+  });
+
   const place = useMutation({
     mutationFn: () =>
       placeFn({
