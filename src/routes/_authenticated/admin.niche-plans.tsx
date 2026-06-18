@@ -113,7 +113,7 @@ function AdminNichePlansPage() {
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       <PageHeader
         title="Planos por nicho"
-        subtitle="Gerencie os módulos especializados de cada macro nicho por plano (Essencial, Ideal, Full)."
+        description="Gerencie os módulos especializados de cada macro nicho por plano (Essencial, Ideal, Full)."
       />
 
       {isLoading ? (
