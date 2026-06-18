@@ -261,9 +261,16 @@ export const updateMarketplaceOrderStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => UpdateOrderStatusInput.parse(d))
   .handler(async ({ context, data }) => {
-    const patch: Record<string, unknown> = { status: data.status };
-    if (data.decision_notes != null) patch.decision_notes = data.decision_notes;
     const nowIso = new Date().toISOString();
+    const patch: {
+      status: typeof data.status;
+      decision_notes?: string | null;
+      approved_at?: string;
+      rejected_at?: string;
+      invoiced_at?: string;
+      completed_at?: string;
+    } = { status: data.status };
+    if (data.decision_notes != null) patch.decision_notes = data.decision_notes;
     if (data.status === "approved") patch.approved_at = nowIso;
     if (data.status === "rejected") patch.rejected_at = nowIso;
     if (data.status === "invoiced") patch.invoiced_at = nowIso;
