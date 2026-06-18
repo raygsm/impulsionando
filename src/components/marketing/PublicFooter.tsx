@@ -111,7 +111,7 @@ export function PublicFooter() {
           <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="font-semibold underline underline-offset-2">
             (21) 99307-5000
           </a>
-          . Para sua segurança e melhor acompanhamento, contatos por outros canais não oficiais não serão considerados.
+          . Para sua segurança e melhor acompanhamento, contatos por outros canais não oficiais não serão considerados. <Link to="/canal-oficial" className="underline underline-offset-2 font-semibold">Saiba mais</Link>.
         </div>
 
         <div className="border-t border-border pt-6 text-xs text-muted-foreground flex flex-col sm:flex-row items-center justify-between gap-2">
