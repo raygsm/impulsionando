@@ -42,16 +42,18 @@ export const setItemStatus = createServerFn({ method: "POST" })
 
     // Sinal INTERNO de "item pronto": lock idempotente e payload para o painel.
     // Nenhum canal (e-mail / WhatsApp / SMS) é disparado ao cliente.
-    let internal: unknown = undefined;
+    let internal: { handled: boolean; itemId?: string; tableNumber?: number | null } = { handled: false };
     if (data.status === "entregue") {
       try {
         const { notifyItemReady } = await import(
           "@/lib/restaurant-customer-notify.server"
         );
-        internal = await notifyItemReady(data.item_id);
+        const r = await notifyItemReady(data.item_id);
+        internal = { handled: true, itemId: r.itemId, tableNumber: r.tableNumber ?? null };
       } catch (e) {
         console.warn("internal salão signal failed", e);
       }
     }
-    return { ok: true, internal };
+    return { ok: true as const, internal };
   });
+
