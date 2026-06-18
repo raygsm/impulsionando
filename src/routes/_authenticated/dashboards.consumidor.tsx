@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { KpiCard } from "@/components/insights/KpiCard";
 import { PercebidoSection } from "@/components/insights/PercebidoSection";
 import { fetchConsumidorDashboard } from "@/lib/audience-dashboards.functions";
-import { Loader2, Heart, MapPin, Receipt, Sparkles, Gift, FileText, Ticket, Lock, Crown } from "lucide-react";
+import { Loader2, Heart, MapPin, Receipt, Sparkles, Gift, FileText, Ticket, TicketCheck, CalendarDays, Star, Lock, Crown } from "lucide-react";
 import type { ReactNode } from "react";
 
 export const Route = createFileRoute("/_authenticated/dashboards/consumidor")({
