@@ -20,7 +20,7 @@ import {
   listMyBreweryBrands, listBreweryPdvs,
   listBreweryTastings, upsertBreweryTasting,
   captureBreweryLead, listBreweryLeads, previewBreweryBlast,
-  listBreweryCampaigns,
+  listBreweryCampaigns, dispatchBreweryBlast, listBreweryBlasts,
 } from "@/lib/brewery.functions";
 
 export const Route = createFileRoute("/_authenticated/cervejaria/relacionamento")({
