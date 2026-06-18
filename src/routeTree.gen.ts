@@ -238,6 +238,7 @@ import { Route as AuthenticatedEmpresaTalentosRouteImport } from './routes/_auth
 import { Route as AuthenticatedEhrIdRouteImport } from './routes/_authenticated/ehr.$id'
 import { Route as AuthenticatedEducacaoPolosRouteImport } from './routes/_authenticated/educacao.polos'
 import { Route as AuthenticatedEducacaoDashboardRouteImport } from './routes/_authenticated/educacao.dashboard'
+import { Route as AuthenticatedEducacaoBrandingRouteImport } from './routes/_authenticated/educacao.branding'
 import { Route as AuthenticatedDashboardsWhiteLabelRouteImport } from './routes/_authenticated/dashboards.white-label'
 import { Route as AuthenticatedDashboardsEmpresaRouteImport } from './routes/_authenticated/dashboards.empresa'
 import { Route as AuthenticatedDashboardsCoreRouteImport } from './routes/_authenticated/dashboards.core'
@@ -1608,6 +1609,12 @@ const AuthenticatedEducacaoDashboardRoute =
     path: '/educacao/dashboard',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedEducacaoBrandingRoute =
+  AuthenticatedEducacaoBrandingRouteImport.update({
+    id: '/educacao/branding',
+    path: '/educacao/branding',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardsWhiteLabelRoute =
   AuthenticatedDashboardsWhiteLabelRouteImport.update({
     id: '/dashboards/white-label',
@@ -2738,6 +2745,7 @@ export interface FileRoutesByFullPath {
   '/dashboards/core': typeof AuthenticatedDashboardsCoreRoute
   '/dashboards/empresa': typeof AuthenticatedDashboardsEmpresaRoute
   '/dashboards/white-label': typeof AuthenticatedDashboardsWhiteLabelRoute
+  '/educacao/branding': typeof AuthenticatedEducacaoBrandingRoute
   '/educacao/dashboard': typeof AuthenticatedEducacaoDashboardRoute
   '/educacao/polos': typeof AuthenticatedEducacaoPolosRoute
   '/ehr/$id': typeof AuthenticatedEhrIdRoute
@@ -3107,6 +3115,7 @@ export interface FileRoutesByTo {
   '/dashboards/core': typeof AuthenticatedDashboardsCoreRoute
   '/dashboards/empresa': typeof AuthenticatedDashboardsEmpresaRoute
   '/dashboards/white-label': typeof AuthenticatedDashboardsWhiteLabelRoute
+  '/educacao/branding': typeof AuthenticatedEducacaoBrandingRoute
   '/educacao/dashboard': typeof AuthenticatedEducacaoDashboardRoute
   '/educacao/polos': typeof AuthenticatedEducacaoPolosRoute
   '/ehr/$id': typeof AuthenticatedEhrIdRoute
@@ -3490,6 +3499,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboards/core': typeof AuthenticatedDashboardsCoreRoute
   '/_authenticated/dashboards/empresa': typeof AuthenticatedDashboardsEmpresaRoute
   '/_authenticated/dashboards/white-label': typeof AuthenticatedDashboardsWhiteLabelRoute
+  '/_authenticated/educacao/branding': typeof AuthenticatedEducacaoBrandingRoute
   '/_authenticated/educacao/dashboard': typeof AuthenticatedEducacaoDashboardRoute
   '/_authenticated/educacao/polos': typeof AuthenticatedEducacaoPolosRoute
   '/_authenticated/ehr/$id': typeof AuthenticatedEhrIdRoute
@@ -3872,6 +3882,7 @@ export interface FileRouteTypes {
     | '/dashboards/core'
     | '/dashboards/empresa'
     | '/dashboards/white-label'
+    | '/educacao/branding'
     | '/educacao/dashboard'
     | '/educacao/polos'
     | '/ehr/$id'
@@ -4241,6 +4252,7 @@ export interface FileRouteTypes {
     | '/dashboards/core'
     | '/dashboards/empresa'
     | '/dashboards/white-label'
+    | '/educacao/branding'
     | '/educacao/dashboard'
     | '/educacao/polos'
     | '/ehr/$id'
@@ -4623,6 +4635,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboards/core'
     | '/_authenticated/dashboards/empresa'
     | '/_authenticated/dashboards/white-label'
+    | '/_authenticated/educacao/branding'
     | '/_authenticated/educacao/dashboard'
     | '/_authenticated/educacao/polos'
     | '/_authenticated/ehr/$id'
@@ -6505,6 +6518,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEducacaoDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/educacao/branding': {
+      id: '/_authenticated/educacao/branding'
+      path: '/educacao/branding'
+      fullPath: '/educacao/branding'
+      preLoaderRoute: typeof AuthenticatedEducacaoBrandingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboards/white-label': {
       id: '/_authenticated/dashboards/white-label'
       path: '/dashboards/white-label'
@@ -8179,6 +8199,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardsCoreRoute: typeof AuthenticatedDashboardsCoreRoute
   AuthenticatedDashboardsEmpresaRoute: typeof AuthenticatedDashboardsEmpresaRoute
   AuthenticatedDashboardsWhiteLabelRoute: typeof AuthenticatedDashboardsWhiteLabelRoute
+  AuthenticatedEducacaoBrandingRoute: typeof AuthenticatedEducacaoBrandingRoute
   AuthenticatedEducacaoDashboardRoute: typeof AuthenticatedEducacaoDashboardRoute
   AuthenticatedEducacaoPolosRoute: typeof AuthenticatedEducacaoPolosRoute
   AuthenticatedEhrIdRoute: typeof AuthenticatedEhrIdRoute
@@ -8305,6 +8326,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardsEmpresaRoute: AuthenticatedDashboardsEmpresaRoute,
   AuthenticatedDashboardsWhiteLabelRoute:
     AuthenticatedDashboardsWhiteLabelRoute,
+  AuthenticatedEducacaoBrandingRoute: AuthenticatedEducacaoBrandingRoute,
   AuthenticatedEducacaoDashboardRoute: AuthenticatedEducacaoDashboardRoute,
   AuthenticatedEducacaoPolosRoute: AuthenticatedEducacaoPolosRoute,
   AuthenticatedEhrIdRoute: AuthenticatedEhrIdRoute,
