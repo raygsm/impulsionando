@@ -183,15 +183,31 @@ function BreweryPdvsPage() {
                   <TableCell className="text-right">{p.sellout90d.units}</TableCell>
                   <TableCell className="text-right">{brl(p.sellout90d.revenueCents)}</TableCell>
                   <TableCell className="text-right">
-                    <Select value={p.contract_status} onValueChange={(v: any) => statusMut.mutate({ pdvLinkId: p.id, contractStatus: v })}>
-                      <SelectTrigger className="w-[120px] h-8"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="pending">Pendente</SelectItem>
-                        <SelectItem value="active">Ativo</SelectItem>
-                        <SelectItem value="paused">Pausado</SelectItem>
-                        <SelectItem value="ended">Encerrado</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div className="flex items-center justify-end gap-1">
+                      {p.portal_token && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          title="Copiar link do parceiro"
+                          onClick={() => {
+                            const url = `${window.location.origin}/parceiro/${p.portal_token}`;
+                            navigator.clipboard.writeText(url);
+                            toast.success("Link do parceiro copiado!");
+                          }}
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </Button>
+                      )}
+                      <Select value={p.contract_status} onValueChange={(v: any) => statusMut.mutate({ pdvLinkId: p.id, contractStatus: v })}>
+                        <SelectTrigger className="w-[120px] h-8"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pending">Pendente</SelectItem>
+                          <SelectItem value="active">Ativo</SelectItem>
+                          <SelectItem value="paused">Pausado</SelectItem>
+                          <SelectItem value="ended">Encerrado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
