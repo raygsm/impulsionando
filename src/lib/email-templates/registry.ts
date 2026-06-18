@@ -17,6 +17,8 @@ import { template as contractSignedTemplate } from './contract-signed'
 import { template as demoFeiraWelcomeTemplate } from './demo-feira-welcome'
 import { template as restaurantOrderReadyTemplate } from './restaurant-order-ready'
 import { template as restaurantBillClosedTemplate } from './restaurant-bill-closed'
+import { template as restaurantPostvisitThanksTemplate } from './restaurant-postvisit-thanks'
+
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -50,4 +52,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'demo-feira-welcome': demoFeiraWelcomeTemplate,
   'restaurant-order-ready': restaurantOrderReadyTemplate,
   'restaurant-bill-closed': restaurantBillClosedTemplate,
+  'restaurant-postvisit-thanks': restaurantPostvisitThanksTemplate,
 }
+

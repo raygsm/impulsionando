@@ -12,7 +12,7 @@ const FROM_DOMAIN = 'www.impulsionando.com.br'
 const SITE_NAME = 'Impulsionando'
 
 export async function sendRestaurantEmail(args: {
-  templateName: 'restaurant-order-ready' | 'restaurant-bill-closed'
+  templateName: 'restaurant-order-ready' | 'restaurant-bill-closed' | 'restaurant-postvisit-thanks'
   to: string
   templateData: Record<string, unknown>
   idempotencyKey: string
