@@ -371,6 +371,7 @@ import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenti
 import { Route as AuthenticatedRestauranteSalaoNotificacoesRouteImport } from './routes/_authenticated/restaurante.salao.notificacoes'
 import { Route as AuthenticatedRestauranteSalaoLogsRouteImport } from './routes/_authenticated/restaurante.salao.logs'
 import { Route as AuthenticatedImobiliariaAprovacoesImprimirFilaRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes.imprimir-fila'
+import { Route as AuthenticatedEmpresaTalentosRedeRouteImport } from './routes/_authenticated/empresa.talentos.rede'
 import { Route as AuthenticatedEmpresaTalentosDashboardRouteImport } from './routes/_authenticated/empresa.talentos.dashboard'
 import { Route as AuthenticatedCoreModulosSlugRouteImport } from './routes/_authenticated/core.modulos.$slug'
 import { Route as AuthenticatedCoreMarketplacePedidosRouteImport } from './routes/_authenticated/core.marketplace.pedidos'
@@ -2384,6 +2385,12 @@ const AuthenticatedImobiliariaAprovacoesImprimirFilaRoute =
     path: '/imprimir-fila',
     getParentRoute: () => AuthenticatedImobiliariaAprovacoesRoute,
   } as any)
+const AuthenticatedEmpresaTalentosRedeRoute =
+  AuthenticatedEmpresaTalentosRedeRouteImport.update({
+    id: '/rede',
+    path: '/rede',
+    getParentRoute: () => AuthenticatedEmpresaTalentosRoute,
+  } as any)
 const AuthenticatedEmpresaTalentosDashboardRoute =
   AuthenticatedEmpresaTalentosDashboardRouteImport.update({
     id: '/dashboard',
@@ -2841,6 +2848,7 @@ export interface FileRoutesByFullPath {
   '/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/empresa/talentos/dashboard': typeof AuthenticatedEmpresaTalentosDashboardRoute
+  '/empresa/talentos/rede': typeof AuthenticatedEmpresaTalentosRedeRoute
   '/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
   '/restaurante/salao/logs': typeof AuthenticatedRestauranteSalaoLogsRoute
   '/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
@@ -3211,6 +3219,7 @@ export interface FileRoutesByTo {
   '/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/empresa/talentos/dashboard': typeof AuthenticatedEmpresaTalentosDashboardRoute
+  '/empresa/talentos/rede': typeof AuthenticatedEmpresaTalentosRedeRoute
   '/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
   '/restaurante/salao/logs': typeof AuthenticatedRestauranteSalaoLogsRoute
   '/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
@@ -3595,6 +3604,7 @@ export interface FileRoutesById {
   '/_authenticated/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/_authenticated/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
   '/_authenticated/empresa/talentos/dashboard': typeof AuthenticatedEmpresaTalentosDashboardRoute
+  '/_authenticated/empresa/talentos/rede': typeof AuthenticatedEmpresaTalentosRedeRoute
   '/_authenticated/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
   '/_authenticated/restaurante/salao/logs': typeof AuthenticatedRestauranteSalaoLogsRoute
   '/_authenticated/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
@@ -3978,6 +3988,7 @@ export interface FileRouteTypes {
     | '/core/marketplace/pedidos'
     | '/core/modulos/$slug'
     | '/empresa/talentos/dashboard'
+    | '/empresa/talentos/rede'
     | '/imobiliaria/aprovacoes/imprimir-fila'
     | '/restaurante/salao/logs'
     | '/restaurante/salao/notificacoes'
@@ -4348,6 +4359,7 @@ export interface FileRouteTypes {
     | '/core/marketplace/pedidos'
     | '/core/modulos/$slug'
     | '/empresa/talentos/dashboard'
+    | '/empresa/talentos/rede'
     | '/imobiliaria/aprovacoes/imprimir-fila'
     | '/restaurante/salao/logs'
     | '/restaurante/salao/notificacoes'
@@ -4731,6 +4743,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/marketplace/pedidos'
     | '/_authenticated/core/modulos/$slug'
     | '/_authenticated/empresa/talentos/dashboard'
+    | '/_authenticated/empresa/talentos/rede'
     | '/_authenticated/imobiliaria/aprovacoes/imprimir-fila'
     | '/_authenticated/restaurante/salao/logs'
     | '/_authenticated/restaurante/salao/notificacoes'
@@ -7449,6 +7462,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRouteImport
       parentRoute: typeof AuthenticatedImobiliariaAprovacoesRoute
     }
+    '/_authenticated/empresa/talentos/rede': {
+      id: '/_authenticated/empresa/talentos/rede'
+      path: '/rede'
+      fullPath: '/empresa/talentos/rede'
+      preLoaderRoute: typeof AuthenticatedEmpresaTalentosRedeRouteImport
+      parentRoute: typeof AuthenticatedEmpresaTalentosRoute
+    }
     '/_authenticated/empresa/talentos/dashboard': {
       id: '/_authenticated/empresa/talentos/dashboard'
       path: '/dashboard'
@@ -8074,12 +8094,15 @@ const AuthenticatedBarMarketplaceRouteWithChildren =
 
 interface AuthenticatedEmpresaTalentosRouteChildren {
   AuthenticatedEmpresaTalentosDashboardRoute: typeof AuthenticatedEmpresaTalentosDashboardRoute
+  AuthenticatedEmpresaTalentosRedeRoute: typeof AuthenticatedEmpresaTalentosRedeRoute
 }
 
 const AuthenticatedEmpresaTalentosRouteChildren: AuthenticatedEmpresaTalentosRouteChildren =
   {
     AuthenticatedEmpresaTalentosDashboardRoute:
       AuthenticatedEmpresaTalentosDashboardRoute,
+    AuthenticatedEmpresaTalentosRedeRoute:
+      AuthenticatedEmpresaTalentosRedeRoute,
   }
 
 const AuthenticatedEmpresaTalentosRouteWithChildren =
