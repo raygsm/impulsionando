@@ -167,9 +167,9 @@ function AuthPage() {
           </div>
         </div>
         <div className="relative z-10 max-w-md space-y-6">
-          <h1 className="text-4xl font-bold leading-tight">Uma plataforma. Todos os nichos. Total controle.</h1>
+          <h1 className="text-4xl font-bold leading-tight">{copy.headline}</h1>
           <p className="text-white/80 text-base leading-relaxed">
-            SaaS multiempresa, modular e parametrizável para clínicas, bares, cervejarias, serviços e varejo.
+            {copy.sub}
           </p>
           <div className="grid gap-3 pt-2">
             {[
