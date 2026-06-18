@@ -94,6 +94,7 @@ import { Route as NichosSlugRouteImport } from './routes/nichos.$slug'
 import { Route as ModulosSlugRouteImport } from './routes/modulos.$slug'
 import { Route as MesaTokenRouteImport } from './routes/mesa.$token'
 import { Route as ImoveisSlugRouteImport } from './routes/imoveis.$slug'
+import { Route as EmpresaLoginRouteImport } from './routes/empresa.login'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as DemoWhiteLabelRouteImport } from './routes/demo.white-label'
 import { Route as DemoWhatsappRouteImport } from './routes/demo.whatsapp'
@@ -773,6 +774,11 @@ const MesaTokenRoute = MesaTokenRouteImport.update({
 const ImoveisSlugRoute = ImoveisSlugRouteImport.update({
   id: '/imoveis/$slug',
   path: '/imoveis/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmpresaLoginRoute = EmpresaLoginRouteImport.update({
+  id: '/empresa/login',
+  path: '/empresa/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
@@ -2275,6 +2281,7 @@ export interface FileRoutesByFullPath {
   '/demo/whatsapp': typeof DemoWhatsappRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/empresa/login': typeof EmpresaLoginRoute
   '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
   '/mesa/$token': typeof MesaTokenRoute
   '/modulos/$slug': typeof ModulosSlugRoute
@@ -2600,6 +2607,7 @@ export interface FileRoutesByTo {
   '/demo/whatsapp': typeof DemoWhatsappRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/empresa/login': typeof EmpresaLoginRoute
   '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
   '/mesa/$token': typeof MesaTokenRoute
   '/modulos/$slug': typeof ModulosSlugRoute
@@ -2939,6 +2947,7 @@ export interface FileRoutesById {
   '/demo/whatsapp': typeof DemoWhatsappRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/empresa/login': typeof EmpresaLoginRoute
   '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
   '/mesa/$token': typeof MesaTokenRoute
   '/modulos/$slug': typeof ModulosSlugRoute
@@ -3277,6 +3286,7 @@ export interface FileRouteTypes {
     | '/demo/whatsapp'
     | '/demo/white-label'
     | '/email/unsubscribe'
+    | '/empresa/login'
     | '/imoveis/$slug'
     | '/mesa/$token'
     | '/modulos/$slug'
@@ -3602,6 +3612,7 @@ export interface FileRouteTypes {
     | '/demo/whatsapp'
     | '/demo/white-label'
     | '/email/unsubscribe'
+    | '/empresa/login'
     | '/imoveis/$slug'
     | '/mesa/$token'
     | '/modulos/$slug'
@@ -3940,6 +3951,7 @@ export interface FileRouteTypes {
     | '/demo/whatsapp'
     | '/demo/white-label'
     | '/email/unsubscribe'
+    | '/empresa/login'
     | '/imoveis/$slug'
     | '/mesa/$token'
     | '/modulos/$slug'
@@ -4249,6 +4261,7 @@ export interface RootRouteChildren {
   DemoWhatsappRoute: typeof DemoWhatsappRoute
   DemoWhiteLabelRoute: typeof DemoWhiteLabelRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  EmpresaLoginRoute: typeof EmpresaLoginRoute
   ImoveisSlugRoute: typeof ImoveisSlugRouteWithChildren
   MesaTokenRoute: typeof MesaTokenRoute
   NichosSlugRoute: typeof NichosSlugRoute
@@ -4924,6 +4937,13 @@ declare module '@tanstack/react-router' {
       path: '/imoveis/$slug'
       fullPath: '/imoveis/$slug'
       preLoaderRoute: typeof ImoveisSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/empresa/login': {
+      id: '/empresa/login'
+      path: '/empresa/login'
+      fullPath: '/empresa/login'
+      preLoaderRoute: typeof EmpresaLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/email/unsubscribe': {
@@ -7481,6 +7501,7 @@ const rootRouteChildren: RootRouteChildren = {
   DemoWhatsappRoute: DemoWhatsappRoute,
   DemoWhiteLabelRoute: DemoWhiteLabelRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  EmpresaLoginRoute: EmpresaLoginRoute,
   ImoveisSlugRoute: ImoveisSlugRouteWithChildren,
   MesaTokenRoute: MesaTokenRoute,
   NichosSlugRoute: NichosSlugRoute,
