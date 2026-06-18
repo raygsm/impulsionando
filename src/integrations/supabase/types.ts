@@ -2511,6 +2511,78 @@ export type Database = {
           },
         ]
       }
+      brewery_blasts: {
+        Row: {
+          audience_count: number
+          audience_filter: Json
+          body: string
+          brand_id: string
+          campaign_id: string | null
+          channel: string
+          created_at: string
+          created_by: string | null
+          enqueued_count: number
+          id: string
+          last_error: string | null
+          sent_at: string | null
+          status: string
+          subject: string | null
+          updated_at: string
+          voucher_code: string | null
+        }
+        Insert: {
+          audience_count?: number
+          audience_filter?: Json
+          body: string
+          brand_id: string
+          campaign_id?: string | null
+          channel: string
+          created_at?: string
+          created_by?: string | null
+          enqueued_count?: number
+          id?: string
+          last_error?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          updated_at?: string
+          voucher_code?: string | null
+        }
+        Update: {
+          audience_count?: number
+          audience_filter?: Json
+          body?: string
+          brand_id?: string
+          campaign_id?: string | null
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          enqueued_count?: number
+          id?: string
+          last_error?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          updated_at?: string
+          voucher_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brewery_blasts_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brewery_brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brewery_blasts_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "brewery_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       brewery_brands: {
         Row: {
           bio: string | null
@@ -2832,6 +2904,8 @@ export type Database = {
         Row: {
           avg_ticket_cents: number | null
           brand_id: string
+          campaign_id: string | null
+          coupon_redemptions: number
           created_at: string
           gross_revenue_cents: number
           id: string
@@ -2843,10 +2917,13 @@ export type Database = {
           source: string
           units: number
           updated_at: string
+          voucher_code: string | null
         }
         Insert: {
           avg_ticket_cents?: number | null
           brand_id: string
+          campaign_id?: string | null
+          coupon_redemptions?: number
           created_at?: string
           gross_revenue_cents?: number
           id?: string
@@ -2858,10 +2935,13 @@ export type Database = {
           source?: string
           units?: number
           updated_at?: string
+          voucher_code?: string | null
         }
         Update: {
           avg_ticket_cents?: number | null
           brand_id?: string
+          campaign_id?: string | null
+          coupon_redemptions?: number
           created_at?: string
           gross_revenue_cents?: number
           id?: string
@@ -2873,6 +2953,7 @@ export type Database = {
           source?: string
           units?: number
           updated_at?: string
+          voucher_code?: string | null
         }
         Relationships: [
           {
@@ -2880,6 +2961,13 @@ export type Database = {
             columns: ["brand_id"]
             isOneToOne: false
             referencedRelation: "brewery_brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brewery_sellouts_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "brewery_campaigns"
             referencedColumns: ["id"]
           },
           {
