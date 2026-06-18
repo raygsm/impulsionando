@@ -330,7 +330,9 @@ export const listLiveDemoActivity = createServerFn({ method: "POST" })
 const DashboardInput = z.object({
   scenarioSlug: z.string().trim().min(2).max(60),
   sinceHours: z.number().int().min(1).max(24 * 30).default(24 * 7),
+  qrKind: z.enum(["mesa", "delivery", "evento", "pesquisa", "clube"]).optional(),
 });
+
 
 type DemoActionRow = {
   id: string;
