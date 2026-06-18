@@ -60,6 +60,8 @@ export const template = {
     `[Interno] Item pronto${d.tableNumber ? ` — mesa ${d.tableNumber}` : ''}`,
   displayName: 'Item pronto (sinal interno de salão)',
   previewData: { staffName: 'Bianca', itemDescription: '1× Picanha na chapa', tableNumber: 7, companyName: 'Bar do João' },
+  internal: true,
+  allowedChannels: ['internal', 'staff'] as const as Array<'internal' | 'staff'>,
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
