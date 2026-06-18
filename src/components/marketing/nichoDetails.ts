@@ -8,6 +8,12 @@ import {
   Building2,
   Dumbbell,
   Home,
+  Brain,
+  Scale,
+  Calculator,
+  CalendarHeart,
+  Car,
+  GraduationCap,
 } from "lucide-react";
 
 import type { ComponentType } from "react";
@@ -720,7 +726,316 @@ export const NICHO_DETAILS: NichoDetail[] = [
     },
     ctaSecondary: { label: "Montar meu orçamento imobiliário", href: "/orcamento" },
   },
-];
+  // ============================================================
+  // NICHOS ADICIONAIS
+  // ============================================================
+  {
+    slug: "saude",
+    title: "Toda a operação da sua saúde — clínicas, consultórios, day hospital e ambulatórios — em um único sistema.",
+    subtitle:
+      "Agenda, prontuário, telemedicina, faturamento, comunicação com o paciente e BI por especialidade, médico e canal.",
+    shortLabel: "Saúde",
+    cardDesc:
+      "Agenda, prontuário, faturamento, WhatsApp 24h, telemedicina e BI por especialidade.",
+    icon: Stethoscope,
+    pains: [
+      "Agenda fragmentada entre médicos e secretárias.",
+      "Prontuário e financeiro em sistemas separados.",
+      "Sem visão consolidada de receita por médico/serviço.",
+    ],
+    silentLosses: [
+      "Horários ociosos não reativados.",
+      "Paciente sem retorno programado.",
+      "Glosa de convênio sem rastreio.",
+    ],
+    solution: [
+      "Agenda multi-profissional",
+      "Prontuário eletrônico",
+      "Telemedicina",
+      "Faturamento TISS",
+      "CRM e reativação",
+      "Portal do paciente",
+      "BI por especialidade",
+    ],
+    journey: [
+      { step: "Captação", detail: "WhatsApp/landing/anúncio direciona ao agendamento." },
+      { step: "Triagem", detail: "Bot identifica especialidade e convênio." },
+      { step: "Agenda", detail: "Médico, serviço, horário e pagamento/coparticipação." },
+      { step: "Atendimento", detail: "Prontuário + prescrição + exames." },
+      { step: "Pós-consulta", detail: "Pesquisa, retorno programado e fidelização." },
+    ],
+    modules: ["agenda", "prontuario", "crm", "whatsapp", "pagamentos", "fiscal", "bi"],
+    benefits: ["Menos no-show", "Mais retorno", "Glosa controlada", "Decisão por dados"],
+    ctaPrimary: {
+      label: "Quero organizar minha operação de saúde",
+      whatsappMsg: "Olá, quero conhecer a Impulsionando para a minha operação de saúde.",
+    },
+    ctaSecondary: { label: "Ver demonstração", href: "/demo/cliente-final" },
+    demoRoute: "/demo/cliente-final",
+  },
 
-export const findNicho = (slug: string) => NICHO_DETAILS.find((n) => n.slug === slug);
+  {
+    slug: "psicologia",
+    title: "Psicologia, terapias e bem-estar com agenda, sigilo e relacionamento sob controle.",
+    subtitle:
+      "Sessões presenciais e online, anamnese, evolução, pagamento recorrente, lembretes e cancelamento com regra clara.",
+    shortLabel: "Psicologia e Terapias",
+    cardDesc:
+      "Agenda online, sessões online, anamnese/evolução, pacotes, recorrência e LGPD aplicada.",
+    icon: Brain,
+    pains: [
+      "Cobrança manual de pacotes e sessões avulsas.",
+      "Falta de protocolo para faltas e remarcações.",
+      "Prontuário em planilhas/papéis.",
+    ],
+    silentLosses: ["Paciente que para o tratamento sem follow-up.", "Sessões não cobradas."],
+    solution: [
+      "Agenda online",
+      "Sessões online integradas",
+      "Pacotes e recorrência",
+      "Anamnese e evolução",
+      "Lembretes",
+      "Regras de cancelamento",
+      "Sigilo e LGPD",
+    ],
+    journey: [
+      { step: "Lead", detail: "Site/Instagram/WhatsApp." },
+      { step: "Primeira sessão", detail: "Agenda + pagamento + termo." },
+      { step: "Tratamento", detail: "Recorrência + evolução + lembretes." },
+      { step: "Alta/retorno", detail: "Pesquisa, indicação, retorno programado." },
+    ],
+    modules: ["agenda", "prontuario", "crm", "whatsapp", "pagamentos", "permissoes"],
+    benefits: ["Receita previsível", "Aderência maior", "Compliance LGPD"],
+    ctaPrimary: {
+      label: "Quero a clínica de psicologia organizada",
+      whatsappMsg: "Olá, sou psicólogo(a)/terapeuta e quero conhecer a Impulsionando.",
+    },
+    ctaSecondary: { label: "Ver demonstração", href: "/demo/cliente-final" },
+  },
+
+  {
+    slug: "juridico",
+    title: "Escritórios jurídicos com clientes, processos, prazos, honorários e produtividade em um só lugar.",
+    subtitle:
+      "Da captação à execução de honorários, com agenda, documentos, contratos eletrônicos e dashboards por área e advogado.",
+    shortLabel: "Jurídico",
+    cardDesc:
+      "Clientes, processos, prazos, documentos, contratos digitais, honorários e BI por área.",
+    icon: Scale,
+    pains: [
+      "Prazos perdidos por controle em planilha.",
+      "Honorários atrasados sem cobrança automática.",
+      "Documentos espalhados em e-mails.",
+    ],
+    silentLosses: ["Cliente sem follow-up.", "Êxito não cobrado."],
+    solution: [
+      "Cadastro de clientes e processos",
+      "Agenda e prazos",
+      "Documentos e contratos digitais",
+      "Honorários e cobrança",
+      "Portal do cliente",
+      "BI por área e advogado",
+    ],
+    journey: [
+      { step: "Captação", detail: "Landing/WhatsApp + qualificação." },
+      { step: "Contratação", detail: "Contrato digital + honorários." },
+      { step: "Execução", detail: "Processos + prazos + comunicação." },
+      { step: "Êxito", detail: "Cobrança, indicação, retenção." },
+    ],
+    modules: ["crm", "agenda", "documentos", "whatsapp", "pagamentos", "bi", "permissoes"],
+    benefits: ["Prazos sob controle", "Honorários em dia", "Cliente bem informado"],
+    ctaPrimary: {
+      label: "Quero o escritório organizado",
+      whatsappMsg: "Olá, sou advogado(a) e quero conhecer a Impulsionando para o meu escritório.",
+    },
+    ctaSecondary: { label: "Ver demonstração", href: "/demo/cliente-final" },
+  },
+
+  {
+    slug: "contabilidade",
+    title: "Contabilidade com cliente organizado, prazos cumpridos e financeiro sob controle.",
+    subtitle:
+      "Onboarding, calendário fiscal, obrigações, documentos, IRPF, departamentos e cobrança recorrente.",
+    shortLabel: "Contabilidade",
+    cardDesc:
+      "Onboarding, calendário fiscal, obrigações, documentos, IRPF, departamentos e cobrança.",
+    icon: Calculator,
+    pains: [
+      "Cliente envia documento por WhatsApp e some.",
+      "Obrigações sem checklist por departamento.",
+      "Cobrança manual de mensalidade.",
+    ],
+    silentLosses: ["Multa por atraso.", "Cliente insatisfeito sem pesquisa."],
+    solution: [
+      "Onboarding do cliente",
+      "Calendário fiscal por porte",
+      "Tarefas por departamento",
+      "Documentos centralizados",
+      "Jornada IRPF",
+      "Cobrança recorrente",
+    ],
+    journey: [
+      { step: "Onboarding", detail: "Contrato + acesso ao portal." },
+      { step: "Rotina mensal", detail: "Obrigações + documentos + comunicação." },
+      { step: "IRPF/anuais", detail: "Jornada guiada por cliente." },
+      { step: "Retenção", detail: "Pesquisa + reajuste + recomendações." },
+    ],
+    modules: ["crm", "documentos", "agenda", "whatsapp", "pagamentos", "bi", "permissoes"],
+    benefits: ["Zero multa por atraso", "Cliente engajado", "Receita recorrente"],
+    ctaPrimary: {
+      label: "Quero a contabilidade organizada",
+      whatsappMsg: "Olá, sou de uma contabilidade e quero conhecer a Impulsionando.",
+    },
+    ctaSecondary: { label: "Ver demonstração", href: "/demo/cliente-final" },
+  },
+
+  {
+    slug: "eventos",
+    title: "Eventos, casas de show e produtoras com bilheteria, check-in e relacionamento integrados.",
+    subtitle:
+      "Venda de ingressos, lotes, cortesias, check-in com QR, comunicação pré e pós-evento e BI por evento, canal e ticket.",
+    shortLabel: "Eventos e Casas de Show",
+    cardDesc:
+      "Bilheteria, lotes, check-in QR, comunicação, transferência de ingresso e BI por evento.",
+    icon: CalendarHeart,
+    pains: [
+      "Bilheteria desconectada do CRM.",
+      "Sem dado do público após o evento.",
+      "Cortesias sem rastreio.",
+    ],
+    silentLosses: ["Público que não volta.", "Patrocinador sem relatório."],
+    solution: [
+      "Bilheteria multi-lote",
+      "Cortesias e cupons",
+      "Check-in com QR",
+      "Transferência de ingresso",
+      "Comunicação pré/pós",
+      "BI por evento",
+    ],
+    journey: [
+      { step: "Pré-venda", detail: "Lotes, cupons, afiliados." },
+      { step: "Venda", detail: "Pagamento, ingresso, e-mail/WhatsApp." },
+      { step: "Evento", detail: "QR check-in, antifraude, cortesia." },
+      { step: "Pós-evento", detail: "Pesquisa, próximo evento, fidelização." },
+    ],
+    modules: ["eventos", "pagamentos", "whatsapp", "crm", "bi", "afiliados"],
+    benefits: ["Mais conversão de público", "Antifraude no check-in", "Dados para patrocinador"],
+    ctaPrimary: {
+      label: "Quero o sistema de eventos",
+      whatsappMsg: "Olá, produzo eventos e quero conhecer a Impulsionando.",
+    },
+    ctaSecondary: { label: "Ver demonstração", href: "/demo" },
+  },
+
+  {
+    slug: "veiculos",
+    title: "Concessionárias, lojas de veículos e oficinas com leads, estoque, OS e pós-venda.",
+    subtitle:
+      "Vitrine integrada, CRM de leads, propostas, financiamento, ordem de serviço e relacionamento pós-venda.",
+    shortLabel: "Veículos",
+    cardDesc: "Vitrine, CRM, propostas, financiamento, OS e pós-venda em um só sistema.",
+    icon: Car,
+    pains: [
+      "Lead chega por vários canais e some.",
+      "Proposta e financiamento em planilha.",
+      "Pós-venda inexistente.",
+    ],
+    silentLosses: ["Test-drive sem follow-up.", "Cliente sem retorno para revisão."],
+    solution: [
+      "Vitrine de veículos",
+      "CRM multi-canal",
+      "Propostas e financiamento",
+      "Ordem de serviço",
+      "Pós-venda automatizado",
+      "BI por vendedor",
+    ],
+    journey: [
+      { step: "Lead", detail: "OLX, Webmotors, redes sociais, site." },
+      { step: "Atendimento", detail: "WhatsApp, agendamento de test-drive." },
+      { step: "Proposta", detail: "Avaliação, financiamento, fechamento." },
+      { step: "Pós-venda", detail: "Revisão, indicação, recompra." },
+    ],
+    modules: ["crm", "whatsapp", "agenda", "pagamentos", "bi", "documentos"],
+    benefits: ["Mais conversão", "Pós-venda recorrente", "Estoque girando"],
+    ctaPrimary: {
+      label: "Quero a loja de veículos organizada",
+      whatsappMsg: "Olá, atuo com veículos e quero conhecer a Impulsionando.",
+    },
+    ctaSecondary: { label: "Ver demonstração", href: "/demo" },
+  },
+
+  // ============================================================
+  // EDUCAÇÃO — instituições, cursos, polos e redes educacionais
+  // ============================================================
+  {
+    slug: "educacao",
+    title: "Sistema para instituições de ensino, cursos, polos e redes educacionais.",
+    subtitle:
+      "Gestão de leads, matrículas, alunos, polos, comunicação, financeiro, campanhas e dashboards para operações educacionais de todos os tamanhos.",
+    shortLabel: "Educação",
+    cardDesc:
+      "CRM educacional, matrículas, gestão de polos, portal do aluno, financeiro e BI consolidado por rede.",
+    icon: GraduationCap,
+    pains: [
+      "Leads de campanha não chegam ao polo certo.",
+      "Matrícula em planilha + papel + WhatsApp.",
+      "Sem visão consolidada da rede de polos.",
+      "Evasão sem alerta nem ação.",
+      "Inadimplência crescente sem régua de cobrança.",
+      "Comunicação com o aluno fragmentada por professor/curso.",
+    ],
+    silentLosses: [
+      "Lead quente sem resposta em 24h.",
+      "Aluno desmotivado sem retenção ativa.",
+      "Polo com meta batida sem reconhecimento.",
+      "Polo abaixo da meta sem diagnóstico.",
+    ],
+    solution: [
+      "CRM Educacional multi-canal",
+      "Distribuição automática de leads por polo/curso",
+      "Matrículas com contrato digital e pagamento",
+      "Cadastro completo de polos (cidade, responsável, metas, capacidade)",
+      "Hierarquia: Mantenedora › Polo › Coordenador › Consultor › Aluno",
+      "Portal do aluno (notas, comunicados, financeiro)",
+      "Campanhas regionais por polo",
+      "Régua de retenção e cobrança",
+      "BI consolidado da rede com ranking de polos",
+      "White Label para redes com dezenas/centenas de polos",
+    ],
+    journey: [
+      { step: "Lead entra por campanha", detail: "Anúncio, busca, indicação ou parceria." },
+      { step: "Sistema identifica curso e polo", detail: "Distribui automaticamente para o consultor responsável." },
+      { step: "Consultor faz contato", detail: "WhatsApp/ligação com playbook do curso." },
+      { step: "Agenda atendimento", detail: "Visita ao polo ou call online." },
+      { step: "Proposta e matrícula", detail: "Contrato digital + boleto/cartão/PIX." },
+      { step: "Portal do aluno", detail: "Boas-vindas, materiais, financeiro, comunicados." },
+      { step: "Retenção e renovação", detail: "Alerta de evasão + régua de cobrança + renovação." },
+    ],
+    extraBlock: {
+      title: "Pensado para redes com muitos polos",
+      lines: [
+        "Opera tranquilamente com 50, 100, 300 ou 600+ polos.",
+        "Mantenedora vê tudo. Polo vê só o que é dele. Consultor vê só sua carteira.",
+        "Campanhas regionais por polo, com atribuição correta de lead.",
+        "Ranking de polos, ranking de consultores e comparativo mensal.",
+        "Pronto para White Label de grupos educacionais e franquias.",
+      ],
+    },
+    modules: ["crm", "agenda", "documentos", "whatsapp", "pagamentos", "bi", "afiliados", "permissoes"],
+    benefits: [
+      "Mais matrículas por polo",
+      "Menos evasão",
+      "Inadimplência sob controle",
+      "Visão consolidada da rede",
+      "Decisão por dado, não por achismo",
+      "Onboarding rápido de novos polos",
+    ],
+    ctaPrimary: {
+      label: "Quero o sistema para minha operação educacional",
+      whatsappMsg:
+        "Olá, atuo com educação (curso/escola/faculdade/rede com polos) e quero conhecer a Impulsionando.",
+    },
+    ctaSecondary: { label: "Falar sobre rede com polos / White Label Educação", href: "/orcamento" },
+  },
+];
 
