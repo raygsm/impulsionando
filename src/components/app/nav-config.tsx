@@ -25,6 +25,8 @@ export interface NavItem {
   badge?: "pendingPix";
   /** Audiências para as quais este item é relevante. Se ausente = todas. */
   audiences?: NavAudience[];
+  /** Tiers de plano que liberam este item. Se ausente = todos. Staff sempre vê. */
+  requiresPlanTier?: Array<"essencial" | "profissional" | "completo">;
 }
 
 
