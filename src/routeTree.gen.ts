@@ -35,6 +35,7 @@ import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as ContaSuspensaRouteImport } from './routes/conta-suspensa'
 import { Route as ConsumidorRouteImport } from './routes/consumidor'
 import { Route as ClubeRouteImport } from './routes/clube'
+import { Route as CatalogoRouteImport } from './routes/catalogo'
 import { Route as CanalOficialRouteImport } from './routes/canal-oficial'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -522,6 +523,11 @@ const ConsumidorRoute = ConsumidorRouteImport.update({
 const ClubeRoute = ClubeRouteImport.update({
   id: '/clube',
   path: '/clube',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatalogoRoute = CatalogoRouteImport.update({
+  id: '/catalogo',
+  path: '/catalogo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CanalOficialRoute = CanalOficialRouteImport.update({
@@ -2524,6 +2530,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/canal-oficial': typeof CanalOficialRoute
+  '/catalogo': typeof CatalogoRoute
   '/clube': typeof AuthenticatedClubeRouteWithChildren
   '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
@@ -2908,6 +2915,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/canal-oficial': typeof CanalOficialRoute
+  '/catalogo': typeof CatalogoRoute
   '/clube': typeof AuthenticatedClubeRouteWithChildren
   '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
@@ -3283,6 +3291,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/canal-oficial': typeof CanalOficialRoute
+  '/catalogo': typeof CatalogoRoute
   '/clube': typeof ClubeRouteWithChildren
   '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
@@ -3670,6 +3679,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/canal-oficial'
+    | '/catalogo'
     | '/clube'
     | '/consumidor'
     | '/conta-suspensa'
@@ -4054,6 +4064,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/canal-oficial'
+    | '/catalogo'
     | '/clube'
     | '/consumidor'
     | '/conta-suspensa'
@@ -4428,6 +4439,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/canal-oficial'
+    | '/catalogo'
     | '/clube'
     | '/consumidor'
     | '/conta-suspensa'
@@ -4815,6 +4827,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   CanalOficialRoute: typeof CanalOficialRoute
+  CatalogoRoute: typeof CatalogoRoute
   ClubeRoute: typeof ClubeRouteWithChildren
   ConsumidorRoute: typeof ConsumidorRoute
   ContaSuspensaRoute: typeof ContaSuspensaRoute
@@ -5134,6 +5147,13 @@ declare module '@tanstack/react-router' {
       path: '/clube'
       fullPath: '/clube'
       preLoaderRoute: typeof ClubeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/catalogo': {
+      id: '/catalogo'
+      path: '/catalogo'
+      fullPath: '/catalogo'
+      preLoaderRoute: typeof CatalogoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/canal-oficial': {
@@ -8577,6 +8597,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   CanalOficialRoute: CanalOficialRoute,
+  CatalogoRoute: CatalogoRoute,
   ClubeRoute: ClubeRouteWithChildren,
   ConsumidorRoute: ConsumidorRoute,
   ContaSuspensaRoute: ContaSuspensaRoute,
