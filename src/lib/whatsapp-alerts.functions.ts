@@ -25,6 +25,10 @@ export interface WhatsAppAlertInput {
   origin?: string;
   ctaHash?: string;
   path?: string;
+  /** Título já renderizado a partir do template do admin. */
+  title?: string;
+  /** Corpo já renderizado a partir do template do admin. */
+  body?: string;
 }
 
 function validate(input: unknown): WhatsAppAlertInput {
@@ -34,15 +38,17 @@ function validate(input: unknown): WhatsAppAlertInput {
 }
 
 function buildMessage(d: WhatsAppAlertInput) {
+  if (d.title && d.body) return { title: d.title, body: d.body };
   const reasons: string[] = [];
   if (d.ctrBelow) reasons.push(`CTR ${d.ctr.toFixed(1)}% < limite ${d.minCtr}%`);
   if (d.sendBelow) reasons.push(`Envio ${d.sendRate.toFixed(1)}% < limite ${d.minSendRate}%`);
-  const title = `⚠️ WhatsApp Oficial — performance abaixo do limite`;
+  const title = d.title ?? `⚠️ WhatsApp Oficial — performance abaixo do limite`;
   const body =
+    d.body ??
     `${reasons.join(" | ")}\n` +
-    `Janela: ${d.windowHours}h · Impr ${d.impressions} · Cliques ${d.clicks} · Envios ${d.sends}` +
-    (d.ctaHash ? `\nCTA hash: ${d.ctaHash}` : "") +
-    (d.path ? `\nRota: ${d.path}` : "");
+      `Janela: ${d.windowHours}h · Impr ${d.impressions} · Cliques ${d.clicks} · Envios ${d.sends}` +
+      (d.ctaHash ? `\nCTA hash: ${d.ctaHash}` : "") +
+      (d.path ? `\nRota: ${d.path}` : "");
   return { title, body };
 }
 
