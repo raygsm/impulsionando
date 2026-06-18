@@ -58,6 +58,34 @@ export const TOP_ITEMS: NavItem[] = [
 
 export const NAV_GROUPS: NavGroup[] = [
   {
+    label: "Minha Área",
+    audiences: ["consumidor"],
+    defaultOpen: true,
+    items: [
+      { to: "/dashboards/consumidor", label: "Início", icon: Home, audiences: ["consumidor"] },
+      { to: "/clube", label: "Clube — Benefícios", icon: Sparkles, audiences: ["consumidor"] },
+      { to: "/clube/notificacoes", label: "Notificações do Clube", icon: Inbox, audiences: ["consumidor"] },
+      { to: "/minha-assinatura", label: "Minha Assinatura", icon: CreditCard, audiences: ["consumidor"] },
+    ],
+  },
+  {
+    label: "Descobrir",
+    audiences: ["consumidor"],
+    defaultOpen: true,
+    items: [
+      { to: "/vitrine", label: "Restaurantes & Parceiros", icon: SearchIcon, audiences: ["consumidor"] },
+      { to: "/saiba-mais", label: "Conheça os planos", icon: BookOpen, audiences: ["consumidor"] },
+    ],
+  },
+  {
+    label: "Configurações",
+    audiences: ["consumidor"],
+    items: [
+      { to: "/privacy", label: "Privacidade & Notificações", icon: ShieldCheck, audiences: ["consumidor"] },
+    ],
+  },
+
+  {
     label: "Captar",
     audiences: ["core", "white-label", "empresa"],
     defaultOpen: true,
