@@ -14,7 +14,8 @@ import { useServerFn } from '@tanstack/react-start'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Bell, Mail, RefreshCw, ShieldCheck } from 'lucide-react'
+import { Bell, Mail, RefreshCw, ShieldCheck, ScrollText } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 import { getInternalSalaoNotifications } from '@/lib/restaurant-salao-notifications.functions'
 
 export const Route = createFileRoute('/_authenticated/restaurante/salao/notificacoes')({
