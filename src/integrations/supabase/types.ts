@@ -9651,6 +9651,51 @@ export type Database = {
           },
         ]
       }
+      mp_plans: {
+        Row: {
+          active: boolean
+          created_at: string
+          currency: string
+          description: string | null
+          display_order: number
+          features: Json
+          id: string
+          interval: string
+          name: string
+          price_cents: number
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          currency?: string
+          description?: string | null
+          display_order?: number
+          features?: Json
+          id?: string
+          interval?: string
+          name: string
+          price_cents?: number
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          currency?: string
+          description?: string | null
+          display_order?: number
+          features?: Json
+          id?: string
+          interval?: string
+          name?: string
+          price_cents?: number
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       mp_reminder_settings: {
         Row: {
           active: boolean
@@ -9674,6 +9719,53 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      mp_subscriptions: {
+        Row: {
+          canceled_at: string | null
+          created_at: string
+          id: string
+          mp_preapproval_id: string | null
+          next_billing_at: string | null
+          plan_id: string | null
+          raw_response: Json | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          canceled_at?: string | null
+          created_at?: string
+          id?: string
+          mp_preapproval_id?: string | null
+          next_billing_at?: string | null
+          plan_id?: string | null
+          raw_response?: Json | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          canceled_at?: string | null
+          created_at?: string
+          id?: string
+          mp_preapproval_id?: string | null
+          next_billing_at?: string | null
+          plan_id?: string | null
+          raw_response?: Json | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mp_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "mp_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mp_suppliers: {
         Row: {
@@ -9782,6 +9874,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      mp_webhook_log: {
+        Row: {
+          error: string | null
+          id: string
+          payload: Json | null
+          processed: boolean
+          received_at: string
+          resource_id: string | null
+          topic: string | null
+        }
+        Insert: {
+          error?: string | null
+          id?: string
+          payload?: Json | null
+          processed?: boolean
+          received_at?: string
+          resource_id?: string | null
+          topic?: string | null
+        }
+        Update: {
+          error?: string | null
+          id?: string
+          payload?: Json | null
+          processed?: boolean
+          received_at?: string
+          resource_id?: string | null
+          topic?: string | null
+        }
+        Relationships: []
       }
       n8n_workflow_runs: {
         Row: {
@@ -10113,6 +10235,71 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          customer_id: string | null
+          due_date: string | null
+          id: string
+          paid_at: string | null
+          payment_id: string | null
+          payment_method: string | null
+          plan_id: string | null
+          raw_response: Json | null
+          status: string
+          subscription_id: string | null
+          updated_at: string
+          user_id: string | null
+          webhook_received_at: string | null
+        }
+        Insert: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          customer_id?: string | null
+          due_date?: string | null
+          id?: string
+          paid_at?: string | null
+          payment_id?: string | null
+          payment_method?: string | null
+          plan_id?: string | null
+          raw_response?: Json | null
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+          webhook_received_at?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          customer_id?: string | null
+          due_date?: string | null
+          id?: string
+          paid_at?: string | null
+          payment_id?: string | null
+          payment_method?: string | null
+          plan_id?: string | null
+          raw_response?: Json | null
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+          webhook_received_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "mp_plans"
             referencedColumns: ["id"]
           },
         ]

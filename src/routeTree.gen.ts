@@ -43,6 +43,7 @@ import { Route as PacienteIndexRouteImport } from './routes/paciente.index'
 import { Route as NichosIndexRouteImport } from './routes/nichos.index'
 import { Route as ModulosIndexRouteImport } from './routes/modulos.index'
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
+import { Route as CheckoutIndexRouteImport } from './routes/checkout.index'
 import { Route as WhiteLabelLoginRouteImport } from './routes/white-label.login'
 import { Route as VitrineSlugRouteImport } from './routes/vitrine.$slug'
 import { Route as TrialCadastroRouteImport } from './routes/trial_.cadastro'
@@ -120,6 +121,7 @@ import { Route as ComoFuncionaFitnessRouteImport } from './routes/como-funciona.
 import { Route as ClubeLoginRouteImport } from './routes/clube.login'
 import { Route as ClubeCadastroRouteImport } from './routes/clube.cadastro'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
+import { Route as CheckoutSlugRouteImport } from './routes/checkout.$slug'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
 import { Route as AuthenticatedUnitsRouteImport } from './routes/_authenticated/units'
@@ -171,6 +173,7 @@ import { Route as PortalContabilidadeTokenRouteImport } from './routes/portal.co
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ImoveisSlugPropertyIdRouteImport } from './routes/imoveis.$slug.$propertyId'
 import { Route as DemoNichoSlugRouteImport } from './routes/demo.nicho.$slug'
+import { Route as ApiMercadopagoWebhookRouteImport } from './routes/api/mercadopago/webhook'
 import { Route as AuthenticatedWhiteLabelCockpitRouteImport } from './routes/_authenticated/white-label.cockpit'
 import { Route as AuthenticatedUsersCorporateRouteImport } from './routes/_authenticated/users.corporate'
 import { Route as AuthenticatedTorreRestaurantesDemoRouteImport } from './routes/_authenticated/torre.restaurantes-demo'
@@ -367,6 +370,7 @@ import { Route as AuthenticatedCoreIntegracoesDiagnosticoRouteImport } from './r
 import { Route as AuthenticatedCoreClienteIdRouteImport } from './routes/_authenticated/core.cliente.$id'
 import { Route as AuthenticatedBarMarketplaceNovoPedidoRouteImport } from './routes/_authenticated/bar.marketplace.novo-pedido'
 import { Route as AuthenticatedAdminModulosClonagemRouteImport } from './routes/_authenticated/admin.modulos.clonagem'
+import { Route as AuthenticatedAdminIntegracoesMercadoPagoRouteImport } from './routes/_authenticated/admin.integracoes.mercado-pago'
 import { Route as ApiPublicPaymentsInfinitepayWebhookRouteImport } from './routes/api/public/payments/infinitepay.webhook'
 import { Route as ApiPublicPaymentsCloseInvoiceReplayRouteImport } from './routes/api/public/payments/close-invoice.replay'
 import { Route as AuthenticatedImobiliariaAprovacoesIdImprimirRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes.$id.imprimir'
@@ -541,6 +545,11 @@ const ModulosIndexRoute = ModulosIndexRouteImport.update({
 const DemoIndexRoute = DemoIndexRouteImport.update({
   id: '/demo/',
   path: '/demo/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutIndexRoute = CheckoutIndexRouteImport.update({
+  id: '/checkout/',
+  path: '/checkout/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WhiteLabelLoginRoute = WhiteLabelLoginRouteImport.update({
@@ -933,6 +942,11 @@ const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
   path: '/checkout/success',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CheckoutSlugRoute = CheckoutSlugRouteImport.update({
+  id: '/checkout/$slug',
+  path: '/checkout/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
@@ -1201,6 +1215,11 @@ const ImoveisSlugPropertyIdRoute = ImoveisSlugPropertyIdRouteImport.update({
 const DemoNichoSlugRoute = DemoNichoSlugRouteImport.update({
   id: '/demo/nicho/$slug',
   path: '/demo/nicho/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMercadopagoWebhookRoute = ApiMercadopagoWebhookRouteImport.update({
+  id: '/api/mercadopago/webhook',
+  path: '/api/mercadopago/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedWhiteLabelCockpitRoute =
@@ -2349,6 +2368,12 @@ const AuthenticatedAdminModulosClonagemRoute =
     path: '/admin/modulos/clonagem',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminIntegracoesMercadoPagoRoute =
+  AuthenticatedAdminIntegracoesMercadoPagoRouteImport.update({
+    id: '/admin/integracoes/mercado-pago',
+    path: '/admin/integracoes/mercado-pago',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicPaymentsInfinitepayWebhookRoute =
   ApiPublicPaymentsInfinitepayWebhookRouteImport.update({
     id: '/api/public/payments/infinitepay/webhook',
@@ -2444,6 +2469,7 @@ export interface FileRoutesByFullPath {
   '/units': typeof AuthenticatedUnitsRoute
   '/users': typeof AuthenticatedUsersRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
   '/clube/login': typeof ClubeLoginRoute
@@ -2521,6 +2547,7 @@ export interface FileRoutesByFullPath {
   '/trial/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
   '/white-label/login': typeof WhiteLabelLoginRoute
+  '/checkout/': typeof CheckoutIndexRoute
   '/demo/': typeof DemoIndexRoute
   '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
@@ -2684,6 +2711,7 @@ export interface FileRoutesByFullPath {
   '/torre/restaurantes-demo': typeof AuthenticatedTorreRestaurantesDemoRouteWithChildren
   '/users/corporate': typeof AuthenticatedUsersCorporateRoute
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
+  '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -2704,6 +2732,7 @@ export interface FileRoutesByFullPath {
   '/reports/': typeof AuthenticatedReportsIndexRoute
   '/saiba-mais/': typeof AuthenticatedSaibaMaisIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
+  '/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/bar/marketplace/novo-pedido': typeof AuthenticatedBarMarketplaceNovoPedidoRoute
   '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
@@ -2797,6 +2826,7 @@ export interface FileRoutesByTo {
   '/units': typeof AuthenticatedUnitsRoute
   '/users': typeof AuthenticatedUsersRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
   '/clube/login': typeof ClubeLoginRoute
@@ -2874,6 +2904,7 @@ export interface FileRoutesByTo {
   '/trial/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
   '/white-label/login': typeof WhiteLabelLoginRoute
+  '/checkout': typeof CheckoutIndexRoute
   '/demo': typeof DemoIndexRoute
   '/modulos': typeof ModulosIndexRoute
   '/nichos': typeof NichosIndexRoute
@@ -3037,6 +3068,7 @@ export interface FileRoutesByTo {
   '/torre/restaurantes-demo': typeof AuthenticatedTorreRestaurantesDemoRouteWithChildren
   '/users/corporate': typeof AuthenticatedUsersCorporateRoute
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
+  '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -3057,6 +3089,7 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedReportsIndexRoute
   '/saiba-mais': typeof AuthenticatedSaibaMaisIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
+  '/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/bar/marketplace/novo-pedido': typeof AuthenticatedBarMarketplaceNovoPedidoRoute
   '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
@@ -3164,6 +3197,7 @@ export interface FileRoutesById {
   '/_authenticated/units': typeof AuthenticatedUnitsRoute
   '/_authenticated/users': typeof AuthenticatedUsersRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
   '/clube/login': typeof ClubeLoginRoute
@@ -3241,6 +3275,7 @@ export interface FileRoutesById {
   '/trial_/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
   '/white-label/login': typeof WhiteLabelLoginRoute
+  '/checkout/': typeof CheckoutIndexRoute
   '/demo/': typeof DemoIndexRoute
   '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
@@ -3404,6 +3439,7 @@ export interface FileRoutesById {
   '/_authenticated/torre/restaurantes-demo': typeof AuthenticatedTorreRestaurantesDemoRouteWithChildren
   '/_authenticated/users/corporate': typeof AuthenticatedUsersCorporateRoute
   '/_authenticated/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
+  '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -3424,6 +3460,7 @@ export interface FileRoutesById {
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
   '/_authenticated/saiba-mais/': typeof AuthenticatedSaibaMaisIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
+  '/_authenticated/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   '/_authenticated/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/_authenticated/bar/marketplace/novo-pedido': typeof AuthenticatedBarMarketplaceNovoPedidoRoute
   '/_authenticated/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
@@ -3530,6 +3567,7 @@ export interface FileRouteTypes {
     | '/units'
     | '/users'
     | '/admin/login'
+    | '/checkout/$slug'
     | '/checkout/success'
     | '/clube/cadastro'
     | '/clube/login'
@@ -3607,6 +3645,7 @@ export interface FileRouteTypes {
     | '/trial/cadastro'
     | '/vitrine/$slug'
     | '/white-label/login'
+    | '/checkout/'
     | '/demo/'
     | '/modulos/'
     | '/nichos/'
@@ -3770,6 +3809,7 @@ export interface FileRouteTypes {
     | '/torre/restaurantes-demo'
     | '/users/corporate'
     | '/white-label/cockpit'
+    | '/api/mercadopago/webhook'
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
@@ -3790,6 +3830,7 @@ export interface FileRouteTypes {
     | '/reports/'
     | '/saiba-mais/'
     | '/sales/'
+    | '/admin/integracoes/mercado-pago'
     | '/admin/modulos/clonagem'
     | '/bar/marketplace/novo-pedido'
     | '/core/cliente/$id'
@@ -3883,6 +3924,7 @@ export interface FileRouteTypes {
     | '/units'
     | '/users'
     | '/admin/login'
+    | '/checkout/$slug'
     | '/checkout/success'
     | '/clube/cadastro'
     | '/clube/login'
@@ -3960,6 +4002,7 @@ export interface FileRouteTypes {
     | '/trial/cadastro'
     | '/vitrine/$slug'
     | '/white-label/login'
+    | '/checkout'
     | '/demo'
     | '/modulos'
     | '/nichos'
@@ -4123,6 +4166,7 @@ export interface FileRouteTypes {
     | '/torre/restaurantes-demo'
     | '/users/corporate'
     | '/white-label/cockpit'
+    | '/api/mercadopago/webhook'
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
@@ -4143,6 +4187,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/saiba-mais'
     | '/sales'
+    | '/admin/integracoes/mercado-pago'
     | '/admin/modulos/clonagem'
     | '/bar/marketplace/novo-pedido'
     | '/core/cliente/$id'
@@ -4249,6 +4294,7 @@ export interface FileRouteTypes {
     | '/_authenticated/units'
     | '/_authenticated/users'
     | '/admin/login'
+    | '/checkout/$slug'
     | '/checkout/success'
     | '/clube/cadastro'
     | '/clube/login'
@@ -4326,6 +4372,7 @@ export interface FileRouteTypes {
     | '/trial_/cadastro'
     | '/vitrine/$slug'
     | '/white-label/login'
+    | '/checkout/'
     | '/demo/'
     | '/modulos/'
     | '/nichos/'
@@ -4489,6 +4536,7 @@ export interface FileRouteTypes {
     | '/_authenticated/torre/restaurantes-demo'
     | '/_authenticated/users/corporate'
     | '/_authenticated/white-label/cockpit'
+    | '/api/mercadopago/webhook'
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
@@ -4509,6 +4557,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reports/'
     | '/_authenticated/saiba-mais/'
     | '/_authenticated/sales/'
+    | '/_authenticated/admin/integracoes/mercado-pago'
     | '/_authenticated/admin/modulos/clonagem'
     | '/_authenticated/bar/marketplace/novo-pedido'
     | '/_authenticated/core/cliente/$id'
@@ -4586,6 +4635,7 @@ export interface RootRouteChildren {
   VitrineRoute: typeof VitrineRouteWithChildren
   WhiteLabelRoute: typeof WhiteLabelRouteWithChildren
   AdminLoginRoute: typeof AdminLoginRoute
+  CheckoutSlugRoute: typeof CheckoutSlugRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   ComoFuncionaFitnessRoute: typeof ComoFuncionaFitnessRoute
   DemoAdvogadosRoute: typeof DemoAdvogadosRoute
@@ -4655,10 +4705,12 @@ export interface RootRouteChildren {
   ShowroomWhatsappRoute: typeof ShowroomWhatsappRoute
   TrabalheConoscoNichoRoute: typeof TrabalheConoscoNichoRoute
   TrialCadastroRoute: typeof TrialCadastroRoute
+  CheckoutIndexRoute: typeof CheckoutIndexRoute
   DemoIndexRoute: typeof DemoIndexRoute
   NichosIndexRoute: typeof NichosIndexRoute
   ShowroomIndexRoute: typeof ShowroomIndexRoute
   TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
+  ApiMercadopagoWebhookRoute: typeof ApiMercadopagoWebhookRoute
   DemoNichoSlugRoute: typeof DemoNichoSlugRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   PortalContabilidadeTokenRoute: typeof PortalContabilidadeTokenRoute
@@ -4928,6 +4980,13 @@ declare module '@tanstack/react-router' {
       path: '/demo'
       fullPath: '/demo/'
       preLoaderRoute: typeof DemoIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout/': {
+      id: '/checkout/'
+      path: '/checkout'
+      fullPath: '/checkout/'
+      preLoaderRoute: typeof CheckoutIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/white-label/login': {
@@ -5469,6 +5528,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutSuccessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/checkout/$slug': {
+      id: '/checkout/$slug'
+      path: '/checkout/$slug'
+      fullPath: '/checkout/$slug'
+      preLoaderRoute: typeof CheckoutSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/admin/login'
@@ -5824,6 +5890,13 @@ declare module '@tanstack/react-router' {
       path: '/demo/nicho/$slug'
       fullPath: '/demo/nicho/$slug'
       preLoaderRoute: typeof DemoNichoSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/mercadopago/webhook': {
+      id: '/api/mercadopago/webhook'
+      path: '/api/mercadopago/webhook'
+      fullPath: '/api/mercadopago/webhook'
+      preLoaderRoute: typeof ApiMercadopagoWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/white-label/cockpit': {
@@ -7198,6 +7271,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminModulosClonagemRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/integracoes/mercado-pago': {
+      id: '/_authenticated/admin/integracoes/mercado-pago'
+      path: '/admin/integracoes/mercado-pago'
+      fullPath: '/admin/integracoes/mercado-pago'
+      preLoaderRoute: typeof AuthenticatedAdminIntegracoesMercadoPagoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/payments/infinitepay/webhook': {
       id: '/api/public/payments/infinitepay/webhook'
       path: '/api/public/payments/infinitepay/webhook'
@@ -7865,6 +7945,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEventosIndexRoute: typeof AuthenticatedEventosIndexRoute
   AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
   AuthenticatedSaibaMaisIndexRoute: typeof AuthenticatedSaibaMaisIndexRoute
+  AuthenticatedAdminIntegracoesMercadoPagoRoute: typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   AuthenticatedAdminModulosClonagemRoute: typeof AuthenticatedAdminModulosClonagemRoute
 }
 
@@ -7994,6 +8075,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEventosIndexRoute: AuthenticatedEventosIndexRoute,
   AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
   AuthenticatedSaibaMaisIndexRoute: AuthenticatedSaibaMaisIndexRoute,
+  AuthenticatedAdminIntegracoesMercadoPagoRoute:
+    AuthenticatedAdminIntegracoesMercadoPagoRoute,
   AuthenticatedAdminModulosClonagemRoute:
     AuthenticatedAdminModulosClonagemRoute,
 }
@@ -8143,6 +8226,7 @@ const rootRouteChildren: RootRouteChildren = {
   VitrineRoute: VitrineRouteWithChildren,
   WhiteLabelRoute: WhiteLabelRouteWithChildren,
   AdminLoginRoute: AdminLoginRoute,
+  CheckoutSlugRoute: CheckoutSlugRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
   ComoFuncionaFitnessRoute: ComoFuncionaFitnessRoute,
   DemoAdvogadosRoute: DemoAdvogadosRoute,
@@ -8212,10 +8296,12 @@ const rootRouteChildren: RootRouteChildren = {
   ShowroomWhatsappRoute: ShowroomWhatsappRoute,
   TrabalheConoscoNichoRoute: TrabalheConoscoNichoRoute,
   TrialCadastroRoute: TrialCadastroRoute,
+  CheckoutIndexRoute: CheckoutIndexRoute,
   DemoIndexRoute: DemoIndexRoute,
   NichosIndexRoute: NichosIndexRoute,
   ShowroomIndexRoute: ShowroomIndexRoute,
   TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
+  ApiMercadopagoWebhookRoute: ApiMercadopagoWebhookRoute,
   DemoNichoSlugRoute: DemoNichoSlugRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   PortalContabilidadeTokenRoute: PortalContabilidadeTokenRoute,
