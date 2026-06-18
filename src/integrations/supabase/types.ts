@@ -3049,6 +3049,48 @@ export type Database = {
           },
         ]
       }
+      catalog_intents: {
+        Row: {
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          macro_slug: string
+          plan_tier: string
+          selected_modules: string[]
+          session_token: string | null
+          source: string
+          subnicho_slug: string
+          user_id: string | null
+        }
+        Insert: {
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          macro_slug: string
+          plan_tier: string
+          selected_modules?: string[]
+          session_token?: string | null
+          source?: string
+          subnicho_slug: string
+          user_id?: string | null
+        }
+        Update: {
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          macro_slug?: string
+          plan_tier?: string
+          selected_modules?: string[]
+          session_token?: string | null
+          source?: string
+          subnicho_slug?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       clube_alerts: {
         Row: {
           active: boolean
@@ -5991,6 +6033,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      core_niche_plan_modules: {
+        Row: {
+          base_price_label: string | null
+          choose_limit: number
+          created_at: string
+          id: string
+          macro_slug: string
+          modules: string[]
+          plan_tier: string
+          updated_at: string
+        }
+        Insert: {
+          base_price_label?: string | null
+          choose_limit?: number
+          created_at?: string
+          id?: string
+          macro_slug: string
+          modules?: string[]
+          plan_tier: string
+          updated_at?: string
+        }
+        Update: {
+          base_price_label?: string | null
+          choose_limit?: number
+          created_at?: string
+          id?: string
+          macro_slug?: string
+          modules?: string[]
+          plan_tier?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       core_refund_rules: {
         Row: {

@@ -1,17 +1,21 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
 import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
-import { ArrowRight, Check, Layers, Workflow, Sparkles, Lock } from 'lucide-react'
+import { useServerFn } from '@tanstack/react-start'
+import { ArrowRight, Check, Layers, Workflow, Sparkles, Lock, Receipt } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
+import { toast } from 'sonner'
 import { PublicHeader } from '@/components/marketing/PublicHeader'
 import { PublicFooter } from '@/components/marketing/PublicFooter'
-import { getCatalog } from '@/lib/catalogo.functions'
-import { CORE_BASE, PLAN_TIERS, PLANS_BY_MACRO, type PlanTier } from '@/lib/niche-plans'
+import { getCatalog, saveCatalogIntent } from '@/lib/catalogo.functions'
+import { CORE_BASE, PLAN_TIERS, type PlanTier } from '@/lib/niche-plans'
 
 const catalogQuery = queryOptions({
-  queryKey: ['catalogo', 'v2'],
+  queryKey: ['catalogo', 'v3'],
   queryFn: () => getCatalog(),
   staleTime: 5 * 60 * 1000,
 })
@@ -28,7 +32,8 @@ export const Route = createFileRoute('/catalogo')({
       { property: 'og:title', content: 'Planos por nicho — Impulsionando' },
       {
         property: 'og:description',
-        content: 'Escolha seu Macro Nicho e Subnicho. Os planos se adaptam aos módulos do seu segmento.',
+        content:
+          'Escolha seu Macro Nicho e Subnicho. Os planos se adaptam aos módulos do seu segmento.',
       },
     ],
     links: [{ rel: 'canonical', href: 'https://impulsionando.com.br/catalogo' }],
@@ -45,10 +50,19 @@ export const Route = createFileRoute('/catalogo')({
 
 function CatalogoPage() {
   const { data } = useSuspenseQuery(catalogQuery)
-  const { macros, subs } = data
+  const { macros, subs, mappings, mappedMacros } = data
+  const mappedSet = useMemo(() => new Set(mappedMacros), [mappedMacros])
+  const saveIntent = useServerFn(saveCatalogIntent)
 
   const [macroSlug, setMacroSlug] = useState<string | null>(null)
   const [subId, setSubId] = useState<string | null>(null)
+  /** Module selection per tier — independent picks per plan card. */
+  const [selectionByTier, setSelectionByTier] = useState<Record<PlanTier, string[]>>({
+    essencial: [],
+    ideal: [],
+    full: [],
+  })
+  const [submitting, setSubmitting] = useState<PlanTier | null>(null)
 
   const selectedMacro = useMemo(
     () => macros.find((m) => m.slug === macroSlug) ?? null,
@@ -63,13 +77,66 @@ function CatalogoPage() {
     [visibleSubs, subId],
   )
 
-  const planSpec = selectedMacro ? PLANS_BY_MACRO[selectedMacro.slug] : null
+  const tierMap = useMemo(() => {
+    const map: Record<PlanTier, (typeof mappings)[number] | undefined> = {
+      essencial: undefined,
+      ideal: undefined,
+      full: undefined,
+    }
+    if (!selectedMacro) return map
+    for (const m of mappings) {
+      if (m.macro_slug === selectedMacro.slug) {
+        map[m.plan_tier as PlanTier] = m
+      }
+    }
+    return map
+  }, [mappings, selectedMacro])
+
+  function toggleModule(tier: PlanTier, module: string, limit: number) {
+    setSelectionByTier((prev) => {
+      const current = prev[tier]
+      if (current.includes(module)) {
+        return { ...prev, [tier]: current.filter((m) => m !== module) }
+      }
+      if (limit > 0 && current.length >= limit) {
+        toast.warning(`Você já escolheu ${limit} módulo${limit > 1 ? 's' : ''} neste plano.`)
+        return prev
+      }
+      return { ...prev, [tier]: [...current, module] }
+    })
+  }
+
+  async function handleContract(tier: PlanTier) {
+    if (!selectedMacro || !selectedSub) return
+    const mapping = tierMap[tier]
+    if (!mapping) return
+    const picked = tier === 'full' ? mapping.modules : selectionByTier[tier]
+    if (tier !== 'full' && mapping.choose_limit > 0 && picked.length === 0) {
+      toast.error('Selecione ao menos um módulo para continuar.')
+      return
+    }
+    setSubmitting(tier)
+    try {
+      const res = await saveIntent({
+        data: {
+          macroSlug: selectedMacro.slug,
+          subnichoSlug: selectedSub.slug,
+          planTier: tier,
+          selectedModules: picked,
+          source: 'catalogo',
+        },
+      })
+      window.location.href = `/onboarding?intent=${encodeURIComponent(res.id)}`
+    } catch (e: unknown) {
+      toast.error((e as Error)?.message ?? 'Não foi possível salvar sua seleção.')
+      setSubmitting(null)
+    }
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
 
-      {/* HERO */}
       <section className="bg-gradient-hero text-primary-foreground">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs mb-4">
@@ -91,7 +158,7 @@ function CatalogoPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {macros.map((m) => {
               const active = macroSlug === m.slug
-              const supported = !!PLANS_BY_MACRO[m.slug]
+              const supported = mappedSet.has(m.slug)
               return (
                 <button
                   key={m.id}
@@ -100,6 +167,7 @@ function CatalogoPage() {
                   onClick={() => {
                     setMacroSlug(m.slug)
                     setSubId(null)
+                    setSelectionByTier({ essencial: [], ideal: [], full: [] })
                   }}
                   aria-pressed={active}
                   className={`text-left p-4 rounded-lg border transition ${
@@ -143,8 +211,8 @@ function CatalogoPage() {
           </Step>
         )}
 
-        {/* STEP 3 — PLANOS POR NICHO */}
-        {selectedMacro && selectedSub && planSpec && (
+        {/* STEP 3 — PLANS */}
+        {selectedMacro && selectedSub && (
           <section aria-labelledby="planos-titulo" className="space-y-6">
             <div className="flex items-center gap-3">
               <div
@@ -163,7 +231,6 @@ function CatalogoPage() {
               </div>
             </div>
 
-            {/* Core Base banner */}
             <Card className="p-5 bg-muted/30 border-dashed">
               <div className="flex items-start gap-3">
                 <Sparkles className="w-5 h-5 text-primary mt-0.5 shrink-0" aria-hidden />
@@ -182,17 +249,16 @@ function CatalogoPage() {
               </div>
             </Card>
 
-            {/* Plans grid */}
             <div className="grid md:grid-cols-3 gap-4">
               {PLAN_TIERS.map((p) => (
                 <PlanCard
                   key={p.tier}
-                  tier={p.tier}
-                  name={p.name}
-                  price={p.price}
-                  tagline={p.tagline}
-                  spec={planSpec}
-                  subSlug={selectedSub.slug}
+                  meta={p}
+                  mapping={tierMap[p.tier]}
+                  selection={selectionByTier[p.tier]}
+                  onToggle={(mod, limit) => toggleModule(p.tier, mod, limit)}
+                  submitting={submitting === p.tier}
+                  onContract={() => handleContract(p.tier)}
                 />
               ))}
             </div>
@@ -205,22 +271,43 @@ function CatalogoPage() {
   )
 }
 
-function PlanCard({
-  tier,
-  name,
-  price,
-  tagline,
-  spec,
-  subSlug,
-}: {
+interface PlanMeta {
   tier: PlanTier
   name: string
   price: string
   tagline: string
-  spec: (typeof PLANS_BY_MACRO)[string]
-  subSlug: string
+}
+
+interface MappingRow {
+  macro_slug: string
+  plan_tier: string
+  choose_limit: number
+  modules: string[]
+  base_price_label: string | null
+}
+
+function PlanCard({
+  meta,
+  mapping,
+  selection,
+  onToggle,
+  submitting,
+  onContract,
+}: {
+  meta: PlanMeta
+  mapping: MappingRow | undefined
+  selection: string[]
+  onToggle: (module: string, limit: number) => void
+  submitting: boolean
+  onContract: () => void
 }) {
-  const highlighted = tier === 'ideal'
+  const highlighted = meta.tier === 'ideal'
+  const isFull = meta.tier === 'full'
+  const price = mapping?.base_price_label ?? meta.price
+  const limit = mapping?.choose_limit ?? 0
+  const modules = mapping?.modules ?? []
+  const visibleSelected = isFull ? modules : selection
+
   return (
     <Card
       className={`p-6 flex flex-col h-full ${
@@ -231,68 +318,97 @@ function PlanCard({
         <Badge className="absolute -top-2 left-1/2 -translate-x-1/2">Recomendado</Badge>
       )}
 
-      <div className="font-semibold text-lg">{name}</div>
+      <div className="font-semibold text-lg">{meta.name}</div>
       <div className="text-2xl font-bold mt-1">{price}</div>
-      <p className="text-sm text-muted-foreground mt-1">{tagline}</p>
+      <p className="text-sm text-muted-foreground mt-1">{meta.tagline}</p>
 
+      {/* Module selector */}
       <div className="mt-5 flex-1 space-y-3">
-        {tier === 'essencial' && (
-          <ModuleList
-            title="Escolha 1 módulo principal"
-            modules={spec.essencialChoose1}
-            limit={1}
-          />
-        )}
-        {tier === 'ideal' && (
-          <ModuleList title="Escolha até 3 módulos" modules={spec.idealChoose3} limit={3} />
-        )}
-        {tier === 'full' && (
+        {!mapping ? (
+          <p className="text-sm text-muted-foreground italic">
+            Nenhum mapeamento para este plano ainda.
+          </p>
+        ) : isFull ? (
           <div className="text-sm">
-            <div className="font-medium mb-2">{spec.fullLabel}</div>
-            <p className="text-xs text-muted-foreground">
-              Sem limite de módulos especializados do nicho. Ideal para operações maduras e
-              multi-unidade.
+            <div className="font-medium mb-2">Todos os módulos do nicho</div>
+            <ul className="space-y-1.5">
+              {modules.map((m) => (
+                <li key={m} className="flex items-center gap-2 text-sm">
+                  <Check className="w-3.5 h-3.5 text-primary shrink-0" aria-hidden /> {m}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <div className="text-sm">
+            <div className="font-medium mb-2 flex items-center gap-1.5">
+              <Lock className="w-3.5 h-3.5 text-muted-foreground" aria-hidden />
+              {limit === 1
+                ? 'Escolha 1 módulo principal'
+                : `Escolha até ${limit} módulos`}
+            </div>
+            <div className="space-y-2" role="group" aria-label={`Módulos do ${meta.name}`}>
+              {modules.map((m) => {
+                const id = `${meta.tier}-${m}`
+                const checked = selection.includes(m)
+                const disabled = !checked && limit > 0 && selection.length >= limit
+                return (
+                  <div key={m} className="flex items-center gap-2">
+                    <Checkbox
+                      id={id}
+                      checked={checked}
+                      disabled={disabled}
+                      onCheckedChange={() => onToggle(m, limit)}
+                    />
+                    <Label
+                      htmlFor={id}
+                      className={`text-sm cursor-pointer ${
+                        disabled ? 'text-muted-foreground' : ''
+                      }`}
+                    >
+                      {m}
+                    </Label>
+                  </div>
+                )
+              })}
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-2">
+              {selection.length}/{limit} selecionado{selection.length === 1 ? '' : 's'}
             </p>
           </div>
         )}
       </div>
 
-      <Button asChild className="mt-5 w-full">
-        <a
-          href={`/onboarding?subnicho=${encodeURIComponent(subSlug)}&plano=${tier}`}
-        >
-          Contratar {name} <ArrowRight className="w-4 h-4 ml-2" />
-        </a>
+      {/* Pricing breakdown */}
+      <div className="mt-5 rounded-md border bg-muted/30 p-3 text-xs space-y-1">
+        <div className="font-medium flex items-center gap-1.5 text-foreground">
+          <Receipt className="w-3.5 h-3.5" aria-hidden /> O que está incluso
+        </div>
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Core Base</span>
+          <span>{CORE_BASE.length} módulos</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">
+            Módulos do nicho {isFull ? '(todos)' : 'selecionados'}
+          </span>
+          <span>{visibleSelected.length}</span>
+        </div>
+        <div className="flex justify-between border-t pt-1 mt-1 font-semibold text-foreground">
+          <span>Total no plano</span>
+          <span>{CORE_BASE.length + visibleSelected.length} módulos</span>
+        </div>
+      </div>
+
+      <Button
+        className="mt-4 w-full"
+        onClick={onContract}
+        disabled={submitting || !mapping}
+      >
+        {submitting ? 'Salvando…' : `Contratar ${meta.name}`}{' '}
+        {!submitting && <ArrowRight className="w-4 h-4 ml-2" />}
       </Button>
     </Card>
-  )
-}
-
-function ModuleList({
-  title,
-  modules,
-  limit,
-}: {
-  title: string
-  modules: string[]
-  limit: number
-}) {
-  return (
-    <div className="text-sm">
-      <div className="font-medium mb-2 flex items-center gap-1.5">
-        <Lock className="w-3.5 h-3.5 text-muted-foreground" aria-hidden /> {title}
-      </div>
-      <ul className="space-y-1.5">
-        {modules.map((m) => (
-          <li key={m} className="flex items-center gap-2 text-sm">
-            <Check className="w-3.5 h-3.5 text-primary shrink-0" aria-hidden /> {m}
-          </li>
-        ))}
-      </ul>
-      <p className="text-[11px] text-muted-foreground mt-2">
-        Limite: até {limit} módulo{limit > 1 ? 's' : ''} do nicho.
-      </p>
-    </div>
   )
 }
 
