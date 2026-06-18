@@ -1307,6 +1307,61 @@ function RulesEditor({
                   onChange={(e) => update(r.id, { minSamples: Number(e.target.value) || 0 })} />
               </div>
             </div>
+            <div className="border-t pt-3 space-y-2">
+              <div className="text-xs text-muted-foreground">
+                Limites e cooldown por canal (vazio = usa o da regra; cooldown padrão 60min).
+              </div>
+              {ALERT_CHANNELS.map((channel) => {
+                const c = r.channels?.[channel];
+                const setCh = (patch: Partial<NonNullable<typeof c>>) =>
+                  update(r.id, {
+                    channels: {
+                      ...(r.channels ?? {}),
+                      [channel]: { enabled: true, ...(c ?? {}), ...patch },
+                    },
+                  });
+                return (
+                  <div key={channel} className="grid gap-2 md:grid-cols-5 items-center">
+                    <div className="flex items-center gap-2">
+                      <Switch checked={c?.enabled ?? true}
+                        onCheckedChange={(v) => setCh({ enabled: v })} />
+                      <Badge variant="outline">{channel}</Badge>
+                    </div>
+                    <div>
+                      <Label className="text-[10px] text-muted-foreground">CTR min</Label>
+                      <Input type="number" min={0} placeholder={String(r.minCtr)}
+                        value={c?.minCtr ?? ""}
+                        onChange={(e) => setCh({
+                          minCtr: e.target.value === "" ? undefined : Number(e.target.value),
+                        })} />
+                    </div>
+                    <div>
+                      <Label className="text-[10px] text-muted-foreground">Envio min</Label>
+                      <Input type="number" min={0} placeholder={String(r.minSendRate)}
+                        value={c?.minSendRate ?? ""}
+                        onChange={(e) => setCh({
+                          minSendRate: e.target.value === "" ? undefined : Number(e.target.value),
+                        })} />
+                    </div>
+                    <div>
+                      <Label className="text-[10px] text-muted-foreground">Cooldown (min)</Label>
+                      <Input type="number" min={1} placeholder="60"
+                        value={c?.cooldownMinutes ?? ""}
+                        onChange={(e) => setCh({
+                          cooldownMinutes: e.target.value === "" ? undefined : Number(e.target.value),
+                        })} />
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">
+                      Último envio:{" "}
+                      {(() => {
+                        const t = readChannelCooldown(ruleScope(r), channel);
+                        return t ? new Date(t).toLocaleString("pt-BR") : "—";
+                      })()}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </Card>
         );
       })}
