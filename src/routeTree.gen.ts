@@ -121,6 +121,7 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedSectorsRouteImport } from './routes/_authenticated/sectors'
 import { Route as AuthenticatedSalesRouteImport } from './routes/_authenticated/sales'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
+import { Route as AuthenticatedRadarRouteImport } from './routes/_authenticated/radar'
 import { Route as AuthenticatedPrivacyRouteImport } from './routes/_authenticated/privacy'
 import { Route as AuthenticatedPermissionsRouteImport } from './routes/_authenticated/permissions'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
@@ -150,6 +151,7 @@ import { Route as AuthenticatedInventoryIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedFinanceIndexRouteImport } from './routes/_authenticated/finance.index'
 import { Route as AuthenticatedEventosIndexRouteImport } from './routes/_authenticated/eventos.index'
 import { Route as AuthenticatedEhrIndexRouteImport } from './routes/_authenticated/ehr.index'
+import { Route as AuthenticatedDashboardsIndexRouteImport } from './routes/_authenticated/dashboards.index'
 import { Route as AuthenticatedCrmIndexRouteImport } from './routes/_authenticated/crm.index'
 import { Route as AuthenticatedCoreIndexRouteImport } from './routes/_authenticated/core.index'
 import { Route as AuthenticatedComunidadeIndexRouteImport } from './routes/_authenticated/comunidade.index'
@@ -189,6 +191,7 @@ import { Route as AuthenticatedInventoryProductsRouteImport } from './routes/_au
 import { Route as AuthenticatedInventoryMovementsRouteImport } from './routes/_authenticated/inventory.movements'
 import { Route as AuthenticatedInventoryCategoriesRouteImport } from './routes/_authenticated/inventory.categories'
 import { Route as AuthenticatedInsightsRespostasRouteImport } from './routes/_authenticated/insights.respostas'
+import { Route as AuthenticatedInsightsPercebidoRouteImport } from './routes/_authenticated/insights.percebido'
 import { Route as AuthenticatedInsightsOportunidadesRouteImport } from './routes/_authenticated/insights.oportunidades'
 import { Route as AuthenticatedImobiliariaVitrineRouteImport } from './routes/_authenticated/imobiliaria.vitrine'
 import { Route as AuthenticatedImobiliariaModulosRouteImport } from './routes/_authenticated/imobiliaria.modulos'
@@ -208,6 +211,10 @@ import { Route as AuthenticatedFinanceCategoriesRouteImport } from './routes/_au
 import { Route as AuthenticatedFinanceAccountsRouteImport } from './routes/_authenticated/finance.accounts'
 import { Route as AuthenticatedEventosIdRouteImport } from './routes/_authenticated/eventos.$id'
 import { Route as AuthenticatedEhrIdRouteImport } from './routes/_authenticated/ehr.$id'
+import { Route as AuthenticatedDashboardsWhiteLabelRouteImport } from './routes/_authenticated/dashboards.white-label'
+import { Route as AuthenticatedDashboardsEmpresaRouteImport } from './routes/_authenticated/dashboards.empresa'
+import { Route as AuthenticatedDashboardsCoreRouteImport } from './routes/_authenticated/dashboards.core'
+import { Route as AuthenticatedDashboardsConsumidorRouteImport } from './routes/_authenticated/dashboards.consumidor'
 import { Route as AuthenticatedCrmPipelinesRouteImport } from './routes/_authenticated/crm.pipelines'
 import { Route as AuthenticatedCrmLeadsRouteImport } from './routes/_authenticated/crm.leads'
 import { Route as AuthenticatedCrmBoardRouteImport } from './routes/_authenticated/crm.board'
@@ -899,6 +906,11 @@ const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
   path: '/reports',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedRadarRoute = AuthenticatedRadarRouteImport.update({
+  id: '/radar',
+  path: '/radar',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPrivacyRoute = AuthenticatedPrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
@@ -1053,6 +1065,12 @@ const AuthenticatedEhrIndexRoute = AuthenticatedEhrIndexRouteImport.update({
   path: '/ehr/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDashboardsIndexRoute =
+  AuthenticatedDashboardsIndexRouteImport.update({
+    id: '/dashboards/',
+    path: '/dashboards/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedCrmIndexRoute = AuthenticatedCrmIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -1278,6 +1296,12 @@ const AuthenticatedInsightsRespostasRoute =
     path: '/insights/respostas',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedInsightsPercebidoRoute =
+  AuthenticatedInsightsPercebidoRouteImport.update({
+    id: '/insights/percebido',
+    path: '/insights/percebido',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedInsightsOportunidadesRoute =
   AuthenticatedInsightsOportunidadesRouteImport.update({
     id: '/insights/oportunidades',
@@ -1390,6 +1414,30 @@ const AuthenticatedEhrIdRoute = AuthenticatedEhrIdRouteImport.update({
   path: '/ehr/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDashboardsWhiteLabelRoute =
+  AuthenticatedDashboardsWhiteLabelRouteImport.update({
+    id: '/dashboards/white-label',
+    path: '/dashboards/white-label',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardsEmpresaRoute =
+  AuthenticatedDashboardsEmpresaRouteImport.update({
+    id: '/dashboards/empresa',
+    path: '/dashboards/empresa',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardsCoreRoute =
+  AuthenticatedDashboardsCoreRouteImport.update({
+    id: '/dashboards/core',
+    path: '/dashboards/core',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardsConsumidorRoute =
+  AuthenticatedDashboardsConsumidorRouteImport.update({
+    id: '/dashboards/consumidor',
+    path: '/dashboards/consumidor',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedCrmPipelinesRoute =
   AuthenticatedCrmPipelinesRouteImport.update({
     id: '/pipelines',
@@ -2173,6 +2221,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof AuthenticatedOnboardingRouteWithChildren
   '/permissions': typeof AuthenticatedPermissionsRoute
   '/privacy': typeof AuthenticatedPrivacyRouteWithChildren
+  '/radar': typeof AuthenticatedRadarRoute
   '/reports': typeof AuthenticatedReportsRouteWithChildren
   '/sales': typeof AuthenticatedSalesRouteWithChildren
   '/sectors': typeof AuthenticatedSectorsRoute
@@ -2346,6 +2395,10 @@ export interface FileRoutesByFullPath {
   '/crm/board': typeof AuthenticatedCrmBoardRoute
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
   '/crm/pipelines': typeof AuthenticatedCrmPipelinesRoute
+  '/dashboards/consumidor': typeof AuthenticatedDashboardsConsumidorRoute
+  '/dashboards/core': typeof AuthenticatedDashboardsCoreRoute
+  '/dashboards/empresa': typeof AuthenticatedDashboardsEmpresaRoute
+  '/dashboards/white-label': typeof AuthenticatedDashboardsWhiteLabelRoute
   '/ehr/$id': typeof AuthenticatedEhrIdRoute
   '/eventos/$id': typeof AuthenticatedEventosIdRoute
   '/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
@@ -2365,6 +2418,7 @@ export interface FileRoutesByFullPath {
   '/imobiliaria/modulos': typeof AuthenticatedImobiliariaModulosRoute
   '/imobiliaria/vitrine': typeof AuthenticatedImobiliariaVitrineRoute
   '/insights/oportunidades': typeof AuthenticatedInsightsOportunidadesRoute
+  '/insights/percebido': typeof AuthenticatedInsightsPercebidoRoute
   '/insights/respostas': typeof AuthenticatedInsightsRespostasRoute
   '/inventory/categories': typeof AuthenticatedInventoryCategoriesRoute
   '/inventory/movements': typeof AuthenticatedInventoryMovementsRoute
@@ -2404,6 +2458,7 @@ export interface FileRoutesByFullPath {
   '/comunidade/': typeof AuthenticatedComunidadeIndexRoute
   '/core/': typeof AuthenticatedCoreIndexRoute
   '/crm/': typeof AuthenticatedCrmIndexRoute
+  '/dashboards/': typeof AuthenticatedDashboardsIndexRoute
   '/ehr/': typeof AuthenticatedEhrIndexRoute
   '/eventos/': typeof AuthenticatedEventosIndexRoute
   '/finance/': typeof AuthenticatedFinanceIndexRoute
@@ -2489,6 +2544,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof AuthenticatedOnboardingRouteWithChildren
   '/permissions': typeof AuthenticatedPermissionsRoute
   '/privacy': typeof AuthenticatedPrivacyRouteWithChildren
+  '/radar': typeof AuthenticatedRadarRoute
   '/sectors': typeof AuthenticatedSectorsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/talents': typeof AuthenticatedTalentsRoute
@@ -2660,6 +2716,10 @@ export interface FileRoutesByTo {
   '/crm/board': typeof AuthenticatedCrmBoardRoute
   '/crm/leads': typeof AuthenticatedCrmLeadsRoute
   '/crm/pipelines': typeof AuthenticatedCrmPipelinesRoute
+  '/dashboards/consumidor': typeof AuthenticatedDashboardsConsumidorRoute
+  '/dashboards/core': typeof AuthenticatedDashboardsCoreRoute
+  '/dashboards/empresa': typeof AuthenticatedDashboardsEmpresaRoute
+  '/dashboards/white-label': typeof AuthenticatedDashboardsWhiteLabelRoute
   '/ehr/$id': typeof AuthenticatedEhrIdRoute
   '/eventos/$id': typeof AuthenticatedEventosIdRoute
   '/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
@@ -2679,6 +2739,7 @@ export interface FileRoutesByTo {
   '/imobiliaria/modulos': typeof AuthenticatedImobiliariaModulosRoute
   '/imobiliaria/vitrine': typeof AuthenticatedImobiliariaVitrineRoute
   '/insights/oportunidades': typeof AuthenticatedInsightsOportunidadesRoute
+  '/insights/percebido': typeof AuthenticatedInsightsPercebidoRoute
   '/insights/respostas': typeof AuthenticatedInsightsRespostasRoute
   '/inventory/categories': typeof AuthenticatedInventoryCategoriesRoute
   '/inventory/movements': typeof AuthenticatedInventoryMovementsRoute
@@ -2718,6 +2779,7 @@ export interface FileRoutesByTo {
   '/comunidade': typeof AuthenticatedComunidadeIndexRoute
   '/core': typeof AuthenticatedCoreIndexRoute
   '/crm': typeof AuthenticatedCrmIndexRoute
+  '/dashboards': typeof AuthenticatedDashboardsIndexRoute
   '/ehr': typeof AuthenticatedEhrIndexRoute
   '/eventos': typeof AuthenticatedEventosIndexRoute
   '/finance': typeof AuthenticatedFinanceIndexRoute
@@ -2815,6 +2877,7 @@ export interface FileRoutesById {
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRouteWithChildren
   '/_authenticated/permissions': typeof AuthenticatedPermissionsRoute
   '/_authenticated/privacy': typeof AuthenticatedPrivacyRouteWithChildren
+  '/_authenticated/radar': typeof AuthenticatedRadarRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRouteWithChildren
   '/_authenticated/sales': typeof AuthenticatedSalesRouteWithChildren
   '/_authenticated/sectors': typeof AuthenticatedSectorsRoute
@@ -2988,6 +3051,10 @@ export interface FileRoutesById {
   '/_authenticated/crm/board': typeof AuthenticatedCrmBoardRoute
   '/_authenticated/crm/leads': typeof AuthenticatedCrmLeadsRoute
   '/_authenticated/crm/pipelines': typeof AuthenticatedCrmPipelinesRoute
+  '/_authenticated/dashboards/consumidor': typeof AuthenticatedDashboardsConsumidorRoute
+  '/_authenticated/dashboards/core': typeof AuthenticatedDashboardsCoreRoute
+  '/_authenticated/dashboards/empresa': typeof AuthenticatedDashboardsEmpresaRoute
+  '/_authenticated/dashboards/white-label': typeof AuthenticatedDashboardsWhiteLabelRoute
   '/_authenticated/ehr/$id': typeof AuthenticatedEhrIdRoute
   '/_authenticated/eventos/$id': typeof AuthenticatedEventosIdRoute
   '/_authenticated/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
@@ -3007,6 +3074,7 @@ export interface FileRoutesById {
   '/_authenticated/imobiliaria/modulos': typeof AuthenticatedImobiliariaModulosRoute
   '/_authenticated/imobiliaria/vitrine': typeof AuthenticatedImobiliariaVitrineRoute
   '/_authenticated/insights/oportunidades': typeof AuthenticatedInsightsOportunidadesRoute
+  '/_authenticated/insights/percebido': typeof AuthenticatedInsightsPercebidoRoute
   '/_authenticated/insights/respostas': typeof AuthenticatedInsightsRespostasRoute
   '/_authenticated/inventory/categories': typeof AuthenticatedInventoryCategoriesRoute
   '/_authenticated/inventory/movements': typeof AuthenticatedInventoryMovementsRoute
@@ -3046,6 +3114,7 @@ export interface FileRoutesById {
   '/_authenticated/comunidade/': typeof AuthenticatedComunidadeIndexRoute
   '/_authenticated/core/': typeof AuthenticatedCoreIndexRoute
   '/_authenticated/crm/': typeof AuthenticatedCrmIndexRoute
+  '/_authenticated/dashboards/': typeof AuthenticatedDashboardsIndexRoute
   '/_authenticated/ehr/': typeof AuthenticatedEhrIndexRoute
   '/_authenticated/eventos/': typeof AuthenticatedEventosIndexRoute
   '/_authenticated/finance/': typeof AuthenticatedFinanceIndexRoute
@@ -3142,6 +3211,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/permissions'
     | '/privacy'
+    | '/radar'
     | '/reports'
     | '/sales'
     | '/sectors'
@@ -3315,6 +3385,10 @@ export interface FileRouteTypes {
     | '/crm/board'
     | '/crm/leads'
     | '/crm/pipelines'
+    | '/dashboards/consumidor'
+    | '/dashboards/core'
+    | '/dashboards/empresa'
+    | '/dashboards/white-label'
     | '/ehr/$id'
     | '/eventos/$id'
     | '/finance/accounts'
@@ -3334,6 +3408,7 @@ export interface FileRouteTypes {
     | '/imobiliaria/modulos'
     | '/imobiliaria/vitrine'
     | '/insights/oportunidades'
+    | '/insights/percebido'
     | '/insights/respostas'
     | '/inventory/categories'
     | '/inventory/movements'
@@ -3373,6 +3448,7 @@ export interface FileRouteTypes {
     | '/comunidade/'
     | '/core/'
     | '/crm/'
+    | '/dashboards/'
     | '/ehr/'
     | '/eventos/'
     | '/finance/'
@@ -3458,6 +3534,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/permissions'
     | '/privacy'
+    | '/radar'
     | '/sectors'
     | '/settings'
     | '/talents'
@@ -3629,6 +3706,10 @@ export interface FileRouteTypes {
     | '/crm/board'
     | '/crm/leads'
     | '/crm/pipelines'
+    | '/dashboards/consumidor'
+    | '/dashboards/core'
+    | '/dashboards/empresa'
+    | '/dashboards/white-label'
     | '/ehr/$id'
     | '/eventos/$id'
     | '/finance/accounts'
@@ -3648,6 +3729,7 @@ export interface FileRouteTypes {
     | '/imobiliaria/modulos'
     | '/imobiliaria/vitrine'
     | '/insights/oportunidades'
+    | '/insights/percebido'
     | '/insights/respostas'
     | '/inventory/categories'
     | '/inventory/movements'
@@ -3687,6 +3769,7 @@ export interface FileRouteTypes {
     | '/comunidade'
     | '/core'
     | '/crm'
+    | '/dashboards'
     | '/ehr'
     | '/eventos'
     | '/finance'
@@ -3783,6 +3866,7 @@ export interface FileRouteTypes {
     | '/_authenticated/onboarding'
     | '/_authenticated/permissions'
     | '/_authenticated/privacy'
+    | '/_authenticated/radar'
     | '/_authenticated/reports'
     | '/_authenticated/sales'
     | '/_authenticated/sectors'
@@ -3956,6 +4040,10 @@ export interface FileRouteTypes {
     | '/_authenticated/crm/board'
     | '/_authenticated/crm/leads'
     | '/_authenticated/crm/pipelines'
+    | '/_authenticated/dashboards/consumidor'
+    | '/_authenticated/dashboards/core'
+    | '/_authenticated/dashboards/empresa'
+    | '/_authenticated/dashboards/white-label'
     | '/_authenticated/ehr/$id'
     | '/_authenticated/eventos/$id'
     | '/_authenticated/finance/accounts'
@@ -3975,6 +4063,7 @@ export interface FileRouteTypes {
     | '/_authenticated/imobiliaria/modulos'
     | '/_authenticated/imobiliaria/vitrine'
     | '/_authenticated/insights/oportunidades'
+    | '/_authenticated/insights/percebido'
     | '/_authenticated/insights/respostas'
     | '/_authenticated/inventory/categories'
     | '/_authenticated/inventory/movements'
@@ -4014,6 +4103,7 @@ export interface FileRouteTypes {
     | '/_authenticated/comunidade/'
     | '/_authenticated/core/'
     | '/_authenticated/crm/'
+    | '/_authenticated/dashboards/'
     | '/_authenticated/ehr/'
     | '/_authenticated/eventos/'
     | '/_authenticated/finance/'
@@ -4975,6 +5065,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReportsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/radar': {
+      id: '/_authenticated/radar'
+      path: '/radar'
+      fullPath: '/radar'
+      preLoaderRoute: typeof AuthenticatedRadarRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/privacy': {
       id: '/_authenticated/privacy'
       path: '/privacy'
@@ -5176,6 +5273,13 @@ declare module '@tanstack/react-router' {
       path: '/ehr'
       fullPath: '/ehr/'
       preLoaderRoute: typeof AuthenticatedEhrIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboards/': {
+      id: '/_authenticated/dashboards/'
+      path: '/dashboards'
+      fullPath: '/dashboards/'
+      preLoaderRoute: typeof AuthenticatedDashboardsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/crm/': {
@@ -5451,6 +5555,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInsightsRespostasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/insights/percebido': {
+      id: '/_authenticated/insights/percebido'
+      path: '/insights/percebido'
+      fullPath: '/insights/percebido'
+      preLoaderRoute: typeof AuthenticatedInsightsPercebidoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/insights/oportunidades': {
       id: '/_authenticated/insights/oportunidades'
       path: '/insights/oportunidades'
@@ -5582,6 +5693,34 @@ declare module '@tanstack/react-router' {
       path: '/ehr/$id'
       fullPath: '/ehr/$id'
       preLoaderRoute: typeof AuthenticatedEhrIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboards/white-label': {
+      id: '/_authenticated/dashboards/white-label'
+      path: '/dashboards/white-label'
+      fullPath: '/dashboards/white-label'
+      preLoaderRoute: typeof AuthenticatedDashboardsWhiteLabelRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboards/empresa': {
+      id: '/_authenticated/dashboards/empresa'
+      path: '/dashboards/empresa'
+      fullPath: '/dashboards/empresa'
+      preLoaderRoute: typeof AuthenticatedDashboardsEmpresaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboards/core': {
+      id: '/_authenticated/dashboards/core'
+      path: '/dashboards/core'
+      fullPath: '/dashboards/core'
+      preLoaderRoute: typeof AuthenticatedDashboardsCoreRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboards/consumidor': {
+      id: '/_authenticated/dashboards/consumidor'
+      path: '/dashboards/consumidor'
+      fullPath: '/dashboards/consumidor'
+      preLoaderRoute: typeof AuthenticatedDashboardsConsumidorRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/crm/pipelines': {
@@ -6930,6 +7069,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRouteWithChildren
   AuthenticatedPermissionsRoute: typeof AuthenticatedPermissionsRoute
   AuthenticatedPrivacyRoute: typeof AuthenticatedPrivacyRouteWithChildren
+  AuthenticatedRadarRoute: typeof AuthenticatedRadarRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRouteWithChildren
   AuthenticatedSalesRoute: typeof AuthenticatedSalesRouteWithChildren
   AuthenticatedSectorsRoute: typeof AuthenticatedSectorsRoute
@@ -6962,6 +7102,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedContabilidadeRelatoriosRoute: typeof AuthenticatedContabilidadeRelatoriosRoute
   AuthenticatedContabilidadeTarefasRoute: typeof AuthenticatedContabilidadeTarefasRoute
   AuthenticatedContratoIdRoute: typeof AuthenticatedContratoIdRoute
+  AuthenticatedDashboardsConsumidorRoute: typeof AuthenticatedDashboardsConsumidorRoute
+  AuthenticatedDashboardsCoreRoute: typeof AuthenticatedDashboardsCoreRoute
+  AuthenticatedDashboardsEmpresaRoute: typeof AuthenticatedDashboardsEmpresaRoute
+  AuthenticatedDashboardsWhiteLabelRoute: typeof AuthenticatedDashboardsWhiteLabelRoute
   AuthenticatedEhrIdRoute: typeof AuthenticatedEhrIdRoute
   AuthenticatedEventosIdRoute: typeof AuthenticatedEventosIdRoute
   AuthenticatedImobiliariaAprovacoesRoute: typeof AuthenticatedImobiliariaAprovacoesRouteWithChildren
@@ -6973,6 +7117,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedImobiliariaModulosRoute: typeof AuthenticatedImobiliariaModulosRoute
   AuthenticatedImobiliariaVitrineRoute: typeof AuthenticatedImobiliariaVitrineRoute
   AuthenticatedInsightsOportunidadesRoute: typeof AuthenticatedInsightsOportunidadesRoute
+  AuthenticatedInsightsPercebidoRoute: typeof AuthenticatedInsightsPercebidoRoute
   AuthenticatedInsightsRespostasRoute: typeof AuthenticatedInsightsRespostasRoute
   AuthenticatedMarketingCockpitRoute: typeof AuthenticatedMarketingCockpitRoute
   AuthenticatedMarketingLeadsRoute: typeof AuthenticatedMarketingLeadsRoute
@@ -6988,6 +7133,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedWhiteLabelCockpitRoute: typeof AuthenticatedWhiteLabelCockpitRoute
   AuthenticatedCockpitsIndexRoute: typeof AuthenticatedCockpitsIndexRoute
   AuthenticatedComunidadeIndexRoute: typeof AuthenticatedComunidadeIndexRoute
+  AuthenticatedDashboardsIndexRoute: typeof AuthenticatedDashboardsIndexRoute
   AuthenticatedEhrIndexRoute: typeof AuthenticatedEhrIndexRoute
   AuthenticatedEventosIndexRoute: typeof AuthenticatedEventosIndexRoute
   AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
@@ -7018,6 +7164,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRouteWithChildren,
   AuthenticatedPermissionsRoute: AuthenticatedPermissionsRoute,
   AuthenticatedPrivacyRoute: AuthenticatedPrivacyRouteWithChildren,
+  AuthenticatedRadarRoute: AuthenticatedRadarRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRouteWithChildren,
   AuthenticatedSalesRoute: AuthenticatedSalesRouteWithChildren,
   AuthenticatedSectorsRoute: AuthenticatedSectorsRoute,
@@ -7062,6 +7209,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedContabilidadeTarefasRoute:
     AuthenticatedContabilidadeTarefasRoute,
   AuthenticatedContratoIdRoute: AuthenticatedContratoIdRoute,
+  AuthenticatedDashboardsConsumidorRoute:
+    AuthenticatedDashboardsConsumidorRoute,
+  AuthenticatedDashboardsCoreRoute: AuthenticatedDashboardsCoreRoute,
+  AuthenticatedDashboardsEmpresaRoute: AuthenticatedDashboardsEmpresaRoute,
+  AuthenticatedDashboardsWhiteLabelRoute:
+    AuthenticatedDashboardsWhiteLabelRoute,
   AuthenticatedEhrIdRoute: AuthenticatedEhrIdRoute,
   AuthenticatedEventosIdRoute: AuthenticatedEventosIdRoute,
   AuthenticatedImobiliariaAprovacoesRoute:
@@ -7078,6 +7231,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedImobiliariaVitrineRoute: AuthenticatedImobiliariaVitrineRoute,
   AuthenticatedInsightsOportunidadesRoute:
     AuthenticatedInsightsOportunidadesRoute,
+  AuthenticatedInsightsPercebidoRoute: AuthenticatedInsightsPercebidoRoute,
   AuthenticatedInsightsRespostasRoute: AuthenticatedInsightsRespostasRoute,
   AuthenticatedMarketingCockpitRoute: AuthenticatedMarketingCockpitRoute,
   AuthenticatedMarketingLeadsRoute: AuthenticatedMarketingLeadsRoute,
@@ -7093,6 +7247,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedWhiteLabelCockpitRoute: AuthenticatedWhiteLabelCockpitRoute,
   AuthenticatedCockpitsIndexRoute: AuthenticatedCockpitsIndexRoute,
   AuthenticatedComunidadeIndexRoute: AuthenticatedComunidadeIndexRoute,
+  AuthenticatedDashboardsIndexRoute: AuthenticatedDashboardsIndexRoute,
   AuthenticatedEhrIndexRoute: AuthenticatedEhrIndexRoute,
   AuthenticatedEventosIndexRoute: AuthenticatedEventosIndexRoute,
   AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
