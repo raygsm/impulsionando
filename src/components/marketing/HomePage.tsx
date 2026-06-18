@@ -464,12 +464,13 @@ export function HomePage() {
                   <span className="text-xs font-normal opacity-90">Quero revender com a minha marca</span>
                 </Link>
               </Button>
-              <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 gap-2 h-auto py-4 flex-col" onClick={() => trackHeroCta("clube")}>
+              <Button asChild size="lg" className="bg-white/10 backdrop-blur border border-white/40 text-white hover:bg-white/20 gap-2 h-auto py-4 flex-col" onClick={() => trackHeroCta("clube")}>
                 <Link to="/clube" data-analytics="hero-clube">
                   <span className="flex items-center gap-2 font-semibold"><Gift className="w-4 h-4" /> Clube Impulsionando</span>
                   <span className="text-xs font-normal opacity-90">Quero descontos e benefícios</span>
                 </Link>
               </Button>
+
             </div>
 
 
