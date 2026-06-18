@@ -33,7 +33,20 @@ function resetState() {
 }
 
 function makeQuery(table: string) {
-  const ctx: any = { table, filters: [] as Array<[string, any]>, isNullCol: null as string | null }
+  const ctx: any = {
+    table,
+    filters: [] as Array<[string, any]>,
+    isNullCol: null as string | null,
+    pendingUpdate: null as Row | null,
+  }
+  const applyPending = () => {
+    if (!ctx.pendingUpdate) return
+    const row = pick(ctx)
+    if (!row) return
+    if (ctx.isNullCol && row[ctx.isNullCol] != null) return
+    Object.assign(row, ctx.pendingUpdate)
+    ctx.pendingUpdate = null
+  }
   const chain: any = {
     select: () => chain,
     eq: (col: string, val: any) => {
@@ -46,21 +59,21 @@ function makeQuery(table: string) {
     },
     maybeSingle: async () => ({ data: pick(ctx), error: null }),
     update: (patch: Row) => {
-      const row = pick(ctx)
-      const apply = () => {
-        if (!row) return
-        if (ctx.isNullCol && row[ctx.isNullCol] != null) return
-        Object.assign(row, patch)
-      }
-      // Some callers do .update(p) and stop; others chain .eq().is(). Defer apply
-      // to .is()/.eq() terminal or apply synchronously since chain is awaitable.
-      apply()
+      ctx.pendingUpdate = patch
       return chain
     },
     insert: (rows: Row | Row[]) => {
       const arr = Array.isArray(rows) ? rows : [rows]
       if (table === 'email_send_log') state.emailLog.push(...arr)
       return { error: null }
+    },
+    then: (onFulfilled: any, onRejected?: any) => {
+      try {
+        applyPending()
+        return Promise.resolve({ data: null, error: null }).then(onFulfilled, onRejected)
+      } catch (e) {
+        return Promise.reject(e).then(onFulfilled, onRejected)
+      }
     },
   }
   return chain
