@@ -4,10 +4,11 @@ import { ChevronDown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import type { CurrentUser } from "@/lib/auth";
-import { NAV_GROUPS, TOP_ITEMS, type NavItem, type NavGroup } from "./nav-config";
+import { NAV_GROUPS, TOP_ITEMS, type NavItem, type NavGroup, type NavAudience } from "./nav-config";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { useImpersonation } from "@/hooks/use-impersonation";
+import { useAudience } from "@/hooks/use-audience";
 import { countPendingPixCharges } from "@/lib/pix-charges.functions";
 
 function isItemActive(pathname: string, to: string) {
@@ -124,14 +125,21 @@ export function SidebarNav({
 }) {
   const location = useLocation();
   const { isImpersonating } = useImpersonation();
+  const { audience } = useAudience();
   const isSuper = currentUser.isSuperAdmin && !isImpersonating;
   const { companyId } = useActiveCompany();
   const { data: perms, isLoading: permsLoading } = useUserPermissions(companyId);
   const { data: pendingPix = 0 } = usePendingPixBadge(isSuper);
 
+  const matchesAudience = (audiences: NavAudience[] | undefined): boolean => {
+    if (!audiences || audiences.length === 0) return true;
+    return audiences.includes(audience);
+  };
+
   // Super admin enxerga tudo. Em modo impersonação, comporta-se como o cliente:
   // esconde itens superOnly e libera os demais (o master tem acesso global).
   const filterItem = (i: NavItem): boolean => {
+    if (!matchesAudience(i.audiences)) return false;
     if (i.superOnly) return isSuper;
     if (isImpersonating) return true; // visão do cliente sem filtro de permissão granular
     if (currentUser.isSuperAdmin) return true;
@@ -140,6 +148,7 @@ export function SidebarNav({
     return perms.has(i.perm);
   };
 
+  const visibleGroups = NAV_GROUPS.filter((g) => matchesAudience(g.audiences));
 
   return (
     <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-1">
@@ -153,7 +162,7 @@ export function SidebarNav({
           />
         ))}
       </div>
-      {NAV_GROUPS.map((g) => (
+      {visibleGroups.map((g) => (
         <Group
           key={g.label}
           group={g}

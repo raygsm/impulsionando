@@ -12,6 +12,8 @@ import {
   Calculator, Activity, RefreshCw, BookOpen,
 } from "lucide-react";
 
+export type NavAudience = "core" | "white-label" | "empresa" | "consumidor";
+
 export interface NavItem {
   to: string;
   label: string;
@@ -21,6 +23,8 @@ export interface NavItem {
   perm?: string;
   /** Renderiza um contador dinâmico ao lado do label. */
   badge?: "pendingPix";
+  /** Audiências para as quais este item é relevante. Se ausente = todas. */
+  audiences?: NavAudience[];
 }
 
 
@@ -28,6 +32,8 @@ export interface NavGroup {
   label: string;
   items: NavItem[];
   defaultOpen?: boolean;
+  /** Audiências para as quais este grupo é relevante. Se ausente = todas. */
+  audiences?: NavAudience[];
 }
 
 export const TOP_ITEMS: NavItem[] = [
@@ -161,6 +167,7 @@ export const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: "Administração",
+    audiences: ["empresa", "core"],
     items: [
       { to: "/companies", label: "Empresas", icon: Building2, superOnly: true },
       { to: "/niches", label: "Nichos", icon: Tags, superOnly: true },
