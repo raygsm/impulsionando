@@ -91,6 +91,7 @@ export const NAV_GROUPS: NavGroup[] = [
     defaultOpen: true,
     items: [
       { to: "/cervejaria", label: "Painel da Cervejaria", icon: Beer },
+      { to: "/cervejaria/pdvs", label: "PDVs Parceiros", icon: Store },
     ],
   },
 
