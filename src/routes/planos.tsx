@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { getCommercialAvailability } from "@/lib/commercial.functions";
 import {
   ArrowRight, MessageCircle, Sparkles, CheckCircle2, Minus, HelpCircle, Star,
-  Building2, Layers, UserRound, PlayCircle, Gauge, Wrench, Clock,
+  Building2, Layers, UserRound, PlayCircle, Gauge, Wrench, Clock, ChevronDown, ChevronUp,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +25,11 @@ import {
 import { PixFallbackDialog } from "@/components/payments/PixFallbackDialog";
 import { ModulePicker } from "@/components/marketing/ModulePicker";
 import { ContractingSummaryDialog } from "@/components/marketing/ContractingSummaryDialog";
+import {
+  getRecommendedSlugs,
+  PLAN_NAME_BY_LEVEL,
+  type RecLevel,
+} from "@/data/nicheRecommendations";
 
 const PLAN_QUOTA: Record<string, number> = {
   Essencial: 3,   // até 3 módulos
@@ -39,6 +44,18 @@ const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20ent
 
 export const Route = createFileRoute("/planos")({
   ssr: false,
+  validateSearch: (search: Record<string, unknown>) => {
+    const lvl = search.recomendado;
+    const recomendado: RecLevel | undefined =
+      lvl === "essencial" || lvl === "ideal" || lvl === "full" ? lvl : undefined;
+    const nichoRaw = typeof search.nicho === "string" ? search.nicho : undefined;
+    const trial = search.trial === 1 || search.trial === "1" ? 1 : undefined;
+    return {
+      nicho: nichoRaw,
+      recomendado,
+      trial,
+    } as { nicho?: string; recomendado?: RecLevel; trial?: 1 };
+  },
   head: () => ({
     meta: [
       { title: "Planos e Preços — Essencial, Integrado, Avançado e Sob Medida | Impulsionando Tecnologia" },
@@ -229,8 +246,14 @@ function formatBRL(v: number) {
 type Audience = "empresas" | "white-label" | "consumidor";
 
 function PlanosPage() {
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const { nicho, recomendado } = search;
+  const cameFromNiche = Boolean(nicho && recomendado);
+
   const [audience, setAudience] = useState<Audience>("empresas");
   const [annual, setAnnual] = useState(false);
+  const [showComparison, setShowComparison] = useState<boolean>(false);
   const { openCheckout, loading: checkoutLoading } = usePaddleCheckout();
   const { data: user } = useCurrentUser();
   const fetchAvailability = useServerFn(getCommercialAvailability);
@@ -266,6 +289,32 @@ function PlanosPage() {
     plan: null,
   });
   const [pickedModules, setPickedModules] = useState<Record<string, string[]>>({});
+
+  // Pré-seleção recomendada por nicho — recalcula quando os query params mudam.
+  const recommendedSlugs = useMemo(
+    () => getRecommendedSlugs(nicho, recomendado),
+    [nicho, recomendado],
+  );
+
+  // Quando vier de /recomendacao com ?nicho=&recomendado=, popula a seleção do plano
+  // recomendado e abre automaticamente o ModulePicker para o usuário confirmar.
+  useEffect(() => {
+    if (!cameFromNiche || !recomendado) return;
+    const planName = PLAN_NAME_BY_LEVEL[recomendado as RecLevel];
+    const plan = PLANS.find((p) => p.name === planName);
+    if (!plan) return;
+    setAudience("empresas");
+    setPickedModules((prev) =>
+      prev[planName]?.length ? prev : { ...prev, [planName]: recommendedSlugs },
+    );
+    setPicker((prev) => (prev.open ? prev : { open: true, plan }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cameFromNiche, recomendado, recommendedSlugs.join(",")]);
+
+  function clearNicheContext() {
+    navigate({ search: { nicho: undefined, recomendado: undefined, trial: undefined } as never, replace: true });
+  }
+
 
   async function runCheckout(plan: Plan, modules: string[]) {
     const quota = PLAN_QUOTA[plan.name] ?? 1;
@@ -562,6 +611,46 @@ function PlanosPage() {
         </div>
       </section>
 
+      {/* Banner contexto vindo do nicho */}
+      {cameFromNiche && (
+        <section className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 mt-8">
+          <div className="rounded-lg border-2 border-primary/30 bg-primary/5 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+            <Sparkles className="w-5 h-5 text-primary shrink-0" />
+            <div className="flex-1 min-w-0 text-sm">
+              <strong>Plano {PLAN_NAME_BY_LEVEL[recomendado as RecLevel]}</strong> recomendado para o nicho
+              <strong> {nicho}</strong> — abrimos a seleção de módulos pré-marcados para você revisar.
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <Button asChild variant="outline" size="sm">
+                <Link to="/recomendacao/$nicho" params={{ nicho: nicho! }}>← Voltar à recomendação</Link>
+              </Button>
+              <Button variant="ghost" size="sm" onClick={clearNicheContext}>
+                Ver todos os planos
+              </Button>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Botão de expandir lista longa — escondida por padrão para não poluir antes da escolha */}
+      <section className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 mt-10 flex justify-center">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowComparison((v) => !v)}
+          aria-expanded={showComparison}
+          aria-controls="planos-detalhes"
+          data-testid="toggle-comparativo"
+        >
+          {showComparison ? (
+            <><ChevronUp className="w-4 h-4" /> Ocultar comparativo detalhado</>
+          ) : (
+            <><ChevronDown className="w-4 h-4" /> Ver módulos e comparativo completo</>
+          )}
+        </Button>
+      </section>
+
+      <div id="planos-detalhes" hidden={!showComparison}>
       {/* MÓDULOS POR PLANO + SINERGIAS */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
         <div className="max-w-3xl mb-8">
@@ -670,6 +759,7 @@ function PlanosPage() {
           </table>
         </div>
       </section>
+      </div>
 
       {/* GUARANTEES */}
       <section className="bg-muted/30 border-y border-border">
