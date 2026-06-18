@@ -534,7 +534,7 @@ function PremiumSection<T extends { id: string }>({
     );
   }
   return (
-    <Card id={id} className={`p-4 scroll-mt-24 ${className ?? ""}`}>
+    <Card id={id} className={`p-4 scroll-mt-[var(--sec-offset,6rem)] ${className ?? ""}`}>
       <div className="flex items-center gap-2 mb-3 text-sm font-semibold">{icon} {title}</div>
       {items.length === 0 ? (
         <EmptyHint text={empty} />
@@ -551,51 +551,114 @@ function PremiumSection<T extends { id: string }>({
   );
 }
 
-function SectionNav({ activeId, onSelect }: { activeId: string; onSelect: (id: string) => void }) {
-  const containerRef = useRef<HTMLDivElement>(null);
+type SectionNavProps = {
+  activeId: string;
+  onSelect: (id: string, scroll?: boolean) => void;
+  ref?: React.Ref<HTMLDivElement>;
+};
+
+function SectionNav({ activeId, onSelect, ref }: SectionNavProps) {
+  const chipsRef = useRef<HTMLDivElement>(null);
 
   // Keep active chip visible when it changes
   useEffect(() => {
-    if (!activeId || !containerRef.current) return;
-    const chip = containerRef.current.querySelector<HTMLElement>(`[data-chip="${activeId}"]`);
+    if (!activeId || !chipsRef.current) return;
+    const chip = chipsRef.current.querySelector<HTMLElement>(`[data-chip="${activeId}"]`);
     if (chip) chip.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
   }, [activeId]);
 
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
-    e.preventDefault();
-    onSelect(id);
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-    const newUrl = `${window.location.pathname}${window.location.search}#${id}`;
-    window.history.replaceState(null, "", newUrl);
+  const focusChip = (id: string) => {
+    chipsRef.current?.querySelector<HTMLElement>(`[data-chip="${id}"]`)?.focus();
   };
 
+  const handleKey = (e: React.KeyboardEvent<HTMLAnchorElement>, idx: number) => {
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      const next = SECTIONS[(idx + 1) % SECTIONS.length];
+      focusChip(next.id);
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      const prev = SECTIONS[(idx - 1 + SECTIONS.length) % SECTIONS.length];
+      focusChip(prev.id);
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      focusChip(SECTIONS[0].id);
+    } else if (e.key === "End") {
+      e.preventDefault();
+      focusChip(SECTIONS[SECTIONS.length - 1].id);
+    } else if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onSelect(SECTIONS[idx].id, true);
+    }
+  };
+
+  const currentIdx = Math.max(0, SECTIONS.findIndex((s) => s.id === activeId));
+  const goPrev = () => onSelect(SECTIONS[Math.max(0, currentIdx - 1)].id, true);
+  const goNext = () => onSelect(SECTIONS[Math.min(SECTIONS.length - 1, currentIdx + 1)].id, true);
+
   return (
-    <div className="sticky top-0 z-10 py-2 bg-background/85 backdrop-blur border-b border-border/60">
-      <div
-        ref={containerRef}
-        className="flex gap-1.5 overflow-x-auto scrollbar-none snap-x snap-mandatory px-1 -mx-1"
-      >
-        {SECTIONS.map((s) => {
-          const active = s.id === activeId;
-          return (
-            <a
-              key={s.id}
-              data-chip={s.id}
-              href={`#${s.id}`}
-              onClick={(e) => handleClick(e, s.id)}
-              aria-current={active ? "true" : undefined}
-              className={`shrink-0 snap-start text-xs px-3 py-1.5 rounded-full border transition-colors ${
-                active
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "border-border/60 bg-card hover:bg-accent hover:text-accent-foreground"
-              }`}
-            >
-              {s.label}
-            </a>
-          );
-        })}
+    <div
+      ref={ref}
+      className="sticky top-0 z-10 py-2 bg-background/85 backdrop-blur border-b border-border/60"
+    >
+      <div className="flex items-center gap-1">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label="Seção anterior"
+          onClick={goPrev}
+          disabled={currentIdx <= 0}
+          className="md:hidden h-8 w-8 shrink-0"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <div
+          ref={chipsRef}
+          role="tablist"
+          aria-label="Seções da Minha área"
+          className="flex gap-1.5 overflow-x-auto scrollbar-none snap-x snap-mandatory px-1 flex-1"
+        >
+          {SECTIONS.map((s, idx) => {
+            const active = s.id === activeId;
+            return (
+              <a
+                key={s.id}
+                data-chip={s.id}
+                href={`#${s.id}`}
+                role="tab"
+                aria-selected={active}
+                aria-current={active ? "true" : undefined}
+                tabIndex={active || (!activeId && idx === 0) ? 0 : -1}
+                onClick={(e) => {
+                  e.preventDefault();
+                  onSelect(s.id, true);
+                }}
+                onKeyDown={(e) => handleKey(e, idx)}
+                className={`shrink-0 snap-start text-xs px-3 py-1.5 rounded-full border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                  active
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "border-border/60 bg-card hover:bg-accent hover:text-accent-foreground"
+                }`}
+              >
+                {s.label}
+              </a>
+            );
+          })}
+        </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label="Próxima seção"
+          onClick={goNext}
+          disabled={currentIdx >= SECTIONS.length - 1}
+          className="md:hidden h-8 w-8 shrink-0"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   );
 }
+
