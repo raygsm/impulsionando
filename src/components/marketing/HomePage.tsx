@@ -451,27 +451,57 @@ export function HomePage() {
               modular, por nicho, com White Label pronto para revender com a sua marca.
             </p>
 
-            <div className="mt-8 grid gap-3 sm:grid-cols-3 max-w-3xl mx-auto">
-              <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 gap-2 h-auto py-4 flex-col" onClick={() => trackHeroCta("sou_empresa")}>
-                <Link to="/orcamento" data-analytics="hero-sou-empresa">
-                  <span className="flex items-center gap-2 font-semibold"><Building2 className="w-4 h-4" /> Sou empresa</span>
-                  <span className="text-xs font-normal opacity-75">Quero usar na minha operação</span>
-                </Link>
-              </Button>
-              <Button asChild size="lg" className="bg-gradient-primary gap-2 h-auto py-4 flex-col" onClick={() => trackHeroCta("white_label")}>
-                <Link to="/nichos/white-label" data-analytics="hero-white-label">
-                  <span className="flex items-center gap-2 font-semibold"><Rocket className="w-4 h-4" /> White Label</span>
-                  <span className="text-xs font-normal opacity-90">Quero revender com a minha marca</span>
-                </Link>
-              </Button>
-              <Button asChild size="lg" className="bg-white/10 backdrop-blur border border-white/40 text-white hover:bg-white/20 gap-2 h-auto py-4 flex-col" onClick={() => trackHeroCta("clube")}>
-                <Link to="/clube" data-analytics="hero-clube">
-                  <span className="flex items-center gap-2 font-semibold"><Gift className="w-4 h-4" /> Clube Impulsionando</span>
-                  <span className="text-xs font-normal opacity-90">Quero descontos e benefícios</span>
-                </Link>
-              </Button>
+            {/* SR-only section heading — dá ao tablist de perfis um H2
+              indexável sem competir com o H1 visível do hero. */}
+            <h2 className="sr-only">Escolha o seu perfil</h2>
 
+            <div
+              className="mt-8 grid gap-3 sm:grid-cols-3 max-w-3xl mx-auto"
+              aria-label="Perfis de uso da Impulsionando"
+              role="group"
+            >
+              <article aria-labelledby="hero-perfil-empresa">
+                <h3 id="hero-perfil-empresa" className="sr-only">
+                  Sou empresa — usar a Impulsionando na minha operação
+                </h3>
+                <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 gap-2 h-auto py-4 flex-col w-full" onClick={() => trackHeroCta("sou_empresa")}>
+                  <Link to="/orcamento" data-analytics="hero-sou-empresa">
+                    <span className="flex items-center gap-2 font-semibold"><Building2 className="w-4 h-4" /> Sou empresa</span>
+                    <span className="text-xs font-normal opacity-75">Quero usar na minha operação</span>
+                  </Link>
+                </Button>
+              </article>
+              <article aria-labelledby="hero-perfil-white-label">
+                <h3 id="hero-perfil-white-label" className="sr-only">
+                  White Label — revender a plataforma com a minha marca
+                </h3>
+                <Button asChild size="lg" className="bg-gradient-primary gap-2 h-auto py-4 flex-col w-full" onClick={() => trackHeroCta("white_label")}>
+                  <Link to="/nichos/white-label" data-analytics="hero-white-label">
+                    <span className="flex items-center gap-2 font-semibold"><Rocket className="w-4 h-4" /> White Label</span>
+                    <span className="text-xs font-normal opacity-90">Quero revender com a minha marca</span>
+                  </Link>
+                </Button>
+              </article>
+              <article aria-labelledby="hero-perfil-clube">
+                <h3 id="hero-perfil-clube" className="sr-only">
+                  Clube Impulsionando — descontos e benefícios para consumidores
+                </h3>
+                <Button
+                  asChild
+                  size="lg"
+                  data-cta="clube"
+                  className="glass-cta gap-2 h-auto py-4 flex-col w-full"
+                  onClick={() => trackHeroCta("clube")}
+                >
+                  <Link to="/clube" data-analytics="hero-clube">
+                    <span className="flex items-center gap-2 font-semibold"><Gift className="w-4 h-4" /> Clube Impulsionando</span>
+                    <span className="text-xs font-normal opacity-90">Quero descontos e benefícios</span>
+                  </Link>
+                </Button>
+              </article>
             </div>
+
+
 
 
             <div className="mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3">

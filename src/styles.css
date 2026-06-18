@@ -234,3 +234,53 @@ html[data-density="compact"] table td {
   padding-top: 0.375rem;
   padding-bottom: 0.375rem;
 }
+
+/* ============================================================
+ * Glass CTA token — tratamento de "vidro" reutilizável usado em
+ * superfícies escuras (heros com gradiente). Mantém contraste AA
+ * sobre o gradient navy→azul do tema e funciona em light/dark.
+ *
+ * Uso: <Button className="glass-cta ...">…</Button>
+ * Estados cobertos: base, hover, active, focus-visible, disabled.
+ * ============================================================ */
+@utility glass-cta {
+  background-color: color-mix(in oklab, white 10%, transparent);
+  backdrop-filter: blur(12px) saturate(140%);
+  border: 1px solid color-mix(in oklab, white 40%, transparent);
+  color: white;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
+
+  &:hover {
+    background-color: color-mix(in oklab, white 20%, transparent);
+    border-color: color-mix(in oklab, white 55%, transparent);
+  }
+  &:active {
+    background-color: color-mix(in oklab, white 28%, transparent);
+    transform: translateY(0.5px);
+  }
+  &:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px var(--background),
+      0 0 0 4px var(--primary-glow);
+  }
+  &:disabled,
+  &[aria-disabled="true"] {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+/* Dark mode: encorpa o vidro para manter contraste sobre fundos
+ * mais escuros sem alterar o restante do tratamento. */
+.dark .glass-cta {
+  background-color: color-mix(in oklab, white 14%, transparent);
+  border-color: color-mix(in oklab, white 45%, transparent);
+}
+.dark .glass-cta:hover {
+  background-color: color-mix(in oklab, white 24%, transparent);
+}
