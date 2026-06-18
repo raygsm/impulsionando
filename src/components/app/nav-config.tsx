@@ -85,6 +85,15 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/privacy", label: "Privacidade & Notificações", icon: ShieldCheck, audiences: ["consumidor"] },
     ],
   },
+  {
+    label: "Microcervejaria",
+    audiences: ["core", "white-label", "empresa"],
+    defaultOpen: true,
+    items: [
+      { to: "/cervejaria", label: "Painel da Cervejaria", icon: Beer },
+    ],
+  },
+
 
   {
     label: "Captar",
