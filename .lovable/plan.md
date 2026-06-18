@@ -1,84 +1,108 @@
-## Princípio
-**Não recriar nada.** O projeto já tem ~120 tabelas, RLS, perfis (Super Admin / Staff Impulsionando / PJ / Operador / PF), módulos (CRM, Agenda, EHR, Finance, Sales, Inventory, Afiliados, Marketing, Trial, Billing, Agentes IA), webhooks InfinitePay, fila de mensagens multicanal e dashboards. O trabalho é **mapear → conectar → consolidar → expor no CORE**, não reconstruir.
+# Roadmap Impulsionando Tecnologia — Prompt Mestre
 
-## Fase 0 — Auditoria (entrega antes de qualquer código)
+> Gerado em 2026-06-18 a partir de auditoria estática do codebase (`src/`, `docs/n8n/`).
+> Fonte de verdade para priorização. Atualizar ao final de cada fase.
 
-Gerar um documento `docs/CORE-AUDIT.md` listando, por área:
-- Tabelas existentes vs. tabelas pedidas no prompt → mapa de equivalência (ex: `companies` = `empresas`, `user_profiles` = `usuarios`, `billing_plans` = `planos`, `company_modules` = `empresa_modulos`, `trial_subscriptions` já cobre demo/trial, `infinitepay_payments` + `billing_invoices` cobrem cobrança).
-- Rotas/telas existentes em `src/routes/_authenticated/admin.*` (billing-contracts, trials, agentes, etc.) e o que falta.
-- Gaps reais (não duplicações): hub CORE unificado, CRUD visual de nichos/módulos/planos, gerador de demo por nicho, dashboard consolidado por nicho.
+## Sumário da auditoria (21 blocos)
 
-Sem essa fase, qualquer migration nova arrisca colidir com schema existente.
+- ✅ Existe: ~52 itens
+- 🟡 Parcial: ~48 itens
+- ❌ Faltante: ~14 itens
 
-## Fase 1 — Hub CORE (somente UI, zero schema novo)
+A plataforma tem **base operacional sólida** (jornada Captar→Cobrar→Comunicar, billing, RBAC, 35+ rotas Core, N8N, RLS). Os gaps concentram-se em **inteligência (insights/benchmarking/saúde), experiência por público (WL, consumidor) e governança de mudanças (sandbox/rollout)**.
 
-Rota única `/_authenticated/core` (Super Admin apenas) com navegação para telas que **já existem**:
-- Empresas (`companies`) — criar/editar/suspender
-- Nichos (`niches`)
-- Módulos (`modules` + `company_modules`)
-- Planos (`billing_plans`)
-- Contratos & Faturas (`billing_contracts`, `billing_invoices`) — já existe em `/admin/billing-contracts`
-- Trials/Demos (`trial_subscriptions`) — já existe em `/admin/trials`
-- Templates de e-mail (`message_templates`)
-- Logs & auditoria (`audit_logs`)
-- Agentes IA (`/adm/agentes`) — já existe
+## Top-10 gaps críticos (ordem de prioridade pós-roadmap)
 
-Entrega: 1 página índice + sidebar. Nenhuma tabela criada.
+| # | Gap | Bloco | Esforço |
+|---|---|---|---|
+| 1 | Benchmarking anonimizado por nicho | 10 | G |
+| 2 | Score de Saúde da Conta (contínuo) | 15 | G |
+| 3 | Mensageria Core com segmentação UI | 13 | G |
+| 4 | Radar do Nicho (feed + curadoria) | 12 | G |
+| 5 | Voz do Cliente + IA | 14 | G |
+| 6 | Portal unificado Consumidor Final | 9 | G |
+| 7 | Wizard de Onboarding 20-passos unificado | 7 | G |
+| 8 | Sandbox + rollout progressivo de módulos | 16 | G |
+| 9 | "O que a Impulsionando percebeu" (insights IA) | 11 | G |
+| 10 | Área White Label completa (gestor WL) | 1/17 | M |
 
-## Fase 2 — Gaps de CRUD no CORE
+---
 
-Construir só o que **não tem tela ainda**, sempre lendo tabelas existentes:
-1. CRUD de **nichos** com associação de módulos padrão.
-2. CRUD de **módulos** (slug, nome, descrição, ícone, categoria).
-3. CRUD de **planos** com seleção visual de módulos incluídos + setup + recorrência + vencimento default dia 5.
-4. Wizard "Criar cliente" — 1 fluxo que: cria `company` → vincula `niche` → ativa `company_modules` do plano → cria `billing_contract` → envia welcome via `enqueue_message`. Tudo via `createServerFn` com `requireSupabaseAuth` + `is_super_admin`.
+## Roadmap em 5 fases (ordem cronológica por dependência)
 
-## Fase 3 — Dashboard CORE consolidado
+### Fase 0 — Auditoria + plano (✅ CONCLUÍDA nesta rodada)
 
-View SQL `core_dashboard_stats` (somente leitura) agregando:
-- `companies` ativos/suspensos por nicho
-- `billing_invoices` MRR/inadimplência
-- `company_modules` adesão por módulo
-- `trial_subscriptions` conversão
+Inventário dos 21 blocos com evidências, gaps e esforço. Este documento.
 
-Tela `/core/dashboard` consumindo a view via server function. Sem schema novo além da view.
+---
 
-## Fase 4 — Régua de cobrança (validar, não recriar)
+### Fase 1 — Navegação por jornada + Saiba Mais (1-2 rodadas)
 
-A função `billing_run_cycle()` **já implementa** D-7, D-1, D0, suspensão automática e `enqueue_message`. Ações:
-- Confirmar cron pg_cron rodando diariamente.
-- Revisar `message_templates` para `billing_*` com identidade Impulsionando.
-- Tela CORE para editar templates inline.
+**Por quê primeiro:** sem reorganizar a nav nos 9 grupos (Captar/Relacionar/Operar/Cobrar/Comunicar/Automatizar/Analisar/Melhorar/Config), os dashboards e ferramentas das Fases 2-4 ficam dispersos. É barato (frontend puro) e destrava UX.
 
-## Fase 5 — Demo por nicho
+**Entregas:**
+1. Refatorar `src/components/app/nav-config.ts` para os 9 grupos do Prompt Mestre.
+2. Sidebar por audiência: shell distinto para Core, WL, Empresa, Consumidor (componente `AppShell` com variantes).
+3. Páginas "Saiba Mais" individuais por plano (`/planos/$slug`) — hoje só existe `/planos` agregado.
+4. Padronizar template de `/modulos/$slug` e `/nichos/$slug` (já existem, falta consistência visual + CTA único).
+5. Ajuda contextual (`HelpTip`) também na área autenticada (hoje só em demo).
+6. Banner de upsell in-app: "Por que este módulo vale a pena" dentro de features não-contratadas (Bloco 19).
 
-Função `core_provision_demo(_niche, _plan)` que:
-- Cria company `is_demo=true` (adicionar coluna se não existir)
-- Aplica módulos do plano
-- Seeda dados fictícios por nicho (clínica, bar, imobiliária, veículos)
-- Retorna URL de acesso
+**Não inclui:** novos dados, novas tabelas, IA.
 
-Reaproveita `trial_subscriptions` para expiração.
+---
 
-## Fase 6 — Dashboards por nicho
+### Fase 2 — Dashboards das 4 camadas + insights (2-3 rodadas)
 
-Templates de dashboard por `niche.slug` em `src/components/dashboards/by-niche/*`. Renderizados condicionalmente no dashboard PJ existente, lendo dados que **já são gravados** pelos módulos atuais.
+**Por quê depois da nav:** os 4 dashboards são pontos de chegada da nav. Definir nav antes evita retrabalho de links.
 
-## Detalhes técnicos
+**Entregas:**
+1. **Dashboard Empresa unificado** (`/dashboard` 360°) consolidando os cockpits fragmentados (finance/commercial/operations/support).
+2. **Dashboard White Label completo** — comissões, repasses, churn dos clientes WL, MRR por WL.
+3. **Portal Consumidor Final** — histórico, faturas, agendamentos, favoritos em 1 tela (substituir `/consumer/unified` minimalista).
+4. **Área "O que a Impulsionando percebeu"** — evoluir `/insights/oportunidades` (hoje heurística de counts) para pipeline `dados → ai-gateway → insight persistido → notificação`. Nova tabela `account_insights`.
+5. **Radar do Nicho** — tabela `niche_radar_posts` (curadoria manual + scheduling), feed em `/radar` por nicho do cliente.
+6. **Benchmarking anonimizado** — view materializada `niche_benchmarks_mv` com regra mínima N>=5 empresas por nicho; tela "como você se compara".
 
-- **Stack**: TanStack Start + Supabase (Lovable Cloud). Não usar Edge Functions para lógica interna — `createServerFn` em `src/lib/core.functions.ts`.
-- **Permissão**: toda rota CORE sob `_authenticated/core/` com `beforeLoad` checando `is_super_admin`.
-- **RLS**: usar `is_super_admin(auth.uid())` já existente. Não criar novas policies amplas.
-- **Migrations**: apenas (a) view de dashboard, (b) flag `is_demo` em `companies` se faltar, (c) seeds de nichos/módulos se faltarem. Nenhum CREATE TABLE redundante.
-- **Webhook InfinitePay**: já existe — não tocar.
-- **Salário mínimo configurável**: linha em `setting_definitions` (tabela já existe).
+**Migrations novas:** `account_insights`, `niche_radar_posts`, `niche_benchmarks_mv`, `nps_responses`.
 
-## Próximo passo concreto
+---
 
-Aprovando o plano, eu começo pela **Fase 0 (auditoria)** e entrego o documento + a tela índice do CORE (Fase 1) na próxima rodada — sem migrations, sem risco de regressão. Depois validamos juntos antes de avançar para Fase 2.
+### Fase 3 — Core Ops: Mensageria + Voz + Saúde + Versões (3-4 rodadas)
 
-## O que NÃO será feito agora
+**Por quê depois dos dashboards:** Saúde e Voz alimentam os dashboards; Mensageria segmenta usando dados de saúde/risco; Versões precisa de telemetria dos dashboards para rollout seguro.
 
-- Reescrever autenticação, dashboards CHRISMED, módulo financeiro, InfinitePay, webhooks, fila de mensagens, RLS existente.
-- Migrar Mercado Pago (não está no schema atual — InfinitePay é o gateway ativo). Se Mercado Pago é requisito, tratamos em fase própria.
-- Construir tudo das seções 6–14 do prompt num único passo. Cada módulo "novo" pedido (vaquinha, sorteios, fidelidade, marketplace) vira fase própria depois do CORE estar sólido.
+**Entregas:**
+1. **Mensageria Core segmentada** (`/core/mensageria`) — UI de seleção (todos/WL/nicho/plano/módulo/risco/inadimplente), preview, agendamento, histórico. Reusa `message_outbox` + `applyGlobalSetting`.
+2. **Voz do Cliente** — persistir `nps_responses` (rota `/pesquisa` já existe sem storage), classificação por IA (positivo/neutro/negativo + tema), dashboard `/core/voz-cliente` por público.
+3. **Score de Saúde da Conta** — função SQL `calc_health_score(company_id)` agregando login/implantação/módulos/pagamentos/tickets/satisfação. Persistir em `company_health` (snapshot diário via cron). Expor em `/core/saude` por empresa + churn_risk + upgrade_opportunity.
+4. **Pipeline de versões de módulos** — sandbox por tenant de teste, rollout progressivo (% configurável por nicho/plano), backup automático antes do upgrade, botão de rollback. Estender `module_versions` + nova `module_rollouts`.
+
+**Migrations novas:** `nps_responses`, `company_health`, `module_rollouts`, `module_backups`.
+
+---
+
+### Fase 4 — Onboarding unificado + automações faltantes (1-2 rodadas)
+
+**Por quê por último:** consolida tudo. Onboarding precisa apontar para dashboards/saúde/módulos já prontos.
+
+**Entregas:**
+1. **Wizard único pós-pagamento (20 passos)** — unificar `/onboarding` (5 passos meta/nicho/diag) com `/onboarding/nicho` (3 passos) em um único fluxo guiado coberindo: tenant→subdomínio→plano→módulos→nicho→templates→dashboards→mensagens→follow-up→logs.
+2. **Persistir respostas do onboarding** (hoje em localStorage) em `onboarding_answers`.
+3. **Cobertura de nichos faltantes** em `applyNicheOnboarding`: adicionar `eventos` e completar templates de `imobiliaria`.
+4. **Testes E2E faltantes** dos 4 perfis de acesso + smoke de dashboards + script `verify-rls-isolation.ts` (referenciado nos docs mas inexistente).
+
+---
+
+## Decisões em aberto (preciso confirmar antes da Fase 1)
+
+1. **Nomes finais dos planos:** o Prompt Mestre diz "Essencial/Profissional/Completo", o código usa "Essencial/Integrado/Avançado". Mantenho o código atual ou padronizo com o Prompt Mestre?
+2. **Shell por audiência (Fase 1.2):** prefere 4 shells separados (mais isolamento, mais código) ou 1 shell com variantes de nav (mais simples)?
+3. **Benchmarking (Fase 2.6):** N mínimo para anonimização é 5 empresas/nicho? Aceita ou prefere 10?
+4. **Onboarding (Fase 4.1):** wizard único linear (20 passos sequenciais) ou checklist navegável (passos podem ser feitos fora de ordem)?
+
+---
+
+## Próxima rodada sugerida
+
+**Fase 1 — Navegação por jornada + Saiba Mais.** Escopo fechado, frontend puro, destrava todas as fases seguintes, baixo risco. Tempo estimado: 1 rodada completa.
