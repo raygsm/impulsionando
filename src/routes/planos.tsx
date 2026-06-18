@@ -153,6 +153,7 @@ const PLAN_OPS: Record<string, { setup: string; maintenance: string; ttv: string
 type Row = { feature: string; values: (boolean | string)[] };
 
 const COMPARE: Row[] = [
+  { feature: "Preço mensal", values: ["½ salário mínimo", "1 salário mínimo", "2× salário mínimo"] },
   { feature: "Módulos principais incluídos", values: ["1", "2 (par curado)", "3 + BI"] },
   { feature: "Módulos adicionais", values: ["R$ 497/mês", "R$ 497/mês", "R$ 497/mês"] },
   { feature: "Usuários", values: ["Até 3", "Até 5", "Até 10"] },
