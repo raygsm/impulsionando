@@ -66,15 +66,16 @@ const CHAPTERS: Chapter[] = [
     number: "03",
     time: "19h31",
     icon: BellRing,
-    title: "Pedido pronto: WhatsApp + push",
-    story: "As batatas saem do forno. O sistema dispara automaticamente uma mensagem no WhatsApp do cliente que abriu a sessão E um push no celular dele. Se um canal falhar, o outro garante a entrega — com dedupe para não notificar duas vezes.",
+    title: "Garçom entrega o prato — comunicação fica para o pós-visita",
+    story: "As batatas saem do forno. Quem leva à mesa é o garçom — a Impulsionando não substitui o atendimento humano da operação. O sistema sinaliza ao bar e ao salão que o item está pronto, mas NÃO dispara WhatsApp avisando 'seu prato chegou'. A comunicação com o cliente é guardada para o que importa: voltar, indicar, fidelizar.",
     what: [
-      "Notificação multi-canal (WhatsApp + Push/SMS)",
-      "Dedupe por event_id evita mensagem duplicada",
-      "Log em webhook_event_log para auditoria",
+      "Sinal interno bar/salão (sem mensagem ao cliente)",
+      "Cliente identificado na sessão para o pós-visita",
+      "Dados de consumo alimentam CRM e Clube — depois",
     ],
-    modules: ["Notificações", "WhatsApp", "Push"],
+    modules: ["Salão", "Identificação", "CRM (pós)"],
   },
+
   {
     number: "04",
     time: "21h47",
