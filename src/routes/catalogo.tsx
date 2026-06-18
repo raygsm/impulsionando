@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
-import { ArrowRight, Check, Layers, Workflow, Sparkles, Lock, Receipt } from 'lucide-react'
+import { ArrowRight, Check, Layers, Workflow, Sparkles, Lock, Receipt, RotateCcw } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -11,8 +11,34 @@ import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { PublicHeader } from '@/components/marketing/PublicHeader'
 import { PublicFooter } from '@/components/marketing/PublicFooter'
-import { getCatalog, saveCatalogIntent } from '@/lib/catalogo.functions'
+import { getCatalog, saveCatalogIntent, trackCatalogEvent } from '@/lib/catalogo.functions'
 import { CORE_BASE, PLAN_TIERS, type PlanTier } from '@/lib/niche-plans'
+
+const STORAGE_KEY = 'impulsionando.catalogo.selection.v1'
+type Persisted = {
+  macroSlug: string | null
+  subId: string | null
+  selectionByTier: Record<PlanTier, string[]>
+}
+function loadPersisted(): Persisted | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw ? (JSON.parse(raw) as Persisted) : null
+  } catch {
+    return null
+  }
+}
+function sessionToken(): string {
+  if (typeof window === 'undefined') return 'ssr'
+  const k = 'impulsionando.session.token'
+  let t = localStorage.getItem(k)
+  if (!t) {
+    t = crypto.randomUUID()
+    localStorage.setItem(k, t)
+  }
+  return t
+}
 
 const catalogQuery = queryOptions({
   queryKey: ['catalogo', 'v3'],
@@ -53,16 +79,61 @@ function CatalogoPage() {
   const { macros, subs, mappings, mappedMacros } = data
   const mappedSet = useMemo(() => new Set(mappedMacros), [mappedMacros])
   const saveIntent = useServerFn(saveCatalogIntent)
+  const track = useServerFn(trackCatalogEvent)
 
   const [macroSlug, setMacroSlug] = useState<string | null>(null)
   const [subId, setSubId] = useState<string | null>(null)
-  /** Module selection per tier — independent picks per plan card. */
   const [selectionByTier, setSelectionByTier] = useState<Record<PlanTier, string[]>>({
     essencial: [],
     ideal: [],
     full: [],
   })
   const [submitting, setSubmitting] = useState<PlanTier | null>(null)
+  const restoredRef = useRef(false)
+  const lastViewedMacroRef = useRef<string | null>(null)
+
+  // Restore persisted selection once
+  useEffect(() => {
+    if (restoredRef.current) return
+    restoredRef.current = true
+    const p = loadPersisted()
+    if (!p) return
+    if (p.macroSlug && mappedSet.has(p.macroSlug)) {
+      setMacroSlug(p.macroSlug)
+      if (p.subId && subs.some((s) => s.id === p.subId)) setSubId(p.subId)
+      if (p.selectionByTier) setSelectionByTier(p.selectionByTier)
+      toast.success('Suas escolhas anteriores foram restauradas.', { duration: 2500 })
+    }
+  }, [mappedSet, subs])
+
+  // Persist on every change
+  useEffect(() => {
+    if (!restoredRef.current || typeof window === 'undefined') return
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ macroSlug, subId, selectionByTier }),
+    )
+  }, [macroSlug, subId, selectionByTier])
+
+  function trackEvent(eventName: string, extra: Record<string, unknown> = {}) {
+    track({
+      data: {
+        eventName,
+        macroSlug: macroSlug ?? null,
+        subnichoSlug: subs.find((s) => s.id === subId)?.slug ?? null,
+        sessionToken: sessionToken(),
+        ...extra,
+      },
+    }).catch(() => {})
+  }
+
+  function clearSelection() {
+    setMacroSlug(null)
+    setSubId(null)
+    setSelectionByTier({ essencial: [], ideal: [], full: [] })
+    if (typeof window !== 'undefined') localStorage.removeItem(STORAGE_KEY)
+  }
+
 
   const selectedMacro = useMemo(
     () => macros.find((m) => m.slug === macroSlug) ?? null,
@@ -102,9 +173,20 @@ function CatalogoPage() {
         toast.warning(`Você já escolheu ${limit} módulo${limit > 1 ? 's' : ''} neste plano.`)
         return prev
       }
+      trackEvent('select_module', { planTier: tier, selectedModules: [module] })
       return { ...prev, [tier]: [...current, module] }
     })
   }
+
+  // Fire view_plans once per (macro,sub) pairing
+  useEffect(() => {
+    if (!selectedMacro || !selectedSub) return
+    const key = `${selectedMacro.slug}|${selectedSub.slug}`
+    if (lastViewedMacroRef.current === key) return
+    lastViewedMacroRef.current = key
+    trackEvent('view_plans')
+     
+  }, [selectedMacro, selectedSub])
 
   async function handleContract(tier: PlanTier) {
     if (!selectedMacro || !selectedSub) return
@@ -117,6 +199,7 @@ function CatalogoPage() {
     }
     setSubmitting(tier)
     try {
+      trackEvent('contract_click', { planTier: tier, selectedModules: picked })
       const res = await saveIntent({
         data: {
           macroSlug: selectedMacro.slug,
@@ -126,12 +209,14 @@ function CatalogoPage() {
           source: 'catalogo',
         },
       })
+      trackEvent('intent_saved', { planTier: tier, selectedModules: picked, intentId: res.id })
       window.location.href = `/onboarding?intent=${encodeURIComponent(res.id)}`
     } catch (e: unknown) {
       toast.error((e as Error)?.message ?? 'Não foi possível salvar sua seleção.')
       setSubmitting(null)
     }
   }
+
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -153,8 +238,23 @@ function CatalogoPage() {
       </section>
 
       <main className="mx-auto max-w-6xl w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-12 space-y-10">
+        {(macroSlug || subId) && (
+          <div className="flex items-center justify-end -mb-6">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={clearSelection}
+              className="text-muted-foreground"
+            >
+              <RotateCcw className="w-3.5 h-3.5 mr-1.5" /> Limpar seleções
+            </Button>
+          </div>
+        )}
+
         {/* STEP 1 — MACRO */}
         <Step n={1} title="Escolha o macro nicho" icon={Layers} done={!!macroSlug}>
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {macros.map((m) => {
               const active = macroSlug === m.slug
@@ -168,7 +268,9 @@ function CatalogoPage() {
                     setMacroSlug(m.slug)
                     setSubId(null)
                     setSelectionByTier({ essencial: [], ideal: [], full: [] })
+                    trackEvent('select_macro', { macroSlug: m.slug })
                   }}
+
                   aria-pressed={active}
                   className={`text-left p-4 rounded-lg border transition ${
                     active
@@ -196,7 +298,11 @@ function CatalogoPage() {
                 <button
                   key={s.id}
                   type="button"
-                  onClick={() => setSubId(s.id)}
+                  onClick={() => {
+                    setSubId(s.id)
+                    trackEvent('select_sub', { subnichoSlug: s.slug })
+                  }}
+
                   aria-pressed={subId === s.id}
                   className={`text-left p-3 rounded-lg border text-sm transition ${
                     subId === s.id

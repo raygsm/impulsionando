@@ -79,6 +79,150 @@ export const saveCatalogIntent = createServerFn({ method: 'POST' })
     return { id: row.id }
   })
 
+// --------- Restore intent (public, by id, only while unconsumed) ---------
+
+export const getCatalogIntent = createServerFn({ method: 'GET' })
+  .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
+  .handler(async ({ data }) => {
+    const sb = publicClient()
+    const { data: row, error } = await sb
+      .from('catalog_intents')
+      .select('id,macro_slug,subnicho_slug,plan_tier,selected_modules,consumed_at,expires_at,source')
+      .eq('id', data.id)
+      .maybeSingle()
+    if (error) throw error
+    if (!row) return null
+    if (row.consumed_at) return null
+    if (row.expires_at && new Date(row.expires_at).getTime() < Date.now()) return null
+    return row
+  })
+
+// --------- Tracking ---------
+
+const TrackInput = z.object({
+  eventName: z.string().trim().min(1).max(60),
+  macroSlug: z.string().trim().max(60).optional().nullable(),
+  subnichoSlug: z.string().trim().max(80).optional().nullable(),
+  planTier: z.string().trim().max(20).optional().nullable(),
+  selectedModules: z.array(z.string().trim().max(80)).max(20).optional(),
+  intentId: z.string().uuid().optional().nullable(),
+  sessionToken: z.string().trim().max(80).optional().nullable(),
+  metadata: z.record(z.string(), z.any()).optional(),
+})
+
+export const trackCatalogEvent = createServerFn({ method: 'POST' })
+  .inputValidator((data: unknown) => TrackInput.parse(data))
+  .handler(async ({ data }) => {
+    const sb = publicClient()
+    const { error } = await sb.from('catalog_events').insert({
+      event_name: data.eventName,
+      macro_slug: data.macroSlug ?? null,
+      subnicho_slug: data.subnichoSlug ?? null,
+      plan_tier: data.planTier ?? null,
+      selected_modules: data.selectedModules ?? [],
+      intent_id: data.intentId ?? null,
+      session_token: data.sessionToken ?? null,
+      metadata: data.metadata ?? {},
+    })
+    if (error) throw error
+    return { ok: true }
+  })
+
+// --------- Conversion analytics (staff) ---------
+
+export const getCatalogAnalytics = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z.object({ days: z.number().int().min(1).max(180).default(30) }).parse(data ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: isStaff } = await context.supabase.rpc('is_impulsionando_staff', {
+      _user: context.userId,
+    })
+    if (!isStaff) throw new Error('Forbidden')
+
+    const since = new Date(Date.now() - data.days * 86400_000).toISOString()
+    const [evRes, intentRes] = await Promise.all([
+      context.supabase
+        .from('catalog_events')
+        .select('event_name,macro_slug,subnicho_slug,plan_tier,created_at')
+        .gte('created_at', since),
+      context.supabase
+        .from('catalog_intents')
+        .select('macro_slug,subnicho_slug,plan_tier,consumed_at,created_at')
+        .gte('created_at', since),
+    ])
+    if (evRes.error) throw evRes.error
+    if (intentRes.error) throw intentRes.error
+
+    type Row = {
+      macro: string
+      sub: string
+      plan: string
+      views: number
+      selects: number
+      intents: number
+      consumed: number
+    }
+    const map = new Map<string, Row>()
+    const key = (m: string | null, s: string | null, p: string | null) =>
+      `${m ?? '-'}|${s ?? '-'}|${p ?? '-'}`
+    const ensure = (m: string | null, s: string | null, p: string | null): Row => {
+      const k = key(m, s, p)
+      let row = map.get(k)
+      if (!row) {
+        row = {
+          macro: m ?? '-',
+          sub: s ?? '-',
+          plan: p ?? '-',
+          views: 0,
+          selects: 0,
+          intents: 0,
+          consumed: 0,
+        }
+        map.set(k, row)
+      }
+      return row
+    }
+    for (const e of evRes.data ?? []) {
+      const r = ensure(e.macro_slug, e.subnicho_slug, e.plan_tier)
+      if (e.event_name === 'view_plans') r.views += 1
+      else if (e.event_name === 'select_module' || e.event_name === 'select_sub') r.selects += 1
+    }
+    for (const i of intentRes.data ?? []) {
+      const r = ensure(i.macro_slug, i.subnicho_slug, i.plan_tier)
+      r.intents += 1
+      if (i.consumed_at) r.consumed += 1
+    }
+    const rows = Array.from(map.values()).sort((a, b) => b.intents - a.intents)
+    const totals = rows.reduce(
+      (acc, r) => {
+        acc.views += r.views
+        acc.selects += r.selects
+        acc.intents += r.intents
+        acc.consumed += r.consumed
+        return acc
+      },
+      { views: 0, selects: 0, intents: 0, consumed: 0 },
+    )
+    return { rows, totals, days: data.days }
+  })
+
+// --------- Mark intent consumed (called from onboarding once opened) ---------
+
+export const consumeCatalogIntent = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from('catalog_intents')
+      .update({ consumed_at: new Date().toISOString(), user_id: context.userId })
+      .eq('id', data.id)
+      .is('consumed_at', null)
+    if (error) throw error
+    return { ok: true }
+  })
+
 // --------- Admin: manage niche → plan → modules ---------
 
 const UpsertInput = z.object({
