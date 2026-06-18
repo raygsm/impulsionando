@@ -404,6 +404,10 @@ function WhatsAppMetricsPage() {
       <Tabs defaultValue="dashboard">
         <TabsList>
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+          <TabsTrigger value="rules">
+            <ShieldAlert className="w-4 h-4 mr-1" /> Regras + Resumo diário
+            {rules.length > 0 && <Badge variant="secondary" className="ml-2">{rules.length}</Badge>}
+          </TabsTrigger>
           <TabsTrigger value="history">
             <History className="w-4 h-4 mr-1" /> Histórico de alertas
             {history.length > 0 && (
@@ -411,6 +415,8 @@ function WhatsAppMetricsPage() {
             )}
           </TabsTrigger>
         </TabsList>
+
+
 
         <TabsContent value="dashboard" className="space-y-6 mt-4">
           {/* Filtros */}
