@@ -63,6 +63,7 @@ function ConsumidorDashboardPage() {
     staleTime: 60_000,
   });
 
+  const reducedMotion = usePrefersReducedMotion();
   const navRef = useRef<HTMLDivElement>(null);
   const [headerOffset, setHeaderOffset] = useState(72);
   const [activeId, setActiveId] = useState<string>(() => {
