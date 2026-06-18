@@ -167,6 +167,7 @@ export const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: "Administração",
+    audiences: ["empresa", "core"],
     items: [
       { to: "/companies", label: "Empresas", icon: Building2, superOnly: true },
       { to: "/niches", label: "Nichos", icon: Tags, superOnly: true },
