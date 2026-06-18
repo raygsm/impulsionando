@@ -234,6 +234,7 @@ import { Route as AuthenticatedFinanceCockpitRouteImport } from './routes/_authe
 import { Route as AuthenticatedFinanceCategoriesRouteImport } from './routes/_authenticated/finance.categories'
 import { Route as AuthenticatedFinanceAccountsRouteImport } from './routes/_authenticated/finance.accounts'
 import { Route as AuthenticatedEventosIdRouteImport } from './routes/_authenticated/eventos.$id'
+import { Route as AuthenticatedEmpresaTalentosRouteImport } from './routes/_authenticated/empresa.talentos'
 import { Route as AuthenticatedEhrIdRouteImport } from './routes/_authenticated/ehr.$id'
 import { Route as AuthenticatedEducacaoPolosRouteImport } from './routes/_authenticated/educacao.polos'
 import { Route as AuthenticatedEducacaoDashboardRouteImport } from './routes/_authenticated/educacao.dashboard'
@@ -1583,6 +1584,12 @@ const AuthenticatedEventosIdRoute = AuthenticatedEventosIdRouteImport.update({
   path: '/eventos/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedEmpresaTalentosRoute =
+  AuthenticatedEmpresaTalentosRouteImport.update({
+    id: '/empresa/talentos',
+    path: '/empresa/talentos',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedEhrIdRoute = AuthenticatedEhrIdRouteImport.update({
   id: '/ehr/$id',
   path: '/ehr/$id',
@@ -2727,6 +2734,7 @@ export interface FileRoutesByFullPath {
   '/educacao/dashboard': typeof AuthenticatedEducacaoDashboardRoute
   '/educacao/polos': typeof AuthenticatedEducacaoPolosRoute
   '/ehr/$id': typeof AuthenticatedEhrIdRoute
+  '/empresa/talentos': typeof AuthenticatedEmpresaTalentosRoute
   '/eventos/$id': typeof AuthenticatedEventosIdRoute
   '/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
   '/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
@@ -3094,6 +3102,7 @@ export interface FileRoutesByTo {
   '/educacao/dashboard': typeof AuthenticatedEducacaoDashboardRoute
   '/educacao/polos': typeof AuthenticatedEducacaoPolosRoute
   '/ehr/$id': typeof AuthenticatedEhrIdRoute
+  '/empresa/talentos': typeof AuthenticatedEmpresaTalentosRoute
   '/eventos/$id': typeof AuthenticatedEventosIdRoute
   '/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
   '/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
@@ -3475,6 +3484,7 @@ export interface FileRoutesById {
   '/_authenticated/educacao/dashboard': typeof AuthenticatedEducacaoDashboardRoute
   '/_authenticated/educacao/polos': typeof AuthenticatedEducacaoPolosRoute
   '/_authenticated/ehr/$id': typeof AuthenticatedEhrIdRoute
+  '/_authenticated/empresa/talentos': typeof AuthenticatedEmpresaTalentosRoute
   '/_authenticated/eventos/$id': typeof AuthenticatedEventosIdRoute
   '/_authenticated/finance/accounts': typeof AuthenticatedFinanceAccountsRoute
   '/_authenticated/finance/categories': typeof AuthenticatedFinanceCategoriesRoute
@@ -3855,6 +3865,7 @@ export interface FileRouteTypes {
     | '/educacao/dashboard'
     | '/educacao/polos'
     | '/ehr/$id'
+    | '/empresa/talentos'
     | '/eventos/$id'
     | '/finance/accounts'
     | '/finance/categories'
@@ -4222,6 +4233,7 @@ export interface FileRouteTypes {
     | '/educacao/dashboard'
     | '/educacao/polos'
     | '/ehr/$id'
+    | '/empresa/talentos'
     | '/eventos/$id'
     | '/finance/accounts'
     | '/finance/categories'
@@ -4602,6 +4614,7 @@ export interface FileRouteTypes {
     | '/_authenticated/educacao/dashboard'
     | '/_authenticated/educacao/polos'
     | '/_authenticated/ehr/$id'
+    | '/_authenticated/empresa/talentos'
     | '/_authenticated/eventos/$id'
     | '/_authenticated/finance/accounts'
     | '/_authenticated/finance/categories'
@@ -6451,6 +6464,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEventosIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/empresa/talentos': {
+      id: '/_authenticated/empresa/talentos'
+      path: '/empresa/talentos'
+      fullPath: '/empresa/talentos'
+      preLoaderRoute: typeof AuthenticatedEmpresaTalentosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/ehr/$id': {
       id: '/_authenticated/ehr/$id'
       path: '/ehr/$id'
@@ -8127,6 +8147,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEducacaoDashboardRoute: typeof AuthenticatedEducacaoDashboardRoute
   AuthenticatedEducacaoPolosRoute: typeof AuthenticatedEducacaoPolosRoute
   AuthenticatedEhrIdRoute: typeof AuthenticatedEhrIdRoute
+  AuthenticatedEmpresaTalentosRoute: typeof AuthenticatedEmpresaTalentosRoute
   AuthenticatedEventosIdRoute: typeof AuthenticatedEventosIdRoute
   AuthenticatedImobiliariaAprovacoesRoute: typeof AuthenticatedImobiliariaAprovacoesRouteWithChildren
   AuthenticatedImobiliariaCampanhasRoute: typeof AuthenticatedImobiliariaCampanhasRoute
@@ -8252,6 +8273,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEducacaoDashboardRoute: AuthenticatedEducacaoDashboardRoute,
   AuthenticatedEducacaoPolosRoute: AuthenticatedEducacaoPolosRoute,
   AuthenticatedEhrIdRoute: AuthenticatedEhrIdRoute,
+  AuthenticatedEmpresaTalentosRoute: AuthenticatedEmpresaTalentosRoute,
   AuthenticatedEventosIdRoute: AuthenticatedEventosIdRoute,
   AuthenticatedImobiliariaAprovacoesRoute:
     AuthenticatedImobiliariaAprovacoesRouteWithChildren,
