@@ -3,7 +3,9 @@ import { useMemo, useState } from "react";
 import {
   MessageCircle, ArrowRight, Sparkles, PlayCircle, Calculator, Search,
   Settings, Eye, CheckCircle2, Rocket, AlertTriangle, TrendingDown, Mail, MessageSquare, Phone,
+  Building2, Gift,
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
