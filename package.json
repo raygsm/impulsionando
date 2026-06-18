@@ -18,7 +18,9 @@
     "security:check": "node scripts/check-security-findings.mjs",
     "security:baseline": "node scripts/check-security-findings.mjs --update-baseline",
     "ci:security": "bun run security:check && bun run test:rls:recent && bun run test:rls:storage",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:visual": "E2E_VISUAL=1 playwright test tests/e2e/dashboards-consumidor-subnav.spec.ts",
+    "test:e2e:visual:update": "E2E_VISUAL=1 playwright test tests/e2e/dashboards-consumidor-subnav.spec.ts --update-snapshots"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^2.0.48",

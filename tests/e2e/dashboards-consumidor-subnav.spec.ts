@@ -1365,4 +1365,250 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
       expect(announces.every((t) => !t.includes(label))).toBe(true);
     }
   });
+
+  test("RTL + reduced motion: Tab, Enter e Space movem foco e roving tabindex", async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({ reducedMotion: "reduce" });
+    const page = await context.newPage();
+    await login(page);
+
+    await page.goto(ROUTE);
+    await page.evaluate(() => {
+      document.documentElement.setAttribute("dir", "rtl");
+      document.documentElement.setAttribute("lang", "ar");
+      sessionStorage.removeItem("dashboards:consumidor:section");
+    });
+    await page.reload();
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(500);
+
+    // Tab into the chip with tabindex=0 (default = favoritos)
+    await page.locator(`#tab-favoritos`).focus();
+    let focusedId = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(focusedId).toBe("tab-favoritos");
+
+    // ArrowRight inside tablist → tab-historico (DOM order)
+    await page.keyboard.press("ArrowRight");
+    focusedId = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(focusedId).toBe("tab-historico");
+
+    // Enter activates → ARIA flips, roving moves, tabpanel focused, ring tokens stay
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(300);
+    await expect(page.locator(`#tab-historico`)).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(page.locator(`#tab-historico`)).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+    let roving = await page
+      .locator('[role="tab"][tabindex="0"]')
+      .evaluateAll((els) => els.map((e) => (e as HTMLElement).id));
+    expect(roving).toEqual(["tab-historico"]);
+    let panelFocused = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(panelFocused).toBe("historico");
+    const ringTokens = await page.locator(`#tab-historico`).evaluate((el) => {
+      const cls = (el as HTMLElement).className;
+      return (
+        cls.includes("focus-visible:ring-2") &&
+        cls.includes("focus-visible:ring-ring") &&
+        cls.includes("focus-visible:ring-offset-2")
+      );
+    });
+    expect(ringTokens).toBe(true);
+
+    // Move focus to next chip via ArrowRight, activate with Space
+    await page.locator(`#tab-historico`).focus();
+    await page.keyboard.press("ArrowRight");
+    focusedId = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(focusedId).toBe("tab-cupons");
+    await page.keyboard.press(" ");
+    await page.waitForTimeout(300);
+    await expect(page.locator(`#tab-cupons`)).toHaveAttribute("aria-selected", "true");
+    roving = await page
+      .locator('[role="tab"][tabindex="0"]')
+      .evaluateAll((els) => els.map((e) => (e as HTMLElement).id));
+    expect(roving).toEqual(["tab-cupons"]);
+    panelFocused = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(panelFocused).toBe("cupons");
+
+    // Reduced motion: tablist still has no scroll-snap
+    const snap = await page
+      .getByRole("tablist", { name: /Seções da Minha área/i })
+      .evaluate((el) => getComputedStyle(el).scrollSnapType);
+    expect(snap === "none" || snap === "" || snap.startsWith("none")).toBe(true);
+
+    await context.close();
+  });
+
+  test("mobile a11y: axe limpo após trocar seções em viewport reduzido", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`${ROUTE}#favoritos`);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(500);
+
+    // Switch via the mobile next button + a direct chip click
+    await page.getByRole("button", { name: /Próxima seção/i }).click();
+    await page.waitForTimeout(300);
+    await page.locator("#tab-vouchers").click();
+    await page.waitForTimeout(300);
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#vouchers");
+
+    const results = await new AxeBuilder({ page })
+      .include('[role="tablist"]')
+      .include('[role="tabpanel"]')
+      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+      .analyze();
+
+    const relevant = results.violations.filter((v) =>
+      [
+        "aria-valid-attr",
+        "aria-valid-attr-value",
+        "aria-required-attr",
+        "aria-required-children",
+        "aria-required-parent",
+        "aria-allowed-attr",
+        "aria-allowed-role",
+        "aria-roles",
+        "tabindex",
+        "duplicate-id",
+        "duplicate-id-aria",
+      ].includes(v.id),
+    );
+    if (relevant.length > 0) {
+      console.error(
+        "axe mobile violations:",
+        JSON.stringify(
+          relevant.map((v) => ({ id: v.id, help: v.help, nodes: v.nodes.length })),
+          null,
+          2,
+        ),
+      );
+    }
+    expect(relevant).toEqual([]);
+
+    // Structural invariants on mobile
+    const selectedCount = await page.locator('[role="tab"][aria-selected="true"]').count();
+    expect(selectedCount).toBe(1);
+    const rovingCount = await page.locator('[role="tab"][tabindex="0"]').count();
+    expect(rovingCount).toBe(1);
+    await expect(page.locator(`#tab-vouchers`)).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator(`#tab-vouchers`)).toHaveAttribute(
+      "aria-controls",
+      "vouchers",
+    );
+    await expect(page.locator(`#vouchers`)).toHaveAttribute("role", "tabpanel");
+    await expect(page.locator(`#vouchers`)).toHaveAttribute(
+      "aria-labelledby",
+      "tab-vouchers",
+    );
+
+    // Every aria-controls reference resolves to an existing tabpanel id
+    const orphanControls = await page.locator('[role="tab"]').evaluateAll((tabs) =>
+      tabs
+        .map((t) => (t as HTMLElement).getAttribute("aria-controls"))
+        .filter((id): id is string => !!id)
+        .filter((id) => !document.getElementById(id)),
+    );
+    expect(orphanControls).toEqual([]);
+  });
+
+  test("hash desconhecido + back/forward: chip padrão estável, anúncios não duplicam", async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      (window as unknown as { __liveAnnounces: string[] }).__liveAnnounces = [];
+      const obs = new MutationObserver(() => {
+        const live = document.querySelector('[role="status"][aria-live="polite"]');
+        const txt = (live?.textContent ?? "").trim();
+        const log = (window as unknown as { __liveAnnounces: string[] }).__liveAnnounces;
+        if (txt && log[log.length - 1] !== txt) log.push(txt);
+      });
+      const start = () => {
+        const live = document.querySelector('[role="status"][aria-live="polite"]');
+        if (!live) return false;
+        obs.observe(live, { childList: true, characterData: true, subtree: true });
+        const txt = (live.textContent ?? "").trim();
+        if (txt) (window as unknown as { __liveAnnounces: string[] }).__liveAnnounces.push(txt);
+        return true;
+      };
+      if (!start()) {
+        const i = setInterval(() => {
+          if (start()) clearInterval(i);
+        }, 50);
+      }
+    });
+
+    // Clear storage so the fallback truly comes from the default chip
+    await page.goto(ROUTE);
+    await page.evaluate(() =>
+      sessionStorage.removeItem("dashboards:consumidor:section"),
+    );
+
+    // 1) Open with an unknown hash — fallback to the default chip
+    await page.goto(`${ROUTE}#hash-invalido-xyz`);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(800);
+
+    const defaultId = SECTIONS[0];
+    await expect(page.locator(`#tab-${defaultId}`)).toHaveAttribute("tabindex", "0");
+
+    // 2) Navigate to a real section and back
+    await page.locator("#tab-cupons").click();
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#cupons");
+    await page.waitForTimeout(300);
+
+    await page.goBack();
+    await page.waitForTimeout(400);
+    // Hash returned to the (unknown) starting hash — default chip must stay stable
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe(
+      "#hash-invalido-xyz",
+    );
+    await expect(page.locator(`#tab-${defaultId}`)).toHaveAttribute("tabindex", "0");
+    const selectedAfterBack = await page
+      .locator('[role="tab"][aria-selected="true"]')
+      .count();
+    expect(selectedAfterBack).toBeLessThanOrEqual(1);
+
+    await page.goForward();
+    await page.waitForTimeout(400);
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#cupons");
+    await expect(page.locator("#tab-cupons")).toHaveAttribute("aria-selected", "true");
+
+    // 3) Live region announcements: deduped (no consecutive duplicates),
+    //    one entry per real section change, no labels other than cupons leaked.
+    const announces: string[] = await page.evaluate(
+      () => (window as unknown as { __liveAnnounces: string[] }).__liveAnnounces,
+    );
+    for (let i = 1; i < announces.length; i++) {
+      expect(announces[i]).not.toBe(announces[i - 1]);
+    }
+    const cuponsHits = announces.filter((t) => /Meus cupons/.test(t));
+    // One announcement when first navigated, plus optionally one on forward —
+    // but never zero, and never an explosion of duplicates.
+    expect(cuponsHits.length).toBeGreaterThanOrEqual(1);
+    expect(cuponsHits.length).toBeLessThanOrEqual(3);
+    for (const id of SECTIONS) {
+      if (id === "cupons" && /Meus cupons/) continue;
+      if (id === defaultId) continue;
+      const label = SECTIONS_LABELS[id];
+      if (id === "cupons") continue;
+      expect(announces.every((t) => !t.includes(label))).toBe(true);
+    }
+  });
 });

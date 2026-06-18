@@ -49,3 +49,27 @@ Em CI, falhas geram o `playwright-report/` que é anexado como artifact por 14 d
 ```bash
 bunx playwright show-report
 ```
+
+## Visual regression (E2E_VISUAL)
+
+Os testes de snapshot do sub-nav da Minha área são pulados por padrão no CI para
+não falhar em runs sem baseline. Para gerar os baselines iniciais (incluindo as
+variações com `reducedMotion: reduce`):
+
+```bash
+# 1) Local: gerar/atualizar todos os PNGs de referência
+export E2E_EMAIL=...
+export E2E_PASSWORD=...
+E2E_VISUAL=1 bunx playwright test tests/e2e/dashboards-consumidor-subnav.spec.ts \
+  --update-snapshots
+
+# 2) Commitar os arquivos sob tests/e2e/__snapshots__/ e
+#    tests/e2e/dashboards-consumidor-subnav.spec.ts-snapshots/
+git add tests/e2e/**/*.png
+```
+
+No CI, defina a variable `E2E_VISUAL=1` (Settings → Variables) para que os testes
+visuais rodem contra os baselines commitados. O primeiro run deve passar logo
+após o commit dos PNGs; mudanças intencionais de UI exigem `--update-snapshots`
+local e novo commit. Sem `E2E_VISUAL=1` o CI continua pulando esses cenários.
+
