@@ -2787,6 +2787,7 @@ export type Database = {
           pdv_company_id: string | null
           pdv_name: string
           pdv_state: string | null
+          portal_token: string
           updated_at: string
         }
         Insert: {
@@ -2803,6 +2804,7 @@ export type Database = {
           pdv_company_id?: string | null
           pdv_name: string
           pdv_state?: string | null
+          portal_token?: string
           updated_at?: string
         }
         Update: {
@@ -2819,6 +2821,7 @@ export type Database = {
           pdv_company_id?: string | null
           pdv_name?: string
           pdv_state?: string | null
+          portal_token?: string
           updated_at?: string
         }
         Relationships: [
@@ -12437,6 +12440,21 @@ export type Database = {
       render_template: {
         Args: { _payload: Json; _template: string }
         Returns: string
+      }
+      resolve_brewery_portal_token: {
+        Args: { _token: string }
+        Returns: {
+          brand_id: string
+          brand_logo_url: string
+          brand_name: string
+          brand_slug: string
+          contact_name: string
+          contract_status: string
+          pdv_city: string
+          pdv_link_id: string
+          pdv_name: string
+          pdv_state: string
+        }[]
       }
       resolve_table_qr: { Args: { _token: string }; Returns: Json }
       restaurant_create_table_invoice: {
