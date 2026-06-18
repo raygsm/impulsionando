@@ -26,6 +26,18 @@ const brl = (cents: number) =>
 const dt = (s: string | null | undefined) =>
   s ? new Date(s).toLocaleDateString("pt-BR") : "—";
 
+const SECTIONS: Array<{ id: string; label: string }> = [
+  { id: "favoritos", label: "Meus favoritos" },
+  { id: "historico", label: "Histórico de visitas" },
+  { id: "cupons", label: "Meus cupons" },
+  { id: "vouchers", label: "Meus vouchers" },
+  { id: "reservas", label: "Minhas reservas" },
+  { id: "avaliacoes", label: "Minhas avaliações" },
+  { id: "comprovantes", label: "Comprovantes" },
+  { id: "notas", label: "Minhas notas" },
+  { id: "creditos", label: "Meus créditos" },
+];
+
 function ConsumidorDashboardPage() {
   const fn = useServerFn(fetchConsumidorDashboard);
   const { data, isLoading, error } = useQuery({
@@ -34,12 +46,73 @@ function ConsumidorDashboardPage() {
     staleTime: 60_000,
   });
 
+  const [activeId, setActiveId] = useState<string>(() => {
+    if (typeof window === "undefined") return "";
+    return window.location.hash.replace("#", "");
+  });
+
+  // Restore scroll on initial load with hash
+  useEffect(() => {
+    if (typeof window === "undefined" || isLoading) return;
+    const hash = window.location.hash.replace("#", "");
+    if (hash && SECTIONS.some((s) => s.id === hash)) {
+      requestAnimationFrame(() => {
+        const el = document.getElementById(hash);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  }, [isLoading]);
+
+  // Scroll-spy: mark active chip while scrolling
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const elements = SECTIONS
+      .map((s) => document.getElementById(s.id))
+      .filter((el): el is HTMLElement => !!el);
+    if (elements.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        if (visible[0]?.target?.id) {
+          const id = visible[0].target.id;
+          setActiveId(id);
+          // Update URL hash without scroll jump
+          const newUrl = `${window.location.pathname}${window.location.search}#${id}`;
+          window.history.replaceState(null, "", newUrl);
+        }
+      },
+      { rootMargin: "-30% 0px -55% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] }
+    );
+    elements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [data]);
+
+  const activeLabel = SECTIONS.find((s) => s.id === activeId)?.label;
+
   return (
     <div className="space-y-6">
-      <nav aria-label="Trilha" className="flex items-center gap-1.5 text-xs text-muted-foreground">
+      <nav aria-label="Trilha" className="flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap">
+        <Link to="/dashboard" className="hover:text-foreground transition-colors">Início</Link>
+        <span className="opacity-50">›</span>
         <Link to="/clube" className="hover:text-foreground transition-colors">Clube</Link>
         <span className="opacity-50">›</span>
-        <span className="text-foreground font-medium">Minha área</span>
+        {activeLabel ? (
+          <>
+            <Link
+              to="/dashboards/consumidor"
+              className="hover:text-foreground transition-colors"
+            >
+              Minha área
+            </Link>
+            <span className="opacity-50">›</span>
+            <span className="text-foreground font-medium">{activeLabel}</span>
+          </>
+        ) : (
+          <span className="text-foreground font-medium">Minha área</span>
+        )}
       </nav>
 
       <PageHeader
@@ -47,7 +120,9 @@ function ConsumidorDashboardPage() {
         description="Tudo o que você curte, consome e economiza num só lugar."
       />
 
-      <SectionNav />
+      <SectionNav activeId={activeId} onSelect={setActiveId} />
+
+
 
 
       {error && (
