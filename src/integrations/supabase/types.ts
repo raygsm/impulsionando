@@ -3465,6 +3465,68 @@ export type Database = {
           },
         ]
       }
+      companies_vitrine_public: {
+        Row: {
+          address_city: string | null
+          address_state: string | null
+          company_type: string | null
+          facebook: string | null
+          id: string
+          instagram: string | null
+          logo_url: string | null
+          name: string
+          primary_color: string | null
+          public_slug: string
+          secondary_color: string | null
+          segment: string | null
+          trade_name: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address_city?: string | null
+          address_state?: string | null
+          company_type?: string | null
+          facebook?: string | null
+          id: string
+          instagram?: string | null
+          logo_url?: string | null
+          name: string
+          primary_color?: string | null
+          public_slug: string
+          secondary_color?: string | null
+          segment?: string | null
+          trade_name?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address_city?: string | null
+          address_state?: string | null
+          company_type?: string | null
+          facebook?: string | null
+          id?: string
+          instagram?: string | null
+          logo_url?: string | null
+          name?: string
+          primary_color?: string | null
+          public_slug?: string
+          secondary_color?: string | null
+          segment?: string | null
+          trade_name?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "companies_vitrine_public_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_modules: {
         Row: {
           company_id: string
