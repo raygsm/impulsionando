@@ -23,6 +23,18 @@ const SECTIONS = [
   "creditos",
 ] as const;
 
+const SECTIONS_LABELS: Record<(typeof SECTIONS)[number], string> = {
+  favoritos: "Meus favoritos",
+  historico: "Histórico de visitas",
+  cupons: "Meus cupons",
+  vouchers: "Meus vouchers",
+  reservas: "Minhas reservas",
+  avaliacoes: "Minhas avaliações",
+  comprovantes: "Comprovantes",
+  notas: "Minhas notas",
+  creditos: "Meus créditos",
+};
+
 async function login(page: Page) {
   await page.goto("/auth");
   await page.getByLabel(/e-?mail/i).first().fill(EMAIL!);
@@ -640,5 +652,237 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
         (el as HTMLElement).className.includes("focus-visible:ring-ring"),
       );
     expect(stillHasRing).toBe(true);
+  });
+
+  test("prefers-reduced-motion: snap/animação desativados, ARIA e live region OK", async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({ reducedMotion: "reduce" });
+    const page = await context.newPage();
+    await login(page);
+    await page.goto(ROUTE);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(400);
+
+    const tablist = page.getByRole("tablist", { name: /Seções da Minha área/i });
+    const snap = await tablist.evaluate((el) => getComputedStyle(el).scrollSnapType);
+    expect(snap === "none" || snap === "" || snap.startsWith("none")).toBe(true);
+
+    // Chips should not carry snap-start when reduced motion is on
+    const chipSnap = await page
+      .locator('#tab-cupons')
+      .evaluate((el) => (el as HTMLElement).className.includes("snap-start"));
+    expect(chipSnap).toBe(false);
+
+    // Activate a chip and confirm ARIA + hash + live region still update
+    const live = page.locator('[role="status"][aria-live="polite"]');
+    await page.getByRole("tab", { name: /Meus cupons/i }).click();
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#cupons");
+    await expect(page.locator('#tab-cupons')).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator('#tab-cupons')).toHaveAttribute("aria-current", "true");
+    await expect(live).toContainText(/Meus cupons/i);
+
+    await context.close();
+  });
+
+  test("mobile: rotação após seleção mantém seção ativa e foco do tabpanel", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(ROUTE);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(500);
+
+    // Select via keyboard so we can assert tabpanel focus afterwards
+    await page.locator('#tab-favoritos').focus();
+    await page.keyboard.press("ArrowRight"); // → historico
+    await page.keyboard.press("ArrowRight"); // → cupons
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(450);
+
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#cupons");
+    const focusedBefore = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(focusedBefore).toBe("cupons");
+
+    // Rotate to landscape and dispatch orientationchange
+    await page.setViewportSize({ width: 844, height: 390 });
+    await page.evaluate(() => window.dispatchEvent(new Event("orientationchange")));
+    await page.waitForTimeout(600);
+
+    // Active section and ARIA must remain pointing to cupons
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#cupons");
+    await expect(page.locator('#tab-cupons')).toHaveAttribute("aria-selected", "true");
+
+    // The tabpanel should still hold (or have been restored to) focus on the panel.
+    // If the browser dropped focus during the viewport change, the focused element
+    // must at minimum still belong to the cupons section (panel or its descendants).
+    const stillInPanel = await page.evaluate(() => {
+      const active = document.activeElement as HTMLElement | null;
+      if (!active) return false;
+      if (active.id === "cupons") return true;
+      const panel = document.getElementById("cupons");
+      return !!panel && panel.contains(active);
+    });
+    expect(stillInPanel).toBe(true);
+
+    // Section is still docked under the (possibly new) sticky header offset
+    const offset = await page.evaluate(() =>
+      Number(
+        getComputedStyle(document.getElementById("cupons")!)
+          .getPropertyValue("--sec-offset")
+          .replace("px", "")
+          .trim() || "0",
+      ),
+    );
+    const top = await page
+      .locator("#cupons")
+      .evaluate((el) => el.getBoundingClientRect().top);
+    expect(top).toBeLessThan(offset + 48);
+    expect(top).toBeGreaterThan(-50);
+  });
+
+  test("teclado: Home/End movem foco para primeira/última chip com ARIA correto", async ({
+    page,
+  }) => {
+    await page.goto(`${ROUTE}#cupons`);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(400);
+
+    const firstId = SECTIONS[0];
+    const lastId = SECTIONS[SECTIONS.length - 1];
+    const live = page.locator('[role="status"][aria-live="polite"]');
+
+    // Focus into the tablist and press End → focus jumps to last chip
+    await page.locator('#tab-cupons').focus();
+    await page.keyboard.press("End");
+    let focusedId = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(focusedId).toBe(`tab-${lastId}`);
+
+    // Focus-ring tokens still present on the chip that received focus
+    const lastRing = await page
+      .locator(`#tab-${lastId}`)
+      .evaluate((el) => {
+        const cls = (el as HTMLElement).className;
+        return (
+          cls.includes("focus-visible:ring-2") &&
+          cls.includes("focus-visible:ring-ring") &&
+          cls.includes("focus-visible:ring-offset-2")
+        );
+      });
+    expect(lastRing).toBe(true);
+
+    // Activate with Enter → ARIA + tabpanel focus must update
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(450);
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe(`#${lastId}`);
+    await expect(page.locator(`#tab-${lastId}`)).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(page.locator(`#tab-${lastId}`)).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+    let panelId = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(panelId).toBe(lastId);
+    await expect(live).toContainText(
+      new RegExp(
+        SECTIONS_LABELS[lastId].replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+        "i",
+      ),
+    );
+
+    // Home → first chip, then Space activates and focuses its tabpanel
+    await page.locator(`#tab-${lastId}`).focus();
+    await page.keyboard.press("Home");
+    focusedId = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(focusedId).toBe(`tab-${firstId}`);
+
+    await page.keyboard.press(" ");
+    await page.waitForTimeout(450);
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe(`#${firstId}`);
+    await expect(page.locator(`#tab-${firstId}`)).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    panelId = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(panelId).toBe(firstId);
+    await expect(live).toContainText(
+      new RegExp(
+        SECTIONS_LABELS[firstId].replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+        "i",
+      ),
+    );
+
+    // Roving tabindex moved with the active chip
+    const tabbables = await page
+      .locator('[role="tab"][tabindex="0"]')
+      .evaluateAll((els) => els.map((e) => (e as HTMLElement).id));
+    expect(tabbables).toEqual([`tab-${firstId}`]);
+  });
+
+  test("rápido: troca em rajada via Alt+Arrow anuncia apenas a última seção", async ({
+    page,
+  }) => {
+    await page.goto(`${ROUTE}#favoritos`);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(400);
+
+    const live = page.locator('[role="status"][aria-live="polite"]');
+    await page.locator("body").focus();
+
+    // Burst: Alt+ArrowRight x4 — should land on SECTIONS[4] = avaliacoes
+    for (let i = 0; i < 4; i++) {
+      await page.keyboard.press("Alt+ArrowRight");
+    }
+    await page.waitForTimeout(400);
+
+    const targetIdx = 4;
+    const targetId = SECTIONS[targetIdx];
+    const targetLabel = SECTIONS_LABELS[targetId];
+
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe(`#${targetId}`);
+    await expect(page.locator(`#tab-${targetId}`)).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+
+    // Live region must show ONLY the latest active label (no stale text)
+    const liveText = ((await live.textContent()) ?? "").trim();
+    expect(liveText).toContain(targetLabel);
+
+    // Verify no other section label leaked into the live region text
+    for (const id of SECTIONS) {
+      if (id === targetId) continue;
+      const label = SECTIONS_LABELS[id];
+      expect(liveText).not.toContain(label);
+    }
+
+    // Add Enter + Space bursts to confirm activation announcements also collapse
+    await page.locator(`#tab-${targetId}`).focus();
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press(" ");
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(450);
+
+    const finalId = SECTIONS[targetIdx + 2];
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe(`#${finalId}`);
+    const finalText = ((await live.textContent()) ?? "").trim();
+    expect(finalText).toContain(SECTIONS_LABELS[finalId]);
+    for (const id of SECTIONS) {
+      if (id === finalId) continue;
+      expect(finalText).not.toContain(SECTIONS_LABELS[id]);
+    }
   });
 });
