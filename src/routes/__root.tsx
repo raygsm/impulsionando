@@ -85,7 +85,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      { name: "theme-color", content: "#0F172A" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "Impulsionando" },
+      { name: "mobile-web-app-capable", content: "yes" },
       { title: "Impulsionando Tecnologia — Plataforma SaaS Multiempresa" },
       { name: "description", content: "Plataforma SaaS multiempresa modular: CRM, agenda online, WhatsApp, pagamentos, emissão fiscal, estoque, BI e automação para empresas que precisam crescer com controle." },
       { name: "author", content: "Impulsionando Tecnologia" },
