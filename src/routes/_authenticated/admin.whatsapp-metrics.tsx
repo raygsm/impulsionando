@@ -77,6 +77,7 @@ function WhatsAppMetricsPage() {
   const [history, setHistory] = useState<AlertHistoryEntry[]>([]);
   const [tick, setTick] = useState(0);
   const [cfg, setCfg] = useState<AlertConfig>(DEFAULT_ALERT_CONFIG);
+  const [tpl, setTpl] = useState<AlertTemplate>(DEFAULT_ALERT_TEMPLATE);
   const notify = useServerFn(notifyWhatsAppAlert);
 
   // filtros do dashboard
@@ -89,11 +90,13 @@ function WhatsAppMetricsPage() {
   const today = new Date().toISOString().slice(0, 10);
   const [hFrom, setHFrom] = useState("");
   const [hTo, setHTo] = useState("");
+  const [hCta, setHCta] = useState("__all");
 
   useEffect(() => {
     setAll(readWhatsAppLocalMetrics());
     setCfg(readAlertConfig());
     setHistory(readAlertHistory());
+    setTpl(readAlertTemplate());
   }, [tick]);
 
   const filtered = useMemo(() => {
