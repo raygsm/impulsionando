@@ -1,16 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
 import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
-import { ArrowRight, Check, Layers, Sparkles, Package, Workflow } from 'lucide-react'
+import { ArrowRight, Check, Layers, Workflow, Sparkles, Lock } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { PublicHeader } from '@/components/marketing/PublicHeader'
 import { PublicFooter } from '@/components/marketing/PublicFooter'
 import { getCatalog } from '@/lib/catalogo.functions'
+import { CORE_BASE, PLAN_TIERS, PLANS_BY_MACRO, type PlanTier } from '@/lib/niche-plans'
 
 const catalogQuery = queryOptions({
-  queryKey: ['catalogo', 'v1'],
+  queryKey: ['catalogo', 'v2'],
   queryFn: () => getCatalog(),
   staleTime: 5 * 60 * 1000,
 })
@@ -18,16 +19,16 @@ const catalogQuery = queryOptions({
 export const Route = createFileRoute('/catalogo')({
   head: () => ({
     meta: [
-      { title: 'Catálogo Impulsionando — Macro Nicho, Subnicho, Template e Plano' },
+      { title: 'Planos por nicho — Impulsionando' },
       {
         name: 'description',
         content:
-          'Monte sua assinatura em 4 passos: escolha o macro nicho, o subnicho, o template e o plano. Capacidade e módulos automáticos.',
+          'Primeiro o nicho, depois o plano. Core Base comum + módulos especializados do seu segmento. Essencial, Ideal e Full.',
       },
-      { property: 'og:title', content: 'Catálogo Impulsionando' },
+      { property: 'og:title', content: 'Planos por nicho — Impulsionando' },
       {
         property: 'og:description',
-        content: 'Macro Nicho → Subnicho → Template → Plano. Simples para escolher, escalável por design.',
+        content: 'Escolha seu Macro Nicho e Subnicho. Os planos se adaptam aos módulos do seu segmento.',
       },
     ],
     links: [{ rel: 'canonical', href: 'https://impulsionando.com.br/catalogo' }],
@@ -35,8 +36,8 @@ export const Route = createFileRoute('/catalogo')({
   loader: ({ context }) => context.queryClient.ensureQueryData(catalogQuery),
   component: CatalogoPage,
   errorComponent: ({ error }) => (
-    <div className="p-8 text-center">
-      <p className="text-destructive">Não foi possível carregar o catálogo.</p>
+    <div className="mx-auto max-w-3xl px-4 py-16 text-center">
+      <p className="text-destructive font-medium">Não foi possível carregar o catálogo.</p>
       <p className="text-xs text-muted-foreground mt-2">{(error as Error)?.message}</p>
     </div>
   ),
@@ -44,79 +45,90 @@ export const Route = createFileRoute('/catalogo')({
 
 function CatalogoPage() {
   const { data } = useSuspenseQuery(catalogQuery)
-  const { macros, subs, templates, plans } = data
+  const { macros, subs } = data
 
-  const [macroId, setMacroId] = useState<string | null>(macros[0]?.id ?? null)
+  const [macroSlug, setMacroSlug] = useState<string | null>(null)
   const [subId, setSubId] = useState<string | null>(null)
-  const [templateId, setTemplateId] = useState<string | null>(null)
-  const [planCode, setPlanCode] = useState<string | null>(null)
 
-  const visibleSubs = useMemo(() => subs.filter((s) => s.macro_id === macroId), [subs, macroId])
-  const visibleTemplates = useMemo(
-    () => templates.filter((t) => t.subnicho_id === subId),
-    [templates, subId],
+  const selectedMacro = useMemo(
+    () => macros.find((m) => m.slug === macroSlug) ?? null,
+    [macros, macroSlug],
   )
-  const selectedTemplate = templates.find((t) => t.id === templateId) ?? null
-  const selectedPlan = plans.find((p) => p.code === planCode) ?? null
+  const visibleSubs = useMemo(
+    () => (selectedMacro ? subs.filter((s) => s.macro_id === selectedMacro.id) : []),
+    [subs, selectedMacro],
+  )
+  const selectedSub = useMemo(
+    () => visibleSubs.find((s) => s.id === subId) ?? null,
+    [visibleSubs, subId],
+  )
+
+  const planSpec = selectedMacro ? PLANS_BY_MACRO[selectedMacro.slug] : null
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
 
+      {/* HERO */}
       <section className="bg-gradient-hero text-primary-foreground">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-14">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs mb-4">
-            <Layers className="w-3.5 h-3.5" /> Catálogo Impulsionando
+            <Layers className="w-3.5 h-3.5" /> Planos por nicho
           </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight max-w-3xl">
-            Monte a sua assinatura em 4 passos.
+            Primeiro o nicho. Depois o plano.
           </h1>
-          <p className="mt-3 text-lg text-white/85 max-w-2xl">
-            Macro Nicho → Subnicho → Template → Plano. A plataforma calcula capacidade, módulos e
-            faturamento automaticamente.
+          <p className="mt-3 text-base sm:text-lg text-white/85 max-w-2xl">
+            Todo plano vem com o <strong>Core Base</strong>. Os módulos especializados mudam
+            conforme o seu segmento — sem poluição visual, sem oferta genérica.
           </p>
         </div>
       </section>
 
-      <main className="mx-auto max-w-6xl w-full px-4 sm:px-6 lg:px-8 py-10 space-y-10">
-        {/* Step 1 — Macro */}
-        <Step n={1} title="Escolha o macro nicho" icon={Layers} done={!!macroId}>
+      <main className="mx-auto max-w-6xl w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-12 space-y-10">
+        {/* STEP 1 — MACRO */}
+        <Step n={1} title="Escolha o macro nicho" icon={Layers} done={!!macroSlug}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {macros.map((m) => (
-              <button
-                key={m.id}
-                type="button"
-                onClick={() => {
-                  setMacroId(m.id)
-                  setSubId(null)
-                  setTemplateId(null)
-                }}
-                aria-pressed={macroId === m.id}
-                className={`text-left p-4 rounded-lg border transition ${
-                  macroId === m.id
-                    ? 'border-primary bg-primary/5 ring-2 ring-primary/30'
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <div className="font-semibold">{m.nome}</div>
-                <div className="text-xs text-muted-foreground mt-1">{m.slug}</div>
-              </button>
-            ))}
+            {macros.map((m) => {
+              const active = macroSlug === m.slug
+              const supported = !!PLANS_BY_MACRO[m.slug]
+              return (
+                <button
+                  key={m.id}
+                  type="button"
+                  disabled={!supported}
+                  onClick={() => {
+                    setMacroSlug(m.slug)
+                    setSubId(null)
+                  }}
+                  aria-pressed={active}
+                  className={`text-left p-4 rounded-lg border transition ${
+                    active
+                      ? 'border-primary bg-primary/5 ring-2 ring-primary/30'
+                      : supported
+                        ? 'border-border hover:border-primary/50'
+                        : 'border-border opacity-50 cursor-not-allowed'
+                  }`}
+                >
+                  <div className="font-semibold text-sm sm:text-base">{m.nome}</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {supported ? 'Planos disponíveis' : 'Em breve'}
+                  </div>
+                </button>
+              )
+            })}
           </div>
         </Step>
 
-        {/* Step 2 — Sub */}
-        {macroId && (
+        {/* STEP 2 — SUB */}
+        {selectedMacro && (
           <Step n={2} title="Escolha o subnicho" icon={Workflow} done={!!subId}>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
               {visibleSubs.map((s) => (
                 <button
                   key={s.id}
                   type="button"
-                  onClick={() => {
-                    setSubId(s.id)
-                    setTemplateId(null)
-                  }}
+                  onClick={() => setSubId(s.id)}
                   aria-pressed={subId === s.id}
                   className={`text-left p-3 rounded-lg border text-sm transition ${
                     subId === s.id
@@ -131,126 +143,155 @@ function CatalogoPage() {
           </Step>
         )}
 
-        {/* Step 3 — Template */}
-        {subId && (
-          <Step n={3} title="Escolha o template" icon={Package} done={!!templateId}>
-            <div className="grid md:grid-cols-2 gap-4">
-              {visibleTemplates.map((t) => (
-                <Card
-                  key={t.id}
-                  className={`p-5 cursor-pointer transition ${
-                    templateId === t.id ? 'ring-2 ring-primary' : 'hover:shadow-md'
-                  }`}
-                  onClick={() => setTemplateId(t.id)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      setTemplateId(t.id)
-                    }
-                  }}
-                  aria-pressed={templateId === t.id}
-                >
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <h3 className="font-semibold">{t.nome}</h3>
-                    {t.destaque && <Badge>Recomendado</Badge>}
+        {/* STEP 3 — PLANOS POR NICHO */}
+        {selectedMacro && selectedSub && planSpec && (
+          <section aria-labelledby="planos-titulo" className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div
+                className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold"
+                aria-hidden
+              >
+                <Check className="w-4 h-4" />
+              </div>
+              <div>
+                <h2 id="planos-titulo" className="text-xl sm:text-2xl font-semibold">
+                  Planos para {selectedSub.nome}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {selectedMacro.nome} · módulos específicos do seu segmento
+                </p>
+              </div>
+            </div>
+
+            {/* Core Base banner */}
+            <Card className="p-5 bg-muted/30 border-dashed">
+              <div className="flex items-start gap-3">
+                <Sparkles className="w-5 h-5 text-primary mt-0.5 shrink-0" aria-hidden />
+                <div className="flex-1">
+                  <div className="font-semibold mb-2">
+                    Core Base — incluso em todos os planos
                   </div>
-                  <p className="text-sm text-muted-foreground">{t.descricao}</p>
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {(t.modulos ?? []).map((m) => (
-                      <Badge key={m} variant="secondary" className="text-[10px]">
-                        {m}
+                  <div className="flex flex-wrap gap-1.5">
+                    {CORE_BASE.map((m) => (
+                      <Badge key={m} variant="secondary" className="text-[11px] font-normal">
+                        <Check className="w-3 h-3 mr-1" /> {m}
                       </Badge>
                     ))}
                   </div>
-                </Card>
-              ))}
-            </div>
-          </Step>
-        )}
-
-        {/* Step 4 — Plan */}
-        {templateId && (
-          <Step n={4} title="Escolha o plano" icon={Sparkles} done={!!planCode}>
-            <div className="grid md:grid-cols-3 gap-4">
-              {plans.map((p) => {
-                const active = planCode === p.code
-                return (
-                  <Card
-                    key={p.id}
-                    className={`p-5 cursor-pointer transition ${
-                      active ? 'ring-2 ring-primary' : 'hover:shadow-md'
-                    }`}
-                    onClick={() => setPlanCode(p.code)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault()
-                        setPlanCode(p.code)
-                      }
-                    }}
-                    aria-pressed={active}
-                  >
-                    <div className="font-semibold text-lg">{p.name}</div>
-                    {p.description && (
-                      <p className="text-sm text-muted-foreground mt-1">{p.description}</p>
-                    )}
-                    <div className="mt-3 text-2xl font-bold">
-                      {p.recurring_amount
-                        ? `R$ ${Number(p.recurring_amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
-                        : 'Sob consulta'}
-                      <span className="text-xs font-normal text-muted-foreground">
-                        {' '}
-                        / {p.cycle ?? 'mês'}
-                      </span>
-                    </div>
-                    {p.included_module_count != null && (
-                      <div className="text-xs text-muted-foreground mt-2">
-                        {p.included_module_count} módulos inclusos
-                        {p.extra_module_price ? ` · extra R$ ${p.extra_module_price}` : ''}
-                      </div>
-                    )}
-                    {active && (
-                      <div className="mt-3 text-sm text-primary flex items-center gap-1">
-                        <Check className="w-4 h-4" /> Selecionado
-                      </div>
-                    )}
-                  </Card>
-                )
-              })}
-            </div>
-          </Step>
-        )}
-
-        {/* Summary CTA */}
-        {selectedTemplate && selectedPlan && (
-          <Card className="p-6 bg-primary/5 border-primary/30">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div>
-                <div className="text-sm text-muted-foreground">Sua escolha</div>
-                <div className="font-semibold text-lg">
-                  {selectedTemplate.nome} · {selectedPlan.name}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {(selectedTemplate.modulos ?? []).length} módulos no template ·{' '}
-                  {selectedPlan.included_module_count ?? '?'} inclusos no plano
                 </div>
               </div>
-              <Button asChild size="lg">
-                <a
-                  href={`/onboarding?template=${encodeURIComponent(selectedTemplate.slug)}&plano=${encodeURIComponent(selectedPlan.code)}`}
-                >
-                  {selectedPlan.cta ?? 'Começar agora'} <ArrowRight className="w-4 h-4 ml-2" />
-                </a>
-              </Button>
+            </Card>
+
+            {/* Plans grid */}
+            <div className="grid md:grid-cols-3 gap-4">
+              {PLAN_TIERS.map((p) => (
+                <PlanCard
+                  key={p.tier}
+                  tier={p.tier}
+                  name={p.name}
+                  price={p.price}
+                  tagline={p.tagline}
+                  spec={planSpec}
+                  subSlug={selectedSub.slug}
+                />
+              ))}
             </div>
-          </Card>
+          </section>
         )}
       </main>
 
       <PublicFooter />
+    </div>
+  )
+}
+
+function PlanCard({
+  tier,
+  name,
+  price,
+  tagline,
+  spec,
+  subSlug,
+}: {
+  tier: PlanTier
+  name: string
+  price: string
+  tagline: string
+  spec: (typeof PLANS_BY_MACRO)[string]
+  subSlug: string
+}) {
+  const highlighted = tier === 'ideal'
+  return (
+    <Card
+      className={`p-6 flex flex-col h-full ${
+        highlighted ? 'ring-2 ring-primary shadow-lg relative' : ''
+      }`}
+    >
+      {highlighted && (
+        <Badge className="absolute -top-2 left-1/2 -translate-x-1/2">Recomendado</Badge>
+      )}
+
+      <div className="font-semibold text-lg">{name}</div>
+      <div className="text-2xl font-bold mt-1">{price}</div>
+      <p className="text-sm text-muted-foreground mt-1">{tagline}</p>
+
+      <div className="mt-5 flex-1 space-y-3">
+        {tier === 'essencial' && (
+          <ModuleList
+            title="Escolha 1 módulo principal"
+            modules={spec.essencialChoose1}
+            limit={1}
+          />
+        )}
+        {tier === 'ideal' && (
+          <ModuleList title="Escolha até 3 módulos" modules={spec.idealChoose3} limit={3} />
+        )}
+        {tier === 'full' && (
+          <div className="text-sm">
+            <div className="font-medium mb-2">{spec.fullLabel}</div>
+            <p className="text-xs text-muted-foreground">
+              Sem limite de módulos especializados do nicho. Ideal para operações maduras e
+              multi-unidade.
+            </p>
+          </div>
+        )}
+      </div>
+
+      <Button asChild className="mt-5 w-full">
+        <a
+          href={`/onboarding?subnicho=${encodeURIComponent(subSlug)}&plano=${tier}`}
+        >
+          Contratar {name} <ArrowRight className="w-4 h-4 ml-2" />
+        </a>
+      </Button>
+    </Card>
+  )
+}
+
+function ModuleList({
+  title,
+  modules,
+  limit,
+}: {
+  title: string
+  modules: string[]
+  limit: number
+}) {
+  return (
+    <div className="text-sm">
+      <div className="font-medium mb-2 flex items-center gap-1.5">
+        <Lock className="w-3.5 h-3.5 text-muted-foreground" aria-hidden /> {title}
+      </div>
+      <ul className="space-y-1.5">
+        {modules.map((m) => (
+          <li key={m} className="flex items-center gap-2 text-sm">
+            <Check className="w-3.5 h-3.5 text-primary shrink-0" aria-hidden /> {m}
+          </li>
+        ))}
+      </ul>
+      <p className="text-[11px] text-muted-foreground mt-2">
+        Limite: até {limit} módulo{limit > 1 ? 's' : ''} do nicho.
+      </p>
     </div>
   )
 }
@@ -279,8 +320,8 @@ function Step({
         >
           {done ? <Check className="w-4 h-4" /> : n}
         </div>
-        <h2 id={`step-${n}`} className="text-xl font-semibold flex items-center gap-2">
-          <Icon className="w-5 h-5 text-primary" /> {title}
+        <h2 id={`step-${n}`} className="text-lg sm:text-xl font-semibold flex items-center gap-2">
+          <Icon className="w-5 h-5 text-primary" aria-hidden /> {title}
         </h2>
       </div>
       {children}
