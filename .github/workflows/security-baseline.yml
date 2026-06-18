@@ -1,0 +1,78 @@
+name: Security Baseline (PR Gate)
+
+# Runs the security:check baseline guard on every pull request and fails the PR
+# if new security findings appear beyond the accepted baseline
+# (scripts/security-baseline.json). Also runs the storage-bucket RLS tests so
+# regressions on the contracts / contab-documents buckets block merges.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: security-baseline-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  security-baseline:
+    name: Security baseline + storage RLS
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      PGHOST: ${{ secrets.PGHOST }}
+      PGPORT: ${{ secrets.PGPORT }}
+      PGUSER: ${{ secrets.PGUSER }}
+      PGPASSWORD: ${{ secrets.PGPASSWORD }}
+      PGDATABASE: ${{ secrets.PGDATABASE }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Verify DB credentials are configured
+        run: |
+          if [ -z "${PGHOST:-}" ] || [ -z "${PGPASSWORD:-}" ]; then
+            echo "::error::Missing PGHOST/PGPASSWORD secrets. Add them in repo settings → Secrets → Actions."
+            exit 1
+          fi
+
+      - name: Install psql client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Security baseline check
+        id: baseline
+        run: bun run security:check | tee security-baseline.txt
+
+      - name: Storage bucket RLS regression tests
+        if: env.SUPABASE_SERVICE_ROLE_KEY != ''
+        run: bunx vitest run tests/storage-buckets-access.test.ts --reporter=verbose 2>&1 | tee storage-rls-report.txt
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-baseline-reports
+          path: |
+            security-baseline.txt
+            storage-rls-report.txt
+          retention-days: 30
+
+      - name: Fail PR if any check failed
+        if: failure()
+        run: |
+          echo "::error::Security baseline regressed or storage RLS tests failed. Review findings before merging."
+          exit 1
