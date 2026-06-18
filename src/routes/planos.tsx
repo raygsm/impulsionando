@@ -126,6 +126,28 @@ function buildPlans(wage: number): Plan[] {
   ];
 }
 
+/** Sinais operacionais por plano: complexidade de setup, manutenção semanal estimada, time-to-value. */
+const PLAN_OPS: Record<string, { setup: "Baixa" | "Média" | "Alta"; maintenance: string; ttv: string; suggested: string[] }> = {
+  Essencial: {
+    setup: "Baixa",
+    maintenance: "~1h/semana",
+    ttv: "1ª venda em 48h",
+    suggested: ["Agenda", "CRM Leve", "Financeiro Essencial"],
+  },
+  Integrado: {
+    setup: "Média",
+    maintenance: "~3h/semana",
+    ttv: "ROI mensurável em 30 dias",
+    suggested: ["CRM + Agenda", "PDV + Estoque", "WhatsApp + IA básica"],
+  },
+  Avançado: {
+    setup: "Alta (assistida)",
+    maintenance: "Time dedicado / CSM",
+    ttv: "Rollout em 30–60 dias",
+    suggested: ["Multi-unidade", "Contratos + Affiliates", "IA avançada + n8n"],
+  },
+};
+
 
 
 type Row = { feature: string; values: (boolean | string)[] };
