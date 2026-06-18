@@ -544,12 +544,15 @@ export const getMarketplaceOrderEvents = createServerFn({ method: "POST" })
     return rows ?? [];
   });
 
-/** Busca paginada de pedidos (com filtros + texto). */
+/** Busca paginada de pedidos (com filtros avançados + texto). */
 const SearchOrdersInput = z.object({
   status: z.string().optional(),
   supplierId: z.string().uuid().optional(),
   buyerId: z.string().uuid().optional(),
   sinceDays: z.number().int().min(1).max(365).optional(),
+  dateFrom: z.string().optional(),
+  dateTo: z.string().optional(),
+  supplierName: z.string().optional(),
   query: z.string().optional(),
   page: z.number().int().min(1).default(1),
   pageSize: z.number().int().min(1).max(100).default(20),
@@ -575,9 +578,18 @@ export const searchMarketplaceOrders = createServerFn({ method: "POST" })
     if (data.status) q = q.eq("status", data.status);
     if (data.supplierId) q = q.eq("supplier_id", data.supplierId);
     if (data.buyerId) q = q.eq("buyer_id", data.buyerId);
-    if (data.sinceDays) {
+    if (data.sinceDays && !data.dateFrom && !data.dateTo) {
       const since = new Date(Date.now() - data.sinceDays * 86400_000).toISOString();
       q = q.gte("placed_at", since);
+    }
+    if (data.dateFrom) q = q.gte("placed_at", new Date(data.dateFrom).toISOString());
+    if (data.dateTo) {
+      const end = new Date(data.dateTo);
+      end.setHours(23, 59, 59, 999);
+      q = q.lte("placed_at", end.toISOString());
+    }
+    if (data.supplierName && data.supplierName.trim()) {
+      q = q.ilike("supplier.display_name", `%${data.supplierName.trim()}%`);
     }
     if (data.query && data.query.trim()) {
       const term = data.query.trim();
@@ -599,48 +611,65 @@ export const searchMarketplaceOrders = createServerFn({ method: "POST" })
     };
   });
 
+/** Filtros usados na exportação (CSV/PDF). */
+const ExportFiltersInput = z.object({
+  status: z.string().optional(),
+  supplierId: z.string().uuid().optional(),
+  buyerId: z.string().uuid().optional(),
+  sinceDays: z.number().int().min(1).max(365).optional(),
+  dateFrom: z.string().optional(),
+  dateTo: z.string().optional(),
+  supplierName: z.string().optional(),
+  query: z.string().optional(),
+});
+
+async function queryOrdersForExport(supabase: any, data: z.infer<typeof ExportFiltersInput>) {
+  let q = supabase
+    .from("mp_orders")
+    .select(`
+      order_number, status, subtotal_cents, fee_pct, fee_cents, supplier_net_cents,
+      placed_at, approved_at, rejected_at, invoiced_at, completed_at, decision_notes,
+      supplier:mp_suppliers!inner(display_name, supplier_type),
+      buyer:mp_buyers(display_name)
+    `)
+    .order("placed_at", { ascending: false })
+    .limit(5000);
+  if (data.status) q = q.eq("status", data.status);
+  if (data.supplierId) q = q.eq("supplier_id", data.supplierId);
+  if (data.buyerId) q = q.eq("buyer_id", data.buyerId);
+  if (data.sinceDays && !data.dateFrom && !data.dateTo) {
+    const since = new Date(Date.now() - data.sinceDays * 86400_000).toISOString();
+    q = q.gte("placed_at", since);
+  }
+  if (data.dateFrom) q = q.gte("placed_at", new Date(data.dateFrom).toISOString());
+  if (data.dateTo) {
+    const end = new Date(data.dateTo);
+    end.setHours(23, 59, 59, 999);
+    q = q.lte("placed_at", end.toISOString());
+  }
+  if (data.supplierName && data.supplierName.trim()) {
+    q = q.ilike("supplier.display_name", `%${data.supplierName.trim()}%`);
+  }
+  if (data.query && data.query.trim()) {
+    const term = data.query.trim();
+    const asNum = Number(term.replace(/[^0-9]/g, ""));
+    if (Number.isFinite(asNum) && asNum > 0) {
+      q = q.or(`order_number.eq.${asNum},supplier.display_name.ilike.%${term}%`);
+    } else {
+      q = q.ilike("supplier.display_name", `%${term}%`);
+    }
+  }
+  const { data: rows, error } = await q;
+  if (error) throw error;
+  return rows ?? [];
+}
+
 /** Exporta pedidos filtrados em CSV (string). */
 export const exportMarketplaceOrdersCsv = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z.object({
-      status: z.string().optional(),
-      supplierId: z.string().uuid().optional(),
-      buyerId: z.string().uuid().optional(),
-      sinceDays: z.number().int().min(1).max(365).optional(),
-      query: z.string().optional(),
-    }).parse(d),
-  )
+  .inputValidator((d: unknown) => ExportFiltersInput.parse(d))
   .handler(async ({ context, data }) => {
-    let q = context.supabase
-      .from("mp_orders")
-      .select(`
-        order_number, status, subtotal_cents, fee_pct, fee_cents, supplier_net_cents,
-        placed_at, approved_at, rejected_at, invoiced_at, completed_at, decision_notes,
-        supplier:mp_suppliers!inner(display_name, supplier_type),
-        buyer:mp_buyers(display_name)
-      `)
-      .order("placed_at", { ascending: false })
-      .limit(5000);
-    if (data.status) q = q.eq("status", data.status);
-    if (data.supplierId) q = q.eq("supplier_id", data.supplierId);
-    if (data.buyerId) q = q.eq("buyer_id", data.buyerId);
-    if (data.sinceDays) {
-      const since = new Date(Date.now() - data.sinceDays * 86400_000).toISOString();
-      q = q.gte("placed_at", since);
-    }
-    if (data.query && data.query.trim()) {
-      const term = data.query.trim();
-      const asNum = Number(term.replace(/[^0-9]/g, ""));
-      if (Number.isFinite(asNum) && asNum > 0) {
-        q = q.or(`order_number.eq.${asNum},supplier.display_name.ilike.%${term}%`);
-      } else {
-        q = q.ilike("supplier.display_name", `%${term}%`);
-      }
-    }
-    const { data: rows, error } = await q;
-    if (error) throw error;
-
+    const rows = await queryOrdersForExport(context.supabase, data);
     const headers = [
       "pedido","status","fornecedor","tipo_fornecedor","comprador",
       "bruto_brl","taxa_pct","taxa_brl","liquido_fornecedor_brl",
@@ -654,7 +683,7 @@ export const exportMarketplaceOrdersCsv = createServerFn({ method: "POST" })
       return /[",;\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
     const lines = [headers.join(";")];
-    (rows ?? []).forEach((o: any) => {
+    rows.forEach((o: any) => {
       lines.push([
         o.order_number, o.status,
         o.supplier?.display_name, o.supplier?.supplier_type,
@@ -666,6 +695,93 @@ export const exportMarketplaceOrdersCsv = createServerFn({ method: "POST" })
         o.decision_notes ?? "",
       ].map(escape).join(";"));
     });
-    return { csv: "\uFEFF" + lines.join("\n"), count: rows?.length ?? 0 };
+    return { csv: "\uFEFF" + lines.join("\n"), count: rows.length };
   });
+
+/** Retorna dados estruturados para gerar PDF no cliente (jsPDF/autoTable). */
+export const exportMarketplaceOrdersData = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => ExportFiltersInput.parse(d))
+  .handler(async ({ context, data }) => {
+    const rows = await queryOrdersForExport(context.supabase, data);
+    const totals = rows.reduce(
+      (acc: any, o: any) => {
+        acc.gross += o.subtotal_cents || 0;
+        acc.fee += o.fee_cents || 0;
+        acc.net += o.supplier_net_cents || 0;
+        return acc;
+      },
+      { gross: 0, fee: 0, net: 0 },
+    );
+    return { rows, count: rows.length, totals, generated_at: new Date().toISOString() };
+  });
+
+// ============================================================================
+// Export presets (filtros salvos para reprocessar)
+// ============================================================================
+
+const PresetInput = z.object({
+  id: z.string().uuid().optional(),
+  name: z.string().min(1).max(80),
+  format: z.enum(["csv", "pdf"]).default("csv"),
+  filters: z.record(z.string(), z.any()).default({}),
+});
+export const saveExportPreset = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => PresetInput.parse(d))
+  .handler(async ({ context, data }) => {
+    const payload: any = { ...data, user_id: context.userId };
+    const { data: row, error } = await context.supabase
+      .from("mp_export_presets").upsert(payload).select().single();
+    if (error) throw error;
+    return row;
+  });
+
+export const listExportPresets = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("mp_export_presets")
+      .select("id,name,format,filters,last_run_at,last_count,created_at")
+      .eq("user_id", context.userId)
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return data ?? [];
+  });
+
+export const deleteExportPreset = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { error } = await context.supabase
+      .from("mp_export_presets").delete().eq("id", data.id).eq("user_id", context.userId);
+    if (error) throw error;
+    return { ok: true };
+  });
+
+export const touchExportPreset = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ id: z.string().uuid(), count: z.number().int().min(0) }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    await context.supabase
+      .from("mp_export_presets")
+      .update({ last_run_at: new Date().toISOString(), last_count: data.count })
+      .eq("id", data.id).eq("user_id", context.userId);
+    return { ok: true };
+  });
+
+// ============================================================================
+// Reminder settings
+// ============================================================================
+
+export const getReminderSettings = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data } = await context.supabase
+      .from("mp_reminder_settings").select("*").eq("id", 1).maybeSingle();
+    return data ?? { threshold_hours: 24, target_statuses: ["pending_approval","approved","in_production"], active: true };
+  });
+
 

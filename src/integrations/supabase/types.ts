@@ -9398,6 +9398,42 @@ export type Database = {
           },
         ]
       }
+      mp_export_presets: {
+        Row: {
+          created_at: string
+          filters: Json
+          format: string
+          id: string
+          last_count: number | null
+          last_run_at: string | null
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          filters?: Json
+          format?: string
+          id?: string
+          last_count?: number | null
+          last_run_at?: string | null
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          filters?: Json
+          format?: string
+          id?: string
+          last_count?: number | null
+          last_run_at?: string | null
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       mp_fee_policies: {
         Row: {
           active: boolean
@@ -9614,6 +9650,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      mp_reminder_settings: {
+        Row: {
+          active: boolean
+          id: number
+          target_statuses: string[]
+          threshold_hours: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          id?: number
+          target_statuses?: string[]
+          threshold_hours?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          id?: number
+          target_statuses?: string[]
+          threshold_hours?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       mp_suppliers: {
         Row: {
@@ -12905,6 +12965,7 @@ export type Database = {
         }
         Returns: number
       }
+      mp_send_pending_reminders: { Args: never; Returns: Json }
       mp_user_in_company: {
         Args: { _company_id: string; _user_id: string }
         Returns: boolean
