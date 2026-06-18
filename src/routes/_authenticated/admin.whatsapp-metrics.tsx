@@ -91,6 +91,7 @@ function WhatsAppMetricsPage() {
   const [tick, setTick] = useState(0);
   const [cfg, setCfg] = useState<AlertConfig>(DEFAULT_ALERT_CONFIG);
   const [tpl, setTpl] = useState<AlertTemplate>(DEFAULT_ALERT_TEMPLATE);
+  const [rules, setRules] = useState<AlertRule[]>([]);
   const notify = useServerFn(notifyWhatsAppAlert);
 
   // filtros do dashboard
@@ -104,12 +105,14 @@ function WhatsAppMetricsPage() {
   const [hFrom, setHFrom] = useState("");
   const [hTo, setHTo] = useState("");
   const [hCta, setHCta] = useState("__all");
+  const [hStatus, setHStatus] = useState<"__all" | "sent" | "failed" | "cooldown" | "no_channels" | "partial">("__all");
 
   useEffect(() => {
     setAll(readWhatsAppLocalMetrics());
     setCfg(readAlertConfig());
     setHistory(readAlertHistory());
     setTpl(readAlertTemplate());
+    setRules(readAlertRules());
   }, [tick]);
 
   const filtered = useMemo(() => {
@@ -125,16 +128,21 @@ function WhatsAppMetricsPage() {
   }, [all, period, origin, campaign, cta]);
 
   const opts = useMemo(() => {
-    const o = new Set<string>(), c = new Set<string>(), t = new Set<string>();
+    const o = new Set<string>(), c = new Set<string>(), t = new Set<string>(),
+      r2 = new Set<string>(), v = new Set<string>();
     for (const r of all) {
       o.add(r.origin);
       c.add(r.campaign ?? "");
       if (r.ctaHash) t.add(r.ctaHash);
+      if (r.path) r2.add(r.path);
+      v.add(r.variant ?? "control");
     }
     return {
       origins: Array.from(o).filter(Boolean).sort(),
       campaigns: Array.from(c).filter(Boolean).sort(),
       ctas: Array.from(t).sort(),
+      routes: Array.from(r2).sort(),
+      variants: Array.from(v).sort(),
     };
   }, [all]);
 
@@ -157,60 +165,183 @@ function WhatsAppMetricsPage() {
   );
 
   const alertEval = useMemo(() => evaluateAlerts(all, cfg), [all, cfg]);
+  const ruleEvals = useMemo(() => evaluateAlertRules(all, rules), [all, rules]);
 
-  // Quando dispara, grava no histórico + tenta notificar (cooldown 1h).
+  /** Cria payload + dispara notify + persiste auditoria. */
+  async function dispatchAlert(
+    scope: string,
+    payload: AlertPayload,
+    extra: { ruleId?: string; ctaHash?: string },
+  ): Promise<AlertHistoryEntry> {
+    const baseEntry: AlertHistoryEntry = {
+      ts: Date.now(),
+      ctr: payload.ctr,
+      sendRate: payload.sendRate,
+      impressions: payload.impressions,
+      clicks: payload.clicks,
+      sends: payload.sends,
+      ctrBelow: payload.ctrBelow,
+      sendBelow: payload.sendBelow,
+      windowHours: payload.windowHours,
+      minCtr: payload.minCtr,
+      minSendRate: payload.minSendRate,
+      ctaHash: extra.ctaHash,
+      scope,
+      ruleId: extra.ruleId,
+      payload,
+    };
+    if (!shouldNotifyAlertNow(scope)) {
+      recordAlertHistory({ ...baseEntry, notified: [], status: "cooldown" });
+      return baseEntry;
+    }
+    try {
+      const res = await notify({ data: { ...payload } });
+      const channels = res?.channels ?? [];
+      const status: AlertHistoryEntry["status"] =
+        res?.ok === false ? "failed"
+        : channels.length === 0 ? "no_channels"
+        : "sent";
+      recordAlertHistory({
+        ...baseEntry,
+        notified: channels,
+        status,
+        error: res?.error,
+      });
+      return baseEntry;
+    } catch (err) {
+      recordAlertHistory({
+        ...baseEntry,
+        notified: [],
+        status: "failed",
+        error: err instanceof Error ? err.message : String(err),
+      });
+      return baseEntry;
+    } finally {
+      setTick((t) => t + 1);
+    }
+  }
+
+  // Alerta global
   useEffect(() => {
     if (!alertEval.triggered) return;
-    const baseEntry: Omit<AlertHistoryEntry, "notified"> = {
-      ts: Date.now(),
-      ctr: alertEval.ctr,
-      sendRate: alertEval.sendRate,
-      impressions: alertEval.impressions,
-      clicks: alertEval.clicks,
-      sends: alertEval.sends,
-      ctrBelow: alertEval.ctrBelow,
-      sendBelow: alertEval.sendBelow,
-      windowHours: cfg.windowHours,
-      minCtr: cfg.minCtr,
-      minSendRate: cfg.minSendRate,
-      ctaHash: cta !== "__all" ? cta : undefined,
-    };
-    if (!shouldNotifyAlertNow()) {
-      recordAlertHistory({ ...baseEntry, notified: [] });
-      return;
-    }
+    const ctaHash = cta !== "__all" ? cta : undefined;
+    const originVal = origin !== "__all" ? origin : undefined;
     const rendered = renderAlertTemplate(tpl, {
-      ctr: alertEval.ctr,
-      sendRate: alertEval.sendRate,
-      impressions: alertEval.impressions,
-      clicks: alertEval.clicks,
-      sends: alertEval.sends,
-      ctrBelow: alertEval.ctrBelow,
-      sendBelow: alertEval.sendBelow,
+      ...alertEval,
       minCtr: cfg.minCtr,
       minSendRate: cfg.minSendRate,
       windowHours: cfg.windowHours,
-      ctaHash: baseEntry.ctaHash,
-      origin: origin !== "__all" ? origin : undefined,
+      ctaHash,
+      origin: originVal,
     });
-    notify({
-      data: {
-        ...baseEntry,
+    dispatchAlert(
+      "global",
+      {
         title: rendered.title,
         body: rendered.body,
-        origin: origin !== "__all" ? origin : undefined,
+        ctr: alertEval.ctr,
+        sendRate: alertEval.sendRate,
+        impressions: alertEval.impressions,
+        clicks: alertEval.clicks,
+        sends: alertEval.sends,
+        ctrBelow: alertEval.ctrBelow,
+        sendBelow: alertEval.sendBelow,
+        minCtr: cfg.minCtr,
+        minSendRate: cfg.minSendRate,
+        windowHours: cfg.windowHours,
+        ctaHash,
+        origin: originVal,
       },
-    })
-      .then((res) => {
-        recordAlertHistory({ ...baseEntry, notified: res?.channels ?? [] });
-        setTick((t) => t + 1);
-      })
-      .catch(() => {
-        recordAlertHistory({ ...baseEntry, notified: [] });
-        setTick((t) => t + 1);
-      });
+      { ctaHash },
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alertEval.triggered]);
+
+  // Alertas por regra (route / variant)
+  useEffect(() => {
+    for (const ev of ruleEvals) {
+      if (!ev.triggered) continue;
+      const rendered = renderAlertTemplate(tpl, {
+        ...ev,
+        minCtr: ev.rule.minCtr,
+        minSendRate: ev.rule.minSendRate,
+        windowHours: ev.rule.windowHours,
+        path: ev.rule.route,
+      });
+      const title = `[${ev.rule.label || ev.scope}] ${rendered.title}`;
+      dispatchAlert(
+        ev.scope,
+        {
+          title,
+          body: rendered.body,
+          ctr: ev.ctr,
+          sendRate: ev.sendRate,
+          impressions: ev.impressions,
+          clicks: ev.clicks,
+          sends: ev.sends,
+          ctrBelow: ev.ctrBelow,
+          sendBelow: ev.sendBelow,
+          minCtr: ev.rule.minCtr,
+          minSendRate: ev.rule.minSendRate,
+          windowHours: ev.rule.windowHours,
+          path: ev.rule.route,
+        },
+        { ruleId: ev.rule.id },
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ruleEvals.map((e) => `${e.rule.id}:${e.triggered}`).join("|")]);
+
+  // Envio do resumo diário (manual ou auto se ainda não enviado hoje)
+  async function sendDailySummary(force = false) {
+    if (!force && dailySummaryAlreadySent()) return;
+    const summary = buildDailySummary(all, history);
+    const { title, body } = renderDailySummary(summary);
+    const payload: AlertPayload = {
+      title, body,
+      ctr: summary.totals.ctr,
+      sendRate: summary.totals.sendRate,
+      impressions: summary.totals.impressions,
+      clicks: summary.totals.clicks,
+      sends: summary.totals.sends,
+      ctrBelow: false,
+      sendBelow: false,
+      minCtr: 0,
+      minSendRate: 0,
+      windowHours: 24,
+    };
+    await dispatchAlert("daily_summary", payload, {});
+    markDailySummarySent();
+  }
+
+  /** Reenvio manual a partir de uma entrada com falha. */
+  async function retryEntry(entry: AlertHistoryEntry) {
+    if (!entry.payload || !entry.id) return;
+    try {
+      const res = await notify({ data: entry.payload });
+      const channels = res?.channels ?? [];
+      const status: AlertHistoryEntry["status"] =
+        res?.ok === false ? "failed"
+        : channels.length === 0 ? "no_channels"
+        : "sent";
+      updateAlertHistory(entry.id, {
+        notified: channels,
+        status,
+        error: res?.error,
+        ts: Date.now(),
+      });
+    } catch (err) {
+      updateAlertHistory(entry.id, {
+        notified: [],
+        status: "failed",
+        error: err instanceof Error ? err.message : String(err),
+        ts: Date.now(),
+      });
+    }
+    setTick((t) => t + 1);
+  }
+
+
 
   const historyCtaOptions = useMemo(() => {
     const s = new Set<string>();
