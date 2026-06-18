@@ -620,10 +620,11 @@ export const fetchDemoRestauranteAudit = createServerFn({ method: "POST" })
     const { data: rows, error, count } = await q;
     if (error) throw new Error(error.message);
 
-    let filtered = (rows ?? []) as Array<{
+    type AuditRow = {
       id: string; session_id: string; action_key: string;
-      payload: Record<string, unknown> | null; created_at: string;
-    }>;
+      payload: unknown; created_at: string;
+    };
+    let filtered = (rows ?? []) as AuditRow[];
 
     if (data.scenarioSlug) {
       filtered = filtered.filter((r) => {
@@ -632,19 +633,25 @@ export const fetchDemoRestauranteAudit = createServerFn({ method: "POST" })
       });
     }
 
-    // Anexa nome mascarado do lead quando houver, e contagem total.
-    const sessionIds = Array.from(new Set(filtered.map((r) => r.session_id)));
-    let leadsBySession = new Map<string, { name: string; whatsapp: string }>();
+    const sessionIds = Array.from(new Set(filtered.map((r) => r.session_id).filter((s): s is string => !!s)));
+    const leadsBySession = new Map<string, { name: string; whatsapp: string }>();
     if (sessionIds.length) {
       const { data: leads } = await supabaseAdmin
         .from("demo_resto_leads")
         .select("session_id,name,whatsapp")
         .in("session_id", sessionIds);
-      for (const l of leads ?? []) leadsBySession.set(l.session_id, { name: l.name, whatsapp: l.whatsapp });
+      for (const l of leads ?? []) {
+        if (l.session_id) leadsBySession.set(l.session_id, { name: l.name, whatsapp: l.whatsapp });
+      }
     }
 
     let final = filtered.map((r) => ({
-      ...r,
+      id: r.id,
+      session_id: r.session_id,
+      action_key: r.action_key,
+      created_at: r.created_at,
+      // Serializa o payload como JSON-safe (object literal); evita erro de tipo serializável.
+      payload: (r.payload ?? null) as Record<string, string | number | boolean | null | string[] | number[]> | null,
       lead: leadsBySession.get(r.session_id) ?? null,
     }));
 
@@ -659,3 +666,4 @@ export const fetchDemoRestauranteAudit = createServerFn({ method: "POST" })
       since: sinceIso,
     };
   });
+
