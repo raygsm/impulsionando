@@ -484,6 +484,57 @@ function WhatsAppMetricsPage() {
     download(`wa-alert-history-${Date.now()}.csv`, [head.join(","), ...lines].join("\n"));
   }
 
+  function runSimulation() {
+    const out = simulateAlertRules(all, rules, simDays, {
+      stepMinutes: simStep, includeNonFiring: simIncludeSuppressed,
+    });
+    setSimResult(out);
+  }
+
+  function exportSimulationCSV() {
+    const head = ["ts", "iso", "ruleId", "ruleLabel", "scope", "channel", "status",
+      "ctr", "sendRate", "impressions", "clicks", "sends",
+      "ctrBelow", "sendBelow", "effMinCtr", "effMinSendRate", "reason"];
+    const esc = (v: unknown) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const lines = simResult.map((e) =>
+      [e.ts, new Date(e.ts).toISOString(), e.ruleId, e.ruleLabel ?? "", e.scope,
+       e.channel, e.status, e.ctr.toFixed(2), e.sendRate.toFixed(2),
+       e.impressions, e.clicks, e.sends, e.ctrBelow, e.sendBelow,
+       e.effectiveMinCtr, e.effectiveMinSendRate, e.reason ?? ""].map(esc).join(","));
+    download(`wa-alert-simulation-${Date.now()}.csv`, [head.join(","), ...lines].join("\n"));
+  }
+
+  function exportDailySummaryCSV() {
+    const from = dsFrom ? new Date(dsFrom + "T00:00:00")
+      : new Date(Date.now() - 7 * 24 * 3_600_000);
+    const to = dsTo ? new Date(dsTo + "T23:59:59") : new Date();
+    const ruleFilter = dsRule !== "__all" ? dsRule : undefined;
+    const rows = buildDailySummaryRange(all, history, from, to, ruleFilter);
+    const head = ["date", "ctaHash", "impressions", "clicks", "sends",
+      "ctr", "sendRate", "alertsFired"];
+    const esc = (v: unknown) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const lines = rows.map((r) => [r.date, r.ctaHash, r.impressions, r.clicks,
+      r.sends, r.ctr.toFixed(2), r.sendRate.toFixed(2), r.alertsFired]
+      .map(esc).join(","));
+    download(`wa-daily-summary-${Date.now()}.csv`, [head.join(","), ...lines].join("\n"));
+  }
+
+  // Auditoria atual por regra (decisão por canal agora)
+  const auditNow = useMemo(() =>
+    ruleEvals.map((ev) => ({
+      ev,
+      decisions: planChannelDispatch(ev, ev.rule),
+    })),
+    [ruleEvals],
+  );
+
+
   return (
     <div className="space-y-6 p-6">
       <PageHeader
