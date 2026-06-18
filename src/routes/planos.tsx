@@ -427,6 +427,20 @@ function PlanosPage() {
                 <div className="text-xl font-semibold tracking-tight mt-1">{plan.displayName ?? plan.name}</div>
                 <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{plan.tagline}</p>
 
+                {PLAN_OPS[plan.name] && (
+                  <div className="mt-3 flex flex-wrap gap-1.5" aria-label="Sinais operacionais">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[10px] font-medium">
+                      <Gauge className="w-3 h-3" /> Setup {PLAN_OPS[plan.name].setup}
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[10px] font-medium">
+                      <Wrench className="w-3 h-3" /> {PLAN_OPS[plan.name].maintenance}
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[10px] font-medium">
+                      <Clock className="w-3 h-3" /> {PLAN_OPS[plan.name].ttv}
+                    </span>
+                  </div>
+                )}
+
                 <div className="mt-5 min-h-[68px]">
                   {monthlyEffective !== null ? (
                     <>
