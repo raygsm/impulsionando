@@ -61,10 +61,11 @@ describe('mudanças no registry preservam idempotência da pós-visita', () => {
   it('alterar delayHours muda a janela mas o lock continua bloqueando segundo envio', async () => {
     // Mock supabaseAdmin igual ao e2e suite mas enxuto.
     const state: any = { sess: null, enqueued: [] }
-    const chain = (): any => {
-      const ctx: any = { filters: [] as any[], isNullCol: null, pendingUpdate: null }
+    const chain = (table: string): any => {
+      const ctx: any = { table, filters: [] as any[], isNullCol: null, pendingUpdate: null }
+      const dataFor = () => (ctx.table === 'restaurant_table_sessions' ? state.sess : null)
       const apply = () => {
-        if (!ctx.pendingUpdate || !state.sess) return
+        if (!ctx.pendingUpdate || ctx.table !== 'restaurant_table_sessions' || !state.sess) return
         if (ctx.isNullCol && state.sess[ctx.isNullCol] != null) return
         Object.assign(state.sess, ctx.pendingUpdate)
         ctx.pendingUpdate = null
@@ -73,7 +74,7 @@ describe('mudanças no registry preservam idempotência da pós-visita', () => {
         select: () => c,
         eq: (k: string, v: any) => { ctx.filters.push([k, v]); return c },
         is: (k: string, v: any) => { if (v === null) ctx.isNullCol = k; return c },
-        maybeSingle: async () => ({ data: state.sess, error: null }),
+        maybeSingle: async () => ({ data: dataFor(), error: null }),
         update: (p: any) => { ctx.pendingUpdate = p; return c },
         insert: () => ({ error: null }),
         then: (ok: any, ko?: any) => {
