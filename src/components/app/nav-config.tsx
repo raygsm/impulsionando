@@ -93,6 +93,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/cervejaria", label: "Painel da Cervejaria", icon: Beer },
       { to: "/cervejaria/pdvs", label: "PDVs Parceiros", icon: Store },
       { to: "/cervejaria/catalogo", label: "Catálogo & Campanhas", icon: Megaphone },
+      { to: "/cervejaria/relacionamento", label: "Relacionamento", icon: Users },
     ],
   },
 
