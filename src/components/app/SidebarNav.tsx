@@ -155,7 +155,7 @@ export function SidebarNav({
   return (
     <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-1">
       <div className="space-y-1">
-        {TOP_ITEMS.filter(filterItem).map((it) => (
+        {TOP_ITEMS.filter((it) => filterItem(it)).map((it) => (
           <NavLinkRow
             key={it.to}
             item={it}
