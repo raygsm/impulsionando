@@ -714,7 +714,222 @@ function WhatsAppMetricsPage() {
               </pre>
             </details>
           </Card>
+
+          {/* CSV do resumo diário por CTA hash com filtros por data e regra */}
+          <Card className="p-6 space-y-3">
+            <div className="flex items-center gap-2">
+              <Download className="w-4 h-4" />
+              <h2 className="text-lg font-semibold">Exportar resumo diário por CTA hash</h2>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Gera CSV com CTR, taxa de envio e alertas disparados por dia/CTA hash.
+              Filtre por intervalo e regra para análise externa.
+            </p>
+            <div className="grid gap-3 md:grid-cols-4 items-end">
+              <div>
+                <Label className="text-xs">De</Label>
+                <Input type="date" value={dsFrom} max={today}
+                  onChange={(e) => setDsFrom(e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs">Até</Label>
+                <Input type="date" value={dsTo} max={today}
+                  onChange={(e) => setDsTo(e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs">Regra</Label>
+                <Select value={dsRule} onValueChange={setDsRule}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all">Todas</SelectItem>
+                    {rules.map((r) => (
+                      <SelectItem key={r.id} value={r.id}>
+                        {r.label || r.id}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button size="sm" onClick={exportDailySummaryCSV}>
+                <Download className="w-4 h-4 mr-1" /> Baixar CSV
+              </Button>
+            </div>
+          </Card>
         </TabsContent>
+
+        {/* Auditoria por regra/escopo — métrica e motivo de cada decisão agora */}
+        <TabsContent value="audit" className="space-y-4 mt-4">
+          <Card className="p-6 space-y-2">
+            <div className="flex items-center gap-2">
+              <Eye className="w-4 h-4" />
+              <h2 className="text-lg font-semibold">Auditoria detalhada por regra</h2>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Mostra a métrica que disparou (ou não) cada regra agora, e por que cada
+              canal foi enviado, suprimido por cooldown ou por amostragem insuficiente.
+              Reflete o estado atual do localStorage de cooldown.
+            </p>
+          </Card>
+
+          {auditNow.length === 0 && (
+            <Card className="p-6">
+              <p className="text-sm text-muted-foreground">
+                Nenhuma regra configurada. Vá em "Regras + Resumo diário".
+              </p>
+            </Card>
+          )}
+
+          {auditNow.map(({ ev, decisions }) => (
+            <Card key={ev.rule.id} className="p-4 space-y-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <strong className="text-sm">{ev.rule.label || ev.rule.id}</strong>
+                <code className="text-xs text-muted-foreground">{ev.scope}</code>
+                {ev.triggered ? (
+                  <Badge variant="destructive">Disparado</Badge>
+                ) : (
+                  <Badge variant="secondary">
+                    <CheckCircle2 className="w-3 h-3 mr-1" /> OK
+                  </Badge>
+                )}
+                <span className="ml-auto text-xs text-muted-foreground">
+                  Janela {ev.rule.windowHours}h · amostras ≥ {ev.rule.minSamples}
+                </span>
+              </div>
+              <div className="grid gap-2 md:grid-cols-5 text-xs">
+                <div><span className="text-muted-foreground">Impressões:</span> <strong>{ev.impressions}</strong></div>
+                <div><span className="text-muted-foreground">Cliques:</span> <strong>{ev.clicks}</strong></div>
+                <div><span className="text-muted-foreground">Envios:</span> <strong>{ev.sends}</strong></div>
+                <div>
+                  <span className="text-muted-foreground">CTR:</span>{" "}
+                  <strong className={ev.ctrBelow ? "text-destructive" : ""}>
+                    {ev.ctr.toFixed(1)}%
+                  </strong>{" "}
+                  <span className="text-muted-foreground">/ min {ev.rule.minCtr}%</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Envio:</span>{" "}
+                  <strong className={ev.sendBelow ? "text-destructive" : ""}>
+                    {ev.sendRate.toFixed(1)}%
+                  </strong>{" "}
+                  <span className="text-muted-foreground">/ min {ev.rule.minSendRate}%</span>
+                </div>
+              </div>
+              <div className="border-t pt-2 space-y-1">
+                <div className="text-xs text-muted-foreground mb-1">Decisão por canal:</div>
+                {decisions.map((d) => (
+                  <DecisionRow key={d.channel} d={d} scope={ev.scope} />
+                ))}
+              </div>
+            </Card>
+          ))}
+        </TabsContent>
+
+        {/* Simulação histórica das regras */}
+        <TabsContent value="simulation" className="space-y-4 mt-4">
+          <Card className="p-6 space-y-3">
+            <div className="flex items-center gap-2">
+              <FlaskConical className="w-4 h-4" />
+              <h2 className="text-lg font-semibold">
+                Simular regras sobre o histórico
+              </h2>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Reaplica as regras ativas em janelas deslizantes ao longo dos
+              últimos N dias do buffer local, com cooldown e dedup por canal.
+              Mostra exatamente quais alertas teriam disparado.
+            </p>
+            <div className="grid gap-3 md:grid-cols-5 items-end">
+              <div>
+                <Label className="text-xs">Dias</Label>
+                <Input type="number" min={1} max={60} value={simDays}
+                  onChange={(e) => setSimDays(Number(e.target.value) || 7)} />
+              </div>
+              <div>
+                <Label className="text-xs">Step (min)</Label>
+                <Input type="number" min={5} max={1440} value={simStep}
+                  onChange={(e) => setSimStep(Number(e.target.value) || 60)} />
+              </div>
+              <div className="flex items-center gap-2 pt-5">
+                <Switch checked={simIncludeSuppressed}
+                  onCheckedChange={setSimIncludeSuppressed} />
+                <Label className="text-xs">Mostrar suprimidos (cooldown/limite)</Label>
+              </div>
+              <Button size="sm" onClick={runSimulation} disabled={rules.length === 0}>
+                <RefreshCw className="w-4 h-4 mr-1" /> Rodar simulação
+              </Button>
+              <Button size="sm" variant="outline" onClick={exportSimulationCSV}
+                disabled={simResult.length === 0}>
+                <Download className="w-4 h-4 mr-1" /> CSV
+              </Button>
+            </div>
+          </Card>
+
+          <Card className="p-6">
+            {simResult.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Sem resultado. Configure regras e clique em "Rodar simulação".
+              </p>
+            ) : (
+              <>
+                <div className="text-xs text-muted-foreground mb-2">
+                  {simResult.filter((r) => r.status === "fired").length} disparos ·{" "}
+                  {simResult.filter((r) => r.status === "suppressed_cooldown").length}{" "}
+                  suprimidos por cooldown ·{" "}
+                  {simResult.filter((r) => r.status === "suppressed_thresholds").length}{" "}
+                  suprimidos por limites
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="text-left text-muted-foreground">
+                      <tr className="border-b">
+                        <th className="py-2 pr-3">Quando</th>
+                        <th className="py-2 pr-3">Regra</th>
+                        <th className="py-2 pr-3">Escopo</th>
+                        <th className="py-2 pr-3">Canal</th>
+                        <th className="py-2 pr-3">Status</th>
+                        <th className="py-2 pr-3">CTR/Envio</th>
+                        <th className="py-2 pr-3">I/C/E</th>
+                        <th className="py-2">Motivo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {simResult.slice(0, 200).map((r, i) => (
+                        <tr key={i} className="border-b last:border-0">
+                          <td className="py-2 pr-3 whitespace-nowrap text-xs">
+                            {new Date(r.ts).toLocaleString("pt-BR")}
+                          </td>
+                          <td className="py-2 pr-3 text-xs">{r.ruleLabel || r.ruleId}</td>
+                          <td className="py-2 pr-3 font-mono text-xs">{r.scope}</td>
+                          <td className="py-2 pr-3">
+                            <Badge variant="outline">{r.channel}</Badge>
+                          </td>
+                          <td className="py-2 pr-3">
+                            <SimStatusBadge status={r.status} />
+                          </td>
+                          <td className="py-2 pr-3 text-xs">
+                            {r.ctr.toFixed(1)}% / {r.sendRate.toFixed(1)}%
+                          </td>
+                          <td className="py-2 pr-3 font-mono text-xs">
+                            {r.impressions}/{r.clicks}/{r.sends}
+                          </td>
+                          <td className="py-2 text-xs text-muted-foreground">
+                            {r.reason ?? "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {simResult.length > 200 && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Mostrando 200 de {simResult.length}. Exporte CSV para ver todos.
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
+          </Card>
+        </TabsContent>
+
 
         <TabsContent value="history" className="space-y-4 mt-4">
           <Card className="p-4 grid gap-3 md:grid-cols-6 items-end">
