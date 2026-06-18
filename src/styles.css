@@ -155,42 +155,79 @@
 
 /* ===================================================================
    P4 — Barras de rolagem globais (Impulsionando)
-   Indicador azul-marinho, trilho claro, sempre visível.
+   Azul institucional visível em qualquer container rolável,
+   inclusive Radix Dialog, Drawer, Popover, Sheet e Command.
    =================================================================== */
 @layer base {
   * {
-    scrollbar-width: thin;
-    scrollbar-color: #1E3A8A #E5E7EB;
+    scrollbar-width: auto;
+    scrollbar-color: #1E3A8A #DBEAFE;
   }
   *::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 14px;
+    height: 14px;
   }
   *::-webkit-scrollbar-track {
-    background: #E5E7EB;
-    border-radius: 8px;
+    background: #DBEAFE;
+    border-radius: 10px;
   }
   *::-webkit-scrollbar-thumb {
     background: #1E3A8A;
-    border-radius: 8px;
-    border: 2px solid #E5E7EB;
+    border-radius: 10px;
+    border: 3px solid #DBEAFE;
+    background-clip: padding-box;
   }
   *::-webkit-scrollbar-thumb:hover {
-    background: #1E40AF;
+    background: #2563EB;
+    background-clip: padding-box;
+    border: 3px solid #DBEAFE;
+  }
+  *::-webkit-scrollbar-thumb:active {
+    background: #1D4ED8;
+    background-clip: padding-box;
+    border: 3px solid #DBEAFE;
   }
   *::-webkit-scrollbar-corner {
-    background: #E5E7EB;
+    background: #DBEAFE;
   }
+
+  /* Reforço dentro de modais/drawers/popovers — trilho mais claro
+     para destacar o thumb azul sobre superfícies brancas. */
+  [role="dialog"] *::-webkit-scrollbar-track,
+  [data-radix-popper-content-wrapper] *::-webkit-scrollbar-track,
+  [data-radix-scroll-area-viewport]::-webkit-scrollbar-track,
+  [data-vaul-drawer] *::-webkit-scrollbar-track {
+    background: #EFF6FF;
+  }
+  [role="dialog"] *::-webkit-scrollbar-thumb,
+  [data-radix-popper-content-wrapper] *::-webkit-scrollbar-thumb,
+  [data-radix-scroll-area-viewport]::-webkit-scrollbar-thumb,
+  [data-vaul-drawer] *::-webkit-scrollbar-thumb {
+    background: #1E3A8A;
+    border: 3px solid #EFF6FF;
+    background-clip: padding-box;
+  }
+  [role="dialog"] *::-webkit-scrollbar-thumb:hover,
+  [data-radix-popper-content-wrapper] *::-webkit-scrollbar-thumb:hover,
+  [data-radix-scroll-area-viewport]::-webkit-scrollbar-thumb:hover {
+    background: #2563EB;
+    background-clip: padding-box;
+    border: 3px solid #EFF6FF;
+  }
+
   .dark * {
-    scrollbar-color: #60A5FA #1F2937;
+    scrollbar-color: #60A5FA #1E293B;
   }
   .dark *::-webkit-scrollbar-track,
   .dark *::-webkit-scrollbar-corner {
-    background: #1F2937;
+    background: #1E293B;
   }
   .dark *::-webkit-scrollbar-thumb {
     background: #3B82F6;
-    border-color: #1F2937;
+    border-color: #1E293B;
+  }
+  .dark *::-webkit-scrollbar-thumb:hover {
+    background: #60A5FA;
   }
 }
 
