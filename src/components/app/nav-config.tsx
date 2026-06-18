@@ -42,6 +42,7 @@ export const TOP_ITEMS: NavItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, perm: "dashboard.read" },
   { to: "/torre/consumidores", label: "Torre · Consumidor Final", icon: UserRound, superOnly: true },
   { to: "/showroom/restaurante", label: "Showroom · Bar & Restaurante", icon: QrCode, superOnly: true },
+  { to: "/torre/restaurantes-demo", label: "Torre · Restaurantes Demo", icon: BarChart3, superOnly: true },
   { to: "/dashboards/core", label: "Dashboard Core", icon: LayoutDashboard, audiences: ["core"] },
   { to: "/dashboards/white-label", label: "Dashboard WL", icon: LayoutDashboard, audiences: ["white-label", "core"] },
   { to: "/dashboards/empresa", label: "Dashboard Empresa", icon: LayoutDashboard, audiences: ["empresa"] },
