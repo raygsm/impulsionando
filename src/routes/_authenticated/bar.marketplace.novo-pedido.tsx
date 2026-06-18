@@ -7,6 +7,7 @@ import {
   listSupplierCatalog,
   getMyBuyerProfile,
   placeMarketplaceOrder,
+  previewMarketplaceFee,
 } from "@/lib/marketplace.functions";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ function NewOrderPage() {
   const catalogFn = useServerFn(listSupplierCatalog);
   const buyerFn = useServerFn(getMyBuyerProfile);
   const placeFn = useServerFn(placeMarketplaceOrder);
+  const feeFn = useServerFn(previewMarketplaceFee);
 
   const [supplierId, setSupplierId] = useState<string | null>(null);
   const [cart, setCart] = useState<Record<string, CartItem>>({});
@@ -58,6 +60,12 @@ function NewOrderPage() {
     () => Object.values(cart).reduce((a, it) => a + Math.round(it.unit_price_cents * it.qty), 0),
     [cart],
   );
+
+  const { data: feePreview } = useQuery({
+    queryKey: ["mp-fee-preview", supplierId, subtotal],
+    queryFn: () => feeFn({ data: { supplier_id: supplierId!, subtotal_cents: subtotal } }),
+    enabled: !!supplierId && subtotal > 0,
+  });
 
   const place = useMutation({
     mutationFn: () =>
@@ -232,9 +240,30 @@ function NewOrderPage() {
                     </div>
                   </div>
                 ))}
-                <div className="border-t pt-3 flex items-center justify-between">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-semibold">{brl(subtotal)}</span>
+                <div className="border-t pt-3 space-y-1.5 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span>{brl(subtotal)}</span>
+                  </div>
+                  {feePreview && subtotal > 0 && (
+                    <>
+                      <div className="flex items-center justify-between text-muted-foreground">
+                        <span>
+                          Taxa Intermediação Digital ({(feePreview.fee_pct * 100).toFixed(2)}%)
+                          <span className="block text-[10px]">cobrada do fornecedor</span>
+                        </span>
+                        <span>− {brl(feePreview.fee_cents)}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>Líquido ao fornecedor</span>
+                        <span>{brl(feePreview.supplier_net_cents)}</span>
+                      </div>
+                    </>
+                  )}
+                  <div className="flex items-center justify-between border-t pt-2 font-semibold text-base">
+                    <span>Total a pagar</span>
+                    <span>{brl(subtotal)}</span>
+                  </div>
                 </div>
                 <Textarea
                   placeholder="Observações para o fornecedor (opcional)"

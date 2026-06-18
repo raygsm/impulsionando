@@ -233,35 +233,101 @@ export const placeMarketplaceOrder = createServerFn({ method: "POST" })
     const { error: iErr } = await context.supabase.from("mp_order_items").insert(items);
     if (iErr) throw iErr;
 
+    // Notifica fornecedor do novo pedido (todos os usuários ativos da empresa)
+    const { data: sup } = await context.supabase
+      .from("mp_suppliers").select("company_id, display_name").eq("id", data.supplier_id).maybeSingle();
+    const { data: buy } = await context.supabase
+      .from("mp_buyers").select("display_name").eq("id", data.buyer_id).maybeSingle();
+    if (sup?.company_id) {
+      const { data: users } = await context.supabase
+        .from("user_profiles").select("user_id").eq("company_id", sup.company_id).eq("is_active", true);
+      const rows = (users ?? []).map((u: any) => ({
+        user_id: u.user_id,
+        company_id: sup.company_id,
+        category: "marketplace",
+        severity: "info",
+        title: "Novo pedido recebido",
+        message: `Pedido #${order.order_number} de ${buy?.display_name ?? "comprador"} — ${(subtotal/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}`,
+        action_url: "/cervejaria/marketplace",
+      }));
+      if (rows.length) await context.supabase.from("notifications").insert(rows);
+    }
+
     return order;
   });
 
 const UpdateOrderStatusInput = z.object({
   order_id: z.string().uuid(),
-  status: z.enum(["approved", "in_production", "in_delivery", "completed", "canceled"]),
+  status: z.enum(["approved", "rejected", "in_production", "in_delivery", "invoiced", "completed", "canceled"]),
+  decision_notes: z.string().nullish(),
 });
+
+async function notify(
+  supabase: any,
+  args: { company_id: string | null; category: string; severity: string; title: string; message: string; action_url?: string },
+) {
+  if (!args.company_id) return;
+  const { data: users } = await supabase
+    .from("user_profiles").select("user_id").eq("company_id", args.company_id).eq("is_active", true);
+  const rows = (users ?? []).map((u: any) => ({
+    user_id: u.user_id,
+    company_id: args.company_id,
+    category: args.category,
+    severity: args.severity,
+    title: args.title,
+    message: args.message,
+    action_url: args.action_url ?? null,
+  }));
+  if (rows.length) await supabase.from("notifications").insert(rows);
+}
 
 export const updateMarketplaceOrderStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => UpdateOrderStatusInput.parse(d))
   .handler(async ({ context, data }) => {
+    const nowIso = new Date().toISOString();
     const patch: {
       status: typeof data.status;
+      decision_notes?: string | null;
       approved_at?: string;
+      rejected_at?: string;
+      invoiced_at?: string;
       completed_at?: string;
     } = { status: data.status };
-    if (data.status === "approved") patch.approved_at = new Date().toISOString();
-    if (data.status === "completed") patch.completed_at = new Date().toISOString();
+    if (data.decision_notes != null) patch.decision_notes = data.decision_notes;
+    if (data.status === "approved") patch.approved_at = nowIso;
+    if (data.status === "rejected") patch.rejected_at = nowIso;
+    if (data.status === "invoiced") patch.invoiced_at = nowIso;
+    if (data.status === "completed") patch.completed_at = nowIso;
 
     const { data: order, error } = await context.supabase
       .from("mp_orders")
       .update(patch)
       .eq("id", data.order_id)
-      .select()
+      .select(`*, supplier:mp_suppliers(company_id, display_name), buyer:mp_buyers(company_id, display_name)`)
       .single();
     if (error) throw error;
 
-    // Ao concluir, registra no ledger (GMV/receita) — idempotente via UNIQUE(order_id)
+    // Notificações para o comprador
+    if (order && (data.status === "approved" || data.status === "rejected" || data.status === "invoiced" || data.status === "completed")) {
+      const labelMap: Record<string, { title: string; sev: string }> = {
+        approved: { title: "Pedido aprovado pelo fornecedor", sev: "success" },
+        rejected: { title: "Pedido recusado pelo fornecedor", sev: "error" },
+        invoiced: { title: "Pedido faturado", sev: "info" },
+        completed: { title: "Pedido concluído", sev: "success" },
+      };
+      const l = labelMap[data.status];
+      await notify(context.supabase, {
+        company_id: order.buyer?.company_id ?? null,
+        category: "marketplace",
+        severity: l.sev,
+        title: l.title,
+        message: `Pedido #${order.order_number} de ${order.supplier?.display_name}. ${data.decision_notes ?? ""}`.trim(),
+        action_url: "/bar/marketplace",
+      });
+    }
+
+    // Ledger ao concluir
     if (data.status === "completed" && order) {
       const period = new Date(order.completed_at ?? order.placed_at);
       const period_month = `${period.getUTCFullYear()}-${String(period.getUTCMonth() + 1).padStart(2, "0")}-01`;
@@ -283,33 +349,58 @@ export const updateMarketplaceOrderStatus = createServerFn({ method: "POST" })
     return order;
   });
 
+const ListOrdersInput = z.object({
+  status: z.string().optional(),
+  supplierId: z.string().uuid().optional(),
+  buyerId: z.string().uuid().optional(),
+  sinceDays: z.number().int().min(1).max(365).optional(),
+  limit: z.number().int().min(1).max(500).default(100),
+});
+
 export const listMarketplaceOrders = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z.object({
-      status: z.string().optional(),
-      supplierId: z.string().uuid().optional(),
-      buyerId: z.string().uuid().optional(),
-      limit: z.number().int().min(1).max(500).default(100),
-    }).parse(d),
-  )
+  .inputValidator((d: unknown) => ListOrdersInput.parse(d))
   .handler(async ({ context, data }) => {
     let q = context.supabase
       .from("mp_orders")
       .select(`
         id, order_number, status, subtotal_cents, fee_pct, fee_cents, total_cents,
-        supplier_net_cents, placed_at, approved_at, completed_at, notes,
-        supplier:mp_suppliers(id, display_name, supplier_type),
-        buyer:mp_buyers(id, display_name, buyer_type)
+        supplier_net_cents, placed_at, approved_at, rejected_at, invoiced_at, completed_at,
+        notes, decision_notes,
+        supplier:mp_suppliers(id, display_name, supplier_type, company_id),
+        buyer:mp_buyers(id, display_name, buyer_type, company_id),
+        items:mp_order_items(id, name_snapshot, unit, unit_price_cents, qty, line_total_cents)
       `)
       .order("placed_at", { ascending: false })
       .limit(data.limit);
     if (data.status) q = q.eq("status", data.status);
     if (data.supplierId) q = q.eq("supplier_id", data.supplierId);
     if (data.buyerId) q = q.eq("buyer_id", data.buyerId);
+    if (data.sinceDays) {
+      const since = new Date(Date.now() - data.sinceDays * 86400_000).toISOString();
+      q = q.gte("placed_at", since);
+    }
     const { data: rows, error } = await q;
     if (error) throw error;
     return rows ?? [];
+  });
+
+// Preview da Taxa de Intermediação Digital antes de gerar o pedido
+export const previewMarketplaceFee = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ supplier_id: z.string().uuid(), subtotal_cents: z.number().int().min(0) }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    const { fee_pct, source } = await resolveFeePct(context.supabase, data.supplier_id);
+    const fee_cents = Math.round(data.subtotal_cents * fee_pct);
+    return {
+      fee_pct,
+      fee_cents,
+      supplier_net_cents: data.subtotal_cents - fee_cents,
+      total_cents: data.subtotal_cents,
+      source,
+    };
   });
 
 // ============================================================================

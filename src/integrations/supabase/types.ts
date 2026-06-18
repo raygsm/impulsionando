@@ -9499,12 +9499,15 @@ export type Database = {
           buyer_id: string
           completed_at: string | null
           created_at: string
+          decision_notes: string | null
           fee_cents: number
           fee_pct: number
           id: string
+          invoiced_at: string | null
           notes: string | null
           order_number: number
           placed_at: string
+          rejected_at: string | null
           status: string
           subtotal_cents: number
           supplier_id: string
@@ -9517,12 +9520,15 @@ export type Database = {
           buyer_id: string
           completed_at?: string | null
           created_at?: string
+          decision_notes?: string | null
           fee_cents?: number
           fee_pct?: number
           id?: string
+          invoiced_at?: string | null
           notes?: string | null
           order_number?: number
           placed_at?: string
+          rejected_at?: string | null
           status?: string
           subtotal_cents?: number
           supplier_id: string
@@ -9535,12 +9541,15 @@ export type Database = {
           buyer_id?: string
           completed_at?: string | null
           created_at?: string
+          decision_notes?: string | null
           fee_cents?: number
           fee_pct?: number
           id?: string
+          invoiced_at?: string | null
           notes?: string | null
           order_number?: number
           placed_at?: string
+          rejected_at?: string | null
           status?: string
           subtotal_cents?: number
           supplier_id?: string
