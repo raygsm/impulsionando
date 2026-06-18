@@ -85,7 +85,7 @@ export async function notifyPostVisitThanks(args: {
       companyName,
       niche,
       voucherCode,
-      voucherLabel: niche ? VOUCHER_LABEL[niche] : undefined,
+      voucherLabel: voucherLabelForNiche(niche),
       clubeUrl: "https://impulsionando.com.br/clube",
       ctaUrl: `https://impulsionando.com.br/r/${companySlug}`,
     },
