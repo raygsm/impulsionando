@@ -370,6 +370,7 @@ import { Route as AuthenticatedCoreIntegracoesDiagnosticoRouteImport } from './r
 import { Route as AuthenticatedCoreClienteIdRouteImport } from './routes/_authenticated/core.cliente.$id'
 import { Route as AuthenticatedBarMarketplaceNovoPedidoRouteImport } from './routes/_authenticated/bar.marketplace.novo-pedido'
 import { Route as AuthenticatedAdminModulosClonagemRouteImport } from './routes/_authenticated/admin.modulos.clonagem'
+import { Route as AuthenticatedAdminIntegracoesMercadoPagoRouteImport } from './routes/_authenticated/admin.integracoes.mercado-pago'
 import { Route as ApiPublicPaymentsInfinitepayWebhookRouteImport } from './routes/api/public/payments/infinitepay.webhook'
 import { Route as ApiPublicPaymentsCloseInvoiceReplayRouteImport } from './routes/api/public/payments/close-invoice.replay'
 import { Route as AuthenticatedImobiliariaAprovacoesIdImprimirRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes.$id.imprimir'
@@ -2367,6 +2368,12 @@ const AuthenticatedAdminModulosClonagemRoute =
     path: '/admin/modulos/clonagem',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminIntegracoesMercadoPagoRoute =
+  AuthenticatedAdminIntegracoesMercadoPagoRouteImport.update({
+    id: '/admin/integracoes/mercado-pago',
+    path: '/admin/integracoes/mercado-pago',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicPaymentsInfinitepayWebhookRoute =
   ApiPublicPaymentsInfinitepayWebhookRouteImport.update({
     id: '/api/public/payments/infinitepay/webhook',
@@ -2725,6 +2732,7 @@ export interface FileRoutesByFullPath {
   '/reports/': typeof AuthenticatedReportsIndexRoute
   '/saiba-mais/': typeof AuthenticatedSaibaMaisIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
+  '/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/bar/marketplace/novo-pedido': typeof AuthenticatedBarMarketplaceNovoPedidoRoute
   '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
@@ -3081,6 +3089,7 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedReportsIndexRoute
   '/saiba-mais': typeof AuthenticatedSaibaMaisIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
+  '/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/bar/marketplace/novo-pedido': typeof AuthenticatedBarMarketplaceNovoPedidoRoute
   '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
@@ -3451,6 +3460,7 @@ export interface FileRoutesById {
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
   '/_authenticated/saiba-mais/': typeof AuthenticatedSaibaMaisIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
+  '/_authenticated/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   '/_authenticated/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/_authenticated/bar/marketplace/novo-pedido': typeof AuthenticatedBarMarketplaceNovoPedidoRoute
   '/_authenticated/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
@@ -3820,6 +3830,7 @@ export interface FileRouteTypes {
     | '/reports/'
     | '/saiba-mais/'
     | '/sales/'
+    | '/admin/integracoes/mercado-pago'
     | '/admin/modulos/clonagem'
     | '/bar/marketplace/novo-pedido'
     | '/core/cliente/$id'
@@ -4176,6 +4187,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/saiba-mais'
     | '/sales'
+    | '/admin/integracoes/mercado-pago'
     | '/admin/modulos/clonagem'
     | '/bar/marketplace/novo-pedido'
     | '/core/cliente/$id'
@@ -4545,6 +4557,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reports/'
     | '/_authenticated/saiba-mais/'
     | '/_authenticated/sales/'
+    | '/_authenticated/admin/integracoes/mercado-pago'
     | '/_authenticated/admin/modulos/clonagem'
     | '/_authenticated/bar/marketplace/novo-pedido'
     | '/_authenticated/core/cliente/$id'
@@ -7258,6 +7271,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminModulosClonagemRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/integracoes/mercado-pago': {
+      id: '/_authenticated/admin/integracoes/mercado-pago'
+      path: '/admin/integracoes/mercado-pago'
+      fullPath: '/admin/integracoes/mercado-pago'
+      preLoaderRoute: typeof AuthenticatedAdminIntegracoesMercadoPagoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/payments/infinitepay/webhook': {
       id: '/api/public/payments/infinitepay/webhook'
       path: '/api/public/payments/infinitepay/webhook'
@@ -7925,6 +7945,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEventosIndexRoute: typeof AuthenticatedEventosIndexRoute
   AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
   AuthenticatedSaibaMaisIndexRoute: typeof AuthenticatedSaibaMaisIndexRoute
+  AuthenticatedAdminIntegracoesMercadoPagoRoute: typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   AuthenticatedAdminModulosClonagemRoute: typeof AuthenticatedAdminModulosClonagemRoute
 }
 
@@ -8054,6 +8075,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEventosIndexRoute: AuthenticatedEventosIndexRoute,
   AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
   AuthenticatedSaibaMaisIndexRoute: AuthenticatedSaibaMaisIndexRoute,
+  AuthenticatedAdminIntegracoesMercadoPagoRoute:
+    AuthenticatedAdminIntegracoesMercadoPagoRoute,
   AuthenticatedAdminModulosClonagemRoute:
     AuthenticatedAdminModulosClonagemRoute,
 }
