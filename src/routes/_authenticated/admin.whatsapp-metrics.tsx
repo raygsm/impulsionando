@@ -511,8 +511,53 @@ function WhatsAppMetricsPage() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="rules" className="space-y-4 mt-4">
+          <RulesEditor
+            rules={rules}
+            setRules={setRules}
+            routes={opts.routes}
+            variants={opts.variants}
+            evals={ruleEvals}
+            onSave={() => { saveAlertRules(rules); setTick((t) => t + 1); }}
+          />
+
+          <Card className="p-6 space-y-3">
+            <div className="flex items-center gap-2">
+              <Mail className="w-4 h-4" />
+              <h2 className="text-lg font-semibold">Resumo diário por CTA hash</h2>
+              {dailySummaryAlreadySent()
+                ? <Badge variant="secondary"><ShieldCheck className="w-3 h-3 mr-1" /> Enviado hoje</Badge>
+                : <Badge variant="outline">Pendente</Badge>}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Envia um e-mail/Slack com totais e quebra por CTA hash do dia. Usa o mesmo
+              canal das notificações de alerta e o mesmo cooldown (1 envio/dia + 1h por escopo).
+              Pode ser disparado manualmente.
+            </p>
+            <div className="flex gap-2">
+              <Button size="sm" onClick={() => sendDailySummary(false)}
+                disabled={dailySummaryAlreadySent()}>
+                Enviar resumo de hoje
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => sendDailySummary(true)}>
+                Forçar reenvio
+              </Button>
+            </div>
+            <details className="text-xs">
+              <summary className="cursor-pointer text-muted-foreground">Pré-visualização</summary>
+              <pre className="mt-2 whitespace-pre-wrap rounded bg-muted p-2">
+{(() => {
+  const s = buildDailySummary(all, history);
+  const r = renderDailySummary(s);
+  return `${r.title}\n\n${r.body}`;
+})()}
+              </pre>
+            </details>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="history" className="space-y-4 mt-4">
-          <Card className="p-4 grid gap-3 md:grid-cols-5 items-end">
+          <Card className="p-4 grid gap-3 md:grid-cols-6 items-end">
             <div>
               <Label className="text-xs">De</Label>
               <Input type="date" value={hFrom} max={today}
@@ -524,9 +569,23 @@ function WhatsAppMetricsPage() {
                 onChange={(e) => setHTo(e.target.value)} />
             </div>
             <FilterSelect label="CTA hash" value={hCta} setValue={setHCta} options={historyCtaOptions} />
+            <div>
+              <Label className="text-xs">Status</Label>
+              <Select value={hStatus} onValueChange={(v) => setHStatus(v as typeof hStatus)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all">Todos</SelectItem>
+                  <SelectItem value="sent">Enviado</SelectItem>
+                  <SelectItem value="failed">Falha</SelectItem>
+                  <SelectItem value="cooldown">Cooldown</SelectItem>
+                  <SelectItem value="no_channels">Sem canal</SelectItem>
+                  <SelectItem value="partial">Parcial</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="flex gap-2 md:col-span-2">
               <Button size="sm" variant="outline"
-                onClick={() => { setHFrom(""); setHTo(""); setHCta("__all"); }}>
+                onClick={() => { setHFrom(""); setHTo(""); setHCta("__all"); setHStatus("__all"); }}>
                 Limpar filtro
               </Button>
               <Button size="sm" onClick={exportHistoryCSV} disabled={historyFiltered.length === 0}>
