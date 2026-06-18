@@ -360,7 +360,7 @@ function WhatsAppMetricsPage() {
         </TabsContent>
 
         <TabsContent value="history" className="space-y-4 mt-4">
-          <Card className="p-4 grid gap-3 md:grid-cols-4 items-end">
+          <Card className="p-4 grid gap-3 md:grid-cols-5 items-end">
             <div>
               <Label className="text-xs">De</Label>
               <Input type="date" value={hFrom} max={today}
@@ -371,9 +371,14 @@ function WhatsAppMetricsPage() {
               <Input type="date" value={hTo} max={today}
                 onChange={(e) => setHTo(e.target.value)} />
             </div>
+            <FilterSelect label="CTA hash" value={hCta} setValue={setHCta} options={historyCtaOptions} />
             <div className="flex gap-2 md:col-span-2">
-              <Button size="sm" variant="outline" onClick={() => { setHFrom(""); setHTo(""); }}>
+              <Button size="sm" variant="outline"
+                onClick={() => { setHFrom(""); setHTo(""); setHCta("__all"); }}>
                 Limpar filtro
+              </Button>
+              <Button size="sm" onClick={exportHistoryCSV} disabled={historyFiltered.length === 0}>
+                <Download className="w-4 h-4 mr-1" /> CSV
               </Button>
               <Button size="sm" variant="ghost"
                 onClick={() => { clearAlertHistory(); setTick((t) => t + 1); }}>
@@ -381,6 +386,59 @@ function WhatsAppMetricsPage() {
               </Button>
             </div>
           </Card>
+
+          {/* Editor do template de mensagem */}
+          <Card className="p-6 space-y-3">
+            <h2 className="text-lg font-semibold">Template de mensagem (Slack / e-mail)</h2>
+            <p className="text-xs text-muted-foreground">
+              Placeholders disponíveis:{" "}
+              <code>{"{ctr} {sendRate} {impressions} {clicks} {sends} {minCtr} {minSendRate} {windowHours} {ctaHash} {origin} {path} {reason}"}</code>
+            </p>
+            <div className="space-y-2">
+              <Label className="text-xs">Título</Label>
+              <Input value={tpl.title} onChange={(e) => setTpl({ ...tpl, title: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs">Corpo</Label>
+              <textarea
+                className="w-full min-h-[140px] rounded-md border bg-background p-2 text-sm font-mono"
+                value={tpl.body}
+                onChange={(e) => setTpl({ ...tpl, body: e.target.value })}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" onClick={() => { saveAlertTemplate(tpl); setTick((t) => t + 1); }}>
+                Salvar template
+              </Button>
+              <Button size="sm" variant="ghost"
+                onClick={() => { saveAlertTemplate(DEFAULT_ALERT_TEMPLATE); setTpl(DEFAULT_ALERT_TEMPLATE); }}>
+                Restaurar padrão
+              </Button>
+            </div>
+            <details className="text-xs">
+              <summary className="cursor-pointer text-muted-foreground">Pré-visualização com a janela atual</summary>
+              <pre className="mt-2 whitespace-pre-wrap rounded bg-muted p-2">
+{(() => {
+  const r = renderAlertTemplate(tpl, {
+    ctr: alertEval.ctr,
+    sendRate: alertEval.sendRate,
+    impressions: alertEval.impressions,
+    clicks: alertEval.clicks,
+    sends: alertEval.sends,
+    ctrBelow: alertEval.ctrBelow || true,
+    sendBelow: alertEval.sendBelow || true,
+    minCtr: cfg.minCtr,
+    minSendRate: cfg.minSendRate,
+    windowHours: cfg.windowHours,
+    ctaHash: hCta !== "__all" ? hCta : undefined,
+    origin: origin !== "__all" ? origin : undefined,
+  });
+  return `${r.title}\n\n${r.body}`;
+})()}
+              </pre>
+            </details>
+          </Card>
+
 
           <Card className="p-6">
             {historyFiltered.length === 0 ? (
