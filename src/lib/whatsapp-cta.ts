@@ -74,6 +74,13 @@ export type WhatsAppCTAEvent =
 const METRICS_KEY = "wa_official_metrics_v1";
 const ALERTS_KEY = "wa_official_alerts_v1";
 const PENDING_KEY = "wa_official_pending_v1";
+const ALERT_HISTORY_KEY = "wa_official_alert_history_v1";
+const LAST_CLICK_KEY = "wa_official_last_click_v1";
+const LAST_SENT_KEY = "wa_official_last_sent_v1";
+const LAST_ALERT_KEY = "wa_official_last_alert_notify_v1";
+const CLICK_DEDUP_MS = 2_000;
+const SENT_DEDUP_MS = 30_000;
+const ALERT_NOTIFY_COOLDOWN_MS = 60 * 60_000;
 const MAX_BUFFER = 1000;
 
 export interface BufferedEvent {
