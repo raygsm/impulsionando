@@ -13,6 +13,10 @@
     "test": "vitest run",
     "test:rls": "vitest run tests/rls-permissions.test.ts",
     "test:rls:contracts": "vitest run tests/rls-contracts-isolation.test.ts",
+    "test:rls:recent": "vitest run tests/rls-recent-hardening.test.ts",
+    "security:check": "node scripts/check-security-findings.mjs",
+    "security:baseline": "node scripts/check-security-findings.mjs --update-baseline",
+    "ci:security": "bun run security:check && bun run test:rls:recent",
     "test:e2e": "playwright test"
   },
   "dependencies": {
