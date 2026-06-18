@@ -113,7 +113,7 @@ function AuditoriaPage() {
 
   const updateSearch = (patch: Partial<typeof search>) => {
     setOffset(0);
-    navigate({ search: (prev) => ({ ...prev, ...patch }) });
+    navigate({ search: (prev: AuditSearch) => ({ ...prev, ...patch }) });
   };
 
   const exportCsv = () => {
