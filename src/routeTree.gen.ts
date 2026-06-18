@@ -121,6 +121,7 @@ import { Route as ComoFuncionaFitnessRouteImport } from './routes/como-funciona.
 import { Route as ClubeLoginRouteImport } from './routes/clube.login'
 import { Route as ClubeCadastroRouteImport } from './routes/clube.cadastro'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
+import { Route as CheckoutSlugRouteImport } from './routes/checkout.$slug'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
 import { Route as AuthenticatedUnitsRouteImport } from './routes/_authenticated/units'
@@ -938,6 +939,11 @@ const ClubeCadastroRoute = ClubeCadastroRouteImport.update({
 const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
   id: '/checkout/success',
   path: '/checkout/success',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutSlugRoute = CheckoutSlugRouteImport.update({
+  id: '/checkout/$slug',
+  path: '/checkout/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
@@ -2456,6 +2462,7 @@ export interface FileRoutesByFullPath {
   '/units': typeof AuthenticatedUnitsRoute
   '/users': typeof AuthenticatedUsersRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
   '/clube/login': typeof ClubeLoginRoute
@@ -2811,6 +2818,7 @@ export interface FileRoutesByTo {
   '/units': typeof AuthenticatedUnitsRoute
   '/users': typeof AuthenticatedUsersRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
   '/clube/login': typeof ClubeLoginRoute
@@ -3180,6 +3188,7 @@ export interface FileRoutesById {
   '/_authenticated/units': typeof AuthenticatedUnitsRoute
   '/_authenticated/users': typeof AuthenticatedUsersRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
   '/clube/login': typeof ClubeLoginRoute
@@ -3548,6 +3557,7 @@ export interface FileRouteTypes {
     | '/units'
     | '/users'
     | '/admin/login'
+    | '/checkout/$slug'
     | '/checkout/success'
     | '/clube/cadastro'
     | '/clube/login'
@@ -3903,6 +3913,7 @@ export interface FileRouteTypes {
     | '/units'
     | '/users'
     | '/admin/login'
+    | '/checkout/$slug'
     | '/checkout/success'
     | '/clube/cadastro'
     | '/clube/login'
@@ -4271,6 +4282,7 @@ export interface FileRouteTypes {
     | '/_authenticated/units'
     | '/_authenticated/users'
     | '/admin/login'
+    | '/checkout/$slug'
     | '/checkout/success'
     | '/clube/cadastro'
     | '/clube/login'
@@ -4610,6 +4622,7 @@ export interface RootRouteChildren {
   VitrineRoute: typeof VitrineRouteWithChildren
   WhiteLabelRoute: typeof WhiteLabelRouteWithChildren
   AdminLoginRoute: typeof AdminLoginRoute
+  CheckoutSlugRoute: typeof CheckoutSlugRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   ComoFuncionaFitnessRoute: typeof ComoFuncionaFitnessRoute
   DemoAdvogadosRoute: typeof DemoAdvogadosRoute
@@ -5500,6 +5513,13 @@ declare module '@tanstack/react-router' {
       path: '/checkout/success'
       fullPath: '/checkout/success'
       preLoaderRoute: typeof CheckoutSuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout/$slug': {
+      id: '/checkout/$slug'
+      path: '/checkout/$slug'
+      fullPath: '/checkout/$slug'
+      preLoaderRoute: typeof CheckoutSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/login': {
@@ -8183,6 +8203,7 @@ const rootRouteChildren: RootRouteChildren = {
   VitrineRoute: VitrineRouteWithChildren,
   WhiteLabelRoute: WhiteLabelRouteWithChildren,
   AdminLoginRoute: AdminLoginRoute,
+  CheckoutSlugRoute: CheckoutSlugRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
   ComoFuncionaFitnessRoute: ComoFuncionaFitnessRoute,
   DemoAdvogadosRoute: DemoAdvogadosRoute,
