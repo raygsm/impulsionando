@@ -207,6 +207,17 @@ function DemoQrShell() {
 
   const { scenario, items } = scenarioQ.data;
   const showMenu = MENU_KINDS.has(currentQr.kind);
+  const SURVEY_KINDS = new Set(["pesquisa", "clube"]);
+  const showSurvey = SURVEY_KINDS.has(currentQr.kind) || (showMenu && checkoutDone);
+
+  // Jornada: 0 scan · 1 cardápio · 2 checkout · 3 voucher · 4 retorno
+  const journeyIndex = voucher
+    ? 3
+    : checkoutDone
+    ? 2
+    : cart.count > 0
+    ? 1
+    : 0;
 
   return (
     <main
@@ -244,20 +255,38 @@ function DemoQrShell() {
           </p>
         </Card>
 
-        {showMenu ? (
-          <DemoMenu items={items as DemoMenuItem[]} onAdd={handleAdd} />
-        ) : (
+        {showMenu && <DemoMenu items={items as DemoMenuItem[]} onAdd={handleAdd} />}
+
+        {checkoutDone && showMenu && !voucher && (
+          <Card className="p-4 space-y-1 border-primary/30 bg-primary/5">
+            <p className="text-sm font-semibold">Quer voltar com 10% de desconto?</p>
+            <p className="text-xs text-muted-foreground">
+              Responda a pesquisa abaixo e o Boteco libera um voucher personalizado pelo perfil do seu pedido.
+            </p>
+          </Card>
+        )}
+
+        {voucher && <DemoVoucherCard voucher={voucher} maskedName={maskedName} />}
+
+        {showSurvey && !voucher && (
+          <DemoSurvey loading={surveyLoading} onSubmit={handleSurveySubmit} />
+        )}
+
+        {!showMenu && !SURVEY_KINDS.has(currentQr.kind) && (
           <Card className="p-4 space-y-2">
             <div className="flex items-center gap-2 text-sm font-semibold">
               <Sparkles className="w-4 h-4" /> Próxima etapa
             </div>
             <p className="text-xs text-muted-foreground">
               Este QR é do tipo <strong>{KIND_LABEL[currentQr.kind] ?? currentQr.kind}</strong>. A jornada
-              dedicada (pesquisa, evento ou Clube) entra na próxima fase da demonstração.
+              dedicada entra nas próximas iterações da demonstração.
             </p>
           </Card>
         )}
+
+        <DemoJourney activeIndex={journeyIndex} />
       </section>
+
 
       {showMenu && (
         <>
