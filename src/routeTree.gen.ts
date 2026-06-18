@@ -350,6 +350,7 @@ import { Route as ApiPublicHooksUptimeCheckRouteImport } from './routes/api/publ
 import { Route as ApiPublicHooksN8nLogRouteImport } from './routes/api/public/hooks/n8n-log'
 import { Route as ApiPublicHooksMpPendingRemindersRouteImport } from './routes/api/public/hooks/mp-pending-reminders'
 import { Route as ApiPublicHooksMarketingLeadNotifyRouteImport } from './routes/api/public/hooks/marketing-lead-notify'
+import { Route as ApiPublicHooksCoreNotificationEventRouteImport } from './routes/api/public/hooks/core-notification-event'
 import { Route as ApiPublicHooksCommsSelfTestRouteImport } from './routes/api/public/hooks/comms-self-test'
 import { Route as ApiPublicHooksClubeJourneyTickRouteImport } from './routes/api/public/hooks/clube-journey-tick'
 import { Route as ApiPublicHooksBillingTickRouteImport } from './routes/api/public/hooks/billing-tick'
@@ -2251,6 +2252,12 @@ const ApiPublicHooksMarketingLeadNotifyRoute =
     path: '/api/public/hooks/marketing-lead-notify',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksCoreNotificationEventRoute =
+  ApiPublicHooksCoreNotificationEventRouteImport.update({
+    id: '/api/public/hooks/core-notification-event',
+    path: '/api/public/hooks/core-notification-event',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksCommsSelfTestRoute =
   ApiPublicHooksCommsSelfTestRouteImport.update({
     id: '/api/public/hooks/comms-self-test',
@@ -2777,6 +2784,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
   '/api/public/hooks/clube-journey-tick': typeof ApiPublicHooksClubeJourneyTickRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
+  '/api/public/hooks/core-notification-event': typeof ApiPublicHooksCoreNotificationEventRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/mp-pending-reminders': typeof ApiPublicHooksMpPendingRemindersRoute
   '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
@@ -3137,6 +3145,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
   '/api/public/hooks/clube-journey-tick': typeof ApiPublicHooksClubeJourneyTickRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
+  '/api/public/hooks/core-notification-event': typeof ApiPublicHooksCoreNotificationEventRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/mp-pending-reminders': typeof ApiPublicHooksMpPendingRemindersRoute
   '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
@@ -3511,6 +3520,7 @@ export interface FileRoutesById {
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
   '/api/public/hooks/clube-journey-tick': typeof ApiPublicHooksClubeJourneyTickRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
+  '/api/public/hooks/core-notification-event': typeof ApiPublicHooksCoreNotificationEventRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/mp-pending-reminders': typeof ApiPublicHooksMpPendingRemindersRoute
   '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
@@ -3884,6 +3894,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/billing-tick'
     | '/api/public/hooks/clube-journey-tick'
     | '/api/public/hooks/comms-self-test'
+    | '/api/public/hooks/core-notification-event'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/mp-pending-reminders'
     | '/api/public/hooks/n8n-log'
@@ -4244,6 +4255,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/billing-tick'
     | '/api/public/hooks/clube-journey-tick'
     | '/api/public/hooks/comms-self-test'
+    | '/api/public/hooks/core-notification-event'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/mp-pending-reminders'
     | '/api/public/hooks/n8n-log'
@@ -4617,6 +4629,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/billing-tick'
     | '/api/public/hooks/clube-journey-tick'
     | '/api/public/hooks/comms-self-test'
+    | '/api/public/hooks/core-notification-event'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/mp-pending-reminders'
     | '/api/public/hooks/n8n-log'
@@ -4761,6 +4774,7 @@ export interface RootRouteChildren {
   ApiPublicHooksBillingTickRoute: typeof ApiPublicHooksBillingTickRoute
   ApiPublicHooksClubeJourneyTickRoute: typeof ApiPublicHooksClubeJourneyTickRoute
   ApiPublicHooksCommsSelfTestRoute: typeof ApiPublicHooksCommsSelfTestRoute
+  ApiPublicHooksCoreNotificationEventRoute: typeof ApiPublicHooksCoreNotificationEventRoute
   ApiPublicHooksMarketingLeadNotifyRoute: typeof ApiPublicHooksMarketingLeadNotifyRoute
   ApiPublicHooksMpPendingRemindersRoute: typeof ApiPublicHooksMpPendingRemindersRoute
   ApiPublicHooksN8nLogRoute: typeof ApiPublicHooksN8nLogRoute
@@ -7170,6 +7184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksMarketingLeadNotifyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/core-notification-event': {
+      id: '/api/public/hooks/core-notification-event'
+      path: '/api/public/hooks/core-notification-event'
+      fullPath: '/api/public/hooks/core-notification-event'
+      preLoaderRoute: typeof ApiPublicHooksCoreNotificationEventRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/comms-self-test': {
       id: '/api/public/hooks/comms-self-test'
       path: '/api/public/hooks/comms-self-test'
@@ -8393,6 +8414,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksBillingTickRoute: ApiPublicHooksBillingTickRoute,
   ApiPublicHooksClubeJourneyTickRoute: ApiPublicHooksClubeJourneyTickRoute,
   ApiPublicHooksCommsSelfTestRoute: ApiPublicHooksCommsSelfTestRoute,
+  ApiPublicHooksCoreNotificationEventRoute:
+    ApiPublicHooksCoreNotificationEventRoute,
   ApiPublicHooksMarketingLeadNotifyRoute:
     ApiPublicHooksMarketingLeadNotifyRoute,
   ApiPublicHooksMpPendingRemindersRoute: ApiPublicHooksMpPendingRemindersRoute,
