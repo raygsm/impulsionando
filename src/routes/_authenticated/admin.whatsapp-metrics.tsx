@@ -199,13 +199,39 @@ function WhatsAppMetricsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alertEval.triggered]);
 
+  const historyCtaOptions = useMemo(() => {
+    const s = new Set<string>();
+    for (const e of history) if (e.ctaHash) s.add(e.ctaHash);
+    return Array.from(s).sort();
+  }, [history]);
+
   const historyFiltered = useMemo(() => {
     const from = hFrom ? new Date(hFrom + "T00:00:00").getTime() : 0;
     const to = hTo ? new Date(hTo + "T23:59:59").getTime() : Number.POSITIVE_INFINITY;
     return history
       .filter((e) => e.ts >= from && e.ts <= to)
+      .filter((e) => hCta === "__all" || (e.ctaHash ?? "") === hCta)
       .sort((a, b) => b.ts - a.ts);
-  }, [history, hFrom, hTo]);
+  }, [history, hFrom, hTo, hCta]);
+
+  function exportHistoryCSV() {
+    const head = [
+      "ts", "iso", "ctr", "sendRate", "impressions", "clicks", "sends",
+      "ctrBelow", "sendBelow", "minCtr", "minSendRate", "windowHours",
+      "ctaHash", "notified",
+    ];
+    const esc = (v: unknown) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const lines = historyFiltered.map((e) =>
+      [e.ts, new Date(e.ts).toISOString(), e.ctr.toFixed(2), e.sendRate.toFixed(2),
+       e.impressions, e.clicks, e.sends, e.ctrBelow, e.sendBelow,
+       e.minCtr, e.minSendRate, e.windowHours, e.ctaHash ?? "",
+       (e.notified ?? []).join("|")].map(esc).join(","),
+    );
+    download(`wa-alert-history-${Date.now()}.csv`, [head.join(","), ...lines].join("\n"));
+  }
 
   return (
     <div className="space-y-6 p-6">
