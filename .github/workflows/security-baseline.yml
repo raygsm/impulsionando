@@ -2,8 +2,8 @@ name: Security Baseline (PR Gate)
 
 # Runs the security:check baseline guard on every pull request and fails the PR
 # if new security findings appear beyond the accepted baseline
-# (scripts/security-baseline.json). Also runs the storage-bucket RLS tests so
-# regressions on the contracts / contab-documents buckets block merges.
+# (scripts/security-baseline.json). Posts a sticky PR comment summarizing the
+# findings + diff on both success and failure.
 
 on:
   pull_request:
@@ -24,6 +24,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+      issues: write
     env:
       PGHOST: ${{ secrets.PGHOST }}
       PGPORT: ${{ secrets.PGPORT }}
@@ -33,6 +34,7 @@ jobs:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      OUT_DIR: ${{ github.workspace }}/security-report
     steps:
       - uses: actions/checkout@v4
 
@@ -53,21 +55,29 @@ jobs:
       - name: Install psql client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
-      - name: Generate full findings report (artifact + job summary)
+      - name: Generate full findings report (artifact + job summary + PR comment body)
         id: report
-        env:
-          OUT_DIR: ${{ github.workspace }}/security-report
         run: |
           mkdir -p "$OUT_DIR"
           node scripts/security-report.mjs
 
       - name: Security baseline check (fails on regression)
         id: baseline
+        continue-on-error: true
         run: bun run security:check 2>&1 | tee security-baseline.txt
 
       - name: Storage bucket RLS regression tests
+        id: storage_tests
         if: env.SUPABASE_SERVICE_ROLE_KEY != ''
-        run: bunx vitest run tests/storage-buckets-access.test.ts tests/storage-signed-urls.test.ts tests/storage-cross-tenant.test.ts --reporter=verbose 2>&1 | tee storage-rls-report.txt
+        continue-on-error: true
+        run: bunx vitest run tests/storage-buckets-access.test.ts tests/storage-signed-urls.test.ts tests/storage-cross-tenant.test.ts tests/storage-metadata-inference.test.ts --reporter=verbose 2>&1 | tee storage-rls-report.txt
+
+      - name: Comment PR with findings summary + diff
+        if: github.event_name == 'pull_request' && always()
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: security-baseline-report
+          path: ${{ env.OUT_DIR }}/pr-comment.md
 
       - name: Upload reports
         if: always()
@@ -79,10 +89,11 @@ jobs:
             storage-rls-report.txt
             security-report/security-report.json
             security-report/security-report.md
+            security-report/pr-comment.md
           retention-days: 30
 
       - name: Fail PR if any check failed
-        if: failure()
+        if: steps.baseline.outcome == 'failure' || steps.storage_tests.outcome == 'failure'
         run: |
-          echo "::error::Security baseline regressed or storage RLS tests failed. See the 'security-baseline-reports' artifact (security-report.md) for the full findings diff."
+          echo "::error::Security baseline regressed or storage RLS tests failed. See the 'security-baseline-reports' artifact (security-report.md) and the PR comment for the full findings diff."
           exit 1

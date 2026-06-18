@@ -1,0 +1,95 @@
+name: Security Nightly Scan
+
+# Re-runs the security review scan nightly and uploads security-report.{json,md}
+# so regressions are detected even when no PR is open. If a regression is
+# detected vs scripts/security-baseline.json, opens (or updates) a tracking
+# issue with the findings diff.
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # 06:00 UTC (~03:00 BRT) daily
+  workflow_dispatch:
+
+concurrency:
+  group: security-nightly
+  cancel-in-progress: false
+
+jobs:
+  nightly-scan:
+    name: Nightly security scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      issues: write
+    env:
+      PGHOST: ${{ secrets.PGHOST }}
+      PGPORT: ${{ secrets.PGPORT }}
+      PGUSER: ${{ secrets.PGUSER }}
+      PGPASSWORD: ${{ secrets.PGPASSWORD }}
+      PGDATABASE: ${{ secrets.PGDATABASE }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      OUT_DIR: ${{ github.workspace }}/security-report
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: Install psql client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Generate security report
+        run: |
+          mkdir -p "$OUT_DIR"
+          node scripts/security-report.mjs
+
+      - name: Baseline check (non-blocking; result drives issue creation)
+        id: baseline
+        continue-on-error: true
+        run: bun run security:check 2>&1 | tee security-baseline.txt
+
+      - name: Upload nightly report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-nightly-${{ github.run_id }}
+          path: |
+            security-baseline.txt
+            security-report/security-report.json
+            security-report/security-report.md
+            security-report/pr-comment.md
+          retention-days: 90
+
+      - name: Open/update tracking issue on regression
+        if: steps.baseline.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync(`${process.env.OUT_DIR}/pr-comment.md`, 'utf8');
+            const title = `🔐 Security baseline regression detected (nightly ${new Date().toISOString().slice(0,10)})`;
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              labels: 'security-regression', state: 'open',
+            });
+            if (existing.length) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: existing[0].number,
+                body: `Nightly scan still failing — updated findings:\n\n${body}`,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title, body, labels: ['security-regression'],
+              });
+            }
+
+      - name: Fail job on regression
+        if: steps.baseline.outcome == 'failure'
+        run: exit 1
