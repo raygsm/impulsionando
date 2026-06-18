@@ -281,6 +281,7 @@ import { Route as AuthenticatedComunidadeIdRouteImport } from './routes/_authent
 import { Route as AuthenticatedCommercialCockpitRouteImport } from './routes/_authenticated/commercial.cockpit'
 import { Route as AuthenticatedClubeNotificacoesRouteImport } from './routes/_authenticated/clube.notificacoes'
 import { Route as AuthenticatedCheckoutPlanoRouteImport } from './routes/_authenticated/checkout.$plano'
+import { Route as AuthenticatedCervejariaPdvsRouteImport } from './routes/_authenticated/cervejaria.pdvs'
 import { Route as AuthenticatedBiNichesRouteImport } from './routes/_authenticated/bi.niches'
 import { Route as AuthenticatedBiMasterRouteImport } from './routes/_authenticated/bi.master'
 import { Route as AuthenticatedBiCompanyRouteImport } from './routes/_authenticated/bi.company'
@@ -1831,6 +1832,12 @@ const AuthenticatedCheckoutPlanoRoute =
     path: '/checkout/$plano',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedCervejariaPdvsRoute =
+  AuthenticatedCervejariaPdvsRouteImport.update({
+    id: '/pdvs',
+    path: '/pdvs',
+    getParentRoute: () => AuthenticatedCervejariaRoute,
+  } as any)
 const AuthenticatedBiNichesRoute = AuthenticatedBiNichesRouteImport.update({
   id: '/niches',
   path: '/niches',
@@ -2304,7 +2311,7 @@ export interface FileRoutesByFullPath {
   '/audit': typeof AuthenticatedAuditRoute
   '/automacoes': typeof AuthenticatedAutomacoesRoute
   '/bi': typeof AuthenticatedBiRouteWithChildren
-  '/cervejaria': typeof AuthenticatedCervejariaRoute
+  '/cervejaria': typeof AuthenticatedCervejariaRouteWithChildren
   '/companies': typeof AuthenticatedCompaniesRoute
   '/core': typeof AuthenticatedCoreRouteWithChildren
   '/crm': typeof AuthenticatedCrmRouteWithChildren
@@ -2444,6 +2451,7 @@ export interface FileRoutesByFullPath {
   '/bi/company': typeof AuthenticatedBiCompanyRoute
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
+  '/cervejaria/pdvs': typeof AuthenticatedCervejariaPdvsRoute
   '/checkout/$plano': typeof AuthenticatedCheckoutPlanoRoute
   '/clube/notificacoes': typeof AuthenticatedClubeNotificacoesRoute
   '/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
@@ -2646,7 +2654,7 @@ export interface FileRoutesByTo {
   '/adm': typeof AuthenticatedAdmRouteWithChildren
   '/audit': typeof AuthenticatedAuditRoute
   '/automacoes': typeof AuthenticatedAutomacoesRoute
-  '/cervejaria': typeof AuthenticatedCervejariaRoute
+  '/cervejaria': typeof AuthenticatedCervejariaRouteWithChildren
   '/companies': typeof AuthenticatedCompaniesRoute
   '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -2780,6 +2788,7 @@ export interface FileRoutesByTo {
   '/bi/company': typeof AuthenticatedBiCompanyRoute
   '/bi/master': typeof AuthenticatedBiMasterRoute
   '/bi/niches': typeof AuthenticatedBiNichesRoute
+  '/cervejaria/pdvs': typeof AuthenticatedCervejariaPdvsRoute
   '/checkout/$plano': typeof AuthenticatedCheckoutPlanoRoute
   '/clube/notificacoes': typeof AuthenticatedClubeNotificacoesRoute
   '/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
@@ -2989,7 +2998,7 @@ export interface FileRoutesById {
   '/_authenticated/audit': typeof AuthenticatedAuditRoute
   '/_authenticated/automacoes': typeof AuthenticatedAutomacoesRoute
   '/_authenticated/bi': typeof AuthenticatedBiRouteWithChildren
-  '/_authenticated/cervejaria': typeof AuthenticatedCervejariaRoute
+  '/_authenticated/cervejaria': typeof AuthenticatedCervejariaRouteWithChildren
   '/_authenticated/clube': typeof AuthenticatedClubeRouteWithChildren
   '/_authenticated/companies': typeof AuthenticatedCompaniesRoute
   '/_authenticated/core': typeof AuthenticatedCoreRouteWithChildren
@@ -3130,6 +3139,7 @@ export interface FileRoutesById {
   '/_authenticated/bi/company': typeof AuthenticatedBiCompanyRoute
   '/_authenticated/bi/master': typeof AuthenticatedBiMasterRoute
   '/_authenticated/bi/niches': typeof AuthenticatedBiNichesRoute
+  '/_authenticated/cervejaria/pdvs': typeof AuthenticatedCervejariaPdvsRoute
   '/_authenticated/checkout/$plano': typeof AuthenticatedCheckoutPlanoRoute
   '/_authenticated/clube/notificacoes': typeof AuthenticatedClubeNotificacoesRoute
   '/_authenticated/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
@@ -3479,6 +3489,7 @@ export interface FileRouteTypes {
     | '/bi/company'
     | '/bi/master'
     | '/bi/niches'
+    | '/cervejaria/pdvs'
     | '/checkout/$plano'
     | '/clube/notificacoes'
     | '/commercial/cockpit'
@@ -3815,6 +3826,7 @@ export interface FileRouteTypes {
     | '/bi/company'
     | '/bi/master'
     | '/bi/niches'
+    | '/cervejaria/pdvs'
     | '/checkout/$plano'
     | '/clube/notificacoes'
     | '/commercial/cockpit'
@@ -4164,6 +4176,7 @@ export interface FileRouteTypes {
     | '/_authenticated/bi/company'
     | '/_authenticated/bi/master'
     | '/_authenticated/bi/niches'
+    | '/_authenticated/cervejaria/pdvs'
     | '/_authenticated/checkout/$plano'
     | '/_authenticated/clube/notificacoes'
     | '/_authenticated/commercial/cockpit'
@@ -6374,6 +6387,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCheckoutPlanoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/cervejaria/pdvs': {
+      id: '/_authenticated/cervejaria/pdvs'
+      path: '/pdvs'
+      fullPath: '/cervejaria/pdvs'
+      preLoaderRoute: typeof AuthenticatedCervejariaPdvsRouteImport
+      parentRoute: typeof AuthenticatedCervejariaRoute
+    }
     '/_authenticated/bi/niches': {
       id: '/_authenticated/bi/niches'
       path: '/niches'
@@ -7021,6 +7041,20 @@ const AuthenticatedBiRouteWithChildren = AuthenticatedBiRoute._addFileChildren(
   AuthenticatedBiRouteChildren,
 )
 
+interface AuthenticatedCervejariaRouteChildren {
+  AuthenticatedCervejariaPdvsRoute: typeof AuthenticatedCervejariaPdvsRoute
+}
+
+const AuthenticatedCervejariaRouteChildren: AuthenticatedCervejariaRouteChildren =
+  {
+    AuthenticatedCervejariaPdvsRoute: AuthenticatedCervejariaPdvsRoute,
+  }
+
+const AuthenticatedCervejariaRouteWithChildren =
+  AuthenticatedCervejariaRoute._addFileChildren(
+    AuthenticatedCervejariaRouteChildren,
+  )
+
 interface AuthenticatedClubeRouteChildren {
   AuthenticatedClubeNotificacoesRoute: typeof AuthenticatedClubeNotificacoesRoute
 }
@@ -7364,7 +7398,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAuditRoute: typeof AuthenticatedAuditRoute
   AuthenticatedAutomacoesRoute: typeof AuthenticatedAutomacoesRoute
   AuthenticatedBiRoute: typeof AuthenticatedBiRouteWithChildren
-  AuthenticatedCervejariaRoute: typeof AuthenticatedCervejariaRoute
+  AuthenticatedCervejariaRoute: typeof AuthenticatedCervejariaRouteWithChildren
   AuthenticatedClubeRoute: typeof AuthenticatedClubeRouteWithChildren
   AuthenticatedCompaniesRoute: typeof AuthenticatedCompaniesRoute
   AuthenticatedCoreRoute: typeof AuthenticatedCoreRouteWithChildren
@@ -7467,7 +7501,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAuditRoute: AuthenticatedAuditRoute,
   AuthenticatedAutomacoesRoute: AuthenticatedAutomacoesRoute,
   AuthenticatedBiRoute: AuthenticatedBiRouteWithChildren,
-  AuthenticatedCervejariaRoute: AuthenticatedCervejariaRoute,
+  AuthenticatedCervejariaRoute: AuthenticatedCervejariaRouteWithChildren,
   AuthenticatedClubeRoute: AuthenticatedClubeRouteWithChildren,
   AuthenticatedCompaniesRoute: AuthenticatedCompaniesRoute,
   AuthenticatedCoreRoute: AuthenticatedCoreRouteWithChildren,

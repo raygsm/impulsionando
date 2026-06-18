@@ -76,7 +76,7 @@ function BreweryPdvsPage() {
   });
 
   const createMut = useMutation({
-    mutationFn: (payload: Parameters<typeof createPdv>[0]["data"]) => createPdv({ data: payload }),
+    mutationFn: (payload: any) => createPdv({ data: payload }),
     onSuccess: () => {
       toast.success("PDV cadastrado");
       qc.invalidateQueries({ queryKey: ["brewery-pdvs"] });
@@ -225,7 +225,7 @@ function BreweryPdvsPage() {
   );
 }
 
-function NewPdvDialog({ open, onOpenChange, brandId, onSubmit, pending }: any) {
+function NewPdvDialog({ open, onOpenChange, brandId, onSubmit, pending }: { open: boolean; onOpenChange: (v: boolean) => void; brandId?: string; onSubmit: (v: any) => void; pending: boolean }) {
   const [form, setForm] = useState({ pdvName: "", pdvCity: "", pdvState: "", contactName: "", contactPhone: "", contractStatus: "pending", notes: "" });
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -301,7 +301,7 @@ function parseCsv(text: string): { headers: string[]; rows: Record<string, strin
   return { headers, rows };
 }
 
-function ImportSelloutDialog({ open, onOpenChange, pdvs, onImport, pending, result }: any) {
+function ImportSelloutDialog({ open, onOpenChange, pdvs, onImport, pending, result }: { open: boolean; onOpenChange: (v: boolean) => void; pdvs: any[]; onImport: (rows: any[]) => void; pending: boolean; result: any }) {
   const [preview, setPreview] = useState<any[]>([]);
   const [errors, setErrors] = useState<string[]>([]);
 
