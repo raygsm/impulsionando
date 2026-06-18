@@ -1687,6 +1687,31 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
     const page = await context.newPage();
     await login(page);
 
+    const tablistRole = () =>
+      page.getByRole("tablist", { name: /Seções da Minha área/i });
+    const tabRole = (label: RegExp) =>
+      tablistRole().getByRole("tab", { name: label });
+    const tabpanelRole = (label: RegExp) =>
+      page.getByRole("tabpanel", { name: label });
+
+    // Retry-based ring-token assertion — replaces brittle one-shot waitForFunction
+    const expectRingTokens = async (chipId: string) => {
+      await expect
+        .poll(
+          () =>
+            page.locator(`#tab-${chipId}`).evaluate((el) => {
+              const cls = (el as HTMLElement).className;
+              return (
+                cls.includes("focus-visible:ring-2") &&
+                cls.includes("focus-visible:ring-ring") &&
+                cls.includes("focus-visible:ring-offset-2")
+              );
+            }),
+          { timeout: 5_000, intervals: [100, 200, 400, 600, 800] },
+        )
+        .toBe(true);
+    };
+
     // Helpers — wait until layout, focus, ring tokens and CSS offset all settle
     const waitSettled = async (chipId: string) => {
       // 1) Web fonts loaded so glyph widths don't shift the snapshot
@@ -1699,21 +1724,18 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
         return !!v && parseFloat(v) > 0;
       });
       // 3) The chip we expect to be focused is actually the active element
-      await page.waitForFunction(
-        (id) => (document.activeElement as HTMLElement | null)?.id === id,
-        `tab-${chipId}`,
-      );
-      // 4) Focus-ring tokens present on the focused chip class list
-      await page.waitForFunction((id) => {
-        const el = document.getElementById(`tab-${id}`);
-        if (!el) return false;
-        const cls = el.className;
-        return (
-          cls.includes("focus-visible:ring-2") &&
-          cls.includes("focus-visible:ring-ring") &&
-          cls.includes("focus-visible:ring-offset-2")
-        );
-      }, chipId);
+      await expect
+        .poll(
+          () =>
+            page.evaluate(
+              (id) => (document.activeElement as HTMLElement | null)?.id,
+              `tab-${chipId}`,
+            ),
+          { timeout: 4_000 },
+        )
+        .toBe(`tab-${chipId}`);
+      // 4) Focus-ring tokens present on the focused chip class list (with retries)
+      await expectRingTokens(chipId);
       // 5) Two animation frames so any final reflow paints before screenshot
       await page.evaluate(
         () =>
@@ -1733,10 +1755,10 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
     });
     await page.reload();
     await page.waitForLoadState("networkidle");
-    await page.locator("#tab-favoritos").focus();
+    await tabRole(/Meus favoritos/i).focus();
     await waitSettled("favoritos");
 
-    const tablistP = page.getByRole("tablist", { name: /Seções da Minha área/i });
+    const tablistP = tablistRole();
     await expect(tablistP).toHaveScreenshot(
       "rm-rtl-mobile-portrait-subnav-default.png",
       { maxDiffPixelRatio: 0.02, animations: "disabled" },
@@ -1748,13 +1770,13 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
     await page.keyboard.press("Enter");
     // After Enter the component focuses the tabpanel; refocus the chip to
     // capture the focus-ring on the chip in a deterministic state.
-    await page.locator("#tab-cupons").focus();
+    await tabRole(/Meus cupons/i).focus();
     await waitSettled("cupons");
     await expect(tablistP).toHaveScreenshot(
       "rm-rtl-mobile-portrait-subnav-focus-cupons.png",
       { maxDiffPixelRatio: 0.02, animations: "disabled" },
     );
-    await expect(page.locator("#cupons")).toHaveScreenshot(
+    await expect(tabpanelRole(/Meus cupons/i)).toHaveScreenshot(
       "rm-rtl-mobile-portrait-tabpanel-cupons.png",
       { maxDiffPixelRatio: 0.03, animations: "disabled" },
     );
@@ -1762,21 +1784,24 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
     // Landscape — rotate, re-measure, wait until offset re-stabilizes
     await page.setViewportSize({ width: 844, height: 390 });
     await page.evaluate(() => window.dispatchEvent(new Event("orientationchange")));
-    await page.locator("#tab-cupons").focus();
+    // Wait for layout to react to rotation before refocusing
+    await page.waitForTimeout(150);
+    await tabRole(/Meus cupons/i).focus();
     await waitSettled("cupons");
 
-    const tablistL = page.getByRole("tablist", { name: /Seções da Minha área/i });
+    const tablistL = tablistRole();
     await expect(tablistL).toHaveScreenshot(
       "rm-rtl-mobile-landscape-subnav-focus-cupons.png",
       { maxDiffPixelRatio: 0.02, animations: "disabled" },
     );
-    await expect(page.locator("#cupons")).toHaveScreenshot(
+    await expect(tabpanelRole(/Meus cupons/i)).toHaveScreenshot(
       "rm-rtl-mobile-landscape-tabpanel-cupons.png",
       { maxDiffPixelRatio: 0.03, animations: "disabled" },
     );
 
     await context.close();
   });
+
 
   test("hash desconhecido + back/forward: foco roving e tokens de ring por etapa", async ({
     page,
