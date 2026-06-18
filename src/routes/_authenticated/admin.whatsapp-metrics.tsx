@@ -148,69 +148,52 @@ function WhatsAppMetricsPage() {
   // Quando dispara, grava no histórico + tenta notificar (cooldown 1h).
   useEffect(() => {
     if (!alertEval.triggered) return;
+    const baseEntry: Omit<AlertHistoryEntry, "notified"> = {
+      ts: Date.now(),
+      ctr: alertEval.ctr,
+      sendRate: alertEval.sendRate,
+      impressions: alertEval.impressions,
+      clicks: alertEval.clicks,
+      sends: alertEval.sends,
+      ctrBelow: alertEval.ctrBelow,
+      sendBelow: alertEval.sendBelow,
+      windowHours: cfg.windowHours,
+      minCtr: cfg.minCtr,
+      minSendRate: cfg.minSendRate,
+      ctaHash: cta !== "__all" ? cta : undefined,
+    };
     if (!shouldNotifyAlertNow()) {
-      recordAlertHistory({
-        ts: Date.now(),
-        ctr: alertEval.ctr,
-        sendRate: alertEval.sendRate,
-        impressions: alertEval.impressions,
-        clicks: alertEval.clicks,
-        sends: alertEval.sends,
-        ctrBelow: alertEval.ctrBelow,
-        sendBelow: alertEval.sendBelow,
-        windowHours: cfg.windowHours,
-        minCtr: cfg.minCtr,
-        minSendRate: cfg.minSendRate,
-        notified: [],
-      });
+      recordAlertHistory({ ...baseEntry, notified: [] });
       return;
     }
+    const rendered = renderAlertTemplate(tpl, {
+      ctr: alertEval.ctr,
+      sendRate: alertEval.sendRate,
+      impressions: alertEval.impressions,
+      clicks: alertEval.clicks,
+      sends: alertEval.sends,
+      ctrBelow: alertEval.ctrBelow,
+      sendBelow: alertEval.sendBelow,
+      minCtr: cfg.minCtr,
+      minSendRate: cfg.minSendRate,
+      windowHours: cfg.windowHours,
+      ctaHash: baseEntry.ctaHash,
+      origin: origin !== "__all" ? origin : undefined,
+    });
     notify({
       data: {
-        ctr: alertEval.ctr,
-        sendRate: alertEval.sendRate,
-        impressions: alertEval.impressions,
-        clicks: alertEval.clicks,
-        sends: alertEval.sends,
-        ctrBelow: alertEval.ctrBelow,
-        sendBelow: alertEval.sendBelow,
-        minCtr: cfg.minCtr,
-        minSendRate: cfg.minSendRate,
-        windowHours: cfg.windowHours,
+        ...baseEntry,
+        title: rendered.title,
+        body: rendered.body,
+        origin: origin !== "__all" ? origin : undefined,
       },
     })
       .then((res) => {
-        recordAlertHistory({
-          ts: Date.now(),
-          ctr: alertEval.ctr,
-          sendRate: alertEval.sendRate,
-          impressions: alertEval.impressions,
-          clicks: alertEval.clicks,
-          sends: alertEval.sends,
-          ctrBelow: alertEval.ctrBelow,
-          sendBelow: alertEval.sendBelow,
-          windowHours: cfg.windowHours,
-          minCtr: cfg.minCtr,
-          minSendRate: cfg.minSendRate,
-          notified: res?.channels ?? [],
-        });
+        recordAlertHistory({ ...baseEntry, notified: res?.channels ?? [] });
         setTick((t) => t + 1);
       })
       .catch(() => {
-        recordAlertHistory({
-          ts: Date.now(),
-          ctr: alertEval.ctr,
-          sendRate: alertEval.sendRate,
-          impressions: alertEval.impressions,
-          clicks: alertEval.clicks,
-          sends: alertEval.sends,
-          ctrBelow: alertEval.ctrBelow,
-          sendBelow: alertEval.sendBelow,
-          windowHours: cfg.windowHours,
-          minCtr: cfg.minCtr,
-          minSendRate: cfg.minSendRate,
-          notified: [],
-        });
+        recordAlertHistory({ ...baseEntry, notified: [] });
         setTick((t) => t + 1);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
