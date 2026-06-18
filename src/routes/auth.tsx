@@ -12,14 +12,58 @@ import { toast } from "sonner";
 import { ShieldCheck, Layers, Zap } from "lucide-react";
 import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 
+type AuthPersona = "core" | "empresa" | "white-label" | "admin" | "clube";
+type AuthMode = "signin" | "signup";
+
+interface AuthSearch {
+  persona?: AuthPersona;
+  mode?: AuthMode;
+}
+
+const PERSONA_COPY: Record<AuthPersona, { headline: string; sub: string; rightTitle: string; rightSub: string }> = {
+  core: {
+    headline: "Uma plataforma. Todos os nichos. Total controle.",
+    sub: "SaaS multiempresa, modular e parametrizável para clínicas, bares, cervejarias, serviços e varejo.",
+    rightTitle: "Acesse sua conta",
+    rightSub: "Use seu e-mail corporativo para continuar.",
+  },
+  empresa: {
+    headline: "Sua empresa, sua operação, no controle.",
+    sub: "Vendas, agenda, financeiro, fiscal e CRM em um único painel.",
+    rightTitle: "Acesso da Empresa",
+    rightSub: "Entre com o e-mail cadastrado na sua empresa.",
+  },
+  "white-label": {
+    headline: "Sua marca. Sua plataforma. Sua receita.",
+    sub: "Gerencie clientes, módulos, fiscal e cobrança com o seu próprio CNPJ.",
+    rightTitle: "Acesso White Label",
+    rightSub: "Entre na sua plataforma parceira.",
+  },
+  admin: {
+    headline: "Central Impulsionando.",
+    sub: "Acesso restrito da equipe operacional.",
+    rightTitle: "Acesso Administrativo",
+    rightSub: "Somente equipe Impulsionando autorizada.",
+  },
+  clube: {
+    headline: "Descubra o que existe perto de você.",
+    sub: "Cupons, eventos, restaurantes, clínicas e benefícios reais — tudo em um só lugar.",
+    rightTitle: "Bem-vindo ao Clube",
+    rightSub: "Crie sua conta gratuita ou entre para acessar seus benefícios.",
+  },
+};
+
 export const Route = createFileRoute("/auth")({
   ssr: false,
+  validateSearch: (s: Record<string, unknown>): AuthSearch => ({
+    persona: (s.persona as AuthPersona) || undefined,
+    mode: s.mode === "signup" ? "signup" : s.mode === "signin" ? "signin" : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Acessar — Impulsionando Tecnologia" },
       { name: "description", content: "Plataforma SaaS multiempresa, multinicho e modular." },
       { property: "og:url", content: "https://impulsionando.com.br/auth" },
-    
     ],
     links: [{ rel: "canonical", href: "https://impulsionando.com.br/auth" }],
   }),
