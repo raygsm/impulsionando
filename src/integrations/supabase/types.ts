@@ -7180,6 +7180,223 @@ export type Database = {
           },
         ]
       }
+      educ_leads: {
+        Row: {
+          campanha: string | null
+          company_id: string | null
+          consultor_id: string | null
+          created_at: string
+          curso_interesse: string | null
+          email: string | null
+          id: string
+          nome: string
+          origem: string | null
+          polo_id: string | null
+          stage: string
+          telefone: string | null
+          updated_at: string
+          valor_estimado: number | null
+        }
+        Insert: {
+          campanha?: string | null
+          company_id?: string | null
+          consultor_id?: string | null
+          created_at?: string
+          curso_interesse?: string | null
+          email?: string | null
+          id?: string
+          nome: string
+          origem?: string | null
+          polo_id?: string | null
+          stage?: string
+          telefone?: string | null
+          updated_at?: string
+          valor_estimado?: number | null
+        }
+        Update: {
+          campanha?: string | null
+          company_id?: string | null
+          consultor_id?: string | null
+          created_at?: string
+          curso_interesse?: string | null
+          email?: string | null
+          id?: string
+          nome?: string
+          origem?: string | null
+          polo_id?: string | null
+          stage?: string
+          telefone?: string | null
+          updated_at?: string
+          valor_estimado?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "educ_leads_polo_id_fkey"
+            columns: ["polo_id"]
+            isOneToOne: false
+            referencedRelation: "educ_polos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      educ_matriculas: {
+        Row: {
+          aluno_id: string | null
+          company_id: string | null
+          created_at: string
+          curso: string
+          evasao_em: string | null
+          id: string
+          lead_id: string | null
+          matriculado_em: string
+          polo_id: string | null
+          status: string
+          status_financeiro: string
+          updated_at: string
+          valor_mensalidade: number | null
+        }
+        Insert: {
+          aluno_id?: string | null
+          company_id?: string | null
+          created_at?: string
+          curso: string
+          evasao_em?: string | null
+          id?: string
+          lead_id?: string | null
+          matriculado_em?: string
+          polo_id?: string | null
+          status?: string
+          status_financeiro?: string
+          updated_at?: string
+          valor_mensalidade?: number | null
+        }
+        Update: {
+          aluno_id?: string | null
+          company_id?: string | null
+          created_at?: string
+          curso?: string
+          evasao_em?: string | null
+          id?: string
+          lead_id?: string | null
+          matriculado_em?: string
+          polo_id?: string | null
+          status?: string
+          status_financeiro?: string
+          updated_at?: string
+          valor_mensalidade?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "educ_matriculas_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "educ_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "educ_matriculas_polo_id_fkey"
+            columns: ["polo_id"]
+            isOneToOne: false
+            referencedRelation: "educ_polos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      educ_polos: {
+        Row: {
+          bairro: string | null
+          capacidade: number | null
+          cidade: string | null
+          codigo: string
+          company_id: string | null
+          created_at: string
+          cursos_ofertados: string[]
+          email: string | null
+          estado: string | null
+          id: string
+          meta_matriculas_mes: number | null
+          nome: string
+          observacoes: string | null
+          responsavel: string | null
+          status: string
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          bairro?: string | null
+          capacidade?: number | null
+          cidade?: string | null
+          codigo: string
+          company_id?: string | null
+          created_at?: string
+          cursos_ofertados?: string[]
+          email?: string | null
+          estado?: string | null
+          id?: string
+          meta_matriculas_mes?: number | null
+          nome: string
+          observacoes?: string | null
+          responsavel?: string | null
+          status?: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bairro?: string | null
+          capacidade?: number | null
+          cidade?: string | null
+          codigo?: string
+          company_id?: string | null
+          created_at?: string
+          cursos_ofertados?: string[]
+          email?: string | null
+          estado?: string | null
+          id?: string
+          meta_matriculas_mes?: number | null
+          nome?: string
+          observacoes?: string | null
+          responsavel?: string | null
+          status?: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      educ_role_assignments: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          id: string
+          polo_id: string | null
+          role: Database["public"]["Enums"]["educ_role"]
+          user_id: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          polo_id?: string | null
+          role: Database["public"]["Enums"]["educ_role"]
+          user_id: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          polo_id?: string | null
+          role?: Database["public"]["Enums"]["educ_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "educ_role_assignments_polo_id_fkey"
+            columns: ["polo_id"]
+            isOneToOne: false
+            referencedRelation: "educ_polos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ehr_documents: {
         Row: {
           ai_status: string
@@ -13195,6 +13412,14 @@ export type Database = {
         Args: { _brand_id: string; _user_id: string }
         Returns: boolean
       }
+      has_educ_role: {
+        Args: {
+          _polo_id?: string
+          _role: Database["public"]["Enums"]["educ_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -13500,6 +13725,7 @@ export type Database = {
         | "profissional"
         | "consumidor"
       company_environment: "demo" | "teste" | "real"
+      educ_role: "mantenedora" | "polo" | "coordenador" | "consultor" | "aluno"
       realestate_approval_status:
         | "pending"
         | "approved"
@@ -13734,6 +13960,7 @@ export const Constants = {
         "consumidor",
       ],
       company_environment: ["demo", "teste", "real"],
+      educ_role: ["mantenedora", "polo", "coordenador", "consultor", "aluno"],
       realestate_approval_status: [
         "pending",
         "approved",
