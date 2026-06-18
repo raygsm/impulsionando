@@ -134,8 +134,9 @@ export function PixCheckoutCard({
           )}
         </div>
         <CardDescription>
-          Cartão / parcelado (Mercado Pago) entra em breve. Por enquanto, libere seu plano
-          pagando via Pix — o valor abaixo já vem com identificação única.
+          Pagamentos do ecossistema Impulsionando são processados via{" "}
+          <strong>Mercado Pago</strong> (PIX, cartão e boleto). O valor abaixo já vem com
+          identificação única para conciliação automática.
         </CardDescription>
       </CardHeader>
 
