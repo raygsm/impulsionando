@@ -141,6 +141,7 @@ import { Route as AuthenticatedCrmRouteImport } from './routes/_authenticated/cr
 import { Route as AuthenticatedCoreRouteImport } from './routes/_authenticated/core'
 import { Route as AuthenticatedCompaniesRouteImport } from './routes/_authenticated/companies'
 import { Route as AuthenticatedClubeRouteImport } from './routes/_authenticated/clube'
+import { Route as AuthenticatedCervejariaRouteImport } from './routes/_authenticated/cervejaria'
 import { Route as AuthenticatedBiRouteImport } from './routes/_authenticated/bi'
 import { Route as AuthenticatedAutomacoesRouteImport } from './routes/_authenticated/automacoes'
 import { Route as AuthenticatedAuditRouteImport } from './routes/_authenticated/audit'
@@ -1020,6 +1021,11 @@ const AuthenticatedCompaniesRoute = AuthenticatedCompaniesRouteImport.update({
 const AuthenticatedClubeRoute = AuthenticatedClubeRouteImport.update({
   id: '/clube',
   path: '/clube',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCervejariaRoute = AuthenticatedCervejariaRouteImport.update({
+  id: '/cervejaria',
+  path: '/cervejaria',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedBiRoute = AuthenticatedBiRouteImport.update({
@@ -2298,6 +2304,7 @@ export interface FileRoutesByFullPath {
   '/audit': typeof AuthenticatedAuditRoute
   '/automacoes': typeof AuthenticatedAutomacoesRoute
   '/bi': typeof AuthenticatedBiRouteWithChildren
+  '/cervejaria': typeof AuthenticatedCervejariaRoute
   '/companies': typeof AuthenticatedCompaniesRoute
   '/core': typeof AuthenticatedCoreRouteWithChildren
   '/crm': typeof AuthenticatedCrmRouteWithChildren
@@ -2639,6 +2646,7 @@ export interface FileRoutesByTo {
   '/adm': typeof AuthenticatedAdmRouteWithChildren
   '/audit': typeof AuthenticatedAuditRoute
   '/automacoes': typeof AuthenticatedAutomacoesRoute
+  '/cervejaria': typeof AuthenticatedCervejariaRoute
   '/companies': typeof AuthenticatedCompaniesRoute
   '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -2981,6 +2989,7 @@ export interface FileRoutesById {
   '/_authenticated/audit': typeof AuthenticatedAuditRoute
   '/_authenticated/automacoes': typeof AuthenticatedAutomacoesRoute
   '/_authenticated/bi': typeof AuthenticatedBiRouteWithChildren
+  '/_authenticated/cervejaria': typeof AuthenticatedCervejariaRoute
   '/_authenticated/clube': typeof AuthenticatedClubeRouteWithChildren
   '/_authenticated/companies': typeof AuthenticatedCompaniesRoute
   '/_authenticated/core': typeof AuthenticatedCoreRouteWithChildren
@@ -3330,6 +3339,7 @@ export interface FileRouteTypes {
     | '/audit'
     | '/automacoes'
     | '/bi'
+    | '/cervejaria'
     | '/companies'
     | '/core'
     | '/crm'
@@ -3671,6 +3681,7 @@ export interface FileRouteTypes {
     | '/adm'
     | '/audit'
     | '/automacoes'
+    | '/cervejaria'
     | '/companies'
     | '/customers'
     | '/dashboard'
@@ -4012,6 +4023,7 @@ export interface FileRouteTypes {
     | '/_authenticated/audit'
     | '/_authenticated/automacoes'
     | '/_authenticated/bi'
+    | '/_authenticated/cervejaria'
     | '/_authenticated/clube'
     | '/_authenticated/companies'
     | '/_authenticated/core'
@@ -5380,6 +5392,13 @@ declare module '@tanstack/react-router' {
       path: '/clube'
       fullPath: '/clube'
       preLoaderRoute: typeof AuthenticatedClubeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/cervejaria': {
+      id: '/_authenticated/cervejaria'
+      path: '/cervejaria'
+      fullPath: '/cervejaria'
+      preLoaderRoute: typeof AuthenticatedCervejariaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/bi': {
@@ -7345,6 +7364,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAuditRoute: typeof AuthenticatedAuditRoute
   AuthenticatedAutomacoesRoute: typeof AuthenticatedAutomacoesRoute
   AuthenticatedBiRoute: typeof AuthenticatedBiRouteWithChildren
+  AuthenticatedCervejariaRoute: typeof AuthenticatedCervejariaRoute
   AuthenticatedClubeRoute: typeof AuthenticatedClubeRouteWithChildren
   AuthenticatedCompaniesRoute: typeof AuthenticatedCompaniesRoute
   AuthenticatedCoreRoute: typeof AuthenticatedCoreRouteWithChildren
@@ -7447,6 +7467,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAuditRoute: AuthenticatedAuditRoute,
   AuthenticatedAutomacoesRoute: AuthenticatedAutomacoesRoute,
   AuthenticatedBiRoute: AuthenticatedBiRouteWithChildren,
+  AuthenticatedCervejariaRoute: AuthenticatedCervejariaRoute,
   AuthenticatedClubeRoute: AuthenticatedClubeRouteWithChildren,
   AuthenticatedCompaniesRoute: AuthenticatedCompaniesRoute,
   AuthenticatedCoreRoute: AuthenticatedCoreRouteWithChildren,
