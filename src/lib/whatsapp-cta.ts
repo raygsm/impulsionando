@@ -343,8 +343,30 @@ export function installWhatsAppReturnTracking() {
   });
 }
 
-// ============ Histórico de alertas ============
+// ============ Histórico de alertas (auditoria) ============
+export type AlertDispatchStatus =
+  | "sent" | "partial" | "failed" | "cooldown" | "no_channels";
+
+export interface AlertPayload {
+  title: string;
+  body: string;
+  ctr: number;
+  sendRate: number;
+  impressions: number;
+  clicks: number;
+  sends: number;
+  ctrBelow: boolean;
+  sendBelow: boolean;
+  minCtr: number;
+  minSendRate: number;
+  windowHours: number;
+  ctaHash?: string;
+  origin?: string;
+  path?: string;
+}
+
 export interface AlertHistoryEntry {
+  id?: string;
   ts: number;
   ctr: number;
   sendRate: number;
@@ -358,6 +380,16 @@ export interface AlertHistoryEntry {
   minSendRate: number;
   ctaHash?: string;
   notified?: string[]; // canais que receberam (slack, email)
+  // Auditoria
+  status?: AlertDispatchStatus;
+  error?: string;
+  scope?: string;  // "global" | "route:/x" | "variant:A" | "route:/x|variant:B" | "daily_summary"
+  ruleId?: string;
+  payload?: AlertPayload; // permite reenvio manual em caso de falha
+}
+
+function uid() {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
 export function recordAlertHistory(entry: AlertHistoryEntry) {
@@ -365,8 +397,24 @@ export function recordAlertHistory(entry: AlertHistoryEntry) {
   try {
     const raw = window.localStorage.getItem(ALERT_HISTORY_KEY);
     const arr: AlertHistoryEntry[] = raw ? JSON.parse(raw) : [];
-    arr.push(entry);
+    arr.push({ id: entry.id ?? uid(), ...entry });
     if (arr.length > 500) arr.splice(0, arr.length - 500);
+    window.localStorage.setItem(ALERT_HISTORY_KEY, JSON.stringify(arr));
+  } catch {
+    /* noop */
+  }
+}
+
+/** Atualiza uma entrada existente (ex.: marcar reenvio como sent). */
+export function updateAlertHistory(id: string, patch: Partial<AlertHistoryEntry>) {
+  if (typeof window === "undefined") return;
+  try {
+    const raw = window.localStorage.getItem(ALERT_HISTORY_KEY);
+    if (!raw) return;
+    const arr: AlertHistoryEntry[] = JSON.parse(raw);
+    const idx = arr.findIndex((e) => e.id === id);
+    if (idx === -1) return;
+    arr[idx] = { ...arr[idx], ...patch };
     window.localStorage.setItem(ALERT_HISTORY_KEY, JSON.stringify(arr));
   } catch {
     /* noop */
@@ -392,19 +440,192 @@ export function clearAlertHistory() {
   }
 }
 
-/** Cooldown para não floodar Slack/e-mail com o mesmo alerta. */
-export function shouldNotifyAlertNow(): boolean {
+/**
+ * Cooldown global ou por escopo (rota/variante/regra) para não floodar
+ * Slack/e-mail com o mesmo alerta. Retorna `true` se pode disparar agora
+ * e já grava o timestamp.
+ */
+export function shouldNotifyAlertNow(scope = "global"): boolean {
   if (typeof window === "undefined") return false;
   try {
-    const raw = window.localStorage.getItem(LAST_ALERT_KEY);
+    const key = `${LAST_ALERT_KEY}:${scope}`;
+    const raw = window.localStorage.getItem(key);
     const last = raw ? Number(raw) : 0;
     if (last && Date.now() - last < ALERT_NOTIFY_COOLDOWN_MS) return false;
-    window.localStorage.setItem(LAST_ALERT_KEY, String(Date.now()));
+    window.localStorage.setItem(key, String(Date.now()));
     return true;
   } catch {
     return false;
   }
 }
+
+// ============ Regras de alerta por rota / variante ============
+const RULES_KEY = "wa_official_alert_rules_v1";
+
+export interface AlertRule {
+  id: string;
+  label?: string;
+  route?: string;   // ex.: "/orcamento" — vazio = qualquer rota
+  variant?: string; // ex.: "A" — vazio = qualquer variante
+  minCtr: number;
+  minSendRate: number;
+  windowHours: number;
+  minSamples: number;
+  enabled: boolean;
+}
+
+export const DEFAULT_RULES: AlertRule[] = [];
+
+export function readAlertRules(): AlertRule[] {
+  if (typeof window === "undefined") return DEFAULT_RULES;
+  try {
+    const raw = window.localStorage.getItem(RULES_KEY);
+    return raw ? (JSON.parse(raw) as AlertRule[]) : DEFAULT_RULES;
+  } catch {
+    return DEFAULT_RULES;
+  }
+}
+
+export function saveAlertRules(rules: AlertRule[]) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(RULES_KEY, JSON.stringify(rules));
+  } catch {
+    /* noop */
+  }
+}
+
+export function ruleScope(rule: Pick<AlertRule, "route" | "variant">): string {
+  const parts: string[] = [];
+  if (rule.route) parts.push(`route:${rule.route}`);
+  if (rule.variant) parts.push(`variant:${rule.variant}`);
+  return parts.join("|") || "global";
+}
+
+export function filterByRule(rows: BufferedEvent[], rule: Pick<AlertRule, "route" | "variant">) {
+  return rows.filter((r) => {
+    if (rule.route && r.path !== rule.route) return false;
+    if (rule.variant && (r.variant ?? "control") !== rule.variant) return false;
+    return true;
+  });
+}
+
+export interface RuleEval extends AlertEval {
+  rule: AlertRule;
+  scope: string;
+}
+
+export function evaluateAlertRules(
+  rows: BufferedEvent[],
+  rules: AlertRule[] = readAlertRules(),
+): RuleEval[] {
+  return rules
+    .filter((r) => r.enabled !== false)
+    .map((rule) => {
+      const scoped = filterByRule(rows, rule);
+      const ev = evaluateAlerts(scoped, {
+        minCtr: rule.minCtr,
+        minSendRate: rule.minSendRate,
+        windowHours: rule.windowHours,
+        minSamples: rule.minSamples,
+      });
+      return { ...ev, rule, scope: ruleScope(rule) };
+    });
+}
+
+// ============ Resumo diário por CTA hash ============
+const DAILY_SUMMARY_KEY = "wa_official_daily_summary_v1"; // "YYYY-MM-DD" last sent
+
+export interface DailySummaryRow {
+  ctaHash: string;
+  impressions: number;
+  clicks: number;
+  sends: number;
+  ctr: number;
+  sendRate: number;
+}
+
+export interface DailySummary {
+  date: string; // YYYY-MM-DD
+  rows: DailySummaryRow[];
+  totals: { impressions: number; clicks: number; sends: number; ctr: number; sendRate: number };
+  alertsFired: number;
+}
+
+function ymd(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
+export function buildDailySummary(
+  events: BufferedEvent[],
+  history: AlertHistoryEntry[],
+  date = new Date(),
+): DailySummary {
+  const dayStart = new Date(date); dayStart.setHours(0, 0, 0, 0);
+  const dayEnd = new Date(date); dayEnd.setHours(23, 59, 59, 999);
+  const inDay = (ts: number) => ts >= dayStart.getTime() && ts <= dayEnd.getTime();
+  const win = events.filter((e) => inDay(e.ts));
+  const byHash = new Map<string, { impressions: number; clicks: number; sends: number }>();
+  let ti = 0, tc = 0, ts = 0;
+  for (const r of win) {
+    const k = r.ctaHash || "—";
+    const cur = byHash.get(k) ?? { impressions: 0, clicks: 0, sends: 0 };
+    if (r.event === "whatsapp_cta_impression") { cur.impressions++; ti++; }
+    else if (r.event === "whatsapp_form_submit" || r.event === "whatsapp_cta_sent") { cur.sends++; ts++; }
+    else if (
+      r.event === "whatsapp_cta_click" || r.event === "whatsapp_fab_click" || r.event === "whatsapp_notice_click"
+    ) { cur.clicks++; tc++; }
+    byHash.set(k, cur);
+  }
+  const rows: DailySummaryRow[] = Array.from(byHash.entries()).map(([ctaHash, v]) => ({
+    ctaHash,
+    ...v,
+    ctr: v.impressions ? (v.clicks / v.impressions) * 100 : 0,
+    sendRate: v.clicks ? (v.sends / v.clicks) * 100 : 0,
+  })).sort((a, b) => b.clicks + b.sends - (a.clicks + a.sends));
+  const alertsFired = history.filter((h) => inDay(h.ts) && h.scope !== "daily_summary").length;
+  return {
+    date: ymd(date),
+    rows,
+    totals: {
+      impressions: ti, clicks: tc, sends: ts,
+      ctr: ti ? (tc / ti) * 100 : 0,
+      sendRate: tc ? (ts / tc) * 100 : 0,
+    },
+    alertsFired,
+  };
+}
+
+export function renderDailySummary(s: DailySummary): { title: string; body: string } {
+  const title = `📊 Resumo diário — WhatsApp Oficial (${s.date})`;
+  const head = `Totais: ${s.totals.impressions} impr · ${s.totals.clicks} cliques · ${s.totals.sends} envios — CTR ${s.totals.ctr.toFixed(1)}% · envio ${s.totals.sendRate.toFixed(1)}%\nAlertas disparados no dia: ${s.alertsFired}\n`;
+  const tbl = s.rows.length
+    ? "\nPor CTA hash:\n" + s.rows.map((r) =>
+        ` • ${r.ctaHash}: ${r.impressions} impr / ${r.clicks} cliq / ${r.sends} env — CTR ${r.ctr.toFixed(1)}% · envio ${r.sendRate.toFixed(1)}%`,
+      ).join("\n")
+    : "\nSem cliques registrados no dia.";
+  return { title, body: head + tbl };
+}
+
+/** Verifica se o resumo de hoje já foi enviado (respeita cooldown diário). */
+export function dailySummaryAlreadySent(date = new Date()): boolean {
+  if (typeof window === "undefined") return true;
+  try {
+    return window.localStorage.getItem(DAILY_SUMMARY_KEY) === ymd(date);
+  } catch {
+    return true;
+  }
+}
+
+export function markDailySummarySent(date = new Date()) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(DAILY_SUMMARY_KEY, ymd(date));
+  } catch {
+    /* noop */
+  }
+}
+
 
 /**
  * Bloqueia mensagens que tentem desviar a conversa para canais não oficiais.
