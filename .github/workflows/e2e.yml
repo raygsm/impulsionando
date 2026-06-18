@@ -32,6 +32,10 @@ jobs:
       # Optional override: point at an external preview deploy instead of
       # building locally. When set, Playwright skips its own webServer.
       E2E_BASE_URL: ${{ vars.E2E_BASE_URL }}
+      # Enable visual-regression snapshots when the repo variable is set.
+      # The reducedMotion / RTL snapshot scenarios skip themselves on CI unless
+      # this is "1" so the first run can produce baselines without failing.
+      E2E_VISUAL: ${{ vars.E2E_VISUAL }}
 
     steps:
       - uses: actions/checkout@v4
@@ -80,5 +84,32 @@ jobs:
           path: |
             playwright-report
             test-results
+          retention-days: 14
+          if-no-files-found: ignore
+
+      # When a visual-regression test fails, Playwright writes
+      # `*-expected.png`, `*-actual.png`, and `*-diff.png` into
+      # `test-results/<test>/`. Upload them as a dedicated artifact so
+      # diffs are one click away from the failed run.
+      - name: Upload visual-diff PNGs (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-visual-diffs
+          path: |
+            test-results/**/*-expected.png
+            test-results/**/*-actual.png
+            test-results/**/*-diff.png
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Upload Playwright traces (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: |
+            test-results/**/trace.zip
+            test-results/**/video.webm
           retention-days: 14
           if-no-files-found: ignore

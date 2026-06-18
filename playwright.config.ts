@@ -14,8 +14,12 @@ export default defineConfig({
   use: {
     baseURL: BASE_URL,
     headless: true,
+    // On failure capture: screenshot, video, and a full trace.zip — Playwright
+    // traces already include DOM snapshots before/after each action, so axe
+    // and reduced-motion RTL failures can be replayed via `show-trace`.
     screenshot: "only-on-failure",
     trace: "retain-on-failure",
+    video: "retain-on-failure",
     viewport: { width: 1440, height: 900 },
   },
   // Auto-start the preview server when E2E_BASE_URL is not provided externally.
