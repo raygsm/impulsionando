@@ -885,4 +885,238 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
       expect(finalText).not.toContain(SECTIONS_LABELS[id]);
     }
   });
+
+  test("visual regression: chip ativo, focus ring e tabpanel após Alt+Arrow/Home/End", async ({
+    page,
+  }) => {
+    test.skip(
+      !!process.env.CI && !process.env.E2E_VISUAL,
+      "Visual snapshots geram baselines no primeiro run — habilite com E2E_VISUAL=1.",
+    );
+
+    await page.goto(`${ROUTE}#favoritos`);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(500);
+
+    const tablist = page.getByRole("tablist", { name: /Seções da Minha área/i });
+
+    // Baseline (no chip focused, favoritos active)
+    await expect(tablist).toHaveScreenshot("subnav-active-favoritos.png", {
+      maxDiffPixelRatio: 0.02,
+      animations: "disabled",
+    });
+
+    // Alt+ArrowRight → historico active; focus the chip to capture focus-ring
+    await page.locator("body").focus();
+    await page.keyboard.press("Alt+ArrowRight");
+    await page.waitForTimeout(400);
+    await page.locator("#tab-historico").focus();
+    await expect(tablist).toHaveScreenshot("subnav-focus-historico.png", {
+      maxDiffPixelRatio: 0.02,
+      animations: "disabled",
+    });
+    await expect(page.locator("#historico")).toHaveScreenshot(
+      "tabpanel-historico.png",
+      { maxDiffPixelRatio: 0.03, animations: "disabled" },
+    );
+
+    // End → last chip focused (creditos)
+    await page.keyboard.press("End");
+    await page.waitForTimeout(200);
+    await expect(tablist).toHaveScreenshot("subnav-focus-end-creditos.png", {
+      maxDiffPixelRatio: 0.02,
+      animations: "disabled",
+    });
+
+    // Home → first chip focused (favoritos)
+    await page.keyboard.press("Home");
+    await page.waitForTimeout(200);
+    await expect(tablist).toHaveScreenshot("subnav-focus-home-favoritos.png", {
+      maxDiffPixelRatio: 0.02,
+      animations: "disabled",
+    });
+  });
+
+  test("RTL: Alt+Arrow, aria-selected/current e roving tabindex seguem a ordem do DOM", async ({
+    browser,
+  }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await login(page);
+
+    // Switch document direction to RTL
+    await page.goto(ROUTE);
+    await page.evaluate(() => {
+      document.documentElement.setAttribute("dir", "rtl");
+      document.documentElement.setAttribute("lang", "ar");
+    });
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(400);
+
+    // DOM order is preserved; Alt+ArrowRight walks forward through SECTIONS
+    await page.locator("body").focus();
+    await page.keyboard.press("Alt+ArrowRight");
+    await page.waitForTimeout(300);
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#historico");
+    await expect(page.locator("#tab-historico")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(page.locator("#tab-historico")).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+
+    // Roving tabindex follows
+    const rovingAfterRight = await page
+      .locator('[role="tab"][tabindex="0"]')
+      .evaluateAll((els) => els.map((e) => (e as HTMLElement).id));
+    expect(rovingAfterRight).toEqual(["tab-historico"]);
+
+    // Alt+ArrowLeft walks back
+    await page.keyboard.press("Alt+ArrowLeft");
+    await page.waitForTimeout(300);
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#favoritos");
+    await expect(page.locator("#tab-favoritos")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    const rovingAfterLeft = await page
+      .locator('[role="tab"][tabindex="0"]')
+      .evaluateAll((els) => els.map((e) => (e as HTMLElement).id));
+    expect(rovingAfterLeft).toEqual(["tab-favoritos"]);
+
+    // Inside the tablist, ArrowRight still focuses the next chip in DOM order
+    await page.locator("#tab-favoritos").focus();
+    await page.keyboard.press("ArrowRight");
+    const focusedId = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(focusedId).toBe("tab-historico");
+
+    await context.close();
+  });
+
+  test("deep link: abrir com #cupons seleciona a chip, anuncia 1x e foca tabpanel", async ({
+    page,
+  }) => {
+    // Listen for live region mutations so we can assert it settled to one value
+    await page.addInitScript(() => {
+      (window as unknown as { __liveAnnounces: string[] }).__liveAnnounces = [];
+      const obs = new MutationObserver(() => {
+        const live = document.querySelector('[role="status"][aria-live="polite"]');
+        const txt = (live?.textContent ?? "").trim();
+        const log = (window as unknown as { __liveAnnounces: string[] }).__liveAnnounces;
+        if (txt && log[log.length - 1] !== txt) log.push(txt);
+      });
+      const start = () => {
+        const live = document.querySelector('[role="status"][aria-live="polite"]');
+        if (!live) return false;
+        obs.observe(live, { childList: true, characterData: true, subtree: true });
+        // Capture initial value
+        const txt = (live.textContent ?? "").trim();
+        if (txt) (window as unknown as { __liveAnnounces: string[] }).__liveAnnounces.push(txt);
+        return true;
+      };
+      if (!start()) {
+        const i = setInterval(() => {
+          if (start()) clearInterval(i);
+        }, 50);
+      }
+    });
+
+    await page.goto(`${ROUTE}#cupons`);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(800);
+
+    await expect(page.locator("#tab-cupons")).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#tab-cupons")).toHaveAttribute("aria-current", "true");
+
+    // Live region should hold the cupons label
+    const live = page.locator('[role="status"][aria-live="polite"]');
+    await expect(live).toContainText(/Meus cupons/i);
+
+    // Only one distinct label was announced during the deep-link load
+    const announces = await page.evaluate(
+      () => (window as unknown as { __liveAnnounces: string[] }).__liveAnnounces,
+    );
+    const cuponsAnnounces = announces.filter((t) => /Meus cupons/i.test(t));
+    expect(cuponsAnnounces.length).toBeGreaterThanOrEqual(1);
+    // No other section label leaked into the live region
+    for (const id of SECTIONS) {
+      if (id === "cupons") continue;
+      const label = SECTIONS_LABELS[id];
+      expect(announces.every((t) => !t.includes(label))).toBe(true);
+    }
+
+    // Activate from the focused chip to land focus inside the tabpanel
+    await page.locator("#tab-cupons").focus();
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(450);
+    const focusedPanel = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(focusedPanel).toBe("cupons");
+  });
+
+  test("hover: hover no chip não dispara seleção nem anúncio na live region", async ({
+    page,
+  }) => {
+    await page.goto(`${ROUTE}#favoritos`);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(500);
+
+    const live = page.locator('[role="status"][aria-live="polite"]');
+    const liveBefore = ((await live.textContent()) ?? "").trim();
+    const hashBefore = await page.evaluate(() => location.hash);
+
+    // Focus a known chip so we can later prove keyboard focus survived hover
+    await page.locator("#tab-favoritos").focus();
+    let focused = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(focused).toBe("tab-favoritos");
+
+    // Hover several other chips — must not change hash, ARIA, or live region
+    for (const id of ["historico", "cupons", "vouchers", "reservas"] as const) {
+      await page.locator(`#tab-${id}`).hover();
+      await page.waitForTimeout(120);
+
+      // No chip other than favoritos is selected
+      await expect(page.locator(`#tab-${id}`)).toHaveAttribute(
+        "aria-selected",
+        "false",
+      );
+      await expect(page.locator(`#tab-${id}`)).not.toHaveAttribute(
+        "aria-current",
+        "true",
+      );
+    }
+
+    // Active chip and hash are unchanged
+    await expect(page.locator("#tab-favoritos")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    expect(await page.evaluate(() => location.hash)).toBe(hashBefore);
+
+    // Live region wasn't updated by hover
+    const liveAfter = ((await live.textContent()) ?? "").trim();
+    expect(liveAfter).toBe(liveBefore);
+
+    // Keyboard focus survived the hover (DOM focus still on the chip we focused)
+    focused = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(focused).toBe("tab-favoritos");
+
+    // Activation (click) is what flips ARIA + updates live region
+    await page.locator("#tab-cupons").click();
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#cupons");
+    await expect(page.locator("#tab-cupons")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(live).toContainText(/Meus cupons/i);
+  });
 });
