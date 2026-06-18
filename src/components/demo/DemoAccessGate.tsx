@@ -142,10 +142,9 @@ function GateDialog({
   return (
     <Dialog open={open}>
       <DialogContent
-        className="sm:max-w-md"
+        className="sm:max-w-md [&>button]:hidden"
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
-        hideClose
       >
         <DialogHeader>
           <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
