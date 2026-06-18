@@ -73,8 +73,13 @@ const permissiveWrites = rows(`
   ORDER BY c.relname, p.polname
 `).map(([table, policy, cmd]) => ({ table, policy, cmd }));
 
+// Match the aggregation used by scripts/check-security-findings.mjs so the
+// report's "errors/warnings" align with the CI gate. We display the detailed
+// rows below for auditor context.
+const anonPiiTables = new Set(anonPii.map((r) => r.table)).size;
+
 const live = {
-  errors: rlsDisabled.length + anonPii.length,
+  errors: rlsDisabled.length + anonPiiTables,
   warnings: permissiveWrites.length,
   rls_disabled: rlsDisabled,
   anon_pii_columns: anonPii,
