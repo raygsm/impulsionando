@@ -662,45 +662,61 @@ function WhatsAppMetricsPage() {
                   <thead className="text-left text-muted-foreground">
                     <tr className="border-b">
                       <th className="py-2 pr-4">Quando</th>
+                      <th className="py-2 pr-4">Escopo</th>
+                      <th className="py-2 pr-4">Status</th>
                       <th className="py-2 pr-4">Motivo</th>
-                      <th className="py-2 pr-4">CTR</th>
-                      <th className="py-2 pr-4">Envio</th>
-                      <th className="py-2 pr-4">Janela</th>
-                      <th className="py-2 pr-4">Impr/Cliq/Env</th>
+                      <th className="py-2 pr-4">CTR/Envio</th>
+                      <th className="py-2 pr-4">I/C/E</th>
                       <th className="py-2 pr-4">CTA hash</th>
-                      <th className="py-2">Notificações</th>
+                      <th className="py-2 pr-4">Notificações</th>
+                      <th className="py-2">Ações</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {historyFiltered.map((e) => (
-                      <tr key={e.ts} className="border-b last:border-0">
-                        <td className="py-2 pr-4 whitespace-nowrap">
-                          {new Date(e.ts).toLocaleString("pt-BR")}
-                        </td>
-                        <td className="py-2 pr-4">
-                          {e.ctrBelow && <Badge variant="destructive" className="mr-1">CTR</Badge>}
-                          {e.sendBelow && <Badge variant="destructive">Envio</Badge>}
-                        </td>
-                        <td className="py-2 pr-4">
-                          {e.ctr.toFixed(1)}% / min {e.minCtr}%
-                        </td>
-                        <td className="py-2 pr-4">
-                          {e.sendRate.toFixed(1)}% / min {e.minSendRate}%
-                        </td>
-                        <td className="py-2 pr-4">{e.windowHours}h</td>
-                        <td className="py-2 pr-4 font-mono text-xs">
-                          {e.impressions}/{e.clicks}/{e.sends}
-                        </td>
-                        <td className="py-2 pr-4 font-mono text-xs">{e.ctaHash ?? "—"}</td>
-                        <td className="py-2">
-                          {e.notified && e.notified.length > 0
-                            ? e.notified.map((c) => (
-                                <Badge key={c} variant="outline" className="mr-1">{c}</Badge>
-                              ))
-                            : <span className="text-xs text-muted-foreground">cooldown / não configurado</span>}
-                        </td>
-                      </tr>
-                    ))}
+                    {historyFiltered.map((e) => {
+                      const status = e.status ?? (e.notified && e.notified.length > 0 ? "sent" : "cooldown");
+                      return (
+                        <tr key={e.id ?? e.ts} className="border-b last:border-0 align-top">
+                          <td className="py-2 pr-4 whitespace-nowrap">
+                            {new Date(e.ts).toLocaleString("pt-BR")}
+                          </td>
+                          <td className="py-2 pr-4 font-mono text-xs">{e.scope ?? "global"}</td>
+                          <td className="py-2 pr-4">
+                            <StatusBadge status={status} />
+                            {e.error && (
+                              <div className="text-xs text-destructive mt-1 max-w-[220px] truncate" title={e.error}>
+                                {e.error}
+                              </div>
+                            )}
+                          </td>
+                          <td className="py-2 pr-4">
+                            {e.ctrBelow && <Badge variant="destructive" className="mr-1">CTR</Badge>}
+                            {e.sendBelow && <Badge variant="destructive">Envio</Badge>}
+                          </td>
+                          <td className="py-2 pr-4 text-xs">
+                            {e.ctr.toFixed(1)}% / {e.sendRate.toFixed(1)}%
+                          </td>
+                          <td className="py-2 pr-4 font-mono text-xs">
+                            {e.impressions}/{e.clicks}/{e.sends}
+                          </td>
+                          <td className="py-2 pr-4 font-mono text-xs">{e.ctaHash ?? "—"}</td>
+                          <td className="py-2 pr-4">
+                            {e.notified && e.notified.length > 0
+                              ? e.notified.map((c) => (
+                                  <Badge key={c} variant="outline" className="mr-1">{c}</Badge>
+                                ))
+                              : <span className="text-xs text-muted-foreground">—</span>}
+                          </td>
+                          <td className="py-2">
+                            {(status === "failed" || status === "no_channels") && e.payload ? (
+                              <Button size="sm" variant="outline" onClick={() => retryEntry(e)}>
+                                <RotateCcw className="w-3 h-3 mr-1" /> Reenviar
+                              </Button>
+                            ) : null}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -711,6 +727,152 @@ function WhatsAppMetricsPage() {
     </div>
   );
 }
+
+function StatusBadge({ status }: { status: AlertHistoryEntry["status"] }) {
+  const cfg: Record<string, { v: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
+    sent: { v: "default", label: "Enviado" },
+    partial: { v: "outline", label: "Parcial" },
+    failed: { v: "destructive", label: "Falha" },
+    cooldown: { v: "secondary", label: "Cooldown" },
+    no_channels: { v: "outline", label: "Sem canal" },
+  };
+  const c = cfg[status ?? "sent"] ?? cfg.sent;
+  return <Badge variant={c.v}>{c.label}</Badge>;
+}
+
+function RulesEditor({
+  rules, setRules, routes, variants, evals, onSave,
+}: {
+  rules: AlertRule[];
+  setRules: (r: AlertRule[]) => void;
+  routes: string[];
+  variants: string[];
+  evals: ReturnType<typeof evaluateAlertRules>;
+  onSave: () => void;
+}) {
+  const evalById = new Map(evals.map((e) => [e.rule.id, e]));
+  function addRule() {
+    setRules([
+      ...rules,
+      {
+        id: `rule_${Date.now().toString(36)}`,
+        label: "Nova regra",
+        route: "",
+        variant: "",
+        minCtr: 5,
+        minSendRate: 30,
+        windowHours: 24,
+        minSamples: 20,
+        enabled: true,
+      },
+    ]);
+  }
+  function update(id: string, patch: Partial<AlertRule>) {
+    setRules(rules.map((r) => (r.id === id ? { ...r, ...patch } : r)));
+  }
+  function remove(id: string) {
+    setRules(rules.filter((r) => r.id !== id));
+  }
+  return (
+    <Card className="p-6 space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <ShieldAlert className="w-4 h-4" />
+          <h2 className="text-lg font-semibold">Regras de alerta por rota e variante</h2>
+        </div>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={addRule}>
+            <Plus className="w-4 h-4 mr-1" /> Nova regra
+          </Button>
+          <Button size="sm" onClick={onSave}>Salvar regras</Button>
+        </div>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        Cada regra avalia o subconjunto de eventos da rota/variante e dispara alerta
+        independente (com cooldown próprio). Deixe em branco para qualquer valor.
+      </p>
+      {rules.length === 0 && (
+        <p className="text-sm text-muted-foreground">
+          Nenhuma regra. Adicione uma para comparar performance por rota ou variante A/B.
+        </p>
+      )}
+      {rules.map((r) => {
+        const ev = evalById.get(r.id);
+        return (
+          <Card key={r.id} className="p-4 space-y-3 border-dashed">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Input
+                className="max-w-[220px]"
+                value={r.label ?? ""}
+                placeholder="Rótulo"
+                onChange={(e) => update(r.id, { label: e.target.value })}
+              />
+              <Switch checked={r.enabled !== false}
+                onCheckedChange={(v) => update(r.id, { enabled: v })} />
+              {ev?.triggered ? (
+                <Badge variant="destructive">Disparado</Badge>
+              ) : (
+                <Badge variant="secondary">
+                  <CheckCircle2 className="w-3 h-3 mr-1" /> OK
+                </Badge>
+              )}
+              <span className="text-xs text-muted-foreground ml-auto">
+                {ev ? `${ev.impressions} impr · ${ev.clicks} cliq · ${ev.sends} env — CTR ${ev.ctr.toFixed(1)}% · envio ${ev.sendRate.toFixed(1)}%` : ""}
+              </span>
+              <Button size="sm" variant="ghost" onClick={() => remove(r.id)}>
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="grid gap-3 md:grid-cols-6">
+              <div>
+                <Label className="text-xs">Rota</Label>
+                <Select value={r.route || "__any"} onValueChange={(v) => update(r.id, { route: v === "__any" ? "" : v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__any">Qualquer</SelectItem>
+                    {routes.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">Variante</Label>
+                <Select value={r.variant || "__any"} onValueChange={(v) => update(r.id, { variant: v === "__any" ? "" : v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__any">Qualquer</SelectItem>
+                    {variants.map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">CTR mínimo (%)</Label>
+                <Input type="number" min={0} value={r.minCtr}
+                  onChange={(e) => update(r.id, { minCtr: Number(e.target.value) || 0 })} />
+              </div>
+              <div>
+                <Label className="text-xs">Envio mínimo (%)</Label>
+                <Input type="number" min={0} value={r.minSendRate}
+                  onChange={(e) => update(r.id, { minSendRate: Number(e.target.value) || 0 })} />
+              </div>
+              <div>
+                <Label className="text-xs">Janela (h)</Label>
+                <Input type="number" min={1} value={r.windowHours}
+                  onChange={(e) => update(r.id, { windowHours: Number(e.target.value) || 1 })} />
+              </div>
+              <div>
+                <Label className="text-xs">Amostras mín.</Label>
+                <Input type="number" min={0} value={r.minSamples}
+                  onChange={(e) => update(r.id, { minSamples: Number(e.target.value) || 0 })} />
+              </div>
+            </div>
+          </Card>
+        );
+      })}
+    </Card>
+  );
+}
+
+
 
 function FilterSelect({
   label, value, setValue, options,
