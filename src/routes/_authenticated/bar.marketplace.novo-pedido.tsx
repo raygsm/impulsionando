@@ -39,6 +39,7 @@ function NewOrderPage() {
   const catalogFn = useServerFn(listSupplierCatalog);
   const buyerFn = useServerFn(getMyBuyerProfile);
   const placeFn = useServerFn(placeMarketplaceOrder);
+  const feeFn = useServerFn(previewMarketplaceFee);
 
   const [supplierId, setSupplierId] = useState<string | null>(null);
   const [cart, setCart] = useState<Record<string, CartItem>>({});
