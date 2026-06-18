@@ -10,7 +10,7 @@ import {
   Home, Search as SearchIcon, Zap, Bot, MessageSquare, QrCode,
   History as HistoryIcon, Headphones, UserRound, Megaphone,
   Calculator, Activity, RefreshCw, BookOpen,
-  Beer,
+  Beer, Store,
 } from "lucide-react";
 
 export type NavAudience = "core" | "white-label" | "empresa" | "consumidor";
@@ -91,6 +91,7 @@ export const NAV_GROUPS: NavGroup[] = [
     defaultOpen: true,
     items: [
       { to: "/cervejaria", label: "Painel da Cervejaria", icon: Beer },
+      { to: "/cervejaria/pdvs", label: "PDVs Parceiros", icon: Store },
     ],
   },
 
