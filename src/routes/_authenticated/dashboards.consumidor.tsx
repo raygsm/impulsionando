@@ -77,7 +77,8 @@ function ConsumidorDashboardPage() {
     return "";
   });
 
-  // Measure real header (sticky sub-nav) height — recompute on resize
+  // Measure real header (sticky sub-nav) height — recompute on resize and
+  // on orientation change (mobile rotates between portrait/landscape).
   useEffect(() => {
     if (!navRef.current) return;
     const measure = () => {
@@ -89,9 +90,11 @@ function ConsumidorDashboardPage() {
     const ro = new ResizeObserver(measure);
     ro.observe(navRef.current);
     window.addEventListener("resize", measure);
+    window.addEventListener("orientationchange", measure);
     return () => {
       ro.disconnect();
       window.removeEventListener("resize", measure);
+      window.removeEventListener("orientationchange", measure);
     };
   }, []);
 
