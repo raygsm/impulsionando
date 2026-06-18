@@ -77,7 +77,8 @@ function ConsumidorDashboardPage() {
     return "";
   });
 
-  // Measure real header (sticky sub-nav) height — recompute on resize
+  // Measure real header (sticky sub-nav) height — recompute on resize and
+  // on orientation change (mobile rotates between portrait/landscape).
   useEffect(() => {
     if (!navRef.current) return;
     const measure = () => {
@@ -89,9 +90,11 @@ function ConsumidorDashboardPage() {
     const ro = new ResizeObserver(measure);
     ro.observe(navRef.current);
     window.addEventListener("resize", measure);
+    window.addEventListener("orientationchange", measure);
     return () => {
       ro.disconnect();
       window.removeEventListener("resize", measure);
+      window.removeEventListener("orientationchange", measure);
     };
   }, []);
 
@@ -106,17 +109,58 @@ function ConsumidorDashboardPage() {
   );
 
   const handleSelect = useCallback(
-    (id: string, scroll = false) => {
+    (id: string, scroll = false, opts?: { pushState?: boolean; focusPanel?: boolean }) => {
       setActiveId(id);
       try {
         const newUrl = `${window.location.pathname}${window.location.search}#${id}`;
-        window.history.replaceState(null, "", newUrl);
+        if (opts?.pushState) window.history.pushState(null, "", newUrl);
+        else window.history.replaceState(null, "", newUrl);
         sessionStorage.setItem(STORAGE_KEY, id);
       } catch {}
       if (scroll) scrollToId(id);
+      if (opts?.focusPanel) {
+        // Move focus to the tabpanel so screen readers land on the content
+        window.setTimeout(() => {
+          const panel = document.getElementById(id);
+          if (panel) (panel as HTMLElement).focus({ preventScroll: true });
+        }, reducedMotion ? 0 : 350);
+      }
     },
-    [scrollToId],
+    [scrollToId, reducedMotion],
   );
+
+  // Browser back/forward: react to hash changes and re-align the section.
+  useEffect(() => {
+    const onPop = () => {
+      const hash = window.location.hash.replace("#", "");
+      if (hash && SECTIONS.some((s) => s.id === hash)) {
+        setActiveId(hash);
+        try {
+          sessionStorage.setItem(STORAGE_KEY, hash);
+        } catch {}
+        requestAnimationFrame(() => scrollToId(hash));
+      }
+    };
+    window.addEventListener("popstate", onPop);
+    window.addEventListener("hashchange", onPop);
+    return () => {
+      window.removeEventListener("popstate", onPop);
+      window.removeEventListener("hashchange", onPop);
+    };
+  }, [scrollToId]);
+
+  // After header height changes (orientation change), re-align active section.
+  useEffect(() => {
+    if (!activeId) return;
+    const t = window.setTimeout(() => {
+      const el = document.getElementById(activeId);
+      if (!el) return;
+      const top = el.getBoundingClientRect().top;
+      if (top < 0 || top > headerOffset + 24) scrollToId(activeId);
+    }, 50);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [headerOffset]);
 
   // Restore scroll on initial load (hash > sessionStorage)
   const restoredRef = useRef(false);
@@ -181,7 +225,7 @@ function ConsumidorDashboardPage() {
         e.key === "ArrowRight"
           ? Math.min(SECTIONS.length - 1, idx + 1)
           : Math.max(0, idx - 1);
-      handleSelect(SECTIONS[next].id, true);
+      handleSelect(SECTIONS[next].id, true, { pushState: true, focusPanel: true });
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -592,7 +636,11 @@ function PremiumSection<T extends { id: string }>({
 
 type SectionNavProps = {
   activeId: string;
-  onSelect: (id: string, scroll?: boolean) => void;
+  onSelect: (
+    id: string,
+    scroll?: boolean,
+    opts?: { pushState?: boolean; focusPanel?: boolean },
+  ) => void;
   reducedMotion?: boolean;
   ref?: React.Ref<HTMLDivElement>;
 };
@@ -633,15 +681,15 @@ function SectionNav({ activeId, onSelect, reducedMotion = false, ref }: SectionN
       focusChip(SECTIONS[SECTIONS.length - 1].id);
     } else if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      onSelect(SECTIONS[idx].id, true);
+      onSelect(SECTIONS[idx].id, true, { pushState: true, focusPanel: true });
     }
   };
 
   const currentIdx = Math.max(0, SECTIONS.findIndex((s) => s.id === activeId));
   const prevSec = currentIdx > 0 ? SECTIONS[currentIdx - 1] : null;
   const nextSec = currentIdx < SECTIONS.length - 1 ? SECTIONS[currentIdx + 1] : null;
-  const goPrev = () => prevSec && onSelect(prevSec.id, true);
-  const goNext = () => nextSec && onSelect(nextSec.id, true);
+  const goPrev = () => prevSec && onSelect(prevSec.id, true, { pushState: true });
+  const goNext = () => nextSec && onSelect(nextSec.id, true, { pushState: true });
 
   // Disable scroll-snap when user prefers reduced motion (snap can cause
   // sudden jumps that feel like motion). Keeps horizontal scrolling usable.
@@ -695,7 +743,7 @@ function SectionNav({ activeId, onSelect, reducedMotion = false, ref }: SectionN
                 tabIndex={active || (!activeId && idx === 0) ? 0 : -1}
                 onClick={(e) => {
                   e.preventDefault();
-                  onSelect(s.id, true);
+                  onSelect(s.id, true, { pushState: true });
                 }}
                 onKeyDown={(e) => handleKey(e, idx)}
                 className={`shrink-0 ${

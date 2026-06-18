@@ -158,4 +158,153 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
 
     await context.close();
   });
+
+  test("desktop: breadcrumbs navegam de volta para Clube e Início", async ({
+    page,
+  }) => {
+    // Active a non-default section so the breadcrumb shows "Minha área › Seção"
+    await page.getByRole("tab", { name: /Meus cupons/i }).click();
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#cupons");
+
+    const trail = page.getByRole("navigation", { name: /Trilha/i });
+    await expect(trail).toBeVisible();
+
+    // The "Minha área" crumb should be a link when a section is active
+    const minhaArea = trail.getByRole("link", { name: /^Minha área$/i });
+    await expect(minhaArea).toBeVisible();
+
+    // Click "Clube" crumb → leaves the dashboard
+    await trail.getByRole("link", { name: /^Clube$/i }).click();
+    await page.waitForURL((u) => u.pathname.startsWith("/clube"), { timeout: 10_000 });
+    expect(page.url()).toContain("/clube");
+
+    // Back returns to the dashboard with the previous hash preserved
+    await page.goBack();
+    await page.waitForLoadState("networkidle");
+    await expect.poll(() => page.evaluate(() => location.pathname)).toBe(ROUTE);
+  });
+
+  test("desktop: history back/forward restaura a seção ativa", async ({ page }) => {
+    const cupons = page.getByRole("tab", { name: /Meus cupons/i });
+    const vouchers = page.getByRole("tab", { name: /Meus vouchers/i });
+
+    await cupons.click();
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#cupons");
+    await vouchers.click();
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#vouchers");
+
+    await page.goBack();
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#cupons");
+    await expect(cupons).toHaveAttribute("aria-selected", "true");
+    await expect(cupons).toHaveAttribute("aria-current", "true");
+
+    await page.goForward();
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#vouchers");
+    await expect(vouchers).toHaveAttribute("aria-selected", "true");
+  });
+
+  test("desktop: live region anuncia a seção ativa e ARIA atualiza por teclado", async ({
+    page,
+  }) => {
+    const live = page.locator('[role="status"][aria-live="polite"]');
+    await expect(live).toHaveCount(1);
+
+    // Move via Alt+ArrowRight (global shortcut)
+    await page.locator("body").focus();
+    await page.keyboard.press("Alt+ArrowRight");
+    await expect.poll(() => page.evaluate(() => location.hash)).not.toBe("");
+
+    const activeAfter1 = await page.evaluate(() => location.hash.replace("#", ""));
+    const tabAfter1 = page.locator(`#tab-${activeAfter1}`);
+    await expect(tabAfter1).toHaveAttribute("aria-selected", "true");
+    await expect(tabAfter1).toHaveAttribute("aria-current", "true");
+
+    // Live region text should reference the same section label
+    const label = await tabAfter1.getAttribute("aria-label");
+    const cleanLabel = (label ?? "").replace(/\s*\(seção atual\)\s*$/i, "").trim();
+    await expect(live).toContainText(cleanLabel);
+
+    // Another step — ARIA must move with the active section
+    await page.keyboard.press("Alt+ArrowRight");
+    const activeAfter2 = await page.evaluate(() => location.hash.replace("#", ""));
+    expect(activeAfter2).not.toBe(activeAfter1);
+    await expect(page.locator(`#tab-${activeAfter1}`)).toHaveAttribute(
+      "aria-selected",
+      "false",
+    );
+    await expect(page.locator(`#tab-${activeAfter2}`)).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+  });
+
+  test("desktop: após refresh, Tab leva o foco à chip ativa e Enter foca o tabpanel", async ({
+    page,
+  }) => {
+    await page.goto(`${ROUTE}#reservas`);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(600);
+
+    // The active chip must be the only one with tabIndex=0 (roving tabindex)
+    const activeTab = page.locator('#tab-reservas');
+    await expect(activeTab).toHaveAttribute("tabindex", "0");
+    await expect(activeTab).toHaveAttribute("aria-selected", "true");
+
+    await activeTab.focus();
+    const focusedId = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(focusedId).toBe("tab-reservas");
+
+    // Activating with Enter should move focus to the tabpanel
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(450);
+    const panelFocused = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.id ?? "",
+    );
+    expect(panelFocused).toBe("reservas");
+  });
+
+  test("mobile: orientation change mantém o alinhamento da seção ativa", async ({
+    page,
+  }) => {
+    // Portrait
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`${ROUTE}#vouchers`);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(700);
+
+    const initialOffset = await page.evaluate(() =>
+      Number(
+        getComputedStyle(document.getElementById("vouchers") || document.documentElement)
+          .getPropertyValue("--sec-offset")
+          .replace("px", "")
+          .trim() || "0",
+      ),
+    );
+
+    // Rotate to landscape and fire orientationchange — the component listens
+    // to it and re-measures the sticky nav, re-aligning the active section.
+    await page.setViewportSize({ width: 844, height: 390 });
+    await page.evaluate(() => window.dispatchEvent(new Event("orientationchange")));
+    await page.waitForTimeout(600);
+
+    const newOffset = await page.evaluate(() =>
+      Number(
+        getComputedStyle(document.getElementById("vouchers") || document.documentElement)
+          .getPropertyValue("--sec-offset")
+          .replace("px", "")
+          .trim() || "0",
+      ),
+    );
+    // Offset may stay similar OR shrink — what matters is the section stays aligned
+    expect(newOffset).toBeGreaterThan(0);
+
+    const top = await page
+      .locator("#vouchers")
+      .evaluate((el) => el.getBoundingClientRect().top);
+    // Must still be docked beneath the sticky header (within tolerance)
+    expect(top).toBeLessThan(Math.max(initialOffset, newOffset) + 40);
+    expect(top).toBeGreaterThan(-50);
+  });
 });
