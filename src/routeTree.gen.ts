@@ -343,6 +343,7 @@ import { Route as ApiPublicHooksZapiStatusRouteImport } from './routes/api/publi
 import { Route as ApiPublicHooksUptimeWhatsappTestRouteImport } from './routes/api/public/hooks/uptime-whatsapp-test'
 import { Route as ApiPublicHooksUptimeCheckRouteImport } from './routes/api/public/hooks/uptime-check'
 import { Route as ApiPublicHooksN8nLogRouteImport } from './routes/api/public/hooks/n8n-log'
+import { Route as ApiPublicHooksMpPendingRemindersRouteImport } from './routes/api/public/hooks/mp-pending-reminders'
 import { Route as ApiPublicHooksMarketingLeadNotifyRouteImport } from './routes/api/public/hooks/marketing-lead-notify'
 import { Route as ApiPublicHooksCommsSelfTestRouteImport } from './routes/api/public/hooks/comms-self-test'
 import { Route as ApiPublicHooksClubeJourneyTickRouteImport } from './routes/api/public/hooks/clube-journey-tick'
@@ -2206,6 +2207,12 @@ const ApiPublicHooksN8nLogRoute = ApiPublicHooksN8nLogRouteImport.update({
   path: '/api/public/hooks/n8n-log',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksMpPendingRemindersRoute =
+  ApiPublicHooksMpPendingRemindersRouteImport.update({
+    id: '/api/public/hooks/mp-pending-reminders',
+    path: '/api/public/hooks/mp-pending-reminders',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksMarketingLeadNotifyRoute =
   ApiPublicHooksMarketingLeadNotifyRouteImport.update({
     id: '/api/public/hooks/marketing-lead-notify',
@@ -2720,6 +2727,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/clube-journey-tick': typeof ApiPublicHooksClubeJourneyTickRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
+  '/api/public/hooks/mp-pending-reminders': typeof ApiPublicHooksMpPendingRemindersRoute
   '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
@@ -3072,6 +3080,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/clube-journey-tick': typeof ApiPublicHooksClubeJourneyTickRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
+  '/api/public/hooks/mp-pending-reminders': typeof ApiPublicHooksMpPendingRemindersRoute
   '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
@@ -3438,6 +3447,7 @@ export interface FileRoutesById {
   '/api/public/hooks/clube-journey-tick': typeof ApiPublicHooksClubeJourneyTickRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
+  '/api/public/hooks/mp-pending-reminders': typeof ApiPublicHooksMpPendingRemindersRoute
   '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
@@ -3803,6 +3813,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/clube-journey-tick'
     | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/marketing-lead-notify'
+    | '/api/public/hooks/mp-pending-reminders'
     | '/api/public/hooks/n8n-log'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
@@ -4155,6 +4166,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/clube-journey-tick'
     | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/marketing-lead-notify'
+    | '/api/public/hooks/mp-pending-reminders'
     | '/api/public/hooks/n8n-log'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
@@ -4520,6 +4532,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/clube-journey-tick'
     | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/marketing-lead-notify'
+    | '/api/public/hooks/mp-pending-reminders'
     | '/api/public/hooks/n8n-log'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
@@ -4658,6 +4671,7 @@ export interface RootRouteChildren {
   ApiPublicHooksClubeJourneyTickRoute: typeof ApiPublicHooksClubeJourneyTickRoute
   ApiPublicHooksCommsSelfTestRoute: typeof ApiPublicHooksCommsSelfTestRoute
   ApiPublicHooksMarketingLeadNotifyRoute: typeof ApiPublicHooksMarketingLeadNotifyRoute
+  ApiPublicHooksMpPendingRemindersRoute: typeof ApiPublicHooksMpPendingRemindersRoute
   ApiPublicHooksN8nLogRoute: typeof ApiPublicHooksN8nLogRoute
   ApiPublicHooksUptimeCheckRoute: typeof ApiPublicHooksUptimeCheckRoute
   ApiPublicHooksUptimeWhatsappTestRoute: typeof ApiPublicHooksUptimeWhatsappTestRoute
@@ -7016,6 +7030,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksN8nLogRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/mp-pending-reminders': {
+      id: '/api/public/hooks/mp-pending-reminders'
+      path: '/api/public/hooks/mp-pending-reminders'
+      fullPath: '/api/public/hooks/mp-pending-reminders'
+      preLoaderRoute: typeof ApiPublicHooksMpPendingRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/marketing-lead-notify': {
       id: '/api/public/hooks/marketing-lead-notify'
       path: '/api/public/hooks/marketing-lead-notify'
@@ -8210,6 +8231,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksCommsSelfTestRoute: ApiPublicHooksCommsSelfTestRoute,
   ApiPublicHooksMarketingLeadNotifyRoute:
     ApiPublicHooksMarketingLeadNotifyRoute,
+  ApiPublicHooksMpPendingRemindersRoute: ApiPublicHooksMpPendingRemindersRoute,
   ApiPublicHooksN8nLogRoute: ApiPublicHooksN8nLogRoute,
   ApiPublicHooksUptimeCheckRoute: ApiPublicHooksUptimeCheckRoute,
   ApiPublicHooksUptimeWhatsappTestRoute: ApiPublicHooksUptimeWhatsappTestRoute,
