@@ -267,14 +267,18 @@ async function notify(
   args: { company_id: string | null; category: string; severity: string; title: string; message: string; action_url?: string },
 ) {
   if (!args.company_id) return;
-  await supabase.from("notifications").insert({
+  const { data: users } = await supabase
+    .from("user_profiles").select("user_id").eq("company_id", args.company_id).eq("is_active", true);
+  const rows = (users ?? []).map((u: any) => ({
+    user_id: u.user_id,
     company_id: args.company_id,
     category: args.category,
     severity: args.severity,
     title: args.title,
     message: args.message,
     action_url: args.action_url ?? null,
-  });
+  }));
+  if (rows.length) await supabase.from("notifications").insert(rows);
 }
 
 export const updateMarketplaceOrderStatus = createServerFn({ method: "POST" })
