@@ -545,3 +545,185 @@ export const upsertBreweryCampaign = createServerFn({ method: "POST" })
     if (error) throw error;
     return row;
   });
+
+/* ============ Degustações ============ */
+
+const ListTastingsInput = z.object({ brandId: z.string().uuid(), sinceDays: z.number().int().min(1).max(365).default(180) });
+export const listBreweryTastings = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => ListTastingsInput.parse(d))
+  .handler(async ({ context, data }) => {
+    const sinceIso = new Date(Date.now() - data.sinceDays * 86400_000).toISOString();
+    const { data: rows, error } = await context.supabase
+      .from("brewery_tastings")
+      .select("id,brand_id,pdv_link_id,event_at,duration_minutes,participants,leads_captured,units_sold,products_showcased,notes,created_at")
+      .eq("brand_id", data.brandId)
+      .gte("event_at", sinceIso)
+      .order("event_at", { ascending: false });
+    if (error) throw error;
+    return rows ?? [];
+  });
+
+const UpsertTastingInput = z.object({
+  id: z.string().uuid().optional(),
+  brandId: z.string().uuid(),
+  pdvLinkId: z.string().uuid().optional().nullable(),
+  eventAt: z.string(),
+  durationMinutes: z.number().int().min(0).max(1440).optional().nullable(),
+  participants: z.number().int().min(0).default(0),
+  leadsCaptured: z.number().int().min(0).default(0),
+  unitsSold: z.number().int().min(0).default(0),
+  productsShowcased: z.array(z.string().uuid()).default([]),
+  notes: z.string().max(500).optional().nullable(),
+});
+export const upsertBreweryTasting = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => UpsertTastingInput.parse(d))
+  .handler(async ({ context, data }) => {
+    const payload = {
+      brand_id: data.brandId,
+      pdv_link_id: data.pdvLinkId ?? null,
+      event_at: data.eventAt,
+      duration_minutes: data.durationMinutes ?? null,
+      participants: data.participants,
+      leads_captured: data.leadsCaptured,
+      units_sold: data.unitsSold,
+      products_showcased: data.productsShowcased,
+      notes: data.notes ?? null,
+    };
+    if (data.id) {
+      const { data: row, error } = await context.supabase
+        .from("brewery_tastings").update(payload).eq("id", data.id).select().single();
+      if (error) throw error;
+      return row;
+    }
+    const { data: row, error } = await context.supabase
+      .from("brewery_tastings").insert(payload).select().single();
+    if (error) throw error;
+    return row;
+  });
+
+/* ============ Leads (consumidores capturados) ============ */
+
+// Mascara nome (primeiro nome + iniciais) e whatsapp (mantém DDD e 4 últimos)
+function maskName(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 4) + "***";
+  return parts[0] + " " + parts.slice(1).map((p) => p[0]?.toUpperCase() + ".").join(" ");
+}
+function maskPhone(p: string): string {
+  const digits = p.replace(/\D/g, "");
+  if (digits.length < 6) return "***";
+  return `(${digits.slice(0, 2)}) ****-${digits.slice(-4)}`;
+}
+
+const CaptureLeadInput = z.object({
+  brandId: z.string().uuid(),
+  name: z.string().min(2).max(120),
+  whatsapp: z.string().min(8).max(20),
+  favoriteStyles: z.array(z.string()).max(8).default([]),
+  frequency: z.enum(["weekly", "biweekly", "monthly", "rarely"]).optional().nullable(),
+  interests: z.array(z.string()).max(8).default([]),
+  consentMarketing: z.boolean().default(false),
+  source: z.string().max(60).default("tasting"),
+});
+export const captureBreweryLead = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => CaptureLeadInput.parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: row, error } = await context.supabase
+      .from("brewery_lead_preferences")
+      .insert({
+        brand_id: data.brandId,
+        consumer_user_id: null,
+        masked_name: maskName(data.name),
+        masked_whatsapp: maskPhone(data.whatsapp),
+        favorite_styles: data.favoriteStyles,
+        favorite_brand_ids: [],
+        frequency: data.frequency ?? null,
+        interests: data.interests,
+        consent_marketing: data.consentMarketing,
+        consent_at: data.consentMarketing ? new Date().toISOString() : null,
+        source: data.source,
+      })
+      .select()
+      .single();
+    if (error) throw error;
+    return row;
+  });
+
+const ListLeadsInput = z.object({
+  brandId: z.string().uuid(),
+  style: z.string().optional(),
+  interest: z.string().optional(),
+  consentOnly: z.boolean().default(false),
+  sinceDays: z.number().int().min(1).max(720).default(180),
+});
+export const listBreweryLeads = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => ListLeadsInput.parse(d))
+  .handler(async ({ context, data }) => {
+    const sinceIso = new Date(Date.now() - data.sinceDays * 86400_000).toISOString();
+    let q = context.supabase
+      .from("brewery_lead_preferences")
+      .select("id,brand_id,masked_name,masked_whatsapp,favorite_styles,frequency,interests,consent_marketing,consent_at,source,created_at")
+      .eq("brand_id", data.brandId)
+      .gte("created_at", sinceIso)
+      .order("created_at", { ascending: false });
+    if (data.consentOnly) q = q.eq("consent_marketing", true);
+    if (data.style) q = q.contains("favorite_styles", [data.style]);
+    if (data.interest) q = q.contains("interests", [data.interest]);
+    const { data: rows, error } = await q;
+    if (error) throw error;
+
+    // Estatísticas de segmentação
+    const byStyle = new Map<string, number>();
+    const byInterest = new Map<string, number>();
+    const byFreq = new Map<string, number>();
+    for (const r of rows ?? []) {
+      for (const s of r.favorite_styles ?? []) byStyle.set(s, (byStyle.get(s) ?? 0) + 1);
+      for (const i of r.interests ?? []) byInterest.set(i, (byInterest.get(i) ?? 0) + 1);
+      if (r.frequency) byFreq.set(r.frequency, (byFreq.get(r.frequency) ?? 0) + 1);
+    }
+    return {
+      leads: rows ?? [],
+      total: rows?.length ?? 0,
+      consented: (rows ?? []).filter((r) => r.consent_marketing).length,
+      stats: {
+        styles: Array.from(byStyle.entries()).map(([k, v]) => ({ key: k, count: v })).sort((a, b) => b.count - a.count),
+        interests: Array.from(byInterest.entries()).map(([k, v]) => ({ key: k, count: v })).sort((a, b) => b.count - a.count),
+        frequency: Array.from(byFreq.entries()).map(([k, v]) => ({ key: k, count: v })),
+      },
+    };
+  });
+
+/* ============ Disparo segmentado (preview de blast) ============ */
+
+const PreviewBlastInput = z.object({
+  brandId: z.string().uuid(),
+  styles: z.array(z.string()).default([]),
+  interests: z.array(z.string()).default([]),
+  campaignId: z.string().uuid().optional(),
+});
+export const previewBreweryBlast = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => PreviewBlastInput.parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: rows, error } = await context.supabase
+      .from("brewery_lead_preferences")
+      .select("id,favorite_styles,interests,consent_marketing,masked_whatsapp")
+      .eq("brand_id", data.brandId)
+      .eq("consent_marketing", true);
+    if (error) throw error;
+    const matches = (rows ?? []).filter((r) => {
+      const okStyle = data.styles.length === 0 || data.styles.some((s) => r.favorite_styles?.includes(s));
+      const okInt = data.interests.length === 0 || data.interests.some((i) => r.interests?.includes(i));
+      return okStyle && okInt;
+    });
+    return {
+      eligible: matches.length,
+      totalConsented: rows?.length ?? 0,
+      sample: matches.slice(0, 5).map((m) => m.masked_whatsapp),
+      campaignId: data.campaignId ?? null,
+    };
+  });
