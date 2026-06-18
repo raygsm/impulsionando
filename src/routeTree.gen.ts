@@ -43,6 +43,7 @@ import { Route as PacienteIndexRouteImport } from './routes/paciente.index'
 import { Route as NichosIndexRouteImport } from './routes/nichos.index'
 import { Route as ModulosIndexRouteImport } from './routes/modulos.index'
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
+import { Route as WhiteLabelLoginRouteImport } from './routes/white-label.login'
 import { Route as VitrineSlugRouteImport } from './routes/vitrine.$slug'
 import { Route as TrialCadastroRouteImport } from './routes/trial_.cadastro'
 import { Route as TrabalheConoscoNichoRouteImport } from './routes/trabalhe-conosco.$nicho'
@@ -94,6 +95,7 @@ import { Route as NichosSlugRouteImport } from './routes/nichos.$slug'
 import { Route as ModulosSlugRouteImport } from './routes/modulos.$slug'
 import { Route as MesaTokenRouteImport } from './routes/mesa.$token'
 import { Route as ImoveisSlugRouteImport } from './routes/imoveis.$slug'
+import { Route as EmpresaLoginRouteImport } from './routes/empresa.login'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as DemoWhiteLabelRouteImport } from './routes/demo.white-label'
 import { Route as DemoWhatsappRouteImport } from './routes/demo.whatsapp'
@@ -113,7 +115,10 @@ import { Route as DemoAfiliadosRouteImport } from './routes/demo.afiliados'
 import { Route as DemoAdvogadosRouteImport } from './routes/demo.advogados'
 import { Route as ContratarSobMedidaRouteImport } from './routes/contratar.sob-medida'
 import { Route as ComoFuncionaFitnessRouteImport } from './routes/como-funciona.fitness'
+import { Route as ClubeLoginRouteImport } from './routes/clube.login'
+import { Route as ClubeCadastroRouteImport } from './routes/clube.cadastro'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
 import { Route as AuthenticatedUnitsRouteImport } from './routes/_authenticated/units'
 import { Route as AuthenticatedTalentsRouteImport } from './routes/_authenticated/talents'
@@ -515,6 +520,11 @@ const DemoIndexRoute = DemoIndexRouteImport.update({
   path: '/demo/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WhiteLabelLoginRoute = WhiteLabelLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => WhiteLabelRoute,
+} as any)
 const VitrineSlugRoute = VitrineSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -775,6 +785,11 @@ const ImoveisSlugRoute = ImoveisSlugRouteImport.update({
   path: '/imoveis/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EmpresaLoginRoute = EmpresaLoginRouteImport.update({
+  id: '/empresa/login',
+  path: '/empresa/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
   path: '/email/unsubscribe',
@@ -870,9 +885,24 @@ const ComoFuncionaFitnessRoute = ComoFuncionaFitnessRouteImport.update({
   path: '/como-funciona/fitness',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClubeLoginRoute = ClubeLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => ClubeRoute,
+} as any)
+const ClubeCadastroRoute = ClubeCadastroRouteImport.update({
+  id: '/cadastro',
+  path: '/cadastro',
+  getParentRoute: () => ClubeRoute,
+} as any)
 const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
   id: '/checkout/success',
   path: '/checkout/success',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
@@ -2226,7 +2256,7 @@ export interface FileRoutesByFullPath {
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/vitrine': typeof VitrineRouteWithChildren
-  '/white-label': typeof WhiteLabelRoute
+  '/white-label': typeof WhiteLabelRouteWithChildren
   '/access-profiles': typeof AuthenticatedAccessProfilesRouteWithChildren
   '/adm': typeof AuthenticatedAdmRouteWithChildren
   '/affiliates': typeof AuthenticatedAffiliatesRouteWithChildren
@@ -2255,7 +2285,10 @@ export interface FileRoutesByFullPath {
   '/talents': typeof AuthenticatedTalentsRoute
   '/units': typeof AuthenticatedUnitsRoute
   '/users': typeof AuthenticatedUsersRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/clube/cadastro': typeof ClubeCadastroRoute
+  '/clube/login': typeof ClubeLoginRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/contratar/sob-medida': typeof ContratarSobMedidaRoute
   '/demo/advogados': typeof DemoAdvogadosRoute
@@ -2275,6 +2308,7 @@ export interface FileRoutesByFullPath {
   '/demo/whatsapp': typeof DemoWhatsappRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/empresa/login': typeof EmpresaLoginRoute
   '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
   '/mesa/$token': typeof MesaTokenRoute
   '/modulos/$slug': typeof ModulosSlugRoute
@@ -2326,6 +2360,7 @@ export interface FileRoutesByFullPath {
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
+  '/white-label/login': typeof WhiteLabelLoginRoute
   '/demo/': typeof DemoIndexRoute
   '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
@@ -2560,7 +2595,7 @@ export interface FileRoutesByTo {
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/vitrine': typeof VitrineRouteWithChildren
-  '/white-label': typeof WhiteLabelRoute
+  '/white-label': typeof WhiteLabelRouteWithChildren
   '/access-profiles': typeof AuthenticatedAccessProfilesRouteWithChildren
   '/adm': typeof AuthenticatedAdmRouteWithChildren
   '/audit': typeof AuthenticatedAuditRoute
@@ -2580,7 +2615,10 @@ export interface FileRoutesByTo {
   '/talents': typeof AuthenticatedTalentsRoute
   '/units': typeof AuthenticatedUnitsRoute
   '/users': typeof AuthenticatedUsersRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/clube/cadastro': typeof ClubeCadastroRoute
+  '/clube/login': typeof ClubeLoginRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/contratar/sob-medida': typeof ContratarSobMedidaRoute
   '/demo/advogados': typeof DemoAdvogadosRoute
@@ -2600,6 +2638,7 @@ export interface FileRoutesByTo {
   '/demo/whatsapp': typeof DemoWhatsappRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/empresa/login': typeof EmpresaLoginRoute
   '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
   '/mesa/$token': typeof MesaTokenRoute
   '/modulos/$slug': typeof ModulosSlugRoute
@@ -2651,6 +2690,7 @@ export interface FileRoutesByTo {
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
+  '/white-label/login': typeof WhiteLabelLoginRoute
   '/demo': typeof DemoIndexRoute
   '/modulos': typeof ModulosIndexRoute
   '/nichos': typeof NichosIndexRoute
@@ -2866,7 +2906,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/canal-oficial': typeof CanalOficialRoute
-  '/clube': typeof ClubeRoute
+  '/clube': typeof ClubeRouteWithChildren
   '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
@@ -2889,7 +2929,7 @@ export interface FileRoutesById {
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/vitrine': typeof VitrineRouteWithChildren
-  '/white-label': typeof WhiteLabelRoute
+  '/white-label': typeof WhiteLabelRouteWithChildren
   '/_authenticated/access-profiles': typeof AuthenticatedAccessProfilesRouteWithChildren
   '/_authenticated/adm': typeof AuthenticatedAdmRouteWithChildren
   '/_authenticated/affiliates': typeof AuthenticatedAffiliatesRouteWithChildren
@@ -2919,7 +2959,10 @@ export interface FileRoutesById {
   '/_authenticated/talents': typeof AuthenticatedTalentsRoute
   '/_authenticated/units': typeof AuthenticatedUnitsRoute
   '/_authenticated/users': typeof AuthenticatedUsersRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/clube/cadastro': typeof ClubeCadastroRoute
+  '/clube/login': typeof ClubeLoginRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
   '/contratar/sob-medida': typeof ContratarSobMedidaRoute
   '/demo/advogados': typeof DemoAdvogadosRoute
@@ -2939,6 +2982,7 @@ export interface FileRoutesById {
   '/demo/whatsapp': typeof DemoWhatsappRoute
   '/demo/white-label': typeof DemoWhiteLabelRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/empresa/login': typeof EmpresaLoginRoute
   '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
   '/mesa/$token': typeof MesaTokenRoute
   '/modulos/$slug': typeof ModulosSlugRoute
@@ -2990,6 +3034,7 @@ export interface FileRoutesById {
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial_/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
+  '/white-label/login': typeof WhiteLabelLoginRoute
   '/demo/': typeof DemoIndexRoute
   '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
@@ -3257,7 +3302,10 @@ export interface FileRouteTypes {
     | '/talents'
     | '/units'
     | '/users'
+    | '/admin/login'
     | '/checkout/success'
+    | '/clube/cadastro'
+    | '/clube/login'
     | '/como-funciona/fitness'
     | '/contratar/sob-medida'
     | '/demo/advogados'
@@ -3277,6 +3325,7 @@ export interface FileRouteTypes {
     | '/demo/whatsapp'
     | '/demo/white-label'
     | '/email/unsubscribe'
+    | '/empresa/login'
     | '/imoveis/$slug'
     | '/mesa/$token'
     | '/modulos/$slug'
@@ -3328,6 +3377,7 @@ export interface FileRouteTypes {
     | '/trabalhe-conosco/$nicho'
     | '/trial/cadastro'
     | '/vitrine/$slug'
+    | '/white-label/login'
     | '/demo/'
     | '/modulos/'
     | '/nichos/'
@@ -3582,7 +3632,10 @@ export interface FileRouteTypes {
     | '/talents'
     | '/units'
     | '/users'
+    | '/admin/login'
     | '/checkout/success'
+    | '/clube/cadastro'
+    | '/clube/login'
     | '/como-funciona/fitness'
     | '/contratar/sob-medida'
     | '/demo/advogados'
@@ -3602,6 +3655,7 @@ export interface FileRouteTypes {
     | '/demo/whatsapp'
     | '/demo/white-label'
     | '/email/unsubscribe'
+    | '/empresa/login'
     | '/imoveis/$slug'
     | '/mesa/$token'
     | '/modulos/$slug'
@@ -3653,6 +3707,7 @@ export interface FileRouteTypes {
     | '/trabalhe-conosco/$nicho'
     | '/trial/cadastro'
     | '/vitrine/$slug'
+    | '/white-label/login'
     | '/demo'
     | '/modulos'
     | '/nichos'
@@ -3920,7 +3975,10 @@ export interface FileRouteTypes {
     | '/_authenticated/talents'
     | '/_authenticated/units'
     | '/_authenticated/users'
+    | '/admin/login'
     | '/checkout/success'
+    | '/clube/cadastro'
+    | '/clube/login'
     | '/como-funciona/fitness'
     | '/contratar/sob-medida'
     | '/demo/advogados'
@@ -3940,6 +3998,7 @@ export interface FileRouteTypes {
     | '/demo/whatsapp'
     | '/demo/white-label'
     | '/email/unsubscribe'
+    | '/empresa/login'
     | '/imoveis/$slug'
     | '/mesa/$token'
     | '/modulos/$slug'
@@ -3991,6 +4050,7 @@ export interface FileRouteTypes {
     | '/trabalhe-conosco/$nicho'
     | '/trial_/cadastro'
     | '/vitrine/$slug'
+    | '/white-label/login'
     | '/demo/'
     | '/modulos/'
     | '/nichos/'
@@ -4206,7 +4266,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   CanalOficialRoute: typeof CanalOficialRoute
-  ClubeRoute: typeof ClubeRoute
+  ClubeRoute: typeof ClubeRouteWithChildren
   ConsumidorRoute: typeof ConsumidorRoute
   ContaSuspensaRoute: typeof ContaSuspensaRoute
   ContatoRoute: typeof ContatoRoute
@@ -4229,7 +4289,8 @@ export interface RootRouteChildren {
   TrialRoute: typeof TrialRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   VitrineRoute: typeof VitrineRouteWithChildren
-  WhiteLabelRoute: typeof WhiteLabelRoute
+  WhiteLabelRoute: typeof WhiteLabelRouteWithChildren
+  AdminLoginRoute: typeof AdminLoginRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   ComoFuncionaFitnessRoute: typeof ComoFuncionaFitnessRoute
   DemoAdvogadosRoute: typeof DemoAdvogadosRoute
@@ -4249,6 +4310,7 @@ export interface RootRouteChildren {
   DemoWhatsappRoute: typeof DemoWhatsappRoute
   DemoWhiteLabelRoute: typeof DemoWhiteLabelRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  EmpresaLoginRoute: typeof EmpresaLoginRoute
   ImoveisSlugRoute: typeof ImoveisSlugRouteWithChildren
   MesaTokenRoute: typeof MesaTokenRoute
   NichosSlugRoute: typeof NichosSlugRoute
@@ -4568,6 +4630,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/demo/'
       preLoaderRoute: typeof DemoIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/white-label/login': {
+      id: '/white-label/login'
+      path: '/login'
+      fullPath: '/white-label/login'
+      preLoaderRoute: typeof WhiteLabelLoginRouteImport
+      parentRoute: typeof WhiteLabelRoute
     }
     '/vitrine/$slug': {
       id: '/vitrine/$slug'
@@ -4926,6 +4995,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImoveisSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/empresa/login': {
+      id: '/empresa/login'
+      path: '/empresa/login'
+      fullPath: '/empresa/login'
+      preLoaderRoute: typeof EmpresaLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/email/unsubscribe': {
       id: '/email/unsubscribe'
       path: '/email/unsubscribe'
@@ -5059,11 +5135,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ComoFuncionaFitnessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/clube/login': {
+      id: '/clube/login'
+      path: '/login'
+      fullPath: '/clube/login'
+      preLoaderRoute: typeof ClubeLoginRouteImport
+      parentRoute: typeof ClubeRoute
+    }
+    '/clube/cadastro': {
+      id: '/clube/cadastro'
+      path: '/cadastro'
+      fullPath: '/clube/cadastro'
+      preLoaderRoute: typeof ClubeCadastroRouteImport
+      parentRoute: typeof ClubeRoute
+    }
     '/checkout/success': {
       id: '/checkout/success'
       path: '/checkout/success'
       fullPath: '/checkout/success'
       preLoaderRoute: typeof CheckoutSuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/users': {
@@ -7345,6 +7442,18 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface ClubeRouteChildren {
+  ClubeCadastroRoute: typeof ClubeCadastroRoute
+  ClubeLoginRoute: typeof ClubeLoginRoute
+}
+
+const ClubeRouteChildren: ClubeRouteChildren = {
+  ClubeCadastroRoute: ClubeCadastroRoute,
+  ClubeLoginRoute: ClubeLoginRoute,
+}
+
+const ClubeRouteWithChildren = ClubeRoute._addFileChildren(ClubeRouteChildren)
+
 interface ContratarRouteChildren {
   ContratarSobMedidaRoute: typeof ContratarSobMedidaRoute
 }
@@ -7406,6 +7515,18 @@ const VitrineRouteChildren: VitrineRouteChildren = {
 const VitrineRouteWithChildren =
   VitrineRoute._addFileChildren(VitrineRouteChildren)
 
+interface WhiteLabelRouteChildren {
+  WhiteLabelLoginRoute: typeof WhiteLabelLoginRoute
+}
+
+const WhiteLabelRouteChildren: WhiteLabelRouteChildren = {
+  WhiteLabelLoginRoute: WhiteLabelLoginRoute,
+}
+
+const WhiteLabelRouteWithChildren = WhiteLabelRoute._addFileChildren(
+  WhiteLabelRouteChildren,
+)
+
 interface ImoveisSlugRouteChildren {
   ImoveisSlugPropertyIdRoute: typeof ImoveisSlugPropertyIdRoute
 }
@@ -7438,7 +7559,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   CanalOficialRoute: CanalOficialRoute,
-  ClubeRoute: ClubeRoute,
+  ClubeRoute: ClubeRouteWithChildren,
   ConsumidorRoute: ConsumidorRoute,
   ContaSuspensaRoute: ContaSuspensaRoute,
   ContatoRoute: ContatoRoute,
@@ -7461,7 +7582,8 @@ const rootRouteChildren: RootRouteChildren = {
   TrialRoute: TrialRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   VitrineRoute: VitrineRouteWithChildren,
-  WhiteLabelRoute: WhiteLabelRoute,
+  WhiteLabelRoute: WhiteLabelRouteWithChildren,
+  AdminLoginRoute: AdminLoginRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
   ComoFuncionaFitnessRoute: ComoFuncionaFitnessRoute,
   DemoAdvogadosRoute: DemoAdvogadosRoute,
@@ -7481,6 +7603,7 @@ const rootRouteChildren: RootRouteChildren = {
   DemoWhatsappRoute: DemoWhatsappRoute,
   DemoWhiteLabelRoute: DemoWhiteLabelRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  EmpresaLoginRoute: EmpresaLoginRoute,
   ImoveisSlugRoute: ImoveisSlugRouteWithChildren,
   MesaTokenRoute: MesaTokenRoute,
   NichosSlugRoute: NichosSlugRoute,

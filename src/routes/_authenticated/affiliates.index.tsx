@@ -11,10 +11,19 @@ import { PLATFORM_FEE_PCT } from "@/lib/affiliates.constants";
 import {
   Boxes, Handshake, Users2, Briefcase, ShoppingCart, Banknote, Percent, BadgeDollarSign, Sparkles,
 } from "lucide-react";
+import { PlanGate } from "@/components/app/PlanGate";
 
 export const Route = createFileRoute("/_authenticated/affiliates/")({
-  component: AffiliatesDashboard,
+  component: AffiliatesGated,
 });
+
+function AffiliatesGated() {
+  return (
+    <PlanGate moduleName="Afiliados & Indicações" allowedTiers={["profissional", "completo"]}>
+      <AffiliatesDashboard />
+    </PlanGate>
+  );
+}
 
 function Stat({ icon: Icon, label, value, hint }: { icon: typeof Boxes; label: string; value: string | number; hint?: string }) {
   return (

@@ -12,14 +12,58 @@ import { toast } from "sonner";
 import { ShieldCheck, Layers, Zap } from "lucide-react";
 import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 
+type AuthPersona = "core" | "empresa" | "white-label" | "admin" | "clube";
+type AuthMode = "signin" | "signup";
+
+interface AuthSearch {
+  persona?: AuthPersona;
+  mode?: AuthMode;
+}
+
+const PERSONA_COPY: Record<AuthPersona, { headline: string; sub: string; rightTitle: string; rightSub: string }> = {
+  core: {
+    headline: "Uma plataforma. Todos os nichos. Total controle.",
+    sub: "SaaS multiempresa, modular e parametrizável para clínicas, bares, cervejarias, serviços e varejo.",
+    rightTitle: "Acesse sua conta",
+    rightSub: "Use seu e-mail corporativo para continuar.",
+  },
+  empresa: {
+    headline: "Sua empresa, sua operação, no controle.",
+    sub: "Vendas, agenda, financeiro, fiscal e CRM em um único painel.",
+    rightTitle: "Acesso da Empresa",
+    rightSub: "Entre com o e-mail cadastrado na sua empresa.",
+  },
+  "white-label": {
+    headline: "Sua marca. Sua plataforma. Sua receita.",
+    sub: "Gerencie clientes, módulos, fiscal e cobrança com o seu próprio CNPJ.",
+    rightTitle: "Acesso White Label",
+    rightSub: "Entre na sua plataforma parceira.",
+  },
+  admin: {
+    headline: "Central Impulsionando.",
+    sub: "Acesso restrito da equipe operacional.",
+    rightTitle: "Acesso Administrativo",
+    rightSub: "Somente equipe Impulsionando autorizada.",
+  },
+  clube: {
+    headline: "Descubra o que existe perto de você.",
+    sub: "Cupons, eventos, restaurantes, clínicas e benefícios reais — tudo em um só lugar.",
+    rightTitle: "Bem-vindo ao Clube",
+    rightSub: "Crie sua conta gratuita ou entre para acessar seus benefícios.",
+  },
+};
+
 export const Route = createFileRoute("/auth")({
   ssr: false,
+  validateSearch: (s: Record<string, unknown>): AuthSearch => ({
+    persona: (s.persona as AuthPersona) || undefined,
+    mode: s.mode === "signup" ? "signup" : s.mode === "signin" ? "signin" : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Acessar — Impulsionando Tecnologia" },
       { name: "description", content: "Plataforma SaaS multiempresa, multinicho e modular." },
       { property: "og:url", content: "https://impulsionando.com.br/auth" },
-    
     ],
     links: [{ rel: "canonical", href: "https://impulsionando.com.br/auth" }],
   }),
@@ -27,6 +71,10 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
+  const search = Route.useSearch();
+  const persona: AuthPersona = search.persona ?? "core";
+  const mode = search.mode;
+  const copy = PERSONA_COPY[persona];
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -119,9 +167,9 @@ function AuthPage() {
           </div>
         </div>
         <div className="relative z-10 max-w-md space-y-6">
-          <h1 className="text-4xl font-bold leading-tight">Uma plataforma. Todos os nichos. Total controle.</h1>
+          <h1 className="text-4xl font-bold leading-tight">{copy.headline}</h1>
           <p className="text-white/80 text-base leading-relaxed">
-            SaaS multiempresa, modular e parametrizável para clínicas, bares, cervejarias, serviços e varejo.
+            {copy.sub}
           </p>
           <div className="grid gap-3 pt-2">
             {[
@@ -151,10 +199,10 @@ function AuthPage() {
           <div className="flex items-center justify-center mb-6 lg:hidden">
             <LogoImpulsionando variant="light" size="md" />
           </div>
-          <h2 className="text-2xl font-semibold tracking-tight">Acesse sua conta</h2>
-          <p className="text-sm text-muted-foreground mt-1">Use seu e-mail corporativo para continuar.</p>
+          <h2 className="text-2xl font-semibold tracking-tight">{copy.rightTitle}</h2>
+          <p className="text-sm text-muted-foreground mt-1">{copy.rightSub}</p>
 
-          <Tabs defaultValue="login" className="mt-6">
+          <Tabs defaultValue={mode === "signup" ? "signup" : "login"} className="mt-6">
             <TabsList className="grid grid-cols-2 w-full">
               <TabsTrigger value="login">Entrar</TabsTrigger>
               <TabsTrigger value="signup">Criar conta</TabsTrigger>
