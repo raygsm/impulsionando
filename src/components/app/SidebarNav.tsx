@@ -77,11 +77,11 @@ function Group({
 }: {
   group: NavGroup;
   pathname: string;
-  filterItem: (i: NavItem) => boolean;
+  filterItem: (i: NavItem, groupAudiences?: NavAudience[]) => boolean;
   onNavigate?: () => void;
   pendingPix: number;
 }) {
-  const items = group.items.filter(filterItem);
+  const items = group.items.filter((i) => filterItem(i, group.audiences));
   if (items.length === 0) return null;
 
   const hasActive = items.some((i) => isItemActive(pathname, i.to));
@@ -138,10 +138,12 @@ export function SidebarNav({
 
   // Super admin enxerga tudo. Em modo impersonação, comporta-se como o cliente:
   // esconde itens superOnly e libera os demais (o master tem acesso global).
-  const filterItem = (i: NavItem): boolean => {
-    if (!matchesAudience(i.audiences)) return false;
+  const filterItem = (i: NavItem, groupAudiences?: NavAudience[]): boolean => {
+    // Item herda audiences do grupo quando não declarar a sua própria.
+    const effective = i.audiences ?? groupAudiences;
+    if (!matchesAudience(effective)) return false;
     if (i.superOnly) return isSuper;
-    if (isImpersonating) return true; // visão do cliente sem filtro de permissão granular
+    if (isImpersonating) return true;
     if (currentUser.isSuperAdmin) return true;
     if (!i.perm) return true;
     if (permsLoading || !perms) return false;
