@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
 import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
 import { ArrowRight, Check, Layers, Sparkles, Package, Workflow } from 'lucide-react'
