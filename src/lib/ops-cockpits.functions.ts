@@ -415,19 +415,20 @@ export const fetchVoiceInsights = createServerFn({ method: "POST" })
     if (data.channel === "all" || data.channel === "poll") {
       let pq = supabase
         .from("clube_polls")
-        .select("id, question, status, created_at, company_id")
+        .select("id, question, active, created_at, company_id")
         .gte("created_at", from)
         .order("created_at", { ascending: false })
         .limit(200);
       if (companyId) pq = pq.eq("company_id", companyId);
-      if (data.status) pq = pq.eq("status", data.status);
+      if (data.status === "active") pq = pq.eq("active", true);
+      if (data.status === "closed") pq = pq.eq("active", false);
       const { data: polls } = await pq;
       for (const p of polls ?? []) {
         insights.push({
           id: p.id,
           source: "poll",
           title: p.question,
-          status: p.status,
+          status: p.active ? "active" : "closed",
           audience: "consumidor",
           createdAt: p.created_at,
         });
