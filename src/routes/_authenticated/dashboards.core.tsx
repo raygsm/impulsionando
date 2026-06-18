@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { PageHeader } from "@/components/app/PageElements";
@@ -7,7 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { KpiCard } from "@/components/insights/KpiCard";
 import { PercebidoSection } from "@/components/insights/PercebidoSection";
 import { fetchCoreAudienceDashboard } from "@/lib/audience-dashboards.functions";
-import { Loader2 } from "lucide-react";
+import { fetchMarketplaceKPIs } from "@/lib/marketplace.functions";
+import { Loader2, TrendingUp, ArrowRight } from "lucide-react";
+
+function brl(c: number) {
+  return (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
 
 export const Route = createFileRoute("/_authenticated/dashboards/core")({
   head: () => ({ meta: [{ title: "Dashboard Core — Impulsionando" }, { name: "robots", content: "noindex,nofollow" }] }),
