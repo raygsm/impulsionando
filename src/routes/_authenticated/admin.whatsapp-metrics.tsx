@@ -20,9 +20,15 @@ import {
   evaluateAlertRules,
   ruleScope,
   buildDailySummary,
+  buildDailySummaryRange,
   renderDailySummary,
   dailySummaryAlreadySent,
   markDailySummarySent,
+  planChannelDispatch,
+  markChannelDispatched,
+  readChannelCooldown,
+  simulateAlertRules,
+  ALERT_CHANNELS,
   DEFAULT_ALERT_CONFIG,
   DEFAULT_ALERT_TEMPLATE,
   type BufferedEvent,
@@ -31,6 +37,10 @@ import {
   type AlertTemplate,
   type AlertRule,
   type AlertPayload,
+  type AlertChannel,
+  type ChannelDelivery,
+  type ChannelDecision,
+  type SimulationDispatch,
 } from "@/lib/whatsapp-cta";
 import { notifyWhatsAppAlert } from "@/lib/whatsapp-alerts.functions";
 import { PageHeader, StatCard } from "@/components/app/PageElements";
@@ -47,7 +57,7 @@ import {
 import {
   MessageCircle, MousePointerClick, Send, Trash2, RefreshCw,
   Download, AlertTriangle, CheckCircle2, BellRing, History,
-  Plus, RotateCcw, Mail, ShieldAlert, ShieldCheck,
+  Plus, RotateCcw, Mail, ShieldAlert, ShieldCheck, FlaskConical, Eye,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/whatsapp-metrics")({
@@ -106,6 +116,17 @@ function WhatsAppMetricsPage() {
   const [hTo, setHTo] = useState("");
   const [hCta, setHCta] = useState("__all");
   const [hStatus, setHStatus] = useState<"__all" | "sent" | "failed" | "cooldown" | "no_channels" | "partial">("__all");
+
+  // simulação
+  const [simDays, setSimDays] = useState(7);
+  const [simStep, setSimStep] = useState(60); // minutos
+  const [simResult, setSimResult] = useState<SimulationDispatch[]>([]);
+  const [simIncludeSuppressed, setSimIncludeSuppressed] = useState(true);
+
+  // resumo diário (CSV)
+  const [dsFrom, setDsFrom] = useState("");
+  const [dsTo, setDsTo] = useState("");
+  const [dsRule, setDsRule] = useState("__all");
 
   useEffect(() => {
     setAll(readWhatsAppLocalMetrics());
@@ -167,7 +188,10 @@ function WhatsAppMetricsPage() {
   const alertEval = useMemo(() => evaluateAlerts(all, cfg), [all, cfg]);
   const ruleEvals = useMemo(() => evaluateAlertRules(all, rules), [all, rules]);
 
-  /** Cria payload + dispara notify + persiste auditoria. */
+  /**
+   * Dispatch global (não-regra): canais agem em paralelo, ambos com cooldown
+   * de escopo `global`. Mantido por compatibilidade.
+   */
   async function dispatchAlert(
     scope: string,
     payload: AlertPayload,
@@ -197,25 +221,125 @@ function WhatsAppMetricsPage() {
     try {
       const res = await notify({ data: { ...payload } });
       const channels = res?.channels ?? [];
+      const deliveries: ChannelDelivery[] = (res?.results ?? []).map((r) => ({
+        channel: r.channel as AlertChannel,
+        status: r.status as ChannelDelivery["status"],
+        error: r.error,
+        ts: Date.now(),
+      }));
       const status: AlertHistoryEntry["status"] =
-        res?.ok === false ? "failed"
+        res?.ok === false ? (channels.length > 0 ? "partial" : "failed")
         : channels.length === 0 ? "no_channels"
         : "sent";
-      recordAlertHistory({
-        ...baseEntry,
-        notified: channels,
-        status,
-        error: res?.error,
-      });
+      recordAlertHistory({ ...baseEntry, notified: channels, status, error: res?.error, deliveries });
       return baseEntry;
     } catch (err) {
       recordAlertHistory({
-        ...baseEntry,
-        notified: [],
-        status: "failed",
+        ...baseEntry, notified: [], status: "failed",
         error: err instanceof Error ? err.message : String(err),
       });
       return baseEntry;
+    } finally {
+      setTick((t) => t + 1);
+    }
+  }
+
+  /**
+   * Dispatch baseado em regra: usa `planChannelDispatch` para decidir
+   * por canal (com limites + cooldown próprios). Cada canal é marcado
+   * individualmente e o status agregado da entrada reflete o resultado.
+   */
+  async function dispatchRuleAlert(
+    rule: AlertRule,
+    ev: ReturnType<typeof evaluateAlertRules>[number],
+    rendered: { title: string; body: string },
+  ): Promise<void> {
+    const scope = ruleScope(rule);
+    const decisions = planChannelDispatch(ev, rule);
+    const willFire = decisions.filter((d) => d.willFire);
+    const basePayload: AlertPayload = {
+      title: rendered.title, body: rendered.body,
+      ctr: ev.ctr, sendRate: ev.sendRate,
+      impressions: ev.impressions, clicks: ev.clicks, sends: ev.sends,
+      ctrBelow: ev.ctrBelow, sendBelow: ev.sendBelow,
+      minCtr: rule.minCtr, minSendRate: rule.minSendRate,
+      windowHours: rule.windowHours, path: rule.route,
+    };
+    const baseEntry: AlertHistoryEntry = {
+      ts: Date.now(),
+      ctr: ev.ctr, sendRate: ev.sendRate,
+      impressions: ev.impressions, clicks: ev.clicks, sends: ev.sends,
+      ctrBelow: ev.ctrBelow, sendBelow: ev.sendBelow,
+      windowHours: rule.windowHours, minCtr: rule.minCtr, minSendRate: rule.minSendRate,
+      scope, ruleId: rule.id, payload: basePayload,
+    };
+
+    if (willFire.length === 0) {
+      const allCooldown = decisions.every((d) => d.reason === "cooldown");
+      recordAlertHistory({
+        ...baseEntry,
+        notified: [],
+        status: allCooldown ? "cooldown" : "no_channels",
+        deliveries: decisions.map((d) => ({
+          channel: d.channel,
+          status: d.reason === "cooldown" ? "cooldown"
+                : d.reason === "disabled" ? "disabled" : "skipped",
+          error: d.reason,
+        })),
+      });
+      setTick((t) => t + 1);
+      return;
+    }
+
+    try {
+      const res = await notify({
+        data: {
+          ...basePayload,
+          channels: {
+            slack: willFire.some((d) => d.channel === "slack"),
+            email: willFire.some((d) => d.channel === "email"),
+          },
+        },
+      });
+      const sentChannels = new Set(res?.channels ?? []);
+      const serverResults = new Map((res?.results ?? []).map((r) => [r.channel, r]));
+      const deliveries: ChannelDelivery[] = decisions.map((d) => {
+        if (!d.willFire) {
+          return {
+            channel: d.channel,
+            status: d.reason === "cooldown" ? "cooldown"
+                  : d.reason === "disabled" ? "disabled" : "skipped",
+            error: d.reason,
+          };
+        }
+        const r = serverResults.get(d.channel);
+        if (r?.status === "sent") {
+          markChannelDispatched(scope, d.channel);
+          return { channel: d.channel, status: "sent", ts: Date.now() };
+        }
+        return { channel: d.channel, status: "failed", error: r?.error ?? "no response" };
+      });
+      const sentCount = deliveries.filter((d) => d.status === "sent").length;
+      const failedCount = deliveries.filter((d) => d.status === "failed").length;
+      const status: AlertHistoryEntry["status"] =
+        sentCount > 0 && failedCount > 0 ? "partial"
+        : sentCount > 0 ? "sent"
+        : failedCount > 0 ? "failed"
+        : "no_channels";
+      recordAlertHistory({
+        ...baseEntry,
+        notified: Array.from(sentChannels),
+        status, error: res?.error, deliveries,
+      });
+    } catch (err) {
+      recordAlertHistory({
+        ...baseEntry, notified: [], status: "failed",
+        error: err instanceof Error ? err.message : String(err),
+        deliveries: willFire.map((d) => ({
+          channel: d.channel, status: "failed" as const,
+          error: err instanceof Error ? err.message : String(err),
+        })),
+      });
     } finally {
       setTick((t) => t + 1);
     }
@@ -237,57 +361,29 @@ function WhatsAppMetricsPage() {
     dispatchAlert(
       "global",
       {
-        title: rendered.title,
-        body: rendered.body,
-        ctr: alertEval.ctr,
-        sendRate: alertEval.sendRate,
-        impressions: alertEval.impressions,
-        clicks: alertEval.clicks,
-        sends: alertEval.sends,
-        ctrBelow: alertEval.ctrBelow,
-        sendBelow: alertEval.sendBelow,
-        minCtr: cfg.minCtr,
-        minSendRate: cfg.minSendRate,
-        windowHours: cfg.windowHours,
-        ctaHash,
-        origin: originVal,
+        title: rendered.title, body: rendered.body,
+        ctr: alertEval.ctr, sendRate: alertEval.sendRate,
+        impressions: alertEval.impressions, clicks: alertEval.clicks, sends: alertEval.sends,
+        ctrBelow: alertEval.ctrBelow, sendBelow: alertEval.sendBelow,
+        minCtr: cfg.minCtr, minSendRate: cfg.minSendRate, windowHours: cfg.windowHours,
+        ctaHash, origin: originVal,
       },
       { ctaHash },
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alertEval.triggered]);
 
-  // Alertas por regra (route / variant)
+  // Alertas por regra (route / variant) — dispatch por canal
   useEffect(() => {
     for (const ev of ruleEvals) {
       if (!ev.triggered) continue;
       const rendered = renderAlertTemplate(tpl, {
         ...ev,
-        minCtr: ev.rule.minCtr,
-        minSendRate: ev.rule.minSendRate,
-        windowHours: ev.rule.windowHours,
-        path: ev.rule.route,
+        minCtr: ev.rule.minCtr, minSendRate: ev.rule.minSendRate,
+        windowHours: ev.rule.windowHours, path: ev.rule.route,
       });
       const title = `[${ev.rule.label || ev.scope}] ${rendered.title}`;
-      dispatchAlert(
-        ev.scope,
-        {
-          title,
-          body: rendered.body,
-          ctr: ev.ctr,
-          sendRate: ev.sendRate,
-          impressions: ev.impressions,
-          clicks: ev.clicks,
-          sends: ev.sends,
-          ctrBelow: ev.ctrBelow,
-          sendBelow: ev.sendBelow,
-          minCtr: ev.rule.minCtr,
-          minSendRate: ev.rule.minSendRate,
-          windowHours: ev.rule.windowHours,
-          path: ev.rule.route,
-        },
-        { ruleId: ev.rule.id },
-      );
+      dispatchRuleAlert(ev.rule, ev, { title, body: rendered.body });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ruleEvals.map((e) => `${e.rule.id}:${e.triggered}`).join("|")]);
@@ -299,16 +395,11 @@ function WhatsAppMetricsPage() {
     const { title, body } = renderDailySummary(summary);
     const payload: AlertPayload = {
       title, body,
-      ctr: summary.totals.ctr,
-      sendRate: summary.totals.sendRate,
-      impressions: summary.totals.impressions,
-      clicks: summary.totals.clicks,
+      ctr: summary.totals.ctr, sendRate: summary.totals.sendRate,
+      impressions: summary.totals.impressions, clicks: summary.totals.clicks,
       sends: summary.totals.sends,
-      ctrBelow: false,
-      sendBelow: false,
-      minCtr: 0,
-      minSendRate: 0,
-      windowHours: 24,
+      ctrBelow: false, sendBelow: false,
+      minCtr: 0, minSendRate: 0, windowHours: 24,
     };
     await dispatchAlert("daily_summary", payload, {});
     markDailySummarySent();
@@ -317,29 +408,43 @@ function WhatsAppMetricsPage() {
   /** Reenvio manual a partir de uma entrada com falha. */
   async function retryEntry(entry: AlertHistoryEntry) {
     if (!entry.payload || !entry.id) return;
+    const failedChannels = (entry.deliveries ?? []).filter((d) => d.status === "failed");
+    const channels = failedChannels.length > 0
+      ? { slack: failedChannels.some((d) => d.channel === "slack"),
+          email: failedChannels.some((d) => d.channel === "email") }
+      : undefined;
     try {
-      const res = await notify({ data: entry.payload });
-      const channels = res?.channels ?? [];
+      const res = await notify({ data: { ...entry.payload, channels } });
+      const sentChannels = new Set(res?.channels ?? []);
+      const serverResults = new Map((res?.results ?? []).map((r) => [r.channel, r]));
+      const merged: ChannelDelivery[] = (entry.deliveries ?? []).map((d) => {
+        if (channels && !channels[d.channel as "slack" | "email"]) return d;
+        const r = serverResults.get(d.channel);
+        if (r?.status === "sent") return { ...d, status: "sent", error: undefined, ts: Date.now() };
+        if (r?.status === "failed") return { ...d, status: "failed", error: r.error, ts: Date.now() };
+        return d;
+      });
+      const sentCount = merged.filter((d) => d.status === "sent").length;
+      const failedCount = merged.filter((d) => d.status === "failed").length;
       const status: AlertHistoryEntry["status"] =
-        res?.ok === false ? "failed"
-        : channels.length === 0 ? "no_channels"
-        : "sent";
+        sentCount > 0 && failedCount > 0 ? "partial"
+        : sentCount > 0 ? "sent"
+        : failedCount > 0 ? "failed"
+        : "no_channels";
       updateAlertHistory(entry.id, {
-        notified: channels,
-        status,
-        error: res?.error,
-        ts: Date.now(),
+        notified: Array.from(sentChannels), status,
+        error: res?.error, deliveries: merged, ts: Date.now(),
       });
     } catch (err) {
       updateAlertHistory(entry.id, {
-        notified: [],
-        status: "failed",
+        notified: [], status: "failed",
         error: err instanceof Error ? err.message : String(err),
         ts: Date.now(),
       });
     }
     setTick((t) => t + 1);
   }
+
 
 
 
@@ -379,6 +484,57 @@ function WhatsAppMetricsPage() {
     download(`wa-alert-history-${Date.now()}.csv`, [head.join(","), ...lines].join("\n"));
   }
 
+  function runSimulation() {
+    const out = simulateAlertRules(all, rules, simDays, {
+      stepMinutes: simStep, includeNonFiring: simIncludeSuppressed,
+    });
+    setSimResult(out);
+  }
+
+  function exportSimulationCSV() {
+    const head = ["ts", "iso", "ruleId", "ruleLabel", "scope", "channel", "status",
+      "ctr", "sendRate", "impressions", "clicks", "sends",
+      "ctrBelow", "sendBelow", "effMinCtr", "effMinSendRate", "reason"];
+    const esc = (v: unknown) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const lines = simResult.map((e) =>
+      [e.ts, new Date(e.ts).toISOString(), e.ruleId, e.ruleLabel ?? "", e.scope,
+       e.channel, e.status, e.ctr.toFixed(2), e.sendRate.toFixed(2),
+       e.impressions, e.clicks, e.sends, e.ctrBelow, e.sendBelow,
+       e.effectiveMinCtr, e.effectiveMinSendRate, e.reason ?? ""].map(esc).join(","));
+    download(`wa-alert-simulation-${Date.now()}.csv`, [head.join(","), ...lines].join("\n"));
+  }
+
+  function exportDailySummaryCSV() {
+    const from = dsFrom ? new Date(dsFrom + "T00:00:00")
+      : new Date(Date.now() - 7 * 24 * 3_600_000);
+    const to = dsTo ? new Date(dsTo + "T23:59:59") : new Date();
+    const ruleFilter = dsRule !== "__all" ? dsRule : undefined;
+    const rows = buildDailySummaryRange(all, history, from, to, ruleFilter);
+    const head = ["date", "ctaHash", "impressions", "clicks", "sends",
+      "ctr", "sendRate", "alertsFired"];
+    const esc = (v: unknown) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const lines = rows.map((r) => [r.date, r.ctaHash, r.impressions, r.clicks,
+      r.sends, r.ctr.toFixed(2), r.sendRate.toFixed(2), r.alertsFired]
+      .map(esc).join(","));
+    download(`wa-daily-summary-${Date.now()}.csv`, [head.join(","), ...lines].join("\n"));
+  }
+
+  // Auditoria atual por regra (decisão por canal agora)
+  const auditNow = useMemo(() =>
+    ruleEvals.map((ev) => ({
+      ev,
+      decisions: planChannelDispatch(ev, ev.rule),
+    })),
+    [ruleEvals],
+  );
+
+
   return (
     <div className="space-y-6 p-6">
       <PageHeader
@@ -402,17 +558,21 @@ function WhatsAppMetricsPage() {
       )}
 
       <Tabs defaultValue="dashboard">
-        <TabsList>
+        <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="rules">
             <ShieldAlert className="w-4 h-4 mr-1" /> Regras + Resumo diário
             {rules.length > 0 && <Badge variant="secondary" className="ml-2">{rules.length}</Badge>}
           </TabsTrigger>
+          <TabsTrigger value="audit">
+            <Eye className="w-4 h-4 mr-1" /> Auditoria por regra
+          </TabsTrigger>
+          <TabsTrigger value="simulation">
+            <FlaskConical className="w-4 h-4 mr-1" /> Simulação
+          </TabsTrigger>
           <TabsTrigger value="history">
-            <History className="w-4 h-4 mr-1" /> Histórico de alertas
-            {history.length > 0 && (
-              <Badge variant="secondary" className="ml-2">{history.length}</Badge>
-            )}
+            <History className="w-4 h-4 mr-1" /> Histórico
+            {history.length > 0 && <Badge variant="secondary" className="ml-2">{history.length}</Badge>}
           </TabsTrigger>
         </TabsList>
 
@@ -554,7 +714,222 @@ function WhatsAppMetricsPage() {
               </pre>
             </details>
           </Card>
+
+          {/* CSV do resumo diário por CTA hash com filtros por data e regra */}
+          <Card className="p-6 space-y-3">
+            <div className="flex items-center gap-2">
+              <Download className="w-4 h-4" />
+              <h2 className="text-lg font-semibold">Exportar resumo diário por CTA hash</h2>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Gera CSV com CTR, taxa de envio e alertas disparados por dia/CTA hash.
+              Filtre por intervalo e regra para análise externa.
+            </p>
+            <div className="grid gap-3 md:grid-cols-4 items-end">
+              <div>
+                <Label className="text-xs">De</Label>
+                <Input type="date" value={dsFrom} max={today}
+                  onChange={(e) => setDsFrom(e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs">Até</Label>
+                <Input type="date" value={dsTo} max={today}
+                  onChange={(e) => setDsTo(e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs">Regra</Label>
+                <Select value={dsRule} onValueChange={setDsRule}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all">Todas</SelectItem>
+                    {rules.map((r) => (
+                      <SelectItem key={r.id} value={r.id}>
+                        {r.label || r.id}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button size="sm" onClick={exportDailySummaryCSV}>
+                <Download className="w-4 h-4 mr-1" /> Baixar CSV
+              </Button>
+            </div>
+          </Card>
         </TabsContent>
+
+        {/* Auditoria por regra/escopo — métrica e motivo de cada decisão agora */}
+        <TabsContent value="audit" className="space-y-4 mt-4">
+          <Card className="p-6 space-y-2">
+            <div className="flex items-center gap-2">
+              <Eye className="w-4 h-4" />
+              <h2 className="text-lg font-semibold">Auditoria detalhada por regra</h2>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Mostra a métrica que disparou (ou não) cada regra agora, e por que cada
+              canal foi enviado, suprimido por cooldown ou por amostragem insuficiente.
+              Reflete o estado atual do localStorage de cooldown.
+            </p>
+          </Card>
+
+          {auditNow.length === 0 && (
+            <Card className="p-6">
+              <p className="text-sm text-muted-foreground">
+                Nenhuma regra configurada. Vá em "Regras + Resumo diário".
+              </p>
+            </Card>
+          )}
+
+          {auditNow.map(({ ev, decisions }) => (
+            <Card key={ev.rule.id} className="p-4 space-y-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <strong className="text-sm">{ev.rule.label || ev.rule.id}</strong>
+                <code className="text-xs text-muted-foreground">{ev.scope}</code>
+                {ev.triggered ? (
+                  <Badge variant="destructive">Disparado</Badge>
+                ) : (
+                  <Badge variant="secondary">
+                    <CheckCircle2 className="w-3 h-3 mr-1" /> OK
+                  </Badge>
+                )}
+                <span className="ml-auto text-xs text-muted-foreground">
+                  Janela {ev.rule.windowHours}h · amostras ≥ {ev.rule.minSamples}
+                </span>
+              </div>
+              <div className="grid gap-2 md:grid-cols-5 text-xs">
+                <div><span className="text-muted-foreground">Impressões:</span> <strong>{ev.impressions}</strong></div>
+                <div><span className="text-muted-foreground">Cliques:</span> <strong>{ev.clicks}</strong></div>
+                <div><span className="text-muted-foreground">Envios:</span> <strong>{ev.sends}</strong></div>
+                <div>
+                  <span className="text-muted-foreground">CTR:</span>{" "}
+                  <strong className={ev.ctrBelow ? "text-destructive" : ""}>
+                    {ev.ctr.toFixed(1)}%
+                  </strong>{" "}
+                  <span className="text-muted-foreground">/ min {ev.rule.minCtr}%</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Envio:</span>{" "}
+                  <strong className={ev.sendBelow ? "text-destructive" : ""}>
+                    {ev.sendRate.toFixed(1)}%
+                  </strong>{" "}
+                  <span className="text-muted-foreground">/ min {ev.rule.minSendRate}%</span>
+                </div>
+              </div>
+              <div className="border-t pt-2 space-y-1">
+                <div className="text-xs text-muted-foreground mb-1">Decisão por canal:</div>
+                {decisions.map((d) => (
+                  <DecisionRow key={d.channel} d={d} scope={ev.scope} />
+                ))}
+              </div>
+            </Card>
+          ))}
+        </TabsContent>
+
+        {/* Simulação histórica das regras */}
+        <TabsContent value="simulation" className="space-y-4 mt-4">
+          <Card className="p-6 space-y-3">
+            <div className="flex items-center gap-2">
+              <FlaskConical className="w-4 h-4" />
+              <h2 className="text-lg font-semibold">
+                Simular regras sobre o histórico
+              </h2>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Reaplica as regras ativas em janelas deslizantes ao longo dos
+              últimos N dias do buffer local, com cooldown e dedup por canal.
+              Mostra exatamente quais alertas teriam disparado.
+            </p>
+            <div className="grid gap-3 md:grid-cols-5 items-end">
+              <div>
+                <Label className="text-xs">Dias</Label>
+                <Input type="number" min={1} max={60} value={simDays}
+                  onChange={(e) => setSimDays(Number(e.target.value) || 7)} />
+              </div>
+              <div>
+                <Label className="text-xs">Step (min)</Label>
+                <Input type="number" min={5} max={1440} value={simStep}
+                  onChange={(e) => setSimStep(Number(e.target.value) || 60)} />
+              </div>
+              <div className="flex items-center gap-2 pt-5">
+                <Switch checked={simIncludeSuppressed}
+                  onCheckedChange={setSimIncludeSuppressed} />
+                <Label className="text-xs">Mostrar suprimidos (cooldown/limite)</Label>
+              </div>
+              <Button size="sm" onClick={runSimulation} disabled={rules.length === 0}>
+                <RefreshCw className="w-4 h-4 mr-1" /> Rodar simulação
+              </Button>
+              <Button size="sm" variant="outline" onClick={exportSimulationCSV}
+                disabled={simResult.length === 0}>
+                <Download className="w-4 h-4 mr-1" /> CSV
+              </Button>
+            </div>
+          </Card>
+
+          <Card className="p-6">
+            {simResult.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Sem resultado. Configure regras e clique em "Rodar simulação".
+              </p>
+            ) : (
+              <>
+                <div className="text-xs text-muted-foreground mb-2">
+                  {simResult.filter((r) => r.status === "fired").length} disparos ·{" "}
+                  {simResult.filter((r) => r.status === "suppressed_cooldown").length}{" "}
+                  suprimidos por cooldown ·{" "}
+                  {simResult.filter((r) => r.status === "suppressed_thresholds").length}{" "}
+                  suprimidos por limites
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="text-left text-muted-foreground">
+                      <tr className="border-b">
+                        <th className="py-2 pr-3">Quando</th>
+                        <th className="py-2 pr-3">Regra</th>
+                        <th className="py-2 pr-3">Escopo</th>
+                        <th className="py-2 pr-3">Canal</th>
+                        <th className="py-2 pr-3">Status</th>
+                        <th className="py-2 pr-3">CTR/Envio</th>
+                        <th className="py-2 pr-3">I/C/E</th>
+                        <th className="py-2">Motivo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {simResult.slice(0, 200).map((r, i) => (
+                        <tr key={i} className="border-b last:border-0">
+                          <td className="py-2 pr-3 whitespace-nowrap text-xs">
+                            {new Date(r.ts).toLocaleString("pt-BR")}
+                          </td>
+                          <td className="py-2 pr-3 text-xs">{r.ruleLabel || r.ruleId}</td>
+                          <td className="py-2 pr-3 font-mono text-xs">{r.scope}</td>
+                          <td className="py-2 pr-3">
+                            <Badge variant="outline">{r.channel}</Badge>
+                          </td>
+                          <td className="py-2 pr-3">
+                            <SimStatusBadge status={r.status} />
+                          </td>
+                          <td className="py-2 pr-3 text-xs">
+                            {r.ctr.toFixed(1)}% / {r.sendRate.toFixed(1)}%
+                          </td>
+                          <td className="py-2 pr-3 font-mono text-xs">
+                            {r.impressions}/{r.clicks}/{r.sends}
+                          </td>
+                          <td className="py-2 text-xs text-muted-foreground">
+                            {r.reason ?? "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {simResult.length > 200 && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Mostrando 200 de {simResult.length}. Exporte CSV para ver todos.
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
+          </Card>
+        </TabsContent>
+
 
         <TabsContent value="history" className="space-y-4 mt-4">
           <Card className="p-4 grid gap-3 md:grid-cols-6 items-end">
@@ -701,11 +1076,19 @@ function WhatsAppMetricsPage() {
                           </td>
                           <td className="py-2 pr-4 font-mono text-xs">{e.ctaHash ?? "—"}</td>
                           <td className="py-2 pr-4">
-                            {e.notified && e.notified.length > 0
-                              ? e.notified.map((c) => (
-                                  <Badge key={c} variant="outline" className="mr-1">{c}</Badge>
-                                ))
-                              : <span className="text-xs text-muted-foreground">—</span>}
+                            {e.deliveries && e.deliveries.length > 0 ? (
+                              <div className="flex flex-col gap-1">
+                                {e.deliveries.map((d) => (
+                                  <DeliveryBadge key={d.channel} d={d} />
+                                ))}
+                              </div>
+                            ) : e.notified && e.notified.length > 0 ? (
+                              e.notified.map((c) => (
+                                <Badge key={c} variant="outline" className="mr-1">{c}</Badge>
+                              ))
+                            ) : (
+                              <span className="text-xs text-muted-foreground">—</span>
+                            )}
                           </td>
                           <td className="py-2">
                             {(status === "failed" || status === "no_channels") && e.payload ? (
@@ -724,6 +1107,65 @@ function WhatsAppMetricsPage() {
           </Card>
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+function SimStatusBadge({ status }: { status: SimulationDispatch["status"] }) {
+  const map: Record<SimulationDispatch["status"], { v: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
+    fired: { v: "destructive", label: "Disparou" },
+    suppressed_cooldown: { v: "secondary", label: "Cooldown" },
+    suppressed_thresholds: { v: "outline", label: "Limite OK" },
+    below_samples: { v: "outline", label: "Amostra baixa" },
+    disabled: { v: "outline", label: "Desativado" },
+  };
+  const c = map[status];
+  return <Badge variant={c.v}>{c.label}</Badge>;
+}
+
+function DeliveryBadge({ d }: { d: ChannelDelivery }) {
+  const variant: "default" | "secondary" | "destructive" | "outline" =
+    d.status === "sent" ? "default"
+    : d.status === "failed" ? "destructive"
+    : "outline";
+  const icon = d.channel === "slack" ? "💬" : "✉️";
+  return (
+    <Badge variant={variant} title={d.error ?? d.status}>
+      {icon} {d.channel}: {d.status}
+    </Badge>
+  );
+}
+
+function DecisionRow({ d, scope }: { d: ChannelDecision; scope: string }) {
+  const fmtCooldown = (until?: number) => {
+    if (!until) return "";
+    const left = Math.max(0, until - Date.now());
+    const m = Math.ceil(left / 60_000);
+    return `${m}min`;
+  };
+  return (
+    <div className="flex items-center gap-2 text-xs">
+      <Badge variant="outline" className="min-w-[60px] justify-center">
+        {d.channel}
+      </Badge>
+      {d.willFire ? (
+        <Badge variant="destructive">Vai disparar</Badge>
+      ) : (
+        <Badge variant="secondary">Bloqueado</Badge>
+      )}
+      <span className="text-muted-foreground">
+        limite CTR {d.effectiveMinCtr}% · envio {d.effectiveMinSendRate}% ·
+        cooldown {Math.round(d.cooldownMs / 60_000)}min
+      </span>
+      {d.reason && (
+        <span className="ml-auto text-muted-foreground">
+          motivo: <strong>{d.reason}</strong>
+          {d.reason === "cooldown" && d.cooldownUntil && (
+            <> — libera em {fmtCooldown(d.cooldownUntil)}</>
+          )}
+        </span>
+      )}
+      <code className="text-[10px] text-muted-foreground">{scope}</code>
     </div>
   );
 }
@@ -864,6 +1306,61 @@ function RulesEditor({
                 <Input type="number" min={0} value={r.minSamples}
                   onChange={(e) => update(r.id, { minSamples: Number(e.target.value) || 0 })} />
               </div>
+            </div>
+            <div className="border-t pt-3 space-y-2">
+              <div className="text-xs text-muted-foreground">
+                Limites e cooldown por canal (vazio = usa o da regra; cooldown padrão 60min).
+              </div>
+              {ALERT_CHANNELS.map((channel) => {
+                const c = r.channels?.[channel];
+                const setCh = (patch: Partial<NonNullable<typeof c>>) =>
+                  update(r.id, {
+                    channels: {
+                      ...(r.channels ?? {}),
+                      [channel]: { enabled: true, ...(c ?? {}), ...patch },
+                    },
+                  });
+                return (
+                  <div key={channel} className="grid gap-2 md:grid-cols-5 items-center">
+                    <div className="flex items-center gap-2">
+                      <Switch checked={c?.enabled ?? true}
+                        onCheckedChange={(v) => setCh({ enabled: v })} />
+                      <Badge variant="outline">{channel}</Badge>
+                    </div>
+                    <div>
+                      <Label className="text-[10px] text-muted-foreground">CTR min</Label>
+                      <Input type="number" min={0} placeholder={String(r.minCtr)}
+                        value={c?.minCtr ?? ""}
+                        onChange={(e) => setCh({
+                          minCtr: e.target.value === "" ? undefined : Number(e.target.value),
+                        })} />
+                    </div>
+                    <div>
+                      <Label className="text-[10px] text-muted-foreground">Envio min</Label>
+                      <Input type="number" min={0} placeholder={String(r.minSendRate)}
+                        value={c?.minSendRate ?? ""}
+                        onChange={(e) => setCh({
+                          minSendRate: e.target.value === "" ? undefined : Number(e.target.value),
+                        })} />
+                    </div>
+                    <div>
+                      <Label className="text-[10px] text-muted-foreground">Cooldown (min)</Label>
+                      <Input type="number" min={1} placeholder="60"
+                        value={c?.cooldownMinutes ?? ""}
+                        onChange={(e) => setCh({
+                          cooldownMinutes: e.target.value === "" ? undefined : Number(e.target.value),
+                        })} />
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">
+                      Último envio:{" "}
+                      {(() => {
+                        const t = readChannelCooldown(ruleScope(r), channel);
+                        return t ? new Date(t).toLocaleString("pt-BR") : "—";
+                      })()}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </Card>
         );
