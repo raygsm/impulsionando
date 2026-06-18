@@ -4,10 +4,11 @@ import { ChevronDown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import type { CurrentUser } from "@/lib/auth";
-import { NAV_GROUPS, TOP_ITEMS, type NavItem, type NavGroup } from "./nav-config";
+import { NAV_GROUPS, TOP_ITEMS, type NavItem, type NavGroup, type NavAudience } from "./nav-config";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { useImpersonation } from "@/hooks/use-impersonation";
+import { useAudience } from "@/hooks/use-audience";
 import { countPendingPixCharges } from "@/lib/pix-charges.functions";
 
 function isItemActive(pathname: string, to: string) {
