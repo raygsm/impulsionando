@@ -326,10 +326,12 @@ function PremiumSection<T extends { id: string }>({
   items: T[];
   render: (item: T) => ReactNode;
   className?: string;
+  anchor?: string;
 }) {
+  const id = anchor;
   if (!isPremium) {
     return (
-      <Card className={`p-4 relative overflow-hidden ${className ?? ""}`}>
+      <Card id={id} className={`p-4 relative overflow-hidden scroll-mt-24 ${className ?? ""}`}>
         <div className="flex items-center gap-2 mb-2 text-sm font-semibold">
           {icon} {title}
           <Badge variant="outline" className="ml-auto gap-1 text-[10px]">
@@ -344,7 +346,7 @@ function PremiumSection<T extends { id: string }>({
     );
   }
   return (
-    <Card className={`p-4 ${className ?? ""}`}>
+    <Card id={id} className={`p-4 scroll-mt-24 ${className ?? ""}`}>
       <div className="flex items-center gap-2 mb-3 text-sm font-semibold">{icon} {title}</div>
       {items.length === 0 ? (
         <EmptyHint text={empty} />
@@ -358,5 +360,35 @@ function PremiumSection<T extends { id: string }>({
         </ul>
       )}
     </Card>
+  );
+}
+
+const SECTIONS: Array<{ id: string; label: string }> = [
+  { id: "favoritos", label: "Meus favoritos" },
+  { id: "historico", label: "Histórico de visitas" },
+  { id: "cupons", label: "Meus cupons" },
+  { id: "vouchers", label: "Meus vouchers" },
+  { id: "reservas", label: "Minhas reservas" },
+  { id: "avaliacoes", label: "Minhas avaliações" },
+  { id: "comprovantes", label: "Comprovantes" },
+  { id: "notas", label: "Minhas notas" },
+  { id: "creditos", label: "Meus créditos" },
+];
+
+function SectionNav() {
+  return (
+    <div className="sticky top-0 z-10 -mx-1 px-1 py-2 bg-background/85 backdrop-blur border-b border-border/60">
+      <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
+        {SECTIONS.map((s) => (
+          <a
+            key={s.id}
+            href={`#${s.id}`}
+            className="shrink-0 text-xs px-3 py-1.5 rounded-full border border-border/60 bg-card hover:bg-accent hover:text-accent-foreground transition-colors"
+          >
+            {s.label}
+          </a>
+        ))}
+      </div>
+    </div>
   );
 }
