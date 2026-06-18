@@ -9442,6 +9442,47 @@ export type Database = {
           },
         ]
       }
+      mp_order_events: {
+        Row: {
+          actor_display_name: string | null
+          actor_role: string | null
+          actor_user_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          notes: string | null
+          order_id: string
+        }
+        Insert: {
+          actor_display_name?: string | null
+          actor_role?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          notes?: string | null
+          order_id: string
+        }
+        Update: {
+          actor_display_name?: string | null
+          actor_role?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          notes?: string | null
+          order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mp_order_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "mp_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mp_order_items: {
         Row: {
           catalog_item_id: string | null
