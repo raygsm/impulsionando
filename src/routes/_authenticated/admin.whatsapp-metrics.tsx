@@ -1076,11 +1076,19 @@ function WhatsAppMetricsPage() {
                           </td>
                           <td className="py-2 pr-4 font-mono text-xs">{e.ctaHash ?? "—"}</td>
                           <td className="py-2 pr-4">
-                            {e.notified && e.notified.length > 0
-                              ? e.notified.map((c) => (
-                                  <Badge key={c} variant="outline" className="mr-1">{c}</Badge>
-                                ))
-                              : <span className="text-xs text-muted-foreground">—</span>}
+                            {e.deliveries && e.deliveries.length > 0 ? (
+                              <div className="flex flex-col gap-1">
+                                {e.deliveries.map((d) => (
+                                  <DeliveryBadge key={d.channel} d={d} />
+                                ))}
+                              </div>
+                            ) : e.notified && e.notified.length > 0 ? (
+                              e.notified.map((c) => (
+                                <Badge key={c} variant="outline" className="mr-1">{c}</Badge>
+                              ))
+                            ) : (
+                              <span className="text-xs text-muted-foreground">—</span>
+                            )}
                           </td>
                           <td className="py-2">
                             {(status === "failed" || status === "no_channels") && e.payload ? (
