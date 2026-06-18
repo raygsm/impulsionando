@@ -3049,6 +3049,53 @@ export type Database = {
           },
         ]
       }
+      catalog_events: {
+        Row: {
+          created_at: string
+          event_name: string
+          id: string
+          intent_id: string | null
+          macro_slug: string | null
+          metadata: Json | null
+          plan_tier: string | null
+          selected_modules: string[] | null
+          session_token: string | null
+          subnicho_slug: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_name: string
+          id?: string
+          intent_id?: string | null
+          macro_slug?: string | null
+          metadata?: Json | null
+          plan_tier?: string | null
+          selected_modules?: string[] | null
+          session_token?: string | null
+          subnicho_slug?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_name?: string
+          id?: string
+          intent_id?: string | null
+          macro_slug?: string | null
+          metadata?: Json | null
+          plan_tier?: string | null
+          selected_modules?: string[] | null
+          session_token?: string | null
+          subnicho_slug?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_events_intent_id_fkey"
+            columns: ["intent_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_intents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       catalog_intents: {
         Row: {
           consumed_at: string | null
