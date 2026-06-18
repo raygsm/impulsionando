@@ -385,7 +385,7 @@ export const fetchVoiceInsights = createServerFn({ method: "POST" })
       status: string;
       audience: "empresa" | "consumidor";
       createdAt: string;
-      meta?: Record<string, unknown>;
+      meta?: { tipo?: string | null };
     };
     const insights: Insight[] = [];
 
