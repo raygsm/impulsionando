@@ -300,7 +300,7 @@ function PlanosPage() {
   // recomendado e abre automaticamente o ModulePicker para o usuário confirmar.
   useEffect(() => {
     if (!cameFromNiche || !recomendado) return;
-    const planName = PLAN_NAME_BY_LEVEL[recomendado];
+    const planName = PLAN_NAME_BY_LEVEL[recomendado as RecLevel];
     const plan = PLANS.find((p) => p.name === planName);
     if (!plan) return;
     setAudience("empresas");
