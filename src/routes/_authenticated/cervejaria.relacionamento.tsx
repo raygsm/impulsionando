@@ -311,16 +311,35 @@ function TastingDialog({ open, onOpenChange, brandId, pdvs, onSubmit, pending }:
 
 /* ============ BLAST ============ */
 function BlastPanel({ brandId }: { brandId: string }) {
+  const qc = useQueryClient();
   const previewFn = useServerFn(previewBreweryBlast);
+  const dispatchFn = useServerFn(dispatchBreweryBlast);
   const campaignsFn = useServerFn(listBreweryCampaigns);
+  const listBlastsFn = useServerFn(listBreweryBlasts);
   const [styles, setStyles] = useState<string[]>([]);
   const [interests, setInterests] = useState<string[]>([]);
   const [campaignId, setCampaignId] = useState<string>("");
+  const [channel, setChannel] = useState<"whatsapp" | "email">("whatsapp");
+  const [voucher, setVoucher] = useState("");
+  const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("Olá! Lançamos uma nova IPA sazonal — passe no bar parceiro e use cupom IPA20.");
 
   const campaignsQ = useQuery({ queryKey: ["brewery-campaigns", brandId], queryFn: () => campaignsFn({ data: { brandId } }) });
+  const blastsQ = useQuery({ queryKey: ["brewery-blasts", brandId], queryFn: () => listBlastsFn({ data: { brandId } }) });
+
   const previewMut = useMutation({
     mutationFn: () => previewFn({ data: { brandId, styles, interests, campaignId: campaignId || undefined } }),
+  });
+  const dispatchMut = useMutation({
+    mutationFn: () => dispatchFn({ data: {
+      brandId, campaignId: campaignId || undefined, channel, styles, interests,
+      voucherCode: voucher || undefined, subject: channel === "email" ? (subject || undefined) : undefined, body: message,
+    } }),
+    onSuccess: (r: any) => {
+      toast.success(`Disparo enfileirado: ${r.enqueued}/${r.eligible} mensagens.`);
+      qc.invalidateQueries({ queryKey: ["brewery-blasts", brandId] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Falha no disparo"),
   });
 
   function toggle(arr: string[], setArr: (v: string[]) => void, v: string) {
@@ -328,57 +347,111 @@ function BlastPanel({ brandId }: { brandId: string }) {
   }
 
   return (
-    <div className="grid gap-3 md:grid-cols-2">
-      <Card>
-        <CardHeader><CardTitle className="text-base flex items-center gap-2"><Sparkles className="w-4 h-4" />Segmentação</CardTitle></CardHeader>
-        <CardContent className="space-y-3">
-          <div>
-            <Label className="text-xs">Estilos preferidos (OR)</Label>
-            <div className="flex flex-wrap gap-2 mt-1">
-              {STYLES.map((s) => (
-                <label key={s} className={`text-xs px-2 py-1 rounded border cursor-pointer ${styles.includes(s) ? "bg-primary text-primary-foreground border-primary" : ""}`}>
-                  <input type="checkbox" className="hidden" checked={styles.includes(s)} onChange={() => toggle(styles, setStyles, s)} />{s}
-                </label>
-              ))}
+    <div className="space-y-3">
+      <div className="grid gap-3 md:grid-cols-2">
+        <Card>
+          <CardHeader><CardTitle className="text-base flex items-center gap-2"><Sparkles className="w-4 h-4" />Segmentação</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            <div>
+              <Label className="text-xs">Estilos preferidos (OR)</Label>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {STYLES.map((s) => (
+                  <label key={s} className={`text-xs px-2 py-1 rounded border cursor-pointer ${styles.includes(s) ? "bg-primary text-primary-foreground border-primary" : ""}`}>
+                    <input type="checkbox" className="hidden" checked={styles.includes(s)} onChange={() => toggle(styles, setStyles, s)} />{s}
+                  </label>
+                ))}
+              </div>
             </div>
-          </div>
-          <div>
-            <Label className="text-xs">Interesses (OR)</Label>
-            <div className="flex flex-wrap gap-2 mt-1">
-              {INTERESTS.map((s) => (
-                <label key={s} className={`text-xs px-2 py-1 rounded border cursor-pointer ${interests.includes(s) ? "bg-primary text-primary-foreground border-primary" : ""}`}>
-                  <input type="checkbox" className="hidden" checked={interests.includes(s)} onChange={() => toggle(interests, setInterests, s)} />{s}
-                </label>
-              ))}
+            <div>
+              <Label className="text-xs">Interesses (OR)</Label>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {INTERESTS.map((s) => (
+                  <label key={s} className={`text-xs px-2 py-1 rounded border cursor-pointer ${interests.includes(s) ? "bg-primary text-primary-foreground border-primary" : ""}`}>
+                    <input type="checkbox" className="hidden" checked={interests.includes(s)} onChange={() => toggle(interests, setInterests, s)} />{s}
+                  </label>
+                ))}
+              </div>
             </div>
-          </div>
-          <div>
-            <Label className="text-xs">Atrelar a campanha (opcional)</Label>
-            <Select value={campaignId || "none"} onValueChange={(v) => setCampaignId(v === "none" ? "" : v)}>
-              <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">Sem campanha</SelectItem>
-                {(campaignsQ.data ?? []).map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-          <Button onClick={() => previewMut.mutate()} disabled={previewMut.isPending}><Send className="w-4 h-4 mr-2" />Calcular público elegível</Button>
-        </CardContent>
-      </Card>
+            <div>
+              <Label className="text-xs">Atrelar a campanha (opcional)</Label>
+              <Select value={campaignId || "none"} onValueChange={(v) => setCampaignId(v === "none" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Sem campanha</SelectItem>
+                  {(campaignsQ.data ?? []).map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button variant="secondary" onClick={() => previewMut.mutate()} disabled={previewMut.isPending}><Send className="w-4 h-4 mr-2" />Calcular público elegível</Button>
+            {previewMut.data && (
+              <div className="text-xs text-muted-foreground">
+                <strong className="text-foreground">{previewMut.data.eligible}</strong> de {previewMut.data.totalConsented} leads atendem aos filtros.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader><CardTitle className="text-base">Mensagem & envio</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-2 gap-2">
+              <div><Label className="text-xs">Canal</Label>
+                <Select value={channel} onValueChange={(v) => setChannel(v as "whatsapp" | "email")}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                    <SelectItem value="email">E-mail</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div><Label className="text-xs">Cupom (opcional)</Label><Input value={voucher} onChange={(e) => setVoucher(e.target.value.toUpperCase())} placeholder="IPA20" /></div>
+            </div>
+            {channel === "email" && (
+              <div><Label className="text-xs">Assunto</Label><Input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Novidade da sua cervejaria" /></div>
+            )}
+            <Textarea rows={5} value={message} onChange={(e) => setMessage(e.target.value)} maxLength={1000} />
+            <p className="text-xs text-muted-foreground">{message.length}/1000 caracteres</p>
+            <Button
+              onClick={() => {
+                if (!confirm(`Confirma o disparo via ${channel === "whatsapp" ? "WhatsApp" : "E-mail"} para a audiência segmentada?`)) return;
+                dispatchMut.mutate();
+              }}
+              disabled={dispatchMut.isPending || message.trim().length < 5}
+            >
+              <Send className="w-4 h-4 mr-2" />{dispatchMut.isPending ? "Enfileirando…" : "Disparar agora"}
+            </Button>
+            <p className="text-[11px] text-muted-foreground leading-snug">
+              As mensagens são enfileiradas na outbox e enviadas pelo serviço de mensageria configurado. Somente leads com consentimento ativo recebem disparo (LGPD).
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
       <Card>
-        <CardHeader><CardTitle className="text-base">Mensagem & preview</CardTitle></CardHeader>
-        <CardContent className="space-y-3">
-          <Textarea rows={6} value={message} onChange={(e) => setMessage(e.target.value)} />
-          <p className="text-xs text-muted-foreground">{message.length}/500 caracteres</p>
-          {previewMut.data && (
-            <div className="border rounded p-3 space-y-2 text-sm">
-              <div><strong>{previewMut.data.eligible}</strong> de {previewMut.data.totalConsented} leads com consentimento atendem aos filtros.</div>
-              {previewMut.data.sample.length > 0 && (
-                <div className="text-xs text-muted-foreground">Amostra: {previewMut.data.sample.join(", ")}</div>
+        <CardHeader><CardTitle className="text-base">Histórico de disparos</CardTitle></CardHeader>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader><TableRow>
+              <TableHead>Data</TableHead><TableHead>Canal</TableHead><TableHead>Cupom</TableHead>
+              <TableHead className="text-right">Enfileirados</TableHead><TableHead className="text-right">Audiência</TableHead><TableHead>Status</TableHead>
+            </TableRow></TableHeader>
+            <TableBody>
+              {(blastsQ.data ?? []).length === 0 && (
+                <TableRow><TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">Nenhum disparo realizado ainda.</TableCell></TableRow>
               )}
-              <p className="text-xs text-muted-foreground">O disparo real será feito quando a integração de mensageria for ativada (Fase 6).</p>
-            </div>
-          )}
+              {(blastsQ.data ?? []).map((b: any) => (
+                <TableRow key={b.id}>
+                  <TableCell className="text-xs">{new Date(b.created_at).toLocaleString("pt-BR")}</TableCell>
+                  <TableCell><Badge variant="outline">{b.channel}</Badge></TableCell>
+                  <TableCell className="text-xs">{b.voucher_code ?? "—"}</TableCell>
+                  <TableCell className="text-right">{b.enqueued_count}</TableCell>
+                  <TableCell className="text-right">{b.audience_count}</TableCell>
+                  <TableCell>
+                    <Badge variant={b.status === "sent" ? "default" : b.status === "failed" ? "destructive" : "secondary"}>{b.status}</Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
     </div>
