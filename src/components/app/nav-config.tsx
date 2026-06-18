@@ -131,6 +131,8 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Comunicar",
     items: [
+      { to: "/ops/mensageria", label: "Mensageria (WhatsApp/E-mail)", icon: MessageSquare },
+      { to: "/ops/voz-cliente", label: "Voz do Cliente", icon: Megaphone },
       { to: "/imobiliaria/mensagens", label: "Mensagens (Imob.)", icon: MessageSquare, perm: "realestate.message.read" },
       { to: "/notifications", label: "Notificações", icon: Inbox },
       { to: "/privacy", label: "Privacidade & Notificações", icon: ShieldCheck },
@@ -139,6 +141,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Automatizar",
     items: [
+      { to: "/ops/versoes", label: "Versões & Atualizações", icon: RefreshCw },
       { to: "/adm/agentes", label: "Central de Agentes", icon: Bot, superOnly: true },
       { to: "/finance/webhook-log", label: "Log de Webhooks", icon: HistoryIcon, perm: "finance.transaction.read" },
     ],
@@ -166,9 +169,10 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Melhorar",
     items: [
       { to: "/onboarding", label: "Onboarding / Melhorar", icon: Sparkles },
+      { to: "/ops/saude", label: "Saúde da Conta", icon: Activity },
       { to: "/saiba-mais", label: "Saiba Mais (planos, módulos, nichos)", icon: BookOpen },
-      { to: "/saiba-mais/saude", label: "Saúde da Conta", icon: Activity },
-      { to: "/saiba-mais/versoes", label: "Versões & Atualizações", icon: RefreshCw },
+      { to: "/saiba-mais/saude", label: "Saúde — Metodologia", icon: BookOpen },
+      { to: "/saiba-mais/versoes", label: "Versões — Pipeline", icon: RefreshCw },
     ],
   },
   {
