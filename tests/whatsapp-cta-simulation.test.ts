@@ -142,7 +142,10 @@ describe("simulateAlertRules", () => {
     const events: BufferedEvent[] = [];
     for (let i = 0; i < 50; i++) events.push(mkEvent(now - 86_400_000 + i * 10_000, "whatsapp_cta_impression"));
     for (let i = 0; i < 30; i++) events.push(mkEvent(now - 86_400_000 + i * 10_000, "whatsapp_cta_click"));
-    const rule: AlertRule = { ...baseRule, minCtr: 0, minSendRate: 50, minSamples: 10 };
+    const rule: AlertRule = {
+      ...baseRule, minCtr: 0, minSendRate: 50, minSamples: 10,
+      channels: { slack: { enabled: true, cooldownMinutes: 120 }, email: { enabled: true, cooldownMinutes: 120 } },
+    };
     const without = simulateAlertRules(events, [rule], 2, { stepMinutes: 60, now });
     const withSuppressed = simulateAlertRules(events, [rule], 2, { stepMinutes: 60, now, includeNonFiring: true });
     expect(withSuppressed.length).toBeGreaterThan(without.length);
