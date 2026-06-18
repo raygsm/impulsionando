@@ -60,6 +60,18 @@ export function ModulePicker({
   const [selected, setSelected] = useState<string[]>(initialSelected);
   const [detail, setDetail] = useState<MotherModule | null>(null);
 
+  // Re-sincroniza a seleção sempre que o modal é aberto com um novo plano
+  // ou quando a lista recomendada (initialSelected) muda.
+  const initialKey = useRef<string>("");
+  useEffect(() => {
+    if (!open) return;
+    const key = `${planName}::${initialSelected.join(",")}`;
+    if (key !== initialKey.current) {
+      initialKey.current = key;
+      setSelected(initialSelected);
+    }
+  }, [open, planName, initialSelected]);
+
   const quotaIsFinite = Number.isFinite(quota);
   const includedCount = quotaIsFinite ? Math.min(selected.length, quota) : selected.length;
   const extraCount = quotaIsFinite ? Math.max(0, selected.length - quota) : 0;
