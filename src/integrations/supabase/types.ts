@@ -7397,6 +7397,66 @@ export type Database = {
           },
         ]
       }
+      educ_white_label_branding: {
+        Row: {
+          ativo: boolean
+          company_id: string | null
+          cor_fundo: string
+          cor_primaria: string
+          cor_secundaria: string
+          created_at: string
+          cta_label: string | null
+          cta_url: string | null
+          dominio_personalizado: string | null
+          favicon_url: string | null
+          hero_subtitulo: string | null
+          hero_titulo: string | null
+          id: string
+          logo_url: string | null
+          nome_exibicao: string
+          rodape_texto: string | null
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          company_id?: string | null
+          cor_fundo?: string
+          cor_primaria?: string
+          cor_secundaria?: string
+          created_at?: string
+          cta_label?: string | null
+          cta_url?: string | null
+          dominio_personalizado?: string | null
+          favicon_url?: string | null
+          hero_subtitulo?: string | null
+          hero_titulo?: string | null
+          id?: string
+          logo_url?: string | null
+          nome_exibicao: string
+          rodape_texto?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          company_id?: string | null
+          cor_fundo?: string
+          cor_primaria?: string
+          cor_secundaria?: string
+          created_at?: string
+          cta_label?: string | null
+          cta_url?: string | null
+          dominio_personalizado?: string | null
+          favicon_url?: string | null
+          hero_subtitulo?: string | null
+          hero_titulo?: string | null
+          id?: string
+          logo_url?: string | null
+          nome_exibicao?: string
+          rodape_texto?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ehr_documents: {
         Row: {
           ai_status: string
@@ -12460,6 +12520,305 @@ export type Database = {
         }
         Relationships: []
       }
+      talentos_candidatos: {
+        Row: {
+          ativo: boolean
+          bairro: string | null
+          cargo_desejado: string
+          cep: string
+          cidade: string | null
+          created_at: string
+          cursando: string | null
+          cursando_instituicao: string | null
+          cursando_previsao: string | null
+          curso_superior: string | null
+          disponibilidade: string | null
+          email: string
+          escolaridade: string | null
+          estado: string | null
+          experiencia: string | null
+          faixa_etaria:
+            | Database["public"]["Enums"]["talentos_faixa_etaria"]
+            | null
+          foto_url: string | null
+          habilidades: string[]
+          id: string
+          idiomas: string[]
+          instituicao: string | null
+          modelo_trabalho: string | null
+          nicho: string | null
+          nome: string
+          pretensao_salarial: string | null
+          tags: string[]
+          updated_at: string
+          user_id: string | null
+          video_url: string | null
+          visivel_rede: boolean
+          whatsapp: string
+        }
+        Insert: {
+          ativo?: boolean
+          bairro?: string | null
+          cargo_desejado: string
+          cep: string
+          cidade?: string | null
+          created_at?: string
+          cursando?: string | null
+          cursando_instituicao?: string | null
+          cursando_previsao?: string | null
+          curso_superior?: string | null
+          disponibilidade?: string | null
+          email: string
+          escolaridade?: string | null
+          estado?: string | null
+          experiencia?: string | null
+          faixa_etaria?:
+            | Database["public"]["Enums"]["talentos_faixa_etaria"]
+            | null
+          foto_url?: string | null
+          habilidades?: string[]
+          id?: string
+          idiomas?: string[]
+          instituicao?: string | null
+          modelo_trabalho?: string | null
+          nicho?: string | null
+          nome: string
+          pretensao_salarial?: string | null
+          tags?: string[]
+          updated_at?: string
+          user_id?: string | null
+          video_url?: string | null
+          visivel_rede?: boolean
+          whatsapp: string
+        }
+        Update: {
+          ativo?: boolean
+          bairro?: string | null
+          cargo_desejado?: string
+          cep?: string
+          cidade?: string | null
+          created_at?: string
+          cursando?: string | null
+          cursando_instituicao?: string | null
+          cursando_previsao?: string | null
+          curso_superior?: string | null
+          disponibilidade?: string | null
+          email?: string
+          escolaridade?: string | null
+          estado?: string | null
+          experiencia?: string | null
+          faixa_etaria?:
+            | Database["public"]["Enums"]["talentos_faixa_etaria"]
+            | null
+          foto_url?: string | null
+          habilidades?: string[]
+          id?: string
+          idiomas?: string[]
+          instituicao?: string | null
+          modelo_trabalho?: string | null
+          nicho?: string | null
+          nome?: string
+          pretensao_salarial?: string | null
+          tags?: string[]
+          updated_at?: string
+          user_id?: string | null
+          video_url?: string | null
+          visivel_rede?: boolean
+          whatsapp?: string
+        }
+        Relationships: []
+      }
+      talentos_company_settings: {
+        Row: {
+          bairros_interesse: string[]
+          cidades_interesse: string[]
+          company_id: string
+          created_at: string
+          id: string
+          nicho: string | null
+          participa: boolean
+          raio_km: number | null
+          receber_automatico: boolean
+          updated_at: string
+        }
+        Insert: {
+          bairros_interesse?: string[]
+          cidades_interesse?: string[]
+          company_id: string
+          created_at?: string
+          id?: string
+          nicho?: string | null
+          participa?: boolean
+          raio_km?: number | null
+          receber_automatico?: boolean
+          updated_at?: string
+        }
+        Update: {
+          bairros_interesse?: string[]
+          cidades_interesse?: string[]
+          company_id?: string
+          created_at?: string
+          id?: string
+          nicho?: string | null
+          participa?: boolean
+          raio_km?: number | null
+          receber_automatico?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      talentos_curriculos: {
+        Row: {
+          arquivo_url: string
+          candidato_id: string
+          created_at: string
+          extracao: Json | null
+          formato: string | null
+          id: string
+          processado_em: string | null
+          texto_bruto: string | null
+        }
+        Insert: {
+          arquivo_url: string
+          candidato_id: string
+          created_at?: string
+          extracao?: Json | null
+          formato?: string | null
+          id?: string
+          processado_em?: string | null
+          texto_bruto?: string | null
+        }
+        Update: {
+          arquivo_url?: string
+          candidato_id?: string
+          created_at?: string
+          extracao?: Json | null
+          formato?: string | null
+          id?: string
+          processado_em?: string | null
+          texto_bruto?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "talentos_curriculos_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "talentos_candidatos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      talentos_matches: {
+        Row: {
+          candidato_id: string
+          company_id: string
+          created_at: string
+          id: string
+          motivos: string[]
+          observacoes: string | null
+          score: number
+          stage: Database["public"]["Enums"]["talentos_stage"]
+          updated_at: string
+          vaga_id: string | null
+        }
+        Insert: {
+          candidato_id: string
+          company_id: string
+          created_at?: string
+          id?: string
+          motivos?: string[]
+          observacoes?: string | null
+          score?: number
+          stage?: Database["public"]["Enums"]["talentos_stage"]
+          updated_at?: string
+          vaga_id?: string | null
+        }
+        Update: {
+          candidato_id?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          motivos?: string[]
+          observacoes?: string | null
+          score?: number
+          stage?: Database["public"]["Enums"]["talentos_stage"]
+          updated_at?: string
+          vaga_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "talentos_matches_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "talentos_candidatos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talentos_matches_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "talentos_vagas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      talentos_vagas: {
+        Row: {
+          ativa: boolean
+          bairro: string | null
+          cargo: string
+          cidade: string | null
+          company_id: string
+          created_at: string
+          descricao: string | null
+          escolaridade_minima: string | null
+          experiencia_minima: string | null
+          faixa_salarial: string | null
+          habilidades_desejadas: string[]
+          id: string
+          modelo_trabalho: string | null
+          nicho: string | null
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          ativa?: boolean
+          bairro?: string | null
+          cargo: string
+          cidade?: string | null
+          company_id: string
+          created_at?: string
+          descricao?: string | null
+          escolaridade_minima?: string | null
+          experiencia_minima?: string | null
+          faixa_salarial?: string | null
+          habilidades_desejadas?: string[]
+          id?: string
+          modelo_trabalho?: string | null
+          nicho?: string | null
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          ativa?: boolean
+          bairro?: string | null
+          cargo?: string
+          cidade?: string | null
+          company_id?: string
+          created_at?: string
+          descricao?: string | null
+          escolaridade_minima?: string | null
+          experiencia_minima?: string | null
+          faixa_salarial?: string | null
+          habilidades_desejadas?: string[]
+          id?: string
+          modelo_trabalho?: string | null
+          nicho?: string | null
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       trial_abuse_index: {
         Row: {
           company_hash: string | null
@@ -13754,6 +14113,20 @@ export type Database = {
         | "kitnet"
         | "studio"
         | "outro"
+      talentos_faixa_etaria:
+        | "18-25"
+        | "26-35"
+        | "36-45"
+        | "46-55"
+        | "56-65"
+        | "66-75"
+        | "76+"
+      talentos_stage:
+        | "novo"
+        | "favorito"
+        | "entrevista"
+        | "contratado"
+        | "descartado"
       trial_plan_choice: "essencial" | "integrado" | "avancado" | "sob_medida"
       trial_status:
         | "solicitado"
@@ -13991,6 +14364,22 @@ export const Constants = {
         "kitnet",
         "studio",
         "outro",
+      ],
+      talentos_faixa_etaria: [
+        "18-25",
+        "26-35",
+        "36-45",
+        "46-55",
+        "56-65",
+        "66-75",
+        "76+",
+      ],
+      talentos_stage: [
+        "novo",
+        "favorito",
+        "entrevista",
+        "contratado",
+        "descartado",
       ],
       trial_plan_choice: ["essencial", "integrado", "avancado", "sob_medida"],
       trial_status: [
