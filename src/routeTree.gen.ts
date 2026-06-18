@@ -182,6 +182,7 @@ import { Route as AuthenticatedReportsAgendaRouteImport } from './routes/_authen
 import { Route as AuthenticatedRealestateCockpitRouteImport } from './routes/_authenticated/realestate.cockpit'
 import { Route as AuthenticatedPrivacyCockpitRouteImport } from './routes/_authenticated/privacy.cockpit'
 import { Route as AuthenticatedPerfilNotificacoesRouteImport } from './routes/_authenticated/perfil.notificacoes'
+import { Route as AuthenticatedOpsMensageriaRouteImport } from './routes/_authenticated/ops.mensageria'
 import { Route as AuthenticatedOperationsCockpitRouteImport } from './routes/_authenticated/operations.cockpit'
 import { Route as AuthenticatedOnboardingNichoRouteImport } from './routes/_authenticated/onboarding.nicho'
 import { Route as AuthenticatedMarketingLeadsRouteImport } from './routes/_authenticated/marketing.leads'
@@ -1240,6 +1241,12 @@ const AuthenticatedPerfilNotificacoesRoute =
   AuthenticatedPerfilNotificacoesRouteImport.update({
     id: '/perfil/notificacoes',
     path: '/perfil/notificacoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOpsMensageriaRoute =
+  AuthenticatedOpsMensageriaRouteImport.update({
+    id: '/ops/mensageria',
+    path: '/ops/mensageria',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedOperationsCockpitRoute =
@@ -2428,6 +2435,7 @@ export interface FileRoutesByFullPath {
   '/marketing/leads': typeof AuthenticatedMarketingLeadsRoute
   '/onboarding/nicho': typeof AuthenticatedOnboardingNichoRoute
   '/operations/cockpit': typeof AuthenticatedOperationsCockpitRoute
+  '/ops/mensageria': typeof AuthenticatedOpsMensageriaRoute
   '/perfil/notificacoes': typeof AuthenticatedPerfilNotificacoesRoute
   '/privacy/cockpit': typeof AuthenticatedPrivacyCockpitRoute
   '/realestate/cockpit': typeof AuthenticatedRealestateCockpitRoute
@@ -2749,6 +2757,7 @@ export interface FileRoutesByTo {
   '/marketing/leads': typeof AuthenticatedMarketingLeadsRoute
   '/onboarding/nicho': typeof AuthenticatedOnboardingNichoRoute
   '/operations/cockpit': typeof AuthenticatedOperationsCockpitRoute
+  '/ops/mensageria': typeof AuthenticatedOpsMensageriaRoute
   '/perfil/notificacoes': typeof AuthenticatedPerfilNotificacoesRoute
   '/privacy/cockpit': typeof AuthenticatedPrivacyCockpitRoute
   '/realestate/cockpit': typeof AuthenticatedRealestateCockpitRoute
@@ -3084,6 +3093,7 @@ export interface FileRoutesById {
   '/_authenticated/marketing/leads': typeof AuthenticatedMarketingLeadsRoute
   '/_authenticated/onboarding/nicho': typeof AuthenticatedOnboardingNichoRoute
   '/_authenticated/operations/cockpit': typeof AuthenticatedOperationsCockpitRoute
+  '/_authenticated/ops/mensageria': typeof AuthenticatedOpsMensageriaRoute
   '/_authenticated/perfil/notificacoes': typeof AuthenticatedPerfilNotificacoesRoute
   '/_authenticated/privacy/cockpit': typeof AuthenticatedPrivacyCockpitRoute
   '/_authenticated/realestate/cockpit': typeof AuthenticatedRealestateCockpitRoute
@@ -3418,6 +3428,7 @@ export interface FileRouteTypes {
     | '/marketing/leads'
     | '/onboarding/nicho'
     | '/operations/cockpit'
+    | '/ops/mensageria'
     | '/perfil/notificacoes'
     | '/privacy/cockpit'
     | '/realestate/cockpit'
@@ -3739,6 +3750,7 @@ export interface FileRouteTypes {
     | '/marketing/leads'
     | '/onboarding/nicho'
     | '/operations/cockpit'
+    | '/ops/mensageria'
     | '/perfil/notificacoes'
     | '/privacy/cockpit'
     | '/realestate/cockpit'
@@ -4073,6 +4085,7 @@ export interface FileRouteTypes {
     | '/_authenticated/marketing/leads'
     | '/_authenticated/onboarding/nicho'
     | '/_authenticated/operations/cockpit'
+    | '/_authenticated/ops/mensageria'
     | '/_authenticated/perfil/notificacoes'
     | '/_authenticated/privacy/cockpit'
     | '/_authenticated/realestate/cockpit'
@@ -5490,6 +5503,13 @@ declare module '@tanstack/react-router' {
       path: '/perfil/notificacoes'
       fullPath: '/perfil/notificacoes'
       preLoaderRoute: typeof AuthenticatedPerfilNotificacoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ops/mensageria': {
+      id: '/_authenticated/ops/mensageria'
+      path: '/ops/mensageria'
+      fullPath: '/ops/mensageria'
+      preLoaderRoute: typeof AuthenticatedOpsMensageriaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/operations/cockpit': {
@@ -7122,6 +7142,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMarketingCockpitRoute: typeof AuthenticatedMarketingCockpitRoute
   AuthenticatedMarketingLeadsRoute: typeof AuthenticatedMarketingLeadsRoute
   AuthenticatedOperationsCockpitRoute: typeof AuthenticatedOperationsCockpitRoute
+  AuthenticatedOpsMensageriaRoute: typeof AuthenticatedOpsMensageriaRoute
   AuthenticatedPerfilNotificacoesRoute: typeof AuthenticatedPerfilNotificacoesRoute
   AuthenticatedRealestateCockpitRoute: typeof AuthenticatedRealestateCockpitRoute
   AuthenticatedRestauranteCardapioRoute: typeof AuthenticatedRestauranteCardapioRoute
@@ -7236,6 +7257,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMarketingCockpitRoute: AuthenticatedMarketingCockpitRoute,
   AuthenticatedMarketingLeadsRoute: AuthenticatedMarketingLeadsRoute,
   AuthenticatedOperationsCockpitRoute: AuthenticatedOperationsCockpitRoute,
+  AuthenticatedOpsMensageriaRoute: AuthenticatedOpsMensageriaRoute,
   AuthenticatedPerfilNotificacoesRoute: AuthenticatedPerfilNotificacoesRoute,
   AuthenticatedRealestateCockpitRoute: AuthenticatedRealestateCockpitRoute,
   AuthenticatedRestauranteCardapioRoute: AuthenticatedRestauranteCardapioRoute,
