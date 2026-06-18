@@ -3,7 +3,9 @@ import { useMemo, useState } from "react";
 import {
   MessageCircle, ArrowRight, Sparkles, PlayCircle, Calculator, Search,
   Settings, Eye, CheckCircle2, Rocket, AlertTriangle, TrendingDown, Mail, MessageSquare, Phone,
+  Building2, Gift,
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -419,25 +421,25 @@ export function HomePage() {
             <div className="mt-8 grid gap-3 sm:grid-cols-3 max-w-3xl mx-auto">
               <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 gap-2 h-auto py-4 flex-col">
                 <Link to="/orcamento">
-                  <span className="flex items-center gap-2 font-semibold"><Sparkles className="w-4 h-4" /> Sou empresa</span>
+                  <span className="flex items-center gap-2 font-semibold"><Building2 className="w-4 h-4" /> Sou empresa</span>
                   <span className="text-xs font-normal opacity-75">Quero usar na minha operação</span>
                 </Link>
               </Button>
               <Button asChild size="lg" className="bg-gradient-primary gap-2 h-auto py-4 flex-col">
                 <Link to="/nichos/white-label">
                   <span className="flex items-center gap-2 font-semibold"><Rocket className="w-4 h-4" /> White Label</span>
-                  <span className="text-xs font-normal opacity-90">Revender com a minha marca</span>
+                  <span className="text-xs font-normal opacity-90">Quero revender com a minha marca</span>
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="bg-transparent border-white/30 text-white hover:bg-white/10 gap-2 h-auto py-4 flex-col">
-                <Link to="/demo">
-                  <span className="flex items-center gap-2 font-semibold"><PlayCircle className="w-4 h-4" /> Ver demos</span>
-                  <span className="text-xs font-normal opacity-75">Testar antes de contratar</span>
+              <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 gap-2 h-auto py-4 flex-col">
+                <Link to="/clube">
+                  <span className="flex items-center gap-2 font-semibold"><Gift className="w-4 h-4" /> Clube Impulsionando</span>
+                  <span className="text-xs font-normal opacity-90">Quero descontos e benefícios</span>
                 </Link>
               </Button>
             </div>
 
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm text-white/75">
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm text-white/75">
               <a href="#diagnostico" className="inline-flex items-center gap-1.5 hover:text-white underline-offset-4 hover:underline">
                 <Search className="w-4 h-4" /> Diagnóstico em 30s
               </a>
@@ -445,7 +447,12 @@ export function HomePage() {
               <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 hover:text-white underline-offset-4 hover:underline">
                 <MessageCircle className="w-4 h-4" /> Falar com Impulsionito
               </a>
+              <span className="opacity-40">•</span>
+              <Link to="/demo" className="inline-flex items-center gap-1.5 hover:text-white underline-offset-4 hover:underline">
+                <PlayCircle className="w-4 h-4" /> Ver demonstrações
+              </Link>
             </div>
+
 
           </div>
         </section>
