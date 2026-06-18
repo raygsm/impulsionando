@@ -1898,4 +1898,167 @@ test.describe("Minha área — sub-nav, hash e restauração", () => {
     expect(await rovingIds()).toEqual(["tab-reservas"]);
     expect(await ringTokens("reservas")).toBe(true);
   });
+
+  test("dark/light toggle (RTL + reduced motion): diffs visuais, ring tokens e aria-selected", async ({
+    browser,
+  }) => {
+    test.skip(
+      !!process.env.CI && !process.env.E2E_VISUAL,
+      "Visual snapshots geram baselines no primeiro run — habilite com E2E_VISUAL=1.",
+    );
+
+    const context = await browser.newContext({ reducedMotion: "reduce" });
+    const page = await context.newPage();
+    await login(page);
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(ROUTE);
+    await page.evaluate(() => {
+      document.documentElement.setAttribute("dir", "rtl");
+      document.documentElement.setAttribute("lang", "ar");
+      sessionStorage.removeItem("dashboards:consumidor:section");
+    });
+    await page.reload();
+    await page.waitForLoadState("networkidle");
+
+    const tablist = page.getByRole("tablist", { name: /Seções da Minha área/i });
+    const cuponsTab = tablist.getByRole("tab", { name: /Meus cupons/i });
+    const cuponsPanel = page.getByRole("tabpanel", { name: /Meus cupons/i });
+
+    const expectRingTokens = async (chipId: string) => {
+      await expect
+        .poll(
+          () =>
+            page.locator(`#tab-${chipId}`).evaluate((el) => {
+              const cls = (el as HTMLElement).className;
+              return (
+                cls.includes("focus-visible:ring-2") &&
+                cls.includes("focus-visible:ring-ring") &&
+                cls.includes("focus-visible:ring-offset-2")
+              );
+            }),
+          { timeout: 5_000, intervals: [100, 200, 400, 600, 800] },
+        )
+        .toBe(true);
+    };
+
+    const applyTheme = async (mode: "light" | "dark") => {
+      await page.evaluate((m) => {
+        document.documentElement.classList.toggle("dark", m === "dark");
+      }, mode);
+      await page.evaluate(
+        () =>
+          new Promise<void>((r) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => r())),
+          ),
+      );
+    };
+
+    for (const mode of ["light", "dark"] as const) {
+      await applyTheme(mode);
+      await cuponsTab.click();
+      await expect(cuponsTab).toHaveAttribute("aria-selected", "true");
+      await expect(cuponsTab).toHaveAttribute("aria-current", "true");
+      await cuponsTab.focus();
+      await expectRingTokens("cupons");
+
+      await expect(tablist).toHaveScreenshot(
+        `rm-rtl-mobile-${mode}-subnav-focus-cupons.png`,
+        { maxDiffPixelRatio: 0.02, animations: "disabled" },
+      );
+      await expect(cuponsPanel).toHaveScreenshot(
+        `rm-rtl-mobile-${mode}-tabpanel-cupons.png`,
+        { maxDiffPixelRatio: 0.03, animations: "disabled" },
+      );
+
+      // Only one chip selected at a time, regardless of theme
+      const selectedCount = await page
+        .locator('[role="tab"][aria-selected="true"]')
+        .count();
+      expect(selectedCount).toBe(1);
+    }
+
+    await context.close();
+  });
+
+  test("RTL + reduced motion: navigation timing — layout settle dentro do threshold", async ({
+    browser,
+  }) => {
+    const SETTLE_THRESHOLD_MS = Number(
+      process.env.E2E_SETTLE_THRESHOLD_MS ?? 1500,
+    );
+
+    const context = await browser.newContext({ reducedMotion: "reduce" });
+    const page = await context.newPage();
+    await login(page);
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(ROUTE);
+    await page.evaluate(() => {
+      document.documentElement.setAttribute("dir", "rtl");
+      document.documentElement.setAttribute("lang", "ar");
+      sessionStorage.removeItem("dashboards:consumidor:section");
+    });
+    await page.reload();
+    await page.waitForLoadState("networkidle");
+
+    const tablist = page.getByRole("tablist", { name: /Seções da Minha área/i });
+
+    const targets: Array<{ id: (typeof SECTIONS)[number]; label: RegExp }> = [
+      { id: "cupons", label: /Meus cupons/i },
+      { id: "reservas", label: /Minhas reservas/i },
+      { id: "creditos", label: /Meus créditos/i },
+    ];
+
+    const timings: Array<{ id: string; ms: number }> = [];
+    for (const t of targets) {
+      const tab = tablist.getByRole("tab", { name: t.label });
+      const started = Date.now();
+      await tab.click();
+
+      // Settle definition: hash updated, aria-selected=true, --sec-offset>0,
+      // and the matching tabpanel is the active element.
+      await expect
+        .poll(() => page.evaluate(() => location.hash), { timeout: 4_000 })
+        .toBe(`#${t.id}`);
+      await expect(tab).toHaveAttribute("aria-selected", "true");
+      await page.waitForFunction(() => {
+        const el = document.querySelector(
+          '[role="tabpanel"]',
+        ) as HTMLElement | null;
+        if (!el) return false;
+        const v = getComputedStyle(el).getPropertyValue("--sec-offset").trim();
+        return !!v && parseFloat(v) > 0;
+      });
+      await expect
+        .poll(
+          () =>
+            page.evaluate(
+              (id) => (document.activeElement as HTMLElement | null)?.id,
+              t.id,
+            ),
+          { timeout: 4_000 },
+        )
+        .toBe(t.id);
+
+      const elapsed = Date.now() - started;
+      timings.push({ id: t.id, ms: elapsed });
+    }
+
+    // Attach a JSON record to the report for inspection
+    await test.info().attach("rtl-reducedmotion-settle-timings.json", {
+      body: JSON.stringify({ thresholdMs: SETTLE_THRESHOLD_MS, timings }, null, 2),
+      contentType: "application/json",
+    });
+
+    for (const { id, ms } of timings) {
+      expect(
+        ms,
+        `Layout settle for "${id}" took ${ms}ms (threshold ${SETTLE_THRESHOLD_MS}ms)`,
+      ).toBeLessThanOrEqual(SETTLE_THRESHOLD_MS);
+    }
+
+    await context.close();
+  });
 });
+
