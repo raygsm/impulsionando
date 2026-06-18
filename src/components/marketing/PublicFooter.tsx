@@ -64,6 +64,7 @@ const COLS = [
       { to: "/termos", label: "Termos de Uso" },
       { to: "/privacidade", label: "Política de Privacidade" },
       { to: "/reembolso", label: "Política de Reembolso" },
+      { to: "/canal-oficial", label: "Canal oficial único" },
     ],
   },
 ];
