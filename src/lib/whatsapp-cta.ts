@@ -462,6 +462,20 @@ export function shouldNotifyAlertNow(scope = "global"): boolean {
 // ============ Regras de alerta por rota / variante ============
 const RULES_KEY = "wa_official_alert_rules_v1";
 
+export const ALERT_CHANNELS = ["slack", "email"] as const;
+export type AlertChannel = (typeof ALERT_CHANNELS)[number];
+
+export interface ChannelThreshold {
+  /** Habilita o canal nesta regra. */
+  enabled: boolean;
+  /** CTR mínimo (%) override por canal. Vazio = usa o da regra. */
+  minCtr?: number;
+  /** Taxa de envio mínima (%) override por canal. Vazio = usa o da regra. */
+  minSendRate?: number;
+  /** Cooldown em minutos (override do padrão de 60). */
+  cooldownMinutes?: number;
+}
+
 export interface AlertRule {
   id: string;
   label?: string;
@@ -472,6 +486,8 @@ export interface AlertRule {
   windowHours: number;
   minSamples: number;
   enabled: boolean;
+  /** Limites e cooldown separados por canal (Slack / e-mail). */
+  channels?: { slack?: ChannelThreshold; email?: ChannelThreshold };
 }
 
 export const DEFAULT_RULES: AlertRule[] = [];
@@ -531,6 +547,228 @@ export function evaluateAlertRules(
       });
       return { ...ev, rule, scope: ruleScope(rule) };
     });
+}
+
+// ============ Despacho por canal (limites + cooldown) ============
+export interface ChannelDecision {
+  channel: AlertChannel;
+  enabled: boolean;
+  willFire: boolean;
+  ctrBelow: boolean;
+  sendBelow: boolean;
+  effectiveMinCtr: number;
+  effectiveMinSendRate: number;
+  cooldownMs: number;
+  /** "disabled" | "thresholds_ok" | "below_samples" | "cooldown" */
+  reason?: string;
+  cooldownUntil?: number;
+}
+
+function chCooldownKey(scope: string, channel: AlertChannel) {
+  return `${LAST_ALERT_KEY}:${scope}:${channel}`;
+}
+
+export function readChannelCooldown(scope: string, channel: AlertChannel): number {
+  if (typeof window === "undefined") return 0;
+  try {
+    const raw = window.localStorage.getItem(chCooldownKey(scope, channel));
+    return raw ? Number(raw) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+export function markChannelDispatched(scope: string, channel: AlertChannel) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(chCooldownKey(scope, channel), String(Date.now()));
+  } catch {
+    /* noop */
+  }
+}
+
+export function planChannelDispatch(
+  ev: AlertEval,
+  rule: AlertRule,
+  opts: {
+    cooldownLookup?: (scope: string, channel: AlertChannel) => number;
+    now?: number;
+  } = {},
+): ChannelDecision[] {
+  const now = opts.now ?? Date.now();
+  const lookup = opts.cooldownLookup ?? readChannelCooldown;
+  const scope = ruleScope(rule);
+  const enoughImpr = ev.impressions >= rule.minSamples;
+  const enoughClicks = ev.clicks >= rule.minSamples;
+  return ALERT_CHANNELS.map<ChannelDecision>((channel) => {
+    const c = rule.channels?.[channel];
+    const enabled = c?.enabled ?? true;
+    const effMinCtr = c?.minCtr ?? rule.minCtr;
+    const effMinSendRate = c?.minSendRate ?? rule.minSendRate;
+    const cooldownMs = (c?.cooldownMinutes ?? 60) * 60_000;
+    if (!enabled) {
+      return { channel, enabled, willFire: false, ctrBelow: false, sendBelow: false,
+        effectiveMinCtr: effMinCtr, effectiveMinSendRate: effMinSendRate,
+        cooldownMs, reason: "disabled" };
+    }
+    const ctrBelow = effMinCtr > 0 && enoughImpr && ev.ctr < effMinCtr;
+    const sendBelow = effMinSendRate > 0 && enoughClicks && ev.sendRate < effMinSendRate;
+    if (!ctrBelow && !sendBelow) {
+      const reason = !enoughImpr && !enoughClicks ? "below_samples" : "thresholds_ok";
+      return { channel, enabled, willFire: false, ctrBelow, sendBelow,
+        effectiveMinCtr: effMinCtr, effectiveMinSendRate: effMinSendRate, cooldownMs, reason };
+    }
+    const last = lookup(scope, channel);
+    if (last && now - last < cooldownMs) {
+      return { channel, enabled, willFire: false, ctrBelow, sendBelow,
+        effectiveMinCtr: effMinCtr, effectiveMinSendRate: effMinSendRate,
+        cooldownMs, reason: "cooldown", cooldownUntil: last + cooldownMs };
+    }
+    return { channel, enabled, willFire: true, ctrBelow, sendBelow,
+      effectiveMinCtr: effMinCtr, effectiveMinSendRate: effMinSendRate, cooldownMs };
+  });
+}
+
+// ============ Simulação histórica de regras ============
+export interface SimulationDispatch {
+  ts: number;
+  ruleId: string;
+  ruleLabel?: string;
+  scope: string;
+  channel: AlertChannel;
+  status: "fired" | "suppressed_cooldown" | "suppressed_thresholds" | "below_samples" | "disabled";
+  ctr: number;
+  sendRate: number;
+  impressions: number;
+  clicks: number;
+  sends: number;
+  ctrBelow: boolean;
+  sendBelow: boolean;
+  effectiveMinCtr: number;
+  effectiveMinSendRate: number;
+  reason?: string;
+}
+
+/** Replay das regras atuais sobre os últimos `days` dias do histórico. */
+export function simulateAlertRules(
+  events: BufferedEvent[],
+  rules: AlertRule[],
+  days: number,
+  opts: { stepMinutes?: number; now?: number; includeNonFiring?: boolean } = {},
+): SimulationDispatch[] {
+  const step = Math.max(1, opts.stepMinutes ?? 60) * 60_000;
+  const now = opts.now ?? Date.now();
+  const from = now - days * 24 * 3_600_000;
+  const out: SimulationDispatch[] = [];
+  const lastBy = new Map<string, number>();
+  const lookup = (scope: string, channel: AlertChannel) =>
+    lastBy.get(`${scope}|${channel}`) ?? 0;
+  const active = rules.filter((r) => r.enabled !== false);
+  if (active.length === 0) return out;
+  for (let t = from; t <= now; t += step) {
+    for (const rule of active) {
+      const since = t - rule.windowHours * 3_600_000;
+      const scoped = events.filter(
+        (e) => e.ts >= since && e.ts <= t &&
+               (!rule.route || e.path === rule.route) &&
+               (!rule.variant || (e.variant ?? "control") === rule.variant),
+      );
+      const impressions = scoped.filter((r) => r.event === "whatsapp_cta_impression").length;
+      const clicks = scoped.filter((r) =>
+        ["whatsapp_cta_click", "whatsapp_fab_click", "whatsapp_notice_click"].includes(r.event),
+      ).length;
+      const sends = scoped.filter(
+        (r) => r.event === "whatsapp_form_submit" || r.event === "whatsapp_cta_sent",
+      ).length;
+      const ctr = impressions ? (clicks / impressions) * 100 : 0;
+      const sendRate = clicks ? (sends / clicks) * 100 : 0;
+      const ev: AlertEval = {
+        ctr, sendRate, impressions, clicks, sends,
+        ctrBelow: rule.minCtr > 0 && impressions >= rule.minSamples && ctr < rule.minCtr,
+        sendBelow: rule.minSendRate > 0 && clicks >= rule.minSamples && sendRate < rule.minSendRate,
+        triggered: false,
+      };
+      ev.triggered = ev.ctrBelow || ev.sendBelow;
+      const scope = ruleScope(rule);
+      const decisions = planChannelDispatch(ev, rule, { cooldownLookup: lookup, now: t });
+      for (const d of decisions) {
+        const status: SimulationDispatch["status"] = d.willFire
+          ? "fired"
+          : d.reason === "cooldown" ? "suppressed_cooldown"
+          : d.reason === "disabled" ? "disabled"
+          : d.reason === "below_samples" ? "below_samples"
+          : "suppressed_thresholds";
+        const emit = d.willFire || (opts.includeNonFiring && ev.triggered);
+        if (d.willFire) lastBy.set(`${scope}|${d.channel}`, t);
+        if (emit) {
+          out.push({
+            ts: t, ruleId: rule.id, ruleLabel: rule.label, scope,
+            channel: d.channel, status,
+            ctr, sendRate, impressions, clicks, sends,
+            ctrBelow: ev.ctrBelow, sendBelow: ev.sendBelow,
+            effectiveMinCtr: d.effectiveMinCtr,
+            effectiveMinSendRate: d.effectiveMinSendRate,
+            reason: d.reason,
+          });
+        }
+      }
+    }
+  }
+  return out;
+}
+
+// ============ Resumo diário multi-data (CSV) ============
+export interface DailySummaryRangeRow {
+  date: string;
+  ctaHash: string;
+  impressions: number;
+  clicks: number;
+  sends: number;
+  ctr: number;
+  sendRate: number;
+  alertsFired: number;
+}
+
+export function buildDailySummaryRange(
+  events: BufferedEvent[],
+  history: AlertHistoryEntry[],
+  fromDate: Date,
+  toDate: Date,
+  ruleFilter?: string,
+): DailySummaryRangeRow[] {
+  const rows: DailySummaryRangeRow[] = [];
+  const start = new Date(fromDate); start.setHours(0, 0, 0, 0);
+  const end = new Date(toDate); end.setHours(23, 59, 59, 999);
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    const summary = buildDailySummary(events, history, new Date(d));
+    const dayHistory = history.filter((h) => {
+      const hd = new Date(h.ts); hd.setHours(0, 0, 0, 0);
+      return ymd(hd) === summary.date && (!ruleFilter || h.ruleId === ruleFilter);
+    });
+    if (summary.rows.length === 0) {
+      rows.push({
+        date: summary.date, ctaHash: "—",
+        impressions: 0, clicks: 0, sends: 0, ctr: 0, sendRate: 0,
+        alertsFired: dayHistory.filter((h) => h.scope !== "daily_summary").length,
+      });
+      continue;
+    }
+    for (const row of summary.rows) {
+      rows.push({
+        date: summary.date,
+        ctaHash: row.ctaHash,
+        impressions: row.impressions,
+        clicks: row.clicks,
+        sends: row.sends,
+        ctr: row.ctr,
+        sendRate: row.sendRate,
+        alertsFired: dayHistory.filter(
+          (h) => (h.ctaHash ?? "—") === row.ctaHash && h.scope !== "daily_summary",
+        ).length,
+      });
+    }
+  }
+  return rows;
 }
 
 // ============ Resumo diário por CTA hash ============
