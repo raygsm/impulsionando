@@ -330,7 +330,9 @@ export const listLiveDemoActivity = createServerFn({ method: "POST" })
 const DashboardInput = z.object({
   scenarioSlug: z.string().trim().min(2).max(60),
   sinceHours: z.number().int().min(1).max(24 * 30).default(24 * 7),
+  qrKind: z.enum(["mesa", "delivery", "evento", "pesquisa", "clube"]).optional(),
 });
+
 
 type DemoActionRow = {
   id: string;
@@ -385,10 +387,24 @@ export const fetchDemoRestauranteDashboard = createServerFn({ method: "POST" })
     ]);
 
     const rawActions = (actionsRes.data ?? []) as DemoActionRow[];
-    const actions = rawActions.filter((a) => {
+    let actions = rawActions.filter((a) => {
       const p = a.payload as { scenario_slug?: string } | null;
       return p?.scenario_slug === scenario.slug;
     });
+
+    // Index session → kind (do primeiro scan da sessão) para permitir filtros drill-down.
+    const sessionKind = new Map<string, string>();
+    const sessionQrSlug = new Map<string, string>();
+    for (const a of actions) {
+      if (a.action_key !== "qr.scan") continue;
+      const p = a.payload as { kind?: string; qr_slug?: string } | null;
+      if (p?.kind && !sessionKind.has(a.session_id)) sessionKind.set(a.session_id, p.kind);
+      if (p?.qr_slug && !sessionQrSlug.has(a.session_id)) sessionQrSlug.set(a.session_id, p.qr_slug);
+    }
+
+    if (data.qrKind) {
+      actions = actions.filter((a) => sessionKind.get(a.session_id) === data.qrKind);
+    }
 
     const byKey = (k: string) => actions.filter((a) => a.action_key === k);
     const scans = byKey("qr.scan");
@@ -406,6 +422,32 @@ export const fetchDemoRestauranteDashboard = createServerFn({ method: "POST" })
       checkoutDone: new Set(checkoutSimulated.map((a) => a.session_id)).size,
       surveysSubmitted: surveys.length,
     };
+
+    // Drill-down: funil por tipo de QR e por QR específico.
+    const buildFunnel = (sessionFilter: (sid: string) => boolean) => {
+      const sf = (rows: DemoActionRow[]) => rows.filter((a) => sessionFilter(a.session_id));
+      return {
+        scans: sf(scans).length,
+        menuActive: new Set(sf(adds).map((a) => a.session_id)).size,
+        checkoutAttempts: new Set(sf(checkoutAttempts).map((a) => a.session_id)).size,
+        checkoutDone: new Set(sf(checkoutSimulated).map((a) => a.session_id)).size,
+        surveysSubmitted: sf(surveys).length,
+      };
+    };
+
+    const kinds = Array.from(new Set(Array.from(sessionKind.values())));
+    const funnelByKind = kinds.map((kind) => ({
+      kind,
+      ...buildFunnel((sid) => sessionKind.get(sid) === kind),
+    })).sort((a, b) => b.scans - a.scans);
+
+    const qrSlugs = Array.from(new Set(Array.from(sessionQrSlug.values())));
+    const funnelByQr = qrSlugs.map((slug) => ({
+      slug,
+      ...buildFunnel((sid) => sessionQrSlug.get(sid) === slug),
+    })).sort((a, b) => b.scans - a.scans);
+
+
 
     const scanByKind = new Map<string, number>();
     for (const a of scans) {
@@ -496,8 +538,11 @@ export const fetchDemoRestauranteDashboard = createServerFn({ method: "POST" })
         avgTicketCents,
       },
       conversion,
+      qrKind: data.qrKind ?? null,
       scanByKind: Array.from(scanByKind.entries()).map(([key, count]) => ({ key, count })),
       topQrs, topItems, paymentMix,
+      funnelByKind, funnelByQr,
+
       preferences: {
         interests: sortMap(interestCount),
         favorites: sortMap(favoriteCount),
@@ -507,3 +552,118 @@ export const fetchDemoRestauranteDashboard = createServerFn({ method: "POST" })
       vouchers, recentLeads,
     };
   });
+
+// ───────────────── LIST SCENARIOS (Super Admin) ─────────────────
+// Para drill-down por restaurante.
+
+export const listDemoRestauranteScenarios = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc(
+      "is_super_admin" as never,
+      { _user: userId } as never,
+    );
+    if (!isAdmin) throw new Error("Acesso restrito ao Super Admin");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("demo_resto_scenarios")
+      .select("slug,name,tagline")
+      .order("name");
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+// ───────────────── AUDIT (Super Admin) ─────────────────
+// Lista paginada de ações da demo com filtros (action_key, sessão, janela).
+
+const AUDIT_ACTIONS = [
+  "qr.scan", "menu.open", "cart.add", "cart.remove", "cart.checkout_attempt",
+  "cart.checkout_simulated", "survey.submit", "voucher.apply",
+] as const;
+
+const AuditInput = z.object({
+  scenarioSlug: z.string().trim().min(2).max(60).optional(),
+  sinceHours: z.number().int().min(1).max(24 * 30).default(24 * 7),
+  actionKey: z.enum(AUDIT_ACTIONS).optional(),
+  sessionId: z.string().uuid().optional(),
+  leadName: z.string().trim().max(60).optional(),
+  limit: z.number().int().min(1).max(500).default(100),
+  offset: z.number().int().min(0).max(10_000).default(0),
+});
+
+export const fetchDemoRestauranteAudit = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => AuditInput.parse(d ?? {}))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc(
+      "is_super_admin" as never,
+      { _user: userId } as never,
+    );
+    if (!isAdmin) throw new Error("Acesso restrito ao Super Admin");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const sinceIso = new Date(Date.now() - data.sinceHours * 3_600_000).toISOString();
+
+    let q = supabaseAdmin
+      .from("demo_actions")
+      .select("id,session_id,action_key,payload,created_at", { count: "exact" })
+      .eq("niche_slug", NICHE)
+      .gte("created_at", sinceIso)
+      .order("created_at", { ascending: false })
+      .range(data.offset, data.offset + data.limit - 1);
+
+    if (data.actionKey) q = q.eq("action_key", data.actionKey);
+    if (data.sessionId) q = q.eq("session_id", data.sessionId);
+
+    const { data: rows, error, count } = await q;
+    if (error) throw new Error(error.message);
+
+    type AuditRow = {
+      id: string; session_id: string; action_key: string;
+      payload: unknown; created_at: string;
+    };
+    let filtered = (rows ?? []) as AuditRow[];
+
+    if (data.scenarioSlug) {
+      filtered = filtered.filter((r) => {
+        const p = r.payload as { scenario_slug?: string } | null;
+        return p?.scenario_slug === data.scenarioSlug;
+      });
+    }
+
+    const sessionIds = Array.from(new Set(filtered.map((r) => r.session_id).filter((s): s is string => !!s)));
+    const leadsBySession = new Map<string, { name: string; whatsapp: string }>();
+    if (sessionIds.length) {
+      const { data: leads } = await supabaseAdmin
+        .from("demo_resto_leads")
+        .select("session_id,name,whatsapp")
+        .in("session_id", sessionIds);
+      for (const l of leads ?? []) {
+        if (l.session_id) leadsBySession.set(l.session_id, { name: l.name, whatsapp: l.whatsapp });
+      }
+    }
+
+    let final = filtered.map((r) => ({
+      id: r.id,
+      session_id: r.session_id,
+      action_key: r.action_key,
+      created_at: r.created_at,
+      // Serializa o payload como JSON-safe (object literal); evita erro de tipo serializável.
+      payload: (r.payload ?? null) as Record<string, string | number | boolean | null | string[] | number[]> | null,
+      lead: leadsBySession.get(r.session_id) ?? null,
+    }));
+
+    if (data.leadName) {
+      const needle = data.leadName.toLowerCase();
+      final = final.filter((r) => r.lead?.name?.toLowerCase().includes(needle));
+    }
+
+    return {
+      total: count ?? final.length,
+      rows: final,
+      since: sinceIso,
+    };
+  });
+
