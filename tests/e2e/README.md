@@ -86,6 +86,17 @@ Os arquivos esperados após a regeneração:
 - `rm-rtl-mobile-portrait-tabpanel-cupons.png`
 - `rm-rtl-mobile-landscape-subnav-focus-cupons.png`
 - `rm-rtl-mobile-landscape-tabpanel-cupons.png`
+- `rm-rtl-mobile-light-subnav-focus-cupons.png` / `rm-rtl-mobile-light-tabpanel-cupons.png`
+- `rm-rtl-mobile-dark-subnav-focus-cupons.png` / `rm-rtl-mobile-dark-tabpanel-cupons.png`
+
+Para regerar apenas o cenário dark/light:
+
+```bash
+E2E_VISUAL=1 bunx playwright test \
+  tests/e2e/dashboards-consumidor-subnav.spec.ts \
+  -g "dark/light toggle \(RTL \+ reduced motion\)" \
+  --update-snapshots
+```
 
 No CI, defina a variable `E2E_VISUAL=1` (Settings → Variables) para rodar os
 visuais contra os baselines commitados. Sem ela o CI continua pulando esses
@@ -110,6 +121,37 @@ Como ler os PNGs:
   Se a mudança for **intencional** (ex.: ajuste de cor/spacing), rode
   `bun run test:e2e:visual:update` localmente e commite os novos baselines.
   Se for **regressão**, corrija o componente e refaça o run.
+
+#### Mapa: qual PNG cobre qual asserção
+
+Cada teste produz um conjunto de PNGs com nomes determinísticos. Use a tabela
+abaixo para identificar rapidamente qual asserção quebrou olhando o nome do
+arquivo no artifact `playwright-visual-diffs`:
+
+| Sufixo do arquivo | Asserção coberta | O que olhar no diff |
+| --- | --- | --- |
+| `*-subnav-default.png` | Estado inicial do tablist (chip ativo padrão) | Posição/estilo do chip `favoritos`, ordem RTL |
+| `*-subnav-focus-cupons.png` | Focus ring no chip ativo (`cupons`) após teclado | Anel de foco (`ring-2 ring-ring ring-offset-2`) e cor do chip selecionado |
+| `*-tabpanel-cupons.png` | Conteúdo do tabpanel ativo | Layout, tipografia e cores do painel `Meus cupons` |
+| `rm-rtl-mobile-light-*` | Variante tema claro | Tokens semânticos no modo light |
+| `rm-rtl-mobile-dark-*` | Variante tema escuro | Tokens semânticos no modo dark |
+| `rm-rtl-mobile-landscape-*` | Após `orientationchange` para landscape | `--sec-offset` recomputado, chip ainda visível |
+
+Exemplo prático: se apenas `rm-rtl-mobile-dark-subnav-focus-cupons.png` falhar
+mas `*-light-*` passar, o problema está na cor/contraste do focus ring no tema
+escuro — não no layout do tablist em si.
+
+### Navigation timing (RTL + reduced motion)
+
+O teste `RTL + reduced motion: navigation timing` mede quanto tempo cada
+ativação de chip leva para "assentar" (hash + `aria-selected` + `--sec-offset` +
+foco no tabpanel). Falha se exceder o threshold padrão de **1500ms**.
+
+- Ajuste local com `E2E_SETTLE_THRESHOLD_MS=2000 bun run test:e2e`.
+- Em cada run, um artifact JSON (`rtl-reducedmotion-settle-timings.json`) é
+  anexado ao Playwright report com os tempos medidos por seção.
+
+
 
 
 
