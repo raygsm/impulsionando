@@ -239,14 +239,11 @@ function CatalogoPage() {
                 </div>
               </div>
               <Button asChild size="lg">
-                <Link
-                  to="/auth"
-                  search={{
-                    redirect: `/onboarding?template=${selectedTemplate.slug}&plano=${selectedPlan.code}`,
-                  }}
+                <a
+                  href={`/onboarding?template=${encodeURIComponent(selectedTemplate.slug)}&plano=${encodeURIComponent(selectedPlan.code)}`}
                 >
                   {selectedPlan.cta ?? 'Começar agora'} <ArrowRight className="w-4 h-4 ml-2" />
-                </Link>
+                </a>
               </Button>
             </div>
           </Card>
