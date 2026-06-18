@@ -9,8 +9,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-
-import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,18 +18,31 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Download, RefreshCw, FileSearch } from "lucide-react";
 import { fetchDemoRestauranteAudit } from "@/lib/demo-restaurante.functions";
 
-const searchSchema = z.object({
-  scenarioSlug: fallback(z.string(), "boteco-aurora").default("boteco-aurora"),
-  sinceHours: fallback(z.number().int().min(1).max(720), 168).default(168),
-  actionKey: fallback(z.string(), "").default(""),
-  sessionId: fallback(z.string(), "").default(""),
-  leadName: fallback(z.string(), "").default(""),
-});
+type AuditSearch = {
+  scenarioSlug: string;
+  sinceHours: number;
+  actionKey: string;
+  sessionId: string;
+  leadName: string;
+};
 
 export const Route = createFileRoute("/_authenticated/torre/restaurantes-demo/auditoria")({
-  validateSearch: zodValidator(searchSchema),
+  validateSearch: (raw: Record<string, unknown>): AuditSearch => {
+    const s = (k: string, d: string) => (typeof raw?.[k] === "string" ? (raw[k] as string) : d);
+    const n = (k: string, d: number) => {
+      const v = Number(raw?.[k]); return Number.isFinite(v) && v > 0 && v <= 720 ? v : d;
+    };
+    return {
+      scenarioSlug: s("scenarioSlug", "boteco-aurora"),
+      sinceHours: n("sinceHours", 168),
+      actionKey: s("actionKey", ""),
+      sessionId: s("sessionId", ""),
+      leadName: s("leadName", ""),
+    };
+  },
   component: AuditoriaPage,
 });
+
 
 const ACTION_LABELS: Record<string, string> = {
   "qr.scan": "QR escaneado",
