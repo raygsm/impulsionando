@@ -1,15 +1,18 @@
 /**
- * Notificações ao cliente do restaurante por múltiplos canais
- * (e-mail + WhatsApp + SMS), com dedupe persistido por canal.
+ * Notificações relacionadas a mesa do restaurante.
  *
- * - `notifyItemReady(item_id)` → notifica que aquele prato ficou pronto.
- * - `notifyTableBillClosed(session_id)` → recibo com itens e total.
+ * REGRA DE PRODUTO (não mudar sem revisar `demo.beer-house.tsx` cap. 03 e 07):
+ *   A Impulsionando NÃO substitui o garçom durante a operação.
+ *   - "Pedido pronto" NÃO dispara comunicação ao cliente (e-mail/WhatsApp/SMS).
+ *     Quem leva o prato à mesa é o garçom. O sistema apenas registra um
+ *     SINAL INTERNO para o salão (auditoria + painel), sem canal externo.
+ *   - Comunicação com o cliente acontece em DOIS momentos válidos:
+ *       (a) Recibo automático no fechamento da conta (notifyTableBillClosed).
+ *       (b) Régua pós-visita (notifyPostVisitThanks) 24h–72h depois,
+ *           com timing/copy por nicho — convite para voltar, voucher,
+ *           entrada no Clube Impulsionando.
  *
- * Dedupe:
- *   - E-mail/WhatsApp: usam `notified_ready_at` / `bill_notified_at`.
- *   - SMS: usam colunas dedicadas `notified_ready_sms_at` /
- *     `bill_notified_sms_at`, para que cada canal tenha lock próprio
- *     (envio independente, sem duplicação).
+ * Qualquer novo canal "ao cliente durante a refeição" deve ser rejeitado.
  */
 import { sendRestaurantEmail } from "@/lib/restaurant-notify.server";
 import { sendWhatsappText } from "@/lib/whatsapp-notify.server";
@@ -21,88 +24,63 @@ const fmtBRL = (cents: number) =>
     currency: "BRL",
   });
 
+/**
+ * SINAL INTERNO de "item pronto / entregue".
+ *
+ * NÃO envia e-mail / WhatsApp / SMS ao cliente.
+ * Apenas marca `notified_ready_at` (lock idempotente) e devolve um payload
+ * com a info do item — usado por painéis internos do salão e por logs de
+ * auditoria. Mantemos a função exportada com o mesmo nome para preservar
+ * compatibilidade com chamadores existentes (ver restaurant-kitchen.functions.ts).
+ */
 export async function notifyItemReady(itemId: string): Promise<{
-  email?: unknown;
-  whatsapp?: unknown;
-  sms?: unknown;
+  internal: true;
+  itemId: string;
+  description?: string;
+  tableNumber?: number;
+  customerName?: string;
+  companyName?: string;
   skipped?: string;
+  /** Sempre `undefined` por desenho — nada é enviado ao cliente neste evento. */
+  email?: undefined;
+  whatsapp?: undefined;
+  sms?: undefined;
 }> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data: row } = await supabaseAdmin
     .from("sales_order_items")
     .select(
-      `id, description, quantity, order_id, company_id, notified_ready_at, notified_ready_sms_at,
+      `id, description, quantity, order_id, company_id, notified_ready_at,
        company:company_id ( name, trade_name )`,
     )
     .eq("id", itemId)
     .maybeSingle();
-  if (!row) return { skipped: "item_not_found" };
+  if (!row) return { internal: true, itemId, skipped: "item_not_found" };
 
   const { data: sess } = await supabaseAdmin
     .from("restaurant_table_sessions")
-    .select("customer_email, customer_phone, customer_name, table:table_id ( number )")
+    .select("customer_name, table:table_id ( number )")
     .eq("sales_order_id", (row as any).order_id)
     .maybeSingle();
 
-  const customerName = (sess as any)?.customer_name as string | undefined;
-  const tableNumber = (sess as any)?.table?.number as number | undefined;
-  const companyName =
-    (row as any).company?.trade_name ?? (row as any).company?.name ?? undefined;
-  const description = `${Number((row as any).quantity)}× ${(row as any).description}`;
-  const phone = (sess as any)?.customer_phone as string | undefined;
-  const email = ((sess as any)?.customer_email ?? "").trim();
-
-  let emailRes: unknown;
-  let whatsappRes: unknown;
-  let smsRes: unknown;
-
-  // ---- Lock e disparo: email + whatsapp (compartilham `notified_ready_at`)
+  // Lock idempotente — mesmo sem disparar canais, evita reprocessar.
   if (!(row as any).notified_ready_at) {
-    const { error: updErr } = await supabaseAdmin
+    await supabaseAdmin
       .from("sales_order_items")
       .update({ notified_ready_at: new Date().toISOString() })
       .eq("id", itemId)
       .is("notified_ready_at", null);
-    if (!updErr) {
-      if (email) {
-        emailRes = await sendRestaurantEmail({
-          templateName: "restaurant-order-ready",
-          to: email,
-          templateData: { customerName, itemDescription: description, tableNumber, companyName },
-          idempotencyKey: `order-ready:${itemId}`,
-        });
-      }
-      if (phone) {
-        const lines = [
-          `🍽️ ${customerName ? customerName + ", o" : "Seu"} pedido ficou pronto!`,
-          tableNumber ? `Mesa ${tableNumber}` : null,
-          description,
-          companyName ? `— ${companyName}` : null,
-        ].filter(Boolean);
-        whatsappRes = await sendWhatsappText({ to: phone, message: lines.join("\n") });
-      }
-    }
   }
 
-  // ---- Lock e disparo: SMS (canal independente)
-  if (phone && !(row as any).notified_ready_sms_at) {
-    const { error: smsLockErr } = await supabaseAdmin
-      .from("sales_order_items")
-      .update({ notified_ready_sms_at: new Date().toISOString() })
-      .eq("id", itemId)
-      .is("notified_ready_sms_at", null);
-    if (!smsLockErr) {
-      const body = [
-        `Pedido pronto${tableNumber ? ` (Mesa ${tableNumber})` : ""}: ${description}`,
-        companyName ? `- ${companyName}` : "",
-      ]
-        .filter(Boolean)
-        .join(" ");
-      smsRes = await sendSms({ to: phone, body });
-    }
-  }
-
-  return { email: emailRes, whatsapp: whatsappRes, sms: smsRes };
+  return {
+    internal: true,
+    itemId,
+    description: `${Number((row as any).quantity)}× ${(row as any).description}`,
+    tableNumber: (sess as any)?.table?.number as number | undefined,
+    customerName: (sess as any)?.customer_name as string | undefined,
+    companyName:
+      (row as any).company?.trade_name ?? (row as any).company?.name ?? undefined,
+  };
 }
 
 export async function notifyTableBillClosed(sessionId: string): Promise<{
@@ -149,7 +127,6 @@ export async function notifyTableBillClosed(sessionId: string): Promise<{
   let whatsappRes: unknown;
   let smsRes: unknown;
 
-  // E-mail + WhatsApp (mesmo lock)
   if (!(sess as any).bill_notified_at) {
     const { error: updErr } = await supabaseAdmin
       .from("restaurant_table_sessions")
@@ -177,7 +154,6 @@ export async function notifyTableBillClosed(sessionId: string): Promise<{
     }
   }
 
-  // SMS (canal independente)
   if (phone && !(sess as any).bill_notified_sms_at) {
     const { error: smsLockErr } = await supabaseAdmin
       .from("restaurant_table_sessions")
@@ -197,11 +173,6 @@ export async function notifyTableBillClosed(sessionId: string): Promise<{
   return { email: emailRes, whatsapp: whatsappRes, sms: smsRes };
 }
 
-/**
- * Notifica cliente que tentativa de pagamento PIX falhou/expirou,
- * com link para o /mesa/$token para tentar novamente.
- * (Sem dedupe: cada falha gera uma notificação curta.)
- */
 export async function notifyTablePaymentFailed(args: {
   session_id: string;
   reason: "failed" | "expired";
