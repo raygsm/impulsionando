@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.mp_send_pending_reminders() FROM PUBLIC, anon, authenticated;
