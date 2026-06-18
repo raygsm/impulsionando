@@ -44,6 +44,18 @@ const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20ent
 
 export const Route = createFileRoute("/planos")({
   ssr: false,
+  validateSearch: (search: Record<string, unknown>) => {
+    const lvl = search.recomendado;
+    const recomendado: RecLevel | undefined =
+      lvl === "essencial" || lvl === "ideal" || lvl === "full" ? lvl : undefined;
+    const nichoRaw = typeof search.nicho === "string" ? search.nicho : undefined;
+    const trial = search.trial === 1 || search.trial === "1" ? 1 : undefined;
+    return {
+      nicho: nichoRaw,
+      recomendado,
+      trial,
+    } as { nicho?: string; recomendado?: RecLevel; trial?: 1 };
+  },
   head: () => ({
     meta: [
       { title: "Planos e Preços — Essencial, Integrado, Avançado e Sob Medida | Impulsionando Tecnologia" },
