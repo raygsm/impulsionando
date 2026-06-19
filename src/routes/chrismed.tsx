@@ -272,14 +272,14 @@ function ChrismedPage() {
                   <div className="mx-auto h-16 w-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3">
                     <CheckCircle2 className="h-9 w-9" />
                   </div>
-                  <CardTitle>Pagamento confirmado!</CardTitle>
-                  <CardDescription>Enviaremos os detalhes da consulta para o seu e-mail em instantes.</CardDescription>
+                  <CardTitle>Atendimento confirmado</CardTitle>
+                  <CardDescription>Seu horário está bloqueado em nossa agenda. Enviamos os detalhes e orientações para o seu e-mail e WhatsApp.</CardDescription>
                 </>
               ) : (
                 <>
-                  <CardTitle>Escaneie o QR Code PIX</CardTitle>
+                  <CardTitle>Reserve seu horário em segundos</CardTitle>
                   <CardDescription>
-                    Aguardando pagamento... Status: <span className="font-medium">{pollStatus}</span>
+                    Aponte a câmera para o QR Code ou use o código copia-e-cola. Confirmaremos automaticamente após o pagamento.
                   </CardDescription>
                 </>
               )}
