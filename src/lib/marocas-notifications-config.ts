@@ -28,7 +28,11 @@ export function loadNotifyConfig(): NotifyConfig {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return defaultNotifyConfig();
     const parsed = JSON.parse(raw) as Partial<NotifyConfig>;
-    return { ...defaultNotifyConfig(), ...parsed };
+    const merged: NotifyConfig = { ...defaultNotifyConfig() };
+    for (const [k, v] of Object.entries(parsed)) {
+      if (v) merged[k] = v as NotifyTypeConfig;
+    }
+    return merged;
   } catch {
     return defaultNotifyConfig();
   }
