@@ -396,7 +396,7 @@ export const sendMarocasReportNow = createServerFn({ method: "POST" })
       to: data.to,
       channels: data.channels,
       triggeredBy: "manual",
-      recipientEmail: context.claims?.email ?? null,
+      recipientEmail: (context.claims as any)?.email ?? null,
     });
   });
 
