@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   listMarocasApartments,
   listMarocasServices,
@@ -14,8 +14,15 @@ import {
   requestMarocasSupplyOrder,
   approveMarocasSupplyOrder,
   receiveMarocasSupplyOrder,
+  createMarocasPhotoUploadUrl,
+  getMarocasPhotoSignedUrl,
+  logMarocasServiceAudit,
+  listMarocasServiceAudit,
+  createMarocasSlaAlert,
+  listMarocasSlaAlerts,
   MAROCAS_SLA_MINUTES,
 } from "@/lib/marocas.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/app/PageElements";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -27,9 +34,10 @@ import { toast } from "sonner";
 import {
   Building2, Sparkles, Package, Wrench, Banknote, ExternalLink,
   Calendar, Clock, AlertTriangle, CheckCircle2, Camera, ListChecks,
-  ShoppingCart, TrendingUp, Zap,
+  ShoppingCart, TrendingUp, Zap, History, Bell, Printer, Upload,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/_authenticated/marocas/cockpit")({
   head: () => ({ meta: [{ title: "Marocas — Cockpit de Temporada" }] }),
@@ -149,6 +157,32 @@ function MarocasCockpit() {
   const svcList = svcQ.data ?? [];
   const supList = supQ.data ?? [];
 
+  // SLA alerts panel
+  const alertsFn = useServerFn(listMarocasSlaAlerts);
+  const alertsQ = useQuery({ queryKey: ["marocas", "alerts"], queryFn: () => alertsFn(), refetchInterval: 60_000 });
+  const createAlert = useServerFn(createMarocasSlaAlert);
+  const sentAlertsRef = useRef<Set<string>>(new Set());
+
+  // Auto-trigger SLA alerts (warning at 80%, late when stourado) once per service/severity per session
+  useEffect(() => {
+    svcList.forEach((s) => {
+      if (s.status === "concluido" || s.status === "cancelado") return;
+      const info = slaInfo(s as any);
+      let severity: "warning" | "late" | null = null;
+      if (info.late) severity = "late";
+      else if (info.pct >= 80) severity = "warning";
+      if (!severity) return;
+      const key = `${s.id}:${severity}`;
+      if (sentAlertsRef.current.has(key)) return;
+      sentAlertsRef.current.add(key);
+      const msg = `${s.service_type} · ${s.marocas_apartments?.code ?? ""} — ${severity === "late" ? "SLA estourado" : "80% do SLA atingido"} (${info.elapsed}/${info.sla}min)`;
+      createAlert({ data: { serviceId: s.id, severity, message: msg } }).then(() => {
+        qc.invalidateQueries({ queryKey: ["marocas", "alerts"] });
+        toast.warning(msg);
+      }).catch(() => { /* silent */ });
+    });
+  }, [svcList, createAlert, qc]);
+
   const kpis = useMemo(() => {
     const apts = aptsQ.data ?? [];
     const stm = stmQ.data ?? [];
@@ -198,6 +232,7 @@ function MarocasCockpit() {
         </TabsList>
 
         <TabsContent value="agenda" className="space-y-4">
+          <AlertsPanel alerts={alertsQ.data ?? []} />
           <AgendaPanel services={svcList} />
         </TabsContent>
 
@@ -448,22 +483,57 @@ function ServiceCard({ svc, onStatus, onSaveChecklist }: {
   onStatus: (s: "em_andamento" | "concluido" | "cancelado") => void;
   onSaveChecklist: (p: { checklist: ChecklistItem[]; photos_before: string[]; photos_after: string[] }) => void;
 }) {
+  const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [ck, setCk] = useState<ChecklistItem[]>(() => readChecklist(svc.checklist, svc.service_type));
   const [pb, setPb] = useState<string[]>(() => (Array.isArray(svc.photos_before) ? svc.photos_before : []));
   const [pa, setPa] = useState<string[]>(() => (Array.isArray(svc.photos_after) ? svc.photos_after : []));
-  const [photoInput, setPhotoInput] = useState("");
-  const [photoTarget, setPhotoTarget] = useState<"before" | "after">("after");
+  const [uploading, setUploading] = useState<null | "before" | "after">(null);
 
   const sla = slaInfo(svc);
   const done = ck.filter((c) => c.done).length;
   const total = ck.length;
 
-  const addPhoto = () => {
-    if (!photoInput.trim()) return;
-    if (photoTarget === "before") setPb([...pb, photoInput.trim()]);
-    else setPa([...pa, photoInput.trim()]);
-    setPhotoInput("");
+  const createUploadUrl = useServerFn(createMarocasPhotoUploadUrl);
+  const logAudit = useServerFn(logMarocasServiceAudit);
+  const listAudit = useServerFn(listMarocasServiceAudit);
+  const auditQ = useQuery({
+    queryKey: ["marocas", "audit", svc.id],
+    queryFn: () => listAudit({ data: { serviceId: svc.id } }),
+    enabled: open,
+  });
+
+  const handleUpload = async (file: File, kind: "before" | "after") => {
+    setUploading(kind);
+    try {
+      const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const { path } = await createUploadUrl({ data: { serviceId: svc.id, kind, filename: safe } });
+      const { error } = await supabase.storage.from("marocas-fotos").upload(path, file, { upsert: false, contentType: file.type });
+      if (error) throw error;
+      if (kind === "before") setPb((prev) => [...prev, path]);
+      else setPa((prev) => [...prev, path]);
+      await logAudit({ data: { serviceId: svc.id, action: `foto_${kind}_enviada`, metadata: { path, name: safe } } });
+      qc.invalidateQueries({ queryKey: ["marocas", "audit", svc.id] });
+      toast.success(`Foto ${kind === "before" ? "antes" : "depois"} enviada`);
+    } catch (e: any) {
+      toast.error(`Falha ao enviar: ${e.message ?? e}`);
+    } finally {
+      setUploading(null);
+    }
+  };
+
+  const handleStatus = (s: "em_andamento" | "concluido" | "cancelado") => {
+    onStatus(s);
+    logAudit({ data: { serviceId: svc.id, action: `status_${s}` } }).then(() => {
+      qc.invalidateQueries({ queryKey: ["marocas", "audit", svc.id] });
+    }).catch(() => {});
+  };
+
+  const handleSave = () => {
+    onSaveChecklist({ checklist: ck, photos_before: pb, photos_after: pa });
+    logAudit({ data: { serviceId: svc.id, action: "checklist_salvo", after: { done: ck.filter((c) => c.done).length, total: ck.length, photos_before: pb.length, photos_after: pa.length } } }).then(() => {
+      qc.invalidateQueries({ queryKey: ["marocas", "audit", svc.id] });
+    }).catch(() => {});
   };
 
   return (
@@ -486,12 +556,12 @@ function ServiceCard({ svc, onStatus, onSaveChecklist }: {
             <span className="flex items-center gap-1 font-semibold">
               <TrendingUp className="h-3 w-3" /> SLA {sla.elapsed}/{sla.sla}min
             </span>
-            <span className={sla.late ? "text-rose-600 font-bold" : "text-muted-foreground"}>
-              {sla.late ? "⚠ Atrasado" : "no prazo"}
+            <span className={sla.late ? "text-rose-600 font-bold" : sla.pct >= 80 ? "text-amber-600 font-bold" : "text-muted-foreground"}>
+              {sla.late ? "⚠ Atrasado" : sla.pct >= 80 ? "⏰ Próximo do limite" : "no prazo"}
             </span>
           </div>
           <div className="h-2 rounded-full bg-muted overflow-hidden">
-            <div className={cn("h-full transition-all", sla.late ? "bg-gradient-to-r from-rose-500 to-orange-500" : "bg-gradient-to-r from-emerald-500 to-teal-500")} style={{ width: `${Math.max(4, sla.pct)}%` }} />
+            <div className={cn("h-full transition-all", sla.late ? "bg-gradient-to-r from-rose-500 to-orange-500" : sla.pct >= 80 ? "bg-gradient-to-r from-amber-500 to-orange-500" : "bg-gradient-to-r from-emerald-500 to-teal-500")} style={{ width: `${Math.max(4, sla.pct)}%` }} />
           </div>
         </div>
         <Badge variant="outline" className="gap-1"><ListChecks className="h-3 w-3" />{done}/{total}</Badge>
@@ -500,8 +570,8 @@ function ServiceCard({ svc, onStatus, onSaveChecklist }: {
         </Button>
         {svc.status !== "concluido" && (
           <div className="flex gap-1">
-            <Button size="sm" variant="outline" onClick={() => onStatus("em_andamento")} className="hover:scale-105 transition-transform">Iniciar</Button>
-            <Button size="sm" onClick={() => onStatus("concluido")} className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 hover:scale-105 transition-all">
+            <Button size="sm" variant="outline" onClick={() => handleStatus("em_andamento")} className="hover:scale-105 transition-transform">Iniciar</Button>
+            <Button size="sm" onClick={() => handleStatus("concluido")} className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 hover:scale-105 transition-all">
               <CheckCircle2 className="h-4 w-4 mr-1" /> Concluir
             </Button>
           </div>
@@ -525,23 +595,17 @@ function ServiceCard({ svc, onStatus, onSaveChecklist }: {
           </div>
 
           <div>
-            <h4 className="text-sm font-bold mb-2 flex items-center gap-1"><Camera className="h-4 w-4" /> Fotos</h4>
-            <div className="flex gap-2 mb-2">
-              <select value={photoTarget} onChange={(e) => setPhotoTarget(e.target.value as any)} className="rounded border bg-background px-2 text-sm">
-                <option value="before">Antes</option>
-                <option value="after">Depois</option>
-              </select>
-              <Input placeholder="https://url-da-foto.jpg" value={photoInput} onChange={(e) => setPhotoInput(e.target.value)} />
-              <Button size="sm" variant="outline" onClick={addPhoto}>Adicionar</Button>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <PhotoStrip title="Antes" urls={pb} onRemove={(i) => setPb(pb.filter((_, idx) => idx !== i))} />
-              <PhotoStrip title="Depois" urls={pa} onRemove={(i) => setPa(pa.filter((_, idx) => idx !== i))} />
+            <h4 className="text-sm font-bold mb-2 flex items-center gap-1"><Camera className="h-4 w-4" /> Fotos (upload real → marocas-fotos)</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <PhotoZone title="Antes" paths={pb} kind="before" uploading={uploading === "before"} onUpload={handleUpload} onRemove={(i) => setPb(pb.filter((_, idx) => idx !== i))} />
+              <PhotoZone title="Depois" paths={pa} kind="after" uploading={uploading === "after"} onUpload={handleUpload} onRemove={(i) => setPa(pa.filter((_, idx) => idx !== i))} />
             </div>
           </div>
 
+          <AuditTimeline rows={auditQ.data ?? []} loading={auditQ.isLoading} />
+
           <div className="flex justify-end">
-            <Button onClick={() => onSaveChecklist({ checklist: ck, photos_before: pb, photos_after: pa })} className="bg-gradient-to-r from-primary to-fuchsia-500 hover:scale-105 transition-all">
+            <Button onClick={handleSave} className="bg-gradient-to-r from-primary to-fuchsia-500 hover:scale-105 transition-all">
               Salvar checklist & fotos
             </Button>
           </div>
@@ -551,22 +615,112 @@ function ServiceCard({ svc, onStatus, onSaveChecklist }: {
   );
 }
 
-function PhotoStrip({ title, urls, onRemove }: { title: string; urls: string[]; onRemove: (i: number) => void }) {
+function PhotoZone({ title, paths, kind, uploading, onUpload, onRemove }: {
+  title: string; paths: string[]; kind: "before" | "after"; uploading: boolean;
+  onUpload: (f: File, k: "before" | "after") => void;
+  onRemove: (i: number) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
   return (
-    <div>
-      <div className="text-xs font-semibold uppercase mb-1 opacity-70">{title}</div>
-      {urls.length === 0 ? (
-        <div className="text-xs text-muted-foreground italic">Sem fotos</div>
+    <div className="rounded-lg border-2 border-dashed border-muted p-3 hover:border-primary/40 transition-colors">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-bold uppercase opacity-70">{title}</span>
+        <Button size="sm" variant="outline" disabled={uploading} onClick={() => inputRef.current?.click()} className="hover:scale-105 transition-transform">
+          <Upload className="h-3 w-3 mr-1" />{uploading ? "Enviando..." : "Enviar foto"}
+        </Button>
+        <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={(e) => {
+          const f = e.target.files?.[0]; if (f) onUpload(f, kind); e.target.value = "";
+        }} />
+      </div>
+      {paths.length === 0 ? (
+        <div className="text-xs text-muted-foreground italic">Nenhuma foto enviada</div>
       ) : (
         <div className="flex gap-2 flex-wrap">
-          {urls.map((u, i) => (
-            <div key={i} className="relative group">
-              <img src={u} alt="" className="w-20 h-20 object-cover rounded border" loading="lazy" />
-              <button onClick={() => onRemove(i)} className="absolute -top-1 -right-1 bg-rose-500 text-white rounded-full w-5 h-5 text-xs opacity-0 group-hover:opacity-100 transition-opacity">×</button>
-            </div>
-          ))}
+          {paths.map((p, i) => <SignedPhoto key={p + i} path={p} onRemove={() => onRemove(i)} />)}
         </div>
       )}
     </div>
   );
 }
+
+function SignedPhoto({ path, onRemove }: { path: string; onRemove: () => void }) {
+  const getUrl = useServerFn(getMarocasPhotoSignedUrl);
+  const q = useQuery({
+    queryKey: ["marocas", "photo", path],
+    queryFn: () => getUrl({ data: { path } }),
+    staleTime: 50 * 60_000,
+  });
+  return (
+    <div className="relative group">
+      {q.data?.url ? (
+        <a href={q.data.url} target="_blank" rel="noreferrer">
+          <img src={q.data.url} alt="" className="w-20 h-20 object-cover rounded border hover:scale-110 transition-transform" loading="lazy" />
+        </a>
+      ) : (
+        <div className="w-20 h-20 rounded border bg-muted animate-pulse" />
+      )}
+      <button onClick={onRemove} className="absolute -top-1 -right-1 bg-rose-500 text-white rounded-full w-5 h-5 text-xs opacity-0 group-hover:opacity-100 transition-opacity">×</button>
+    </div>
+  );
+}
+
+function AuditTimeline({ rows, loading }: { rows: any[]; loading: boolean }) {
+  return (
+    <div>
+      <h4 className="text-sm font-bold mb-2 flex items-center gap-1"><History className="h-4 w-4" /> Auditoria — quem fez o quê</h4>
+      {loading ? (
+        <div className="text-xs text-muted-foreground italic">Carregando histórico...</div>
+      ) : rows.length === 0 ? (
+        <div className="text-xs text-muted-foreground italic">Sem eventos registrados ainda.</div>
+      ) : (
+        <ol className="space-y-1 max-h-60 overflow-y-auto pr-2">
+          {rows.map((r) => (
+            <li key={r.id} className="text-xs flex items-start gap-2 p-2 rounded bg-muted/30">
+              <Badge variant="outline" className="font-mono text-[10px]">{r.action}</Badge>
+              <span className="flex-1">{r.user_email ?? r.user_id?.slice(0, 8) ?? "—"}</span>
+              <span className="text-muted-foreground tabular-nums">{dt(r.created_at)}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+    </div>
+  );
+}
+
+function AlertsPanel({ alerts }: { alerts: any[] }) {
+  const active = alerts.filter((a) => !a.is_read).slice(0, 5);
+  const handlePrint = (period: "dia" | "semana") => {
+    window.print();
+    toast.info(`Relatório ${period === "dia" ? "diário" : "semanal"} pronto para PDF — use "Salvar como PDF" na caixa de impressão.`);
+  };
+  return (
+    <Card className="p-4 bg-gradient-to-r from-amber-500/10 via-rose-500/5 to-transparent border-amber-500/30">
+      <div className="flex items-center gap-2 flex-wrap">
+        <Bell className="h-5 w-5 text-amber-600" />
+        <h3 className="font-bold">Alertas SLA & Relatórios</h3>
+        <span className="text-xs text-muted-foreground">{active.length} alerta(s) ativo(s)</span>
+        <div className="ml-auto flex gap-2 print:hidden">
+          <Button size="sm" variant="outline" onClick={() => handlePrint("dia")} className="hover:scale-105 transition-transform">
+            <Printer className="h-3 w-3 mr-1" /> PDF diário
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => handlePrint("semana")} className="hover:scale-105 transition-transform">
+            <Printer className="h-3 w-3 mr-1" /> PDF semanal
+          </Button>
+        </div>
+      </div>
+      {active.length > 0 && (
+        <ul className="mt-3 space-y-1">
+          {active.map((a) => (
+            <li key={a.id} className="text-xs flex items-center gap-2">
+              <Badge className={a.severity === "critical" ? STATUS_TONE.atrasado : STATUS_TONE.em_andamento}>{a.severity}</Badge>
+              <strong>{a.title}</strong>
+              <span className="text-muted-foreground">— {a.message}</span>
+              <span className="ml-auto text-muted-foreground tabular-nums">{dt(a.created_at)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
+  );
+}
+
