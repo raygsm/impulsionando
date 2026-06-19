@@ -5,6 +5,8 @@ import { useMemo, useState } from "react";
 import {
   listMarocasServices,
   sendMarocasReportNow,
+  listMarocasReportSchedules,
+  upsertMarocasReportSchedule,
   MAROCAS_SLA_MINUTES,
 } from "@/lib/marocas.functions";
 import {
@@ -21,8 +23,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
-import { ArrowLeft, Bell, RotateCcw, Save, Send, Eye } from "lucide-react";
+import { ArrowLeft, Bell, RotateCcw, Save, Send, Eye, History } from "lucide-react";
 import { toast } from "sonner";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/_authenticated/marocas/cockpit/notificacoes")({
   head: () => ({ meta: [{ title: "Marocas — Notificações & Limiares" }] }),
@@ -49,6 +52,23 @@ function NotificationsConfigPage() {
   const services = useServerFn(listMarocasServices);
   const svcQ = useQuery({ queryKey: ["marocas", "services", "preview"], queryFn: () => services({ data: {} }) });
   const sendReport = useServerFn(sendMarocasReportNow);
+  const listSchedules = useServerFn(listMarocasReportSchedules);
+  const upsertSchedule = useServerFn(upsertMarocasReportSchedule);
+
+  // Carrega schedules salvos no servidor e mescla na configuração local
+  const schedQ = useQuery({ queryKey: ["marocas", "report-schedules"], queryFn: () => listSchedules() });
+  useEffect(() => {
+    if (!schedQ.data) return;
+    const d = schedQ.data.find((s: any) => s.period === "dia");
+    const w = schedQ.data.find((s: any) => s.period === "semana");
+    setCfg((prev) => ({
+      ...prev,
+      reports: {
+        daily: d ? { enabled: d.enabled, hour: d.hour, channels: d.channels, weekday: undefined } : prev.reports.daily,
+        weekly: w ? { enabled: w.enabled, hour: w.hour, channels: w.channels, weekday: w.weekday ?? 1 } : prev.reports.weekly,
+      },
+    }));
+  }, [schedQ.data]);
 
   const updateType = (key: string, patch: Partial<NotifyConfig["types"][string]>) => {
     setCfg({ ...cfg, types: { ...cfg.types, [key]: { ...cfg.types[key], ...patch } } });
@@ -78,7 +98,19 @@ function NotificationsConfigPage() {
     return items.slice(0, 20);
   }, [svcQ.data, cfg]);
 
-  const handleSave = () => { saveNotifyConfig(cfg); toast.success("Configuração salva localmente"); };
+  const handleSave = async () => {
+    saveNotifyConfig(cfg);
+    // Persiste schedules diário/semanal no servidor (para o pg_cron disparar)
+    try {
+      await Promise.all([
+        upsertSchedule({ data: { period: "dia", hour: cfg.reports.daily.hour, weekday: null, channels: cfg.reports.daily.channels, enabled: cfg.reports.daily.enabled } }),
+        upsertSchedule({ data: { period: "semana", hour: cfg.reports.weekly.hour, weekday: cfg.reports.weekly.weekday ?? 1, channels: cfg.reports.weekly.channels, enabled: cfg.reports.weekly.enabled } }),
+      ]);
+      toast.success("Configuração salva (limiares locais + agendamento no servidor)");
+    } catch (e: any) {
+      toast.error(`Limiares salvos localmente, mas o agendamento falhou: ${e.message ?? e}`);
+    }
+  };
   const handleReset = () => { const d = defaultNotifyConfig(); setCfg(d); saveNotifyConfig(d); toast.success("Restaurado para padrão"); };
 
   const handleSendNow = async (period: "dia" | "semana") => {
@@ -89,7 +121,7 @@ function NotificationsConfigPage() {
     if (period === "dia") from.setHours(0, 0, 0, 0); else from.setDate(now.getDate() - 7);
     try {
       const r = await sendReport({ data: { period, from: from.toISOString(), to: now.toISOString(), channels } });
-      toast.success(`Relatório enviado: ${r.total} serviços (${r.done} concluídos)`);
+      toast.success(`Relatório enviado: ${r.total} serviços (${r.done} concluídos, status ${r.status})`);
     } catch (e: any) { toast.error(`Falha: ${e.message ?? e}`); }
   };
 
@@ -102,6 +134,7 @@ function NotificationsConfigPage() {
           </Link>
           <h1 className="text-2xl font-bold flex items-center gap-2"><Bell className="h-6 w-6 text-amber-600" /> Notificações & limiares</h1>
           <div className="ml-auto flex gap-2">
+            <Link to="/marocas/cockpit/relatorios-enviados"><Button variant="outline"><History className="h-4 w-4 mr-1" /> Histórico</Button></Link>
             <Button variant="outline" onClick={handleReset}><RotateCcw className="h-4 w-4 mr-1" /> Padrão</Button>
             <Button onClick={handleSave} className="bg-gradient-to-r from-primary to-fuchsia-500"><Save className="h-4 w-4 mr-1" /> Salvar</Button>
           </div>

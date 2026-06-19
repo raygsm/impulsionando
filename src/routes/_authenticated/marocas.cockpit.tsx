@@ -744,6 +744,11 @@ function AlertsPanel({ alerts }: {
               <Settings className="h-3 w-3 mr-1" /> Notificações & limiares
             </Button>
           </Link>
+          <Link to="/marocas/cockpit/relatorios-enviados">
+            <Button size="sm" variant="outline" className="hover:scale-105 transition-transform">
+              <FileText className="h-3 w-3 mr-1" /> Envios (histórico)
+            </Button>
+          </Link>
         </div>
       </div>
 

@@ -292,6 +292,7 @@ export const listMarocasServiceAudit = createServerFn({ method: "POST" })
   .inputValidator((d: { serviceId: string }) =>
     z.object({ serviceId: z.string().uuid() }).parse(d))
   .handler(async ({ context, data }) => {
+    await assertMarocasAuthorized(context.supabase, context.userId);
     const { data: rows, error } = await context.supabase
       .from("audit_logs")
       .select("id, action, before, after, metadata, user_email, user_id, created_at")
@@ -350,6 +351,7 @@ export const listMarocasAuditByPeriod = createServerFn({ method: "POST" })
       professionalId: z.string().uuid().optional(),
     }).parse(d))
   .handler(async ({ context, data }) => {
+    await assertMarocasAuthorized(context.supabase, context.userId);
     // 1) buscar serviços do período (com apto/prestador)
     let svcQ = context.supabase
       .from("marocas_services")
@@ -385,39 +387,182 @@ export const sendMarocasReportNow = createServerFn({ method: "POST" })
       channels: z.array(z.enum(["cockpit", "whatsapp", "email"])).min(1),
     }).parse(d))
   .handler(async ({ context, data }) => {
-    const { data: svcs, error } = await context.supabase
-      .from("marocas_services")
-      .select("id, status, service_type, scheduled_for")
-      .gte("scheduled_for", new Date(data.from).toISOString())
-      .lte("scheduled_for", new Date(data.to).toISOString());
-    if (error) throw error;
-    const total = (svcs ?? []).length;
-    const done = (svcs ?? []).filter((s) => s.status === "concluido").length;
-    const title = `Relatório ${data.period === "dia" ? "diário" : "semanal"} — Marocas`;
-    const message = `${total} serviços no período · ${done} concluídos · canais: ${data.channels.join(", ")}`;
-
-    // Sempre registra notificação "cockpit" para histórico
-    const { error: nErr } = await context.supabase.from("notifications").insert({
-      user_id: context.userId,
-      category: "marocas_report",
-      severity: "info",
-      title,
-      message,
-      action_label: "Abrir relatório",
-      action_url: `/marocas/cockpit/relatorio`,
+    await assertMarocasAuthorized(context.supabase, context.userId);
+    return await dispatchMarocasReport({
+      supabase: context.supabase,
+      userId: context.userId,
+      period: data.period,
+      from: data.from,
+      to: data.to,
+      channels: data.channels,
+      triggeredBy: "manual",
+      recipientEmail: (context.claims as any)?.email ?? null,
     });
-    if (nErr) throw nErr;
+  });
 
-    // Outros canais (whatsapp/email) ficam registrados como intenção via audit_logs
-    const extra = data.channels.filter((c) => c !== "cockpit");
-    if (extra.length > 0) {
-      await context.supabase.from("audit_logs").insert({
-        entity: "marocas_report",
-        entity_id: null,
-        action: `dispatch_${data.period}`,
-        metadata: { channels: extra, total, done, from: data.from, to: data.to } as never,
-        user_id: context.userId,
+// Núcleo compartilhado de envio — usado pela fn autenticada e pelo hook público (com supabase admin).
+export async function dispatchMarocasReport(opts: {
+  supabase: any;
+  userId: string | null;
+  period: "dia" | "semana";
+  from: string;
+  to: string;
+  channels: string[];
+  triggeredBy: "manual" | "cron";
+  scheduleId?: string | null;
+  recipientEmail?: string | null;
+  recipientPhone?: string | null;
+}) {
+  const { supabase, userId, period, from, to, channels, triggeredBy } = opts;
+  const fromIso = new Date(from).toISOString();
+  const toIso = new Date(to).toISOString();
+  let status: "success" | "error" | "partial" = "success";
+  let errorMsg: string | null = null;
+  let total = 0, done = 0, late = 0;
+  try {
+    const { data: svcs, error } = await supabase
+      .from("marocas_services")
+      .select("id, status, service_type, scheduled_for, started_at")
+      .gte("scheduled_for", fromIso)
+      .lte("scheduled_for", toIso);
+    if (error) throw error;
+    total = (svcs ?? []).length;
+    done = (svcs ?? []).filter((s: any) => s.status === "concluido").length;
+    const now = Date.now();
+    late = (svcs ?? []).filter((s: any) => {
+      const sla = MAROCAS_SLA_MINUTES[s.service_type] ?? 60;
+      if (s.status === "em_andamento" && s.started_at) return (now - new Date(s.started_at).getTime()) / 60000 > sla;
+      if (s.status === "agendado") return now > new Date(s.scheduled_for).getTime();
+      return false;
+    }).length;
+
+    const title = `Relatório ${period === "dia" ? "diário" : "semanal"} — Marocas`;
+    const message = `${total} serviços · ${done} concluídos · ${late} atrasados (${new Date(from).toLocaleDateString("pt-BR")} → ${new Date(to).toLocaleDateString("pt-BR")})`;
+
+    // Canal cockpit: notificação direta
+    if (channels.includes("cockpit") && userId) {
+      const { error: nErr } = await supabase.from("notifications").insert({
+        user_id: userId,
+        category: "marocas_report",
+        severity: "info",
+        title,
+        message,
+        action_label: "Abrir relatório",
+        action_url: `/marocas/cockpit/relatorio`,
       });
+      if (nErr) { status = "partial"; errorMsg = `cockpit: ${nErr.message}`; }
     }
-    return { ok: true, total, done };
+
+    // Canais whatsapp/email: enfileirar em message_outbox (worker externo despacha)
+    const queued: Array<{ channel: string }> = [];
+    for (const ch of channels) {
+      if (ch === "cockpit") continue;
+      const recipient = ch === "email" ? opts.recipientEmail : opts.recipientPhone;
+      const { error: oErr } = await supabase.from("message_outbox").insert({
+        event_code: `marocas_report_${period}`,
+        channel: ch,
+        recipient_email: ch === "email" ? recipient : null,
+        recipient_phone: ch === "whatsapp" ? recipient : null,
+        recipient_user_id: userId,
+        subject: title,
+        body: message,
+        payload: { period, from: fromIso, to: toIso, total, done, late, triggered_by: triggeredBy },
+        status: "pending",
+        attempts: 0,
+        max_attempts: 3,
+        scheduled_at: new Date().toISOString(),
+        reference_type: "marocas_report",
+      });
+      if (oErr) { status = status === "success" ? "partial" : status; errorMsg = `${ch}: ${oErr.message}`; }
+      else queued.push({ channel: ch });
+    }
+  } catch (e: any) {
+    status = "error";
+    errorMsg = e?.message ?? String(e);
+  }
+
+  // Registra histórico (best effort)
+  try {
+    await supabase.from("marocas_report_runs").insert({
+      user_id: userId,
+      schedule_id: opts.scheduleId ?? null,
+      period,
+      range_from: fromIso,
+      range_to: toIso,
+      channels,
+      status,
+      total, done, late,
+      error: errorMsg,
+      triggered_by: triggeredBy,
+    });
+  } catch { /* silencioso */ }
+
+  return { ok: status !== "error", status, total, done, late, error: errorMsg };
+}
+
+// === Autorização Marocas (admin/gestor) ===
+async function assertMarocasAuthorized(supabase: any, userId: string) {
+  const { data, error } = await supabase.rpc("is_marocas_authorized", { _user_id: userId });
+  if (error) throw error;
+  if (!data) throw new Error("Forbidden: requer perfil admin ou gestor");
+}
+
+// === Schedules de relatórios automáticos ===
+export const listMarocasReportSchedules = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertMarocasAuthorized(context.supabase, context.userId);
+    const { data, error } = await (context.supabase as any)
+      .from("marocas_report_schedules")
+      .select("id, period, hour, weekday, channels, enabled, updated_at")
+      .order("period");
+    if (error) throw error;
+    return data ?? [];
+  });
+
+export const upsertMarocasReportSchedule = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { period: "dia" | "semana"; hour: number; weekday?: number | null; channels: string[]; enabled: boolean }) =>
+    z.object({
+      period: z.enum(["dia", "semana"]),
+      hour: z.number().int().min(0).max(23),
+      weekday: z.number().int().min(0).max(6).nullable().optional(),
+      channels: z.array(z.enum(["cockpit", "whatsapp", "email"])).min(1),
+      enabled: z.boolean(),
+    }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertMarocasAuthorized(context.supabase, context.userId);
+    const row = {
+      user_id: context.userId,
+      period: data.period,
+      hour: data.hour,
+      weekday: data.period === "semana" ? (data.weekday ?? 1) : null,
+      channels: data.channels,
+      enabled: data.enabled,
+    };
+    const { error } = await (context.supabase as any)
+      .from("marocas_report_schedules")
+      .upsert(row, { onConflict: "user_id,period" });
+    if (error) throw error;
+    return { ok: true };
+  });
+
+export const listMarocasReportRuns = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { period?: "dia" | "semana"; limit?: number }) =>
+    z.object({
+      period: z.enum(["dia", "semana"]).optional(),
+      limit: z.number().int().min(1).max(200).optional(),
+    }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertMarocasAuthorized(context.supabase, context.userId);
+    let q = (context.supabase as any)
+      .from("marocas_report_runs")
+      .select("id, period, range_from, range_to, channels, status, total, done, late, error, triggered_by, created_at, user_id")
+      .order("created_at", { ascending: false })
+      .limit(data.limit ?? 50);
+    if (data.period) q = q.eq("period", data.period);
+    const { data: rows, error } = await q;
+    if (error) throw error;
+    return rows ?? [];
   });
