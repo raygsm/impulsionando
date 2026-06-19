@@ -90,6 +90,48 @@ function MarocasReportPage() {
 
   const handlePrint = () => window.print();
 
+  const fetchAudit = useServerFn(listMarocasAuditByPeriod);
+  const exportAudit = async (format: "csv" | "json") => {
+    try {
+      const { services: svcs, events } = await fetchAudit({ data: { from: range.start.toISOString(), to: range.end.toISOString() } });
+      const svcMap = new Map(svcs.map((s: any) => [s.id, s]));
+      const enriched = events.map((e: any) => {
+        const s: any = svcMap.get(e.entity_id);
+        return {
+          created_at: e.created_at,
+          action: e.action,
+          apartment: s?.marocas_apartments?.code ?? "—",
+          professional: s?.marocas_professionals?.full_name ?? "—",
+          service_type: s?.service_type ?? "—",
+          service_status: s?.status ?? "—",
+          user_email: e.user_email ?? e.user_id ?? "—",
+          metadata: e.metadata ?? {},
+        };
+      });
+      const base = `auditoria-marocas-${isoDay(range.start)}_${isoDay(range.end)}`;
+      let blob: Blob;
+      let filename: string;
+      if (format === "json") {
+        blob = new Blob([JSON.stringify({ from: range.start, to: range.end, count: enriched.length, events: enriched }, null, 2)], { type: "application/json" });
+        filename = `${base}.json`;
+      } else {
+        const safe = (s: any) => String(s ?? "").replace(/"/g, '""');
+        const header = "created_at,apartment,professional,service_type,service_status,action,user,metadata\n";
+        const body = enriched.map((r) =>
+          `"${safe(r.created_at)}","${safe(r.apartment)}","${safe(r.professional)}","${safe(r.service_type)}","${safe(r.service_status)}","${safe(r.action)}","${safe(r.user_email)}","${safe(JSON.stringify(r.metadata))}"`
+        ).join("\n");
+        blob = new Blob([header + body], { type: "text/csv;charset=utf-8" });
+        filename = `${base}.csv`;
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+      toast.success(`Auditoria exportada (${enriched.length} eventos)`);
+    } catch (e: any) {
+      toast.error(`Falha ao exportar: ${e.message ?? e}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="print:hidden border-b bg-card">
