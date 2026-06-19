@@ -350,6 +350,7 @@ export const listMarocasAuditByPeriod = createServerFn({ method: "POST" })
       professionalId: z.string().uuid().optional(),
     }).parse(d))
   .handler(async ({ context, data }) => {
+    await assertMarocasAuthorized(context.supabase, context.userId);
     // 1) buscar serviços do período (com apto/prestador)
     let svcQ = context.supabase
       .from("marocas_services")
