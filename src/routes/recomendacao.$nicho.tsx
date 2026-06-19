@@ -368,6 +368,25 @@ const RECOMENDACOES: Record<string, Recomendacao> = {
       { level: "full", modules: ["Multi-polos", "BI acadêmico", "EAD", "Integrações MEC/sistemas oficiais"], why: "Para grupos com vários polos, EAD próprio e integrações oficiais." },
     ],
     combo: { title: "Matrícula + Portal do aluno + Financeiro", text: "Aluno entra, acompanha o curso pelo portal, paga em dia. Secretaria sai da planilha." },
+    verticalOffer: {
+      eyebrow: "Universidade com muitos polos?",
+      title: "White Label Acadêmico — sua marca, sua plataforma, todos os polos sob controle",
+      description:
+        "Reitoria centraliza políticas, matrícula, financeiro e BI; cada polo opera com a sua identidade, autonomia local e relatórios próprios. Tudo em uma instância White Label da Impulsionando, com sua marca, seu domínio e seu app.",
+      bullets: [
+        "Marca, domínio e app próprios — reitoria + cada polo com identidade local",
+        "Multi-polos com permissões por unidade, curso e coordenação",
+        "BI consolidado da reitoria com drill-down por polo, curso e turma",
+        "Matrícula, financeiro, EAD e portal do aluno padronizados em todos os polos",
+        "Onboarding assistido + migração de bases e contratos existentes",
+      ],
+      cta: {
+        label: "Contratar White Label Acadêmico",
+        to: "/orcamento",
+        search: { segmento: "white-label-educacao", origem: "recomendacao-educacao" },
+      },
+      secondaryCta: { label: "Ver como funciona o White Label", to: "/nichos/white-label" },
+    },
   },
 };
 
