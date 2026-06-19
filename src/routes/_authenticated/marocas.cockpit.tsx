@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   listMarocasApartments,
   listMarocasServices,
@@ -14,8 +14,15 @@ import {
   requestMarocasSupplyOrder,
   approveMarocasSupplyOrder,
   receiveMarocasSupplyOrder,
+  createMarocasPhotoUploadUrl,
+  getMarocasPhotoSignedUrl,
+  logMarocasServiceAudit,
+  listMarocasServiceAudit,
+  createMarocasSlaAlert,
+  listMarocasSlaAlerts,
   MAROCAS_SLA_MINUTES,
 } from "@/lib/marocas.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/app/PageElements";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -27,9 +34,10 @@ import { toast } from "sonner";
 import {
   Building2, Sparkles, Package, Wrench, Banknote, ExternalLink,
   Calendar, Clock, AlertTriangle, CheckCircle2, Camera, ListChecks,
-  ShoppingCart, TrendingUp, Zap,
+  ShoppingCart, TrendingUp, Zap, History, Bell, Printer, Upload,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/_authenticated/marocas/cockpit")({
   head: () => ({ meta: [{ title: "Marocas — Cockpit de Temporada" }] }),
