@@ -464,10 +464,10 @@ export function HomePage() {
                 <h3 id="hero-perfil-empresa" className="sr-only">
                   Sou empresa — usar a plataforma na minha operação
                 </h3>
-                <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 gap-2 h-auto py-4 flex-col w-full" onClick={() => trackHeroCta("sou_empresa")}>
+                <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 h-auto min-h-[76px] py-3 px-4 w-full [&>*]:flex [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-1 [&>*]:text-center [&>*]:w-full" onClick={() => trackHeroCta("sou_empresa")}>
                   <Link to="/orcamento" data-analytics="hero-sou-empresa">
-                    <span className="flex items-center gap-2 font-semibold"><Building2 className="w-4 h-4" /> Sou empresa</span>
-                    <span className="text-xs font-normal opacity-75">Quero usar na minha operação</span>
+                    <span className="flex items-center justify-center gap-2 font-semibold leading-tight"><Building2 className="w-4 h-4 shrink-0" /> Sou empresa</span>
+                    <span className="text-xs font-normal opacity-75 leading-tight">Quero usar na minha operação</span>
                   </Link>
                 </Button>
               </article>
@@ -475,10 +475,10 @@ export function HomePage() {
                 <h3 id="hero-perfil-white-label" className="sr-only">
                   White Label — revender a plataforma com a minha marca
                 </h3>
-                <Button asChild size="lg" className="bg-gradient-primary gap-2 h-auto py-4 flex-col w-full" onClick={() => trackHeroCta("white_label")}>
+                <Button asChild size="lg" className="bg-gradient-primary h-auto min-h-[76px] py-3 px-4 w-full [&>*]:flex [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-1 [&>*]:text-center [&>*]:w-full" onClick={() => trackHeroCta("white_label")}>
                   <Link to="/nichos/white-label" data-analytics="hero-white-label">
-                    <span className="flex items-center gap-2 font-semibold"><Rocket className="w-4 h-4" /> White Label</span>
-                    <span className="text-xs font-normal opacity-90">Quero revender com a minha marca</span>
+                    <span className="flex items-center justify-center gap-2 font-semibold leading-tight"><Rocket className="w-4 h-4 shrink-0" /> White Label</span>
+                    <span className="text-xs font-normal opacity-90 leading-tight">Quero revender com a minha marca</span>
                   </Link>
                 </Button>
               </article>
@@ -490,12 +490,12 @@ export function HomePage() {
                   asChild
                   size="lg"
                   data-cta="clube"
-                  className="glass-cta gap-2 h-auto py-4 flex-col w-full"
+                  className="glass-cta h-auto min-h-[76px] py-3 px-4 w-full [&>*]:flex [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-1 [&>*]:text-center [&>*]:w-full"
                   onClick={() => trackHeroCta("clube")}
                 >
                   <Link to="/clube" data-analytics="hero-clube">
-                    <span className="flex items-center gap-2 font-semibold"><Gift className="w-4 h-4" /> Clube de Vantagens</span>
-                    <span className="text-xs font-normal opacity-90">Quero descontos e benefícios</span>
+                    <span className="flex items-center justify-center gap-2 font-semibold leading-tight"><Gift className="w-4 h-4 shrink-0" /> Clube de Vantagens</span>
+                    <span className="text-xs font-normal opacity-90 leading-tight">Quero descontos e benefícios</span>
                   </Link>
                 </Button>
               </article>
