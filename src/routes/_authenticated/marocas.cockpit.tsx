@@ -34,9 +34,10 @@ import { toast } from "sonner";
 import {
   Building2, Sparkles, Package, Wrench, Banknote, ExternalLink,
   Calendar, Clock, AlertTriangle, CheckCircle2, Camera, ListChecks,
-  ShoppingCart, TrendingUp, Zap, History, Bell, Printer, Upload,
+  ShoppingCart, TrendingUp, Zap, History, Bell, Printer, Upload, Settings, Download, FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { loadNotifyConfig, saveNotifyConfig, shouldNotify, type NotifyConfig } from "@/lib/marocas-notifications-config";
 
 
 export const Route = createFileRoute("/_authenticated/marocas/cockpit")({
