@@ -1,8 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
-  Stethoscope, HeartPulse,
-  UtensilsCrossed, Beer,
-  Home, Car, Calculator, Scale, Briefcase,
+  Stethoscope, HeartPulse, Activity, Dumbbell,
+  UtensilsCrossed, Beer, Factory,
+  Home, Car, Calculator, Scale, Briefcase, GraduationCap,
   CalendarRange, ShoppingBag, Layers,
   ArrowRight, Target, Sparkles,
 } from "lucide-react";
@@ -37,16 +37,20 @@ type NichoCard = {
  * já estão mesclados (um card cada), e ambos vivem sob "Saúde".
  */
 const NICHO_CARDS: Record<string, NichoCard> = {
+  // Todos os slugs abaixo têm entrada em RECOMENDACOES (recomendacao.$nicho.tsx).
+  // Mantenha sincronizado: testes em tests/nichos-funnel-routes.test.ts checam isso.
   clinicas:           { slug: "clinicas",           label: "Clínicas e Consultórios",  desc: "Agenda, prontuário, portal do paciente e relacionamento.",   icon: Stethoscope },
   psicologia:         { slug: "psicologia",         label: "Psicologia e Terapias",    desc: "Agenda, prontuário sigiloso, sessões e pagamento.",          icon: HeartPulse },
-  // saude/fitness/fornecedores/educacao não têm entrada em RECOMENDACOES
-  // (recomendacao.$nicho.tsx) — ficam fora do funil até existir conteúdo.
+  saude:              { slug: "saude",              label: "Saúde (outras áreas)",     desc: "Fisioterapia, nutrição, odontologia e terapias integrativas.", icon: Activity },
+  fitness:            { slug: "fitness",            label: "Fitness e Performance",    desc: "Academias, CrossFit, funcional, personal e estúdios.",        icon: Dumbbell },
   "bares-restaurantes": { slug: "bares-restaurantes", label: "Bares e Restaurantes",   desc: "Cardápio digital, QR Code, comanda, CRM e fidelidade.",      icon: UtensilsCrossed },
   microcervejarias:   { slug: "microcervejarias",   label: "Cervejarias",              desc: "PDV, marketplace B2B, eventos e ações de marca.",            icon: Beer },
+  fornecedores:       { slug: "fornecedores",       label: "Fornecedores e Indústria", desc: "Catálogo B2B, pedidos, comissões e CRM de revenda.",         icon: Factory },
   imobiliaria:        { slug: "imobiliaria",        label: "Imobiliária",              desc: "CRM imobiliário, visitas, propostas e portal do cliente.",   icon: Home },
   servicos:           { slug: "servicos",           label: "Serviços",                 desc: "Agenda, propostas, contratos, cobrança e relacionamento.",   icon: Briefcase },
   juridico:           { slug: "juridico",           label: "Escritório Jurídico",      desc: "CRM jurídico, processos, prazos e portal do cliente.",       icon: Scale },
   contabilidade:      { slug: "contabilidade",      label: "Contabilidade",            desc: "Portal do cliente, obrigações, documentos e financeiro.",    icon: Calculator },
+  educacao:           { slug: "educacao",           label: "Educação",                 desc: "Matrículas, polos, portal do aluno e educação corporativa.", icon: GraduationCap },
   eventos:            { slug: "eventos",            label: "Eventos",                  desc: "Ingressos, check-in, listas e relacionamento pós-evento.",   icon: CalendarRange },
   ecommerce:          { slug: "ecommerce",          label: "E-commerce e Varejo",      desc: "Catálogo, pedidos, estoque, CRM e pós-venda automatizado.",  icon: ShoppingBag },
   veiculos:           { slug: "veiculos",           label: "Revenda de Veículos",      desc: "Estoque, leads, propostas e financiamento integrado.",       icon: Car },

@@ -5905,6 +5905,7 @@ export type Database = {
           id: string
           nome: string
           ordem: number
+          recommendation_slug: string
           slug: string
         }
         Insert: {
@@ -5912,6 +5913,7 @@ export type Database = {
           id?: string
           nome: string
           ordem?: number
+          recommendation_slug: string
           slug: string
         }
         Update: {
@@ -5919,6 +5921,7 @@ export type Database = {
           id?: string
           nome?: string
           ordem?: number
+          recommendation_slug?: string
           slug?: string
         }
         Relationships: []
@@ -6448,6 +6451,7 @@ export type Database = {
           macro_id: string
           nome: string
           ordem: number
+          recommendation_slug: string
           slug: string
         }
         Insert: {
@@ -6456,6 +6460,7 @@ export type Database = {
           macro_id: string
           nome: string
           ordem?: number
+          recommendation_slug: string
           slug: string
         }
         Update: {
@@ -6464,6 +6469,7 @@ export type Database = {
           macro_id?: string
           nome?: string
           ordem?: number
+          recommendation_slug?: string
           slug?: string
         }
         Relationships: [
