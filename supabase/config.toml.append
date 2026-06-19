@@ -1,0 +1,2 @@
+[functions.mpago-webhook]
+verify_jwt = false
