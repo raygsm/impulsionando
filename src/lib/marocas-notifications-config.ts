@@ -10,16 +10,26 @@ export type NotifyTypeConfig = {
   lateOffsetMin: number; // minutos depois do SLA para soar "atrasado" (geralmente 0)
   channels: NotifyChannel[];
 };
-export type NotifyConfig = Record<string, NotifyTypeConfig>;
+export type ReportSchedule = { enabled: boolean; channels: NotifyChannel[]; hour: number; weekday?: number };
+export type NotifyConfig = {
+  types: Record<string, NotifyTypeConfig>;
+  reports: { daily: ReportSchedule; weekly: ReportSchedule };
+};
 
 const STORAGE_KEY = "marocas.notify.config.v1";
 
 export function defaultNotifyConfig(): NotifyConfig {
-  const cfg: NotifyConfig = {};
+  const types: Record<string, NotifyTypeConfig> = {};
   for (const k of Object.keys(MAROCAS_SLA_MINUTES)) {
-    cfg[k] = { enabled: true, warningPct: 80, lateOffsetMin: 0, channels: ["cockpit"] };
+    types[k] = { enabled: true, warningPct: 80, lateOffsetMin: 0, channels: ["cockpit"] };
   }
-  return cfg;
+  return {
+    types,
+    reports: {
+      daily: { enabled: false, channels: ["cockpit"], hour: 8 },
+      weekly: { enabled: false, channels: ["cockpit"], hour: 8, weekday: 1 },
+    },
+  };
 }
 
 export function loadNotifyConfig(): NotifyConfig {
@@ -28,11 +38,13 @@ export function loadNotifyConfig(): NotifyConfig {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return defaultNotifyConfig();
     const parsed = JSON.parse(raw) as Partial<NotifyConfig>;
-    const merged: NotifyConfig = { ...defaultNotifyConfig() };
-    for (const [k, v] of Object.entries(parsed)) {
-      if (v) merged[k] = v as NotifyTypeConfig;
-    }
-    return merged;
+    const base = defaultNotifyConfig();
+    const types = { ...base.types, ...(parsed.types ?? {}) };
+    const reports = {
+      daily: { ...base.reports.daily, ...(parsed.reports?.daily ?? {}) },
+      weekly: { ...base.reports.weekly, ...(parsed.reports?.weekly ?? {}) },
+    };
+    return { types, reports };
   } catch {
     return defaultNotifyConfig();
   }
@@ -49,7 +61,7 @@ export function shouldNotify(
   pct: number,
   late: boolean,
 ): "warning" | "late" | null {
-  const c = cfg[serviceType] ?? defaultNotifyConfig()[serviceType];
+  const c = cfg.types[serviceType] ?? defaultNotifyConfig().types[serviceType];
   if (!c?.enabled) return null;
   if (late) return "late";
   if (pct >= c.warningPct) return "warning";

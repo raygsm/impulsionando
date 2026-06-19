@@ -378,6 +378,7 @@ import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenti
 import { Route as AuthenticatedRestauranteSalaoNotificacoesRouteImport } from './routes/_authenticated/restaurante.salao.notificacoes'
 import { Route as AuthenticatedRestauranteSalaoLogsRouteImport } from './routes/_authenticated/restaurante.salao.logs'
 import { Route as AuthenticatedMarocasCockpitRelatorioRouteImport } from './routes/_authenticated/marocas.cockpit.relatorio'
+import { Route as AuthenticatedMarocasCockpitNotificacoesRouteImport } from './routes/_authenticated/marocas.cockpit.notificacoes'
 import { Route as AuthenticatedImobiliariaAprovacoesImprimirFilaRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes.imprimir-fila'
 import { Route as AuthenticatedEmpresaTalentosRedeRouteImport } from './routes/_authenticated/empresa.talentos.rede'
 import { Route as AuthenticatedEmpresaTalentosDashboardRouteImport } from './routes/_authenticated/empresa.talentos.dashboard'
@@ -2434,6 +2435,12 @@ const AuthenticatedMarocasCockpitRelatorioRoute =
     path: '/relatorio',
     getParentRoute: () => AuthenticatedMarocasCockpitRoute,
   } as any)
+const AuthenticatedMarocasCockpitNotificacoesRoute =
+  AuthenticatedMarocasCockpitNotificacoesRouteImport.update({
+    id: '/notificacoes',
+    path: '/notificacoes',
+    getParentRoute: () => AuthenticatedMarocasCockpitRoute,
+  } as any)
 const AuthenticatedImobiliariaAprovacoesImprimirFilaRoute =
   AuthenticatedImobiliariaAprovacoesImprimirFilaRouteImport.update({
     id: '/imprimir-fila',
@@ -2919,6 +2926,7 @@ export interface FileRoutesByFullPath {
   '/empresa/talentos/dashboard': typeof AuthenticatedEmpresaTalentosDashboardRoute
   '/empresa/talentos/rede': typeof AuthenticatedEmpresaTalentosRedeRoute
   '/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
+  '/marocas/cockpit/notificacoes': typeof AuthenticatedMarocasCockpitNotificacoesRoute
   '/marocas/cockpit/relatorio': typeof AuthenticatedMarocasCockpitRelatorioRoute
   '/restaurante/salao/logs': typeof AuthenticatedRestauranteSalaoLogsRoute
   '/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
@@ -3299,6 +3307,7 @@ export interface FileRoutesByTo {
   '/empresa/talentos/dashboard': typeof AuthenticatedEmpresaTalentosDashboardRoute
   '/empresa/talentos/rede': typeof AuthenticatedEmpresaTalentosRedeRoute
   '/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
+  '/marocas/cockpit/notificacoes': typeof AuthenticatedMarocasCockpitNotificacoesRoute
   '/marocas/cockpit/relatorio': typeof AuthenticatedMarocasCockpitRelatorioRoute
   '/restaurante/salao/logs': typeof AuthenticatedRestauranteSalaoLogsRoute
   '/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
@@ -3693,6 +3702,7 @@ export interface FileRoutesById {
   '/_authenticated/empresa/talentos/dashboard': typeof AuthenticatedEmpresaTalentosDashboardRoute
   '/_authenticated/empresa/talentos/rede': typeof AuthenticatedEmpresaTalentosRedeRoute
   '/_authenticated/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
+  '/_authenticated/marocas/cockpit/notificacoes': typeof AuthenticatedMarocasCockpitNotificacoesRoute
   '/_authenticated/marocas/cockpit/relatorio': typeof AuthenticatedMarocasCockpitRelatorioRoute
   '/_authenticated/restaurante/salao/logs': typeof AuthenticatedRestauranteSalaoLogsRoute
   '/_authenticated/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
@@ -4086,6 +4096,7 @@ export interface FileRouteTypes {
     | '/empresa/talentos/dashboard'
     | '/empresa/talentos/rede'
     | '/imobiliaria/aprovacoes/imprimir-fila'
+    | '/marocas/cockpit/notificacoes'
     | '/marocas/cockpit/relatorio'
     | '/restaurante/salao/logs'
     | '/restaurante/salao/notificacoes'
@@ -4466,6 +4477,7 @@ export interface FileRouteTypes {
     | '/empresa/talentos/dashboard'
     | '/empresa/talentos/rede'
     | '/imobiliaria/aprovacoes/imprimir-fila'
+    | '/marocas/cockpit/notificacoes'
     | '/marocas/cockpit/relatorio'
     | '/restaurante/salao/logs'
     | '/restaurante/salao/notificacoes'
@@ -4859,6 +4871,7 @@ export interface FileRouteTypes {
     | '/_authenticated/empresa/talentos/dashboard'
     | '/_authenticated/empresa/talentos/rede'
     | '/_authenticated/imobiliaria/aprovacoes/imprimir-fila'
+    | '/_authenticated/marocas/cockpit/notificacoes'
     | '/_authenticated/marocas/cockpit/relatorio'
     | '/_authenticated/restaurante/salao/logs'
     | '/_authenticated/restaurante/salao/notificacoes'
@@ -7628,6 +7641,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMarocasCockpitRelatorioRouteImport
       parentRoute: typeof AuthenticatedMarocasCockpitRoute
     }
+    '/_authenticated/marocas/cockpit/notificacoes': {
+      id: '/_authenticated/marocas/cockpit/notificacoes'
+      path: '/notificacoes'
+      fullPath: '/marocas/cockpit/notificacoes'
+      preLoaderRoute: typeof AuthenticatedMarocasCockpitNotificacoesRouteImport
+      parentRoute: typeof AuthenticatedMarocasCockpitRoute
+    }
     '/_authenticated/imobiliaria/aprovacoes/imprimir-fila': {
       id: '/_authenticated/imobiliaria/aprovacoes/imprimir-fila'
       path: '/imprimir-fila'
@@ -8312,11 +8332,14 @@ const AuthenticatedImobiliariaAprovacoesRouteWithChildren =
   )
 
 interface AuthenticatedMarocasCockpitRouteChildren {
+  AuthenticatedMarocasCockpitNotificacoesRoute: typeof AuthenticatedMarocasCockpitNotificacoesRoute
   AuthenticatedMarocasCockpitRelatorioRoute: typeof AuthenticatedMarocasCockpitRelatorioRoute
 }
 
 const AuthenticatedMarocasCockpitRouteChildren: AuthenticatedMarocasCockpitRouteChildren =
   {
+    AuthenticatedMarocasCockpitNotificacoesRoute:
+      AuthenticatedMarocasCockpitNotificacoesRoute,
     AuthenticatedMarocasCockpitRelatorioRoute:
       AuthenticatedMarocasCockpitRelatorioRoute,
   }

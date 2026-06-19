@@ -338,3 +338,86 @@ export const listMarocasSlaAlerts = createServerFn({ method: "GET" })
     if (error) throw error;
     return data ?? [];
   });
+
+// === Auditoria por período (cockpit-wide) ===
+export const listMarocasAuditByPeriod = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { from: string; to: string; apartmentId?: string; professionalId?: string }) =>
+    z.object({
+      from: z.string().datetime().or(z.string().min(10)),
+      to: z.string().datetime().or(z.string().min(10)),
+      apartmentId: z.string().uuid().optional(),
+      professionalId: z.string().uuid().optional(),
+    }).parse(d))
+  .handler(async ({ context, data }) => {
+    // 1) buscar serviços do período (com apto/prestador)
+    let svcQ = context.supabase
+      .from("marocas_services")
+      .select("id, service_type, status, scheduled_for, apartment_id, professional_id, marocas_apartments(code,title), marocas_professionals(full_name,role)")
+      .gte("scheduled_for", new Date(data.from).toISOString())
+      .lte("scheduled_for", new Date(data.to).toISOString());
+    if (data.apartmentId) svcQ = svcQ.eq("apartment_id", data.apartmentId);
+    if (data.professionalId) svcQ = svcQ.eq("professional_id", data.professionalId);
+    const { data: services, error: sErr } = await svcQ;
+    if (sErr) throw sErr;
+    const ids = (services ?? []).map((s) => s.id);
+    if (ids.length === 0) return { services: [], events: [] };
+
+    const { data: events, error: eErr } = await context.supabase
+      .from("audit_logs")
+      .select("id, entity_id, action, before, after, metadata, user_email, user_id, created_at")
+      .eq("entity", "marocas_service")
+      .in("entity_id", ids)
+      .order("created_at", { ascending: false })
+      .limit(5000);
+    if (eErr) throw eErr;
+    return { services: services ?? [], events: events ?? [] };
+  });
+
+// === Envio manual de relatório (gera notificações por canal) ===
+export const sendMarocasReportNow = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { period: "dia" | "semana"; from: string; to: string; channels: Array<"cockpit" | "whatsapp" | "email"> }) =>
+    z.object({
+      period: z.enum(["dia", "semana"]),
+      from: z.string().min(10),
+      to: z.string().min(10),
+      channels: z.array(z.enum(["cockpit", "whatsapp", "email"])).min(1),
+    }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: svcs, error } = await context.supabase
+      .from("marocas_services")
+      .select("id, status, service_type, scheduled_for")
+      .gte("scheduled_for", new Date(data.from).toISOString())
+      .lte("scheduled_for", new Date(data.to).toISOString());
+    if (error) throw error;
+    const total = (svcs ?? []).length;
+    const done = (svcs ?? []).filter((s) => s.status === "concluido").length;
+    const title = `Relatório ${data.period === "dia" ? "diário" : "semanal"} — Marocas`;
+    const message = `${total} serviços no período · ${done} concluídos · canais: ${data.channels.join(", ")}`;
+
+    // Sempre registra notificação "cockpit" para histórico
+    const { error: nErr } = await context.supabase.from("notifications").insert({
+      user_id: context.userId,
+      category: "marocas_report",
+      severity: "info",
+      title,
+      message,
+      action_label: "Abrir relatório",
+      action_url: `/marocas/cockpit/relatorio`,
+    });
+    if (nErr) throw nErr;
+
+    // Outros canais (whatsapp/email) ficam registrados como intenção via audit_logs
+    const extra = data.channels.filter((c) => c !== "cockpit");
+    if (extra.length > 0) {
+      await context.supabase.from("audit_logs").insert({
+        entity: "marocas_report",
+        entity_id: null,
+        action: `dispatch_${data.period}`,
+        metadata: { channels: extra, total, done, from: data.from, to: data.to } as never,
+        user_id: context.userId,
+      });
+    }
+    return { ok: true, total, done };
+  });
