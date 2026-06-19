@@ -80,7 +80,6 @@ function CatalogoPage() {
   const { macros, subs, mappings, mappedMacros } = data
   const mappedSet = useMemo(() => new Set(mappedMacros), [mappedMacros])
   const saveIntent = useServerFn(saveCatalogIntent)
-  const track = useServerFn(trackCatalogEvent)
 
   const [macroSlug, setMacroSlug] = useState<string | null>(null)
   const [subId, setSubId] = useState<string | null>(null)
@@ -117,16 +116,15 @@ function CatalogoPage() {
   }, [macroSlug, subId, selectionByTier])
 
   function trackEvent(eventName: string, extra: Record<string, unknown> = {}) {
-    track({
-      data: {
-        eventName,
-        macroSlug: macroSlug ?? null,
-        subnichoSlug: subs.find((s) => s.id === subId)?.slug ?? null,
-        sessionToken: sessionToken(),
-        ...extra,
-      },
-    }).catch(() => {})
+    trackCatalog({
+      eventName,
+      macroSlug: macroSlug ?? null,
+      subnichoSlug: subs.find((s) => s.id === subId)?.slug ?? null,
+      sessionToken: sessionToken(),
+      ...extra,
+    })
   }
+
 
   function clearSelection() {
     setMacroSlug(null)
