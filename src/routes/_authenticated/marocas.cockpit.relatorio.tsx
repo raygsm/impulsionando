@@ -100,7 +100,13 @@ function MarocasReportPage() {
           <h1 className="text-xl font-bold flex items-center gap-2">
             <FileText className="h-5 w-5" /> Relatório operacional Marocas
           </h1>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-2 flex-wrap">
+            <Button variant="outline" onClick={() => exportAudit("csv")}>
+              <Download className="h-4 w-4 mr-1" /> Auditoria CSV
+            </Button>
+            <Button variant="outline" onClick={() => exportAudit("json")}>
+              <Download className="h-4 w-4 mr-1" /> Auditoria JSON
+            </Button>
             <Button onClick={handlePrint} className="bg-gradient-to-r from-primary to-fuchsia-500">
               <Printer className="h-4 w-4 mr-1" /> Exportar PDF
             </Button>
