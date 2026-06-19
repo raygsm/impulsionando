@@ -145,7 +145,7 @@ function AlertasPage() {
   async function retryOutbox(id: string) {
     await supabase
       .from('message_outbox')
-      .update({ status: 'queued', attempts: 0, last_error: null, next_retry_at: null })
+      .update({ status: 'queued', attempts: 0, last_error: null, scheduled_at: new Date().toISOString() })
       .eq('id', id);
     load();
   }
