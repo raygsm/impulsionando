@@ -3336,6 +3336,81 @@ export type Database = {
         }
         Relationships: []
       }
+      chrismed_service_offerings: {
+        Row: {
+          active: boolean
+          cid_categories: string[] | null
+          company_id: string
+          created_at: string
+          description: string | null
+          display_order: number
+          duration_minutes: number
+          id: string
+          metadata: Json
+          modality: string
+          name: string
+          price_cents: number
+          refund_window_hours: number
+          requires_prepayment: boolean
+          reschedule_window_hours: number
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          cid_categories?: string[] | null
+          company_id: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          duration_minutes?: number
+          id?: string
+          metadata?: Json
+          modality: string
+          name: string
+          price_cents: number
+          refund_window_hours?: number
+          requires_prepayment?: boolean
+          reschedule_window_hours?: number
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          cid_categories?: string[] | null
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          duration_minutes?: number
+          id?: string
+          metadata?: Json
+          modality?: string
+          name?: string
+          price_cents?: number
+          refund_window_hours?: number
+          requires_prepayment?: boolean
+          reschedule_window_hours?: number
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chrismed_service_offerings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chrismed_service_offerings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       clube_alerts: {
         Row: {
           active: boolean
@@ -11626,6 +11701,355 @@ export type Database = {
           topic?: string | null
         }
         Relationships: []
+      }
+      mpago_credentials: {
+        Row: {
+          access_token_secret_name: string
+          active: boolean
+          company_id: string
+          created_at: string
+          environment: string
+          id: string
+          public_key: string
+          updated_at: string
+          user_id_mp: string | null
+          webhook_secret_name: string | null
+        }
+        Insert: {
+          access_token_secret_name: string
+          active?: boolean
+          company_id: string
+          created_at?: string
+          environment?: string
+          id?: string
+          public_key: string
+          updated_at?: string
+          user_id_mp?: string | null
+          webhook_secret_name?: string | null
+        }
+        Update: {
+          access_token_secret_name?: string
+          active?: boolean
+          company_id?: string
+          created_at?: string
+          environment?: string
+          id?: string
+          public_key?: string
+          updated_at?: string
+          user_id_mp?: string | null
+          webhook_secret_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mpago_credentials_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mpago_credentials_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      mpago_payments: {
+        Row: {
+          amount_cents: number
+          approved_at: string | null
+          card_last4: string | null
+          company_id: string
+          context_id: string | null
+          context_type: string | null
+          created_at: string
+          currency: string
+          description: string | null
+          external_reference: string
+          id: string
+          installments: number | null
+          metadata: Json
+          mp_payment_id: string | null
+          mp_preference_id: string | null
+          payer_doc: string | null
+          payer_email: string | null
+          payer_name: string | null
+          payment_method: string
+          pix_expires_at: string | null
+          pix_qr_code: string | null
+          pix_qr_code_base64: string | null
+          refunded_at: string | null
+          rejected_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          approved_at?: string | null
+          card_last4?: string | null
+          company_id: string
+          context_id?: string | null
+          context_type?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          external_reference: string
+          id?: string
+          installments?: number | null
+          metadata?: Json
+          mp_payment_id?: string | null
+          mp_preference_id?: string | null
+          payer_doc?: string | null
+          payer_email?: string | null
+          payer_name?: string | null
+          payment_method: string
+          pix_expires_at?: string | null
+          pix_qr_code?: string | null
+          pix_qr_code_base64?: string | null
+          refunded_at?: string | null
+          rejected_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          approved_at?: string | null
+          card_last4?: string | null
+          company_id?: string
+          context_id?: string | null
+          context_type?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          external_reference?: string
+          id?: string
+          installments?: number | null
+          metadata?: Json
+          mp_payment_id?: string | null
+          mp_preference_id?: string | null
+          payer_doc?: string | null
+          payer_email?: string | null
+          payer_name?: string | null
+          payment_method?: string
+          pix_expires_at?: string | null
+          pix_qr_code?: string | null
+          pix_qr_code_base64?: string | null
+          refunded_at?: string | null
+          rejected_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mpago_payments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mpago_payments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      mpago_refunds: {
+        Row: {
+          amount_cents: number
+          company_id: string
+          created_at: string
+          id: string
+          mp_refund_id: string | null
+          payment_id: string
+          reason: string | null
+          requested_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          company_id: string
+          created_at?: string
+          id?: string
+          mp_refund_id?: string | null
+          payment_id: string
+          reason?: string | null
+          requested_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          company_id?: string
+          created_at?: string
+          id?: string
+          mp_refund_id?: string | null
+          payment_id?: string
+          reason?: string | null
+          requested_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mpago_refunds_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mpago_refunds_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "mpago_refunds_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "mpago_payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mpago_subscriptions: {
+        Row: {
+          amount_cents: number
+          cancelled_at: string | null
+          company_id: string
+          created_at: string
+          external_reference: string
+          frequency: string
+          id: string
+          metadata: Json
+          mp_preapproval_id: string | null
+          next_payment_date: string | null
+          payer_email: string
+          payer_id: string | null
+          plan_slug: string
+          started_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          cancelled_at?: string | null
+          company_id: string
+          created_at?: string
+          external_reference: string
+          frequency?: string
+          id?: string
+          metadata?: Json
+          mp_preapproval_id?: string | null
+          next_payment_date?: string | null
+          payer_email: string
+          payer_id?: string | null
+          plan_slug: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          cancelled_at?: string | null
+          company_id?: string
+          created_at?: string
+          external_reference?: string
+          frequency?: string
+          id?: string
+          metadata?: Json
+          mp_preapproval_id?: string | null
+          next_payment_date?: string | null
+          payer_email?: string
+          payer_id?: string | null
+          plan_slug?: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mpago_subscriptions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mpago_subscriptions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      mpago_webhook_events: {
+        Row: {
+          action: string | null
+          company_id: string | null
+          event_type: string
+          id: string
+          mp_event_id: string | null
+          mp_resource_id: string | null
+          processed: boolean
+          processed_at: string | null
+          processing_error: string | null
+          raw_payload: Json
+          received_at: string
+          signature_valid: boolean | null
+        }
+        Insert: {
+          action?: string | null
+          company_id?: string | null
+          event_type: string
+          id?: string
+          mp_event_id?: string | null
+          mp_resource_id?: string | null
+          processed?: boolean
+          processed_at?: string | null
+          processing_error?: string | null
+          raw_payload: Json
+          received_at?: string
+          signature_valid?: boolean | null
+        }
+        Update: {
+          action?: string | null
+          company_id?: string | null
+          event_type?: string
+          id?: string
+          mp_event_id?: string | null
+          mp_resource_id?: string | null
+          processed?: boolean
+          processed_at?: string | null
+          processing_error?: string | null
+          raw_payload?: Json
+          received_at?: string
+          signature_valid?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mpago_webhook_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mpago_webhook_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+        ]
       }
       n8n_workflow_runs: {
         Row: {
