@@ -721,24 +721,12 @@ function AuditTimeline({ rows, loading, serviceId, apartmentCode, professional }
   );
 }
 
-function AlertsPanel({ alerts, notifyCfg, onSaveCfg }: {
+function AlertsPanel({ alerts }: {
   alerts: any[];
   notifyCfg: NotifyConfig;
   onSaveCfg: (c: NotifyConfig) => void;
 }) {
-  const [cfgOpen, setCfgOpen] = useState(false);
-  const [draft, setDraft] = useState<NotifyConfig>(notifyCfg);
-  useEffect(() => { setDraft(notifyCfg); }, [notifyCfg]);
   const active = alerts.filter((a) => !a.is_read).slice(0, 5);
-
-  const toggleChannel = (type: string, ch: "cockpit" | "whatsapp" | "email") => {
-    const cur = draft[type];
-    if (!cur) return;
-    const has = cur.channels.includes(ch);
-    const channels = has ? cur.channels.filter((c) => c !== ch) : [...cur.channels, ch];
-    setDraft({ ...draft, [type]: { ...cur, channels } });
-  };
-
   return (
     <Card className="p-4 bg-gradient-to-r from-amber-500/10 via-rose-500/5 to-transparent border-amber-500/30">
       <div className="flex items-center gap-2 flex-wrap">
@@ -751,48 +739,29 @@ function AlertsPanel({ alerts, notifyCfg, onSaveCfg }: {
               <FileText className="h-3 w-3 mr-1" /> Relatório formal (PDF)
             </Button>
           </Link>
-          <Button size="sm" variant="outline" onClick={() => setCfgOpen((v) => !v)} className="hover:scale-105 transition-transform">
-            <Settings className="h-3 w-3 mr-1" /> Configurar alertas
-          </Button>
+          <Link to="/marocas/cockpit/notificacoes">
+            <Button size="sm" variant="outline" className="hover:scale-105 transition-transform">
+              <Settings className="h-3 w-3 mr-1" /> Notificações & limiares
+            </Button>
+          </Link>
         </div>
       </div>
 
-      {cfgOpen && (
-        <div className="mt-3 p-3 rounded border bg-background space-y-2 animate-in fade-in slide-in-from-top-2">
-          <p className="text-xs text-muted-foreground">Ajuste limiares (aviso em % do SLA) e canais por tipo de serviço.</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {Object.entries(draft).map(([type, c]) => (
-              <div key={type} className="border rounded p-2 text-xs">
-                <div className="flex items-center gap-2 mb-1">
-                  <Checkbox checked={c.enabled} onCheckedChange={(v) => setDraft({ ...draft, [type]: { ...c, enabled: !!v } })} />
-                  <strong className="font-mono">{type}</strong>
-                </div>
-                <div className="flex items-center gap-2">
-                  <label>Aviso em</label>
-                  <Input type="number" min={1} max={100} value={c.warningPct} onChange={(e) => setDraft({ ...draft, [type]: { ...c, warningPct: Number(e.target.value) } })} className="w-16 h-7" />
-                  <span>% do SLA</span>
-                </div>
-                <div className="flex items-center gap-2 mt-1">
-                  <label>Atraso +</label>
-                  <Input type="number" min={0} max={240} value={c.lateOffsetMin} onChange={(e) => setDraft({ ...draft, [type]: { ...c, lateOffsetMin: Number(e.target.value) } })} className="w-16 h-7" />
-                  <span>min</span>
-                </div>
-                <div className="flex gap-2 mt-1 flex-wrap">
-                  {(["cockpit", "whatsapp", "email"] as const).map((ch) => (
-                    <label key={ch} className="flex items-center gap-1">
-                      <Checkbox checked={c.channels.includes(ch)} onCheckedChange={() => toggleChannel(type, ch)} />
-                      <span>{ch}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="flex justify-end gap-2">
-            <Button size="sm" variant="ghost" onClick={() => setCfgOpen(false)}>Cancelar</Button>
-            <Button size="sm" onClick={() => { onSaveCfg(draft); setCfgOpen(false); }} className="bg-gradient-to-r from-primary to-fuchsia-500">Salvar</Button>
-          </div>
-        </div>
+      {active.length > 0 && (
+        <ul className="mt-3 space-y-1">
+          {active.map((a) => (
+            <li key={a.id} className="text-xs flex items-center gap-2">
+              <Badge className={a.severity === "critical" ? STATUS_TONE.atrasado : STATUS_TONE.em_andamento}>{a.severity}</Badge>
+              <strong>{a.title}</strong>
+              <span className="text-muted-foreground">— {a.message}</span>
+              <span className="ml-auto text-muted-foreground tabular-nums">{dt(a.created_at)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
+  );
+}
       )}
 
       {active.length > 0 && (
