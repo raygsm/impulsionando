@@ -315,11 +315,26 @@ export const createMarocasSlaAlert = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const { error } = await context.supabase.from("notifications").insert({
       user_id: context.userId,
-      type: data.severity === "late" ? "marocas_sla_late" : "marocas_sla_warning",
+      category: "marocas_sla",
+      severity: data.severity === "late" ? "critical" : "warning",
       title: data.severity === "late" ? "SLA estourado — Marocas" : "SLA chegando ao limite — Marocas",
       message: data.message,
-      data: { service_id: data.serviceId, severity: data.severity } as never,
+      action_label: "Abrir cockpit",
+      action_url: "/marocas/cockpit",
     });
     if (error) throw error;
     return { ok: true };
+  });
+
+export const listMarocasSlaAlerts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("notifications")
+      .select("id, severity, title, message, action_url, is_read, created_at")
+      .eq("category", "marocas_sla")
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) throw error;
+    return data ?? [];
   });
