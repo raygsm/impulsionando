@@ -762,22 +762,5 @@ function AlertsPanel({ alerts }: {
     </Card>
   );
 }
-      )}
-
-      {active.length > 0 && (
-        <ul className="mt-3 space-y-1">
-          {active.map((a) => (
-            <li key={a.id} className="text-xs flex items-center gap-2">
-              <Badge className={a.severity === "critical" ? STATUS_TONE.atrasado : STATUS_TONE.em_andamento}>{a.severity}</Badge>
-              <strong>{a.title}</strong>
-              <span className="text-muted-foreground">— {a.message}</span>
-              <span className="ml-auto text-muted-foreground tabular-nums">{dt(a.created_at)}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </Card>
-  );
-}
 
 
