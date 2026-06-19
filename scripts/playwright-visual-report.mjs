@@ -51,11 +51,19 @@ function walkDiffs(dir) {
  * Retorna null se não bater com nenhum padrão conhecido.
  */
 function categorize(snapshotName) {
-  // vertical-offer-educacao-<viewport>-<state>
+  // vertical-offer-educacao-<viewport>-[secondary-]<state>
   let m = snapshotName.match(
-    /^vertical-offer-educacao-(mobile-375|tablet-768|desktop-1280)-(default|hover|focus)$/,
+    /^vertical-offer-educacao-(mobile-375|tablet-768|desktop-1280)-(secondary-)?(default|hover|focus)$/,
   );
-  if (m) return { component: "verticalOffer (educacao)", viewport: m[1], state: m[2] };
+  if (m) {
+    const target = m[2] ? "CTA secundário" : "CTA principal";
+    return {
+      component: `verticalOffer (educacao · ${target})`,
+      viewport: m[1],
+      state: m[3],
+    };
+  }
+
 
   // public-footer-nichos-col-<viewport>
   m = snapshotName.match(/^public-footer-nichos-col-(mobile-375|tablet-768|desktop-1280)$/);
@@ -112,11 +120,13 @@ function buildReport(diffs) {
 
   // Tabela por componente × viewport × estado
   const priorityComponents = [
-    "verticalOffer (educacao)",
+    "verticalOffer (educacao · CTA principal)",
+    "verticalOffer (educacao · CTA secundário)",
     "PublicFooter",
     "PublicFooter · coluna Nichos",
     "Hero CTAs",
   ];
+
   const orderedComponents = [
     ...priorityComponents.filter((c) => byComponent.has(c)),
     ...[...byComponent.keys()].filter((c) => !priorityComponents.includes(c)),

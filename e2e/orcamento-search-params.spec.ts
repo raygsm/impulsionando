@@ -29,11 +29,13 @@ test.describe("/orcamento — recebe SearchParams white-label-educacao", () => {
       page.getByRole("heading", { level: 1, name: /Monte seu Orçamento/i }),
     ).toBeVisible();
 
-    // 3) Funil avança/exibe seleções condizentes com White Label.
-    //    Em qualquer etapa visível do wizard, o texto "White Label"
-    //    deve estar presente como opção/seleção (categoria do segmento).
-    const whiteLabelMentions = page.getByText(/White Label/i);
-    await expect(whiteLabelMentions.first()).toBeVisible();
+    // 3) Funil exibe estado correspondente: banner contextual da origem
+    //    pré-seleção White Label Acadêmico visível com texto humano.
+    const banner = page.locator('[data-segmento-banner="white-label-educacao"]');
+    await expect(banner).toBeVisible();
+    await expect(banner).toContainText(/White Label Acadêmico/i);
+    await expect(banner).toContainText(/Recomendação Educação/i);
+
   });
 
   test("navegação real do CTA preserva params no destino", async ({ page }) => {
@@ -51,5 +53,9 @@ test.describe("/orcamento — recebe SearchParams white-label-educacao", () => {
     await expect(
       page.getByRole("heading", { level: 1, name: /Monte seu Orçamento/i }),
     ).toBeVisible();
+    await expect(
+      page.locator('[data-segmento-banner="white-label-educacao"]'),
+    ).toBeVisible();
+
   });
 });

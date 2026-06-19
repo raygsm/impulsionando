@@ -69,6 +69,32 @@ test.describe("Visual regression — verticalOffer /recomendacao/educacao", () =
         maxDiffPixelRatio: 0.02,
         animations: "disabled",
       });
+
+      // CTA SECUNDÁRIO ("Ver como funciona o White Label") — também
+      // precisa manter alinhamento e indicador de foco visíveis em
+      // todos os engines/breakpoints. Snapshots dedicados de hover e
+      // focus do bloco com o secundário ativo.
+      const secondary = offer.getByRole("link", {
+        name: /Ver como funciona o White Label/i,
+      });
+      await page.mouse.move(0, 0);
+      await cta.blur();
+      await secondary.hover();
+      await page.evaluate(
+        () => new Promise<void>((r) => requestAnimationFrame(() => r())),
+      );
+      await expect(offer).toHaveScreenshot(
+        `vertical-offer-educacao-${name}-secondary-hover.png`,
+        { maxDiffPixelRatio: 0.02, animations: "disabled" },
+      );
+
+      await page.mouse.move(0, 0);
+      await secondary.focus();
+      await expect(offer).toHaveScreenshot(
+        `vertical-offer-educacao-${name}-secondary-focus.png`,
+        { maxDiffPixelRatio: 0.02, animations: "disabled" },
+      );
     });
   }
 });
+

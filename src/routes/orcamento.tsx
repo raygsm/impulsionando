@@ -300,6 +300,30 @@ function OrcamentoPage() {
               </p>
             </div>
 
+            {/* Banner contextual: quando o visitante chega via CTA de uma
+                recomendação por nicho, mostramos a origem + segmento
+                pré-selecionado. Hoje cobre o CTA "Contratar White Label
+                Acadêmico" em /recomendacao/educacao. */}
+            {search.segmento === "white-label-educacao" && (
+              <div
+                data-segmento-banner="white-label-educacao"
+                className="mb-6 rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm flex items-start gap-3"
+              >
+                <Sparkles className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+                <div>
+                  <div className="font-semibold text-foreground">
+                    White Label Acadêmico pré-selecionado
+                  </div>
+                  <div className="text-muted-foreground">
+                    Origem: <strong>Recomendação Educação</strong>. Vamos
+                    montar o orçamento já considerando uma instância White
+                    Label para sua universidade e seus polos.
+                  </div>
+                </div>
+              </div>
+            )}
+
+
             {/* Progress */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-2 text-sm">
