@@ -6,6 +6,7 @@ import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { WhatsAppBlock } from "@/components/marketing/WhatsAppBlock";
 import { NICHO_DETAILS } from "@/components/marketing/nichoDetails";
+import { MACRO_NICHOS } from "@/components/marketing/nichoMacros";
 
 const WA_HOME =
   "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20escolher%20o%20meu%20nicho%20e%20conhecer%20a%20Impulsionando.";
@@ -57,90 +58,48 @@ function NichosIndex() {
 
       {/* GRID DE NICHOS — agrupado por categoria principal (Saúde primeiro) */}
       <section className="mx-auto max-w-6xl w-full px-4 sm:px-6 lg:px-8 py-12 lg:py-16 space-y-12">
-        {(() => {
-          const CATEGORIAS_NICHO: { label: string; description: string; slugs: string[] }[] = [
-            {
-              label: "Saúde, Bem-estar e Performance",
-              description:
-                "Clínicas, médicos, dentistas, fisioterapeutas, academias, boxes, personal trainers, pilates e yoga.",
-              slugs: ["clinicas", "fitness"],
-            },
-            {
-              label: "Alimentação, Bebidas e Experiências",
-              description:
-                "Bares, restaurantes, delivery, pizzarias, hamburguerias, microcervejarias, fornecedores e eventos.",
-              slugs: ["bares-restaurantes", "microcervejarias", "fornecedores"],
-            },
-            {
-              label: "Serviços, Educação e Atendimento",
-              description:
-                "Prestadores, consultorias, escolas, cursos, salões, barbearias, estéticas e atendimento recorrente.",
-              slugs: ["servicos"],
-            },
-            {
-              label: "Varejo, E-commerce e Produtos",
-              description:
-                "Lojas físicas, e-commerce, catálogos digitais, clube de vantagens e recompra.",
-              slugs: ["ecommerce"],
-            },
-            {
-              label: "Imobiliárias",
-              description:
-                "Vitrine inteligente de imóveis, CRM com corretores e gerentes, e ERP de comissões, repasses e contratos — modular e integrado.",
-              slugs: ["imobiliaria"],
-            },
-            {
-              label: "White Label e Parceiros",
-              description:
-                "Agências, integradores, revendedores e consultorias que vendem tecnologia com marca própria.",
-              slugs: ["white-label"],
-            },
-
-          ];
-
-          return CATEGORIAS_NICHO.map((cat) => {
-            const items = cat.slugs
-              .map((s) => NICHO_DETAILS.find((n) => n.slug === s))
-              .filter((n): n is (typeof NICHO_DETAILS)[number] => !!n);
-            if (items.length === 0) return null;
-            return (
-              <div key={cat.label}>
-                <div className="mb-4">
-                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{cat.label}</h2>
-                  <p className="text-sm text-muted-foreground mt-1 max-w-3xl">{cat.description}</p>
-                </div>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {items.map((n) => {
-                    const Icon = n.icon;
-                    return (
-                      <Card key={n.slug} className="p-6 hover:shadow-elegant transition-shadow flex flex-col">
-                        <div className="flex items-start gap-3 mb-3">
-                          <div className="w-10 h-10 rounded-md bg-gradient-primary flex items-center justify-center text-primary-foreground shrink-0">
-                            <Icon className="w-5 h-5" />
-                          </div>
-                          <div className="font-semibold tracking-tight leading-tight">{n.shortLabel}</div>
-                        </div>
-                        <p className="text-sm text-muted-foreground leading-relaxed flex-1">{n.cardDesc}</p>
-                        <div className="mt-4 flex gap-2">
-                          <Button asChild size="sm" className="flex-1 gap-1.5 bg-gradient-primary">
-                            <Link to="/nichos/$slug" params={{ slug: n.slug }}>
-                              Ver nicho <ArrowRight className="w-3.5 h-3.5" />
-                            </Link>
-                          </Button>
-                          {n.demoRoute && (
-                            <Button asChild size="sm" variant="outline">
-                              <Link to={n.demoRoute}>Demo</Link>
-                            </Button>
-                          )}
-                        </div>
-                      </Card>
-                    );
-                  })}
-                </div>
+        {MACRO_NICHOS.map((cat) => {
+          const items = cat.slugs
+            .map((s) => NICHO_DETAILS.find((n) => n.slug === s))
+            .filter((n): n is (typeof NICHO_DETAILS)[number] => !!n);
+          if (items.length === 0) return null;
+          return (
+            <div key={cat.slug}>
+              <div className="mb-4">
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{cat.label}</h2>
+                <p className="text-sm text-muted-foreground mt-1 max-w-3xl">{cat.description}</p>
               </div>
-            );
-          });
-        })()}
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {items.map((n) => {
+                  const Icon = n.icon;
+                  return (
+                    <Card key={n.slug} className="p-6 hover:shadow-elegant transition-shadow flex flex-col">
+                      <div className="flex items-start gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-md bg-gradient-primary flex items-center justify-center text-primary-foreground shrink-0">
+                          <Icon className="w-5 h-5" />
+                        </div>
+                        <div className="font-semibold tracking-tight leading-tight">{n.shortLabel}</div>
+                      </div>
+                      <p className="text-sm text-muted-foreground leading-relaxed flex-1">{n.cardDesc}</p>
+                      <div className="mt-4 flex gap-2">
+                        <Button asChild size="sm" className="flex-1 gap-1.5 bg-gradient-primary">
+                          <Link to="/nichos/$slug" params={{ slug: n.slug }}>
+                            Ver nicho <ArrowRight className="w-3.5 h-3.5" />
+                          </Link>
+                        </Button>
+                        {n.demoRoute && (
+                          <Button asChild size="sm" variant="outline">
+                            <Link to={n.demoRoute}>Demo</Link>
+                          </Button>
+                        )}
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
 
         <div className="pt-4">
           <WhatsAppBlock />

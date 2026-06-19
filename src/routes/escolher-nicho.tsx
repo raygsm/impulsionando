@@ -1,13 +1,16 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
-  Stethoscope, HeartPulse, UtensilsCrossed, Beer, CalendarRange,
-  Home, Car, Calculator, Scale, Briefcase, ShoppingBag, Layers,
+  Stethoscope, HeartPulse,
+  UtensilsCrossed, Beer,
+  Home, Car, Calculator, Scale, Briefcase,
+  CalendarRange, ShoppingBag, Layers,
   ArrowRight, Target, Sparkles,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
+import { MACRO_NICHOS } from "@/components/marketing/nichoMacros";
 
 export const Route = createFileRoute("/escolher-nicho")({
   head: () => ({
@@ -28,20 +31,27 @@ type NichoCard = {
   icon: typeof Stethoscope;
 };
 
-const NICHOS: NichoCard[] = [
-  { slug: "clinicas",          label: "Clínica ou Consultório",   desc: "Agenda, prontuário, portal do paciente e relacionamento.", icon: Stethoscope },
-  { slug: "psicologia",        label: "Psicologia e Terapias",    desc: "Agenda, prontuário sigiloso, sessões e pagamento.",         icon: HeartPulse },
-  { slug: "bares-restaurantes",label: "Bar ou Restaurante",       desc: "Cardápio digital, QR Code, comanda, CRM e fidelidade.",      icon: UtensilsCrossed },
-  { slug: "microcervejarias",  label: "Cervejaria",                desc: "PDV, marketplace B2B, eventos e ações de marca.",            icon: Beer },
-  { slug: "eventos",           label: "Eventos",                   desc: "Ingressos, check-in, listas e relacionamento pós-evento.",   icon: CalendarRange },
-  { slug: "imobiliaria",       label: "Imobiliária",               desc: "CRM imobiliário, visitas, propostas e portal do cliente.",   icon: Home },
-  { slug: "veiculos",          label: "Revenda de Veículos",       desc: "Estoque, leads, propostas e financiamento integrado.",       icon: Car },
-  { slug: "contabilidade",     label: "Contabilidade",             desc: "Portal do cliente, obrigações, documentos e financeiro.",    icon: Calculator },
-  { slug: "juridico",          label: "Escritório Jurídico",       desc: "CRM jurídico, processos, prazos e portal do cliente.",       icon: Scale },
-  { slug: "servicos",          label: "Serviços",                  desc: "Agenda, propostas, contratos, cobrança e relacionamento.",   icon: Briefcase },
-  { slug: "ecommerce",         label: "E-commerce",                desc: "Catálogo, pedidos, estoque, CRM e pós-venda automatizado.",  icon: ShoppingBag },
-  { slug: "white-label",       label: "White Label",               desc: "Plataforma com sua marca para revender tecnologia.",         icon: Layers },
-];
+/**
+ * Catálogo de cards por slug. O agrupamento por macro vem de MACRO_NICHOS —
+ * aqui só descrevemos cada subnicho. Clínicas/consultórios e psicologia/terapias
+ * já estão mesclados (um card cada), e ambos vivem sob "Saúde".
+ */
+const NICHO_CARDS: Record<string, NichoCard> = {
+  clinicas:           { slug: "clinicas",           label: "Clínicas e Consultórios",  desc: "Agenda, prontuário, portal do paciente e relacionamento.",   icon: Stethoscope },
+  psicologia:         { slug: "psicologia",         label: "Psicologia e Terapias",    desc: "Agenda, prontuário sigiloso, sessões e pagamento.",          icon: HeartPulse },
+  // saude/fitness/fornecedores/educacao não têm entrada em RECOMENDACOES
+  // (recomendacao.$nicho.tsx) — ficam fora do funil até existir conteúdo.
+  "bares-restaurantes": { slug: "bares-restaurantes", label: "Bares e Restaurantes",   desc: "Cardápio digital, QR Code, comanda, CRM e fidelidade.",      icon: UtensilsCrossed },
+  microcervejarias:   { slug: "microcervejarias",   label: "Cervejarias",              desc: "PDV, marketplace B2B, eventos e ações de marca.",            icon: Beer },
+  imobiliaria:        { slug: "imobiliaria",        label: "Imobiliária",              desc: "CRM imobiliário, visitas, propostas e portal do cliente.",   icon: Home },
+  servicos:           { slug: "servicos",           label: "Serviços",                 desc: "Agenda, propostas, contratos, cobrança e relacionamento.",   icon: Briefcase },
+  juridico:           { slug: "juridico",           label: "Escritório Jurídico",      desc: "CRM jurídico, processos, prazos e portal do cliente.",       icon: Scale },
+  contabilidade:      { slug: "contabilidade",      label: "Contabilidade",            desc: "Portal do cliente, obrigações, documentos e financeiro.",    icon: Calculator },
+  eventos:            { slug: "eventos",            label: "Eventos",                  desc: "Ingressos, check-in, listas e relacionamento pós-evento.",   icon: CalendarRange },
+  ecommerce:          { slug: "ecommerce",          label: "E-commerce e Varejo",      desc: "Catálogo, pedidos, estoque, CRM e pós-venda automatizado.",  icon: ShoppingBag },
+  veiculos:           { slug: "veiculos",           label: "Revenda de Veículos",      desc: "Estoque, leads, propostas e financiamento integrado.",       icon: Car },
+  "white-label":      { slug: "white-label",        label: "White Label",              desc: "Plataforma com sua marca para revender tecnologia.",         icon: Layers },
+};
 
 function PlanosComecarPage() {
   const navigate = useNavigate();
@@ -70,37 +80,51 @@ function PlanosComecarPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl w-full px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {NICHOS.map((n) => {
-            const Icon = n.icon;
-            return (
-              <button
-                key={n.slug}
-                type="button"
-                onClick={() => pick(n.slug)}
-                className="text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl"
-              >
-                <Card className="p-6 h-full flex flex-col hover:shadow-elegant hover:-translate-y-0.5 transition-all border-2 hover:border-primary/40">
-                  <div className="flex items-start gap-3 mb-3">
-                    <div className="w-11 h-11 shrink-0 rounded-lg bg-gradient-primary grid place-items-center text-primary-foreground">
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="font-semibold leading-tight">{n.label}</div>
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed flex-1">
-                    {n.desc}
-                  </p>
-                  <div className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary">
-                    Ver recomendação <ArrowRight className="w-4 h-4" />
-                  </div>
-                </Card>
-              </button>
-            );
-          })}
-        </div>
+      <section className="mx-auto max-w-6xl w-full px-4 sm:px-6 lg:px-8 py-10 lg:py-14 space-y-10">
+        {MACRO_NICHOS.map((macro) => {
+          const cards = macro.slugs
+            .map((s) => NICHO_CARDS[s])
+            .filter((c): c is NichoCard => !!c);
+          if (cards.length === 0) return null;
+          return (
+            <div key={macro.slug}>
+              <div className="mb-4">
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{macro.label}</h2>
+                <p className="text-sm text-muted-foreground mt-1 max-w-3xl">{macro.description}</p>
+              </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {cards.map((n) => {
+                  const Icon = n.icon;
+                  return (
+                    <button
+                      key={n.slug}
+                      type="button"
+                      onClick={() => pick(n.slug)}
+                      className="text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl"
+                    >
+                      <Card className="p-6 h-full flex flex-col hover:shadow-elegant hover:-translate-y-0.5 transition-all border-2 hover:border-primary/40">
+                        <div className="flex items-start gap-3 mb-3">
+                          <div className="w-11 h-11 shrink-0 rounded-lg bg-gradient-primary grid place-items-center text-primary-foreground">
+                            <Icon className="w-5 h-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-semibold leading-tight">{n.label}</div>
+                          </div>
+                        </div>
+                        <p className="text-sm text-muted-foreground leading-relaxed flex-1">
+                          {n.desc}
+                        </p>
+                        <div className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary">
+                          Ver recomendação <ArrowRight className="w-4 h-4" />
+                        </div>
+                      </Card>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
 
         <Card className="mt-10 p-6 lg:p-8 bg-muted/40 border-dashed">
           <div className="flex items-start gap-3">
