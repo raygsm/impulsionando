@@ -37,6 +37,25 @@ export const Route = createFileRoute('/_authenticated/admin/catalog-analytics')(
 
 const RANGES = [7, 30, 90] as const
 
+const DEDUPE_LS_KEY = 'admin.catalog.dedupeThresholds.v1'
+const DEFAULT_DEDUPE_MIN = 5
+const DEFAULT_DEDUPE_MAX = 40
+
+function loadDedupeThresholds(): { min: number; max: number } {
+  if (typeof window === 'undefined') return { min: DEFAULT_DEDUPE_MIN, max: DEFAULT_DEDUPE_MAX }
+  try {
+    const raw = window.localStorage.getItem(DEDUPE_LS_KEY)
+    if (!raw) return { min: DEFAULT_DEDUPE_MIN, max: DEFAULT_DEDUPE_MAX }
+    const v = JSON.parse(raw)
+    return {
+      min: Number.isFinite(v?.min) ? Number(v.min) : DEFAULT_DEDUPE_MIN,
+      max: Number.isFinite(v?.max) ? Number(v.max) : DEFAULT_DEDUPE_MAX,
+    }
+  } catch {
+    return { min: DEFAULT_DEDUPE_MIN, max: DEFAULT_DEDUPE_MAX }
+  }
+}
+
 function CatalogAnalyticsPage() {
   const fetchFn = useServerFn(getCatalogAnalytics)
   const fetchTrackerStats = useServerFn(getTrackerStats)
@@ -45,6 +64,26 @@ function CatalogAnalyticsPage() {
   const [fSub, setFSub] = useState('')
   const [fPlan, setFPlan] = useState('')
   const [selectedKinds, setSelectedKinds] = useState<string[]>([])
+  const [dedupeMin, setDedupeMin] = useState(DEFAULT_DEDUPE_MIN)
+  const [dedupeMax, setDedupeMax] = useState(DEFAULT_DEDUPE_MAX)
+
+  // Load persisted thresholds once on mount
+  useMemo(() => {
+    const t = loadDedupeThresholds()
+    setDedupeMin(t.min)
+    setDedupeMax(t.max)
+    return null
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  function persistThresholds(min: number, max: number) {
+    if (typeof window === 'undefined') return
+    try {
+      window.localStorage.setItem(DEDUPE_LS_KEY, JSON.stringify({ min, max }))
+    } catch {
+      // ignore
+    }
+  }
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['admin', 'catalog-analytics', days],
@@ -55,6 +94,32 @@ function CatalogAnalyticsPage() {
     queryKey: ['admin', 'tracker-stats', days],
     queryFn: () => fetchTrackerStats({ data: { days: Math.min(days, 30) } }),
   })
+
+  const dedupePct = trackerStats?.dedupePct ?? 0
+  const dedupeAlert: { kind: 'low' | 'high'; msg: string; causes: string[] } | null =
+    trackerStats && trackerStats.totals.samples > 0
+      ? dedupePct > dedupeMax
+        ? {
+            kind: 'high',
+            msg: `Dedupe alto: ${dedupePct}% (limite ${dedupeMax}%).`,
+            causes: [
+              'Possível SUBCONTAGEM de cliques legítimos (janela de 800ms agrupando ações distintas).',
+              'Usuário repetindo a mesma seleção rápido demais (UX confusa, botão pouco responsivo).',
+              'Re-render disparando eventos duplicados no mesmo componente.',
+            ],
+          }
+        : dedupePct < dedupeMin
+          ? {
+              kind: 'low',
+              msg: `Dedupe baixo: ${dedupePct}% (mínimo ${dedupeMin}%).`,
+              causes: [
+                'Possível SUPERCONTAGEM: dedupe deixou de agrupar cliques repetidos esperados.',
+                'Tracker reiniciando entre eventos (sessionToken trocando, key de dedupe instável).',
+                'Janela de 800ms curta demais para o fluxo atual.',
+              ],
+            }
+          : null
+      : null
 
   const rows = data?.rows ?? []
   const filtered = useMemo(() => {
