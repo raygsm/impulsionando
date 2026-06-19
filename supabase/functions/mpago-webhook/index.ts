@@ -110,10 +110,56 @@ Deno.serve(async (req) => {
           if (mpData.status === 'rejected') update.rejected_at = new Date().toISOString();
           if (mpData.status === 'refunded') update.refunded_at = new Date().toISOString();
 
-          await supabase
+          const { data: updatedRows } = await supabase
             .from('mpago_payments')
             .update(update)
-            .eq('mp_payment_id', resourceId);
+            .eq('mp_payment_id', resourceId)
+            .select()
+            .maybeSingle();
+
+          // 4b. Se aprovado, enfileira confirmação por e-mail (e WhatsApp se houver telefone)
+          if (mpData.status === 'approved' && updatedRows && companyId) {
+            const firstName = (updatedRows.payer_name ?? '').split(' ')[0] || 'cliente';
+            const amountBrl = (updatedRows.amount_cents / 100).toFixed(2).replace('.', ',');
+            const serviceName = updatedRows.description?.replace(/^CHRISMED — /, '') ?? 'sua consulta';
+
+            const renderTemplate = (body: string, vars: Record<string, string>) =>
+              body.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k] ?? '');
+
+            const vars = {
+              first_name: firstName,
+              amount_brl: amountBrl,
+              service_name: serviceName,
+              payment_id: updatedRows.id,
+            };
+
+            const { data: tpl } = await supabase
+              .from('message_templates')
+              .select('id,subject,body')
+              .eq('company_id', companyId)
+              .eq('event_code', 'payment_confirmed')
+              .eq('channel', 'email')
+              .eq('is_active', true)
+              .maybeSingle();
+
+            if (tpl && updatedRows.payer_email) {
+              await supabase.from('message_outbox').insert({
+                company_id: companyId,
+                event_code: 'payment_confirmed',
+                channel: 'email',
+                template_id: tpl.id,
+                recipient_email: updatedRows.payer_email,
+                recipient_name: updatedRows.payer_name,
+                subject: tpl.subject ? renderTemplate(tpl.subject, vars) : null,
+                body: renderTemplate(tpl.body, vars),
+                payload: { vars, payment_id: updatedRows.id },
+                status: 'pending',
+                scheduled_at: new Date().toISOString(),
+                reference_type: 'mpago_payment',
+                reference_id: updatedRows.id,
+              });
+            }
+          }
         }
       }
     }
