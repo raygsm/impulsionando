@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import {
   listMarocasServices,
+  listMarocasAuditByPeriod,
   MAROCAS_SLA_MINUTES,
 } from "@/lib/marocas.functions";
 import { Card } from "@/components/ui/card";
@@ -11,7 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Printer, ArrowLeft, FileText, Calendar } from "lucide-react";
+import { Printer, ArrowLeft, FileText, Calendar, Download } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/marocas/cockpit/relatorio")({
   head: () => ({ meta: [{ title: "Marocas — Relatório Operacional" }] }),
