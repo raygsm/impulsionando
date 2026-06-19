@@ -5,7 +5,7 @@ import {
   Building2, LayoutDashboard, Boxes, CreditCard, Globe, Rocket,
   KanbanSquare, Wallet, MessageSquare, Users, KeyRound, FileSearch,
   SlidersHorizontal, Plug, HeartPulse, FlaskConical, TrendingUp, Sparkles, CheckCircle2,
-  Megaphone, FileCode,
+  Megaphone, FileCode, Upload,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/core")({
