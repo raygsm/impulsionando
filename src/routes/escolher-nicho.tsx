@@ -1,8 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
-  Stethoscope, HeartPulse,
-  UtensilsCrossed, Beer,
-  Home, Car, Calculator, Scale, Briefcase,
+  Stethoscope, HeartPulse, Activity, Dumbbell,
+  UtensilsCrossed, Beer, Factory,
+  Home, Car, Calculator, Scale, Briefcase, GraduationCap,
   CalendarRange, ShoppingBag, Layers,
   ArrowRight, Target, Sparkles,
 } from "lucide-react";
