@@ -127,23 +127,42 @@ export async function sendVitrineEmail(args: {
 }
 
 async function getCompanyManagerUserIds(companyId: string): Promise<string[]> {
-  const { data } = await supabaseAdmin
+  // Resolve the permission ids that grant manager-level access to the vitrine
+  // flows. We do explicit queries instead of a PostgREST nested embed because
+  // there is no direct FK from user_profiles to profile_permissions (both
+  // reference profiles.id), so the embed silently returns nothing.
+  const { data: perms, error: pErr } = await supabaseAdmin
+    .from('permissions')
+    .select('id, code')
+    .in('code', ['realestate.interest.read', 'realestate.message.read'])
+  if (pErr) {
+    console.warn('[notifyManagers] permissions lookup failed', pErr)
+    return []
+  }
+  const permIds = (perms ?? []).map((p: any) => p.id as string)
+  if (!permIds.length) return []
+  const { data: pp, error: ppErr } = await supabaseAdmin
+    .from('profile_permissions')
+    .select('profile_id')
+    .in('permission_id', permIds)
+  if (ppErr) {
+    console.warn('[notifyManagers] profile_permissions lookup failed', ppErr)
+    return []
+  }
+  const profileIds = Array.from(new Set((pp ?? []).map((r: any) => r.profile_id as string)))
+  if (!profileIds.length) return []
+  const { data: users, error: uErr } = await supabaseAdmin
     .from('user_profiles')
-    .select('user_id, profile_id, profile_permissions:profile_id(permission_id, permissions:permission_id(code))')
+    .select('user_id')
     .eq('company_id', companyId)
     .eq('is_active', true)
-  const ids = new Set<string>()
-  for (const row of (data ?? []) as any[]) {
-    const perms = row.profile_permissions ?? []
-    const list = Array.isArray(perms) ? perms : [perms]
-    for (const p of list) {
-      const code = p?.permissions?.code
-      if (code === 'realestate.interest.read' || code === 'realestate.message.read') {
-        ids.add(row.user_id)
-        break
-      }
-    }
+    .in('profile_id', profileIds)
+  if (uErr) {
+    console.warn('[notifyManagers] user_profiles lookup failed', uErr)
+    return []
   }
+  const ids = new Set<string>()
+  for (const row of (users ?? []) as any[]) ids.add(row.user_id)
   return Array.from(ids)
 }
 
