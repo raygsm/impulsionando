@@ -132,14 +132,14 @@ function OfertasPage() {
                       <div className="text-2xl font-bold text-slate-900">{brl(o.price_cents)}</div>
                       <div className="text-xs text-muted-foreground">~{o.duration_minutes} min</div>
                     </div>
-                    <Link to="/chrismed"><Button className="bg-teal-600 hover:bg-teal-700">Agendar</Button></Link>
+                    <Link to="/chrismed"><Button className="bg-teal-600 hover:bg-teal-700 shadow-sm">Reservar horário</Button></Link>
                   </CardContent>
                 </Card>
               );
             })}
             {filtered.length === 0 && (
               <div className="md:col-span-2 text-center py-12 text-muted-foreground">
-                Nenhum serviço nesta modalidade ainda.
+                Nenhuma modalidade ativa nesse filtro no momento.
               </div>
             )}
           </div>
@@ -148,8 +148,8 @@ function OfertasPage() {
 
       <footer className="border-t mt-16 py-8 text-center text-sm text-muted-foreground">
         <div className="container">
-          CHRISMED · Clínica Médica
-          <div className="mt-1">Powered by <span className="font-semibold text-teal-700">Impulsionando</span></div>
+          CHRISMED · Central Médica · Atendimento ético, sigiloso e humanizado
+          <div className="mt-1">Tecnologia <span className="font-semibold text-teal-700">Impulsionando</span></div>
         </div>
       </footer>
     </div>
