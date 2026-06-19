@@ -32,19 +32,18 @@ const COLS = [
   },
   {
     title: "Soluções por Nicho",
+    // Agrupado por macro-nicho — cada item é o macro inteiro, não subnichos
+    // paralelos. Saúde NÃO pode aparecer ao lado de Psicologia/Clínicas:
+    // elas vivem dentro do macro Saúde em /nichos.
     links: [
-      { to: "/nichos/saude", label: "Saúde" },
-      { to: "/nichos/psicologia", label: "Psicologia e Terapias" },
-      { to: "/nichos/juridico", label: "Jurídico" },
-      { to: "/nichos/contabilidade", label: "Contabilidade" },
-      { to: "/nichos/imobiliaria", label: "Imobiliário" },
-      { to: "/nichos/bares-restaurantes", label: "Restaurantes e Bares" },
-      { to: "/nichos/microcervejarias", label: "Cervejarias" },
-      { to: "/nichos/eventos", label: "Eventos" },
-      { to: "/nichos/veiculos", label: "Veículos" },
-      { to: "/nichos/servicos", label: "Serviços" },
-      { to: "/nichos/ecommerce", label: "E-commerce" },
-      { to: "/nichos/educacao", label: "Educação" },
+      { to: "/nichos#saude", label: "Saúde (clínicas, psicologia, fitness)" },
+      { to: "/nichos#alimentacao", label: "Alimentação (bares, restaurantes, cervejarias)" },
+      { to: "/nichos#imobiliario", label: "Imobiliário" },
+      { to: "/nichos#servicos", label: "Serviços (jurídico, contábil, agências)" },
+      { to: "/nichos#educacao", label: "Educação e Universidades" },
+      { to: "/nichos#eventos", label: "Eventos" },
+      { to: "/nichos#varejo", label: "Varejo, E-commerce e Veículos" },
+      { to: "/nichos#fornecedores", label: "Fornecedores e Indústria" },
       { to: "/nichos/white-label", label: "White Label" },
       { to: "/clube", label: "Clube Impulsionando" },
     ],

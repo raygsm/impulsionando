@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   playwright:
-    name: Playwright (admin logo audit)
+    name: Playwright E2E + a11y + visual (Chromium / Firefox / WebKit · desktop+mobile)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -66,17 +66,23 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: pw-${{ runner.os }}-${{ hashFiles('**/bun.lock', '**/bun.lockb', '**/package.json') }}
+          # Bump key whenever we add/remove engines (chromium+firefox+webkit).
+          key: pw-cfw-${{ runner.os }}-${{ hashFiles('**/bun.lock', '**/bun.lockb', '**/package.json') }}
 
-      - name: Install Playwright Chromium
+      - name: Install Playwright browsers (Chromium + Firefox + WebKit)
         if: steps.pw-cache.outputs.cache-hit != 'true'
-        run: bunx playwright install --with-deps chromium
+        run: bunx playwright install --with-deps chromium firefox webkit
 
       - name: Install Playwright system deps (cache hit)
         if: steps.pw-cache.outputs.cache-hit == 'true'
-        run: bunx playwright install-deps chromium
+        run: bunx playwright install-deps chromium firefox webkit
 
-      - name: Run admin E2E suite
+      # Roda a matriz inteira definida em playwright.config.ts:
+      # desktop-{chromium,firefox,webkit} + mobile-{chromium,webkit,firefox}.
+      # Inclui specs de funil (e2e/nichos-funnel.spec.ts), visual regression
+      # (e2e/hero-cta-visual.spec.ts, e2e/escolher-nicho-visual.spec.ts) e
+      # auditoria axe (e2e/nichos-a11y.spec.ts — falha em violação critical).
+      - name: Run Playwright suite (all engines · desktop+mobile)
         run: bun run test:e2e
 
       - name: Upload Playwright report

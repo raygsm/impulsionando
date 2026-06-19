@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowRight, CheckCircle2, Crown, Sparkles, Zap, BookOpen } from "lucide-react";
+import { ArrowRight, CheckCircle2, Crown, Sparkles, Zap, BookOpen, Layers, Building2, Network } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -53,6 +53,19 @@ type Recomendacao = {
   ganhos: string[];
   plans: RecPlan[];
   combo: { title: string; text: string };
+  /**
+   * Oferta vertical opcional: bloco destacado para um perfil específico
+   * dentro do nicho (ex.: universidade com muitos polos → White Label).
+   * Renderiza após o grid de planos com CTA direto para contratação.
+   */
+  verticalOffer?: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    bullets: string[];
+    cta: { label: string; to: string; search?: Record<string, string> };
+    secondaryCta?: { label: string; to: string };
+  };
 };
 
 const RECOMENDACOES: Record<string, Recomendacao> = {
@@ -355,6 +368,25 @@ const RECOMENDACOES: Record<string, Recomendacao> = {
       { level: "full", modules: ["Multi-polos", "BI acadêmico", "EAD", "Integrações MEC/sistemas oficiais"], why: "Para grupos com vários polos, EAD próprio e integrações oficiais." },
     ],
     combo: { title: "Matrícula + Portal do aluno + Financeiro", text: "Aluno entra, acompanha o curso pelo portal, paga em dia. Secretaria sai da planilha." },
+    verticalOffer: {
+      eyebrow: "Universidade com muitos polos?",
+      title: "White Label Acadêmico — sua marca, sua plataforma, todos os polos sob controle",
+      description:
+        "Reitoria centraliza políticas, matrícula, financeiro e BI; cada polo opera com a sua identidade, autonomia local e relatórios próprios. Tudo em uma instância White Label da Impulsionando, com sua marca, seu domínio e seu app.",
+      bullets: [
+        "Marca, domínio e app próprios — reitoria + cada polo com identidade local",
+        "Multi-polos com permissões por unidade, curso e coordenação",
+        "BI consolidado da reitoria com drill-down por polo, curso e turma",
+        "Matrícula, financeiro, EAD e portal do aluno padronizados em todos os polos",
+        "Onboarding assistido + migração de bases e contratos existentes",
+      ],
+      cta: {
+        label: "Contratar White Label Acadêmico",
+        to: "/orcamento",
+        search: { segmento: "white-label-educacao", origem: "recomendacao-educacao" },
+      },
+      secondaryCta: { label: "Ver como funciona o White Label", to: "/nichos/white-label" },
+    },
   },
 };
 
@@ -474,6 +506,66 @@ function RecomendacaoPage() {
             </div>
           </div>
         </Card>
+
+        {/* Oferta vertical (ex.: White Label para universidades com muitos polos) */}
+        {r.verticalOffer && (
+          <Card
+            data-vertical-offer={nicho}
+            className="relative overflow-hidden p-6 lg:p-10 bg-gradient-primary text-primary-foreground border-0 shadow-elegant"
+          >
+            <div className="pointer-events-none absolute -bottom-24 -right-24 w-[420px] h-[420px] rounded-full bg-accent/30 blur-3xl" />
+            <div className="relative grid lg:grid-cols-[1.4fr_1fr] gap-8 items-center">
+              <div className="space-y-4 min-w-0">
+                <div className="inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur px-3 py-1 text-xs font-medium">
+                  <Building2 className="w-3.5 h-3.5" /> {r.verticalOffer.eyebrow}
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-bold tracking-tight leading-tight">
+                  {r.verticalOffer.title}
+                </h3>
+                <p className="text-white/90 leading-relaxed text-base sm:text-lg">
+                  {r.verticalOffer.description}
+                </p>
+                <ul className="grid sm:grid-cols-2 gap-2.5 pt-1">
+                  {r.verticalOffer.bullets.map((b) => (
+                    <li key={b} className="flex items-start gap-2 text-sm">
+                      <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-white" />
+                      <span className="text-white/95 leading-snug">{b}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex flex-wrap gap-3 pt-3">
+                  <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 font-semibold">
+                    <Link
+                      to={r.verticalOffer.cta.to}
+                      search={(r.verticalOffer.cta.search ?? {}) as never}
+                    >
+                      <Layers className="w-4 h-4 mr-1.5" /> {r.verticalOffer.cta.label}
+                      <ArrowRight className="w-4 h-4 ml-1" />
+                    </Link>
+                  </Button>
+                  {r.verticalOffer.secondaryCta && (
+                    <Button
+                      asChild
+                      size="lg"
+                      variant="outline"
+                      className="border-white/40 bg-white/10 text-white hover:bg-white/20"
+                    >
+                      <Link to={r.verticalOffer.secondaryCta.to}>
+                        {r.verticalOffer.secondaryCta.label}
+                      </Link>
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <div className="hidden lg:flex justify-center">
+                <div className="relative w-56 h-56 rounded-3xl bg-white/10 backdrop-blur grid place-items-center ring-1 ring-white/20">
+                  <Network className="w-28 h-28 text-white/90" />
+                </div>
+              </div>
+            </div>
+          </Card>
+        )}
+
 
         {/* Navegação */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t">
