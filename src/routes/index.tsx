@@ -18,23 +18,6 @@ function resolveSubdomainRedirect(host: string | null | undefined): string | nul
 }
 
 export const Route = createFileRoute("/")({
-  beforeLoad: ({ location }) => {
-    // SSR: o host chega via Request headers. No client cai no useEffect abaixo.
-    if (typeof window !== "undefined") return;
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
-      const { getRequest } = require("@tanstack/react-start/server") as { getRequest: () => Request };
-      const req = getRequest();
-      const host = req?.headers.get("host");
-      const target = resolveSubdomainRedirect(host);
-      if (target && location.pathname === "/") {
-        throw redirect({ to: target });
-      }
-    } catch (err) {
-      if (err && typeof err === "object" && "isRedirect" in err) throw err;
-      // se não houver request (ex.: build-time), ignora silenciosamente
-    }
-  },
   head: () => ({
     meta: [
       { title: "Impulsionando Tecnologia — Sistemas modulares e automação" },
