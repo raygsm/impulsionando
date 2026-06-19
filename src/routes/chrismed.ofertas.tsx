@@ -28,10 +28,10 @@ const MODALITY_META = {
 export const Route = createFileRoute('/chrismed/ofertas')({
   head: () => ({
     meta: [
-      { title: 'CHRISMED — Catálogo de serviços e modalidades' },
-      { name: 'description', content: 'Conheça todas as modalidades de atendimento da CHRISMED: presencial, telemedicina, visita domiciliar e retornos.' },
-      { property: 'og:title', content: 'CHRISMED — Catálogo de Serviços' },
-      { property: 'og:description', content: 'Consultas presenciais, telemedicina, visitas domiciliares e retornos. Pagamento via PIX em segundos.' },
+      { title: 'CHRISMED — Modalidades de Atendimento Premium' },
+      { name: 'description', content: 'Conheça as modalidades CHRISMED: atendimento no consultório, por vídeo, médico onde você estiver e retornos acompanhados. Concierge médico com confirmação imediata.' },
+      { property: 'og:title', content: 'CHRISMED — Modalidades de Atendimento' },
+      { property: 'og:description', content: 'Atendimento médico no formato que se encaixa na sua rotina. Confirmação imediata, sigilo absoluto e equipe disponível.' },
     ],
   }),
   component: OfertasPage,
