@@ -234,7 +234,7 @@ function MarocasCockpit() {
         </TabsList>
 
         <TabsContent value="agenda" className="space-y-4">
-          <AlertsPanel alerts={alertsQ.data ?? []} />
+          <AlertsPanel alerts={alertsQ.data ?? []} notifyCfg={notifyCfg} onSaveCfg={(c) => { setNotifyCfg(c); saveNotifyConfig(c); sentAlertsRef.current.clear(); toast.success("Configuração de notificações salva"); }} />
           <AgendaPanel services={svcList} />
         </TabsContent>
 
