@@ -246,6 +246,7 @@ function CatalogAnalyticsPage() {
         </div>
       </Card>
     </div>
+    </TooltipProvider>
   )
 }
 
