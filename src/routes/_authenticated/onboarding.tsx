@@ -199,6 +199,16 @@ function OnboardingPage() {
     let cancelled = false;
     (async () => {
       try {
+        // Always attempt to consume first — server is idempotent and logs
+        // reuse attempts. If the intent was already consumed, we keep the
+        // user in onboarding but show a non-blocking notice.
+        const consume = await consumeIntent({ data: { id: search.intent! } }).catch(
+          () => ({ ok: false, alreadyConsumed: false }) as { ok: boolean; alreadyConsumed: boolean },
+        );
+        if (consume?.alreadyConsumed) {
+          if (!cancelled) setIntentReused(true);
+        }
+
         const row = await fetchIntent({ data: { id: search.intent! } });
         if (cancelled || !row) return;
         setIntent(row as CatalogIntentSnapshot);
@@ -219,13 +229,20 @@ function OnboardingPage() {
             intentId: row.id,
           },
         }).catch(() => {});
-        consumeIntent({ data: { id: row.id } }).catch(() => {});
       } catch {
         /* silent */
       }
     })();
     return () => { cancelled = true; };
   }, [search.intent, fetchIntent, consumeIntent, track]);
+
+  // Conversion = user reaches the final action plan (step 4). Idempotent server-side.
+  useEffect(() => {
+    if (state.step !== 4) return;
+    if (!intent?.id) return;
+    markConversion({ data: { id: intent.id, kind: "onboarding_completed" } }).catch(() => {});
+  }, [state.step, intent?.id, markConversion]);
+
 
   useEffect(() => {
     if (typeof window !== "undefined") localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
