@@ -35,7 +35,9 @@ import {
   setDedupeThresholds,
   recordDedupeThresholdCheck,
   getDedupeThresholdEvents,
+  getDedupeThresholdAudit,
 } from '@/lib/catalogo.functions'
+
 import { downloadCsv } from '@/lib/exports'
 import { Checkbox } from '@/components/ui/checkbox'
 
