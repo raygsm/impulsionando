@@ -63,7 +63,7 @@ function OfertasPage() {
   const modalities: Array<'todos' | Offering['modality']> = ['todos', 'presencial', 'telemedicina', 'domiciliar', 'retorno'];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-teal-50/40 to-white">
+    <div className="chrismed-brand min-h-screen bg-gradient-to-b from-teal-50/40 to-white">
       <header className="border-b bg-white/80 backdrop-blur sticky top-0 z-10">
         <div className="container flex items-center justify-between py-4">
           <Link to="/chrismed" className="flex items-center gap-2.5">
