@@ -10,7 +10,11 @@ export type NotifyTypeConfig = {
   lateOffsetMin: number; // minutos depois do SLA para soar "atrasado" (geralmente 0)
   channels: NotifyChannel[];
 };
-export type NotifyConfig = Record<string, NotifyTypeConfig>;
+export type ReportSchedule = { enabled: boolean; channels: NotifyChannel[]; hour: number; weekday?: number };
+export type NotifyConfig = {
+  types: Record<string, NotifyTypeConfig>;
+  reports: { daily: ReportSchedule; weekly: ReportSchedule };
+};
 
 const STORAGE_KEY = "marocas.notify.config.v1";
 
