@@ -2,3 +2,6 @@ project_id = "fpywvlhsfdtztkbncmdt"
 
 [functions.mpago-webhook]
 verify_jwt = false
+
+[functions.chrismed-healthcheck]
+verify_jwt = false
