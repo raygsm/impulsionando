@@ -92,7 +92,7 @@ function SuspendedPage() {
           </Button>
           <Button asChild className="flex-1">
             <a
-              href="https://wa.me/5500000000000?text=Olá%2C%20preciso%20de%20suporte%20financeiro"
+              href="https://wa.me/5521993075000?text=Olá%2C%20preciso%20de%20suporte%20financeiro"
               target="_blank"
               rel="noreferrer"
             >
