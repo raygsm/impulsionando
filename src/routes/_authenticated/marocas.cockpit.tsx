@@ -175,7 +175,7 @@ function MarocasCockpit() {
       const key = `${s.id}:${severity}`;
       if (sentAlertsRef.current.has(key)) return;
       sentAlertsRef.current.add(key);
-      const cfg = notifyCfg[s.service_type];
+      const cfg = notifyCfg.types[s.service_type];
       const channels = (cfg?.channels ?? ["cockpit"]).join(", ");
       const msg = `${s.service_type} · ${s.marocas_apartments?.code ?? ""} — ${severity === "late" ? "SLA estourado" : `${cfg?.warningPct ?? 80}% do SLA atingido`} (${info.elapsed}/${info.sla}min) · canais: ${channels}`;
       createAlert({ data: { serviceId: s.id, severity, message: msg } }).then(() => {
