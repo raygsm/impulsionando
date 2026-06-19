@@ -43,8 +43,6 @@ const NICHO_CARDS: Record<string, NichoCard> = {
   psicologia:         { slug: "psicologia",         label: "Psicologia e Terapias",    desc: "Agenda, prontuário sigiloso, sessões e pagamento.",          icon: HeartPulse },
   saude:              { slug: "saude",              label: "Saúde (outras áreas)",     desc: "Fisioterapia, nutrição, odontologia e terapias integrativas.", icon: Activity },
   fitness:            { slug: "fitness",            label: "Fitness e Performance",    desc: "Academias, CrossFit, funcional, personal e estúdios.",        icon: Dumbbell },
-  saude:              { slug: "saude",              label: "Saúde (outras áreas)",     desc: "Fisioterapia, nutrição, odontologia e terapias integrativas.", icon: Activity },
-  fitness:            { slug: "fitness",            label: "Fitness e Performance",    desc: "Academias, CrossFit, funcional, personal e estúdios.",        icon: Dumbbell },
   "bares-restaurantes": { slug: "bares-restaurantes", label: "Bares e Restaurantes",   desc: "Cardápio digital, QR Code, comanda, CRM e fidelidade.",      icon: UtensilsCrossed },
   microcervejarias:   { slug: "microcervejarias",   label: "Cervejarias",              desc: "PDV, marketplace B2B, eventos e ações de marca.",            icon: Beer },
   fornecedores:       { slug: "fornecedores",       label: "Fornecedores e Indústria", desc: "Catálogo B2B, pedidos, comissões e CRM de revenda.",         icon: Factory },
