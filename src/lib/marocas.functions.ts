@@ -226,3 +226,100 @@ export const receiveMarocasSupplyOrder = createServerFn({ method: "POST" })
     if (error) throw error;
     return { ok: true };
   });
+
+// === Upload de fotos no bucket marocas-fotos ===
+export const createMarocasPhotoUploadUrl = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { serviceId: string; kind: "before" | "after"; filename: string }) =>
+    z.object({
+      serviceId: z.string().uuid(),
+      kind: z.enum(["before", "after"]),
+      filename: z.string().min(1).max(120).regex(/^[a-zA-Z0-9._-]+$/, "filename inválido"),
+    }).parse(d))
+  .handler(async ({ context, data }) => {
+    const path = `services/${data.serviceId}/${data.kind}/${Date.now()}-${data.filename}`;
+    const { data: signed, error } = await context.supabase.storage
+      .from("marocas-fotos")
+      .createSignedUploadUrl(path);
+    if (error) throw error;
+    return { path, token: signed.token, signedUrl: signed.signedUrl };
+  });
+
+export const getMarocasPhotoSignedUrl = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { path: string }) =>
+    z.object({ path: z.string().min(1).max(500) }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: signed, error } = await context.supabase.storage
+      .from("marocas-fotos")
+      .createSignedUrl(data.path, 60 * 60); // 1h
+    if (error) throw error;
+    return { url: signed.signedUrl };
+  });
+
+// === Auditoria de checklist (usa public.audit_logs) ===
+export const logMarocasServiceAudit = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: {
+    serviceId: string;
+    action: string;
+    before?: unknown;
+    after?: unknown;
+    metadata?: Record<string, unknown>;
+  }) => z.object({
+    serviceId: z.string().uuid(),
+    action: z.string().min(1).max(80),
+    before: z.unknown().optional(),
+    after: z.unknown().optional(),
+    metadata: z.record(z.unknown()).optional(),
+  }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { error } = await context.supabase.from("audit_logs").insert({
+      entity: "marocas_service",
+      entity_id: data.serviceId,
+      action: data.action,
+      before: (data.before ?? null) as never,
+      after: (data.after ?? null) as never,
+      metadata: (data.metadata ?? {}) as never,
+      user_id: context.userId,
+    });
+    if (error) throw error;
+    return { ok: true };
+  });
+
+export const listMarocasServiceAudit = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { serviceId: string }) =>
+    z.object({ serviceId: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: rows, error } = await context.supabase
+      .from("audit_logs")
+      .select("id, action, before, after, metadata, user_email, user_id, created_at")
+      .eq("entity", "marocas_service")
+      .eq("entity_id", data.serviceId)
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) throw error;
+    return rows ?? [];
+  });
+
+// === Alertas SLA (notificações no cockpit) ===
+export const createMarocasSlaAlert = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { serviceId: string; severity: "warning" | "late"; message: string }) =>
+    z.object({
+      serviceId: z.string().uuid(),
+      severity: z.enum(["warning", "late"]),
+      message: z.string().min(1).max(500),
+    }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { error } = await context.supabase.from("notifications").insert({
+      user_id: context.userId,
+      type: data.severity === "late" ? "marocas_sla_late" : "marocas_sla_warning",
+      title: data.severity === "late" ? "SLA estourado — Marocas" : "SLA chegando ao limite — Marocas",
+      message: data.message,
+      data: { service_id: data.serviceId, severity: data.severity } as never,
+    });
+    if (error) throw error;
+    return { ok: true };
+  });
