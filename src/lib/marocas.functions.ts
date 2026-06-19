@@ -558,11 +558,72 @@ export const listMarocasReportRuns = createServerFn({ method: "POST" })
     await assertMarocasAuthorized(context.supabase, context.userId);
     let q = (context.supabase as any)
       .from("marocas_report_runs")
-      .select("id, period, range_from, range_to, channels, status, total, done, late, error, triggered_by, created_at, user_id")
+      .select("id, period, range_from, range_to, channels, status, total, done, late, error, triggered_by, created_at, user_id, schedule_id")
       .order("created_at", { ascending: false })
       .limit(data.limit ?? 50);
     if (data.period) q = q.eq("period", data.period);
     const { data: rows, error } = await q;
     if (error) throw error;
     return rows ?? [];
+  });
+
+// === Métricas de sucesso (7d / 30d) ===
+export const getMarocasReportMetrics = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertMarocasAuthorized(context.supabase, context.userId);
+    const now = Date.now();
+    const cutoff30 = new Date(now - 30 * 86400_000).toISOString();
+    const { data, error } = await (context.supabase as any)
+      .from("marocas_report_runs")
+      .select("status, created_at, period")
+      .gte("created_at", cutoff30);
+    if (error) throw error;
+    const rows = (data ?? []) as Array<{ status: string; created_at: string; period: string }>;
+    const cutoff7 = now - 7 * 86400_000;
+    const calc = (subset: typeof rows) => {
+      const total = subset.length;
+      const ok = subset.filter(r => r.status === "success").length;
+      const partial = subset.filter(r => r.status === "partial").length;
+      const err = subset.filter(r => r.status === "error").length;
+      const rate = total ? Math.round((ok / total) * 1000) / 10 : 0;
+      return { total, ok, partial, err, rate };
+    };
+    const last7 = rows.filter(r => new Date(r.created_at).getTime() >= cutoff7);
+    return {
+      d7: calc(last7),
+      d30: calc(rows),
+      daily7: calc(last7.filter(r => r.period === "dia")),
+      weekly7: calc(last7.filter(r => r.period === "semana")),
+    };
+  });
+
+// === Reenvio (retry) de um run com falha/parcial ===
+export const retryMarocasReportRun = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertMarocasAuthorized(context.supabase, context.userId);
+    const { data: run, error } = await (context.supabase as any)
+      .from("marocas_report_runs")
+      .select("id, period, range_from, range_to, channels, schedule_id, user_id, status")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw error;
+    if (!run) throw new Error("Run não encontrado");
+    if (run.status === "success") {
+      return { ok: true, skipped: true, message: "Run já estava com sucesso — nada a reenviar." };
+    }
+    const result = await dispatchMarocasReport({
+      supabase: context.supabase,
+      userId: run.user_id ?? context.userId,
+      period: run.period,
+      from: run.range_from,
+      to: run.range_to,
+      channels: run.channels ?? ["cockpit"],
+      triggeredBy: "manual",
+      scheduleId: run.schedule_id,
+      recipientEmail: (context.claims as any)?.email ?? null,
+    });
+    return { ...result, ok: result.status !== "error" };
   });
