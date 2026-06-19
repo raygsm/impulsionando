@@ -421,3 +421,70 @@ export const sendMarocasReportNow = createServerFn({ method: "POST" })
     }
     return { ok: true, total, done };
   });
+
+// === Autorização Marocas (admin/gestor) ===
+async function assertMarocasAuthorized(supabase: any, userId: string) {
+  const { data, error } = await supabase.rpc("is_marocas_authorized", { _user_id: userId });
+  if (error) throw error;
+  if (!data) throw new Error("Forbidden: requer perfil admin ou gestor");
+}
+
+// === Schedules de relatórios automáticos ===
+export const listMarocasReportSchedules = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertMarocasAuthorized(context.supabase, context.userId);
+    const { data, error } = await (context.supabase as any)
+      .from("marocas_report_schedules")
+      .select("id, period, hour, weekday, channels, enabled, updated_at")
+      .order("period");
+    if (error) throw error;
+    return data ?? [];
+  });
+
+export const upsertMarocasReportSchedule = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { period: "dia" | "semana"; hour: number; weekday?: number | null; channels: string[]; enabled: boolean }) =>
+    z.object({
+      period: z.enum(["dia", "semana"]),
+      hour: z.number().int().min(0).max(23),
+      weekday: z.number().int().min(0).max(6).nullable().optional(),
+      channels: z.array(z.enum(["cockpit", "whatsapp", "email"])).min(1),
+      enabled: z.boolean(),
+    }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertMarocasAuthorized(context.supabase, context.userId);
+    const row = {
+      user_id: context.userId,
+      period: data.period,
+      hour: data.hour,
+      weekday: data.period === "semana" ? (data.weekday ?? 1) : null,
+      channels: data.channels,
+      enabled: data.enabled,
+    };
+    const { error } = await (context.supabase as any)
+      .from("marocas_report_schedules")
+      .upsert(row, { onConflict: "user_id,period" });
+    if (error) throw error;
+    return { ok: true };
+  });
+
+export const listMarocasReportRuns = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { period?: "dia" | "semana"; limit?: number }) =>
+    z.object({
+      period: z.enum(["dia", "semana"]).optional(),
+      limit: z.number().int().min(1).max(200).optional(),
+    }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertMarocasAuthorized(context.supabase, context.userId);
+    let q = (context.supabase as any)
+      .from("marocas_report_runs")
+      .select("id, period, range_from, range_to, channels, status, total, done, late, error, triggered_by, created_at, user_id")
+      .order("created_at", { ascending: false })
+      .limit(data.limit ?? 50);
+    if (data.period) q = q.eq("period", data.period);
+    const { data: rows, error } = await q;
+    if (error) throw error;
+    return rows ?? [];
+  });
