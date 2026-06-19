@@ -97,7 +97,7 @@ export const getCatalogIntent = createServerFn({ method: 'GET' })
     return row
   })
 
-// --------- Tracking ---------
+// --------- Tracking (single + batch) ---------
 
 const TrackInput = z.object({
   eventName: z.string().trim().min(1).max(60),
@@ -128,6 +128,27 @@ export const trackCatalogEvent = createServerFn({ method: 'POST' })
     return { ok: true }
   })
 
+export const trackCatalogEventsBatch = createServerFn({ method: 'POST' })
+  .inputValidator((data: unknown) =>
+    z.object({ events: z.array(TrackInput).min(1).max(50) }).parse(data),
+  )
+  .handler(async ({ data }) => {
+    const sb = publicClient()
+    const rows = data.events.map((e) => ({
+      event_name: e.eventName,
+      macro_slug: e.macroSlug ?? null,
+      subnicho_slug: e.subnichoSlug ?? null,
+      plan_tier: e.planTier ?? null,
+      selected_modules: e.selectedModules ?? [],
+      intent_id: e.intentId ?? null,
+      session_token: e.sessionToken ?? null,
+      metadata: e.metadata ?? {},
+    }))
+    const { error } = await sb.from('catalog_events').insert(rows)
+    if (error) throw error
+    return { ok: true, inserted: rows.length }
+  })
+
 // --------- Conversion analytics (staff) ---------
 
 export const getCatalogAnalytics = createServerFn({ method: 'GET' })
@@ -149,7 +170,7 @@ export const getCatalogAnalytics = createServerFn({ method: 'GET' })
         .gte('created_at', since),
       context.supabase
         .from('catalog_intents')
-        .select('macro_slug,subnicho_slug,plan_tier,consumed_at,created_at')
+        .select('macro_slug,subnicho_slug,plan_tier,consumed_at,converted_at,conversion_kind,reuse_attempts,created_at')
         .gte('created_at', since),
     ])
     if (evRes.error) throw evRes.error
@@ -162,7 +183,9 @@ export const getCatalogAnalytics = createServerFn({ method: 'GET' })
       views: number
       selects: number
       intents: number
-      consumed: number
+      opened: number
+      converted: number
+      reuseAttempts: number
     }
     const map = new Map<string, Row>()
     const key = (m: string | null, s: string | null, p: string | null) =>
@@ -178,7 +201,9 @@ export const getCatalogAnalytics = createServerFn({ method: 'GET' })
           views: 0,
           selects: 0,
           intents: 0,
-          consumed: 0,
+          opened: 0,
+          converted: 0,
+          reuseAttempts: 0,
         }
         map.set(k, row)
       }
@@ -192,7 +217,9 @@ export const getCatalogAnalytics = createServerFn({ method: 'GET' })
     for (const i of intentRes.data ?? []) {
       const r = ensure(i.macro_slug, i.subnicho_slug, i.plan_tier)
       r.intents += 1
-      if (i.consumed_at) r.consumed += 1
+      if (i.consumed_at) r.opened += 1
+      if (i.converted_at) r.converted += 1
+      r.reuseAttempts += i.reuse_attempts ?? 0
     }
     const rows = Array.from(map.values()).sort((a, b) => b.intents - a.intents)
     const totals = rows.reduce(
@@ -200,27 +227,79 @@ export const getCatalogAnalytics = createServerFn({ method: 'GET' })
         acc.views += r.views
         acc.selects += r.selects
         acc.intents += r.intents
-        acc.consumed += r.consumed
+        acc.opened += r.opened
+        acc.converted += r.converted
+        acc.reuseAttempts += r.reuseAttempts
         return acc
       },
-      { views: 0, selects: 0, intents: 0, consumed: 0 },
+      { views: 0, selects: 0, intents: 0, opened: 0, converted: 0, reuseAttempts: 0 },
     )
     return { rows, totals, days: data.days }
   })
 
-// --------- Mark intent consumed (called from onboarding once opened) ---------
+// --------- Idempotent consume + conversion ---------
+// "Consumed" = intent has been opened in onboarding (intent reaches the app).
+// "Converted" = a downstream success event happened (onboarding finished,
+// contract signed, payment captured). Set via markCatalogConversion.
 
 export const consumeCatalogIntent = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
+    const { data: existing, error: readErr } = await context.supabase
+      .from('catalog_intents')
+      .select('id,consumed_at,reuse_attempts')
+      .eq('id', data.id)
+      .maybeSingle()
+    if (readErr) throw readErr
+    if (!existing) return { ok: false, alreadyConsumed: false, notFound: true }
+
+    if (existing.consumed_at) {
+      // Idempotent: count + log the reuse attempt, do not re-consume.
+      const sbAnon = publicClient()
+      await sbAnon.from('catalog_events').insert({
+        event_name: 'intent_reuse_attempt',
+        intent_id: data.id,
+        metadata: { user_id: context.userId },
+      })
+      await context.supabase
+        .from('catalog_intents')
+        .update({
+          reuse_attempts: (existing.reuse_attempts ?? 0) + 1,
+          last_reuse_attempt_at: new Date().toISOString(),
+        })
+        .eq('id', data.id)
+      return { ok: true, alreadyConsumed: true, reuseAttempts: (existing.reuse_attempts ?? 0) + 1 }
+    }
+
     const { error } = await context.supabase
       .from('catalog_intents')
       .update({ consumed_at: new Date().toISOString(), user_id: context.userId })
       .eq('id', data.id)
       .is('consumed_at', null)
     if (error) throw error
-    return { ok: true }
+    return { ok: true, alreadyConsumed: false }
+  })
+
+export const markCatalogConversion = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z.object({
+      id: z.string().uuid(),
+      kind: z.enum(['onboarding_completed', 'contract_signed', 'payment_captured']),
+    }).parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    // Idempotent: only first conversion wins.
+    const { data: updated, error } = await context.supabase
+      .from('catalog_intents')
+      .update({ converted_at: new Date().toISOString(), conversion_kind: data.kind })
+      .eq('id', data.id)
+      .is('converted_at', null)
+      .select('id')
+      .maybeSingle()
+    if (error) throw error
+    return { ok: true, firstConversion: !!updated, kind: data.kind }
   })
 
 // --------- Admin: manage niche → plan → modules ---------

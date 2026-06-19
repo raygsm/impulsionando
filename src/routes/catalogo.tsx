@@ -11,7 +11,8 @@ import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { PublicHeader } from '@/components/marketing/PublicHeader'
 import { PublicFooter } from '@/components/marketing/PublicFooter'
-import { getCatalog, saveCatalogIntent, trackCatalogEvent } from '@/lib/catalogo.functions'
+import { getCatalog, saveCatalogIntent } from '@/lib/catalogo.functions'
+import { trackCatalog, flushCatalogTracker } from '@/lib/catalog-track'
 import { CORE_BASE, PLAN_TIERS, type PlanTier } from '@/lib/niche-plans'
 
 const STORAGE_KEY = 'impulsionando.catalogo.selection.v1'
@@ -79,7 +80,6 @@ function CatalogoPage() {
   const { macros, subs, mappings, mappedMacros } = data
   const mappedSet = useMemo(() => new Set(mappedMacros), [mappedMacros])
   const saveIntent = useServerFn(saveCatalogIntent)
-  const track = useServerFn(trackCatalogEvent)
 
   const [macroSlug, setMacroSlug] = useState<string | null>(null)
   const [subId, setSubId] = useState<string | null>(null)
@@ -116,16 +116,15 @@ function CatalogoPage() {
   }, [macroSlug, subId, selectionByTier])
 
   function trackEvent(eventName: string, extra: Record<string, unknown> = {}) {
-    track({
-      data: {
-        eventName,
-        macroSlug: macroSlug ?? null,
-        subnichoSlug: subs.find((s) => s.id === subId)?.slug ?? null,
-        sessionToken: sessionToken(),
-        ...extra,
-      },
-    }).catch(() => {})
+    trackCatalog({
+      eventName,
+      macroSlug: macroSlug ?? null,
+      subnichoSlug: subs.find((s) => s.id === subId)?.slug ?? null,
+      sessionToken: sessionToken(),
+      ...extra,
+    })
   }
+
 
   function clearSelection() {
     setMacroSlug(null)
@@ -210,6 +209,7 @@ function CatalogoPage() {
         },
       })
       trackEvent('intent_saved', { planTier: tier, selectedModules: picked, intentId: res.id })
+      await flushCatalogTracker()
       window.location.href = `/onboarding?intent=${encodeURIComponent(res.id)}`
     } catch (e: unknown) {
       toast.error((e as Error)?.message ?? 'Não foi possível salvar sua seleção.')

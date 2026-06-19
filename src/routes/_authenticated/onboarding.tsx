@@ -16,7 +16,12 @@ import {
   ShoppingCart, GraduationCap, Briefcase, ArrowRight, ArrowLeft, CheckCircle2,
   AlertTriangle, Lightbulb, Rocket, Link2,
 } from "lucide-react";
-import { getCatalogIntent, consumeCatalogIntent, trackCatalogEvent } from "@/lib/catalogo.functions";
+import {
+  getCatalogIntent,
+  consumeCatalogIntent,
+  trackCatalogEvent,
+  markCatalogConversion,
+} from "@/lib/catalogo.functions";
 
 const onboardingSearchSchema = z.object({ intent: z.string().uuid().optional() });
 
@@ -177,9 +182,11 @@ function OnboardingPage() {
   const search = useSearch({ from: "/_authenticated/onboarding" });
   const fetchIntent = useServerFn(getCatalogIntent);
   const consumeIntent = useServerFn(consumeCatalogIntent);
+  const markConversion = useServerFn(markCatalogConversion);
   const track = useServerFn(trackCatalogEvent);
   const [state, setState] = useState<State>(DEFAULT_STATE);
   const [intent, setIntent] = useState<CatalogIntentSnapshot | null>(null);
+  const [intentReused, setIntentReused] = useState(false);
 
   useEffect(() => {
     setState(loadState());
@@ -192,6 +199,16 @@ function OnboardingPage() {
     let cancelled = false;
     (async () => {
       try {
+        // Always attempt to consume first — server is idempotent and logs
+        // reuse attempts. If the intent was already consumed, we keep the
+        // user in onboarding but show a non-blocking notice.
+        const consume = await consumeIntent({ data: { id: search.intent! } }).catch(
+          () => ({ ok: false, alreadyConsumed: false }) as { ok: boolean; alreadyConsumed: boolean },
+        );
+        if (consume?.alreadyConsumed) {
+          if (!cancelled) setIntentReused(true);
+        }
+
         const row = await fetchIntent({ data: { id: search.intent! } });
         if (cancelled || !row) return;
         setIntent(row as CatalogIntentSnapshot);
@@ -212,13 +229,20 @@ function OnboardingPage() {
             intentId: row.id,
           },
         }).catch(() => {});
-        consumeIntent({ data: { id: row.id } }).catch(() => {});
       } catch {
         /* silent */
       }
     })();
     return () => { cancelled = true; };
   }, [search.intent, fetchIntent, consumeIntent, track]);
+
+  // Conversion = user reaches the final action plan (step 4). Idempotent server-side.
+  useEffect(() => {
+    if (state.step !== 4) return;
+    if (!intent?.id) return;
+    markConversion({ data: { id: intent.id, kind: "onboarding_completed" } }).catch(() => {});
+  }, [state.step, intent?.id, markConversion]);
+
 
   useEffect(() => {
     if (typeof window !== "undefined") localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -253,6 +277,16 @@ function OnboardingPage() {
         title="Como podemos te ajudar a melhorar?"
         description="5 perguntas rápidas pra montar seu plano de ação personalizado."
       />
+
+      {intentReused && (
+        <Card className="mb-4 p-3 border-amber-300/50 bg-amber-50 dark:bg-amber-950/30 text-sm flex items-start gap-2">
+          <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" aria-hidden />
+          <div>
+            Este link de intenção já foi aberto antes. Suas seleções continuam disponíveis,
+            mas a conversão original foi mantida — a tentativa de reabertura ficou registrada.
+          </div>
+        </Card>
+      )}
 
       {intent && (
         <Card className="mb-6 p-4 border-primary/30 bg-primary/5">
