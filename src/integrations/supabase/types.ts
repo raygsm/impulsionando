@@ -9986,6 +9986,101 @@ export type Database = {
         }
         Relationships: []
       }
+      marocas_report_runs: {
+        Row: {
+          channels: string[]
+          created_at: string
+          done: number
+          error: string | null
+          id: string
+          late: number
+          period: string
+          range_from: string
+          range_to: string
+          schedule_id: string | null
+          status: string
+          total: number
+          triggered_by: string
+          user_id: string | null
+        }
+        Insert: {
+          channels?: string[]
+          created_at?: string
+          done?: number
+          error?: string | null
+          id?: string
+          late?: number
+          period: string
+          range_from: string
+          range_to: string
+          schedule_id?: string | null
+          status: string
+          total?: number
+          triggered_by?: string
+          user_id?: string | null
+        }
+        Update: {
+          channels?: string[]
+          created_at?: string
+          done?: number
+          error?: string | null
+          id?: string
+          late?: number
+          period?: string
+          range_from?: string
+          range_to?: string
+          schedule_id?: string | null
+          status?: string
+          total?: number
+          triggered_by?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marocas_report_runs_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "marocas_report_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marocas_report_schedules: {
+        Row: {
+          channels: string[]
+          created_at: string
+          enabled: boolean
+          hour: number
+          id: string
+          period: string
+          updated_at: string
+          user_id: string
+          weekday: number | null
+        }
+        Insert: {
+          channels?: string[]
+          created_at?: string
+          enabled?: boolean
+          hour: number
+          id?: string
+          period: string
+          updated_at?: string
+          user_id: string
+          weekday?: number | null
+        }
+        Update: {
+          channels?: string[]
+          created_at?: string
+          enabled?: boolean
+          hour?: number
+          id?: string
+          period?: string
+          updated_at?: string
+          user_id?: string
+          weekday?: number | null
+        }
+        Relationships: []
+      }
       marocas_services: {
         Row: {
           apartment_id: string
@@ -14772,6 +14867,7 @@ export type Database = {
         Returns: boolean
       }
       is_impulsionando_staff: { Args: { _user: string }; Returns: boolean }
+      is_marocas_authorized: { Args: { _user_id: string }; Returns: boolean }
       is_patient_of_record:
         | { Args: { _record: string; _user: string }; Returns: boolean }
         | {
