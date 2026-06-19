@@ -225,12 +225,12 @@ function ChrismedPage() {
         {selected && !pixResult && (
           <Card className="max-w-xl mx-auto border-teal-100">
             <CardHeader>
-              <button onClick={() => setSelected(null)} className="text-sm text-teal-700 hover:underline self-start mb-2">← Trocar serviço</button>
+              <button onClick={() => setSelected(null)} className="text-sm text-teal-700 hover:underline self-start mb-2">← Trocar modalidade</button>
               <CardTitle>{selected.name}</CardTitle>
               <CardDescription>
                 {selected.price_cents === 0
-                  ? 'Sem cobrança — preencha seus dados para confirmar.'
-                  : `R$ ${(selected.price_cents / 100).toFixed(2).replace('.', ',')} via PIX`}
+                  ? 'Sem custo — confirme seus dados e reservamos seu horário.'
+                  : `Investimento de R$ ${(selected.price_cents / 100).toFixed(2).replace('.', ',')} · pagamento via PIX com confirmação imediata`}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
