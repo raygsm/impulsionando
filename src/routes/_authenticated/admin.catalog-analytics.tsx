@@ -9,6 +9,12 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import {
   BarChart3,
   TrendingUp,
   MousePointerClick,
@@ -16,6 +22,7 @@ import {
   Download,
   AlertTriangle,
   DoorOpen,
+  Info,
 } from 'lucide-react'
 import { getCatalogAnalytics } from '@/lib/catalogo.functions'
 import { downloadCsv } from '@/lib/exports'
