@@ -140,7 +140,7 @@ function ChrismedPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-teal-50/40 via-white to-white">
+    <div className="chrismed-brand min-h-screen bg-gradient-to-b from-teal-50/40 via-white to-white">
       {/* Top bar */}
       <header className="border-b bg-white/85 backdrop-blur sticky top-0 z-10">
         <div className="container flex items-center justify-between py-4">
