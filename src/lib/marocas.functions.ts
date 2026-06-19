@@ -625,5 +625,5 @@ export const retryMarocasReportRun = createServerFn({ method: "POST" })
       scheduleId: run.schedule_id,
       recipientEmail: (context.claims as any)?.email ?? null,
     });
-    return { ok: result.status !== "error", ...result };
+    return { ...result, ok: result.status !== "error" };
   });
