@@ -140,20 +140,20 @@ function ChrismedPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-teal-50/50 to-white">
-      {/* Hero */}
-      <header className="border-b bg-white/80 backdrop-blur sticky top-0 z-10">
+    <div className="min-h-screen bg-gradient-to-b from-teal-50/40 via-white to-white">
+      {/* Top bar */}
+      <header className="border-b bg-white/85 backdrop-blur sticky top-0 z-10">
         <div className="container flex items-center justify-between py-4">
-          <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-lg bg-teal-600 flex items-center justify-center text-white font-bold">C</div>
+          <div className="flex items-center gap-2.5">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-teal-600 to-teal-700 flex items-center justify-center text-white font-bold shadow-sm">C</div>
             <div>
-              <div className="font-semibold tracking-tight">CHRISMED</div>
-              <div className="text-xs text-muted-foreground -mt-0.5">Clínica Médica</div>
+              <div className="font-semibold tracking-tight text-slate-900">CHRISMED</div>
+              <div className="text-[11px] uppercase tracking-wider text-teal-700/80 -mt-0.5">Central Médica Premium</div>
             </div>
           </div>
           <nav className="flex items-center gap-1">
             <a href="/chrismed" className="px-3 py-1.5 text-sm font-medium text-teal-700 hover:bg-teal-50 rounded-md">Agendar</a>
-            <a href="/chrismed/ofertas" className="px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-md">Ofertas</a>
+            <a href="/chrismed/ofertas" className="px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-md">Modalidades</a>
           </nav>
         </div>
       </header>
@@ -162,12 +162,13 @@ function ChrismedPage() {
         {!pixResult && !selected && (
           <>
             <div className="text-center mb-12">
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-4">
-                Sua consulta médica em <span className="text-teal-600">poucos cliques</span>
+              <Badge variant="outline" className="border-teal-200 text-teal-700 mb-4 bg-teal-50/60">Atendimento concierge · presencial, vídeo e domiciliar</Badge>
+              <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-4 leading-[1.1]">
+                Cuidado médico <span className="text-teal-600">sem fila, sem espera</span>,<br className="hidden md:block" /> com a privacidade que você merece.
               </h1>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Escolha a modalidade, pague via PIX e receba a confirmação imediata.
-                Prontuário eletrônico, prescrição digital e acompanhamento contínuo.
+              <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+                Escolha a modalidade, confirme em minutos e tenha seu atendimento garantido.
+                Prontuário eletrônico, prescrição digital e equipe disponível antes, durante e após a consulta.
               </p>
             </div>
 
@@ -178,7 +179,7 @@ function ChrismedPage() {
                 {offerings.map((o) => {
                   const Icon = MODALITY_META[o.modality].icon;
                   return (
-                    <Card key={o.id} className="border-teal-100 hover:border-teal-300 hover:shadow-lg transition-all cursor-pointer group" onClick={() => setSelected(o)}>
+                    <Card key={o.id} className="border-teal-100/80 hover:border-teal-400 hover:shadow-xl hover:-translate-y-0.5 transition-all cursor-pointer group bg-white" onClick={() => setSelected(o)}>
                       <CardHeader>
                         <div className="flex items-start justify-between">
                           <div className="h-12 w-12 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center group-hover:bg-teal-600 group-hover:text-white transition-colors">
@@ -186,23 +187,37 @@ function ChrismedPage() {
                           </div>
                           <Badge variant="secondary" className="bg-teal-50 text-teal-700 hover:bg-teal-100">{MODALITY_META[o.modality].label}</Badge>
                         </div>
-                        <CardTitle className="mt-3">{o.name}</CardTitle>
-                        <CardDescription>{o.description}</CardDescription>
+                        <CardTitle className="mt-3 text-xl">{o.name}</CardTitle>
+                        <CardDescription className="text-slate-600">{o.description}</CardDescription>
                       </CardHeader>
                       <CardContent className="flex items-end justify-between">
                         <div>
                           <div className="text-3xl font-bold text-slate-900">
                             {o.price_cents === 0 ? 'Cortesia' : `R$ ${(o.price_cents / 100).toFixed(2).replace('.', ',')}`}
                           </div>
-                          <div className="text-xs text-muted-foreground">~{o.duration_minutes} min</div>
+                          <div className="text-xs text-muted-foreground">Duração estimada: {o.duration_minutes} min</div>
                         </div>
-                        <Button className="bg-teal-600 hover:bg-teal-700">Agendar</Button>
+                        <Button className="bg-teal-600 hover:bg-teal-700 shadow-sm">Reservar horário</Button>
                       </CardContent>
                     </Card>
                   );
                 })}
               </div>
             )}
+
+            {/* Trust signals */}
+            <div className="grid sm:grid-cols-3 gap-4 mt-14 pt-10 border-t border-teal-100">
+              {[
+                { t: 'Confirmação imediata', d: 'Pagou, está confirmado. Horário reservado e bloqueado em sua agenda.' },
+                { t: 'Sigilo absoluto', d: 'Prontuário eletrônico criptografado. Conformidade total com a LGPD.' },
+                { t: 'Equipe à disposição', d: 'WhatsApp dedicado para dúvidas antes e suporte clínico após o atendimento.' },
+              ].map((b) => (
+                <div key={b.t} className="text-center sm:text-left">
+                  <div className="font-semibold text-slate-900 mb-1">{b.t}</div>
+                  <div className="text-sm text-slate-600">{b.d}</div>
+                </div>
+              ))}
+            </div>
           </>
         )}
 
