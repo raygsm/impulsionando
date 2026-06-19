@@ -99,10 +99,14 @@ function ChrismedAdmin() {
           <h1 className="text-3xl font-bold text-foreground">CHRISMED — Painel</h1>
           <p className="text-sm text-muted-foreground">KPIs, pagamentos e fila de mensagens em tempo real (atualiza a cada 15s)</p>
         </div>
-        <Button variant="outline" size="sm" onClick={load} disabled={loading}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Atualizar
-        </Button>
+        <div className="flex gap-2">
+          <a href="/chrismed/alertas"><Button variant="outline" size="sm">Alertas</Button></a>
+          <a href="/chrismed/setup"><Button variant="outline" size="sm">Setup</Button></a>
+          <Button variant="outline" size="sm" onClick={load} disabled={loading}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Atualizar
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
