@@ -120,11 +120,13 @@ function buildReport(diffs) {
 
   // Tabela por componente × viewport × estado
   const priorityComponents = [
-    "verticalOffer (educacao)",
+    "verticalOffer (educacao · CTA principal)",
+    "verticalOffer (educacao · CTA secundário)",
     "PublicFooter",
     "PublicFooter · coluna Nichos",
     "Hero CTAs",
   ];
+
   const orderedComponents = [
     ...priorityComponents.filter((c) => byComponent.has(c)),
     ...[...byComponent.keys()].filter((c) => !priorityComponents.includes(c)),
