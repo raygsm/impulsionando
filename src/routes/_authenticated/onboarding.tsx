@@ -278,6 +278,16 @@ function OnboardingPage() {
         description="5 perguntas rápidas pra montar seu plano de ação personalizado."
       />
 
+      {intentReused && (
+        <Card className="mb-4 p-3 border-amber-300/50 bg-amber-50 dark:bg-amber-950/30 text-sm flex items-start gap-2">
+          <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" aria-hidden />
+          <div>
+            Este link de intenção já foi aberto antes. Suas seleções continuam disponíveis,
+            mas a conversão original foi mantida — a tentativa de reabertura ficou registrada.
+          </div>
+        </Card>
+      )}
+
       {intent && (
         <Card className="mb-6 p-4 border-primary/30 bg-primary/5">
           <div className="flex items-start gap-3">
