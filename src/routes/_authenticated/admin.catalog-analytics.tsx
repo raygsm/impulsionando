@@ -532,7 +532,7 @@ function CatalogAnalyticsPage() {
                       </td>
                     </tr>
                   )}
-                  </>
+                  </Fragment>
                 )
               })}
             </tbody>
