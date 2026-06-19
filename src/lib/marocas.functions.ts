@@ -292,6 +292,7 @@ export const listMarocasServiceAudit = createServerFn({ method: "POST" })
   .inputValidator((d: { serviceId: string }) =>
     z.object({ serviceId: z.string().uuid() }).parse(d))
   .handler(async ({ context, data }) => {
+    await assertMarocasAuthorized(context.supabase, context.userId);
     const { data: rows, error } = await context.supabase
       .from("audit_logs")
       .select("id, action, before, after, metadata, user_email, user_id, created_at")
