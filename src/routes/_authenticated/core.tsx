@@ -45,6 +45,8 @@ function CoreLayout() {
     { to: "/core/modulos", label: "Biblioteca de Módulos", icon: Boxes },
     { to: "/core/releases", label: "Releases (DEV→PROD)", icon: Rocket },
     { to: "/core/dominios", label: "Domínios dos Tenants", icon: Globe },
+    { to: "/core/importar-clientes", label: "Importar Clientes (CSV)", icon: Upload },
+    { to: "/core/financeiro-consolidado", label: "Financeiro Consolidado", icon: Wallet },
     { to: "/core/finalizacao-comercial", label: "Finalização Comercial", icon: CheckCircle2 },
     { to: "/core/planos", label: "Gestão de Planos", icon: CreditCard },
     { to: "/core/templates", label: "Templates de Site", icon: Globe },
