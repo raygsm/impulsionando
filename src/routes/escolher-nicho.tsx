@@ -1,13 +1,16 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
-  Stethoscope, HeartPulse, UtensilsCrossed, Beer, CalendarRange,
-  Home, Car, Calculator, Scale, Briefcase, ShoppingBag, Layers,
+  Stethoscope, HeartPulse, Activity, Dumbbell,
+  UtensilsCrossed, Beer, Factory,
+  Home, Car, Calculator, Scale, Briefcase, GraduationCap,
+  CalendarRange, ShoppingBag, Layers,
   ArrowRight, Target, Sparkles,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
+import { MACRO_NICHOS } from "@/components/marketing/nichoMacros";
 
 export const Route = createFileRoute("/escolher-nicho")({
   head: () => ({
@@ -28,20 +31,29 @@ type NichoCard = {
   icon: typeof Stethoscope;
 };
 
-const NICHOS: NichoCard[] = [
-  { slug: "clinicas",          label: "Clínica ou Consultório",   desc: "Agenda, prontuário, portal do paciente e relacionamento.", icon: Stethoscope },
-  { slug: "psicologia",        label: "Psicologia e Terapias",    desc: "Agenda, prontuário sigiloso, sessões e pagamento.",         icon: HeartPulse },
-  { slug: "bares-restaurantes",label: "Bar ou Restaurante",       desc: "Cardápio digital, QR Code, comanda, CRM e fidelidade.",      icon: UtensilsCrossed },
-  { slug: "microcervejarias",  label: "Cervejaria",                desc: "PDV, marketplace B2B, eventos e ações de marca.",            icon: Beer },
-  { slug: "eventos",           label: "Eventos",                   desc: "Ingressos, check-in, listas e relacionamento pós-evento.",   icon: CalendarRange },
-  { slug: "imobiliaria",       label: "Imobiliária",               desc: "CRM imobiliário, visitas, propostas e portal do cliente.",   icon: Home },
-  { slug: "veiculos",          label: "Revenda de Veículos",       desc: "Estoque, leads, propostas e financiamento integrado.",       icon: Car },
-  { slug: "contabilidade",     label: "Contabilidade",             desc: "Portal do cliente, obrigações, documentos e financeiro.",    icon: Calculator },
-  { slug: "juridico",          label: "Escritório Jurídico",       desc: "CRM jurídico, processos, prazos e portal do cliente.",       icon: Scale },
-  { slug: "servicos",          label: "Serviços",                  desc: "Agenda, propostas, contratos, cobrança e relacionamento.",   icon: Briefcase },
-  { slug: "ecommerce",         label: "E-commerce",                desc: "Catálogo, pedidos, estoque, CRM e pós-venda automatizado.",  icon: ShoppingBag },
-  { slug: "white-label",       label: "White Label",               desc: "Plataforma com sua marca para revender tecnologia.",         icon: Layers },
-];
+/**
+ * Catálogo de cards por slug. O agrupamento por macro vem de MACRO_NICHOS —
+ * aqui só descrevemos cada subnicho. Clínicas/consultórios e psicologia/terapias
+ * já estão mesclados (um card cada), e ambos vivem sob "Saúde".
+ */
+const NICHO_CARDS: Record<string, NichoCard> = {
+  clinicas:           { slug: "clinicas",           label: "Clínicas e Consultórios",  desc: "Agenda, prontuário, portal do paciente e relacionamento.",   icon: Stethoscope },
+  psicologia:         { slug: "psicologia",         label: "Psicologia e Terapias",    desc: "Agenda, prontuário sigiloso, sessões e pagamento.",          icon: HeartPulse },
+  saude:              { slug: "saude",              label: "Saúde (outras áreas)",     desc: "Fisioterapia, nutrição, odontologia, terapias integrativas.", icon: Activity },
+  fitness:            { slug: "fitness",            label: "Fitness e Performance",    desc: "Academias, CrossFit, funcional, personal trainers e pilates.", icon: Dumbbell },
+  "bares-restaurantes": { slug: "bares-restaurantes", label: "Bares e Restaurantes",   desc: "Cardápio digital, QR Code, comanda, CRM e fidelidade.",      icon: UtensilsCrossed },
+  microcervejarias:   { slug: "microcervejarias",   label: "Cervejarias",              desc: "PDV, marketplace B2B, eventos e ações de marca.",            icon: Beer },
+  fornecedores:       { slug: "fornecedores",       label: "Fornecedores e Indústria", desc: "Catálogo B2B, pedidos, comissões e relacionamento com revendas.", icon: Factory },
+  imobiliaria:        { slug: "imobiliaria",        label: "Imobiliária",              desc: "CRM imobiliário, visitas, propostas e portal do cliente.",   icon: Home },
+  servicos:           { slug: "servicos",           label: "Serviços",                 desc: "Agenda, propostas, contratos, cobrança e relacionamento.",   icon: Briefcase },
+  juridico:           { slug: "juridico",           label: "Escritório Jurídico",      desc: "CRM jurídico, processos, prazos e portal do cliente.",       icon: Scale },
+  contabilidade:      { slug: "contabilidade",      label: "Contabilidade",            desc: "Portal do cliente, obrigações, documentos e financeiro.",    icon: Calculator },
+  educacao:           { slug: "educacao",           label: "Educação",                 desc: "Matrículas, polos, portal do aluno e educação corporativa.", icon: GraduationCap },
+  eventos:            { slug: "eventos",            label: "Eventos",                  desc: "Ingressos, check-in, listas e relacionamento pós-evento.",   icon: CalendarRange },
+  ecommerce:          { slug: "ecommerce",          label: "E-commerce e Varejo",      desc: "Catálogo, pedidos, estoque, CRM e pós-venda automatizado.",  icon: ShoppingBag },
+  veiculos:           { slug: "veiculos",           label: "Revenda de Veículos",      desc: "Estoque, leads, propostas e financiamento integrado.",       icon: Car },
+  "white-label":      { slug: "white-label",        label: "White Label",              desc: "Plataforma com sua marca para revender tecnologia.",         icon: Layers },
+};
 
 function PlanosComecarPage() {
   const navigate = useNavigate();
