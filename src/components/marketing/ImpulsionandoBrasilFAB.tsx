@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Sparkles, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 
-const WHATSAPP_URL = "https://wa.me/5500000000000?text=" + encodeURIComponent(
+const WHATSAPP_URL = "https://wa.me/5521993075000?text=" + encodeURIComponent(
   "Olá! Vim do site da Impulsionando e quero falar com a Impulsionando Brasil sobre marketing.",
 );
 
