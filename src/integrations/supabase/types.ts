@@ -9634,6 +9634,489 @@ export type Database = {
         }
         Relationships: []
       }
+      marocas_apartments: {
+        Row: {
+          address: string | null
+          amenities: Json | null
+          area_m2: number | null
+          bathrooms: number | null
+          bedrooms: number | null
+          building: string | null
+          capacity: number | null
+          city: string | null
+          code: string
+          cover_photo_url: string | null
+          created_at: string
+          daily_rate: number | null
+          id: string
+          marocas_commission_percent: number | null
+          notes: string | null
+          owner_id: string
+          photos: Json | null
+          state: string | null
+          status: Database["public"]["Enums"]["marocas_apartment_status"]
+          title: string
+          updated_at: string
+          zip: string | null
+        }
+        Insert: {
+          address?: string | null
+          amenities?: Json | null
+          area_m2?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          building?: string | null
+          capacity?: number | null
+          city?: string | null
+          code: string
+          cover_photo_url?: string | null
+          created_at?: string
+          daily_rate?: number | null
+          id?: string
+          marocas_commission_percent?: number | null
+          notes?: string | null
+          owner_id: string
+          photos?: Json | null
+          state?: string | null
+          status?: Database["public"]["Enums"]["marocas_apartment_status"]
+          title: string
+          updated_at?: string
+          zip?: string | null
+        }
+        Update: {
+          address?: string | null
+          amenities?: Json | null
+          area_m2?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          building?: string | null
+          capacity?: number | null
+          city?: string | null
+          code?: string
+          cover_photo_url?: string | null
+          created_at?: string
+          daily_rate?: number | null
+          id?: string
+          marocas_commission_percent?: number | null
+          notes?: string | null
+          owner_id?: string
+          photos?: Json | null
+          state?: string | null
+          status?: Database["public"]["Enums"]["marocas_apartment_status"]
+          title?: string
+          updated_at?: string
+          zip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marocas_apartments_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "marocas_owners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marocas_maintenance_quotes: {
+        Row: {
+          amount: number
+          created_at: string
+          estimated_hours: number | null
+          id: string
+          notes: string | null
+          professional_id: string
+          request_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          estimated_hours?: number | null
+          id?: string
+          notes?: string | null
+          professional_id: string
+          request_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          estimated_hours?: number | null
+          id?: string
+          notes?: string | null
+          professional_id?: string
+          request_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marocas_maintenance_quotes_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "marocas_professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marocas_maintenance_quotes_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "marocas_maintenance_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marocas_maintenance_requests: {
+        Row: {
+          apartment_id: string
+          approved_quote_id: string | null
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          opened_by: string | null
+          photos: Json | null
+          priority: Database["public"]["Enums"]["marocas_maintenance_priority"]
+          resolved_at: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          apartment_id: string
+          approved_quote_id?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          opened_by?: string | null
+          photos?: Json | null
+          priority?: Database["public"]["Enums"]["marocas_maintenance_priority"]
+          resolved_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          apartment_id?: string
+          approved_quote_id?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          opened_by?: string | null
+          photos?: Json | null
+          priority?: Database["public"]["Enums"]["marocas_maintenance_priority"]
+          resolved_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marocas_maintenance_requests_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "marocas_apartments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marocas_owner_statements: {
+        Row: {
+          apartment_id: string
+          breakdown: Json | null
+          created_at: string
+          expenses: number
+          gross_revenue: number
+          id: string
+          marocas_fee: number
+          net_payout: number
+          owner_id: string
+          paid_at: string | null
+          pix_txid: string | null
+          reference_month: string
+          status: Database["public"]["Enums"]["marocas_payout_status"]
+          updated_at: string
+        }
+        Insert: {
+          apartment_id: string
+          breakdown?: Json | null
+          created_at?: string
+          expenses?: number
+          gross_revenue?: number
+          id?: string
+          marocas_fee?: number
+          net_payout?: number
+          owner_id: string
+          paid_at?: string | null
+          pix_txid?: string | null
+          reference_month: string
+          status?: Database["public"]["Enums"]["marocas_payout_status"]
+          updated_at?: string
+        }
+        Update: {
+          apartment_id?: string
+          breakdown?: Json | null
+          created_at?: string
+          expenses?: number
+          gross_revenue?: number
+          id?: string
+          marocas_fee?: number
+          net_payout?: number
+          owner_id?: string
+          paid_at?: string | null
+          pix_txid?: string | null
+          reference_month?: string
+          status?: Database["public"]["Enums"]["marocas_payout_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marocas_owner_statements_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "marocas_apartments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marocas_owner_statements_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "marocas_owners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marocas_owners: {
+        Row: {
+          bank_info: Json | null
+          created_at: string
+          document: string | null
+          email: string | null
+          full_name: string
+          id: string
+          notes: string | null
+          phone: string | null
+          pix_key: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          bank_info?: Json | null
+          created_at?: string
+          document?: string | null
+          email?: string | null
+          full_name: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          pix_key?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          bank_info?: Json | null
+          created_at?: string
+          document?: string | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          pix_key?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      marocas_professionals: {
+        Row: {
+          active: boolean
+          created_at: string
+          document: string | null
+          email: string | null
+          full_name: string
+          hourly_rate: number | null
+          id: string
+          notes: string | null
+          per_service_rate: number | null
+          phone: string | null
+          pix_key: string | null
+          rating: number | null
+          role: Database["public"]["Enums"]["marocas_professional_role"]
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          document?: string | null
+          email?: string | null
+          full_name: string
+          hourly_rate?: number | null
+          id?: string
+          notes?: string | null
+          per_service_rate?: number | null
+          phone?: string | null
+          pix_key?: string | null
+          rating?: number | null
+          role: Database["public"]["Enums"]["marocas_professional_role"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          document?: string | null
+          email?: string | null
+          full_name?: string
+          hourly_rate?: number | null
+          id?: string
+          notes?: string | null
+          per_service_rate?: number | null
+          phone?: string | null
+          pix_key?: string | null
+          rating?: number | null
+          role?: Database["public"]["Enums"]["marocas_professional_role"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      marocas_services: {
+        Row: {
+          apartment_id: string
+          checklist: Json | null
+          completed_at: string | null
+          cost: number | null
+          created_at: string
+          id: string
+          notes: string | null
+          photos_after: Json | null
+          photos_before: Json | null
+          priority:
+            | Database["public"]["Enums"]["marocas_maintenance_priority"]
+            | null
+          professional_id: string | null
+          scheduled_for: string
+          service_type: Database["public"]["Enums"]["marocas_service_type"]
+          started_at: string | null
+          status: Database["public"]["Enums"]["marocas_service_status"]
+          updated_at: string
+        }
+        Insert: {
+          apartment_id: string
+          checklist?: Json | null
+          completed_at?: string | null
+          cost?: number | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          photos_after?: Json | null
+          photos_before?: Json | null
+          priority?:
+            | Database["public"]["Enums"]["marocas_maintenance_priority"]
+            | null
+          professional_id?: string | null
+          scheduled_for: string
+          service_type: Database["public"]["Enums"]["marocas_service_type"]
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["marocas_service_status"]
+          updated_at?: string
+        }
+        Update: {
+          apartment_id?: string
+          checklist?: Json | null
+          completed_at?: string | null
+          cost?: number | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          photos_after?: Json | null
+          photos_before?: Json | null
+          priority?:
+            | Database["public"]["Enums"]["marocas_maintenance_priority"]
+            | null
+          professional_id?: string | null
+          scheduled_for?: string
+          service_type?: Database["public"]["Enums"]["marocas_service_type"]
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["marocas_service_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marocas_services_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "marocas_apartments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marocas_services_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "marocas_professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marocas_supplies: {
+        Row: {
+          apartment_id: string | null
+          category: string
+          created_at: string
+          current_qty: number
+          id: string
+          item_name: string
+          last_restocked_at: string | null
+          min_qty: number
+          notes: string | null
+          unit: string | null
+          unit_cost: number | null
+          updated_at: string
+        }
+        Insert: {
+          apartment_id?: string | null
+          category: string
+          created_at?: string
+          current_qty?: number
+          id?: string
+          item_name: string
+          last_restocked_at?: string | null
+          min_qty?: number
+          notes?: string | null
+          unit?: string | null
+          unit_cost?: number | null
+          updated_at?: string
+        }
+        Update: {
+          apartment_id?: string | null
+          category?: string
+          created_at?: string
+          current_qty?: number
+          id?: string
+          item_name?: string
+          last_restocked_at?: string | null
+          min_qty?: number
+          notes?: string | null
+          unit?: string | null
+          unit_cost?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marocas_supplies_apartment_id_fkey"
+            columns: ["apartment_id"]
+            isOneToOne: false
+            referencedRelation: "marocas_apartments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       message_outbox: {
         Row: {
           attempts: number
@@ -14587,6 +15070,33 @@ export type Database = {
         | "consumidor"
       company_environment: "demo" | "teste" | "real"
       educ_role: "mantenedora" | "polo" | "coordenador" | "consultor" | "aluno"
+      marocas_apartment_status:
+        | "disponivel"
+        | "ocupado"
+        | "manutencao"
+        | "bloqueado"
+      marocas_maintenance_priority: "baixa" | "media" | "alta" | "urgente"
+      marocas_payment_status: "pendente" | "pago" | "atrasado" | "estornado"
+      marocas_payout_status: "previsto" | "liberado" | "pago" | "contestado"
+      marocas_professional_role:
+        | "camareira"
+        | "lavanderia"
+        | "manutencao"
+        | "vistoriador"
+        | "gerente"
+      marocas_service_status:
+        | "agendado"
+        | "em_andamento"
+        | "concluido"
+        | "cancelado"
+        | "atrasado"
+      marocas_service_type:
+        | "limpeza"
+        | "reposicao"
+        | "enxoval"
+        | "lavanderia"
+        | "manutencao"
+        | "vistoria"
       realestate_approval_status:
         | "pending"
         | "approved"
@@ -14836,6 +15346,37 @@ export const Constants = {
       ],
       company_environment: ["demo", "teste", "real"],
       educ_role: ["mantenedora", "polo", "coordenador", "consultor", "aluno"],
+      marocas_apartment_status: [
+        "disponivel",
+        "ocupado",
+        "manutencao",
+        "bloqueado",
+      ],
+      marocas_maintenance_priority: ["baixa", "media", "alta", "urgente"],
+      marocas_payment_status: ["pendente", "pago", "atrasado", "estornado"],
+      marocas_payout_status: ["previsto", "liberado", "pago", "contestado"],
+      marocas_professional_role: [
+        "camareira",
+        "lavanderia",
+        "manutencao",
+        "vistoriador",
+        "gerente",
+      ],
+      marocas_service_status: [
+        "agendado",
+        "em_andamento",
+        "concluido",
+        "cancelado",
+        "atrasado",
+      ],
+      marocas_service_type: [
+        "limpeza",
+        "reposicao",
+        "enxoval",
+        "lavanderia",
+        "manutencao",
+        "vistoria",
+      ],
       realestate_approval_status: [
         "pending",
         "approved",
