@@ -82,37 +82,51 @@ function PlanosComecarPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl w-full px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {NICHOS.map((n) => {
-            const Icon = n.icon;
-            return (
-              <button
-                key={n.slug}
-                type="button"
-                onClick={() => pick(n.slug)}
-                className="text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl"
-              >
-                <Card className="p-6 h-full flex flex-col hover:shadow-elegant hover:-translate-y-0.5 transition-all border-2 hover:border-primary/40">
-                  <div className="flex items-start gap-3 mb-3">
-                    <div className="w-11 h-11 shrink-0 rounded-lg bg-gradient-primary grid place-items-center text-primary-foreground">
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="font-semibold leading-tight">{n.label}</div>
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed flex-1">
-                    {n.desc}
-                  </p>
-                  <div className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary">
-                    Ver recomendação <ArrowRight className="w-4 h-4" />
-                  </div>
-                </Card>
-              </button>
-            );
-          })}
-        </div>
+      <section className="mx-auto max-w-6xl w-full px-4 sm:px-6 lg:px-8 py-10 lg:py-14 space-y-10">
+        {MACRO_NICHOS.map((macro) => {
+          const cards = macro.slugs
+            .map((s) => NICHO_CARDS[s])
+            .filter((c): c is NichoCard => !!c);
+          if (cards.length === 0) return null;
+          return (
+            <div key={macro.slug}>
+              <div className="mb-4">
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{macro.label}</h2>
+                <p className="text-sm text-muted-foreground mt-1 max-w-3xl">{macro.description}</p>
+              </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {cards.map((n) => {
+                  const Icon = n.icon;
+                  return (
+                    <button
+                      key={n.slug}
+                      type="button"
+                      onClick={() => pick(n.slug)}
+                      className="text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl"
+                    >
+                      <Card className="p-6 h-full flex flex-col hover:shadow-elegant hover:-translate-y-0.5 transition-all border-2 hover:border-primary/40">
+                        <div className="flex items-start gap-3 mb-3">
+                          <div className="w-11 h-11 shrink-0 rounded-lg bg-gradient-primary grid place-items-center text-primary-foreground">
+                            <Icon className="w-5 h-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-semibold leading-tight">{n.label}</div>
+                          </div>
+                        </div>
+                        <p className="text-sm text-muted-foreground leading-relaxed flex-1">
+                          {n.desc}
+                        </p>
+                        <div className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary">
+                          Ver recomendação <ArrowRight className="w-4 h-4" />
+                        </div>
+                      </Card>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
 
         <Card className="mt-10 p-6 lg:p-8 bg-muted/40 border-dashed">
           <div className="flex items-start gap-3">
