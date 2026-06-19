@@ -27,6 +27,7 @@ import { Route as PesquisaRouteImport } from './routes/pesquisa'
 import { Route as PacienteRouteImport } from './routes/paciente'
 import { Route as OrcamentoRouteImport } from './routes/orcamento'
 import { Route as ModulosRouteImport } from './routes/modulos'
+import { Route as MarocasRouteImport } from './routes/marocas'
 import { Route as MarketingRouteImport } from './routes/marketing'
 import { Route as EscolherNichoRouteImport } from './routes/escolher-nicho'
 import { Route as EmpresasRouteImport } from './routes/empresas'
@@ -487,6 +488,11 @@ const OrcamentoRoute = OrcamentoRouteImport.update({
 const ModulosRoute = ModulosRouteImport.update({
   id: '/modulos',
   path: '/modulos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarocasRoute = MarocasRouteImport.update({
+  id: '/marocas',
+  path: '/marocas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketingRoute = MarketingRouteImport.update({
@@ -2567,6 +2573,7 @@ export interface FileRoutesByFullPath {
   '/empresas': typeof EmpresasRoute
   '/escolher-nicho': typeof EscolherNichoRoute
   '/marketing': typeof MarketingRoute
+  '/marocas': typeof MarocasRoute
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
   '/paciente': typeof PacienteRouteWithChildren
@@ -2956,6 +2963,7 @@ export interface FileRoutesByTo {
   '/empresas': typeof EmpresasRoute
   '/escolher-nicho': typeof EscolherNichoRoute
   '/marketing': typeof MarketingRoute
+  '/marocas': typeof MarocasRoute
   '/orcamento': typeof OrcamentoRoute
   '/pesquisa': typeof PesquisaRoute
   '/planos': typeof PlanosRouteWithChildren
@@ -3336,6 +3344,7 @@ export interface FileRoutesById {
   '/empresas': typeof EmpresasRoute
   '/escolher-nicho': typeof EscolherNichoRoute
   '/marketing': typeof MarketingRoute
+  '/marocas': typeof MarocasRoute
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
   '/paciente': typeof PacienteRouteWithChildren
@@ -3728,6 +3737,7 @@ export interface FileRouteTypes {
     | '/empresas'
     | '/escolher-nicho'
     | '/marketing'
+    | '/marocas'
     | '/modulos'
     | '/orcamento'
     | '/paciente'
@@ -4117,6 +4127,7 @@ export interface FileRouteTypes {
     | '/empresas'
     | '/escolher-nicho'
     | '/marketing'
+    | '/marocas'
     | '/orcamento'
     | '/pesquisa'
     | '/planos'
@@ -4496,6 +4507,7 @@ export interface FileRouteTypes {
     | '/empresas'
     | '/escolher-nicho'
     | '/marketing'
+    | '/marocas'
     | '/modulos'
     | '/orcamento'
     | '/paciente'
@@ -4888,6 +4900,7 @@ export interface RootRouteChildren {
   EmpresasRoute: typeof EmpresasRoute
   EscolherNichoRoute: typeof EscolherNichoRoute
   MarketingRoute: typeof MarketingRoute
+  MarocasRoute: typeof MarocasRoute
   ModulosRoute: typeof ModulosRouteWithChildren
   OrcamentoRoute: typeof OrcamentoRoute
   PacienteRoute: typeof PacienteRouteWithChildren
@@ -5143,6 +5156,13 @@ declare module '@tanstack/react-router' {
       path: '/modulos'
       fullPath: '/modulos'
       preLoaderRoute: typeof ModulosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/marocas': {
+      id: '/marocas'
+      path: '/marocas'
+      fullPath: '/marocas'
+      preLoaderRoute: typeof MarocasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/marketing': {
@@ -8695,6 +8715,7 @@ const rootRouteChildren: RootRouteChildren = {
   EmpresasRoute: EmpresasRoute,
   EscolherNichoRoute: EscolherNichoRoute,
   MarketingRoute: MarketingRoute,
+  MarocasRoute: MarocasRoute,
   ModulosRoute: ModulosRouteWithChildren,
   OrcamentoRoute: OrcamentoRoute,
   PacienteRoute: PacienteRouteWithChildren,
