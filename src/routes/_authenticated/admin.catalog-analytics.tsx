@@ -161,10 +161,22 @@ function CatalogAnalyticsPage() {
         </Button>
       </div>
 
-      <Card className="p-3 text-xs text-muted-foreground bg-muted/30">
-        <strong className="text-foreground">Definição de "Convertida":</strong> intenção do catálogo
-        que gerou uma conversão downstream (onboarding concluído, contrato assinado ou pagamento capturado).
-        "Abertas no onboarding" = intent foi consumido pelo usuário autenticado.
+      <Card className="p-3 text-xs text-muted-foreground bg-muted/30 flex gap-2 items-start">
+        <Info className="w-3.5 h-3.5 mt-0.5 text-foreground shrink-0" aria-hidden />
+        <div>
+          <strong className="text-foreground">Definições:</strong>{' '}
+          <strong className="text-foreground">Intenções</strong> = cliques em
+          "Contratar" no catálogo (registro em <code>catalog_intents</code>).{' '}
+          <strong className="text-foreground">Abertas (consumed)</strong> = intent
+          aberto pelo usuário autenticado no onboarding (<code>consumed_at</code>{' '}
+          preenchido pela 1ª vez; reaberturas só incrementam{' '}
+          <code>reuse_attempts</code> e geram <code>intent_reuse_attempt</code>).{' '}
+          <strong className="text-foreground">Convertidas</strong> = intent com{' '}
+          <code>converted_at</code> preenchido — onboarding concluído (todos
+          campos válidos ao chegar no Step 4), contrato assinado ou pagamento
+          capturado. Fórmula da taxa:{' '}
+          <code>convertidas ÷ intenções × 100</code>.
+        </div>
       </Card>
 
       {error && (
@@ -174,23 +186,46 @@ function CatalogAnalyticsPage() {
       )}
 
       <div className="grid sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <Kpi icon={BarChart3} label="Views de planos" value={totals.views} />
-        <Kpi icon={MousePointerClick} label="Seleções" value={totals.selects} />
-        <Kpi icon={Receipt} label="Intenções" value={totals.intents} />
-        <Kpi icon={DoorOpen} label="Abertas no onboarding" value={totals.opened} />
+        <Kpi
+          icon={BarChart3}
+          label="Views de planos"
+          value={totals.views}
+          tip="Quantas vezes a tela de planos foi exibida (evento view_plans, deduplicado por sessão)."
+        />
+        <Kpi
+          icon={MousePointerClick}
+          label="Seleções"
+          value={totals.selects}
+          tip="Cliques em subnicho + módulos (eventos select_sub e select_module, com dedupe de 800 ms)."
+        />
+        <Kpi
+          icon={Receipt}
+          label="Intenções"
+          value={totals.intents}
+          tip="Registros em catalog_intents — usuário clicou em Contratar no catálogo."
+        />
+        <Kpi
+          icon={DoorOpen}
+          label="Abertas no onboarding"
+          value={totals.opened}
+          tip="Intents com consumed_at preenchido (usuário autenticado abriu /onboarding?intent=…)."
+        />
         <Kpi
           icon={TrendingUp}
           label="Convertidas"
           value={totals.converted}
           extra={convPct(totals.converted, totals.intents)}
+          tip="Intents com converted_at. Conta apenas a 1ª conversão (onboarding_completed, contract_signed ou payment_captured). Taxa = convertidas ÷ intenções."
         />
         <Kpi
           icon={AlertTriangle}
           label="Reusos detectados"
           value={totals.reuseAttempts}
           extra="tentativas com intent já consumido"
+          tip="Soma de reuse_attempts em catalog_intents. Cada reabertura gera intent_reuse_attempt em catalog_events."
         />
       </div>
+
 
       <Card className="overflow-hidden">
         <div className="border-b p-4">
