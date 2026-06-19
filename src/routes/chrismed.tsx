@@ -254,8 +254,11 @@ function ChrismedPage() {
               </div>
               <Button onClick={handlePay} disabled={submitting} className="w-full bg-teal-600 hover:bg-teal-700">
                 {submitting ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : null}
-                {selected.price_cents === 0 ? 'Confirmar agendamento' : 'Gerar PIX'}
+                {selected.price_cents === 0 ? 'Confirmar reserva' : 'Reservar e pagar via PIX'}
               </Button>
+              <p className="text-xs text-center text-slate-500 mt-2">
+                Seu horário só é bloqueado após a confirmação do pagamento. Reembolso integral para cancelamentos com mais de 24h.
+              </p>
             </CardContent>
           </Card>
         )}
