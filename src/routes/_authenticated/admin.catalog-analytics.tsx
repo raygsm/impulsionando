@@ -199,6 +199,52 @@ function CatalogAnalyticsPage() {
         </Button>
       </div>
 
+      <div className="flex flex-wrap items-center gap-3 text-xs">
+        <span className="text-muted-foreground">Filtrar por conversion_kind:</span>
+        {CONVERSION_KINDS.map((k) => (
+          <label key={k} className="flex items-center gap-1.5 cursor-pointer">
+            <Checkbox checked={selectedKinds.includes(k)} onCheckedChange={() => toggleKind(k)} />
+            <code className="text-[11px]">{k}</code>
+          </label>
+        ))}
+        {selectedKinds.length > 0 && (
+          <Button variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={() => setSelectedKinds([])}>
+            limpar
+          </Button>
+        )}
+        <span className="ml-auto text-muted-foreground">
+          {selectedKinds.length > 0
+            ? `KPIs e CSV restritos a: ${selectedKinds.join(', ')}`
+            : 'Todos os tipos de conversão'}
+        </span>
+      </div>
+
+      {trackerStats && (
+        <Card className="p-3 text-xs flex flex-wrap items-center gap-4">
+          <span className="font-semibold">Tracker (qualidade dos KPIs)</span>
+          <span>
+            Tentativas: <strong className="tabular-nums">{trackerStats.totals.attempted.toLocaleString('pt-BR')}</strong>
+          </span>
+          <span>
+            Enviadas: <strong className="tabular-nums">{trackerStats.totals.sent.toLocaleString('pt-BR')}</strong>
+          </span>
+          <span>
+            Dedupe (800ms): <strong className="tabular-nums">{trackerStats.totals.deduped.toLocaleString('pt-BR')}</strong>
+            <span className="text-muted-foreground"> ({trackerStats.dedupePct}%)</span>
+          </span>
+          <span>
+            Descartadas (falha): <strong className="tabular-nums">{trackerStats.totals.dropped.toLocaleString('pt-BR')}</strong>
+          </span>
+          <span>
+            Lotes: <strong className="tabular-nums">{trackerStats.totals.batches.toLocaleString('pt-BR')}</strong>
+          </span>
+          <span className="text-muted-foreground">
+            Se dedupe% subir muito, KPIs podem subcontar cliques legítimos.
+          </span>
+        </Card>
+      )}
+
+
       <Card className="p-3 text-xs text-muted-foreground bg-muted/30 flex gap-2 items-start">
         <Info className="w-3.5 h-3.5 mt-0.5 text-foreground shrink-0" aria-hidden />
         <div>
