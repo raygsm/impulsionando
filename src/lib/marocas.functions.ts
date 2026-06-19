@@ -90,3 +90,134 @@ export const marcarRepasseMarocas = createServerFn({ method: "POST" })
     if (error) throw error;
     return { ok: true };
   });
+
+// SLA padrão por tipo de serviço (em minutos)
+export const MAROCAS_SLA_MINUTES: Record<string, number> = {
+  limpeza: 120,
+  enxoval: 60,
+  manutencao: 180,
+  vistoria: 45,
+  check_in: 30,
+  check_out: 30,
+  lavanderia: 90,
+  reposicao: 45,
+};
+
+const ChecklistItem = z.object({
+  label: z.string().min(1).max(140),
+  done: z.boolean(),
+});
+
+export const updateMarocasServiceChecklist = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: {
+    id: string;
+    checklist?: Array<{ label: string; done: boolean }>;
+    photos_before?: string[];
+    photos_after?: string[];
+    notes?: string;
+  }) =>
+    z.object({
+      id: z.string().uuid(),
+      checklist: z.array(ChecklistItem).max(50).optional(),
+      photos_before: z.array(z.string().url()).max(20).optional(),
+      photos_after: z.array(z.string().url()).max(20).optional(),
+      notes: z.string().max(2000).optional(),
+    }).parse(d))
+  .handler(async ({ context, data }) => {
+    const patch: Record<string, unknown> = {};
+    if (data.checklist) patch.checklist = data.checklist;
+    if (data.photos_before) patch.photos_before = data.photos_before;
+    if (data.photos_after) patch.photos_after = data.photos_after;
+    if (typeof data.notes === "string") patch.notes = data.notes;
+    const { error } = await context.supabase
+      .from("marocas_services")
+      .update(patch)
+      .eq("id", data.id);
+    if (error) throw error;
+    return { ok: true };
+  });
+
+// Pedido automático de suprimentos: usa o campo `notes` como JSON com o estado do pedido
+type SupplyOrder = {
+  status: "pendente" | "aprovado" | "recebido";
+  qty: number;
+  requested_at: string;
+  approved_at?: string;
+  received_at?: string;
+};
+
+function parseOrder(notes: string | null | undefined): SupplyOrder | null {
+  if (!notes) return null;
+  try {
+    const parsed = JSON.parse(notes);
+    if (parsed && parsed.order) return parsed.order as SupplyOrder;
+  } catch { /* not json */ }
+  return null;
+}
+
+export const requestMarocasSupplyOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; qty: number }) =>
+    z.object({ id: z.string().uuid(), qty: z.number().int().positive().max(9999) }).parse(d))
+  .handler(async ({ context, data }) => {
+    const order: SupplyOrder = {
+      status: "pendente",
+      qty: data.qty,
+      requested_at: new Date().toISOString(),
+    };
+    const { error } = await context.supabase
+      .from("marocas_supplies")
+      .update({ notes: JSON.stringify({ order }) })
+      .eq("id", data.id);
+    if (error) throw error;
+    return { ok: true };
+  });
+
+export const approveMarocasSupplyOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: row, error: rErr } = await context.supabase
+      .from("marocas_supplies")
+      .select("notes")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (rErr) throw rErr;
+    const order = parseOrder(row?.notes);
+    if (!order) throw new Error("Pedido não encontrado");
+    order.status = "aprovado";
+    order.approved_at = new Date().toISOString();
+    const { error } = await context.supabase
+      .from("marocas_supplies")
+      .update({ notes: JSON.stringify({ order }) })
+      .eq("id", data.id);
+    if (error) throw error;
+    return { ok: true };
+  });
+
+export const receiveMarocasSupplyOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: row, error: rErr } = await context.supabase
+      .from("marocas_supplies")
+      .select("notes,current_qty")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (rErr) throw rErr;
+    const order = parseOrder(row?.notes);
+    if (!order) throw new Error("Pedido não encontrado");
+    order.status = "recebido";
+    order.received_at = new Date().toISOString();
+    const { error } = await context.supabase
+      .from("marocas_supplies")
+      .update({
+        notes: JSON.stringify({ order }),
+        current_qty: Number(row?.current_qty ?? 0) + order.qty,
+        last_restocked_at: new Date().toISOString(),
+      })
+      .eq("id", data.id);
+    if (error) throw error;
+    return { ok: true };
+  });
