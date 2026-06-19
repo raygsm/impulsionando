@@ -1,20 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
-import { z } from "zod";
 import type { Database } from "@/integrations/supabase/types";
-
-const LeadSchema = z.object({
-  name: z.string().min(1).max(200).optional().nullable(),
-  email: z.string().email().max(200).optional().nullable(),
-  phone: z.string().min(3).max(50).optional().nullable(),
-  company: z.string().max(200).optional().nullable(),
-  message: z.string().max(5000).optional().nullable(),
-  interest: z.string().max(200).optional().nullable(),
-  page_url: z.string().max(500).optional().nullable(),
-});
+import { validateMarketingLead, normalizePhone } from "./marketing-lead.schema";
 
 export const submitMarketingLead = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => LeadSchema.parse(d))
+  .inputValidator((d: unknown) => validateMarketingLead(d))
   .handler(async ({ data }) => {
     const supabase = createClient<Database>(
       process.env.SUPABASE_URL!,
@@ -22,15 +12,14 @@ export const submitMarketingLead = createServerFn({ method: "POST" })
       { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
     );
 
-    const hasContact = [data.name, data.email, data.phone].some((v) => v && v.trim() !== "");
-    if (!hasContact) throw new Error("Informe ao menos nome, email ou telefone.");
+    const normalizedPhone = normalizePhone(data.phone);
 
     const { error } = await supabase.from("marketing_leads").insert({
       source: "contato",
       status: "new",
       name: data.name ?? null,
       email: data.email ?? null,
-      phone: data.phone ?? null,
+      phone: normalizedPhone,
       company: data.company ?? null,
       message: data.message ?? null,
       notes: data.interest ? `Interesse: ${data.interest}` : null,
@@ -40,5 +29,22 @@ export const submitMarketingLead = createServerFn({ method: "POST" })
     } as never);
 
     if (error) throw new Error(error.message);
+
+    // Analytics: log conversion event (best-effort, não bloqueia)
+    try {
+      await supabase.from("catalog_events").insert({
+        event_name: "marketing_lead_submitted",
+        metadata: {
+          interest: data.interest ?? null,
+          page_url: data.page_url ?? null,
+          has_email: Boolean(data.email),
+          has_phone: Boolean(normalizedPhone),
+          has_company: Boolean(data.company),
+        },
+      } as never);
+    } catch {
+      // ignore analytics failures
+    }
+
     return { ok: true };
   });
