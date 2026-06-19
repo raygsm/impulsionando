@@ -485,8 +485,9 @@ function CatalogAnalyticsPage() {
                     <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
                   )
                 return (
-                  <>
-                  <tr key={e.id} className="border-t">
+                  <Fragment key={e.id}>
+                  <tr className="border-t">
+
                     <td className="px-3 py-2 tabular-nums align-top">
                       {new Date(e.created_at).toLocaleString('pt-BR')}
                     </td>
