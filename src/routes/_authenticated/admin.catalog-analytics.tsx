@@ -103,6 +103,12 @@ function CatalogAnalyticsPage() {
     queryFn: () => fetchTrackerStats({ data: { days: Math.min(days, 30) } }),
   })
 
+  const auditQuery = useQuery({
+    queryKey: ['admin', 'dedupe-threshold-audit'],
+    queryFn: () => fetchAudit({ data: { limit: 50 } }),
+  })
+
+
   const eventsQuery = useQuery({
     queryKey: ['admin', 'dedupe-threshold-events'],
     queryFn: () => fetchEvents({ data: { limit: 50 } }),
