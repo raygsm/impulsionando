@@ -26,12 +26,12 @@ Deno.serve(async (req) => {
   const checks: Check[] = [];
 
   // 1. Empresa
-  const { data: company } = await sb.from("companies").select("id,name,active").eq("id", companyId).maybeSingle();
+  const { data: company } = await sb.from("companies").select("id,name,is_active").eq("id", companyId).maybeSingle();
   checks.push({
     id: "company",
     label: "Empresa cadastrada",
     status: company ? "ok" : "error",
-    detail: company ? `${company.name} (${company.active ? "ativa" : "inativa"})` : "Empresa não encontrada",
+    detail: company ? `${company.name} (${company.is_active ? "ativa" : "inativa"})` : "Empresa não encontrada",
   });
 
   // 2. Credencial MP
