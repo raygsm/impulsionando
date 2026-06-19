@@ -47,6 +47,7 @@ function CoreLayout() {
     { to: "/core/dominios", label: "Domínios dos Tenants", icon: Globe },
     { to: "/core/importar-clientes", label: "Importar Clientes (CSV)", icon: Upload },
     { to: "/core/financeiro-consolidado", label: "Financeiro Consolidado", icon: Wallet },
+    { to: "/marketing", label: "Impulsionando Brasil", icon: Sparkles },
     { to: "/core/finalizacao-comercial", label: "Finalização Comercial", icon: CheckCircle2 },
     { to: "/core/planos", label: "Gestão de Planos", icon: CreditCard },
     { to: "/core/templates", label: "Templates de Site", icon: Globe },

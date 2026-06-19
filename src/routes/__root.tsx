@@ -18,6 +18,7 @@ import { OfficialWhatsAppFAB } from "@/components/marketing/OfficialWhatsAppFAB"
 import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 import { DemoAccessGate } from "@/components/demo/DemoAccessGate";
 import { TenantBrandingProvider } from "@/components/app/TenantBrandingProvider";
+import { ImpulsionandoBrasilFAB } from "@/components/marketing/ImpulsionandoBrasilFAB";
 import { isMaintenanceOn, MAINTENANCE_KEY } from "@/lib/maintenance";
 
 function MaintenanceGate() {
@@ -197,6 +198,7 @@ function RootComponent() {
       <Outlet />
       <LGPDBanner />
       <OfficialWhatsAppFAB />
+      <ImpulsionandoBrasilFAB />
       <DemoAccessGate />
     </QueryClientProvider>
   );
