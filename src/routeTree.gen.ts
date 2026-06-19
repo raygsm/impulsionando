@@ -336,6 +336,7 @@ import { Route as AuthenticatedAdminTrialsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminPixPendentesRouteImport } from './routes/_authenticated/admin.pix-pendentes'
 import { Route as AuthenticatedAdminNichePlansRouteImport } from './routes/_authenticated/admin.niche-plans'
 import { Route as AuthenticatedAdminClubeRouteImport } from './routes/_authenticated/admin.clube'
+import { Route as AuthenticatedAdminCatalogIntentsRouteImport } from './routes/_authenticated/admin.catalog-intents'
 import { Route as AuthenticatedAdminCatalogAnalyticsRouteImport } from './routes/_authenticated/admin.catalog-analytics'
 import { Route as AuthenticatedAdminBillingPolicyRouteImport } from './routes/_authenticated/admin.billing-policy'
 import { Route as AuthenticatedAdminBillingContractsRouteImport } from './routes/_authenticated/admin.billing-contracts'
@@ -2188,6 +2189,12 @@ const AuthenticatedAdminClubeRoute = AuthenticatedAdminClubeRouteImport.update({
   path: '/admin/clube',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminCatalogIntentsRoute =
+  AuthenticatedAdminCatalogIntentsRouteImport.update({
+    id: '/admin/catalog-intents',
+    path: '/admin/catalog-intents',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminCatalogAnalyticsRoute =
   AuthenticatedAdminCatalogAnalyticsRouteImport.update({
     id: '/admin/catalog-analytics',
@@ -2694,6 +2701,7 @@ export interface FileRoutesByFullPath {
   '/admin/billing-contracts': typeof AuthenticatedAdminBillingContractsRoute
   '/admin/billing-policy': typeof AuthenticatedAdminBillingPolicyRoute
   '/admin/catalog-analytics': typeof AuthenticatedAdminCatalogAnalyticsRoute
+  '/admin/catalog-intents': typeof AuthenticatedAdminCatalogIntentsRoute
   '/admin/clube': typeof AuthenticatedAdminClubeRoute
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
@@ -3070,6 +3078,7 @@ export interface FileRoutesByTo {
   '/admin/billing-contracts': typeof AuthenticatedAdminBillingContractsRoute
   '/admin/billing-policy': typeof AuthenticatedAdminBillingPolicyRoute
   '/admin/catalog-analytics': typeof AuthenticatedAdminCatalogAnalyticsRoute
+  '/admin/catalog-intents': typeof AuthenticatedAdminCatalogIntentsRoute
   '/admin/clube': typeof AuthenticatedAdminClubeRoute
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
@@ -3460,6 +3469,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/billing-contracts': typeof AuthenticatedAdminBillingContractsRoute
   '/_authenticated/admin/billing-policy': typeof AuthenticatedAdminBillingPolicyRoute
   '/_authenticated/admin/catalog-analytics': typeof AuthenticatedAdminCatalogAnalyticsRoute
+  '/_authenticated/admin/catalog-intents': typeof AuthenticatedAdminCatalogIntentsRoute
   '/_authenticated/admin/clube': typeof AuthenticatedAdminClubeRoute
   '/_authenticated/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/_authenticated/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
@@ -3849,6 +3859,7 @@ export interface FileRouteTypes {
     | '/admin/billing-contracts'
     | '/admin/billing-policy'
     | '/admin/catalog-analytics'
+    | '/admin/catalog-intents'
     | '/admin/clube'
     | '/admin/niche-plans'
     | '/admin/pix-pendentes'
@@ -4225,6 +4236,7 @@ export interface FileRouteTypes {
     | '/admin/billing-contracts'
     | '/admin/billing-policy'
     | '/admin/catalog-analytics'
+    | '/admin/catalog-intents'
     | '/admin/clube'
     | '/admin/niche-plans'
     | '/admin/pix-pendentes'
@@ -4614,6 +4626,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/billing-contracts'
     | '/_authenticated/admin/billing-policy'
     | '/_authenticated/admin/catalog-analytics'
+    | '/_authenticated/admin/catalog-intents'
     | '/_authenticated/admin/clube'
     | '/_authenticated/admin/niche-plans'
     | '/_authenticated/admin/pix-pendentes'
@@ -7282,6 +7295,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClubeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/catalog-intents': {
+      id: '/_authenticated/admin/catalog-intents'
+      path: '/admin/catalog-intents'
+      fullPath: '/admin/catalog-intents'
+      preLoaderRoute: typeof AuthenticatedAdminCatalogIntentsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/catalog-analytics': {
       id: '/_authenticated/admin/catalog-analytics'
       path: '/admin/catalog-analytics'
@@ -8299,6 +8319,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminBillingContractsRoute: typeof AuthenticatedAdminBillingContractsRoute
   AuthenticatedAdminBillingPolicyRoute: typeof AuthenticatedAdminBillingPolicyRoute
   AuthenticatedAdminCatalogAnalyticsRoute: typeof AuthenticatedAdminCatalogAnalyticsRoute
+  AuthenticatedAdminCatalogIntentsRoute: typeof AuthenticatedAdminCatalogIntentsRoute
   AuthenticatedAdminClubeRoute: typeof AuthenticatedAdminClubeRoute
   AuthenticatedAdminNichePlansRoute: typeof AuthenticatedAdminNichePlansRoute
   AuthenticatedAdminPixPendentesRoute: typeof AuthenticatedAdminPixPendentesRoute
@@ -8416,6 +8437,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminBillingPolicyRoute: AuthenticatedAdminBillingPolicyRoute,
   AuthenticatedAdminCatalogAnalyticsRoute:
     AuthenticatedAdminCatalogAnalyticsRoute,
+  AuthenticatedAdminCatalogIntentsRoute: AuthenticatedAdminCatalogIntentsRoute,
   AuthenticatedAdminClubeRoute: AuthenticatedAdminClubeRoute,
   AuthenticatedAdminNichePlansRoute: AuthenticatedAdminNichePlansRoute,
   AuthenticatedAdminPixPendentesRoute: AuthenticatedAdminPixPendentesRoute,
