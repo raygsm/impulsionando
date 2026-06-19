@@ -53,6 +53,19 @@ type Recomendacao = {
   ganhos: string[];
   plans: RecPlan[];
   combo: { title: string; text: string };
+  /**
+   * Oferta vertical opcional: bloco destacado para um perfil específico
+   * dentro do nicho (ex.: universidade com muitos polos → White Label).
+   * Renderiza após o grid de planos com CTA direto para contratação.
+   */
+  verticalOffer?: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    bullets: string[];
+    cta: { label: string; to: string; search?: Record<string, string> };
+    secondaryCta?: { label: string; to: string };
+  };
 };
 
 const RECOMENDACOES: Record<string, Recomendacao> = {
