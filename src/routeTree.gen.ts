@@ -278,6 +278,7 @@ import { Route as AuthenticatedCoreFinanceiroMasterRouteImport } from './routes/
 import { Route as AuthenticatedCoreFinalizacaoComercialRouteImport } from './routes/_authenticated/core.finalizacao-comercial'
 import { Route as AuthenticatedCoreFeiraLeadsRouteImport } from './routes/_authenticated/core.feira-leads'
 import { Route as AuthenticatedCoreEventosRouteImport } from './routes/_authenticated/core.eventos'
+import { Route as AuthenticatedCoreDominiosRouteImport } from './routes/_authenticated/core.dominios'
 import { Route as AuthenticatedCoreDiagnosticoGeralRouteImport } from './routes/_authenticated/core.diagnostico-geral'
 import { Route as AuthenticatedCoreDemosRouteImport } from './routes/_authenticated/core.demos'
 import { Route as AuthenticatedCoreDemoInsightsRouteImport } from './routes/_authenticated/core.demo-insights'
@@ -1856,6 +1857,12 @@ const AuthenticatedCoreEventosRoute =
     path: '/eventos',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreDominiosRoute =
+  AuthenticatedCoreDominiosRouteImport.update({
+    id: '/dominios',
+    path: '/dominios',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreDiagnosticoGeralRoute =
   AuthenticatedCoreDiagnosticoGeralRouteImport.update({
     id: '/diagnostico-geral',
@@ -2876,6 +2883,7 @@ export interface FileRoutesByFullPath {
   '/core/demo-insights': typeof AuthenticatedCoreDemoInsightsRoute
   '/core/demos': typeof AuthenticatedCoreDemosRoute
   '/core/diagnostico-geral': typeof AuthenticatedCoreDiagnosticoGeralRoute
+  '/core/dominios': typeof AuthenticatedCoreDominiosRoute
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/core/feira-leads': typeof AuthenticatedCoreFeiraLeadsRoute
   '/core/finalizacao-comercial': typeof AuthenticatedCoreFinalizacaoComercialRoute
@@ -3268,6 +3276,7 @@ export interface FileRoutesByTo {
   '/core/demo-insights': typeof AuthenticatedCoreDemoInsightsRoute
   '/core/demos': typeof AuthenticatedCoreDemosRoute
   '/core/diagnostico-geral': typeof AuthenticatedCoreDiagnosticoGeralRoute
+  '/core/dominios': typeof AuthenticatedCoreDominiosRoute
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/core/feira-leads': typeof AuthenticatedCoreFeiraLeadsRoute
   '/core/finalizacao-comercial': typeof AuthenticatedCoreFinalizacaoComercialRoute
@@ -3674,6 +3683,7 @@ export interface FileRoutesById {
   '/_authenticated/core/demo-insights': typeof AuthenticatedCoreDemoInsightsRoute
   '/_authenticated/core/demos': typeof AuthenticatedCoreDemosRoute
   '/_authenticated/core/diagnostico-geral': typeof AuthenticatedCoreDiagnosticoGeralRoute
+  '/_authenticated/core/dominios': typeof AuthenticatedCoreDominiosRoute
   '/_authenticated/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/_authenticated/core/feira-leads': typeof AuthenticatedCoreFeiraLeadsRoute
   '/_authenticated/core/finalizacao-comercial': typeof AuthenticatedCoreFinalizacaoComercialRoute
@@ -4079,6 +4089,7 @@ export interface FileRouteTypes {
     | '/core/demo-insights'
     | '/core/demos'
     | '/core/diagnostico-geral'
+    | '/core/dominios'
     | '/core/eventos'
     | '/core/feira-leads'
     | '/core/finalizacao-comercial'
@@ -4471,6 +4482,7 @@ export interface FileRouteTypes {
     | '/core/demo-insights'
     | '/core/demos'
     | '/core/diagnostico-geral'
+    | '/core/dominios'
     | '/core/eventos'
     | '/core/feira-leads'
     | '/core/finalizacao-comercial'
@@ -4876,6 +4888,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/demo-insights'
     | '/_authenticated/core/demos'
     | '/_authenticated/core/diagnostico-geral'
+    | '/_authenticated/core/dominios'
     | '/_authenticated/core/eventos'
     | '/_authenticated/core/feira-leads'
     | '/_authenticated/core/finalizacao-comercial'
@@ -7084,6 +7097,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreEventosRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/dominios': {
+      id: '/_authenticated/core/dominios'
+      path: '/dominios'
+      fullPath: '/core/dominios'
+      preLoaderRoute: typeof AuthenticatedCoreDominiosRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/diagnostico-geral': {
       id: '/_authenticated/core/diagnostico-geral'
       path: '/diagnostico-geral'
@@ -8262,6 +8282,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreDemoInsightsRoute: typeof AuthenticatedCoreDemoInsightsRoute
   AuthenticatedCoreDemosRoute: typeof AuthenticatedCoreDemosRoute
   AuthenticatedCoreDiagnosticoGeralRoute: typeof AuthenticatedCoreDiagnosticoGeralRoute
+  AuthenticatedCoreDominiosRoute: typeof AuthenticatedCoreDominiosRoute
   AuthenticatedCoreEventosRoute: typeof AuthenticatedCoreEventosRoute
   AuthenticatedCoreFeiraLeadsRoute: typeof AuthenticatedCoreFeiraLeadsRoute
   AuthenticatedCoreFinalizacaoComercialRoute: typeof AuthenticatedCoreFinalizacaoComercialRoute
@@ -8305,6 +8326,7 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreDemosRoute: AuthenticatedCoreDemosRoute,
   AuthenticatedCoreDiagnosticoGeralRoute:
     AuthenticatedCoreDiagnosticoGeralRoute,
+  AuthenticatedCoreDominiosRoute: AuthenticatedCoreDominiosRoute,
   AuthenticatedCoreEventosRoute: AuthenticatedCoreEventosRoute,
   AuthenticatedCoreFeiraLeadsRoute: AuthenticatedCoreFeiraLeadsRoute,
   AuthenticatedCoreFinalizacaoComercialRoute:
