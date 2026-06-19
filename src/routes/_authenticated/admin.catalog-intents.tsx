@@ -75,6 +75,8 @@ function CatalogIntentsAuditPage() {
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState<(typeof PAGE_SIZES)[number]>(50)
+  const [selected, setSelected] = useState<IntentRow | null>(null)
+
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['admin', 'catalog-intents-audit', days, onlyConverted, kinds.join(',')],
