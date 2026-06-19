@@ -150,10 +150,10 @@ describe("RBAC — visibilidade do menu (Sidebar) por persona", () => {
   it("Cliente Empresa vê módulos do tenant mas não a central", () => {
     const labels = visibleLabels(EMPRESA);
     expect(labels).toContain("Dashboard");
-    expect(labels).toContain("Kanban");
+    expect(labels).toContain("Kanban de oportunidades");
     expect(labels).toContain("Leads");
     expect(labels).toContain("Clientes");
-    expect(labels).toContain("Hoje"); // agenda
+    expect(labels).toContain("Agenda — hoje");
     expect(labels).not.toContain("/adm — Central Impulsionando");
     expect(labels).not.toContain("Empresas");
     expect(labels).not.toContain("Auditoria");
