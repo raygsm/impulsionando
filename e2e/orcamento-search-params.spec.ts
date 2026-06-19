@@ -53,5 +53,9 @@ test.describe("/orcamento — recebe SearchParams white-label-educacao", () => {
     await expect(
       page.getByRole("heading", { level: 1, name: /Monte seu Orçamento/i }),
     ).toBeVisible();
+    await expect(
+      page.locator('[data-segmento-banner="white-label-educacao"]'),
+    ).toBeVisible();
+
   });
 });
