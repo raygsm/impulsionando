@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_dedupe_threshold_audit: {
+        Row: {
+          changed_at: string
+          changed_by: string
+          id: string
+          new_max_pct: number
+          new_min_pct: number
+          old_max_pct: number | null
+          old_min_pct: number | null
+          target_user: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by: string
+          id?: string
+          new_max_pct: number
+          new_min_pct: number
+          old_max_pct?: number | null
+          old_min_pct?: number | null
+          target_user: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string
+          id?: string
+          new_max_pct?: number
+          new_min_pct?: number
+          old_max_pct?: number | null
+          old_min_pct?: number | null
+          target_user?: string
+        }
+        Relationships: []
+      }
       admin_dedupe_thresholds: {
         Row: {
           created_at: string
@@ -6949,6 +6982,7 @@ export type Database = {
       }
       dedupe_threshold_events: {
         Row: {
+          causes: Json
           created_at: string
           days_window: number
           dedupe_pct: number
@@ -6961,6 +6995,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          causes?: Json
           created_at?: string
           days_window: number
           dedupe_pct: number
@@ -6973,6 +7008,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          causes?: Json
           created_at?: string
           days_window?: number
           dedupe_pct?: number
