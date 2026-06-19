@@ -55,13 +55,15 @@ beforeAll(async () => {
   ids.professional = prof.data!.id;
 
   const svc = await admin.from("agenda_services").insert({
-    company_id: companyChris, name: `Consulta E2E ${RUN}`, duration_minutes: 30, price: 200, is_active: true,
+    company_id: companyChris, name: `Consulta E2E ${RUN}`, duration_min: 30, price: 200, is_active: true,
   } as any).select("id").single();
+  if (svc.error) throw svc.error;
   ids.service = svc.data!.id;
 
   const cust = await admin.from("customers").insert({
     company_id: companyChris, name: `Paciente E2E ${RUN}`, email: `pac-${RUN}@example.com`, phone: "+5511999999999",
   } as any).select("id").single();
+  if (cust.error) throw cust.error;
   ids.customer = cust.data!.id;
 
   const apt = await admin.from("agenda_appointments").insert({
@@ -75,28 +77,35 @@ beforeAll(async () => {
     status: "scheduled",
     price: 200,
   } as any).select("id").single();
+  if (apt.error) throw apt.error;
   ids.appointment = apt.data!.id;
 
   const tpl = await admin.from("message_templates").insert({
-    company_id: companyChris, name: `tpl-e2e-${RUN}`, channel: "email", body: "ola {{nome}}",
+    company_id: companyChris, event_code: `tpl-e2e-${RUN}`, channel: "email", body: "ola {{nome}}",
   } as any).select("id").single();
+  if (tpl.error) throw tpl.error;
   ids.template = tpl.data!.id;
 
   const out = await admin.from("message_outbox").insert({
-    company_id: companyChris, channel: "email",
-    to_address: `pac-${RUN}@example.com`, subject: "E2E", body: "msg e2e",
+    company_id: companyChris, event_code: `tpl-e2e-${RUN}`, channel: "email",
+    recipient_email: `pac-${RUN}@example.com`, subject: "E2E", body: "msg e2e",
     status: "queued",
   } as any).select("id").single();
   ids.outbox = out.data?.id ?? "";
 });
 
+async function safeDelete(table: string, id: string) {
+  if (!id) return;
+  try { await admin.from(table as any).delete().eq("id", id); } catch {}
+}
+
 afterAll(async () => {
-  await admin.from("agenda_appointments").delete().eq("id", ids.appointment).catch(() => {});
-  await admin.from("customers").delete().eq("id", ids.customer).catch(() => {});
-  await admin.from("agenda_services").delete().eq("id", ids.service).catch(() => {});
-  await admin.from("agenda_professionals").delete().eq("id", ids.professional).catch(() => {});
-  await admin.from("message_templates").delete().eq("id", ids.template).catch(() => {});
-  if (ids.outbox) await admin.from("message_outbox").delete().eq("id", ids.outbox).catch(() => {});
+  await safeDelete("agenda_appointments", ids.appointment);
+  await safeDelete("customers", ids.customer);
+  await safeDelete("agenda_services", ids.service);
+  await safeDelete("agenda_professionals", ids.professional);
+  await safeDelete("message_templates", ids.template);
+  await safeDelete("message_outbox", ids.outbox);
   await deleteUser(userChris); await deleteUser(userOther);
   await deleteCompany(companyChris); await deleteCompany(companyOther);
 });

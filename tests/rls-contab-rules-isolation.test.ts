@@ -74,7 +74,7 @@ async function grant(userId: string, company: string, permCode: string) {
 describe("core_refund_rules — write requires permission", () => {
   it("super admin pode criar", async () => {
     const { error, data } = await clients.sa.from("core_refund_rules")
-      .insert({ company_id: companyA, name: "sa-rule", refund_percentage: 100 } as any)
+      .insert({ company_id: companyA } as any)
       .select().single();
     expect(error).toBeNull();
     if (data) await admin.from("core_refund_rules").delete().eq("id", data.id);
@@ -82,14 +82,14 @@ describe("core_refund_rules — write requires permission", () => {
 
   it("membro sem company.settings.write é bloqueado", async () => {
     const r = await clients.noPerm.from("core_refund_rules")
-      .insert({ company_id: companyA, name: "noperm", refund_percentage: 50 } as any).select();
+      .insert({ company_id: companyA } as any).select();
     expect(r.error !== null || (r.data ?? []).length === 0).toBe(true);
   });
 
   it("usuário com permissão concedida consegue criar", async () => {
     await grant(users.noPerm, companyA, "company.settings.write");
     const r = await clients.noPerm.from("core_refund_rules")
-      .insert({ company_id: companyA, name: "granted", refund_percentage: 25 } as any).select().single();
+      .insert({ company_id: companyA } as any).select().single();
     expect(r.error).toBeNull();
     if (r.data) await admin.from("core_refund_rules").delete().eq("id", r.data.id);
     await admin.from("user_permission_overrides").delete()
@@ -98,13 +98,13 @@ describe("core_refund_rules — write requires permission", () => {
 
   it("não atravessa empresas (outsider)", async () => {
     const r = await clients.outsider.from("core_refund_rules")
-      .insert({ company_id: companyA, name: "x", refund_percentage: 10 } as any).select();
+      .insert({ company_id: companyA } as any).select();
     expect(r.error !== null || (r.data ?? []).length === 0).toBe(true);
   });
 
   it("escrita gera registro em audit_logs (trigger)", async () => {
     const { data } = await clients.sa.from("core_refund_rules")
-      .insert({ company_id: companyA, name: "audit-rule", refund_percentage: 70 } as any).select().single();
+      .insert({ company_id: companyA } as any).select().single();
     const { data: logs } = await admin.from("audit_logs")
       .select("action, entity, metadata").eq("entity", "core_refund_rules").eq("entity_id", data!.id);
     expect((logs ?? []).length).toBeGreaterThan(0);
@@ -116,13 +116,13 @@ describe("core_refund_rules — write requires permission", () => {
 describe("core_reschedule_rules — write requires permission", () => {
   it("membro sem permissão é bloqueado", async () => {
     const r = await clients.noPerm.from("core_reschedule_rules")
-      .insert({ company_id: companyA, name: "noperm" } as any).select();
+      .insert({ company_id: companyA } as any).select();
     expect(r.error !== null || (r.data ?? []).length === 0).toBe(true);
   });
 
   it("super admin grava e dispara auditoria", async () => {
     const { data, error } = await clients.sa.from("core_reschedule_rules")
-      .insert({ company_id: companyA, name: "sa-resched" } as any).select().single();
+      .insert({ company_id: companyA } as any).select().single();
     expect(error).toBeNull();
     const { data: logs } = await admin.from("audit_logs")
       .select("metadata").eq("entity", "core_reschedule_rules").eq("entity_id", data!.id);
@@ -133,9 +133,9 @@ describe("core_reschedule_rules — write requires permission", () => {
 
 describe("contab_contracts / contab_onboarding / contab_irpf_journeys — write requires permission", () => {
   it.each([
-    ["contab_contracts", { name: "x" } as any, "contab.contract.write"],
-    ["contab_onboarding", { step_key: "k", title: "t" } as any, "contab.onboarding.write"],
-    ["contab_irpf_journeys", { taxpayer_name: "x", taxpayer_cpf: "00000000000", year: 2026 } as any, "contab.irpf.write"],
+    ["contab_contracts", { title: "x" } as any, "contab.contract.write"],
+    ["contab_onboarding", { step_name: "k", step_order: 1 } as any, "contab.onboarding.write"],
+    ["contab_irpf_journeys", { taxpayer_name: "x", taxpayer_cpf: "00000000000", base_year: 2026 } as any, "contab.irpf.write"],
   ])("%s bloqueia sem permissão e permite com grant", async (table, payload, perm) => {
     const denied = await clients.noPerm.from(table as any).insert({ company_id: companyA, ...payload }).select();
     expect(denied.error !== null || (denied.data ?? []).length === 0).toBe(true);
@@ -152,10 +152,12 @@ describe("contab_contracts / contab_onboarding / contab_irpf_journeys — write 
 describe("contab_office_finance — leitura restrita", () => {
   let rowId = "";
   beforeAll(async () => {
-    const { data } = await admin.from("contab_office_finance")
-      .insert({ company_id: companyA, kind: "income", status: "open", amount: 100 } as any)
+    const { data, error } = await admin.from("contab_office_finance")
+      .insert({ company_id: companyA, kind: "income", status: "open", amount: 100, description: "test" } as any)
       .select("id").single();
+    if (error) throw error;
     rowId = data!.id;
+
   });
   afterAll(async () => { await admin.from("contab_office_finance").delete().eq("id", rowId); });
 
