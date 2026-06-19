@@ -31,8 +31,8 @@ export const Route = createFileRoute("/api/public/hooks/marocas-report")({
         const hour = now.getUTCHours();
         const weekday = now.getUTCDay();
 
-        let q = supabaseAdmin
-          .from("marocas_report_schedules" as any)
+        let q = (supabaseAdmin as any)
+          .from("marocas_report_schedules")
           .select("id, user_id, period, hour, weekday, channels, enabled")
           .eq("enabled", true)
           .eq("hour", hour);
