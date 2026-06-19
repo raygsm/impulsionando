@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useMemo, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
 import { PageHeader } from '@/components/app/PageElements'
 import { Card } from '@/components/ui/card'
@@ -23,8 +23,19 @@ import {
   AlertTriangle,
   DoorOpen,
   Info,
+  ArrowDownCircle,
+  ArrowUpCircle,
+  CheckCircle2,
+  History,
 } from 'lucide-react'
-import { getCatalogAnalytics, getTrackerStats } from '@/lib/catalogo.functions'
+import {
+  getCatalogAnalytics,
+  getTrackerStats,
+  getDedupeThresholds,
+  setDedupeThresholds,
+  recordDedupeThresholdCheck,
+  getDedupeThresholdEvents,
+} from '@/lib/catalogo.functions'
 import { downloadCsv } from '@/lib/exports'
 import { Checkbox } from '@/components/ui/checkbox'
 
@@ -36,52 +47,43 @@ export const Route = createFileRoute('/_authenticated/admin/catalog-analytics')(
 })
 
 const RANGES = [7, 30, 90] as const
-
-const DEDUPE_LS_KEY = 'admin.catalog.dedupeThresholds.v1'
 const DEFAULT_DEDUPE_MIN = 5
 const DEFAULT_DEDUPE_MAX = 40
 
-function loadDedupeThresholds(): { min: number; max: number } {
-  if (typeof window === 'undefined') return { min: DEFAULT_DEDUPE_MIN, max: DEFAULT_DEDUPE_MAX }
-  try {
-    const raw = window.localStorage.getItem(DEDUPE_LS_KEY)
-    if (!raw) return { min: DEFAULT_DEDUPE_MIN, max: DEFAULT_DEDUPE_MAX }
-    const v = JSON.parse(raw)
-    return {
-      min: Number.isFinite(v?.min) ? Number(v.min) : DEFAULT_DEDUPE_MIN,
-      max: Number.isFinite(v?.max) ? Number(v.max) : DEFAULT_DEDUPE_MAX,
-    }
-  } catch {
-    return { min: DEFAULT_DEDUPE_MIN, max: DEFAULT_DEDUPE_MAX }
-  }
-}
-
 function CatalogAnalyticsPage() {
+  const qc = useQueryClient()
   const fetchFn = useServerFn(getCatalogAnalytics)
   const fetchTrackerStats = useServerFn(getTrackerStats)
+  const fetchThresholds = useServerFn(getDedupeThresholds)
+  const saveThresholds = useServerFn(setDedupeThresholds)
+  const recordCrossing = useServerFn(recordDedupeThresholdCheck)
+  const fetchEvents = useServerFn(getDedupeThresholdEvents)
+
   const [days, setDays] = useState<(typeof RANGES)[number]>(30)
   const [fMacro, setFMacro] = useState('')
   const [fSub, setFSub] = useState('')
   const [fPlan, setFPlan] = useState('')
   const [selectedKinds, setSelectedKinds] = useState<string[]>([])
-  const [dedupeMin, setDedupeMin] = useState(DEFAULT_DEDUPE_MIN)
-  const [dedupeMax, setDedupeMax] = useState(DEFAULT_DEDUPE_MAX)
 
-  // Load persisted thresholds once on mount
+  const thresholdsQuery = useQuery({
+    queryKey: ['admin', 'dedupe-thresholds'],
+    queryFn: () => fetchThresholds(),
+  })
+  const dedupeMin = thresholdsQuery.data?.min ?? DEFAULT_DEDUPE_MIN
+  const dedupeMax = thresholdsQuery.data?.max ?? DEFAULT_DEDUPE_MAX
+  const [draftMin, setDraftMin] = useState(DEFAULT_DEDUPE_MIN)
+  const [draftMax, setDraftMax] = useState(DEFAULT_DEDUPE_MAX)
   useEffect(() => {
-    const t = loadDedupeThresholds()
-    setDedupeMin(t.min)
-    setDedupeMax(t.max)
-  }, [])
-
-  function persistThresholds(min: number, max: number) {
-    if (typeof window === 'undefined') return
-    try {
-      window.localStorage.setItem(DEDUPE_LS_KEY, JSON.stringify({ min, max }))
-    } catch {
-      // ignore
+    if (thresholdsQuery.data) {
+      setDraftMin(thresholdsQuery.data.min)
+      setDraftMax(thresholdsQuery.data.max)
     }
-  }
+  }, [thresholdsQuery.data])
+
+  const saveMut = useMutation({
+    mutationFn: (vars: { min: number; max: number }) => saveThresholds({ data: vars }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'dedupe-thresholds'] }),
+  })
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['admin', 'catalog-analytics', days],
@@ -92,6 +94,12 @@ function CatalogAnalyticsPage() {
     queryKey: ['admin', 'tracker-stats', days],
     queryFn: () => fetchTrackerStats({ data: { days: Math.min(days, 30) } }),
   })
+
+  const eventsQuery = useQuery({
+    queryKey: ['admin', 'dedupe-threshold-events'],
+    queryFn: () => fetchEvents({ data: { limit: 50 } }),
+  })
+
 
   const dedupePct = trackerStats?.dedupePct ?? 0
   const dedupeAlert: { kind: 'low' | 'high'; msg: string; causes: string[] } | null =
