@@ -209,6 +209,7 @@ function CatalogoPage() {
         },
       })
       trackEvent('intent_saved', { planTier: tier, selectedModules: picked, intentId: res.id })
+      await flushCatalogTracker()
       window.location.href = `/onboarding?intent=${encodeURIComponent(res.id)}`
     } catch (e: unknown) {
       toast.error((e as Error)?.message ?? 'Não foi possível salvar sua seleção.')
