@@ -353,9 +353,9 @@ function CatalogAnalyticsPage() {
                   <Td className="text-right tabular-nums">{r.selects}</Td>
                   <Td className="text-right tabular-nums">{r.intents}</Td>
                   <Td className="text-right tabular-nums">{r.opened}</Td>
-                  <Td className="text-right tabular-nums">{r.converted}</Td>
+                  <Td className="text-right tabular-nums">{scopedConverted(r)}</Td>
                   <Td className="text-right tabular-nums font-medium">
-                    {convPct(r.converted, r.intents)}
+                    {convPct(scopedConverted(r), r.intents)}
                   </Td>
                   <Td className="text-right tabular-nums text-muted-foreground">{r.reuseAttempts}</Td>
                 </tr>
