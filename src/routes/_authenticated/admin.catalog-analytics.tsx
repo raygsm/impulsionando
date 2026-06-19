@@ -118,7 +118,9 @@ function CatalogAnalyticsPage() {
 
 
   return (
+    <TooltipProvider delayDuration={150}>
     <div className="container mx-auto py-6 space-y-6">
+
       <PageHeader
         title="Conversão do Catálogo"
         description="Funil do catálogo público até a conversão (onboarding concluído / contrato / pagamento), por macro, subnicho e plano."
