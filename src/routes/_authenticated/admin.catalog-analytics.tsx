@@ -160,6 +160,13 @@ function CatalogAnalyticsPage() {
         max: dedupeMax,
         daysWindow: days,
         samples: trackerStats.totals.samples,
+        tracker: {
+          attempted: trackerStats.totals.attempted,
+          sent: trackerStats.totals.sent,
+          deduped: trackerStats.totals.deduped,
+          dropped: trackerStats.totals.dropped,
+          batches: trackerStats.totals.batches,
+        },
       },
     })
       .then((res) => {
@@ -169,6 +176,7 @@ function CatalogAnalyticsPage() {
         loggedKeyRef.current = null
       })
   }, [trackerStats, thresholdsQuery.data, dedupePct, dedupeMin, dedupeMax, days, recordCrossing, qc])
+
 
 
   const rows = data?.rows ?? []
