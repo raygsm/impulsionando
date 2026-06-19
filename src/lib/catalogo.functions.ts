@@ -391,7 +391,21 @@ export const getCatalogIntentsAudit = createServerFn({ method: 'GET' })
     }
     const { data: rows, error } = await q
     if (error) throw error
-    return { rows: (rows as unknown as Array<Record<string, unknown>>) ?? [] }
+    type AuditRow = {
+      id: string
+      macro_slug: string | null
+      subnicho_slug: string | null
+      plan_tier: string | null
+      selected_modules: string[] | null
+      created_at: string
+      consumed_at: string | null
+      converted_at: string | null
+      conversion_kind: string | null
+      reuse_attempts: number | null
+      last_reuse_attempt_at: string | null
+      validated_fields: Record<string, boolean> | null
+    }
+    return { rows: (rows as unknown as AuditRow[]) ?? [] }
   })
 
 export const getTrackerStats = createServerFn({ method: 'GET' })
