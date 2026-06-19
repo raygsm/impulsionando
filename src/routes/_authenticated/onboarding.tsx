@@ -16,7 +16,12 @@ import {
   ShoppingCart, GraduationCap, Briefcase, ArrowRight, ArrowLeft, CheckCircle2,
   AlertTriangle, Lightbulb, Rocket, Link2,
 } from "lucide-react";
-import { getCatalogIntent, consumeCatalogIntent, trackCatalogEvent } from "@/lib/catalogo.functions";
+import {
+  getCatalogIntent,
+  consumeCatalogIntent,
+  trackCatalogEvent,
+  markCatalogConversion,
+} from "@/lib/catalogo.functions";
 
 const onboardingSearchSchema = z.object({ intent: z.string().uuid().optional() });
 
