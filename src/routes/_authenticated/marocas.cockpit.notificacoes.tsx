@@ -134,6 +134,7 @@ function NotificationsConfigPage() {
           </Link>
           <h1 className="text-2xl font-bold flex items-center gap-2"><Bell className="h-6 w-6 text-amber-600" /> Notificações & limiares</h1>
           <div className="ml-auto flex gap-2">
+            <Link to="/marocas/cockpit/relatorios-enviados"><Button variant="outline"><History className="h-4 w-4 mr-1" /> Histórico</Button></Link>
             <Button variant="outline" onClick={handleReset}><RotateCcw className="h-4 w-4 mr-1" /> Padrão</Button>
             <Button onClick={handleSave} className="bg-gradient-to-r from-primary to-fuchsia-500"><Save className="h-4 w-4 mr-1" /> Salvar</Button>
           </div>
