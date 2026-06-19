@@ -373,7 +373,12 @@ function CatalogIntentsAuditPage() {
               {paginated.map((r) => {
                 const v = (r.validated_fields ?? {}) as Record<string, boolean>
                 return (
-                  <tr key={r.id} className="border-t align-top">
+                  <tr
+                    key={r.id}
+                    className="border-t align-top cursor-pointer hover:bg-muted/30"
+                    onClick={() => setSelected(r as IntentRow)}
+                  >
+
                     <td className="px-3 py-2">
                       <div className="font-medium">{r.macro_slug ?? '—'} / {r.subnicho_slug ?? '—'}</div>
                       <Badge variant="secondary" className="mt-1 capitalize">{r.plan_tier ?? '—'}</Badge>
