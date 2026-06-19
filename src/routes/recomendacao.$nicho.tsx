@@ -280,6 +280,82 @@ const RECOMENDACOES: Record<string, Recomendacao> = {
     ],
     combo: { title: "Marca + Revenda + Split", text: "Sua marca na frente, nossa tecnologia atrás, o split na conta certa." },
   },
+  "saude": {
+    nicheLabel: "Saúde",
+    headline: "Para clínicas, terapias e cuidado, agenda + prontuário + relacionamento são o coração da operação",
+    lead:
+      "Fisioterapia, nutrição, odontologia, terapias integrativas e demais áreas de saúde. Agenda, prontuário, retorno automático, financeiro e portal do paciente em uma única plataforma — sem ferramentas soltas.",
+    ganhos: [
+      "Agenda multiprofissional sem furos nem sobreposição",
+      "Prontuário digital com histórico completo do paciente",
+      "Confirmação e retorno automáticos via WhatsApp",
+      "Portal do paciente com receitas, atestados e exames",
+      "Financeiro integrado a convênios e particulares",
+    ],
+    plans: [
+      { level: "essencial", modules: ["Agenda", "Cadastro de pacientes"], why: "O básico para profissionalizar a operação e parar de perder paciente por desorganização." },
+      { level: "ideal", modules: ["Agenda", "Prontuário", "Portal do paciente", "Comunicação", "Financeiro"], why: "Operação completa de cuidado — do agendamento ao financeiro, com relacionamento contínuo." },
+      { level: "full", modules: ["Multi-unidades", "Convênios", "Teleconsulta", "Indicadores clínicos", "BI"], why: "Para clínicas com várias unidades, convênios e necessidade de indicadores clínicos." },
+    ],
+    combo: { title: "Agenda + Prontuário + Portal do paciente", text: "O paciente marca, é lembrado, comparece, registra a evolução, recebe o documento. Tudo conectado." },
+  },
+  "fitness": {
+    nicheLabel: "Fitness e Performance",
+    headline: "Para academias, boxes e estúdios, retenção é tudo — e retenção mora no relacionamento",
+    lead:
+      "Academias, CrossFit, funcional, personal trainers, pilates e yoga. Matrícula, agenda de aulas e personal, cobrança recorrente, frequência e relacionamento — para reduzir churn e aumentar LTV.",
+    ganhos: [
+      "Matrícula 100% digital com contrato assinado",
+      "Agenda de aulas, turmas e personal em um só calendário",
+      "Cobrança recorrente automática (Pix, cartão, boleto)",
+      "Acompanhamento de frequência e alerta de evasão",
+      "Comunicação automática para retenção e winback",
+    ],
+    plans: [
+      { level: "essencial", modules: ["Matrícula digital", "Cobrança recorrente"], why: "Comece profissionalizando a entrada e a cobrança do aluno." },
+      { level: "ideal", modules: ["Matrícula", "Agenda de aulas", "Frequência", "Comunicação", "Financeiro"], why: "Operação completa de retenção — do primeiro check-in à régua de winback." },
+      { level: "full", modules: ["Multi-unidades", "App do aluno", "BI de retenção", "Integrações wearables"], why: "Para redes com várias unidades, app próprio e indicadores de performance." },
+    ],
+    combo: { title: "Matrícula + Frequência + Comunicação", text: "Aluno entra fácil, é acompanhado, e quando some, recebe contato no tempo certo — antes do churn." },
+  },
+  "fornecedores": {
+    nicheLabel: "Fornecedores e Indústria",
+    headline: "Para fornecedores B2B, catálogo digital + pedido + relacionamento com revenda é o que escala",
+    lead:
+      "Distribuidoras, vinícolas, destilarias, torrefações e indústrias. Catálogo B2B com tabelas por cliente, pedidos pelos próprios revendedores, comissões de representantes e relacionamento contínuo com o ponto de venda.",
+    ganhos: [
+      "Catálogo B2B com tabelas e condições por cliente",
+      "Pedido digital direto pelo revendedor (sem ligação)",
+      "Comissão automática de representantes",
+      "Histórico de compra e sell-out por revenda",
+      "Campanhas e blasts segmentados por canal",
+    ],
+    plans: [
+      { level: "essencial", modules: ["Catálogo B2B", "Pedidos"], why: "Tire o pedido do WhatsApp e do papel e tenha histórico de verdade." },
+      { level: "ideal", modules: ["Catálogo B2B", "Pedidos", "Comissões", "CRM de revenda", "Comunicação"], why: "Operação completa de relacionamento com revenda, com comissão e CRM integrados." },
+      { level: "full", modules: ["Sell-out", "Campanhas", "BI de canal", "Integrações ERP"], why: "Para indústrias que precisam de sell-out, BI de canal e integração com ERP corporativo." },
+    ],
+    combo: { title: "Catálogo + Pedido + CRM de revenda", text: "O revendedor compra sozinho, você acompanha o sell-out e ativa campanha onde precisa." },
+  },
+  "educacao": {
+    nicheLabel: "Educação",
+    headline: "Para escolas e cursos, matrícula + portal do aluno + financeiro tiram a operação da planilha",
+    lead:
+      "Escolas, cursos livres, idiomas, faculdades e educação corporativa. Matrícula digital, portal do aluno, financeiro, polos e relacionamento — sem trocar de sistema a cada turma nova.",
+    ganhos: [
+      "Matrícula digital com contrato e cobrança",
+      "Portal do aluno com notas, frequência e documentos",
+      "Financeiro com mensalidades e inadimplência sob controle",
+      "Gestão de polos, turmas e professores",
+      "Comunicação automática com aluno e responsável",
+    ],
+    plans: [
+      { level: "essencial", modules: ["Matrícula digital", "Cobrança"], why: "Resolva matrícula e mensalidade antes de pensar em qualquer outra coisa." },
+      { level: "ideal", modules: ["Matrícula", "Portal do aluno", "Financeiro", "Comunicação", "Turmas"], why: "Operação completa do ciclo do aluno — entrada, jornada e cobrança." },
+      { level: "full", modules: ["Multi-polos", "BI acadêmico", "EAD", "Integrações MEC/sistemas oficiais"], why: "Para grupos com vários polos, EAD próprio e integrações oficiais." },
+    ],
+    combo: { title: "Matrícula + Portal do aluno + Financeiro", text: "Aluno entra, acompanha o curso pelo portal, paga em dia. Secretaria sai da planilha." },
+  },
 };
 
 const PLAN_META = {
