@@ -433,9 +433,132 @@ function CatalogIntentsAuditPage() {
           </table>
         </div>
       </Card>
+
+      <IntentDetailsSheet row={selected} onClose={() => setSelected(null)} />
     </div>
   )
 }
+
+function IntentDetailsSheet({
+  row,
+  onClose,
+}: {
+  row: IntentRow | null
+  onClose: () => void
+}) {
+  const v = (row?.validated_fields ?? {}) as Record<string, boolean>
+  const validated = REQUIRED.filter((k) => v[k])
+  const missing = REQUIRED.filter((k) => !v[k])
+  return (
+    <Sheet open={!!row} onOpenChange={(o) => !o && onClose()}>
+      <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle>Detalhes da intent</SheetTitle>
+          <SheetDescription className="break-all">{row?.id}</SheetDescription>
+        </SheetHeader>
+        {row && (
+          <div className="mt-4 space-y-4 text-sm">
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Macro" value={row.macro_slug ?? '—'} />
+              <Field label="Subnicho" value={row.subnicho_slug ?? '—'} />
+              <Field
+                label="Plano"
+                value={<Badge variant="secondary" className="capitalize">{row.plan_tier ?? '—'}</Badge>}
+              />
+              <Field
+                label="Tipo de conversão"
+                value={row.conversion_kind ? <Badge>{row.conversion_kind}</Badge> : '—'}
+              />
+              <Field label="Criada" value={fmt(row.created_at)} />
+              <Field label="Aberta (consumed)" value={fmt(row.consumed_at)} />
+              <Field label="Convertida" value={fmt(row.converted_at)} />
+              <Field label="Reusos" value={String(row.reuse_attempts ?? 0)} />
+              <Field label="Último reuso" value={fmt(row.last_reuse_attempt_at)} />
+            </div>
+
+            <div>
+              <div className="text-xs font-semibold text-muted-foreground mb-1.5">
+                Módulos selecionados
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {(row.selected_modules ?? []).length === 0 ? (
+                  <span className="text-xs text-muted-foreground">Nenhum</span>
+                ) : (
+                  (row.selected_modules ?? []).map((m) => (
+                    <Badge key={m} variant="outline" className="text-[10px]">{m}</Badge>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div>
+              <div className="text-xs font-semibold text-muted-foreground mb-1.5">
+                Campos válidos no Step 4 ({validated.length}/{REQUIRED.length})
+              </div>
+              {validated.length === 0 ? (
+                <div className="text-xs text-muted-foreground">
+                  Sem snapshot — esta intent ainda não foi marcada como convertida ou foi convertida antes do snapshot existir.
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-1.5">
+                  {validated.map((k) => (
+                    <span
+                      key={k}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] bg-green-500/10 text-green-700 dark:text-green-400"
+                    >
+                      <CheckCircle2 className="w-3 h-3" /> {k}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <div className="text-xs font-semibold text-muted-foreground mb-1.5">
+                Campos faltantes
+              </div>
+              {missing.length === 0 ? (
+                <span className="inline-flex items-center gap-1 text-xs text-green-700 dark:text-green-400">
+                  <CheckCircle2 className="w-3 h-3" /> Nenhum — Step 4 completo.
+                </span>
+              ) : (
+                <div className="flex flex-wrap gap-1.5">
+                  {missing.map((k) => (
+                    <span
+                      key={k}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] bg-red-500/10 text-red-700 dark:text-red-400"
+                    >
+                      <XCircle className="w-3 h-3" /> {k}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <details className="text-xs">
+              <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
+                JSON bruto (validated_fields)
+              </summary>
+              <pre className="mt-2 p-2 rounded bg-muted overflow-x-auto text-[11px]">
+{JSON.stringify(row.validated_fields ?? {}, null, 2)}
+              </pre>
+            </details>
+          </div>
+        )}
+      </SheetContent>
+    </Sheet>
+  )
+}
+
+function Field({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div>
+      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</div>
+      <div className="text-sm mt-0.5">{value}</div>
+    </div>
+  )
+}
+
 
 function SortableTh({
   active,
