@@ -479,3 +479,146 @@ export const upsertNichePlanModules = createServerFn({ method: 'POST' })
     if (error) throw error
     return { ok: true }
   })
+
+// --------- Admin: per-user dedupe thresholds (persisted) ---------
+
+const DEFAULT_MIN = 5
+const DEFAULT_MAX = 40
+
+export const getDedupeThresholds = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: isStaff } = await context.supabase.rpc('is_impulsionando_staff', {
+      _user: context.userId,
+    })
+    if (!isStaff) throw new Error('Forbidden')
+    const { data, error } = await context.supabase
+      .from('admin_dedupe_thresholds' as never)
+      .select('min_pct,max_pct,updated_at')
+      .eq('user_id', context.userId)
+      .maybeSingle()
+    if (error) throw error
+    const row = data as { min_pct: number; max_pct: number; updated_at: string } | null
+    return {
+      min: row ? Number(row.min_pct) : DEFAULT_MIN,
+      max: row ? Number(row.max_pct) : DEFAULT_MAX,
+      updatedAt: row?.updated_at ?? null,
+      hasCustom: !!row,
+    }
+  })
+
+export const setDedupeThresholds = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        min: z.number().min(0).max(100),
+        max: z.number().min(0).max(100),
+      })
+      .refine((v) => v.min <= v.max, { message: 'min must be ≤ max' })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: isStaff } = await context.supabase.rpc('is_impulsionando_staff', {
+      _user: context.userId,
+    })
+    if (!isStaff) throw new Error('Forbidden')
+    const { error } = await context.supabase
+      .from('admin_dedupe_thresholds' as never)
+      .upsert(
+        { user_id: context.userId, min_pct: data.min, max_pct: data.max } as never,
+        { onConflict: 'user_id' },
+      )
+    if (error) throw error
+    return { ok: true, min: data.min, max: data.max }
+  })
+
+// --------- Admin: dedupe threshold crossing log ---------
+
+type DedupeState = 'below' | 'normal' | 'above'
+function classify(pct: number, min: number, max: number): DedupeState {
+  if (pct > max) return 'above'
+  if (pct < min) return 'below'
+  return 'normal'
+}
+
+export const recordDedupeThresholdCheck = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        dedupePct: z.number().min(0).max(100),
+        min: z.number().min(0).max(100),
+        max: z.number().min(0).max(100),
+        daysWindow: z.number().int().min(1).max(180),
+        samples: z.number().int().min(0).default(0),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: isStaff } = await context.supabase.rpc('is_impulsionando_staff', {
+      _user: context.userId,
+    })
+    if (!isStaff) throw new Error('Forbidden')
+
+    const state = classify(data.dedupePct, data.min, data.max)
+
+    // Look up the most recent event for this user to decide whether
+    // we've actually crossed a threshold (state change only).
+    const { data: last } = await context.supabase
+      .from('dedupe_threshold_events' as never)
+      .select('state')
+      .eq('user_id', context.userId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    const prev = (last as { state: DedupeState } | null)?.state ?? null
+
+    if (prev === state) {
+      return { ok: true, logged: false, state, prevState: prev }
+    }
+
+    const { error } = await context.supabase.from('dedupe_threshold_events' as never).insert({
+      user_id: context.userId,
+      dedupe_pct: data.dedupePct,
+      min_pct: data.min,
+      max_pct: data.max,
+      state,
+      prev_state: prev,
+      days_window: data.daysWindow,
+      samples: data.samples,
+    } as never)
+    if (error) throw error
+    return { ok: true, logged: true, state, prevState: prev }
+  })
+
+export const getDedupeThresholdEvents = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z.object({ limit: z.number().int().min(1).max(200).default(50) }).parse(data ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: isStaff } = await context.supabase.rpc('is_impulsionando_staff', {
+      _user: context.userId,
+    })
+    if (!isStaff) throw new Error('Forbidden')
+    const { data: rows, error } = await context.supabase
+      .from('dedupe_threshold_events' as never)
+      .select('id,user_id,dedupe_pct,min_pct,max_pct,state,prev_state,days_window,samples,created_at')
+      .order('created_at', { ascending: false })
+      .limit(data.limit)
+    if (error) throw error
+    type EvtRow = {
+      id: string
+      user_id: string
+      dedupe_pct: number
+      min_pct: number
+      max_pct: number
+      state: DedupeState
+      prev_state: DedupeState | null
+      days_window: number
+      samples: number
+      created_at: string
+    }
+    return { rows: (rows as unknown as EvtRow[]) ?? [] }
+  })

@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_dedupe_thresholds: {
+        Row: {
+          created_at: string
+          max_pct: number
+          min_pct: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          max_pct?: number
+          min_pct?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          max_pct?: number
+          min_pct?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       aff_affiliate_products: {
         Row: {
           affiliate_id: string
@@ -6919,6 +6943,45 @@ export type Database = {
           processed_at?: string | null
           status?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      dedupe_threshold_events: {
+        Row: {
+          created_at: string
+          days_window: number
+          dedupe_pct: number
+          id: string
+          max_pct: number
+          min_pct: number
+          prev_state: string | null
+          samples: number
+          state: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          days_window: number
+          dedupe_pct: number
+          id?: string
+          max_pct: number
+          min_pct: number
+          prev_state?: string | null
+          samples?: number
+          state: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          days_window?: number
+          dedupe_pct?: number
+          id?: string
+          max_pct?: number
+          min_pct?: number
+          prev_state?: string | null
+          samples?: number
+          state?: string
           user_id?: string
         }
         Relationships: []

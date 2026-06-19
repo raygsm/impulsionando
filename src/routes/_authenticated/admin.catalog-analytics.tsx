@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useMemo, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
 import { PageHeader } from '@/components/app/PageElements'
 import { Card } from '@/components/ui/card'
@@ -23,8 +23,19 @@ import {
   AlertTriangle,
   DoorOpen,
   Info,
+  ArrowDownCircle,
+  ArrowUpCircle,
+  CheckCircle2,
+  History,
 } from 'lucide-react'
-import { getCatalogAnalytics, getTrackerStats } from '@/lib/catalogo.functions'
+import {
+  getCatalogAnalytics,
+  getTrackerStats,
+  getDedupeThresholds,
+  setDedupeThresholds,
+  recordDedupeThresholdCheck,
+  getDedupeThresholdEvents,
+} from '@/lib/catalogo.functions'
 import { downloadCsv } from '@/lib/exports'
 import { Checkbox } from '@/components/ui/checkbox'
 
@@ -36,52 +47,43 @@ export const Route = createFileRoute('/_authenticated/admin/catalog-analytics')(
 })
 
 const RANGES = [7, 30, 90] as const
-
-const DEDUPE_LS_KEY = 'admin.catalog.dedupeThresholds.v1'
 const DEFAULT_DEDUPE_MIN = 5
 const DEFAULT_DEDUPE_MAX = 40
 
-function loadDedupeThresholds(): { min: number; max: number } {
-  if (typeof window === 'undefined') return { min: DEFAULT_DEDUPE_MIN, max: DEFAULT_DEDUPE_MAX }
-  try {
-    const raw = window.localStorage.getItem(DEDUPE_LS_KEY)
-    if (!raw) return { min: DEFAULT_DEDUPE_MIN, max: DEFAULT_DEDUPE_MAX }
-    const v = JSON.parse(raw)
-    return {
-      min: Number.isFinite(v?.min) ? Number(v.min) : DEFAULT_DEDUPE_MIN,
-      max: Number.isFinite(v?.max) ? Number(v.max) : DEFAULT_DEDUPE_MAX,
-    }
-  } catch {
-    return { min: DEFAULT_DEDUPE_MIN, max: DEFAULT_DEDUPE_MAX }
-  }
-}
-
 function CatalogAnalyticsPage() {
+  const qc = useQueryClient()
   const fetchFn = useServerFn(getCatalogAnalytics)
   const fetchTrackerStats = useServerFn(getTrackerStats)
+  const fetchThresholds = useServerFn(getDedupeThresholds)
+  const saveThresholds = useServerFn(setDedupeThresholds)
+  const recordCrossing = useServerFn(recordDedupeThresholdCheck)
+  const fetchEvents = useServerFn(getDedupeThresholdEvents)
+
   const [days, setDays] = useState<(typeof RANGES)[number]>(30)
   const [fMacro, setFMacro] = useState('')
   const [fSub, setFSub] = useState('')
   const [fPlan, setFPlan] = useState('')
   const [selectedKinds, setSelectedKinds] = useState<string[]>([])
-  const [dedupeMin, setDedupeMin] = useState(DEFAULT_DEDUPE_MIN)
-  const [dedupeMax, setDedupeMax] = useState(DEFAULT_DEDUPE_MAX)
 
-  // Load persisted thresholds once on mount
+  const thresholdsQuery = useQuery({
+    queryKey: ['admin', 'dedupe-thresholds'],
+    queryFn: () => fetchThresholds(),
+  })
+  const dedupeMin = thresholdsQuery.data?.min ?? DEFAULT_DEDUPE_MIN
+  const dedupeMax = thresholdsQuery.data?.max ?? DEFAULT_DEDUPE_MAX
+  const [draftMin, setDraftMin] = useState(DEFAULT_DEDUPE_MIN)
+  const [draftMax, setDraftMax] = useState(DEFAULT_DEDUPE_MAX)
   useEffect(() => {
-    const t = loadDedupeThresholds()
-    setDedupeMin(t.min)
-    setDedupeMax(t.max)
-  }, [])
-
-  function persistThresholds(min: number, max: number) {
-    if (typeof window === 'undefined') return
-    try {
-      window.localStorage.setItem(DEDUPE_LS_KEY, JSON.stringify({ min, max }))
-    } catch {
-      // ignore
+    if (thresholdsQuery.data) {
+      setDraftMin(thresholdsQuery.data.min)
+      setDraftMax(thresholdsQuery.data.max)
     }
-  }
+  }, [thresholdsQuery.data])
+
+  const saveMut = useMutation({
+    mutationFn: (vars: { min: number; max: number }) => saveThresholds({ data: vars }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'dedupe-thresholds'] }),
+  })
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['admin', 'catalog-analytics', days],
@@ -92,6 +94,12 @@ function CatalogAnalyticsPage() {
     queryKey: ['admin', 'tracker-stats', days],
     queryFn: () => fetchTrackerStats({ data: { days: Math.min(days, 30) } }),
   })
+
+  const eventsQuery = useQuery({
+    queryKey: ['admin', 'dedupe-threshold-events'],
+    queryFn: () => fetchEvents({ data: { limit: 50 } }),
+  })
+
 
   const dedupePct = trackerStats?.dedupePct ?? 0
   const dedupeAlert: { kind: 'low' | 'high'; msg: string; causes: string[] } | null =
@@ -118,6 +126,36 @@ function CatalogAnalyticsPage() {
             }
           : null
       : null
+
+  // Log threshold crossings (state changes) to the backend, exactly once
+  // per unique (state, min, max, days) combination per page session. The
+  // server still does its own state-change check, so dupes are safe.
+  const loggedKeyRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (!trackerStats || trackerStats.totals.samples === 0) return
+    if (!thresholdsQuery.data) return
+    const state: 'below' | 'normal' | 'above' =
+      dedupePct > dedupeMax ? 'above' : dedupePct < dedupeMin ? 'below' : 'normal'
+    const key = `${state}|${dedupeMin}|${dedupeMax}|${days}`
+    if (loggedKeyRef.current === key) return
+    loggedKeyRef.current = key
+    recordCrossing({
+      data: {
+        dedupePct,
+        min: dedupeMin,
+        max: dedupeMax,
+        daysWindow: days,
+        samples: trackerStats.totals.samples,
+      },
+    })
+      .then((res) => {
+        if (res?.logged) qc.invalidateQueries({ queryKey: ['admin', 'dedupe-threshold-events'] })
+      })
+      .catch(() => {
+        loggedKeyRef.current = null
+      })
+  }, [trackerStats, thresholdsQuery.data, dedupePct, dedupeMin, dedupeMax, days, recordCrossing, qc])
+
 
   const rows = data?.rows ?? []
   const filtered = useMemo(() => {
@@ -316,12 +354,8 @@ function CatalogAnalyticsPage() {
                 min={0}
                 max={100}
                 className="h-7 w-16"
-                value={dedupeMin}
-                onChange={(e) => {
-                  const v = Math.max(0, Math.min(100, Number(e.target.value) || 0))
-                  setDedupeMin(v)
-                  persistThresholds(v, dedupeMax)
-                }}
+                value={draftMin}
+                onChange={(e) => setDraftMin(Math.max(0, Math.min(100, Number(e.target.value) || 0)))}
               />
               <span className="text-muted-foreground">–</span>
               <Input
@@ -329,14 +363,29 @@ function CatalogAnalyticsPage() {
                 min={0}
                 max={100}
                 className="h-7 w-16"
-                value={dedupeMax}
-                onChange={(e) => {
-                  const v = Math.max(0, Math.min(100, Number(e.target.value) || 0))
-                  setDedupeMax(v)
-                  persistThresholds(dedupeMin, v)
-                }}
+                value={draftMax}
+                onChange={(e) => setDraftMax(Math.max(0, Math.min(100, Number(e.target.value) || 0)))}
               />
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7"
+                disabled={
+                  saveMut.isPending ||
+                  draftMin > draftMax ||
+                  (draftMin === dedupeMin && draftMax === dedupeMax)
+                }
+                onClick={() => saveMut.mutate({ min: draftMin, max: draftMax })}
+              >
+                {saveMut.isPending ? 'Salvando…' : 'Salvar'}
+              </Button>
+              {thresholdsQuery.data?.updatedAt && (
+                <span className="text-[10px] text-muted-foreground">
+                  salvo {new Date(thresholdsQuery.data.updatedAt).toLocaleString('pt-BR')}
+                </span>
+              )}
             </div>
+
           </div>
           {dedupeAlert && (
             <div
@@ -364,6 +413,83 @@ function CatalogAnalyticsPage() {
           )}
         </Card>
       )}
+
+      <Card className="overflow-hidden">
+        <div className="border-b p-3 flex items-center gap-2">
+          <History className="w-4 h-4" />
+          <div className="font-semibold text-sm">Histórico de cruzamentos do limiar de dedupe</div>
+          <span className="text-xs text-muted-foreground ml-2">
+            Registrado automaticamente toda vez que o dedupe % muda de estado (abaixo / normal / acima) para os seus limites.
+          </span>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="ml-auto"
+            onClick={() => eventsQuery.refetch()}
+          >
+            Atualizar
+          </Button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead className="bg-muted/40 text-muted-foreground">
+              <tr>
+                <th className="text-left px-3 py-2">Quando</th>
+                <th className="text-left px-3 py-2">Estado</th>
+                <th className="text-left px-3 py-2">De → Para</th>
+                <th className="text-right px-3 py-2">Dedupe %</th>
+                <th className="text-right px-3 py-2">Limiar (min–max)</th>
+                <th className="text-right px-3 py-2">Janela</th>
+                <th className="text-right px-3 py-2">Amostras</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(eventsQuery.data?.rows ?? []).length === 0 && (
+                <tr>
+                  <td colSpan={7} className="p-4 text-center text-muted-foreground">
+                    {eventsQuery.isLoading
+                      ? 'Carregando…'
+                      : 'Nenhum cruzamento registrado ainda.'}
+                  </td>
+                </tr>
+              )}
+              {(eventsQuery.data?.rows ?? []).map((e) => {
+                const icon =
+                  e.state === 'above' ? (
+                    <ArrowUpCircle className="w-3.5 h-3.5 text-amber-600" />
+                  ) : e.state === 'below' ? (
+                    <ArrowDownCircle className="w-3.5 h-3.5 text-red-600" />
+                  ) : (
+                    <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
+                  )
+                return (
+                  <tr key={e.id} className="border-t">
+                    <td className="px-3 py-2 tabular-nums">
+                      {new Date(e.created_at).toLocaleString('pt-BR')}
+                    </td>
+                    <td className="px-3 py-2">
+                      <span className="inline-flex items-center gap-1">
+                        {icon} {e.state}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2 text-muted-foreground">
+                      {e.prev_state ?? '—'} → <strong>{e.state}</strong>
+                    </td>
+                    <td className="px-3 py-2 text-right tabular-nums">{Number(e.dedupe_pct).toFixed(1)}%</td>
+                    <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">
+                      {Number(e.min_pct).toFixed(0)} – {Number(e.max_pct).toFixed(0)}
+                    </td>
+                    <td className="px-3 py-2 text-right tabular-nums">{e.days_window}d</td>
+                    <td className="px-3 py-2 text-right tabular-nums">{e.samples}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+
+
 
 
       <Card className="p-3 text-xs text-muted-foreground bg-muted/30 flex gap-2 items-start">
