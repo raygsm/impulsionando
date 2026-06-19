@@ -324,12 +324,8 @@ function CatalogAnalyticsPage() {
                 min={0}
                 max={100}
                 className="h-7 w-16"
-                value={dedupeMin}
-                onChange={(e) => {
-                  const v = Math.max(0, Math.min(100, Number(e.target.value) || 0))
-                  setDedupeMin(v)
-                  persistThresholds(v, dedupeMax)
-                }}
+                value={draftMin}
+                onChange={(e) => setDraftMin(Math.max(0, Math.min(100, Number(e.target.value) || 0)))}
               />
               <span className="text-muted-foreground">–</span>
               <Input
@@ -337,14 +333,29 @@ function CatalogAnalyticsPage() {
                 min={0}
                 max={100}
                 className="h-7 w-16"
-                value={dedupeMax}
-                onChange={(e) => {
-                  const v = Math.max(0, Math.min(100, Number(e.target.value) || 0))
-                  setDedupeMax(v)
-                  persistThresholds(dedupeMin, v)
-                }}
+                value={draftMax}
+                onChange={(e) => setDraftMax(Math.max(0, Math.min(100, Number(e.target.value) || 0)))}
               />
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7"
+                disabled={
+                  saveMut.isPending ||
+                  draftMin > draftMax ||
+                  (draftMin === dedupeMin && draftMax === dedupeMax)
+                }
+                onClick={() => saveMut.mutate({ min: draftMin, max: draftMax })}
+              >
+                {saveMut.isPending ? 'Salvando…' : 'Salvar'}
+              </Button>
+              {thresholdsQuery.data?.updatedAt && (
+                <span className="text-[10px] text-muted-foreground">
+                  salvo {new Date(thresholdsQuery.data.updatedAt).toLocaleString('pt-BR')}
+                </span>
+              )}
             </div>
+
           </div>
           {dedupeAlert && (
             <div
