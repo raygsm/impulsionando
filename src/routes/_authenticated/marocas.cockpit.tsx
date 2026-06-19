@@ -163,26 +163,27 @@ function MarocasCockpit() {
   const alertsQ = useQuery({ queryKey: ["marocas", "alerts"], queryFn: () => alertsFn(), refetchInterval: 60_000 });
   const createAlert = useServerFn(createMarocasSlaAlert);
   const sentAlertsRef = useRef<Set<string>>(new Set());
+  const [notifyCfg, setNotifyCfg] = useState<NotifyConfig>(() => loadNotifyConfig());
 
-  // Auto-trigger SLA alerts (warning at 80%, late when stourado) once per service/severity per session
+  // Auto-trigger SLA alerts conforme a configuração (warning% e atraso por tipo)
   useEffect(() => {
     svcList.forEach((s) => {
       if (s.status === "concluido" || s.status === "cancelado") return;
       const info = slaInfo(s as any);
-      let severity: "warning" | "late" | null = null;
-      if (info.late) severity = "late";
-      else if (info.pct >= 80) severity = "warning";
+      const severity = shouldNotify(notifyCfg, s.service_type, info.pct, info.late);
       if (!severity) return;
       const key = `${s.id}:${severity}`;
       if (sentAlertsRef.current.has(key)) return;
       sentAlertsRef.current.add(key);
-      const msg = `${s.service_type} · ${s.marocas_apartments?.code ?? ""} — ${severity === "late" ? "SLA estourado" : "80% do SLA atingido"} (${info.elapsed}/${info.sla}min)`;
+      const cfg = notifyCfg[s.service_type];
+      const channels = (cfg?.channels ?? ["cockpit"]).join(", ");
+      const msg = `${s.service_type} · ${s.marocas_apartments?.code ?? ""} — ${severity === "late" ? "SLA estourado" : `${cfg?.warningPct ?? 80}% do SLA atingido`} (${info.elapsed}/${info.sla}min) · canais: ${channels}`;
       createAlert({ data: { serviceId: s.id, severity, message: msg } }).then(() => {
         qc.invalidateQueries({ queryKey: ["marocas", "alerts"] });
         toast.warning(msg);
       }).catch(() => { /* silent */ });
     });
-  }, [svcList, createAlert, qc]);
+  }, [svcList, createAlert, qc, notifyCfg]);
 
   const kpis = useMemo(() => {
     const apts = aptsQ.data ?? [];
