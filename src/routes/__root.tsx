@@ -17,6 +17,36 @@ import { LGPDBanner } from "@/components/marketing/LGPDBanner";
 import { OfficialWhatsAppFAB } from "@/components/marketing/OfficialWhatsAppFAB";
 import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 import { DemoAccessGate } from "@/components/demo/DemoAccessGate";
+import { isMaintenanceOn, MAINTENANCE_KEY } from "@/lib/maintenance";
+
+function MaintenanceGate() {
+  const router = useRouter();
+  useEffect(() => {
+    const allow = (path: string) =>
+      path.startsWith("/manutencao") ||
+      path.startsWith("/admin/manutencao") ||
+      path.startsWith("/healthz");
+    const check = () => {
+      if (!isMaintenanceOn()) return;
+      const path = window.location.pathname;
+      if (!allow(path)) router.navigate({ to: "/manutencao" });
+    };
+    check();
+    const unsub = router.subscribe("onResolved", check);
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === MAINTENANCE_KEY) check();
+    };
+    const onChanged = () => check();
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("maintenance:changed", onChanged);
+    return () => {
+      unsub();
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("maintenance:changed", onChanged);
+    };
+  }, [router]);
+  return null;
+}
 
 function NotFoundComponent() {
   return (
@@ -160,6 +190,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthSync />
       <AnalyticsTracker />
+      <MaintenanceGate />
       <Toaster richColors position="top-right" />
       <Outlet />
       <LGPDBanner />

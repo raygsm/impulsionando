@@ -29,6 +29,8 @@ import { Route as OrcamentoRouteImport } from './routes/orcamento'
 import { Route as ModulosRouteImport } from './routes/modulos'
 import { Route as MarocasRouteImport } from './routes/marocas'
 import { Route as MarketingRouteImport } from './routes/marketing'
+import { Route as ManutencaoRouteImport } from './routes/manutencao'
+import { Route as HealthzRouteImport } from './routes/healthz'
 import { Route as EscolherNichoRouteImport } from './routes/escolher-nicho'
 import { Route as EmpresasRouteImport } from './routes/empresas'
 import { Route as ContratarRouteImport } from './routes/contratar'
@@ -129,6 +131,7 @@ import { Route as ClubeCadastroRouteImport } from './routes/clube.cadastro'
 import { Route as ChrismedOfertasRouteImport } from './routes/chrismed.ofertas'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as CheckoutSlugRouteImport } from './routes/checkout.$slug'
+import { Route as AdminManutencaoRouteImport } from './routes/admin.manutencao'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
 import { Route as AuthenticatedUnitsRouteImport } from './routes/_authenticated/units'
@@ -507,6 +510,16 @@ const MarocasRoute = MarocasRouteImport.update({
 const MarketingRoute = MarketingRouteImport.update({
   id: '/marketing',
   path: '/marketing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManutencaoRoute = ManutencaoRouteImport.update({
+  id: '/manutencao',
+  path: '/manutencao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HealthzRoute = HealthzRouteImport.update({
+  id: '/healthz',
+  path: '/healthz',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EscolherNichoRoute = EscolherNichoRouteImport.update({
@@ -1011,6 +1024,11 @@ const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
 const CheckoutSlugRoute = CheckoutSlugRouteImport.update({
   id: '/checkout/$slug',
   path: '/checkout/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminManutencaoRoute = AdminManutencaoRouteImport.update({
+  id: '/admin/manutencao',
+  path: '/admin/manutencao',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
@@ -2634,6 +2652,8 @@ export interface FileRoutesByFullPath {
   '/contratar': typeof ContratarRouteWithChildren
   '/empresas': typeof EmpresasRoute
   '/escolher-nicho': typeof EscolherNichoRoute
+  '/healthz': typeof HealthzRoute
+  '/manutencao': typeof ManutencaoRoute
   '/marketing': typeof MarketingRoute
   '/marocas': typeof MarocasRoute
   '/modulos': typeof ModulosRouteWithChildren
@@ -2684,6 +2704,7 @@ export interface FileRoutesByFullPath {
   '/units': typeof AuthenticatedUnitsRoute
   '/users': typeof AuthenticatedUsersRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/admin/manutencao': typeof AdminManutencaoRoute
   '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/chrismed/ofertas': typeof ChrismedOfertasRoute
@@ -3033,6 +3054,8 @@ export interface FileRoutesByTo {
   '/contratar': typeof ContratarRouteWithChildren
   '/empresas': typeof EmpresasRoute
   '/escolher-nicho': typeof EscolherNichoRoute
+  '/healthz': typeof HealthzRoute
+  '/manutencao': typeof ManutencaoRoute
   '/marketing': typeof MarketingRoute
   '/marocas': typeof MarocasRoute
   '/orcamento': typeof OrcamentoRoute
@@ -3072,6 +3095,7 @@ export interface FileRoutesByTo {
   '/units': typeof AuthenticatedUnitsRoute
   '/users': typeof AuthenticatedUsersRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/admin/manutencao': typeof AdminManutencaoRoute
   '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/chrismed/ofertas': typeof ChrismedOfertasRoute
@@ -3423,6 +3447,8 @@ export interface FileRoutesById {
   '/contratar': typeof ContratarRouteWithChildren
   '/empresas': typeof EmpresasRoute
   '/escolher-nicho': typeof EscolherNichoRoute
+  '/healthz': typeof HealthzRoute
+  '/manutencao': typeof ManutencaoRoute
   '/marketing': typeof MarketingRoute
   '/marocas': typeof MarocasRoute
   '/modulos': typeof ModulosRouteWithChildren
@@ -3474,6 +3500,7 @@ export interface FileRoutesById {
   '/_authenticated/units': typeof AuthenticatedUnitsRoute
   '/_authenticated/users': typeof AuthenticatedUsersRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/admin/manutencao': typeof AdminManutencaoRoute
   '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/chrismed/ofertas': typeof ChrismedOfertasRoute
@@ -3825,6 +3852,8 @@ export interface FileRouteTypes {
     | '/contratar'
     | '/empresas'
     | '/escolher-nicho'
+    | '/healthz'
+    | '/manutencao'
     | '/marketing'
     | '/marocas'
     | '/modulos'
@@ -3875,6 +3904,7 @@ export interface FileRouteTypes {
     | '/units'
     | '/users'
     | '/admin/login'
+    | '/admin/manutencao'
     | '/checkout/$slug'
     | '/checkout/success'
     | '/chrismed/ofertas'
@@ -4224,6 +4254,8 @@ export interface FileRouteTypes {
     | '/contratar'
     | '/empresas'
     | '/escolher-nicho'
+    | '/healthz'
+    | '/manutencao'
     | '/marketing'
     | '/marocas'
     | '/orcamento'
@@ -4263,6 +4295,7 @@ export interface FileRouteTypes {
     | '/units'
     | '/users'
     | '/admin/login'
+    | '/admin/manutencao'
     | '/checkout/$slug'
     | '/checkout/success'
     | '/chrismed/ofertas'
@@ -4613,6 +4646,8 @@ export interface FileRouteTypes {
     | '/contratar'
     | '/empresas'
     | '/escolher-nicho'
+    | '/healthz'
+    | '/manutencao'
     | '/marketing'
     | '/marocas'
     | '/modulos'
@@ -4664,6 +4699,7 @@ export interface FileRouteTypes {
     | '/_authenticated/units'
     | '/_authenticated/users'
     | '/admin/login'
+    | '/admin/manutencao'
     | '/checkout/$slug'
     | '/checkout/success'
     | '/chrismed/ofertas'
@@ -5015,6 +5051,8 @@ export interface RootRouteChildren {
   ContratarRoute: typeof ContratarRouteWithChildren
   EmpresasRoute: typeof EmpresasRoute
   EscolherNichoRoute: typeof EscolherNichoRoute
+  HealthzRoute: typeof HealthzRoute
+  ManutencaoRoute: typeof ManutencaoRoute
   MarketingRoute: typeof MarketingRoute
   MarocasRoute: typeof MarocasRoute
   ModulosRoute: typeof ModulosRouteWithChildren
@@ -5036,6 +5074,7 @@ export interface RootRouteChildren {
   VitrineRoute: typeof VitrineRouteWithChildren
   WhiteLabelRoute: typeof WhiteLabelRouteWithChildren
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminManutencaoRoute: typeof AdminManutencaoRoute
   CheckoutSlugRoute: typeof CheckoutSlugRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   ComoFuncionaFitnessRoute: typeof ComoFuncionaFitnessRoute
@@ -5287,6 +5326,20 @@ declare module '@tanstack/react-router' {
       path: '/marketing'
       fullPath: '/marketing'
       preLoaderRoute: typeof MarketingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manutencao': {
+      id: '/manutencao'
+      path: '/manutencao'
+      fullPath: '/manutencao'
+      preLoaderRoute: typeof ManutencaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/healthz': {
+      id: '/healthz'
+      path: '/healthz'
+      fullPath: '/healthz'
+      preLoaderRoute: typeof HealthzRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/escolher-nicho': {
@@ -5987,6 +6040,13 @@ declare module '@tanstack/react-router' {
       path: '/checkout/$slug'
       fullPath: '/checkout/$slug'
       preLoaderRoute: typeof CheckoutSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/manutencao': {
+      id: '/admin/manutencao'
+      path: '/admin/manutencao'
+      fullPath: '/admin/manutencao'
+      preLoaderRoute: typeof AdminManutencaoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/login': {
@@ -8935,6 +8995,8 @@ const rootRouteChildren: RootRouteChildren = {
   ContratarRoute: ContratarRouteWithChildren,
   EmpresasRoute: EmpresasRoute,
   EscolherNichoRoute: EscolherNichoRoute,
+  HealthzRoute: HealthzRoute,
+  ManutencaoRoute: ManutencaoRoute,
   MarketingRoute: MarketingRoute,
   MarocasRoute: MarocasRoute,
   ModulosRoute: ModulosRouteWithChildren,
@@ -8956,6 +9018,7 @@ const rootRouteChildren: RootRouteChildren = {
   VitrineRoute: VitrineRouteWithChildren,
   WhiteLabelRoute: WhiteLabelRouteWithChildren,
   AdminLoginRoute: AdminLoginRoute,
+  AdminManutencaoRoute: AdminManutencaoRoute,
   CheckoutSlugRoute: CheckoutSlugRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
   ComoFuncionaFitnessRoute: ComoFuncionaFitnessRoute,
@@ -9076,13 +9139,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
