@@ -19,19 +19,19 @@ type Offering = {
 };
 
 const MODALITY_META = {
-  presencial: { icon: Stethoscope, label: 'Presencial', color: 'bg-teal-50 text-teal-700 border-teal-200' },
-  telemedicina: { icon: Video, label: 'Telemedicina', color: 'bg-sky-50 text-sky-700 border-sky-200' },
-  domiciliar: { icon: Home, label: 'Domiciliar', color: 'bg-amber-50 text-amber-700 border-amber-200' },
-  retorno: { icon: RefreshCw, label: 'Retorno', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  presencial: { icon: Stethoscope, label: 'No consultório', color: 'bg-teal-50 text-teal-700 border-teal-200' },
+  telemedicina: { icon: Video, label: 'Por vídeo', color: 'bg-sky-50 text-sky-700 border-sky-200' },
+  domiciliar: { icon: Home, label: 'Onde você estiver', color: 'bg-amber-50 text-amber-700 border-amber-200' },
+  retorno: { icon: RefreshCw, label: 'Retorno acompanhado', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
 } as const;
 
 export const Route = createFileRoute('/chrismed/ofertas')({
   head: () => ({
     meta: [
-      { title: 'CHRISMED — Catálogo de serviços e modalidades' },
-      { name: 'description', content: 'Conheça todas as modalidades de atendimento da CHRISMED: presencial, telemedicina, visita domiciliar e retornos.' },
-      { property: 'og:title', content: 'CHRISMED — Catálogo de Serviços' },
-      { property: 'og:description', content: 'Consultas presenciais, telemedicina, visitas domiciliares e retornos. Pagamento via PIX em segundos.' },
+      { title: 'CHRISMED — Modalidades de Atendimento Premium' },
+      { name: 'description', content: 'Conheça as modalidades CHRISMED: atendimento no consultório, por vídeo, médico onde você estiver e retornos acompanhados. Concierge médico com confirmação imediata.' },
+      { property: 'og:title', content: 'CHRISMED — Modalidades de Atendimento' },
+      { property: 'og:description', content: 'Atendimento médico no formato que se encaixa na sua rotina. Confirmação imediata, sigilo absoluto e equipe disponível.' },
     ],
   }),
   component: OfertasPage,
@@ -66,27 +66,28 @@ function OfertasPage() {
     <div className="min-h-screen bg-gradient-to-b from-teal-50/40 to-white">
       <header className="border-b bg-white/80 backdrop-blur sticky top-0 z-10">
         <div className="container flex items-center justify-between py-4">
-          <Link to="/chrismed" className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-lg bg-teal-600 flex items-center justify-center text-white font-bold">C</div>
+          <Link to="/chrismed" className="flex items-center gap-2.5">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-teal-600 to-teal-700 flex items-center justify-center text-white font-bold shadow-sm">C</div>
             <div>
-              <div className="font-semibold tracking-tight">CHRISMED</div>
-              <div className="text-xs text-muted-foreground -mt-0.5">Catálogo de serviços</div>
+              <div className="font-semibold tracking-tight text-slate-900">CHRISMED</div>
+              <div className="text-[11px] uppercase tracking-wider text-teal-700/80 -mt-0.5">Modalidades de atendimento</div>
             </div>
           </Link>
           <nav className="flex items-center gap-1">
             <Link to="/chrismed"><Button variant="ghost" size="sm">Agendar</Button></Link>
-            <Link to="/chrismed/ofertas"><Button variant="secondary" size="sm">Ofertas</Button></Link>
+            <Link to="/chrismed/ofertas"><Button variant="secondary" size="sm">Modalidades</Button></Link>
           </nav>
         </div>
       </header>
 
       <main className="container py-12 max-w-5xl">
         <div className="text-center mb-10">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-3">
-            Nossas <span className="text-teal-600">modalidades</span> de atendimento
+          <Badge variant="outline" className="border-teal-200 text-teal-700 mb-4 bg-teal-50/60">Concierge médico · você escolhe como ser atendido</Badge>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-3 leading-[1.1]">
+            O atendimento certo, <span className="text-teal-600">no formato que cabe na sua rotina</span>
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Escolha o formato que melhor se encaixa na sua rotina. Todos com prontuário eletrônico e prescrição digital.
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+            Cada modalidade entrega a mesma qualidade clínica, com prontuário eletrônico, prescrição digital e equipe sempre acessível.
           </p>
         </div>
 
@@ -131,14 +132,14 @@ function OfertasPage() {
                       <div className="text-2xl font-bold text-slate-900">{brl(o.price_cents)}</div>
                       <div className="text-xs text-muted-foreground">~{o.duration_minutes} min</div>
                     </div>
-                    <Link to="/chrismed"><Button className="bg-teal-600 hover:bg-teal-700">Agendar</Button></Link>
+                    <Link to="/chrismed"><Button className="bg-teal-600 hover:bg-teal-700 shadow-sm">Reservar horário</Button></Link>
                   </CardContent>
                 </Card>
               );
             })}
             {filtered.length === 0 && (
               <div className="md:col-span-2 text-center py-12 text-muted-foreground">
-                Nenhum serviço nesta modalidade ainda.
+                Nenhuma modalidade ativa nesse filtro no momento.
               </div>
             )}
           </div>
@@ -147,8 +148,8 @@ function OfertasPage() {
 
       <footer className="border-t mt-16 py-8 text-center text-sm text-muted-foreground">
         <div className="container">
-          CHRISMED · Clínica Médica
-          <div className="mt-1">Powered by <span className="font-semibold text-teal-700">Impulsionando</span></div>
+          CHRISMED · Central Médica · Atendimento ético, sigiloso e humanizado
+          <div className="mt-1">Tecnologia <span className="font-semibold text-teal-700">Impulsionando</span></div>
         </div>
       </footer>
     </div>

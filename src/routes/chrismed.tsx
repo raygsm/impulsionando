@@ -23,19 +23,19 @@ type Offering = {
 };
 
 const MODALITY_META: Record<Offering['modality'], { icon: typeof Stethoscope; label: string }> = {
-  presencial: { icon: Stethoscope, label: 'Presencial' },
-  telemedicina: { icon: Video, label: 'Telemedicina' },
-  domiciliar: { icon: Home, label: 'Domiciliar' },
-  retorno: { icon: RefreshCw, label: 'Retorno' },
+  presencial: { icon: Stethoscope, label: 'Atendimento no consultório' },
+  telemedicina: { icon: Video, label: 'Atendimento por vídeo' },
+  domiciliar: { icon: Home, label: 'Médico onde você estiver' },
+  retorno: { icon: RefreshCw, label: 'Retorno acompanhado' },
 };
 
 export const Route = createFileRoute('/chrismed')({
   head: () => ({
     meta: [
-      { title: 'CHRISMED — Agende sua consulta online ou presencial' },
-      { name: 'description', content: 'Clínica CHRISMED: agendamento e pagamento online via PIX. Consultas presenciais, telemedicina e visitas domiciliares.' },
-      { property: 'og:title', content: 'CHRISMED — Sua saúde com agilidade' },
-      { property: 'og:description', content: 'Agende e pague em segundos. PIX instantâneo, confirmação automática.' },
+      { title: 'CHRISMED — Central Médica Premium · agende em minutos' },
+      { name: 'description', content: 'Atendimento médico premium: presencial, por vídeo ou na sua residência, hotel ou empresa. Confirmação imediata via PIX, prontuário eletrônico e equipe à disposição.' },
+      { property: 'og:title', content: 'CHRISMED — Sua saúde com agilidade, sigilo e excelência' },
+      { property: 'og:description', content: 'Escolha o melhor horário e confirme seu atendimento em poucos minutos. Presencial, vídeo e domiciliar.' },
       { property: 'og:type', content: 'website' },
     ],
   }),
@@ -140,20 +140,20 @@ function ChrismedPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-teal-50/50 to-white">
-      {/* Hero */}
-      <header className="border-b bg-white/80 backdrop-blur sticky top-0 z-10">
+    <div className="min-h-screen bg-gradient-to-b from-teal-50/40 via-white to-white">
+      {/* Top bar */}
+      <header className="border-b bg-white/85 backdrop-blur sticky top-0 z-10">
         <div className="container flex items-center justify-between py-4">
-          <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-lg bg-teal-600 flex items-center justify-center text-white font-bold">C</div>
+          <div className="flex items-center gap-2.5">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-teal-600 to-teal-700 flex items-center justify-center text-white font-bold shadow-sm">C</div>
             <div>
-              <div className="font-semibold tracking-tight">CHRISMED</div>
-              <div className="text-xs text-muted-foreground -mt-0.5">Clínica Médica</div>
+              <div className="font-semibold tracking-tight text-slate-900">CHRISMED</div>
+              <div className="text-[11px] uppercase tracking-wider text-teal-700/80 -mt-0.5">Central Médica Premium</div>
             </div>
           </div>
           <nav className="flex items-center gap-1">
             <a href="/chrismed" className="px-3 py-1.5 text-sm font-medium text-teal-700 hover:bg-teal-50 rounded-md">Agendar</a>
-            <a href="/chrismed/ofertas" className="px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-md">Ofertas</a>
+            <a href="/chrismed/ofertas" className="px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-md">Modalidades</a>
           </nav>
         </div>
       </header>
@@ -162,12 +162,13 @@ function ChrismedPage() {
         {!pixResult && !selected && (
           <>
             <div className="text-center mb-12">
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-4">
-                Sua consulta médica em <span className="text-teal-600">poucos cliques</span>
+              <Badge variant="outline" className="border-teal-200 text-teal-700 mb-4 bg-teal-50/60">Atendimento concierge · presencial, vídeo e domiciliar</Badge>
+              <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-4 leading-[1.1]">
+                Cuidado médico <span className="text-teal-600">sem fila, sem espera</span>,<br className="hidden md:block" /> com a privacidade que você merece.
               </h1>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Escolha a modalidade, pague via PIX e receba a confirmação imediata.
-                Prontuário eletrônico, prescrição digital e acompanhamento contínuo.
+              <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+                Escolha a modalidade, confirme em minutos e tenha seu atendimento garantido.
+                Prontuário eletrônico, prescrição digital e equipe disponível antes, durante e após a consulta.
               </p>
             </div>
 
@@ -178,7 +179,7 @@ function ChrismedPage() {
                 {offerings.map((o) => {
                   const Icon = MODALITY_META[o.modality].icon;
                   return (
-                    <Card key={o.id} className="border-teal-100 hover:border-teal-300 hover:shadow-lg transition-all cursor-pointer group" onClick={() => setSelected(o)}>
+                    <Card key={o.id} className="border-teal-100/80 hover:border-teal-400 hover:shadow-xl hover:-translate-y-0.5 transition-all cursor-pointer group bg-white" onClick={() => setSelected(o)}>
                       <CardHeader>
                         <div className="flex items-start justify-between">
                           <div className="h-12 w-12 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center group-hover:bg-teal-600 group-hover:text-white transition-colors">
@@ -186,23 +187,37 @@ function ChrismedPage() {
                           </div>
                           <Badge variant="secondary" className="bg-teal-50 text-teal-700 hover:bg-teal-100">{MODALITY_META[o.modality].label}</Badge>
                         </div>
-                        <CardTitle className="mt-3">{o.name}</CardTitle>
-                        <CardDescription>{o.description}</CardDescription>
+                        <CardTitle className="mt-3 text-xl">{o.name}</CardTitle>
+                        <CardDescription className="text-slate-600">{o.description}</CardDescription>
                       </CardHeader>
                       <CardContent className="flex items-end justify-between">
                         <div>
                           <div className="text-3xl font-bold text-slate-900">
                             {o.price_cents === 0 ? 'Cortesia' : `R$ ${(o.price_cents / 100).toFixed(2).replace('.', ',')}`}
                           </div>
-                          <div className="text-xs text-muted-foreground">~{o.duration_minutes} min</div>
+                          <div className="text-xs text-muted-foreground">Duração estimada: {o.duration_minutes} min</div>
                         </div>
-                        <Button className="bg-teal-600 hover:bg-teal-700">Agendar</Button>
+                        <Button className="bg-teal-600 hover:bg-teal-700 shadow-sm">Reservar horário</Button>
                       </CardContent>
                     </Card>
                   );
                 })}
               </div>
             )}
+
+            {/* Trust signals */}
+            <div className="grid sm:grid-cols-3 gap-4 mt-14 pt-10 border-t border-teal-100">
+              {[
+                { t: 'Confirmação imediata', d: 'Pagou, está confirmado. Horário reservado e bloqueado em sua agenda.' },
+                { t: 'Sigilo absoluto', d: 'Prontuário eletrônico criptografado. Conformidade total com a LGPD.' },
+                { t: 'Equipe à disposição', d: 'WhatsApp dedicado para dúvidas antes e suporte clínico após o atendimento.' },
+              ].map((b) => (
+                <div key={b.t} className="text-center sm:text-left">
+                  <div className="font-semibold text-slate-900 mb-1">{b.t}</div>
+                  <div className="text-sm text-slate-600">{b.d}</div>
+                </div>
+              ))}
+            </div>
           </>
         )}
 
@@ -210,12 +225,12 @@ function ChrismedPage() {
         {selected && !pixResult && (
           <Card className="max-w-xl mx-auto border-teal-100">
             <CardHeader>
-              <button onClick={() => setSelected(null)} className="text-sm text-teal-700 hover:underline self-start mb-2">← Trocar serviço</button>
+              <button onClick={() => setSelected(null)} className="text-sm text-teal-700 hover:underline self-start mb-2">← Trocar modalidade</button>
               <CardTitle>{selected.name}</CardTitle>
               <CardDescription>
                 {selected.price_cents === 0
-                  ? 'Sem cobrança — preencha seus dados para confirmar.'
-                  : `R$ ${(selected.price_cents / 100).toFixed(2).replace('.', ',')} via PIX`}
+                  ? 'Sem custo — confirme seus dados e reservamos seu horário.'
+                  : `Investimento de R$ ${(selected.price_cents / 100).toFixed(2).replace('.', ',')} · pagamento via PIX com confirmação imediata`}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -239,8 +254,11 @@ function ChrismedPage() {
               </div>
               <Button onClick={handlePay} disabled={submitting} className="w-full bg-teal-600 hover:bg-teal-700">
                 {submitting ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : null}
-                {selected.price_cents === 0 ? 'Confirmar agendamento' : 'Gerar PIX'}
+                {selected.price_cents === 0 ? 'Confirmar reserva' : 'Reservar e pagar via PIX'}
               </Button>
+              <p className="text-xs text-center text-slate-500 mt-2">
+                Seu horário só é bloqueado após a confirmação do pagamento. Reembolso integral para cancelamentos com mais de 24h.
+              </p>
             </CardContent>
           </Card>
         )}
@@ -254,14 +272,14 @@ function ChrismedPage() {
                   <div className="mx-auto h-16 w-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3">
                     <CheckCircle2 className="h-9 w-9" />
                   </div>
-                  <CardTitle>Pagamento confirmado!</CardTitle>
-                  <CardDescription>Enviaremos os detalhes da consulta para o seu e-mail em instantes.</CardDescription>
+                  <CardTitle>Atendimento confirmado</CardTitle>
+                  <CardDescription>Seu horário está bloqueado em nossa agenda. Enviamos os detalhes e orientações para o seu e-mail e WhatsApp.</CardDescription>
                 </>
               ) : (
                 <>
-                  <CardTitle>Escaneie o QR Code PIX</CardTitle>
+                  <CardTitle>Reserve seu horário em segundos</CardTitle>
                   <CardDescription>
-                    Aguardando pagamento... Status: <span className="font-medium">{pollStatus}</span>
+                    Aponte a câmera para o QR Code ou use o código copia-e-cola. Confirmaremos automaticamente após o pagamento.
                   </CardDescription>
                 </>
               )}
@@ -300,8 +318,8 @@ function ChrismedPage() {
 
       <footer className="border-t mt-16 py-8 text-center text-sm text-muted-foreground">
         <div className="container">
-          CHRISMED · Clínica Médica · Atendimento ético e humanizado
-          <div className="mt-1">Powered by <span className="font-semibold text-teal-700">Impulsionando</span></div>
+          CHRISMED · Central Médica · Atendimento ético, sigiloso e humanizado
+          <div className="mt-1">Tecnologia <span className="font-semibold text-teal-700">Impulsionando</span></div>
         </div>
       </footer>
     </div>
