@@ -19,10 +19,10 @@ type Offering = {
 };
 
 const MODALITY_META = {
-  presencial: { icon: Stethoscope, label: 'Presencial', color: 'bg-teal-50 text-teal-700 border-teal-200' },
-  telemedicina: { icon: Video, label: 'Telemedicina', color: 'bg-sky-50 text-sky-700 border-sky-200' },
-  domiciliar: { icon: Home, label: 'Domiciliar', color: 'bg-amber-50 text-amber-700 border-amber-200' },
-  retorno: { icon: RefreshCw, label: 'Retorno', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  presencial: { icon: Stethoscope, label: 'No consultório', color: 'bg-teal-50 text-teal-700 border-teal-200' },
+  telemedicina: { icon: Video, label: 'Por vídeo', color: 'bg-sky-50 text-sky-700 border-sky-200' },
+  domiciliar: { icon: Home, label: 'Onde você estiver', color: 'bg-amber-50 text-amber-700 border-amber-200' },
+  retorno: { icon: RefreshCw, label: 'Retorno acompanhado', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
 } as const;
 
 export const Route = createFileRoute('/chrismed/ofertas')({
