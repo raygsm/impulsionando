@@ -151,7 +151,10 @@ function ChrismedPage() {
               <div className="text-xs text-muted-foreground -mt-0.5">Clínica Médica</div>
             </div>
           </div>
-          <Badge variant="outline" className="border-teal-200 text-teal-700">Atendimento online e presencial</Badge>
+          <nav className="flex items-center gap-1">
+            <a href="/chrismed" className="px-3 py-1.5 text-sm font-medium text-teal-700 hover:bg-teal-50 rounded-md">Agendar</a>
+            <a href="/chrismed/ofertas" className="px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-md">Ofertas</a>
+          </nav>
         </div>
       </header>
 

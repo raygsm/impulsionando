@@ -7,9 +7,16 @@ const SUBDOMAIN_LANDING: Record<string, string> = {
   marocas: "/marocas",
 };
 
+// Domínios de clientes (white-label) → rota dedicada.
+const CUSTOM_HOST_LANDING: Record<string, string> = {
+  "agenda.chrismed.com.br": "/chrismed",
+  "www.agenda.chrismed.com.br": "/chrismed",
+};
+
 function resolveSubdomainRedirect(host: string | null | undefined): string | null {
   if (!host) return null;
   const h = host.toLowerCase().split(":")[0];
+  if (CUSTOM_HOST_LANDING[h]) return CUSTOM_HOST_LANDING[h];
   // Apenas subdomínios do domínio principal (não tocar em *.lovable.app/preview).
   if (!h.endsWith(".impulsionando.com.br")) return null;
   const sub = h.replace(/\.impulsionando\.com\.br$/, "");

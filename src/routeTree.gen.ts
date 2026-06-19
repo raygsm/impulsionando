@@ -126,6 +126,7 @@ import { Route as ContratarSobMedidaRouteImport } from './routes/contratar.sob-m
 import { Route as ComoFuncionaFitnessRouteImport } from './routes/como-funciona.fitness'
 import { Route as ClubeLoginRouteImport } from './routes/clube.login'
 import { Route as ClubeCadastroRouteImport } from './routes/clube.cadastro'
+import { Route as ChrismedOfertasRouteImport } from './routes/chrismed.ofertas'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as CheckoutSlugRouteImport } from './routes/checkout.$slug'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
@@ -302,6 +303,7 @@ import { Route as AuthenticatedComunidadeIdRouteImport } from './routes/_authent
 import { Route as AuthenticatedCommercialCockpitRouteImport } from './routes/_authenticated/commercial.cockpit'
 import { Route as AuthenticatedClubeNotificacoesRouteImport } from './routes/_authenticated/clube.notificacoes'
 import { Route as AuthenticatedChrismedSetupRouteImport } from './routes/_authenticated/chrismed.setup'
+import { Route as AuthenticatedChrismedAlertasRouteImport } from './routes/_authenticated/chrismed.alertas'
 import { Route as AuthenticatedChrismedAdminRouteImport } from './routes/_authenticated/chrismed.admin'
 import { Route as AuthenticatedCheckoutPlanoRouteImport } from './routes/_authenticated/checkout.$plano'
 import { Route as AuthenticatedCervejariaRetornoRouteImport } from './routes/_authenticated/cervejaria.retorno'
@@ -995,6 +997,11 @@ const ClubeCadastroRoute = ClubeCadastroRouteImport.update({
   id: '/cadastro',
   path: '/cadastro',
   getParentRoute: () => ClubeRoute,
+} as any)
+const ChrismedOfertasRoute = ChrismedOfertasRouteImport.update({
+  id: '/ofertas',
+  path: '/ofertas',
+  getParentRoute: () => ChrismedRoute,
 } as any)
 const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
   id: '/checkout/success',
@@ -1996,6 +2003,12 @@ const AuthenticatedChrismedSetupRoute =
     path: '/chrismed/setup',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedChrismedAlertasRoute =
+  AuthenticatedChrismedAlertasRouteImport.update({
+    id: '/chrismed/alertas',
+    path: '/chrismed/alertas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedChrismedAdminRoute =
   AuthenticatedChrismedAdminRouteImport.update({
     id: '/chrismed/admin',
@@ -2613,7 +2626,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/canal-oficial': typeof CanalOficialRoute
   '/catalogo': typeof CatalogoRoute
-  '/chrismed': typeof ChrismedRoute
+  '/chrismed': typeof ChrismedRouteWithChildren
   '/clube': typeof AuthenticatedClubeRouteWithChildren
   '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
@@ -2673,6 +2686,7 @@ export interface FileRoutesByFullPath {
   '/admin/login': typeof AdminLoginRoute
   '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/chrismed/ofertas': typeof ChrismedOfertasRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
   '/clube/login': typeof ClubeLoginRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
@@ -2804,6 +2818,7 @@ export interface FileRoutesByFullPath {
   '/cervejaria/retorno': typeof AuthenticatedCervejariaRetornoRoute
   '/checkout/$plano': typeof AuthenticatedCheckoutPlanoRoute
   '/chrismed/admin': typeof AuthenticatedChrismedAdminRoute
+  '/chrismed/alertas': typeof AuthenticatedChrismedAlertasRoute
   '/chrismed/setup': typeof AuthenticatedChrismedSetupRoute
   '/clube/notificacoes': typeof AuthenticatedClubeNotificacoesRoute
   '/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
@@ -3010,7 +3025,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/canal-oficial': typeof CanalOficialRoute
   '/catalogo': typeof CatalogoRoute
-  '/chrismed': typeof ChrismedRoute
+  '/chrismed': typeof ChrismedRouteWithChildren
   '/clube': typeof AuthenticatedClubeRouteWithChildren
   '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
@@ -3059,6 +3074,7 @@ export interface FileRoutesByTo {
   '/admin/login': typeof AdminLoginRoute
   '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/chrismed/ofertas': typeof ChrismedOfertasRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
   '/clube/login': typeof ClubeLoginRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
@@ -3190,6 +3206,7 @@ export interface FileRoutesByTo {
   '/cervejaria/retorno': typeof AuthenticatedCervejariaRetornoRoute
   '/checkout/$plano': typeof AuthenticatedCheckoutPlanoRoute
   '/chrismed/admin': typeof AuthenticatedChrismedAdminRoute
+  '/chrismed/alertas': typeof AuthenticatedChrismedAlertasRoute
   '/chrismed/setup': typeof AuthenticatedChrismedSetupRoute
   '/clube/notificacoes': typeof AuthenticatedClubeNotificacoesRoute
   '/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
@@ -3398,7 +3415,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/canal-oficial': typeof CanalOficialRoute
   '/catalogo': typeof CatalogoRoute
-  '/chrismed': typeof ChrismedRoute
+  '/chrismed': typeof ChrismedRouteWithChildren
   '/clube': typeof ClubeRouteWithChildren
   '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
@@ -3459,6 +3476,7 @@ export interface FileRoutesById {
   '/admin/login': typeof AdminLoginRoute
   '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/chrismed/ofertas': typeof ChrismedOfertasRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
   '/clube/login': typeof ClubeLoginRoute
   '/como-funciona/fitness': typeof ComoFuncionaFitnessRoute
@@ -3590,6 +3608,7 @@ export interface FileRoutesById {
   '/_authenticated/cervejaria/retorno': typeof AuthenticatedCervejariaRetornoRoute
   '/_authenticated/checkout/$plano': typeof AuthenticatedCheckoutPlanoRoute
   '/_authenticated/chrismed/admin': typeof AuthenticatedChrismedAdminRoute
+  '/_authenticated/chrismed/alertas': typeof AuthenticatedChrismedAlertasRoute
   '/_authenticated/chrismed/setup': typeof AuthenticatedChrismedSetupRoute
   '/_authenticated/clube/notificacoes': typeof AuthenticatedClubeNotificacoesRoute
   '/_authenticated/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
@@ -3858,6 +3877,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/checkout/$slug'
     | '/checkout/success'
+    | '/chrismed/ofertas'
     | '/clube/cadastro'
     | '/clube/login'
     | '/como-funciona/fitness'
@@ -3989,6 +4009,7 @@ export interface FileRouteTypes {
     | '/cervejaria/retorno'
     | '/checkout/$plano'
     | '/chrismed/admin'
+    | '/chrismed/alertas'
     | '/chrismed/setup'
     | '/clube/notificacoes'
     | '/commercial/cockpit'
@@ -4244,6 +4265,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/checkout/$slug'
     | '/checkout/success'
+    | '/chrismed/ofertas'
     | '/clube/cadastro'
     | '/clube/login'
     | '/como-funciona/fitness'
@@ -4375,6 +4397,7 @@ export interface FileRouteTypes {
     | '/cervejaria/retorno'
     | '/checkout/$plano'
     | '/chrismed/admin'
+    | '/chrismed/alertas'
     | '/chrismed/setup'
     | '/clube/notificacoes'
     | '/commercial/cockpit'
@@ -4643,6 +4666,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/checkout/$slug'
     | '/checkout/success'
+    | '/chrismed/ofertas'
     | '/clube/cadastro'
     | '/clube/login'
     | '/como-funciona/fitness'
@@ -4774,6 +4798,7 @@ export interface FileRouteTypes {
     | '/_authenticated/cervejaria/retorno'
     | '/_authenticated/checkout/$plano'
     | '/_authenticated/chrismed/admin'
+    | '/_authenticated/chrismed/alertas'
     | '/_authenticated/chrismed/setup'
     | '/_authenticated/clube/notificacoes'
     | '/_authenticated/commercial/cockpit'
@@ -4982,7 +5007,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CanalOficialRoute: typeof CanalOficialRoute
   CatalogoRoute: typeof CatalogoRoute
-  ChrismedRoute: typeof ChrismedRoute
+  ChrismedRoute: typeof ChrismedRouteWithChildren
   ClubeRoute: typeof ClubeRouteWithChildren
   ConsumidorRoute: typeof ConsumidorRoute
   ContaSuspensaRoute: typeof ContaSuspensaRoute
@@ -5942,6 +5967,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/clube/cadastro'
       preLoaderRoute: typeof ClubeCadastroRouteImport
       parentRoute: typeof ClubeRoute
+    }
+    '/chrismed/ofertas': {
+      id: '/chrismed/ofertas'
+      path: '/ofertas'
+      fullPath: '/chrismed/ofertas'
+      preLoaderRoute: typeof ChrismedOfertasRouteImport
+      parentRoute: typeof ChrismedRoute
     }
     '/checkout/success': {
       id: '/checkout/success'
@@ -7173,6 +7205,13 @@ declare module '@tanstack/react-router' {
       path: '/chrismed/setup'
       fullPath: '/chrismed/setup'
       preLoaderRoute: typeof AuthenticatedChrismedSetupRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/chrismed/alertas': {
+      id: '/_authenticated/chrismed/alertas'
+      path: '/chrismed/alertas'
+      fullPath: '/chrismed/alertas'
+      preLoaderRoute: typeof AuthenticatedChrismedAlertasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/chrismed/admin': {
@@ -8531,6 +8570,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedBarMarketplaceRoute: typeof AuthenticatedBarMarketplaceRouteWithChildren
   AuthenticatedCheckoutPlanoRoute: typeof AuthenticatedCheckoutPlanoRoute
   AuthenticatedChrismedAdminRoute: typeof AuthenticatedChrismedAdminRoute
+  AuthenticatedChrismedAlertasRoute: typeof AuthenticatedChrismedAlertasRoute
   AuthenticatedChrismedSetupRoute: typeof AuthenticatedChrismedSetupRoute
   AuthenticatedCommercialCockpitRoute: typeof AuthenticatedCommercialCockpitRoute
   AuthenticatedComunidadeIdRoute: typeof AuthenticatedComunidadeIdRoute
@@ -8654,6 +8694,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedBarMarketplaceRouteWithChildren,
   AuthenticatedCheckoutPlanoRoute: AuthenticatedCheckoutPlanoRoute,
   AuthenticatedChrismedAdminRoute: AuthenticatedChrismedAdminRoute,
+  AuthenticatedChrismedAlertasRoute: AuthenticatedChrismedAlertasRoute,
   AuthenticatedChrismedSetupRoute: AuthenticatedChrismedSetupRoute,
   AuthenticatedCommercialCockpitRoute: AuthenticatedCommercialCockpitRoute,
   AuthenticatedComunidadeIdRoute: AuthenticatedComunidadeIdRoute,
@@ -8755,6 +8796,18 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
+interface ChrismedRouteChildren {
+  ChrismedOfertasRoute: typeof ChrismedOfertasRoute
+}
+
+const ChrismedRouteChildren: ChrismedRouteChildren = {
+  ChrismedOfertasRoute: ChrismedOfertasRoute,
+}
+
+const ChrismedRouteWithChildren = ChrismedRoute._addFileChildren(
+  ChrismedRouteChildren,
+)
 
 interface ClubeRouteChildren {
   ClubeCadastroRoute: typeof ClubeCadastroRoute
@@ -8874,7 +8927,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CanalOficialRoute: CanalOficialRoute,
   CatalogoRoute: CatalogoRoute,
-  ChrismedRoute: ChrismedRoute,
+  ChrismedRoute: ChrismedRouteWithChildren,
   ClubeRoute: ClubeRouteWithChildren,
   ConsumidorRoute: ConsumidorRoute,
   ContaSuspensaRoute: ContaSuspensaRoute,
