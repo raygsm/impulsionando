@@ -318,8 +318,8 @@ function ChrismedPage() {
 
       <footer className="border-t mt-16 py-8 text-center text-sm text-muted-foreground">
         <div className="container">
-          CHRISMED · Clínica Médica · Atendimento ético e humanizado
-          <div className="mt-1">Powered by <span className="font-semibold text-teal-700">Impulsionando</span></div>
+          CHRISMED · Central Médica · Atendimento ético, sigiloso e humanizado
+          <div className="mt-1">Tecnologia <span className="font-semibold text-teal-700">Impulsionando</span></div>
         </div>
       </footer>
     </div>
