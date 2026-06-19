@@ -170,7 +170,9 @@ export const getCatalogAnalytics = createServerFn({ method: 'GET' })
         .gte('created_at', since),
       context.supabase
         .from('catalog_intents')
-        .select('macro_slug,subnicho_slug,plan_tier,consumed_at,converted_at,conversion_kind,reuse_attempts,created_at')
+        .select(
+          'macro_slug,subnicho_slug,plan_tier,consumed_at,converted_at,conversion_kind,reuse_attempts,last_reuse_attempt_at,created_at',
+        )
         .gte('created_at', since),
     ])
     if (evRes.error) throw evRes.error
@@ -186,6 +188,9 @@ export const getCatalogAnalytics = createServerFn({ method: 'GET' })
       opened: number
       converted: number
       reuseAttempts: number
+      lastConvertedAt: string | null
+      lastReuseAt: string | null
+      conversionKinds: Record<string, number>
     }
     const map = new Map<string, Row>()
     const key = (m: string | null, s: string | null, p: string | null) =>
@@ -204,11 +209,16 @@ export const getCatalogAnalytics = createServerFn({ method: 'GET' })
           opened: 0,
           converted: 0,
           reuseAttempts: 0,
+          lastConvertedAt: null,
+          lastReuseAt: null,
+          conversionKinds: {},
         }
         map.set(k, row)
       }
       return row
     }
+    const maxIso = (a: string | null, b: string | null) =>
+      !a ? b : !b ? a : a > b ? a : b
     for (const e of evRes.data ?? []) {
       const r = ensure(e.macro_slug, e.subnicho_slug, e.plan_tier)
       if (e.event_name === 'view_plans') r.views += 1
@@ -218,8 +228,17 @@ export const getCatalogAnalytics = createServerFn({ method: 'GET' })
       const r = ensure(i.macro_slug, i.subnicho_slug, i.plan_tier)
       r.intents += 1
       if (i.consumed_at) r.opened += 1
-      if (i.converted_at) r.converted += 1
+      if (i.converted_at) {
+        r.converted += 1
+        r.lastConvertedAt = maxIso(r.lastConvertedAt, i.converted_at)
+        if (i.conversion_kind) {
+          r.conversionKinds[i.conversion_kind] = (r.conversionKinds[i.conversion_kind] ?? 0) + 1
+        }
+      }
       r.reuseAttempts += i.reuse_attempts ?? 0
+      if (i.last_reuse_attempt_at) {
+        r.lastReuseAt = maxIso(r.lastReuseAt, i.last_reuse_attempt_at)
+      }
     }
     const rows = Array.from(map.values()).sort((a, b) => b.intents - a.intents)
     const totals = rows.reduce(
@@ -237,6 +256,7 @@ export const getCatalogAnalytics = createServerFn({ method: 'GET' })
     return { rows, totals, days: data.days }
   })
 
+
 // --------- Idempotent consume + conversion ---------
 // "Consumed" = intent has been opened in onboarding (intent reaches the app).
 // "Converted" = a downstream success event happened (onboarding finished,
@@ -246,32 +266,36 @@ export const consumeCatalogIntent = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
+    const { decideConsumeAction } = await import('./catalog-intent-lifecycle')
     const { data: existing, error: readErr } = await context.supabase
       .from('catalog_intents')
       .select('id,consumed_at,reuse_attempts')
       .eq('id', data.id)
       .maybeSingle()
     if (readErr) throw readErr
-    if (!existing) return { ok: false, alreadyConsumed: false, notFound: true }
+    const action = decideConsumeAction(existing)
 
-    if (existing.consumed_at) {
-      // Idempotent: count + log the reuse attempt, do not re-consume.
+    if (action.kind === 'not_found') {
+      return { ok: false, alreadyConsumed: false, notFound: true }
+    }
+    if (action.kind === 'reuse') {
       const sbAnon = publicClient()
       await sbAnon.from('catalog_events').insert({
         event_name: 'intent_reuse_attempt',
         intent_id: data.id,
-        metadata: { user_id: context.userId },
+        metadata: { user_id: context.userId, attempt: action.nextAttempts },
       })
       await context.supabase
         .from('catalog_intents')
         .update({
-          reuse_attempts: (existing.reuse_attempts ?? 0) + 1,
+          reuse_attempts: action.nextAttempts,
           last_reuse_attempt_at: new Date().toISOString(),
         })
         .eq('id', data.id)
-      return { ok: true, alreadyConsumed: true, reuseAttempts: (existing.reuse_attempts ?? 0) + 1 }
+      return { ok: true, alreadyConsumed: true, reuseAttempts: action.nextAttempts }
     }
-
+    // first_consume — guarded by `.is('consumed_at', null)` so two parallel
+    // requests can't both win.
     const { error } = await context.supabase
       .from('catalog_intents')
       .update({ consumed_at: new Date().toISOString(), user_id: context.userId })
@@ -290,7 +314,8 @@ export const markCatalogConversion = createServerFn({ method: 'POST' })
     }).parse(data),
   )
   .handler(async ({ data, context }) => {
-    // Idempotent: only first conversion wins.
+    // `.is('converted_at', null)` makes this idempotent at the DB level too:
+    // only the first call writes; subsequent calls match 0 rows.
     const { data: updated, error } = await context.supabase
       .from('catalog_intents')
       .update({ converted_at: new Date().toISOString(), conversion_kind: data.kind })
@@ -301,6 +326,7 @@ export const markCatalogConversion = createServerFn({ method: 'POST' })
     if (error) throw error
     return { ok: true, firstConversion: !!updated, kind: data.kind }
   })
+
 
 // --------- Admin: manage niche → plan → modules ---------
 
