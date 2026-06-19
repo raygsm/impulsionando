@@ -37,12 +37,12 @@ type NichoCard = {
  * já estão mesclados (um card cada), e ambos vivem sob "Saúde".
  */
 const NICHO_CARDS: Record<string, NichoCard> = {
-  clinicas:           { slug: "clinicas",           label: "Clínicas e Consultórios",  desc: "Agenda, prontuário, portal do paciente e relacionamento.",   icon: Stethoscope },
-  psicologia:         { slug: "psicologia",         label: "Psicologia e Terapias",    desc: "Agenda, prontuário sigiloso, sessões e pagamento.",          icon: HeartPulse },
   // Todos os slugs abaixo têm entrada em RECOMENDACOES (recomendacao.$nicho.tsx).
   // Mantenha sincronizado: testes em tests/nichos-funnel-routes.test.ts checam isso.
   clinicas:           { slug: "clinicas",           label: "Clínicas e Consultórios",  desc: "Agenda, prontuário, portal do paciente e relacionamento.",   icon: Stethoscope },
   psicologia:         { slug: "psicologia",         label: "Psicologia e Terapias",    desc: "Agenda, prontuário sigiloso, sessões e pagamento.",          icon: HeartPulse },
+  saude:              { slug: "saude",              label: "Saúde (outras áreas)",     desc: "Fisioterapia, nutrição, odontologia e terapias integrativas.", icon: Activity },
+  fitness:            { slug: "fitness",            label: "Fitness e Performance",    desc: "Academias, CrossFit, funcional, personal e estúdios.",        icon: Dumbbell },
   saude:              { slug: "saude",              label: "Saúde (outras áreas)",     desc: "Fisioterapia, nutrição, odontologia e terapias integrativas.", icon: Activity },
   fitness:            { slug: "fitness",            label: "Fitness e Performance",    desc: "Academias, CrossFit, funcional, personal e estúdios.",        icon: Dumbbell },
   "bares-restaurantes": { slug: "bares-restaurantes", label: "Bares e Restaurantes",   desc: "Cardápio digital, QR Code, comanda, CRM e fidelidade.",      icon: UtensilsCrossed },
