@@ -125,6 +125,14 @@ jobs:
           retention-days: 14
           if-no-files-found: ignore
 
+      # Gera relatório agrupando diffs por componente × viewport × estado
+      # (verticalOffer educacao, PublicFooter, Hero CTAs, etc.) e
+      # publica no Job Summary + expõe como output para o comentário.
+      - name: Generate visual regression report
+        if: always()
+        id: visual-report
+        run: node scripts/playwright-visual-report.mjs test-results
+
       # Comment on the PR with direct links to the uploaded artifacts so
       # reviewers can fetch expected/actual/diff PNGs and traces in one click.
       # Only runs on pull_request events and only when something failed.
@@ -136,9 +144,11 @@ jobs:
           TRACE_URL: ${{ steps.upload-traces.outputs.artifact-url }}
           REPORT_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           VISUAL_ENABLED: ${{ vars.E2E_VISUAL }}
+          VISUAL_REPORT: ${{ steps.visual-report.outputs.report }}
+          DIFF_COUNT: ${{ steps.visual-report.outputs.diff_count }}
         with:
           script: |
-            const { DIFF_URL, TRACE_URL, REPORT_URL, VISUAL_ENABLED } = process.env;
+            const { DIFF_URL, TRACE_URL, REPORT_URL, VISUAL_ENABLED, VISUAL_REPORT, DIFF_COUNT } = process.env;
             const lines = [
               "### ❌ Playwright E2E falhou",
               "",
@@ -157,6 +167,13 @@ jobs:
               lines.push("");
               lines.push("> 💡 Os cenários de visual regression só rodam com `E2E_VISUAL=1` (Settings → Variables).");
             }
+            if (VISUAL_REPORT && Number(DIFF_COUNT ?? 0) > 0) {
+              lines.push("");
+              lines.push("<details><summary>📊 Relatório de visual regression (viewport × estado)</summary>");
+              lines.push("");
+              lines.push(VISUAL_REPORT);
+              lines.push("</details>");
+            }
             lines.push("");
             lines.push("Como interpretar os PNGs em `playwright-visual-diffs`:");
             lines.push("");
@@ -170,3 +187,4 @@ jobs:
               issue_number: context.issue.number,
               body,
             });
+
