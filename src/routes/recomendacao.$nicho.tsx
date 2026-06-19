@@ -10,13 +10,28 @@ export const Route = createFileRoute("/recomendacao/$nicho")({
   head: ({ params }) => {
     const r = RECOMENDACOES[params.nicho];
     const title = r ? `${r.nicheLabel} — Recomendação Impulsionando` : "Recomendação por nicho";
+    const description = r?.lead ?? "Recomendação inteligente de plano e módulos por nicho.";
+    const url = `https://impulsionando.com.br/recomendacao/${params.nicho}`;
     return {
       meta: [
         { title },
-        { name: "description", content: r?.lead ?? "Recomendação inteligente de plano e módulos por nicho." },
+        { name: "description", content: description },
+        // Open Graph — leaf article. og:image é omitido propositalmente
+        // (não temos asset por nicho; um placeholder é pior que nada).
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "article" },
+        { property: "og:url", content: url },
+        // Twitter card — herda og:* quando ausentes, mas declaramos
+        // o tipo de cartão explicitamente para evitar fallback "summary".
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
       ],
+      links: [{ rel: "canonical", href: url }],
     };
   },
+
   loader: ({ params }) => {
     if (!RECOMENDACOES[params.nicho]) throw notFound();
     return { nicho: params.nicho };
