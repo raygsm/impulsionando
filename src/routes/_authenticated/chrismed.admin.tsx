@@ -21,7 +21,7 @@ export const Route = createFileRoute('/_authenticated/chrismed/admin')({
 type Payment = {
   id: string;
   status: string;
-  amount: number;
+  amount_cents: number;
   payer_name: string | null;
   payer_email: string | null;
   payment_method: string | null;
@@ -63,7 +63,7 @@ function ChrismedAdmin() {
     const [pay, out] = await Promise.all([
       supabase
         .from('mpago_payments')
-        .select('id,status,amount,payer_name,payer_email,payment_method,created_at,approved_at')
+        .select('id,status,amount_cents,payer_name,payer_email,payment_method,created_at,approved_at')
         .eq('company_id', CHRISMED_COMPANY_ID)
         .order('created_at', { ascending: false })
         .limit(50),
@@ -86,7 +86,7 @@ function ChrismedAdmin() {
   }, []);
 
   const approved = payments.filter((p) => p.status === 'approved');
-  const gmv = approved.reduce((s, p) => s + Number(p.amount || 0), 0);
+  const gmv = approved.reduce((s, p) => s + Number(p.amount_cents || 0) / 100, 0);
   const pending = payments.filter((p) => p.status === 'pending').length;
   const queued = outbox.filter((o) => ['queued', 'sending'].includes(o.status)).length;
   const sent = outbox.filter((o) => o.status === 'sent').length;
@@ -157,7 +157,7 @@ function ChrismedAdmin() {
                       <div className="text-xs text-muted-foreground">{p.payer_email ?? ''}</div>
                     </td>
                     <td className="py-2 pr-3 uppercase text-xs">{p.payment_method ?? '—'}</td>
-                    <td className="py-2 pr-3 text-right font-medium">{brl(Number(p.amount || 0))}</td>
+                    <td className="py-2 pr-3 text-right font-medium">{brl(Number(p.amount_cents || 0) / 100)}</td>
                     <td className="py-2 pr-3"><Badge variant={statusColor(p.status)}>{p.status}</Badge></td>
                   </tr>
                 ))}
