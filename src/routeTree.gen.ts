@@ -27,6 +27,7 @@ import { Route as PesquisaRouteImport } from './routes/pesquisa'
 import { Route as PacienteRouteImport } from './routes/paciente'
 import { Route as OrcamentoRouteImport } from './routes/orcamento'
 import { Route as ModulosRouteImport } from './routes/modulos'
+import { Route as MarocasRouteImport } from './routes/marocas'
 import { Route as MarketingRouteImport } from './routes/marketing'
 import { Route as EscolherNichoRouteImport } from './routes/escolher-nicho'
 import { Route as EmpresasRouteImport } from './routes/empresas'
@@ -208,6 +209,7 @@ import { Route as AuthenticatedOpsSaudeRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedOpsMensageriaRouteImport } from './routes/_authenticated/ops.mensageria'
 import { Route as AuthenticatedOperationsCockpitRouteImport } from './routes/_authenticated/operations.cockpit'
 import { Route as AuthenticatedOnboardingNichoRouteImport } from './routes/_authenticated/onboarding.nicho'
+import { Route as AuthenticatedMarocasCockpitRouteImport } from './routes/_authenticated/marocas.cockpit'
 import { Route as AuthenticatedMarketingLeadsRouteImport } from './routes/_authenticated/marketing.leads'
 import { Route as AuthenticatedMarketingCockpitRouteImport } from './routes/_authenticated/marketing.cockpit'
 import { Route as AuthenticatedInventorySuppliersRouteImport } from './routes/_authenticated/inventory.suppliers'
@@ -486,6 +488,11 @@ const OrcamentoRoute = OrcamentoRouteImport.update({
 const ModulosRoute = ModulosRouteImport.update({
   id: '/modulos',
   path: '/modulos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarocasRoute = MarocasRouteImport.update({
+  id: '/marocas',
+  path: '/marocas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketingRoute = MarketingRouteImport.update({
@@ -1436,6 +1443,12 @@ const AuthenticatedOnboardingNichoRoute =
     id: '/nicho',
     path: '/nicho',
     getParentRoute: () => AuthenticatedOnboardingRoute,
+  } as any)
+const AuthenticatedMarocasCockpitRoute =
+  AuthenticatedMarocasCockpitRouteImport.update({
+    id: '/marocas/cockpit',
+    path: '/marocas/cockpit',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedMarketingLeadsRoute =
   AuthenticatedMarketingLeadsRouteImport.update({
@@ -2560,6 +2573,7 @@ export interface FileRoutesByFullPath {
   '/empresas': typeof EmpresasRoute
   '/escolher-nicho': typeof EscolherNichoRoute
   '/marketing': typeof MarketingRoute
+  '/marocas': typeof MarocasRoute
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
   '/paciente': typeof PacienteRouteWithChildren
@@ -2830,6 +2844,7 @@ export interface FileRoutesByFullPath {
   '/inventory/suppliers': typeof AuthenticatedInventorySuppliersRoute
   '/marketing/cockpit': typeof AuthenticatedMarketingCockpitRoute
   '/marketing/leads': typeof AuthenticatedMarketingLeadsRoute
+  '/marocas/cockpit': typeof AuthenticatedMarocasCockpitRoute
   '/onboarding/nicho': typeof AuthenticatedOnboardingNichoRoute
   '/operations/cockpit': typeof AuthenticatedOperationsCockpitRoute
   '/ops/mensageria': typeof AuthenticatedOpsMensageriaRoute
@@ -2948,6 +2963,7 @@ export interface FileRoutesByTo {
   '/empresas': typeof EmpresasRoute
   '/escolher-nicho': typeof EscolherNichoRoute
   '/marketing': typeof MarketingRoute
+  '/marocas': typeof MarocasRoute
   '/orcamento': typeof OrcamentoRoute
   '/pesquisa': typeof PesquisaRoute
   '/planos': typeof PlanosRouteWithChildren
@@ -3207,6 +3223,7 @@ export interface FileRoutesByTo {
   '/inventory/suppliers': typeof AuthenticatedInventorySuppliersRoute
   '/marketing/cockpit': typeof AuthenticatedMarketingCockpitRoute
   '/marketing/leads': typeof AuthenticatedMarketingLeadsRoute
+  '/marocas/cockpit': typeof AuthenticatedMarocasCockpitRoute
   '/onboarding/nicho': typeof AuthenticatedOnboardingNichoRoute
   '/operations/cockpit': typeof AuthenticatedOperationsCockpitRoute
   '/ops/mensageria': typeof AuthenticatedOpsMensageriaRoute
@@ -3327,6 +3344,7 @@ export interface FileRoutesById {
   '/empresas': typeof EmpresasRoute
   '/escolher-nicho': typeof EscolherNichoRoute
   '/marketing': typeof MarketingRoute
+  '/marocas': typeof MarocasRoute
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
   '/paciente': typeof PacienteRouteWithChildren
@@ -3598,6 +3616,7 @@ export interface FileRoutesById {
   '/_authenticated/inventory/suppliers': typeof AuthenticatedInventorySuppliersRoute
   '/_authenticated/marketing/cockpit': typeof AuthenticatedMarketingCockpitRoute
   '/_authenticated/marketing/leads': typeof AuthenticatedMarketingLeadsRoute
+  '/_authenticated/marocas/cockpit': typeof AuthenticatedMarocasCockpitRoute
   '/_authenticated/onboarding/nicho': typeof AuthenticatedOnboardingNichoRoute
   '/_authenticated/operations/cockpit': typeof AuthenticatedOperationsCockpitRoute
   '/_authenticated/ops/mensageria': typeof AuthenticatedOpsMensageriaRoute
@@ -3718,6 +3737,7 @@ export interface FileRouteTypes {
     | '/empresas'
     | '/escolher-nicho'
     | '/marketing'
+    | '/marocas'
     | '/modulos'
     | '/orcamento'
     | '/paciente'
@@ -3988,6 +4008,7 @@ export interface FileRouteTypes {
     | '/inventory/suppliers'
     | '/marketing/cockpit'
     | '/marketing/leads'
+    | '/marocas/cockpit'
     | '/onboarding/nicho'
     | '/operations/cockpit'
     | '/ops/mensageria'
@@ -4106,6 +4127,7 @@ export interface FileRouteTypes {
     | '/empresas'
     | '/escolher-nicho'
     | '/marketing'
+    | '/marocas'
     | '/orcamento'
     | '/pesquisa'
     | '/planos'
@@ -4365,6 +4387,7 @@ export interface FileRouteTypes {
     | '/inventory/suppliers'
     | '/marketing/cockpit'
     | '/marketing/leads'
+    | '/marocas/cockpit'
     | '/onboarding/nicho'
     | '/operations/cockpit'
     | '/ops/mensageria'
@@ -4484,6 +4507,7 @@ export interface FileRouteTypes {
     | '/empresas'
     | '/escolher-nicho'
     | '/marketing'
+    | '/marocas'
     | '/modulos'
     | '/orcamento'
     | '/paciente'
@@ -4755,6 +4779,7 @@ export interface FileRouteTypes {
     | '/_authenticated/inventory/suppliers'
     | '/_authenticated/marketing/cockpit'
     | '/_authenticated/marketing/leads'
+    | '/_authenticated/marocas/cockpit'
     | '/_authenticated/onboarding/nicho'
     | '/_authenticated/operations/cockpit'
     | '/_authenticated/ops/mensageria'
@@ -4875,6 +4900,7 @@ export interface RootRouteChildren {
   EmpresasRoute: typeof EmpresasRoute
   EscolherNichoRoute: typeof EscolherNichoRoute
   MarketingRoute: typeof MarketingRoute
+  MarocasRoute: typeof MarocasRoute
   ModulosRoute: typeof ModulosRouteWithChildren
   OrcamentoRoute: typeof OrcamentoRoute
   PacienteRoute: typeof PacienteRouteWithChildren
@@ -5130,6 +5156,13 @@ declare module '@tanstack/react-router' {
       path: '/modulos'
       fullPath: '/modulos'
       preLoaderRoute: typeof ModulosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/marocas': {
+      id: '/marocas'
+      path: '/marocas'
+      fullPath: '/marocas'
+      preLoaderRoute: typeof MarocasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/marketing': {
@@ -6398,6 +6431,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/onboarding/nicho'
       preLoaderRoute: typeof AuthenticatedOnboardingNichoRouteImport
       parentRoute: typeof AuthenticatedOnboardingRoute
+    }
+    '/_authenticated/marocas/cockpit': {
+      id: '/_authenticated/marocas/cockpit'
+      path: '/marocas/cockpit'
+      fullPath: '/marocas/cockpit'
+      preLoaderRoute: typeof AuthenticatedMarocasCockpitRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/marketing/leads': {
       id: '/_authenticated/marketing/leads'
@@ -8369,6 +8409,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedInsightsRespostasRoute: typeof AuthenticatedInsightsRespostasRoute
   AuthenticatedMarketingCockpitRoute: typeof AuthenticatedMarketingCockpitRoute
   AuthenticatedMarketingLeadsRoute: typeof AuthenticatedMarketingLeadsRoute
+  AuthenticatedMarocasCockpitRoute: typeof AuthenticatedMarocasCockpitRoute
   AuthenticatedOperationsCockpitRoute: typeof AuthenticatedOperationsCockpitRoute
   AuthenticatedOpsMensageriaRoute: typeof AuthenticatedOpsMensageriaRoute
   AuthenticatedOpsSaudeRoute: typeof AuthenticatedOpsSaudeRoute
@@ -8509,6 +8550,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInsightsRespostasRoute: AuthenticatedInsightsRespostasRoute,
   AuthenticatedMarketingCockpitRoute: AuthenticatedMarketingCockpitRoute,
   AuthenticatedMarketingLeadsRoute: AuthenticatedMarketingLeadsRoute,
+  AuthenticatedMarocasCockpitRoute: AuthenticatedMarocasCockpitRoute,
   AuthenticatedOperationsCockpitRoute: AuthenticatedOperationsCockpitRoute,
   AuthenticatedOpsMensageriaRoute: AuthenticatedOpsMensageriaRoute,
   AuthenticatedOpsSaudeRoute: AuthenticatedOpsSaudeRoute,
@@ -8673,6 +8715,7 @@ const rootRouteChildren: RootRouteChildren = {
   EmpresasRoute: EmpresasRoute,
   EscolherNichoRoute: EscolherNichoRoute,
   MarketingRoute: MarketingRoute,
+  MarocasRoute: MarocasRoute,
   ModulosRoute: ModulosRouteWithChildren,
   OrcamentoRoute: OrcamentoRoute,
   PacienteRoute: PacienteRouteWithChildren,
