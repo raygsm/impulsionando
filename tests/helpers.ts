@@ -38,6 +38,7 @@ export async function createUser(email: string, password = "TestPass123!") {
 }
 
 export async function deleteUser(id: string) {
+  try { await admin.from("trial_subscriptions").delete().eq("user_id", id); } catch {}
   await admin.auth.admin.deleteUser(id).catch(() => {});
 }
 
@@ -65,6 +66,23 @@ export async function assignProfile(opts: {
     is_active: true,
   });
   if (error) throw error;
+
+  // Ensure an active trial exists tied to this user+company so the
+  // operational permission gate (`user_has_permission`) doesn't block
+  // crm/finance/agenda/sales/inventory/ehr/customer.* in tests.
+  await admin.from("trial_subscriptions").insert({
+    company_id: opts.companyId,
+    user_id: opts.userId,
+    contact_name: opts.email.split("@")[0],
+    contact_company: `Test Co ${opts.companyId.slice(0, 6)}`,
+    contact_email: opts.email,
+    contact_whatsapp: "+5511999999999",
+    contact_doc: "00000000000",
+    status: "ativo",
+    started_at: new Date().toISOString(),
+    ends_at: new Date(Date.now() + 30 * 86_400_000).toISOString(),
+    source: "automated-test",
+  } as any);
 }
 
 export async function createCompany(name: string) {
@@ -79,5 +97,6 @@ export async function createCompany(name: string) {
 
 export async function deleteCompany(id: string) {
   await admin.from("user_profiles").delete().eq("company_id", id);
+  await admin.from("trial_subscriptions").delete().eq("company_id", id);
   await admin.from("companies").delete().eq("id", id);
 }
