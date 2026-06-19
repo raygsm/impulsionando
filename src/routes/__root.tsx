@@ -17,6 +17,7 @@ import { LGPDBanner } from "@/components/marketing/LGPDBanner";
 import { OfficialWhatsAppFAB } from "@/components/marketing/OfficialWhatsAppFAB";
 import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 import { DemoAccessGate } from "@/components/demo/DemoAccessGate";
+import { TenantBrandingProvider } from "@/components/app/TenantBrandingProvider";
 import { isMaintenanceOn, MAINTENANCE_KEY } from "@/lib/maintenance";
 
 function MaintenanceGate() {
@@ -191,6 +192,7 @@ function RootComponent() {
       <AuthSync />
       <AnalyticsTracker />
       <MaintenanceGate />
+      <TenantBrandingProvider />
       <Toaster richColors position="top-right" />
       <Outlet />
       <LGPDBanner />

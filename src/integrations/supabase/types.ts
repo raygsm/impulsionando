@@ -16187,6 +16187,19 @@ export type Database = {
         Returns: Json
       }
       resolve_table_qr: { Args: { _token: string }; Returns: Json }
+      resolve_tenant_by_host: {
+        Args: { _host: string }
+        Returns: {
+          domain: string
+          id: string
+          is_active: boolean
+          logo_url: string
+          name: string
+          primary_color: string
+          secondary_color: string
+          subdomain: string
+        }[]
+      }
       restaurant_create_table_invoice: {
         Args: { _token: string }
         Returns: Json
