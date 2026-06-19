@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
+    "verify:niches": "node scripts/verify-niche-destinations.mjs",
+    "prebuild": "node scripts/verify-niche-destinations.mjs",
     "build": "NODE_OPTIONS=--max-old-space-size=6144 vite build",
     "build:dev": "NODE_OPTIONS=--max-old-space-size=6144 vite build --mode development",
     "preview": "vite preview",
