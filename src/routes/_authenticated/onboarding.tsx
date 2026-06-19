@@ -182,9 +182,11 @@ function OnboardingPage() {
   const search = useSearch({ from: "/_authenticated/onboarding" });
   const fetchIntent = useServerFn(getCatalogIntent);
   const consumeIntent = useServerFn(consumeCatalogIntent);
+  const markConversion = useServerFn(markCatalogConversion);
   const track = useServerFn(trackCatalogEvent);
   const [state, setState] = useState<State>(DEFAULT_STATE);
   const [intent, setIntent] = useState<CatalogIntentSnapshot | null>(null);
+  const [intentReused, setIntentReused] = useState(false);
 
   useEffect(() => {
     setState(loadState());
