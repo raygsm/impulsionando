@@ -5,32 +5,53 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
+import ogEducacaoAsset from "@/assets/og-recomendacao-educacao.jpg.asset.json";
+import ogDefaultAsset from "@/assets/og-recomendacao-default.jpg.asset.json";
+
+// Mapeamento nicho → og:image. Hoje temos arte dedicada para Educação
+// (White Label Acadêmico) e um fallback de marca para os demais nichos.
+// Novas artes por nicho podem ser adicionadas aqui sem mexer no head().
+const SITE_ORIGIN = "https://impulsionando.com.br";
+const OG_IMAGES_BY_NICHO: Record<string, string> = {
+  educacao: `${SITE_ORIGIN}${ogEducacaoAsset.url}`,
+};
+const OG_IMAGE_DEFAULT = `${SITE_ORIGIN}${ogDefaultAsset.url}`;
+// Imagens geradas em 1216x640 (proporção ~1.9:1 — Open Graph recomenda 1200x630).
+const OG_IMAGE_WIDTH = 1216;
+const OG_IMAGE_HEIGHT = 640;
 
 export const Route = createFileRoute("/recomendacao/$nicho")({
   head: ({ params }) => {
     const r = RECOMENDACOES[params.nicho];
     const title = r ? `${r.nicheLabel} — Recomendação Impulsionando` : "Recomendação por nicho";
     const description = r?.lead ?? "Recomendação inteligente de plano e módulos por nicho.";
-    const url = `https://impulsionando.com.br/recomendacao/${params.nicho}`;
+    const url = `${SITE_ORIGIN}/recomendacao/${params.nicho}`;
+    const ogImage = OG_IMAGES_BY_NICHO[params.nicho] ?? OG_IMAGE_DEFAULT;
     return {
       meta: [
         { title },
         { name: "description", content: description },
-        // Open Graph — leaf article. og:image é omitido propositalmente
-        // (não temos asset por nicho; um placeholder é pior que nada).
+        // Open Graph — leaf article com arte dedicada (URL absoluta).
         { property: "og:title", content: title },
         { property: "og:description", content: description },
         { property: "og:type", content: "article" },
         { property: "og:url", content: url },
-        // Twitter card — herda og:* quando ausentes, mas declaramos
-        // o tipo de cartão explicitamente para evitar fallback "summary".
+        { property: "og:image", content: ogImage },
+        { property: "og:image:width", content: String(OG_IMAGE_WIDTH) },
+        { property: "og:image:height", content: String(OG_IMAGE_HEIGHT) },
+        { property: "og:image:type", content: "image/jpeg" },
+        { property: "og:image:alt", content: title },
+        // Twitter card — large image herdando do og:image.
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: description },
+        { name: "twitter:image", content: ogImage },
       ],
       links: [{ rel: "canonical", href: url }],
     };
   },
+
+
 
   loader: ({ params }) => {
     if (!RECOMENDACOES[params.nicho]) throw notFound();
