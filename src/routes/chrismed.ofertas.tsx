@@ -66,27 +66,28 @@ function OfertasPage() {
     <div className="min-h-screen bg-gradient-to-b from-teal-50/40 to-white">
       <header className="border-b bg-white/80 backdrop-blur sticky top-0 z-10">
         <div className="container flex items-center justify-between py-4">
-          <Link to="/chrismed" className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-lg bg-teal-600 flex items-center justify-center text-white font-bold">C</div>
+          <Link to="/chrismed" className="flex items-center gap-2.5">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-teal-600 to-teal-700 flex items-center justify-center text-white font-bold shadow-sm">C</div>
             <div>
-              <div className="font-semibold tracking-tight">CHRISMED</div>
-              <div className="text-xs text-muted-foreground -mt-0.5">Catálogo de serviços</div>
+              <div className="font-semibold tracking-tight text-slate-900">CHRISMED</div>
+              <div className="text-[11px] uppercase tracking-wider text-teal-700/80 -mt-0.5">Modalidades de atendimento</div>
             </div>
           </Link>
           <nav className="flex items-center gap-1">
             <Link to="/chrismed"><Button variant="ghost" size="sm">Agendar</Button></Link>
-            <Link to="/chrismed/ofertas"><Button variant="secondary" size="sm">Ofertas</Button></Link>
+            <Link to="/chrismed/ofertas"><Button variant="secondary" size="sm">Modalidades</Button></Link>
           </nav>
         </div>
       </header>
 
       <main className="container py-12 max-w-5xl">
         <div className="text-center mb-10">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-3">
-            Nossas <span className="text-teal-600">modalidades</span> de atendimento
+          <Badge variant="outline" className="border-teal-200 text-teal-700 mb-4 bg-teal-50/60">Concierge médico · você escolhe como ser atendido</Badge>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-3 leading-[1.1]">
+            O atendimento certo, <span className="text-teal-600">no formato que cabe na sua rotina</span>
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Escolha o formato que melhor se encaixa na sua rotina. Todos com prontuário eletrônico e prescrição digital.
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+            Cada modalidade entrega a mesma qualidade clínica, com prontuário eletrônico, prescrição digital e equipe sempre acessível.
           </p>
         </div>
 
