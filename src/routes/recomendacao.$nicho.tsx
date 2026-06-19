@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowRight, CheckCircle2, Crown, Sparkles, Zap, BookOpen } from "lucide-react";
+import { ArrowRight, CheckCircle2, Crown, Sparkles, Zap, BookOpen, Layers, Building2, Network } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
