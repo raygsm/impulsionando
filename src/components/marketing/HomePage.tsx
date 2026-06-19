@@ -455,49 +455,79 @@ export function HomePage() {
               indexável sem competir com o H1 visível do hero. */}
             <h2 className="sr-only">Escolha o seu perfil</h2>
 
+            {/*
+              Hero CTAs — três cartões de perfil.
+              Layout responsivo:
+              - <sm  : 1 coluna, full-width, altura confortável.
+              - >=sm : 3 colunas equal, mesma altura via items-stretch.
+              Estrutura interna em flex-col centralizado garante alinhamento
+              de ícone+título e subtítulo em qualquer breakpoint.
+            */}
             <div
-              className="mt-8 grid gap-3 sm:grid-cols-3 max-w-3xl mx-auto"
+              className="mt-8 grid gap-3 grid-cols-1 sm:grid-cols-3 items-stretch max-w-3xl mx-auto"
               aria-label="Perfis de uso da Impulsionando"
               role="group"
             >
-              <article aria-labelledby="hero-perfil-empresa">
+              <article aria-labelledby="hero-perfil-empresa" className="h-full">
                 <h3 id="hero-perfil-empresa" className="sr-only">
                   Sou empresa — usar a plataforma na minha operação
                 </h3>
-                <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 h-auto min-h-[76px] py-3 px-4 w-full [&>*]:flex [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-1 [&>*]:text-center [&>*]:w-full" onClick={() => trackHeroCta("sou_empresa")}>
-                  <Link to="/orcamento" data-analytics="hero-sou-empresa">
-                    <span className="flex items-center justify-center gap-2 font-semibold leading-tight"><Building2 className="w-4 h-4 shrink-0" /> Sou empresa</span>
-                    <span className="text-xs font-normal opacity-75 leading-tight">Quero usar na minha operação</span>
-                  </Link>
-                </Button>
+                <Link
+                  to="/orcamento"
+                  data-analytics="hero-sou-empresa"
+                  onClick={() => trackHeroCta("sou_empresa")}
+                  className="group flex h-full w-full flex-col items-center justify-center gap-1.5 rounded-xl bg-white text-primary px-4 py-4 text-center shadow-sm ring-1 ring-white/20 transition hover:bg-white/95 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                >
+                  <span className="flex items-center justify-center gap-2 text-base font-semibold leading-tight">
+                    <Building2 className="w-4 h-4 shrink-0" />
+                    <span>Sou empresa</span>
+                  </span>
+                  <span className="text-xs font-normal leading-snug opacity-75">
+                    Quero usar na minha operação
+                  </span>
+                </Link>
               </article>
-              <article aria-labelledby="hero-perfil-white-label">
+
+              <article aria-labelledby="hero-perfil-white-label" className="h-full">
                 <h3 id="hero-perfil-white-label" className="sr-only">
                   White Label — revender a plataforma com a minha marca
                 </h3>
-                <Button asChild size="lg" className="bg-gradient-primary h-auto min-h-[76px] py-3 px-4 w-full [&>*]:flex [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-1 [&>*]:text-center [&>*]:w-full" onClick={() => trackHeroCta("white_label")}>
-                  <Link to="/nichos/white-label" data-analytics="hero-white-label">
-                    <span className="flex items-center justify-center gap-2 font-semibold leading-tight"><Rocket className="w-4 h-4 shrink-0" /> White Label</span>
-                    <span className="text-xs font-normal opacity-90 leading-tight">Quero revender com a minha marca</span>
-                  </Link>
-                </Button>
+                <Link
+                  to="/nichos/$slug"
+                  params={{ slug: "white-label" }}
+                  data-analytics="hero-white-label"
+                  onClick={() => trackHeroCta("white_label")}
+                  className="group flex h-full w-full flex-col items-center justify-center gap-1.5 rounded-xl bg-gradient-primary text-primary-foreground px-4 py-4 text-center shadow-sm ring-1 ring-white/20 transition hover:brightness-110 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                >
+                  <span className="flex items-center justify-center gap-2 text-base font-semibold leading-tight">
+                    <Rocket className="w-4 h-4 shrink-0" />
+                    <span>White Label</span>
+                  </span>
+                  <span className="text-xs font-normal leading-snug opacity-90">
+                    Quero revender com a minha marca
+                  </span>
+                </Link>
               </article>
-              <article aria-labelledby="hero-perfil-clube">
+
+              <article aria-labelledby="hero-perfil-clube" className="h-full">
                 <h3 id="hero-perfil-clube" className="sr-only">
                   Clube de Vantagens — descontos e benefícios para consumidores
                 </h3>
-                <Button
-                  asChild
-                  size="lg"
+                <Link
+                  to="/clube"
+                  data-analytics="hero-clube"
                   data-cta="clube"
-                  className="glass-cta h-auto min-h-[76px] py-3 px-4 w-full [&>*]:flex [&>*]:flex-col [&>*]:items-center [&>*]:justify-center [&>*]:gap-1 [&>*]:text-center [&>*]:w-full"
                   onClick={() => trackHeroCta("clube")}
+                  className="group glass-cta flex h-full w-full flex-col items-center justify-center gap-1.5 rounded-xl px-4 py-4 text-center shadow-sm transition hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                 >
-                  <Link to="/clube" data-analytics="hero-clube">
-                    <span className="flex items-center justify-center gap-2 font-semibold leading-tight"><Gift className="w-4 h-4 shrink-0" /> Clube de Vantagens</span>
-                    <span className="text-xs font-normal opacity-90 leading-tight">Quero descontos e benefícios</span>
-                  </Link>
-                </Button>
+                  <span className="flex items-center justify-center gap-2 text-base font-semibold leading-tight">
+                    <Gift className="w-4 h-4 shrink-0" />
+                    <span>Clube de Vantagens</span>
+                  </span>
+                  <span className="text-xs font-normal leading-snug opacity-90">
+                    Quero descontos e benefícios
+                  </span>
+                </Link>
               </article>
             </div>
 
