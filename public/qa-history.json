@@ -1,0 +1,14 @@
+[
+  {
+    "ts": "2026-06-19T22:06:01.695Z",
+    "total": 456,
+    "passed": 456,
+    "failed": 0,
+    "files": 166,
+    "durationMs": 168149.2509765625,
+    "success": true,
+    "sha": null,
+    "ref": null,
+    "runId": null
+  }
+]

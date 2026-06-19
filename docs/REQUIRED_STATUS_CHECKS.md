@@ -45,3 +45,34 @@ bunx vitest run \
   tests/rls-exports-isolation.test.ts \
   tests/audit-denied-exports.test.ts
 ```
+
+---
+
+## Required check adicional: `Tests Gate`
+
+O workflow `.github/workflows/tests-gate.yml` (job **`Vitest full suite (456/456 must pass)`**)
+deve ser marcado como required status check em **Settings → Branches → main**:
+
+1. Settings → Branches → Branch protection rules → editar regra de `main`
+2. Em **Status checks that are required**, adicionar:
+   - `Vitest full suite (456/456 must pass)`
+3. Manter **Require branches to be up to date before merging** ativo
+4. Salvar
+
+Resultado: qualquer PR cujo `bunx vitest run` falhe (qualquer dos 456 testes)
+fica automaticamente bloqueado para merge. O job ainda publica o artefato
+`vitest-results` (JSON + JUnit + log) e atualiza `public/qa-history.json`
+alimentando o dashboard em `/admin/qualidade`.
+
+### Reprodução local
+
+```bash
+bunx vitest run
+```
+
+Para regenerar o histórico/PDF manualmente:
+
+```bash
+bunx vitest run --reporter=json --outputFile=/tmp/vitest.json
+node scripts/append-quality-history.mjs /tmp/vitest.json > public/qa-history.json
+```
