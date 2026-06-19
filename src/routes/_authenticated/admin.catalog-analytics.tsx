@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
 import { PageHeader } from '@/components/app/PageElements'
@@ -35,7 +35,9 @@ import {
   setDedupeThresholds,
   recordDedupeThresholdCheck,
   getDedupeThresholdEvents,
+  getDedupeThresholdAudit,
 } from '@/lib/catalogo.functions'
+
 import { downloadCsv } from '@/lib/exports'
 import { Checkbox } from '@/components/ui/checkbox'
 
@@ -58,6 +60,8 @@ function CatalogAnalyticsPage() {
   const saveThresholds = useServerFn(setDedupeThresholds)
   const recordCrossing = useServerFn(recordDedupeThresholdCheck)
   const fetchEvents = useServerFn(getDedupeThresholdEvents)
+  const fetchAudit = useServerFn(getDedupeThresholdAudit)
+
 
   const [days, setDays] = useState<(typeof RANGES)[number]>(30)
   const [fMacro, setFMacro] = useState('')
@@ -82,8 +86,12 @@ function CatalogAnalyticsPage() {
 
   const saveMut = useMutation({
     mutationFn: (vars: { min: number; max: number }) => saveThresholds({ data: vars }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'dedupe-thresholds'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin', 'dedupe-thresholds'] })
+      qc.invalidateQueries({ queryKey: ['admin', 'dedupe-threshold-audit'] })
+    },
   })
+
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['admin', 'catalog-analytics', days],
@@ -94,6 +102,12 @@ function CatalogAnalyticsPage() {
     queryKey: ['admin', 'tracker-stats', days],
     queryFn: () => fetchTrackerStats({ data: { days: Math.min(days, 30) } }),
   })
+
+  const auditQuery = useQuery({
+    queryKey: ['admin', 'dedupe-threshold-audit'],
+    queryFn: () => fetchAudit({ data: { limit: 50 } }),
+  })
+
 
   const eventsQuery = useQuery({
     queryKey: ['admin', 'dedupe-threshold-events'],
@@ -146,6 +160,13 @@ function CatalogAnalyticsPage() {
         max: dedupeMax,
         daysWindow: days,
         samples: trackerStats.totals.samples,
+        tracker: {
+          attempted: trackerStats.totals.attempted,
+          sent: trackerStats.totals.sent,
+          deduped: trackerStats.totals.deduped,
+          dropped: trackerStats.totals.dropped,
+          batches: trackerStats.totals.batches,
+        },
       },
     })
       .then((res) => {
@@ -155,6 +176,7 @@ function CatalogAnalyticsPage() {
         loggedKeyRef.current = null
       })
   }, [trackerStats, thresholdsQuery.data, dedupePct, dedupeMin, dedupeMax, days, recordCrossing, qc])
+
 
 
   const rows = data?.rows ?? []
@@ -463,24 +485,111 @@ function CatalogAnalyticsPage() {
                     <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
                   )
                 return (
-                  <tr key={e.id} className="border-t">
-                    <td className="px-3 py-2 tabular-nums">
+                  <Fragment key={e.id}>
+                  <tr className="border-t">
+
+                    <td className="px-3 py-2 tabular-nums align-top">
                       {new Date(e.created_at).toLocaleString('pt-BR')}
                     </td>
-                    <td className="px-3 py-2">
+                    <td className="px-3 py-2 align-top">
                       <span className="inline-flex items-center gap-1">
                         {icon} {e.state}
                       </span>
                     </td>
-                    <td className="px-3 py-2 text-muted-foreground">
+                    <td className="px-3 py-2 text-muted-foreground align-top">
                       {e.prev_state ?? '—'} → <strong>{e.state}</strong>
                     </td>
-                    <td className="px-3 py-2 text-right tabular-nums">{Number(e.dedupe_pct).toFixed(1)}%</td>
-                    <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">
+                    <td className="px-3 py-2 text-right tabular-nums align-top">{Number(e.dedupe_pct).toFixed(1)}%</td>
+                    <td className="px-3 py-2 text-right tabular-nums text-muted-foreground align-top">
                       {Number(e.min_pct).toFixed(0)} – {Number(e.max_pct).toFixed(0)}
                     </td>
-                    <td className="px-3 py-2 text-right tabular-nums">{e.days_window}d</td>
-                    <td className="px-3 py-2 text-right tabular-nums">{e.samples}</td>
+                    <td className="px-3 py-2 text-right tabular-nums align-top">{e.days_window}d</td>
+                    <td className="px-3 py-2 text-right tabular-nums align-top">{e.samples}</td>
+                  </tr>
+                  {e.causes && (e.causes.findings?.length ?? 0) > 0 && (
+                    <tr key={e.id + '-causes'} className="bg-muted/20">
+                      <td colSpan={7} className="px-3 pb-3 pt-1">
+                        <div className="text-[11px] text-muted-foreground italic mb-1">
+                          {e.causes.summary}
+                        </div>
+                        <ul className="space-y-1">
+                          {e.causes.findings.map((f) => (
+                            <li
+                              key={f.code}
+                              className={`text-[11px] flex items-start gap-1 ${
+                                f.severity === 'high'
+                                  ? 'text-red-700 dark:text-red-400'
+                                  : f.severity === 'warn'
+                                    ? 'text-amber-700 dark:text-amber-400'
+                                    : 'text-muted-foreground'
+                              }`}
+                            >
+                              <span className="font-mono opacity-60">[{f.severity}]</span>
+                              <span>{f.label}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </td>
+                    </tr>
+                  )}
+                  </Fragment>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+
+      <Card className="overflow-hidden">
+        <div className="border-b p-3 flex items-center gap-2">
+          <History className="w-4 h-4" />
+          <div className="font-semibold text-sm">Auditoria — alterações de limiar</div>
+          <span className="text-xs text-muted-foreground ml-2">
+            Quem alterou o limiar mínimo/máximo de dedupe, com valores antigos e novos.
+          </span>
+          <Button size="sm" variant="ghost" className="ml-auto" onClick={() => auditQuery.refetch()}>
+            Atualizar
+          </Button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead className="bg-muted/40 text-muted-foreground">
+              <tr>
+                <th className="text-left px-3 py-2">Quando (updated_at)</th>
+                <th className="text-left px-3 py-2">Alterado por (changed_by)</th>
+                <th className="text-left px-3 py-2">Usuário-alvo</th>
+                <th className="text-right px-3 py-2">Antigo (min–max)</th>
+                <th className="text-right px-3 py-2">Novo (min–max)</th>
+                <th className="text-left px-3 py-2">Δ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(auditQuery.data?.rows ?? []).length === 0 && (
+                <tr>
+                  <td colSpan={6} className="p-4 text-center text-muted-foreground">
+                    {auditQuery.isLoading ? 'Carregando…' : 'Nenhuma alteração registrada.'}
+                  </td>
+                </tr>
+              )}
+              {(auditQuery.data?.rows ?? []).map((a) => {
+                const oldStr = a.old_min_pct === null || a.old_max_pct === null
+                  ? '—'
+                  : `${Number(a.old_min_pct).toFixed(0)} – ${Number(a.old_max_pct).toFixed(0)}`
+                const newStr = `${Number(a.new_min_pct).toFixed(0)} – ${Number(a.new_max_pct).toFixed(0)}`
+                const dMin = a.old_min_pct === null ? null : Number(a.new_min_pct) - Number(a.old_min_pct)
+                const dMax = a.old_max_pct === null ? null : Number(a.new_max_pct) - Number(a.old_max_pct)
+                return (
+                  <tr key={a.id} className="border-t">
+                    <td className="px-3 py-2 tabular-nums">{new Date(a.changed_at).toLocaleString('pt-BR')}</td>
+                    <td className="px-3 py-2 font-mono text-[10px]">{a.changed_by.slice(0, 8)}…</td>
+                    <td className="px-3 py-2 font-mono text-[10px]">{a.target_user.slice(0, 8)}…</td>
+                    <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{oldStr}</td>
+                    <td className="px-3 py-2 text-right tabular-nums">{newStr}</td>
+                    <td className="px-3 py-2 text-muted-foreground text-[11px]">
+                      {dMin === null
+                        ? 'primeira definição'
+                        : `min ${dMin >= 0 ? '+' : ''}${dMin.toFixed(0)} · max ${(dMax ?? 0) >= 0 ? '+' : ''}${(dMax ?? 0).toFixed(0)}`}
+                    </td>
                   </tr>
                 )
               })}
@@ -488,6 +597,8 @@ function CatalogAnalyticsPage() {
           </table>
         </div>
       </Card>
+
+
 
 
 

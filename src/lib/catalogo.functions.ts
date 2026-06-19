@@ -523,6 +523,16 @@ export const setDedupeThresholds = createServerFn({ method: 'POST' })
       _user: context.userId,
     })
     if (!isStaff) throw new Error('Forbidden')
+
+    // Capture the prior values BEFORE the upsert so the audit row has them.
+    const { data: prior } = await context.supabase
+      .from('admin_dedupe_thresholds' as never)
+      .select('min_pct,max_pct')
+      .eq('user_id', context.userId)
+      .maybeSingle()
+    const oldMin = (prior as { min_pct: number } | null)?.min_pct ?? null
+    const oldMax = (prior as { max_pct: number } | null)?.max_pct ?? null
+
     const { error } = await context.supabase
       .from('admin_dedupe_thresholds' as never)
       .upsert(
@@ -530,17 +540,53 @@ export const setDedupeThresholds = createServerFn({ method: 'POST' })
         { onConflict: 'user_id' },
       )
     if (error) throw error
-    return { ok: true, min: data.min, max: data.max }
+
+    // Only log an audit row when something actually changed (or first set).
+    const changed = oldMin === null || oldMax === null || Number(oldMin) !== data.min || Number(oldMax) !== data.max
+    if (changed) {
+      await context.supabase.from('admin_dedupe_threshold_audit' as never).insert({
+        changed_by: context.userId,
+        target_user: context.userId,
+        old_min_pct: oldMin,
+        old_max_pct: oldMax,
+        new_min_pct: data.min,
+        new_max_pct: data.max,
+      } as never)
+    }
+
+    return { ok: true, min: data.min, max: data.max, oldMin, oldMax, audited: changed }
   })
 
-// --------- Admin: dedupe threshold crossing log ---------
+export const getDedupeThresholdAudit = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z.object({ limit: z.number().int().min(1).max(200).default(50) }).parse(data ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: isStaff } = await context.supabase.rpc('is_impulsionando_staff', {
+      _user: context.userId,
+    })
+    if (!isStaff) throw new Error('Forbidden')
+    const { data: rows, error } = await context.supabase
+      .from('admin_dedupe_threshold_audit' as never)
+      .select('id,changed_by,target_user,old_min_pct,old_max_pct,new_min_pct,new_max_pct,changed_at')
+      .order('changed_at', { ascending: false })
+      .limit(data.limit)
+    if (error) throw error
+    type AuditRow = {
+      id: string
+      changed_by: string
+      target_user: string
+      old_min_pct: number | null
+      old_max_pct: number | null
+      new_min_pct: number
+      new_max_pct: number
+      changed_at: string
+    }
+    return { rows: (rows as unknown as AuditRow[]) ?? [] }
+  })
 
-type DedupeState = 'below' | 'normal' | 'above'
-function classify(pct: number, min: number, max: number): DedupeState {
-  if (pct > max) return 'above'
-  if (pct < min) return 'below'
-  return 'normal'
-}
+// --------- Admin: dedupe threshold crossing log (rate-limited) ---------
 
 export const recordDedupeThresholdCheck = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
@@ -552,6 +598,18 @@ export const recordDedupeThresholdCheck = createServerFn({ method: 'POST' })
         max: z.number().min(0).max(100),
         daysWindow: z.number().int().min(1).max(180),
         samples: z.number().int().min(0).default(0),
+        // Optional tracker counters for the same window — used to build
+        // the "possible causes" breakdown stored alongside the event.
+        tracker: z
+          .object({
+            attempted: z.number().int().min(0),
+            sent: z.number().int().min(0),
+            deduped: z.number().int().min(0),
+            dropped: z.number().int().min(0),
+            batches: z.number().int().min(0),
+          })
+          .optional(),
+        cooldownMs: z.number().int().min(0).max(3_600_000).optional(),
       })
       .parse(data),
   )
@@ -561,35 +619,88 @@ export const recordDedupeThresholdCheck = createServerFn({ method: 'POST' })
     })
     if (!isStaff) throw new Error('Forbidden')
 
-    const state = classify(data.dedupePct, data.min, data.max)
+    const { decideCrossingAction, buildCauseBreakdown } = await import(
+      './dedupe-threshold-lifecycle'
+    )
 
-    // Look up the most recent event for this user to decide whether
-    // we've actually crossed a threshold (state change only).
     const { data: last } = await context.supabase
       .from('dedupe_threshold_events' as never)
-      .select('state')
+      .select('state,created_at')
       .eq('user_id', context.userId)
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle()
-    const prev = (last as { state: DedupeState } | null)?.state ?? null
+    const lastTyped = last as { state: 'below' | 'normal' | 'above'; created_at: string } | null
 
-    if (prev === state) {
-      return { ok: true, logged: false, state, prevState: prev }
+    const decision = decideCrossingAction({
+      currentPct: data.dedupePct,
+      min: data.min,
+      max: data.max,
+      last: lastTyped
+        ? { state: lastTyped.state, createdAtMs: new Date(lastTyped.created_at).getTime() }
+        : null,
+      nowMs: Date.now(),
+      cooldownMs: data.cooldownMs,
+    })
+
+    if (decision.kind !== 'log') {
+      return {
+        ok: true,
+        logged: false,
+        state: decision.state,
+        prevState: decision.prevState,
+        reason: decision.kind,
+      }
     }
+
+    // Pull funnel deltas for the same window to enrich causes.
+    let intents = 0
+    let consumed = 0
+    let converted = 0
+    const since = new Date(Date.now() - data.daysWindow * 86400_000).toISOString()
+    const { data: funnel } = await context.supabase
+      .from('catalog_intents')
+      .select('consumed_at,converted_at')
+      .gte('created_at', since)
+    for (const r of funnel ?? []) {
+      intents += 1
+      if (r.consumed_at) consumed += 1
+      if (r.converted_at) converted += 1
+    }
+
+    const causes = buildCauseBreakdown({
+      state: decision.state,
+      dedupePct: data.dedupePct,
+      attempted: data.tracker?.attempted ?? 0,
+      sent: data.tracker?.sent ?? 0,
+      deduped: data.tracker?.deduped ?? 0,
+      dropped: data.tracker?.dropped ?? 0,
+      batches: data.tracker?.batches ?? 0,
+      samples: data.samples,
+      intents,
+      consumed,
+      converted,
+    })
 
     const { error } = await context.supabase.from('dedupe_threshold_events' as never).insert({
       user_id: context.userId,
       dedupe_pct: data.dedupePct,
       min_pct: data.min,
       max_pct: data.max,
-      state,
-      prev_state: prev,
+      state: decision.state,
+      prev_state: decision.prevState,
       days_window: data.daysWindow,
       samples: data.samples,
+      causes,
     } as never)
     if (error) throw error
-    return { ok: true, logged: true, state, prevState: prev }
+    return {
+      ok: true,
+      logged: true,
+      state: decision.state,
+      prevState: decision.prevState,
+      causes,
+    }
   })
 
 export const getDedupeThresholdEvents = createServerFn({ method: 'GET' })
@@ -604,7 +715,9 @@ export const getDedupeThresholdEvents = createServerFn({ method: 'GET' })
     if (!isStaff) throw new Error('Forbidden')
     const { data: rows, error } = await context.supabase
       .from('dedupe_threshold_events' as never)
-      .select('id,user_id,dedupe_pct,min_pct,max_pct,state,prev_state,days_window,samples,created_at')
+      .select(
+        'id,user_id,dedupe_pct,min_pct,max_pct,state,prev_state,days_window,samples,created_at,causes',
+      )
       .order('created_at', { ascending: false })
       .limit(data.limit)
     if (error) throw error
@@ -614,11 +727,16 @@ export const getDedupeThresholdEvents = createServerFn({ method: 'GET' })
       dedupe_pct: number
       min_pct: number
       max_pct: number
-      state: DedupeState
-      prev_state: DedupeState | null
+      state: 'below' | 'normal' | 'above'
+      prev_state: 'below' | 'normal' | 'above' | null
       days_window: number
       samples: number
       created_at: string
+      causes: {
+        summary: string
+        findings: { code: string; label: string; severity: 'info' | 'warn' | 'high' }[]
+      } | null
     }
     return { rows: (rows as unknown as EvtRow[]) ?? [] }
   })
+
