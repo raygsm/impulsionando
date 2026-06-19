@@ -4309,6 +4309,7 @@ export type Database = {
           phone: string | null
           primary_color: string | null
           public_slug: string | null
+          release_channel: string
           secondary_color: string | null
           segment: string | null
           status: string
@@ -4354,6 +4355,7 @@ export type Database = {
           phone?: string | null
           primary_color?: string | null
           public_slug?: string | null
+          release_channel?: string
           secondary_color?: string | null
           segment?: string | null
           status?: string
@@ -4399,6 +4401,7 @@ export type Database = {
           phone?: string | null
           primary_color?: string | null
           public_slug?: string | null
+          release_channel?: string
           secondary_color?: string | null
           segment?: string | null
           status?: string
@@ -10904,6 +10907,7 @@ export type Database = {
       }
       module_versions: {
         Row: {
+          channel: string
           created_at: string
           id: string
           module_id: string
@@ -10914,6 +10918,7 @@ export type Database = {
           version: string
         }
         Insert: {
+          channel?: string
           created_at?: string
           id?: string
           module_id: string
@@ -10924,6 +10929,7 @@ export type Database = {
           version: string
         }
         Update: {
+          channel?: string
           created_at?: string
           id?: string
           module_id?: string
