@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
 import { PageHeader } from '@/components/app/PageElements'
@@ -68,12 +68,10 @@ function CatalogAnalyticsPage() {
   const [dedupeMax, setDedupeMax] = useState(DEFAULT_DEDUPE_MAX)
 
   // Load persisted thresholds once on mount
-  useMemo(() => {
+  useEffect(() => {
     const t = loadDedupeThresholds()
     setDedupeMin(t.min)
     setDedupeMax(t.max)
-    return null
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   function persistThresholds(min: number, max: number) {
