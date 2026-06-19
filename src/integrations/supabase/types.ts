@@ -15544,6 +15544,33 @@ export type Database = {
             }
             Returns: string
           }
+      get_catalog_intent_by_token: {
+        Args: { p_token: string }
+        Returns: {
+          consumed_at: string | null
+          conversion_kind: string | null
+          converted_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          last_reuse_attempt_at: string | null
+          macro_slug: string
+          plan_tier: string
+          reuse_attempts: number
+          selected_modules: string[]
+          session_token: string | null
+          source: string
+          subnicho_slug: string
+          user_id: string | null
+          validated_fields: Json | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "catalog_intents"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_contab_portal_data: { Args: { _token: string }; Returns: Json }
       get_menu_for_audience: {
         Args: { _audience: string; _niche_slug?: string }
@@ -15823,6 +15850,10 @@ export type Database = {
       trigger_smoke_purge: { Args: { days?: number }; Returns: Json }
       user_belongs_to_company: {
         Args: { _company: string; _user: string }
+        Returns: boolean
+      }
+      user_has_company_module: {
+        Args: { _module_slug: string; _user: string }
         Returns: boolean
       }
       user_has_permission: {
