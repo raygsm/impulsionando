@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
 import { PageHeader } from '@/components/app/PageElements'
@@ -37,6 +37,25 @@ export const Route = createFileRoute('/_authenticated/admin/catalog-analytics')(
 
 const RANGES = [7, 30, 90] as const
 
+const DEDUPE_LS_KEY = 'admin.catalog.dedupeThresholds.v1'
+const DEFAULT_DEDUPE_MIN = 5
+const DEFAULT_DEDUPE_MAX = 40
+
+function loadDedupeThresholds(): { min: number; max: number } {
+  if (typeof window === 'undefined') return { min: DEFAULT_DEDUPE_MIN, max: DEFAULT_DEDUPE_MAX }
+  try {
+    const raw = window.localStorage.getItem(DEDUPE_LS_KEY)
+    if (!raw) return { min: DEFAULT_DEDUPE_MIN, max: DEFAULT_DEDUPE_MAX }
+    const v = JSON.parse(raw)
+    return {
+      min: Number.isFinite(v?.min) ? Number(v.min) : DEFAULT_DEDUPE_MIN,
+      max: Number.isFinite(v?.max) ? Number(v.max) : DEFAULT_DEDUPE_MAX,
+    }
+  } catch {
+    return { min: DEFAULT_DEDUPE_MIN, max: DEFAULT_DEDUPE_MAX }
+  }
+}
+
 function CatalogAnalyticsPage() {
   const fetchFn = useServerFn(getCatalogAnalytics)
   const fetchTrackerStats = useServerFn(getTrackerStats)
@@ -45,6 +64,24 @@ function CatalogAnalyticsPage() {
   const [fSub, setFSub] = useState('')
   const [fPlan, setFPlan] = useState('')
   const [selectedKinds, setSelectedKinds] = useState<string[]>([])
+  const [dedupeMin, setDedupeMin] = useState(DEFAULT_DEDUPE_MIN)
+  const [dedupeMax, setDedupeMax] = useState(DEFAULT_DEDUPE_MAX)
+
+  // Load persisted thresholds once on mount
+  useEffect(() => {
+    const t = loadDedupeThresholds()
+    setDedupeMin(t.min)
+    setDedupeMax(t.max)
+  }, [])
+
+  function persistThresholds(min: number, max: number) {
+    if (typeof window === 'undefined') return
+    try {
+      window.localStorage.setItem(DEDUPE_LS_KEY, JSON.stringify({ min, max }))
+    } catch {
+      // ignore
+    }
+  }
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['admin', 'catalog-analytics', days],
@@ -55,6 +92,32 @@ function CatalogAnalyticsPage() {
     queryKey: ['admin', 'tracker-stats', days],
     queryFn: () => fetchTrackerStats({ data: { days: Math.min(days, 30) } }),
   })
+
+  const dedupePct = trackerStats?.dedupePct ?? 0
+  const dedupeAlert: { kind: 'low' | 'high'; msg: string; causes: string[] } | null =
+    trackerStats && trackerStats.totals.samples > 0
+      ? dedupePct > dedupeMax
+        ? {
+            kind: 'high',
+            msg: `Dedupe alto: ${dedupePct}% (limite ${dedupeMax}%).`,
+            causes: [
+              'Possível SUBCONTAGEM de cliques legítimos (janela de 800ms agrupando ações distintas).',
+              'Usuário repetindo a mesma seleção rápido demais (UX confusa, botão pouco responsivo).',
+              'Re-render disparando eventos duplicados no mesmo componente.',
+            ],
+          }
+        : dedupePct < dedupeMin
+          ? {
+              kind: 'low',
+              msg: `Dedupe baixo: ${dedupePct}% (mínimo ${dedupeMin}%).`,
+              causes: [
+                'Possível SUPERCONTAGEM: dedupe deixou de agrupar cliques repetidos esperados.',
+                'Tracker reiniciando entre eventos (sessionToken trocando, key de dedupe instável).',
+                'Janela de 800ms curta demais para o fluxo atual.',
+              ],
+            }
+          : null
+      : null
 
   const rows = data?.rows ?? []
   const filtered = useMemo(() => {
@@ -220,27 +283,85 @@ function CatalogAnalyticsPage() {
       </div>
 
       {trackerStats && (
-        <Card className="p-3 text-xs flex flex-wrap items-center gap-4">
-          <span className="font-semibold">Tracker (qualidade dos KPIs)</span>
-          <span>
-            Tentativas: <strong className="tabular-nums">{trackerStats.totals.attempted.toLocaleString('pt-BR')}</strong>
-          </span>
-          <span>
-            Enviadas: <strong className="tabular-nums">{trackerStats.totals.sent.toLocaleString('pt-BR')}</strong>
-          </span>
-          <span>
-            Dedupe (800ms): <strong className="tabular-nums">{trackerStats.totals.deduped.toLocaleString('pt-BR')}</strong>
-            <span className="text-muted-foreground"> ({trackerStats.dedupePct}%)</span>
-          </span>
-          <span>
-            Descartadas (falha): <strong className="tabular-nums">{trackerStats.totals.dropped.toLocaleString('pt-BR')}</strong>
-          </span>
-          <span>
-            Lotes: <strong className="tabular-nums">{trackerStats.totals.batches.toLocaleString('pt-BR')}</strong>
-          </span>
-          <span className="text-muted-foreground">
-            Se dedupe% subir muito, KPIs podem subcontar cliques legítimos.
-          </span>
+        <Card className="p-3 text-xs space-y-3">
+          <div className="flex flex-wrap items-center gap-4">
+            <span className="font-semibold">Tracker (qualidade dos KPIs)</span>
+            <span>
+              Tentativas: <strong className="tabular-nums">{trackerStats.totals.attempted.toLocaleString('pt-BR')}</strong>
+            </span>
+            <span>
+              Enviadas: <strong className="tabular-nums">{trackerStats.totals.sent.toLocaleString('pt-BR')}</strong>
+            </span>
+            <span>
+              Dedupe (800ms):{' '}
+              <strong
+                className={`tabular-nums ${
+                  dedupeAlert ? (dedupeAlert.kind === 'high' ? 'text-amber-600' : 'text-red-600') : ''
+                }`}
+              >
+                {trackerStats.totals.deduped.toLocaleString('pt-BR')}
+              </strong>
+              <span className="text-muted-foreground"> ({dedupePct}%)</span>
+            </span>
+            <span>
+              Descartadas (falha): <strong className="tabular-nums">{trackerStats.totals.dropped.toLocaleString('pt-BR')}</strong>
+            </span>
+            <span>
+              Lotes: <strong className="tabular-nums">{trackerStats.totals.batches.toLocaleString('pt-BR')}</strong>
+            </span>
+            <div className="ml-auto flex items-center gap-2">
+              <Label className="text-[11px] text-muted-foreground">Limiar dedupe %</Label>
+              <Input
+                type="number"
+                min={0}
+                max={100}
+                className="h-7 w-16"
+                value={dedupeMin}
+                onChange={(e) => {
+                  const v = Math.max(0, Math.min(100, Number(e.target.value) || 0))
+                  setDedupeMin(v)
+                  persistThresholds(v, dedupeMax)
+                }}
+              />
+              <span className="text-muted-foreground">–</span>
+              <Input
+                type="number"
+                min={0}
+                max={100}
+                className="h-7 w-16"
+                value={dedupeMax}
+                onChange={(e) => {
+                  const v = Math.max(0, Math.min(100, Number(e.target.value) || 0))
+                  setDedupeMax(v)
+                  persistThresholds(dedupeMin, v)
+                }}
+              />
+            </div>
+          </div>
+          {dedupeAlert && (
+            <div
+              className={`flex gap-2 rounded p-2 text-xs border ${
+                dedupeAlert.kind === 'high'
+                  ? 'border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-200'
+                  : 'border-red-500/40 bg-red-500/10 text-red-900 dark:text-red-200'
+              }`}
+            >
+              <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
+              <div>
+                <div className="font-semibold">
+                  {dedupeAlert.kind === 'high'
+                    ? 'Risco de subcontagem de cliques'
+                    : 'Risco de supercontagem de cliques'}
+                </div>
+                <div>{dedupeAlert.msg}</div>
+                <ul className="list-disc ml-4 mt-1">
+                  {dedupeAlert.causes.map((c) => (
+                    <li key={c}>{c}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
         </Card>
       )}
 

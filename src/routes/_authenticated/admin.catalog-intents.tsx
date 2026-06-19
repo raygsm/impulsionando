@@ -1,14 +1,31 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
 import { PageHeader } from '@/components/app/PageElements'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Download, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  Download,
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUp,
+  ArrowDown,
+} from 'lucide-react'
 import { getCatalogIntentsAudit } from '@/lib/catalogo.functions'
 import { downloadCsv } from '@/lib/exports'
 
@@ -20,12 +37,21 @@ export const Route = createFileRoute('/_authenticated/admin/catalog-intents')({
 const KINDS = ['onboarding_completed', 'contract_signed', 'payment_captured'] as const
 const REQUIRED = ['goal', 'niche', 'mainPain', 'metric', 'target'] as const
 const RANGES = [7, 30, 90] as const
+const PAGE_SIZES = [25, 50, 100, 200] as const
+
+type SortKey = 'macro' | 'subnicho' | 'plano' | 'created_at' | 'converted_at'
+type SortDir = 'asc' | 'desc'
 
 function CatalogIntentsAuditPage() {
   const fetchFn = useServerFn(getCatalogIntentsAudit)
   const [days, setDays] = useState<(typeof RANGES)[number]>(30)
   const [onlyConverted, setOnlyConverted] = useState(false)
   const [kinds, setKinds] = useState<string[]>([])
+  const [search, setSearch] = useState('')
+  const [sortKey, setSortKey] = useState<SortKey>('created_at')
+  const [sortDir, setSortDir] = useState<SortDir>('desc')
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState<(typeof PAGE_SIZES)[number]>(50)
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['admin', 'catalog-intents-audit', days, onlyConverted, kinds.join(',')],
@@ -42,9 +68,60 @@ function CatalogIntentsAuditPage() {
 
   const rows = data?.rows ?? []
 
-  function exportCsv() {
+  const filteredSorted = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    const filtered = q
+      ? rows.filter(
+          (r) =>
+            (r.macro_slug ?? '').toLowerCase().includes(q) ||
+            (r.subnicho_slug ?? '').toLowerCase().includes(q) ||
+            (r.plan_tier ?? '').toLowerCase().includes(q) ||
+            (r.id ?? '').toLowerCase().includes(q),
+        )
+      : rows.slice()
+    const dir = sortDir === 'asc' ? 1 : -1
+    const get = (r: (typeof rows)[number]): string => {
+      switch (sortKey) {
+        case 'macro':
+          return r.macro_slug ?? ''
+        case 'subnicho':
+          return r.subnicho_slug ?? ''
+        case 'plano':
+          return r.plan_tier ?? ''
+        case 'created_at':
+          return r.created_at ?? ''
+        case 'converted_at':
+          return r.converted_at ?? ''
+      }
+    }
+    filtered.sort((a, b) => {
+      const va = get(a)
+      const vb = get(b)
+      if (va === vb) return 0
+      // empties last for desc, first for asc
+      if (!va) return 1
+      if (!vb) return -1
+      return va < vb ? -1 * dir : 1 * dir
+    })
+    return filtered
+  }, [rows, search, sortKey, sortDir])
+
+  const totalPages = Math.max(1, Math.ceil(filteredSorted.length / pageSize))
+  const safePage = Math.min(page, totalPages)
+  const paginated = filteredSorted.slice((safePage - 1) * pageSize, safePage * pageSize)
+
+  function toggleSort(k: SortKey) {
+    if (sortKey === k) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+    else {
+      setSortKey(k)
+      setSortDir(k === 'created_at' || k === 'converted_at' ? 'desc' : 'asc')
+    }
+  }
+
+  function exportCsv(scope: 'page' | 'all') {
+    const source = scope === 'page' ? paginated : filteredSorted
     downloadCsv(
-      `catalog-intents-audit-${days}d-${new Date().toISOString().slice(0, 10)}.csv`,
+      `catalog-intents-audit-${days}d-${scope}-${new Date().toISOString().slice(0, 10)}.csv`,
       [
         'id',
         'macro',
@@ -60,7 +137,7 @@ function CatalogIntentsAuditPage() {
         'validated_fields',
         'missing_fields',
       ],
-      rows.map((r) => {
+      source.map((r) => {
         const v = (r.validated_fields ?? {}) as Record<string, boolean>
         const missing = REQUIRED.filter((k) => !v[k]).join(';')
         return {
@@ -84,6 +161,7 @@ function CatalogIntentsAuditPage() {
 
   function toggleKind(k: string) {
     setKinds((prev) => (prev.includes(k) ? prev.filter((x) => x !== k) : [...prev, k]))
+    setPage(1)
   }
 
   return (
@@ -102,7 +180,10 @@ function CatalogIntentsAuditPage() {
                 key={d}
                 size="sm"
                 variant={days === d ? 'default' : 'outline'}
-                onClick={() => setDays(d)}
+                onClick={() => {
+                  setDays(d)
+                  setPage(1)
+                }}
               >
                 {d}d
               </Button>
@@ -123,13 +204,29 @@ function CatalogIntentsAuditPage() {
         <label className="flex items-center gap-1.5 text-xs cursor-pointer">
           <Checkbox
             checked={onlyConverted}
-            onCheckedChange={(c) => setOnlyConverted(c === true)}
+            onCheckedChange={(c) => {
+              setOnlyConverted(c === true)
+              setPage(1)
+            }}
           />
           Apenas convertidas
         </label>
         <div className="ml-auto flex gap-2">
-          <Button size="sm" variant="outline" onClick={exportCsv} disabled={rows.length === 0}>
-            <Download className="w-4 h-4 mr-1.5" /> Exportar CSV
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => exportCsv('page')}
+            disabled={paginated.length === 0}
+          >
+            <Download className="w-4 h-4 mr-1.5" /> CSV (página)
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => exportCsv('all')}
+            disabled={filteredSorted.length === 0}
+          >
+            <Download className="w-4 h-4 mr-1.5" /> CSV (filtrado)
           </Button>
           <Button size="sm" variant="ghost" onClick={() => refetch()}>
             Atualizar
@@ -137,21 +234,103 @@ function CatalogIntentsAuditPage() {
         </div>
       </div>
 
+      <div className="flex flex-wrap items-end gap-3">
+        <div className="flex-1 min-w-[220px]">
+          <Label className="text-xs">Buscar (macro, subnicho, plano, id)</Label>
+          <Input
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value)
+              setPage(1)
+            }}
+            placeholder="ex: saude / clinicas / full"
+          />
+        </div>
+        <div>
+          <Label className="text-xs">Ordenar por</Label>
+          <div className="flex gap-2 mt-1">
+            <Select value={sortKey} onValueChange={(v) => setSortKey(v as SortKey)}>
+              <SelectTrigger className="h-9 w-[160px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="created_at">Criada</SelectItem>
+                <SelectItem value="converted_at">Convertida</SelectItem>
+                <SelectItem value="macro">Macro</SelectItem>
+                <SelectItem value="subnicho">Subnicho</SelectItem>
+                <SelectItem value="plano">Plano</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
+              aria-label={sortDir === 'asc' ? 'Ascendente' : 'Descendente'}
+            >
+              {sortDir === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
+            </Button>
+          </div>
+        </div>
+        <div>
+          <Label className="text-xs">Por página</Label>
+          <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v) as (typeof PAGE_SIZES)[number]); setPage(1) }}>
+            <SelectTrigger className="h-9 w-[100px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PAGE_SIZES.map((s) => (
+                <SelectItem key={s} value={String(s)}>{s}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
       <Card className="overflow-hidden">
-        <div className="border-b p-4">
-          <div className="font-semibold">{isLoading ? 'Carregando…' : `${rows.length} intents`}</div>
-          <div className="text-xs text-muted-foreground">
-            Última atualização: {new Date().toLocaleTimeString('pt-BR')}
+        <div className="border-b p-4 flex items-center justify-between flex-wrap gap-2">
+          <div>
+            <div className="font-semibold">
+              {isLoading
+                ? 'Carregando…'
+                : `${filteredSorted.length} intents (de ${rows.length} no período)`}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Página {safePage} de {totalPages} · {paginated.length} exibidas
+            </div>
+          </div>
+          <div className="flex items-center gap-1">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={safePage <= 1}
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={safePage >= totalPages}
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
           </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead className="bg-muted/40 text-muted-foreground">
               <tr>
-                <th className="text-left px-3 py-2">Macro / Sub / Plano</th>
-                <th className="text-left px-3 py-2">Criada</th>
+                <SortableTh active={sortKey === 'macro'} dir={sortDir} onClick={() => toggleSort('macro')}>
+                  Macro / Sub / Plano
+                </SortableTh>
+                <SortableTh active={sortKey === 'created_at'} dir={sortDir} onClick={() => toggleSort('created_at')}>
+                  Criada
+                </SortableTh>
                 <th className="text-left px-3 py-2">Aberta</th>
-                <th className="text-left px-3 py-2">Convertida</th>
+                <SortableTh active={sortKey === 'converted_at'} dir={sortDir} onClick={() => toggleSort('converted_at')}>
+                  Convertida
+                </SortableTh>
                 <th className="text-left px-3 py-2">Tipo</th>
                 <th className="text-left px-3 py-2">Campos válidos (Step 4)</th>
                 <th className="text-right px-3 py-2">Reusos</th>
@@ -159,14 +338,14 @@ function CatalogIntentsAuditPage() {
               </tr>
             </thead>
             <tbody>
-              {rows.length === 0 && !isLoading && (
+              {paginated.length === 0 && !isLoading && (
                 <tr>
                   <td colSpan={8} className="p-6 text-center text-muted-foreground">
                     Nenhuma intent no período/filtros.
                   </td>
                 </tr>
               )}
-              {rows.map((r) => {
+              {paginated.map((r) => {
                 const v = (r.validated_fields ?? {}) as Record<string, boolean>
                 return (
                   <tr key={r.id} className="border-t align-top">
@@ -225,6 +404,31 @@ function CatalogIntentsAuditPage() {
         </div>
       </Card>
     </div>
+  )
+}
+
+function SortableTh({
+  active,
+  dir,
+  onClick,
+  children,
+}: {
+  active: boolean
+  dir: SortDir
+  onClick: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <th className="text-left px-3 py-2">
+      <button
+        type="button"
+        onClick={onClick}
+        className={`inline-flex items-center gap-1 hover:text-foreground ${active ? 'text-foreground font-medium' : ''}`}
+      >
+        {children}
+        {active && (dir === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
+      </button>
+    </th>
   )
 }
 
