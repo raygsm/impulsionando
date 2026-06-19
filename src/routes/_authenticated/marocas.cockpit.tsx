@@ -666,10 +666,42 @@ function SignedPhoto({ path, onRemove }: { path: string; onRemove: () => void })
   );
 }
 
-function AuditTimeline({ rows, loading }: { rows: any[]; loading: boolean }) {
+function AuditTimeline({ rows, loading, serviceId, apartmentCode, professional }: {
+  rows: any[]; loading: boolean; serviceId: string; apartmentCode?: string; professional?: string;
+}) {
+  const download = (format: "csv" | "json") => {
+    const safe = (s: any) => String(s ?? "").replace(/"/g, '""');
+    let blob: Blob;
+    let filename: string;
+    const base = `auditoria-${apartmentCode ?? "apto"}-${serviceId.slice(0, 8)}`;
+    if (format === "json") {
+      blob = new Blob([JSON.stringify({ serviceId, apartmentCode, professional, rows }, null, 2)], { type: "application/json" });
+      filename = `${base}.json`;
+    } else {
+      const header = "created_at,action,user_email,user_id,metadata\n";
+      const body = rows.map((r) =>
+        `"${safe(r.created_at)}","${safe(r.action)}","${safe(r.user_email)}","${safe(r.user_id)}","${safe(JSON.stringify(r.metadata ?? {}))}"`
+      ).join("\n");
+      blob = new Blob([header + body], { type: "text/csv;charset=utf-8" });
+      filename = `${base}.csv`;
+    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+  };
   return (
     <div>
-      <h4 className="text-sm font-bold mb-2 flex items-center gap-1"><History className="h-4 w-4" /> Auditoria — quem fez o quê</h4>
+      <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+        <h4 className="text-sm font-bold flex items-center gap-1"><History className="h-4 w-4" /> Auditoria — quem fez o quê</h4>
+        <div className="flex gap-1">
+          <Button size="sm" variant="outline" disabled={rows.length === 0} onClick={() => download("csv")} className="h-7 text-xs">
+            <Download className="h-3 w-3 mr-1" /> CSV
+          </Button>
+          <Button size="sm" variant="outline" disabled={rows.length === 0} onClick={() => download("json")} className="h-7 text-xs">
+            <Download className="h-3 w-3 mr-1" /> JSON
+          </Button>
+        </div>
+      </div>
       {loading ? (
         <div className="text-xs text-muted-foreground italic">Carregando histórico...</div>
       ) : rows.length === 0 ? (
@@ -689,27 +721,80 @@ function AuditTimeline({ rows, loading }: { rows: any[]; loading: boolean }) {
   );
 }
 
-function AlertsPanel({ alerts }: { alerts: any[] }) {
+function AlertsPanel({ alerts, notifyCfg, onSaveCfg }: {
+  alerts: any[];
+  notifyCfg: NotifyConfig;
+  onSaveCfg: (c: NotifyConfig) => void;
+}) {
+  const [cfgOpen, setCfgOpen] = useState(false);
+  const [draft, setDraft] = useState<NotifyConfig>(notifyCfg);
+  useEffect(() => { setDraft(notifyCfg); }, [notifyCfg]);
   const active = alerts.filter((a) => !a.is_read).slice(0, 5);
-  const handlePrint = (period: "dia" | "semana") => {
-    window.print();
-    toast.info(`Relatório ${period === "dia" ? "diário" : "semanal"} pronto para PDF — use "Salvar como PDF" na caixa de impressão.`);
+
+  const toggleChannel = (type: string, ch: "cockpit" | "whatsapp" | "email") => {
+    const cur = draft[type];
+    if (!cur) return;
+    const has = cur.channels.includes(ch);
+    const channels = has ? cur.channels.filter((c) => c !== ch) : [...cur.channels, ch];
+    setDraft({ ...draft, [type]: { ...cur, channels } });
   };
+
   return (
     <Card className="p-4 bg-gradient-to-r from-amber-500/10 via-rose-500/5 to-transparent border-amber-500/30">
       <div className="flex items-center gap-2 flex-wrap">
         <Bell className="h-5 w-5 text-amber-600" />
         <h3 className="font-bold">Alertas SLA & Relatórios</h3>
         <span className="text-xs text-muted-foreground">{active.length} alerta(s) ativo(s)</span>
-        <div className="ml-auto flex gap-2 print:hidden">
-          <Button size="sm" variant="outline" onClick={() => handlePrint("dia")} className="hover:scale-105 transition-transform">
-            <Printer className="h-3 w-3 mr-1" /> PDF diário
-          </Button>
-          <Button size="sm" variant="outline" onClick={() => handlePrint("semana")} className="hover:scale-105 transition-transform">
-            <Printer className="h-3 w-3 mr-1" /> PDF semanal
+        <div className="ml-auto flex gap-2 print:hidden flex-wrap">
+          <Link to="/marocas/cockpit/relatorio">
+            <Button size="sm" variant="outline" className="hover:scale-105 transition-transform">
+              <FileText className="h-3 w-3 mr-1" /> Relatório formal (PDF)
+            </Button>
+          </Link>
+          <Button size="sm" variant="outline" onClick={() => setCfgOpen((v) => !v)} className="hover:scale-105 transition-transform">
+            <Settings className="h-3 w-3 mr-1" /> Configurar alertas
           </Button>
         </div>
       </div>
+
+      {cfgOpen && (
+        <div className="mt-3 p-3 rounded border bg-background space-y-2 animate-in fade-in slide-in-from-top-2">
+          <p className="text-xs text-muted-foreground">Ajuste limiares (aviso em % do SLA) e canais por tipo de serviço.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {Object.entries(draft).map(([type, c]) => (
+              <div key={type} className="border rounded p-2 text-xs">
+                <div className="flex items-center gap-2 mb-1">
+                  <Checkbox checked={c.enabled} onCheckedChange={(v) => setDraft({ ...draft, [type]: { ...c, enabled: !!v } })} />
+                  <strong className="font-mono">{type}</strong>
+                </div>
+                <div className="flex items-center gap-2">
+                  <label>Aviso em</label>
+                  <Input type="number" min={1} max={100} value={c.warningPct} onChange={(e) => setDraft({ ...draft, [type]: { ...c, warningPct: Number(e.target.value) } })} className="w-16 h-7" />
+                  <span>% do SLA</span>
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <label>Atraso +</label>
+                  <Input type="number" min={0} max={240} value={c.lateOffsetMin} onChange={(e) => setDraft({ ...draft, [type]: { ...c, lateOffsetMin: Number(e.target.value) } })} className="w-16 h-7" />
+                  <span>min</span>
+                </div>
+                <div className="flex gap-2 mt-1 flex-wrap">
+                  {(["cockpit", "whatsapp", "email"] as const).map((ch) => (
+                    <label key={ch} className="flex items-center gap-1">
+                      <Checkbox checked={c.channels.includes(ch)} onCheckedChange={() => toggleChannel(type, ch)} />
+                      <span>{ch}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button size="sm" variant="ghost" onClick={() => setCfgOpen(false)}>Cancelar</Button>
+            <Button size="sm" onClick={() => { onSaveCfg(draft); setCfgOpen(false); }} className="bg-gradient-to-r from-primary to-fuchsia-500">Salvar</Button>
+          </div>
+        </div>
+      )}
+
       {active.length > 0 && (
         <ul className="mt-3 space-y-1">
           {active.map((a) => (
@@ -725,4 +810,5 @@ function AlertsPanel({ alerts }: { alerts: any[] }) {
     </Card>
   );
 }
+
 
