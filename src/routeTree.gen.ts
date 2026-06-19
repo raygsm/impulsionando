@@ -378,6 +378,7 @@ import { Route as AuthenticatedTorreRestaurantesDemoAuditoriaRouteImport } from 
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
 import { Route as AuthenticatedRestauranteSalaoNotificacoesRouteImport } from './routes/_authenticated/restaurante.salao.notificacoes'
 import { Route as AuthenticatedRestauranteSalaoLogsRouteImport } from './routes/_authenticated/restaurante.salao.logs'
+import { Route as AuthenticatedMarocasCockpitRelatoriosEnviadosRouteImport } from './routes/_authenticated/marocas.cockpit.relatorios-enviados'
 import { Route as AuthenticatedMarocasCockpitRelatorioRouteImport } from './routes/_authenticated/marocas.cockpit.relatorio'
 import { Route as AuthenticatedMarocasCockpitNotificacoesRouteImport } from './routes/_authenticated/marocas.cockpit.notificacoes'
 import { Route as AuthenticatedImobiliariaAprovacoesImprimirFilaRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes.imprimir-fila'
@@ -2436,6 +2437,12 @@ const AuthenticatedRestauranteSalaoLogsRoute =
     path: '/logs',
     getParentRoute: () => AuthenticatedRestauranteSalaoRoute,
   } as any)
+const AuthenticatedMarocasCockpitRelatoriosEnviadosRoute =
+  AuthenticatedMarocasCockpitRelatoriosEnviadosRouteImport.update({
+    id: '/relatorios-enviados',
+    path: '/relatorios-enviados',
+    getParentRoute: () => AuthenticatedMarocasCockpitRoute,
+  } as any)
 const AuthenticatedMarocasCockpitRelatorioRoute =
   AuthenticatedMarocasCockpitRelatorioRouteImport.update({
     id: '/relatorio',
@@ -2935,6 +2942,7 @@ export interface FileRoutesByFullPath {
   '/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
   '/marocas/cockpit/notificacoes': typeof AuthenticatedMarocasCockpitNotificacoesRoute
   '/marocas/cockpit/relatorio': typeof AuthenticatedMarocasCockpitRelatorioRoute
+  '/marocas/cockpit/relatorios-enviados': typeof AuthenticatedMarocasCockpitRelatoriosEnviadosRoute
   '/restaurante/salao/logs': typeof AuthenticatedRestauranteSalaoLogsRoute
   '/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
@@ -3317,6 +3325,7 @@ export interface FileRoutesByTo {
   '/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
   '/marocas/cockpit/notificacoes': typeof AuthenticatedMarocasCockpitNotificacoesRoute
   '/marocas/cockpit/relatorio': typeof AuthenticatedMarocasCockpitRelatorioRoute
+  '/marocas/cockpit/relatorios-enviados': typeof AuthenticatedMarocasCockpitRelatoriosEnviadosRoute
   '/restaurante/salao/logs': typeof AuthenticatedRestauranteSalaoLogsRoute
   '/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
@@ -3713,6 +3722,7 @@ export interface FileRoutesById {
   '/_authenticated/imobiliaria/aprovacoes/imprimir-fila': typeof AuthenticatedImobiliariaAprovacoesImprimirFilaRoute
   '/_authenticated/marocas/cockpit/notificacoes': typeof AuthenticatedMarocasCockpitNotificacoesRoute
   '/_authenticated/marocas/cockpit/relatorio': typeof AuthenticatedMarocasCockpitRelatorioRoute
+  '/_authenticated/marocas/cockpit/relatorios-enviados': typeof AuthenticatedMarocasCockpitRelatoriosEnviadosRoute
   '/_authenticated/restaurante/salao/logs': typeof AuthenticatedRestauranteSalaoLogsRoute
   '/_authenticated/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
@@ -4108,6 +4118,7 @@ export interface FileRouteTypes {
     | '/imobiliaria/aprovacoes/imprimir-fila'
     | '/marocas/cockpit/notificacoes'
     | '/marocas/cockpit/relatorio'
+    | '/marocas/cockpit/relatorios-enviados'
     | '/restaurante/salao/logs'
     | '/restaurante/salao/notificacoes'
     | '/sales/cash/$id'
@@ -4490,6 +4501,7 @@ export interface FileRouteTypes {
     | '/imobiliaria/aprovacoes/imprimir-fila'
     | '/marocas/cockpit/notificacoes'
     | '/marocas/cockpit/relatorio'
+    | '/marocas/cockpit/relatorios-enviados'
     | '/restaurante/salao/logs'
     | '/restaurante/salao/notificacoes'
     | '/sales/cash/$id'
@@ -4885,6 +4897,7 @@ export interface FileRouteTypes {
     | '/_authenticated/imobiliaria/aprovacoes/imprimir-fila'
     | '/_authenticated/marocas/cockpit/notificacoes'
     | '/_authenticated/marocas/cockpit/relatorio'
+    | '/_authenticated/marocas/cockpit/relatorios-enviados'
     | '/_authenticated/restaurante/salao/logs'
     | '/_authenticated/restaurante/salao/notificacoes'
     | '/_authenticated/sales/cash/$id'
@@ -7655,6 +7668,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRestauranteSalaoLogsRouteImport
       parentRoute: typeof AuthenticatedRestauranteSalaoRoute
     }
+    '/_authenticated/marocas/cockpit/relatorios-enviados': {
+      id: '/_authenticated/marocas/cockpit/relatorios-enviados'
+      path: '/relatorios-enviados'
+      fullPath: '/marocas/cockpit/relatorios-enviados'
+      preLoaderRoute: typeof AuthenticatedMarocasCockpitRelatoriosEnviadosRouteImport
+      parentRoute: typeof AuthenticatedMarocasCockpitRoute
+    }
     '/_authenticated/marocas/cockpit/relatorio': {
       id: '/_authenticated/marocas/cockpit/relatorio'
       path: '/relatorio'
@@ -8355,6 +8375,7 @@ const AuthenticatedImobiliariaAprovacoesRouteWithChildren =
 interface AuthenticatedMarocasCockpitRouteChildren {
   AuthenticatedMarocasCockpitNotificacoesRoute: typeof AuthenticatedMarocasCockpitNotificacoesRoute
   AuthenticatedMarocasCockpitRelatorioRoute: typeof AuthenticatedMarocasCockpitRelatorioRoute
+  AuthenticatedMarocasCockpitRelatoriosEnviadosRoute: typeof AuthenticatedMarocasCockpitRelatoriosEnviadosRoute
 }
 
 const AuthenticatedMarocasCockpitRouteChildren: AuthenticatedMarocasCockpitRouteChildren =
@@ -8363,6 +8384,8 @@ const AuthenticatedMarocasCockpitRouteChildren: AuthenticatedMarocasCockpitRoute
       AuthenticatedMarocasCockpitNotificacoesRoute,
     AuthenticatedMarocasCockpitRelatorioRoute:
       AuthenticatedMarocasCockpitRelatorioRoute,
+    AuthenticatedMarocasCockpitRelatoriosEnviadosRoute:
+      AuthenticatedMarocasCockpitRelatoriosEnviadosRoute,
   }
 
 const AuthenticatedMarocasCockpitRouteWithChildren =
