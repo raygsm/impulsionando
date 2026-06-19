@@ -170,7 +170,9 @@ export const getCatalogAnalytics = createServerFn({ method: 'GET' })
         .gte('created_at', since),
       context.supabase
         .from('catalog_intents')
-        .select('macro_slug,subnicho_slug,plan_tier,consumed_at,converted_at,conversion_kind,reuse_attempts,created_at')
+        .select(
+          'macro_slug,subnicho_slug,plan_tier,consumed_at,converted_at,conversion_kind,reuse_attempts,last_reuse_attempt_at,created_at',
+        )
         .gte('created_at', since),
     ])
     if (evRes.error) throw evRes.error
@@ -186,6 +188,9 @@ export const getCatalogAnalytics = createServerFn({ method: 'GET' })
       opened: number
       converted: number
       reuseAttempts: number
+      lastConvertedAt: string | null
+      lastReuseAt: string | null
+      conversionKinds: Record<string, number>
     }
     const map = new Map<string, Row>()
     const key = (m: string | null, s: string | null, p: string | null) =>
@@ -204,11 +209,16 @@ export const getCatalogAnalytics = createServerFn({ method: 'GET' })
           opened: 0,
           converted: 0,
           reuseAttempts: 0,
+          lastConvertedAt: null,
+          lastReuseAt: null,
+          conversionKinds: {},
         }
         map.set(k, row)
       }
       return row
     }
+    const maxIso = (a: string | null, b: string | null) =>
+      !a ? b : !b ? a : a > b ? a : b
     for (const e of evRes.data ?? []) {
       const r = ensure(e.macro_slug, e.subnicho_slug, e.plan_tier)
       if (e.event_name === 'view_plans') r.views += 1
@@ -218,8 +228,17 @@ export const getCatalogAnalytics = createServerFn({ method: 'GET' })
       const r = ensure(i.macro_slug, i.subnicho_slug, i.plan_tier)
       r.intents += 1
       if (i.consumed_at) r.opened += 1
-      if (i.converted_at) r.converted += 1
+      if (i.converted_at) {
+        r.converted += 1
+        r.lastConvertedAt = maxIso(r.lastConvertedAt, i.converted_at)
+        if (i.conversion_kind) {
+          r.conversionKinds[i.conversion_kind] = (r.conversionKinds[i.conversion_kind] ?? 0) + 1
+        }
+      }
       r.reuseAttempts += i.reuse_attempts ?? 0
+      if (i.last_reuse_attempt_at) {
+        r.lastReuseAt = maxIso(r.lastReuseAt, i.last_reuse_attempt_at)
+      }
     }
     const rows = Array.from(map.values()).sort((a, b) => b.intents - a.intents)
     const totals = rows.reduce(
@@ -236,6 +255,7 @@ export const getCatalogAnalytics = createServerFn({ method: 'GET' })
     )
     return { rows, totals, days: data.days }
   })
+
 
 // --------- Idempotent consume + conversion ---------
 // "Consumed" = intent has been opened in onboarding (intent reaches the app).
