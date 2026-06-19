@@ -14,12 +14,23 @@ export default defineConfig({
   expect: { timeout: 5_000 },
   fullyParallel: true,
   retries: 0,
-  reporter: [["list"]],
+  // List para o log em tempo real + HTML para o artifact navegável
+  // (review de falhas com screenshots inline, traces, videos e snapshots
+  // de DOM já anexados pelo Playwright).
+  reporter: [
+    ["list"],
+    ["html", { outputFolder: "playwright-report", open: "never" }],
+  ],
   use: {
     baseURL: process.env.E2E_BASE_URL ?? "http://localhost:8080",
+    // Ao falhar, retemos: trace completo (DOM snapshots + network + console),
+    // screenshot do estado final e video da execução. Tudo é coletado pelo
+    // workflow e disponibilizado como artifacts.
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
+    video: "retain-on-failure",
   },
+
   /**
    * Matriz de projetos: cobrimos os 3 engines (Chromium, Firefox, WebKit)
    * em forma desktop e mobile para capturar diferenças de renderização e
