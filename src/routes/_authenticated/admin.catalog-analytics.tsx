@@ -414,6 +414,83 @@ function CatalogAnalyticsPage() {
         </Card>
       )}
 
+      <Card className="overflow-hidden">
+        <div className="border-b p-3 flex items-center gap-2">
+          <History className="w-4 h-4" />
+          <div className="font-semibold text-sm">Histórico de cruzamentos do limiar de dedupe</div>
+          <span className="text-xs text-muted-foreground ml-2">
+            Registrado automaticamente toda vez que o dedupe % muda de estado (abaixo / normal / acima) para os seus limites.
+          </span>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="ml-auto"
+            onClick={() => eventsQuery.refetch()}
+          >
+            Atualizar
+          </Button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead className="bg-muted/40 text-muted-foreground">
+              <tr>
+                <th className="text-left px-3 py-2">Quando</th>
+                <th className="text-left px-3 py-2">Estado</th>
+                <th className="text-left px-3 py-2">De → Para</th>
+                <th className="text-right px-3 py-2">Dedupe %</th>
+                <th className="text-right px-3 py-2">Limiar (min–max)</th>
+                <th className="text-right px-3 py-2">Janela</th>
+                <th className="text-right px-3 py-2">Amostras</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(eventsQuery.data?.rows ?? []).length === 0 && (
+                <tr>
+                  <td colSpan={7} className="p-4 text-center text-muted-foreground">
+                    {eventsQuery.isLoading
+                      ? 'Carregando…'
+                      : 'Nenhum cruzamento registrado ainda.'}
+                  </td>
+                </tr>
+              )}
+              {(eventsQuery.data?.rows ?? []).map((e) => {
+                const icon =
+                  e.state === 'above' ? (
+                    <ArrowUpCircle className="w-3.5 h-3.5 text-amber-600" />
+                  ) : e.state === 'below' ? (
+                    <ArrowDownCircle className="w-3.5 h-3.5 text-red-600" />
+                  ) : (
+                    <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
+                  )
+                return (
+                  <tr key={e.id} className="border-t">
+                    <td className="px-3 py-2 tabular-nums">
+                      {new Date(e.created_at).toLocaleString('pt-BR')}
+                    </td>
+                    <td className="px-3 py-2">
+                      <span className="inline-flex items-center gap-1">
+                        {icon} {e.state}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2 text-muted-foreground">
+                      {e.prev_state ?? '—'} → <strong>{e.state}</strong>
+                    </td>
+                    <td className="px-3 py-2 text-right tabular-nums">{Number(e.dedupe_pct).toFixed(1)}%</td>
+                    <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">
+                      {Number(e.min_pct).toFixed(0)} – {Number(e.max_pct).toFixed(0)}
+                    </td>
+                    <td className="px-3 py-2 text-right tabular-nums">{e.days_window}d</td>
+                    <td className="px-3 py-2 text-right tabular-nums">{e.samples}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+
+
+
 
       <Card className="p-3 text-xs text-muted-foreground bg-muted/30 flex gap-2 items-start">
         <Info className="w-3.5 h-3.5 mt-0.5 text-foreground shrink-0" aria-hidden />
