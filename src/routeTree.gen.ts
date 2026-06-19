@@ -276,6 +276,7 @@ import { Route as AuthenticatedCoreImportarClientesRouteImport } from './routes/
 import { Route as AuthenticatedCoreImplantacoesRouteImport } from './routes/_authenticated/core.implantacoes'
 import { Route as AuthenticatedCoreFlagsRouteImport } from './routes/_authenticated/core.flags'
 import { Route as AuthenticatedCoreFinanceiroMasterRouteImport } from './routes/_authenticated/core.financeiro-master'
+import { Route as AuthenticatedCoreFinanceiroConsolidadoRouteImport } from './routes/_authenticated/core.financeiro-consolidado'
 import { Route as AuthenticatedCoreFinalizacaoComercialRouteImport } from './routes/_authenticated/core.finalizacao-comercial'
 import { Route as AuthenticatedCoreFeiraLeadsRouteImport } from './routes/_authenticated/core.feira-leads'
 import { Route as AuthenticatedCoreEventosRouteImport } from './routes/_authenticated/core.eventos'
@@ -1846,6 +1847,12 @@ const AuthenticatedCoreFinanceiroMasterRoute =
     path: '/financeiro-master',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreFinanceiroConsolidadoRoute =
+  AuthenticatedCoreFinanceiroConsolidadoRouteImport.update({
+    id: '/financeiro-consolidado',
+    path: '/financeiro-consolidado',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreFinalizacaoComercialRoute =
   AuthenticatedCoreFinalizacaoComercialRouteImport.update({
     id: '/finalizacao-comercial',
@@ -2894,6 +2901,7 @@ export interface FileRoutesByFullPath {
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/core/feira-leads': typeof AuthenticatedCoreFeiraLeadsRoute
   '/core/finalizacao-comercial': typeof AuthenticatedCoreFinalizacaoComercialRoute
+  '/core/financeiro-consolidado': typeof AuthenticatedCoreFinanceiroConsolidadoRoute
   '/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/core/flags': typeof AuthenticatedCoreFlagsRoute
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
@@ -3288,6 +3296,7 @@ export interface FileRoutesByTo {
   '/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/core/feira-leads': typeof AuthenticatedCoreFeiraLeadsRoute
   '/core/finalizacao-comercial': typeof AuthenticatedCoreFinalizacaoComercialRoute
+  '/core/financeiro-consolidado': typeof AuthenticatedCoreFinanceiroConsolidadoRoute
   '/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/core/flags': typeof AuthenticatedCoreFlagsRoute
   '/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
@@ -3696,6 +3705,7 @@ export interface FileRoutesById {
   '/_authenticated/core/eventos': typeof AuthenticatedCoreEventosRoute
   '/_authenticated/core/feira-leads': typeof AuthenticatedCoreFeiraLeadsRoute
   '/_authenticated/core/finalizacao-comercial': typeof AuthenticatedCoreFinalizacaoComercialRoute
+  '/_authenticated/core/financeiro-consolidado': typeof AuthenticatedCoreFinanceiroConsolidadoRoute
   '/_authenticated/core/financeiro-master': typeof AuthenticatedCoreFinanceiroMasterRoute
   '/_authenticated/core/flags': typeof AuthenticatedCoreFlagsRoute
   '/_authenticated/core/implantacoes': typeof AuthenticatedCoreImplantacoesRoute
@@ -4103,6 +4113,7 @@ export interface FileRouteTypes {
     | '/core/eventos'
     | '/core/feira-leads'
     | '/core/finalizacao-comercial'
+    | '/core/financeiro-consolidado'
     | '/core/financeiro-master'
     | '/core/flags'
     | '/core/implantacoes'
@@ -4497,6 +4508,7 @@ export interface FileRouteTypes {
     | '/core/eventos'
     | '/core/feira-leads'
     | '/core/finalizacao-comercial'
+    | '/core/financeiro-consolidado'
     | '/core/financeiro-master'
     | '/core/flags'
     | '/core/implantacoes'
@@ -4904,6 +4916,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/eventos'
     | '/_authenticated/core/feira-leads'
     | '/_authenticated/core/finalizacao-comercial'
+    | '/_authenticated/core/financeiro-consolidado'
     | '/_authenticated/core/financeiro-master'
     | '/_authenticated/core/flags'
     | '/_authenticated/core/implantacoes'
@@ -7096,6 +7109,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreFinanceiroMasterRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/financeiro-consolidado': {
+      id: '/_authenticated/core/financeiro-consolidado'
+      path: '/financeiro-consolidado'
+      fullPath: '/core/financeiro-consolidado'
+      preLoaderRoute: typeof AuthenticatedCoreFinanceiroConsolidadoRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/finalizacao-comercial': {
       id: '/_authenticated/core/finalizacao-comercial'
       path: '/finalizacao-comercial'
@@ -8306,6 +8326,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreEventosRoute: typeof AuthenticatedCoreEventosRoute
   AuthenticatedCoreFeiraLeadsRoute: typeof AuthenticatedCoreFeiraLeadsRoute
   AuthenticatedCoreFinalizacaoComercialRoute: typeof AuthenticatedCoreFinalizacaoComercialRoute
+  AuthenticatedCoreFinanceiroConsolidadoRoute: typeof AuthenticatedCoreFinanceiroConsolidadoRoute
   AuthenticatedCoreFinanceiroMasterRoute: typeof AuthenticatedCoreFinanceiroMasterRoute
   AuthenticatedCoreFlagsRoute: typeof AuthenticatedCoreFlagsRoute
   AuthenticatedCoreImplantacoesRoute: typeof AuthenticatedCoreImplantacoesRoute
@@ -8352,6 +8373,8 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreFeiraLeadsRoute: AuthenticatedCoreFeiraLeadsRoute,
   AuthenticatedCoreFinalizacaoComercialRoute:
     AuthenticatedCoreFinalizacaoComercialRoute,
+  AuthenticatedCoreFinanceiroConsolidadoRoute:
+    AuthenticatedCoreFinanceiroConsolidadoRoute,
   AuthenticatedCoreFinanceiroMasterRoute:
     AuthenticatedCoreFinanceiroMasterRoute,
   AuthenticatedCoreFlagsRoute: AuthenticatedCoreFlagsRoute,

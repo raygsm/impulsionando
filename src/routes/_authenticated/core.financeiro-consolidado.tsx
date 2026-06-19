@@ -117,7 +117,7 @@ function ConsolidadoPage() {
             {(data?.rows ?? []).map((r: any) => (
               <tr key={r.id} className="border-t hover:bg-muted/30">
                 <td className="px-4 py-2">
-                  <Link to={"/core/cliente/$id" as any} params={{ id: r.id }} className="text-primary hover:underline">
+                  <Link to={"/core/cliente/$id" as any} params={{ id: r.id } as any} className="text-primary hover:underline">
                     {r.name}
                   </Link>
                 </td>
