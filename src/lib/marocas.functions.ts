@@ -125,7 +125,12 @@ export const updateMarocasServiceChecklist = createServerFn({ method: "POST" })
       notes: z.string().max(2000).optional(),
     }).parse(d))
   .handler(async ({ context, data }) => {
-    const patch: Record<string, unknown> = {};
+    const patch: {
+      checklist?: { label: string; done: boolean }[];
+      photos_before?: string[];
+      photos_after?: string[];
+      notes?: string;
+    } = {};
     if (data.checklist) patch.checklist = data.checklist;
     if (data.photos_before) patch.photos_before = data.photos_before;
     if (data.photos_after) patch.photos_after = data.photos_after;
