@@ -290,22 +290,41 @@ function Kpi({
   label,
   value,
   extra,
+  tip,
 }: {
   icon: React.ComponentType<{ className?: string }>
   label: string
   value: number
   extra?: string
+  tip?: string
 }) {
   return (
     <Card className="p-4">
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <Icon className="w-3.5 h-3.5" /> {label}
+      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <Icon className="w-3.5 h-3.5" /> <span>{label}</span>
+        {tip && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                aria-label={`Detalhes de ${label}`}
+                className="ml-0.5 inline-flex items-center text-muted-foreground hover:text-foreground"
+              >
+                <Info className="w-3 h-3" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs text-xs leading-snug">
+              {tip}
+            </TooltipContent>
+          </Tooltip>
+        )}
       </div>
       <div className="mt-2 text-2xl font-bold tabular-nums">{value.toLocaleString('pt-BR')}</div>
       {extra && <div className="text-xs text-muted-foreground mt-1">{extra}</div>}
     </Card>
   )
 }
+
 
 function Th({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return <th className={`px-3 py-2 text-left font-medium ${className}`}>{children}</th>
