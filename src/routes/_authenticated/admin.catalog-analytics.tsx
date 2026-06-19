@@ -24,8 +24,11 @@ import {
   DoorOpen,
   Info,
 } from 'lucide-react'
-import { getCatalogAnalytics } from '@/lib/catalogo.functions'
+import { getCatalogAnalytics, getTrackerStats } from '@/lib/catalogo.functions'
 import { downloadCsv } from '@/lib/exports'
+import { Checkbox } from '@/components/ui/checkbox'
+
+const CONVERSION_KINDS = ['onboarding_completed', 'contract_signed', 'payment_captured'] as const
 
 export const Route = createFileRoute('/_authenticated/admin/catalog-analytics')({
   head: () => ({ meta: [{ title: 'Conversão do Catálogo — Admin' }] }),
