@@ -127,6 +127,36 @@ function CatalogAnalyticsPage() {
           : null
       : null
 
+  // Log threshold crossings (state changes) to the backend, exactly once
+  // per unique (state, min, max, days) combination per page session. The
+  // server still does its own state-change check, so dupes are safe.
+  const loggedKeyRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (!trackerStats || trackerStats.totals.samples === 0) return
+    if (!thresholdsQuery.data) return
+    const state: 'below' | 'normal' | 'above' =
+      dedupePct > dedupeMax ? 'above' : dedupePct < dedupeMin ? 'below' : 'normal'
+    const key = `${state}|${dedupeMin}|${dedupeMax}|${days}`
+    if (loggedKeyRef.current === key) return
+    loggedKeyRef.current = key
+    recordCrossing({
+      data: {
+        dedupePct,
+        min: dedupeMin,
+        max: dedupeMax,
+        daysWindow: days,
+        samples: trackerStats.totals.samples,
+      },
+    })
+      .then((res) => {
+        if (res?.logged) qc.invalidateQueries({ queryKey: ['admin', 'dedupe-threshold-events'] })
+      })
+      .catch(() => {
+        loggedKeyRef.current = null
+      })
+  }, [trackerStats, thresholdsQuery.data, dedupePct, dedupeMin, dedupeMax, days, recordCrossing, qc])
+
+
   const rows = data?.rows ?? []
   const filtered = useMemo(() => {
     const mc = fMacro.trim().toLowerCase()
