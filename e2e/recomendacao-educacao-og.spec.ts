@@ -71,10 +71,34 @@ test.describe("Open Graph — /recomendacao/educacao", () => {
       expect(twCard, "twitter:card presente").toBeTruthy();
       expect(["summary", "summary_large_image"]).toContain(twCard);
 
-      // og:image — opcional. Quando presente, deve ser URL absoluta.
-      if (ogImage) {
-        expect(ogImage, "og:image (quando presente) deve ser URL absoluta").toMatch(/^https?:\/\//);
-      }
+      // og:image — agora OBRIGATÓRIO. Valida presença, URL absoluta,
+      // dimensões declaradas e que o asset realmente resolve com
+      // content-type de imagem nos 3 engines.
+      expect(ogImage, "og:image presente").toBeTruthy();
+      expect(ogImage!, "og:image deve ser URL absoluta (não relativa)").toMatch(/^https?:\/\//);
+      expect(ogImage!).toMatch(/\.(jpe?g|png|webp|avif)(\?|$)/i);
+
+      const ogImageWidth = await getMeta(page, 'meta[property="og:image:width"]');
+      const ogImageHeight = await getMeta(page, 'meta[property="og:image:height"]');
+      const ogImageType = await getMeta(page, 'meta[property="og:image:type"]');
+      const ogImageAlt = await getMeta(page, 'meta[property="og:image:alt"]');
+      const twImage = await getMeta(page, 'meta[name="twitter:image"]');
+      expect(ogImageWidth, "og:image:width declarado").toBeTruthy();
+      expect(Number(ogImageWidth)).toBeGreaterThanOrEqual(1200);
+      expect(ogImageHeight, "og:image:height declarado").toBeTruthy();
+      expect(Number(ogImageHeight)).toBeGreaterThanOrEqual(600);
+      expect(ogImageType, "og:image:type declarado").toMatch(/^image\//);
+      expect(ogImageAlt, "og:image:alt presente para acessibilidade").toBeTruthy();
+      expect(twImage, "twitter:image presente (espelha og:image)").toBe(ogImage);
+
+      // HEAD na URL absoluta — bate o asset e confere content-type.
+      // Em modo dev local o asset CDN pode usar caminho proxy; aceitamos
+      // tanto 2xx quanto 3xx (redirect para o CDN final).
+      const head = await page.request.fetch(ogImage!, { method: "HEAD" });
+      expect(head.status(), `HEAD og:image (${ogImage}) deve responder OK`)
+        .toBeLessThan(400);
+      const ct = head.headers()["content-type"] ?? "";
+      expect(ct, `content-type do og:image (${ct})`).toMatch(/^image\//);
 
       // Não deve haver MAIS de um canonical no head (TanStack concatena
       // links sem dedup — duplicidade = canonical inválido).
@@ -83,3 +107,4 @@ test.describe("Open Graph — /recomendacao/educacao", () => {
     });
   }
 });
+
