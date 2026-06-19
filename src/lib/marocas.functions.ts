@@ -70,7 +70,7 @@ export const updateMarocasServiceStatus = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string; status: z.infer<typeof ServiceStatusEnum> }) =>
     z.object({ id: z.string().uuid(), status: ServiceStatusEnum }).parse(d))
   .handler(async ({ context, data }) => {
-    const patch: Record<string, unknown> = { status: data.status };
+    const patch: { status: typeof data.status; started_at?: string; completed_at?: string } = { status: data.status };
     if (data.status === "em_andamento") patch.started_at = new Date().toISOString();
     if (data.status === "concluido") patch.completed_at = new Date().toISOString();
     const { error } = await context.supabase.from("marocas_services").update(patch).eq("id", data.id);
