@@ -44,6 +44,7 @@ function CoreLayout() {
     { to: "/core/implantacoes", label: "Implantações", icon: Rocket },
     { to: "/core/modulos", label: "Biblioteca de Módulos", icon: Boxes },
     { to: "/core/releases", label: "Releases (DEV→PROD)", icon: Rocket },
+    { to: "/core/dominios", label: "Domínios dos Tenants", icon: Globe },
     { to: "/core/finalizacao-comercial", label: "Finalização Comercial", icon: CheckCircle2 },
     { to: "/core/planos", label: "Gestão de Planos", icon: CreditCard },
     { to: "/core/templates", label: "Templates de Site", icon: Globe },
