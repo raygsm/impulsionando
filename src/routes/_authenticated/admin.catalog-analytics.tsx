@@ -60,6 +60,8 @@ function CatalogAnalyticsPage() {
   const saveThresholds = useServerFn(setDedupeThresholds)
   const recordCrossing = useServerFn(recordDedupeThresholdCheck)
   const fetchEvents = useServerFn(getDedupeThresholdEvents)
+  const fetchAudit = useServerFn(getDedupeThresholdAudit)
+
 
   const [days, setDays] = useState<(typeof RANGES)[number]>(30)
   const [fMacro, setFMacro] = useState('')
