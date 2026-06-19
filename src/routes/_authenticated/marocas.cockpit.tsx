@@ -232,6 +232,7 @@ function MarocasCockpit() {
         </TabsList>
 
         <TabsContent value="agenda" className="space-y-4">
+          <AlertsPanel alerts={alertsQ.data ?? []} />
           <AgendaPanel services={svcList} />
         </TabsContent>
 
