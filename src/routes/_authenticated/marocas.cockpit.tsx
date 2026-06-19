@@ -604,7 +604,7 @@ function ServiceCard({ svc, onStatus, onSaveChecklist }: {
             </div>
           </div>
 
-          <AuditTimeline rows={auditQ.data ?? []} loading={auditQ.isLoading} />
+          <AuditTimeline rows={auditQ.data ?? []} loading={auditQ.isLoading} serviceId={svc.id} apartmentCode={svc.marocas_apartments?.code} professional={svc.marocas_professionals?.full_name} />
 
           <div className="flex justify-end">
             <Button onClick={handleSave} className="bg-gradient-to-r from-primary to-fuchsia-500 hover:scale-105 transition-all">
