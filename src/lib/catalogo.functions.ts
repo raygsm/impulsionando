@@ -246,32 +246,36 @@ export const consumeCatalogIntent = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
+    const { decideConsumeAction } = await import('./catalog-intent-lifecycle')
     const { data: existing, error: readErr } = await context.supabase
       .from('catalog_intents')
       .select('id,consumed_at,reuse_attempts')
       .eq('id', data.id)
       .maybeSingle()
     if (readErr) throw readErr
-    if (!existing) return { ok: false, alreadyConsumed: false, notFound: true }
+    const action = decideConsumeAction(existing)
 
-    if (existing.consumed_at) {
-      // Idempotent: count + log the reuse attempt, do not re-consume.
+    if (action.kind === 'not_found') {
+      return { ok: false, alreadyConsumed: false, notFound: true }
+    }
+    if (action.kind === 'reuse') {
       const sbAnon = publicClient()
       await sbAnon.from('catalog_events').insert({
         event_name: 'intent_reuse_attempt',
         intent_id: data.id,
-        metadata: { user_id: context.userId },
+        metadata: { user_id: context.userId, attempt: action.nextAttempts },
       })
       await context.supabase
         .from('catalog_intents')
         .update({
-          reuse_attempts: (existing.reuse_attempts ?? 0) + 1,
+          reuse_attempts: action.nextAttempts,
           last_reuse_attempt_at: new Date().toISOString(),
         })
         .eq('id', data.id)
-      return { ok: true, alreadyConsumed: true, reuseAttempts: (existing.reuse_attempts ?? 0) + 1 }
+      return { ok: true, alreadyConsumed: true, reuseAttempts: action.nextAttempts }
     }
-
+    // first_consume — guarded by `.is('consumed_at', null)` so two parallel
+    // requests can't both win.
     const { error } = await context.supabase
       .from('catalog_intents')
       .update({ consumed_at: new Date().toISOString(), user_id: context.userId })
@@ -290,7 +294,8 @@ export const markCatalogConversion = createServerFn({ method: 'POST' })
     }).parse(data),
   )
   .handler(async ({ data, context }) => {
-    // Idempotent: only first conversion wins.
+    // `.is('converted_at', null)` makes this idempotent at the DB level too:
+    // only the first call writes; subsequent calls match 0 rows.
     const { data: updated, error } = await context.supabase
       .from('catalog_intents')
       .update({ converted_at: new Date().toISOString(), conversion_kind: data.kind })
@@ -301,6 +306,7 @@ export const markCatalogConversion = createServerFn({ method: 'POST' })
     if (error) throw error
     return { ok: true, firstConversion: !!updated, kind: data.kind }
   })
+
 
 // --------- Admin: manage niche → plan → modules ---------
 
