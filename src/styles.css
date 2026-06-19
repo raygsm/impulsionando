@@ -321,3 +321,74 @@ html[data-density="compact"] table td {
 .dark .glass-cta:hover {
   background-color: color-mix(in oklab, white 24%, transparent);
 }
+
+/* ============================================================
+ * CHRISMED — Central Médica Premium
+ * Paleta oficial extraída de chrismed.com.br
+ * Escopo: aplique a classe `chrismed-brand` no wrapper raiz
+ * das rotas /chrismed*. NÃO altera tokens globais — preserva
+ * o isolamento visual entre tenants do Impulsionando.
+ * ============================================================ */
+.chrismed-brand {
+  --chrismed-teal: oklch(0.42 0.07 190);          /* #0F5C5C — verde profundo institucional */
+  --chrismed-teal-deep: oklch(0.32 0.06 190);     /* assinatura escura, headers e footers */
+  --chrismed-teal-soft: oklch(0.72 0.06 190);     /* hover/accent suave */
+  --chrismed-gold: oklch(0.74 0.13 75);           /* #C9962B — dourado premium, CTAs secundários */
+  --chrismed-gold-soft: oklch(0.92 0.06 80);      /* fundos de destaque */
+  --chrismed-ink: oklch(0.22 0.02 200);           /* texto principal sobre claro */
+  --chrismed-cream: oklch(0.985 0.005 90);        /* fundo da página */
+
+  --primary: var(--chrismed-teal);
+  --primary-foreground: oklch(0.99 0 0);
+  --ring: var(--chrismed-teal);
+  --accent: var(--chrismed-gold);
+  --accent-foreground: oklch(0.18 0.02 200);
+
+  background-color: var(--chrismed-cream);
+  color: var(--chrismed-ink);
+}
+
+/* Tipografia premium: títulos com mais peso e tracking fechado,
+ * remetendo a hospitais privados de excelência. */
+.chrismed-brand h1,
+.chrismed-brand h2,
+.chrismed-brand h3 {
+  letter-spacing: -0.02em;
+  color: var(--chrismed-teal-deep);
+}
+
+/* CTA primária CHRISMED — gradiente teal com brilho dourado sutil
+ * no hover. Usar via `<Button className="chrismed-cta">`. */
+.chrismed-brand .chrismed-cta {
+  background: linear-gradient(135deg, var(--chrismed-teal-deep), var(--chrismed-teal));
+  color: white;
+  border: 1px solid color-mix(in oklab, var(--chrismed-teal-deep) 60%, transparent);
+  box-shadow: 0 8px 24px -8px color-mix(in oklab, var(--chrismed-teal) 55%, transparent);
+  transition: transform 200ms ease, box-shadow 200ms ease, background 200ms ease;
+}
+.chrismed-brand .chrismed-cta:hover {
+  background: linear-gradient(135deg, var(--chrismed-teal), var(--chrismed-gold));
+  transform: translateY(-1px);
+  box-shadow: 0 14px 32px -10px color-mix(in oklab, var(--chrismed-gold) 50%, transparent);
+}
+
+/* Badge "premium" para selos de confiança (LGPD, confirmação imediata,
+ * suporte dedicado). */
+.chrismed-brand .chrismed-trust-badge {
+  background: color-mix(in oklab, var(--chrismed-gold) 14%, white);
+  color: var(--chrismed-teal-deep);
+  border: 1px solid color-mix(in oklab, var(--chrismed-gold) 35%, transparent);
+}
+
+/* Card de oferta — borda teal sutil + elevação no hover. */
+.chrismed-brand .chrismed-offer-card {
+  border: 1px solid color-mix(in oklab, var(--chrismed-teal) 18%, transparent);
+  background: white;
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+}
+.chrismed-brand .chrismed-offer-card:hover {
+  border-color: var(--chrismed-teal);
+  transform: translateY(-2px);
+  box-shadow: 0 18px 36px -16px color-mix(in oklab, var(--chrismed-teal) 35%, transparent);
+}
+
