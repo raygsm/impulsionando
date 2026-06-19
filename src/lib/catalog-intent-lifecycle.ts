@@ -9,6 +9,10 @@
  * - An intent is "converted" only the first time a downstream success
  *   happens (onboarding_completed | contract_signed | payment_captured).
  *   Subsequent calls are no-ops.
+ * - For onboarding_completed, the conversion is ONLY valid when every
+ *   required Step 4 field is true in `validatedFields`. Skipping any
+ *   required field must not count as a conversion, even if the user
+ *   ends up on Step 4 by clicking around.
  */
 
 export type IntentRow = {
@@ -39,16 +43,41 @@ export type ConversionKind =
   | 'contract_signed'
   | 'payment_captured'
 
+export const REQUIRED_STEP4_FIELDS = [
+  'goal',
+  'niche',
+  'mainPain',
+  'metric',
+  'target',
+] as const
+
+export type Step4Field = (typeof REQUIRED_STEP4_FIELDS)[number]
+
+export type ValidatedFields = Partial<Record<Step4Field, boolean>>
+
+export function isStep4Complete(v: ValidatedFields | null | undefined): boolean {
+  if (!v) return false
+  return REQUIRED_STEP4_FIELDS.every((k) => v[k] === true)
+}
+
 export type ConvertAction =
   | { kind: 'not_found' }
-  | { kind: 'first_conversion'; conversionKind: ConversionKind }
+  | { kind: 'first_conversion'; conversionKind: ConversionKind; validatedFields: ValidatedFields | null }
   | { kind: 'already_converted' }
+  | { kind: 'incomplete'; missing: Step4Field[] }
 
 export function decideConversionAction(
   existing: Pick<IntentRow, 'converted_at'> | null,
   next: ConversionKind,
+  validatedFields?: ValidatedFields | null,
 ): ConvertAction {
   if (!existing) return { kind: 'not_found' }
   if (existing.converted_at) return { kind: 'already_converted' }
-  return { kind: 'first_conversion', conversionKind: next }
+  // Only `onboarding_completed` is gated by the Step 4 snapshot —
+  // contract_signed / payment_captured are downstream and trustworthy on their own.
+  if (next === 'onboarding_completed') {
+    const missing = REQUIRED_STEP4_FIELDS.filter((k) => !validatedFields?.[k])
+    if (missing.length > 0) return { kind: 'incomplete', missing }
+  }
+  return { kind: 'first_conversion', conversionKind: next, validatedFields: validatedFields ?? null }
 }

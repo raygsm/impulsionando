@@ -311,20 +311,137 @@ export const markCatalogConversion = createServerFn({ method: 'POST' })
     z.object({
       id: z.string().uuid(),
       kind: z.enum(['onboarding_completed', 'contract_signed', 'payment_captured']),
+      validatedFields: z
+        .object({
+          goal: z.boolean().optional(),
+          niche: z.boolean().optional(),
+          mainPain: z.boolean().optional(),
+          metric: z.boolean().optional(),
+          target: z.boolean().optional(),
+        })
+        .optional(),
     }).parse(data),
   )
   .handler(async ({ data, context }) => {
-    // `.is('converted_at', null)` makes this idempotent at the DB level too:
-    // only the first call writes; subsequent calls match 0 rows.
+    const { decideConversionAction } = await import('./catalog-intent-lifecycle')
+    const { data: existing } = await context.supabase
+      .from('catalog_intents')
+      .select('id,converted_at')
+      .eq('id', data.id)
+      .maybeSingle()
+    const action = decideConversionAction(existing, data.kind, data.validatedFields ?? null)
+    if (action.kind !== 'first_conversion') {
+      return {
+        ok: action.kind !== 'not_found',
+        firstConversion: false,
+        kind: data.kind,
+        reason: action.kind,
+        missing: action.kind === 'incomplete' ? action.missing : undefined,
+      }
+    }
+    // `.is('converted_at', null)` makes this idempotent at the DB level too.
     const { data: updated, error } = await context.supabase
       .from('catalog_intents')
-      .update({ converted_at: new Date().toISOString(), conversion_kind: data.kind })
+      .update({
+        converted_at: new Date().toISOString(),
+        conversion_kind: data.kind,
+        // typed-cast: validated_fields column added in a later migration
+        ...(data.validatedFields ? ({ validated_fields: data.validatedFields } as Record<string, unknown>) : {}),
+      } as never)
       .eq('id', data.id)
       .is('converted_at', null)
       .select('id')
       .maybeSingle()
     if (error) throw error
     return { ok: true, firstConversion: !!updated, kind: data.kind }
+  })
+
+// --------- Admin: intent audit + tracker dedupe stats ---------
+
+export const getCatalogIntentsAudit = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        days: z.number().int().min(1).max(180).default(30),
+        onlyConverted: z.boolean().default(false),
+        conversionKinds: z.array(z.string()).optional(),
+        limit: z.number().int().min(1).max(500).default(200),
+      })
+      .parse(data ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: isStaff } = await context.supabase.rpc('is_impulsionando_staff', {
+      _user: context.userId,
+    })
+    if (!isStaff) throw new Error('Forbidden')
+    const since = new Date(Date.now() - data.days * 86400_000).toISOString()
+    let q = context.supabase
+      .from('catalog_intents')
+      .select(
+        // include validated_fields (added in later migration)
+        'id,macro_slug,subnicho_slug,plan_tier,selected_modules,created_at,consumed_at,converted_at,conversion_kind,reuse_attempts,last_reuse_attempt_at,validated_fields' as never,
+      )
+      .gte('created_at', since)
+      .order('created_at', { ascending: false })
+      .limit(data.limit)
+    if (data.onlyConverted) q = q.not('converted_at', 'is', null)
+    if (data.conversionKinds && data.conversionKinds.length > 0) {
+      q = q.in('conversion_kind', data.conversionKinds)
+    }
+    const { data: rows, error } = await q
+    if (error) throw error
+    type AuditRow = {
+      id: string
+      macro_slug: string | null
+      subnicho_slug: string | null
+      plan_tier: string | null
+      selected_modules: string[] | null
+      created_at: string
+      consumed_at: string | null
+      converted_at: string | null
+      conversion_kind: string | null
+      reuse_attempts: number | null
+      last_reuse_attempt_at: string | null
+      validated_fields: Record<string, boolean> | null
+    }
+    return { rows: (rows as unknown as AuditRow[]) ?? [] }
+  })
+
+export const getTrackerStats = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z.object({ days: z.number().int().min(1).max(180).default(7) }).parse(data ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: isStaff } = await context.supabase.rpc('is_impulsionando_staff', {
+      _user: context.userId,
+    })
+    if (!isStaff) throw new Error('Forbidden')
+    const since = new Date(Date.now() - data.days * 86400_000).toISOString()
+    const { data: rows, error } = await context.supabase
+      .from('catalog_events')
+      .select('metadata,created_at')
+      .eq('event_name', 'tracker_stats')
+      .gte('created_at', since)
+      .order('created_at', { ascending: false })
+      .limit(1000)
+    if (error) throw error
+    const totals = { attempted: 0, sent: 0, deduped: 0, dropped: 0, batches: 0, samples: 0 }
+    for (const r of rows ?? []) {
+      const m = (r.metadata ?? {}) as Record<string, number>
+      totals.attempted += Number(m.attempted ?? 0)
+      totals.sent += Number(m.sent ?? 0)
+      totals.deduped += Number(m.deduped ?? 0)
+      totals.dropped += Number(m.dropped ?? 0)
+      totals.batches += Number(m.batches ?? 0)
+      totals.samples += 1
+    }
+    const dedupePct =
+      totals.attempted > 0
+        ? Number(((totals.deduped / totals.attempted) * 100).toFixed(1))
+        : 0
+    return { totals, dedupePct, days: data.days }
   })
 
 

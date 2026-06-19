@@ -242,14 +242,18 @@ function OnboardingPage() {
   useEffect(() => {
     if (state.step !== 4) return;
     if (!intent?.id) return;
-    const completed =
-      !!state.goal &&
-      !!state.niche &&
-      state.diag.mainPain.trim().length > 3 &&
-      state.outcome.metric.trim().length > 0 &&
-      state.outcome.target.trim().length > 0;
+    const validatedFields = {
+      goal: !!state.goal,
+      niche: !!state.niche,
+      mainPain: state.diag.mainPain.trim().length > 3,
+      metric: state.outcome.metric.trim().length > 0,
+      target: state.outcome.target.trim().length > 0,
+    };
+    const completed = Object.values(validatedFields).every(Boolean);
     if (!completed) return;
-    markConversion({ data: { id: intent.id, kind: "onboarding_completed" } }).catch(() => {});
+    markConversion({
+      data: { id: intent.id, kind: "onboarding_completed", validatedFields },
+    }).catch(() => {});
   }, [
     state.step,
     state.goal,

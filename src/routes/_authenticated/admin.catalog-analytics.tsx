@@ -24,8 +24,11 @@ import {
   DoorOpen,
   Info,
 } from 'lucide-react'
-import { getCatalogAnalytics } from '@/lib/catalogo.functions'
+import { getCatalogAnalytics, getTrackerStats } from '@/lib/catalogo.functions'
 import { downloadCsv } from '@/lib/exports'
+import { Checkbox } from '@/components/ui/checkbox'
+
+const CONVERSION_KINDS = ['onboarding_completed', 'contract_signed', 'payment_captured'] as const
 
 export const Route = createFileRoute('/_authenticated/admin/catalog-analytics')({
   head: () => ({ meta: [{ title: 'Conversão do Catálogo — Admin' }] }),
@@ -36,14 +39,21 @@ const RANGES = [7, 30, 90] as const
 
 function CatalogAnalyticsPage() {
   const fetchFn = useServerFn(getCatalogAnalytics)
+  const fetchTrackerStats = useServerFn(getTrackerStats)
   const [days, setDays] = useState<(typeof RANGES)[number]>(30)
   const [fMacro, setFMacro] = useState('')
   const [fSub, setFSub] = useState('')
   const [fPlan, setFPlan] = useState('')
+  const [selectedKinds, setSelectedKinds] = useState<string[]>([])
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['admin', 'catalog-analytics', days],
     queryFn: () => fetchFn({ data: { days } }),
+  })
+
+  const { data: trackerStats } = useQuery({
+    queryKey: ['admin', 'tracker-stats', days],
+    queryFn: () => fetchTrackerStats({ data: { days: Math.min(days, 30) } }),
   })
 
   const rows = data?.rows ?? []
@@ -51,13 +61,26 @@ function CatalogAnalyticsPage() {
     const mc = fMacro.trim().toLowerCase()
     const sc = fSub.trim().toLowerCase()
     const pc = fPlan.trim().toLowerCase()
-    return rows.filter(
-      (r) =>
-        (!mc || r.macro.toLowerCase().includes(mc)) &&
-        (!sc || r.sub.toLowerCase().includes(sc)) &&
-        (!pc || r.plan.toLowerCase().includes(pc)),
-    )
-  }, [rows, fMacro, fSub, fPlan])
+    return rows
+      .filter(
+        (r) =>
+          (!mc || r.macro.toLowerCase().includes(mc)) &&
+          (!sc || r.sub.toLowerCase().includes(sc)) &&
+          (!pc || r.plan.toLowerCase().includes(pc)),
+      )
+      .filter((r) => {
+        if (selectedKinds.length === 0) return true
+        // keep only rows that have at least one of the selected kinds
+        return selectedKinds.some((k) => (r.conversionKinds[k] ?? 0) > 0)
+      })
+  }, [rows, fMacro, fSub, fPlan, selectedKinds])
+
+  // When kinds are selected, restrict the "converted" totals to that subset
+  // so KPIs and CSV reflect the same selection.
+  const scopedConverted = (r: (typeof rows)[number]) => {
+    if (selectedKinds.length === 0) return r.converted
+    return selectedKinds.reduce((sum, k) => sum + (r.conversionKinds[k] ?? 0), 0)
+  }
 
   const totals = useMemo(
     () =>
@@ -67,20 +90,30 @@ function CatalogAnalyticsPage() {
           a.selects += r.selects
           a.intents += r.intents
           a.opened += r.opened
-          a.converted += r.converted
+          a.converted += scopedConverted(r)
           a.reuseAttempts += r.reuseAttempts
           return a
         },
         { views: 0, selects: 0, intents: 0, opened: 0, converted: 0, reuseAttempts: 0 },
       ),
-    [filtered],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [filtered, selectedKinds],
   )
 
   const convPct = (n: number, d: number) => (d > 0 ? ((n / d) * 100).toFixed(1) + '%' : '—')
 
+  function toggleKind(k: string) {
+    setSelectedKinds((prev) =>
+      prev.includes(k) ? prev.filter((x) => x !== k) : [...prev, k],
+    )
+  }
+
   function exportCsv() {
+    const kindsToInclude =
+      selectedKinds.length > 0 ? selectedKinds : (CONVERSION_KINDS as readonly string[])
+    const suffix = selectedKinds.length > 0 ? `-${selectedKinds.join('+')}` : ''
     downloadCsv(
-      `catalog-analytics-${days}d-${new Date().toISOString().slice(0, 10)}.csv`,
+      `catalog-analytics-${days}d${suffix}-${new Date().toISOString().slice(0, 10)}.csv`,
       [
         'macro',
         'subnicho',
@@ -96,25 +129,30 @@ function CatalogAnalyticsPage() {
         'ultima_conversao',
         'ultima_tentativa_reuso',
       ],
-      filtered.map((r) => ({
-        macro: r.macro,
-        subnicho: r.sub,
-        plano: r.plan,
-        views: r.views,
-        selecoes: r.selects,
-        intencoes: r.intents,
-        abertas_onboarding: r.opened,
-        convertidas: r.converted,
-        taxa_conversao: convPct(r.converted, r.intents),
-        tentativas_reuso: r.reuseAttempts,
-        conversion_kinds: Object.entries(r.conversionKinds)
-          .map(([k, v]) => `${k}:${v}`)
-          .join('; '),
-        ultima_conversao: r.lastConvertedAt ?? '',
-        ultima_tentativa_reuso: r.lastReuseAt ?? '',
-      })),
+      filtered.map((r) => {
+        const conv = scopedConverted(r)
+        return {
+          macro: r.macro,
+          subnicho: r.sub,
+          plano: r.plan,
+          views: r.views,
+          selecoes: r.selects,
+          intencoes: r.intents,
+          abertas_onboarding: r.opened,
+          convertidas: conv,
+          taxa_conversao: convPct(conv, r.intents),
+          tentativas_reuso: r.reuseAttempts,
+          conversion_kinds: kindsToInclude
+            .filter((k) => (r.conversionKinds[k] ?? 0) > 0)
+            .map((k) => `${k}:${r.conversionKinds[k]}`)
+            .join('; '),
+          ultima_conversao: r.lastConvertedAt ?? '',
+          ultima_tentativa_reuso: r.lastReuseAt ?? '',
+        }
+      }),
     )
   }
+
 
 
   return (
@@ -160,6 +198,52 @@ function CatalogAnalyticsPage() {
           Atualizar
         </Button>
       </div>
+
+      <div className="flex flex-wrap items-center gap-3 text-xs">
+        <span className="text-muted-foreground">Filtrar por conversion_kind:</span>
+        {CONVERSION_KINDS.map((k) => (
+          <label key={k} className="flex items-center gap-1.5 cursor-pointer">
+            <Checkbox checked={selectedKinds.includes(k)} onCheckedChange={() => toggleKind(k)} />
+            <code className="text-[11px]">{k}</code>
+          </label>
+        ))}
+        {selectedKinds.length > 0 && (
+          <Button variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={() => setSelectedKinds([])}>
+            limpar
+          </Button>
+        )}
+        <span className="ml-auto text-muted-foreground">
+          {selectedKinds.length > 0
+            ? `KPIs e CSV restritos a: ${selectedKinds.join(', ')}`
+            : 'Todos os tipos de conversão'}
+        </span>
+      </div>
+
+      {trackerStats && (
+        <Card className="p-3 text-xs flex flex-wrap items-center gap-4">
+          <span className="font-semibold">Tracker (qualidade dos KPIs)</span>
+          <span>
+            Tentativas: <strong className="tabular-nums">{trackerStats.totals.attempted.toLocaleString('pt-BR')}</strong>
+          </span>
+          <span>
+            Enviadas: <strong className="tabular-nums">{trackerStats.totals.sent.toLocaleString('pt-BR')}</strong>
+          </span>
+          <span>
+            Dedupe (800ms): <strong className="tabular-nums">{trackerStats.totals.deduped.toLocaleString('pt-BR')}</strong>
+            <span className="text-muted-foreground"> ({trackerStats.dedupePct}%)</span>
+          </span>
+          <span>
+            Descartadas (falha): <strong className="tabular-nums">{trackerStats.totals.dropped.toLocaleString('pt-BR')}</strong>
+          </span>
+          <span>
+            Lotes: <strong className="tabular-nums">{trackerStats.totals.batches.toLocaleString('pt-BR')}</strong>
+          </span>
+          <span className="text-muted-foreground">
+            Se dedupe% subir muito, KPIs podem subcontar cliques legítimos.
+          </span>
+        </Card>
+      )}
+
 
       <Card className="p-3 text-xs text-muted-foreground bg-muted/30 flex gap-2 items-start">
         <Info className="w-3.5 h-3.5 mt-0.5 text-foreground shrink-0" aria-hidden />
@@ -269,9 +353,9 @@ function CatalogAnalyticsPage() {
                   <Td className="text-right tabular-nums">{r.selects}</Td>
                   <Td className="text-right tabular-nums">{r.intents}</Td>
                   <Td className="text-right tabular-nums">{r.opened}</Td>
-                  <Td className="text-right tabular-nums">{r.converted}</Td>
+                  <Td className="text-right tabular-nums">{scopedConverted(r)}</Td>
                   <Td className="text-right tabular-nums font-medium">
-                    {convPct(r.converted, r.intents)}
+                    {convPct(scopedConverted(r), r.intents)}
                   </Td>
                   <Td className="text-right tabular-nums text-muted-foreground">{r.reuseAttempts}</Td>
                 </tr>

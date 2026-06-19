@@ -3113,6 +3113,7 @@ export type Database = {
           source: string
           subnicho_slug: string
           user_id: string | null
+          validated_fields: Json | null
         }
         Insert: {
           consumed_at?: string | null
@@ -3130,6 +3131,7 @@ export type Database = {
           source?: string
           subnicho_slug: string
           user_id?: string | null
+          validated_fields?: Json | null
         }
         Update: {
           consumed_at?: string | null
@@ -3147,6 +3149,7 @@ export type Database = {
           source?: string
           subnicho_slug?: string
           user_id?: string | null
+          validated_fields?: Json | null
         }
         Relationships: []
       }
