@@ -23,19 +23,19 @@ type Offering = {
 };
 
 const MODALITY_META: Record<Offering['modality'], { icon: typeof Stethoscope; label: string }> = {
-  presencial: { icon: Stethoscope, label: 'Presencial' },
-  telemedicina: { icon: Video, label: 'Telemedicina' },
-  domiciliar: { icon: Home, label: 'Domiciliar' },
-  retorno: { icon: RefreshCw, label: 'Retorno' },
+  presencial: { icon: Stethoscope, label: 'Atendimento no consultório' },
+  telemedicina: { icon: Video, label: 'Atendimento por vídeo' },
+  domiciliar: { icon: Home, label: 'Médico onde você estiver' },
+  retorno: { icon: RefreshCw, label: 'Retorno acompanhado' },
 };
 
 export const Route = createFileRoute('/chrismed')({
   head: () => ({
     meta: [
-      { title: 'CHRISMED — Agende sua consulta online ou presencial' },
-      { name: 'description', content: 'Clínica CHRISMED: agendamento e pagamento online via PIX. Consultas presenciais, telemedicina e visitas domiciliares.' },
-      { property: 'og:title', content: 'CHRISMED — Sua saúde com agilidade' },
-      { property: 'og:description', content: 'Agende e pague em segundos. PIX instantâneo, confirmação automática.' },
+      { title: 'CHRISMED — Central Médica Premium · agende em minutos' },
+      { name: 'description', content: 'Atendimento médico premium: presencial, por vídeo ou na sua residência, hotel ou empresa. Confirmação imediata via PIX, prontuário eletrônico e equipe à disposição.' },
+      { property: 'og:title', content: 'CHRISMED — Sua saúde com agilidade, sigilo e excelência' },
+      { property: 'og:description', content: 'Escolha o melhor horário e confirme seu atendimento em poucos minutos. Presencial, vídeo e domiciliar.' },
       { property: 'og:type', content: 'website' },
     ],
   }),
