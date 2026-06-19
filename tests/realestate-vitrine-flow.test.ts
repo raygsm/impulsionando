@@ -62,9 +62,10 @@ beforeAll(async () => {
   propertyId = prop.id
 
   // Pre-suppress one specific recipient for suppression test.
+  // `reason` must satisfy the CHECK constraint: bounce | complaint | unsubscribe.
   await admin.from('suppressed_emails').upsert({
     email: suppressedEmail.toLowerCase(),
-    reason: 'test',
+    reason: 'bounce',
   } as any, { onConflict: 'email' })
 }, 90_000)
 
