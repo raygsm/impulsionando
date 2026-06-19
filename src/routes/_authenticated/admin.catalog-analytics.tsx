@@ -86,8 +86,12 @@ function CatalogAnalyticsPage() {
 
   const saveMut = useMutation({
     mutationFn: (vars: { min: number; max: number }) => saveThresholds({ data: vars }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'dedupe-thresholds'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin', 'dedupe-thresholds'] })
+      qc.invalidateQueries({ queryKey: ['admin', 'dedupe-threshold-audit'] })
+    },
   })
+
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['admin', 'catalog-analytics', days],
