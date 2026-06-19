@@ -17,6 +17,13 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet'
+import {
   Download,
   CheckCircle2,
   XCircle,
@@ -28,6 +35,22 @@ import {
 } from 'lucide-react'
 import { getCatalogIntentsAudit } from '@/lib/catalogo.functions'
 import { downloadCsv } from '@/lib/exports'
+
+type IntentRow = {
+  id: string
+  macro_slug: string | null
+  subnicho_slug: string | null
+  plan_tier: string | null
+  selected_modules: string[] | null
+  created_at: string
+  consumed_at: string | null
+  converted_at: string | null
+  conversion_kind: string | null
+  reuse_attempts: number | null
+  last_reuse_attempt_at: string | null
+  validated_fields: Record<string, boolean> | null
+}
+
 
 export const Route = createFileRoute('/_authenticated/admin/catalog-intents')({
   head: () => ({ meta: [{ title: 'Auditoria de Intents — Admin' }] }),
