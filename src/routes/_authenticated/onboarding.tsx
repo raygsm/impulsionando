@@ -236,12 +236,31 @@ function OnboardingPage() {
     return () => { cancelled = true; };
   }, [search.intent, fetchIntent, consumeIntent, track]);
 
-  // Conversion = user reaches the final action plan (step 4). Idempotent server-side.
+  // Conversion = user reaches the final action plan (step 4) AFTER completing
+  // every required input (goal, niche, dor, métrica + meta). Users can navigate
+  // back/forth, but skipping required fields must not count as a conversion.
   useEffect(() => {
     if (state.step !== 4) return;
     if (!intent?.id) return;
+    const completed =
+      !!state.goal &&
+      !!state.niche &&
+      state.diag.mainPain.trim().length > 3 &&
+      state.outcome.metric.trim().length > 0 &&
+      state.outcome.target.trim().length > 0;
+    if (!completed) return;
     markConversion({ data: { id: intent.id, kind: "onboarding_completed" } }).catch(() => {});
-  }, [state.step, intent?.id, markConversion]);
+  }, [
+    state.step,
+    state.goal,
+    state.niche,
+    state.diag.mainPain,
+    state.outcome.metric,
+    state.outcome.target,
+    intent?.id,
+    markConversion,
+  ]);
+
 
 
   useEffect(() => {
