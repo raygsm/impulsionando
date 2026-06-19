@@ -92,6 +92,9 @@ function CatalogAnalyticsPage() {
         'convertidas',
         'taxa_conversao',
         'tentativas_reuso',
+        'conversion_kinds',
+        'ultima_conversao',
+        'ultima_tentativa_reuso',
       ],
       filtered.map((r) => ({
         macro: r.macro,
@@ -104,9 +107,15 @@ function CatalogAnalyticsPage() {
         convertidas: r.converted,
         taxa_conversao: convPct(r.converted, r.intents),
         tentativas_reuso: r.reuseAttempts,
+        conversion_kinds: Object.entries(r.conversionKinds)
+          .map(([k, v]) => `${k}:${v}`)
+          .join('; '),
+        ultima_conversao: r.lastConvertedAt ?? '',
+        ultima_tentativa_reuso: r.lastReuseAt ?? '',
       })),
     )
   }
+
 
   return (
     <div className="container mx-auto py-6 space-y-6">
