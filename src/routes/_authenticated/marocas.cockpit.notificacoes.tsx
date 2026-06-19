@@ -5,6 +5,8 @@ import { useMemo, useState } from "react";
 import {
   listMarocasServices,
   sendMarocasReportNow,
+  listMarocasReportSchedules,
+  upsertMarocasReportSchedule,
   MAROCAS_SLA_MINUTES,
 } from "@/lib/marocas.functions";
 import {
@@ -21,8 +23,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
-import { ArrowLeft, Bell, RotateCcw, Save, Send, Eye } from "lucide-react";
+import { ArrowLeft, Bell, RotateCcw, Save, Send, Eye, History } from "lucide-react";
 import { toast } from "sonner";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/_authenticated/marocas/cockpit/notificacoes")({
   head: () => ({ meta: [{ title: "Marocas — Notificações & Limiares" }] }),
