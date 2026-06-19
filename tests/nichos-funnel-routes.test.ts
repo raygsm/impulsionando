@@ -32,21 +32,56 @@ function read(rel: string): string {
  * Suficiente para os nossos catálogos, que são objetos literais simples.
  */
 function extractRecordKeys(source: string, varName: string): string[] {
-  const re = new RegExp(
-    `const\\s+${varName}\\b[^=]*=\\s*\\{([\\s\\S]*?)\\n\\}\\s*;`,
-    "m",
-  );
-  const match = source.match(re);
-  if (!match) {
+  const re = new RegExp(`const\\s+${varName}\\b[^=]*=\\s*\\{`);
+  const start = source.match(re);
+  if (!start || start.index === undefined) {
     throw new Error(`Não encontrei a constante ${varName} no arquivo.`);
   }
-  const body = match[1];
+  // Encontra o `{` de abertura e percorre balanceando chaves para isolar o corpo.
+  const openIdx = source.indexOf("{", start.index);
+  let depth = 0;
+  let endIdx = -1;
+  for (let i = openIdx; i < source.length; i++) {
+    const ch = source[i];
+    if (ch === "{") depth++;
+    else if (ch === "}") {
+      depth--;
+      if (depth === 0) { endIdx = i; break; }
+    }
+  }
+  if (endIdx === -1) throw new Error(`Chaves desbalanceadas em ${varName}.`);
+  const body = source.slice(openIdx + 1, endIdx);
+
+  // Varre só o nível raiz — ignora qualquer coisa dentro de chaves aninhadas.
   const keys = new Set<string>();
-  // Casa `"slug":` ou `slug:` no início de cada propriedade.
-  const keyRe = /(?:^|\n)\s*(?:"([^"]+)"|([a-zA-Z0-9_-]+))\s*:\s*\{/g;
-  let m: RegExpExecArray | null;
-  while ((m = keyRe.exec(body)) !== null) {
-    keys.add(m[1] ?? m[2]);
+  depth = 0;
+  let i = 0;
+  while (i < body.length) {
+    const ch = body[i];
+    if (ch === "{") { depth++; i++; continue; }
+    if (ch === "}") { depth--; i++; continue; }
+    if (depth === 0) {
+      // Pula strings entre aspas pra não confundir o cursor.
+      if (ch === '"' || ch === "'" || ch === "`") {
+        const quote = ch;
+        i++;
+        while (i < body.length && body[i] !== quote) {
+          if (body[i] === "\\") i++;
+          i++;
+        }
+        i++;
+        continue;
+      }
+      // Casa início de propriedade: ou `"slug":` ou `slug:`
+      const rest = body.slice(i);
+      const m = rest.match(/^\s*(?:"([^"]+)"|([a-zA-Z0-9_-]+))\s*:/);
+      if (m && /[\n,{]/.test(body[i - 1] ?? "\n")) {
+        keys.add(m[1] ?? m[2]);
+        i += m[0].length;
+        continue;
+      }
+    }
+    i++;
   }
   return [...keys];
 }
