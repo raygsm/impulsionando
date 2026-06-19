@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   playwright:
-    name: Playwright (admin logo audit)
+    name: Playwright E2E + a11y + visual (Chromium / Firefox / WebKit · desktop+mobile)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
