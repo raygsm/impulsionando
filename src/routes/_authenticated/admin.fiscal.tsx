@@ -957,9 +957,21 @@ function AdminFiscalPage() {
                                 setTimeout(() => resendMut.mutate(false), 50);
                               }}
                               disabled={resendMut.isPending || f.max_attempts_reached || !f.backoff_ready}
+                              title="Respeita backoff e máx. tentativas"
                               className="rounded border border-red-500/40 bg-red-500/10 px-2 py-0.5 text-[10px] font-medium text-red-700 disabled:opacity-40">
                               Reenviar
                             </button>
+                            <button
+                              onClick={() => {
+                                setYear(f.year); setMonth(f.month);
+                                setTimeout(() => resendMut.mutate(true), 50);
+                              }}
+                              disabled={resendMut.isPending}
+                              title="Reenvia imediatamente ignorando backoff e máx. tentativas. A ação fica registrada na auditoria."
+                              className="rounded bg-red-600 px-2 py-0.5 text-[10px] font-bold text-white disabled:opacity-40">
+                              Reenviar agora
+                            </button>
+
                           </div>
                         </td>
                       </tr>
