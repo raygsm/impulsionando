@@ -1,5 +1,6 @@
-import { createFileRoute, useRouter } from '@tanstack/react-router';
+import { createFileRoute, useRouter, useSearch } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
+import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,7 +31,12 @@ const MODALITY_META: Record<Offering['modality'], { icon: typeof Stethoscope; la
   retorno: { icon: RefreshCw, label: 'Retorno acompanhado' },
 };
 
+const searchSchema = z.object({
+  modality: z.enum(['presencial', 'telemedicina', 'domiciliar', 'retorno']).optional(),
+});
+
 export const Route = createFileRoute('/chrismed/agendar')({
+  validateSearch: searchSchema,
   head: () => ({
     meta: [
       { title: 'CHRISMED — Central Médica Premium · agende em minutos' },
@@ -52,6 +58,7 @@ export const Route = createFileRoute('/chrismed/agendar')({
 });
 
 function ChrismedPage() {
+  const { modality } = useSearch({ from: '/chrismed/agendar' });
   const router = useRouter();
   const [offerings, setOfferings] = useState<Offering[]>([]);
   const [loading, setLoading] = useState(true);
@@ -74,6 +81,13 @@ function ChrismedPage() {
       setLoading(false);
     })();
   }, []);
+
+  // Pré-seleciona modalidade vinda da URL (?modality=telemedicina|presencial|domiciliar|retorno)
+  useEffect(() => {
+    if (!modality || selected || offerings.length === 0) return;
+    const match = offerings.find((o) => o.modality === modality);
+    if (match) setSelected(match);
+  }, [modality, offerings, selected]);
 
   // Polling do status do pagamento PIX
   useEffect(() => {
