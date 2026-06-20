@@ -738,67 +738,138 @@ function AdminFiscalPage() {
                 className="rounded border border-border bg-background px-3 py-1 text-xs font-medium disabled:opacity-50">
                 {testMut.isPending ? "Enviando teste…" : `Enviar teste (${testEmailMode ?? schedDraft.email_mode})`}
               </button>
+              <button onClick={() => downloadTestPdf({ year, month, email_mode: testEmailMode ?? schedDraft.email_mode, recipient: testRecipient || null })}
+                title="Gera um PDF do corpo do e-mail de teste (independente do modo link/inline). Abre uma nova janela e dispara o diálogo de impressão para salvar como PDF. O download é registrado na auditoria."
+                className="rounded border border-border bg-background px-3 py-1 text-xs font-medium">
+                Baixar PDF do teste
+              </button>
               <span className="text-[10px] text-muted-foreground">
                 Útil para validar conteúdo/link antes do envio para o contador. Assunto vai com prefixo [TESTE]. O modo escolhido fica registrado na auditoria.
               </span>
             </div>
 
-            {/* Histórico recente de envios de teste */}
+            {/* Histórico de envios de teste */}
             <div className="mt-3 rounded border border-border bg-background">
-              <div className="flex items-center justify-between border-b border-border bg-muted/40 px-3 py-1.5">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-muted/40 px-3 py-1.5">
                 <span className="text-xs font-semibold">Histórico de envios de teste</span>
-                <button onClick={() => testHistoryQ.refetch()}
-                  className="rounded border border-border bg-background px-2 py-0.5 text-[10px]">
-                  Atualizar
-                </button>
+                <div className="flex flex-wrap items-center gap-1">
+                  <input type="text" placeholder="destinatário contém…"
+                    value={testFilters.recipient ?? ""}
+                    onChange={(e) => setTestFilters({ ...testFilters, recipient: e.target.value || undefined, page: 0 })}
+                    className="w-40 rounded border border-border bg-background px-2 py-0.5 text-[10px]" />
+                  <select value={testFilters.status ?? "all"}
+                    onChange={(e) => setTestFilters({ ...testFilters, status: e.target.value as any, page: 0 })}
+                    className="rounded border border-border bg-background px-1 py-0.5 text-[10px]">
+                    <option value="all">Todos status</option>
+                    <option value="sent">Enviado</option>
+                    <option value="failed">Falhou</option>
+                  </select>
+                  <select value={testFilters.month ?? ""}
+                    onChange={(e) => setTestFilters({ ...testFilters, month: e.target.value ? Number(e.target.value) : undefined, page: 0 })}
+                    className="rounded border border-border bg-background px-1 py-0.5 text-[10px]">
+                    <option value="">Mês</option>
+                    {MONTHS.map((m, i) => <option key={m} value={i + 1}>{String(i + 1).padStart(2, "0")}</option>)}
+                  </select>
+                  <input type="number" placeholder="ano"
+                    value={testFilters.year ?? ""}
+                    onChange={(e) => setTestFilters({ ...testFilters, year: e.target.value ? Number(e.target.value) : undefined, page: 0 })}
+                    className="w-16 rounded border border-border bg-background px-1 py-0.5 text-[10px]" />
+                  <button onClick={() => setTestFilters({ status: "all", page: 0 })}
+                    className="rounded border border-border bg-background px-1 py-0.5 text-[10px]">
+                    Limpar
+                  </button>
+                  <button onClick={() => testHistoryQ.refetch()}
+                    className="rounded border border-border bg-background px-2 py-0.5 text-[10px]">
+                    Atualizar
+                  </button>
+                </div>
               </div>
-              {testHistoryQ.isLoading ? (
-                <div className="px-3 py-2 text-[11px] text-muted-foreground">Carregando…</div>
-              ) : (testHistoryQ.data ?? []).length === 0 ? (
-                <div className="px-3 py-2 text-[11px] text-muted-foreground">
-                  Nenhum envio de teste registrado ainda.
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-[11px]">
-                    <thead className="text-[10px] uppercase text-muted-foreground">
-                      <tr>
-                        <th className="px-3 py-1">Quando</th>
-                        <th className="px-3 py-1">Status</th>
-                        <th className="px-3 py-1">Destinatário</th>
-                        <th className="px-3 py-1">Período</th>
-                        <th className="px-3 py-1">Modo</th>
-                        <th className="px-3 py-1">Erro</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(testHistoryQ.data ?? []).map((t: any) => (
-                        <tr key={t.id} className="border-t border-border/60 align-top">
-                          <td className="px-3 py-1 whitespace-nowrap">{new Date(t.created_at).toLocaleString("pt-BR")}</td>
-                          <td className="px-3 py-1">
-                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                              t.status === "failed"
-                                ? "bg-red-500/15 text-red-700"
-                                : "bg-emerald-500/15 text-emerald-700"
-                            }`}>
-                              {t.status === "failed" ? "Falhou" : "Enviado"}
-                            </span>
-                          </td>
-                          <td className="px-3 py-1">{t.recipient ?? "—"}</td>
-                          <td className="px-3 py-1">
-                            {t.year && t.month ? `${String(t.month).padStart(2, "0")}/${t.year}` : "—"}
-                          </td>
-                          <td className="px-3 py-1">{t.email_mode ?? "—"}</td>
-                          <td className="px-3 py-1 text-red-700 max-w-xs truncate" title={t.error ?? ""}>
-                            {t.error ?? "—"}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+              {(() => {
+                const data = testHistoryQ.data as any;
+                const items: any[] = Array.isArray(data?.items) ? data.items : [];
+                const total: number = data?.total ?? 0;
+                const totalPages = Math.max(1, Math.ceil(total / TEST_PAGE_SIZE));
+                if (testHistoryQ.isLoading) {
+                  return <div className="px-3 py-2 text-[11px] text-muted-foreground">Carregando…</div>;
+                }
+                if (items.length === 0) {
+                  return <div className="px-3 py-2 text-[11px] text-muted-foreground">
+                    Nenhum envio de teste com esses filtros.
+                  </div>;
+                }
+                return (
+                  <>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-[11px]">
+                        <thead className="text-[10px] uppercase text-muted-foreground">
+                          <tr>
+                            <th className="px-3 py-1">Quando</th>
+                            <th className="px-3 py-1">Status</th>
+                            <th className="px-3 py-1">Destinatário</th>
+                            <th className="px-3 py-1">Período</th>
+                            <th className="px-3 py-1">Modo</th>
+                            <th className="px-3 py-1">Erro</th>
+                            <th className="px-3 py-1">Ações</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {items.map((t: any) => (
+                            <tr key={t.id} className="border-t border-border/60 align-top">
+                              <td className="px-3 py-1 whitespace-nowrap">{new Date(t.created_at).toLocaleString("pt-BR")}</td>
+                              <td className="px-3 py-1">
+                                <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                                  t.status === "failed"
+                                    ? "bg-red-500/15 text-red-700"
+                                    : "bg-emerald-500/15 text-emerald-700"
+                                }`}>
+                                  {t.status === "failed" ? "Falhou" : "Enviado"}
+                                </span>
+                              </td>
+                              <td className="px-3 py-1">{t.recipient ?? "—"}</td>
+                              <td className="px-3 py-1">
+                                {t.year && t.month ? `${String(t.month).padStart(2, "0")}/${t.year}` : "—"}
+                              </td>
+                              <td className="px-3 py-1">{t.email_mode ?? "—"}</td>
+                              <td className="px-3 py-1 text-red-700 max-w-xs truncate" title={t.error ?? ""}>
+                                {t.error ?? "—"}
+                              </td>
+                              <td className="px-3 py-1">
+                                {t.year && t.month && t.status !== "failed" ? (
+                                  <button onClick={() => downloadTestPdf({
+                                    year: t.year, month: t.month,
+                                    email_mode: (t.email_mode === "inline" ? "inline" : "link"),
+                                    recipient: t.recipient,
+                                  })}
+                                    className="rounded border border-border bg-background px-2 py-0.5 text-[10px]">
+                                    Baixar PDF
+                                  </button>
+                                ) : "—"}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    <div className="flex items-center justify-between border-t border-border px-3 py-1.5 text-[10px] text-muted-foreground">
+                      <span>{total} registro(s) · página {testFilters.page + 1}/{totalPages}</span>
+                      <div className="flex items-center gap-1">
+                        <button onClick={() => setTestFilters({ ...testFilters, page: Math.max(0, testFilters.page - 1) })}
+                          disabled={testFilters.page === 0}
+                          className="rounded border border-border bg-background px-2 py-0.5 disabled:opacity-40">
+                          ‹ Anterior
+                        </button>
+                        <button onClick={() => setTestFilters({ ...testFilters, page: Math.min(totalPages - 1, testFilters.page + 1) })}
+                          disabled={testFilters.page >= totalPages - 1}
+                          className="rounded border border-border bg-background px-2 py-0.5 disabled:opacity-40">
+                          Próxima ›
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
+
 
 
 
