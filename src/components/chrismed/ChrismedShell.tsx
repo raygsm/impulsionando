@@ -1,24 +1,26 @@
 import { Link, useRouterState, useNavigate } from '@tanstack/react-router';
-import { Globe, Menu, X } from 'lucide-react';
+import { Globe, Menu, X, Briefcase, CalendarCheck } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 export type Lang = 'pt' | 'en' | 'es';
 
-const NAV: Array<{ to: string; labels: Record<Lang, string> }> = [
-  { to: '/chrismed', labels: { pt: 'Início', en: 'Home', es: 'Inicio' } },
-  { to: '/chrismed/dra-cristiane', labels: { pt: 'Dra. Cristiane Alencar', en: 'Dr. Alencar', es: 'Dra. Alencar' } },
-  { to: '/chrismed/internacional', labels: { pt: 'Internacional', en: 'International', es: 'Internacional' } },
-  { to: '/chrismed#teleconsulta', labels: { pt: 'Teleconsulta', en: 'Telehealth', es: 'Teleconsulta' } },
-  { to: '/chrismed#domiciliar', labels: { pt: 'Consulta domiciliar', en: 'Home visit', es: 'Visita a domicilio' } },
-  { to: '/chrismed/clinica', labels: { pt: 'Clínica CrisMed', en: 'CrisMed Clinic', es: 'Clínica CrisMed' } },
-  { to: '/chrismed/ocupacional', labels: { pt: 'Medicina ocupacional', en: 'Occupational health', es: 'Salud ocupacional' } },
+// Menu principal — ordem definida pelo cliente: Dra. Cristiane, Teleconsulta,
+// Consulta domiciliar, Consulta no consultório, Empresa (destaque), Contato,
+// Área dos Médicos, e CTA "Agendar agora" como botão final.
+const NAV: Array<{ to: string; labels: Record<Lang, string>; emphasis?: 'company' }> = [
+  { to: '/chrismed/dra-cristiane', labels: { pt: 'Dra. Cristiane', en: 'Dr. Alencar', es: 'Dra. Alencar' } },
+  { to: '/chrismed/teleconsulta', labels: { pt: 'Teleconsulta', en: 'Telehealth', es: 'Teleconsulta' } },
+  { to: '/chrismed/domiciliar', labels: { pt: 'Consulta domiciliar', en: 'Home visit', es: 'Visita a domicilio' } },
+  { to: '/chrismed/consultorio', labels: { pt: 'Consulta no consultório', en: 'In-office', es: 'En consultorio' } },
+  { to: '/chrismed/ocupacional', labels: { pt: 'Empresa', en: 'For business', es: 'Empresa' }, emphasis: 'company' },
+  { to: '/chrismed/contato', labels: { pt: 'Contato', en: 'Contact', es: 'Contacto' } },
+  { to: '/chrismed/medicos', labels: { pt: 'Área dos Médicos', en: 'Doctors area', es: 'Área de médicos' } },
 ];
 
 const CTA = {
-  book: { pt: 'Agendar consulta', en: 'Book a consultation', es: 'Agendar consulta' },
-  oliver: { pt: 'Falar com Oliver', en: 'Talk to Oliver', es: 'Hablar con Oliver' },
+  book: { pt: 'Agendar agora', en: 'Book now', es: 'Agendar ahora' },
 } as const;
 
 export function useLang(): Lang {
@@ -58,32 +60,45 @@ export function ChrismedHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-emerald-900/10 bg-[#f7f4ed]/90 backdrop-blur">
       <div className="container flex items-center justify-between gap-4 py-4">
-        <Link to="/chrismed" className="flex items-center gap-3">
+        <Link to="/chrismed/dra-cristiane" className="flex items-center gap-3">
           <div className="h-11 w-11 rounded-full border border-amber-300/70 bg-gradient-to-br from-emerald-900 to-emerald-800 text-amber-100 flex items-center justify-center font-serif text-lg shadow-sm">
             C
           </div>
           <div className="leading-tight">
             <div className="font-serif text-lg text-emerald-950">CrisMed</div>
-            <div className="text-[10px] uppercase tracking-[0.18em] text-amber-700/90">Medicina privada · Internacional</div>
+            <div className="text-[10px] uppercase tracking-[0.18em] text-amber-700/90">Dra. Cristiane Alencar</div>
           </div>
         </Link>
 
         <nav className="hidden xl:flex items-center gap-0.5">
           {NAV.map((item) => {
-            const active = pathname === item.to.split('#')[0];
+            const active = pathname === item.to;
+            const isCompany = item.emphasis === 'company';
             return (
               <Link
                 key={item.to}
-                to={item.to.split('#')[0]}
-                hash={item.to.includes('#') ? item.to.split('#')[1] : undefined}
+                to={item.to}
                 className={cn(
-                  'px-3 py-1.5 text-[13px] rounded-md transition-colors',
-                  active
+                  'px-3 py-1.5 text-[13px] rounded-md transition-all',
+                  isCompany
+                    ? cn(
+                        'font-semibold border border-amber-400/70 bg-amber-100/70 text-emerald-950',
+                        'hover:bg-amber-300 hover:text-emerald-950 hover:shadow-[0_8px_24px_-10px_rgba(180,120,20,0.6)] hover:-translate-y-px',
+                        active && 'bg-amber-300 shadow-[0_8px_24px_-10px_rgba(180,120,20,0.6)]',
+                      )
+                    : active
                     ? 'text-emerald-950 font-medium bg-emerald-900/5'
                     : 'text-emerald-900/70 hover:text-emerald-950 hover:bg-emerald-900/5',
                 )}
               >
-                {item.labels[lang]}
+                {isCompany ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    <Briefcase className="h-3.5 w-3.5" />
+                    {item.labels[lang]}
+                  </span>
+                ) : (
+                  item.labels[lang]
+                )}
               </Link>
             );
           })}
@@ -91,11 +106,8 @@ export function ChrismedHeader() {
 
         <div className="flex items-center gap-2">
           <LangSwitcher lang={lang} />
-          <Button asChild size="sm" variant="ghost" className="hidden md:inline-flex text-emerald-900 hover:bg-emerald-900/5">
-            <a href="#oliver">{CTA.oliver[lang]}</a>
-          </Button>
-          <Button asChild size="sm" className="hidden md:inline-flex bg-emerald-900 hover:bg-emerald-950 text-amber-50">
-            <Link to="/chrismed">{CTA.book[lang]}</Link>
+          <Button asChild size="sm" className="hidden md:inline-flex bg-emerald-900 hover:bg-emerald-950 text-amber-50 gap-1.5">
+            <Link to="/chrismed/agendar"><CalendarCheck className="h-4 w-4" />{CTA.book[lang]}</Link>
           </Button>
           <button
             className="xl:hidden p-2 rounded-md text-emerald-900 hover:bg-emerald-900/5"
@@ -113,16 +125,20 @@ export function ChrismedHeader() {
             {NAV.map((item) => (
               <Link
                 key={item.to}
-                to={item.to.split('#')[0]}
-                hash={item.to.includes('#') ? item.to.split('#')[1] : undefined}
+                to={item.to}
                 onClick={() => setOpen(false)}
-                className="px-2 py-2 text-sm text-emerald-900/80 hover:text-emerald-950 rounded-md"
+                className={cn(
+                  'px-2 py-2 text-sm rounded-md',
+                  item.emphasis === 'company'
+                    ? 'bg-amber-100 text-emerald-950 font-semibold border border-amber-300'
+                    : 'text-emerald-900/80 hover:text-emerald-950',
+                )}
               >
                 {item.labels[lang]}
               </Link>
             ))}
             <Button asChild className="mt-2 bg-emerald-900 hover:bg-emerald-950 text-amber-50">
-              <Link to="/chrismed">{CTA.book[lang]}</Link>
+              <Link to="/chrismed/agendar" onClick={() => setOpen(false)}>{CTA.book[lang]}</Link>
             </Button>
           </div>
         </div>
@@ -130,6 +146,7 @@ export function ChrismedHeader() {
     </header>
   );
 }
+
 
 export function ChrismedFooter() {
   const lang = useLang();
