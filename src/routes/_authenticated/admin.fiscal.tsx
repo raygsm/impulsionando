@@ -21,6 +21,7 @@ import {
   logFiscalLinkAction,
   logFiscalPreviewCsvDownload,
   listTestSendHistory,
+  getTestFiscalEmailPdfHtml,
 } from "@/lib/admin-fiscal.functions";
 import { downloadCsv } from "@/lib/exports";
 
