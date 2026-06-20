@@ -838,13 +838,16 @@ export const sendMonthlyFiscalEmail = createServerFn({ method: "POST" })
   });
 
 export const resendMonthlyFiscalEmail = createServerFn({ method: "POST" })
-  .inputValidator((data: { year: number; month: number; force?: boolean; expiry_hours?: number }) => {
+  .inputValidator((data: { year: number; month: number; force?: boolean; expiry_hours?: number; reason?: string }) => {
     if (!Number.isInteger(data.year) || !Number.isInteger(data.month)) {
       throw new Error("invalid period");
     }
     if (data.expiry_hours !== undefined) {
       if (!Number.isInteger(data.expiry_hours) || data.expiry_hours < 1 || data.expiry_hours > 720)
         throw new Error("Expiração do link entre 1h e 720h.");
+    }
+    if (data.reason !== undefined && typeof data.reason === "string") {
+      data.reason = data.reason.trim().slice(0, 500);
     }
     return data;
   })
