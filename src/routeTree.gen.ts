@@ -199,6 +199,7 @@ import { Route as MarocasContratarPlanoRouteImport } from './routes/marocas.cont
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ImoveisSlugPropertyIdRouteImport } from './routes/imoveis.$slug.$propertyId'
 import { Route as DemoNichoSlugRouteImport } from './routes/demo.nicho.$slug'
+import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiMercadopagoWebhookRouteImport } from './routes/api/mercadopago/webhook'
 import { Route as AuthenticatedWhiteLabelCockpitRouteImport } from './routes/_authenticated/white-label.cockpit'
 import { Route as AuthenticatedWhiteLabelCapacidadeRouteImport } from './routes/_authenticated/white-label.capacidade'
@@ -1411,6 +1412,11 @@ const ImoveisSlugPropertyIdRoute = ImoveisSlugPropertyIdRouteImport.update({
 const DemoNichoSlugRoute = DemoNichoSlugRouteImport.update({
   id: '/demo/nicho/$slug',
   path: '/demo/nicho/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
+  id: '/api/public/health',
+  path: '/api/public/health',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiMercadopagoWebhookRoute = ApiMercadopagoWebhookRouteImport.update({
@@ -3200,6 +3206,7 @@ export interface FileRoutesByFullPath {
   '/white-label/capacidade': typeof AuthenticatedWhiteLabelCapacidadeRoute
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
+  '/api/public/health': typeof ApiPublicHealthRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -3623,6 +3630,7 @@ export interface FileRoutesByTo {
   '/white-label/capacidade': typeof AuthenticatedWhiteLabelCapacidadeRoute
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
+  '/api/public/health': typeof ApiPublicHealthRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -4060,6 +4068,7 @@ export interface FileRoutesById {
   '/_authenticated/white-label/capacidade': typeof AuthenticatedWhiteLabelCapacidadeRoute
   '/_authenticated/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
+  '/api/public/health': typeof ApiPublicHealthRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -4496,6 +4505,7 @@ export interface FileRouteTypes {
     | '/white-label/capacidade'
     | '/white-label/cockpit'
     | '/api/mercadopago/webhook'
+    | '/api/public/health'
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
@@ -4919,6 +4929,7 @@ export interface FileRouteTypes {
     | '/white-label/capacidade'
     | '/white-label/cockpit'
     | '/api/mercadopago/webhook'
+    | '/api/public/health'
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
@@ -5355,6 +5366,7 @@ export interface FileRouteTypes {
     | '/_authenticated/white-label/capacidade'
     | '/_authenticated/white-label/cockpit'
     | '/api/mercadopago/webhook'
+    | '/api/public/health'
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
@@ -5553,6 +5565,7 @@ export interface RootRouteChildren {
   ShowroomIndexRoute: typeof ShowroomIndexRoute
   TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
   ApiMercadopagoWebhookRoute: typeof ApiMercadopagoWebhookRoute
+  ApiPublicHealthRoute: typeof ApiPublicHealthRoute
   DemoNichoSlugRoute: typeof DemoNichoSlugRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   PortalContabilidadeTokenRoute: typeof PortalContabilidadeTokenRoute
@@ -6919,6 +6932,13 @@ declare module '@tanstack/react-router' {
       path: '/demo/nicho/$slug'
       fullPath: '/demo/nicho/$slug'
       preLoaderRoute: typeof DemoNichoSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/health': {
+      id: '/api/public/health'
+      path: '/api/public/health'
+      fullPath: '/api/public/health'
+      preLoaderRoute: typeof ApiPublicHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/mercadopago/webhook': {
@@ -9798,6 +9818,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShowroomIndexRoute: ShowroomIndexRoute,
   TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
   ApiMercadopagoWebhookRoute: ApiMercadopagoWebhookRoute,
+  ApiPublicHealthRoute: ApiPublicHealthRoute,
   DemoNichoSlugRoute: DemoNichoSlugRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   PortalContabilidadeTokenRoute: PortalContabilidadeTokenRoute,
