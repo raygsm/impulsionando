@@ -1362,7 +1362,7 @@ function AdminFiscalPage() {
             </div>
 
             <div className="mb-2 flex items-center gap-2">
-              <button onClick={() => setAuditFilters({})}
+              <button onClick={() => setAuditFilters({ from: undefined, to: undefined, user_email: undefined, recipient: undefined, kind: undefined, kinds: undefined })}
                 className="rounded border border-border bg-background px-2 py-1 text-xs">
                 Limpar filtros
               </button>
