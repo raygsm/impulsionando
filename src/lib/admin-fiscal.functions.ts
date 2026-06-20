@@ -90,10 +90,12 @@ async function audit(
     | "fiscal.email.skipped"
     | "fiscal.schedule.update"
     | "fiscal.preview"
+    | "fiscal.preview.csv"
     | "fiscal.link.regenerated"
     | "fiscal.link.copied"
     | "fiscal.link.opened"
-    | "fiscal.email.test",
+    | "fiscal.email.test"
+    | "fiscal.email.test.failed",
   params: Record<string, unknown>,
   row_count: number,
   notes?: string,
@@ -1000,12 +1002,93 @@ export const sendTestFiscalEmail = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     await ensureAdmin(supabase, userId);
-    return sendFiscalReportInternal({
-      year: data.year, month: data.month, recipient: data.recipient,
-      triggeredBy: "user", userId, emailMode: data.email_mode,
-      expirySeconds: data.expiry_hours ? data.expiry_hours * 3600 : undefined,
-      test: true,
+    try {
+      const res = await sendFiscalReportInternal({
+        year: data.year, month: data.month, recipient: data.recipient,
+        triggeredBy: "user", userId, emailMode: data.email_mode,
+        expirySeconds: data.expiry_hours ? data.expiry_hours * 3600 : undefined,
+        test: true,
+      });
+      return res;
+    } catch (e: any) {
+      await audit(supabase, userId, "fiscal.email.test.failed", {
+        year: data.year, month: data.month, recipient: data.recipient,
+        email_mode: data.email_mode ?? null,
+        expiry_hours: data.expiry_hours ?? null,
+        error: String(e?.message ?? e).slice(0, 1000),
+      }, 0, "test-failed");
+      throw e;
+    }
+  });
+
+// ───────────────────────── Histórico de testes ─────────────────────────
+
+export const listTestSendHistory = createServerFn({ method: "GET" })
+  .inputValidator((data?: { limit?: number }) => data ?? {})
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    await ensureAdmin(supabase, userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const limit = Math.max(1, Math.min(data.limit ?? 10, 50));
+    const { data: rows, error } = await supabaseAdmin
+      .from("core_export_logs")
+      .select("id, user_id, kind, params, notes, created_at")
+      .eq("scope", "admin.fiscal")
+      .in("kind", ["fiscal.email.test", "fiscal.email.test.failed"])
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    const userIds = Array.from(new Set((rows ?? []).map((r) => r.user_id).filter(Boolean)));
+    const { data: users } = userIds.length
+      ? await supabaseAdmin
+          .from("user_profiles")
+          .select("user_id, email")
+          .in("user_id", userIds as string[])
+      : { data: [] };
+    const uMap = new Map<string, any>((users ?? []).map((u: any) => [u.user_id, u]));
+    return (rows ?? []).map((r) => {
+      const p = (r.params ?? {}) as any;
+      return {
+        id: r.id,
+        created_at: r.created_at,
+        status: r.kind === "fiscal.email.test.failed" ? "failed" : "sent",
+        recipient: p.recipient ?? null,
+        year: p.year ?? null,
+        month: p.month ?? null,
+        email_mode: p.email_mode ?? null,
+        error: p.error ?? null,
+        user_email: r.user_id ? uMap.get(r.user_id)?.email ?? null : null,
+      };
     });
+  });
+
+// ───────────────────────── Log de download do CSV no preview ─────────────────────────
+
+export const logFiscalPreviewCsvDownload = createServerFn({ method: "POST" })
+  .inputValidator((data: {
+    year: number; month: number;
+    recipient?: string | null;
+    email_mode?: "link" | "inline" | null;
+    row_count?: number;
+    filename?: string;
+  }) => {
+    if (!Number.isInteger(data.year) || !Number.isInteger(data.month))
+      throw new Error("invalid period");
+    return data;
+  })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    await ensureAdmin(supabase, userId);
+    await audit(supabase, userId, "fiscal.preview.csv", {
+      year: data.year, month: data.month,
+      recipient: data.recipient ?? null,
+      email_mode: data.email_mode ?? null,
+      filename: data.filename ?? null,
+      source: "preview-modal",
+    }, data.row_count ?? 0, "preview-download");
+    return { ok: true };
   });
 
 // ───────────────────────── Auditoria de link assinado ─────────────────────────
