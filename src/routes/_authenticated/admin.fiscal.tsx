@@ -181,6 +181,11 @@ function AdminFiscalPage() {
     queryFn: () => fetchFailed(),
     refetchInterval: 60_000,
   });
+  const testHistoryQ = useQuery({
+    queryKey: ["admin-fiscal-test-history"],
+    queryFn: () => fetchTestHistory({ data: { limit: 10 } }),
+    refetchOnWindowFocus: false,
+  });
 
 
   useEffect(() => {
