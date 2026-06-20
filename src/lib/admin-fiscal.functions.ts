@@ -495,6 +495,7 @@ async function sendFiscalReportInternal(opts: {
   triggeredBy: "user" | "cron" | "retry";
   userId?: string | null;
   emailMode?: "link" | "inline";
+  expirySeconds?: number;
 }) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
