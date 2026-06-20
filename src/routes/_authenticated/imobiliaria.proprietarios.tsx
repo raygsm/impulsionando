@@ -33,8 +33,23 @@ type Owner = {
   status: "active" | "inactive";
   portal_invited_at: string | null;
   portal_last_login_at: string | null;
+  portal_token: string | null;
   created_at: string;
 };
+
+async function copyPortalLink(token: string | null) {
+  if (!token) {
+    toast.error("Token não disponível");
+    return;
+  }
+  const url = `${window.location.origin}/portal/proprietario/${token}`;
+  try {
+    await navigator.clipboard.writeText(url);
+    toast.success("Link do portal copiado");
+  } catch {
+    toast.message(url);
+  }
+}
 
 type FormState = Partial<Owner>;
 
