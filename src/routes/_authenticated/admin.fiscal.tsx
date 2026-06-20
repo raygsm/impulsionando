@@ -159,8 +159,47 @@ function AdminFiscalPage() {
   }, [acctQ.data?.email]);
 
   useEffect(() => {
-    if (schedQ.data) setSchedDraft(schedQ.data);
+    if (schedQ.data) {
+      setSchedDraft({
+        day: schedQ.data.day,
+        hour: schedQ.data.hour,
+        minute: schedQ.data.minute,
+        tz: schedQ.data.tz,
+        email_mode: schedQ.data.email_mode,
+        max_attempts: schedQ.data.max_attempts ?? 3,
+        backoff_minutes: schedQ.data.backoff_minutes ?? 60,
+        link_expiry_hours: schedQ.data.link_expiry_hours ?? 168,
+      });
+      setExpiryHours(schedQ.data.link_expiry_hours ?? 168);
+    }
   }, [schedQ.data]);
+
+  // Validação client-side da agenda
+  const schedErrors = useMemo(() => {
+    const e: Record<string, string> = {};
+    if (!Number.isInteger(schedDraft.day) || schedDraft.day < 1 || schedDraft.day > 28)
+      e.day = "Dia entre 1 e 28.";
+    if (!Number.isInteger(schedDraft.hour) || schedDraft.hour < 0 || schedDraft.hour > 23)
+      e.hour = "Hora 0–23.";
+    if (!Number.isInteger(schedDraft.minute) || schedDraft.minute < 0 || schedDraft.minute > 59)
+      e.minute = "Minuto 0–59.";
+    if (!isValidTz(schedDraft.tz))
+      e.tz = "Fuso IANA inválido (ex.: America/Sao_Paulo).";
+    if (!Number.isInteger(schedDraft.max_attempts) || schedDraft.max_attempts < 1 || schedDraft.max_attempts > 10)
+      e.max_attempts = "Entre 1 e 10.";
+    if (!Number.isInteger(schedDraft.backoff_minutes) || schedDraft.backoff_minutes < 5 || schedDraft.backoff_minutes > 1440)
+      e.backoff_minutes = "Entre 5 e 1440 min.";
+    if (!Number.isInteger(schedDraft.link_expiry_hours) || schedDraft.link_expiry_hours < 1 || schedDraft.link_expiry_hours > 720)
+      e.link_expiry_hours = "Entre 1h e 720h.";
+    return e;
+  }, [schedDraft]);
+  const schedHasErrors = Object.keys(schedErrors).length > 0;
+
+  const expiryError = useMemo(() => {
+    if (!Number.isInteger(expiryHours) || expiryHours < 1 || expiryHours > 720)
+      return "Expiração entre 1h e 720h.";
+    return null;
+  }, [expiryHours]);
 
   const saveMut = useMutation({
     mutationFn: (email: string) => saveAccountant({ data: { email } }),
@@ -178,6 +217,7 @@ function AdminFiscalPage() {
           year, month,
           recipient: recipientDraft || undefined,
           email_mode: schedDraft.email_mode,
+          expiry_hours: expiryHours,
         },
       }),
     onSuccess: (res: any) => {
@@ -190,7 +230,7 @@ function AdminFiscalPage() {
 
   const resendMut = useMutation({
     mutationFn: (force: boolean) =>
-      resendEmail({ data: { year, month, force } }),
+      resendEmail({ data: { year, month, force, expiry_hours: expiryHours } }),
     onSuccess: (res: any) => {
       setFeedback(`Reenviado para ${res.recipient}.`);
       qc.invalidateQueries({ queryKey: ["admin-fiscal-logs"] });
@@ -202,11 +242,32 @@ function AdminFiscalPage() {
   const schedMut = useMutation({
     mutationFn: () => saveSchedule({ data: schedDraft }),
     onSuccess: () => {
-      setSchedFeedback("Agenda salva. O cron verifica a cada hora e dispara no momento configurado.");
+      setSchedFeedback("Agenda salva. O cron verifica de hora em hora e dispara no momento configurado.");
       qc.invalidateQueries({ queryKey: ["admin-fiscal-schedule"] });
     },
     onError: (e: any) => setSchedFeedback(`Erro: ${e?.message ?? e}`),
   });
+
+  const previewMut = useMutation({
+    mutationFn: () =>
+      previewEmail({ data: { year, month, email_mode: schedDraft.email_mode } }),
+    onSuccess: (res: any) => {
+      setPreviewHtml(res.html);
+      setPreviewMeta({ subject: res.subject, email_mode: res.email_mode, expires_at: res.expires_at });
+    },
+    onError: (e: any) => setFeedback(`Erro na pré-visualização: ${e?.message ?? e}`),
+  });
+
+  const regenMut = useMutation({
+    mutationFn: (csv_path: string) => regenerateLink({ data: { csv_path, expiry_hours: expiryHours } }),
+    onSuccess: (res: any) => {
+      try { navigator.clipboard?.writeText(res.url); } catch {}
+      setFeedback(`Link regerado (expira ${new Date(res.expires_at).toLocaleString("pt-BR")}) e copiado.`);
+      qc.invalidateQueries({ queryKey: ["admin-fiscal-logs"] });
+    },
+    onError: (e: any) => setFeedback(`Erro ao regerar link: ${e?.message ?? e}`),
+  });
+
 
   async function downloadReportCsv() {
     const res = await fetchCsv({ data: { year, month } });
