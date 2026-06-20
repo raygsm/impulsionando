@@ -300,6 +300,25 @@ function AdminFiscalPage() {
 
   const r = q.data;
   const latest = statusQ.data?.latest;
+  const history = statusQ.data?.history ?? [];
+  const failedRuns = failedQ.data?.runs ?? [];
+
+  // Estado do link assinado do envio mais recente (para alerta pré-envio)
+  const latestLinkState = useMemo(() => {
+    const exp = latest?.signed_url_expires_at;
+    if (!exp || !latest?.csv_path) return null;
+    const ms = new Date(exp).getTime() - Date.now();
+    const hours = ms / 3_600_000;
+    return {
+      csv_path: latest.csv_path as string,
+      expires_at: exp as string,
+      hours_remaining: hours,
+      expired: hours <= 0,
+      expiring_soon: hours > 0 && hours <= 24,
+    };
+  }, [latest]);
+
+
 
   const auditRows = useMemo(
     () =>
