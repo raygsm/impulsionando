@@ -1085,14 +1085,29 @@ function AdminFiscalPage() {
                             </button>
                             <button
                               onClick={() => {
+                                const reason = window.prompt(
+                                  `Motivo do reenvio imediato — ${String(f.month).padStart(2, "0")}/${f.year}\n\nIsso ignora backoff e máx. tentativas. O texto fica registrado na auditoria.`,
+                                  "",
+                                );
+                                if (reason === null) return; // cancelado
+                                const trimmed = reason.trim();
+                                if (!trimmed) {
+                                  setFeedback("Reenvio cancelado: informe um motivo.");
+                                  return;
+                                }
                                 setYear(f.year); setMonth(f.month);
-                                setTimeout(() => resendMut.mutate(true), 50);
+                                setTimeout(() => resendMut.mutate({
+                                  force: true,
+                                  reason: trimmed,
+                                  year: f.year, month: f.month,
+                                }), 50);
                               }}
                               disabled={resendMut.isPending}
-                              title="Reenvia imediatamente ignorando backoff e máx. tentativas. A ação fica registrada na auditoria."
+                              title="Reenvia imediatamente ignorando backoff e máx. tentativas. Pede um motivo que é gravado na auditoria."
                               className="rounded bg-red-600 px-2 py-0.5 text-[10px] font-bold text-white disabled:opacity-40">
                               Reenviar agora
                             </button>
+
 
                           </div>
                         </td>
