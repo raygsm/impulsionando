@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+
 
 export const Route = createFileRoute('/chrismed/ocupacional')({
   head: () => ({
@@ -34,14 +36,32 @@ function OcupacionalPage() {
     }
     setSending(true);
     try {
-      // Lightweight: just toast + (future) persist via server fn. Keep it safe and not blocking.
-      await new Promise((r) => setTimeout(r, 500));
+      const { error } = await supabase.from('marketing_leads').insert({
+        source: 'outro',
+        name: form.contact,
+        email: form.email,
+        phone: form.phone || null,
+        company: form.company,
+        message: form.message || null,
+        answers: {
+          tipo: 'empresa_medicina_ocupacional',
+          cnpj: form.cnpj || null,
+          colaboradores: form.employees || null,
+          tenant: 'chrismed',
+          classificacao: 'Empresa — Medicina Ocupacional',
+        },
+        page_url: typeof window !== 'undefined' ? window.location.href : null,
+      });
+      if (error) throw error;
       toast.success(t.okSent);
       setForm({ company: '', cnpj: '', contact: '', email: '', phone: '', employees: '', message: '' });
+    } catch (err: any) {
+      toast.error(err?.message ?? 'Não foi possível enviar agora.');
     } finally {
       setSending(false);
     }
   }
+
 
   return (
     <ChrismedShell>
