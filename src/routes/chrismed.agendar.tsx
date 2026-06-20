@@ -1,5 +1,6 @@
 import { createFileRoute, useRouter, useSearch } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
+import { zodValidator, fallback } from '@tanstack/zod-adapter';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -32,11 +33,11 @@ const MODALITY_META: Record<Offering['modality'], { icon: typeof Stethoscope; la
 };
 
 const searchSchema = z.object({
-  modality: z.enum(['presencial', 'telemedicina', 'domiciliar', 'retorno']).optional(),
+  modality: fallback(z.enum(['presencial', 'telemedicina', 'domiciliar', 'retorno']).optional(), undefined),
 });
 
 export const Route = createFileRoute('/chrismed/agendar')({
-  validateSearch: searchSchema,
+  validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
       { title: 'CHRISMED — Central Médica Premium · agende em minutos' },
