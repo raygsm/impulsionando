@@ -268,6 +268,7 @@ export const listFiscalAuditLogs = createServerFn({ method: "GET" })
     user_email?: string;
     recipient?: string;
     kind?: string;
+    kinds?: string[];
     limit?: number;
   }) => data ?? {})
   .middleware([requireSupabaseAuth])
@@ -287,7 +288,11 @@ export const listFiscalAuditLogs = createServerFn({ method: "GET" })
 
     if (data.from) query = query.gte("created_at", data.from);
     if (data.to) query = query.lte("created_at", data.to);
-    if (data.kind) query = query.eq("kind", data.kind);
+    if (data.kinds && data.kinds.length > 0) {
+      query = query.in("kind", data.kinds);
+    } else if (data.kind) {
+      query = query.eq("kind", data.kind);
+    }
 
     const { data: rows, error } = await query;
     if (error) throw error;
