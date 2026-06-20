@@ -2,7 +2,7 @@
 // Chamado por pg_cron com header HMAC. Usa service_role.
 import { createFileRoute } from '@tanstack/react-router'
 import { createHmac, timingSafeEqual } from 'crypto'
-import { runConsolidation } from '@/lib/payout-batches.functions'
+import { runConsolidation } from '@/lib/payout-consolidation'
 
 function frequencyToPeriod(freq: string, now: Date): { start: string; end: string } | null {
   const end = new Date(now)
