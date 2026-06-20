@@ -888,7 +888,7 @@ function AdminFiscalPage() {
                     value={testFilters.year ?? ""}
                     onChange={(e) => setTestFilters({ ...testFilters, year: e.target.value ? Number(e.target.value) : undefined, page: 0 })}
                     className="w-16 rounded border border-border bg-background px-1 py-0.5 text-[10px]" />
-                  <button onClick={() => setTestFilters({ status: "all", page: 0 })}
+                  <button onClick={() => setTestFilters({ recipient: undefined, status: "all", year: undefined, month: undefined, page: 0 })}
                     className="rounded border border-border bg-background px-1 py-0.5 text-[10px]">
                     Limpar
                   </button>
