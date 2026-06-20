@@ -237,6 +237,30 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Failed to persist payment', details: insErr.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
+    // === Registra evento de monetização (pending) ============================
+    if (modelKind) {
+      try {
+        await supabase.from('core_payout_events').insert({
+          company_id: body.company_id,
+          model_id: modelId,
+          rate_id: rateId,
+          event_type: revshareEvent,
+          gross_cents: body.amount_cents,
+          fee_cents: appFeeCents,
+          percent_bps_applied: percentBpsApplied,
+          rule_version: ruleVersion,
+          provider: 'mercadopago',
+          provider_payment_id: payment.mp_payment_id ?? payment.mp_preference_id ?? null,
+          status: 'pending',
+          reference_table: 'mpago_payments',
+          reference_id: payment.id,
+          metadata: { external_reference: externalRef, model_kind: modelKind },
+        });
+      } catch (e) {
+        console.warn('[monetization] failed to record payout event:', e);
+      }
+    }
+
     return new Response(JSON.stringify({
       payment,
       mp: {
