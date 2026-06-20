@@ -129,6 +129,7 @@ import { Route as ComoFuncionaFitnessRouteImport } from './routes/como-funciona.
 import { Route as ClubeLoginRouteImport } from './routes/clube.login'
 import { Route as ClubeCadastroRouteImport } from './routes/clube.cadastro'
 import { Route as ChrismedOfertasRouteImport } from './routes/chrismed.ofertas'
+import { Route as ChrismedInternacionalRouteImport } from './routes/chrismed.internacional'
 import { Route as ChrismedDraCristianeRouteImport } from './routes/chrismed.dra-cristiane'
 import { Route as ChrismedClinicaRouteImport } from './routes/chrismed.clinica'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
@@ -1023,6 +1024,11 @@ const ClubeCadastroRoute = ClubeCadastroRouteImport.update({
 const ChrismedOfertasRoute = ChrismedOfertasRouteImport.update({
   id: '/ofertas',
   path: '/ofertas',
+  getParentRoute: () => ChrismedRoute,
+} as any)
+const ChrismedInternacionalRoute = ChrismedInternacionalRouteImport.update({
+  id: '/internacional',
+  path: '/internacional',
   getParentRoute: () => ChrismedRoute,
 } as any)
 const ChrismedDraCristianeRoute = ChrismedDraCristianeRouteImport.update({
@@ -2770,6 +2776,7 @@ export interface FileRoutesByFullPath {
   '/checkout/success': typeof CheckoutSuccessRoute
   '/chrismed/clinica': typeof ChrismedClinicaRoute
   '/chrismed/dra-cristiane': typeof ChrismedDraCristianeRoute
+  '/chrismed/internacional': typeof ChrismedInternacionalRoute
   '/chrismed/ofertas': typeof ChrismedOfertasRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
   '/clube/login': typeof ClubeLoginRoute
@@ -3170,6 +3177,7 @@ export interface FileRoutesByTo {
   '/checkout/success': typeof CheckoutSuccessRoute
   '/chrismed/clinica': typeof ChrismedClinicaRoute
   '/chrismed/dra-cristiane': typeof ChrismedDraCristianeRoute
+  '/chrismed/internacional': typeof ChrismedInternacionalRoute
   '/chrismed/ofertas': typeof ChrismedOfertasRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
   '/clube/login': typeof ClubeLoginRoute
@@ -3584,6 +3592,7 @@ export interface FileRoutesById {
   '/checkout/success': typeof CheckoutSuccessRoute
   '/chrismed/clinica': typeof ChrismedClinicaRoute
   '/chrismed/dra-cristiane': typeof ChrismedDraCristianeRoute
+  '/chrismed/internacional': typeof ChrismedInternacionalRoute
   '/chrismed/ofertas': typeof ChrismedOfertasRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
   '/clube/login': typeof ClubeLoginRoute
@@ -3997,6 +4006,7 @@ export interface FileRouteTypes {
     | '/checkout/success'
     | '/chrismed/clinica'
     | '/chrismed/dra-cristiane'
+    | '/chrismed/internacional'
     | '/chrismed/ofertas'
     | '/clube/cadastro'
     | '/clube/login'
@@ -4397,6 +4407,7 @@ export interface FileRouteTypes {
     | '/checkout/success'
     | '/chrismed/clinica'
     | '/chrismed/dra-cristiane'
+    | '/chrismed/internacional'
     | '/chrismed/ofertas'
     | '/clube/cadastro'
     | '/clube/login'
@@ -4810,6 +4821,7 @@ export interface FileRouteTypes {
     | '/checkout/success'
     | '/chrismed/clinica'
     | '/chrismed/dra-cristiane'
+    | '/chrismed/internacional'
     | '/chrismed/ofertas'
     | '/clube/cadastro'
     | '/clube/login'
@@ -6142,6 +6154,13 @@ declare module '@tanstack/react-router' {
       path: '/ofertas'
       fullPath: '/chrismed/ofertas'
       preLoaderRoute: typeof ChrismedOfertasRouteImport
+      parentRoute: typeof ChrismedRoute
+    }
+    '/chrismed/internacional': {
+      id: '/chrismed/internacional'
+      path: '/internacional'
+      fullPath: '/chrismed/internacional'
+      preLoaderRoute: typeof ChrismedInternacionalRouteImport
       parentRoute: typeof ChrismedRoute
     }
     '/chrismed/dra-cristiane': {
@@ -9053,12 +9072,14 @@ const AuthenticatedRouteRouteWithChildren =
 interface ChrismedRouteChildren {
   ChrismedClinicaRoute: typeof ChrismedClinicaRoute
   ChrismedDraCristianeRoute: typeof ChrismedDraCristianeRoute
+  ChrismedInternacionalRoute: typeof ChrismedInternacionalRoute
   ChrismedOfertasRoute: typeof ChrismedOfertasRoute
 }
 
 const ChrismedRouteChildren: ChrismedRouteChildren = {
   ChrismedClinicaRoute: ChrismedClinicaRoute,
   ChrismedDraCristianeRoute: ChrismedDraCristianeRoute,
+  ChrismedInternacionalRoute: ChrismedInternacionalRoute,
   ChrismedOfertasRoute: ChrismedOfertasRoute,
 }
 
