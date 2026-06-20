@@ -284,6 +284,7 @@ import { Route as AuthenticatedCrmActivitiesRouteImport } from './routes/_authen
 import { Route as AuthenticatedCoreTestesRouteImport } from './routes/_authenticated/core.testes'
 import { Route as AuthenticatedCoreTemplatesRouteImport } from './routes/_authenticated/core.templates'
 import { Route as AuthenticatedCoreSaudeRouteImport } from './routes/_authenticated/core.saude'
+import { Route as AuthenticatedCoreRepassesRouteImport } from './routes/_authenticated/core.repasses'
 import { Route as AuthenticatedCoreReleasesRouteImport } from './routes/_authenticated/core.releases'
 import { Route as AuthenticatedCorePromptsRouteImport } from './routes/_authenticated/core.prompts'
 import { Route as AuthenticatedCorePlanosRouteImport } from './routes/_authenticated/core.planos'
@@ -1915,6 +1916,12 @@ const AuthenticatedCoreSaudeRoute = AuthenticatedCoreSaudeRouteImport.update({
   path: '/saude',
   getParentRoute: () => AuthenticatedCoreRoute,
 } as any)
+const AuthenticatedCoreRepassesRoute =
+  AuthenticatedCoreRepassesRouteImport.update({
+    id: '/repasses',
+    path: '/repasses',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreReleasesRoute =
   AuthenticatedCoreReleasesRouteImport.update({
     id: '/releases',
@@ -3153,6 +3160,7 @@ export interface FileRoutesByFullPath {
   '/core/planos': typeof AuthenticatedCorePlanosRoute
   '/core/prompts': typeof AuthenticatedCorePromptsRoute
   '/core/releases': typeof AuthenticatedCoreReleasesRoute
+  '/core/repasses': typeof AuthenticatedCoreRepassesRoute
   '/core/saude': typeof AuthenticatedCoreSaudeRoute
   '/core/templates': typeof AuthenticatedCoreTemplatesRoute
   '/core/testes': typeof AuthenticatedCoreTestesRoute
@@ -3581,6 +3589,7 @@ export interface FileRoutesByTo {
   '/core/planos': typeof AuthenticatedCorePlanosRoute
   '/core/prompts': typeof AuthenticatedCorePromptsRoute
   '/core/releases': typeof AuthenticatedCoreReleasesRoute
+  '/core/repasses': typeof AuthenticatedCoreRepassesRoute
   '/core/saude': typeof AuthenticatedCoreSaudeRoute
   '/core/templates': typeof AuthenticatedCoreTemplatesRoute
   '/core/testes': typeof AuthenticatedCoreTestesRoute
@@ -4023,6 +4032,7 @@ export interface FileRoutesById {
   '/_authenticated/core/planos': typeof AuthenticatedCorePlanosRoute
   '/_authenticated/core/prompts': typeof AuthenticatedCorePromptsRoute
   '/_authenticated/core/releases': typeof AuthenticatedCoreReleasesRoute
+  '/_authenticated/core/repasses': typeof AuthenticatedCoreRepassesRoute
   '/_authenticated/core/saude': typeof AuthenticatedCoreSaudeRoute
   '/_authenticated/core/templates': typeof AuthenticatedCoreTemplatesRoute
   '/_authenticated/core/testes': typeof AuthenticatedCoreTestesRoute
@@ -4464,6 +4474,7 @@ export interface FileRouteTypes {
     | '/core/planos'
     | '/core/prompts'
     | '/core/releases'
+    | '/core/repasses'
     | '/core/saude'
     | '/core/templates'
     | '/core/testes'
@@ -4892,6 +4903,7 @@ export interface FileRouteTypes {
     | '/core/planos'
     | '/core/prompts'
     | '/core/releases'
+    | '/core/repasses'
     | '/core/saude'
     | '/core/templates'
     | '/core/testes'
@@ -5333,6 +5345,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/planos'
     | '/_authenticated/core/prompts'
     | '/_authenticated/core/releases'
+    | '/_authenticated/core/repasses'
     | '/_authenticated/core/saude'
     | '/_authenticated/core/templates'
     | '/_authenticated/core/testes'
@@ -7582,6 +7595,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreSaudeRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/repasses': {
+      id: '/_authenticated/core/repasses'
+      path: '/repasses'
+      fullPath: '/core/repasses'
+      preLoaderRoute: typeof AuthenticatedCoreRepassesRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/releases': {
       id: '/_authenticated/core/releases'
       path: '/releases'
@@ -8994,6 +9014,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCorePlanosRoute: typeof AuthenticatedCorePlanosRoute
   AuthenticatedCorePromptsRoute: typeof AuthenticatedCorePromptsRoute
   AuthenticatedCoreReleasesRoute: typeof AuthenticatedCoreReleasesRoute
+  AuthenticatedCoreRepassesRoute: typeof AuthenticatedCoreRepassesRoute
   AuthenticatedCoreSaudeRoute: typeof AuthenticatedCoreSaudeRoute
   AuthenticatedCoreTemplatesRoute: typeof AuthenticatedCoreTemplatesRoute
   AuthenticatedCoreTestesRoute: typeof AuthenticatedCoreTestesRoute
@@ -9047,6 +9068,7 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCorePlanosRoute: AuthenticatedCorePlanosRoute,
   AuthenticatedCorePromptsRoute: AuthenticatedCorePromptsRoute,
   AuthenticatedCoreReleasesRoute: AuthenticatedCoreReleasesRoute,
+  AuthenticatedCoreRepassesRoute: AuthenticatedCoreRepassesRoute,
   AuthenticatedCoreSaudeRoute: AuthenticatedCoreSaudeRoute,
   AuthenticatedCoreTemplatesRoute: AuthenticatedCoreTemplatesRoute,
   AuthenticatedCoreTestesRoute: AuthenticatedCoreTestesRoute,
