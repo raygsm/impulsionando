@@ -113,6 +113,17 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
 
+  {
+    label: "Ecossistema",
+    audiences: ["core"],
+    items: [
+      { to: "/core/ecossistema", label: "Painel do Ecossistema", icon: Sparkles, superOnly: true },
+      { to: "/ecossistema", label: "Vitrine pública", icon: Store },
+    ],
+  },
+
+
+
 
 
   {
