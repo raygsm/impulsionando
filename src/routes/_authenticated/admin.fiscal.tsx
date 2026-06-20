@@ -769,3 +769,21 @@ function Stat({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+function inputCls(error?: string) {
+  return `mt-1 w-full rounded border bg-background px-2 py-1 text-sm ${
+    error ? "border-red-500" : "border-border"
+  }`;
+}
+
+function Field({
+  label, error, children,
+}: { label: string; error?: string; children: React.ReactNode }) {
+  return (
+    <label className="text-xs">
+      <span>{label}</span>
+      {children}
+      {error && <span className="mt-0.5 block text-[10px] text-red-700">{error}</span>}
+    </label>
+  );
+}
