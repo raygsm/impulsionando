@@ -8,6 +8,8 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
+type RevshareEvent = 'sale' | 'rent' | 'recurring' | 'service' | 'subscription' | 'event' | 'product';
+
 interface CreatePaymentBody {
   company_id: string;
   payment_method: 'pix' | 'credit_card' | 'debit_card' | 'boleto' | 'preference';
@@ -23,6 +25,8 @@ interface CreatePaymentBody {
   context_type?: string;
   context_id?: string;
   metadata?: Record<string, unknown>;
+  // Split / monetização
+  revshare_event_type?: RevshareEvent;
   // Cartão
   token?: string;
   installments?: number;
@@ -31,6 +35,20 @@ interface CreatePaymentBody {
   // Preferência
   items?: Array<{ title: string; quantity: number; unit_price: number }>;
   back_urls?: { success: string; pending: string; failure: string };
+}
+
+// Cálculo do fee — espelha src/lib/payouts.ts (cents + bps).
+function calcFee(
+  gross: number,
+  bps: number,
+  minBps?: number | null,
+  maxBps?: number | null,
+): number {
+  if (gross <= 0 || bps <= 0) return 0;
+  let fee = Math.floor((gross * bps) / 10_000);
+  if (minBps != null) fee = Math.max(fee, Math.floor((gross * minBps) / 10_000));
+  if (maxBps != null) fee = Math.min(fee, Math.floor((gross * maxBps) / 10_000));
+  return Math.min(fee, gross);
 }
 
 Deno.serve(async (req) => {
