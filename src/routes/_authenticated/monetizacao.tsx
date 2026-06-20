@@ -34,12 +34,17 @@ const monetizationQuery = (
 export const Route = createFileRoute('/_authenticated/monetizacao')({
   component: ClientMonetizacaoPage,
   head: () => ({ meta: [{ title: 'Monetização — Impulsionando' }] }),
-  errorComponent: ({ error }) => (
-    <div className="p-6">
-      <h1 className="text-xl font-semibold">Erro</h1>
-      <p className="text-sm text-muted-foreground mt-2">{String((error as Error)?.message ?? error)}</p>
-    </div>
-  ),
+  errorComponent: ({ error }) => {
+    if (typeof window !== 'undefined') {
+      import('@/lib/sentry.client').then(({ Sentry }) => Sentry.captureException(error, { tags: { route: 'monetizacao' } }))
+    }
+    return (
+      <div className="p-6">
+        <h1 className="text-xl font-semibold">Erro</h1>
+        <p className="text-sm text-muted-foreground mt-2">{String((error as Error)?.message ?? error)}</p>
+      </div>
+    )
+  },
   notFoundComponent: () => <div className="p-6">Não encontrado</div>,
 })
 

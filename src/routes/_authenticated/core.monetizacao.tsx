@@ -28,12 +28,17 @@ export const Route = createFileRoute('/_authenticated/core/monetizacao')({
   head: () => ({
     meta: [{ title: 'Monetização — CORE Impulsionando' }],
   }),
-  errorComponent: ({ error }) => (
-    <div className="p-6">
-      <h1 className="text-xl font-semibold">Erro ao carregar monetização</h1>
-      <p className="text-sm text-muted-foreground mt-2">{String(error?.message ?? error)}</p>
-    </div>
-  ),
+  errorComponent: ({ error }) => {
+    if (typeof window !== 'undefined') {
+      import('@/lib/sentry.client').then(({ Sentry }) => Sentry.captureException(error, { tags: { route: 'core.monetizacao' } }))
+    }
+    return (
+      <div className="p-6">
+        <h1 className="text-xl font-semibold">Erro ao carregar monetização</h1>
+        <p className="text-sm text-muted-foreground mt-2">{String(error?.message ?? error)}</p>
+      </div>
+    )
+  },
   notFoundComponent: () => <div className="p-6">Não encontrado</div>,
 })
 
