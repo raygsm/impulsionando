@@ -4282,6 +4282,7 @@ export type Database = {
         Row: {
           address_city: string | null
           address_line: string | null
+          address_neighborhood: string | null
           address_state: string | null
           address_zip: string | null
           commercial_email: string | null
@@ -4301,14 +4302,18 @@ export type Database = {
           is_active: boolean
           is_demo: boolean
           is_master: boolean
+          latitude: number | null
           legal_name: string | null
           logo_url: string | null
+          longitude: number | null
           name: string
           niche_id: string | null
           owner_name: string | null
           phone: string | null
           primary_color: string | null
           public_slug: string | null
+          rating_avg: number | null
+          rating_count: number | null
           release_channel: string
           secondary_color: string | null
           segment: string | null
@@ -4328,6 +4333,7 @@ export type Database = {
         Insert: {
           address_city?: string | null
           address_line?: string | null
+          address_neighborhood?: string | null
           address_state?: string | null
           address_zip?: string | null
           commercial_email?: string | null
@@ -4347,14 +4353,18 @@ export type Database = {
           is_active?: boolean
           is_demo?: boolean
           is_master?: boolean
+          latitude?: number | null
           legal_name?: string | null
           logo_url?: string | null
+          longitude?: number | null
           name: string
           niche_id?: string | null
           owner_name?: string | null
           phone?: string | null
           primary_color?: string | null
           public_slug?: string | null
+          rating_avg?: number | null
+          rating_count?: number | null
           release_channel?: string
           secondary_color?: string | null
           segment?: string | null
@@ -4374,6 +4384,7 @@ export type Database = {
         Update: {
           address_city?: string | null
           address_line?: string | null
+          address_neighborhood?: string | null
           address_state?: string | null
           address_zip?: string | null
           commercial_email?: string | null
@@ -4393,14 +4404,18 @@ export type Database = {
           is_active?: boolean
           is_demo?: boolean
           is_master?: boolean
+          latitude?: number | null
           legal_name?: string | null
           logo_url?: string | null
+          longitude?: number | null
           name?: string
           niche_id?: string | null
           owner_name?: string | null
           phone?: string | null
           primary_color?: string | null
           public_slug?: string | null
+          rating_avg?: number | null
+          rating_count?: number | null
           release_channel?: string
           secondary_color?: string | null
           segment?: string | null
@@ -4430,15 +4445,21 @@ export type Database = {
       companies_vitrine_public: {
         Row: {
           address_city: string | null
+          address_neighborhood: string | null
           address_state: string | null
+          address_zip: string | null
           company_type: string | null
           facebook: string | null
           id: string
           instagram: string | null
+          latitude: number | null
           logo_url: string | null
+          longitude: number | null
           name: string
           primary_color: string | null
           public_slug: string
+          rating_avg: number | null
+          rating_count: number | null
           secondary_color: string | null
           segment: string | null
           trade_name: string | null
@@ -4447,15 +4468,21 @@ export type Database = {
         }
         Insert: {
           address_city?: string | null
+          address_neighborhood?: string | null
           address_state?: string | null
+          address_zip?: string | null
           company_type?: string | null
           facebook?: string | null
           id: string
           instagram?: string | null
+          latitude?: number | null
           logo_url?: string | null
+          longitude?: number | null
           name: string
           primary_color?: string | null
           public_slug: string
+          rating_avg?: number | null
+          rating_count?: number | null
           secondary_color?: string | null
           segment?: string | null
           trade_name?: string | null
@@ -4464,15 +4491,21 @@ export type Database = {
         }
         Update: {
           address_city?: string | null
+          address_neighborhood?: string | null
           address_state?: string | null
+          address_zip?: string | null
           company_type?: string | null
           facebook?: string | null
           id?: string
           instagram?: string | null
+          latitude?: number | null
           logo_url?: string | null
+          longitude?: number | null
           name?: string
           primary_color?: string | null
           public_slug?: string
+          rating_avg?: number | null
+          rating_count?: number | null
           secondary_color?: string | null
           segment?: string | null
           trade_name?: string | null
@@ -7954,6 +7987,51 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "demo_environments"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      ecosystem_reviews: {
+        Row: {
+          comment: string | null
+          company_id: string
+          created_at: string
+          id: string
+          stars: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          stars: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          stars?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ecosystem_reviews_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ecosystem_reviews_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
           },
         ]
       }
