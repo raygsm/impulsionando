@@ -31,7 +31,12 @@ const MODALITY_META: Record<Offering['modality'], { icon: typeof Stethoscope; la
   retorno: { icon: RefreshCw, label: 'Retorno acompanhado' },
 };
 
+const searchSchema = z.object({
+  modality: z.enum(['presencial', 'telemedicina', 'domiciliar', 'retorno']).optional(),
+});
+
 export const Route = createFileRoute('/chrismed/agendar')({
+  validateSearch: searchSchema,
   head: () => ({
     meta: [
       { title: 'CHRISMED — Central Médica Premium · agende em minutos' },
