@@ -327,6 +327,7 @@ import { Route as AuthenticatedCoreConsumidorPremiumRouteImport } from './routes
 import { Route as AuthenticatedCoreConfiguracoesRouteImport } from './routes/_authenticated/core.configuracoes'
 import { Route as AuthenticatedCoreClientesRouteImport } from './routes/_authenticated/core.clientes'
 import { Route as AuthenticatedCoreBriefingsRouteImport } from './routes/_authenticated/core.briefings'
+import { Route as AuthenticatedCoreBiEcossistemaRouteImport } from './routes/_authenticated/core.bi-ecossistema'
 import { Route as AuthenticatedContratoIdRouteImport } from './routes/_authenticated/contrato.$id'
 import { Route as AuthenticatedContabilidadeTarefasRouteImport } from './routes/_authenticated/contabilidade.tarefas'
 import { Route as AuthenticatedContabilidadeRelatoriosRouteImport } from './routes/_authenticated/contabilidade.relatorios'
@@ -2172,6 +2173,12 @@ const AuthenticatedCoreBriefingsRoute =
     path: '/briefings',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreBiEcossistemaRoute =
+  AuthenticatedCoreBiEcossistemaRouteImport.update({
+    id: '/bi-ecossistema',
+    path: '/bi-ecossistema',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedContratoIdRoute = AuthenticatedContratoIdRouteImport.update({
   id: '/contrato/$id',
   path: '/contrato/$id',
@@ -3176,6 +3183,7 @@ export interface FileRoutesByFullPath {
   '/contabilidade/relatorios': typeof AuthenticatedContabilidadeRelatoriosRoute
   '/contabilidade/tarefas': typeof AuthenticatedContabilidadeTarefasRoute
   '/contrato/$id': typeof AuthenticatedContratoIdRoute
+  '/core/bi-ecossistema': typeof AuthenticatedCoreBiEcossistemaRoute
   '/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/core/configuracoes': typeof AuthenticatedCoreConfiguracoesRoute
@@ -3612,6 +3620,7 @@ export interface FileRoutesByTo {
   '/contabilidade/relatorios': typeof AuthenticatedContabilidadeRelatoriosRoute
   '/contabilidade/tarefas': typeof AuthenticatedContabilidadeTarefasRoute
   '/contrato/$id': typeof AuthenticatedContratoIdRoute
+  '/core/bi-ecossistema': typeof AuthenticatedCoreBiEcossistemaRoute
   '/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/core/configuracoes': typeof AuthenticatedCoreConfiguracoesRoute
@@ -4062,6 +4071,7 @@ export interface FileRoutesById {
   '/_authenticated/contabilidade/relatorios': typeof AuthenticatedContabilidadeRelatoriosRoute
   '/_authenticated/contabilidade/tarefas': typeof AuthenticatedContabilidadeTarefasRoute
   '/_authenticated/contrato/$id': typeof AuthenticatedContratoIdRoute
+  '/_authenticated/core/bi-ecossistema': typeof AuthenticatedCoreBiEcossistemaRoute
   '/_authenticated/core/briefings': typeof AuthenticatedCoreBriefingsRoute
   '/_authenticated/core/clientes': typeof AuthenticatedCoreClientesRoute
   '/_authenticated/core/configuracoes': typeof AuthenticatedCoreConfiguracoesRoute
@@ -4511,6 +4521,7 @@ export interface FileRouteTypes {
     | '/contabilidade/relatorios'
     | '/contabilidade/tarefas'
     | '/contrato/$id'
+    | '/core/bi-ecossistema'
     | '/core/briefings'
     | '/core/clientes'
     | '/core/configuracoes'
@@ -4947,6 +4958,7 @@ export interface FileRouteTypes {
     | '/contabilidade/relatorios'
     | '/contabilidade/tarefas'
     | '/contrato/$id'
+    | '/core/bi-ecossistema'
     | '/core/briefings'
     | '/core/clientes'
     | '/core/configuracoes'
@@ -5396,6 +5408,7 @@ export interface FileRouteTypes {
     | '/_authenticated/contabilidade/relatorios'
     | '/_authenticated/contabilidade/tarefas'
     | '/_authenticated/contrato/$id'
+    | '/_authenticated/core/bi-ecossistema'
     | '/_authenticated/core/briefings'
     | '/_authenticated/core/clientes'
     | '/_authenticated/core/configuracoes'
@@ -7984,6 +7997,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreBriefingsRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/bi-ecossistema': {
+      id: '/_authenticated/core/bi-ecossistema'
+      path: '/bi-ecossistema'
+      fullPath: '/core/bi-ecossistema'
+      preLoaderRoute: typeof AuthenticatedCoreBiEcossistemaRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/contrato/$id': {
       id: '/_authenticated/contrato/$id'
       path: '/contrato/$id'
@@ -9116,6 +9136,7 @@ const AuthenticatedCoreClienteIdRouteWithChildren =
   )
 
 interface AuthenticatedCoreRouteChildren {
+  AuthenticatedCoreBiEcossistemaRoute: typeof AuthenticatedCoreBiEcossistemaRoute
   AuthenticatedCoreBriefingsRoute: typeof AuthenticatedCoreBriefingsRoute
   AuthenticatedCoreClientesRoute: typeof AuthenticatedCoreClientesRoute
   AuthenticatedCoreConfiguracoesRoute: typeof AuthenticatedCoreConfiguracoesRoute
@@ -9164,6 +9185,7 @@ interface AuthenticatedCoreRouteChildren {
 }
 
 const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
+  AuthenticatedCoreBiEcossistemaRoute: AuthenticatedCoreBiEcossistemaRoute,
   AuthenticatedCoreBriefingsRoute: AuthenticatedCoreBriefingsRoute,
   AuthenticatedCoreClientesRoute: AuthenticatedCoreClientesRoute,
   AuthenticatedCoreConfiguracoesRoute: AuthenticatedCoreConfiguracoesRoute,
