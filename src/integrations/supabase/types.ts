@@ -6499,6 +6499,84 @@ export type Database = {
         }
         Relationships: []
       }
+      core_monetization_models: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          company_id: string
+          covered_events: string[]
+          created_at: string
+          effective_from: string
+          effective_to: string | null
+          id: string
+          is_active: boolean
+          min_payout_cents: number
+          model: string
+          monthly_fee_cents: number
+          notes: string | null
+          payout_frequency: string
+          setup_fee_cents: number
+          signature_hash: string | null
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          company_id: string
+          covered_events?: string[]
+          created_at?: string
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean
+          min_payout_cents?: number
+          model: string
+          monthly_fee_cents?: number
+          notes?: string | null
+          payout_frequency?: string
+          setup_fee_cents?: number
+          signature_hash?: string | null
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          company_id?: string
+          covered_events?: string[]
+          created_at?: string
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean
+          min_payout_cents?: number
+          model?: string
+          monthly_fee_cents?: number
+          notes?: string | null
+          payout_frequency?: string
+          setup_fee_cents?: number
+          signature_hash?: string | null
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_monetization_models_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_monetization_models_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       core_niche_modules: {
         Row: {
           created_at: string
@@ -6582,6 +6660,176 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      core_payout_events: {
+        Row: {
+          approved_at: string | null
+          company_id: string
+          created_at: string
+          event_type: string
+          fee_cents: number
+          gross_cents: number
+          id: string
+          metadata: Json
+          model_id: string | null
+          net_cents: number
+          occurred_at: string
+          percent_bps_applied: number
+          provider: string
+          provider_payment_id: string | null
+          rate_id: string | null
+          reference_id: string | null
+          reference_table: string | null
+          rule_version: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          company_id: string
+          created_at?: string
+          event_type: string
+          fee_cents?: number
+          gross_cents: number
+          id?: string
+          metadata?: Json
+          model_id?: string | null
+          net_cents?: number
+          occurred_at?: string
+          percent_bps_applied?: number
+          provider?: string
+          provider_payment_id?: string | null
+          rate_id?: string | null
+          reference_id?: string | null
+          reference_table?: string | null
+          rule_version?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          company_id?: string
+          created_at?: string
+          event_type?: string
+          fee_cents?: number
+          gross_cents?: number
+          id?: string
+          metadata?: Json
+          model_id?: string | null
+          net_cents?: number
+          occurred_at?: string
+          percent_bps_applied?: number
+          provider?: string
+          provider_payment_id?: string | null
+          rate_id?: string | null
+          reference_id?: string | null
+          reference_table?: string | null
+          rule_version?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_payout_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_payout_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_payout_events_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "core_monetization_models"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_payout_events_rate_id_fkey"
+            columns: ["rate_id"]
+            isOneToOne: false
+            referencedRelation: "core_revshare_rates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      core_payout_ledger: {
+        Row: {
+          company_id: string
+          created_at: string
+          event_count: number
+          fee_cents: number
+          gross_cents: number
+          id: string
+          metadata: Json
+          net_cents: number
+          paid_at: string | null
+          period_end: string
+          period_start: string
+          provider: string
+          provider_payout_id: string | null
+          receipt_url: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          event_count?: number
+          fee_cents?: number
+          gross_cents?: number
+          id?: string
+          metadata?: Json
+          net_cents?: number
+          paid_at?: string | null
+          period_end: string
+          period_start: string
+          provider?: string
+          provider_payout_id?: string | null
+          receipt_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          event_count?: number
+          fee_cents?: number
+          gross_cents?: number
+          id?: string
+          metadata?: Json
+          net_cents?: number
+          paid_at?: string | null
+          period_end?: string
+          period_start?: string
+          provider?: string
+          provider_payout_id?: string | null
+          receipt_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_payout_ledger_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_payout_ledger_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+        ]
       }
       core_refund_rules: {
         Row: {
@@ -6721,6 +6969,70 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "v_company_macro"
             referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      core_revshare_rates: {
+        Row: {
+          company_id: string
+          created_at: string
+          event_type: string
+          id: string
+          is_active: boolean
+          max_bps: number | null
+          min_bps: number | null
+          model_id: string
+          percent_bps: number
+          provider_account_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          event_type: string
+          id?: string
+          is_active?: boolean
+          max_bps?: number | null
+          min_bps?: number | null
+          model_id: string
+          percent_bps: number
+          provider_account_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          is_active?: boolean
+          max_bps?: number | null
+          min_bps?: number | null
+          model_id?: string
+          percent_bps?: number
+          provider_account_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_revshare_rates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_revshare_rates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_revshare_rates_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "core_monetization_models"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -16394,6 +16706,34 @@ export type Database = {
       }
     }
     Views: {
+      core_monetization_dashboard: {
+        Row: {
+          approved_count: number | null
+          company_id: string | null
+          event_type: string | null
+          fee_cents: number | null
+          gross_cents: number | null
+          net_cents: number | null
+          period_month: string | null
+          reversed_cents: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_payout_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_payout_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       n8n_lead_journey: {
         Row: {
           contact_email: string | null

@@ -288,6 +288,7 @@ import { Route as AuthenticatedCorePromptsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedCorePlanosRouteImport } from './routes/_authenticated/core.planos'
 import { Route as AuthenticatedCoreParametrosRouteImport } from './routes/_authenticated/core.parametros'
 import { Route as AuthenticatedCoreNovaImplantacaoRouteImport } from './routes/_authenticated/core.nova-implantacao'
+import { Route as AuthenticatedCoreMonetizacaoRouteImport } from './routes/_authenticated/core.monetizacao'
 import { Route as AuthenticatedCoreModulosRouteImport } from './routes/_authenticated/core.modulos'
 import { Route as AuthenticatedCoreMetricasReguasRouteImport } from './routes/_authenticated/core.metricas-reguas'
 import { Route as AuthenticatedCoreMenusRouteImport } from './routes/_authenticated/core.menus'
@@ -1934,6 +1935,12 @@ const AuthenticatedCoreNovaImplantacaoRoute =
     path: '/nova-implantacao',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreMonetizacaoRoute =
+  AuthenticatedCoreMonetizacaoRouteImport.update({
+    id: '/monetizacao',
+    path: '/monetizacao',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreModulosRoute =
   AuthenticatedCoreModulosRouteImport.update({
     id: '/modulos',
@@ -3118,6 +3125,7 @@ export interface FileRoutesByFullPath {
   '/core/menus': typeof AuthenticatedCoreMenusRoute
   '/core/metricas-reguas': typeof AuthenticatedCoreMetricasReguasRoute
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
+  '/core/monetizacao': typeof AuthenticatedCoreMonetizacaoRoute
   '/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/core/parametros': typeof AuthenticatedCoreParametrosRoute
   '/core/planos': typeof AuthenticatedCorePlanosRoute
@@ -3542,6 +3550,7 @@ export interface FileRoutesByTo {
   '/core/menus': typeof AuthenticatedCoreMenusRoute
   '/core/metricas-reguas': typeof AuthenticatedCoreMetricasReguasRoute
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
+  '/core/monetizacao': typeof AuthenticatedCoreMonetizacaoRoute
   '/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/core/parametros': typeof AuthenticatedCoreParametrosRoute
   '/core/planos': typeof AuthenticatedCorePlanosRoute
@@ -3980,6 +3989,7 @@ export interface FileRoutesById {
   '/_authenticated/core/menus': typeof AuthenticatedCoreMenusRoute
   '/_authenticated/core/metricas-reguas': typeof AuthenticatedCoreMetricasReguasRoute
   '/_authenticated/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
+  '/_authenticated/core/monetizacao': typeof AuthenticatedCoreMonetizacaoRoute
   '/_authenticated/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
   '/_authenticated/core/parametros': typeof AuthenticatedCoreParametrosRoute
   '/_authenticated/core/planos': typeof AuthenticatedCorePlanosRoute
@@ -4417,6 +4427,7 @@ export interface FileRouteTypes {
     | '/core/menus'
     | '/core/metricas-reguas'
     | '/core/modulos'
+    | '/core/monetizacao'
     | '/core/nova-implantacao'
     | '/core/parametros'
     | '/core/planos'
@@ -4841,6 +4852,7 @@ export interface FileRouteTypes {
     | '/core/menus'
     | '/core/metricas-reguas'
     | '/core/modulos'
+    | '/core/monetizacao'
     | '/core/nova-implantacao'
     | '/core/parametros'
     | '/core/planos'
@@ -5278,6 +5290,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/menus'
     | '/_authenticated/core/metricas-reguas'
     | '/_authenticated/core/modulos'
+    | '/_authenticated/core/monetizacao'
     | '/_authenticated/core/nova-implantacao'
     | '/_authenticated/core/parametros'
     | '/_authenticated/core/planos'
@@ -7557,6 +7570,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreNovaImplantacaoRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/monetizacao': {
+      id: '/_authenticated/core/monetizacao'
+      path: '/monetizacao'
+      fullPath: '/core/monetizacao'
+      preLoaderRoute: typeof AuthenticatedCoreMonetizacaoRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/modulos': {
       id: '/_authenticated/core/modulos'
       path: '/modulos'
@@ -8907,6 +8927,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreMenusRoute: typeof AuthenticatedCoreMenusRoute
   AuthenticatedCoreMetricasReguasRoute: typeof AuthenticatedCoreMetricasReguasRoute
   AuthenticatedCoreModulosRoute: typeof AuthenticatedCoreModulosRouteWithChildren
+  AuthenticatedCoreMonetizacaoRoute: typeof AuthenticatedCoreMonetizacaoRoute
   AuthenticatedCoreNovaImplantacaoRoute: typeof AuthenticatedCoreNovaImplantacaoRoute
   AuthenticatedCoreParametrosRoute: typeof AuthenticatedCoreParametrosRoute
   AuthenticatedCorePlanosRoute: typeof AuthenticatedCorePlanosRoute
@@ -8959,6 +8980,7 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreMenusRoute: AuthenticatedCoreMenusRoute,
   AuthenticatedCoreMetricasReguasRoute: AuthenticatedCoreMetricasReguasRoute,
   AuthenticatedCoreModulosRoute: AuthenticatedCoreModulosRouteWithChildren,
+  AuthenticatedCoreMonetizacaoRoute: AuthenticatedCoreMonetizacaoRoute,
   AuthenticatedCoreNovaImplantacaoRoute: AuthenticatedCoreNovaImplantacaoRoute,
   AuthenticatedCoreParametrosRoute: AuthenticatedCoreParametrosRoute,
   AuthenticatedCorePlanosRoute: AuthenticatedCorePlanosRoute,
@@ -9864,13 +9886,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
