@@ -129,6 +129,7 @@ import { Route as ComoFuncionaFitnessRouteImport } from './routes/como-funciona.
 import { Route as ClubeLoginRouteImport } from './routes/clube.login'
 import { Route as ClubeCadastroRouteImport } from './routes/clube.cadastro'
 import { Route as ChrismedOfertasRouteImport } from './routes/chrismed.ofertas'
+import { Route as ChrismedDraCristianeRouteImport } from './routes/chrismed.dra-cristiane'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as CheckoutSlugRouteImport } from './routes/checkout.$slug'
 import { Route as AdminManutencaoRouteImport } from './routes/admin.manutencao'
@@ -1021,6 +1022,11 @@ const ClubeCadastroRoute = ClubeCadastroRouteImport.update({
 const ChrismedOfertasRoute = ChrismedOfertasRouteImport.update({
   id: '/ofertas',
   path: '/ofertas',
+  getParentRoute: () => ChrismedRoute,
+} as any)
+const ChrismedDraCristianeRoute = ChrismedDraCristianeRouteImport.update({
+  id: '/dra-cristiane',
+  path: '/dra-cristiane',
   getParentRoute: () => ChrismedRoute,
 } as any)
 const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
@@ -2756,6 +2762,7 @@ export interface FileRoutesByFullPath {
   '/admin/manutencao': typeof AdminManutencaoRoute
   '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/chrismed/dra-cristiane': typeof ChrismedDraCristianeRoute
   '/chrismed/ofertas': typeof ChrismedOfertasRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
   '/clube/login': typeof ClubeLoginRoute
@@ -3154,6 +3161,7 @@ export interface FileRoutesByTo {
   '/admin/manutencao': typeof AdminManutencaoRoute
   '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/chrismed/dra-cristiane': typeof ChrismedDraCristianeRoute
   '/chrismed/ofertas': typeof ChrismedOfertasRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
   '/clube/login': typeof ClubeLoginRoute
@@ -3566,6 +3574,7 @@ export interface FileRoutesById {
   '/admin/manutencao': typeof AdminManutencaoRoute
   '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/chrismed/dra-cristiane': typeof ChrismedDraCristianeRoute
   '/chrismed/ofertas': typeof ChrismedOfertasRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
   '/clube/login': typeof ClubeLoginRoute
@@ -3977,6 +3986,7 @@ export interface FileRouteTypes {
     | '/admin/manutencao'
     | '/checkout/$slug'
     | '/checkout/success'
+    | '/chrismed/dra-cristiane'
     | '/chrismed/ofertas'
     | '/clube/cadastro'
     | '/clube/login'
@@ -4375,6 +4385,7 @@ export interface FileRouteTypes {
     | '/admin/manutencao'
     | '/checkout/$slug'
     | '/checkout/success'
+    | '/chrismed/dra-cristiane'
     | '/chrismed/ofertas'
     | '/clube/cadastro'
     | '/clube/login'
@@ -4786,6 +4797,7 @@ export interface FileRouteTypes {
     | '/admin/manutencao'
     | '/checkout/$slug'
     | '/checkout/success'
+    | '/chrismed/dra-cristiane'
     | '/chrismed/ofertas'
     | '/clube/cadastro'
     | '/clube/login'
@@ -6118,6 +6130,13 @@ declare module '@tanstack/react-router' {
       path: '/ofertas'
       fullPath: '/chrismed/ofertas'
       preLoaderRoute: typeof ChrismedOfertasRouteImport
+      parentRoute: typeof ChrismedRoute
+    }
+    '/chrismed/dra-cristiane': {
+      id: '/chrismed/dra-cristiane'
+      path: '/dra-cristiane'
+      fullPath: '/chrismed/dra-cristiane'
+      preLoaderRoute: typeof ChrismedDraCristianeRouteImport
       parentRoute: typeof ChrismedRoute
     }
     '/checkout/success': {
@@ -9013,10 +9032,12 @@ const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface ChrismedRouteChildren {
+  ChrismedDraCristianeRoute: typeof ChrismedDraCristianeRoute
   ChrismedOfertasRoute: typeof ChrismedOfertasRoute
 }
 
 const ChrismedRouteChildren: ChrismedRouteChildren = {
+  ChrismedDraCristianeRoute: ChrismedDraCristianeRoute,
   ChrismedOfertasRoute: ChrismedOfertasRoute,
 }
 
