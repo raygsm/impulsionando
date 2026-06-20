@@ -593,7 +593,10 @@ async function sendFiscalReportInternal(opts: {
       });
     if (upErr) throw upErr;
 
-    const EXPIRES_SEC = 60 * 60 * 24 * 7;
+    const defaultSec = Math.max(3600, Math.min(720, schedule.link_expiry_hours) * 3600);
+    const EXPIRES_SEC = opts.expirySeconds && opts.expirySeconds > 0
+      ? Math.max(3600, Math.min(opts.expirySeconds, 720 * 3600))
+      : defaultSec;
     const { data: signed, error: signErr } = await supabaseAdmin.storage
       .from("fiscal-reports")
       .createSignedUrl(path, EXPIRES_SEC);
