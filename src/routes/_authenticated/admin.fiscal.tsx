@@ -56,10 +56,14 @@ const KIND_OPTIONS = [
   { value: "fiscal.email.retry", label: "Reenvio" },
   { value: "fiscal.email.cron", label: "E-mail automático" },
   { value: "fiscal.email.skipped", label: "Cron pulado (retry)" },
+  { value: "fiscal.email.test", label: "E-mail de teste" },
   { value: "fiscal.schedule.update", label: "Atualização de agenda" },
   { value: "fiscal.preview", label: "Pré-visualização" },
   { value: "fiscal.link.regenerated", label: "Link assinado regerado" },
+  { value: "fiscal.link.copied", label: "Link assinado copiado" },
+  { value: "fiscal.link.opened", label: "Link assinado aberto" },
 ];
+
 
 function isValidTz(tz: string): boolean {
   if (!tz) return false;
