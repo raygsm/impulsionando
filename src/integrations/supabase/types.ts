@@ -9539,6 +9539,60 @@ export type Database = {
           },
         ]
       }
+      fiscal_email_runs: {
+        Row: {
+          attempt: number
+          created_at: string
+          csv_path: string | null
+          email_mode: string
+          error_message: string | null
+          id: string
+          message_id: string | null
+          month: number
+          recipient: string
+          signed_url_expires_at: string | null
+          status: string
+          triggered_by: string
+          updated_at: string
+          user_id: string | null
+          year: number
+        }
+        Insert: {
+          attempt?: number
+          created_at?: string
+          csv_path?: string | null
+          email_mode?: string
+          error_message?: string | null
+          id?: string
+          message_id?: string | null
+          month: number
+          recipient: string
+          signed_url_expires_at?: string | null
+          status: string
+          triggered_by: string
+          updated_at?: string
+          user_id?: string | null
+          year: number
+        }
+        Update: {
+          attempt?: number
+          created_at?: string
+          csv_path?: string | null
+          email_mode?: string
+          error_message?: string | null
+          id?: string
+          message_id?: string | null
+          month?: number
+          recipient?: string
+          signed_url_expires_at?: string | null
+          status?: string
+          triggered_by?: string
+          updated_at?: string
+          user_id?: string | null
+          year?: number
+        }
+        Relationships: []
+      }
       generated_page_versions: {
         Row: {
           content: Json
