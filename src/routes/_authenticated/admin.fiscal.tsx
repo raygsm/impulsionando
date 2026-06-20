@@ -255,15 +255,29 @@ function AdminFiscalPage() {
 
   // Confirmation dialog state for bulk resend
   const [bulkConfirm, setBulkConfirm] = useState<{
-    runs: Array<{ id: string; year: number; month: number }>;
+    runs: Array<{ id: string; year: number; month: number; error?: string }>;
     reason: string;
     error?: string;
   } | null>(null);
-  // Last-used reason (persisted locally so repeat reenvios skip retyping)
+  // Last-used reason — seeded from URL (shareable) then localStorage
   const [lastBulkReason, setLastBulkReason] = useState<string>(() => {
+    const fromUrl = typeof search?.br_reason === "string" ? search.br_reason : "";
+    if (fromUrl) return fromUrl;
     if (typeof window === "undefined") return "";
     try { return window.localStorage.getItem(REASON_STORAGE_KEY) ?? ""; } catch { return ""; }
   });
+  // Progress + final summary for bulk resend
+  const [bulkProgress, setBulkProgress] = useState<
+    { done: number; total: number; current?: string } | null
+  >(null);
+  const [bulkSummary, setBulkSummary] = useState<{
+    ok: number; fail: number; reason: string;
+    results: Array<{ id: string; year: number; month: number; ok: boolean; error?: string }>;
+  } | null>(null);
+  // Last bulk selection (in-memory copy of what was confirmed) — used for "repetir"
+  const [lastBulkSelection, setLastBulkSelection] = useState<
+    { runs: Array<{ id: string; year: number; month: number }>; reason: string } | null
+  >(null);
 
   const q = useQuery({
     queryKey: ["admin-fiscal", year, month],
