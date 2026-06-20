@@ -41,15 +41,18 @@ function ClinicaPage() {
 
       <section className="container py-16 max-w-5xl">
         <div className="grid md:grid-cols-2 gap-5">
-          {t.services.map((s, i) => (
-            <article key={s.title} className="rounded-2xl border border-emerald-900/10 bg-white/70 p-7">
-              <div className="h-11 w-11 rounded-full bg-emerald-900/5 text-emerald-900 flex items-center justify-center">
-                {[Building2, FileCheck2, Stethoscope, ClipboardList][i % 4]({ className: 'h-5 w-5' } as never) as never}
-              </div>
-              <h3 className="mt-5 font-serif text-xl text-emerald-950">{s.title}</h3>
-              <p className="mt-2 text-sm text-emerald-900/75 leading-relaxed">{s.body}</p>
-            </article>
-          ))}
+          {t.services.map((s, i) => {
+            const Icon = [Building2, FileCheck2, Stethoscope, ClipboardList][i % 4];
+            return (
+              <article key={s.title} className="rounded-2xl border border-emerald-900/10 bg-white/70 p-7">
+                <div className="h-11 w-11 rounded-full bg-emerald-900/5 text-emerald-900 flex items-center justify-center">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <h3 className="mt-5 font-serif text-xl text-emerald-950">{s.title}</h3>
+                <p className="mt-2 text-sm text-emerald-900/75 leading-relaxed">{s.body}</p>
+              </article>
+            );
+          })}
         </div>
       </section>
     </ChrismedShell>
