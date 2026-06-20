@@ -324,7 +324,12 @@ export const setAccountantEmail = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin
       .from("core_settings")
       .upsert(
-        { key: "fiscal.accountant_email", value: data.email, updated_at: new Date().toISOString() },
+        {
+          key: "fiscal.accountant_email",
+          label: "E-mail do contador (relatório fiscal)",
+          value: data.email,
+          updated_at: new Date().toISOString(),
+        },
         { onConflict: "key" },
       );
     if (error) throw error;
