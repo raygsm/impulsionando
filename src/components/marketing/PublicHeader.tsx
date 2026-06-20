@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { MessageCircle, Menu, LogIn, Sparkles, PlayCircle, ChevronDown } from "lucide-react";
+import { MessageCircle, Menu, LogIn, Sparkles, PlayCircle, ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
@@ -10,10 +10,13 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
-import { NICHO_DETAILS } from "@/components/marketing/nichoDetails";
+import {
+  EMPRESAS_MACROS,
+  type EmpresasItem,
+  type EmpresasMacro,
+} from "@/components/marketing/empresasMacros";
 import { cn } from "@/lib/utils";
 
 const WHATSAPP_URL =
