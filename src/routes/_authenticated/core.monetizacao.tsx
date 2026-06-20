@@ -16,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { reportError } from '@/lib/report-error'
 
 const modelsQuery = (fetcher: () => Promise<any[]>) =>
   queryOptions({
@@ -29,9 +30,7 @@ export const Route = createFileRoute('/_authenticated/core/monetizacao')({
     meta: [{ title: 'Monetização — CORE Impulsionando' }],
   }),
   errorComponent: ({ error }) => {
-    if (typeof window !== 'undefined') {
-      import('@/lib/sentry.client').then(({ Sentry }) => Sentry.captureException(error, { tags: { route: 'core.monetizacao' } }))
-    }
+    reportError(error, { route: 'core.monetizacao' })
     return (
       <div className="p-6">
         <h1 className="text-xl font-semibold">Erro ao carregar monetização</h1>
