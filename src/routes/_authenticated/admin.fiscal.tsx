@@ -698,16 +698,90 @@ function AdminFiscalPage() {
                   placeholder="voce@empresa.com"
                   className="ml-2 w-64 rounded border border-border bg-background px-2 py-1 text-xs" />
               </label>
+              <label className="text-xs" title="Anexos não são suportados — ‘link assinado’ envia o CSV via link seguro; ‘inline’ adiciona um resumo no corpo do e-mail.">
+                Modo do teste
+                <select
+                  value={testEmailMode ?? schedDraft.email_mode}
+                  onChange={(e) => setTestEmailMode(e.target.value as "link" | "inline")}
+                  className="ml-2 rounded border border-border bg-background px-2 py-1 text-xs">
+                  <option value="link">Link assinado (CSV)</option>
+                  <option value="inline">Resumo inline + link</option>
+                </select>
+              </label>
+              {testEmailMode && testEmailMode !== schedDraft.email_mode && (
+                <button type="button" onClick={() => setTestEmailMode(null)}
+                  className="rounded border border-border bg-background px-2 py-0.5 text-[10px] text-muted-foreground">
+                  Usar modo configurado ({schedDraft.email_mode})
+                </button>
+              )}
               <button onClick={() => testMut.mutate()}
                 disabled={testMut.isPending || !testRecipient || !!expiryError}
                 title="Envia o corpo real e um link assinado novo para o destinatário informado, sem registrar como envio oficial"
                 className="rounded border border-border bg-background px-3 py-1 text-xs font-medium disabled:opacity-50">
-                {testMut.isPending ? "Enviando teste…" : "Enviar teste"}
+                {testMut.isPending ? "Enviando teste…" : `Enviar teste (${testEmailMode ?? schedDraft.email_mode})`}
               </button>
               <span className="text-[10px] text-muted-foreground">
-                Útil para validar conteúdo/link antes do envio para o contador. Assunto vai com prefixo [TESTE].
+                Útil para validar conteúdo/link antes do envio para o contador. Assunto vai com prefixo [TESTE]. O modo escolhido fica registrado na auditoria.
               </span>
             </div>
+
+            {/* Histórico recente de envios de teste */}
+            <div className="mt-3 rounded border border-border bg-background">
+              <div className="flex items-center justify-between border-b border-border bg-muted/40 px-3 py-1.5">
+                <span className="text-xs font-semibold">Histórico de envios de teste</span>
+                <button onClick={() => testHistoryQ.refetch()}
+                  className="rounded border border-border bg-background px-2 py-0.5 text-[10px]">
+                  Atualizar
+                </button>
+              </div>
+              {testHistoryQ.isLoading ? (
+                <div className="px-3 py-2 text-[11px] text-muted-foreground">Carregando…</div>
+              ) : (testHistoryQ.data ?? []).length === 0 ? (
+                <div className="px-3 py-2 text-[11px] text-muted-foreground">
+                  Nenhum envio de teste registrado ainda.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-[11px]">
+                    <thead className="text-[10px] uppercase text-muted-foreground">
+                      <tr>
+                        <th className="px-3 py-1">Quando</th>
+                        <th className="px-3 py-1">Status</th>
+                        <th className="px-3 py-1">Destinatário</th>
+                        <th className="px-3 py-1">Período</th>
+                        <th className="px-3 py-1">Modo</th>
+                        <th className="px-3 py-1">Erro</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(testHistoryQ.data ?? []).map((t: any) => (
+                        <tr key={t.id} className="border-t border-border/60 align-top">
+                          <td className="px-3 py-1 whitespace-nowrap">{new Date(t.created_at).toLocaleString("pt-BR")}</td>
+                          <td className="px-3 py-1">
+                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                              t.status === "failed"
+                                ? "bg-red-500/15 text-red-700"
+                                : "bg-emerald-500/15 text-emerald-700"
+                            }`}>
+                              {t.status === "failed" ? "Falhou" : "Enviado"}
+                            </span>
+                          </td>
+                          <td className="px-3 py-1">{t.recipient ?? "—"}</td>
+                          <td className="px-3 py-1">
+                            {t.year && t.month ? `${String(t.month).padStart(2, "0")}/${t.year}` : "—"}
+                          </td>
+                          <td className="px-3 py-1">{t.email_mode ?? "—"}</td>
+                          <td className="px-3 py-1 text-red-700 max-w-xs truncate" title={t.error ?? ""}>
+                            {t.error ?? "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
 
 
 
