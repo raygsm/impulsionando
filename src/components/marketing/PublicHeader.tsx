@@ -30,7 +30,6 @@ type NavItem = { to: string; label: string; exact?: boolean };
  */
 const NAV: NavItem[] = [
   { to: "/", label: "Início", exact: true },
-  { to: "/white-label", label: "White Label" },
   { to: "/clube", label: "Clube" },
   { to: "/demo", label: "Demonstrações" },
   { to: "/escolher-nicho", label: "Planos" },
