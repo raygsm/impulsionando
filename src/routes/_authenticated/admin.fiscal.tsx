@@ -606,8 +606,16 @@ function AdminFiscalPage() {
   );
 
   function exportAuditCsv() {
+    const today = new Date().toISOString().slice(0, 10);
+    const parts: string[] = ["auditoria-fiscal", today];
+    if (auditFilters.from) parts.push(`de-${auditFilters.from.slice(0, 10)}`);
+    if (auditFilters.to) parts.push(`ate-${auditFilters.to.slice(0, 10)}`);
+    if (auditFilters.recipient) parts.push(`dest-${auditFilters.recipient.replace(/[^a-z0-9]+/gi, "_").slice(0, 30)}`);
+    if (auditFilters.user_email) parts.push(`user-${auditFilters.user_email.replace(/[^a-z0-9]+/gi, "_").slice(0, 30)}`);
+    if (auditFilters.kinds?.length) parts.push(`kinds-${auditFilters.kinds.length}`);
+    else if (auditFilters.kind) parts.push(`kind-${auditFilters.kind.replace(/\./g, "_")}`);
     downloadCsv(
-      `auditoria-fiscal-${new Date().toISOString().slice(0, 10)}.csv`,
+      `${parts.join("_")}.csv`,
       [
         "quando", "usuario", "acao", "ano", "mes", "destinatario",
         "modo", "arquivo", "tentativa", "expiry_hours", "link",
@@ -616,6 +624,7 @@ function AdminFiscalPage() {
       auditRows,
     );
   }
+
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 print:px-0 print:py-0">
