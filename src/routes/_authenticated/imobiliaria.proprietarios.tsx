@@ -177,11 +177,13 @@ function Page() {
           <Loader2 className="h-4 w-4 animate-spin" /> Carregando...
         </div>
       ) : owners.length === 0 && companyId ? (
-        <EmptyState
-          title="Nenhum proprietário cadastrado"
-          description="Comece adicionando o primeiro proprietário desta imobiliária."
-          action={<Button onClick={openNew}><Plus className="h-4 w-4 mr-1" /> Adicionar proprietário</Button>}
-        />
+        <div className="text-center py-12">
+          <EmptyState
+            title="Nenhum proprietário cadastrado"
+            description="Comece adicionando o primeiro proprietário desta imobiliária."
+          />
+          <Button onClick={openNew} className="mt-4"><Plus className="h-4 w-4 mr-1" /> Adicionar proprietário</Button>
+        </div>
       ) : (
         <div className="overflow-x-auto rounded-lg border bg-card">
           <table className="w-full text-sm">
