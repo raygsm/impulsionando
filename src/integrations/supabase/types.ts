@@ -16171,6 +16171,7 @@ export type Database = {
           sort_order: number
         }[]
       }
+      get_owner_portal_data: { Args: { _token: string }; Returns: Json }
       get_smoke_retention_info: { Args: never; Returns: Json }
       get_table_menu: { Args: { _token: string }; Returns: Json }
       has_active_subscription: {
