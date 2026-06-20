@@ -140,7 +140,7 @@ function DomiciliarPage() {
           <Button type="submit" disabled={sending} className="w-full bg-emerald-900 hover:bg-emerald-950 text-amber-50">
             {sending ? 'Enviando…' : 'Solicitar disponibilidade'}
           </Button>
-          <p className="text-[11px] text-emerald-900/60">Após confirmação da zona, enviamos os horários e o link de pagamento. <Link to="/chrismed/agendar" className="underline">Ver fluxo completo</Link>.</p>
+          <p className="text-[11px] text-emerald-900/60">Após confirmação da zona, enviamos os horários e o link de pagamento. <Link to="/chrismed/agendar" search={{ modality: 'domiciliar' }} className="underline">Ver fluxo completo</Link>.</p>
         </form>
       </section>
     </ChrismedShell>
