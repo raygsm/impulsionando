@@ -1141,10 +1141,68 @@ function AdminFiscalPage() {
                   Backoff: {failedQ.data?.schedule.backoff_minutes}min · Máx. tent.: {failedQ.data?.schedule.max_attempts}
                 </span>
               </div>
+
+              {/* Bulk actions bar */}
+              {(() => {
+                const selected = sorted.filter((f: any) => selectedRunIds.has(f.id));
+                const allSelected = sorted.length > 0 && selected.length === sorted.length;
+                return (
+                  <div className="mb-2 flex flex-wrap items-center gap-2 rounded border border-border bg-background/60 px-2 py-1.5 text-[11px]">
+                    <label className="flex items-center gap-1">
+                      <input type="checkbox" checked={allSelected}
+                        onChange={(e) => {
+                          if (e.target.checked) setSelectedRunIds(new Set(sorted.map((f: any) => f.id)));
+                          else setSelectedRunIds(new Set());
+                        }} />
+                      Selecionar todos ({sorted.length})
+                    </label>
+                    <button
+                      onClick={() => setSelectedRunIds(new Set(sorted.filter((f: any) => f.backoff_ready && !f.max_attempts_reached).map((f: any) => f.id)))}
+                      className="rounded border border-border bg-background px-2 py-0.5">
+                      Selecionar prontos ({ready})
+                    </button>
+                    {selectedRunIds.size > 0 && (
+                      <button onClick={() => setSelectedRunIds(new Set())}
+                        className="rounded border border-border bg-background px-2 py-0.5 text-muted-foreground">
+                        Limpar seleção
+                      </button>
+                    )}
+                    <span className="ml-auto font-medium">
+                      {selectedRunIds.size} selecionado(s)
+                    </span>
+                    <button
+                      disabled={bulkResendMut.isPending || selectedRunIds.size === 0}
+                      onClick={() => {
+                        const runs = sorted
+                          .filter((f: any) => selectedRunIds.has(f.id))
+                          .map((f: any) => ({ id: f.id, year: f.year, month: f.month }));
+                        if (runs.length === 0) return;
+                        const reason = window.prompt(
+                          `Motivo do reenvio em lote — ${runs.length} período(s)\n\n` +
+                          runs.map((r) => `• ${String(r.month).padStart(2, "0")}/${r.year}`).join("\n") +
+                          `\n\nIgnora backoff e máx. tentativas. O motivo será gravado na auditoria de cada reenvio.`,
+                          "",
+                        );
+                        if (reason === null) return;
+                        const trimmed = reason.trim();
+                        if (!trimmed) { setFeedback("Reenvio em lote cancelado: informe um motivo."); return; }
+                        bulkResendMut.mutate({ reason: trimmed, runs });
+                      }}
+                      title="Reenvia imediatamente todos os períodos selecionados, ignorando backoff e máx. tentativas. Pede um único motivo, registrado em cada auditoria."
+                      className="rounded bg-red-600 px-2 py-1 text-[11px] font-bold text-white disabled:opacity-40">
+                      {bulkResendMut.isPending
+                        ? `Reenviando… (${bulkResendMut.variables?.runs.length ?? 0})`
+                        : `Reenviar selecionados (${selectedRunIds.size})`}
+                    </button>
+                  </div>
+                );
+              })()}
+
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead className="text-[10px] uppercase text-muted-foreground">
                     <tr>
+                      <th className="py-1 pr-3 w-6"></th>
                       <th className="py-1 pr-3">#</th>
                       <th className="py-1 pr-3">Período</th>
                       <th className="py-1 pr-3">Tent.</th>
@@ -1159,6 +1217,11 @@ function AdminFiscalPage() {
                   <tbody>
                     {sorted.map((f: any, idx: number) => (
                       <tr key={f.id} className="border-t border-border/60 align-top">
+                        <td className="py-1 pr-3">
+                          <input type="checkbox"
+                            checked={selectedRunIds.has(f.id)}
+                            onChange={() => toggleRunSelected(f.id)} />
+                        </td>
                         <td className="py-1 pr-3 font-mono text-muted-foreground">{idx + 1}</td>
                         <td className="py-1 pr-3 font-medium">
                           {String(f.month).padStart(2, "0")}/{f.year}
