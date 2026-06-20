@@ -291,6 +291,8 @@ function AdminFiscalPage() {
       (logsQ.data ?? []).map((l: any) => {
         const p = l.params ?? {};
         return {
+          id: l.id,
+          kind: l.kind,
           quando: new Date(l.created_at).toLocaleString("pt-BR"),
           usuario: l.user_email ?? (l.notes === "cron" ? "(cron)" : ""),
           acao: kindLabel(l.kind),
@@ -300,6 +302,11 @@ function AdminFiscalPage() {
           modo: p.email_mode ?? "",
           arquivo: p.path ?? p.filename ?? "",
           tentativa: p.attempt ?? "",
+          link: p.signed_url ?? "",
+          link_expira_em: p.signed_url_expires_at
+            ? new Date(p.signed_url_expires_at).toLocaleString("pt-BR")
+            : "",
+          expiry_hours: p.expiry_hours ?? "",
           linhas: l.row_count ?? 0,
         };
       }),
@@ -309,7 +316,11 @@ function AdminFiscalPage() {
   function exportAuditCsv() {
     downloadCsv(
       `auditoria-fiscal-${new Date().toISOString().slice(0, 10)}.csv`,
-      ["quando", "usuario", "acao", "ano", "mes", "destinatario", "modo", "arquivo", "tentativa", "linhas"],
+      [
+        "quando", "usuario", "acao", "ano", "mes", "destinatario",
+        "modo", "arquivo", "tentativa", "expiry_hours", "link",
+        "link_expira_em", "linhas",
+      ],
       auditRows,
     );
   }
