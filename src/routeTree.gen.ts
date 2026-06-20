@@ -416,6 +416,7 @@ import { Route as ApiPublicHooksAffAdvanceCommissionsRouteImport } from './route
 import { Route as ApiPublicHealthMonetizationRouteImport } from './routes/api/public/health/monetization'
 import { Route as ApiPublicDemoSendTestRouteImport } from './routes/api/public/demo/send-test'
 import { Route as ApiPublicDemoFeiraLeadRouteImport } from './routes/api/public/demo/feira-lead'
+import { Route as ApiPublicCronPayoutsConsolidateRouteImport } from './routes/api/public/cron/payouts-consolidate'
 import { Route as ApiPaymentsInfinitepayCreateRouteImport } from './routes/api/payments/infinitepay.create'
 import { Route as ApiPaymentsInfinitepayCheckStatusRouteImport } from './routes/api/payments/infinitepay.check-status'
 import { Route as AuthenticatedTorreRestaurantesDemoAuditoriaRouteImport } from './routes/_authenticated/torre.restaurantes-demo.auditoria'
@@ -2687,6 +2688,12 @@ const ApiPublicDemoFeiraLeadRoute = ApiPublicDemoFeiraLeadRouteImport.update({
   path: '/api/public/demo/feira-lead',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicCronPayoutsConsolidateRoute =
+  ApiPublicCronPayoutsConsolidateRouteImport.update({
+    id: '/api/public/cron/payouts-consolidate',
+    path: '/api/public/cron/payouts-consolidate',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPaymentsInfinitepayCreateRoute =
   ApiPaymentsInfinitepayCreateRouteImport.update({
     id: '/api/payments/infinitepay/create',
@@ -3277,6 +3284,7 @@ export interface FileRoutesByFullPath {
   '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
+  '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/health/monetization': typeof ApiPublicHealthMonetizationRoute
@@ -3704,6 +3712,7 @@ export interface FileRoutesByTo {
   '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
+  '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/health/monetization': typeof ApiPublicHealthMonetizationRoute
@@ -4145,6 +4154,7 @@ export interface FileRoutesById {
   '/_authenticated/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
+  '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/health/monetization': typeof ApiPublicHealthMonetizationRoute
@@ -4585,6 +4595,7 @@ export interface FileRouteTypes {
     | '/torre/restaurantes-demo/auditoria'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
+    | '/api/public/cron/payouts-consolidate'
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
     | '/api/public/health/monetization'
@@ -5012,6 +5023,7 @@ export interface FileRouteTypes {
     | '/torre/restaurantes-demo/auditoria'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
+    | '/api/public/cron/payouts-consolidate'
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
     | '/api/public/health/monetization'
@@ -5452,6 +5464,7 @@ export interface FileRouteTypes {
     | '/_authenticated/torre/restaurantes-demo/auditoria'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
+    | '/api/public/cron/payouts-consolidate'
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
     | '/api/public/health/monetization'
@@ -5611,6 +5624,7 @@ export interface RootRouteChildren {
   PortalProprietarioTokenRoute: typeof PortalProprietarioTokenRoute
   ApiPaymentsInfinitepayCheckStatusRoute: typeof ApiPaymentsInfinitepayCheckStatusRoute
   ApiPaymentsInfinitepayCreateRoute: typeof ApiPaymentsInfinitepayCreateRoute
+  ApiPublicCronPayoutsConsolidateRoute: typeof ApiPublicCronPayoutsConsolidateRoute
   ApiPublicDemoFeiraLeadRoute: typeof ApiPublicDemoFeiraLeadRoute
   ApiPublicDemoSendTestRoute: typeof ApiPublicDemoSendTestRoute
   ApiPublicHooksAffAdvanceCommissionsRoute: typeof ApiPublicHooksAffAdvanceCommissionsRoute
@@ -8492,6 +8506,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDemoFeiraLeadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/cron/payouts-consolidate': {
+      id: '/api/public/cron/payouts-consolidate'
+      path: '/api/public/cron/payouts-consolidate'
+      fullPath: '/api/public/cron/payouts-consolidate'
+      preLoaderRoute: typeof ApiPublicCronPayoutsConsolidateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/payments/infinitepay/create': {
       id: '/api/payments/infinitepay/create'
       path: '/api/payments/infinitepay/create'
@@ -9902,6 +9923,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPaymentsInfinitepayCheckStatusRoute:
     ApiPaymentsInfinitepayCheckStatusRoute,
   ApiPaymentsInfinitepayCreateRoute: ApiPaymentsInfinitepayCreateRoute,
+  ApiPublicCronPayoutsConsolidateRoute: ApiPublicCronPayoutsConsolidateRoute,
   ApiPublicDemoFeiraLeadRoute: ApiPublicDemoFeiraLeadRoute,
   ApiPublicDemoSendTestRoute: ApiPublicDemoSendTestRoute,
   ApiPublicHooksAffAdvanceCommissionsRoute:
