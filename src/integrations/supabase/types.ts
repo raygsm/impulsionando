@@ -15497,6 +15497,59 @@ export type Database = {
         }
         Relationships: []
       }
+      support_email_inbox: {
+        Row: {
+          body_html: string | null
+          body_text: string | null
+          error: string | null
+          from_email: string
+          from_name: string | null
+          headers: Json | null
+          id: string
+          mailbox: string
+          processed: boolean
+          received_at: string
+          subject: string | null
+          ticket_id: string | null
+        }
+        Insert: {
+          body_html?: string | null
+          body_text?: string | null
+          error?: string | null
+          from_email: string
+          from_name?: string | null
+          headers?: Json | null
+          id?: string
+          mailbox: string
+          processed?: boolean
+          received_at?: string
+          subject?: string | null
+          ticket_id?: string | null
+        }
+        Update: {
+          body_html?: string | null
+          body_text?: string | null
+          error?: string | null
+          from_email?: string
+          from_name?: string | null
+          headers?: Json | null
+          id?: string
+          mailbox?: string
+          processed?: boolean
+          received_at?: string
+          subject?: string | null
+          ticket_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_email_inbox_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       support_sessions: {
         Row: {
           company_id: string
@@ -15538,6 +15591,140 @@ export type Database = {
           },
           {
             foreignKeyName: "support_sessions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      support_ticket_messages: {
+        Row: {
+          attachments: Json
+          author_role: string
+          author_user_id: string | null
+          body: string
+          created_at: string
+          id: string
+          is_internal: boolean
+          ticket_id: string
+        }
+        Insert: {
+          attachments?: Json
+          author_role: string
+          author_user_id?: string | null
+          body: string
+          created_at?: string
+          id?: string
+          is_internal?: boolean
+          ticket_id: string
+        }
+        Update: {
+          attachments?: Json
+          author_role?: string
+          author_user_id?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          is_internal?: boolean
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          assigned_to: string | null
+          closed_at: string | null
+          company_id: string | null
+          consumer_user_id: string | null
+          created_at: string
+          description: string
+          first_response_at: string | null
+          id: string
+          metadata: Json
+          origin: Database["public"]["Enums"]["support_ticket_origin"]
+          priority: Database["public"]["Enums"]["support_ticket_priority"]
+          protocol: string
+          rating: number | null
+          rating_comment: string | null
+          requester_email: string | null
+          requester_name: string | null
+          requester_user_id: string | null
+          resolved_at: string | null
+          sla_due_at: string | null
+          status: Database["public"]["Enums"]["support_ticket_status"]
+          subject: string
+          type: Database["public"]["Enums"]["support_ticket_type"]
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          closed_at?: string | null
+          company_id?: string | null
+          consumer_user_id?: string | null
+          created_at?: string
+          description: string
+          first_response_at?: string | null
+          id?: string
+          metadata?: Json
+          origin?: Database["public"]["Enums"]["support_ticket_origin"]
+          priority?: Database["public"]["Enums"]["support_ticket_priority"]
+          protocol?: string
+          rating?: number | null
+          rating_comment?: string | null
+          requester_email?: string | null
+          requester_name?: string | null
+          requester_user_id?: string | null
+          resolved_at?: string | null
+          sla_due_at?: string | null
+          status?: Database["public"]["Enums"]["support_ticket_status"]
+          subject: string
+          type?: Database["public"]["Enums"]["support_ticket_type"]
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          closed_at?: string | null
+          company_id?: string | null
+          consumer_user_id?: string | null
+          created_at?: string
+          description?: string
+          first_response_at?: string | null
+          id?: string
+          metadata?: Json
+          origin?: Database["public"]["Enums"]["support_ticket_origin"]
+          priority?: Database["public"]["Enums"]["support_ticket_priority"]
+          protocol?: string
+          rating?: number | null
+          rating_comment?: string | null
+          requester_email?: string | null
+          requester_name?: string | null
+          requester_user_id?: string | null
+          resolved_at?: string | null
+          sla_due_at?: string | null
+          status?: Database["public"]["Enums"]["support_ticket_status"]
+          subject?: string
+          type?: Database["public"]["Enums"]["support_ticket_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "v_company_macro"
@@ -17443,6 +17630,50 @@ export type Database = {
         | "kitnet"
         | "studio"
         | "outro"
+      support_ticket_origin:
+        | "form"
+        | "email"
+        | "whatsapp"
+        | "manual"
+        | "system_error"
+        | "payment_failure"
+        | "integration_failure"
+        | "webhook_failure"
+      support_ticket_priority: "low" | "medium" | "high" | "critical"
+      support_ticket_status:
+        | "new"
+        | "received"
+        | "in_review"
+        | "waiting_customer"
+        | "waiting_core"
+        | "waiting_third_party"
+        | "in_development"
+        | "resolved"
+        | "closed"
+        | "reopened"
+        | "cancelled"
+      support_ticket_type:
+        | "financial"
+        | "payment"
+        | "payout"
+        | "commission"
+        | "contract"
+        | "access"
+        | "technical"
+        | "whatsapp"
+        | "email"
+        | "mercadopago"
+        | "dashboard"
+        | "permission"
+        | "registration"
+        | "marketplace"
+        | "clube"
+        | "consumer"
+        | "lgpd"
+        | "suggestion"
+        | "question"
+        | "commercial"
+        | "other"
       talentos_faixa_etaria:
         | "18-25"
         | "26-35"
@@ -17725,6 +17956,53 @@ export const Constants = {
         "kitnet",
         "studio",
         "outro",
+      ],
+      support_ticket_origin: [
+        "form",
+        "email",
+        "whatsapp",
+        "manual",
+        "system_error",
+        "payment_failure",
+        "integration_failure",
+        "webhook_failure",
+      ],
+      support_ticket_priority: ["low", "medium", "high", "critical"],
+      support_ticket_status: [
+        "new",
+        "received",
+        "in_review",
+        "waiting_customer",
+        "waiting_core",
+        "waiting_third_party",
+        "in_development",
+        "resolved",
+        "closed",
+        "reopened",
+        "cancelled",
+      ],
+      support_ticket_type: [
+        "financial",
+        "payment",
+        "payout",
+        "commission",
+        "contract",
+        "access",
+        "technical",
+        "whatsapp",
+        "email",
+        "mercadopago",
+        "dashboard",
+        "permission",
+        "registration",
+        "marketplace",
+        "clube",
+        "consumer",
+        "lgpd",
+        "suggestion",
+        "question",
+        "commercial",
+        "other",
       ],
       talentos_faixa_etaria: [
         "18-25",
