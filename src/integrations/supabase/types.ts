@@ -6786,6 +6786,7 @@ export type Database = {
           period_start: string
           provider: string
           provider_payout_id: string | null
+          receipt_path: string | null
           receipt_url: string | null
           retention_reason: string | null
           status: string
@@ -6807,6 +6808,7 @@ export type Database = {
           period_start: string
           provider?: string
           provider_payout_id?: string | null
+          receipt_path?: string | null
           receipt_url?: string | null
           retention_reason?: string | null
           status?: string
@@ -6828,6 +6830,7 @@ export type Database = {
           period_start?: string
           provider?: string
           provider_payout_id?: string | null
+          receipt_path?: string | null
           receipt_url?: string | null
           retention_reason?: string | null
           status?: string
