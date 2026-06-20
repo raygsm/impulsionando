@@ -193,8 +193,15 @@ function AdminFiscalPage() {
     refetchInterval: 60_000,
   });
   const testHistoryQ = useQuery({
-    queryKey: ["admin-fiscal-test-history"],
-    queryFn: () => fetchTestHistory({ data: { limit: 10 } }),
+    queryKey: ["admin-fiscal-test-history", testFilters],
+    queryFn: () => fetchTestHistory({ data: {
+      limit: TEST_PAGE_SIZE,
+      offset: testFilters.page * TEST_PAGE_SIZE,
+      recipient: testFilters.recipient || undefined,
+      status: testFilters.status === "all" ? undefined : testFilters.status,
+      year: testFilters.year,
+      month: testFilters.month,
+    }}),
     refetchOnWindowFocus: false,
   });
 
