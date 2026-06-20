@@ -1,7 +1,7 @@
 // Testa consolidação de lotes: agrupamento, idempotência e mínimo retido.
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { admin } from './helpers'
-import { runConsolidation } from '../src/lib/payout-batches.functions'
+import { runConsolidation } from '../src/lib/payout-consolidation'
 
 const PERIOD_START = '2026-06-01T00:00:00Z'
 const PERIOD_END = '2026-06-30T00:00:00Z'
