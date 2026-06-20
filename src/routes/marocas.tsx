@@ -180,7 +180,7 @@ function MarocasLanding() {
               </div>
             </div>
 
-            <Link to="/contato" className="block text-center mt-6 rounded-md border px-4 py-2 font-semibold hover:bg-muted transition">
+            <Link to="/marocas/contratar/$plano" params={{ plano: "avulso" }} className="block text-center mt-6 rounded-md border px-4 py-2 font-semibold hover:bg-muted transition">
               Contratar serviço avulso
             </Link>
           </div>
@@ -203,7 +203,7 @@ function MarocasLanding() {
               <li className="flex gap-2"><Check className="h-4 w-4 mt-0.5 text-primary" /> Portal do proprietário + repasse PIX</li>
             </ul>
 
-            <Link to="/contato" className="block text-center mt-6 rounded-md bg-primary text-primary-foreground px-4 py-2 font-semibold">
+            <Link to="/marocas/contratar/$plano" params={{ plano: "mensal" }} className="block text-center mt-6 rounded-md bg-primary text-primary-foreground px-4 py-2 font-semibold">
               Falar com consultor
             </Link>
             <p className="text-xs text-center text-muted-foreground mt-3">Valor sob consulta conforme metragem e ocupação.</p>
@@ -223,7 +223,7 @@ function MarocasLanding() {
               <li className="flex gap-2"><ShieldCheck className="h-4 w-4 mt-0.5 text-emerald-600" /> Mediação direta com plataformas (Airbnb, Booking)</li>
             </ul>
 
-            <Link to="/contato" className="block text-center mt-6 rounded-md border px-4 py-2 font-semibold hover:bg-muted transition">
+            <Link to="/marocas/contratar/$plano" params={{ plano: "care-plus" }} className="block text-center mt-6 rounded-md border px-4 py-2 font-semibold hover:bg-muted transition">
               Adicionar proteção
             </Link>
             <p className="text-xs text-center text-muted-foreground mt-3">Disponível como add-on do plano mensal.</p>
