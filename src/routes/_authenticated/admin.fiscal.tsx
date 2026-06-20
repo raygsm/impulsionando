@@ -767,12 +767,26 @@ function AdminFiscalPage() {
             )}
           </section>
 
-          {/* Períodos com falha pendente — próximo retry */}
-          {failedRuns.length > 0 && (
+          {/* Fila de reenvios agendados — próximo retry por período (ordenada por prioridade) */}
+          {failedRuns.length > 0 && (() => {
+            const sorted = [...failedRuns].sort((a: any, b: any) => {
+              // 1) prontos primeiro, 2) menor restante, 3) limite atingido por último
+              const maxA = a.max_attempts_reached ? 1 : 0;
+              const maxB = b.max_attempts_reached ? 1 : 0;
+              if (maxA !== maxB) return maxA - maxB;
+              return (a.remaining_minutes ?? 0) - (b.remaining_minutes ?? 0);
+            });
+            const ready = sorted.filter((r) => !r.max_attempts_reached && r.backoff_ready).length;
+            const waiting = sorted.filter((r) => !r.max_attempts_reached && !r.backoff_ready).length;
+            const blocked = sorted.filter((r) => r.max_attempts_reached).length;
+            return (
             <section className="no-print mb-6 rounded-lg border border-red-500/30 bg-red-500/5 p-4">
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                 <h2 className="text-sm font-semibold text-foreground">
-                  Períodos com falha pendente ({failedRuns.length})
+                  Fila de reenvios agendados ({sorted.length})
+                  <span className="ml-2 text-[11px] font-normal text-muted-foreground">
+                    {ready} pronto(s) · {waiting} aguardando · {blocked} bloqueado(s)
+                  </span>
                 </h2>
                 <span className="text-[11px] text-muted-foreground">
                   Backoff: {failedQ.data?.schedule.backoff_minutes}min · Máx. tent.: {failedQ.data?.schedule.max_attempts}
@@ -782,6 +796,7 @@ function AdminFiscalPage() {
                 <table className="w-full text-left text-xs">
                   <thead className="text-[10px] uppercase text-muted-foreground">
                     <tr>
+                      <th className="py-1 pr-3">#</th>
                       <th className="py-1 pr-3">Período</th>
                       <th className="py-1 pr-3">Tent.</th>
                       <th className="py-1 pr-3">Última falha</th>
@@ -791,6 +806,7 @@ function AdminFiscalPage() {
                       <th className="py-1 pr-3">Ações</th>
                     </tr>
                   </thead>
+
                   <tbody>
                     {failedRuns.map((f: any) => (
                       <tr key={f.id} className="border-t border-border/60 align-top">
