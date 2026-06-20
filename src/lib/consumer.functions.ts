@@ -91,6 +91,32 @@ export const submitCompanyReview = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const getMyReviewForCompany = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ company_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: row } = await context.supabase
+      .from("ecosystem_reviews")
+      .select("id, stars, comment, created_at, updated_at")
+      .eq("company_id", data.company_id)
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    return { review: row ?? null };
+  });
+
+export const deleteCompanyReview = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ company_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("ecosystem_reviews")
+      .delete()
+      .eq("company_id", data.company_id)
+      .eq("user_id", context.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const getMyConsumerArea = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
