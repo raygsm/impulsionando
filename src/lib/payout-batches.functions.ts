@@ -39,10 +39,6 @@ export const consolidatePayouts = createServerFn({ method: 'POST' })
     ),
   )
 
-
-  return { batches, events: totalEvents, retained }
-}
-
 /** Lista lotes — RLS filtra por empresa (cliente) ou tudo (staff). */
 export const listPayoutBatches = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
