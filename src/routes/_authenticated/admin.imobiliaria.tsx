@@ -60,7 +60,7 @@ const GROUPS: Group[] = [
     title: "Pessoas",
     items: [
       { label: "Clientes", icon: User, to: "/imobiliaria/interessados", status: "ok" },
-      { label: "Proprietários", icon: Landmark, status: "missing", note: "CRUD dedicado de proprietários" },
+      { label: "Proprietários", icon: Landmark, to: "/imobiliaria/proprietarios", status: "ok" },
     ],
   },
   {
