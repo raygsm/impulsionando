@@ -23,7 +23,20 @@ export const DEFAULT_SCHEDULE = {
   minute: 0, // 0-59
   tz: "America/Sao_Paulo", // IANA
   email_mode: "link" as "link" | "inline",
+  // Retry / backoff (aplicado pelo cron e pelo botão "reenviar")
+  max_attempts: 3,
+  backoff_minutes: 60,
+  // Expiração padrão do link assinado (horas)
+  link_expiry_hours: 168, // 7 dias
 };
+
+function isValidTz(tz: string): boolean {
+  if (!tz || typeof tz !== "string") return false;
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: tz });
+    return true;
+  } catch { return false; }
+}
 
 const MONTHS_PT = [
   "janeiro", "fevereiro", "março", "abril", "maio", "junho",
@@ -68,7 +81,16 @@ function monthBounds(year: number, month: number) {
 async function audit(
   supabase: any,
   userId: string | null,
-  kind: "fiscal.report" | "fiscal.csv" | "fiscal.email" | "fiscal.email.cron" | "fiscal.email.retry" | "fiscal.schedule.update",
+  kind:
+    | "fiscal.report"
+    | "fiscal.csv"
+    | "fiscal.email"
+    | "fiscal.email.cron"
+    | "fiscal.email.retry"
+    | "fiscal.email.skipped"
+    | "fiscal.schedule.update"
+    | "fiscal.preview"
+    | "fiscal.link.regenerated",
   params: Record<string, unknown>,
   row_count: number,
   notes?: string,
@@ -343,6 +365,8 @@ async function readSchedule(supabaseAdmin: any) {
     .in("key", [
       "fiscal.cron.day", "fiscal.cron.hour", "fiscal.cron.minute",
       "fiscal.cron.tz", "fiscal.email_mode",
+      "fiscal.retry.max_attempts", "fiscal.retry.backoff_minutes",
+      "fiscal.link.expiry_hours",
     ]);
   const out = { ...DEFAULT_SCHEDULE };
   for (const r of data ?? []) {
@@ -355,9 +379,15 @@ async function readSchedule(supabaseAdmin: any) {
     } else if (r.key === "fiscal.cron.minute") {
       const n = Number(v); if (Number.isInteger(n) && n >= 0 && n <= 59) out.minute = n;
     } else if (r.key === "fiscal.cron.tz") {
-      if (typeof v === "string" && v) out.tz = v;
+      if (typeof v === "string" && isValidTz(v)) out.tz = v;
     } else if (r.key === "fiscal.email_mode") {
       if (v === "link" || v === "inline") out.email_mode = v;
+    } else if (r.key === "fiscal.retry.max_attempts") {
+      const n = Number(v); if (Number.isInteger(n) && n >= 1 && n <= 10) out.max_attempts = n;
+    } else if (r.key === "fiscal.retry.backoff_minutes") {
+      const n = Number(v); if (Number.isInteger(n) && n >= 5 && n <= 1440) out.backoff_minutes = n;
+    } else if (r.key === "fiscal.link.expiry_hours") {
+      const n = Number(v); if (Number.isInteger(n) && n >= 1 && n <= 720) out.link_expiry_hours = n;
     }
   }
   return out;
@@ -376,15 +406,35 @@ export const setFiscalScheduleSettings = createServerFn({ method: "POST" })
   .inputValidator((data: {
     day: number; hour: number; minute: number; tz: string;
     email_mode: "link" | "inline";
+    max_attempts?: number;
+    backoff_minutes?: number;
+    link_expiry_hours?: number;
   }) => {
-    if (!Number.isInteger(data.day) || data.day < 1 || data.day > 28) throw new Error("invalid day");
-    if (!Number.isInteger(data.hour) || data.hour < 0 || data.hour > 23) throw new Error("invalid hour");
-    if (!Number.isInteger(data.minute) || data.minute < 0 || data.minute > 59) throw new Error("invalid minute");
-    if (!data.tz || typeof data.tz !== "string") throw new Error("invalid tz");
-    // valida tz
-    try { new Intl.DateTimeFormat("en-US", { timeZone: data.tz }); }
-    catch { throw new Error("invalid timezone"); }
-    if (data.email_mode !== "link" && data.email_mode !== "inline") throw new Error("invalid mode");
+    const errors: Record<string, string> = {};
+    if (!Number.isInteger(data.day) || data.day < 1 || data.day > 28)
+      errors.day = "Dia precisa ser inteiro entre 1 e 28.";
+    if (!Number.isInteger(data.hour) || data.hour < 0 || data.hour > 23)
+      errors.hour = "Hora precisa estar entre 0 e 23.";
+    if (!Number.isInteger(data.minute) || data.minute < 0 || data.minute > 59)
+      errors.minute = "Minuto precisa estar entre 0 e 59.";
+    if (!data.tz || typeof data.tz !== "string" || !isValidTz(data.tz))
+      errors.tz = "Fuso IANA inválido (ex.: America/Sao_Paulo).";
+    if (data.email_mode !== "link" && data.email_mode !== "inline")
+      errors.email_mode = "Modo inválido.";
+    if (data.max_attempts !== undefined &&
+        (!Number.isInteger(data.max_attempts) || data.max_attempts < 1 || data.max_attempts > 10))
+      errors.max_attempts = "Máx. de tentativas entre 1 e 10.";
+    if (data.backoff_minutes !== undefined &&
+        (!Number.isInteger(data.backoff_minutes) || data.backoff_minutes < 5 || data.backoff_minutes > 1440))
+      errors.backoff_minutes = "Backoff entre 5 e 1440 min.";
+    if (data.link_expiry_hours !== undefined &&
+        (!Number.isInteger(data.link_expiry_hours) || data.link_expiry_hours < 1 || data.link_expiry_hours > 720))
+      errors.link_expiry_hours = "Expiração do link entre 1h e 720h (30 dias).";
+    if (Object.keys(errors).length) {
+      const e: any = new Error("validation:" + JSON.stringify(errors));
+      e.validation = errors;
+      throw e;
+    }
     return data;
   })
   .middleware([requireSupabaseAuth])
@@ -393,13 +443,19 @@ export const setFiscalScheduleSettings = createServerFn({ method: "POST" })
     await ensureAdmin(supabase, userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const now = new Date().toISOString();
-    const payload = [
+    const payload: any[] = [
       { key: "fiscal.cron.day", label: "Dia do envio mensal", value: data.day, updated_at: now },
       { key: "fiscal.cron.hour", label: "Hora do envio mensal", value: data.hour, updated_at: now },
       { key: "fiscal.cron.minute", label: "Minuto do envio mensal", value: data.minute, updated_at: now },
       { key: "fiscal.cron.tz", label: "Fuso horário do envio mensal", value: data.tz, updated_at: now },
       { key: "fiscal.email_mode", label: "Modo do e-mail fiscal", value: data.email_mode, updated_at: now },
     ];
+    if (data.max_attempts !== undefined)
+      payload.push({ key: "fiscal.retry.max_attempts", label: "Máx. tentativas (envio fiscal)", value: data.max_attempts, updated_at: now });
+    if (data.backoff_minutes !== undefined)
+      payload.push({ key: "fiscal.retry.backoff_minutes", label: "Backoff entre tentativas (min)", value: data.backoff_minutes, updated_at: now });
+    if (data.link_expiry_hours !== undefined)
+      payload.push({ key: "fiscal.link.expiry_hours", label: "Expiração padrão do link assinado (h)", value: data.link_expiry_hours, updated_at: now });
     const { error } = await supabaseAdmin
       .from("core_settings")
       .upsert(payload, { onConflict: "key" });
@@ -439,6 +495,7 @@ async function sendFiscalReportInternal(opts: {
   triggeredBy: "user" | "cron" | "retry";
   userId?: string | null;
   emailMode?: "link" | "inline";
+  expirySeconds?: number;
 }) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -536,7 +593,10 @@ async function sendFiscalReportInternal(opts: {
       });
     if (upErr) throw upErr;
 
-    const EXPIRES_SEC = 60 * 60 * 24 * 7;
+    const defaultSec = Math.max(3600, Math.min(720, schedule.link_expiry_hours) * 3600);
+    const EXPIRES_SEC = opts.expirySeconds && opts.expirySeconds > 0
+      ? Math.max(3600, Math.min(opts.expirySeconds, 720 * 3600))
+      : defaultSec;
     const { data: signed, error: signErr } = await supabaseAdmin.storage
       .from("fiscal-reports")
       .createSignedUrl(path, EXPIRES_SEC);
@@ -636,6 +696,9 @@ async function sendFiscalReportInternal(opts: {
       params: {
         year: opts.year, month: opts.month, recipient: opts.recipient,
         path, message_id: messageId, email_mode: emailMode, attempt,
+        signed_url: signed.signedUrl,
+        signed_url_expires_at: expiresIso,
+        expiry_hours: Math.round(EXPIRES_SEC / 3600),
       },
       row_count: totals.count,
       notes: opts.triggeredBy,
@@ -661,9 +724,14 @@ export const sendMonthlyFiscalEmail = createServerFn({ method: "POST" })
   .inputValidator((data: {
     year: number; month: number; recipient?: string;
     email_mode?: "link" | "inline";
+    expiry_hours?: number;
   }) => {
     if (!Number.isInteger(data.year) || !Number.isInteger(data.month)) {
       throw new Error("invalid period");
+    }
+    if (data.expiry_hours !== undefined) {
+      if (!Number.isInteger(data.expiry_hours) || data.expiry_hours < 1 || data.expiry_hours > 720)
+        throw new Error("Expiração do link entre 1h e 720h.");
     }
     if (data.recipient !== undefined) {
       const email = String(data.recipient).trim().toLowerCase();
@@ -691,13 +759,18 @@ export const sendMonthlyFiscalEmail = createServerFn({ method: "POST" })
     return sendFiscalReportInternal({
       year: data.year, month: data.month, recipient,
       triggeredBy: "user", userId, emailMode: data.email_mode,
+      expirySeconds: data.expiry_hours ? data.expiry_hours * 3600 : undefined,
     });
   });
 
 export const resendMonthlyFiscalEmail = createServerFn({ method: "POST" })
-  .inputValidator((data: { year: number; month: number; force?: boolean }) => {
+  .inputValidator((data: { year: number; month: number; force?: boolean; expiry_hours?: number }) => {
     if (!Number.isInteger(data.year) || !Number.isInteger(data.month)) {
       throw new Error("invalid period");
+    }
+    if (data.expiry_hours !== undefined) {
+      if (!Number.isInteger(data.expiry_hours) || data.expiry_hours < 1 || data.expiry_hours > 720)
+        throw new Error("Expiração do link entre 1h e 720h.");
     }
     return data;
   })
@@ -706,10 +779,11 @@ export const resendMonthlyFiscalEmail = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     await ensureAdmin(supabase, userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const schedule = await readSchedule(supabaseAdmin);
 
     const { data: runs } = await supabaseAdmin
       .from("fiscal_email_runs")
-      .select("status, recipient")
+      .select("status, recipient, attempt, updated_at, created_at")
       .eq("year", data.year)
       .eq("month", data.month)
       .order("created_at", { ascending: false })
@@ -717,6 +791,21 @@ export const resendMonthlyFiscalEmail = createServerFn({ method: "POST" })
     const last = (runs ?? [])[0];
     if (!data.force && (!last || last.status !== "failed")) {
       throw new Error("Reenvio automático só disponível quando o último envio falhou.");
+    }
+    // Limite de tentativas (somente em retry não-forçado)
+    if (!data.force && last) {
+      if ((last.attempt ?? 0) >= schedule.max_attempts) {
+        throw new Error(
+          `Limite de ${schedule.max_attempts} tentativas atingido. Use "Forçar novo envio" para retomar manualmente.`,
+        );
+      }
+      const lastTs = new Date(last.updated_at ?? last.created_at).getTime();
+      const waitMs = schedule.backoff_minutes * 60_000;
+      const elapsed = Date.now() - lastTs;
+      if (elapsed < waitMs) {
+        const remain = Math.ceil((waitMs - elapsed) / 60_000);
+        throw new Error(`Aguarde ${remain} min de backoff antes de reenviar (ou use "Forçar novo envio").`);
+      }
     }
 
     let recipient = last?.recipient as string | undefined;
@@ -732,14 +821,100 @@ export const resendMonthlyFiscalEmail = createServerFn({ method: "POST" })
     return sendFiscalReportInternal({
       year: data.year, month: data.month, recipient,
       triggeredBy: "retry", userId,
+      expirySeconds: data.expiry_hours ? data.expiry_hours * 3600 : undefined,
     });
+  });
+
+// ───────────────────────── Preview ─────────────────────────
+
+export const previewMonthlyFiscalEmail = createServerFn({ method: "POST" })
+  .inputValidator((data: {
+    year: number; month: number;
+    email_mode?: "link" | "inline";
+    recipient?: string;
+  }) => {
+    if (!Number.isInteger(data.year) || !Number.isInteger(data.month)) {
+      throw new Error("invalid period");
+    }
+    return data;
+  })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    await ensureAdmin(supabase, userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const schedule = await readSchedule(supabaseAdmin);
+    const emailMode = data.email_mode ?? schedule.email_mode;
+
+    const report = await getMonthlyFiscalReport({ data: { year: data.year, month: data.month } });
+    const monthStr = monthLabel(data.year, data.month);
+    const fakeExpiry = new Date(Date.now() + schedule.link_expiry_hours * 3600 * 1000)
+      .toLocaleDateString("pt-BR");
+
+    const { TEMPLATES } = await import("@/lib/email-templates/registry");
+    const tpl = TEMPLATES["fiscal-report-monthly"];
+    if (!tpl) throw new Error("template fiscal-report-monthly not registered");
+
+    const templateData = {
+      monthLabel: monthStr,
+      totalCount: report.totals.count,
+      grossBRL: brlPretty(report.totals.gross),
+      taxBRL: brlPretty(report.totals.total_tax),
+      netBRL: brlPretty(report.totals.net),
+      csvUrl: "https://example.invalid/preview.csv",
+      dashboardUrl: "https://impulsionando.lovable.app/admin/fiscal",
+      expiresAt: fakeExpiry,
+      mode: emailMode,
+      inlineRows: emailMode === "inline"
+        ? report.rows.map((r: any) => ({
+            paid_at: r.paid_at ? new Date(r.paid_at).toLocaleDateString("pt-BR") : "—",
+            company_name: r.company_name,
+            company_document: r.company_document,
+            gross: brlPretty(r.gross),
+            tax: brlPretty(r.total_tax),
+            net: brlPretty(r.net),
+          }))
+        : [],
+    };
+    const element = React.createElement(tpl.component as any, templateData);
+    const html = await renderAsync(element);
+    const subject = typeof tpl.subject === "function" ? tpl.subject(templateData) : tpl.subject;
+    await audit(supabase, userId, "fiscal.preview",
+      { year: data.year, month: data.month, email_mode: emailMode }, report.totals.count);
+    return { html, subject, email_mode: emailMode, expires_at: fakeExpiry };
+  });
+
+// ───────────────────────── Regenerar link assinado ─────────────────────────
+
+export const regenerateFiscalReportSignedUrl = createServerFn({ method: "POST" })
+  .inputValidator((data: { csv_path: string; expiry_hours?: number }) => {
+    if (!data.csv_path || typeof data.csv_path !== "string") throw new Error("invalid path");
+    const h = data.expiry_hours ?? 168;
+    if (!Number.isInteger(h) || h < 1 || h > 720) throw new Error("Expiração entre 1h e 720h.");
+    return { csv_path: data.csv_path, expiry_hours: h };
+  })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    await ensureAdmin(supabase, userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const sec = data.expiry_hours * 3600;
+    const { data: signed, error } = await supabaseAdmin.storage
+      .from("fiscal-reports")
+      .createSignedUrl(data.csv_path, sec);
+    if (error || !signed?.signedUrl) throw error ?? new Error("sign failed");
+    const expires_at = new Date(Date.now() + sec * 1000).toISOString();
+    await audit(supabase, userId, "fiscal.link.regenerated",
+      { path: data.csv_path, expiry_hours: data.expiry_hours, signed_url: signed.signedUrl, signed_url_expires_at: expires_at }, 1);
+    return { url: signed.signedUrl, expires_at };
   });
 
 // ───────────────────────── Cron ─────────────────────────
 
 /**
  * Acionada pelo cron (sem auth). Decide se é o momento configurado pelo admin
- * (dia/hora/fuso) e evita duplicatas usando `fiscal_email_runs`.
+ * (dia/hora/fuso) e respeita limite de tentativas/backoff antes de reenviar
+ * em períodos com falha.
  */
 export async function runMonthlyFiscalEmailCron() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -747,14 +922,19 @@ export async function runMonthlyFiscalEmailCron() {
   const schedule = await readSchedule(supabaseAdmin);
 
   // Hora atual no fuso configurado
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: schedule.tz,
-    year: "numeric", month: "2-digit", day: "2-digit",
-    hour: "2-digit", minute: "2-digit", hour12: false,
-  }).formatToParts(new Date()).reduce<Record<string, string>>((acc, p) => {
-    if (p.type !== "literal") acc[p.type] = p.value;
-    return acc;
-  }, {});
+  let parts: Record<string, string>;
+  try {
+    parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: schedule.tz,
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", hour12: false,
+    }).formatToParts(new Date()).reduce<Record<string, string>>((acc, p) => {
+      if (p.type !== "literal") acc[p.type] = p.value;
+      return acc;
+    }, {});
+  } catch {
+    return { ok: false, skipped: "invalid_timezone" as const, tz: schedule.tz };
+  }
   const localYear = Number(parts.year);
   const localMonth = Number(parts.month);
   const localDay = Number(parts.day);
@@ -769,17 +949,42 @@ export async function runMonthlyFiscalEmailCron() {
   const refMonth = localMonth === 1 ? 12 : localMonth - 1;
 
   // Idempotência: já existe um run com sucesso ou pendente nas últimas 24h?
-  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-  const { data: existing } = await supabaseAdmin
+  const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const { data: recent } = await supabaseAdmin
     .from("fiscal_email_runs")
     .select("id, status")
     .eq("year", refYear)
     .eq("month", refMonth)
-    .gte("created_at", since)
+    .gte("created_at", since24h)
     .in("status", ["sent", "pending"])
     .limit(1);
-  if (existing && existing.length > 0) {
+  if (recent && recent.length > 0) {
     return { ok: true, skipped: "already_processed" as const, year: refYear, month: refMonth };
+  }
+
+  // Política de retry: olha o último run do período (sem janela)
+  const { data: lastRuns } = await supabaseAdmin
+    .from("fiscal_email_runs")
+    .select("status, attempt, updated_at, created_at")
+    .eq("year", refYear)
+    .eq("month", refMonth)
+    .order("created_at", { ascending: false })
+    .limit(1);
+  const last = (lastRuns ?? [])[0];
+  if (last && last.status === "failed") {
+    if ((last.attempt ?? 0) >= schedule.max_attempts) {
+      await supabaseAdmin.from("core_export_logs").insert({
+        user_id: null, kind: "fiscal.email.skipped", scope: "admin.fiscal",
+        params: { year: refYear, month: refMonth, reason: "max_attempts_reached",
+          attempt: last.attempt, max_attempts: schedule.max_attempts },
+        row_count: 0, notes: "cron",
+      });
+      return { ok: true, skipped: "max_attempts_reached" as const, attempt: last.attempt };
+    }
+    const lastTs = new Date(last.updated_at ?? last.created_at).getTime();
+    if (Date.now() - lastTs < schedule.backoff_minutes * 60_000) {
+      return { ok: true, skipped: "backoff_window" as const, backoff_minutes: schedule.backoff_minutes };
+    }
   }
 
   const { data: setting } = await supabaseAdmin
