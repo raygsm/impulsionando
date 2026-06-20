@@ -5,7 +5,9 @@ import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
 import { listMyCompanies } from '@/lib/payouts.functions'
 import { listPayoutBatches } from '@/lib/payout-batches.functions'
+import { getPayoutReceiptUrl } from '@/lib/payout-receipt.functions'
 import { formatBRL } from '@/lib/payouts'
+import { toast } from 'sonner'
 import { reportError } from '@/lib/report-error'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -53,6 +55,7 @@ export const Route = createFileRoute('/_authenticated/repasses')({
 function RepassesClientePage() {
   const listCompanies = useServerFn(listMyCompanies)
   const listBatches = useServerFn(listPayoutBatches)
+  const getReceipt = useServerFn(getPayoutReceiptUrl)
 
   const { data: companies } = useSuspenseQuery(companiesQuery(() => listCompanies()))
   const [companyId, setCompanyId] = useState<string>((companies as any[])[0]?.id ?? '')
@@ -60,6 +63,15 @@ function RepassesClientePage() {
   const { data: batches } = useSuspenseQuery(
     batchesQuery(() => listBatches({ data: { company_id: companyId } }), companyId),
   )
+
+  const handleReceipt = async (ledgerId: string) => {
+    try {
+      const r = await getReceipt({ data: { ledger_id: ledgerId } })
+      window.open(r.url, '_blank', 'noopener,noreferrer')
+    } catch (e) {
+      toast.error('Falha ao gerar comprovante', { description: String((e as Error).message) })
+    }
+  }
 
   const rows = (batches as any[]) ?? []
   const totals = {
@@ -123,13 +135,9 @@ function RepassesClientePage() {
                     <TableCell className="text-right">{b.event_count}</TableCell>
                     <TableCell><Badge variant={meta.variant}>{meta.label}</Badge></TableCell>
                     <TableCell>
-                      {b.receipt_url ? (
-                        <Button asChild size="sm" variant="ghost">
-                          <a href={b.receipt_url} target="_blank" rel="noreferrer">Abrir</a>
-                        </Button>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
-                      )}
+                      <Button size="sm" variant="ghost" onClick={() => handleReceipt(b.id)}>
+                        Baixar PDF
+                      </Button>
                     </TableCell>
                   </TableRow>
                 )
