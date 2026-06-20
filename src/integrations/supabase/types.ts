@@ -13146,6 +13146,7 @@ export type Database = {
           phone: string | null
           portal_invited_at: string | null
           portal_last_login_at: string | null
+          portal_token: string | null
           preferred_contact: string | null
           status: string
           updated_at: string
@@ -13167,6 +13168,7 @@ export type Database = {
           phone?: string | null
           portal_invited_at?: string | null
           portal_last_login_at?: string | null
+          portal_token?: string | null
           preferred_contact?: string | null
           status?: string
           updated_at?: string
@@ -13188,6 +13190,7 @@ export type Database = {
           phone?: string | null
           portal_invited_at?: string | null
           portal_last_login_at?: string | null
+          portal_token?: string | null
           preferred_contact?: string | null
           status?: string
           updated_at?: string
