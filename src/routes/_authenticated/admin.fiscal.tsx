@@ -129,7 +129,7 @@ function AdminFiscalPage() {
   // Audit filters
   const [auditFilters, setAuditFilters] = useState<{
     from?: string; to?: string; user_email?: string;
-    recipient?: string; kind?: string;
+    recipient?: string; kind?: string; kinds?: string[];
   }>({});
 
   const fetchReport = useServerFn(getMonthlyFiscalReport);
