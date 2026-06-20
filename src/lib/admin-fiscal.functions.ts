@@ -767,6 +767,7 @@ async function sendFiscalReportInternal(opts: {
         signed_url_expires_at: expiresIso,
         expiry_hours: Math.round(EXPIRES_SEC / 3600),
         test: isTest || undefined,
+        reason: opts.reason ?? undefined,
       },
       row_count: totals.count,
       notes: isTest ? "test" : opts.triggeredBy,
