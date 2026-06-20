@@ -272,9 +272,11 @@ function AdminFiscalPage() {
     { done: number; total: number; current?: string } | null
   >(null);
   const [bulkSummary, setBulkSummary] = useState<{
-    ok: number; fail: number; reason: string;
-    results: Array<{ id: string; year: number; month: number; ok: boolean; error?: string }>;
+    ok: number; fail: number; canceled: number; reason: string;
+    results: Array<{ id: string; year: number; month: number; ok: boolean; canceled?: boolean; error?: string }>;
   } | null>(null);
+  // Cancellation flag — checked between iterations of the bulk loop
+  const cancelBulkRef = useRef(false);
   // Last bulk selection (in-memory copy of what was confirmed) — used for "repetir"
   const [lastBulkSelection, setLastBulkSelection] = useState<
     { runs: Array<{ id: string; year: number; month: number }>; reason: string } | null
