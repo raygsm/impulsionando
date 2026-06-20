@@ -201,11 +201,11 @@ function Page() {
         )}
 
         <div className="flex justify-between pt-4 border-t">
-          <Button variant="outline" onClick={() => setStep((s) => Math.max(0, (s - 1) as Step))} disabled={step === 0 || submitting}>
+          <Button variant="outline" onClick={() => setStep((s) => Math.max(0, s - 1) as Step)} disabled={step === 0 || submitting}>
             Voltar
           </Button>
           {step < 3 ? (
-            <Button onClick={() => setStep((s) => Math.min(3, (s + 1) as Step))} disabled={!canNext}>
+            <Button onClick={() => setStep((s) => Math.min(3, s + 1) as Step)} disabled={!canNext}>
               Avançar
             </Button>
           ) : (
