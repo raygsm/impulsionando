@@ -25,9 +25,11 @@ function MarocasLanding() {
             Marocas
           </div>
           <nav className="flex items-center gap-4 text-sm">
+            <a href="#aproveite-o-rio" className="hover:underline">Aproveite o Rio</a>
             <a href="#como-funciona" className="hover:underline">Como funciona</a>
             <a href="#operacao" className="hover:underline">Operação</a>
-            <a href="#proprietario" className="hover:underline">Para o proprietário</a>
+            <a href="#planos" className="hover:underline">Planos</a>
+            <a href="#proprietario" className="hover:underline">Proprietário</a>
             <Link to="/contato" className="rounded-md bg-primary text-primary-foreground px-3 py-1.5 font-medium">Quero gerir meu apto</Link>
           </nav>
         </div>
