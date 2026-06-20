@@ -687,11 +687,19 @@ function AdminFiscalPage() {
                     {" · "}<strong>Modo:</strong> {previewMeta?.email_mode ?? "—"}
                     {" · "}Link expiraria em {previewMeta?.expires_at ?? "—"}
                   </div>
-                  <button onClick={() => { setPreviewHtml(null); setPreviewMeta(null); }}
-                    className="rounded border border-border bg-background px-2 py-0.5 text-[11px]">
-                    Fechar
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button onClick={downloadPreviewCsv}
+                      title="Baixa o CSV exato que seria enviado para o contador"
+                      className="rounded border border-border bg-background px-2 py-0.5 text-[11px] font-medium">
+                      Baixar CSV
+                    </button>
+                    <button onClick={() => { setPreviewHtml(null); setPreviewMeta(null); }}
+                      className="rounded border border-border bg-background px-2 py-0.5 text-[11px]">
+                      Fechar
+                    </button>
+                  </div>
                 </div>
+
                 <iframe title="Pré-visualização do e-mail" srcDoc={previewHtml}
                   className="h-[520px] w-full rounded-b bg-white" sandbox="" />
               </div>
