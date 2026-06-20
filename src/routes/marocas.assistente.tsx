@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { z } from "zod";
 import { Building2, MessageCircle, ChevronRight, ArrowLeft, Wrench, ShoppingBag, LifeBuoy, MapPin, Sparkles } from "lucide-react";
+import { MarocasHelpFab } from "@/components/marocas/MarocasHelpFab";
 
 const searchSchema = z.object({
   topico: z.enum(["suporte", "emergencia", "manutencao", "contratacao", "dicas"]).optional(),
@@ -316,6 +317,7 @@ function AssistentePage() {
           Em emergências com risco imediato, ligue 190 (polícia), 192 (SAMU) ou 193 (bombeiros).
         </p>
       </section>
+      <MarocasHelpFab />
     </main>
   );
 }
