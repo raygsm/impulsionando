@@ -395,6 +395,31 @@ function AdminFiscalPage() {
   }
 
 
+  async function downloadTestPdf(opts: {
+    year: number; month: number;
+    email_mode: "link" | "inline";
+    recipient: string | null;
+  }) {
+    try {
+      const res = await fetchTestPdfHtml({ data: opts });
+      const win = window.open("", "_blank", "width=820,height=900");
+      if (!win) {
+        setFeedback("Não foi possível abrir a janela de impressão. Verifique o bloqueador de popups.");
+        return;
+      }
+      // Sanitiza: o HTML do template é gerado pelo servidor a partir do nosso
+      // próprio React Email template — origem confiável.
+      win.document.open();
+      win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${res.filename}</title>
+        <style>@media print { @page { margin: 12mm; } body { -webkit-print-color-adjust: exact; } }</style>
+      </head><body>${res.html}<script>setTimeout(function(){window.print();},250);</script></body></html>`);
+      win.document.close();
+      setFeedback(`PDF do teste pronto (${res.filename}). Use o diálogo de impressão para salvar.`);
+      qc.invalidateQueries({ queryKey: ["admin-fiscal-logs"] });
+    } catch (e: any) {
+      setFeedback(`Erro ao gerar PDF: ${e?.message ?? e}`);
+    }
+  }
 
 
   async function downloadReportCsv() {
