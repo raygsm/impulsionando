@@ -13130,6 +13130,87 @@ export type Database = {
           },
         ]
       }
+      realestate_owners: {
+        Row: {
+          address: Json | null
+          bank_account: Json | null
+          company_id: string
+          created_at: string
+          document: string | null
+          document_type: string | null
+          email: string | null
+          full_name: string
+          id: string
+          metadata: Json
+          notes: string | null
+          phone: string | null
+          portal_invited_at: string | null
+          portal_last_login_at: string | null
+          preferred_contact: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: Json | null
+          bank_account?: Json | null
+          company_id: string
+          created_at?: string
+          document?: string | null
+          document_type?: string | null
+          email?: string | null
+          full_name: string
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          phone?: string | null
+          portal_invited_at?: string | null
+          portal_last_login_at?: string | null
+          preferred_contact?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: Json | null
+          bank_account?: Json | null
+          company_id?: string
+          created_at?: string
+          document?: string | null
+          document_type?: string | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          phone?: string | null
+          portal_invited_at?: string | null
+          portal_last_login_at?: string | null
+          preferred_contact?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "realestate_owners_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "realestate_owners_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       realestate_partner_brokers: {
         Row: {
           broker_name: string
@@ -13213,6 +13294,7 @@ export type Database = {
           longitude: number | null
           neighborhood: string | null
           operation: Database["public"]["Enums"]["realestate_operation"]
+          owner_id: string | null
           parking_spots: number
           photos: Json
           property_type: Database["public"]["Enums"]["realestate_property_type"]
@@ -13253,6 +13335,7 @@ export type Database = {
           longitude?: number | null
           neighborhood?: string | null
           operation?: Database["public"]["Enums"]["realestate_operation"]
+          owner_id?: string | null
           parking_spots?: number
           photos?: Json
           property_type?: Database["public"]["Enums"]["realestate_property_type"]
@@ -13293,6 +13376,7 @@ export type Database = {
           longitude?: number | null
           neighborhood?: string | null
           operation?: Database["public"]["Enums"]["realestate_operation"]
+          owner_id?: string | null
           parking_spots?: number
           photos?: Json
           property_type?: Database["public"]["Enums"]["realestate_property_type"]
@@ -13325,6 +13409,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_company_macro"
             referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "realestate_properties_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "realestate_owners"
+            referencedColumns: ["id"]
           },
         ]
       }
