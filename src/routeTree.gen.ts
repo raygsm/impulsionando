@@ -150,6 +150,7 @@ import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
 import { Route as AuthenticatedUnitsRouteImport } from './routes/_authenticated/units'
 import { Route as AuthenticatedTalentsRouteImport } from './routes/_authenticated/talents'
+import { Route as AuthenticatedSuporteRouteImport } from './routes/_authenticated/suporte'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSectorsRouteImport } from './routes/_authenticated/sectors'
 import { Route as AuthenticatedSalesRouteImport } from './routes/_authenticated/sales'
@@ -175,6 +176,7 @@ import { Route as AuthenticatedCervejariaRouteImport } from './routes/_authentic
 import { Route as AuthenticatedBiRouteImport } from './routes/_authenticated/bi'
 import { Route as AuthenticatedAutomacoesRouteImport } from './routes/_authenticated/automacoes'
 import { Route as AuthenticatedAuditRouteImport } from './routes/_authenticated/audit'
+import { Route as AuthenticatedAjudaRouteImport } from './routes/_authenticated/ajuda'
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
 import { Route as AuthenticatedAffiliatesRouteImport } from './routes/_authenticated/affiliates'
 import { Route as AuthenticatedAdmRouteImport } from './routes/_authenticated/adm'
@@ -284,6 +286,7 @@ import { Route as AuthenticatedCrmBoardRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedCrmActivitiesRouteImport } from './routes/_authenticated/crm.activities'
 import { Route as AuthenticatedCoreTestesRouteImport } from './routes/_authenticated/core.testes'
 import { Route as AuthenticatedCoreTemplatesRouteImport } from './routes/_authenticated/core.templates'
+import { Route as AuthenticatedCoreSuporteRouteImport } from './routes/_authenticated/core.suporte'
 import { Route as AuthenticatedCoreSaudeRouteImport } from './routes/_authenticated/core.saude'
 import { Route as AuthenticatedCoreRepassesRouteImport } from './routes/_authenticated/core.repasses'
 import { Route as AuthenticatedCoreReleasesRouteImport } from './routes/_authenticated/core.releases'
@@ -1160,6 +1163,11 @@ const AuthenticatedTalentsRoute = AuthenticatedTalentsRouteImport.update({
   path: '/talents',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSuporteRoute = AuthenticatedSuporteRouteImport.update({
+  id: '/suporte',
+  path: '/suporte',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -1286,6 +1294,11 @@ const AuthenticatedAutomacoesRoute = AuthenticatedAutomacoesRouteImport.update({
 const AuthenticatedAuditRoute = AuthenticatedAuditRouteImport.update({
   id: '/audit',
   path: '/audit',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAjudaRoute = AuthenticatedAjudaRouteImport.update({
+  id: '/ajuda',
+  path: '/ajuda',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAgendaRoute = AuthenticatedAgendaRouteImport.update({
@@ -1915,6 +1928,12 @@ const AuthenticatedCoreTemplatesRoute =
   AuthenticatedCoreTemplatesRouteImport.update({
     id: '/templates',
     path: '/templates',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
+const AuthenticatedCoreSuporteRoute =
+  AuthenticatedCoreSuporteRouteImport.update({
+    id: '/suporte',
+    path: '/suporte',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
 const AuthenticatedCoreSaudeRoute = AuthenticatedCoreSaudeRouteImport.update({
@@ -2934,6 +2953,7 @@ export interface FileRoutesByFullPath {
   '/adm': typeof AuthenticatedAdmRouteWithChildren
   '/affiliates': typeof AuthenticatedAffiliatesRouteWithChildren
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
+  '/ajuda': typeof AuthenticatedAjudaRoute
   '/audit': typeof AuthenticatedAuditRoute
   '/automacoes': typeof AuthenticatedAutomacoesRoute
   '/bi': typeof AuthenticatedBiRouteWithChildren
@@ -2958,6 +2978,7 @@ export interface FileRoutesByFullPath {
   '/sales': typeof AuthenticatedSalesRouteWithChildren
   '/sectors': typeof AuthenticatedSectorsRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/suporte': typeof AuthenticatedSuporteRoute
   '/talents': typeof AuthenticatedTalentsRoute
   '/units': typeof AuthenticatedUnitsRoute
   '/users': typeof AuthenticatedUsersRouteWithChildren
@@ -3169,6 +3190,7 @@ export interface FileRoutesByFullPath {
   '/core/releases': typeof AuthenticatedCoreReleasesRoute
   '/core/repasses': typeof AuthenticatedCoreRepassesRoute
   '/core/saude': typeof AuthenticatedCoreSaudeRoute
+  '/core/suporte': typeof AuthenticatedCoreSuporteRoute
   '/core/templates': typeof AuthenticatedCoreTemplatesRoute
   '/core/testes': typeof AuthenticatedCoreTestesRoute
   '/crm/activities': typeof AuthenticatedCrmActivitiesRoute
@@ -3371,6 +3393,7 @@ export interface FileRoutesByTo {
   '/white-label': typeof WhiteLabelRouteWithChildren
   '/access-profiles': typeof AuthenticatedAccessProfilesRouteWithChildren
   '/adm': typeof AuthenticatedAdmRouteWithChildren
+  '/ajuda': typeof AuthenticatedAjudaRoute
   '/audit': typeof AuthenticatedAuditRoute
   '/automacoes': typeof AuthenticatedAutomacoesRoute
   '/cervejaria': typeof AuthenticatedCervejariaRouteWithChildren
@@ -3388,6 +3411,7 @@ export interface FileRoutesByTo {
   '/repasses': typeof AuthenticatedRepassesRoute
   '/sectors': typeof AuthenticatedSectorsRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/suporte': typeof AuthenticatedSuporteRoute
   '/talents': typeof AuthenticatedTalentsRoute
   '/units': typeof AuthenticatedUnitsRoute
   '/users': typeof AuthenticatedUsersRouteWithChildren
@@ -3599,6 +3623,7 @@ export interface FileRoutesByTo {
   '/core/releases': typeof AuthenticatedCoreReleasesRoute
   '/core/repasses': typeof AuthenticatedCoreRepassesRoute
   '/core/saude': typeof AuthenticatedCoreSaudeRoute
+  '/core/suporte': typeof AuthenticatedCoreSuporteRoute
   '/core/templates': typeof AuthenticatedCoreTemplatesRoute
   '/core/testes': typeof AuthenticatedCoreTestesRoute
   '/crm/activities': typeof AuthenticatedCrmActivitiesRoute
@@ -3807,6 +3832,7 @@ export interface FileRoutesById {
   '/_authenticated/adm': typeof AuthenticatedAdmRouteWithChildren
   '/_authenticated/affiliates': typeof AuthenticatedAffiliatesRouteWithChildren
   '/_authenticated/agenda': typeof AuthenticatedAgendaRouteWithChildren
+  '/_authenticated/ajuda': typeof AuthenticatedAjudaRoute
   '/_authenticated/audit': typeof AuthenticatedAuditRoute
   '/_authenticated/automacoes': typeof AuthenticatedAutomacoesRoute
   '/_authenticated/bi': typeof AuthenticatedBiRouteWithChildren
@@ -3832,6 +3858,7 @@ export interface FileRoutesById {
   '/_authenticated/sales': typeof AuthenticatedSalesRouteWithChildren
   '/_authenticated/sectors': typeof AuthenticatedSectorsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/suporte': typeof AuthenticatedSuporteRoute
   '/_authenticated/talents': typeof AuthenticatedTalentsRoute
   '/_authenticated/units': typeof AuthenticatedUnitsRoute
   '/_authenticated/users': typeof AuthenticatedUsersRouteWithChildren
@@ -4043,6 +4070,7 @@ export interface FileRoutesById {
   '/_authenticated/core/releases': typeof AuthenticatedCoreReleasesRoute
   '/_authenticated/core/repasses': typeof AuthenticatedCoreRepassesRoute
   '/_authenticated/core/saude': typeof AuthenticatedCoreSaudeRoute
+  '/_authenticated/core/suporte': typeof AuthenticatedCoreSuporteRoute
   '/_authenticated/core/templates': typeof AuthenticatedCoreTemplatesRoute
   '/_authenticated/core/testes': typeof AuthenticatedCoreTestesRoute
   '/_authenticated/crm/activities': typeof AuthenticatedCrmActivitiesRoute
@@ -4251,6 +4279,7 @@ export interface FileRouteTypes {
     | '/adm'
     | '/affiliates'
     | '/agenda'
+    | '/ajuda'
     | '/audit'
     | '/automacoes'
     | '/bi'
@@ -4275,6 +4304,7 @@ export interface FileRouteTypes {
     | '/sales'
     | '/sectors'
     | '/settings'
+    | '/suporte'
     | '/talents'
     | '/units'
     | '/users'
@@ -4486,6 +4516,7 @@ export interface FileRouteTypes {
     | '/core/releases'
     | '/core/repasses'
     | '/core/saude'
+    | '/core/suporte'
     | '/core/templates'
     | '/core/testes'
     | '/crm/activities'
@@ -4688,6 +4719,7 @@ export interface FileRouteTypes {
     | '/white-label'
     | '/access-profiles'
     | '/adm'
+    | '/ajuda'
     | '/audit'
     | '/automacoes'
     | '/cervejaria'
@@ -4705,6 +4737,7 @@ export interface FileRouteTypes {
     | '/repasses'
     | '/sectors'
     | '/settings'
+    | '/suporte'
     | '/talents'
     | '/units'
     | '/users'
@@ -4916,6 +4949,7 @@ export interface FileRouteTypes {
     | '/core/releases'
     | '/core/repasses'
     | '/core/saude'
+    | '/core/suporte'
     | '/core/templates'
     | '/core/testes'
     | '/crm/activities'
@@ -5123,6 +5157,7 @@ export interface FileRouteTypes {
     | '/_authenticated/adm'
     | '/_authenticated/affiliates'
     | '/_authenticated/agenda'
+    | '/_authenticated/ajuda'
     | '/_authenticated/audit'
     | '/_authenticated/automacoes'
     | '/_authenticated/bi'
@@ -5148,6 +5183,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sales'
     | '/_authenticated/sectors'
     | '/_authenticated/settings'
+    | '/_authenticated/suporte'
     | '/_authenticated/talents'
     | '/_authenticated/units'
     | '/_authenticated/users'
@@ -5359,6 +5395,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/releases'
     | '/_authenticated/core/repasses'
     | '/_authenticated/core/saude'
+    | '/_authenticated/core/suporte'
     | '/_authenticated/core/templates'
     | '/_authenticated/core/testes'
     | '/_authenticated/crm/activities'
@@ -6669,6 +6706,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTalentsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/suporte': {
+      id: '/_authenticated/suporte'
+      path: '/suporte'
+      fullPath: '/suporte'
+      preLoaderRoute: typeof AuthenticatedSuporteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
@@ -6842,6 +6886,13 @@ declare module '@tanstack/react-router' {
       path: '/audit'
       fullPath: '/audit'
       preLoaderRoute: typeof AuthenticatedAuditRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ajuda': {
+      id: '/_authenticated/ajuda'
+      path: '/ajuda'
+      fullPath: '/ajuda'
+      preLoaderRoute: typeof AuthenticatedAjudaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/agenda': {
@@ -7605,6 +7656,13 @@ declare module '@tanstack/react-router' {
       path: '/templates'
       fullPath: '/core/templates'
       preLoaderRoute: typeof AuthenticatedCoreTemplatesRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/core/suporte': {
+      id: '/_authenticated/core/suporte'
+      path: '/suporte'
+      fullPath: '/core/suporte'
+      preLoaderRoute: typeof AuthenticatedCoreSuporteRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
     '/_authenticated/core/saude': {
@@ -9035,6 +9093,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreReleasesRoute: typeof AuthenticatedCoreReleasesRoute
   AuthenticatedCoreRepassesRoute: typeof AuthenticatedCoreRepassesRoute
   AuthenticatedCoreSaudeRoute: typeof AuthenticatedCoreSaudeRoute
+  AuthenticatedCoreSuporteRoute: typeof AuthenticatedCoreSuporteRoute
   AuthenticatedCoreTemplatesRoute: typeof AuthenticatedCoreTemplatesRoute
   AuthenticatedCoreTestesRoute: typeof AuthenticatedCoreTestesRoute
   AuthenticatedCoreIndexRoute: typeof AuthenticatedCoreIndexRoute
@@ -9089,6 +9148,7 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreReleasesRoute: AuthenticatedCoreReleasesRoute,
   AuthenticatedCoreRepassesRoute: AuthenticatedCoreRepassesRoute,
   AuthenticatedCoreSaudeRoute: AuthenticatedCoreSaudeRoute,
+  AuthenticatedCoreSuporteRoute: AuthenticatedCoreSuporteRoute,
   AuthenticatedCoreTemplatesRoute: AuthenticatedCoreTemplatesRoute,
   AuthenticatedCoreTestesRoute: AuthenticatedCoreTestesRoute,
   AuthenticatedCoreIndexRoute: AuthenticatedCoreIndexRoute,
@@ -9373,6 +9433,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdmRoute: typeof AuthenticatedAdmRouteWithChildren
   AuthenticatedAffiliatesRoute: typeof AuthenticatedAffiliatesRouteWithChildren
   AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRouteWithChildren
+  AuthenticatedAjudaRoute: typeof AuthenticatedAjudaRoute
   AuthenticatedAuditRoute: typeof AuthenticatedAuditRoute
   AuthenticatedAutomacoesRoute: typeof AuthenticatedAutomacoesRoute
   AuthenticatedBiRoute: typeof AuthenticatedBiRouteWithChildren
@@ -9398,6 +9459,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSalesRoute: typeof AuthenticatedSalesRouteWithChildren
   AuthenticatedSectorsRoute: typeof AuthenticatedSectorsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedSuporteRoute: typeof AuthenticatedSuporteRoute
   AuthenticatedTalentsRoute: typeof AuthenticatedTalentsRoute
   AuthenticatedUnitsRoute: typeof AuthenticatedUnitsRoute
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRouteWithChildren
@@ -9505,6 +9567,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdmRoute: AuthenticatedAdmRouteWithChildren,
   AuthenticatedAffiliatesRoute: AuthenticatedAffiliatesRouteWithChildren,
   AuthenticatedAgendaRoute: AuthenticatedAgendaRouteWithChildren,
+  AuthenticatedAjudaRoute: AuthenticatedAjudaRoute,
   AuthenticatedAuditRoute: AuthenticatedAuditRoute,
   AuthenticatedAutomacoesRoute: AuthenticatedAutomacoesRoute,
   AuthenticatedBiRoute: AuthenticatedBiRouteWithChildren,
@@ -9530,6 +9593,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSalesRoute: AuthenticatedSalesRouteWithChildren,
   AuthenticatedSectorsRoute: AuthenticatedSectorsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedSuporteRoute: AuthenticatedSuporteRoute,
   AuthenticatedTalentsRoute: AuthenticatedTalentsRoute,
   AuthenticatedUnitsRoute: AuthenticatedUnitsRoute,
   AuthenticatedUsersRoute: AuthenticatedUsersRouteWithChildren,
