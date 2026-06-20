@@ -95,7 +95,7 @@ export const recordLegalAcceptance = createServerFn({ method: 'POST' })
           document_hash: hash,
           ip_address: ip,
           user_agent: ua,
-          metadata: data.metadata ?? {},
+          metadata: (data.metadata ?? {}) as any,
         })
         .select('id, accepted_at').single()
       if (error) throw error
