@@ -51,7 +51,7 @@ const GROUPS: Group[] = [
     title: "Equipe",
     items: [
       { label: "Corretores", icon: UserCog, to: "/agenda/professionals", status: "partial", note: "Cadastro como profissional" },
-      { label: "Equipes", icon: Trophy, status: "missing", note: "Agrupamento de corretores + metas" },
+      { label: "Equipes", icon: Trophy, to: "/imobiliaria/equipes", status: "ok", note: "Times + metas mensais" },
       { label: "Usuários", icon: Users, to: "/access-profiles", status: "ok" },
       { label: "Permissões", icon: Lock, to: "/access-profiles/matrix", status: "ok" },
     ],
