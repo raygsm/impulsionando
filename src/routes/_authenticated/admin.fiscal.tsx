@@ -1810,11 +1810,30 @@ function AdminFiscalPage() {
               Você está prestes a reenviar imediatamente <strong>{bulkConfirm.runs.length}</strong> execução(ões),
               ignorando backoff e máx. tentativas. O motivo abaixo será gravado na auditoria de cada reenvio.
             </p>
-            <div className="mt-3 max-h-32 overflow-auto rounded border border-border bg-background p-2 text-[11px]">
+            <div className="mt-3 max-h-48 overflow-auto rounded border border-border bg-background p-2 text-[11px]">
+              {(() => {
+                const withErr = bulkConfirm.runs.filter((r) => r.error).length;
+                return (
+                  <div className="mb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+                    {bulkConfirm.runs.length} período(s)
+                    {withErr > 0 && (
+                      <span className="ml-1 text-red-700">· {withErr} com erro anterior</span>
+                    )}
+                  </div>
+                );
+              })()}
               <ul className="space-y-0.5">
                 {bulkConfirm.runs.map((r) => (
                   <li key={r.id} className="font-mono">
-                    • {String(r.month).padStart(2, "0")}/{r.year}
+                    <span>• {String(r.month).padStart(2, "0")}/{r.year}</span>
+                    {r.error && (
+                      <span
+                        className="ml-2 text-red-700"
+                        title={r.error}
+                      >
+                        — {r.error.length > 120 ? `${r.error.slice(0, 120)}…` : r.error}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>
