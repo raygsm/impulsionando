@@ -383,6 +383,37 @@ function AdminFiscalPage() {
     onError: (e: any) => setFeedback(`Erro no reenvio: ${e?.message ?? e}`),
   });
 
+  // Bulk resend (one reason, multiple queued runs)
+  const bulkResendMut = useMutation({
+    mutationFn: async (input: { reason: string; runs: Array<{ id: string; year: number; month: number }> }) => {
+      const results: Array<{ id: string; year: number; month: number; ok: boolean; error?: string }> = [];
+      for (const r of input.runs) {
+        try {
+          await resendEmail({ data: {
+            year: r.year, month: r.month,
+            force: true,
+            expiry_hours: expiryHours,
+            reason: input.reason,
+          }});
+          results.push({ ...r, ok: true });
+        } catch (e: any) {
+          results.push({ ...r, ok: false, error: e?.message ?? String(e) });
+        }
+      }
+      return results;
+    },
+    onSuccess: (results) => {
+      const ok = results.filter((r) => r.ok).length;
+      const fail = results.length - ok;
+      setFeedback(`Reenvio em lote: ${ok} ok, ${fail} falha(s). Cada reenvio foi gravado na auditoria.`);
+      setSelectedRunIds(new Set());
+      qc.invalidateQueries({ queryKey: ["admin-fiscal-logs"] });
+      qc.invalidateQueries({ queryKey: ["admin-fiscal-failed"] });
+      qc.invalidateQueries({ queryKey: ["admin-fiscal-status"] });
+    },
+    onError: (e: any) => setFeedback(`Erro no reenvio em lote: ${e?.message ?? e}`),
+  });
+
   const schedMut = useMutation({
     mutationFn: () => saveSchedule({ data: schedDraft }),
     onSuccess: () => {
