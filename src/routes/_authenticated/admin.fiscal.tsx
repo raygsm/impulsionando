@@ -236,6 +236,7 @@ function AdminFiscalPage() {
       setFeedback(`Enviado para ${res.recipient} (modo ${res.email_mode}).`);
       qc.invalidateQueries({ queryKey: ["admin-fiscal-logs"] });
       qc.invalidateQueries({ queryKey: ["admin-fiscal-status", year, month] });
+      qc.invalidateQueries({ queryKey: ["admin-fiscal-failed"] });
     },
     onError: (e: any) => setFeedback(`Erro: ${e?.message ?? e}`),
   });
@@ -247,6 +248,8 @@ function AdminFiscalPage() {
       setFeedback(`Reenviado para ${res.recipient}.`);
       qc.invalidateQueries({ queryKey: ["admin-fiscal-logs"] });
       qc.invalidateQueries({ queryKey: ["admin-fiscal-status", year, month] });
+      qc.invalidateQueries({ queryKey: ["admin-fiscal-failed"] });
+
     },
     onError: (e: any) => setFeedback(`Erro no reenvio: ${e?.message ?? e}`),
   });
