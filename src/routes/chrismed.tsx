@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Stethoscope, Video, Home, RefreshCw, CheckCircle2, Copy } from 'lucide-react';
 import { toast } from 'sonner';
+import { ChrismedShell, useLang } from '@/components/chrismed/ChrismedShell';
 
 const CHRISMED_COMPANY_ID = '642096b5-a9ff-4521-a82a-c004f6d2e2d2';
 
@@ -139,37 +140,50 @@ function ChrismedPage() {
     }
   }
 
-  return (
-    <div className="chrismed-brand min-h-screen bg-gradient-to-b from-teal-50/40 via-white to-white">
-      {/* Top bar */}
-      <header className="border-b bg-white/85 backdrop-blur sticky top-0 z-10">
-        <div className="container flex items-center justify-between py-4">
-          <div className="flex items-center gap-2.5">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-teal-600 to-teal-700 flex items-center justify-center text-white font-bold shadow-sm">C</div>
-            <div>
-              <div className="font-semibold tracking-tight text-slate-900">CHRISMED</div>
-              <div className="text-[11px] uppercase tracking-wider text-teal-700/80 -mt-0.5">Central Médica Premium</div>
-            </div>
-          </div>
-          <nav className="flex items-center gap-1">
-            <a href="/chrismed" className="px-3 py-1.5 text-sm font-medium text-teal-700 hover:bg-teal-50 rounded-md">Agendar</a>
-            <a href="/chrismed/ofertas" className="px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-md">Modalidades</a>
-          </nav>
-        </div>
-      </header>
+  const lang = useLang();
+  const heroCopy = {
+    pt: {
+      eyebrow: 'Medicina privada · Internacional · Concierge',
+      title: 'Medicina privada, internacional e humana,',
+      titleHL: 'com a autoridade da Dra. Cristiane Alencar.',
+      lead: 'Atendimento clínico de alto padrão para brasileiros e estrangeiros — em português, inglês e espanhol. Teleconsulta, consulta domiciliar e atendimento presencial em Copacabana.',
+      reserveTitle: 'Reserve em minutos',
+      reserveSub: 'Pagamento via PIX, confirmação imediata e horário bloqueado em sua agenda.',
+    },
+    en: {
+      eyebrow: 'Private · International · Concierge',
+      title: 'Private, international and humane medicine,',
+      titleHL: 'with the authority of Dr. Cristiane Alencar.',
+      lead: 'High-end clinical care for Brazilians and international patients — in Portuguese, English and Spanish. Telehealth, home visit and in-person care in Copacabana.',
+      reserveTitle: 'Book in minutes',
+      reserveSub: 'PIX payment, instant confirmation, slot locked in your agenda.',
+    },
+    es: {
+      eyebrow: 'Privada · Internacional · Concierge',
+      title: 'Medicina privada, internacional y humana,',
+      titleHL: 'con la autoridad de la Dra. Cristiane Alencar.',
+      lead: 'Atención clínica de alto nivel para brasileños y extranjeros — en portugués, inglés y español. Teleconsulta, visita a domicilio y atención presencial en Copacabana.',
+      reserveTitle: 'Reserve en minutos',
+      reserveSub: 'Pago vía PIX, confirmación inmediata y horario bloqueado en su agenda.',
+    },
+  }[lang];
 
-      <main className="container py-12 max-w-5xl">
+  return (
+    <ChrismedShell>
+      <div className="container py-12 max-w-5xl">
         {!pixResult && !selected && (
           <>
-            <div className="text-center mb-12">
-              <Badge variant="outline" className="border-teal-200 text-teal-700 mb-4 bg-teal-50/60">Atendimento concierge · presencial, vídeo e domiciliar</Badge>
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-4 leading-[1.1]">
-                Cuidado médico <span className="text-teal-600">sem fila, sem espera</span>,<br className="hidden md:block" /> com a privacidade que você merece.
+            <div className="mb-14">
+              <Badge variant="outline" className="border-emerald-900/15 bg-emerald-900/5 text-emerald-900 uppercase tracking-[0.18em] text-[10px] mb-5">{heroCopy.eyebrow}</Badge>
+              <h1 className="font-serif text-4xl md:text-6xl text-emerald-950 leading-[1.05] max-w-3xl">
+                {heroCopy.title} <span className="text-amber-700/90">{heroCopy.titleHL}</span>
               </h1>
-              <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-                Escolha a modalidade, confirme em minutos e tenha seu atendimento garantido.
-                Prontuário eletrônico, prescrição digital e equipe disponível antes, durante e após a consulta.
-              </p>
+              <p className="mt-6 text-lg text-emerald-900/75 max-w-2xl">{heroCopy.lead}</p>
+            </div>
+
+            <div id="teleconsulta" className="scroll-mt-24">
+              <div className="text-[11px] uppercase tracking-[0.18em] text-amber-700/90 mb-2">{heroCopy.reserveTitle}</div>
+              <p className="text-sm text-emerald-900/70 mb-6">{heroCopy.reserveSub}</p>
             </div>
 
             {loading ? (
@@ -314,14 +328,7 @@ function ChrismedPage() {
             )}
           </Card>
         )}
-      </main>
-
-      <footer className="border-t mt-16 py-8 text-center text-sm text-muted-foreground">
-        <div className="container">
-          CHRISMED · Central Médica · Atendimento ético, sigiloso e humanizado
-          <div className="mt-1">Tecnologia <span className="font-semibold text-teal-700">Impulsionando</span></div>
-        </div>
-      </footer>
-    </div>
+      </div>
+    </ChrismedShell>
   );
 }
