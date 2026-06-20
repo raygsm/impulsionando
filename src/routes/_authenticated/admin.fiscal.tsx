@@ -19,6 +19,8 @@ import {
   listFailedFiscalRuns,
   sendTestFiscalEmail,
   logFiscalLinkAction,
+  logFiscalPreviewCsvDownload,
+  listTestSendHistory,
 } from "@/lib/admin-fiscal.functions";
 import { downloadCsv } from "@/lib/exports";
 
