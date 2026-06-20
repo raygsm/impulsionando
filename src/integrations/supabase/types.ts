@@ -6670,6 +6670,7 @@ export type Database = {
           fee_cents: number
           gross_cents: number
           id: string
+          ledger_id: string | null
           metadata: Json
           model_id: string | null
           net_cents: number
@@ -6692,6 +6693,7 @@ export type Database = {
           fee_cents?: number
           gross_cents: number
           id?: string
+          ledger_id?: string | null
           metadata?: Json
           model_id?: string | null
           net_cents?: number
@@ -6714,6 +6716,7 @@ export type Database = {
           fee_cents?: number
           gross_cents?: number
           id?: string
+          ledger_id?: string | null
           metadata?: Json
           model_id?: string | null
           net_cents?: number
@@ -6744,6 +6747,13 @@ export type Database = {
             referencedColumns: ["company_id"]
           },
           {
+            foreignKeyName: "core_payout_events_ledger_id_fkey"
+            columns: ["ledger_id"]
+            isOneToOne: false
+            referencedRelation: "core_payout_ledger"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "core_payout_events_model_id_fkey"
             columns: ["model_id"]
             isOneToOne: false
@@ -6767,14 +6777,17 @@ export type Database = {
           fee_cents: number
           gross_cents: number
           id: string
+          marked_paid_at: string | null
           metadata: Json
           net_cents: number
           paid_at: string | null
+          paid_by: string | null
           period_end: string
           period_start: string
           provider: string
           provider_payout_id: string | null
           receipt_url: string | null
+          retention_reason: string | null
           status: string
           updated_at: string
         }
@@ -6785,14 +6798,17 @@ export type Database = {
           fee_cents?: number
           gross_cents?: number
           id?: string
+          marked_paid_at?: string | null
           metadata?: Json
           net_cents?: number
           paid_at?: string | null
+          paid_by?: string | null
           period_end: string
           period_start: string
           provider?: string
           provider_payout_id?: string | null
           receipt_url?: string | null
+          retention_reason?: string | null
           status?: string
           updated_at?: string
         }
@@ -6803,14 +6819,17 @@ export type Database = {
           fee_cents?: number
           gross_cents?: number
           id?: string
+          marked_paid_at?: string | null
           metadata?: Json
           net_cents?: number
           paid_at?: string | null
+          paid_by?: string | null
           period_end?: string
           period_start?: string
           provider?: string
           provider_payout_id?: string | null
           receipt_url?: string | null
+          retention_reason?: string | null
           status?: string
           updated_at?: string
         }

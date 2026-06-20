@@ -154,6 +154,7 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedSectorsRouteImport } from './routes/_authenticated/sectors'
 import { Route as AuthenticatedSalesRouteImport } from './routes/_authenticated/sales'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
+import { Route as AuthenticatedRepassesRouteImport } from './routes/_authenticated/repasses'
 import { Route as AuthenticatedRadarRouteImport } from './routes/_authenticated/radar'
 import { Route as AuthenticatedPrivacyRouteImport } from './routes/_authenticated/privacy'
 import { Route as AuthenticatedPermissionsRouteImport } from './routes/_authenticated/permissions'
@@ -284,6 +285,7 @@ import { Route as AuthenticatedCrmActivitiesRouteImport } from './routes/_authen
 import { Route as AuthenticatedCoreTestesRouteImport } from './routes/_authenticated/core.testes'
 import { Route as AuthenticatedCoreTemplatesRouteImport } from './routes/_authenticated/core.templates'
 import { Route as AuthenticatedCoreSaudeRouteImport } from './routes/_authenticated/core.saude'
+import { Route as AuthenticatedCoreRepassesRouteImport } from './routes/_authenticated/core.repasses'
 import { Route as AuthenticatedCoreReleasesRouteImport } from './routes/_authenticated/core.releases'
 import { Route as AuthenticatedCorePromptsRouteImport } from './routes/_authenticated/core.prompts'
 import { Route as AuthenticatedCorePlanosRouteImport } from './routes/_authenticated/core.planos'
@@ -416,6 +418,7 @@ import { Route as ApiPublicHooksAffAdvanceCommissionsRouteImport } from './route
 import { Route as ApiPublicHealthMonetizationRouteImport } from './routes/api/public/health/monetization'
 import { Route as ApiPublicDemoSendTestRouteImport } from './routes/api/public/demo/send-test'
 import { Route as ApiPublicDemoFeiraLeadRouteImport } from './routes/api/public/demo/feira-lead'
+import { Route as ApiPublicCronPayoutsConsolidateRouteImport } from './routes/api/public/cron/payouts-consolidate'
 import { Route as ApiPaymentsInfinitepayCreateRouteImport } from './routes/api/payments/infinitepay.create'
 import { Route as ApiPaymentsInfinitepayCheckStatusRouteImport } from './routes/api/payments/infinitepay.check-status'
 import { Route as AuthenticatedTorreRestaurantesDemoAuditoriaRouteImport } from './routes/_authenticated/torre.restaurantes-demo.auditoria'
@@ -1177,6 +1180,11 @@ const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
   path: '/reports',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedRepassesRoute = AuthenticatedRepassesRouteImport.update({
+  id: '/repasses',
+  path: '/repasses',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedRadarRoute = AuthenticatedRadarRouteImport.update({
   id: '/radar',
   path: '/radar',
@@ -1914,6 +1922,12 @@ const AuthenticatedCoreSaudeRoute = AuthenticatedCoreSaudeRouteImport.update({
   path: '/saude',
   getParentRoute: () => AuthenticatedCoreRoute,
 } as any)
+const AuthenticatedCoreRepassesRoute =
+  AuthenticatedCoreRepassesRouteImport.update({
+    id: '/repasses',
+    path: '/repasses',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreReleasesRoute =
   AuthenticatedCoreReleasesRouteImport.update({
     id: '/releases',
@@ -2687,6 +2701,12 @@ const ApiPublicDemoFeiraLeadRoute = ApiPublicDemoFeiraLeadRouteImport.update({
   path: '/api/public/demo/feira-lead',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicCronPayoutsConsolidateRoute =
+  ApiPublicCronPayoutsConsolidateRouteImport.update({
+    id: '/api/public/cron/payouts-consolidate',
+    path: '/api/public/cron/payouts-consolidate',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPaymentsInfinitepayCreateRoute =
   ApiPaymentsInfinitepayCreateRouteImport.update({
     id: '/api/payments/infinitepay/create',
@@ -2933,6 +2953,7 @@ export interface FileRoutesByFullPath {
   '/permissions': typeof AuthenticatedPermissionsRoute
   '/privacy': typeof AuthenticatedPrivacyRouteWithChildren
   '/radar': typeof AuthenticatedRadarRoute
+  '/repasses': typeof AuthenticatedRepassesRoute
   '/reports': typeof AuthenticatedReportsRouteWithChildren
   '/sales': typeof AuthenticatedSalesRouteWithChildren
   '/sectors': typeof AuthenticatedSectorsRoute
@@ -3146,6 +3167,7 @@ export interface FileRoutesByFullPath {
   '/core/planos': typeof AuthenticatedCorePlanosRoute
   '/core/prompts': typeof AuthenticatedCorePromptsRoute
   '/core/releases': typeof AuthenticatedCoreReleasesRoute
+  '/core/repasses': typeof AuthenticatedCoreRepassesRoute
   '/core/saude': typeof AuthenticatedCoreSaudeRoute
   '/core/templates': typeof AuthenticatedCoreTemplatesRoute
   '/core/testes': typeof AuthenticatedCoreTestesRoute
@@ -3277,6 +3299,7 @@ export interface FileRoutesByFullPath {
   '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
+  '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/health/monetization': typeof ApiPublicHealthMonetizationRoute
@@ -3362,6 +3385,7 @@ export interface FileRoutesByTo {
   '/permissions': typeof AuthenticatedPermissionsRoute
   '/privacy': typeof AuthenticatedPrivacyRouteWithChildren
   '/radar': typeof AuthenticatedRadarRoute
+  '/repasses': typeof AuthenticatedRepassesRoute
   '/sectors': typeof AuthenticatedSectorsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/talents': typeof AuthenticatedTalentsRoute
@@ -3573,6 +3597,7 @@ export interface FileRoutesByTo {
   '/core/planos': typeof AuthenticatedCorePlanosRoute
   '/core/prompts': typeof AuthenticatedCorePromptsRoute
   '/core/releases': typeof AuthenticatedCoreReleasesRoute
+  '/core/repasses': typeof AuthenticatedCoreRepassesRoute
   '/core/saude': typeof AuthenticatedCoreSaudeRoute
   '/core/templates': typeof AuthenticatedCoreTemplatesRoute
   '/core/testes': typeof AuthenticatedCoreTestesRoute
@@ -3704,6 +3729,7 @@ export interface FileRoutesByTo {
   '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
+  '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/health/monetization': typeof ApiPublicHealthMonetizationRoute
@@ -3801,6 +3827,7 @@ export interface FileRoutesById {
   '/_authenticated/permissions': typeof AuthenticatedPermissionsRoute
   '/_authenticated/privacy': typeof AuthenticatedPrivacyRouteWithChildren
   '/_authenticated/radar': typeof AuthenticatedRadarRoute
+  '/_authenticated/repasses': typeof AuthenticatedRepassesRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRouteWithChildren
   '/_authenticated/sales': typeof AuthenticatedSalesRouteWithChildren
   '/_authenticated/sectors': typeof AuthenticatedSectorsRoute
@@ -4014,6 +4041,7 @@ export interface FileRoutesById {
   '/_authenticated/core/planos': typeof AuthenticatedCorePlanosRoute
   '/_authenticated/core/prompts': typeof AuthenticatedCorePromptsRoute
   '/_authenticated/core/releases': typeof AuthenticatedCoreReleasesRoute
+  '/_authenticated/core/repasses': typeof AuthenticatedCoreRepassesRoute
   '/_authenticated/core/saude': typeof AuthenticatedCoreSaudeRoute
   '/_authenticated/core/templates': typeof AuthenticatedCoreTemplatesRoute
   '/_authenticated/core/testes': typeof AuthenticatedCoreTestesRoute
@@ -4145,6 +4173,7 @@ export interface FileRoutesById {
   '/_authenticated/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
   '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
+  '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/health/monetization': typeof ApiPublicHealthMonetizationRoute
@@ -4241,6 +4270,7 @@ export interface FileRouteTypes {
     | '/permissions'
     | '/privacy'
     | '/radar'
+    | '/repasses'
     | '/reports'
     | '/sales'
     | '/sectors'
@@ -4454,6 +4484,7 @@ export interface FileRouteTypes {
     | '/core/planos'
     | '/core/prompts'
     | '/core/releases'
+    | '/core/repasses'
     | '/core/saude'
     | '/core/templates'
     | '/core/testes'
@@ -4585,6 +4616,7 @@ export interface FileRouteTypes {
     | '/torre/restaurantes-demo/auditoria'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
+    | '/api/public/cron/payouts-consolidate'
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
     | '/api/public/health/monetization'
@@ -4670,6 +4702,7 @@ export interface FileRouteTypes {
     | '/permissions'
     | '/privacy'
     | '/radar'
+    | '/repasses'
     | '/sectors'
     | '/settings'
     | '/talents'
@@ -4881,6 +4914,7 @@ export interface FileRouteTypes {
     | '/core/planos'
     | '/core/prompts'
     | '/core/releases'
+    | '/core/repasses'
     | '/core/saude'
     | '/core/templates'
     | '/core/testes'
@@ -5012,6 +5046,7 @@ export interface FileRouteTypes {
     | '/torre/restaurantes-demo/auditoria'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
+    | '/api/public/cron/payouts-consolidate'
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
     | '/api/public/health/monetization'
@@ -5108,6 +5143,7 @@ export interface FileRouteTypes {
     | '/_authenticated/permissions'
     | '/_authenticated/privacy'
     | '/_authenticated/radar'
+    | '/_authenticated/repasses'
     | '/_authenticated/reports'
     | '/_authenticated/sales'
     | '/_authenticated/sectors'
@@ -5321,6 +5357,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/planos'
     | '/_authenticated/core/prompts'
     | '/_authenticated/core/releases'
+    | '/_authenticated/core/repasses'
     | '/_authenticated/core/saude'
     | '/_authenticated/core/templates'
     | '/_authenticated/core/testes'
@@ -5452,6 +5489,7 @@ export interface FileRouteTypes {
     | '/_authenticated/torre/restaurantes-demo/auditoria'
     | '/api/payments/infinitepay/check-status'
     | '/api/payments/infinitepay/create'
+    | '/api/public/cron/payouts-consolidate'
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
     | '/api/public/health/monetization'
@@ -5611,6 +5649,7 @@ export interface RootRouteChildren {
   PortalProprietarioTokenRoute: typeof PortalProprietarioTokenRoute
   ApiPaymentsInfinitepayCheckStatusRoute: typeof ApiPaymentsInfinitepayCheckStatusRoute
   ApiPaymentsInfinitepayCreateRoute: typeof ApiPaymentsInfinitepayCreateRoute
+  ApiPublicCronPayoutsConsolidateRoute: typeof ApiPublicCronPayoutsConsolidateRoute
   ApiPublicDemoFeiraLeadRoute: typeof ApiPublicDemoFeiraLeadRoute
   ApiPublicDemoSendTestRoute: typeof ApiPublicDemoSendTestRoute
   ApiPublicHooksAffAdvanceCommissionsRoute: typeof ApiPublicHooksAffAdvanceCommissionsRoute
@@ -6658,6 +6697,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReportsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/repasses': {
+      id: '/_authenticated/repasses'
+      path: '/repasses'
+      fullPath: '/repasses'
+      preLoaderRoute: typeof AuthenticatedRepassesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/radar': {
       id: '/_authenticated/radar'
       path: '/radar'
@@ -7566,6 +7612,13 @@ declare module '@tanstack/react-router' {
       path: '/saude'
       fullPath: '/core/saude'
       preLoaderRoute: typeof AuthenticatedCoreSaudeRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/core/repasses': {
+      id: '/_authenticated/core/repasses'
+      path: '/repasses'
+      fullPath: '/core/repasses'
+      preLoaderRoute: typeof AuthenticatedCoreRepassesRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
     '/_authenticated/core/releases': {
@@ -8492,6 +8545,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDemoFeiraLeadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/cron/payouts-consolidate': {
+      id: '/api/public/cron/payouts-consolidate'
+      path: '/api/public/cron/payouts-consolidate'
+      fullPath: '/api/public/cron/payouts-consolidate'
+      preLoaderRoute: typeof ApiPublicCronPayoutsConsolidateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/payments/infinitepay/create': {
       id: '/api/payments/infinitepay/create'
       path: '/api/payments/infinitepay/create'
@@ -8973,6 +9033,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCorePlanosRoute: typeof AuthenticatedCorePlanosRoute
   AuthenticatedCorePromptsRoute: typeof AuthenticatedCorePromptsRoute
   AuthenticatedCoreReleasesRoute: typeof AuthenticatedCoreReleasesRoute
+  AuthenticatedCoreRepassesRoute: typeof AuthenticatedCoreRepassesRoute
   AuthenticatedCoreSaudeRoute: typeof AuthenticatedCoreSaudeRoute
   AuthenticatedCoreTemplatesRoute: typeof AuthenticatedCoreTemplatesRoute
   AuthenticatedCoreTestesRoute: typeof AuthenticatedCoreTestesRoute
@@ -9026,6 +9087,7 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCorePlanosRoute: AuthenticatedCorePlanosRoute,
   AuthenticatedCorePromptsRoute: AuthenticatedCorePromptsRoute,
   AuthenticatedCoreReleasesRoute: AuthenticatedCoreReleasesRoute,
+  AuthenticatedCoreRepassesRoute: AuthenticatedCoreRepassesRoute,
   AuthenticatedCoreSaudeRoute: AuthenticatedCoreSaudeRoute,
   AuthenticatedCoreTemplatesRoute: AuthenticatedCoreTemplatesRoute,
   AuthenticatedCoreTestesRoute: AuthenticatedCoreTestesRoute,
@@ -9331,6 +9393,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPermissionsRoute: typeof AuthenticatedPermissionsRoute
   AuthenticatedPrivacyRoute: typeof AuthenticatedPrivacyRouteWithChildren
   AuthenticatedRadarRoute: typeof AuthenticatedRadarRoute
+  AuthenticatedRepassesRoute: typeof AuthenticatedRepassesRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRouteWithChildren
   AuthenticatedSalesRoute: typeof AuthenticatedSalesRouteWithChildren
   AuthenticatedSectorsRoute: typeof AuthenticatedSectorsRoute
@@ -9462,6 +9525,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPermissionsRoute: AuthenticatedPermissionsRoute,
   AuthenticatedPrivacyRoute: AuthenticatedPrivacyRouteWithChildren,
   AuthenticatedRadarRoute: AuthenticatedRadarRoute,
+  AuthenticatedRepassesRoute: AuthenticatedRepassesRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRouteWithChildren,
   AuthenticatedSalesRoute: AuthenticatedSalesRouteWithChildren,
   AuthenticatedSectorsRoute: AuthenticatedSectorsRoute,
@@ -9902,6 +9966,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPaymentsInfinitepayCheckStatusRoute:
     ApiPaymentsInfinitepayCheckStatusRoute,
   ApiPaymentsInfinitepayCreateRoute: ApiPaymentsInfinitepayCreateRoute,
+  ApiPublicCronPayoutsConsolidateRoute: ApiPublicCronPayoutsConsolidateRoute,
   ApiPublicDemoFeiraLeadRoute: ApiPublicDemoFeiraLeadRoute,
   ApiPublicDemoSendTestRoute: ApiPublicDemoSendTestRoute,
   ApiPublicHooksAffAdvanceCommissionsRoute:
