@@ -48,8 +48,8 @@ beforeAll(async () => {
   }).select('id').single()
   requestA = rA!.id
 
-  clientA = await signIn(emails.a)
-  clientB = await signIn(emails.b)
+  clientA = (await signIn(emails.a)).client
+  clientB = (await signIn(emails.b)).client
 })
 
 afterAll(async () => {
