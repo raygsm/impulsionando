@@ -184,7 +184,13 @@ export const updateTicketStatus = createServerFn({ method: 'POST' })
   )
   .handler(async ({ data, context }) =>
     withInstrumentation('support.updateStatus', { user_id: context.userId, ticket_id: data.ticket_id }, async () => {
-      const patch: Record<string, unknown> = {}
+      const patch: {
+        status?: typeof STATUSES[number]
+        priority?: typeof PRIORITIES[number]
+        assigned_to?: string | null
+        rating?: number
+        rating_comment?: string
+      } = {}
       if (data.status) patch.status = data.status
       if (data.priority) patch.priority = data.priority
       if (data.assigned_to !== undefined) patch.assigned_to = data.assigned_to
