@@ -30,6 +30,7 @@ import { Route as ModulosRouteImport } from './routes/modulos'
 import { Route as MarocasRouteImport } from './routes/marocas'
 import { Route as MarketingRouteImport } from './routes/marketing'
 import { Route as ManutencaoRouteImport } from './routes/manutencao'
+import { Route as LegalRouteImport } from './routes/legal'
 import { Route as HealthzRouteImport } from './routes/healthz'
 import { Route as EscolherNichoRouteImport } from './routes/escolher-nicho'
 import { Route as EmpresasRouteImport } from './routes/empresas'
@@ -557,6 +558,11 @@ const MarketingRoute = MarketingRouteImport.update({
 const ManutencaoRoute = ManutencaoRouteImport.update({
   id: '/manutencao',
   path: '/manutencao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalRoute = LegalRouteImport.update({
+  id: '/legal',
+  path: '/legal',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HealthzRoute = HealthzRouteImport.update({
@@ -2928,6 +2934,7 @@ export interface FileRoutesByFullPath {
   '/empresas': typeof EmpresasRoute
   '/escolher-nicho': typeof EscolherNichoRoute
   '/healthz': typeof HealthzRoute
+  '/legal': typeof LegalRoute
   '/manutencao': typeof ManutencaoRoute
   '/marketing': typeof MarketingRoute
   '/marocas': typeof MarocasRouteWithChildren
@@ -3372,6 +3379,7 @@ export interface FileRoutesByTo {
   '/empresas': typeof EmpresasRoute
   '/escolher-nicho': typeof EscolherNichoRoute
   '/healthz': typeof HealthzRoute
+  '/legal': typeof LegalRoute
   '/manutencao': typeof ManutencaoRoute
   '/marketing': typeof MarketingRoute
   '/marocas': typeof MarocasRouteWithChildren
@@ -3807,6 +3815,7 @@ export interface FileRoutesById {
   '/empresas': typeof EmpresasRoute
   '/escolher-nicho': typeof EscolherNichoRoute
   '/healthz': typeof HealthzRoute
+  '/legal': typeof LegalRoute
   '/manutencao': typeof ManutencaoRoute
   '/marketing': typeof MarketingRoute
   '/marocas': typeof MarocasRouteWithChildren
@@ -4254,6 +4263,7 @@ export interface FileRouteTypes {
     | '/empresas'
     | '/escolher-nicho'
     | '/healthz'
+    | '/legal'
     | '/manutencao'
     | '/marketing'
     | '/marocas'
@@ -4698,6 +4708,7 @@ export interface FileRouteTypes {
     | '/empresas'
     | '/escolher-nicho'
     | '/healthz'
+    | '/legal'
     | '/manutencao'
     | '/marketing'
     | '/marocas'
@@ -5132,6 +5143,7 @@ export interface FileRouteTypes {
     | '/empresas'
     | '/escolher-nicho'
     | '/healthz'
+    | '/legal'
     | '/manutencao'
     | '/marketing'
     | '/marocas'
@@ -5579,6 +5591,7 @@ export interface RootRouteChildren {
   EmpresasRoute: typeof EmpresasRoute
   EscolherNichoRoute: typeof EscolherNichoRoute
   HealthzRoute: typeof HealthzRoute
+  LegalRoute: typeof LegalRoute
   ManutencaoRoute: typeof ManutencaoRoute
   MarketingRoute: typeof MarketingRoute
   MarocasRoute: typeof MarocasRouteWithChildren
@@ -5864,6 +5877,13 @@ declare module '@tanstack/react-router' {
       path: '/manutencao'
       fullPath: '/manutencao'
       preLoaderRoute: typeof ManutencaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal': {
+      id: '/legal'
+      path: '/legal'
+      fullPath: '/legal'
+      preLoaderRoute: typeof LegalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/healthz': {
@@ -9922,6 +9942,7 @@ const rootRouteChildren: RootRouteChildren = {
   EmpresasRoute: EmpresasRoute,
   EscolherNichoRoute: EscolherNichoRoute,
   HealthzRoute: HealthzRoute,
+  LegalRoute: LegalRoute,
   ManutencaoRoute: ManutencaoRoute,
   MarketingRoute: MarketingRoute,
   MarocasRoute: MarocasRouteWithChildren,
