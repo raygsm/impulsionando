@@ -976,6 +976,71 @@ export const regenerateFiscalReportSignedUrl = createServerFn({ method: "POST" }
     return { url: signed.signedUrl, expires_at };
   });
 
+// ───────────────────────── Envio de teste ─────────────────────────
+
+export const sendTestFiscalEmail = createServerFn({ method: "POST" })
+  .inputValidator((data: {
+    year: number; month: number; recipient: string;
+    email_mode?: "link" | "inline"; expiry_hours?: number;
+  }) => {
+    if (!Number.isInteger(data.year) || !Number.isInteger(data.month))
+      throw new Error("invalid period");
+    const email = String(data.recipient ?? "").trim().toLowerCase();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      throw new Error("destinatário de teste inválido");
+    if (data.expiry_hours !== undefined &&
+        (!Number.isInteger(data.expiry_hours) || data.expiry_hours < 1 || data.expiry_hours > 720))
+      throw new Error("Expiração entre 1h e 720h.");
+    return { ...data, recipient: email };
+  })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    await ensureAdmin(supabase, userId);
+    return sendFiscalReportInternal({
+      year: data.year, month: data.month, recipient: data.recipient,
+      triggeredBy: "user", userId, emailMode: data.email_mode,
+      expirySeconds: data.expiry_hours ? data.expiry_hours * 3600 : undefined,
+      test: true,
+    });
+  });
+
+// ───────────────────────── Auditoria de link assinado ─────────────────────────
+
+export const logFiscalLinkAction = createServerFn({ method: "POST" })
+  .inputValidator((data: {
+    action: "copied" | "opened";
+    csv_path?: string;
+    signed_url?: string;
+    signed_url_expires_at?: string;
+    year?: number; month?: number;
+    source?: string;
+  }) => {
+    if (data.action !== "copied" && data.action !== "opened")
+      throw new Error("invalid action");
+    return data;
+  })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    await ensureAdmin(supabase, userId);
+    await audit(
+      supabase, userId,
+      data.action === "copied" ? "fiscal.link.copied" : "fiscal.link.opened",
+      {
+        path: data.csv_path,
+        signed_url: data.signed_url,
+        signed_url_expires_at: data.signed_url_expires_at,
+        year: data.year, month: data.month,
+        source: data.source ?? null,
+      },
+      1,
+    );
+    return { ok: true };
+  });
+
+
+
 // ───────────────────────── Cron ─────────────────────────
 
 /**
