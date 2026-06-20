@@ -175,7 +175,7 @@ function VitrineDetailPage() {
             <p className="text-sm text-muted-foreground">Seja o primeiro a avaliar.</p>
           ) : (
             <ul className="space-y-3">
-              {reviews.map((r) => (
+              {reviews.map((r: { id: string; stars: number; comment: string | null; created_at: string }) => (
                 <li key={r.id} className="border rounded-lg p-3">
                   <div className="flex items-center justify-between">
                     <Stars value={r.stars} />
