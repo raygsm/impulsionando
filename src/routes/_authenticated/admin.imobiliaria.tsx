@@ -119,7 +119,7 @@ const GROUPS: Group[] = [
   {
     title: "Portais",
     items: [
-      { label: "Portal Proprietário", icon: Building, status: "missing", note: "Portal externo do proprietário" },
+      { label: "Portal Proprietário", icon: Building, to: "/imobiliaria/proprietarios", status: "ok", note: "Acesso por link único — copiar no cadastro do proprietário" },
       { label: "Portal Cliente", icon: Key, status: "missing", note: "Portal externo do cliente" },
     ],
   },
