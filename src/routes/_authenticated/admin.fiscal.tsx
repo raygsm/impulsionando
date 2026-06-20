@@ -652,6 +652,33 @@ function AdminFiscalPage() {
               )}
             </div>
 
+            {/* Envio de teste */}
+            <div className="mt-3 flex flex-wrap items-end gap-2 rounded border border-dashed border-border bg-muted/30 p-3">
+              <div className="text-xs font-semibold text-foreground">
+                Envio de teste
+                <span className="ml-2 rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium text-amber-800">
+                  não conta como envio oficial
+                </span>
+              </div>
+              <label className="text-xs">Destinatário de teste
+                <input type="email" value={testRecipient}
+                  onChange={(e) => setTestRecipient(e.target.value)}
+                  placeholder="voce@empresa.com"
+                  className="ml-2 w-64 rounded border border-border bg-background px-2 py-1 text-xs" />
+              </label>
+              <button onClick={() => testMut.mutate()}
+                disabled={testMut.isPending || !testRecipient || !!expiryError}
+                title="Envia o corpo real e um link assinado novo para o destinatário informado, sem registrar como envio oficial"
+                className="rounded border border-border bg-background px-3 py-1 text-xs font-medium disabled:opacity-50">
+                {testMut.isPending ? "Enviando teste…" : "Enviar teste"}
+              </button>
+              <span className="text-[10px] text-muted-foreground">
+                Útil para validar conteúdo/link antes do envio para o contador. Assunto vai com prefixo [TESTE].
+              </span>
+            </div>
+
+
+
             {previewHtml && (
               <div className="mt-4 rounded border border-border bg-background">
                 <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-3 py-2 text-xs">
