@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, Plus, Pencil, Trash2, Mail, Phone, Search } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Mail, Phone, Search, Link2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/imobiliaria/proprietarios")({
   head: () => ({ meta: [{ title: "Proprietários — Imobiliária" }] }),
