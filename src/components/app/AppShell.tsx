@@ -21,6 +21,7 @@ import { TOP_ITEMS, NAV_GROUPS } from "./nav-config";
 import { CheckoutShell, isCheckoutPath } from "./CheckoutShell";
 import { useAudience } from "@/hooks/use-audience";
 import { useConsumerHasActiveMembership } from "@/hooks/use-consumer-membership";
+import { MobileBottomNav } from "./MobileBottomNav";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
@@ -120,6 +121,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex bg-background">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-3 focus:py-2 focus:rounded-md focus:bg-primary focus:text-primary-foreground focus:shadow-lg"
+      >
+        Pular para o conteúdo
+      </a>
       <Sidebar currentUser={data} />
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar currentUser={data} />
@@ -127,8 +134,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <TrialBanner />
         <PastDueBanner />
         <Breadcrumbs />
-        <main className="flex-1 p-6 lg:p-8 overflow-x-hidden">{children}</main>
+        <main id="main-content" className="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden pb-20 lg:pb-8">
+          {children}
+        </main>
       </div>
+      <MobileBottomNav />
       <CommandPalette />
       <QuickActions />
     </div>
