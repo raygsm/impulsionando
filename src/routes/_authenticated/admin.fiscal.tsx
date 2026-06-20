@@ -100,12 +100,18 @@ function AdminFiscalPage() {
   const [feedback, setFeedback] = useState<string | null>(null);
   const qc = useQueryClient();
 
-  // Schedule form state
+  // Schedule form state (inclui retry + expiração)
   const [schedDraft, setSchedDraft] = useState({
     day: 1, hour: 6, minute: 0, tz: "America/Sao_Paulo",
     email_mode: "link" as "link" | "inline",
+    max_attempts: 3,
+    backoff_minutes: 60,
+    link_expiry_hours: 168,
   });
   const [schedFeedback, setSchedFeedback] = useState<string | null>(null);
+  const [expiryHours, setExpiryHours] = useState<number>(168);
+  const [previewHtml, setPreviewHtml] = useState<string | null>(null);
+  const [previewMeta, setPreviewMeta] = useState<{ subject?: string; email_mode?: string; expires_at?: string } | null>(null);
 
   // Audit filters
   const [auditFilters, setAuditFilters] = useState<{
@@ -123,6 +129,8 @@ function AdminFiscalPage() {
   const fetchSchedule = useServerFn(getFiscalScheduleSettings);
   const saveSchedule = useServerFn(setFiscalScheduleSettings);
   const fetchStatus = useServerFn(getFiscalPeriodStatus);
+  const previewEmail = useServerFn(previewMonthlyFiscalEmail);
+  const regenerateLink = useServerFn(regenerateFiscalReportSignedUrl);
 
   const q = useQuery({
     queryKey: ["admin-fiscal", year, month],
