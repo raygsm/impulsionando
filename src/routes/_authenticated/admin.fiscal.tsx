@@ -133,6 +133,10 @@ function AdminFiscalPage() {
   const fetchStatus = useServerFn(getFiscalPeriodStatus);
   const previewEmail = useServerFn(previewMonthlyFiscalEmail);
   const regenerateLink = useServerFn(regenerateFiscalReportSignedUrl);
+  const fetchFailed = useServerFn(listFailedFiscalRuns);
+
+  const [showHistory, setShowHistory] = useState(false);
+
 
   const q = useQuery({
     queryKey: ["admin-fiscal", year, month],
