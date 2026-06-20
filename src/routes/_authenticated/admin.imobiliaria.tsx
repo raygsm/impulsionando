@@ -39,7 +39,7 @@ const GROUPS: Group[] = [
     title: "Comercial",
     items: [
       { label: "Leads", icon: Flame, to: "/crm/leads", status: "ok" },
-      { label: "Distribuição", icon: Shuffle, status: "missing", note: "Round-robin / regras de atribuição" },
+      { label: "Distribuição", icon: Shuffle, to: "/imobiliaria/distribuicao", status: "ok", note: "Regras de atribuição (round-robin, equipe, bairro)" },
       { label: "Visitas", icon: Home, to: "/agenda/appointments", status: "partial", note: "Usa agenda genérica" },
       { label: "Propostas", icon: FileSignature, to: "/imobiliaria/aprovacoes", status: "ok" },
       { label: "Contratos", icon: FileText, to: "/imobiliaria/aprovacoes/imprimir-fila", status: "partial", note: "Fila de impressão; falta gestão de contrato" },
