@@ -362,6 +362,17 @@ function AdminFiscalPage() {
     a.href = url; a.download = res.filename;
     document.body.appendChild(a); a.click(); a.remove();
     URL.revokeObjectURL(url);
+    try {
+      await logPreviewCsv({ data: {
+        year, month,
+        recipient: recipientDraft || acctQ.data?.email || null,
+        email_mode: previewMeta?.email_mode === "inline" || previewMeta?.email_mode === "link"
+          ? previewMeta.email_mode
+          : schedDraft.email_mode,
+        row_count: r?.totals.count ?? 0,
+        filename: res.filename,
+      }});
+    } catch {}
     qc.invalidateQueries({ queryKey: ["admin-fiscal-logs"] });
   }
 
