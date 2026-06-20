@@ -5,6 +5,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
+import { withInstrumentation } from './instrumentation'
 
 export type MonetizationModel = 'saas' | 'revshare' | 'hybrid'
 export type PayoutFrequency = 'instant' | 'daily' | 'weekly' | 'biweekly' | 'monthly'
