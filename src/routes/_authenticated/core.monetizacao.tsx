@@ -53,7 +53,11 @@ const FREQ_LABEL: Record<string, string> = {
 
 function MonetizacaoPage() {
   const fetcher = useServerFn(listAllMonetizationModels)
+  const overviewFetcher = useServerFn(getGlobalPayoutOverview)
   const { data } = useSuspenseQuery(modelsQuery(() => fetcher()))
+  const { data: overview } = useSuspenseQuery(
+    queryOptions({ queryKey: ['core', 'monetization-overview'], queryFn: () => overviewFetcher() }),
+  )
 
   const totals = {
     saas: data.filter((m: any) => m.model === 'saas').length,
