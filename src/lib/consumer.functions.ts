@@ -46,13 +46,39 @@ export const getPublicCompanyBySlug = createServerFn({ method: "GET" })
     const sb = publicClient();
     const { data: row, error } = await sb
       .from("companies")
-      .select("id, name, trade_name, segment, logo_url, public_slug, address_city, address_state, address_line, instagram, facebook, website, whatsapp, primary_color")
+      .select("id, name, trade_name, segment, logo_url, public_slug, address_city, address_state, address_line, instagram, facebook, website, whatsapp, primary_color, rating_avg, rating_count")
       .eq("public_slug", data.slug)
       .eq("vitrine_enabled", true)
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!row) throw new Error("Empresa não encontrada");
-    return { company: row };
+    const { data: reviews } = await sb
+      .from("ecosystem_reviews")
+      .select("id, stars, comment, created_at")
+      .eq("company_id", row.id)
+      .order("created_at", { ascending: false })
+      .limit(20);
+    return { company: row, reviews: reviews ?? [] };
+  });
+
+export const submitCompanyReview = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      company_id: z.string().uuid(),
+      stars: z.number().int().min(1).max(5),
+      comment: z.string().max(1000).optional(),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("ecosystem_reviews")
+      .upsert(
+        { company_id: data.company_id, user_id: context.userId, stars: data.stars, comment: data.comment ?? null },
+        { onConflict: "company_id,user_id" },
+      );
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
 
 export const getMyConsumerArea = createServerFn({ method: "GET" })
