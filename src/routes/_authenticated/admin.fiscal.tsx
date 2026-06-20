@@ -152,11 +152,8 @@ function AdminFiscalPage() {
   const [previewHtml, setPreviewHtml] = useState<string | null>(null);
   const [previewMeta, setPreviewMeta] = useState<{ subject?: string; email_mode?: string; expires_at?: string } | null>(null);
 
-  // Audit filters
-  const [auditFilters, setAuditFilters] = useState<{
-    from?: string; to?: string; user_email?: string;
-    recipient?: string; kind?: string; kinds?: string[];
-  }>({});
+  // (Audit filters are URL-backed below, after the server-fn refs.)
+
 
   const fetchReport = useServerFn(getMonthlyFiscalReport);
   const fetchCsv = useServerFn(exportMonthlyFiscalCsv);
