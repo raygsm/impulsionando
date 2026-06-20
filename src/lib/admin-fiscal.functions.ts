@@ -23,7 +23,20 @@ export const DEFAULT_SCHEDULE = {
   minute: 0, // 0-59
   tz: "America/Sao_Paulo", // IANA
   email_mode: "link" as "link" | "inline",
+  // Retry / backoff (aplicado pelo cron e pelo botão "reenviar")
+  max_attempts: 3,
+  backoff_minutes: 60,
+  // Expiração padrão do link assinado (horas)
+  link_expiry_hours: 168, // 7 dias
 };
+
+function isValidTz(tz: string): boolean {
+  if (!tz || typeof tz !== "string") return false;
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: tz });
+    return true;
+  } catch { return false; }
+}
 
 const MONTHS_PT = [
   "janeiro", "fevereiro", "março", "abril", "maio", "junho",
