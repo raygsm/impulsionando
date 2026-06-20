@@ -120,71 +120,73 @@ export const listAllMonetizationModels = createServerFn({ method: 'GET' })
 export const upsertMonetizationModel = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => upsertSchema.parse(d))
-  .handler(async ({ data, context }) => {
-    await requireStaff(context.supabase, context.userId)
+  .handler(async ({ data, context }) =>
+    withInstrumentation(
+      'monetization.upsertMonetizationModel',
+      { user_id: context.userId, company_id: data.company_id, model: data.model },
+      async () => {
+        await requireStaff(context.supabase, context.userId)
 
-    // 1) busca versão atual
-    const { data: prev } = await context.supabase
-      .from('core_monetization_models')
-      .select('id, version')
-      .eq('company_id', data.company_id)
-      .eq('is_active', true)
-      .order('version', { ascending: false })
-      .limit(1)
-      .maybeSingle()
+        const { data: prev } = await context.supabase
+          .from('core_monetization_models')
+          .select('id, version')
+          .eq('company_id', data.company_id)
+          .eq('is_active', true)
+          .order('version', { ascending: false })
+          .limit(1)
+          .maybeSingle()
 
-    const nextVersion = (prev?.version ?? 0) + 1
+        const nextVersion = (prev?.version ?? 0) + 1
 
-    // 2) desativa anterior
-    if (prev?.id) {
-      const { error: deactErr } = await context.supabase
-        .from('core_monetization_models')
-        .update({ is_active: false, effective_to: new Date().toISOString() })
-        .eq('id', prev.id)
-      if (deactErr) throw deactErr
-    }
+        if (prev?.id) {
+          const { error: deactErr } = await context.supabase
+            .from('core_monetization_models')
+            .update({ is_active: false, effective_to: new Date().toISOString() })
+            .eq('id', prev.id)
+          if (deactErr) throw deactErr
+        }
 
-    // 3) cria nova versão
-    const { data: created, error: insErr } = await context.supabase
-      .from('core_monetization_models')
-      .insert({
-        company_id: data.company_id,
-        model: data.model,
-        monthly_fee_cents: data.monthly_fee_cents,
-        setup_fee_cents: data.setup_fee_cents,
-        min_payout_cents: data.min_payout_cents,
-        payout_frequency: data.payout_frequency,
-        covered_events: data.covered_events,
-        version: nextVersion,
-        is_active: true,
-        notes: data.notes ?? null,
-      })
-      .select('id')
-      .single()
-    if (insErr) throw insErr
+        const { data: created, error: insErr } = await context.supabase
+          .from('core_monetization_models')
+          .insert({
+            company_id: data.company_id,
+            model: data.model,
+            monthly_fee_cents: data.monthly_fee_cents,
+            setup_fee_cents: data.setup_fee_cents,
+            min_payout_cents: data.min_payout_cents,
+            payout_frequency: data.payout_frequency,
+            covered_events: data.covered_events,
+            version: nextVersion,
+            is_active: true,
+            notes: data.notes ?? null,
+          })
+          .select('id')
+          .single()
+        if (insErr) throw insErr
 
-    // 4) insere taxas
-    if (data.rates.length > 0 && (data.model === 'revshare' || data.model === 'hybrid')) {
-      const rows = data.rates.map((r) => ({
-        model_id: created.id,
-        company_id: data.company_id,
-        event_type: r.event_type,
-        percent_bps: r.percent_bps,
-        min_bps: r.min_bps ?? null,
-        max_bps: r.max_bps ?? null,
-      }))
-      const { error: ratesErr } = await context.supabase.from('core_revshare_rates').insert(rows)
-      if (ratesErr) throw ratesErr
-    }
+        if (data.rates.length > 0 && (data.model === 'revshare' || data.model === 'hybrid')) {
+          const rows = data.rates.map((r) => ({
+            model_id: created.id,
+            company_id: data.company_id,
+            event_type: r.event_type,
+            percent_bps: r.percent_bps,
+            min_bps: r.min_bps ?? null,
+            max_bps: r.max_bps ?? null,
+          }))
+          const { error: ratesErr } = await context.supabase.from('core_revshare_rates').insert(rows)
+          if (ratesErr) throw ratesErr
+        }
 
-    // 5) auditoria
-    await context.supabase.from('audit_logs').insert({
-      user_id: context.userId,
-      action: 'monetization.upsert',
-      entity: 'core_monetization_models',
-      entity_id: created.id,
-      after: { ...data, version: nextVersion },
-    })
+        await context.supabase.from('audit_logs').insert({
+          user_id: context.userId,
+          action: 'monetization.upsert',
+          entity: 'core_monetization_models',
+          entity_id: created.id,
+          after: { ...data, version: nextVersion },
+        })
 
-    return { id: created.id, version: nextVersion }
-  })
+        return { id: created.id, version: nextVersion }
+      },
+    ),
+  )
+
