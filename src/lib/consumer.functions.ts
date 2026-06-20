@@ -54,7 +54,7 @@ export const getPublicCompanyBySlug = createServerFn({ method: "GET" })
     if (!row) throw new Error("Empresa não encontrada");
     const { data: reviews } = await sb
       .from("ecosystem_reviews")
-      .select("id, rating, comment, created_at")
+      .select("id, stars, comment, created_at")
       .eq("company_id", row.id)
       .order("created_at", { ascending: false })
       .limit(20);
@@ -66,7 +66,7 @@ export const submitCompanyReview = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z.object({
       company_id: z.string().uuid(),
-      rating: z.number().int().min(1).max(5),
+      stars: z.number().int().min(1).max(5),
       comment: z.string().max(1000).optional(),
     }).parse(d),
   )
@@ -74,7 +74,7 @@ export const submitCompanyReview = createServerFn({ method: "POST" })
     const { error } = await context.supabase
       .from("ecosystem_reviews")
       .upsert(
-        { company_id: data.company_id, user_id: context.userId, rating: data.rating, comment: data.comment ?? null },
+        { company_id: data.company_id, user_id: context.userId, stars: data.stars, comment: data.comment ?? null },
         { onConflict: "company_id,user_id" },
       );
     if (error) throw new Error(error.message);
