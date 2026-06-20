@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Building2, ShieldCheck, Sparkles, BarChart3, Banknote, Wrench, Camera, Wifi } from "lucide-react";
+import { Building2, ShieldCheck, Sparkles, BarChart3, Banknote, Wrench, Camera, Wifi, Waves, UtensilsCrossed, ShoppingBag, Bus, Mountain, Pill, LifeBuoy, Check } from "lucide-react";
 
 export const Route = createFileRoute("/marocas")({
   head: () => ({
