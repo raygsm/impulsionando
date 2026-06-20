@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, Plus, Pencil, Trash2, Mail, Phone, Search } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Mail, Phone, Search, Link2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/imobiliaria/proprietarios")({
   head: () => ({ meta: [{ title: "Proprietários — Imobiliária" }] }),
@@ -33,8 +33,23 @@ type Owner = {
   status: "active" | "inactive";
   portal_invited_at: string | null;
   portal_last_login_at: string | null;
+  portal_token: string | null;
   created_at: string;
 };
+
+async function copyPortalLink(token: string | null) {
+  if (!token) {
+    toast.error("Token não disponível");
+    return;
+  }
+  const url = `${window.location.origin}/portal/proprietario/${token}`;
+  try {
+    await navigator.clipboard.writeText(url);
+    toast.success("Link do portal copiado");
+  } catch {
+    toast.message(url);
+  }
+}
 
 type FormState = Partial<Owner>;
 
@@ -219,6 +234,9 @@ function Page() {
                     </Badge>
                   </td>
                   <td className="px-4 py-2 text-right">
+                    <Button size="sm" variant="ghost" title="Copiar link do Portal do Proprietário" onClick={() => copyPortalLink(o.portal_token)}>
+                      <Link2 className="h-3.5 w-3.5" />
+                    </Button>
                     <Button size="sm" variant="ghost" onClick={() => openEdit(o)}>
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>

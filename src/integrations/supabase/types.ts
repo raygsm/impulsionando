@@ -13146,6 +13146,7 @@ export type Database = {
           phone: string | null
           portal_invited_at: string | null
           portal_last_login_at: string | null
+          portal_token: string | null
           preferred_contact: string | null
           status: string
           updated_at: string
@@ -13167,6 +13168,7 @@ export type Database = {
           phone?: string | null
           portal_invited_at?: string | null
           portal_last_login_at?: string | null
+          portal_token?: string | null
           preferred_contact?: string | null
           status?: string
           updated_at?: string
@@ -13188,6 +13190,7 @@ export type Database = {
           phone?: string | null
           portal_invited_at?: string | null
           portal_last_login_at?: string | null
+          portal_token?: string | null
           preferred_contact?: string | null
           status?: string
           updated_at?: string
@@ -16168,6 +16171,7 @@ export type Database = {
           sort_order: number
         }[]
       }
+      get_owner_portal_data: { Args: { _token: string }; Returns: Json }
       get_smoke_retention_info: { Args: never; Returns: Json }
       get_table_menu: { Args: { _token: string }; Returns: Json }
       has_active_subscription: {

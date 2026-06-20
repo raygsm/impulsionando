@@ -186,6 +186,7 @@ import { Route as AuthenticatedCockpitsIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedBiIndexRouteImport } from './routes/_authenticated/bi.index'
 import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenticated/agenda.index'
 import { Route as AuthenticatedAffiliatesIndexRouteImport } from './routes/_authenticated/affiliates.index'
+import { Route as PortalProprietarioTokenRouteImport } from './routes/portal.proprietario.$token'
 import { Route as PortalContabilidadeTokenRouteImport } from './routes/portal.contabilidade.$token'
 import { Route as MarocasContratarPlanoRouteImport } from './routes/marocas.contratar.$plano'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
@@ -1332,6 +1333,11 @@ const AuthenticatedAffiliatesIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedAffiliatesRoute,
   } as any)
+const PortalProprietarioTokenRoute = PortalProprietarioTokenRouteImport.update({
+  id: '/portal/proprietario/$token',
+  path: '/portal/proprietario/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PortalContabilidadeTokenRoute =
   PortalContabilidadeTokenRouteImport.update({
     id: '/portal/contabilidade/$token',
@@ -3094,6 +3100,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/marocas/contratar/$plano': typeof MarocasContratarPlanoRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
+  '/portal/proprietario/$token': typeof PortalProprietarioTokenRoute
   '/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/bi/': typeof AuthenticatedBiIndexRoute
@@ -3502,6 +3509,7 @@ export interface FileRoutesByTo {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/marocas/contratar/$plano': typeof MarocasContratarPlanoRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
+  '/portal/proprietario/$token': typeof PortalProprietarioTokenRoute
   '/affiliates': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda': typeof AuthenticatedAgendaIndexRoute
   '/bi': typeof AuthenticatedBiIndexRoute
@@ -3924,6 +3932,7 @@ export interface FileRoutesById {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/marocas/contratar/$plano': typeof MarocasContratarPlanoRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
+  '/portal/proprietario/$token': typeof PortalProprietarioTokenRoute
   '/_authenticated/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/_authenticated/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/_authenticated/bi/': typeof AuthenticatedBiIndexRoute
@@ -4345,6 +4354,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/marocas/contratar/$plano'
     | '/portal/contabilidade/$token'
+    | '/portal/proprietario/$token'
     | '/affiliates/'
     | '/agenda/'
     | '/bi/'
@@ -4753,6 +4763,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/marocas/contratar/$plano'
     | '/portal/contabilidade/$token'
+    | '/portal/proprietario/$token'
     | '/affiliates'
     | '/agenda'
     | '/bi'
@@ -5174,6 +5185,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/marocas/contratar/$plano'
     | '/portal/contabilidade/$token'
+    | '/portal/proprietario/$token'
     | '/_authenticated/affiliates/'
     | '/_authenticated/agenda/'
     | '/_authenticated/bi/'
@@ -5368,6 +5380,7 @@ export interface RootRouteChildren {
   DemoNichoSlugRoute: typeof DemoNichoSlugRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   PortalContabilidadeTokenRoute: typeof PortalContabilidadeTokenRoute
+  PortalProprietarioTokenRoute: typeof PortalProprietarioTokenRoute
   ApiPaymentsInfinitepayCheckStatusRoute: typeof ApiPaymentsInfinitepayCheckStatusRoute
   ApiPaymentsInfinitepayCreateRoute: typeof ApiPaymentsInfinitepayCreateRoute
   ApiPublicDemoFeiraLeadRoute: typeof ApiPublicDemoFeiraLeadRoute
@@ -6640,6 +6653,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/affiliates/'
       preLoaderRoute: typeof AuthenticatedAffiliatesIndexRouteImport
       parentRoute: typeof AuthenticatedAffiliatesRoute
+    }
+    '/portal/proprietario/$token': {
+      id: '/portal/proprietario/$token'
+      path: '/portal/proprietario/$token'
+      fullPath: '/portal/proprietario/$token'
+      preLoaderRoute: typeof PortalProprietarioTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/portal/contabilidade/$token': {
       id: '/portal/contabilidade/$token'
@@ -9476,6 +9496,7 @@ const rootRouteChildren: RootRouteChildren = {
   DemoNichoSlugRoute: DemoNichoSlugRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   PortalContabilidadeTokenRoute: PortalContabilidadeTokenRoute,
+  PortalProprietarioTokenRoute: PortalProprietarioTokenRoute,
   ApiPaymentsInfinitepayCheckStatusRoute:
     ApiPaymentsInfinitepayCheckStatusRoute,
   ApiPaymentsInfinitepayCreateRoute: ApiPaymentsInfinitepayCreateRoute,
