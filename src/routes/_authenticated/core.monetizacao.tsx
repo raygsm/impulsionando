@@ -110,6 +110,53 @@ function MonetizacaoPage() {
         </Card>
       </div>
 
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">GMV 90 dias</CardTitle></CardHeader>
+          <CardContent className="text-2xl font-semibold">{formatBRL(overview.totals.gross)}</CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Taxa retida 90 dias</CardTitle></CardHeader>
+          <CardContent className="text-2xl font-semibold text-amber-600">{formatBRL(overview.totals.fee)}</CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Eventos aprovados</CardTitle></CardHeader>
+          <CardContent className="text-2xl font-semibold">{overview.totals.events}</CardContent>
+        </Card>
+      </div>
+
+      {overview.top.length > 0 && (
+        <Card>
+          <CardHeader><CardTitle>Top clientes por taxa retida (90 dias)</CardTitle></CardHeader>
+          <CardContent className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Cliente</TableHead>
+                  <TableHead>Nicho</TableHead>
+                  <TableHead className="text-right">Bruto</TableHead>
+                  <TableHead className="text-right">Taxa</TableHead>
+                  <TableHead className="text-right">Eventos</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {overview.top.map((t: any) => (
+                  <TableRow key={t.company_id}>
+                    <TableCell className="font-medium">{t.name}</TableCell>
+                    <TableCell className="text-muted-foreground">{t.niche ?? '—'}</TableCell>
+                    <TableCell className="text-right tabular-nums">{formatBRL(t.gross)}</TableCell>
+                    <TableCell className="text-right tabular-nums text-amber-600">{formatBRL(t.fee)}</TableCell>
+                    <TableCell className="text-right tabular-nums">{t.events}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
+
+
+
       <Card>
         <CardHeader>
           <CardTitle>Clientes</CardTitle>
