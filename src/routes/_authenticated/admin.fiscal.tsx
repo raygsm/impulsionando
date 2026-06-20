@@ -320,14 +320,19 @@ function AdminFiscalPage() {
     mutationFn: () => sendTest({ data: {
       year, month,
       recipient: testRecipient,
-      email_mode: schedDraft.email_mode,
+      email_mode: testEmailMode ?? schedDraft.email_mode,
       expiry_hours: expiryHours,
     }}),
     onSuccess: (res: any) => {
       setFeedback(`E-mail de teste enviado para ${res.recipient} (modo ${res.email_mode}). Não conta como envio oficial.`);
       qc.invalidateQueries({ queryKey: ["admin-fiscal-logs"] });
+      qc.invalidateQueries({ queryKey: ["admin-fiscal-test-history"] });
     },
-    onError: (e: any) => setFeedback(`Erro no envio de teste: ${e?.message ?? e}`),
+    onError: (e: any) => {
+      setFeedback(`Erro no envio de teste: ${e?.message ?? e}`);
+      qc.invalidateQueries({ queryKey: ["admin-fiscal-logs"] });
+      qc.invalidateQueries({ queryKey: ["admin-fiscal-test-history"] });
+    },
   });
 
   async function copySignedLink(opts: {
