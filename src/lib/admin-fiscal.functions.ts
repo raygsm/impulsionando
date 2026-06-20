@@ -696,6 +696,9 @@ async function sendFiscalReportInternal(opts: {
       params: {
         year: opts.year, month: opts.month, recipient: opts.recipient,
         path, message_id: messageId, email_mode: emailMode, attempt,
+        signed_url: signed.signedUrl,
+        signed_url_expires_at: expiresIso,
+        expiry_hours: Math.round(EXPIRES_SEC / 3600),
       },
       row_count: totals.count,
       notes: opts.triggeredBy,
