@@ -22,7 +22,7 @@ const CTA = {
 } as const;
 
 export function useLang(): Lang {
-  const search = useRouterState({ select: (s) => s.location.search }) as Record<string, unknown>;
+  const search = useRouterState({ select: (s) => s.location.search as Record<string, unknown> });
   const raw = (search?.lang as string | undefined) ?? 'pt';
   return (['pt', 'en', 'es'].includes(raw) ? raw : 'pt') as Lang;
 }
