@@ -47,7 +47,7 @@ export async function generatePayoutReceiptPdf(batch: ReceiptBatch): Promise<Uin
 
   const rows: Array<[string, string]> = [
     ['Lote', batch.id.slice(0, 8).toUpperCase()],
-    ['Período', `${fmtDate(batch.period_start)} → ${fmtDate(batch.period_end)}`],
+    ['Período', `${fmtDate(batch.period_start)} -> ${fmtDate(batch.period_end)}`],
     ['Eventos', String(batch.event_count)],
     ['Bruto', fmtBRL(batch.gross_cents)],
     ['Taxa', `- ${fmtBRL(batch.fee_cents)}`],
