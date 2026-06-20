@@ -81,7 +81,16 @@ function monthBounds(year: number, month: number) {
 async function audit(
   supabase: any,
   userId: string | null,
-  kind: "fiscal.report" | "fiscal.csv" | "fiscal.email" | "fiscal.email.cron" | "fiscal.email.retry" | "fiscal.schedule.update",
+  kind:
+    | "fiscal.report"
+    | "fiscal.csv"
+    | "fiscal.email"
+    | "fiscal.email.cron"
+    | "fiscal.email.retry"
+    | "fiscal.email.skipped"
+    | "fiscal.schedule.update"
+    | "fiscal.preview"
+    | "fiscal.link.regenerated",
   params: Record<string, unknown>,
   row_count: number,
   notes?: string,
