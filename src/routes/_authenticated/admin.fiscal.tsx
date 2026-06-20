@@ -149,10 +149,20 @@ function AdminFiscalPage() {
   const logLink = useServerFn(logFiscalLinkAction);
   const logPreviewCsv = useServerFn(logFiscalPreviewCsvDownload);
   const fetchTestHistory = useServerFn(listTestSendHistory);
+  const fetchTestPdfHtml = useServerFn(getTestFiscalEmailPdfHtml);
 
   const [showHistory, setShowHistory] = useState(false);
   const [testRecipient, setTestRecipient] = useState("");
   const [testEmailMode, setTestEmailMode] = useState<"link" | "inline" | null>(null);
+  // Test-history pagination + filters
+  const TEST_PAGE_SIZE = 5;
+  const [testFilters, setTestFilters] = useState<{
+    recipient?: string;
+    status?: "all" | "sent" | "failed";
+    year?: number;
+    month?: number;
+    page: number;
+  }>({ status: "all", page: 0 });
 
 
 
