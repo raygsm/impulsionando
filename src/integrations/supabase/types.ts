@@ -13028,6 +13028,166 @@ export type Database = {
         }
         Relationships: []
       }
+      realestate_documents: {
+        Row: {
+          company_id: string
+          contract_id: string | null
+          created_at: string
+          created_by: string | null
+          doc_type: string
+          expires_at: string | null
+          file_url: string | null
+          id: string
+          notes: string | null
+          owner_id: string | null
+          property_id: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          contract_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          doc_type?: string
+          expires_at?: string | null
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          owner_id?: string | null
+          property_id?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          contract_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          doc_type?: string
+          expires_at?: string | null
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          owner_id?: string | null
+          property_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "realestate_documents_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "realestate_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "realestate_documents_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "realestate_owners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "realestate_documents_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "realestate_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      realestate_financings: {
+        Row: {
+          approved_at: string | null
+          bank: string | null
+          client_document: string | null
+          client_name: string
+          company_id: string
+          contract_id: string | null
+          created_at: string
+          created_by: string | null
+          denied_reason: string | null
+          down_payment: number | null
+          financed_value: number | null
+          id: string
+          interest_rate: number | null
+          monthly_installment: number | null
+          notes: string | null
+          property_id: string | null
+          property_value: number | null
+          status: string
+          submitted_at: string | null
+          term_months: number | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          bank?: string | null
+          client_document?: string | null
+          client_name: string
+          company_id: string
+          contract_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          denied_reason?: string | null
+          down_payment?: number | null
+          financed_value?: number | null
+          id?: string
+          interest_rate?: number | null
+          monthly_installment?: number | null
+          notes?: string | null
+          property_id?: string | null
+          property_value?: number | null
+          status?: string
+          submitted_at?: string | null
+          term_months?: number | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          bank?: string | null
+          client_document?: string | null
+          client_name?: string
+          company_id?: string
+          contract_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          denied_reason?: string | null
+          down_payment?: number | null
+          financed_value?: number | null
+          id?: string
+          interest_rate?: number | null
+          monthly_installment?: number | null
+          notes?: string | null
+          property_id?: string | null
+          property_value?: number | null
+          status?: string
+          submitted_at?: string | null
+          term_months?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "realestate_financings_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "realestate_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "realestate_financings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "realestate_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       realestate_interests: {
         Row: {
           broker_user_id: string | null
