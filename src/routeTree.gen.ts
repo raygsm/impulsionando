@@ -154,6 +154,7 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedSectorsRouteImport } from './routes/_authenticated/sectors'
 import { Route as AuthenticatedSalesRouteImport } from './routes/_authenticated/sales'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
+import { Route as AuthenticatedRepassesRouteImport } from './routes/_authenticated/repasses'
 import { Route as AuthenticatedRadarRouteImport } from './routes/_authenticated/radar'
 import { Route as AuthenticatedPrivacyRouteImport } from './routes/_authenticated/privacy'
 import { Route as AuthenticatedPermissionsRouteImport } from './routes/_authenticated/permissions'
@@ -1177,6 +1178,11 @@ const AuthenticatedSalesRoute = AuthenticatedSalesRouteImport.update({
 const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRepassesRoute = AuthenticatedRepassesRouteImport.update({
+  id: '/repasses',
+  path: '/repasses',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedRadarRoute = AuthenticatedRadarRouteImport.update({
@@ -2947,6 +2953,7 @@ export interface FileRoutesByFullPath {
   '/permissions': typeof AuthenticatedPermissionsRoute
   '/privacy': typeof AuthenticatedPrivacyRouteWithChildren
   '/radar': typeof AuthenticatedRadarRoute
+  '/repasses': typeof AuthenticatedRepassesRoute
   '/reports': typeof AuthenticatedReportsRouteWithChildren
   '/sales': typeof AuthenticatedSalesRouteWithChildren
   '/sectors': typeof AuthenticatedSectorsRoute
@@ -3378,6 +3385,7 @@ export interface FileRoutesByTo {
   '/permissions': typeof AuthenticatedPermissionsRoute
   '/privacy': typeof AuthenticatedPrivacyRouteWithChildren
   '/radar': typeof AuthenticatedRadarRoute
+  '/repasses': typeof AuthenticatedRepassesRoute
   '/sectors': typeof AuthenticatedSectorsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/talents': typeof AuthenticatedTalentsRoute
@@ -3819,6 +3827,7 @@ export interface FileRoutesById {
   '/_authenticated/permissions': typeof AuthenticatedPermissionsRoute
   '/_authenticated/privacy': typeof AuthenticatedPrivacyRouteWithChildren
   '/_authenticated/radar': typeof AuthenticatedRadarRoute
+  '/_authenticated/repasses': typeof AuthenticatedRepassesRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRouteWithChildren
   '/_authenticated/sales': typeof AuthenticatedSalesRouteWithChildren
   '/_authenticated/sectors': typeof AuthenticatedSectorsRoute
@@ -4261,6 +4270,7 @@ export interface FileRouteTypes {
     | '/permissions'
     | '/privacy'
     | '/radar'
+    | '/repasses'
     | '/reports'
     | '/sales'
     | '/sectors'
@@ -4692,6 +4702,7 @@ export interface FileRouteTypes {
     | '/permissions'
     | '/privacy'
     | '/radar'
+    | '/repasses'
     | '/sectors'
     | '/settings'
     | '/talents'
@@ -5132,6 +5143,7 @@ export interface FileRouteTypes {
     | '/_authenticated/permissions'
     | '/_authenticated/privacy'
     | '/_authenticated/radar'
+    | '/_authenticated/repasses'
     | '/_authenticated/reports'
     | '/_authenticated/sales'
     | '/_authenticated/sectors'
@@ -6683,6 +6695,13 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/reports'
       preLoaderRoute: typeof AuthenticatedReportsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/repasses': {
+      id: '/_authenticated/repasses'
+      path: '/repasses'
+      fullPath: '/repasses'
+      preLoaderRoute: typeof AuthenticatedRepassesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/radar': {
@@ -9374,6 +9393,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPermissionsRoute: typeof AuthenticatedPermissionsRoute
   AuthenticatedPrivacyRoute: typeof AuthenticatedPrivacyRouteWithChildren
   AuthenticatedRadarRoute: typeof AuthenticatedRadarRoute
+  AuthenticatedRepassesRoute: typeof AuthenticatedRepassesRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRouteWithChildren
   AuthenticatedSalesRoute: typeof AuthenticatedSalesRouteWithChildren
   AuthenticatedSectorsRoute: typeof AuthenticatedSectorsRoute
@@ -9505,6 +9525,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPermissionsRoute: AuthenticatedPermissionsRoute,
   AuthenticatedPrivacyRoute: AuthenticatedPrivacyRouteWithChildren,
   AuthenticatedRadarRoute: AuthenticatedRadarRoute,
+  AuthenticatedRepassesRoute: AuthenticatedRepassesRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRouteWithChildren,
   AuthenticatedSalesRoute: AuthenticatedSalesRouteWithChildren,
   AuthenticatedSectorsRoute: AuthenticatedSectorsRoute,
