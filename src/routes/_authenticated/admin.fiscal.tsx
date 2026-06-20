@@ -245,6 +245,7 @@ function AdminFiscalPage() {
   // Bulk selection for queued resends
   const BULK_RESEND_MAX = 20;
   const REASON_STORAGE_KEY = "fiscal.bulk-resend.last-reason";
+  const SUMMARY_STORAGE_KEY = "fiscal.bulk-resend.last-summary";
   const [selectedRunIds, setSelectedRunIds] = useState<Set<string>>(new Set());
   const toggleRunSelected = (id: string) => {
     setSelectedRunIds((prev) => {
@@ -271,10 +272,26 @@ function AdminFiscalPage() {
   const [bulkProgress, setBulkProgress] = useState<
     { done: number; total: number; current?: string } | null
   >(null);
-  const [bulkSummary, setBulkSummary] = useState<{
+  type BulkResultRow = {
+    id: string; year: number; month: number;
+    ok: boolean; canceled?: boolean; error?: string;
+    started_at?: string; finished_at?: string;
+  };
+  type BulkSummaryState = {
     ok: number; fail: number; canceled: number; reason: string;
-    results: Array<{ id: string; year: number; month: number; ok: boolean; canceled?: boolean; error?: string }>;
-  } | null>(null);
+    results: Array<BulkResultRow>;
+    finished_at?: string;
+  };
+  const [bulkSummary, setBulkSummary] = useState<BulkSummaryState | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = window.localStorage.getItem(SUMMARY_STORAGE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw) as BulkSummaryState;
+      if (!parsed || !Array.isArray(parsed.results)) return null;
+      return parsed;
+    } catch { return null; }
+  });
   // Cancellation flag — checked between iterations of the bulk loop
   const cancelBulkRef = useRef(false);
   // Last bulk selection (in-memory copy of what was confirmed) — used for "repetir"
@@ -421,16 +438,16 @@ function AdminFiscalPage() {
   // Bulk resend (one reason, multiple queued runs)
   const bulkResendMut = useMutation({
     mutationFn: async (input: { reason: string; runs: Array<{ id: string; year: number; month: number }> }) => {
-      const results: Array<{ id: string; year: number; month: number; ok: boolean; canceled?: boolean; error?: string }> = [];
+      const results: Array<BulkResultRow> = [];
       cancelBulkRef.current = false;
       setBulkProgress({ done: 0, total: input.runs.length });
       for (let i = 0; i < input.runs.length; i++) {
         const r = input.runs[i];
         if (cancelBulkRef.current) {
-          // Mark remaining runs (including current) as canceled
+          const nowIso = new Date().toISOString();
           for (let j = i; j < input.runs.length; j++) {
             const rr = input.runs[j];
-            results.push({ ...rr, ok: false, canceled: true, error: "Cancelado pelo usuário" });
+            results.push({ ...rr, ok: false, canceled: true, error: "Cancelado pelo usuário", started_at: nowIso, finished_at: nowIso });
           }
           break;
         }
@@ -439,6 +456,7 @@ function AdminFiscalPage() {
           total: input.runs.length,
           current: `${String(r.month).padStart(2, "0")}/${r.year}`,
         });
+        const startedAt = new Date().toISOString();
         try {
           await resendEmail({ data: {
             year: r.year, month: r.month,
@@ -446,9 +464,9 @@ function AdminFiscalPage() {
             expiry_hours: expiryHours,
             reason: input.reason,
           }});
-          results.push({ ...r, ok: true });
+          results.push({ ...r, ok: true, started_at: startedAt, finished_at: new Date().toISOString() });
         } catch (e: any) {
-          results.push({ ...r, ok: false, error: e?.message ?? String(e) });
+          results.push({ ...r, ok: false, error: e?.message ?? String(e), started_at: startedAt, finished_at: new Date().toISOString() });
         }
       }
       const processed = results.filter((r) => !r.canceled).length;
@@ -464,27 +482,59 @@ function AdminFiscalPage() {
         ? `Reenvio em lote interrompido: ${ok} ok, ${fail} falha(s), ${canceled} cancelada(s).`
         : `Reenvio em lote: ${ok} ok, ${fail} falha(s). Cada reenvio foi gravado na auditoria.`;
       setFeedback(summaryMsg);
-      setBulkSummary({ ok, fail, canceled, reason: variables.reason, results });
+      const summary: BulkSummaryState = {
+        ok, fail, canceled, reason: variables.reason, results,
+        finished_at: new Date().toISOString(),
+      };
+      setBulkSummary(summary);
+      try { window.localStorage.setItem(SUMMARY_STORAGE_KEY, JSON.stringify(summary)); } catch {}
 
-      // Toast: success / partial failure / canceled with link to summary
+      // Group errors by normalized message (first 80 chars, case-insensitive)
+      const errorGroups = new Map<string, number>();
+      const firstErrorRowId = new Map<string, string>();
+      for (const r of results) {
+        if (r.ok || !r.error) continue;
+        const key = (r.error || "").toLowerCase().slice(0, 80) || "erro desconhecido";
+        errorGroups.set(key, (errorGroups.get(key) ?? 0) + 1);
+        if (!firstErrorRowId.has(key)) firstErrorRowId.set(key, r.id);
+      }
+      const topErrors = [...errorGroups.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
+      const errorBlurb = topErrors.length
+        ? topErrors.map(([msg, n]) => `• ${n}× ${msg.length > 60 ? msg.slice(0, 60) + "…" : msg}`).join("\n")
+        : "";
+
       const openSummary = () => {
         const el = document.getElementById("bulk-resend-summary");
         if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); (el as HTMLDetailsElement).open = true; }
       };
+      const jumpToFirstError = () => {
+        const firstId = topErrors[0] ? firstErrorRowId.get(topErrors[0][0]) : undefined;
+        const details = document.getElementById("bulk-resend-summary") as HTMLDetailsElement | null;
+        if (details) details.open = true;
+        const target = firstId ? document.getElementById(`bulk-row-${firstId}`) : null;
+        if (target) {
+          target.scrollIntoView({ behavior: "smooth", block: "center" });
+          target.classList.add("ring-2", "ring-red-500");
+          setTimeout(() => target.classList.remove("ring-2", "ring-red-500"), 2500);
+        } else {
+          openSummary();
+        }
+      };
+
       if (wasCanceled) {
         toast.warning(`Cancelado: ${ok} ok · ${fail} falha(s) · ${canceled} não processada(s)`, {
-          description: "A fila foi interrompida. Veja o resumo para detalhes.",
-          action: { label: "Abrir resumo", onClick: openSummary },
+          description: errorBlurb || "A fila foi interrompida. Veja o resumo para detalhes.",
+          action: { label: fail > 0 ? "Ver 1ª falha" : "Abrir resumo", onClick: fail > 0 ? jumpToFirstError : openSummary },
         });
       } else if (fail > 0 && ok > 0) {
         toast.warning(`Reenvio parcial: ${ok} ok · ${fail} falha(s)`, {
-          description: "Algumas execuções falharam — abra o resumo para ver os erros.",
-          action: { label: "Abrir resumo", onClick: openSummary },
+          description: errorBlurb || "Algumas execuções falharam — abra o resumo para ver os erros.",
+          action: { label: "Ver 1ª falha", onClick: jumpToFirstError },
         });
       } else if (fail > 0) {
         toast.error(`Todas as ${fail} execuções falharam`, {
-          description: "Nenhum reenvio concluído com sucesso.",
-          action: { label: "Abrir resumo", onClick: openSummary },
+          description: errorBlurb || "Nenhum reenvio concluído com sucesso.",
+          action: { label: "Ver 1ª falha", onClick: jumpToFirstError },
         });
       } else {
         toast.success(`Reenvio em lote concluído: ${ok} ok`, {
@@ -1458,22 +1508,55 @@ function AdminFiscalPage() {
                           const ts = new Date().toISOString().replace(/[:.]/g, "-");
                           downloadCsv(
                             `reenvio-em-lote_${ts}.csv`,
-                            ["id", "periodo", "ano", "mes", "status", "mensagem_erro", "reason"],
-                            bulkSummary.results.map((r) => ({
-                              id: r.id,
-                              periodo: `${String(r.month).padStart(2, "0")}/${r.year}`,
-                              ano: r.year,
-                              mes: r.month,
-                              status: r.ok ? "ok" : r.canceled ? "cancelado" : "falha",
-                              mensagem_erro: r.error ?? "",
-                              reason: bulkSummary.reason,
-                            })),
+                            ["id", "periodo", "ano", "mes", "status", "iniciado_em", "finalizado_em", "duracao_ms", "mensagem_erro", "reason"],
+                            bulkSummary.results.map((r) => {
+                              const dur = r.started_at && r.finished_at
+                                ? new Date(r.finished_at).getTime() - new Date(r.started_at).getTime()
+                                : "";
+                              return {
+                                id: r.id,
+                                periodo: `${String(r.month).padStart(2, "0")}/${r.year}`,
+                                ano: r.year,
+                                mes: r.month,
+                                status: r.ok ? "ok" : r.canceled ? "cancelado" : "falha",
+                                iniciado_em: r.started_at ?? "",
+                                finalizado_em: r.finished_at ?? "",
+                                duracao_ms: dur,
+                                mensagem_erro: r.error ?? "",
+                                reason: bulkSummary.reason,
+                              };
+                            }),
                           );
                           toast.success("CSV do resumo baixado");
                         }}
                         className="rounded border border-border bg-background px-2 py-0.5 text-[10px] text-muted-foreground hover:bg-muted">
                         Baixar CSV do resumo
                       </button>
+                      {bulkSummary.fail > 0 && (
+                        <button
+                          type="button"
+                          disabled={bulkResendMut.isPending}
+                          onClick={() => {
+                            const failedRuns = bulkSummary.results
+                              .filter((r) => !r.ok && !r.canceled)
+                              .map((r) => ({ id: r.id, year: r.year, month: r.month, error: r.error }));
+                            if (failedRuns.length === 0) {
+                              toast.info("Nenhuma falha para reenviar.");
+                              return;
+                            }
+                            if (failedRuns.length > BULK_RESEND_MAX) {
+                              toast.error(
+                                `Bloqueado: ${failedRuns.length} falhas excedem o limite de ${BULK_RESEND_MAX} por ação.`,
+                              );
+                              return;
+                            }
+                            setSelectedRunIds(new Set(failedRuns.map((r) => r.id)));
+                            setBulkConfirm({ runs: failedRuns, reason: bulkSummary.reason });
+                          }}
+                          className="rounded bg-amber-600 px-2 py-0.5 text-[10px] font-bold text-white disabled:opacity-40">
+                          Reenviar somente as {bulkSummary.fail} falha(s)
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={repeatLastBulk}
@@ -1483,27 +1566,45 @@ function AdminFiscalPage() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => setBulkSummary(null)}
+                        onClick={() => {
+                          setBulkSummary(null);
+                          try { window.localStorage.removeItem(SUMMARY_STORAGE_KEY); } catch {}
+                        }}
                         className="rounded border border-border bg-background px-2 py-0.5 text-[10px] text-muted-foreground">
                         Fechar
                       </button>
                     </div>
                   </div>
+                  {bulkSummary.finished_at && (
+                    <div className="mt-1 text-[10px] text-muted-foreground">
+                      Finalizado em {new Date(bulkSummary.finished_at).toLocaleString("pt-BR")} · motivo:{" "}
+                      <span className="italic">{bulkSummary.reason || "(sem motivo)"}</span>
+                    </div>
+                  )}
                   <details id="bulk-resend-summary" className="mt-1">
                     <summary className="cursor-pointer text-muted-foreground">Detalhes por execução</summary>
                     <ul className="mt-1 space-y-0.5 font-mono">
-                      {bulkSummary.results.map((r) => (
-                        <li
-                          key={r.id}
-                          className={r.ok ? "text-emerald-700" : r.canceled ? "text-amber-700" : "text-red-700"}>
-                          • {String(r.month).padStart(2, "0")}/{r.year}{" "}
-                          — {r.ok
-                            ? "ok"
-                            : r.canceled
-                              ? "cancelado (não processado)"
-                              : `falhou: ${r.error ?? "erro desconhecido"}`}
-                        </li>
-                      ))}
+                      {bulkSummary.results.map((r) => {
+                        const dur = r.started_at && r.finished_at
+                          ? Math.max(0, new Date(r.finished_at).getTime() - new Date(r.started_at).getTime())
+                          : null;
+                        return (
+                          <li
+                            id={`bulk-row-${r.id}`}
+                            key={r.id}
+                            className={`rounded px-1 transition-shadow ${r.ok ? "text-emerald-700" : r.canceled ? "text-amber-700" : "text-red-700"}`}>
+                            • {String(r.month).padStart(2, "0")}/{r.year}{" "}
+                            — {r.ok
+                              ? "ok"
+                              : r.canceled
+                                ? "cancelado (não processado)"
+                                : `falhou: ${r.error ?? "erro desconhecido"}`}
+                            {dur !== null && (
+                              <span className="ml-2 text-[10px] text-muted-foreground">({dur} ms)</span>
+                            )}
+                          </li>
+                        );
+                      })}
                     </ul>
                   </details>
                 </div>
