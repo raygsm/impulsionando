@@ -281,13 +281,70 @@ function AdminFiscalPage() {
 
   const regenMut = useMutation({
     mutationFn: (csv_path: string) => regenerateLink({ data: { csv_path, expiry_hours: expiryHours } }),
-    onSuccess: (res: any) => {
+    onSuccess: async (res: any, csv_path: string) => {
       try { navigator.clipboard?.writeText(res.url); } catch {}
+      // O servidor já registra fiscal.link.regenerated; aqui adicionamos o "copiado" pra rastrear UI
+      try {
+        await logLink({ data: {
+          action: "copied",
+          csv_path,
+          signed_url: res.url,
+          signed_url_expires_at: res.expires_at,
+          year, month,
+          source: "regenerate-button",
+        }});
+      } catch {}
       setFeedback(`Link regerado (expira ${new Date(res.expires_at).toLocaleString("pt-BR")}) e copiado.`);
       qc.invalidateQueries({ queryKey: ["admin-fiscal-logs"] });
     },
     onError: (e: any) => setFeedback(`Erro ao regerar link: ${e?.message ?? e}`),
   });
+
+  const testMut = useMutation({
+    mutationFn: () => sendTest({ data: {
+      year, month,
+      recipient: testRecipient,
+      email_mode: schedDraft.email_mode,
+      expiry_hours: expiryHours,
+    }}),
+    onSuccess: (res: any) => {
+      setFeedback(`E-mail de teste enviado para ${res.recipient} (modo ${res.email_mode}). Não conta como envio oficial.`);
+      qc.invalidateQueries({ queryKey: ["admin-fiscal-logs"] });
+    },
+    onError: (e: any) => setFeedback(`Erro no envio de teste: ${e?.message ?? e}`),
+  });
+
+  async function copySignedLink(opts: {
+    url: string; csv_path?: string; expires_at?: string;
+    year?: number; month?: number; source: string;
+  }) {
+    try { await navigator.clipboard?.writeText(opts.url); } catch {}
+    try {
+      await logLink({ data: {
+        action: "copied",
+        csv_path: opts.csv_path,
+        signed_url: opts.url,
+        signed_url_expires_at: opts.expires_at,
+        year: opts.year, month: opts.month,
+        source: opts.source,
+      }});
+    } catch {}
+    setFeedback("Link copiado e registrado na auditoria.");
+    qc.invalidateQueries({ queryKey: ["admin-fiscal-logs"] });
+  }
+
+  async function downloadPreviewCsv() {
+    const res = await fetchCsv({ data: { year, month } });
+    const blob = new Blob([res.csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = res.filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    qc.invalidateQueries({ queryKey: ["admin-fiscal-logs"] });
+  }
+
+
 
 
   async function downloadReportCsv() {
