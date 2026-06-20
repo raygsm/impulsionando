@@ -179,6 +179,14 @@ Deno.serve(async (req) => {
       };
     }
 
+    // Aplica application_fee no MP (split nativo) quando houver taxa calculada.
+    // Em pagamentos card/pix isso vira retenção automática para a conta Marketplace.
+    if (appFeeCents > 0 && body.payment_method !== 'preference') {
+      (mpBody as Record<string, unknown>).application_fee = appFeeCents / 100;
+    }
+
+
+
     mpResponse = await fetch(endpoint, {
       method: 'POST',
       headers: {
