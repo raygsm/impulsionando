@@ -17,6 +17,8 @@ import {
   previewMonthlyFiscalEmail,
   regenerateFiscalReportSignedUrl,
   listFailedFiscalRuns,
+  sendTestFiscalEmail,
+  logFiscalLinkAction,
 } from "@/lib/admin-fiscal.functions";
 import { downloadCsv } from "@/lib/exports";
 
@@ -54,10 +56,14 @@ const KIND_OPTIONS = [
   { value: "fiscal.email.retry", label: "Reenvio" },
   { value: "fiscal.email.cron", label: "E-mail automático" },
   { value: "fiscal.email.skipped", label: "Cron pulado (retry)" },
+  { value: "fiscal.email.test", label: "E-mail de teste" },
   { value: "fiscal.schedule.update", label: "Atualização de agenda" },
   { value: "fiscal.preview", label: "Pré-visualização" },
   { value: "fiscal.link.regenerated", label: "Link assinado regerado" },
+  { value: "fiscal.link.copied", label: "Link assinado copiado" },
+  { value: "fiscal.link.opened", label: "Link assinado aberto" },
 ];
+
 
 function isValidTz(tz: string): boolean {
   if (!tz) return false;
@@ -134,8 +140,12 @@ function AdminFiscalPage() {
   const previewEmail = useServerFn(previewMonthlyFiscalEmail);
   const regenerateLink = useServerFn(regenerateFiscalReportSignedUrl);
   const fetchFailed = useServerFn(listFailedFiscalRuns);
+  const sendTest = useServerFn(sendTestFiscalEmail);
+  const logLink = useServerFn(logFiscalLinkAction);
 
   const [showHistory, setShowHistory] = useState(false);
+  const [testRecipient, setTestRecipient] = useState("");
+
 
 
   const q = useQuery({
@@ -275,13 +285,70 @@ function AdminFiscalPage() {
 
   const regenMut = useMutation({
     mutationFn: (csv_path: string) => regenerateLink({ data: { csv_path, expiry_hours: expiryHours } }),
-    onSuccess: (res: any) => {
+    onSuccess: async (res: any, csv_path: string) => {
       try { navigator.clipboard?.writeText(res.url); } catch {}
+      // O servidor já registra fiscal.link.regenerated; aqui adicionamos o "copiado" pra rastrear UI
+      try {
+        await logLink({ data: {
+          action: "copied",
+          csv_path,
+          signed_url: res.url,
+          signed_url_expires_at: res.expires_at,
+          year, month,
+          source: "regenerate-button",
+        }});
+      } catch {}
       setFeedback(`Link regerado (expira ${new Date(res.expires_at).toLocaleString("pt-BR")}) e copiado.`);
       qc.invalidateQueries({ queryKey: ["admin-fiscal-logs"] });
     },
     onError: (e: any) => setFeedback(`Erro ao regerar link: ${e?.message ?? e}`),
   });
+
+  const testMut = useMutation({
+    mutationFn: () => sendTest({ data: {
+      year, month,
+      recipient: testRecipient,
+      email_mode: schedDraft.email_mode,
+      expiry_hours: expiryHours,
+    }}),
+    onSuccess: (res: any) => {
+      setFeedback(`E-mail de teste enviado para ${res.recipient} (modo ${res.email_mode}). Não conta como envio oficial.`);
+      qc.invalidateQueries({ queryKey: ["admin-fiscal-logs"] });
+    },
+    onError: (e: any) => setFeedback(`Erro no envio de teste: ${e?.message ?? e}`),
+  });
+
+  async function copySignedLink(opts: {
+    url: string; csv_path?: string; expires_at?: string;
+    year?: number; month?: number; source: string;
+  }) {
+    try { await navigator.clipboard?.writeText(opts.url); } catch {}
+    try {
+      await logLink({ data: {
+        action: "copied",
+        csv_path: opts.csv_path,
+        signed_url: opts.url,
+        signed_url_expires_at: opts.expires_at,
+        year: opts.year, month: opts.month,
+        source: opts.source,
+      }});
+    } catch {}
+    setFeedback("Link copiado e registrado na auditoria.");
+    qc.invalidateQueries({ queryKey: ["admin-fiscal-logs"] });
+  }
+
+  async function downloadPreviewCsv() {
+    const res = await fetchCsv({ data: { year, month } });
+    const blob = new Blob([res.csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = res.filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    qc.invalidateQueries({ queryKey: ["admin-fiscal-logs"] });
+  }
+
+
 
 
   async function downloadReportCsv() {
@@ -589,6 +656,33 @@ function AdminFiscalPage() {
               )}
             </div>
 
+            {/* Envio de teste */}
+            <div className="mt-3 flex flex-wrap items-end gap-2 rounded border border-dashed border-border bg-muted/30 p-3">
+              <div className="text-xs font-semibold text-foreground">
+                Envio de teste
+                <span className="ml-2 rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium text-amber-800">
+                  não conta como envio oficial
+                </span>
+              </div>
+              <label className="text-xs">Destinatário de teste
+                <input type="email" value={testRecipient}
+                  onChange={(e) => setTestRecipient(e.target.value)}
+                  placeholder="voce@empresa.com"
+                  className="ml-2 w-64 rounded border border-border bg-background px-2 py-1 text-xs" />
+              </label>
+              <button onClick={() => testMut.mutate()}
+                disabled={testMut.isPending || !testRecipient || !!expiryError}
+                title="Envia o corpo real e um link assinado novo para o destinatário informado, sem registrar como envio oficial"
+                className="rounded border border-border bg-background px-3 py-1 text-xs font-medium disabled:opacity-50">
+                {testMut.isPending ? "Enviando teste…" : "Enviar teste"}
+              </button>
+              <span className="text-[10px] text-muted-foreground">
+                Útil para validar conteúdo/link antes do envio para o contador. Assunto vai com prefixo [TESTE].
+              </span>
+            </div>
+
+
+
             {previewHtml && (
               <div className="mt-4 rounded border border-border bg-background">
                 <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-3 py-2 text-xs">
@@ -597,11 +691,19 @@ function AdminFiscalPage() {
                     {" · "}<strong>Modo:</strong> {previewMeta?.email_mode ?? "—"}
                     {" · "}Link expiraria em {previewMeta?.expires_at ?? "—"}
                   </div>
-                  <button onClick={() => { setPreviewHtml(null); setPreviewMeta(null); }}
-                    className="rounded border border-border bg-background px-2 py-0.5 text-[11px]">
-                    Fechar
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button onClick={downloadPreviewCsv}
+                      title="Baixa o CSV exato que seria enviado para o contador"
+                      className="rounded border border-border bg-background px-2 py-0.5 text-[11px] font-medium">
+                      Baixar CSV
+                    </button>
+                    <button onClick={() => { setPreviewHtml(null); setPreviewMeta(null); }}
+                      className="rounded border border-border bg-background px-2 py-0.5 text-[11px]">
+                      Fechar
+                    </button>
+                  </div>
                 </div>
+
                 <iframe title="Pré-visualização do e-mail" srcDoc={previewHtml}
                   className="h-[520px] w-full rounded-b bg-white" sandbox="" />
               </div>
@@ -669,12 +771,26 @@ function AdminFiscalPage() {
             )}
           </section>
 
-          {/* Períodos com falha pendente — próximo retry */}
-          {failedRuns.length > 0 && (
+          {/* Fila de reenvios agendados — próximo retry por período (ordenada por prioridade) */}
+          {failedRuns.length > 0 && (() => {
+            const sorted = [...failedRuns].sort((a: any, b: any) => {
+              // 1) prontos primeiro, 2) menor restante, 3) limite atingido por último
+              const maxA = a.max_attempts_reached ? 1 : 0;
+              const maxB = b.max_attempts_reached ? 1 : 0;
+              if (maxA !== maxB) return maxA - maxB;
+              return (a.remaining_minutes ?? 0) - (b.remaining_minutes ?? 0);
+            });
+            const ready = sorted.filter((r) => !r.max_attempts_reached && r.backoff_ready).length;
+            const waiting = sorted.filter((r) => !r.max_attempts_reached && !r.backoff_ready).length;
+            const blocked = sorted.filter((r) => r.max_attempts_reached).length;
+            return (
             <section className="no-print mb-6 rounded-lg border border-red-500/30 bg-red-500/5 p-4">
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                 <h2 className="text-sm font-semibold text-foreground">
-                  Períodos com falha pendente ({failedRuns.length})
+                  Fila de reenvios agendados ({sorted.length})
+                  <span className="ml-2 text-[11px] font-normal text-muted-foreground">
+                    {ready} pronto(s) · {waiting} aguardando · {blocked} bloqueado(s)
+                  </span>
                 </h2>
                 <span className="text-[11px] text-muted-foreground">
                   Backoff: {failedQ.data?.schedule.backoff_minutes}min · Máx. tent.: {failedQ.data?.schedule.max_attempts}
@@ -684,6 +800,7 @@ function AdminFiscalPage() {
                 <table className="w-full text-left text-xs">
                   <thead className="text-[10px] uppercase text-muted-foreground">
                     <tr>
+                      <th className="py-1 pr-3">#</th>
                       <th className="py-1 pr-3">Período</th>
                       <th className="py-1 pr-3">Tent.</th>
                       <th className="py-1 pr-3">Última falha</th>
@@ -693,9 +810,11 @@ function AdminFiscalPage() {
                       <th className="py-1 pr-3">Ações</th>
                     </tr>
                   </thead>
+
                   <tbody>
-                    {failedRuns.map((f: any) => (
+                    {sorted.map((f: any, idx: number) => (
                       <tr key={f.id} className="border-t border-border/60 align-top">
+                        <td className="py-1 pr-3 font-mono text-muted-foreground">{idx + 1}</td>
                         <td className="py-1 pr-3 font-medium">
                           {String(f.month).padStart(2, "0")}/{f.year}
                         </td>
@@ -747,10 +866,13 @@ function AdminFiscalPage() {
                 </table>
               </div>
               <p className="mt-2 text-[10px] text-muted-foreground">
-                O cron respeita backoff e máx. tentativas. Use "Forçar novo envio" no período selecionado para ignorar a política.
+                Ordenado por prioridade: prontos primeiro, depois por menor tempo restante; limite atingido vai pro fim. O cron respeita backoff e máx. tentativas — use "Forçar novo envio" no período selecionado para ignorar a política.
               </p>
             </section>
-          )}
+            );
+          })()}
+
+
 
 
 
@@ -920,10 +1042,35 @@ function AdminFiscalPage() {
                         <td className="py-1 pr-3">
                           {url ? (
                             <div className="flex flex-col gap-0.5">
-                              <a href={url} target="_blank" rel="noreferrer"
-                                className={`underline ${expired ? "text-muted-foreground line-through" : "text-primary"}`}>
-                                {expired ? "Link expirado" : "Abrir CSV"}
-                              </a>
+                              <div className="flex items-center gap-1">
+                                <a href={url} target="_blank" rel="noreferrer"
+                                  onClick={() => {
+                                    if (!expired) {
+                                      logLink({ data: {
+                                        action: "opened",
+                                        csv_path: csvPath,
+                                        signed_url: url,
+                                        signed_url_expires_at: expIso,
+                                        year: p.year, month: p.month,
+                                        source: "audit-table",
+                                      }}).catch(() => {});
+                                    }
+                                  }}
+                                  className={`underline ${expired ? "text-muted-foreground line-through" : "text-primary"}`}>
+                                  {expired ? "Link expirado" : "Abrir CSV"}
+                                </a>
+                                {!expired && (
+                                  <button
+                                    onClick={() => copySignedLink({
+                                      url, csv_path: csvPath, expires_at: expIso,
+                                      year: p.year, month: p.month, source: "audit-table",
+                                    })}
+                                    title="Copia o link e registra na auditoria"
+                                    className="rounded border border-border bg-background px-1 py-0.5 text-[10px]">
+                                    Copiar
+                                  </button>
+                                )}
+                              </div>
                               {expIso && (
                                 <span className="text-[10px] text-muted-foreground">
                                   expira {new Date(expIso).toLocaleString("pt-BR")}
@@ -937,6 +1084,7 @@ function AdminFiscalPage() {
                                 </button>
                               )}
                             </div>
+
                           ) : csvPath ? (
                             <button onClick={() => regenMut.mutate(csvPath)}
                               disabled={regenMut.isPending}

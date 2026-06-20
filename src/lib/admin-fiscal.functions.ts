@@ -90,7 +90,10 @@ async function audit(
     | "fiscal.email.skipped"
     | "fiscal.schedule.update"
     | "fiscal.preview"
-    | "fiscal.link.regenerated",
+    | "fiscal.link.regenerated"
+    | "fiscal.link.copied"
+    | "fiscal.link.opened"
+    | "fiscal.email.test",
   params: Record<string, unknown>,
   row_count: number,
   notes?: string,
@@ -542,40 +545,49 @@ async function sendFiscalReportInternal(opts: {
   userId?: string | null;
   emailMode?: "link" | "inline";
   expirySeconds?: number;
+  test?: boolean;
 }) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const isTest = !!opts.test;
 
-  // Conta tentativas anteriores
-  const { data: prev } = await supabaseAdmin
-    .from("fiscal_email_runs")
-    .select("attempt")
-    .eq("year", opts.year)
-    .eq("month", opts.month)
-    .order("created_at", { ascending: false })
-    .limit(1);
-  const attempt = ((prev ?? [])[0]?.attempt ?? 0) + 1;
+  // Conta tentativas anteriores (apenas para sends reais)
+  let attempt = 1;
+  let runId: string | null = null;
+  if (!isTest) {
+    const { data: prev } = await supabaseAdmin
+      .from("fiscal_email_runs")
+      .select("attempt")
+      .eq("year", opts.year)
+      .eq("month", opts.month)
+      .order("created_at", { ascending: false })
+      .limit(1);
+    attempt = ((prev ?? [])[0]?.attempt ?? 0) + 1;
+  }
 
   // Resolve email_mode
   const schedule = await readSchedule(supabaseAdmin);
   const emailMode = opts.emailMode ?? schedule.email_mode;
 
-  // Cria registro pendente
-  const { data: runRow, error: runErr } = await supabaseAdmin
-    .from("fiscal_email_runs")
-    .insert({
-      year: opts.year,
-      month: opts.month,
-      recipient: opts.recipient,
-      status: "pending",
-      triggered_by: opts.triggeredBy,
-      email_mode: emailMode,
-      attempt,
-      user_id: opts.userId ?? null,
-    })
-    .select("id")
-    .single();
-  if (runErr) throw runErr;
-  const runId = runRow!.id as string;
+  // Cria registro pendente (somente para sends reais)
+  if (!isTest) {
+    const { data: runRow, error: runErr } = await supabaseAdmin
+      .from("fiscal_email_runs")
+      .insert({
+        year: opts.year,
+        month: opts.month,
+        recipient: opts.recipient,
+        status: "pending",
+        triggered_by: opts.triggeredBy,
+        email_mode: emailMode,
+        attempt,
+        user_id: opts.userId ?? null,
+      })
+      .select("id")
+      .single();
+    if (runErr) throw runErr;
+    runId = runRow!.id as string;
+  }
+
 
   try {
     const { startIso, endIso } = monthBounds(opts.year, opts.month);
@@ -680,7 +692,8 @@ async function sendFiscalReportInternal(opts: {
     const element = React.createElement(tpl.component as any, templateData);
     const html = await renderAsync(element);
     const plainText = await renderAsync(element, { plainText: true });
-    const subject = typeof tpl.subject === "function" ? tpl.subject(templateData) : tpl.subject;
+    const rawSubject = typeof tpl.subject === "function" ? tpl.subject(templateData) : tpl.subject;
+    const subject = isTest ? `[TESTE] ${rawSubject}` : rawSubject;
 
     const messageId = crypto.randomUUID();
     const SITE_NAME = "impulsionando";
@@ -694,6 +707,7 @@ async function sendFiscalReportInternal(opts: {
       status: "pending",
     });
 
+    const idemSuffix = isTest ? `test-${messageId}` : `${attempt}`;
     const { error: enqErr } = await supabaseAdmin.rpc("enqueue_email", {
       queue_name: "transactional_emails",
       payload: {
@@ -703,8 +717,8 @@ async function sendFiscalReportInternal(opts: {
         sender_domain: SENDER_DOMAIN,
         subject, html, text: plainText,
         purpose: "transactional",
-        label: "fiscal-report-monthly",
-        idempotency_key: `fiscal-${opts.year}-${opts.month}-${opts.recipient}-${attempt}`,
+        label: isTest ? "fiscal-report-monthly-test" : "fiscal-report-monthly",
+        idempotency_key: `fiscal-${opts.year}-${opts.month}-${opts.recipient}-${idemSuffix}`,
         queued_at: new Date().toISOString(),
       },
     });
@@ -719,25 +733,29 @@ async function sendFiscalReportInternal(opts: {
       throw enqErr;
     }
 
-    // marca como enviado
-    await supabaseAdmin
-      .from("fiscal_email_runs")
-      .update({
-        status: "sent",
-        message_id: messageId,
-        csv_path: path,
-        signed_url_expires_at: expiresIso,
-        error_message: null,
-      })
-      .eq("id", runId);
+    // marca como enviado (apenas sends reais)
+    if (!isTest && runId) {
+      await supabaseAdmin
+        .from("fiscal_email_runs")
+        .update({
+          status: "sent",
+          message_id: messageId,
+          csv_path: path,
+          signed_url_expires_at: expiresIso,
+          error_message: null,
+        })
+        .eq("id", runId);
+    }
 
     await supabaseAdmin.from("core_export_logs").insert({
       user_id: opts.userId ?? null,
-      kind: opts.triggeredBy === "cron"
-        ? "fiscal.email.cron"
-        : opts.triggeredBy === "retry"
-          ? "fiscal.email.retry"
-          : "fiscal.email",
+      kind: isTest
+        ? "fiscal.email.test"
+        : opts.triggeredBy === "cron"
+          ? "fiscal.email.cron"
+          : opts.triggeredBy === "retry"
+            ? "fiscal.email.retry"
+            : "fiscal.email",
       scope: "admin.fiscal",
       params: {
         year: opts.year, month: opts.month, recipient: opts.recipient,
@@ -745,26 +763,32 @@ async function sendFiscalReportInternal(opts: {
         signed_url: signed.signedUrl,
         signed_url_expires_at: expiresIso,
         expiry_hours: Math.round(EXPIRES_SEC / 3600),
+        test: isTest || undefined,
       },
       row_count: totals.count,
-      notes: opts.triggeredBy,
+      notes: isTest ? "test" : opts.triggeredBy,
     });
 
     return {
       ok: true, run_id: runId, message_id: messageId,
       recipient: opts.recipient, csv_path: path, email_mode: emailMode,
+      signed_url: signed.signedUrl, signed_url_expires_at: expiresIso,
+      test: isTest,
     };
   } catch (e: any) {
-    await supabaseAdmin
-      .from("fiscal_email_runs")
-      .update({
-        status: "failed",
-        error_message: String(e?.message ?? e).slice(0, 1000),
-      })
-      .eq("id", runId);
+    if (!isTest && runId) {
+      await supabaseAdmin
+        .from("fiscal_email_runs")
+        .update({
+          status: "failed",
+          error_message: String(e?.message ?? e).slice(0, 1000),
+        })
+        .eq("id", runId);
+    }
     throw e;
   }
 }
+
 
 export const sendMonthlyFiscalEmail = createServerFn({ method: "POST" })
   .inputValidator((data: {
@@ -954,6 +978,71 @@ export const regenerateFiscalReportSignedUrl = createServerFn({ method: "POST" }
       { path: data.csv_path, expiry_hours: data.expiry_hours, signed_url: signed.signedUrl, signed_url_expires_at: expires_at }, 1);
     return { url: signed.signedUrl, expires_at };
   });
+
+// ───────────────────────── Envio de teste ─────────────────────────
+
+export const sendTestFiscalEmail = createServerFn({ method: "POST" })
+  .inputValidator((data: {
+    year: number; month: number; recipient: string;
+    email_mode?: "link" | "inline"; expiry_hours?: number;
+  }) => {
+    if (!Number.isInteger(data.year) || !Number.isInteger(data.month))
+      throw new Error("invalid period");
+    const email = String(data.recipient ?? "").trim().toLowerCase();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      throw new Error("destinatário de teste inválido");
+    if (data.expiry_hours !== undefined &&
+        (!Number.isInteger(data.expiry_hours) || data.expiry_hours < 1 || data.expiry_hours > 720))
+      throw new Error("Expiração entre 1h e 720h.");
+    return { ...data, recipient: email };
+  })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    await ensureAdmin(supabase, userId);
+    return sendFiscalReportInternal({
+      year: data.year, month: data.month, recipient: data.recipient,
+      triggeredBy: "user", userId, emailMode: data.email_mode,
+      expirySeconds: data.expiry_hours ? data.expiry_hours * 3600 : undefined,
+      test: true,
+    });
+  });
+
+// ───────────────────────── Auditoria de link assinado ─────────────────────────
+
+export const logFiscalLinkAction = createServerFn({ method: "POST" })
+  .inputValidator((data: {
+    action: "copied" | "opened";
+    csv_path?: string;
+    signed_url?: string;
+    signed_url_expires_at?: string;
+    year?: number; month?: number;
+    source?: string;
+  }) => {
+    if (data.action !== "copied" && data.action !== "opened")
+      throw new Error("invalid action");
+    return data;
+  })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    await ensureAdmin(supabase, userId);
+    await audit(
+      supabase, userId,
+      data.action === "copied" ? "fiscal.link.copied" : "fiscal.link.opened",
+      {
+        path: data.csv_path,
+        signed_url: data.signed_url,
+        signed_url_expires_at: data.signed_url_expires_at,
+        year: data.year, month: data.month,
+        source: data.source ?? null,
+      },
+      1,
+    );
+    return { ok: true };
+  });
+
+
 
 // ───────────────────────── Cron ─────────────────────────
 
