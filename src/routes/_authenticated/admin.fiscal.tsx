@@ -21,6 +21,7 @@ import {
   logFiscalLinkAction,
   logFiscalPreviewCsvDownload,
   listTestSendHistory,
+  getTestFiscalEmailPdfHtml,
 } from "@/lib/admin-fiscal.functions";
 import { downloadCsv } from "@/lib/exports";
 
@@ -60,6 +61,7 @@ const KIND_OPTIONS = [
   { value: "fiscal.email.skipped", label: "Cron pulado (retry)" },
   { value: "fiscal.email.test", label: "E-mail de teste" },
   { value: "fiscal.email.test.failed", label: "E-mail de teste (falhou)" },
+  { value: "fiscal.email.test.pdf", label: "PDF do e-mail de teste" },
   { value: "fiscal.schedule.update", label: "Atualização de agenda" },
   { value: "fiscal.preview", label: "Pré-visualização" },
   { value: "fiscal.preview.csv", label: "CSV baixado na pré-visualização" },
@@ -128,7 +130,7 @@ function AdminFiscalPage() {
   // Audit filters
   const [auditFilters, setAuditFilters] = useState<{
     from?: string; to?: string; user_email?: string;
-    recipient?: string; kind?: string;
+    recipient?: string; kind?: string; kinds?: string[];
   }>({});
 
   const fetchReport = useServerFn(getMonthlyFiscalReport);
@@ -148,10 +150,20 @@ function AdminFiscalPage() {
   const logLink = useServerFn(logFiscalLinkAction);
   const logPreviewCsv = useServerFn(logFiscalPreviewCsvDownload);
   const fetchTestHistory = useServerFn(listTestSendHistory);
+  const fetchTestPdfHtml = useServerFn(getTestFiscalEmailPdfHtml);
 
   const [showHistory, setShowHistory] = useState(false);
   const [testRecipient, setTestRecipient] = useState("");
   const [testEmailMode, setTestEmailMode] = useState<"link" | "inline" | null>(null);
+  // Test-history pagination + filters
+  const TEST_PAGE_SIZE = 5;
+  const [testFilters, setTestFilters] = useState<{
+    recipient?: string;
+    status?: "all" | "sent" | "failed";
+    year?: number;
+    month?: number;
+    page: number;
+  }>({ status: "all", page: 0 });
 
 
 
@@ -182,8 +194,15 @@ function AdminFiscalPage() {
     refetchInterval: 60_000,
   });
   const testHistoryQ = useQuery({
-    queryKey: ["admin-fiscal-test-history"],
-    queryFn: () => fetchTestHistory({ data: { limit: 10 } }),
+    queryKey: ["admin-fiscal-test-history", testFilters],
+    queryFn: () => fetchTestHistory({ data: {
+      limit: TEST_PAGE_SIZE,
+      offset: testFilters.page * TEST_PAGE_SIZE,
+      recipient: testFilters.recipient || undefined,
+      status: testFilters.status === "all" ? undefined : testFilters.status,
+      year: testFilters.year,
+      month: testFilters.month,
+    }}),
     refetchOnWindowFocus: false,
   });
 
@@ -264,14 +283,22 @@ function AdminFiscalPage() {
   });
 
   const resendMut = useMutation({
-    mutationFn: (force: boolean) =>
-      resendEmail({ data: { year, month, force, expiry_hours: expiryHours } }),
+    mutationFn: (opts: boolean | { force: boolean; reason?: string; year?: number; month?: number }) => {
+      const norm = typeof opts === "boolean"
+        ? { force: opts, reason: undefined, year, month }
+        : { force: opts.force, reason: opts.reason, year: opts.year ?? year, month: opts.month ?? month };
+      return resendEmail({ data: {
+        year: norm.year, month: norm.month,
+        force: norm.force,
+        expiry_hours: expiryHours,
+        reason: norm.reason,
+      }});
+    },
     onSuccess: (res: any) => {
-      setFeedback(`Reenviado para ${res.recipient}.`);
+      setFeedback(`Reenviado para ${res.recipient}${res.reason ? ` (motivo registrado)` : ""}.`);
       qc.invalidateQueries({ queryKey: ["admin-fiscal-logs"] });
       qc.invalidateQueries({ queryKey: ["admin-fiscal-status", year, month] });
       qc.invalidateQueries({ queryKey: ["admin-fiscal-failed"] });
-
     },
     onError: (e: any) => setFeedback(`Erro no reenvio: ${e?.message ?? e}`),
   });
@@ -377,6 +404,31 @@ function AdminFiscalPage() {
   }
 
 
+  async function downloadTestPdf(opts: {
+    year: number; month: number;
+    email_mode: "link" | "inline";
+    recipient: string | null;
+  }) {
+    try {
+      const res = await fetchTestPdfHtml({ data: opts });
+      const win = window.open("", "_blank", "width=820,height=900");
+      if (!win) {
+        setFeedback("Não foi possível abrir a janela de impressão. Verifique o bloqueador de popups.");
+        return;
+      }
+      // Sanitiza: o HTML do template é gerado pelo servidor a partir do nosso
+      // próprio React Email template — origem confiável.
+      win.document.open();
+      win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${res.filename}</title>
+        <style>@media print { @page { margin: 12mm; } body { -webkit-print-color-adjust: exact; } }</style>
+      </head><body>${res.html}<script>setTimeout(function(){window.print();},250);</script></body></html>`);
+      win.document.close();
+      setFeedback(`PDF do teste pronto (${res.filename}). Use o diálogo de impressão para salvar.`);
+      qc.invalidateQueries({ queryKey: ["admin-fiscal-logs"] });
+    } catch (e: any) {
+      setFeedback(`Erro ao gerar PDF: ${e?.message ?? e}`);
+    }
+  }
 
 
   async function downloadReportCsv() {
@@ -720,67 +772,138 @@ function AdminFiscalPage() {
                 className="rounded border border-border bg-background px-3 py-1 text-xs font-medium disabled:opacity-50">
                 {testMut.isPending ? "Enviando teste…" : `Enviar teste (${testEmailMode ?? schedDraft.email_mode})`}
               </button>
+              <button onClick={() => downloadTestPdf({ year, month, email_mode: testEmailMode ?? schedDraft.email_mode, recipient: testRecipient || null })}
+                title="Gera um PDF do corpo do e-mail de teste (independente do modo link/inline). Abre uma nova janela e dispara o diálogo de impressão para salvar como PDF. O download é registrado na auditoria."
+                className="rounded border border-border bg-background px-3 py-1 text-xs font-medium">
+                Baixar PDF do teste
+              </button>
               <span className="text-[10px] text-muted-foreground">
                 Útil para validar conteúdo/link antes do envio para o contador. Assunto vai com prefixo [TESTE]. O modo escolhido fica registrado na auditoria.
               </span>
             </div>
 
-            {/* Histórico recente de envios de teste */}
+            {/* Histórico de envios de teste */}
             <div className="mt-3 rounded border border-border bg-background">
-              <div className="flex items-center justify-between border-b border-border bg-muted/40 px-3 py-1.5">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-muted/40 px-3 py-1.5">
                 <span className="text-xs font-semibold">Histórico de envios de teste</span>
-                <button onClick={() => testHistoryQ.refetch()}
-                  className="rounded border border-border bg-background px-2 py-0.5 text-[10px]">
-                  Atualizar
-                </button>
+                <div className="flex flex-wrap items-center gap-1">
+                  <input type="text" placeholder="destinatário contém…"
+                    value={testFilters.recipient ?? ""}
+                    onChange={(e) => setTestFilters({ ...testFilters, recipient: e.target.value || undefined, page: 0 })}
+                    className="w-40 rounded border border-border bg-background px-2 py-0.5 text-[10px]" />
+                  <select value={testFilters.status ?? "all"}
+                    onChange={(e) => setTestFilters({ ...testFilters, status: e.target.value as any, page: 0 })}
+                    className="rounded border border-border bg-background px-1 py-0.5 text-[10px]">
+                    <option value="all">Todos status</option>
+                    <option value="sent">Enviado</option>
+                    <option value="failed">Falhou</option>
+                  </select>
+                  <select value={testFilters.month ?? ""}
+                    onChange={(e) => setTestFilters({ ...testFilters, month: e.target.value ? Number(e.target.value) : undefined, page: 0 })}
+                    className="rounded border border-border bg-background px-1 py-0.5 text-[10px]">
+                    <option value="">Mês</option>
+                    {MONTHS.map((m, i) => <option key={m} value={i + 1}>{String(i + 1).padStart(2, "0")}</option>)}
+                  </select>
+                  <input type="number" placeholder="ano"
+                    value={testFilters.year ?? ""}
+                    onChange={(e) => setTestFilters({ ...testFilters, year: e.target.value ? Number(e.target.value) : undefined, page: 0 })}
+                    className="w-16 rounded border border-border bg-background px-1 py-0.5 text-[10px]" />
+                  <button onClick={() => setTestFilters({ status: "all", page: 0 })}
+                    className="rounded border border-border bg-background px-1 py-0.5 text-[10px]">
+                    Limpar
+                  </button>
+                  <button onClick={() => testHistoryQ.refetch()}
+                    className="rounded border border-border bg-background px-2 py-0.5 text-[10px]">
+                    Atualizar
+                  </button>
+                </div>
               </div>
-              {testHistoryQ.isLoading ? (
-                <div className="px-3 py-2 text-[11px] text-muted-foreground">Carregando…</div>
-              ) : (testHistoryQ.data ?? []).length === 0 ? (
-                <div className="px-3 py-2 text-[11px] text-muted-foreground">
-                  Nenhum envio de teste registrado ainda.
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-[11px]">
-                    <thead className="text-[10px] uppercase text-muted-foreground">
-                      <tr>
-                        <th className="px-3 py-1">Quando</th>
-                        <th className="px-3 py-1">Status</th>
-                        <th className="px-3 py-1">Destinatário</th>
-                        <th className="px-3 py-1">Período</th>
-                        <th className="px-3 py-1">Modo</th>
-                        <th className="px-3 py-1">Erro</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(testHistoryQ.data ?? []).map((t: any) => (
-                        <tr key={t.id} className="border-t border-border/60 align-top">
-                          <td className="px-3 py-1 whitespace-nowrap">{new Date(t.created_at).toLocaleString("pt-BR")}</td>
-                          <td className="px-3 py-1">
-                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                              t.status === "failed"
-                                ? "bg-red-500/15 text-red-700"
-                                : "bg-emerald-500/15 text-emerald-700"
-                            }`}>
-                              {t.status === "failed" ? "Falhou" : "Enviado"}
-                            </span>
-                          </td>
-                          <td className="px-3 py-1">{t.recipient ?? "—"}</td>
-                          <td className="px-3 py-1">
-                            {t.year && t.month ? `${String(t.month).padStart(2, "0")}/${t.year}` : "—"}
-                          </td>
-                          <td className="px-3 py-1">{t.email_mode ?? "—"}</td>
-                          <td className="px-3 py-1 text-red-700 max-w-xs truncate" title={t.error ?? ""}>
-                            {t.error ?? "—"}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+              {(() => {
+                const data = testHistoryQ.data as any;
+                const items: any[] = Array.isArray(data?.items) ? data.items : [];
+                const total: number = data?.total ?? 0;
+                const totalPages = Math.max(1, Math.ceil(total / TEST_PAGE_SIZE));
+                if (testHistoryQ.isLoading) {
+                  return <div className="px-3 py-2 text-[11px] text-muted-foreground">Carregando…</div>;
+                }
+                if (items.length === 0) {
+                  return <div className="px-3 py-2 text-[11px] text-muted-foreground">
+                    Nenhum envio de teste com esses filtros.
+                  </div>;
+                }
+                return (
+                  <>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-[11px]">
+                        <thead className="text-[10px] uppercase text-muted-foreground">
+                          <tr>
+                            <th className="px-3 py-1">Quando</th>
+                            <th className="px-3 py-1">Status</th>
+                            <th className="px-3 py-1">Destinatário</th>
+                            <th className="px-3 py-1">Período</th>
+                            <th className="px-3 py-1">Modo</th>
+                            <th className="px-3 py-1">Erro</th>
+                            <th className="px-3 py-1">Ações</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {items.map((t: any) => (
+                            <tr key={t.id} className="border-t border-border/60 align-top">
+                              <td className="px-3 py-1 whitespace-nowrap">{new Date(t.created_at).toLocaleString("pt-BR")}</td>
+                              <td className="px-3 py-1">
+                                <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                                  t.status === "failed"
+                                    ? "bg-red-500/15 text-red-700"
+                                    : "bg-emerald-500/15 text-emerald-700"
+                                }`}>
+                                  {t.status === "failed" ? "Falhou" : "Enviado"}
+                                </span>
+                              </td>
+                              <td className="px-3 py-1">{t.recipient ?? "—"}</td>
+                              <td className="px-3 py-1">
+                                {t.year && t.month ? `${String(t.month).padStart(2, "0")}/${t.year}` : "—"}
+                              </td>
+                              <td className="px-3 py-1">{t.email_mode ?? "—"}</td>
+                              <td className="px-3 py-1 text-red-700 max-w-xs truncate" title={t.error ?? ""}>
+                                {t.error ?? "—"}
+                              </td>
+                              <td className="px-3 py-1">
+                                {t.year && t.month && t.status !== "failed" ? (
+                                  <button onClick={() => downloadTestPdf({
+                                    year: t.year, month: t.month,
+                                    email_mode: (t.email_mode === "inline" ? "inline" : "link"),
+                                    recipient: t.recipient,
+                                  })}
+                                    className="rounded border border-border bg-background px-2 py-0.5 text-[10px]">
+                                    Baixar PDF
+                                  </button>
+                                ) : "—"}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    <div className="flex items-center justify-between border-t border-border px-3 py-1.5 text-[10px] text-muted-foreground">
+                      <span>{total} registro(s) · página {testFilters.page + 1}/{totalPages}</span>
+                      <div className="flex items-center gap-1">
+                        <button onClick={() => setTestFilters({ ...testFilters, page: Math.max(0, testFilters.page - 1) })}
+                          disabled={testFilters.page === 0}
+                          className="rounded border border-border bg-background px-2 py-0.5 disabled:opacity-40">
+                          ‹ Anterior
+                        </button>
+                        <button onClick={() => setTestFilters({ ...testFilters, page: Math.min(totalPages - 1, testFilters.page + 1) })}
+                          disabled={testFilters.page >= totalPages - 1}
+                          className="rounded border border-border bg-background px-2 py-0.5 disabled:opacity-40">
+                          Próxima ›
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
+
 
 
 
@@ -963,14 +1086,29 @@ function AdminFiscalPage() {
                             </button>
                             <button
                               onClick={() => {
+                                const reason = window.prompt(
+                                  `Motivo do reenvio imediato — ${String(f.month).padStart(2, "0")}/${f.year}\n\nIsso ignora backoff e máx. tentativas. O texto fica registrado na auditoria.`,
+                                  "",
+                                );
+                                if (reason === null) return; // cancelado
+                                const trimmed = reason.trim();
+                                if (!trimmed) {
+                                  setFeedback("Reenvio cancelado: informe um motivo.");
+                                  return;
+                                }
                                 setYear(f.year); setMonth(f.month);
-                                setTimeout(() => resendMut.mutate(true), 50);
+                                setTimeout(() => resendMut.mutate({
+                                  force: true,
+                                  reason: trimmed,
+                                  year: f.year, month: f.month,
+                                }), 50);
                               }}
                               disabled={resendMut.isPending}
-                              title="Reenvia imediatamente ignorando backoff e máx. tentativas. A ação fica registrada na auditoria."
+                              title="Reenvia imediatamente ignorando backoff e máx. tentativas. Pede um motivo que é gravado na auditoria."
                               className="rounded bg-red-600 px-2 py-0.5 text-[10px] font-bold text-white disabled:opacity-40">
                               Reenviar agora
                             </button>
+
 
                           </div>
                         </td>
@@ -1108,6 +1246,41 @@ function AdminFiscalPage() {
                 </select>
               </label>
             </div>
+
+            {/* Atalhos rápidos por tipo de evento (multi) */}
+            <div className="mb-2 flex flex-wrap items-center gap-1 text-[11px]">
+              <span className="text-muted-foreground">Atalhos:</span>
+              {([
+                { kinds: ["fiscal.preview.csv"], label: "CSV do preview" },
+                { kinds: ["fiscal.email.test", "fiscal.email.test.failed", "fiscal.email.test.pdf"], label: "E-mail de teste" },
+                { kinds: ["fiscal.email.retry"], label: "Reenvios" },
+                { kinds: ["fiscal.preview.csv", "fiscal.email.test", "fiscal.email.test.failed", "fiscal.email.test.pdf", "fiscal.email.retry"], label: "Todos os 3" },
+              ] as const).map((q) => {
+                const active = JSON.stringify(auditFilters.kinds ?? []) === JSON.stringify(q.kinds);
+                return (
+                  <button key={q.label}
+                    onClick={() => setAuditFilters({
+                      ...auditFilters,
+                      kinds: active ? undefined : [...q.kinds],
+                      kind: undefined,
+                    })}
+                    className={`rounded-full border px-2 py-0.5 ${
+                      active
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-background text-muted-foreground hover:bg-muted"
+                    }`}>
+                    {q.label}
+                  </button>
+                );
+              })}
+              {auditFilters.kinds && (
+                <button onClick={() => setAuditFilters({ ...auditFilters, kinds: undefined })}
+                  className="rounded-full border border-border bg-background px-2 py-0.5 text-muted-foreground">
+                  Limpar atalho
+                </button>
+              )}
+            </div>
+
             <div className="mb-2 flex items-center gap-2">
               <button onClick={() => setAuditFilters({})}
                 className="rounded border border-border bg-background px-2 py-1 text-xs">
@@ -1117,6 +1290,7 @@ function AdminFiscalPage() {
                 {auditRows.length} registro(s)
               </span>
             </div>
+
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">

@@ -95,7 +95,8 @@ async function audit(
     | "fiscal.link.copied"
     | "fiscal.link.opened"
     | "fiscal.email.test"
-    | "fiscal.email.test.failed",
+    | "fiscal.email.test.failed"
+    | "fiscal.email.test.pdf",
   params: Record<string, unknown>,
   row_count: number,
   notes?: string,
@@ -268,6 +269,7 @@ export const listFiscalAuditLogs = createServerFn({ method: "GET" })
     user_email?: string;
     recipient?: string;
     kind?: string;
+    kinds?: string[];
     limit?: number;
   }) => data ?? {})
   .middleware([requireSupabaseAuth])
@@ -287,7 +289,11 @@ export const listFiscalAuditLogs = createServerFn({ method: "GET" })
 
     if (data.from) query = query.gte("created_at", data.from);
     if (data.to) query = query.lte("created_at", data.to);
-    if (data.kind) query = query.eq("kind", data.kind);
+    if (data.kinds && data.kinds.length > 0) {
+      query = query.in("kind", data.kinds);
+    } else if (data.kind) {
+      query = query.eq("kind", data.kind);
+    }
 
     const { data: rows, error } = await query;
     if (error) throw error;
@@ -548,6 +554,7 @@ async function sendFiscalReportInternal(opts: {
   emailMode?: "link" | "inline";
   expirySeconds?: number;
   test?: boolean;
+  reason?: string | null;
 }) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const isTest = !!opts.test;
@@ -766,6 +773,7 @@ async function sendFiscalReportInternal(opts: {
         signed_url_expires_at: expiresIso,
         expiry_hours: Math.round(EXPIRES_SEC / 3600),
         test: isTest || undefined,
+        reason: opts.reason ?? undefined,
       },
       row_count: totals.count,
       notes: isTest ? "test" : opts.triggeredBy,
@@ -836,13 +844,16 @@ export const sendMonthlyFiscalEmail = createServerFn({ method: "POST" })
   });
 
 export const resendMonthlyFiscalEmail = createServerFn({ method: "POST" })
-  .inputValidator((data: { year: number; month: number; force?: boolean; expiry_hours?: number }) => {
+  .inputValidator((data: { year: number; month: number; force?: boolean; expiry_hours?: number; reason?: string }) => {
     if (!Number.isInteger(data.year) || !Number.isInteger(data.month)) {
       throw new Error("invalid period");
     }
     if (data.expiry_hours !== undefined) {
       if (!Number.isInteger(data.expiry_hours) || data.expiry_hours < 1 || data.expiry_hours > 720)
         throw new Error("Expiração do link entre 1h e 720h.");
+    }
+    if (data.reason !== undefined && typeof data.reason === "string") {
+      data.reason = data.reason.trim().slice(0, 500);
     }
     return data;
   })
@@ -894,6 +905,7 @@ export const resendMonthlyFiscalEmail = createServerFn({ method: "POST" })
       year: data.year, month: data.month, recipient,
       triggeredBy: "retry", userId,
       expirySeconds: data.expiry_hours ? data.expiry_hours * 3600 : undefined,
+      reason: data.reason || null,
     });
   });
 
@@ -1024,21 +1036,44 @@ export const sendTestFiscalEmail = createServerFn({ method: "POST" })
 // ───────────────────────── Histórico de testes ─────────────────────────
 
 export const listTestSendHistory = createServerFn({ method: "GET" })
-  .inputValidator((data?: { limit?: number }) => data ?? {})
+  .inputValidator((data?: {
+    limit?: number;
+    offset?: number;
+    recipient?: string;
+    status?: "sent" | "failed" | "all";
+    year?: number;
+    month?: number;
+    from?: string;
+    to?: string;
+  }) => data ?? {})
   .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     await ensureAdmin(supabase, userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const limit = Math.max(1, Math.min(data.limit ?? 10, 50));
-    const { data: rows, error } = await supabaseAdmin
+    const limit = Math.max(1, Math.min(data.limit ?? 10, 100));
+    const offset = Math.max(0, data.offset ?? 0);
+
+    // Filtra kinds pelo status pedido (sent/failed/all)
+    let kinds: string[] = ["fiscal.email.test", "fiscal.email.test.failed"];
+    if (data.status === "sent") kinds = ["fiscal.email.test"];
+    if (data.status === "failed") kinds = ["fiscal.email.test.failed"];
+
+    // Coleta um pool maior (até 500) e filtra por recipient/período em memória
+    // pois esses campos vivem dentro do JSON `params`.
+    let baseQ = supabaseAdmin
       .from("core_export_logs")
       .select("id, user_id, kind, params, notes, created_at")
       .eq("scope", "admin.fiscal")
-      .in("kind", ["fiscal.email.test", "fiscal.email.test.failed"])
+      .in("kind", kinds)
       .order("created_at", { ascending: false })
-      .limit(limit);
+      .limit(500);
+    if (data.from) baseQ = baseQ.gte("created_at", data.from);
+    if (data.to) baseQ = baseQ.lte("created_at", data.to);
+
+    const { data: rows, error } = await baseQ;
     if (error) throw error;
+
     const userIds = Array.from(new Set((rows ?? []).map((r) => r.user_id).filter(Boolean)));
     const { data: users } = userIds.length
       ? await supabaseAdmin
@@ -1047,7 +1082,8 @@ export const listTestSendHistory = createServerFn({ method: "GET" })
           .in("user_id", userIds as string[])
       : { data: [] };
     const uMap = new Map<string, any>((users ?? []).map((u: any) => [u.user_id, u]));
-    return (rows ?? []).map((r) => {
+
+    let mapped = (rows ?? []).map((r) => {
       const p = (r.params ?? {}) as any;
       return {
         id: r.id,
@@ -1061,7 +1097,92 @@ export const listTestSendHistory = createServerFn({ method: "GET" })
         user_email: r.user_id ? uMap.get(r.user_id)?.email ?? null : null,
       };
     });
+
+    if (data.recipient) {
+      const needle = data.recipient.toLowerCase();
+      mapped = mapped.filter((r) => (r.recipient ?? "").toLowerCase().includes(needle));
+    }
+    if (Number.isInteger(data.year)) {
+      mapped = mapped.filter((r) => r.year === data.year);
+    }
+    if (Number.isInteger(data.month)) {
+      mapped = mapped.filter((r) => r.month === data.month);
+    }
+
+    const total = mapped.length;
+    const page = mapped.slice(offset, offset + limit);
+    return { items: page, total, limit, offset };
   });
+
+// ───────────────────────── PDF do e-mail de teste ─────────────────────────
+
+/**
+ * Renderiza o template do e-mail (sem enviar) e devolve HTML pronto para
+ * abrir em uma nova janela e imprimir como PDF. Registra o download no audit.
+ */
+export const getTestFiscalEmailPdfHtml = createServerFn({ method: "POST" })
+  .inputValidator((data: {
+    year: number; month: number;
+    email_mode?: "link" | "inline";
+    recipient?: string | null;
+  }) => {
+    if (!Number.isInteger(data.year) || !Number.isInteger(data.month))
+      throw new Error("invalid period");
+    return data;
+  })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    await ensureAdmin(supabase, userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const schedule = await readSchedule(supabaseAdmin);
+    const emailMode = data.email_mode ?? schedule.email_mode;
+    const report = await getMonthlyFiscalReport({ data: { year: data.year, month: data.month } });
+    const monthStr = monthLabel(data.year, data.month);
+    const fakeExpiry = new Date(Date.now() + schedule.link_expiry_hours * 3600 * 1000)
+      .toLocaleDateString("pt-BR");
+
+    const { TEMPLATES } = await import("@/lib/email-templates/registry");
+    const tpl = TEMPLATES["fiscal-report-monthly"];
+    if (!tpl) throw new Error("template fiscal-report-monthly not registered");
+
+    const templateData = {
+      monthLabel: monthStr,
+      totalCount: report.totals.count,
+      grossBRL: brlPretty(report.totals.gross),
+      taxBRL: brlPretty(report.totals.total_tax),
+      netBRL: brlPretty(report.totals.net),
+      csvUrl: "https://example.invalid/test-preview.csv",
+      dashboardUrl: "https://impulsionando.lovable.app/admin/fiscal",
+      expiresAt: fakeExpiry,
+      mode: emailMode,
+      inlineRows: emailMode === "inline"
+        ? report.rows.map((r: any) => ({
+            paid_at: r.paid_at ? new Date(r.paid_at).toLocaleDateString("pt-BR") : "—",
+            company_name: r.company_name,
+            company_document: r.company_document,
+            gross: brlPretty(r.gross),
+            tax: brlPretty(r.total_tax),
+            net: brlPretty(r.net),
+          }))
+        : [],
+    };
+    const element = React.createElement(tpl.component as any, templateData);
+    const html = await renderAsync(element);
+    const subject = typeof tpl.subject === "function" ? tpl.subject(templateData) : tpl.subject;
+    const filename = `fiscal-teste-${data.year}-${String(data.month).padStart(2, "0")}.pdf`;
+
+    await audit(supabase, userId, "fiscal.email.test.pdf", {
+      year: data.year, month: data.month,
+      recipient: data.recipient ?? null,
+      email_mode: emailMode,
+      filename,
+      source: "test-pdf",
+    }, report.totals.count, "test-pdf");
+
+    return { html, subject, email_mode: emailMode, filename };
+  });
+
 
 // ───────────────────────── Log de download do CSV no preview ─────────────────────────
 
