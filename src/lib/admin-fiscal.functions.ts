@@ -542,40 +542,49 @@ async function sendFiscalReportInternal(opts: {
   userId?: string | null;
   emailMode?: "link" | "inline";
   expirySeconds?: number;
+  test?: boolean;
 }) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const isTest = !!opts.test;
 
-  // Conta tentativas anteriores
-  const { data: prev } = await supabaseAdmin
-    .from("fiscal_email_runs")
-    .select("attempt")
-    .eq("year", opts.year)
-    .eq("month", opts.month)
-    .order("created_at", { ascending: false })
-    .limit(1);
-  const attempt = ((prev ?? [])[0]?.attempt ?? 0) + 1;
+  // Conta tentativas anteriores (apenas para sends reais)
+  let attempt = 1;
+  let runId: string | null = null;
+  if (!isTest) {
+    const { data: prev } = await supabaseAdmin
+      .from("fiscal_email_runs")
+      .select("attempt")
+      .eq("year", opts.year)
+      .eq("month", opts.month)
+      .order("created_at", { ascending: false })
+      .limit(1);
+    attempt = ((prev ?? [])[0]?.attempt ?? 0) + 1;
+  }
 
   // Resolve email_mode
   const schedule = await readSchedule(supabaseAdmin);
   const emailMode = opts.emailMode ?? schedule.email_mode;
 
-  // Cria registro pendente
-  const { data: runRow, error: runErr } = await supabaseAdmin
-    .from("fiscal_email_runs")
-    .insert({
-      year: opts.year,
-      month: opts.month,
-      recipient: opts.recipient,
-      status: "pending",
-      triggered_by: opts.triggeredBy,
-      email_mode: emailMode,
-      attempt,
-      user_id: opts.userId ?? null,
-    })
-    .select("id")
-    .single();
-  if (runErr) throw runErr;
-  const runId = runRow!.id as string;
+  // Cria registro pendente (somente para sends reais)
+  if (!isTest) {
+    const { data: runRow, error: runErr } = await supabaseAdmin
+      .from("fiscal_email_runs")
+      .insert({
+        year: opts.year,
+        month: opts.month,
+        recipient: opts.recipient,
+        status: "pending",
+        triggered_by: opts.triggeredBy,
+        email_mode: emailMode,
+        attempt,
+        user_id: opts.userId ?? null,
+      })
+      .select("id")
+      .single();
+    if (runErr) throw runErr;
+    runId = runRow!.id as string;
+  }
+
 
   try {
     const { startIso, endIso } = monthBounds(opts.year, opts.month);
