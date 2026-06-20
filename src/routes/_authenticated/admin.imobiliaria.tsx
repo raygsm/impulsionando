@@ -74,8 +74,8 @@ const GROUPS: Group[] = [
   {
     title: "Documental",
     items: [
-      { label: "Documentação", icon: BookOpen, status: "missing", note: "Biblioteca de documentos do imóvel/cliente" },
-      { label: "Financiamento", icon: Banknote, status: "missing", note: "Simulador + pipeline bancário" },
+      { label: "Documentação", icon: BookOpen, to: "/imobiliaria/documentos", status: "ok", note: "Biblioteca com validade e alertas" },
+      { label: "Financiamento", icon: Banknote, to: "/imobiliaria/financiamento", status: "ok", note: "Simulador + pipeline bancário" },
     ],
   },
   {
