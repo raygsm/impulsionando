@@ -1,7 +1,6 @@
 // Cron público: consolida lotes de repasse para empresas com periodicidade vencida.
-// Chamado por pg_cron com header HMAC. Usa service_role.
+// Autenticação: header `apikey` deve bater com SUPABASE_PUBLISHABLE_KEY (padrão canônico pg_cron).
 import { createFileRoute } from '@tanstack/react-router'
-import { createHmac, timingSafeEqual } from 'crypto'
 import { runConsolidation } from '@/lib/payout-consolidation'
 
 function frequencyToPeriod(freq: string, now: Date): { start: string; end: string } | null {
@@ -22,7 +21,7 @@ function frequencyToPeriod(freq: string, now: Date): { start: string; end: strin
       start.setUTCMonth(start.getUTCMonth() - 1)
       break
     default:
-      return null // 'instant' não usa consolidação
+      return null
   }
   return { start: start.toISOString(), end: end.toISOString() }
 }
@@ -31,21 +30,18 @@ export const Route = createFileRoute('/api/public/cron/payouts-consolidate')({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const secret = process.env.CRON_SHARED_SECRET
-        if (!secret) return new Response('Cron secret not configured', { status: 500 })
-
-        const sig = request.headers.get('x-cron-signature') ?? ''
-        const body = await request.text()
-        const expected = createHmac('sha256', secret).update(body).digest('hex')
-        const sigBuf = Buffer.from(sig)
-        const expBuf = Buffer.from(expected)
-        if (sigBuf.length !== expBuf.length || !timingSafeEqual(sigBuf, expBuf)) {
-          return new Response('Invalid signature', { status: 401 })
+        const expected = process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY
+        const got = request.headers.get('apikey') ?? ''
+        if (!expected || got !== expected) {
+          return new Response('Unauthorized', { status: 401 })
         }
 
         const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
         const now = new Date()
         const results: Record<string, unknown> = {}
+
+
+
 
         for (const freq of ['daily', 'weekly', 'biweekly', 'monthly']) {
           const period = frequencyToPeriod(freq, now)
