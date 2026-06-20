@@ -307,7 +307,18 @@ function Page() {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-[260px] flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <div className="font-semibold">{r.contact_name}</div>
+                    <InteressadoDetailDialog
+                      interest={r}
+                      companyId={companyId!}
+                      trigger={
+                        <button
+                          type="button"
+                          className="font-semibold text-left text-primary hover:underline focus:underline focus:outline-none"
+                        >
+                          {r.contact_name}
+                        </button>
+                      }
+                    />
                     <Badge className={STATUS_BADGE[r.status] ?? ''}>{STATUS.find((s) => s.value === r.status)?.label ?? r.status}</Badge>
                     <Badge variant="outline">{KIND_LABEL[r.kind] ?? r.kind}</Badge>
                     <span className="text-xs text-muted-foreground">{fmtDate(r.created_at)}</span>
@@ -409,6 +420,122 @@ function ResendEmailButton({ companyId, contactEmail }: { companyId: string; con
             ))}
           </div>
         )}
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function InteressadoDetailDialog({
+  interest,
+  companyId,
+  trigger,
+}: {
+  interest: any
+  companyId: string
+  trigger: React.ReactNode
+}) {
+  const [open, setOpen] = useState(false)
+  const fetchLogs = useServerFn(listVitrineEmailLog)
+  const { data, isLoading } = useQuery({
+    queryKey: ['vitrine-interest-detail-emails', companyId, interest.contact_email, open],
+    enabled: open && !!interest.contact_email,
+    queryFn: () => fetchLogs({ data: { companyId, templatePrefix: 'realestate-vitrine-interest', limit: 50 } }),
+  })
+  const emailHistory = (data?.rows ?? []).filter(
+    (r: any) => r.recipient_email === interest.contact_email,
+  )
+  const waUrl = interest.contact_whatsapp
+    ? `https://wa.me/${String(interest.contact_whatsapp).replace(/\D/g, '')}`
+    : interest.contact_phone
+      ? `https://wa.me/${String(interest.contact_phone).replace(/\D/g, '')}`
+      : null
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-auto">
+        <DialogHeader>
+          <DialogTitle>{interest.contact_name}</DialogTitle>
+          <DialogDescription>
+            Ficha do interessado · {KIND_LABEL[interest.kind] ?? interest.kind} · {fmtDate(interest.created_at)}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 text-sm">
+          <section>
+            <h4 className="font-semibold mb-2 text-xs uppercase tracking-wide text-muted-foreground">Contato</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {interest.contact_email && (
+                <a href={`mailto:${interest.contact_email}`} className="inline-flex items-center gap-2 hover:underline">
+                  <Mail className="h-3 w-3" /> {interest.contact_email}
+                </a>
+              )}
+              {interest.contact_phone && (
+                <a href={`tel:${interest.contact_phone}`} className="inline-flex items-center gap-2 hover:underline">
+                  <Phone className="h-3 w-3" /> {interest.contact_phone}
+                </a>
+              )}
+              {waUrl && (
+                <a href={waUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-emerald-700 hover:underline">
+                  <MessageSquare className="h-3 w-3" /> Abrir WhatsApp
+                </a>
+              )}
+            </div>
+          </section>
+
+          {interest.property && (
+            <section>
+              <h4 className="font-semibold mb-2 text-xs uppercase tracking-wide text-muted-foreground">Imóvel de interesse</h4>
+              <div className="rounded border p-3 bg-muted/40">
+                <div className="font-medium inline-flex items-center gap-2">
+                  <Home className="h-3 w-3" />
+                  {interest.property.reference_code ? `${interest.property.reference_code} — ` : ''}
+                  {interest.property.title}
+                </div>
+              </div>
+            </section>
+          )}
+
+          {interest.message && (
+            <section>
+              <h4 className="font-semibold mb-2 text-xs uppercase tracking-wide text-muted-foreground">Mensagem</h4>
+              <p className="p-3 bg-muted rounded whitespace-pre-wrap">{interest.message}</p>
+            </section>
+          )}
+
+          <section>
+            <h4 className="font-semibold mb-2 text-xs uppercase tracking-wide text-muted-foreground">Status atual</h4>
+            <Badge className={STATUS_BADGE[interest.status] ?? ''}>
+              {STATUS.find((s) => s.value === interest.status)?.label ?? interest.status}
+            </Badge>
+          </section>
+
+          <section>
+            <h4 className="font-semibold mb-2 text-xs uppercase tracking-wide text-muted-foreground">Histórico de e-mails</h4>
+            {!interest.contact_email ? (
+              <div className="text-muted-foreground text-xs">Sem e-mail registrado.</div>
+            ) : isLoading ? (
+              <div className="text-muted-foreground text-xs inline-flex items-center gap-2">
+                <Loader2 className="h-3 w-3 animate-spin" /> Carregando…
+              </div>
+            ) : emailHistory.length === 0 ? (
+              <div className="text-muted-foreground text-xs">Nenhum e-mail enviado para este contato.</div>
+            ) : (
+              <ul className="space-y-1 max-h-48 overflow-auto">
+                {emailHistory.map((row: any) => (
+                  <li key={row.id} className="flex items-center justify-between border rounded p-2 text-xs">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium truncate">{row.template_name}</div>
+                      <div className="text-muted-foreground">{new Date(row.created_at).toLocaleString('pt-BR')}</div>
+                      {row.error_message && <div className="text-destructive truncate">{row.error_message}</div>}
+                    </div>
+                    <Badge variant="outline">{row.status}</Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
       </DialogContent>
     </Dialog>
   )
