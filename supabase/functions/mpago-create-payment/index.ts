@@ -8,6 +8,8 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
+type RevshareEvent = 'sale' | 'rent' | 'recurring' | 'service' | 'subscription' | 'event' | 'product';
+
 interface CreatePaymentBody {
   company_id: string;
   payment_method: 'pix' | 'credit_card' | 'debit_card' | 'boleto' | 'preference';
@@ -23,6 +25,8 @@ interface CreatePaymentBody {
   context_type?: string;
   context_id?: string;
   metadata?: Record<string, unknown>;
+  // Split / monetização
+  revshare_event_type?: RevshareEvent;
   // Cartão
   token?: string;
   installments?: number;
@@ -31,6 +35,20 @@ interface CreatePaymentBody {
   // Preferência
   items?: Array<{ title: string; quantity: number; unit_price: number }>;
   back_urls?: { success: string; pending: string; failure: string };
+}
+
+// Cálculo do fee — espelha src/lib/payouts.ts (cents + bps).
+function calcFee(
+  gross: number,
+  bps: number,
+  minBps?: number | null,
+  maxBps?: number | null,
+): number {
+  if (gross <= 0 || bps <= 0) return 0;
+  let fee = Math.floor((gross * bps) / 10_000);
+  if (minBps != null) fee = Math.max(fee, Math.floor((gross * minBps) / 10_000));
+  if (maxBps != null) fee = Math.min(fee, Math.floor((gross * maxBps) / 10_000));
+  return Math.min(fee, gross);
 }
 
 Deno.serve(async (req) => {
@@ -68,6 +86,51 @@ Deno.serve(async (req) => {
 
     const externalRef = body.external_reference ?? crypto.randomUUID();
     const idempotencyKey = crypto.randomUUID();
+
+    // === Motor de monetização (split) ===========================================
+    // Resolve modelo ativo + taxa do evento. Para revshare/hybrid aplicamos
+    // application_fee no Mercado Pago e registramos um core_payout_events pendente.
+    const revshareEvent: RevshareEvent = (body.revshare_event_type ?? 'service');
+    let appFeeCents = 0;
+    let modelId: string | null = null;
+    let rateId: string | null = null;
+    let percentBpsApplied = 0;
+    let ruleVersion = 1;
+    let modelKind: 'saas' | 'revshare' | 'hybrid' | null = null;
+    try {
+      const { data: model } = await supabase
+        .from('core_monetization_models')
+        .select('id, model, version, covered_events')
+        .eq('company_id', body.company_id)
+        .eq('is_active', true)
+        .order('version', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (model) {
+        modelId = model.id;
+        ruleVersion = model.version ?? 1;
+        modelKind = model.model;
+        const covered = Array.isArray(model.covered_events) ? model.covered_events : [];
+        if ((model.model === 'revshare' || model.model === 'hybrid') && covered.includes(revshareEvent)) {
+          const { data: rate } = await supabase
+            .from('core_revshare_rates')
+            .select('id, percent_bps, min_bps, max_bps')
+            .eq('model_id', model.id)
+            .eq('event_type', revshareEvent)
+            .eq('is_active', true)
+            .maybeSingle();
+          if (rate) {
+            rateId = rate.id;
+            percentBpsApplied = rate.percent_bps;
+            appFeeCents = calcFee(body.amount_cents, rate.percent_bps, rate.min_bps, rate.max_bps);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[monetization] lookup failed (non-fatal):', e);
+    }
+
+
 
     let mpResponse: Response;
     let endpoint: string;
@@ -115,6 +178,14 @@ Deno.serve(async (req) => {
         metadata: { company_id: body.company_id, context_type: body.context_type, context_id: body.context_id, ...body.metadata },
       };
     }
+
+    // Aplica application_fee no MP (split nativo) quando houver taxa calculada.
+    // Em pagamentos card/pix isso vira retenção automática para a conta Marketplace.
+    if (appFeeCents > 0 && body.payment_method !== 'preference') {
+      (mpBody as Record<string, unknown>).application_fee = appFeeCents / 100;
+    }
+
+
 
     mpResponse = await fetch(endpoint, {
       method: 'POST',
@@ -164,6 +235,30 @@ Deno.serve(async (req) => {
     if (insErr) {
       console.error('Insert error:', insErr);
       return new Response(JSON.stringify({ error: 'Failed to persist payment', details: insErr.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    // === Registra evento de monetização (pending) ============================
+    if (modelKind) {
+      try {
+        await supabase.from('core_payout_events').insert({
+          company_id: body.company_id,
+          model_id: modelId,
+          rate_id: rateId,
+          event_type: revshareEvent,
+          gross_cents: body.amount_cents,
+          fee_cents: appFeeCents,
+          percent_bps_applied: percentBpsApplied,
+          rule_version: ruleVersion,
+          provider: 'mercadopago',
+          provider_payment_id: payment.mp_payment_id ?? payment.mp_preference_id ?? null,
+          status: 'pending',
+          reference_table: 'mpago_payments',
+          reference_id: payment.id,
+          metadata: { external_reference: externalRef, model_kind: modelKind },
+        });
+      } catch (e) {
+        console.warn('[monetization] failed to record payout event:', e);
+      }
     }
 
     return new Response(JSON.stringify({

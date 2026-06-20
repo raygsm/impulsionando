@@ -110,6 +110,30 @@ Deno.serve(async (req) => {
           if (mpData.status === 'rejected') update.rejected_at = new Date().toISOString();
           if (mpData.status === 'refunded') update.refunded_at = new Date().toISOString();
 
+          // === Sincroniza core_payout_events com o status do MP ===============
+          try {
+            const newStatus =
+              mpData.status === 'approved' ? 'approved'
+              : mpData.status === 'refunded' ? 'refunded'
+              : mpData.status === 'charged_back' ? 'chargeback'
+              : mpData.status === 'cancelled' ? 'cancelled'
+              : mpData.status === 'rejected' ? 'failed'
+              : null;
+            if (newStatus) {
+              await supabase
+                .from('core_payout_events')
+                .update({
+                  status: newStatus,
+                  approved_at: newStatus === 'approved' ? new Date().toISOString() : null,
+                })
+                .eq('provider', 'mercadopago')
+                .eq('provider_payment_id', String(resourceId));
+            }
+          } catch (e) {
+            console.warn('[monetization] failed to sync payout event:', e);
+          }
+
+
           const { data: updatedRows } = await supabase
             .from('mpago_payments')
             .update(update)
