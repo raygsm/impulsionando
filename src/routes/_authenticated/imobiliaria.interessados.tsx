@@ -439,7 +439,7 @@ function InteressadoDetailDialog({
   const { data, isLoading } = useQuery({
     queryKey: ['vitrine-interest-detail-emails', companyId, interest.contact_email, open],
     enabled: open && !!interest.contact_email,
-    queryFn: () => fetchLogs({ data: { companyId, templatePrefix: 'realestate-vitrine', limit: 50 } }),
+    queryFn: () => fetchLogs({ data: { companyId, templatePrefix: 'realestate-vitrine-interest', limit: 50 } }),
   })
   const emailHistory = (data?.rows ?? []).filter(
     (r: any) => r.recipient_email === interest.contact_email,
