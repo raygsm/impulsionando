@@ -96,18 +96,21 @@ export const getMonetizationModel = createServerFn({ method: 'POST' })
 /** Lista o modelo de todas as empresas — visão CORE para o dashboard. */
 export const listAllMonetizationModels = createServerFn({ method: 'GET' })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    await requireStaff(context.supabase, context.userId)
-    const { data, error } = await context.supabase
-      .from('core_monetization_models')
-      .select(
-        'id, company_id, model, monthly_fee_cents, payout_frequency, covered_events, is_active, version, updated_at, companies:companies(id, name, niche)',
-      )
-      .eq('is_active', true)
-      .order('updated_at', { ascending: false })
-    if (error) throw error
-    return data ?? []
-  })
+  .handler(async ({ context }) =>
+    withInstrumentation('monetization.listAllMonetizationModels', { user_id: context.userId }, async () => {
+      await requireStaff(context.supabase, context.userId)
+      const { data, error } = await context.supabase
+        .from('core_monetization_models')
+        .select(
+          'id, company_id, model, monthly_fee_cents, payout_frequency, covered_events, is_active, version, updated_at, companies:companies(id, name, niche)',
+        )
+        .eq('is_active', true)
+        .order('updated_at', { ascending: false })
+      if (error) throw error
+      return data ?? []
+    }),
+  )
+
 
 /**
  * Cria (ou versiona) o modelo de uma empresa.
