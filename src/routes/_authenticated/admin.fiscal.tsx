@@ -180,17 +180,75 @@ function AdminFiscalPage() {
   const [showHistory, setShowHistory] = useState(false);
   const [testRecipient, setTestRecipient] = useState("");
   const [testEmailMode, setTestEmailMode] = useState<"link" | "inline" | null>(null);
-  // Test-history pagination + filters
   const TEST_PAGE_SIZE = 5;
-  const [testFilters, setTestFilters] = useState<{
-    recipient?: string;
-    status?: "all" | "sent" | "failed";
-    year?: number;
-    month?: number;
-    page: number;
-  }>({ status: "all", page: 0 });
 
+  // ── URL-backed state (shareable filters + pagination) ──
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+  const patchSearch = (patch: Partial<FiscalSearch>) => {
+    navigate({
+      search: (prev: FiscalSearch) => {
+        const next: FiscalSearch = { ...prev, ...patch };
+        (Object.keys(next) as (keyof FiscalSearch)[]).forEach((k) => {
+          const v = next[k];
+          if (v === undefined || v === "" || v === null) delete next[k];
+        });
+        return next;
+      },
+      replace: true,
+    });
+  };
 
+  const auditFilters = useMemo(() => ({
+    from: search.af_from,
+    to: search.af_to,
+    user_email: search.af_user,
+    recipient: search.af_recipient,
+    kind: search.af_kind,
+    kinds: search.af_kinds ? search.af_kinds.split(",").filter(Boolean) : undefined,
+  }), [search]);
+
+  const setAuditFilters = (
+    updater: typeof auditFilters | ((prev: typeof auditFilters) => typeof auditFilters),
+  ) => {
+    const next = typeof updater === "function" ? (updater as any)(auditFilters) : updater;
+    patchSearch({
+      af_from: next.from, af_to: next.to,
+      af_user: next.user_email, af_recipient: next.recipient,
+      af_kind: next.kind,
+      af_kinds: next.kinds && next.kinds.length ? next.kinds.join(",") : undefined,
+    });
+  };
+
+  const testFilters = useMemo(() => ({
+    recipient: search.th_recipient,
+    status: (search.th_status ?? "all") as "all" | "sent" | "failed",
+    year: search.th_year,
+    month: search.th_month,
+    page: search.th_page ?? 0,
+  }), [search]);
+
+  const setTestFilters = (
+    updater: typeof testFilters | ((prev: typeof testFilters) => typeof testFilters),
+  ) => {
+    const next = typeof updater === "function" ? (updater as any)(testFilters) : updater;
+    patchSearch({
+      th_recipient: next.recipient,
+      th_status: next.status === "all" ? undefined : next.status,
+      th_year: next.year, th_month: next.month,
+      th_page: next.page && next.page > 0 ? next.page : undefined,
+    });
+  };
+
+  // Bulk selection for queued resends
+  const [selectedRunIds, setSelectedRunIds] = useState<Set<string>>(new Set());
+  const toggleRunSelected = (id: string) => {
+    setSelectedRunIds((prev) => {
+      const n = new Set(prev);
+      if (n.has(id)) n.delete(id); else n.add(id);
+      return n;
+    });
+  };
 
   const q = useQuery({
     queryKey: ["admin-fiscal", year, month],
