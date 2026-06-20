@@ -130,6 +130,7 @@ import { Route as ClubeLoginRouteImport } from './routes/clube.login'
 import { Route as ClubeCadastroRouteImport } from './routes/clube.cadastro'
 import { Route as ChrismedOfertasRouteImport } from './routes/chrismed.ofertas'
 import { Route as ChrismedDraCristianeRouteImport } from './routes/chrismed.dra-cristiane'
+import { Route as ChrismedClinicaRouteImport } from './routes/chrismed.clinica'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as CheckoutSlugRouteImport } from './routes/checkout.$slug'
 import { Route as AdminManutencaoRouteImport } from './routes/admin.manutencao'
@@ -1027,6 +1028,11 @@ const ChrismedOfertasRoute = ChrismedOfertasRouteImport.update({
 const ChrismedDraCristianeRoute = ChrismedDraCristianeRouteImport.update({
   id: '/dra-cristiane',
   path: '/dra-cristiane',
+  getParentRoute: () => ChrismedRoute,
+} as any)
+const ChrismedClinicaRoute = ChrismedClinicaRouteImport.update({
+  id: '/clinica',
+  path: '/clinica',
   getParentRoute: () => ChrismedRoute,
 } as any)
 const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
@@ -2762,6 +2768,7 @@ export interface FileRoutesByFullPath {
   '/admin/manutencao': typeof AdminManutencaoRoute
   '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/chrismed/clinica': typeof ChrismedClinicaRoute
   '/chrismed/dra-cristiane': typeof ChrismedDraCristianeRoute
   '/chrismed/ofertas': typeof ChrismedOfertasRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
@@ -3161,6 +3168,7 @@ export interface FileRoutesByTo {
   '/admin/manutencao': typeof AdminManutencaoRoute
   '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/chrismed/clinica': typeof ChrismedClinicaRoute
   '/chrismed/dra-cristiane': typeof ChrismedDraCristianeRoute
   '/chrismed/ofertas': typeof ChrismedOfertasRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
@@ -3574,6 +3582,7 @@ export interface FileRoutesById {
   '/admin/manutencao': typeof AdminManutencaoRoute
   '/checkout/$slug': typeof CheckoutSlugRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/chrismed/clinica': typeof ChrismedClinicaRoute
   '/chrismed/dra-cristiane': typeof ChrismedDraCristianeRoute
   '/chrismed/ofertas': typeof ChrismedOfertasRoute
   '/clube/cadastro': typeof ClubeCadastroRoute
@@ -3986,6 +3995,7 @@ export interface FileRouteTypes {
     | '/admin/manutencao'
     | '/checkout/$slug'
     | '/checkout/success'
+    | '/chrismed/clinica'
     | '/chrismed/dra-cristiane'
     | '/chrismed/ofertas'
     | '/clube/cadastro'
@@ -4385,6 +4395,7 @@ export interface FileRouteTypes {
     | '/admin/manutencao'
     | '/checkout/$slug'
     | '/checkout/success'
+    | '/chrismed/clinica'
     | '/chrismed/dra-cristiane'
     | '/chrismed/ofertas'
     | '/clube/cadastro'
@@ -4797,6 +4808,7 @@ export interface FileRouteTypes {
     | '/admin/manutencao'
     | '/checkout/$slug'
     | '/checkout/success'
+    | '/chrismed/clinica'
     | '/chrismed/dra-cristiane'
     | '/chrismed/ofertas'
     | '/clube/cadastro'
@@ -6137,6 +6149,13 @@ declare module '@tanstack/react-router' {
       path: '/dra-cristiane'
       fullPath: '/chrismed/dra-cristiane'
       preLoaderRoute: typeof ChrismedDraCristianeRouteImport
+      parentRoute: typeof ChrismedRoute
+    }
+    '/chrismed/clinica': {
+      id: '/chrismed/clinica'
+      path: '/clinica'
+      fullPath: '/chrismed/clinica'
+      preLoaderRoute: typeof ChrismedClinicaRouteImport
       parentRoute: typeof ChrismedRoute
     }
     '/checkout/success': {
@@ -9032,11 +9051,13 @@ const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface ChrismedRouteChildren {
+  ChrismedClinicaRoute: typeof ChrismedClinicaRoute
   ChrismedDraCristianeRoute: typeof ChrismedDraCristianeRoute
   ChrismedOfertasRoute: typeof ChrismedOfertasRoute
 }
 
 const ChrismedRouteChildren: ChrismedRouteChildren = {
+  ChrismedClinicaRoute: ChrismedClinicaRoute,
   ChrismedDraCristianeRoute: ChrismedDraCristianeRoute,
   ChrismedOfertasRoute: ChrismedOfertasRoute,
 }
