@@ -413,6 +413,7 @@ import { Route as ApiPublicHooksCommsSelfTestRouteImport } from './routes/api/pu
 import { Route as ApiPublicHooksClubeJourneyTickRouteImport } from './routes/api/public/hooks/clube-journey-tick'
 import { Route as ApiPublicHooksBillingTickRouteImport } from './routes/api/public/hooks/billing-tick'
 import { Route as ApiPublicHooksAffAdvanceCommissionsRouteImport } from './routes/api/public/hooks/aff-advance-commissions'
+import { Route as ApiPublicHealthMonetizationRouteImport } from './routes/api/public/health/monetization'
 import { Route as ApiPublicDemoSendTestRouteImport } from './routes/api/public/demo/send-test'
 import { Route as ApiPublicDemoFeiraLeadRouteImport } from './routes/api/public/demo/feira-lead'
 import { Route as ApiPaymentsInfinitepayCreateRouteImport } from './routes/api/payments/infinitepay.create'
@@ -2670,6 +2671,12 @@ const ApiPublicHooksAffAdvanceCommissionsRoute =
     path: '/api/public/hooks/aff-advance-commissions',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHealthMonetizationRoute =
+  ApiPublicHealthMonetizationRouteImport.update({
+    id: '/monetization',
+    path: '/monetization',
+    getParentRoute: () => ApiPublicHealthRoute,
+  } as any)
 const ApiPublicDemoSendTestRoute = ApiPublicDemoSendTestRouteImport.update({
   id: '/api/public/demo/send-test',
   path: '/api/public/demo/send-test',
@@ -3222,7 +3229,7 @@ export interface FileRoutesByFullPath {
   '/white-label/capacidade': typeof AuthenticatedWhiteLabelCapacidadeRoute
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
-  '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -3272,6 +3279,7 @@ export interface FileRoutesByFullPath {
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
+  '/api/public/health/monetization': typeof ApiPublicHealthMonetizationRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
   '/api/public/hooks/clube-journey-tick': typeof ApiPublicHooksClubeJourneyTickRoute
@@ -3648,7 +3656,7 @@ export interface FileRoutesByTo {
   '/white-label/capacidade': typeof AuthenticatedWhiteLabelCapacidadeRoute
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
-  '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -3698,6 +3706,7 @@ export interface FileRoutesByTo {
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
+  '/api/public/health/monetization': typeof ApiPublicHealthMonetizationRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
   '/api/public/hooks/clube-journey-tick': typeof ApiPublicHooksClubeJourneyTickRoute
@@ -4088,7 +4097,7 @@ export interface FileRoutesById {
   '/_authenticated/white-label/capacidade': typeof AuthenticatedWhiteLabelCapacidadeRoute
   '/_authenticated/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
-  '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -4138,6 +4147,7 @@ export interface FileRoutesById {
   '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
+  '/api/public/health/monetization': typeof ApiPublicHealthMonetizationRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
   '/api/public/hooks/clube-journey-tick': typeof ApiPublicHooksClubeJourneyTickRoute
@@ -4577,6 +4587,7 @@ export interface FileRouteTypes {
     | '/api/payments/infinitepay/create'
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
+    | '/api/public/health/monetization'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/billing-tick'
     | '/api/public/hooks/clube-journey-tick'
@@ -5003,6 +5014,7 @@ export interface FileRouteTypes {
     | '/api/payments/infinitepay/create'
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
+    | '/api/public/health/monetization'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/billing-tick'
     | '/api/public/hooks/clube-journey-tick'
@@ -5442,6 +5454,7 @@ export interface FileRouteTypes {
     | '/api/payments/infinitepay/create'
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
+    | '/api/public/health/monetization'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/billing-tick'
     | '/api/public/hooks/clube-journey-tick'
@@ -5591,7 +5604,7 @@ export interface RootRouteChildren {
   ShowroomIndexRoute: typeof ShowroomIndexRoute
   TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
   ApiMercadopagoWebhookRoute: typeof ApiMercadopagoWebhookRoute
-  ApiPublicHealthRoute: typeof ApiPublicHealthRoute
+  ApiPublicHealthRoute: typeof ApiPublicHealthRouteWithChildren
   DemoNichoSlugRoute: typeof DemoNichoSlugRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   PortalContabilidadeTokenRoute: typeof PortalContabilidadeTokenRoute
@@ -8458,6 +8471,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksAffAdvanceCommissionsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/health/monetization': {
+      id: '/api/public/health/monetization'
+      path: '/monetization'
+      fullPath: '/api/public/health/monetization'
+      preLoaderRoute: typeof ApiPublicHealthMonetizationRouteImport
+      parentRoute: typeof ApiPublicHealthRoute
+    }
     '/api/public/demo/send-test': {
       id: '/api/public/demo/send-test'
       path: '/api/public/demo/send-test'
@@ -9731,6 +9751,18 @@ const ImoveisSlugRouteWithChildren = ImoveisSlugRoute._addFileChildren(
   ImoveisSlugRouteChildren,
 )
 
+interface ApiPublicHealthRouteChildren {
+  ApiPublicHealthMonetizationRoute: typeof ApiPublicHealthMonetizationRoute
+}
+
+const ApiPublicHealthRouteChildren: ApiPublicHealthRouteChildren = {
+  ApiPublicHealthMonetizationRoute: ApiPublicHealthMonetizationRoute,
+}
+
+const ApiPublicHealthRouteWithChildren = ApiPublicHealthRoute._addFileChildren(
+  ApiPublicHealthRouteChildren,
+)
+
 interface ApiPublicPaymentsCloseInvoiceRouteChildren {
   ApiPublicPaymentsCloseInvoiceReplayRoute: typeof ApiPublicPaymentsCloseInvoiceReplayRoute
 }
@@ -9862,7 +9894,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShowroomIndexRoute: ShowroomIndexRoute,
   TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
   ApiMercadopagoWebhookRoute: ApiMercadopagoWebhookRoute,
-  ApiPublicHealthRoute: ApiPublicHealthRoute,
+  ApiPublicHealthRoute: ApiPublicHealthRouteWithChildren,
   DemoNichoSlugRoute: DemoNichoSlugRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   PortalContabilidadeTokenRoute: PortalContabilidadeTokenRoute,
