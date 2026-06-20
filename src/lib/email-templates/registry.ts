@@ -18,6 +18,7 @@ import { template as demoFeiraWelcomeTemplate } from './demo-feira-welcome'
 import { template as restaurantOrderReadyTemplate } from './restaurant-order-ready'
 import { template as restaurantBillClosedTemplate } from './restaurant-bill-closed'
 import { template as restaurantPostvisitThanksTemplate } from './restaurant-postvisit-thanks'
+import { template as fiscalReportMonthlyTemplate } from './fiscal-report-monthly'
 
 
 export interface TemplateEntry {
@@ -87,6 +88,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'restaurant-order-ready': restaurantOrderReadyTemplate,
   'restaurant-bill-closed': restaurantBillClosedTemplate,
   'restaurant-postvisit-thanks': restaurantPostvisitThanksTemplate,
+  'fiscal-report-monthly': fiscalReportMonthlyTemplate,
 }
 
 
