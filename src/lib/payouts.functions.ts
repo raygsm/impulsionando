@@ -3,6 +3,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
+import { withInstrumentation } from './instrumentation'
 
 export type PayoutEventStatus = 'pending' | 'approved' | 'refunded' | 'chargeback' | 'cancelled' | 'failed'
 
