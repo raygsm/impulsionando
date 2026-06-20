@@ -69,10 +69,119 @@ function NavLink({
   );
 }
 
+function ItemLink({
+  item,
+  className,
+  onClick,
+}: {
+  item: EmpresasItem;
+  className?: string;
+  onClick?: () => void;
+}) {
+  if (item.nichoSlug) {
+    return (
+      <Link
+        to="/nichos/$slug"
+        params={{ slug: item.nichoSlug }}
+        onClick={onClick}
+        className={className}
+      >
+        {item.label}
+      </Link>
+    );
+  }
+  return (
+    <Link to={(item.to ?? "/empresas") as string} onClick={onClick} className={className}>
+      {item.label}
+    </Link>
+  );
+}
+
+function MacroDetail({ macro }: { macro: EmpresasMacro }) {
+  const Icon = macro.icon;
+  return (
+    <div className="flex h-full flex-col gap-3 p-4">
+      <div className="flex items-start gap-3">
+        <span
+          aria-hidden="true"
+          className={cn(
+            "grid h-10 w-10 shrink-0 place-items-center rounded-md",
+            macro.highlight
+              ? "bg-gradient-primary text-primary-foreground"
+              : "bg-primary/10 text-primary",
+          )}
+        >
+          <Icon className="h-5 w-5" />
+        </span>
+        <div className="min-w-0">
+          <div className="text-sm font-semibold text-foreground">{macro.label}</div>
+          <p className="text-xs text-muted-foreground leading-snug">{macro.message}</p>
+        </div>
+      </div>
+
+      <div className="grid gap-2">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+            Principais benefícios
+          </div>
+          <ul className="space-y-0.5 text-xs text-foreground/90">
+            {macro.benefits.map((b) => (
+              <li key={b} className="flex gap-1.5">
+                <ChevronRight className="h-3 w-3 shrink-0 mt-0.5 text-primary" />
+                <span>{b}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+            Subnichos
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {macro.items.map((it) => (
+              <ItemLink
+                key={`${it.label}-${it.nichoSlug ?? it.to ?? ""}`}
+                item={it}
+                className="rounded-full border border-border bg-background px-2 py-0.5 text-[11px] text-muted-foreground hover:border-primary hover:text-foreground hover:bg-accent transition-colors"
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 text-[11px] text-muted-foreground">
+          <div>
+            <span className="font-semibold text-foreground">Exemplos: </span>
+            {macro.examples}
+          </div>
+          <div>
+            <span className="font-semibold text-foreground">Módulos: </span>
+            {macro.modules.join(" · ")}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-auto flex gap-2 pt-2">
+        <Button asChild size="sm" variant="outline" className="flex-1">
+          <Link to={macro.demoTo as string}>
+            <PlayCircle className="h-3.5 w-3.5 mr-1" /> Ver demonstração
+          </Link>
+        </Button>
+        <Button asChild size="sm" className="flex-1 bg-gradient-primary text-primary-foreground">
+          <Link to={macro.solutionTo as string}>Conhecer solução</Link>
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function EmpresasMenu() {
   const empresasActive = useActive("/empresas");
   const nichosActive = useActive("/nichos");
   const active = empresasActive || nichosActive;
+  const [activeSlug, setActiveSlug] = useState<string>(EMPRESAS_MACROS[0]!.slug);
+  const activeMacro =
+    EMPRESAS_MACROS.find((m) => m.slug === activeSlug) ?? EMPRESAS_MACROS[0]!;
 
   return (
     <NavigationMenu>
@@ -89,96 +198,58 @@ function EmpresasMenu() {
             Empresas
           </NavigationMenuTrigger>
           <NavigationMenuContent>
-            <div className="grid grid-cols-[260px_minmax(0,1fr)] gap-0 w-[640px]">
-              <div className="p-4 bg-gradient-primary text-primary-foreground rounded-l-md flex flex-col gap-3">
-                <div className="text-xs font-semibold uppercase tracking-wider opacity-90">
-                  Para empresas
-                </div>
-                <h3 className="text-lg font-bold leading-tight">
-                  A plataforma certa para o seu nicho
-                </h3>
-                <p className="text-sm opacity-90 leading-snug">
-                  Módulos, jornadas e demonstrações pensados para cada tipo de
-                  operação. Escolha por onde começar.
-                </p>
-                <div className="mt-auto flex flex-col gap-2">
-                  <Button asChild size="sm" variant="secondary" className="w-full">
-                    <Link to="/empresas">Ver visão geral</Link>
-                  </Button>
-                  <Button
-                    asChild
-                    size="sm"
-                    variant="outline"
-                    className="w-full bg-white/10 border-white/40 text-primary-foreground hover:bg-white/20"
-                  >
-                    <Link to="/escolher-nicho">Ver planos</Link>
-                  </Button>
-                </div>
-              </div>
-
-              <div className="p-3 max-h-[420px] overflow-y-auto">
-                <h2
-                  id="nichos-submenu-heading"
-                  className="px-2 pb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
-                >
-                  Nichos
-                </h2>
-                <ul
-                  className="grid grid-cols-1 gap-1"
-                  aria-labelledby="nichos-submenu-heading"
-                >
-                  {NICHO_DETAILS.map((n) => {
-                    const Icon = n.icon;
-                    return (
-                      <li key={n.slug}>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to="/nichos/$slug"
-                            params={{ slug: n.slug }}
-                            aria-label={`${n.shortLabel}: ${n.cardDesc}`}
-                            className="flex items-start gap-3 rounded-md p-2 text-sm hover:bg-accent focus-visible:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-colors"
-                          >
-                            <span
-                              aria-hidden="true"
-                              className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-primary/10 text-primary"
-                            >
-                              <Icon className="h-4 w-4" />
-                            </span>
-                            <span className="min-w-0">
-                              <span className="block font-medium text-foreground truncate">
-                                {n.shortLabel}
-                              </span>
-                              <span className="block text-xs text-muted-foreground line-clamp-2">
-                                {n.cardDesc}
-                              </span>
-                            </span>
-                          </Link>
-                        </NavigationMenuLink>
-                      </li>
-                    );
-                  })}
-                </ul>
-                <div className="mt-2 pt-2 border-t border-border/60 grid grid-cols-3 gap-1 text-xs">
-                  <Link
-                    to="/empresas"
-                    className="px-2 py-1.5 rounded hover:bg-accent text-center text-muted-foreground hover:text-foreground"
-                  >
-                    Recursos
-                  </Link>
-                  <Link
-                    to="/demo"
-                    className="px-2 py-1.5 rounded hover:bg-accent text-center text-muted-foreground hover:text-foreground"
-                  >
-                    Demos
-                  </Link>
-                  <Link
-                    to="/escolher-nicho"
-                    className="px-2 py-1.5 rounded hover:bg-accent text-center text-muted-foreground hover:text-foreground"
-                  >
-                    Planos
-                  </Link>
-                </div>
-              </div>
+            <div className="grid grid-cols-[240px_minmax(0,1fr)] w-[820px]">
+              <ul
+                className="border-r border-border/60 p-2 bg-muted/30 rounded-l-md"
+                aria-label="Macrocategorias"
+              >
+                {EMPRESAS_MACROS.map((m) => {
+                  const Icon = m.icon;
+                  const isActive = m.slug === activeMacro.slug;
+                  return (
+                    <li key={m.slug}>
+                      <button
+                        type="button"
+                        onMouseEnter={() => setActiveSlug(m.slug)}
+                        onFocus={() => setActiveSlug(m.slug)}
+                        className={cn(
+                          "w-full flex items-center gap-2 rounded-md px-2 py-2 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                          isActive
+                            ? "bg-background text-foreground shadow-sm"
+                            : "text-muted-foreground hover:bg-background/60 hover:text-foreground",
+                          m.highlight && "border border-primary/30",
+                        )}
+                        aria-current={isActive ? "true" : undefined}
+                      >
+                        <span
+                          aria-hidden="true"
+                          className={cn(
+                            "grid h-7 w-7 shrink-0 place-items-center rounded-md",
+                            m.highlight
+                              ? "bg-gradient-primary text-primary-foreground"
+                              : "bg-primary/10 text-primary",
+                          )}
+                        >
+                          <Icon className="h-3.5 w-3.5" />
+                        </span>
+                        <span className="flex-1 truncate font-medium">{m.label}</span>
+                        <ChevronRight className="h-3.5 w-3.5 opacity-50" />
+                      </button>
+                    </li>
+                  );
+                })}
+                <li className="mt-2 pt-2 border-t border-border/60">
+                  <NavigationMenuLink asChild>
+                    <Link
+                      to="/empresas"
+                      className="block rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-background/60"
+                    >
+                      Ver visão geral →
+                    </Link>
+                  </NavigationMenuLink>
+                </li>
+              </ul>
+              <MacroDetail macro={activeMacro} />
             </div>
           </NavigationMenuContent>
         </NavigationMenuItem>
