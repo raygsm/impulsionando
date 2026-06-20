@@ -30,6 +30,7 @@ type FiscalSearch = {
   af_kind?: string; af_kinds?: string;
   th_recipient?: string; th_status?: "all" | "sent" | "failed";
   th_year?: number; th_month?: number; th_page?: number;
+  br_reason?: string; br_ids?: string;
 };
 
 function parseFiscalSearch(raw: Record<string, unknown>): FiscalSearch {
@@ -46,6 +47,9 @@ function parseFiscalSearch(raw: Record<string, unknown>): FiscalSearch {
   s.th_recipient = str("th_recipient");
   const st = str("th_status"); if (st === "all" || st === "sent" || st === "failed") s.th_status = st;
   s.th_year = num("th_year"); s.th_month = num("th_month"); s.th_page = num("th_page");
+  s.br_reason = str("br_reason"); s.br_ids = str("br_ids");
+  // Truncate excessively long reason in URL to keep links shareable
+  if (s.br_reason && s.br_reason.length > 500) s.br_reason = s.br_reason.slice(0, 500);
   return s;
 }
 
@@ -251,15 +255,29 @@ function AdminFiscalPage() {
 
   // Confirmation dialog state for bulk resend
   const [bulkConfirm, setBulkConfirm] = useState<{
-    runs: Array<{ id: string; year: number; month: number }>;
+    runs: Array<{ id: string; year: number; month: number; error?: string }>;
     reason: string;
     error?: string;
   } | null>(null);
-  // Last-used reason (persisted locally so repeat reenvios skip retyping)
+  // Last-used reason — seeded from URL (shareable) then localStorage
   const [lastBulkReason, setLastBulkReason] = useState<string>(() => {
+    const fromUrl = typeof search?.br_reason === "string" ? search.br_reason : "";
+    if (fromUrl) return fromUrl;
     if (typeof window === "undefined") return "";
     try { return window.localStorage.getItem(REASON_STORAGE_KEY) ?? ""; } catch { return ""; }
   });
+  // Progress + final summary for bulk resend
+  const [bulkProgress, setBulkProgress] = useState<
+    { done: number; total: number; current?: string } | null
+  >(null);
+  const [bulkSummary, setBulkSummary] = useState<{
+    ok: number; fail: number; reason: string;
+    results: Array<{ id: string; year: number; month: number; ok: boolean; error?: string }>;
+  } | null>(null);
+  // Last bulk selection (in-memory copy of what was confirmed) — used for "repetir"
+  const [lastBulkSelection, setLastBulkSelection] = useState<
+    { runs: Array<{ id: string; year: number; month: number }>; reason: string } | null
+  >(null);
 
   const q = useQuery({
     queryKey: ["admin-fiscal", year, month],
@@ -401,7 +419,14 @@ function AdminFiscalPage() {
   const bulkResendMut = useMutation({
     mutationFn: async (input: { reason: string; runs: Array<{ id: string; year: number; month: number }> }) => {
       const results: Array<{ id: string; year: number; month: number; ok: boolean; error?: string }> = [];
-      for (const r of input.runs) {
+      setBulkProgress({ done: 0, total: input.runs.length });
+      for (let i = 0; i < input.runs.length; i++) {
+        const r = input.runs[i];
+        setBulkProgress({
+          done: i,
+          total: input.runs.length,
+          current: `${String(r.month).padStart(2, "0")}/${r.year}`,
+        });
         try {
           await resendEmail({ data: {
             year: r.year, month: r.month,
@@ -414,19 +439,74 @@ function AdminFiscalPage() {
           results.push({ ...r, ok: false, error: e?.message ?? String(e) });
         }
       }
+      setBulkProgress({ done: input.runs.length, total: input.runs.length });
       return results;
     },
-    onSuccess: (results) => {
+    onSuccess: (results, variables) => {
       const ok = results.filter((r) => r.ok).length;
       const fail = results.length - ok;
       setFeedback(`Reenvio em lote: ${ok} ok, ${fail} falha(s). Cada reenvio foi gravado na auditoria.`);
+      setBulkSummary({ ok, fail, reason: variables.reason, results });
+      setLastBulkSelection({
+        runs: variables.runs.map((r) => ({ id: r.id, year: r.year, month: r.month })),
+        reason: variables.reason,
+      });
+      // Persistir motivo + ids na URL para reabrir a mesma seleção em outro acesso
+      patchSearch({
+        br_reason: variables.reason,
+        br_ids: variables.runs.map((r) => r.id).join(","),
+      });
       setSelectedRunIds(new Set());
       qc.invalidateQueries({ queryKey: ["admin-fiscal-logs"] });
       qc.invalidateQueries({ queryKey: ["admin-fiscal-failed"] });
       qc.invalidateQueries({ queryKey: ["admin-fiscal-status"] });
     },
     onError: (e: any) => setFeedback(`Erro no reenvio em lote: ${e?.message ?? e}`),
+    onSettled: () => {
+      // Mantém a barra visível por 1.5s pro usuário ver "X/X concluído"
+      setTimeout(() => setBulkProgress(null), 1500);
+    },
   });
+
+  // Reabre a confirmação com a última seleção (estado em memória ou reconstruída via URL)
+  const repeatLastBulk = () => {
+    const sourceRuns: Array<{ id: string; year: number; month: number }> =
+      lastBulkSelection?.runs
+      ?? (search.br_ids
+        ? search.br_ids.split(",").filter(Boolean).map((id: string) => ({ id, year: 0, month: 0 }))
+        : []);
+    const reason = lastBulkSelection?.reason ?? search.br_reason ?? lastBulkReason ?? "";
+    if (sourceRuns.length === 0) {
+      setFeedback("Nenhuma seleção anterior para repetir.");
+      return;
+    }
+    // Enriquece com year/month/error a partir da fila atual
+    const queue: any[] = failedQ.data?.runs ?? [];
+    const queueById = new Map<string, any>(queue.map((f: any) => [f.id as string, f]));
+    const runs = sourceRuns
+      .map((r: { id: string; year: number; month: number }) => {
+        const f = queueById.get(r.id);
+        if (f) return { id: f.id, year: f.year, month: f.month, error: f.error_message ?? undefined };
+        // Se já saiu da fila (foi reenviado com sucesso), preserva os metadados que tivermos
+        if (r.year && r.month) return { id: r.id, year: r.year, month: r.month, error: "não está mais na fila" };
+        return null;
+      })
+      .filter(Boolean) as Array<{ id: string; year: number; month: number; error?: string }>;
+    if (runs.length === 0) {
+      setFeedback("Nenhuma execução da última seleção continua na fila — nada a repetir.");
+      return;
+    }
+    if (runs.length > BULK_RESEND_MAX) {
+      setFeedback(
+        `Repetição bloqueada: ${runs.length} execuções excedem o limite de ${BULK_RESEND_MAX} por ação.`,
+      );
+      return;
+    }
+    setSelectedRunIds(new Set(runs.map((r) => r.id)));
+    setBulkConfirm({ runs, reason });
+    setBulkSummary(null);
+  };
+
 
   const schedMut = useMutation({
     mutationFn: () => saveSchedule({ data: schedDraft }),
@@ -1212,7 +1292,10 @@ function AdminFiscalPage() {
                       onClick={() => {
                         const runs = sorted
                           .filter((f: any) => selectedRunIds.has(f.id))
-                          .map((f: any) => ({ id: f.id, year: f.year, month: f.month }));
+                          .map((f: any) => ({
+                            id: f.id, year: f.year, month: f.month,
+                            error: f.error_message ?? undefined,
+                          }));
                         if (runs.length === 0) return;
                         if (runs.length > BULK_RESEND_MAX) {
                           setFeedback(
@@ -1227,16 +1310,105 @@ function AdminFiscalPage() {
                       title={
                         selectedRunIds.size > BULK_RESEND_MAX
                           ? `Selecione no máximo ${BULK_RESEND_MAX} por ação para evitar timeouts.`
-                          : "Abre uma confirmação com a lista de períodos e o motivo, registrado em cada auditoria."
+                          : "Abre uma confirmação com a lista de períodos, mensagens de erro e o motivo, registrado em cada auditoria."
                       }
                       className="rounded bg-red-600 px-2 py-1 text-[11px] font-bold text-white disabled:opacity-40">
                       {bulkResendMut.isPending
                         ? `Reenviando… (${bulkResendMut.variables?.runs.length ?? 0})`
                         : `Reenviar selecionados (${selectedRunIds.size})`}
                     </button>
+                    {(lastBulkSelection || search.br_ids) && (
+                      <button
+                        type="button"
+                        onClick={repeatLastBulk}
+                        disabled={bulkResendMut.isPending}
+                        title="Reabre a confirmação com a mesma seleção e motivo do último reenvio em lote."
+                        className="rounded border border-red-500/40 bg-red-500/10 px-2 py-1 text-[11px] font-medium text-red-700 disabled:opacity-40">
+                        Repetir último lote
+                        {(() => {
+                          const n = lastBulkSelection?.runs.length
+                            ?? (search.br_ids ? search.br_ids.split(",").filter(Boolean).length : 0);
+                          return n ? ` (${n})` : "";
+                        })()}
+                      </button>
+                    )}
                   </div>
                 );
               })()}
+
+              {/* Barra de progresso durante o reenvio em lote */}
+              {bulkProgress && (
+                <div className="mb-2 rounded border border-red-500/30 bg-background/80 px-2 py-1.5 text-[11px]">
+                  <div className="flex items-center justify-between gap-2">
+                    <span>
+                      Reenviando em lote: <strong>{bulkProgress.done}/{bulkProgress.total}</strong>
+                      {bulkProgress.current && bulkProgress.done < bulkProgress.total && (
+                        <span className="ml-1 text-muted-foreground">(processando {bulkProgress.current}…)</span>
+                      )}
+                      {bulkProgress.done >= bulkProgress.total && (
+                        <span className="ml-1 text-emerald-700">concluído</span>
+                      )}
+                    </span>
+                    <span className="font-mono text-muted-foreground">
+                      {Math.round((bulkProgress.done / Math.max(1, bulkProgress.total)) * 100)}%
+                    </span>
+                  </div>
+                  <div className="mt-1 h-1.5 w-full overflow-hidden rounded bg-muted">
+                    <div
+                      className="h-full bg-red-600 transition-all"
+                      style={{ width: `${(bulkProgress.done / Math.max(1, bulkProgress.total)) * 100}%` }}
+                      role="progressbar"
+                      aria-valuemin={0}
+                      aria-valuemax={bulkProgress.total}
+                      aria-valuenow={bulkProgress.done}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Resumo final do último reenvio em lote */}
+              {bulkSummary && (
+                <div className="mb-2 rounded border border-border bg-background/80 px-2 py-1.5 text-[11px]">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span>
+                      Último reenvio em lote:{" "}
+                      <strong className="text-emerald-700">{bulkSummary.ok} ok</strong>
+                      {" · "}
+                      <strong className={bulkSummary.fail > 0 ? "text-red-700" : "text-muted-foreground"}>
+                        {bulkSummary.fail} falha(s)
+                      </strong>
+                      <span className="ml-2 text-muted-foreground">de {bulkSummary.results.length} execução(ões)</span>
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={repeatLastBulk}
+                        disabled={bulkResendMut.isPending}
+                        className="rounded bg-red-600 px-2 py-0.5 text-[10px] font-bold text-white disabled:opacity-40">
+                        Repetir mesma seleção e motivo
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setBulkSummary(null)}
+                        className="rounded border border-border bg-background px-2 py-0.5 text-[10px] text-muted-foreground">
+                        Fechar
+                      </button>
+                    </div>
+                  </div>
+                  <details className="mt-1">
+                    <summary className="cursor-pointer text-muted-foreground">Detalhes por execução</summary>
+                    <ul className="mt-1 space-y-0.5 font-mono">
+                      {bulkSummary.results.map((r) => (
+                        <li key={r.id} className={r.ok ? "text-emerald-700" : "text-red-700"}>
+                          • {String(r.month).padStart(2, "0")}/{r.year}{" "}
+                          — {r.ok ? "ok" : `falhou: ${r.error ?? "erro desconhecido"}`}
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                </div>
+              )}
+
 
 
               <div className="overflow-x-auto">
@@ -1638,11 +1810,30 @@ function AdminFiscalPage() {
               Você está prestes a reenviar imediatamente <strong>{bulkConfirm.runs.length}</strong> execução(ões),
               ignorando backoff e máx. tentativas. O motivo abaixo será gravado na auditoria de cada reenvio.
             </p>
-            <div className="mt-3 max-h-32 overflow-auto rounded border border-border bg-background p-2 text-[11px]">
+            <div className="mt-3 max-h-48 overflow-auto rounded border border-border bg-background p-2 text-[11px]">
+              {(() => {
+                const withErr = bulkConfirm.runs.filter((r) => r.error).length;
+                return (
+                  <div className="mb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+                    {bulkConfirm.runs.length} período(s)
+                    {withErr > 0 && (
+                      <span className="ml-1 text-red-700">· {withErr} com erro anterior</span>
+                    )}
+                  </div>
+                );
+              })()}
               <ul className="space-y-0.5">
                 {bulkConfirm.runs.map((r) => (
                   <li key={r.id} className="font-mono">
-                    • {String(r.month).padStart(2, "0")}/{r.year}
+                    <span>• {String(r.month).padStart(2, "0")}/{r.year}</span>
+                    {r.error && (
+                      <span
+                        className="ml-2 text-red-700"
+                        title={r.error}
+                      >
+                        — {r.error.length > 120 ? `${r.error.slice(0, 120)}…` : r.error}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>
