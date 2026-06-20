@@ -233,6 +233,7 @@ import { Route as AuthenticatedInsightsRespostasRouteImport } from './routes/_au
 import { Route as AuthenticatedInsightsPercebidoRouteImport } from './routes/_authenticated/insights.percebido'
 import { Route as AuthenticatedInsightsOportunidadesRouteImport } from './routes/_authenticated/insights.oportunidades'
 import { Route as AuthenticatedImobiliariaVitrineRouteImport } from './routes/_authenticated/imobiliaria.vitrine'
+import { Route as AuthenticatedImobiliariaProprietariosRouteImport } from './routes/_authenticated/imobiliaria.proprietarios'
 import { Route as AuthenticatedImobiliariaParceirosRouteImport } from './routes/_authenticated/imobiliaria.parceiros'
 import { Route as AuthenticatedImobiliariaModulosRouteImport } from './routes/_authenticated/imobiliaria.modulos'
 import { Route as AuthenticatedImobiliariaMensagensRouteImport } from './routes/_authenticated/imobiliaria.mensagens'
@@ -1601,6 +1602,12 @@ const AuthenticatedImobiliariaVitrineRoute =
   AuthenticatedImobiliariaVitrineRouteImport.update({
     id: '/imobiliaria/vitrine',
     path: '/imobiliaria/vitrine',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedImobiliariaProprietariosRoute =
+  AuthenticatedImobiliariaProprietariosRouteImport.update({
+    id: '/imobiliaria/proprietarios',
+    path: '/imobiliaria/proprietarios',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedImobiliariaParceirosRoute =
@@ -3039,6 +3046,7 @@ export interface FileRoutesByFullPath {
   '/imobiliaria/mensagens': typeof AuthenticatedImobiliariaMensagensRoute
   '/imobiliaria/modulos': typeof AuthenticatedImobiliariaModulosRoute
   '/imobiliaria/parceiros': typeof AuthenticatedImobiliariaParceirosRoute
+  '/imobiliaria/proprietarios': typeof AuthenticatedImobiliariaProprietariosRoute
   '/imobiliaria/vitrine': typeof AuthenticatedImobiliariaVitrineRoute
   '/insights/oportunidades': typeof AuthenticatedInsightsOportunidadesRoute
   '/insights/percebido': typeof AuthenticatedInsightsPercebidoRoute
@@ -3446,6 +3454,7 @@ export interface FileRoutesByTo {
   '/imobiliaria/mensagens': typeof AuthenticatedImobiliariaMensagensRoute
   '/imobiliaria/modulos': typeof AuthenticatedImobiliariaModulosRoute
   '/imobiliaria/parceiros': typeof AuthenticatedImobiliariaParceirosRoute
+  '/imobiliaria/proprietarios': typeof AuthenticatedImobiliariaProprietariosRoute
   '/imobiliaria/vitrine': typeof AuthenticatedImobiliariaVitrineRoute
   '/insights/oportunidades': typeof AuthenticatedInsightsOportunidadesRoute
   '/insights/percebido': typeof AuthenticatedInsightsPercebidoRoute
@@ -3867,6 +3876,7 @@ export interface FileRoutesById {
   '/_authenticated/imobiliaria/mensagens': typeof AuthenticatedImobiliariaMensagensRoute
   '/_authenticated/imobiliaria/modulos': typeof AuthenticatedImobiliariaModulosRoute
   '/_authenticated/imobiliaria/parceiros': typeof AuthenticatedImobiliariaParceirosRoute
+  '/_authenticated/imobiliaria/proprietarios': typeof AuthenticatedImobiliariaProprietariosRoute
   '/_authenticated/imobiliaria/vitrine': typeof AuthenticatedImobiliariaVitrineRoute
   '/_authenticated/insights/oportunidades': typeof AuthenticatedInsightsOportunidadesRoute
   '/_authenticated/insights/percebido': typeof AuthenticatedInsightsPercebidoRoute
@@ -4287,6 +4297,7 @@ export interface FileRouteTypes {
     | '/imobiliaria/mensagens'
     | '/imobiliaria/modulos'
     | '/imobiliaria/parceiros'
+    | '/imobiliaria/proprietarios'
     | '/imobiliaria/vitrine'
     | '/insights/oportunidades'
     | '/insights/percebido'
@@ -4694,6 +4705,7 @@ export interface FileRouteTypes {
     | '/imobiliaria/mensagens'
     | '/imobiliaria/modulos'
     | '/imobiliaria/parceiros'
+    | '/imobiliaria/proprietarios'
     | '/imobiliaria/vitrine'
     | '/insights/oportunidades'
     | '/insights/percebido'
@@ -5114,6 +5126,7 @@ export interface FileRouteTypes {
     | '/_authenticated/imobiliaria/mensagens'
     | '/_authenticated/imobiliaria/modulos'
     | '/_authenticated/imobiliaria/parceiros'
+    | '/_authenticated/imobiliaria/proprietarios'
     | '/_authenticated/imobiliaria/vitrine'
     | '/_authenticated/insights/oportunidades'
     | '/_authenticated/insights/percebido'
@@ -6955,6 +6968,13 @@ declare module '@tanstack/react-router' {
       path: '/imobiliaria/vitrine'
       fullPath: '/imobiliaria/vitrine'
       preLoaderRoute: typeof AuthenticatedImobiliariaVitrineRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/imobiliaria/proprietarios': {
+      id: '/_authenticated/imobiliaria/proprietarios'
+      path: '/imobiliaria/proprietarios'
+      fullPath: '/imobiliaria/proprietarios'
+      preLoaderRoute: typeof AuthenticatedImobiliariaProprietariosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/imobiliaria/parceiros': {
@@ -8993,6 +9013,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedImobiliariaMensagensRoute: typeof AuthenticatedImobiliariaMensagensRoute
   AuthenticatedImobiliariaModulosRoute: typeof AuthenticatedImobiliariaModulosRoute
   AuthenticatedImobiliariaParceirosRoute: typeof AuthenticatedImobiliariaParceirosRoute
+  AuthenticatedImobiliariaProprietariosRoute: typeof AuthenticatedImobiliariaProprietariosRoute
   AuthenticatedImobiliariaVitrineRoute: typeof AuthenticatedImobiliariaVitrineRoute
   AuthenticatedInsightsOportunidadesRoute: typeof AuthenticatedInsightsOportunidadesRoute
   AuthenticatedInsightsPercebidoRoute: typeof AuthenticatedInsightsPercebidoRoute
@@ -9139,6 +9160,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedImobiliariaModulosRoute: AuthenticatedImobiliariaModulosRoute,
   AuthenticatedImobiliariaParceirosRoute:
     AuthenticatedImobiliariaParceirosRoute,
+  AuthenticatedImobiliariaProprietariosRoute:
+    AuthenticatedImobiliariaProprietariosRoute,
   AuthenticatedImobiliariaVitrineRoute: AuthenticatedImobiliariaVitrineRoute,
   AuthenticatedInsightsOportunidadesRoute:
     AuthenticatedInsightsOportunidadesRoute,
