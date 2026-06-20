@@ -139,7 +139,7 @@ function Page() {
       <PageHeader
         title="Proprietários"
         description="Cadastro de proprietários dos imóveis sob gestão da imobiliária."
-        actions={
+        action={
           <Button onClick={openNew} disabled={!companyId}>
             <Plus className="h-4 w-4 mr-1" /> Novo proprietário
           </Button>
