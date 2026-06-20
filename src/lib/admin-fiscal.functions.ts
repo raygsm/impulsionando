@@ -689,7 +689,8 @@ async function sendFiscalReportInternal(opts: {
     const element = React.createElement(tpl.component as any, templateData);
     const html = await renderAsync(element);
     const plainText = await renderAsync(element, { plainText: true });
-    const subject = typeof tpl.subject === "function" ? tpl.subject(templateData) : tpl.subject;
+    const rawSubject = typeof tpl.subject === "function" ? tpl.subject(templateData) : tpl.subject;
+    const subject = isTest ? `[TESTE] ${rawSubject}` : rawSubject;
 
     const messageId = crypto.randomUUID();
     const SITE_NAME = "impulsionando";
@@ -703,6 +704,7 @@ async function sendFiscalReportInternal(opts: {
       status: "pending",
     });
 
+    const idemSuffix = isTest ? `test-${messageId}` : `${attempt}`;
     const { error: enqErr } = await supabaseAdmin.rpc("enqueue_email", {
       queue_name: "transactional_emails",
       payload: {
@@ -712,8 +714,8 @@ async function sendFiscalReportInternal(opts: {
         sender_domain: SENDER_DOMAIN,
         subject, html, text: plainText,
         purpose: "transactional",
-        label: "fiscal-report-monthly",
-        idempotency_key: `fiscal-${opts.year}-${opts.month}-${opts.recipient}-${attempt}`,
+        label: isTest ? "fiscal-report-monthly-test" : "fiscal-report-monthly",
+        idempotency_key: `fiscal-${opts.year}-${opts.month}-${opts.recipient}-${idemSuffix}`,
         queued_at: new Date().toISOString(),
       },
     });
@@ -728,25 +730,29 @@ async function sendFiscalReportInternal(opts: {
       throw enqErr;
     }
 
-    // marca como enviado
-    await supabaseAdmin
-      .from("fiscal_email_runs")
-      .update({
-        status: "sent",
-        message_id: messageId,
-        csv_path: path,
-        signed_url_expires_at: expiresIso,
-        error_message: null,
-      })
-      .eq("id", runId);
+    // marca como enviado (apenas sends reais)
+    if (!isTest && runId) {
+      await supabaseAdmin
+        .from("fiscal_email_runs")
+        .update({
+          status: "sent",
+          message_id: messageId,
+          csv_path: path,
+          signed_url_expires_at: expiresIso,
+          error_message: null,
+        })
+        .eq("id", runId);
+    }
 
     await supabaseAdmin.from("core_export_logs").insert({
       user_id: opts.userId ?? null,
-      kind: opts.triggeredBy === "cron"
-        ? "fiscal.email.cron"
-        : opts.triggeredBy === "retry"
-          ? "fiscal.email.retry"
-          : "fiscal.email",
+      kind: isTest
+        ? "fiscal.email.test"
+        : opts.triggeredBy === "cron"
+          ? "fiscal.email.cron"
+          : opts.triggeredBy === "retry"
+            ? "fiscal.email.retry"
+            : "fiscal.email",
       scope: "admin.fiscal",
       params: {
         year: opts.year, month: opts.month, recipient: opts.recipient,
@@ -754,26 +760,32 @@ async function sendFiscalReportInternal(opts: {
         signed_url: signed.signedUrl,
         signed_url_expires_at: expiresIso,
         expiry_hours: Math.round(EXPIRES_SEC / 3600),
+        test: isTest || undefined,
       },
       row_count: totals.count,
-      notes: opts.triggeredBy,
+      notes: isTest ? "test" : opts.triggeredBy,
     });
 
     return {
       ok: true, run_id: runId, message_id: messageId,
       recipient: opts.recipient, csv_path: path, email_mode: emailMode,
+      signed_url: signed.signedUrl, signed_url_expires_at: expiresIso,
+      test: isTest,
     };
   } catch (e: any) {
-    await supabaseAdmin
-      .from("fiscal_email_runs")
-      .update({
-        status: "failed",
-        error_message: String(e?.message ?? e).slice(0, 1000),
-      })
-      .eq("id", runId);
+    if (!isTest && runId) {
+      await supabaseAdmin
+        .from("fiscal_email_runs")
+        .update({
+          status: "failed",
+          error_message: String(e?.message ?? e).slice(0, 1000),
+        })
+        .eq("id", runId);
+    }
     throw e;
   }
 }
+
 
 export const sendMonthlyFiscalEmail = createServerFn({ method: "POST" })
   .inputValidator((data: {
