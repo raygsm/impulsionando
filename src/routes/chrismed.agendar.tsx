@@ -30,7 +30,7 @@ const MODALITY_META: Record<Offering['modality'], { icon: typeof Stethoscope; la
   retorno: { icon: RefreshCw, label: 'Retorno acompanhado' },
 };
 
-export const Route = createFileRoute('/chrismed')({
+export const Route = createFileRoute('/chrismed/agendar')({
   head: () => ({
     meta: [
       { title: 'CHRISMED — Central Médica Premium · agende em minutos' },
