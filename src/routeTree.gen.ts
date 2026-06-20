@@ -159,6 +159,7 @@ import { Route as AuthenticatedPrivacyRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedPermissionsRouteImport } from './routes/_authenticated/permissions'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedNichesRouteImport } from './routes/_authenticated/niches'
+import { Route as AuthenticatedMonetizacaoRouteImport } from './routes/_authenticated/monetizacao'
 import { Route as AuthenticatedModulesRouteImport } from './routes/_authenticated/modules'
 import { Route as AuthenticatedMinhaAssinaturaRouteImport } from './routes/_authenticated/minha-assinatura'
 import { Route as AuthenticatedInventoryRouteImport } from './routes/_authenticated/inventory'
@@ -1201,6 +1202,12 @@ const AuthenticatedNichesRoute = AuthenticatedNichesRouteImport.update({
   path: '/niches',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMonetizacaoRoute =
+  AuthenticatedMonetizacaoRouteImport.update({
+    id: '/monetizacao',
+    path: '/monetizacao',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedModulesRoute = AuthenticatedModulesRouteImport.update({
   id: '/modules',
   path: '/modules',
@@ -2913,6 +2920,7 @@ export interface FileRoutesByFullPath {
   '/inventory': typeof AuthenticatedInventoryRouteWithChildren
   '/minha-assinatura': typeof AuthenticatedMinhaAssinaturaRoute
   '/modules': typeof AuthenticatedModulesRoute
+  '/monetizacao': typeof AuthenticatedMonetizacaoRoute
   '/niches': typeof AuthenticatedNichesRoute
   '/onboarding': typeof AuthenticatedOnboardingRouteWithChildren
   '/permissions': typeof AuthenticatedPermissionsRoute
@@ -3340,6 +3348,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/minha-assinatura': typeof AuthenticatedMinhaAssinaturaRoute
   '/modules': typeof AuthenticatedModulesRoute
+  '/monetizacao': typeof AuthenticatedMonetizacaoRoute
   '/niches': typeof AuthenticatedNichesRoute
   '/onboarding': typeof AuthenticatedOnboardingRouteWithChildren
   '/permissions': typeof AuthenticatedPermissionsRoute
@@ -3777,6 +3786,7 @@ export interface FileRoutesById {
   '/_authenticated/inventory': typeof AuthenticatedInventoryRouteWithChildren
   '/_authenticated/minha-assinatura': typeof AuthenticatedMinhaAssinaturaRoute
   '/_authenticated/modules': typeof AuthenticatedModulesRoute
+  '/_authenticated/monetizacao': typeof AuthenticatedMonetizacaoRoute
   '/_authenticated/niches': typeof AuthenticatedNichesRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRouteWithChildren
   '/_authenticated/permissions': typeof AuthenticatedPermissionsRoute
@@ -4215,6 +4225,7 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/minha-assinatura'
     | '/modules'
+    | '/monetizacao'
     | '/niches'
     | '/onboarding'
     | '/permissions'
@@ -4642,6 +4653,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/minha-assinatura'
     | '/modules'
+    | '/monetizacao'
     | '/niches'
     | '/onboarding'
     | '/permissions'
@@ -5078,6 +5090,7 @@ export interface FileRouteTypes {
     | '/_authenticated/inventory'
     | '/_authenticated/minha-assinatura'
     | '/_authenticated/modules'
+    | '/_authenticated/monetizacao'
     | '/_authenticated/niches'
     | '/_authenticated/onboarding'
     | '/_authenticated/permissions'
@@ -6665,6 +6678,13 @@ declare module '@tanstack/react-router' {
       path: '/niches'
       fullPath: '/niches'
       preLoaderRoute: typeof AuthenticatedNichesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/monetizacao': {
+      id: '/_authenticated/monetizacao'
+      path: '/monetizacao'
+      fullPath: '/monetizacao'
+      preLoaderRoute: typeof AuthenticatedMonetizacaoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/modules': {
@@ -9285,6 +9305,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedInventoryRoute: typeof AuthenticatedInventoryRouteWithChildren
   AuthenticatedMinhaAssinaturaRoute: typeof AuthenticatedMinhaAssinaturaRoute
   AuthenticatedModulesRoute: typeof AuthenticatedModulesRoute
+  AuthenticatedMonetizacaoRoute: typeof AuthenticatedMonetizacaoRoute
   AuthenticatedNichesRoute: typeof AuthenticatedNichesRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRouteWithChildren
   AuthenticatedPermissionsRoute: typeof AuthenticatedPermissionsRoute
@@ -9415,6 +9436,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInventoryRoute: AuthenticatedInventoryRouteWithChildren,
   AuthenticatedMinhaAssinaturaRoute: AuthenticatedMinhaAssinaturaRoute,
   AuthenticatedModulesRoute: AuthenticatedModulesRoute,
+  AuthenticatedMonetizacaoRoute: AuthenticatedMonetizacaoRoute,
   AuthenticatedNichesRoute: AuthenticatedNichesRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRouteWithChildren,
   AuthenticatedPermissionsRoute: AuthenticatedPermissionsRoute,
