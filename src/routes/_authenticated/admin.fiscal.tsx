@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import * as React from "react";
@@ -25,6 +25,30 @@ import {
 } from "@/lib/admin-fiscal.functions";
 import { downloadCsv } from "@/lib/exports";
 
+type FiscalSearch = {
+  af_from?: string; af_to?: string; af_user?: string; af_recipient?: string;
+  af_kind?: string; af_kinds?: string;
+  th_recipient?: string; th_status?: "all" | "sent" | "failed";
+  th_year?: number; th_month?: number; th_page?: number;
+};
+
+function parseFiscalSearch(raw: Record<string, unknown>): FiscalSearch {
+  const s: FiscalSearch = {};
+  const str = (k: string) => (typeof raw[k] === "string" && raw[k] ? (raw[k] as string) : undefined);
+  const num = (k: string) => {
+    const v = raw[k];
+    const n = typeof v === "number" ? v : typeof v === "string" ? Number(v) : NaN;
+    return Number.isFinite(n) ? n : undefined;
+  };
+  s.af_from = str("af_from"); s.af_to = str("af_to");
+  s.af_user = str("af_user"); s.af_recipient = str("af_recipient");
+  s.af_kind = str("af_kind"); s.af_kinds = str("af_kinds");
+  s.th_recipient = str("th_recipient");
+  const st = str("th_status"); if (st === "all" || st === "sent" || st === "failed") s.th_status = st;
+  s.th_year = num("th_year"); s.th_month = num("th_month"); s.th_page = num("th_page");
+  return s;
+}
+
 export const Route = createFileRoute("/_authenticated/admin/fiscal")({
   head: () => ({
     meta: [
@@ -32,6 +56,7 @@ export const Route = createFileRoute("/_authenticated/admin/fiscal")({
       { name: "robots", content: "noindex,nofollow" },
     ],
   }),
+  validateSearch: (raw: Record<string, unknown>) => parseFiscalSearch(raw),
   component: AdminFiscalPage,
 });
 
@@ -127,11 +152,8 @@ function AdminFiscalPage() {
   const [previewHtml, setPreviewHtml] = useState<string | null>(null);
   const [previewMeta, setPreviewMeta] = useState<{ subject?: string; email_mode?: string; expires_at?: string } | null>(null);
 
-  // Audit filters
-  const [auditFilters, setAuditFilters] = useState<{
-    from?: string; to?: string; user_email?: string;
-    recipient?: string; kind?: string; kinds?: string[];
-  }>({});
+  // (Audit filters are URL-backed below, after the server-fn refs.)
+
 
   const fetchReport = useServerFn(getMonthlyFiscalReport);
   const fetchCsv = useServerFn(exportMonthlyFiscalCsv);
@@ -155,17 +177,75 @@ function AdminFiscalPage() {
   const [showHistory, setShowHistory] = useState(false);
   const [testRecipient, setTestRecipient] = useState("");
   const [testEmailMode, setTestEmailMode] = useState<"link" | "inline" | null>(null);
-  // Test-history pagination + filters
   const TEST_PAGE_SIZE = 5;
-  const [testFilters, setTestFilters] = useState<{
-    recipient?: string;
-    status?: "all" | "sent" | "failed";
-    year?: number;
-    month?: number;
-    page: number;
-  }>({ status: "all", page: 0 });
 
+  // ── URL-backed state (shareable filters + pagination) ──
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+  const patchSearch = (patch: Partial<FiscalSearch>) => {
+    navigate({
+      search: (prev: FiscalSearch) => {
+        const next: FiscalSearch = { ...prev, ...patch };
+        (Object.keys(next) as (keyof FiscalSearch)[]).forEach((k) => {
+          const v = next[k];
+          if (v === undefined || v === "" || v === null) delete next[k];
+        });
+        return next;
+      },
+      replace: true,
+    });
+  };
 
+  const auditFilters = useMemo(() => ({
+    from: search.af_from,
+    to: search.af_to,
+    user_email: search.af_user,
+    recipient: search.af_recipient,
+    kind: search.af_kind,
+    kinds: search.af_kinds ? search.af_kinds.split(",").filter(Boolean) : undefined,
+  }), [search]);
+
+  const setAuditFilters = (
+    updater: typeof auditFilters | ((prev: typeof auditFilters) => typeof auditFilters),
+  ) => {
+    const next = typeof updater === "function" ? (updater as any)(auditFilters) : updater;
+    patchSearch({
+      af_from: next.from, af_to: next.to,
+      af_user: next.user_email, af_recipient: next.recipient,
+      af_kind: next.kind,
+      af_kinds: next.kinds && next.kinds.length ? next.kinds.join(",") : undefined,
+    });
+  };
+
+  const testFilters = useMemo(() => ({
+    recipient: search.th_recipient,
+    status: (search.th_status ?? "all") as "all" | "sent" | "failed",
+    year: search.th_year,
+    month: search.th_month,
+    page: search.th_page ?? 0,
+  }), [search]);
+
+  const setTestFilters = (
+    updater: typeof testFilters | ((prev: typeof testFilters) => typeof testFilters),
+  ) => {
+    const next = typeof updater === "function" ? (updater as any)(testFilters) : updater;
+    patchSearch({
+      th_recipient: next.recipient,
+      th_status: next.status === "all" ? undefined : next.status,
+      th_year: next.year, th_month: next.month,
+      th_page: next.page && next.page > 0 ? next.page : undefined,
+    });
+  };
+
+  // Bulk selection for queued resends
+  const [selectedRunIds, setSelectedRunIds] = useState<Set<string>>(new Set());
+  const toggleRunSelected = (id: string) => {
+    setSelectedRunIds((prev) => {
+      const n = new Set(prev);
+      if (n.has(id)) n.delete(id); else n.add(id);
+      return n;
+    });
+  };
 
   const q = useQuery({
     queryKey: ["admin-fiscal", year, month],
@@ -301,6 +381,37 @@ function AdminFiscalPage() {
       qc.invalidateQueries({ queryKey: ["admin-fiscal-failed"] });
     },
     onError: (e: any) => setFeedback(`Erro no reenvio: ${e?.message ?? e}`),
+  });
+
+  // Bulk resend (one reason, multiple queued runs)
+  const bulkResendMut = useMutation({
+    mutationFn: async (input: { reason: string; runs: Array<{ id: string; year: number; month: number }> }) => {
+      const results: Array<{ id: string; year: number; month: number; ok: boolean; error?: string }> = [];
+      for (const r of input.runs) {
+        try {
+          await resendEmail({ data: {
+            year: r.year, month: r.month,
+            force: true,
+            expiry_hours: expiryHours,
+            reason: input.reason,
+          }});
+          results.push({ ...r, ok: true });
+        } catch (e: any) {
+          results.push({ ...r, ok: false, error: e?.message ?? String(e) });
+        }
+      }
+      return results;
+    },
+    onSuccess: (results) => {
+      const ok = results.filter((r) => r.ok).length;
+      const fail = results.length - ok;
+      setFeedback(`Reenvio em lote: ${ok} ok, ${fail} falha(s). Cada reenvio foi gravado na auditoria.`);
+      setSelectedRunIds(new Set());
+      qc.invalidateQueries({ queryKey: ["admin-fiscal-logs"] });
+      qc.invalidateQueries({ queryKey: ["admin-fiscal-failed"] });
+      qc.invalidateQueries({ queryKey: ["admin-fiscal-status"] });
+    },
+    onError: (e: any) => setFeedback(`Erro no reenvio em lote: ${e?.message ?? e}`),
   });
 
   const schedMut = useMutation({
@@ -495,8 +606,16 @@ function AdminFiscalPage() {
   );
 
   function exportAuditCsv() {
+    const today = new Date().toISOString().slice(0, 10);
+    const parts: string[] = ["auditoria-fiscal", today];
+    if (auditFilters.from) parts.push(`de-${auditFilters.from.slice(0, 10)}`);
+    if (auditFilters.to) parts.push(`ate-${auditFilters.to.slice(0, 10)}`);
+    if (auditFilters.recipient) parts.push(`dest-${auditFilters.recipient.replace(/[^a-z0-9]+/gi, "_").slice(0, 30)}`);
+    if (auditFilters.user_email) parts.push(`user-${auditFilters.user_email.replace(/[^a-z0-9]+/gi, "_").slice(0, 30)}`);
+    if (auditFilters.kinds?.length) parts.push(`kinds-${auditFilters.kinds.length}`);
+    else if (auditFilters.kind) parts.push(`kind-${auditFilters.kind.replace(/\./g, "_")}`);
     downloadCsv(
-      `auditoria-fiscal-${new Date().toISOString().slice(0, 10)}.csv`,
+      `${parts.join("_")}.csv`,
       [
         "quando", "usuario", "acao", "ano", "mes", "destinatario",
         "modo", "arquivo", "tentativa", "expiry_hours", "link",
@@ -505,6 +624,7 @@ function AdminFiscalPage() {
       auditRows,
     );
   }
+
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 print:px-0 print:py-0">
@@ -808,7 +928,7 @@ function AdminFiscalPage() {
                     value={testFilters.year ?? ""}
                     onChange={(e) => setTestFilters({ ...testFilters, year: e.target.value ? Number(e.target.value) : undefined, page: 0 })}
                     className="w-16 rounded border border-border bg-background px-1 py-0.5 text-[10px]" />
-                  <button onClick={() => setTestFilters({ status: "all", page: 0 })}
+                  <button onClick={() => setTestFilters({ recipient: undefined, status: "all", year: undefined, month: undefined, page: 0 })}
                     className="rounded border border-border bg-background px-1 py-0.5 text-[10px]">
                     Limpar
                   </button>
@@ -1021,10 +1141,68 @@ function AdminFiscalPage() {
                   Backoff: {failedQ.data?.schedule.backoff_minutes}min · Máx. tent.: {failedQ.data?.schedule.max_attempts}
                 </span>
               </div>
+
+              {/* Bulk actions bar */}
+              {(() => {
+                const selected = sorted.filter((f: any) => selectedRunIds.has(f.id));
+                const allSelected = sorted.length > 0 && selected.length === sorted.length;
+                return (
+                  <div className="mb-2 flex flex-wrap items-center gap-2 rounded border border-border bg-background/60 px-2 py-1.5 text-[11px]">
+                    <label className="flex items-center gap-1">
+                      <input type="checkbox" checked={allSelected}
+                        onChange={(e) => {
+                          if (e.target.checked) setSelectedRunIds(new Set(sorted.map((f: any) => f.id)));
+                          else setSelectedRunIds(new Set());
+                        }} />
+                      Selecionar todos ({sorted.length})
+                    </label>
+                    <button
+                      onClick={() => setSelectedRunIds(new Set(sorted.filter((f: any) => f.backoff_ready && !f.max_attempts_reached).map((f: any) => f.id)))}
+                      className="rounded border border-border bg-background px-2 py-0.5">
+                      Selecionar prontos ({ready})
+                    </button>
+                    {selectedRunIds.size > 0 && (
+                      <button onClick={() => setSelectedRunIds(new Set())}
+                        className="rounded border border-border bg-background px-2 py-0.5 text-muted-foreground">
+                        Limpar seleção
+                      </button>
+                    )}
+                    <span className="ml-auto font-medium">
+                      {selectedRunIds.size} selecionado(s)
+                    </span>
+                    <button
+                      disabled={bulkResendMut.isPending || selectedRunIds.size === 0}
+                      onClick={() => {
+                        const runs = sorted
+                          .filter((f: any) => selectedRunIds.has(f.id))
+                          .map((f: any) => ({ id: f.id, year: f.year, month: f.month }));
+                        if (runs.length === 0) return;
+                        const reason = window.prompt(
+                          `Motivo do reenvio em lote — ${runs.length} período(s)\n\n` +
+                          runs.map((r) => `• ${String(r.month).padStart(2, "0")}/${r.year}`).join("\n") +
+                          `\n\nIgnora backoff e máx. tentativas. O motivo será gravado na auditoria de cada reenvio.`,
+                          "",
+                        );
+                        if (reason === null) return;
+                        const trimmed = reason.trim();
+                        if (!trimmed) { setFeedback("Reenvio em lote cancelado: informe um motivo."); return; }
+                        bulkResendMut.mutate({ reason: trimmed, runs });
+                      }}
+                      title="Reenvia imediatamente todos os períodos selecionados, ignorando backoff e máx. tentativas. Pede um único motivo, registrado em cada auditoria."
+                      className="rounded bg-red-600 px-2 py-1 text-[11px] font-bold text-white disabled:opacity-40">
+                      {bulkResendMut.isPending
+                        ? `Reenviando… (${bulkResendMut.variables?.runs.length ?? 0})`
+                        : `Reenviar selecionados (${selectedRunIds.size})`}
+                    </button>
+                  </div>
+                );
+              })()}
+
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead className="text-[10px] uppercase text-muted-foreground">
                     <tr>
+                      <th className="py-1 pr-3 w-6"></th>
                       <th className="py-1 pr-3">#</th>
                       <th className="py-1 pr-3">Período</th>
                       <th className="py-1 pr-3">Tent.</th>
@@ -1039,6 +1217,11 @@ function AdminFiscalPage() {
                   <tbody>
                     {sorted.map((f: any, idx: number) => (
                       <tr key={f.id} className="border-t border-border/60 align-top">
+                        <td className="py-1 pr-3">
+                          <input type="checkbox"
+                            checked={selectedRunIds.has(f.id)}
+                            onChange={() => toggleRunSelected(f.id)} />
+                        </td>
                         <td className="py-1 pr-3 font-mono text-muted-foreground">{idx + 1}</td>
                         <td className="py-1 pr-3 font-medium">
                           {String(f.month).padStart(2, "0")}/{f.year}
@@ -1282,7 +1465,7 @@ function AdminFiscalPage() {
             </div>
 
             <div className="mb-2 flex items-center gap-2">
-              <button onClick={() => setAuditFilters({})}
+              <button onClick={() => setAuditFilters({ from: undefined, to: undefined, user_email: undefined, recipient: undefined, kind: undefined, kinds: undefined })}
                 className="rounded border border-border bg-background px-2 py-1 text-xs">
                 Limpar filtros
               </button>
