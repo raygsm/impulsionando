@@ -90,10 +90,12 @@ async function audit(
     | "fiscal.email.skipped"
     | "fiscal.schedule.update"
     | "fiscal.preview"
+    | "fiscal.preview.csv"
     | "fiscal.link.regenerated"
     | "fiscal.link.copied"
     | "fiscal.link.opened"
-    | "fiscal.email.test",
+    | "fiscal.email.test"
+    | "fiscal.email.test.failed",
   params: Record<string, unknown>,
   row_count: number,
   notes?: string,
