@@ -36,6 +36,34 @@ function MarocasLanding() {
         </div>
       </header>
 
+      {/* Faixa fixa: Primeira vez no Rio? — acesso rápido para hóspedes */}
+      <div className="sticky top-0 z-40 bg-sky-600 text-white shadow-md">
+        <div className="container mx-auto px-6 py-2 flex items-center gap-4 overflow-x-auto text-sm">
+          <span className="font-semibold whitespace-nowrap flex items-center gap-1">
+            <Waves className="h-4 w-4" /> Primeira vez no Rio?
+          </span>
+          {[
+            { t: "Praias", topico: "praias", i: <Waves className="h-3.5 w-3.5" /> },
+            { t: "Restaurantes", topico: "restaurantes", i: <UtensilsCrossed className="h-3.5 w-3.5" /> },
+            { t: "Mercados", topico: "mercados", i: <ShoppingBag className="h-3.5 w-3.5" /> },
+            { t: "Farmácias", topico: "farmacias", i: <Pill className="h-3.5 w-3.5" /> },
+            { t: "Transporte", topico: "transporte", i: <Bus className="h-3.5 w-3.5" /> },
+            { t: "Passeios", topico: "passeios", i: <Mountain className="h-3.5 w-3.5" /> },
+            { t: "Emergências", topico: "emergencia", i: <LifeBuoy className="h-3.5 w-3.5" /> },
+            { t: "Dicas locais", topico: "dicas", i: <Sparkles className="h-3.5 w-3.5" /> },
+          ].map((q) => (
+            <Link
+              key={q.topico}
+              to="/marocas/assistente"
+              search={{ topico: q.topico }}
+              className="flex items-center gap-1 whitespace-nowrap rounded-full bg-white/10 hover:bg-white/20 px-3 py-1 transition"
+            >
+              {q.i} {q.t}
+            </Link>
+          ))}
+        </div>
+      </div>
+
       <section className="container mx-auto px-6 py-16 grid md:grid-cols-2 gap-10 items-center">
         <div>
           <p className="text-sm font-semibold text-primary uppercase tracking-wider">Aluguel por temporada · turnkey</p>
