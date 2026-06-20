@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Building2, ShieldCheck, Sparkles, BarChart3, Banknote, Wrench, Camera, Wifi, Waves, UtensilsCrossed, ShoppingBag, Bus, Mountain, Pill, LifeBuoy, Check } from "lucide-react";
+import { MarocasHelpFab } from "@/components/marocas/MarocasHelpFab";
 
 export const Route = createFileRoute("/marocas")({
   head: () => ({
@@ -27,9 +28,9 @@ function MarocasLanding() {
           <nav className="flex items-center gap-4 text-sm">
             <a href="#aproveite-o-rio" className="hover:underline">Aproveite o Rio</a>
             <a href="#como-funciona" className="hover:underline">Como funciona</a>
-            <a href="#operacao" className="hover:underline">Operação</a>
-            <a href="#planos" className="hover:underline">Planos</a>
-            <a href="#proprietario" className="hover:underline">Proprietário</a>
+            <Link to="/marocas/planos" className="hover:underline">Planos</Link>
+            <Link to="/marocas/assistente" className="hover:underline">Assistente</Link>
+            <Link to="/marocas/login" className="hover:underline">Entrar</Link>
             <Link to="/contato" className="rounded-md bg-primary text-primary-foreground px-3 py-1.5 font-medium">Quero gerir meu apto</Link>
           </nav>
         </div>
@@ -264,6 +265,8 @@ function MarocasLanding() {
         Marocas é uma operação integrada ao{" "}
         <Link to="/" className="underline">CORE Impulsionando</Link>.
       </footer>
+
+      <MarocasHelpFab />
     </main>
   );
 }
