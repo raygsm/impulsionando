@@ -439,6 +439,7 @@ import { Route as AuthenticatedImobiliariaAprovacoesImprimirFilaRouteImport } fr
 import { Route as AuthenticatedEmpresaTalentosRedeRouteImport } from './routes/_authenticated/empresa.talentos.rede'
 import { Route as AuthenticatedEmpresaTalentosDashboardRouteImport } from './routes/_authenticated/empresa.talentos.dashboard'
 import { Route as AuthenticatedEmpresaTalentosCandidatosRouteImport } from './routes/_authenticated/empresa.talentos.candidatos'
+import { Route as AuthenticatedCoreTenantsNovoRouteImport } from './routes/_authenticated/core.tenants.novo'
 import { Route as AuthenticatedCoreModulosSlugRouteImport } from './routes/_authenticated/core.modulos.$slug'
 import { Route as AuthenticatedCoreMarketplacePedidosRouteImport } from './routes/_authenticated/core.marketplace.pedidos'
 import { Route as AuthenticatedCoreMarketplaceFornecedoresRouteImport } from './routes/_authenticated/core.marketplace.fornecedores'
@@ -2831,6 +2832,12 @@ const AuthenticatedEmpresaTalentosCandidatosRoute =
     path: '/candidatos',
     getParentRoute: () => AuthenticatedEmpresaTalentosRoute,
   } as any)
+const AuthenticatedCoreTenantsNovoRoute =
+  AuthenticatedCoreTenantsNovoRouteImport.update({
+    id: '/tenants/novo',
+    path: '/tenants/novo',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreModulosSlugRoute =
   AuthenticatedCoreModulosSlugRouteImport.update({
     id: '/$slug',
@@ -3339,6 +3346,7 @@ export interface FileRoutesByFullPath {
   '/core/marketplace/fornecedores': typeof AuthenticatedCoreMarketplaceFornecedoresRoute
   '/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
+  '/core/tenants/novo': typeof AuthenticatedCoreTenantsNovoRoute
   '/empresa/talentos/candidatos': typeof AuthenticatedEmpresaTalentosCandidatosRoute
   '/empresa/talentos/dashboard': typeof AuthenticatedEmpresaTalentosDashboardRoute
   '/empresa/talentos/rede': typeof AuthenticatedEmpresaTalentosRedeRoute
@@ -3776,6 +3784,7 @@ export interface FileRoutesByTo {
   '/core/marketplace/fornecedores': typeof AuthenticatedCoreMarketplaceFornecedoresRoute
   '/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
+  '/core/tenants/novo': typeof AuthenticatedCoreTenantsNovoRoute
   '/empresa/talentos/candidatos': typeof AuthenticatedEmpresaTalentosCandidatosRoute
   '/empresa/talentos/dashboard': typeof AuthenticatedEmpresaTalentosDashboardRoute
   '/empresa/talentos/rede': typeof AuthenticatedEmpresaTalentosRedeRoute
@@ -4227,6 +4236,7 @@ export interface FileRoutesById {
   '/_authenticated/core/marketplace/fornecedores': typeof AuthenticatedCoreMarketplaceFornecedoresRoute
   '/_authenticated/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/_authenticated/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
+  '/_authenticated/core/tenants/novo': typeof AuthenticatedCoreTenantsNovoRoute
   '/_authenticated/empresa/talentos/candidatos': typeof AuthenticatedEmpresaTalentosCandidatosRoute
   '/_authenticated/empresa/talentos/dashboard': typeof AuthenticatedEmpresaTalentosDashboardRoute
   '/_authenticated/empresa/talentos/rede': typeof AuthenticatedEmpresaTalentosRedeRoute
@@ -4677,6 +4687,7 @@ export interface FileRouteTypes {
     | '/core/marketplace/fornecedores'
     | '/core/marketplace/pedidos'
     | '/core/modulos/$slug'
+    | '/core/tenants/novo'
     | '/empresa/talentos/candidatos'
     | '/empresa/talentos/dashboard'
     | '/empresa/talentos/rede'
@@ -5114,6 +5125,7 @@ export interface FileRouteTypes {
     | '/core/marketplace/fornecedores'
     | '/core/marketplace/pedidos'
     | '/core/modulos/$slug'
+    | '/core/tenants/novo'
     | '/empresa/talentos/candidatos'
     | '/empresa/talentos/dashboard'
     | '/empresa/talentos/rede'
@@ -5564,6 +5576,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/marketplace/fornecedores'
     | '/_authenticated/core/marketplace/pedidos'
     | '/_authenticated/core/modulos/$slug'
+    | '/_authenticated/core/tenants/novo'
     | '/_authenticated/empresa/talentos/candidatos'
     | '/_authenticated/empresa/talentos/dashboard'
     | '/_authenticated/empresa/talentos/rede'
@@ -8781,6 +8794,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEmpresaTalentosCandidatosRouteImport
       parentRoute: typeof AuthenticatedEmpresaTalentosRoute
     }
+    '/_authenticated/core/tenants/novo': {
+      id: '/_authenticated/core/tenants/novo'
+      path: '/tenants/novo'
+      fullPath: '/core/tenants/novo'
+      preLoaderRoute: typeof AuthenticatedCoreTenantsNovoRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/modulos/$slug': {
       id: '/_authenticated/core/modulos/$slug'
       path: '/$slug'
@@ -9182,6 +9202,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreIntegracoesDiagnosticoRoute: typeof AuthenticatedCoreIntegracoesDiagnosticoRoute
   AuthenticatedCoreIntegracoesMercadopagoRoute: typeof AuthenticatedCoreIntegracoesMercadopagoRoute
   AuthenticatedCoreIntegracoesN8nRoute: typeof AuthenticatedCoreIntegracoesN8nRoute
+  AuthenticatedCoreTenantsNovoRoute: typeof AuthenticatedCoreTenantsNovoRoute
 }
 
 const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
@@ -9240,6 +9261,7 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreIntegracoesMercadopagoRoute:
     AuthenticatedCoreIntegracoesMercadopagoRoute,
   AuthenticatedCoreIntegracoesN8nRoute: AuthenticatedCoreIntegracoesN8nRoute,
+  AuthenticatedCoreTenantsNovoRoute: AuthenticatedCoreTenantsNovoRoute,
 }
 
 const AuthenticatedCoreRouteWithChildren =
