@@ -1042,10 +1042,35 @@ function AdminFiscalPage() {
                         <td className="py-1 pr-3">
                           {url ? (
                             <div className="flex flex-col gap-0.5">
-                              <a href={url} target="_blank" rel="noreferrer"
-                                className={`underline ${expired ? "text-muted-foreground line-through" : "text-primary"}`}>
-                                {expired ? "Link expirado" : "Abrir CSV"}
-                              </a>
+                              <div className="flex items-center gap-1">
+                                <a href={url} target="_blank" rel="noreferrer"
+                                  onClick={() => {
+                                    if (!expired) {
+                                      logLink({ data: {
+                                        action: "opened",
+                                        csv_path: csvPath,
+                                        signed_url: url,
+                                        signed_url_expires_at: expIso,
+                                        year: p.year, month: p.month,
+                                        source: "audit-table",
+                                      }}).catch(() => {});
+                                    }
+                                  }}
+                                  className={`underline ${expired ? "text-muted-foreground line-through" : "text-primary"}`}>
+                                  {expired ? "Link expirado" : "Abrir CSV"}
+                                </a>
+                                {!expired && (
+                                  <button
+                                    onClick={() => copySignedLink({
+                                      url, csv_path: csvPath, expires_at: expIso,
+                                      year: p.year, month: p.month, source: "audit-table",
+                                    })}
+                                    title="Copia o link e registra na auditoria"
+                                    className="rounded border border-border bg-background px-1 py-0.5 text-[10px]">
+                                    Copiar
+                                  </button>
+                                )}
+                              </div>
                               {expIso && (
                                 <span className="text-[10px] text-muted-foreground">
                                   expira {new Date(expIso).toLocaleString("pt-BR")}
@@ -1059,6 +1084,7 @@ function AdminFiscalPage() {
                                 </button>
                               )}
                             </div>
+
                           ) : csvPath ? (
                             <button onClick={() => regenMut.mutate(csvPath)}
                               disabled={regenMut.isPending}
