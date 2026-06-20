@@ -4,6 +4,7 @@ import { useSuspenseQuery, queryOptions, useQueryClient } from '@tanstack/react-
 import { useServerFn } from '@tanstack/react-start'
 import { useState, useMemo } from 'react'
 import { listPayoutBatches, getPayoutBatch, markPayoutPaid, reopenPayout } from '@/lib/payout-batches.functions'
+import { getPayoutReceiptUrl } from '@/lib/payout-receipt.functions'
 import { formatBRL } from '@/lib/payouts'
 import { reportError } from '@/lib/report-error'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -65,7 +66,17 @@ function RepassesPage() {
   const detail = useServerFn(getPayoutBatch)
   const markPaid = useServerFn(markPayoutPaid)
   const reopen = useServerFn(reopenPayout)
+  const getReceipt = useServerFn(getPayoutReceiptUrl)
   const qc = useQueryClient()
+
+  const handleReceipt = async (ledgerId: string) => {
+    try {
+      const r = await getReceipt({ data: { ledger_id: ledgerId } })
+      window.open(r.url, '_blank', 'noopener,noreferrer')
+    } catch (e) {
+      toast.error('Falha ao gerar comprovante', { description: String((e as Error).message) })
+    }
+  }
 
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const fetcher = () => list({ data: statusFilter === 'all' ? {} : { status: statusFilter as any } })
@@ -209,6 +220,7 @@ function RepassesPage() {
                     <TableCell><Badge variant={meta.variant}>{meta.label}</Badge></TableCell>
                     <TableCell className="space-x-2">
                       <Button size="sm" variant="ghost" onClick={() => setSelectedId(b.id)}>Ver</Button>
+                      <Button size="sm" variant="ghost" onClick={() => handleReceipt(b.id)}>PDF</Button>
                       {b.status === 'scheduled' && (
                         <Button size="sm" onClick={() => { setSelectedId(b.id); setPayOpen(true) }}>
                           Pagar
