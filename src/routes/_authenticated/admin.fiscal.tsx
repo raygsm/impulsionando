@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import * as React from "react";
@@ -25,6 +25,30 @@ import {
 } from "@/lib/admin-fiscal.functions";
 import { downloadCsv } from "@/lib/exports";
 
+type FiscalSearch = {
+  af_from?: string; af_to?: string; af_user?: string; af_recipient?: string;
+  af_kind?: string; af_kinds?: string;
+  th_recipient?: string; th_status?: "all" | "sent" | "failed";
+  th_year?: number; th_month?: number; th_page?: number;
+};
+
+function parseFiscalSearch(raw: Record<string, unknown>): FiscalSearch {
+  const s: FiscalSearch = {};
+  const str = (k: string) => (typeof raw[k] === "string" && raw[k] ? (raw[k] as string) : undefined);
+  const num = (k: string) => {
+    const v = raw[k];
+    const n = typeof v === "number" ? v : typeof v === "string" ? Number(v) : NaN;
+    return Number.isFinite(n) ? n : undefined;
+  };
+  s.af_from = str("af_from"); s.af_to = str("af_to");
+  s.af_user = str("af_user"); s.af_recipient = str("af_recipient");
+  s.af_kind = str("af_kind"); s.af_kinds = str("af_kinds");
+  s.th_recipient = str("th_recipient");
+  const st = str("th_status"); if (st === "all" || st === "sent" || st === "failed") s.th_status = st;
+  s.th_year = num("th_year"); s.th_month = num("th_month"); s.th_page = num("th_page");
+  return s;
+}
+
 export const Route = createFileRoute("/_authenticated/admin/fiscal")({
   head: () => ({
     meta: [
@@ -32,6 +56,7 @@ export const Route = createFileRoute("/_authenticated/admin/fiscal")({
       { name: "robots", content: "noindex,nofollow" },
     ],
   }),
+  validateSearch: (raw: Record<string, unknown>) => parseFiscalSearch(raw),
   component: AdminFiscalPage,
 });
 
