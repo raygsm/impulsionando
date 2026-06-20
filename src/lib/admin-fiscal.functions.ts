@@ -899,6 +899,7 @@ export const resendMonthlyFiscalEmail = createServerFn({ method: "POST" })
       year: data.year, month: data.month, recipient,
       triggeredBy: "retry", userId,
       expirySeconds: data.expiry_hours ? data.expiry_hours * 3600 : undefined,
+      reason: data.reason || null,
     });
   });
 
