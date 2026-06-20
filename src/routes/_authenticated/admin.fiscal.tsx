@@ -1292,7 +1292,10 @@ function AdminFiscalPage() {
                       onClick={() => {
                         const runs = sorted
                           .filter((f: any) => selectedRunIds.has(f.id))
-                          .map((f: any) => ({ id: f.id, year: f.year, month: f.month }));
+                          .map((f: any) => ({
+                            id: f.id, year: f.year, month: f.month,
+                            error: f.error_message ?? undefined,
+                          }));
                         if (runs.length === 0) return;
                         if (runs.length > BULK_RESEND_MAX) {
                           setFeedback(
@@ -1307,16 +1310,105 @@ function AdminFiscalPage() {
                       title={
                         selectedRunIds.size > BULK_RESEND_MAX
                           ? `Selecione no máximo ${BULK_RESEND_MAX} por ação para evitar timeouts.`
-                          : "Abre uma confirmação com a lista de períodos e o motivo, registrado em cada auditoria."
+                          : "Abre uma confirmação com a lista de períodos, mensagens de erro e o motivo, registrado em cada auditoria."
                       }
                       className="rounded bg-red-600 px-2 py-1 text-[11px] font-bold text-white disabled:opacity-40">
                       {bulkResendMut.isPending
                         ? `Reenviando… (${bulkResendMut.variables?.runs.length ?? 0})`
                         : `Reenviar selecionados (${selectedRunIds.size})`}
                     </button>
+                    {(lastBulkSelection || search.br_ids) && (
+                      <button
+                        type="button"
+                        onClick={repeatLastBulk}
+                        disabled={bulkResendMut.isPending}
+                        title="Reabre a confirmação com a mesma seleção e motivo do último reenvio em lote."
+                        className="rounded border border-red-500/40 bg-red-500/10 px-2 py-1 text-[11px] font-medium text-red-700 disabled:opacity-40">
+                        Repetir último lote
+                        {(() => {
+                          const n = lastBulkSelection?.runs.length
+                            ?? (search.br_ids ? search.br_ids.split(",").filter(Boolean).length : 0);
+                          return n ? ` (${n})` : "";
+                        })()}
+                      </button>
+                    )}
                   </div>
                 );
               })()}
+
+              {/* Barra de progresso durante o reenvio em lote */}
+              {bulkProgress && (
+                <div className="mb-2 rounded border border-red-500/30 bg-background/80 px-2 py-1.5 text-[11px]">
+                  <div className="flex items-center justify-between gap-2">
+                    <span>
+                      Reenviando em lote: <strong>{bulkProgress.done}/{bulkProgress.total}</strong>
+                      {bulkProgress.current && bulkProgress.done < bulkProgress.total && (
+                        <span className="ml-1 text-muted-foreground">(processando {bulkProgress.current}…)</span>
+                      )}
+                      {bulkProgress.done >= bulkProgress.total && (
+                        <span className="ml-1 text-emerald-700">concluído</span>
+                      )}
+                    </span>
+                    <span className="font-mono text-muted-foreground">
+                      {Math.round((bulkProgress.done / Math.max(1, bulkProgress.total)) * 100)}%
+                    </span>
+                  </div>
+                  <div className="mt-1 h-1.5 w-full overflow-hidden rounded bg-muted">
+                    <div
+                      className="h-full bg-red-600 transition-all"
+                      style={{ width: `${(bulkProgress.done / Math.max(1, bulkProgress.total)) * 100}%` }}
+                      role="progressbar"
+                      aria-valuemin={0}
+                      aria-valuemax={bulkProgress.total}
+                      aria-valuenow={bulkProgress.done}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Resumo final do último reenvio em lote */}
+              {bulkSummary && (
+                <div className="mb-2 rounded border border-border bg-background/80 px-2 py-1.5 text-[11px]">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span>
+                      Último reenvio em lote:{" "}
+                      <strong className="text-emerald-700">{bulkSummary.ok} ok</strong>
+                      {" · "}
+                      <strong className={bulkSummary.fail > 0 ? "text-red-700" : "text-muted-foreground"}>
+                        {bulkSummary.fail} falha(s)
+                      </strong>
+                      <span className="ml-2 text-muted-foreground">de {bulkSummary.results.length} execução(ões)</span>
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={repeatLastBulk}
+                        disabled={bulkResendMut.isPending}
+                        className="rounded bg-red-600 px-2 py-0.5 text-[10px] font-bold text-white disabled:opacity-40">
+                        Repetir mesma seleção e motivo
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setBulkSummary(null)}
+                        className="rounded border border-border bg-background px-2 py-0.5 text-[10px] text-muted-foreground">
+                        Fechar
+                      </button>
+                    </div>
+                  </div>
+                  <details className="mt-1">
+                    <summary className="cursor-pointer text-muted-foreground">Detalhes por execução</summary>
+                    <ul className="mt-1 space-y-0.5 font-mono">
+                      {bulkSummary.results.map((r) => (
+                        <li key={r.id} className={r.ok ? "text-emerald-700" : "text-red-700"}>
+                          • {String(r.month).padStart(2, "0")}/{r.year}{" "}
+                          — {r.ok ? "ok" : `falhou: ${r.error ?? "erro desconhecido"}`}
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                </div>
+              )}
+
 
 
               <div className="overflow-x-auto">
