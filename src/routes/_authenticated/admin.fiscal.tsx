@@ -1245,6 +1245,41 @@ function AdminFiscalPage() {
                 </select>
               </label>
             </div>
+
+            {/* Atalhos rápidos por tipo de evento (multi) */}
+            <div className="mb-2 flex flex-wrap items-center gap-1 text-[11px]">
+              <span className="text-muted-foreground">Atalhos:</span>
+              {([
+                { kinds: ["fiscal.preview.csv"], label: "CSV do preview" },
+                { kinds: ["fiscal.email.test", "fiscal.email.test.failed", "fiscal.email.test.pdf"], label: "E-mail de teste" },
+                { kinds: ["fiscal.email.retry"], label: "Reenvios" },
+                { kinds: ["fiscal.preview.csv", "fiscal.email.test", "fiscal.email.test.failed", "fiscal.email.test.pdf", "fiscal.email.retry"], label: "Todos os 3" },
+              ] as const).map((q) => {
+                const active = JSON.stringify(auditFilters.kinds ?? []) === JSON.stringify(q.kinds);
+                return (
+                  <button key={q.label}
+                    onClick={() => setAuditFilters({
+                      ...auditFilters,
+                      kinds: active ? undefined : [...q.kinds],
+                      kind: undefined,
+                    })}
+                    className={`rounded-full border px-2 py-0.5 ${
+                      active
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-background text-muted-foreground hover:bg-muted"
+                    }`}>
+                    {q.label}
+                  </button>
+                );
+              })}
+              {auditFilters.kinds && (
+                <button onClick={() => setAuditFilters({ ...auditFilters, kinds: undefined })}
+                  className="rounded-full border border-border bg-background px-2 py-0.5 text-muted-foreground">
+                  Limpar atalho
+                </button>
+              )}
+            </div>
+
             <div className="mb-2 flex items-center gap-2">
               <button onClick={() => setAuditFilters({})}
                 className="rounded border border-border bg-background px-2 py-1 text-xs">
@@ -1254,6 +1289,7 @@ function AdminFiscalPage() {
                 {auditRows.length} registro(s)
               </span>
             </div>
+
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
