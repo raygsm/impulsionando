@@ -808,8 +808,9 @@ function AdminFiscalPage() {
                   </thead>
 
                   <tbody>
-                    {failedRuns.map((f: any) => (
+                    {sorted.map((f: any, idx: number) => (
                       <tr key={f.id} className="border-t border-border/60 align-top">
+                        <td className="py-1 pr-3 font-mono text-muted-foreground">{idx + 1}</td>
                         <td className="py-1 pr-3 font-medium">
                           {String(f.month).padStart(2, "0")}/{f.year}
                         </td>
@@ -861,10 +862,13 @@ function AdminFiscalPage() {
                 </table>
               </div>
               <p className="mt-2 text-[10px] text-muted-foreground">
-                O cron respeita backoff e máx. tentativas. Use "Forçar novo envio" no período selecionado para ignorar a política.
+                Ordenado por prioridade: prontos primeiro, depois por menor tempo restante; limite atingido vai pro fim. O cron respeita backoff e máx. tentativas — use "Forçar novo envio" no período selecionado para ignorar a política.
               </p>
             </section>
-          )}
+            );
+          })()}
+
+
 
 
 
