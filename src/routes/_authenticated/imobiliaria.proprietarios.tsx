@@ -234,6 +234,9 @@ function Page() {
                     </Badge>
                   </td>
                   <td className="px-4 py-2 text-right">
+                    <Button size="sm" variant="ghost" title="Copiar link do Portal do Proprietário" onClick={() => copyPortalLink(o.portal_token)}>
+                      <Link2 className="h-3.5 w-3.5" />
+                    </Button>
                     <Button size="sm" variant="ghost" onClick={() => openEdit(o)}>
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>
