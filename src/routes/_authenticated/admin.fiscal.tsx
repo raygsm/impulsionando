@@ -385,47 +385,69 @@ function AdminFiscalPage() {
             <Stat label="Receita líquida" value={brl(r.totals.net)} />
           </section>
 
-          {/* Agenda + modo */}
+          {/* Agenda + modo + retry */}
           <section className="no-print mb-6 rounded-lg border border-border bg-card p-4">
             <h2 className="mb-2 text-sm font-semibold text-foreground">Agenda do envio mensal</h2>
             <p className="mb-3 text-xs text-muted-foreground">
               O cron roda de hora em hora; o e-mail só é disparado no dia/hora abaixo, no fuso
-              escolhido, e apenas uma vez por mês (idempotente).
+              escolhido, e apenas uma vez por mês (idempotente). Falhas respeitam o limite de tentativas e backoff abaixo.
             </p>
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-              <label className="text-xs">Dia do mês
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              <Field label="Dia do mês" error={schedErrors.day}>
                 <input type="number" min={1} max={28} value={schedDraft.day}
                   onChange={(e) => setSchedDraft({ ...schedDraft, day: Number(e.target.value) })}
-                  className="mt-1 w-full rounded border border-border bg-background px-2 py-1 text-sm" />
-              </label>
-              <label className="text-xs">Hora (0-23)
+                  className={inputCls(schedErrors.day)} />
+              </Field>
+              <Field label="Hora (0-23)" error={schedErrors.hour}>
                 <input type="number" min={0} max={23} value={schedDraft.hour}
                   onChange={(e) => setSchedDraft({ ...schedDraft, hour: Number(e.target.value) })}
-                  className="mt-1 w-full rounded border border-border bg-background px-2 py-1 text-sm" />
-              </label>
-              <label className="text-xs">Minuto
+                  className={inputCls(schedErrors.hour)} />
+              </Field>
+              <Field label="Minuto" error={schedErrors.minute}>
                 <input type="number" min={0} max={59} value={schedDraft.minute}
                   onChange={(e) => setSchedDraft({ ...schedDraft, minute: Number(e.target.value) })}
-                  className="mt-1 w-full rounded border border-border bg-background px-2 py-1 text-sm" />
-              </label>
-              <label className="text-xs">Fuso horário
-                <select value={schedDraft.tz}
+                  className={inputCls(schedErrors.minute)} />
+              </Field>
+              <Field label="Fuso horário (IANA)" error={schedErrors.tz}>
+                <input list="tz-list" value={schedDraft.tz}
                   onChange={(e) => setSchedDraft({ ...schedDraft, tz: e.target.value })}
-                  className="mt-1 w-full rounded border border-border bg-background px-2 py-1 text-sm">
-                  {TIMEZONES.map((t) => <option key={t} value={t}>{t}</option>)}
-                </select>
-              </label>
-              <label className="text-xs">Modo do e-mail
+                  className={inputCls(schedErrors.tz)} />
+                <datalist id="tz-list">
+                  {TIMEZONES.map((t) => <option key={t} value={t} />)}
+                </datalist>
+              </Field>
+              <Field label="Modo do e-mail">
                 <select value={schedDraft.email_mode}
                   onChange={(e) => setSchedDraft({ ...schedDraft, email_mode: e.target.value as any })}
-                  className="mt-1 w-full rounded border border-border bg-background px-2 py-1 text-sm">
+                  className={inputCls()}>
                   <option value="link">Apenas link assinado (CSV)</option>
                   <option value="inline">Resumo inline + link assinado</option>
                 </select>
-              </label>
+              </Field>
+              <Field label="Máx. tentativas" error={schedErrors.max_attempts}>
+                <input type="number" min={1} max={10} value={schedDraft.max_attempts}
+                  onChange={(e) => setSchedDraft({ ...schedDraft, max_attempts: Number(e.target.value) })}
+                  className={inputCls(schedErrors.max_attempts)} />
+              </Field>
+              <Field label="Backoff (min)" error={schedErrors.backoff_minutes}>
+                <input type="number" min={5} max={1440} value={schedDraft.backoff_minutes}
+                  onChange={(e) => setSchedDraft({ ...schedDraft, backoff_minutes: Number(e.target.value) })}
+                  className={inputCls(schedErrors.backoff_minutes)} />
+              </Field>
+              <Field label="Expiração padrão do link (h)" error={schedErrors.link_expiry_hours}>
+                <input type="number" min={1} max={720} value={schedDraft.link_expiry_hours}
+                  onChange={(e) => setSchedDraft({ ...schedDraft, link_expiry_hours: Number(e.target.value) })}
+                  className={inputCls(schedErrors.link_expiry_hours)} />
+              </Field>
             </div>
+            {schedHasErrors && (
+              <p className="mt-2 rounded bg-red-500/10 px-3 py-2 text-xs text-red-700">
+                Corrija os campos destacados antes de salvar.
+              </p>
+            )}
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <button onClick={() => schedMut.mutate()} disabled={schedMut.isPending}
+              <button onClick={() => schedMut.mutate()}
+                disabled={schedMut.isPending || schedHasErrors}
                 className="rounded bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground disabled:opacity-50">
                 {schedMut.isPending ? "Salvando…" : "Salvar agenda"}
               </button>
@@ -433,13 +455,12 @@ function AdminFiscalPage() {
                 <span className="text-xs text-muted-foreground">{schedFeedback}</span>
               )}
               <span className="ml-auto text-[11px] text-muted-foreground">
-                Anexar PDF via e-mail não é suportado pelo provedor; o modo "Resumo inline" embute a tabela no corpo
-                do e-mail (pronta para "Imprimir → Salvar como PDF") junto com o link assinado para o CSV.
+                Após {schedDraft.max_attempts} falhas consecutivas o cron para de tentar; use "Forçar novo envio" para retomar.
               </span>
             </div>
           </section>
 
-          {/* Envio + status do período */}
+          {/* Envio + status do período + expiração + preview */}
           <section className="no-print mb-6 rounded-lg border border-border bg-card p-4">
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-sm font-semibold text-foreground">
@@ -449,7 +470,7 @@ function AdminFiscalPage() {
                 Status: {statusBadge(latest?.status)}
                 {latest && (
                   <span className="text-[11px] text-muted-foreground">
-                    tent. #{latest.attempt} · {new Date(latest.created_at).toLocaleString("pt-BR")}
+                    tent. #{latest.attempt}/{schedDraft.max_attempts} · {new Date(latest.created_at).toLocaleString("pt-BR")}
                   </span>
                 )}
               </div>
@@ -466,34 +487,66 @@ function AdminFiscalPage() {
                   placeholder="contador@escritorio.com.br"
                   className="ml-2 w-72 rounded border border-border bg-background px-2 py-1 text-sm" />
               </label>
+              <label className="text-sm">Link expira em (h)
+                <input type="number" min={1} max={720} value={expiryHours}
+                  onChange={(e) => setExpiryHours(Number(e.target.value))}
+                  className={`ml-2 w-24 rounded border bg-background px-2 py-1 text-sm ${expiryError ? "border-red-500" : "border-border"}`} />
+              </label>
               <button onClick={() => saveMut.mutate(recipientDraft)}
                 disabled={saveMut.isPending || !recipientDraft}
                 className="rounded border border-border bg-background px-3 py-1.5 text-sm disabled:opacity-50">
                 {saveMut.isPending ? "Salvando…" : "Salvar padrão"}
               </button>
+              <button onClick={() => previewMut.mutate()} disabled={previewMut.isPending}
+                className="rounded border border-border bg-background px-3 py-1.5 text-sm disabled:opacity-50">
+                {previewMut.isPending ? "Gerando…" : "Pré-visualizar e-mail"}
+              </button>
               <button onClick={() => sendMut.mutate()}
-                disabled={sendMut.isPending || !recipientDraft}
+                disabled={sendMut.isPending || !recipientDraft || !!expiryError}
                 className="rounded bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground disabled:opacity-50">
                 {sendMut.isPending ? "Enviando…" : `Enviar agora`}
               </button>
               <button onClick={() => resendMut.mutate(false)}
-                disabled={resendMut.isPending || latest?.status !== "failed"}
+                disabled={resendMut.isPending || latest?.status !== "failed" || !!expiryError}
                 title={latest?.status === "failed"
-                  ? "Reenvia automaticamente o último período com falha"
+                  ? "Respeita máx. tentativas e janela de backoff configurados"
                   : "Disponível apenas quando o último envio falhou"}
                 className="rounded border border-red-500/40 bg-red-500/10 px-3 py-1.5 text-sm font-medium text-red-700 disabled:opacity-40">
                 {resendMut.isPending ? "Reenviando…" : "Reenviar (último falhou)"}
               </button>
               <button onClick={() => resendMut.mutate(true)}
-                disabled={resendMut.isPending}
+                disabled={resendMut.isPending || !!expiryError}
+                title="Ignora máx. tentativas e backoff"
                 className="rounded border border-border bg-background px-3 py-1.5 text-xs text-muted-foreground disabled:opacity-50">
                 Forçar novo envio
               </button>
+              {expiryError && (
+                <span className="text-xs text-red-700">{expiryError}</span>
+              )}
               {feedback && (
                 <span className="text-xs text-muted-foreground">{feedback}</span>
               )}
             </div>
+
+            {previewHtml && (
+              <div className="mt-4 rounded border border-border bg-background">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-3 py-2 text-xs">
+                  <div>
+                    <strong>Assunto:</strong> {previewMeta?.subject ?? "—"}
+                    {" · "}<strong>Modo:</strong> {previewMeta?.email_mode ?? "—"}
+                    {" · "}Link expiraria em {previewMeta?.expires_at ?? "—"}
+                  </div>
+                  <button onClick={() => { setPreviewHtml(null); setPreviewMeta(null); }}
+                    className="rounded border border-border bg-background px-2 py-0.5 text-[11px]">
+                    Fechar
+                  </button>
+                </div>
+                <iframe title="Pré-visualização do e-mail" srcDoc={previewHtml}
+                  className="h-[520px] w-full rounded-b bg-white" sandbox="" />
+              </div>
+            )}
           </section>
+
 
           {/* Tabela de faturas */}
           <section className="rounded-lg border border-border bg-card p-4 print:border-0 print:p-0">
