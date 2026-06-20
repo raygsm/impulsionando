@@ -5,15 +5,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { getPublicVitrine } from "@/lib/consumer.functions";
-import { MapPin, Sparkles, Crown, ArrowRight, Building2 } from "lucide-react";
+import { MapPin, Sparkles, Crown, ArrowRight, Building2, Star } from "lucide-react";
 
 const SEGMENTS = [
   { value: "", label: "Todos" },
