@@ -470,9 +470,10 @@ function AdminFiscalPage() {
 
   // Reabre a confirmação com a última seleção (estado em memória ou reconstruída via URL)
   const repeatLastBulk = () => {
-    const sourceRuns = lastBulkSelection?.runs
+    const sourceRuns: Array<{ id: string; year: number; month: number }> =
+      lastBulkSelection?.runs
       ?? (search.br_ids
-        ? search.br_ids.split(",").filter(Boolean).map((id) => ({ id, year: 0, month: 0 }))
+        ? search.br_ids.split(",").filter(Boolean).map((id: string) => ({ id, year: 0, month: 0 }))
         : []);
     const reason = lastBulkSelection?.reason ?? search.br_reason ?? lastBulkReason ?? "";
     if (sourceRuns.length === 0) {
@@ -480,10 +481,10 @@ function AdminFiscalPage() {
       return;
     }
     // Enriquece com year/month/error a partir da fila atual
-    const queue: any[] = failedQ.data?.failed ?? [];
-    const queueById = new Map(queue.map((f: any) => [f.id as string, f]));
+    const queue: any[] = failedQ.data?.runs ?? [];
+    const queueById = new Map<string, any>(queue.map((f: any) => [f.id as string, f]));
     const runs = sourceRuns
-      .map((r) => {
+      .map((r: { id: string; year: number; month: number }) => {
         const f = queueById.get(r.id);
         if (f) return { id: f.id, year: f.year, month: f.month, error: f.error_message ?? undefined };
         // Se já saiu da fila (foi reenviado com sucesso), preserva os metadados que tivermos
