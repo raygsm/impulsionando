@@ -1399,9 +1399,25 @@ function AdminFiscalPage() {
                         <span className="ml-1 text-emerald-700">concluído</span>
                       )}
                     </span>
-                    <span className="font-mono text-muted-foreground">
-                      {Math.round((bulkProgress.done / Math.max(1, bulkProgress.total)) * 100)}%
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-muted-foreground">
+                        {Math.round((bulkProgress.done / Math.max(1, bulkProgress.total)) * 100)}%
+                      </span>
+                      {bulkResendMut.isPending && !cancelBulkRef.current && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            cancelBulkRef.current = true;
+                            setFeedback("Cancelando reenvio em lote… aguardando a execução atual terminar.");
+                          }}
+                          className="rounded border border-red-500/40 bg-background px-2 py-0.5 text-[10px] font-bold text-red-700 hover:bg-red-50">
+                          Cancelar
+                        </button>
+                      )}
+                      {cancelBulkRef.current && bulkResendMut.isPending && (
+                        <span className="text-[10px] italic text-muted-foreground">cancelando…</span>
+                      )}
+                    </div>
                   </div>
                   <div className="mt-1 h-1.5 w-full overflow-hidden rounded bg-muted">
                     <div
