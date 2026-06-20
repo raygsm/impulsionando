@@ -202,7 +202,7 @@ function ContratarPage() {
           <div className="text-xl font-bold mt-2">{plano.preco}</div>
           {plano.precoNota && <div className="text-xs text-muted-foreground">{plano.precoNota}</div>}
           <ul className="mt-5 space-y-1.5 text-sm">
-            {plano.inclui.slice(0, 6).map((i) => (
+            {plano.inclui.slice(0, 6).map((i: string) => (
               <li key={i} className="flex gap-2"><Check className="h-4 w-4 mt-0.5 text-emerald-600 shrink-0" /> {i}</li>
             ))}
           </ul>

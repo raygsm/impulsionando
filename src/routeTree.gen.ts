@@ -105,6 +105,9 @@ import { Route as PacienteIdRouteImport } from './routes/paciente.$id'
 import { Route as NichosSlugRouteImport } from './routes/nichos.$slug'
 import { Route as ModulosSlugRouteImport } from './routes/modulos.$slug'
 import { Route as MesaTokenRouteImport } from './routes/mesa.$token'
+import { Route as MarocasPlanosRouteImport } from './routes/marocas.planos'
+import { Route as MarocasLoginRouteImport } from './routes/marocas.login'
+import { Route as MarocasAssistenteRouteImport } from './routes/marocas.assistente'
 import { Route as ImoveisSlugRouteImport } from './routes/imoveis.$slug'
 import { Route as EmpresaLoginRouteImport } from './routes/empresa.login'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
@@ -184,6 +187,7 @@ import { Route as AuthenticatedBiIndexRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenticated/agenda.index'
 import { Route as AuthenticatedAffiliatesIndexRouteImport } from './routes/_authenticated/affiliates.index'
 import { Route as PortalContabilidadeTokenRouteImport } from './routes/portal.contabilidade.$token'
+import { Route as MarocasContratarPlanoRouteImport } from './routes/marocas.contratar.$plano'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ImoveisSlugPropertyIdRouteImport } from './routes/imoveis.$slug.$propertyId'
 import { Route as DemoNichoSlugRouteImport } from './routes/demo.nicho.$slug'
@@ -907,6 +911,21 @@ const MesaTokenRoute = MesaTokenRouteImport.update({
   path: '/mesa/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarocasPlanosRoute = MarocasPlanosRouteImport.update({
+  id: '/planos',
+  path: '/planos',
+  getParentRoute: () => MarocasRoute,
+} as any)
+const MarocasLoginRoute = MarocasLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => MarocasRoute,
+} as any)
+const MarocasAssistenteRoute = MarocasAssistenteRouteImport.update({
+  id: '/assistente',
+  path: '/assistente',
+  getParentRoute: () => MarocasRoute,
+} as any)
 const ImoveisSlugRoute = ImoveisSlugRouteImport.update({
   id: '/imoveis/$slug',
   path: '/imoveis/$slug',
@@ -1317,6 +1336,11 @@ const PortalContabilidadeTokenRoute =
     path: '/portal/contabilidade/$token',
     getParentRoute: () => rootRouteImport,
   } as any)
+const MarocasContratarPlanoRoute = MarocasContratarPlanoRouteImport.update({
+  id: '/contratar/$plano',
+  path: '/contratar/$plano',
+  getParentRoute: () => MarocasRoute,
+} as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
@@ -2728,7 +2752,7 @@ export interface FileRoutesByFullPath {
   '/healthz': typeof HealthzRoute
   '/manutencao': typeof ManutencaoRoute
   '/marketing': typeof MarketingRoute
-  '/marocas': typeof MarocasRoute
+  '/marocas': typeof MarocasRouteWithChildren
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
   '/paciente': typeof PacienteRouteWithChildren
@@ -2808,6 +2832,9 @@ export interface FileRoutesByFullPath {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/empresa/login': typeof EmpresaLoginRoute
   '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
+  '/marocas/assistente': typeof MarocasAssistenteRoute
+  '/marocas/login': typeof MarocasLoginRoute
+  '/marocas/planos': typeof MarocasPlanosRoute
   '/mesa/$token': typeof MesaTokenRoute
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
@@ -3049,6 +3076,7 @@ export interface FileRoutesByFullPath {
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/marocas/contratar/$plano': typeof MarocasContratarPlanoRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda/': typeof AuthenticatedAgendaIndexRoute
@@ -3141,7 +3169,7 @@ export interface FileRoutesByTo {
   '/healthz': typeof HealthzRoute
   '/manutencao': typeof ManutencaoRoute
   '/marketing': typeof MarketingRoute
-  '/marocas': typeof MarocasRoute
+  '/marocas': typeof MarocasRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
   '/pesquisa': typeof PesquisaRoute
   '/planos': typeof PlanosRouteWithChildren
@@ -3210,6 +3238,9 @@ export interface FileRoutesByTo {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/empresa/login': typeof EmpresaLoginRoute
   '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
+  '/marocas/assistente': typeof MarocasAssistenteRoute
+  '/marocas/login': typeof MarocasLoginRoute
+  '/marocas/planos': typeof MarocasPlanosRoute
   '/mesa/$token': typeof MesaTokenRoute
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
@@ -3451,6 +3482,7 @@ export interface FileRoutesByTo {
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/marocas/contratar/$plano': typeof MarocasContratarPlanoRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/affiliates': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda': typeof AuthenticatedAgendaIndexRoute
@@ -3545,7 +3577,7 @@ export interface FileRoutesById {
   '/healthz': typeof HealthzRoute
   '/manutencao': typeof ManutencaoRoute
   '/marketing': typeof MarketingRoute
-  '/marocas': typeof MarocasRoute
+  '/marocas': typeof MarocasRouteWithChildren
   '/modulos': typeof ModulosRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
   '/paciente': typeof PacienteRouteWithChildren
@@ -3626,6 +3658,9 @@ export interface FileRoutesById {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/empresa/login': typeof EmpresaLoginRoute
   '/imoveis/$slug': typeof ImoveisSlugRouteWithChildren
+  '/marocas/assistente': typeof MarocasAssistenteRoute
+  '/marocas/login': typeof MarocasLoginRoute
+  '/marocas/planos': typeof MarocasPlanosRoute
   '/mesa/$token': typeof MesaTokenRoute
   '/modulos/$slug': typeof ModulosSlugRoute
   '/nichos/$slug': typeof NichosSlugRoute
@@ -3867,6 +3902,7 @@ export interface FileRoutesById {
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/marocas/contratar/$plano': typeof MarocasContratarPlanoRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/_authenticated/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/_authenticated/agenda/': typeof AuthenticatedAgendaIndexRoute
@@ -4041,6 +4077,9 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/empresa/login'
     | '/imoveis/$slug'
+    | '/marocas/assistente'
+    | '/marocas/login'
+    | '/marocas/planos'
     | '/mesa/$token'
     | '/modulos/$slug'
     | '/nichos/$slug'
@@ -4282,6 +4321,7 @@ export interface FileRouteTypes {
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
+    | '/marocas/contratar/$plano'
     | '/portal/contabilidade/$token'
     | '/affiliates/'
     | '/agenda/'
@@ -4443,6 +4483,9 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/empresa/login'
     | '/imoveis/$slug'
+    | '/marocas/assistente'
+    | '/marocas/login'
+    | '/marocas/planos'
     | '/mesa/$token'
     | '/modulos/$slug'
     | '/nichos/$slug'
@@ -4684,6 +4727,7 @@ export interface FileRouteTypes {
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
+    | '/marocas/contratar/$plano'
     | '/portal/contabilidade/$token'
     | '/affiliates'
     | '/agenda'
@@ -4858,6 +4902,9 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/empresa/login'
     | '/imoveis/$slug'
+    | '/marocas/assistente'
+    | '/marocas/login'
+    | '/marocas/planos'
     | '/mesa/$token'
     | '/modulos/$slug'
     | '/nichos/$slug'
@@ -5099,6 +5146,7 @@ export interface FileRouteTypes {
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
+    | '/marocas/contratar/$plano'
     | '/portal/contabilidade/$token'
     | '/_authenticated/affiliates/'
     | '/_authenticated/agenda/'
@@ -5193,7 +5241,7 @@ export interface RootRouteChildren {
   HealthzRoute: typeof HealthzRoute
   ManutencaoRoute: typeof ManutencaoRoute
   MarketingRoute: typeof MarketingRoute
-  MarocasRoute: typeof MarocasRoute
+  MarocasRoute: typeof MarocasRouteWithChildren
   ModulosRoute: typeof ModulosRouteWithChildren
   OrcamentoRoute: typeof OrcamentoRoute
   PacienteRoute: typeof PacienteRouteWithChildren
@@ -6000,6 +6048,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MesaTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/marocas/planos': {
+      id: '/marocas/planos'
+      path: '/planos'
+      fullPath: '/marocas/planos'
+      preLoaderRoute: typeof MarocasPlanosRouteImport
+      parentRoute: typeof MarocasRoute
+    }
+    '/marocas/login': {
+      id: '/marocas/login'
+      path: '/login'
+      fullPath: '/marocas/login'
+      preLoaderRoute: typeof MarocasLoginRouteImport
+      parentRoute: typeof MarocasRoute
+    }
+    '/marocas/assistente': {
+      id: '/marocas/assistente'
+      path: '/assistente'
+      fullPath: '/marocas/assistente'
+      preLoaderRoute: typeof MarocasAssistenteRouteImport
+      parentRoute: typeof MarocasRoute
+    }
     '/imoveis/$slug': {
       id: '/imoveis/$slug'
       path: '/imoveis/$slug'
@@ -6552,6 +6621,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/portal/contabilidade/$token'
       preLoaderRoute: typeof PortalContabilidadeTokenRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/marocas/contratar/$plano': {
+      id: '/marocas/contratar/$plano'
+      path: '/contratar/$plano'
+      fullPath: '/marocas/contratar/$plano'
+      preLoaderRoute: typeof MarocasContratarPlanoRouteImport
+      parentRoute: typeof MarocasRoute
     }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
@@ -9132,6 +9208,23 @@ const ContratarRouteWithChildren = ContratarRoute._addFileChildren(
   ContratarRouteChildren,
 )
 
+interface MarocasRouteChildren {
+  MarocasAssistenteRoute: typeof MarocasAssistenteRoute
+  MarocasLoginRoute: typeof MarocasLoginRoute
+  MarocasPlanosRoute: typeof MarocasPlanosRoute
+  MarocasContratarPlanoRoute: typeof MarocasContratarPlanoRoute
+}
+
+const MarocasRouteChildren: MarocasRouteChildren = {
+  MarocasAssistenteRoute: MarocasAssistenteRoute,
+  MarocasLoginRoute: MarocasLoginRoute,
+  MarocasPlanosRoute: MarocasPlanosRoute,
+  MarocasContratarPlanoRoute: MarocasContratarPlanoRoute,
+}
+
+const MarocasRouteWithChildren =
+  MarocasRoute._addFileChildren(MarocasRouteChildren)
+
 interface ModulosRouteChildren {
   ModulosSlugRoute: typeof ModulosSlugRoute
   ModulosIndexRoute: typeof ModulosIndexRoute
@@ -9237,7 +9330,7 @@ const rootRouteChildren: RootRouteChildren = {
   HealthzRoute: HealthzRoute,
   ManutencaoRoute: ManutencaoRoute,
   MarketingRoute: MarketingRoute,
-  MarocasRoute: MarocasRoute,
+  MarocasRoute: MarocasRouteWithChildren,
   ModulosRoute: ModulosRouteWithChildren,
   OrcamentoRoute: OrcamentoRoute,
   PacienteRoute: PacienteRouteWithChildren,
