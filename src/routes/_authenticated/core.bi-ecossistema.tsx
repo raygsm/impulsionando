@@ -28,7 +28,7 @@ function Page() {
   if (error) {
     return (
       <div className="space-y-4">
-        <PageHeader title="BI Ecossistema" subtitle="Visão consolidada Impulsionando" />
+        <PageHeader title="BI Ecossistema" description="Visão consolidada Impulsionando" />
         <Card className="p-6 text-sm text-destructive">
           {(error as Error).message.includes('Forbidden')
             ? 'Acesso restrito a admins do core.'
@@ -42,8 +42,8 @@ function Page() {
     <div className="space-y-6">
       <PageHeader
         title="BI Ecossistema Impulsionando"
-        subtitle="KPIs consolidados de todos os tenants do core"
-        actions={
+        description="KPIs consolidados de todos os tenants do core"
+        action={
           <Tabs value={String(days)} onValueChange={(v) => setDays(Number(v))}>
             <TabsList>
               <TabsTrigger value="7">7d</TabsTrigger>
