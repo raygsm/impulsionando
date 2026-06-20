@@ -58,6 +58,7 @@ export const Route = createFileRoute('/chrismed/agendar')({
 });
 
 function ChrismedPage() {
+  const { modality } = useSearch({ from: '/chrismed/agendar' });
   const router = useRouter();
   const [offerings, setOfferings] = useState<Offering[]>([]);
   const [loading, setLoading] = useState(true);
