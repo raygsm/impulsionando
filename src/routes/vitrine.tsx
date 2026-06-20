@@ -43,13 +43,19 @@ function VitrinePage() {
   const fetchFn = useServerFn(getPublicVitrine);
   const [segment, setSegment] = useState("");
   const [city, setCity] = useState("");
+  const [sort, setSort] = useState<"rating" | "recent" | "name">("rating");
+  const [minRating, setMinRating] = useState<number>(0);
 
   const q = useQuery({
-    queryKey: ["public-vitrine", segment, city],
-    queryFn: () => fetchFn({ data: { segment: segment || undefined, city: city || undefined, limit: 80 } }),
+    queryKey: ["public-vitrine", segment, city, sort],
+    queryFn: () => fetchFn({ data: { segment: segment || undefined, city: city || undefined, sort, limit: 120 } }),
   });
 
-  const companies = q.data?.companies ?? [];
+  const companies = useMemo(() => {
+    const all = q.data?.companies ?? [];
+    if (minRating <= 0) return all;
+    return all.filter((c: { rating_avg: number | null }) => Number(c.rating_avg ?? 0) >= minRating);
+  }, [q.data, minRating]);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
