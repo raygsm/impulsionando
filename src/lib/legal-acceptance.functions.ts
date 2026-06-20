@@ -114,6 +114,6 @@ export const myLegalAcceptances = createServerFn({ method: 'POST' })
         .eq('user_id', context.userId)
         .order('accepted_at', { ascending: false }).limit(500)
       if (error) throw error
-      return data ?? []
+      return (data ?? []).map((r: any) => ({ ...r, ip_address: r.ip_address ? String(r.ip_address) : null }))
     }),
   )
