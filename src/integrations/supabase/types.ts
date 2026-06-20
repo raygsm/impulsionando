@@ -8324,6 +8324,621 @@ export type Database = {
           },
         ]
       }
+      eco_legal_acceptances: {
+        Row: {
+          accepted_at: string
+          company_id: string | null
+          context: string
+          document_hash: string
+          document_id: string
+          document_kind: string
+          document_version: string
+          id: string
+          ip_address: unknown
+          metadata: Json | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string
+          company_id?: string | null
+          context: string
+          document_hash: string
+          document_id: string
+          document_kind: string
+          document_version: string
+          id?: string
+          ip_address?: unknown
+          metadata?: Json | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string
+          company_id?: string | null
+          context?: string
+          document_hash?: string
+          document_id?: string
+          document_kind?: string
+          document_version?: string
+          id?: string
+          ip_address?: unknown
+          metadata?: Json | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "eco_legal_acceptances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eco_legal_acceptances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "eco_legal_acceptances_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "eco_legal_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      eco_legal_documents: {
+        Row: {
+          audience: string
+          body_md: string
+          created_at: string
+          effective_at: string
+          id: string
+          is_current: boolean
+          kind: string
+          niche: string | null
+          title: string
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          audience?: string
+          body_md: string
+          created_at?: string
+          effective_at?: string
+          id?: string
+          is_current?: boolean
+          kind: string
+          niche?: string | null
+          title: string
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          audience?: string
+          body_md?: string
+          created_at?: string
+          effective_at?: string
+          id?: string
+          is_current?: boolean
+          kind?: string
+          niche?: string | null
+          title?: string
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
+      eco_marketplace_engagements: {
+        Row: {
+          completed_at: string | null
+          contract_id: string | null
+          created_at: string
+          gmv_cents: number
+          id: string
+          intermediation_fee_bps: number
+          intermediation_fee_cents: number
+          nda_id: string | null
+          provider_company_id: string
+          quote_id: string
+          request_id: string
+          requester_company_id: string
+          started_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          contract_id?: string | null
+          created_at?: string
+          gmv_cents: number
+          id?: string
+          intermediation_fee_bps?: number
+          intermediation_fee_cents?: number
+          nda_id?: string | null
+          provider_company_id: string
+          quote_id: string
+          request_id: string
+          requester_company_id: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          contract_id?: string | null
+          created_at?: string
+          gmv_cents?: number
+          id?: string
+          intermediation_fee_bps?: number
+          intermediation_fee_cents?: number
+          nda_id?: string | null
+          provider_company_id?: string
+          quote_id?: string
+          request_id?: string
+          requester_company_id?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "eco_marketplace_engagements_provider_company_id_fkey"
+            columns: ["provider_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eco_marketplace_engagements_provider_company_id_fkey"
+            columns: ["provider_company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "eco_marketplace_engagements_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "eco_marketplace_quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eco_marketplace_engagements_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "eco_marketplace_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eco_marketplace_engagements_requester_company_id_fkey"
+            columns: ["requester_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eco_marketplace_engagements_requester_company_id_fkey"
+            columns: ["requester_company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      eco_marketplace_listings: {
+        Row: {
+          audience: string
+          company_id: string
+          coverage_area: string | null
+          created_at: string
+          currency: string
+          description: string
+          id: string
+          max_price_cents: number | null
+          min_price_cents: number | null
+          niche: string
+          pricing_model: string
+          search_vector: unknown
+          status: string
+          subniche: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          visibility: string
+        }
+        Insert: {
+          audience?: string
+          company_id: string
+          coverage_area?: string | null
+          created_at?: string
+          currency?: string
+          description: string
+          id?: string
+          max_price_cents?: number | null
+          min_price_cents?: number | null
+          niche: string
+          pricing_model?: string
+          search_vector?: unknown
+          status?: string
+          subniche?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          visibility?: string
+        }
+        Update: {
+          audience?: string
+          company_id?: string
+          coverage_area?: string | null
+          created_at?: string
+          currency?: string
+          description?: string
+          id?: string
+          max_price_cents?: number | null
+          min_price_cents?: number | null
+          niche?: string
+          pricing_model?: string
+          search_vector?: unknown
+          status?: string
+          subniche?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "eco_marketplace_listings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eco_marketplace_listings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      eco_marketplace_quotes: {
+        Row: {
+          amount_cents: number
+          attachments: Json | null
+          created_at: string
+          currency: string
+          delivery_days: number | null
+          expires_at: string | null
+          id: string
+          message: string | null
+          provider_company_id: string
+          provider_user_id: string
+          request_id: string
+          scope_details: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          attachments?: Json | null
+          created_at?: string
+          currency?: string
+          delivery_days?: number | null
+          expires_at?: string | null
+          id?: string
+          message?: string | null
+          provider_company_id: string
+          provider_user_id: string
+          request_id: string
+          scope_details: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          attachments?: Json | null
+          created_at?: string
+          currency?: string
+          delivery_days?: number | null
+          expires_at?: string | null
+          id?: string
+          message?: string | null
+          provider_company_id?: string
+          provider_user_id?: string
+          request_id?: string
+          scope_details?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "eco_marketplace_quotes_provider_company_id_fkey"
+            columns: ["provider_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eco_marketplace_quotes_provider_company_id_fkey"
+            columns: ["provider_company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "eco_marketplace_quotes_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "eco_marketplace_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      eco_marketplace_referrals: {
+        Row: {
+          context_note: string | null
+          converted_engagement_id: string | null
+          created_at: string
+          id: string
+          referred_company_id: string
+          referrer_company_id: string
+          referrer_user_id: string
+          reward_cents: number | null
+          status: string
+          target_company_id: string | null
+          target_email: string | null
+          updated_at: string
+        }
+        Insert: {
+          context_note?: string | null
+          converted_engagement_id?: string | null
+          created_at?: string
+          id?: string
+          referred_company_id: string
+          referrer_company_id: string
+          referrer_user_id: string
+          reward_cents?: number | null
+          status?: string
+          target_company_id?: string | null
+          target_email?: string | null
+          updated_at?: string
+        }
+        Update: {
+          context_note?: string | null
+          converted_engagement_id?: string | null
+          created_at?: string
+          id?: string
+          referred_company_id?: string
+          referrer_company_id?: string
+          referrer_user_id?: string
+          reward_cents?: number | null
+          status?: string
+          target_company_id?: string | null
+          target_email?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "eco_marketplace_referrals_converted_engagement_id_fkey"
+            columns: ["converted_engagement_id"]
+            isOneToOne: false
+            referencedRelation: "eco_marketplace_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eco_marketplace_referrals_referred_company_id_fkey"
+            columns: ["referred_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eco_marketplace_referrals_referred_company_id_fkey"
+            columns: ["referred_company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "eco_marketplace_referrals_referrer_company_id_fkey"
+            columns: ["referrer_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eco_marketplace_referrals_referrer_company_id_fkey"
+            columns: ["referrer_company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "eco_marketplace_referrals_target_company_id_fkey"
+            columns: ["target_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eco_marketplace_referrals_target_company_id_fkey"
+            columns: ["target_company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      eco_marketplace_requests: {
+        Row: {
+          budget_cents: number | null
+          contract_required: boolean
+          created_at: string
+          deadline: string | null
+          id: string
+          invited_providers: string[] | null
+          listing_id: string | null
+          nda_required: boolean
+          requester_company_id: string
+          requester_user_id: string
+          scope: string
+          status: string
+          target_niche: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          budget_cents?: number | null
+          contract_required?: boolean
+          created_at?: string
+          deadline?: string | null
+          id?: string
+          invited_providers?: string[] | null
+          listing_id?: string | null
+          nda_required?: boolean
+          requester_company_id: string
+          requester_user_id: string
+          scope: string
+          status?: string
+          target_niche?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          budget_cents?: number | null
+          contract_required?: boolean
+          created_at?: string
+          deadline?: string | null
+          id?: string
+          invited_providers?: string[] | null
+          listing_id?: string | null
+          nda_required?: boolean
+          requester_company_id?: string
+          requester_user_id?: string
+          scope?: string
+          status?: string
+          target_niche?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "eco_marketplace_requests_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "eco_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eco_marketplace_requests_requester_company_id_fkey"
+            columns: ["requester_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eco_marketplace_requests_requester_company_id_fkey"
+            columns: ["requester_company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      eco_marketplace_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          engagement_id: string
+          id: string
+          rating: number
+          rating_communication: number | null
+          rating_deadline: number | null
+          rating_price: number | null
+          rating_quality: number | null
+          reviewed_company_id: string
+          reviewer_company_id: string
+          reviewer_user_id: string
+          updated_at: string
+          visibility: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          engagement_id: string
+          id?: string
+          rating: number
+          rating_communication?: number | null
+          rating_deadline?: number | null
+          rating_price?: number | null
+          rating_quality?: number | null
+          reviewed_company_id: string
+          reviewer_company_id: string
+          reviewer_user_id: string
+          updated_at?: string
+          visibility?: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          engagement_id?: string
+          id?: string
+          rating?: number
+          rating_communication?: number | null
+          rating_deadline?: number | null
+          rating_price?: number | null
+          rating_quality?: number | null
+          reviewed_company_id?: string
+          reviewer_company_id?: string
+          reviewer_user_id?: string
+          updated_at?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "eco_marketplace_reviews_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "eco_marketplace_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eco_marketplace_reviews_reviewed_company_id_fkey"
+            columns: ["reviewed_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eco_marketplace_reviews_reviewed_company_id_fkey"
+            columns: ["reviewed_company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "eco_marketplace_reviews_reviewer_company_id_fkey"
+            columns: ["reviewer_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eco_marketplace_reviews_reviewer_company_id_fkey"
+            columns: ["reviewer_company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       ecosystem_reviews: {
         Row: {
           comment: string | null
@@ -17258,6 +17873,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_ecosystem_member: { Args: { _user_id: string }; Returns: boolean }
       is_impulsionando_staff: { Args: { _user: string }; Returns: boolean }
       is_marocas_authorized: { Args: { _user_id: string }; Returns: boolean }
       is_patient_of_record:

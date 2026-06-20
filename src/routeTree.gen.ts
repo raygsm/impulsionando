@@ -30,6 +30,7 @@ import { Route as ModulosRouteImport } from './routes/modulos'
 import { Route as MarocasRouteImport } from './routes/marocas'
 import { Route as MarketingRouteImport } from './routes/marketing'
 import { Route as ManutencaoRouteImport } from './routes/manutencao'
+import { Route as LegalRouteImport } from './routes/legal'
 import { Route as HealthzRouteImport } from './routes/healthz'
 import { Route as EscolherNichoRouteImport } from './routes/escolher-nicho'
 import { Route as EmpresasRouteImport } from './routes/empresas'
@@ -164,6 +165,8 @@ import { Route as AuthenticatedNichesRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedMonetizacaoRouteImport } from './routes/_authenticated/monetizacao'
 import { Route as AuthenticatedModulesRouteImport } from './routes/_authenticated/modules'
 import { Route as AuthenticatedMinhaAssinaturaRouteImport } from './routes/_authenticated/minha-assinatura'
+import { Route as AuthenticatedMarketplaceEcoRouteImport } from './routes/_authenticated/marketplace-eco'
+import { Route as AuthenticatedLegalAceitesRouteImport } from './routes/_authenticated/legal-aceites'
 import { Route as AuthenticatedInventoryRouteImport } from './routes/_authenticated/inventory'
 import { Route as AuthenticatedFinanceRouteImport } from './routes/_authenticated/finance'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -557,6 +560,11 @@ const MarketingRoute = MarketingRouteImport.update({
 const ManutencaoRoute = ManutencaoRouteImport.update({
   id: '/manutencao',
   path: '/manutencao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalRoute = LegalRouteImport.update({
+  id: '/legal',
+  path: '/legal',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HealthzRoute = HealthzRouteImport.update({
@@ -1234,6 +1242,18 @@ const AuthenticatedMinhaAssinaturaRoute =
   AuthenticatedMinhaAssinaturaRouteImport.update({
     id: '/minha-assinatura',
     path: '/minha-assinatura',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMarketplaceEcoRoute =
+  AuthenticatedMarketplaceEcoRouteImport.update({
+    id: '/marketplace-eco',
+    path: '/marketplace-eco',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedLegalAceitesRoute =
+  AuthenticatedLegalAceitesRouteImport.update({
+    id: '/legal-aceites',
+    path: '/legal-aceites',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedInventoryRoute = AuthenticatedInventoryRouteImport.update({
@@ -2928,6 +2948,7 @@ export interface FileRoutesByFullPath {
   '/empresas': typeof EmpresasRoute
   '/escolher-nicho': typeof EscolherNichoRoute
   '/healthz': typeof HealthzRoute
+  '/legal': typeof LegalRoute
   '/manutencao': typeof ManutencaoRoute
   '/marketing': typeof MarketingRoute
   '/marocas': typeof MarocasRouteWithChildren
@@ -2965,6 +2986,8 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/finance': typeof AuthenticatedFinanceRouteWithChildren
   '/inventory': typeof AuthenticatedInventoryRouteWithChildren
+  '/legal-aceites': typeof AuthenticatedLegalAceitesRoute
+  '/marketplace-eco': typeof AuthenticatedMarketplaceEcoRoute
   '/minha-assinatura': typeof AuthenticatedMinhaAssinaturaRoute
   '/modules': typeof AuthenticatedModulesRoute
   '/monetizacao': typeof AuthenticatedMonetizacaoRoute
@@ -3372,6 +3395,7 @@ export interface FileRoutesByTo {
   '/empresas': typeof EmpresasRoute
   '/escolher-nicho': typeof EscolherNichoRoute
   '/healthz': typeof HealthzRoute
+  '/legal': typeof LegalRoute
   '/manutencao': typeof ManutencaoRoute
   '/marketing': typeof MarketingRoute
   '/marocas': typeof MarocasRouteWithChildren
@@ -3400,6 +3424,8 @@ export interface FileRoutesByTo {
   '/companies': typeof AuthenticatedCompaniesRoute
   '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/legal-aceites': typeof AuthenticatedLegalAceitesRoute
+  '/marketplace-eco': typeof AuthenticatedMarketplaceEcoRoute
   '/minha-assinatura': typeof AuthenticatedMinhaAssinaturaRoute
   '/modules': typeof AuthenticatedModulesRoute
   '/monetizacao': typeof AuthenticatedMonetizacaoRoute
@@ -3807,6 +3833,7 @@ export interface FileRoutesById {
   '/empresas': typeof EmpresasRoute
   '/escolher-nicho': typeof EscolherNichoRoute
   '/healthz': typeof HealthzRoute
+  '/legal': typeof LegalRoute
   '/manutencao': typeof ManutencaoRoute
   '/marketing': typeof MarketingRoute
   '/marocas': typeof MarocasRouteWithChildren
@@ -3845,6 +3872,8 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/finance': typeof AuthenticatedFinanceRouteWithChildren
   '/_authenticated/inventory': typeof AuthenticatedInventoryRouteWithChildren
+  '/_authenticated/legal-aceites': typeof AuthenticatedLegalAceitesRoute
+  '/_authenticated/marketplace-eco': typeof AuthenticatedMarketplaceEcoRoute
   '/_authenticated/minha-assinatura': typeof AuthenticatedMinhaAssinaturaRoute
   '/_authenticated/modules': typeof AuthenticatedModulesRoute
   '/_authenticated/monetizacao': typeof AuthenticatedMonetizacaoRoute
@@ -4254,6 +4283,7 @@ export interface FileRouteTypes {
     | '/empresas'
     | '/escolher-nicho'
     | '/healthz'
+    | '/legal'
     | '/manutencao'
     | '/marketing'
     | '/marocas'
@@ -4291,6 +4321,8 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/finance'
     | '/inventory'
+    | '/legal-aceites'
+    | '/marketplace-eco'
     | '/minha-assinatura'
     | '/modules'
     | '/monetizacao'
@@ -4698,6 +4730,7 @@ export interface FileRouteTypes {
     | '/empresas'
     | '/escolher-nicho'
     | '/healthz'
+    | '/legal'
     | '/manutencao'
     | '/marketing'
     | '/marocas'
@@ -4726,6 +4759,8 @@ export interface FileRouteTypes {
     | '/companies'
     | '/customers'
     | '/dashboard'
+    | '/legal-aceites'
+    | '/marketplace-eco'
     | '/minha-assinatura'
     | '/modules'
     | '/monetizacao'
@@ -5132,6 +5167,7 @@ export interface FileRouteTypes {
     | '/empresas'
     | '/escolher-nicho'
     | '/healthz'
+    | '/legal'
     | '/manutencao'
     | '/marketing'
     | '/marocas'
@@ -5170,6 +5206,8 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/finance'
     | '/_authenticated/inventory'
+    | '/_authenticated/legal-aceites'
+    | '/_authenticated/marketplace-eco'
     | '/_authenticated/minha-assinatura'
     | '/_authenticated/modules'
     | '/_authenticated/monetizacao'
@@ -5579,6 +5617,7 @@ export interface RootRouteChildren {
   EmpresasRoute: typeof EmpresasRoute
   EscolherNichoRoute: typeof EscolherNichoRoute
   HealthzRoute: typeof HealthzRoute
+  LegalRoute: typeof LegalRoute
   ManutencaoRoute: typeof ManutencaoRoute
   MarketingRoute: typeof MarketingRoute
   MarocasRoute: typeof MarocasRouteWithChildren
@@ -5864,6 +5903,13 @@ declare module '@tanstack/react-router' {
       path: '/manutencao'
       fullPath: '/manutencao'
       preLoaderRoute: typeof ManutencaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal': {
+      id: '/legal'
+      path: '/legal'
+      fullPath: '/legal'
+      preLoaderRoute: typeof LegalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/healthz': {
@@ -6802,6 +6848,20 @@ declare module '@tanstack/react-router' {
       path: '/minha-assinatura'
       fullPath: '/minha-assinatura'
       preLoaderRoute: typeof AuthenticatedMinhaAssinaturaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/marketplace-eco': {
+      id: '/_authenticated/marketplace-eco'
+      path: '/marketplace-eco'
+      fullPath: '/marketplace-eco'
+      preLoaderRoute: typeof AuthenticatedMarketplaceEcoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/legal-aceites': {
+      id: '/_authenticated/legal-aceites'
+      path: '/legal-aceites'
+      fullPath: '/legal-aceites'
+      preLoaderRoute: typeof AuthenticatedLegalAceitesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/inventory': {
@@ -9446,6 +9506,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedFinanceRoute: typeof AuthenticatedFinanceRouteWithChildren
   AuthenticatedInventoryRoute: typeof AuthenticatedInventoryRouteWithChildren
+  AuthenticatedLegalAceitesRoute: typeof AuthenticatedLegalAceitesRoute
+  AuthenticatedMarketplaceEcoRoute: typeof AuthenticatedMarketplaceEcoRoute
   AuthenticatedMinhaAssinaturaRoute: typeof AuthenticatedMinhaAssinaturaRoute
   AuthenticatedModulesRoute: typeof AuthenticatedModulesRoute
   AuthenticatedMonetizacaoRoute: typeof AuthenticatedMonetizacaoRoute
@@ -9580,6 +9642,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedFinanceRoute: AuthenticatedFinanceRouteWithChildren,
   AuthenticatedInventoryRoute: AuthenticatedInventoryRouteWithChildren,
+  AuthenticatedLegalAceitesRoute: AuthenticatedLegalAceitesRoute,
+  AuthenticatedMarketplaceEcoRoute: AuthenticatedMarketplaceEcoRoute,
   AuthenticatedMinhaAssinaturaRoute: AuthenticatedMinhaAssinaturaRoute,
   AuthenticatedModulesRoute: AuthenticatedModulesRoute,
   AuthenticatedMonetizacaoRoute: AuthenticatedMonetizacaoRoute,
@@ -9922,6 +9986,7 @@ const rootRouteChildren: RootRouteChildren = {
   EmpresasRoute: EmpresasRoute,
   EscolherNichoRoute: EscolherNichoRoute,
   HealthzRoute: HealthzRoute,
+  LegalRoute: LegalRoute,
   ManutencaoRoute: ManutencaoRoute,
   MarketingRoute: MarketingRoute,
   MarocasRoute: MarocasRouteWithChildren,
