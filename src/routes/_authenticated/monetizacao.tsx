@@ -17,6 +17,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Download } from 'lucide-react'
+import { reportError } from '@/lib/report-error'
 
 const myCompaniesQuery = (fetcher: () => Promise<any[]>) =>
   queryOptions({ queryKey: ['monetizacao', 'my-companies'], queryFn: fetcher })
@@ -35,9 +36,7 @@ export const Route = createFileRoute('/_authenticated/monetizacao')({
   component: ClientMonetizacaoPage,
   head: () => ({ meta: [{ title: 'Monetização — Impulsionando' }] }),
   errorComponent: ({ error }) => {
-    if (typeof window !== 'undefined') {
-      import('@/lib/sentry.client').then(({ Sentry }) => Sentry.captureException(error, { tags: { route: 'monetizacao' } }))
-    }
+    reportError(error, { route: 'monetizacao' })
     return (
       <div className="p-6">
         <h1 className="text-xl font-semibold">Erro</h1>
