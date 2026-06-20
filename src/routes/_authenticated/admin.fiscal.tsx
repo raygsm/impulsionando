@@ -51,8 +51,17 @@ const KIND_OPTIONS = [
   { value: "fiscal.email", label: "E-mail manual" },
   { value: "fiscal.email.retry", label: "Reenvio" },
   { value: "fiscal.email.cron", label: "E-mail automático" },
+  { value: "fiscal.email.skipped", label: "Cron pulado (retry)" },
   { value: "fiscal.schedule.update", label: "Atualização de agenda" },
+  { value: "fiscal.preview", label: "Pré-visualização" },
+  { value: "fiscal.link.regenerated", label: "Link assinado regerado" },
 ];
+
+function isValidTz(tz: string): boolean {
+  if (!tz) return false;
+  try { new Intl.DateTimeFormat("en-US", { timeZone: tz }); return true; }
+  catch { return false; }
+}
 
 function brl(n: number) {
   return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
