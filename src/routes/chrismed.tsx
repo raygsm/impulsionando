@@ -170,7 +170,7 @@ function ChrismedPage() {
 
   return (
     <ChrismedShell>
-      <main className="container py-12 max-w-5xl">
+      <div className="container py-12 max-w-5xl">
         {!pixResult && !selected && (
           <>
             <div className="mb-14">
@@ -328,7 +328,7 @@ function ChrismedPage() {
             )}
           </Card>
         )}
-      </main>
+      </div>
     </ChrismedShell>
   );
 }
