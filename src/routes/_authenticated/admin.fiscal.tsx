@@ -159,6 +159,12 @@ function AdminFiscalPage() {
     queryKey: ["admin-fiscal-status", year, month],
     queryFn: () => fetchStatus({ data: { year, month } }),
   });
+  const failedQ = useQuery({
+    queryKey: ["admin-fiscal-failed"],
+    queryFn: () => fetchFailed(),
+    refetchInterval: 60_000,
+  });
+
 
   useEffect(() => {
     if (acctQ.data?.email && !recipientDraft) setRecipientDraft(acctQ.data.email);
