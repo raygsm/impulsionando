@@ -12920,6 +12920,81 @@ export type Database = {
           },
         ]
       }
+      realestate_contracts: {
+        Row: {
+          client_document: string | null
+          client_name: string
+          company_id: string
+          contract_type: string
+          created_at: string
+          created_by: string | null
+          document_url: string | null
+          end_date: string | null
+          id: string
+          notes: string | null
+          owner_id: string | null
+          property_id: string | null
+          signed_at: string | null
+          start_date: string | null
+          status: string
+          updated_at: string
+          value: number | null
+        }
+        Insert: {
+          client_document?: string | null
+          client_name: string
+          company_id: string
+          contract_type?: string
+          created_at?: string
+          created_by?: string | null
+          document_url?: string | null
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          owner_id?: string | null
+          property_id?: string | null
+          signed_at?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+          value?: number | null
+        }
+        Update: {
+          client_document?: string | null
+          client_name?: string
+          company_id?: string
+          contract_type?: string
+          created_at?: string
+          created_by?: string | null
+          document_url?: string | null
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          owner_id?: string | null
+          property_id?: string | null
+          signed_at?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "realestate_contracts_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "realestate_owners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "realestate_contracts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "realestate_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       realestate_distribution_rules: {
         Row: {
           company_id: string
@@ -13848,6 +13923,68 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      realestate_visits: {
+        Row: {
+          broker_user_id: string | null
+          client_email: string | null
+          client_name: string
+          client_phone: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          duration_minutes: number
+          feedback: string | null
+          id: string
+          notes: string | null
+          property_id: string | null
+          scheduled_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          broker_user_id?: string | null
+          client_email?: string | null
+          client_name: string
+          client_phone?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          duration_minutes?: number
+          feedback?: string | null
+          id?: string
+          notes?: string | null
+          property_id?: string | null
+          scheduled_at: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          broker_user_id?: string | null
+          client_email?: string | null
+          client_name?: string
+          client_phone?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          duration_minutes?: number
+          feedback?: string | null
+          id?: string
+          notes?: string | null
+          property_id?: string | null
+          scheduled_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "realestate_visits_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "realestate_properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       restaurant_menu_categories: {
         Row: {

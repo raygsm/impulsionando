@@ -40,9 +40,9 @@ const GROUPS: Group[] = [
     items: [
       { label: "Leads", icon: Flame, to: "/crm/leads", status: "ok" },
       { label: "Distribuição", icon: Shuffle, to: "/imobiliaria/distribuicao", status: "ok", note: "Regras de atribuição (round-robin, equipe, bairro)" },
-      { label: "Visitas", icon: Home, to: "/agenda/appointments", status: "partial", note: "Usa agenda genérica" },
+      { label: "Visitas", icon: Home, to: "/imobiliaria/visitas", status: "ok", note: "Agenda dedicada com feedback pós-visita" },
       { label: "Propostas", icon: FileSignature, to: "/imobiliaria/aprovacoes", status: "ok" },
-      { label: "Contratos", icon: FileText, to: "/imobiliaria/aprovacoes/imprimir-fila", status: "partial", note: "Fila de impressão; falta gestão de contrato" },
+      { label: "Contratos", icon: FileText, to: "/imobiliaria/contratos", status: "ok", note: "Gestão de contratos de venda/locação" },
       { label: "Tarefas & Follow-ups", icon: CheckSquare, to: "/crm/activities", status: "partial", note: "Atividades genéricas do CRM" },
       { label: "Agenda", icon: CalendarDays, to: "/agenda", status: "ok" },
     ],
