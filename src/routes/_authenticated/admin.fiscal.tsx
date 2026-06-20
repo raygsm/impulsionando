@@ -245,6 +245,7 @@ function AdminFiscalPage() {
   // Bulk selection for queued resends
   const BULK_RESEND_MAX = 20;
   const REASON_STORAGE_KEY = "fiscal.bulk-resend.last-reason";
+  const SUMMARY_STORAGE_KEY = "fiscal.bulk-resend.last-summary";
   const [selectedRunIds, setSelectedRunIds] = useState<Set<string>>(new Set());
   const toggleRunSelected = (id: string) => {
     setSelectedRunIds((prev) => {
