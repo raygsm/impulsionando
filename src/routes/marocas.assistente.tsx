@@ -5,7 +5,21 @@ import { Building2, MessageCircle, ChevronRight, ArrowLeft, Wrench, ShoppingBag,
 import { MarocasHelpFab } from "@/components/marocas/MarocasHelpFab";
 
 const searchSchema = z.object({
-  topico: z.enum(["suporte", "emergencia", "manutencao", "contratacao", "dicas"]).optional(),
+  topico: z
+    .enum([
+      "suporte",
+      "emergencia",
+      "manutencao",
+      "contratacao",
+      "dicas",
+      "praias",
+      "restaurantes",
+      "mercados",
+      "farmacias",
+      "transporte",
+      "passeios",
+    ])
+    .optional(),
 });
 
 export const Route = createFileRoute("/marocas/assistente")({
