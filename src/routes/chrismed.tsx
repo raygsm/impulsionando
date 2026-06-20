@@ -329,13 +329,6 @@ function ChrismedPage() {
           </Card>
         )}
       </main>
-
-      <footer className="border-t mt-16 py-8 text-center text-sm text-muted-foreground">
-        <div className="container">
-          CHRISMED · Central Médica · Atendimento ético, sigiloso e humanizado
-          <div className="mt-1">Tecnologia <span className="font-semibold text-teal-700">Impulsionando</span></div>
-        </div>
-      </footer>
-    </div>
+    </ChrismedShell>
   );
 }
