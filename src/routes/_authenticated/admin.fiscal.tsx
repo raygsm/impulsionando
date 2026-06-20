@@ -2,7 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import * as React from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import {
   getMonthlyFiscalReport,
   exportMonthlyFiscalCsv,
@@ -271,9 +272,11 @@ function AdminFiscalPage() {
     { done: number; total: number; current?: string } | null
   >(null);
   const [bulkSummary, setBulkSummary] = useState<{
-    ok: number; fail: number; reason: string;
-    results: Array<{ id: string; year: number; month: number; ok: boolean; error?: string }>;
+    ok: number; fail: number; canceled: number; reason: string;
+    results: Array<{ id: string; year: number; month: number; ok: boolean; canceled?: boolean; error?: string }>;
   } | null>(null);
+  // Cancellation flag — checked between iterations of the bulk loop
+  const cancelBulkRef = useRef(false);
   // Last bulk selection (in-memory copy of what was confirmed) — used for "repetir"
   const [lastBulkSelection, setLastBulkSelection] = useState<
     { runs: Array<{ id: string; year: number; month: number }>; reason: string } | null
@@ -418,10 +421,19 @@ function AdminFiscalPage() {
   // Bulk resend (one reason, multiple queued runs)
   const bulkResendMut = useMutation({
     mutationFn: async (input: { reason: string; runs: Array<{ id: string; year: number; month: number }> }) => {
-      const results: Array<{ id: string; year: number; month: number; ok: boolean; error?: string }> = [];
+      const results: Array<{ id: string; year: number; month: number; ok: boolean; canceled?: boolean; error?: string }> = [];
+      cancelBulkRef.current = false;
       setBulkProgress({ done: 0, total: input.runs.length });
       for (let i = 0; i < input.runs.length; i++) {
         const r = input.runs[i];
+        if (cancelBulkRef.current) {
+          // Mark remaining runs (including current) as canceled
+          for (let j = i; j < input.runs.length; j++) {
+            const rr = input.runs[j];
+            results.push({ ...rr, ok: false, canceled: true, error: "Cancelado pelo usuário" });
+          }
+          break;
+        }
         setBulkProgress({
           done: i,
           total: input.runs.length,
@@ -439,14 +451,48 @@ function AdminFiscalPage() {
           results.push({ ...r, ok: false, error: e?.message ?? String(e) });
         }
       }
-      setBulkProgress({ done: input.runs.length, total: input.runs.length });
+      const processed = results.filter((r) => !r.canceled).length;
+      setBulkProgress({ done: processed, total: input.runs.length });
       return results;
     },
     onSuccess: (results, variables) => {
       const ok = results.filter((r) => r.ok).length;
-      const fail = results.length - ok;
-      setFeedback(`Reenvio em lote: ${ok} ok, ${fail} falha(s). Cada reenvio foi gravado na auditoria.`);
-      setBulkSummary({ ok, fail, reason: variables.reason, results });
+      const canceled = results.filter((r) => r.canceled).length;
+      const fail = results.length - ok - canceled;
+      const wasCanceled = canceled > 0;
+      const summaryMsg = wasCanceled
+        ? `Reenvio em lote interrompido: ${ok} ok, ${fail} falha(s), ${canceled} cancelada(s).`
+        : `Reenvio em lote: ${ok} ok, ${fail} falha(s). Cada reenvio foi gravado na auditoria.`;
+      setFeedback(summaryMsg);
+      setBulkSummary({ ok, fail, canceled, reason: variables.reason, results });
+
+      // Toast: success / partial failure / canceled with link to summary
+      const openSummary = () => {
+        const el = document.getElementById("bulk-resend-summary");
+        if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); (el as HTMLDetailsElement).open = true; }
+      };
+      if (wasCanceled) {
+        toast.warning(`Cancelado: ${ok} ok · ${fail} falha(s) · ${canceled} não processada(s)`, {
+          description: "A fila foi interrompida. Veja o resumo para detalhes.",
+          action: { label: "Abrir resumo", onClick: openSummary },
+        });
+      } else if (fail > 0 && ok > 0) {
+        toast.warning(`Reenvio parcial: ${ok} ok · ${fail} falha(s)`, {
+          description: "Algumas execuções falharam — abra o resumo para ver os erros.",
+          action: { label: "Abrir resumo", onClick: openSummary },
+        });
+      } else if (fail > 0) {
+        toast.error(`Todas as ${fail} execuções falharam`, {
+          description: "Nenhum reenvio concluído com sucesso.",
+          action: { label: "Abrir resumo", onClick: openSummary },
+        });
+      } else {
+        toast.success(`Reenvio em lote concluído: ${ok} ok`, {
+          description: "Todos os reenvios foram registrados na auditoria.",
+          action: { label: "Abrir resumo", onClick: openSummary },
+        });
+      }
+
       setLastBulkSelection({
         runs: variables.runs.map((r) => ({ id: r.id, year: r.year, month: r.month })),
         reason: variables.reason,
@@ -461,8 +507,12 @@ function AdminFiscalPage() {
       qc.invalidateQueries({ queryKey: ["admin-fiscal-failed"] });
       qc.invalidateQueries({ queryKey: ["admin-fiscal-status"] });
     },
-    onError: (e: any) => setFeedback(`Erro no reenvio em lote: ${e?.message ?? e}`),
+    onError: (e: any) => {
+      setFeedback(`Erro no reenvio em lote: ${e?.message ?? e}`);
+      toast.error("Erro no reenvio em lote", { description: e?.message ?? String(e) });
+    },
     onSettled: () => {
+      cancelBulkRef.current = false;
       // Mantém a barra visível por 1.5s pro usuário ver "X/X concluído"
       setTimeout(() => setBulkProgress(null), 1500);
     },
@@ -1349,9 +1399,25 @@ function AdminFiscalPage() {
                         <span className="ml-1 text-emerald-700">concluído</span>
                       )}
                     </span>
-                    <span className="font-mono text-muted-foreground">
-                      {Math.round((bulkProgress.done / Math.max(1, bulkProgress.total)) * 100)}%
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-muted-foreground">
+                        {Math.round((bulkProgress.done / Math.max(1, bulkProgress.total)) * 100)}%
+                      </span>
+                      {bulkResendMut.isPending && !cancelBulkRef.current && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            cancelBulkRef.current = true;
+                            setFeedback("Cancelando reenvio em lote… aguardando a execução atual terminar.");
+                          }}
+                          className="rounded border border-red-500/40 bg-background px-2 py-0.5 text-[10px] font-bold text-red-700 hover:bg-red-50">
+                          Cancelar
+                        </button>
+                      )}
+                      {cancelBulkRef.current && bulkResendMut.isPending && (
+                        <span className="text-[10px] italic text-muted-foreground">cancelando…</span>
+                      )}
+                    </div>
                   </div>
                   <div className="mt-1 h-1.5 w-full overflow-hidden rounded bg-muted">
                     <div
@@ -1377,9 +1443,37 @@ function AdminFiscalPage() {
                       <strong className={bulkSummary.fail > 0 ? "text-red-700" : "text-muted-foreground"}>
                         {bulkSummary.fail} falha(s)
                       </strong>
+                      {bulkSummary.canceled > 0 && (
+                        <>
+                          {" · "}
+                          <strong className="text-amber-700">{bulkSummary.canceled} cancelada(s)</strong>
+                        </>
+                      )}
                       <span className="ml-2 text-muted-foreground">de {bulkSummary.results.length} execução(ões)</span>
                     </span>
                     <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const ts = new Date().toISOString().replace(/[:.]/g, "-");
+                          downloadCsv(
+                            `reenvio-em-lote_${ts}.csv`,
+                            ["id", "periodo", "ano", "mes", "status", "mensagem_erro", "reason"],
+                            bulkSummary.results.map((r) => ({
+                              id: r.id,
+                              periodo: `${String(r.month).padStart(2, "0")}/${r.year}`,
+                              ano: r.year,
+                              mes: r.month,
+                              status: r.ok ? "ok" : r.canceled ? "cancelado" : "falha",
+                              mensagem_erro: r.error ?? "",
+                              reason: bulkSummary.reason,
+                            })),
+                          );
+                          toast.success("CSV do resumo baixado");
+                        }}
+                        className="rounded border border-border bg-background px-2 py-0.5 text-[10px] text-muted-foreground hover:bg-muted">
+                        Baixar CSV do resumo
+                      </button>
                       <button
                         type="button"
                         onClick={repeatLastBulk}
@@ -1395,13 +1489,19 @@ function AdminFiscalPage() {
                       </button>
                     </div>
                   </div>
-                  <details className="mt-1">
+                  <details id="bulk-resend-summary" className="mt-1">
                     <summary className="cursor-pointer text-muted-foreground">Detalhes por execução</summary>
                     <ul className="mt-1 space-y-0.5 font-mono">
                       {bulkSummary.results.map((r) => (
-                        <li key={r.id} className={r.ok ? "text-emerald-700" : "text-red-700"}>
+                        <li
+                          key={r.id}
+                          className={r.ok ? "text-emerald-700" : r.canceled ? "text-amber-700" : "text-red-700"}>
                           • {String(r.month).padStart(2, "0")}/{r.year}{" "}
-                          — {r.ok ? "ok" : `falhou: ${r.error ?? "erro desconhecido"}`}
+                          — {r.ok
+                            ? "ok"
+                            : r.canceled
+                              ? "cancelado (não processado)"
+                              : `falhou: ${r.error ?? "erro desconhecido"}`}
                         </li>
                       ))}
                     </ul>
