@@ -10,15 +10,18 @@ export type PayoutEventStatus = 'pending' | 'approved' | 'refunded' | 'chargebac
 /** Lista empresas que o usuário enxerga (via RLS de companies). Usado p/ menu. */
 export const listMyCompanies = createServerFn({ method: 'GET' })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
-      .from('companies')
-      .select('id, name, trade_name, niche')
-      .order('name')
-      .limit(50)
-    if (error) throw error
-    return data ?? []
-  })
+  .handler(async ({ context }) =>
+    withInstrumentation('payouts.listMyCompanies', { user_id: context.userId }, async () => {
+      const { data, error } = await context.supabase
+        .from('companies')
+        .select('id, name, trade_name, niche')
+        .order('name')
+        .limit(50)
+      if (error) throw error
+      return data ?? []
+    }),
+  )
+
 
 /** Resumo de monetização para uma empresa (KPIs + últimos eventos). */
 export const getCompanyMonetization = createServerFn({ method: 'POST' })
