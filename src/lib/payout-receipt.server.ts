@@ -53,8 +53,8 @@ export async function generatePayoutReceiptPdf(batch: ReceiptBatch): Promise<Uin
     ['Taxa', `- ${fmtBRL(batch.fee_cents)}`],
     ['Líquido', fmtBRL(batch.net_cents)],
     ['Status', batch.status.toUpperCase()],
-    ['Provedor', batch.provider ?? '—'],
-    ['ID Provedor', batch.provider_payout_id ?? '—'],
+    ['Provedor', batch.provider ?? '-'],
+    ['ID Provedor', batch.provider_payout_id ?? '-'],
     ['Pago em', fmtDate(batch.paid_at)],
   ]
   if (batch.retention_reason) rows.push(['Retenção', batch.retention_reason])
