@@ -26,16 +26,26 @@ export const getPublicVitrine = createServerFn({ method: "GET" })
     z.object({
       segment: z.string().optional(),
       city: z.string().optional(),
+      sort: z.enum(["rating", "recent", "name"]).default("rating"),
       limit: z.number().int().min(1).max(200).default(60),
     }).parse(d ?? {}),
   )
   .handler(async ({ data }) => {
     const sb = publicClient();
-    const { data: rows, error } = await sb.rpc("public_vitrine_list", {
-      p_segment: data.segment ?? null,
-      p_city: data.city ?? null,
-      p_limit: data.limit,
-    });
+    let query = sb
+      .from("companies_vitrine_public")
+      .select("id, name, trade_name, segment, logo_url, public_slug, address_city, address_state, rating_avg, rating_count")
+      .limit(data.limit);
+    if (data.segment) query = query.eq("segment", data.segment);
+    if (data.city) query = query.ilike("address_city", `%${data.city}%`);
+    if (data.sort === "rating") {
+      query = query.order("rating_avg", { ascending: false, nullsFirst: false }).order("rating_count", { ascending: false });
+    } else if (data.sort === "recent") {
+      query = query.order("updated_at", { ascending: false });
+    } else {
+      query = query.order("name", { ascending: true });
+    }
+    const { data: rows, error } = await query;
     if (error) return { companies: [], error: error.message };
     return { companies: rows ?? [] };
   });
