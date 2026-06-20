@@ -12,6 +12,15 @@ import {
 } from '@react-email/components'
 import type { TemplateEntry } from './registry'
 
+interface InlineRow {
+  paid_at: string
+  company_name: string
+  company_document: string
+  gross: string
+  tax: string
+  net: string
+}
+
 interface Props {
   monthLabel?: string
   totalCount?: number
@@ -21,6 +30,8 @@ interface Props {
   csvUrl?: string
   dashboardUrl?: string
   expiresAt?: string
+  mode?: 'link' | 'inline'
+  inlineRows?: InlineRow[]
 }
 
 const Email = ({
@@ -32,18 +43,22 @@ const Email = ({
   csvUrl,
   dashboardUrl,
   expiresAt,
+  mode = 'link',
+  inlineRows = [],
 }: Props) => (
   <Html lang="pt-BR" dir="ltr">
     <Head />
     <Preview>
-      Relatório fiscal de {monthLabel ?? '—'} disponível para download
+      Relatório fiscal de {monthLabel ?? '—'} disponível
     </Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>Relatório fiscal mensal</Heading>
         <Text style={text}>
           Segue o consolidado de faturas pagas em <strong>{monthLabel ?? '—'}</strong>.
-          Os arquivos foram gerados automaticamente pela Impulsionando.
+          {mode === 'inline'
+            ? ' Resumo completo abaixo + link assinado para o CSV.'
+            : ' Use o botão abaixo para baixar o arquivo CSV.'}
         </Text>
 
         <Section style={card}>
@@ -56,6 +71,45 @@ const Email = ({
           <Text style={label}>Receita líquida estimada</Text>
           <Text style={value}>{netBRL ?? 'R$ 0,00'}</Text>
         </Section>
+
+        {mode === 'inline' && inlineRows.length > 0 ? (
+          <Section style={{ margin: '16px 0' }}>
+            <Text style={{ ...label, marginBottom: 8 }}>
+              Detalhamento fatura a fatura
+            </Text>
+            <table style={tableStyle} cellPadding={6} cellSpacing={0}>
+              <thead>
+                <tr>
+                  <th style={th}>Pago em</th>
+                  <th style={th}>Cliente</th>
+                  <th style={th}>CNPJ/CPF</th>
+                  <th style={{ ...th, textAlign: 'right' }}>Bruto</th>
+                  <th style={{ ...th, textAlign: 'right' }}>Impostos</th>
+                  <th style={{ ...th, textAlign: 'right' }}>Líquido</th>
+                </tr>
+              </thead>
+              <tbody>
+                {inlineRows.map((r, i) => (
+                  <tr key={i} style={i % 2 ? { background: '#f8fafc' } : undefined}>
+                    <td style={td}>{r.paid_at}</td>
+                    <td style={td}>{r.company_name}</td>
+                    <td style={{ ...td, fontFamily: 'monospace', fontSize: 11 }}>
+                      {r.company_document || '—'}
+                    </td>
+                    <td style={{ ...td, textAlign: 'right' }}>{r.gross}</td>
+                    <td style={{ ...td, textAlign: 'right' }}>{r.tax}</td>
+                    <td style={{ ...td, textAlign: 'right', fontWeight: 600 }}>
+                      {r.net}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <Text style={small}>
+              Para imprimir como PDF, abra este e-mail e use "Imprimir → Salvar como PDF".
+            </Text>
+          </Section>
+        ) : null}
 
         {csvUrl ? (
           <Section style={{ textAlign: 'center', margin: '24px 0' }}>
@@ -70,11 +124,8 @@ const Email = ({
 
         {dashboardUrl ? (
           <Text style={text}>
-            Para gerar o PDF (Imprimir / Salvar PDF) e revisar fatura a fatura, acesse o{' '}
-            <a href={dashboardUrl} style={link}>
-              painel fiscal
-            </a>
-            .
+            Para gerar PDF formatado ou revisar com filtros, acesse o{' '}
+            <a href={dashboardUrl} style={link}>painel fiscal</a>.
           </Text>
         ) : null}
 
@@ -101,12 +152,14 @@ export const template = {
     csvUrl: 'https://example.com/fiscal-2026-05.csv',
     dashboardUrl: 'https://app.impulsionando.com.br/admin/fiscal',
     expiresAt: '27/06/2026',
+    mode: 'link',
+    inlineRows: [],
   },
   allowedChannels: ['internal', 'staff'],
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '24px 28px', maxWidth: '600px', margin: '0 auto' }
+const container = { padding: '24px 28px', maxWidth: '720px', margin: '0 auto' }
 const h1 = { fontSize: '22px', fontWeight: 700, color: '#0f172a', margin: '0 0 12px' }
 const text = { fontSize: '15px', lineHeight: '22px', color: '#1f2937', margin: '0 0 12px' }
 const small = { fontSize: '12px', color: '#64748b', margin: '8px 0 0' }
@@ -130,3 +183,23 @@ const button = {
   display: 'inline-block',
 }
 const link = { color: '#0ea5e9', textDecoration: 'underline' }
+const tableStyle = {
+  borderCollapse: 'collapse' as const,
+  width: '100%',
+  fontSize: 12,
+  border: '1px solid #e2e8f0',
+}
+const th = {
+  textAlign: 'left' as const,
+  background: '#f1f5f9',
+  borderBottom: '1px solid #cbd5e1',
+  padding: '6px 8px',
+  fontSize: 11,
+  textTransform: 'uppercase' as const,
+  color: '#475569',
+}
+const td = {
+  borderBottom: '1px solid #f1f5f9',
+  padding: '6px 8px',
+  color: '#0f172a',
+}
