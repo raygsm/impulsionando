@@ -71,47 +71,49 @@ export const getCompanyMonetization = createServerFn({ method: 'POST' })
 /** Visão CORE — agrega por empresa (staff). */
 export const getGlobalPayoutOverview = createServerFn({ method: 'GET' })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { data: isStaff } = await context.supabase.rpc('is_impulsionando_staff', { _user: context.userId })
-    if (!isStaff) throw new Error('Forbidden: staff only')
+  .handler(async ({ context }) =>
+    withInstrumentation('payouts.getGlobalPayoutOverview', { user_id: context.userId }, async () => {
+      const { data: isStaff } = await context.supabase.rpc('is_impulsionando_staff', { _user: context.userId })
+      if (!isStaff) throw new Error('Forbidden: staff only')
 
-    const since = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
-    const { data, error } = await context.supabase
-      .from('core_payout_events')
-      .select('company_id, gross_cents, fee_cents, net_cents, status, occurred_at, companies:companies(name, niche)')
-      .gte('occurred_at', since)
-      .order('occurred_at', { ascending: false })
-      .limit(5000)
-    if (error) throw error
+      const since = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
+      const { data, error } = await context.supabase
+        .from('core_payout_events')
+        .select('company_id, gross_cents, fee_cents, net_cents, status, occurred_at, companies:companies(name, niche)')
+        .gte('occurred_at', since)
+        .order('occurred_at', { ascending: false })
+        .limit(5000)
+      if (error) throw error
 
-    const rows = data ?? []
-    const approved = rows.filter((r) => r.status === 'approved')
-    const totals = {
-      gross: approved.reduce((a, r) => a + (r.gross_cents ?? 0), 0),
-      fee: approved.reduce((a, r) => a + (r.fee_cents ?? 0), 0),
-      events: approved.length,
-    }
-
-    // Top clientes por taxa retida nos últimos 90 dias
-    const byCompany = new Map<string, { name: string; niche: string | null; gross: number; fee: number; events: number }>()
-    for (const r of approved) {
-      const key = r.company_id
-      const prev = byCompany.get(key) ?? {
-        name: (r as any).companies?.name ?? '—',
-        niche: (r as any).companies?.niche ?? null,
-        gross: 0,
-        fee: 0,
-        events: 0,
+      const rows = data ?? []
+      const approved = rows.filter((r) => r.status === 'approved')
+      const totals = {
+        gross: approved.reduce((a, r) => a + (r.gross_cents ?? 0), 0),
+        fee: approved.reduce((a, r) => a + (r.fee_cents ?? 0), 0),
+        events: approved.length,
       }
-      prev.gross += r.gross_cents ?? 0
-      prev.fee += r.fee_cents ?? 0
-      prev.events += 1
-      byCompany.set(key, prev)
-    }
-    const top = Array.from(byCompany.entries())
-      .map(([company_id, v]) => ({ company_id, ...v }))
-      .sort((a, b) => b.fee - a.fee)
-      .slice(0, 10)
 
-    return { totals, top, sample: rows.slice(0, 100) }
-  })
+      const byCompany = new Map<string, { name: string; niche: string | null; gross: number; fee: number; events: number }>()
+      for (const r of approved) {
+        const key = r.company_id
+        const prev = byCompany.get(key) ?? {
+          name: (r as any).companies?.name ?? '—',
+          niche: (r as any).companies?.niche ?? null,
+          gross: 0,
+          fee: 0,
+          events: 0,
+        }
+        prev.gross += r.gross_cents ?? 0
+        prev.fee += r.fee_cents ?? 0
+        prev.events += 1
+        byCompany.set(key, prev)
+      }
+      const top = Array.from(byCompany.entries())
+        .map(([company_id, v]) => ({ company_id, ...v }))
+        .sort((a, b) => b.fee - a.fee)
+        .slice(0, 10)
+
+      return { totals, top, sample: rows.slice(0, 100) }
+    }),
+  )
+
