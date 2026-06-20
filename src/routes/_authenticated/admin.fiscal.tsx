@@ -369,7 +369,7 @@ function AdminFiscalPage() {
         email_mode: previewMeta?.email_mode === "inline" || previewMeta?.email_mode === "link"
           ? previewMeta.email_mode
           : schedDraft.email_mode,
-        row_count: r?.totals.count ?? 0,
+        row_count: q.data?.totals.count ?? 0,
         filename: res.filename,
       }});
     } catch {}
