@@ -352,36 +352,52 @@ export function PublicHeader() {
                     >
                       Visão geral
                     </Link>
-                    <h3 className="px-3 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                      Nichos
-                    </h3>
-                    {NICHO_DETAILS.map((n) => (
-                      <Link
-                        key={n.slug}
-                        to="/nichos/$slug"
-                        params={{ slug: n.slug }}
-                        onClick={() => setOpen(false)}
-                        aria-label={n.shortLabel}
-                        className="px-3 py-1.5 text-sm rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/60 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      >
-                        <n.icon aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
-                        <span className="truncate">{n.shortLabel}</span>
-                      </Link>
-                    ))}
-                    <Link
-                      to="/demo"
-                      onClick={() => setOpen(false)}
-                      className="px-3 py-1.5 mt-1 text-xs text-muted-foreground hover:text-foreground rounded-md hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      Demonstrações
-                    </Link>
-                    <Link
-                      to="/escolher-nicho"
-                      onClick={() => setOpen(false)}
-                      className="px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground rounded-md hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      Planos
-                    </Link>
+                    {EMPRESAS_MACROS.map((m) => {
+                      const Icon = m.icon;
+                      return (
+                        <details key={m.slug} className="group">
+                          <summary
+                            className={cn(
+                              "list-none cursor-pointer px-3 py-1.5 text-sm rounded-md text-foreground hover:bg-accent/60 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                              m.highlight && "font-semibold",
+                            )}
+                          >
+                            <Icon aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
+                            <span className="flex-1 truncate">{m.label}</span>
+                            <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
+                          </summary>
+                          <div className="ml-6 pl-2 border-l border-border/60 mt-1 mb-2 flex flex-col gap-0.5">
+                            <p className="px-3 py-1 text-[11px] text-muted-foreground leading-snug">
+                              {m.message}
+                            </p>
+                            {m.items.map((it) => (
+                              <ItemLink
+                                key={`${m.slug}-${it.label}`}
+                                item={it}
+                                onClick={() => setOpen(false)}
+                                className="px-3 py-1 text-xs text-muted-foreground hover:text-foreground rounded-md hover:bg-accent/60"
+                              />
+                            ))}
+                            <div className="flex gap-1 px-1 pt-1">
+                              <Link
+                                to={m.demoTo as string}
+                                onClick={() => setOpen(false)}
+                                className="flex-1 text-center px-2 py-1 text-[11px] rounded border border-border text-muted-foreground hover:text-foreground"
+                              >
+                                Demonstração
+                              </Link>
+                              <Link
+                                to={m.solutionTo as string}
+                                onClick={() => setOpen(false)}
+                                className="flex-1 text-center px-2 py-1 text-[11px] rounded bg-gradient-primary text-primary-foreground"
+                              >
+                                Solução
+                              </Link>
+                            </div>
+                          </div>
+                        </details>
+                      );
+                    })}
                   </div>
                 ) : null}
 
