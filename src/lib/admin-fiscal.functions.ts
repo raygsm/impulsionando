@@ -486,6 +486,52 @@ export const getFiscalPeriodStatus = createServerFn({ method: "GET" })
     };
   });
 
+/**
+ * Lista runs com status "failed" (mais recente por período), com cálculo
+ * de próximo retry/backoff e flag de limite de tentativas atingido.
+ */
+export const listFailedFiscalRuns = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    await ensureAdmin(supabase, userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const schedule = await readSchedule(supabaseAdmin);
+    const { data: runs } = await supabaseAdmin
+      .from("fiscal_email_runs")
+      .select("id, year, month, status, recipient, attempt, error_message, csv_path, signed_url_expires_at, created_at, updated_at, triggered_by, email_mode")
+      .order("created_at", { ascending: false })
+      .limit(300);
+    const seen = new Set<string>();
+    const failed: any[] = [];
+    const now = Date.now();
+    for (const r of runs ?? []) {
+      const key = `${r.year}-${r.month}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      if (r.status !== "failed") continue;
+      const lastTs = new Date(r.updated_at ?? r.created_at).getTime();
+      const nextRetryTs = lastTs + schedule.backoff_minutes * 60_000;
+      const remainingMinutes = Math.max(0, Math.ceil((nextRetryTs - now) / 60_000));
+      const maxReached = (r.attempt ?? 0) >= schedule.max_attempts;
+      failed.push({
+        ...r,
+        next_retry_at: new Date(nextRetryTs).toISOString(),
+        remaining_minutes: remainingMinutes,
+        backoff_ready: remainingMinutes === 0,
+        max_attempts_reached: maxReached,
+        max_attempts: schedule.max_attempts,
+        backoff_minutes: schedule.backoff_minutes,
+      });
+    }
+    return {
+      runs: failed,
+      schedule: { max_attempts: schedule.max_attempts, backoff_minutes: schedule.backoff_minutes },
+    };
+  });
+
+
+
 // ───────────────────────── Envio ─────────────────────────
 
 async function sendFiscalReportInternal(opts: {
