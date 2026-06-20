@@ -1624,6 +1624,97 @@ function AdminFiscalPage() {
           </section>
         </>
       )}
+
+      {/* Confirmação do reenvio em lote */}
+      {bulkConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          role="dialog" aria-modal="true" aria-labelledby="bulk-confirm-title"
+          onClick={(e) => { if (e.target === e.currentTarget && !bulkResendMut.isPending) setBulkConfirm(null); }}>
+          <div className="w-full max-w-lg rounded-lg border border-border bg-card p-4 shadow-xl">
+            <h3 id="bulk-confirm-title" className="text-sm font-semibold text-foreground">
+              Confirmar reenvio em lote
+            </h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Você está prestes a reenviar imediatamente <strong>{bulkConfirm.runs.length}</strong> execução(ões),
+              ignorando backoff e máx. tentativas. O motivo abaixo será gravado na auditoria de cada reenvio.
+            </p>
+            <div className="mt-3 max-h-32 overflow-auto rounded border border-border bg-background p-2 text-[11px]">
+              <ul className="space-y-0.5">
+                {bulkConfirm.runs.map((r) => (
+                  <li key={r.id} className="font-mono">
+                    • {String(r.month).padStart(2, "0")}/{r.year}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <label className="mt-3 block text-xs">
+              Motivo do reenvio
+              <textarea
+                value={bulkConfirm.reason}
+                onChange={(e) => setBulkConfirm({ ...bulkConfirm, reason: e.target.value, error: undefined })}
+                placeholder="Ex.: provedor de e-mail estava fora do ar; reenviando após estabilização."
+                rows={3}
+                maxLength={500}
+                className="mt-1 w-full rounded border border-border bg-background px-2 py-1 text-xs" />
+              <div className="mt-0.5 flex items-center justify-between text-[10px] text-muted-foreground">
+                <span>{bulkConfirm.reason.trim().length}/500 caracteres</span>
+                {lastBulkReason && bulkConfirm.reason !== lastBulkReason && (
+                  <button type="button"
+                    onClick={() => setBulkConfirm({ ...bulkConfirm, reason: lastBulkReason, error: undefined })}
+                    className="rounded border border-border bg-background px-1.5 py-0.5">
+                    Usar último motivo
+                  </button>
+                )}
+              </div>
+            </label>
+            {bulkConfirm.runs.length > BULK_RESEND_MAX && (
+              <p className="mt-2 rounded bg-red-500/10 px-2 py-1 text-[11px] text-red-700">
+                Bloqueado: máximo de {BULK_RESEND_MAX} execuções por ação para evitar timeouts.
+              </p>
+            )}
+            {bulkConfirm.error && (
+              <p className="mt-2 rounded bg-red-500/10 px-2 py-1 text-[11px] text-red-700">
+                {bulkConfirm.error}
+              </p>
+            )}
+            <div className="mt-4 flex items-center justify-end gap-2">
+              <button
+                onClick={() => setBulkConfirm(null)}
+                disabled={bulkResendMut.isPending}
+                className="rounded border border-border bg-background px-3 py-1.5 text-xs disabled:opacity-50">
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  const trimmed = bulkConfirm.reason.trim();
+                  if (!trimmed) {
+                    setBulkConfirm({ ...bulkConfirm, error: "Informe um motivo antes de confirmar." });
+                    return;
+                  }
+                  if (bulkConfirm.runs.length > BULK_RESEND_MAX) {
+                    setBulkConfirm({
+                      ...bulkConfirm,
+                      error: `Excede o limite de ${BULK_RESEND_MAX} execuções por ação.`,
+                    });
+                    return;
+                  }
+                  try { window.localStorage.setItem(REASON_STORAGE_KEY, trimmed); } catch {}
+                  setLastBulkReason(trimmed);
+                  bulkResendMut.mutate(
+                    { reason: trimmed, runs: bulkConfirm.runs },
+                    { onSettled: () => setBulkConfirm(null) },
+                  );
+                }}
+                disabled={bulkResendMut.isPending}
+                className="rounded bg-red-600 px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50">
+                {bulkResendMut.isPending
+                  ? `Reenviando… (${bulkConfirm.runs.length})`
+                  : `Confirmar reenvio (${bulkConfirm.runs.length})`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
