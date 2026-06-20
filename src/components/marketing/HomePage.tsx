@@ -531,6 +531,34 @@ export function HomePage() {
               </article>
             </div>
 
+            {/* CTA Ecossistema — porta de entrada do consumidor final */}
+            <div className="mt-8 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 p-5 sm:p-6 text-left">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                <div className="flex-1">
+                  <Badge className="bg-white/20 text-white border-0 mb-2">
+                    <Sparkles className="w-3.5 h-3.5 mr-1" /> Para o consumidor
+                  </Badge>
+                  <h3 className="text-xl sm:text-2xl font-bold">Conheça o Ecossistema</h3>
+                  <p className="text-sm sm:text-base text-white/85 mt-1">
+                    Encontre empresas, serviços, benefícios e experiências próximas de você dentro da rede Impulsionando.
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2 sm:flex-shrink-0">
+                  <Button asChild size="sm" className="bg-white text-primary hover:bg-white/90 gap-1.5">
+                    <Link to="/ecossistema" data-analytics="hero-ecossistema"><Sparkles className="w-4 h-4" /> Conheça o Ecossistema</Link>
+                  </Button>
+                  <Button asChild size="sm" variant="outline" className="bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white gap-1.5">
+                    <Link to="/ecossistema" search={{ geo: 1 }} data-analytics="hero-ecossistema-geo"><Building2 className="w-4 h-4" /> Empresas perto de mim</Link>
+                  </Button>
+                  <Button asChild size="sm" variant="outline" className="bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white gap-1.5">
+                    <Link to="/clube" data-analytics="hero-ecossistema-clube"><Gift className="w-4 h-4" /> Entrar no Clube</Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+
+
 
 
 
