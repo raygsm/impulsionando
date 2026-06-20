@@ -33,6 +33,7 @@ import { Route as ManutencaoRouteImport } from './routes/manutencao'
 import { Route as HealthzRouteImport } from './routes/healthz'
 import { Route as EscolherNichoRouteImport } from './routes/escolher-nicho'
 import { Route as EmpresasRouteImport } from './routes/empresas'
+import { Route as EcossistemaRouteImport } from './routes/ecossistema'
 import { Route as ContratarRouteImport } from './routes/contratar'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as ContaSuspensaRouteImport } from './routes/conta-suspensa'
@@ -554,6 +555,11 @@ const EscolherNichoRoute = EscolherNichoRouteImport.update({
 const EmpresasRoute = EmpresasRouteImport.update({
   id: '/empresas',
   path: '/empresas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EcossistemaRoute = EcossistemaRouteImport.update({
+  id: '/ecossistema',
+  path: '/ecossistema',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContratarRoute = ContratarRouteImport.update({
@@ -2809,6 +2815,7 @@ export interface FileRoutesByFullPath {
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
   '/contratar': typeof ContratarRouteWithChildren
+  '/ecossistema': typeof EcossistemaRoute
   '/empresas': typeof EmpresasRoute
   '/escolher-nicho': typeof EscolherNichoRoute
   '/healthz': typeof HealthzRoute
@@ -3235,6 +3242,7 @@ export interface FileRoutesByTo {
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
   '/contratar': typeof ContratarRouteWithChildren
+  '/ecossistema': typeof EcossistemaRoute
   '/empresas': typeof EmpresasRoute
   '/escolher-nicho': typeof EscolherNichoRoute
   '/healthz': typeof HealthzRoute
@@ -3652,6 +3660,7 @@ export interface FileRoutesById {
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
   '/contratar': typeof ContratarRouteWithChildren
+  '/ecossistema': typeof EcossistemaRoute
   '/empresas': typeof EmpresasRoute
   '/escolher-nicho': typeof EscolherNichoRoute
   '/healthz': typeof HealthzRoute
@@ -4081,6 +4090,7 @@ export interface FileRouteTypes {
     | '/conta-suspensa'
     | '/contato'
     | '/contratar'
+    | '/ecossistema'
     | '/empresas'
     | '/escolher-nicho'
     | '/healthz'
@@ -4507,6 +4517,7 @@ export interface FileRouteTypes {
     | '/conta-suspensa'
     | '/contato'
     | '/contratar'
+    | '/ecossistema'
     | '/empresas'
     | '/escolher-nicho'
     | '/healthz'
@@ -4923,6 +4934,7 @@ export interface FileRouteTypes {
     | '/conta-suspensa'
     | '/contato'
     | '/contratar'
+    | '/ecossistema'
     | '/empresas'
     | '/escolher-nicho'
     | '/healthz'
@@ -5352,6 +5364,7 @@ export interface RootRouteChildren {
   ContaSuspensaRoute: typeof ContaSuspensaRoute
   ContatoRoute: typeof ContatoRoute
   ContratarRoute: typeof ContratarRouteWithChildren
+  EcossistemaRoute: typeof EcossistemaRoute
   EmpresasRoute: typeof EmpresasRoute
   EscolherNichoRoute: typeof EscolherNichoRoute
   HealthzRoute: typeof HealthzRoute
@@ -5659,6 +5672,13 @@ declare module '@tanstack/react-router' {
       path: '/empresas'
       fullPath: '/empresas'
       preLoaderRoute: typeof EmpresasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ecossistema': {
+      id: '/ecossistema'
+      path: '/ecossistema'
+      fullPath: '/ecossistema'
+      preLoaderRoute: typeof EcossistemaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contratar': {
@@ -9526,6 +9546,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContaSuspensaRoute: ContaSuspensaRoute,
   ContatoRoute: ContatoRoute,
   ContratarRoute: ContratarRouteWithChildren,
+  EcossistemaRoute: EcossistemaRoute,
   EmpresasRoute: EmpresasRoute,
   EscolherNichoRoute: EscolherNichoRoute,
   HealthzRoute: HealthzRoute,
