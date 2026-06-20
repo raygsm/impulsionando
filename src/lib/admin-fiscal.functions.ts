@@ -548,6 +548,7 @@ async function sendFiscalReportInternal(opts: {
   emailMode?: "link" | "inline";
   expirySeconds?: number;
   test?: boolean;
+  reason?: string | null;
 }) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const isTest = !!opts.test;
