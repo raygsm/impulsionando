@@ -146,9 +146,12 @@ function AdminFiscalPage() {
   const fetchFailed = useServerFn(listFailedFiscalRuns);
   const sendTest = useServerFn(sendTestFiscalEmail);
   const logLink = useServerFn(logFiscalLinkAction);
+  const logPreviewCsv = useServerFn(logFiscalPreviewCsvDownload);
+  const fetchTestHistory = useServerFn(listTestSendHistory);
 
   const [showHistory, setShowHistory] = useState(false);
   const [testRecipient, setTestRecipient] = useState("");
+  const [testEmailMode, setTestEmailMode] = useState<"link" | "inline" | null>(null);
 
 
 
