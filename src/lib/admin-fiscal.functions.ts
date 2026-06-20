@@ -365,6 +365,8 @@ async function readSchedule(supabaseAdmin: any) {
     .in("key", [
       "fiscal.cron.day", "fiscal.cron.hour", "fiscal.cron.minute",
       "fiscal.cron.tz", "fiscal.email_mode",
+      "fiscal.retry.max_attempts", "fiscal.retry.backoff_minutes",
+      "fiscal.link.expiry_hours",
     ]);
   const out = { ...DEFAULT_SCHEDULE };
   for (const r of data ?? []) {
@@ -377,9 +379,15 @@ async function readSchedule(supabaseAdmin: any) {
     } else if (r.key === "fiscal.cron.minute") {
       const n = Number(v); if (Number.isInteger(n) && n >= 0 && n <= 59) out.minute = n;
     } else if (r.key === "fiscal.cron.tz") {
-      if (typeof v === "string" && v) out.tz = v;
+      if (typeof v === "string" && isValidTz(v)) out.tz = v;
     } else if (r.key === "fiscal.email_mode") {
       if (v === "link" || v === "inline") out.email_mode = v;
+    } else if (r.key === "fiscal.retry.max_attempts") {
+      const n = Number(v); if (Number.isInteger(n) && n >= 1 && n <= 10) out.max_attempts = n;
+    } else if (r.key === "fiscal.retry.backoff_minutes") {
+      const n = Number(v); if (Number.isInteger(n) && n >= 5 && n <= 1440) out.backoff_minutes = n;
+    } else if (r.key === "fiscal.link.expiry_hours") {
+      const n = Number(v); if (Number.isInteger(n) && n >= 1 && n <= 720) out.link_expiry_hours = n;
     }
   }
   return out;
@@ -398,15 +406,35 @@ export const setFiscalScheduleSettings = createServerFn({ method: "POST" })
   .inputValidator((data: {
     day: number; hour: number; minute: number; tz: string;
     email_mode: "link" | "inline";
+    max_attempts?: number;
+    backoff_minutes?: number;
+    link_expiry_hours?: number;
   }) => {
-    if (!Number.isInteger(data.day) || data.day < 1 || data.day > 28) throw new Error("invalid day");
-    if (!Number.isInteger(data.hour) || data.hour < 0 || data.hour > 23) throw new Error("invalid hour");
-    if (!Number.isInteger(data.minute) || data.minute < 0 || data.minute > 59) throw new Error("invalid minute");
-    if (!data.tz || typeof data.tz !== "string") throw new Error("invalid tz");
-    // valida tz
-    try { new Intl.DateTimeFormat("en-US", { timeZone: data.tz }); }
-    catch { throw new Error("invalid timezone"); }
-    if (data.email_mode !== "link" && data.email_mode !== "inline") throw new Error("invalid mode");
+    const errors: Record<string, string> = {};
+    if (!Number.isInteger(data.day) || data.day < 1 || data.day > 28)
+      errors.day = "Dia precisa ser inteiro entre 1 e 28.";
+    if (!Number.isInteger(data.hour) || data.hour < 0 || data.hour > 23)
+      errors.hour = "Hora precisa estar entre 0 e 23.";
+    if (!Number.isInteger(data.minute) || data.minute < 0 || data.minute > 59)
+      errors.minute = "Minuto precisa estar entre 0 e 59.";
+    if (!data.tz || typeof data.tz !== "string" || !isValidTz(data.tz))
+      errors.tz = "Fuso IANA inválido (ex.: America/Sao_Paulo).";
+    if (data.email_mode !== "link" && data.email_mode !== "inline")
+      errors.email_mode = "Modo inválido.";
+    if (data.max_attempts !== undefined &&
+        (!Number.isInteger(data.max_attempts) || data.max_attempts < 1 || data.max_attempts > 10))
+      errors.max_attempts = "Máx. de tentativas entre 1 e 10.";
+    if (data.backoff_minutes !== undefined &&
+        (!Number.isInteger(data.backoff_minutes) || data.backoff_minutes < 5 || data.backoff_minutes > 1440))
+      errors.backoff_minutes = "Backoff entre 5 e 1440 min.";
+    if (data.link_expiry_hours !== undefined &&
+        (!Number.isInteger(data.link_expiry_hours) || data.link_expiry_hours < 1 || data.link_expiry_hours > 720))
+      errors.link_expiry_hours = "Expiração do link entre 1h e 720h (30 dias).";
+    if (Object.keys(errors).length) {
+      const e: any = new Error("validation:" + JSON.stringify(errors));
+      e.validation = errors;
+      throw e;
+    }
     return data;
   })
   .middleware([requireSupabaseAuth])
@@ -415,13 +443,19 @@ export const setFiscalScheduleSettings = createServerFn({ method: "POST" })
     await ensureAdmin(supabase, userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const now = new Date().toISOString();
-    const payload = [
+    const payload: any[] = [
       { key: "fiscal.cron.day", label: "Dia do envio mensal", value: data.day, updated_at: now },
       { key: "fiscal.cron.hour", label: "Hora do envio mensal", value: data.hour, updated_at: now },
       { key: "fiscal.cron.minute", label: "Minuto do envio mensal", value: data.minute, updated_at: now },
       { key: "fiscal.cron.tz", label: "Fuso horário do envio mensal", value: data.tz, updated_at: now },
       { key: "fiscal.email_mode", label: "Modo do e-mail fiscal", value: data.email_mode, updated_at: now },
     ];
+    if (data.max_attempts !== undefined)
+      payload.push({ key: "fiscal.retry.max_attempts", label: "Máx. tentativas (envio fiscal)", value: data.max_attempts, updated_at: now });
+    if (data.backoff_minutes !== undefined)
+      payload.push({ key: "fiscal.retry.backoff_minutes", label: "Backoff entre tentativas (min)", value: data.backoff_minutes, updated_at: now });
+    if (data.link_expiry_hours !== undefined)
+      payload.push({ key: "fiscal.link.expiry_hours", label: "Expiração padrão do link assinado (h)", value: data.link_expiry_hours, updated_at: now });
     const { error } = await supabaseAdmin
       .from("core_settings")
       .upsert(payload, { onConflict: "key" });
