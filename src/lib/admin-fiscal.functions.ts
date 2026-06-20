@@ -95,7 +95,8 @@ async function audit(
     | "fiscal.link.copied"
     | "fiscal.link.opened"
     | "fiscal.email.test"
-    | "fiscal.email.test.failed",
+    | "fiscal.email.test.failed"
+    | "fiscal.email.test.pdf",
   params: Record<string, unknown>,
   row_count: number,
   notes?: string,
