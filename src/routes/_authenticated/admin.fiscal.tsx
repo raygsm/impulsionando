@@ -17,6 +17,8 @@ import {
   previewMonthlyFiscalEmail,
   regenerateFiscalReportSignedUrl,
   listFailedFiscalRuns,
+  sendTestFiscalEmail,
+  logFiscalLinkAction,
 } from "@/lib/admin-fiscal.functions";
 import { downloadCsv } from "@/lib/exports";
 
