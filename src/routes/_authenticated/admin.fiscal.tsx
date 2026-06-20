@@ -507,6 +507,12 @@ function AdminFiscalPage() {
                     tent. #{latest.attempt}/{schedDraft.max_attempts} · {new Date(latest.created_at).toLocaleString("pt-BR")}
                   </span>
                 )}
+                {history.length > 0 && (
+                  <button onClick={() => setShowHistory((v) => !v)}
+                    className="rounded border border-border bg-background px-2 py-0.5 text-[11px]">
+                    {showHistory ? "Ocultar" : "Ver"} histórico ({history.length})
+                  </button>
+                )}
               </div>
             </div>
             {latest?.status === "failed" && latest?.error_message && (
@@ -514,6 +520,27 @@ function AdminFiscalPage() {
                 Último erro: {latest.error_message}
               </p>
             )}
+            {latestLinkState && (latestLinkState.expired || latestLinkState.expiring_soon) && (
+              <div className={`mb-2 flex flex-wrap items-center gap-2 rounded px-3 py-2 text-xs ${
+                latestLinkState.expired
+                  ? "bg-red-500/10 text-red-700"
+                  : "bg-amber-500/10 text-amber-800"
+              }`}>
+                <span>
+                  {latestLinkState.expired
+                    ? "⚠ O link assinado do último envio já expirou."
+                    : `⚠ O link assinado expira em ~${Math.round(latestLinkState.hours_remaining)}h (${new Date(latestLinkState.expires_at).toLocaleString("pt-BR")}).`}
+                  {" Regere antes de reenviar para o contador."}
+                </span>
+                <button
+                  onClick={() => regenMut.mutate(latestLinkState.csv_path)}
+                  disabled={regenMut.isPending || !!expiryError}
+                  className="rounded border border-border bg-background px-2 py-0.5 text-[11px] font-medium">
+                  {regenMut.isPending ? "Regerando…" : `Regerar link (${expiryHours}h)`}
+                </button>
+              </div>
+            )}
+
             <div className="flex flex-wrap items-end gap-2">
               <label className="text-sm">E-mail do contador
                 <input type="email" value={recipientDraft}
