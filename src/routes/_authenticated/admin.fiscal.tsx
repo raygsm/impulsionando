@@ -596,6 +596,18 @@ function AdminFiscalPage() {
     () =>
       (logsQ.data ?? []).map((l: any) => {
         const p = l.params ?? {};
+        // Derive a coarse status + error message: failure-flavored kinds and
+        // params/notes that carry error strings show up as "failed" with the
+        // raw message; everything else is treated as "ok".
+        const errorText =
+          (typeof p.error === "string" && p.error) ||
+          (typeof p.error_message === "string" && p.error_message) ||
+          (typeof l.notes === "string" && l.notes && l.notes !== "cron" && l.notes !== "download" ? l.notes : "") ||
+          "";
+        const isFailureKind = l.kind === "fiscal.email.test.failed";
+        const status = isFailureKind || (errorText && /erro|fail|invalid|unauthor|forbidden|timeout/i.test(errorText))
+          ? "failed"
+          : "ok";
         return {
           id: l.id,
           kind: l.kind,
@@ -614,6 +626,8 @@ function AdminFiscalPage() {
             : "",
           expiry_hours: p.expiry_hours ?? "",
           linhas: l.row_count ?? 0,
+          status,
+          mensagem_erro: errorText,
         };
       }),
     [logsQ.data],
@@ -632,8 +646,8 @@ function AdminFiscalPage() {
       `${parts.join("_")}.csv`,
       [
         "quando", "usuario", "acao", "ano", "mes", "destinatario",
-        "modo", "arquivo", "tentativa", "expiry_hours", "link",
-        "link_expira_em", "linhas",
+        "modo", "status", "mensagem_erro", "arquivo", "tentativa",
+        "expiry_hours", "link", "link_expira_em", "linhas",
       ],
       auditRows,
     );
