@@ -29,37 +29,44 @@ export const getCompanyMonetization = createServerFn({ method: 'POST' })
   .inputValidator((d: { company_id: string; limit?: number }) =>
     z.object({ company_id: z.string().uuid(), limit: z.number().int().min(1).max(500).optional() }).parse(d),
   )
-  .handler(async ({ data, context }) => {
-    const limit = data.limit ?? 50
-    const { data: events, error } = await context.supabase
-      .from('core_payout_events')
-      .select(
-        'id, event_type, gross_cents, fee_cents, net_cents, percent_bps_applied, rule_version, provider, provider_payment_id, status, occurred_at, approved_at, metadata',
-      )
-      .eq('company_id', data.company_id)
-      .order('occurred_at', { ascending: false })
-      .limit(limit)
-    if (error) throw error
+  .handler(async ({ data, context }) =>
+    withInstrumentation(
+      'payouts.getCompanyMonetization',
+      { user_id: context.userId, company_id: data.company_id },
+      async () => {
+        const limit = data.limit ?? 50
+        const { data: events, error } = await context.supabase
+          .from('core_payout_events')
+          .select(
+            'id, event_type, gross_cents, fee_cents, net_cents, percent_bps_applied, rule_version, provider, provider_payment_id, status, occurred_at, approved_at, metadata',
+          )
+          .eq('company_id', data.company_id)
+          .order('occurred_at', { ascending: false })
+          .limit(limit)
+        if (error) throw error
 
-    const { data: ledger, error: ledErr } = await context.supabase
-      .from('core_payout_ledger')
-      .select('id, period_start, period_end, gross_cents, fee_cents, net_cents, event_count, status, provider, provider_payout_id, receipt_url, paid_at')
-      .eq('company_id', data.company_id)
-      .order('period_end', { ascending: false })
-      .limit(24)
-    if (ledErr) throw ledErr
+        const { data: ledger, error: ledErr } = await context.supabase
+          .from('core_payout_ledger')
+          .select('id, period_start, period_end, gross_cents, fee_cents, net_cents, event_count, status, provider, provider_payout_id, receipt_url, paid_at')
+          .eq('company_id', data.company_id)
+          .order('period_end', { ascending: false })
+          .limit(24)
+        if (ledErr) throw ledErr
 
-    const approved = (events ?? []).filter((e) => e.status === 'approved')
-    const summary = {
-      gross_total: approved.reduce((a, e) => a + (e.gross_cents ?? 0), 0),
-      fee_total: approved.reduce((a, e) => a + (e.fee_cents ?? 0), 0),
-      net_total: approved.reduce((a, e) => a + (e.net_cents ?? 0), 0),
-      events_count: approved.length,
-      pending_count: (events ?? []).filter((e) => e.status === 'pending').length,
-    }
+        const approved = (events ?? []).filter((e) => e.status === 'approved')
+        const summary = {
+          gross_total: approved.reduce((a, e) => a + (e.gross_cents ?? 0), 0),
+          fee_total: approved.reduce((a, e) => a + (e.fee_cents ?? 0), 0),
+          net_total: approved.reduce((a, e) => a + (e.net_cents ?? 0), 0),
+          events_count: approved.length,
+          pending_count: (events ?? []).filter((e) => e.status === 'pending').length,
+        }
 
-    return { summary, events: events ?? [], ledger: ledger ?? [] }
-  })
+        return { summary, events: events ?? [], ledger: ledger ?? [] }
+      },
+    ),
+  )
+
 
 /** Visão CORE — agrega por empresa (staff). */
 export const getGlobalPayoutOverview = createServerFn({ method: 'GET' })
