@@ -282,14 +282,22 @@ function AdminFiscalPage() {
   });
 
   const resendMut = useMutation({
-    mutationFn: (force: boolean) =>
-      resendEmail({ data: { year, month, force, expiry_hours: expiryHours } }),
+    mutationFn: (opts: boolean | { force: boolean; reason?: string; year?: number; month?: number }) => {
+      const norm = typeof opts === "boolean"
+        ? { force: opts, reason: undefined, year, month }
+        : { force: opts.force, reason: opts.reason, year: opts.year ?? year, month: opts.month ?? month };
+      return resendEmail({ data: {
+        year: norm.year, month: norm.month,
+        force: norm.force,
+        expiry_hours: expiryHours,
+        reason: norm.reason,
+      }});
+    },
     onSuccess: (res: any) => {
-      setFeedback(`Reenviado para ${res.recipient}.`);
+      setFeedback(`Reenviado para ${res.recipient}${res.reason ? ` (motivo registrado)` : ""}.`);
       qc.invalidateQueries({ queryKey: ["admin-fiscal-logs"] });
       qc.invalidateQueries({ queryKey: ["admin-fiscal-status", year, month] });
       qc.invalidateQueries({ queryKey: ["admin-fiscal-failed"] });
-
     },
     onError: (e: any) => setFeedback(`Erro no reenvio: ${e?.message ?? e}`),
   });
