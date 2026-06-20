@@ -82,6 +82,13 @@ function ChrismedPage() {
     })();
   }, []);
 
+  // Pré-seleciona modalidade vinda da URL (?modality=telemedicina|presencial|domiciliar|retorno)
+  useEffect(() => {
+    if (!modality || selected || offerings.length === 0) return;
+    const match = offerings.find((o) => o.modality === modality);
+    if (match) setSelected(match);
+  }, [modality, offerings, selected]);
+
   // Polling do status do pagamento PIX
   useEffect(() => {
     if (!pixResult || pollStatus === 'approved') return;
