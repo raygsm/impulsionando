@@ -1197,26 +1197,38 @@ function AdminFiscalPage() {
                     )}
                     <span className="ml-auto font-medium">
                       {selectedRunIds.size} selecionado(s)
+                      {selectedRunIds.size > BULK_RESEND_MAX && (
+                        <span className="ml-2 rounded bg-red-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                          excede limite ({BULK_RESEND_MAX})
+                        </span>
+                      )}
                     </span>
                     <button
-                      disabled={bulkResendMut.isPending || selectedRunIds.size === 0}
+                      disabled={
+                        bulkResendMut.isPending
+                        || selectedRunIds.size === 0
+                        || selectedRunIds.size > BULK_RESEND_MAX
+                      }
                       onClick={() => {
                         const runs = sorted
                           .filter((f: any) => selectedRunIds.has(f.id))
                           .map((f: any) => ({ id: f.id, year: f.year, month: f.month }));
                         if (runs.length === 0) return;
-                        const reason = window.prompt(
-                          `Motivo do reenvio em lote — ${runs.length} período(s)\n\n` +
-                          runs.map((r) => `• ${String(r.month).padStart(2, "0")}/${r.year}`).join("\n") +
-                          `\n\nIgnora backoff e máx. tentativas. O motivo será gravado na auditoria de cada reenvio.`,
-                          "",
-                        );
-                        if (reason === null) return;
-                        const trimmed = reason.trim();
-                        if (!trimmed) { setFeedback("Reenvio em lote cancelado: informe um motivo."); return; }
-                        bulkResendMut.mutate({ reason: trimmed, runs });
+                        if (runs.length > BULK_RESEND_MAX) {
+                          setFeedback(
+                            `Reenvio em lote bloqueado: ${runs.length} períodos selecionados excedem o limite de ${BULK_RESEND_MAX} por ação. ` +
+                            `Reduza a seleção para evitar timeouts.`,
+                          );
+                          return;
+                        }
+                        // Abre confirmação com o último motivo persistido
+                        setBulkConfirm({ runs, reason: lastBulkReason });
                       }}
-                      title="Reenvia imediatamente todos os períodos selecionados, ignorando backoff e máx. tentativas. Pede um único motivo, registrado em cada auditoria."
+                      title={
+                        selectedRunIds.size > BULK_RESEND_MAX
+                          ? `Selecione no máximo ${BULK_RESEND_MAX} por ação para evitar timeouts.`
+                          : "Abre uma confirmação com a lista de períodos e o motivo, registrado em cada auditoria."
+                      }
                       className="rounded bg-red-600 px-2 py-1 text-[11px] font-bold text-white disabled:opacity-40">
                       {bulkResendMut.isPending
                         ? `Reenviando… (${bulkResendMut.variables?.runs.length ?? 0})`
@@ -1225,6 +1237,7 @@ function AdminFiscalPage() {
                   </div>
                 );
               })()}
+
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
