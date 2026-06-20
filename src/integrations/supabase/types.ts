@@ -12920,6 +12920,39 @@ export type Database = {
           },
         ]
       }
+      realestate_distribution_rules: {
+        Row: {
+          company_id: string
+          config: Json
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          strategy: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          config?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          strategy?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          config?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          strategy?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       realestate_interests: {
         Row: {
           broker_user_id: string | null
@@ -13129,6 +13162,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      realestate_lead_assignments: {
+        Row: {
+          assigned_by: string | null
+          broker_user_id: string | null
+          company_id: string
+          created_at: string
+          id: string
+          lead_id: string
+          strategy: string
+          team_id: string | null
+        }
+        Insert: {
+          assigned_by?: string | null
+          broker_user_id?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          lead_id: string
+          strategy?: string
+          team_id?: string | null
+        }
+        Update: {
+          assigned_by?: string | null
+          broker_user_id?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          lead_id?: string
+          strategy?: string
+          team_id?: string | null
+        }
+        Relationships: []
       }
       realestate_owners: {
         Row: {
@@ -13717,6 +13783,71 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      realestate_team_members: {
+        Row: {
+          created_at: string
+          id: string
+          role: string
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: string
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: string
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "realestate_team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "realestate_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      realestate_teams: {
+        Row: {
+          company_id: string
+          created_at: string
+          goal_monthly: number | null
+          id: string
+          leader_user_id: string | null
+          name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          goal_monthly?: number | null
+          id?: string
+          leader_user_id?: string | null
+          name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          goal_monthly?: number | null
+          id?: string
+          leader_user_id?: string | null
+          name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       restaurant_menu_categories: {
         Row: {
