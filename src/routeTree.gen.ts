@@ -242,6 +242,8 @@ import { Route as AuthenticatedImobiliariaMatchesRouteImport } from './routes/_a
 import { Route as AuthenticatedImobiliariaInteressadosRouteImport } from './routes/_authenticated/imobiliaria.interessados'
 import { Route as AuthenticatedImobiliariaIntencoesRouteImport } from './routes/_authenticated/imobiliaria.intencoes'
 import { Route as AuthenticatedImobiliariaImoveisRouteImport } from './routes/_authenticated/imobiliaria.imoveis'
+import { Route as AuthenticatedImobiliariaEquipesRouteImport } from './routes/_authenticated/imobiliaria.equipes'
+import { Route as AuthenticatedImobiliariaDistribuicaoRouteImport } from './routes/_authenticated/imobiliaria.distribuicao'
 import { Route as AuthenticatedImobiliariaCampanhasRouteImport } from './routes/_authenticated/imobiliaria.campanhas'
 import { Route as AuthenticatedImobiliariaAprovacoesRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes'
 import { Route as AuthenticatedFinanceWebhookLogRouteImport } from './routes/_authenticated/finance.webhook-log'
@@ -1658,6 +1660,18 @@ const AuthenticatedImobiliariaImoveisRoute =
     path: '/imobiliaria/imoveis',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedImobiliariaEquipesRoute =
+  AuthenticatedImobiliariaEquipesRouteImport.update({
+    id: '/imobiliaria/equipes',
+    path: '/imobiliaria/equipes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedImobiliariaDistribuicaoRoute =
+  AuthenticatedImobiliariaDistribuicaoRouteImport.update({
+    id: '/imobiliaria/distribuicao',
+    path: '/imobiliaria/distribuicao',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedImobiliariaCampanhasRoute =
   AuthenticatedImobiliariaCampanhasRouteImport.update({
     id: '/imobiliaria/campanhas',
@@ -3045,6 +3059,8 @@ export interface FileRoutesByFullPath {
   '/finance/webhook-log': typeof AuthenticatedFinanceWebhookLogRoute
   '/imobiliaria/aprovacoes': typeof AuthenticatedImobiliariaAprovacoesRouteWithChildren
   '/imobiliaria/campanhas': typeof AuthenticatedImobiliariaCampanhasRoute
+  '/imobiliaria/distribuicao': typeof AuthenticatedImobiliariaDistribuicaoRoute
+  '/imobiliaria/equipes': typeof AuthenticatedImobiliariaEquipesRoute
   '/imobiliaria/imoveis': typeof AuthenticatedImobiliariaImoveisRoute
   '/imobiliaria/intencoes': typeof AuthenticatedImobiliariaIntencoesRoute
   '/imobiliaria/interessados': typeof AuthenticatedImobiliariaInteressadosRoute
@@ -3454,6 +3470,8 @@ export interface FileRoutesByTo {
   '/finance/webhook-log': typeof AuthenticatedFinanceWebhookLogRoute
   '/imobiliaria/aprovacoes': typeof AuthenticatedImobiliariaAprovacoesRouteWithChildren
   '/imobiliaria/campanhas': typeof AuthenticatedImobiliariaCampanhasRoute
+  '/imobiliaria/distribuicao': typeof AuthenticatedImobiliariaDistribuicaoRoute
+  '/imobiliaria/equipes': typeof AuthenticatedImobiliariaEquipesRoute
   '/imobiliaria/imoveis': typeof AuthenticatedImobiliariaImoveisRoute
   '/imobiliaria/intencoes': typeof AuthenticatedImobiliariaIntencoesRoute
   '/imobiliaria/interessados': typeof AuthenticatedImobiliariaInteressadosRoute
@@ -3877,6 +3895,8 @@ export interface FileRoutesById {
   '/_authenticated/finance/webhook-log': typeof AuthenticatedFinanceWebhookLogRoute
   '/_authenticated/imobiliaria/aprovacoes': typeof AuthenticatedImobiliariaAprovacoesRouteWithChildren
   '/_authenticated/imobiliaria/campanhas': typeof AuthenticatedImobiliariaCampanhasRoute
+  '/_authenticated/imobiliaria/distribuicao': typeof AuthenticatedImobiliariaDistribuicaoRoute
+  '/_authenticated/imobiliaria/equipes': typeof AuthenticatedImobiliariaEquipesRoute
   '/_authenticated/imobiliaria/imoveis': typeof AuthenticatedImobiliariaImoveisRoute
   '/_authenticated/imobiliaria/intencoes': typeof AuthenticatedImobiliariaIntencoesRoute
   '/_authenticated/imobiliaria/interessados': typeof AuthenticatedImobiliariaInteressadosRoute
@@ -4299,6 +4319,8 @@ export interface FileRouteTypes {
     | '/finance/webhook-log'
     | '/imobiliaria/aprovacoes'
     | '/imobiliaria/campanhas'
+    | '/imobiliaria/distribuicao'
+    | '/imobiliaria/equipes'
     | '/imobiliaria/imoveis'
     | '/imobiliaria/intencoes'
     | '/imobiliaria/interessados'
@@ -4708,6 +4730,8 @@ export interface FileRouteTypes {
     | '/finance/webhook-log'
     | '/imobiliaria/aprovacoes'
     | '/imobiliaria/campanhas'
+    | '/imobiliaria/distribuicao'
+    | '/imobiliaria/equipes'
     | '/imobiliaria/imoveis'
     | '/imobiliaria/intencoes'
     | '/imobiliaria/interessados'
@@ -5130,6 +5154,8 @@ export interface FileRouteTypes {
     | '/_authenticated/finance/webhook-log'
     | '/_authenticated/imobiliaria/aprovacoes'
     | '/_authenticated/imobiliaria/campanhas'
+    | '/_authenticated/imobiliaria/distribuicao'
+    | '/_authenticated/imobiliaria/equipes'
     | '/_authenticated/imobiliaria/imoveis'
     | '/_authenticated/imobiliaria/intencoes'
     | '/_authenticated/imobiliaria/interessados'
@@ -7044,6 +7070,20 @@ declare module '@tanstack/react-router' {
       path: '/imobiliaria/imoveis'
       fullPath: '/imobiliaria/imoveis'
       preLoaderRoute: typeof AuthenticatedImobiliariaImoveisRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/imobiliaria/equipes': {
+      id: '/_authenticated/imobiliaria/equipes'
+      path: '/imobiliaria/equipes'
+      fullPath: '/imobiliaria/equipes'
+      preLoaderRoute: typeof AuthenticatedImobiliariaEquipesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/imobiliaria/distribuicao': {
+      id: '/_authenticated/imobiliaria/distribuicao'
+      path: '/imobiliaria/distribuicao'
+      fullPath: '/imobiliaria/distribuicao'
+      preLoaderRoute: typeof AuthenticatedImobiliariaDistribuicaoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/imobiliaria/campanhas': {
@@ -9026,6 +9066,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEventosIdRoute: typeof AuthenticatedEventosIdRoute
   AuthenticatedImobiliariaAprovacoesRoute: typeof AuthenticatedImobiliariaAprovacoesRouteWithChildren
   AuthenticatedImobiliariaCampanhasRoute: typeof AuthenticatedImobiliariaCampanhasRoute
+  AuthenticatedImobiliariaDistribuicaoRoute: typeof AuthenticatedImobiliariaDistribuicaoRoute
+  AuthenticatedImobiliariaEquipesRoute: typeof AuthenticatedImobiliariaEquipesRoute
   AuthenticatedImobiliariaImoveisRoute: typeof AuthenticatedImobiliariaImoveisRoute
   AuthenticatedImobiliariaIntencoesRoute: typeof AuthenticatedImobiliariaIntencoesRoute
   AuthenticatedImobiliariaInteressadosRoute: typeof AuthenticatedImobiliariaInteressadosRoute
@@ -9169,6 +9211,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedImobiliariaAprovacoesRouteWithChildren,
   AuthenticatedImobiliariaCampanhasRoute:
     AuthenticatedImobiliariaCampanhasRoute,
+  AuthenticatedImobiliariaDistribuicaoRoute:
+    AuthenticatedImobiliariaDistribuicaoRoute,
+  AuthenticatedImobiliariaEquipesRoute: AuthenticatedImobiliariaEquipesRoute,
   AuthenticatedImobiliariaImoveisRoute: AuthenticatedImobiliariaImoveisRoute,
   AuthenticatedImobiliariaIntencoesRoute:
     AuthenticatedImobiliariaIntencoesRoute,
