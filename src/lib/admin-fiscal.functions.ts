@@ -282,7 +282,7 @@ export const listFiscalAuditLogs = createServerFn({ method: "GET" })
     const { data: users } = userIds.length
       ? await supabaseAdmin
           .from("user_profiles")
-          .select("user_id, email, full_name")
+          .select("user_id, email, display_name")
           .in("user_id", userIds as string[])
       : { data: [] };
     const uMap = new Map<string, any>((users ?? []).map((u: any) => [u.user_id, u]));
@@ -290,7 +290,7 @@ export const listFiscalAuditLogs = createServerFn({ method: "GET" })
     return (rows ?? []).map((r) => ({
       ...r,
       user_email: r.user_id ? uMap.get(r.user_id)?.email ?? null : null,
-      user_name: r.user_id ? uMap.get(r.user_id)?.full_name ?? null : null,
+      user_name: r.user_id ? uMap.get(r.user_id)?.display_name ?? null : null,
     }));
   });
 
