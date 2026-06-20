@@ -32,7 +32,7 @@ function TeleconsultaPage() {
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild className="bg-emerald-900 hover:bg-emerald-950 text-amber-50">
-              <Link to="/chrismed/agendar" hash="telemedicina">Ver horários e agendar</Link>
+              <Link to="/chrismed/agendar" search={{ modality: 'telemedicina' }}>Ver horários e agendar</Link>
             </Button>
             <Button asChild variant="outline" className="border-emerald-900/20">
               <Link to="/chrismed/contato">Falar com a equipe</Link>
