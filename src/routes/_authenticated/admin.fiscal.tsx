@@ -1443,9 +1443,37 @@ function AdminFiscalPage() {
                       <strong className={bulkSummary.fail > 0 ? "text-red-700" : "text-muted-foreground"}>
                         {bulkSummary.fail} falha(s)
                       </strong>
+                      {bulkSummary.canceled > 0 && (
+                        <>
+                          {" · "}
+                          <strong className="text-amber-700">{bulkSummary.canceled} cancelada(s)</strong>
+                        </>
+                      )}
                       <span className="ml-2 text-muted-foreground">de {bulkSummary.results.length} execução(ões)</span>
                     </span>
                     <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const ts = new Date().toISOString().replace(/[:.]/g, "-");
+                          downloadCsv(
+                            `reenvio-em-lote_${ts}.csv`,
+                            ["id", "periodo", "ano", "mes", "status", "mensagem_erro", "reason"],
+                            bulkSummary.results.map((r) => ({
+                              id: r.id,
+                              periodo: `${String(r.month).padStart(2, "0")}/${r.year}`,
+                              ano: r.year,
+                              mes: r.month,
+                              status: r.ok ? "ok" : r.canceled ? "cancelado" : "falha",
+                              mensagem_erro: r.error ?? "",
+                              reason: bulkSummary.reason,
+                            })),
+                          );
+                          toast.success("CSV do resumo baixado");
+                        }}
+                        className="rounded border border-border bg-background px-2 py-0.5 text-[10px] text-muted-foreground hover:bg-muted">
+                        Baixar CSV do resumo
+                      </button>
                       <button
                         type="button"
                         onClick={repeatLastBulk}
@@ -1461,13 +1489,19 @@ function AdminFiscalPage() {
                       </button>
                     </div>
                   </div>
-                  <details className="mt-1">
+                  <details id="bulk-resend-summary" className="mt-1">
                     <summary className="cursor-pointer text-muted-foreground">Detalhes por execução</summary>
                     <ul className="mt-1 space-y-0.5 font-mono">
                       {bulkSummary.results.map((r) => (
-                        <li key={r.id} className={r.ok ? "text-emerald-700" : "text-red-700"}>
+                        <li
+                          key={r.id}
+                          className={r.ok ? "text-emerald-700" : r.canceled ? "text-amber-700" : "text-red-700"}>
                           • {String(r.month).padStart(2, "0")}/{r.year}{" "}
-                          — {r.ok ? "ok" : `falhou: ${r.error ?? "erro desconhecido"}`}
+                          — {r.ok
+                            ? "ok"
+                            : r.canceled
+                              ? "cancelado (não processado)"
+                              : `falhou: ${r.error ?? "erro desconhecido"}`}
                         </li>
                       ))}
                     </ul>
