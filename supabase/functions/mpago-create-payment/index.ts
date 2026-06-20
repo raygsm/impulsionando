@@ -87,6 +87,51 @@ Deno.serve(async (req) => {
     const externalRef = body.external_reference ?? crypto.randomUUID();
     const idempotencyKey = crypto.randomUUID();
 
+    // === Motor de monetização (split) ===========================================
+    // Resolve modelo ativo + taxa do evento. Para revshare/hybrid aplicamos
+    // application_fee no Mercado Pago e registramos um core_payout_events pendente.
+    const revshareEvent: RevshareEvent = (body.revshare_event_type ?? 'service');
+    let appFeeCents = 0;
+    let modelId: string | null = null;
+    let rateId: string | null = null;
+    let percentBpsApplied = 0;
+    let ruleVersion = 1;
+    let modelKind: 'saas' | 'revshare' | 'hybrid' | null = null;
+    try {
+      const { data: model } = await supabase
+        .from('core_monetization_models')
+        .select('id, model, version, covered_events')
+        .eq('company_id', body.company_id)
+        .eq('is_active', true)
+        .order('version', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (model) {
+        modelId = model.id;
+        ruleVersion = model.version ?? 1;
+        modelKind = model.model;
+        const covered = Array.isArray(model.covered_events) ? model.covered_events : [];
+        if ((model.model === 'revshare' || model.model === 'hybrid') && covered.includes(revshareEvent)) {
+          const { data: rate } = await supabase
+            .from('core_revshare_rates')
+            .select('id, percent_bps, min_bps, max_bps')
+            .eq('model_id', model.id)
+            .eq('event_type', revshareEvent)
+            .eq('is_active', true)
+            .maybeSingle();
+          if (rate) {
+            rateId = rate.id;
+            percentBpsApplied = rate.percent_bps;
+            appFeeCents = calcFee(body.amount_cents, rate.percent_bps, rate.min_bps, rate.max_bps);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[monetization] lookup failed (non-fatal):', e);
+    }
+
+
+
     let mpResponse: Response;
     let endpoint: string;
     let mpBody: Record<string, unknown>;
