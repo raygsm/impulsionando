@@ -136,8 +136,12 @@ function AdminFiscalPage() {
   const previewEmail = useServerFn(previewMonthlyFiscalEmail);
   const regenerateLink = useServerFn(regenerateFiscalReportSignedUrl);
   const fetchFailed = useServerFn(listFailedFiscalRuns);
+  const sendTest = useServerFn(sendTestFiscalEmail);
+  const logLink = useServerFn(logFiscalLinkAction);
 
   const [showHistory, setShowHistory] = useState(false);
+  const [testRecipient, setTestRecipient] = useState("");
+
 
 
   const q = useQuery({
