@@ -3,6 +3,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
 import { withInstrumentation } from './instrumentation'
+import { runConsolidation } from './payout-consolidation'
 
 export type LedgerStatus = 'scheduled' | 'pending' | 'processing' | 'paid' | 'retained' | 'failed' | 'cancelled'
 
