@@ -606,7 +606,153 @@ function AdminFiscalPage() {
                   className="h-[520px] w-full rounded-b bg-white" sandbox="" />
               </div>
             )}
+
+            {showHistory && history.length > 0 && (
+              <div className="mt-4 rounded border border-border">
+                <div className="border-b border-border bg-muted/40 px-3 py-2 text-xs font-semibold">
+                  Histórico de execuções — {MONTHS[month - 1]}/{year}
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-[11px]">
+                    <thead className="text-[10px] uppercase text-muted-foreground">
+                      <tr>
+                        <th className="px-3 py-1.5">Quando</th>
+                        <th className="px-3 py-1.5">Status</th>
+                        <th className="px-3 py-1.5">Origem</th>
+                        <th className="px-3 py-1.5">Modo</th>
+                        <th className="px-3 py-1.5">Tent.</th>
+                        <th className="px-3 py-1.5">Destinatário</th>
+                        <th className="px-3 py-1.5">Arquivo / link</th>
+                        <th className="px-3 py-1.5">Mensagem</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {history.map((h: any) => (
+                        <tr key={h.id} className="border-t border-border/60 align-top">
+                          <td className="px-3 py-1.5 whitespace-nowrap">
+                            {new Date(h.created_at).toLocaleString("pt-BR")}
+                          </td>
+                          <td className="px-3 py-1.5">{statusBadge(h.status)}</td>
+                          <td className="px-3 py-1.5">{h.triggered_by}</td>
+                          <td className="px-3 py-1.5">{h.email_mode}</td>
+                          <td className="px-3 py-1.5">#{h.attempt}</td>
+                          <td className="px-3 py-1.5">{h.recipient}</td>
+                          <td className="px-3 py-1.5">
+                            {h.csv_path ? (
+                              <div className="flex flex-col gap-0.5">
+                                <code className="text-[10px]">{h.csv_path}</code>
+                                {h.signed_url_expires_at && (
+                                  <span className="text-[10px] text-muted-foreground">
+                                    expira {new Date(h.signed_url_expires_at).toLocaleString("pt-BR")}
+                                  </span>
+                                )}
+                                <button onClick={() => regenMut.mutate(h.csv_path)}
+                                  disabled={regenMut.isPending || !!expiryError}
+                                  className="self-start rounded border border-border bg-background px-1 py-0.5 text-[10px]">
+                                  Regerar link ({expiryHours}h)
+                                </button>
+                              </div>
+                            ) : "—"}
+                          </td>
+                          <td className="px-3 py-1.5 text-red-700">
+                            {h.error_message ?? (h.message_id ? `msg ${h.message_id.slice(0, 8)}…` : "—")}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="border-t border-border px-3 py-2 text-[10px] text-muted-foreground">
+                  Fonte: <code>fiscal_email_runs</code>. Inclui parâmetros usados, todas as tentativas e o status/erro final de cada execução.
+                </div>
+              </div>
+            )}
           </section>
+
+          {/* Períodos com falha pendente — próximo retry */}
+          {failedRuns.length > 0 && (
+            <section className="no-print mb-6 rounded-lg border border-red-500/30 bg-red-500/5 p-4">
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <h2 className="text-sm font-semibold text-foreground">
+                  Períodos com falha pendente ({failedRuns.length})
+                </h2>
+                <span className="text-[11px] text-muted-foreground">
+                  Backoff: {failedQ.data?.schedule.backoff_minutes}min · Máx. tent.: {failedQ.data?.schedule.max_attempts}
+                </span>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="text-[10px] uppercase text-muted-foreground">
+                    <tr>
+                      <th className="py-1 pr-3">Período</th>
+                      <th className="py-1 pr-3">Tent.</th>
+                      <th className="py-1 pr-3">Última falha</th>
+                      <th className="py-1 pr-3">Próximo retry</th>
+                      <th className="py-1 pr-3">Restante</th>
+                      <th className="py-1 pr-3">Erro</th>
+                      <th className="py-1 pr-3">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {failedRuns.map((f: any) => (
+                      <tr key={f.id} className="border-t border-border/60 align-top">
+                        <td className="py-1 pr-3 font-medium">
+                          {String(f.month).padStart(2, "0")}/{f.year}
+                        </td>
+                        <td className="py-1 pr-3">
+                          #{f.attempt}/{f.max_attempts}
+                          {f.max_attempts_reached && (
+                            <span className="ml-1 rounded bg-red-600 px-1 text-[9px] font-bold text-white">
+                              MÁX
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-1 pr-3">{new Date(f.updated_at ?? f.created_at).toLocaleString("pt-BR")}</td>
+                        <td className="py-1 pr-3">
+                          {f.max_attempts_reached
+                            ? <span className="text-muted-foreground">— (limite atingido)</span>
+                            : new Date(f.next_retry_at).toLocaleString("pt-BR")}
+                        </td>
+                        <td className="py-1 pr-3">
+                          {f.max_attempts_reached
+                            ? "—"
+                            : f.backoff_ready
+                              ? <span className="text-emerald-700 font-medium">pronto</span>
+                              : <span>~{f.remaining_minutes} min</span>}
+                        </td>
+                        <td className="py-1 pr-3 text-red-700 max-w-xs truncate" title={f.error_message ?? ""}>
+                          {f.error_message ?? "—"}
+                        </td>
+                        <td className="py-1 pr-3">
+                          <div className="flex flex-col gap-1">
+                            <button
+                              onClick={() => { setYear(f.year); setMonth(f.month); setShowHistory(true); }}
+                              className="rounded border border-border bg-background px-2 py-0.5 text-[10px]">
+                              Abrir período
+                            </button>
+                            <button
+                              onClick={() => {
+                                setYear(f.year); setMonth(f.month);
+                                setTimeout(() => resendMut.mutate(false), 50);
+                              }}
+                              disabled={resendMut.isPending || f.max_attempts_reached || !f.backoff_ready}
+                              className="rounded border border-red-500/40 bg-red-500/10 px-2 py-0.5 text-[10px] font-medium text-red-700 disabled:opacity-40">
+                              Reenviar
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="mt-2 text-[10px] text-muted-foreground">
+                O cron respeita backoff e máx. tentativas. Use "Forçar novo envio" no período selecionado para ignorar a política.
+              </p>
+            </section>
+          )}
+
+
 
 
           {/* Tabela de faturas */}
