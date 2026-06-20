@@ -61,6 +61,7 @@ const KIND_OPTIONS = [
   { value: "fiscal.email.skipped", label: "Cron pulado (retry)" },
   { value: "fiscal.email.test", label: "E-mail de teste" },
   { value: "fiscal.email.test.failed", label: "E-mail de teste (falhou)" },
+  { value: "fiscal.email.test.pdf", label: "PDF do e-mail de teste" },
   { value: "fiscal.schedule.update", label: "Atualização de agenda" },
   { value: "fiscal.preview", label: "Pré-visualização" },
   { value: "fiscal.preview.csv", label: "CSV baixado na pré-visualização" },
