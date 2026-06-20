@@ -686,14 +686,19 @@ function AdminFiscalPage() {
                     <th className="py-1 pr-3">Destinatário</th>
                     <th className="py-1 pr-3">Modo</th>
                     <th className="py-1 pr-3">Tent.</th>
+                    <th className="py-1 pr-3">Link / expira</th>
                     <th className="py-1 pr-3 text-right">Linhas</th>
                   </tr>
                 </thead>
                 <tbody>
                   {(logsQ.data ?? []).map((l: any) => {
                     const p = l.params ?? {};
+                    const url = p.signed_url as string | undefined;
+                    const expIso = p.signed_url_expires_at as string | undefined;
+                    const expired = expIso ? new Date(expIso).getTime() < Date.now() : false;
+                    const csvPath = p.path as string | undefined;
                     return (
-                      <tr key={l.id} className="border-t border-border/60">
+                      <tr key={l.id} className="border-t border-border/60 align-top">
                         <td className="py-1 pr-3">{new Date(l.created_at).toLocaleString("pt-BR")}</td>
                         <td className="py-1 pr-3">
                           {l.user_email ?? (l.notes === "cron" ? "— (cron)" : "—")}
@@ -705,12 +710,40 @@ function AdminFiscalPage() {
                         <td className="py-1 pr-3">{l.recipient ?? "—"}</td>
                         <td className="py-1 pr-3">{p.email_mode ?? "—"}</td>
                         <td className="py-1 pr-3">{p.attempt ?? "—"}</td>
+                        <td className="py-1 pr-3">
+                          {url ? (
+                            <div className="flex flex-col gap-0.5">
+                              <a href={url} target="_blank" rel="noreferrer"
+                                className={`underline ${expired ? "text-muted-foreground line-through" : "text-primary"}`}>
+                                {expired ? "Link expirado" : "Abrir CSV"}
+                              </a>
+                              {expIso && (
+                                <span className="text-[10px] text-muted-foreground">
+                                  expira {new Date(expIso).toLocaleString("pt-BR")}
+                                </span>
+                              )}
+                              {csvPath && expired && (
+                                <button onClick={() => regenMut.mutate(csvPath)}
+                                  disabled={regenMut.isPending}
+                                  className="self-start rounded border border-border bg-background px-1 py-0.5 text-[10px]">
+                                  Regerar link ({expiryHours}h)
+                                </button>
+                              )}
+                            </div>
+                          ) : csvPath ? (
+                            <button onClick={() => regenMut.mutate(csvPath)}
+                              disabled={regenMut.isPending}
+                              className="rounded border border-border bg-background px-1 py-0.5 text-[10px]">
+                              Gerar link ({expiryHours}h)
+                            </button>
+                          ) : "—"}
+                        </td>
                         <td className="py-1 pr-3 text-right">{l.row_count}</td>
                       </tr>
                     );
                   })}
                   {(logsQ.data ?? []).length === 0 && !logsQ.isLoading && (
-                    <tr><td colSpan={8} className="py-4 text-center text-muted-foreground">
+                    <tr><td colSpan={9} className="py-4 text-center text-muted-foreground">
                       Nenhum registro com esses filtros.
                     </td></tr>
                   )}
