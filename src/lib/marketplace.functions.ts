@@ -1,787 +1,279 @@
-/**
- * Marketplace B2B — server functions.
- *
- * Conecta fornecedores (microcervejarias, distribuidores, vinícolas etc.) a
- * compradores (bares, restaurantes, hotéis, eventos), com cálculo automático
- * da Taxa de Intermediação Digital e registro auditável de GMV no ledger.
- *
- * IMPORTANTE: "Taxa de Intermediação Digital" — nunca chamar de "comissão"
- * na UI nem nos nomes de campos visíveis ao usuário.
- */
-import { createServerFn } from "@tanstack/react-start";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { z } from "zod";
+// Marketplace Interno B2B "Todos para Todos" — Impulsionando.
+// Busca, pedidos, propostas, contratações, avaliações (ecosystem-only) e indicações.
+import { createServerFn } from '@tanstack/react-start'
+import { z } from 'zod'
+import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
+import { withInstrumentation } from './instrumentation'
 
-// ============================================================================
-// Helpers
-// ============================================================================
+const DEFAULT_FEE_PCT = 0.005 // 0,50%
 
-/** Retorna o fee_pct aplicável: supplier override > niche policy > default. */
-async function resolveFeePct(
-  supabase: any,
-  supplierId: string,
-): Promise<{ fee_pct: number; source: string }> {
-  // 1) override no próprio fornecedor
-  const { data: sup } = await supabase
-    .from("mp_suppliers")
-    .select("id,supplier_type,custom_fee_pct")
-    .eq("id", supplierId)
-    .maybeSingle();
-  if (sup?.custom_fee_pct != null) {
-    return { fee_pct: Number(sup.custom_fee_pct), source: "supplier" };
-  }
-
-  // 2) policy por nicho
-  if (sup?.supplier_type) {
-    const { data: niche } = await supabase
-      .from("mp_fee_policies")
-      .select("fee_pct")
-      .eq("scope", "niche")
-      .eq("niche_slug", sup.supplier_type)
-      .eq("active", true)
-      .maybeSingle();
-    if (niche?.fee_pct != null) {
-      return { fee_pct: Number(niche.fee_pct), source: "niche" };
-    }
-  }
-
-  // 3) default
-  const { data: def } = await supabase
-    .from("mp_fee_policies")
-    .select("fee_pct")
-    .eq("scope", "default")
-    .eq("active", true)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  return { fee_pct: Number(def?.fee_pct ?? 0.005), source: "default" };
+/** Resolve a empresa do usuário (membro principal). */
+async function getMyCompanyId(supabase: any, userId: string): Promise<string | null> {
+  const { data } = await supabase
+    .from('user_profiles').select('company_id').eq('user_id', userId).maybeSingle()
+  return data?.company_id ?? null
 }
 
-// ============================================================================
-// Suppliers & Buyers (admin/Core)
-// ============================================================================
-
-export const listMarketplaceSuppliers = createServerFn({ method: "GET" })
+/** Busca pública de listagens ativas — RLS filtra. */
+export const searchListings = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
-      .from("mp_suppliers")
-      .select("id,company_id,supplier_type,display_name,description,regions_served,status,custom_fee_pct,created_at")
-      .order("display_name", { ascending: true });
-    if (error) throw error;
-    return data ?? [];
-  });
-
-export const listMarketplaceBuyers = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
-      .from("mp_buyers")
-      .select("id,company_id,buyer_type,display_name,delivery_address,status,created_at")
-      .order("display_name", { ascending: true });
-    if (error) throw error;
-    return data ?? [];
-  });
-
-const UpsertSupplierInput = z.object({
-  id: z.string().uuid().optional(),
-  company_id: z.string().uuid(),
-  supplier_type: z.enum([
-    "microcervejaria", "distribuidor", "vinicola", "cafe_especial",
-    "destilaria", "alimentos_artesanais", "outros",
-  ]),
-  display_name: z.string().min(1),
-  description: z.string().nullish(),
-  regions_served: z.array(z.string()).default([]),
-  status: z.enum(["active", "paused", "blocked"]).default("active"),
-  custom_fee_pct: z.number().min(0).max(0.2).nullish(),
-});
-export const upsertMarketplaceSupplier = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => UpsertSupplierInput.parse(d))
-  .handler(async ({ context, data }) => {
-    const { data: row, error } = await context.supabase
-      .from("mp_suppliers")
-      .upsert(data, { onConflict: "company_id" })
-      .select()
-      .single();
-    if (error) throw error;
-    return row;
-  });
-
-const UpsertBuyerInput = z.object({
-  id: z.string().uuid().optional(),
-  company_id: z.string().uuid(),
-  buyer_type: z.enum(["bar", "restaurante", "hotel", "eventos", "outros"]),
-  display_name: z.string().min(1),
-  delivery_address: z.any().nullish(),
-  status: z.enum(["active", "paused", "blocked"]).default("active"),
-});
-export const upsertMarketplaceBuyer = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => UpsertBuyerInput.parse(d))
-  .handler(async ({ context, data }) => {
-    const { data: row, error } = await context.supabase
-      .from("mp_buyers")
-      .upsert(data, { onConflict: "company_id" })
-      .select()
-      .single();
-    if (error) throw error;
-    return row;
-  });
-
-// ============================================================================
-// Catalog
-// ============================================================================
-
-export const listSupplierCatalog = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z.object({ supplierId: z.string().uuid() }).parse(d),
+  .inputValidator((d: {
+    query?: string; niche?: string; audience?: 'b2b' | 'b2c' | 'both'; limit?: number;
+  }) =>
+    z.object({
+      query: z.string().trim().max(200).optional(),
+      niche: z.string().trim().max(80).optional(),
+      audience: z.enum(['b2b', 'b2c', 'both']).optional(),
+      limit: z.number().int().min(1).max(50).default(20),
+    }).parse(d),
   )
-  .handler(async ({ context, data }) => {
-    const { data: items, error } = await context.supabase
-      .from("mp_catalog_items")
-      .select("id,supplier_id,sku,name,description,unit,price_cents,min_order_qty,stock_qty,active")
-      .eq("supplier_id", data.supplierId)
-      .order("name", { ascending: true });
-    if (error) throw error;
-    return items ?? [];
-  });
-
-const CatalogItemInput = z.object({
-  id: z.string().uuid().optional(),
-  supplier_id: z.string().uuid(),
-  sku: z.string().nullish(),
-  name: z.string().min(1),
-  description: z.string().nullish(),
-  unit: z.string().default("un"),
-  price_cents: z.number().int().min(0),
-  min_order_qty: z.number().min(0).default(1),
-  stock_qty: z.number().nullish(),
-  active: z.boolean().default(true),
-});
-export const upsertCatalogItem = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => CatalogItemInput.parse(d))
-  .handler(async ({ context, data }) => {
-    const { data: row, error } = await context.supabase
-      .from("mp_catalog_items")
-      .upsert(data)
-      .select()
-      .single();
-    if (error) throw error;
-    return row;
-  });
-
-// ============================================================================
-// Orders
-// ============================================================================
-
-const PlaceOrderInput = z.object({
-  supplier_id: z.string().uuid(),
-  buyer_id: z.string().uuid(),
-  items: z.array(z.object({
-    catalog_item_id: z.string().uuid().optional(),
-    name: z.string().min(1),
-    unit: z.string().default("un"),
-    unit_price_cents: z.number().int().min(0),
-    qty: z.number().min(0.001),
-  })).min(1),
-  notes: z.string().nullish(),
-});
-
-export const placeMarketplaceOrder = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => PlaceOrderInput.parse(d))
-  .handler(async ({ context, data }) => {
-    const subtotal = data.items.reduce(
-      (acc, it) => acc + Math.round(it.unit_price_cents * it.qty),
-      0,
-    );
-    const { fee_pct } = await resolveFeePct(context.supabase, data.supplier_id);
-    const fee_cents = Math.round(subtotal * fee_pct);
-    const total_cents = subtotal; // a Taxa é deduzida do fornecedor (não soma)
-    const supplier_net_cents = subtotal - fee_cents;
-
-    const { data: order, error } = await context.supabase
-      .from("mp_orders")
-      .insert({
-        supplier_id: data.supplier_id,
-        buyer_id: data.buyer_id,
-        status: "pending_approval",
-        subtotal_cents: subtotal,
-        fee_pct,
-        fee_cents,
-        total_cents,
-        supplier_net_cents,
-        notes: data.notes ?? null,
-      })
-      .select()
-      .single();
-    if (error) throw error;
-
-    const items = data.items.map((it) => ({
-      order_id: order.id,
-      catalog_item_id: it.catalog_item_id ?? null,
-      name_snapshot: it.name,
-      unit: it.unit,
-      unit_price_cents: it.unit_price_cents,
-      qty: it.qty,
-      line_total_cents: Math.round(it.unit_price_cents * it.qty),
-    }));
-    const { error: iErr } = await context.supabase.from("mp_order_items").insert(items);
-    if (iErr) throw iErr;
-
-    // Notifica fornecedor do novo pedido (todos os usuários ativos da empresa)
-    const { data: sup } = await context.supabase
-      .from("mp_suppliers").select("company_id, display_name").eq("id", data.supplier_id).maybeSingle();
-    const { data: buy } = await context.supabase
-      .from("mp_buyers").select("display_name").eq("id", data.buyer_id).maybeSingle();
-    if (sup?.company_id) {
-      await notify(context.supabase, {
-        company_id: sup.company_id,
-        category: "marketplace",
-        severity: "info",
-        title: "Novo pedido recebido",
-        message: `Pedido #${order.order_number} de ${buy?.display_name ?? "comprador"} — ${(subtotal/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}`,
-        action_url: `/cervejaria/marketplace?order=${order.id}`,
-      });
-    }
-
-    // Audit: pedido enviado
-    await audit(context.supabase, context.userId, {
-      order_id: order.id,
-      event_type: "placed",
-      notes: data.notes ?? null,
-      role: "buyer",
-    });
-
-    return order;
-  });
-
-const UpdateOrderStatusInput = z.object({
-  order_id: z.string().uuid(),
-  status: z.enum(["approved", "rejected", "in_production", "in_delivery", "invoiced", "completed", "canceled"]),
-  decision_notes: z.string().nullish(),
-});
-
-async function notify(
-  supabase: any,
-  args: { company_id: string | null; category: string; severity: string; title: string; message: string; action_url?: string },
-) {
-  if (!args.company_id) return;
-  const { data: users } = await supabase
-    .from("user_profiles").select("user_id").eq("company_id", args.company_id).eq("is_active", true);
-  const rows = (users ?? []).map((u: any) => ({
-    user_id: u.user_id,
-    company_id: args.company_id,
-    category: args.category,
-    severity: args.severity,
-    title: args.title,
-    message: args.message,
-    action_url: args.action_url ?? null,
-  }));
-  if (rows.length) await supabase.from("notifications").insert(rows);
-}
-
-async function audit(
-  supabase: any,
-  userId: string,
-  args: { order_id: string; event_type: string; notes?: string | null; role?: string },
-) {
-  const { data: profile } = await supabase
-    .from("user_profiles").select("display_name,email").eq("user_id", userId).maybeSingle();
-  await supabase.from("mp_order_events").insert({
-    order_id: args.order_id,
-    event_type: args.event_type,
-    notes: args.notes ?? null,
-    actor_user_id: userId,
-    actor_display_name: profile?.display_name ?? profile?.email ?? null,
-    actor_role: args.role ?? null,
-  });
-}
-
-export const updateMarketplaceOrderStatus = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => UpdateOrderStatusInput.parse(d))
-  .handler(async ({ context, data }) => {
-    const nowIso = new Date().toISOString();
-    const patch: {
-      status: typeof data.status;
-      decision_notes?: string | null;
-      approved_at?: string;
-      rejected_at?: string;
-      invoiced_at?: string;
-      completed_at?: string;
-    } = { status: data.status };
-    if (data.decision_notes != null) patch.decision_notes = data.decision_notes;
-    if (data.status === "approved") patch.approved_at = nowIso;
-    if (data.status === "rejected") patch.rejected_at = nowIso;
-    if (data.status === "invoiced") patch.invoiced_at = nowIso;
-    if (data.status === "completed") patch.completed_at = nowIso;
-
-    const { data: order, error } = await context.supabase
-      .from("mp_orders")
-      .update(patch)
-      .eq("id", data.order_id)
-      .select(`*, supplier:mp_suppliers(company_id, display_name), buyer:mp_buyers(company_id, display_name)`)
-      .single();
-    if (error) throw error;
-
-
-    // Notificações para AMBAS as partes (comprador + fornecedor)
-    if (order && ["approved", "rejected", "in_production", "in_delivery", "invoiced", "completed", "canceled"].includes(data.status)) {
-      const labelMap: Record<string, { title: string; sev: string }> = {
-        approved: { title: "Pedido aprovado pelo fornecedor", sev: "success" },
-        rejected: { title: "Pedido recusado pelo fornecedor", sev: "error" },
-        in_production: { title: "Pedido em produção", sev: "info" },
-        in_delivery: { title: "Pedido em entrega", sev: "info" },
-        invoiced: { title: "Pedido faturado", sev: "info" },
-        completed: { title: "Pedido concluído", sev: "success" },
-        canceled: { title: "Pedido cancelado", sev: "warning" },
-      };
-      const l = labelMap[data.status];
-      const msgBase = `Pedido #${order.order_number} · ${order.supplier?.display_name} ↔ ${order.buyer?.display_name}.`;
-      const msg = `${msgBase} ${data.decision_notes ?? ""}`.trim();
-      // Comprador
-      await notify(context.supabase, {
-        company_id: order.buyer?.company_id ?? null,
-        category: "marketplace", severity: l.sev, title: l.title, message: msg,
-        action_url: `/bar/marketplace?order=${order.id}`,
-      });
-      // Fornecedor (confirmação interna p/ equipe)
-      await notify(context.supabase, {
-        company_id: order.supplier?.company_id ?? null,
-        category: "marketplace", severity: l.sev, title: l.title, message: msg,
-        action_url: `/cervejaria/marketplace?order=${order.id}`,
-      });
-    }
-
-    // Audit: registra o evento com o usuário responsável
-    await audit(context.supabase, context.userId, {
-      order_id: order.id,
-      event_type: data.status,
-      notes: data.decision_notes ?? null,
-      role: "supplier",
-    });
-
-    // Ledger ao concluir
-    if (data.status === "completed" && order) {
-      const period = new Date(order.completed_at ?? order.placed_at);
-      const period_month = `${period.getUTCFullYear()}-${String(period.getUTCMonth() + 1).padStart(2, "0")}-01`;
-      await context.supabase.from("mp_transactions_ledger").upsert(
-        {
-          order_id: order.id,
-          supplier_id: order.supplier_id,
-          buyer_id: order.buyer_id,
-          period_month,
-          gmv_cents: order.subtotal_cents,
-          fee_pct: order.fee_pct,
-          fee_cents: order.fee_cents,
-          supplier_net_cents: order.supplier_net_cents,
-        },
-        { onConflict: "order_id" },
-      );
-    }
-
-    return order;
-  });
-
-const ListOrdersInput = z.object({
-  status: z.string().optional(),
-  supplierId: z.string().uuid().optional(),
-  buyerId: z.string().uuid().optional(),
-  sinceDays: z.number().int().min(1).max(365).optional(),
-  limit: z.number().int().min(1).max(500).default(100),
-});
-
-export const listMarketplaceOrders = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => ListOrdersInput.parse(d))
-  .handler(async ({ context, data }) => {
-    let q = context.supabase
-      .from("mp_orders")
-      .select(`
-        id, order_number, status, subtotal_cents, fee_pct, fee_cents, total_cents,
-        supplier_net_cents, placed_at, approved_at, rejected_at, invoiced_at, completed_at,
-        notes, decision_notes,
-        supplier:mp_suppliers(id, display_name, supplier_type, company_id),
-        buyer:mp_buyers(id, display_name, buyer_type, company_id),
-        items:mp_order_items(id, name_snapshot, unit, unit_price_cents, qty, line_total_cents)
-      `)
-      .order("placed_at", { ascending: false })
-      .limit(data.limit);
-    if (data.status) q = q.eq("status", data.status);
-    if (data.supplierId) q = q.eq("supplier_id", data.supplierId);
-    if (data.buyerId) q = q.eq("buyer_id", data.buyerId);
-    if (data.sinceDays) {
-      const since = new Date(Date.now() - data.sinceDays * 86400_000).toISOString();
-      q = q.gte("placed_at", since);
-    }
-    const { data: rows, error } = await q;
-    if (error) throw error;
-    return rows ?? [];
-  });
-
-// Preview da Taxa de Intermediação Digital antes de gerar o pedido
-export const previewMarketplaceFee = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z.object({ supplier_id: z.string().uuid(), subtotal_cents: z.number().int().min(0) }).parse(d),
+  .handler(async ({ data, context }) =>
+    withInstrumentation('marketplace.searchListings', { user_id: context.userId }, async () => {
+      let q = context.supabase
+        .from('eco_marketplace_listings')
+        .select('id, company_id, title, description, niche, subniche, audience, pricing_model, min_price_cents, max_price_cents, tags, coverage_area, companies:company_id(name, logo_url, rating_avg, rating_count)')
+        .eq('status', 'active')
+        .order('updated_at', { ascending: false })
+        .limit(data.limit)
+      if (data.niche) q = q.eq('niche', data.niche)
+      if (data.audience) q = q.in('audience', [data.audience, 'both'])
+      if (data.query) q = q.textSearch('search_vector', data.query, { type: 'websearch', config: 'portuguese' })
+      const { data: rows, error } = await q
+      if (error) throw error
+      return rows ?? []
+    }),
   )
-  .handler(async ({ context, data }) => {
-    const { fee_pct, source } = await resolveFeePct(context.supabase, data.supplier_id);
-    const fee_cents = Math.round(data.subtotal_cents * fee_pct);
-    return {
-      fee_pct,
-      fee_cents,
-      supplier_net_cents: data.subtotal_cents - fee_cents,
-      total_cents: data.subtotal_cents,
-      source,
-    };
-  });
 
-// ============================================================================
-// KPIs / GMV
-// ============================================================================
-
-export const fetchMarketplaceKPIs = createServerFn({ method: "POST" })
+/** Cria listagem (empresa do usuário). */
+export const createListing = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z.object({ sinceDays: z.number().int().min(1).max(365).default(30) }).parse(d),
+  .inputValidator((d: any) =>
+    z.object({
+      title: z.string().trim().min(3).max(200),
+      description: z.string().trim().min(10).max(5000),
+      niche: z.string().trim().min(2).max(80),
+      subniche: z.string().trim().max(80).optional(),
+      audience: z.enum(['b2b', 'b2c', 'both']).default('b2b'),
+      pricing_model: z.enum(['hour', 'project', 'recurring', 'custom']).default('project'),
+      min_price_cents: z.number().int().min(0).optional(),
+      max_price_cents: z.number().int().min(0).optional(),
+      tags: z.array(z.string().trim().max(40)).max(20).default([]),
+      coverage_area: z.string().trim().max(120).default('national'),
+      status: z.enum(['draft', 'active', 'paused']).default('active'),
+    }).parse(d),
   )
-  .handler(async ({ context, data }) => {
-    const sinceIso = new Date(Date.now() - data.sinceDays * 86400_000).toISOString();
-    const { data: ledger, error } = await context.supabase
-      .from("mp_transactions_ledger")
-      .select("gmv_cents,fee_cents,supplier_net_cents,period_month,supplier_id,buyer_id")
-      .gte("recorded_at", sinceIso);
-    if (error) throw error;
-
-    const gmv = (ledger ?? []).reduce((a, r) => a + (r.gmv_cents || 0), 0);
-    const fee = (ledger ?? []).reduce((a, r) => a + (r.fee_cents || 0), 0);
-    const supplierNet = (ledger ?? []).reduce((a, r) => a + (r.supplier_net_cents || 0), 0);
-
-    // Top fornecedores
-    const bySupplier = new Map<string, number>();
-    (ledger ?? []).forEach((r) => bySupplier.set(r.supplier_id, (bySupplier.get(r.supplier_id) || 0) + r.gmv_cents));
-    const topSuppliers = [...bySupplier.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([supplier_id, gmv_cents]) => ({ supplier_id, gmv_cents }));
-
-    return {
-      window_days: data.sinceDays,
-      gmv_cents: gmv,
-      fee_cents: fee,
-      supplier_net_cents: supplierNet,
-      orders: ledger?.length ?? 0,
-      top_suppliers: topSuppliers,
-    };
-  });
-
-// ============================================================================
-// Fee policies
-// ============================================================================
-
-export const listFeePolicies = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
-      .from("mp_fee_policies")
-      .select("id,scope,niche_slug,supplier_id,fee_pct,label,active,created_at")
-      .order("created_at", { ascending: false });
-    if (error) throw error;
-    return data ?? [];
-  });
-
-// ============================================================================
-// Buyer self-service
-// ============================================================================
-
-/** Retorna o perfil de comprador (mp_buyers) das empresas do usuário logado. */
-export const getMyBuyerProfile = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
-      .from("mp_buyers")
-      .select("id,company_id,buyer_type,display_name,delivery_address,status")
-      .limit(1)
-      .maybeSingle();
-    if (error) throw error;
-    return data;
-  });
-
-/** Lista fornecedores ativos visíveis no marketplace (sem exigir Core). */
-export const listActiveSuppliersPublic = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
-      .from("mp_suppliers")
-      .select("id,supplier_type,display_name,description,regions_served,status")
-      .eq("status", "active")
-      .order("display_name", { ascending: true });
-    if (error) throw error;
-    return data ?? [];
-  });
-
-// ============================================================================
-// Audit trail / paginated search / CSV export
-// ============================================================================
-
-/** Eventos da trilha de auditoria de um pedido. */
-export const getMarketplaceOrderEvents = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ order_id: z.string().uuid() }).parse(d))
-  .handler(async ({ context, data }) => {
-    const { data: rows, error } = await context.supabase
-      .from("mp_order_events")
-      .select("id,event_type,notes,actor_display_name,actor_role,created_at")
-      .eq("order_id", data.order_id)
-      .order("created_at", { ascending: true });
-    if (error) throw error;
-    return rows ?? [];
-  });
-
-/** Busca paginada de pedidos (com filtros avançados + texto). */
-const SearchOrdersInput = z.object({
-  status: z.string().optional(),
-  supplierId: z.string().uuid().optional(),
-  buyerId: z.string().uuid().optional(),
-  sinceDays: z.number().int().min(1).max(365).optional(),
-  dateFrom: z.string().optional(),
-  dateTo: z.string().optional(),
-  supplierName: z.string().optional(),
-  query: z.string().optional(),
-  page: z.number().int().min(1).default(1),
-  pageSize: z.number().int().min(1).max(100).default(20),
-});
-export const searchMarketplaceOrders = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => SearchOrdersInput.parse(d))
-  .handler(async ({ context, data }) => {
-    const from = (data.page - 1) * data.pageSize;
-    const to = from + data.pageSize - 1;
-    let q = context.supabase
-      .from("mp_orders")
-      .select(`
-        id, order_number, status, subtotal_cents, fee_pct, fee_cents, total_cents,
-        supplier_net_cents, placed_at, approved_at, rejected_at, invoiced_at, completed_at,
-        notes, decision_notes,
-        supplier:mp_suppliers!inner(id, display_name, supplier_type, company_id),
-        buyer:mp_buyers(id, display_name, buyer_type, company_id),
-        items:mp_order_items(id, name_snapshot, unit, unit_price_cents, qty, line_total_cents)
-      `, { count: "exact" })
-      .order("placed_at", { ascending: false })
-      .range(from, to);
-    if (data.status) q = q.eq("status", data.status);
-    if (data.supplierId) q = q.eq("supplier_id", data.supplierId);
-    if (data.buyerId) q = q.eq("buyer_id", data.buyerId);
-    if (data.sinceDays && !data.dateFrom && !data.dateTo) {
-      const since = new Date(Date.now() - data.sinceDays * 86400_000).toISOString();
-      q = q.gte("placed_at", since);
-    }
-    if (data.dateFrom) q = q.gte("placed_at", new Date(data.dateFrom).toISOString());
-    if (data.dateTo) {
-      const end = new Date(data.dateTo);
-      end.setHours(23, 59, 59, 999);
-      q = q.lte("placed_at", end.toISOString());
-    }
-    if (data.supplierName && data.supplierName.trim()) {
-      q = q.ilike("supplier.display_name", `%${data.supplierName.trim()}%`);
-    }
-    if (data.query && data.query.trim()) {
-      const term = data.query.trim();
-      const asNum = Number(term.replace(/[^0-9]/g, ""));
-      if (Number.isFinite(asNum) && asNum > 0) {
-        q = q.or(`order_number.eq.${asNum},supplier.display_name.ilike.%${term}%`);
-      } else {
-        q = q.ilike("supplier.display_name", `%${term}%`);
-      }
-    }
-    const { data: rows, error, count } = await q;
-    if (error) throw error;
-    return {
-      rows: rows ?? [],
-      total: count ?? 0,
-      page: data.page,
-      pageSize: data.pageSize,
-      totalPages: Math.max(1, Math.ceil((count ?? 0) / data.pageSize)),
-    };
-  });
-
-/** Filtros usados na exportação (CSV/PDF). */
-const ExportFiltersInput = z.object({
-  status: z.string().optional(),
-  supplierId: z.string().uuid().optional(),
-  buyerId: z.string().uuid().optional(),
-  sinceDays: z.number().int().min(1).max(365).optional(),
-  dateFrom: z.string().optional(),
-  dateTo: z.string().optional(),
-  supplierName: z.string().optional(),
-  query: z.string().optional(),
-});
-
-async function queryOrdersForExport(supabase: any, data: z.infer<typeof ExportFiltersInput>) {
-  let q = supabase
-    .from("mp_orders")
-    .select(`
-      order_number, status, subtotal_cents, fee_pct, fee_cents, supplier_net_cents,
-      placed_at, approved_at, rejected_at, invoiced_at, completed_at, decision_notes,
-      supplier:mp_suppliers!inner(display_name, supplier_type),
-      buyer:mp_buyers(display_name)
-    `)
-    .order("placed_at", { ascending: false })
-    .limit(5000);
-  if (data.status) q = q.eq("status", data.status);
-  if (data.supplierId) q = q.eq("supplier_id", data.supplierId);
-  if (data.buyerId) q = q.eq("buyer_id", data.buyerId);
-  if (data.sinceDays && !data.dateFrom && !data.dateTo) {
-    const since = new Date(Date.now() - data.sinceDays * 86400_000).toISOString();
-    q = q.gte("placed_at", since);
-  }
-  if (data.dateFrom) q = q.gte("placed_at", new Date(data.dateFrom).toISOString());
-  if (data.dateTo) {
-    const end = new Date(data.dateTo);
-    end.setHours(23, 59, 59, 999);
-    q = q.lte("placed_at", end.toISOString());
-  }
-  if (data.supplierName && data.supplierName.trim()) {
-    q = q.ilike("supplier.display_name", `%${data.supplierName.trim()}%`);
-  }
-  if (data.query && data.query.trim()) {
-    const term = data.query.trim();
-    const asNum = Number(term.replace(/[^0-9]/g, ""));
-    if (Number.isFinite(asNum) && asNum > 0) {
-      q = q.or(`order_number.eq.${asNum},supplier.display_name.ilike.%${term}%`);
-    } else {
-      q = q.ilike("supplier.display_name", `%${term}%`);
-    }
-  }
-  const { data: rows, error } = await q;
-  if (error) throw error;
-  return rows ?? [];
-}
-
-/** Exporta pedidos filtrados em CSV (string). */
-export const exportMarketplaceOrdersCsv = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => ExportFiltersInput.parse(d))
-  .handler(async ({ context, data }) => {
-    const rows = await queryOrdersForExport(context.supabase, data);
-    const headers = [
-      "pedido","status","fornecedor","tipo_fornecedor","comprador",
-      "bruto_brl","taxa_pct","taxa_brl","liquido_fornecedor_brl",
-      "enviado_em","aprovado_em","recusado_em","faturado_em","concluido_em","decisao",
-    ];
-    const fmtBRL = (c: number) => (c / 100).toFixed(2).replace(".", ",");
-    const fmtPct = (n: number) => (n * 100).toFixed(2).replace(".", ",");
-    const fmtDate = (s: string | null) => (s ? new Date(s).toLocaleString("pt-BR") : "");
-    const escape = (v: any) => {
-      const s = v == null ? "" : String(v);
-      return /[",;\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-    };
-    const lines = [headers.join(";")];
-    rows.forEach((o: any) => {
-      lines.push([
-        o.order_number, o.status,
-        o.supplier?.display_name, o.supplier?.supplier_type,
-        o.buyer?.display_name,
-        fmtBRL(o.subtotal_cents), fmtPct(Number(o.fee_pct)),
-        fmtBRL(o.fee_cents), fmtBRL(o.supplier_net_cents),
-        fmtDate(o.placed_at), fmtDate(o.approved_at), fmtDate(o.rejected_at),
-        fmtDate(o.invoiced_at), fmtDate(o.completed_at),
-        o.decision_notes ?? "",
-      ].map(escape).join(";"));
-    });
-    return { csv: "\uFEFF" + lines.join("\n"), count: rows.length };
-  });
-
-/** Retorna dados estruturados para gerar PDF no cliente (jsPDF/autoTable). */
-export const exportMarketplaceOrdersData = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => ExportFiltersInput.parse(d))
-  .handler(async ({ context, data }) => {
-    const rows = await queryOrdersForExport(context.supabase, data);
-    const totals = rows.reduce(
-      (acc: any, o: any) => {
-        acc.gross += o.subtotal_cents || 0;
-        acc.fee += o.fee_cents || 0;
-        acc.net += o.supplier_net_cents || 0;
-        return acc;
-      },
-      { gross: 0, fee: 0, net: 0 },
-    );
-    return { rows, count: rows.length, totals, generated_at: new Date().toISOString() };
-  });
-
-// ============================================================================
-// Export presets (filtros salvos para reprocessar)
-// ============================================================================
-
-const PresetInput = z.object({
-  id: z.string().uuid().optional(),
-  name: z.string().min(1).max(80),
-  format: z.enum(["csv", "pdf"]).default("csv"),
-  filters: z.record(z.string(), z.any()).default({}),
-});
-export const saveExportPreset = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => PresetInput.parse(d))
-  .handler(async ({ context, data }) => {
-    const payload: any = { ...data, user_id: context.userId };
-    const { data: row, error } = await context.supabase
-      .from("mp_export_presets").upsert(payload).select().single();
-    if (error) throw error;
-    return row;
-  });
-
-export const listExportPresets = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
-      .from("mp_export_presets")
-      .select("id,name,format,filters,last_run_at,last_count,created_at")
-      .eq("user_id", context.userId)
-      .order("created_at", { ascending: false });
-    if (error) throw error;
-    return data ?? [];
-  });
-
-export const deleteExportPreset = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
-  .handler(async ({ context, data }) => {
-    const { error } = await context.supabase
-      .from("mp_export_presets").delete().eq("id", data.id).eq("user_id", context.userId);
-    if (error) throw error;
-    return { ok: true };
-  });
-
-export const touchExportPreset = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z.object({ id: z.string().uuid(), count: z.number().int().min(0) }).parse(d),
+  .handler(async ({ data, context }) =>
+    withInstrumentation('marketplace.createListing', { user_id: context.userId }, async () => {
+      const companyId = await getMyCompanyId(context.supabase, context.userId)
+      if (!companyId) throw new Error('Você precisa estar vinculado a uma empresa para publicar.')
+      const { data: row, error } = await context.supabase
+        .from('eco_marketplace_listings')
+        .insert({ ...data, company_id: companyId })
+        .select('id').single()
+      if (error) throw error
+      return row
+    }),
   )
-  .handler(async ({ context, data }) => {
-    await context.supabase
-      .from("mp_export_presets")
-      .update({ last_run_at: new Date().toISOString(), last_count: data.count })
-      .eq("id", data.id).eq("user_id", context.userId);
-    return { ok: true };
-  });
 
-// ============================================================================
-// Reminder settings
-// ============================================================================
-
-export const getReminderSettings = createServerFn({ method: "GET" })
+export const myListings = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { data } = await context.supabase
-      .from("mp_reminder_settings").select("*").eq("id", 1).maybeSingle();
-    return data ?? { threshold_hours: 24, target_statuses: ["pending_approval","approved","in_production"], active: true };
-  });
+  .handler(async ({ context }) =>
+    withInstrumentation('marketplace.myListings', { user_id: context.userId }, async () => {
+      const companyId = await getMyCompanyId(context.supabase, context.userId)
+      if (!companyId) return []
+      const { data, error } = await context.supabase
+        .from('eco_marketplace_listings')
+        .select('*').eq('company_id', companyId).order('updated_at', { ascending: false })
+      if (error) throw error
+      return data ?? []
+    }),
+  )
 
+/** Cria um pedido de proposta. */
+export const createRequest = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: any) =>
+    z.object({
+      title: z.string().trim().min(3).max(200),
+      scope: z.string().trim().min(10).max(5000),
+      listing_id: z.string().uuid().optional(),
+      target_niche: z.string().trim().max(80).optional(),
+      budget_cents: z.number().int().min(0).optional(),
+      deadline: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+      nda_required: z.boolean().default(false),
+      contract_required: z.boolean().default(true),
+      invited_providers: z.array(z.string().uuid()).max(20).default([]),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) =>
+    withInstrumentation('marketplace.createRequest', { user_id: context.userId }, async () => {
+      const companyId = await getMyCompanyId(context.supabase, context.userId)
+      if (!companyId) throw new Error('Você precisa estar vinculado a uma empresa para abrir pedidos.')
+      const { data: row, error } = await context.supabase
+        .from('eco_marketplace_requests')
+        .insert({
+          ...data,
+          requester_company_id: companyId,
+          requester_user_id: context.userId,
+          status: 'open',
+        })
+        .select('id').single()
+      if (error) throw error
+      return row
+    }),
+  )
 
+/** Meus pedidos (como solicitante) + pedidos onde fui convidado/abertos. */
+export const listRequests = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { scope?: 'mine' | 'inbox' }) =>
+    z.object({ scope: z.enum(['mine', 'inbox']).default('mine') }).parse(d ?? {}),
+  )
+  .handler(async ({ data, context }) =>
+    withInstrumentation('marketplace.listRequests', { user_id: context.userId }, async () => {
+      const companyId = await getMyCompanyId(context.supabase, context.userId)
+      let q = context.supabase
+        .from('eco_marketplace_requests')
+        .select('id, title, scope, status, budget_cents, deadline, nda_required, contract_required, created_at, requester_company_id, target_niche')
+        .order('created_at', { ascending: false }).limit(100)
+      if (data.scope === 'mine' && companyId) q = q.eq('requester_company_id', companyId)
+      if (data.scope === 'inbox') q = q.eq('status', 'open')
+      const { data: rows, error } = await q
+      if (error) throw error
+      return rows ?? []
+    }),
+  )
+
+export const submitQuote = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: any) =>
+    z.object({
+      request_id: z.string().uuid(),
+      amount_cents: z.number().int().min(100),
+      scope_details: z.string().trim().min(10).max(5000),
+      delivery_days: z.number().int().min(1).max(3650).optional(),
+      message: z.string().trim().max(2000).optional(),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) =>
+    withInstrumentation('marketplace.submitQuote', { user_id: context.userId }, async () => {
+      const companyId = await getMyCompanyId(context.supabase, context.userId)
+      if (!companyId) throw new Error('Você precisa estar vinculado a uma empresa para enviar propostas.')
+      const { data: row, error } = await context.supabase
+        .from('eco_marketplace_quotes')
+        .insert({
+          ...data,
+          provider_company_id: companyId,
+          provider_user_id: context.userId,
+          status: 'sent',
+        })
+        .select('id').single()
+      if (error) throw error
+      return row
+    }),
+  )
+
+/** Aceita uma proposta: cria engagement com taxa de intermediação calculada. */
+export const acceptQuote = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { quote_id: string }) =>
+    z.object({ quote_id: z.string().uuid() }).parse(d),
+  )
+  .handler(async ({ data, context }) =>
+    withInstrumentation('marketplace.acceptQuote', { user_id: context.userId }, async () => {
+      const { data: quote, error: qErr } = await context.supabase
+        .from('eco_marketplace_quotes')
+        .select('id, request_id, provider_company_id, amount_cents, status, eco_marketplace_requests!inner(requester_company_id, target_niche)')
+        .eq('id', data.quote_id).single()
+      if (qErr || !quote) throw qErr ?? new Error('Proposta não encontrada')
+      if (quote.status !== 'sent') throw new Error('Proposta não está disponível para aceite')
+
+      const niche = (quote as any).eco_marketplace_requests?.target_niche ?? null
+      const { data: fee } = await context.supabase
+        .from('mp_fee_policies').select('fee_pct')
+        .or(`niche_slug.eq.${niche},scope.eq.default`)
+        .eq('active', true).order('scope').limit(1).maybeSingle()
+      const feePct = Number(fee?.fee_pct ?? DEFAULT_FEE_PCT)
+      const feeCents = Math.round(quote.amount_cents * feePct)
+      const feeBps = Math.round(feePct * 10000)
+
+      const { data: eng, error: eErr } = await context.supabase
+        .from('eco_marketplace_engagements')
+        .insert({
+          quote_id: quote.id,
+          request_id: quote.request_id,
+          requester_company_id: (quote as any).eco_marketplace_requests.requester_company_id,
+          provider_company_id: quote.provider_company_id,
+          gmv_cents: quote.amount_cents,
+          intermediation_fee_cents: feeCents,
+          intermediation_fee_bps: feeBps,
+          status: 'active',
+        })
+        .select('id').single()
+      if (eErr) throw eErr
+
+      await context.supabase.from('eco_marketplace_quotes').update({ status: 'accepted' }).eq('id', quote.id)
+      await context.supabase.from('eco_marketplace_requests').update({ status: 'awarded' }).eq('id', quote.request_id)
+      return eng
+    }),
+  )
+
+export const submitReview = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: any) =>
+    z.object({
+      engagement_id: z.string().uuid(),
+      reviewed_company_id: z.string().uuid(),
+      rating: z.number().int().min(1).max(5),
+      rating_quality: z.number().int().min(1).max(5).optional(),
+      rating_deadline: z.number().int().min(1).max(5).optional(),
+      rating_communication: z.number().int().min(1).max(5).optional(),
+      rating_price: z.number().int().min(1).max(5).optional(),
+      comment: z.string().trim().max(2000).optional(),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) =>
+    withInstrumentation('marketplace.submitReview', { user_id: context.userId }, async () => {
+      const companyId = await getMyCompanyId(context.supabase, context.userId)
+      if (!companyId) throw new Error('Apenas membros de empresa podem avaliar.')
+      const { data: row, error } = await context.supabase
+        .from('eco_marketplace_reviews')
+        .insert({
+          ...data,
+          reviewer_company_id: companyId,
+          reviewer_user_id: context.userId,
+        })
+        .select('id').single()
+      if (error) throw error
+      return row
+    }),
+  )
+
+/** Indicação empresa→empresa (B recomenda C para A, ou B indica C como prestador). */
+export const createReferral = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: any) =>
+    z.object({
+      referred_company_id: z.string().uuid(),
+      target_company_id: z.string().uuid().optional(),
+      target_email: z.string().trim().email().max(255).optional(),
+      context_note: z.string().trim().max(1000).optional(),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) =>
+    withInstrumentation('marketplace.createReferral', { user_id: context.userId }, async () => {
+      const companyId = await getMyCompanyId(context.supabase, context.userId)
+      if (!companyId) throw new Error('Apenas membros de empresa podem indicar.')
+      const { data: row, error } = await context.supabase
+        .from('eco_marketplace_referrals')
+        .insert({
+          ...data,
+          referrer_company_id: companyId,
+          referrer_user_id: context.userId,
+          status: 'sent',
+        })
+        .select('id').single()
+      if (error) throw error
+      return row
+    }),
+  )
