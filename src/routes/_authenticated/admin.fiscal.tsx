@@ -238,6 +238,8 @@ function AdminFiscalPage() {
   };
 
   // Bulk selection for queued resends
+  const BULK_RESEND_MAX = 20;
+  const REASON_STORAGE_KEY = "fiscal.bulk-resend.last-reason";
   const [selectedRunIds, setSelectedRunIds] = useState<Set<string>>(new Set());
   const toggleRunSelected = (id: string) => {
     setSelectedRunIds((prev) => {
@@ -246,6 +248,18 @@ function AdminFiscalPage() {
       return n;
     });
   };
+
+  // Confirmation dialog state for bulk resend
+  const [bulkConfirm, setBulkConfirm] = useState<{
+    runs: Array<{ id: string; year: number; month: number }>;
+    reason: string;
+    error?: string;
+  } | null>(null);
+  // Last-used reason (persisted locally so repeat reenvios skip retyping)
+  const [lastBulkReason, setLastBulkReason] = useState<string>(() => {
+    if (typeof window === "undefined") return "";
+    try { return window.localStorage.getItem(REASON_STORAGE_KEY) ?? ""; } catch { return ""; }
+  });
 
   const q = useQuery({
     queryKey: ["admin-fiscal", year, month],
