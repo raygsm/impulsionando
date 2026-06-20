@@ -166,11 +166,14 @@ export function ChrismedFooter() {
           <div className="text-[11px] uppercase tracking-wider text-amber-700/90 mb-2">Atendimento</div>
           <ul className="space-y-1">
             <li><Link to="/chrismed/dra-cristiane" className="hover:text-emerald-950">Dra. Cristiane Alencar</Link></li>
-            <li><Link to="/chrismed/internacional" className="hover:text-emerald-950">International patients</Link></li>
-            <li><Link to="/chrismed/clinica" className="hover:text-emerald-950">Clínica CrisMed</Link></li>
-            <li><Link to="/chrismed/ocupacional" className="hover:text-emerald-950">Medicina ocupacional</Link></li>
+            <li><Link to="/chrismed/teleconsulta" className="hover:text-emerald-950">Teleconsulta</Link></li>
+            <li><Link to="/chrismed/domiciliar" className="hover:text-emerald-950">Consulta domiciliar</Link></li>
+            <li><Link to="/chrismed/consultorio" className="hover:text-emerald-950">Consulta no consultório</Link></li>
+            <li><Link to="/chrismed/ocupacional" className="hover:text-emerald-950">Empresa · Medicina ocupacional</Link></li>
+            <li><Link to="/chrismed/medicos" className="hover:text-emerald-950">Área dos Médicos</Link></li>
           </ul>
         </div>
+
         <div>
           <div className="text-[11px] uppercase tracking-wider text-amber-700/90 mb-2">Contato</div>
           <ul className="space-y-1">
