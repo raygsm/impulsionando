@@ -30,6 +30,7 @@ type FiscalSearch = {
   af_kind?: string; af_kinds?: string;
   th_recipient?: string; th_status?: "all" | "sent" | "failed";
   th_year?: number; th_month?: number; th_page?: number;
+  br_reason?: string; br_ids?: string;
 };
 
 function parseFiscalSearch(raw: Record<string, unknown>): FiscalSearch {
@@ -46,6 +47,9 @@ function parseFiscalSearch(raw: Record<string, unknown>): FiscalSearch {
   s.th_recipient = str("th_recipient");
   const st = str("th_status"); if (st === "all" || st === "sent" || st === "failed") s.th_status = st;
   s.th_year = num("th_year"); s.th_month = num("th_month"); s.th_page = num("th_page");
+  s.br_reason = str("br_reason"); s.br_ids = str("br_ids");
+  // Truncate excessively long reason in URL to keep links shareable
+  if (s.br_reason && s.br_reason.length > 500) s.br_reason = s.br_reason.slice(0, 500);
   return s;
 }
 
