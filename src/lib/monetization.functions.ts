@@ -61,30 +61,37 @@ async function requireStaff(supabase: any, userId: string) {
 export const getMonetizationModel = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { company_id: string }) => z.object({ company_id: z.string().uuid() }).parse(d))
-  .handler(async ({ data, context }) => {
-    const { data: model, error } = await context.supabase
-      .from('core_monetization_models')
-      .select(
-        'id, company_id, model, monthly_fee_cents, setup_fee_cents, min_payout_cents, payout_frequency, covered_events, version, is_active, effective_from, effective_to, accepted_by, accepted_at, signature_hash, notes, created_at, updated_at',
-      )
-      .eq('company_id', data.company_id)
-      .eq('is_active', true)
-      .order('version', { ascending: false })
-      .limit(1)
-      .maybeSingle()
-    if (error) throw error
-    if (!model) return { model: null, rates: [] as Array<z.infer<typeof rateInput>> }
+  .handler(async ({ data, context }) =>
+    withInstrumentation(
+      'monetization.getMonetizationModel',
+      { user_id: context.userId, company_id: data.company_id },
+      async () => {
+        const { data: model, error } = await context.supabase
+          .from('core_monetization_models')
+          .select(
+            'id, company_id, model, monthly_fee_cents, setup_fee_cents, min_payout_cents, payout_frequency, covered_events, version, is_active, effective_from, effective_to, accepted_by, accepted_at, signature_hash, notes, created_at, updated_at',
+          )
+          .eq('company_id', data.company_id)
+          .eq('is_active', true)
+          .order('version', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        if (error) throw error
+        if (!model) return { model: null, rates: [] as Array<z.infer<typeof rateInput>> }
 
-    const { data: rates, error: ratesErr } = await context.supabase
-      .from('core_revshare_rates')
-      .select('id, event_type, percent_bps, min_bps, max_bps, provider_account_id, is_active')
-      .eq('model_id', model.id)
-      .eq('is_active', true)
-      .order('event_type')
-    if (ratesErr) throw ratesErr
+        const { data: rates, error: ratesErr } = await context.supabase
+          .from('core_revshare_rates')
+          .select('id, event_type, percent_bps, min_bps, max_bps, provider_account_id, is_active')
+          .eq('model_id', model.id)
+          .eq('is_active', true)
+          .order('event_type')
+        if (ratesErr) throw ratesErr
 
-    return { model, rates: rates ?? [] }
-  })
+        return { model, rates: rates ?? [] }
+      },
+    ),
+  )
+
 
 /** Lista o modelo de todas as empresas — visão CORE para o dashboard. */
 export const listAllMonetizationModels = createServerFn({ method: 'GET' })
