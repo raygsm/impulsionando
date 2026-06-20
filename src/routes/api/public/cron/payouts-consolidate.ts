@@ -42,9 +42,6 @@ export const Route = createFileRoute('/api/public/cron/payouts-consolidate')({
 
 
 
-        const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
-        const now = new Date()
-        const results: Record<string, unknown> = {}
 
         for (const freq of ['daily', 'weekly', 'biweekly', 'monthly']) {
           const period = frequencyToPeriod(freq, now)
