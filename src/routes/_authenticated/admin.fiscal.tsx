@@ -419,7 +419,14 @@ function AdminFiscalPage() {
   const bulkResendMut = useMutation({
     mutationFn: async (input: { reason: string; runs: Array<{ id: string; year: number; month: number }> }) => {
       const results: Array<{ id: string; year: number; month: number; ok: boolean; error?: string }> = [];
-      for (const r of input.runs) {
+      setBulkProgress({ done: 0, total: input.runs.length });
+      for (let i = 0; i < input.runs.length; i++) {
+        const r = input.runs[i];
+        setBulkProgress({
+          done: i,
+          total: input.runs.length,
+          current: `${String(r.month).padStart(2, "0")}/${r.year}`,
+        });
         try {
           await resendEmail({ data: {
             year: r.year, month: r.month,
@@ -432,19 +439,73 @@ function AdminFiscalPage() {
           results.push({ ...r, ok: false, error: e?.message ?? String(e) });
         }
       }
+      setBulkProgress({ done: input.runs.length, total: input.runs.length });
       return results;
     },
-    onSuccess: (results) => {
+    onSuccess: (results, variables) => {
       const ok = results.filter((r) => r.ok).length;
       const fail = results.length - ok;
       setFeedback(`Reenvio em lote: ${ok} ok, ${fail} falha(s). Cada reenvio foi gravado na auditoria.`);
+      setBulkSummary({ ok, fail, reason: variables.reason, results });
+      setLastBulkSelection({
+        runs: variables.runs.map((r) => ({ id: r.id, year: r.year, month: r.month })),
+        reason: variables.reason,
+      });
+      // Persistir motivo + ids na URL para reabrir a mesma seleção em outro acesso
+      patchSearch({
+        br_reason: variables.reason,
+        br_ids: variables.runs.map((r) => r.id).join(","),
+      });
       setSelectedRunIds(new Set());
       qc.invalidateQueries({ queryKey: ["admin-fiscal-logs"] });
       qc.invalidateQueries({ queryKey: ["admin-fiscal-failed"] });
       qc.invalidateQueries({ queryKey: ["admin-fiscal-status"] });
     },
     onError: (e: any) => setFeedback(`Erro no reenvio em lote: ${e?.message ?? e}`),
+    onSettled: () => {
+      // Mantém a barra visível por 1.5s pro usuário ver "X/X concluído"
+      setTimeout(() => setBulkProgress(null), 1500);
+    },
   });
+
+  // Reabre a confirmação com a última seleção (estado em memória ou reconstruída via URL)
+  const repeatLastBulk = () => {
+    const sourceRuns = lastBulkSelection?.runs
+      ?? (search.br_ids
+        ? search.br_ids.split(",").filter(Boolean).map((id) => ({ id, year: 0, month: 0 }))
+        : []);
+    const reason = lastBulkSelection?.reason ?? search.br_reason ?? lastBulkReason ?? "";
+    if (sourceRuns.length === 0) {
+      setFeedback("Nenhuma seleção anterior para repetir.");
+      return;
+    }
+    // Enriquece com year/month/error a partir da fila atual
+    const queue: any[] = failedQ.data?.failed ?? [];
+    const queueById = new Map(queue.map((f: any) => [f.id as string, f]));
+    const runs = sourceRuns
+      .map((r) => {
+        const f = queueById.get(r.id);
+        if (f) return { id: f.id, year: f.year, month: f.month, error: f.error_message ?? undefined };
+        // Se já saiu da fila (foi reenviado com sucesso), preserva os metadados que tivermos
+        if (r.year && r.month) return { id: r.id, year: r.year, month: r.month, error: "não está mais na fila" };
+        return null;
+      })
+      .filter(Boolean) as Array<{ id: string; year: number; month: number; error?: string }>;
+    if (runs.length === 0) {
+      setFeedback("Nenhuma execução da última seleção continua na fila — nada a repetir.");
+      return;
+    }
+    if (runs.length > BULK_RESEND_MAX) {
+      setFeedback(
+        `Repetição bloqueada: ${runs.length} execuções excedem o limite de ${BULK_RESEND_MAX} por ação.`,
+      );
+      return;
+    }
+    setSelectedRunIds(new Set(runs.map((r) => r.id)));
+    setBulkConfirm({ runs, reason });
+    setBulkSummary(null);
+  };
+
 
   const schedMut = useMutation({
     mutationFn: () => saveSchedule({ data: schedDraft }),
