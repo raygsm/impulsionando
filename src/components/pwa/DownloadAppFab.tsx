@@ -26,13 +26,10 @@ function isStandalone(): boolean {
 }
 
 /**
- * Botão flutuante "Baixar APP" — sempre visível para todos os usuários até
- * o app ser instalado. Trata 3 cenários:
- *   - Android/Desktop com suporte a beforeinstallprompt → instala direto
- *   - iOS Safari → abre diálogo com instruções (Compartilhar → Adicionar à Tela de Início)
- *   - Outros → leva para /app com instruções completas
- *
- * Some quando: já instalado (standalone) ou dispensado nos últimos 7 dias.
+ * Botão flutuante "Baixar APP" — SEMPRE visível para todos os usuários,
+ * sem exceção. Única exceção lógica: quando o próprio app já está rodando
+ * instalado (display-mode: standalone) — nesse caso o usuário já está dentro
+ * do app e não precisa baixá-lo de novo.
  */
 export function DownloadAppFab() {
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
