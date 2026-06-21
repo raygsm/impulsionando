@@ -118,7 +118,14 @@ function AgendaHome() {
 
       <Card className="shadow-card">
         <div className="p-4 border-b flex items-center justify-between">
-          <div className="flex items-center gap-2 font-medium"><Clock className="w-4 h-4" />Hoje · {today.toLocaleDateString("pt-BR")}</div>
+          <div className="flex items-center gap-2 font-medium">
+            <Clock className="w-4 h-4" />Hoje · {today.toLocaleDateString("pt-BR")}
+            {liveOn && (
+              <Badge variant="outline" className="ml-2 bg-emerald-500/10 text-emerald-700 border-emerald-500/30 text-[10px]">
+                <Radio className="w-3 h-3 mr-1 animate-pulse" /> Ao vivo
+              </Badge>
+            )}
+          </div>
           <Link to="/agenda/schedules" className="text-xs text-primary inline-flex items-center gap-1"><ListChecks className="w-3 h-3" />Gerenciar horários</Link>
         </div>
         <div className="divide-y">
