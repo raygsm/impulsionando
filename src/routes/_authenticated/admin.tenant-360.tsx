@@ -41,6 +41,9 @@ function Tenant360Page() {
     enabled: Boolean(companyId),
   });
 
+  const insightsFn = useServerFn(getTenantInsights);
+  const insights = useMutation({ mutationFn: (cid: string) => insightsFn({ data: { companyId: cid } }) });
+
   return (
     <div className="p-6 space-y-6">
       <div>
