@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
@@ -132,7 +132,9 @@ function CockpitTenantsPage() {
                       <HealthDot v={t.health} />
                     </td>
                     <td className="p-2">
-                      <div className="font-medium">{t.name}</div>
+                      <Link to="/admin/tenant/$id" params={{ id: t.id }} className="font-medium hover:underline">
+                        {t.name}
+                      </Link>
                       <div className="text-xs text-muted-foreground">
                         {t.subdomain ?? "—"} {t.demo ? "· demo" : ""} {t.master ? "· master" : ""}
                       </div>

@@ -483,6 +483,7 @@ import { Route as AuthenticatedCoreIntegracoesMercadopagoRouteImport } from './r
 import { Route as AuthenticatedCoreIntegracoesDiagnosticoRouteImport } from './routes/_authenticated/core.integracoes.diagnostico'
 import { Route as AuthenticatedCoreClienteIdRouteImport } from './routes/_authenticated/core.cliente.$id'
 import { Route as AuthenticatedBarMarketplaceNovoPedidoRouteImport } from './routes/_authenticated/bar.marketplace.novo-pedido'
+import { Route as AuthenticatedAdminTenantIdRouteImport } from './routes/_authenticated/admin.tenant.$id'
 import { Route as AuthenticatedAdminModulosClonagemRouteImport } from './routes/_authenticated/admin.modulos.clonagem'
 import { Route as AuthenticatedAdminIntegracoesMercadoPagoRouteImport } from './routes/_authenticated/admin.integracoes.mercado-pago'
 import { Route as ApiPublicPaymentsCloseInvoiceReplayRouteImport } from './routes/api/public/payments/close-invoice.replay'
@@ -3127,6 +3128,12 @@ const AuthenticatedBarMarketplaceNovoPedidoRoute =
     path: '/novo-pedido',
     getParentRoute: () => AuthenticatedBarMarketplaceRoute,
   } as any)
+const AuthenticatedAdminTenantIdRoute =
+  AuthenticatedAdminTenantIdRouteImport.update({
+    id: '/admin/tenant/$id',
+    path: '/admin/tenant/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminModulosClonagemRoute =
   AuthenticatedAdminModulosClonagemRouteImport.update({
     id: '/admin/modulos/clonagem',
@@ -3587,6 +3594,7 @@ export interface FileRoutesByFullPath {
   '/sales/': typeof AuthenticatedSalesIndexRoute
   '/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
+  '/admin/tenant/$id': typeof AuthenticatedAdminTenantIdRoute
   '/bar/marketplace/novo-pedido': typeof AuthenticatedBarMarketplaceNovoPedidoRoute
   '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
   '/core/integracoes/diagnostico': typeof AuthenticatedCoreIntegracoesDiagnosticoRoute
@@ -4057,6 +4065,7 @@ export interface FileRoutesByTo {
   '/sales': typeof AuthenticatedSalesIndexRoute
   '/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
+  '/admin/tenant/$id': typeof AuthenticatedAdminTenantIdRoute
   '/bar/marketplace/novo-pedido': typeof AuthenticatedBarMarketplaceNovoPedidoRoute
   '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
   '/core/integracoes/diagnostico': typeof AuthenticatedCoreIntegracoesDiagnosticoRoute
@@ -4541,6 +4550,7 @@ export interface FileRoutesById {
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
   '/_authenticated/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   '/_authenticated/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
+  '/_authenticated/admin/tenant/$id': typeof AuthenticatedAdminTenantIdRoute
   '/_authenticated/bar/marketplace/novo-pedido': typeof AuthenticatedBarMarketplaceNovoPedidoRoute
   '/_authenticated/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
   '/_authenticated/core/integracoes/diagnostico': typeof AuthenticatedCoreIntegracoesDiagnosticoRoute
@@ -5024,6 +5034,7 @@ export interface FileRouteTypes {
     | '/sales/'
     | '/admin/integracoes/mercado-pago'
     | '/admin/modulos/clonagem'
+    | '/admin/tenant/$id'
     | '/bar/marketplace/novo-pedido'
     | '/core/cliente/$id'
     | '/core/integracoes/diagnostico'
@@ -5494,6 +5505,7 @@ export interface FileRouteTypes {
     | '/sales'
     | '/admin/integracoes/mercado-pago'
     | '/admin/modulos/clonagem'
+    | '/admin/tenant/$id'
     | '/bar/marketplace/novo-pedido'
     | '/core/cliente/$id'
     | '/core/integracoes/diagnostico'
@@ -5977,6 +5989,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sales/'
     | '/_authenticated/admin/integracoes/mercado-pago'
     | '/_authenticated/admin/modulos/clonagem'
+    | '/_authenticated/admin/tenant/$id'
     | '/_authenticated/bar/marketplace/novo-pedido'
     | '/_authenticated/core/cliente/$id'
     | '/_authenticated/core/integracoes/diagnostico'
@@ -9520,6 +9533,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBarMarketplaceNovoPedidoRouteImport
       parentRoute: typeof AuthenticatedBarMarketplaceRoute
     }
+    '/_authenticated/admin/tenant/$id': {
+      id: '/_authenticated/admin/tenant/$id'
+      path: '/admin/tenant/$id'
+      fullPath: '/admin/tenant/$id'
+      preLoaderRoute: typeof AuthenticatedAdminTenantIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/modulos/clonagem': {
       id: '/_authenticated/admin/modulos/clonagem'
       path: '/admin/modulos/clonagem'
@@ -10344,6 +10364,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSaibaMaisIndexRoute: typeof AuthenticatedSaibaMaisIndexRoute
   AuthenticatedAdminIntegracoesMercadoPagoRoute: typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   AuthenticatedAdminModulosClonagemRoute: typeof AuthenticatedAdminModulosClonagemRoute
+  AuthenticatedAdminTenantIdRoute: typeof AuthenticatedAdminTenantIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -10546,6 +10567,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminIntegracoesMercadoPagoRoute,
   AuthenticatedAdminModulosClonagemRoute:
     AuthenticatedAdminModulosClonagemRoute,
+  AuthenticatedAdminTenantIdRoute: AuthenticatedAdminTenantIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
