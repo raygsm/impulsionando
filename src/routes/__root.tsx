@@ -200,6 +200,7 @@ function RootComponent() {
       <LGPDBanner />
       <OfficialWhatsAppFAB />
       <ImpulsionandoBrasilFAB />
+      <DownloadAppFab />
       <DemoAccessGate />
     </QueryClientProvider>
   );
