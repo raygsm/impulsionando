@@ -4,6 +4,11 @@ Fluxos prontos para importar no N8N (Cloud ou self-hosted). Todos consomem
 **eventos** publicados pelo backend via webhook (Lovable Cloud) e disparam
 ações em **WhatsApp (Z-API/Meta)**, **E-mail (Resend)** e **CRM interno**.
 
+> **Governança:** todo workflow opera pela ótica do funil Impulsionando
+> (captar → converter → relacionar → reter → expandir) e tem variantes por
+> nicho. Mapa workflow→estágio, contrato dos agentes IA e checklist de
+> aceitação em `docs/CORE_GROWTH_GOVERNANCE.md`.
+
 ## Eventos esperados (contrato)
 
 | Evento | Origem | Quando dispara | Payload mínimo |
