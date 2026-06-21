@@ -436,7 +436,9 @@ import { Route as ApiPublicHooksN8nLogRouteImport } from './routes/api/public/ho
 import { Route as ApiPublicHooksMpPendingRemindersRouteImport } from './routes/api/public/hooks/mp-pending-reminders'
 import { Route as ApiPublicHooksMarocasReportRouteImport } from './routes/api/public/hooks/marocas-report'
 import { Route as ApiPublicHooksMarketingLeadNotifyRouteImport } from './routes/api/public/hooks/marketing-lead-notify'
+import { Route as ApiPublicHooksFocusNfeRouteImport } from './routes/api/public/hooks/focus-nfe'
 import { Route as ApiPublicHooksFiscalMonthlyEmailRouteImport } from './routes/api/public/hooks/fiscal-monthly-email'
+import { Route as ApiPublicHooksDispatchFiscalRouteImport } from './routes/api/public/hooks/dispatch-fiscal'
 import { Route as ApiPublicHooksCorePullChrismedRouteImport } from './routes/api/public/hooks/core-pull-chrismed'
 import { Route as ApiPublicHooksCoreNotificationEventRouteImport } from './routes/api/public/hooks/core-notification-event'
 import { Route as ApiPublicHooksCommsSelfTestRouteImport } from './routes/api/public/hooks/comms-self-test'
@@ -2838,10 +2840,21 @@ const ApiPublicHooksMarketingLeadNotifyRoute =
     path: '/api/public/hooks/marketing-lead-notify',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksFocusNfeRoute = ApiPublicHooksFocusNfeRouteImport.update({
+  id: '/api/public/hooks/focus-nfe',
+  path: '/api/public/hooks/focus-nfe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksFiscalMonthlyEmailRoute =
   ApiPublicHooksFiscalMonthlyEmailRouteImport.update({
     id: '/api/public/hooks/fiscal-monthly-email',
     path: '/api/public/hooks/fiscal-monthly-email',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksDispatchFiscalRoute =
+  ApiPublicHooksDispatchFiscalRouteImport.update({
+    id: '/api/public/hooks/dispatch-fiscal',
+    path: '/api/public/hooks/dispatch-fiscal',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicHooksCorePullChrismedRoute =
@@ -3538,7 +3551,9 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/core-notification-event': typeof ApiPublicHooksCoreNotificationEventRoute
   '/api/public/hooks/core-pull-chrismed': typeof ApiPublicHooksCorePullChrismedRoute
+  '/api/public/hooks/dispatch-fiscal': typeof ApiPublicHooksDispatchFiscalRoute
   '/api/public/hooks/fiscal-monthly-email': typeof ApiPublicHooksFiscalMonthlyEmailRoute
+  '/api/public/hooks/focus-nfe': typeof ApiPublicHooksFocusNfeRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/marocas-report': typeof ApiPublicHooksMarocasReportRoute
   '/api/public/hooks/mp-pending-reminders': typeof ApiPublicHooksMpPendingRemindersRoute
@@ -3997,7 +4012,9 @@ export interface FileRoutesByTo {
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/core-notification-event': typeof ApiPublicHooksCoreNotificationEventRoute
   '/api/public/hooks/core-pull-chrismed': typeof ApiPublicHooksCorePullChrismedRoute
+  '/api/public/hooks/dispatch-fiscal': typeof ApiPublicHooksDispatchFiscalRoute
   '/api/public/hooks/fiscal-monthly-email': typeof ApiPublicHooksFiscalMonthlyEmailRoute
+  '/api/public/hooks/focus-nfe': typeof ApiPublicHooksFocusNfeRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/marocas-report': typeof ApiPublicHooksMarocasReportRoute
   '/api/public/hooks/mp-pending-reminders': typeof ApiPublicHooksMpPendingRemindersRoute
@@ -4470,7 +4487,9 @@ export interface FileRoutesById {
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/core-notification-event': typeof ApiPublicHooksCoreNotificationEventRoute
   '/api/public/hooks/core-pull-chrismed': typeof ApiPublicHooksCorePullChrismedRoute
+  '/api/public/hooks/dispatch-fiscal': typeof ApiPublicHooksDispatchFiscalRoute
   '/api/public/hooks/fiscal-monthly-email': typeof ApiPublicHooksFiscalMonthlyEmailRoute
+  '/api/public/hooks/focus-nfe': typeof ApiPublicHooksFocusNfeRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/marocas-report': typeof ApiPublicHooksMarocasReportRoute
   '/api/public/hooks/mp-pending-reminders': typeof ApiPublicHooksMpPendingRemindersRoute
@@ -4942,7 +4961,9 @@ export interface FileRouteTypes {
     | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/core-notification-event'
     | '/api/public/hooks/core-pull-chrismed'
+    | '/api/public/hooks/dispatch-fiscal'
     | '/api/public/hooks/fiscal-monthly-email'
+    | '/api/public/hooks/focus-nfe'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/marocas-report'
     | '/api/public/hooks/mp-pending-reminders'
@@ -5401,7 +5422,9 @@ export interface FileRouteTypes {
     | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/core-notification-event'
     | '/api/public/hooks/core-pull-chrismed'
+    | '/api/public/hooks/dispatch-fiscal'
     | '/api/public/hooks/fiscal-monthly-email'
+    | '/api/public/hooks/focus-nfe'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/marocas-report'
     | '/api/public/hooks/mp-pending-reminders'
@@ -5873,7 +5896,9 @@ export interface FileRouteTypes {
     | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/core-notification-event'
     | '/api/public/hooks/core-pull-chrismed'
+    | '/api/public/hooks/dispatch-fiscal'
     | '/api/public/hooks/fiscal-monthly-email'
+    | '/api/public/hooks/focus-nfe'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/marocas-report'
     | '/api/public/hooks/mp-pending-reminders'
@@ -6032,7 +6057,9 @@ export interface RootRouteChildren {
   ApiPublicHooksCommsSelfTestRoute: typeof ApiPublicHooksCommsSelfTestRoute
   ApiPublicHooksCoreNotificationEventRoute: typeof ApiPublicHooksCoreNotificationEventRoute
   ApiPublicHooksCorePullChrismedRoute: typeof ApiPublicHooksCorePullChrismedRoute
+  ApiPublicHooksDispatchFiscalRoute: typeof ApiPublicHooksDispatchFiscalRoute
   ApiPublicHooksFiscalMonthlyEmailRoute: typeof ApiPublicHooksFiscalMonthlyEmailRoute
+  ApiPublicHooksFocusNfeRoute: typeof ApiPublicHooksFocusNfeRoute
   ApiPublicHooksMarketingLeadNotifyRoute: typeof ApiPublicHooksMarketingLeadNotifyRoute
   ApiPublicHooksMarocasReportRoute: typeof ApiPublicHooksMarocasReportRoute
   ApiPublicHooksMpPendingRemindersRoute: typeof ApiPublicHooksMpPendingRemindersRoute
@@ -9046,11 +9073,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksMarketingLeadNotifyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/focus-nfe': {
+      id: '/api/public/hooks/focus-nfe'
+      path: '/api/public/hooks/focus-nfe'
+      fullPath: '/api/public/hooks/focus-nfe'
+      preLoaderRoute: typeof ApiPublicHooksFocusNfeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/fiscal-monthly-email': {
       id: '/api/public/hooks/fiscal-monthly-email'
       path: '/api/public/hooks/fiscal-monthly-email'
       fullPath: '/api/public/hooks/fiscal-monthly-email'
       preLoaderRoute: typeof ApiPublicHooksFiscalMonthlyEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/dispatch-fiscal': {
+      id: '/api/public/hooks/dispatch-fiscal'
+      path: '/api/public/hooks/dispatch-fiscal'
+      fullPath: '/api/public/hooks/dispatch-fiscal'
+      preLoaderRoute: typeof ApiPublicHooksDispatchFiscalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/core-pull-chrismed': {
@@ -10592,7 +10633,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksCoreNotificationEventRoute:
     ApiPublicHooksCoreNotificationEventRoute,
   ApiPublicHooksCorePullChrismedRoute: ApiPublicHooksCorePullChrismedRoute,
+  ApiPublicHooksDispatchFiscalRoute: ApiPublicHooksDispatchFiscalRoute,
   ApiPublicHooksFiscalMonthlyEmailRoute: ApiPublicHooksFiscalMonthlyEmailRoute,
+  ApiPublicHooksFocusNfeRoute: ApiPublicHooksFocusNfeRoute,
   ApiPublicHooksMarketingLeadNotifyRoute:
     ApiPublicHooksMarketingLeadNotifyRoute,
   ApiPublicHooksMarocasReportRoute: ApiPublicHooksMarocasReportRoute,
