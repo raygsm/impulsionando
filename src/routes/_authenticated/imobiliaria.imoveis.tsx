@@ -14,8 +14,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Trash2, Pencil } from "lucide-react";
+import { Plus, Trash2, Pencil, Radio } from "lucide-react";
 import { toast } from "sonner";
+import { useRealtimeAvailability } from "@/hooks/use-realtime-availability";
 
 export const Route = createFileRoute("/_authenticated/imobiliaria/imoveis")({
   head: () => ({ meta: [{ title: "Imóveis — Imobiliária" }] }),
