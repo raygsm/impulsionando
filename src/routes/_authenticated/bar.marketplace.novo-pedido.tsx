@@ -14,8 +14,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { ShoppingCart, ArrowLeft, Trash2, Plus, Minus } from "lucide-react";
+import { ShoppingCart, ArrowLeft, Trash2, Plus, Minus, Radio, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { useRealtimeAvailability } from "@/hooks/use-realtime-availability";
 
 export const Route = createFileRoute("/_authenticated/bar/marketplace/novo-pedido")({
   component: NewOrderPage,
@@ -53,6 +54,14 @@ function NewOrderPage() {
   const { data: catalog } = useQuery({
     queryKey: ["mp-catalog", supplierId],
     queryFn: () => catalogFn({ data: { supplierId: supplierId! } }),
+    enabled: !!supplierId,
+  });
+
+  // Estoque ao vivo: sincroniza mp_catalog_items deste fornecedor sem refetch.
+  const { liveOn } = useRealtimeAvailability({
+    table: "mp_catalog_items",
+    filter: { column: "supplier_id", value: supplierId },
+    queryKey: ["mp-catalog", supplierId],
     enabled: !!supplierId,
   });
 
@@ -178,24 +187,59 @@ function NewOrderPage() {
             {supplierId && (
               <Card>
                 <CardHeader>
-                  <CardTitle>2. Catálogo</CardTitle>
-                  <CardDescription>Adicione itens ao carrinho.</CardDescription>
+                  <CardTitle className="flex items-center justify-between gap-2">
+                    <span>2. Catálogo</span>
+                    {liveOn && (
+                      <Badge variant="outline" className="bg-emerald-500/10 text-emerald-700 border-emerald-500/30 text-[10px]">
+                        <Radio className="w-3 h-3 mr-1 animate-pulse" /> Estoque ao vivo
+                      </Badge>
+                    )}
+                  </CardTitle>
+                  <CardDescription>Adicione itens ao carrinho. O estoque do fornecedor atualiza em tempo real.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  {(catalog ?? []).filter((i: any) => i.active).map((i: any) => (
-                    <div key={i.id} className="flex items-center justify-between border-b last:border-0 py-2">
-                      <div>
-                        <div className="font-medium">{i.name}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {brl(i.price_cents)} / {i.unit} · mín {i.min_order_qty}
-                          {i.stock_qty != null && ` · estoque ${i.stock_qty}`}
+                  {(catalog ?? []).filter((i: any) => i.active).map((i: any) => {
+                    const stock = i.stock_qty;
+                    const inCart = cart[i.id]?.qty ?? 0;
+                    const outOfStock = stock != null && stock <= 0;
+                    const lowStock = stock != null && stock > 0 && stock <= 5;
+                    const exceeds = stock != null && inCart >= stock;
+                    return (
+                      <div key={i.id} className="flex items-center justify-between border-b last:border-0 py-2 gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium flex items-center gap-2">
+                            {i.name}
+                            {outOfStock && (
+                              <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30 text-[10px]">
+                                Sem estoque
+                              </Badge>
+                            )}
+                            {lowStock && !outOfStock && (
+                              <Badge variant="outline" className="bg-amber-500/10 text-amber-700 border-amber-500/30 text-[10px]">
+                                <AlertTriangle className="w-3 h-3 mr-1" /> Restam {stock}
+                              </Badge>
+                            )}
+                            {!lowStock && !outOfStock && stock != null && (
+                              <Badge variant="outline" className="bg-emerald-500/10 text-emerald-700 border-emerald-500/30 text-[10px]">
+                                {stock} em estoque
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {brl(i.price_cents)} / {i.unit} · mín {i.min_order_qty}
+                          </div>
                         </div>
+                        <Button
+                          size="sm"
+                          onClick={() => addToCart(i)}
+                          disabled={outOfStock || exceeds}
+                          title={exceeds ? "Já atingiu o estoque disponível" : outOfStock ? "Sem estoque" : "Adicionar"}
+                        >
+                          <Plus className="w-4 h-4" /> Adicionar
+                        </Button>
                       </div>
-                      <Button size="sm" onClick={() => addToCart(i)}>
-                        <Plus className="w-4 h-4" /> Adicionar
-                      </Button>
-                    </div>
-                  ))}
+                    );
+                  })}
                   {(catalog ?? []).length === 0 && (
                     <p className="text-sm text-muted-foreground">Fornecedor sem itens no catálogo.</p>
                   )}
