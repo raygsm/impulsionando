@@ -284,8 +284,8 @@ function Page() {
             <div className="flex justify-between"><span className="text-muted-foreground">Pago</span><span className={Math.abs(paid - total) > 0.01 ? "text-amber-600" : "text-emerald-600"}>{fmt(paid)}</span></div>
             <div className="flex justify-between text-xs"><span className="text-muted-foreground">Diferença</span><span>{fmt(total - paid)}</span></div>
           </div>
-          <Button className="w-full mt-4" onClick={() => confirmSale.mutate()} disabled={confirmSale.isPending || !items.length}>
-            Confirmar venda
+          <Button className="w-full mt-4" onClick={() => confirmSale.mutate()} disabled={confirmSale.isPending || !items.length || hasBlockingStock}>
+            {hasBlockingStock ? "Estoque insuficiente" : "Confirmar venda"}
           </Button>
         </Card>
       </div>
