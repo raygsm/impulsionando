@@ -141,6 +141,12 @@ export const createPixPayment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => PixInput.parse(d))
   .handler(async ({ context, data }) => {
+    const { captureServerError } = await import('@/lib/runtime-observability.functions');
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    return captureServerError(
+      { scope: 'mercadopago.createPixPayment', userId: context.userId, supabaseAdmin, context: { plan_id: data.plan_id } },
+      async () => {
+
     const { data: plan, error } = await context.supabase
       .from("mp_plans")
       .select("id,name,price_cents,currency")
@@ -190,7 +196,10 @@ export const createPixPayment = createServerFn({ method: "POST" })
       ticket_url: json.point_of_interaction?.transaction_data?.ticket_url,
       expires_at: json.date_of_expiration,
     };
+      },
+    );
   });
+
 
 const CardInput = z.object({
   plan_id: z.string().uuid(),
@@ -208,6 +217,12 @@ export const createCardPayment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => CardInput.parse(d))
   .handler(async ({ context, data }) => {
+    const { captureServerError } = await import('@/lib/runtime-observability.functions');
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    return captureServerError(
+      { scope: 'mercadopago.createCardPayment', userId: context.userId, supabaseAdmin, context: { plan_id: data.plan_id, payment_method_id: data.payment_method_id } },
+      async () => {
+
     const { data: plan, error } = await context.supabase
       .from("mp_plans")
       .select("id,name,price_cents,currency")
@@ -256,7 +271,10 @@ export const createCardPayment = createServerFn({ method: "POST" })
       status: json.status,
       status_detail: json.status_detail,
     };
+      },
+    );
   });
+
 
 export const getPaymentStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

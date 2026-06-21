@@ -66,8 +66,21 @@ Deno.serve(async (req) => {
     }).eq('id', payment.id);
 
     return new Response(JSON.stringify({ refund, mp: mpData }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-  } catch (e) {
+  } catch (e: any) {
     console.error('Refund error:', e);
+    try {
+      const supabase = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+      );
+      await supabase.from('runtime_events').insert({
+        scope: 'mpago.refund',
+        level: 'error',
+        message: String(e?.message ?? e),
+        context: { stack: String(e?.stack ?? '').slice(0, 4000) },
+      });
+    } catch (_) { /* best-effort */ }
     return new Response(JSON.stringify({ error: String(e) }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });
+
