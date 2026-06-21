@@ -117,14 +117,16 @@ export const Route = createFileRoute('/api/public/hooks/core-pull-chrismed')({
           scope: SOURCE_SCOPE,
           message: e.resumo ?? e.event_type,
           company_id: CHRISMED_COMPANY_ID,
-          context: {
-            remote_id: e.id,
-            event_type: e.event_type,
-            reference_id: e.reference_id,
-            status: e.status,
-            tenant_id: e.tenant_id,
-            payload: e.payload,
-          },
+          context: JSON.parse(
+            JSON.stringify({
+              remote_id: e.id,
+              event_type: e.event_type,
+              reference_id: e.reference_id,
+              status: e.status,
+              tenant_id: e.tenant_id,
+              payload: e.payload ?? null,
+            }),
+          ),
           occurred_at: e.created_at,
         }))
 
