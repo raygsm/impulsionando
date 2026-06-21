@@ -439,6 +439,7 @@ import { Route as AuthenticatedEmpresaTalentosDashboardRouteImport } from './rou
 import { Route as AuthenticatedEmpresaTalentosCandidatosRouteImport } from './routes/_authenticated/empresa.talentos.candidatos'
 import { Route as AuthenticatedCoreTenantsNovoRouteImport } from './routes/_authenticated/core.tenants.novo'
 import { Route as AuthenticatedCoreTenantsDominiosRouteImport } from './routes/_authenticated/core.tenants.dominios'
+import { Route as AuthenticatedCoreModulosAgendaRouteImport } from './routes/_authenticated/core.modulos.agenda'
 import { Route as AuthenticatedCoreModulosSlugRouteImport } from './routes/_authenticated/core.modulos.$slug'
 import { Route as AuthenticatedCoreMarketplacePedidosRouteImport } from './routes/_authenticated/core.marketplace.pedidos'
 import { Route as AuthenticatedCoreMarketplaceFornecedoresRouteImport } from './routes/_authenticated/core.marketplace.fornecedores'
@@ -2832,6 +2833,12 @@ const AuthenticatedCoreTenantsDominiosRoute =
     path: '/tenants/dominios',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreModulosAgendaRoute =
+  AuthenticatedCoreModulosAgendaRouteImport.update({
+    id: '/agenda',
+    path: '/agenda',
+    getParentRoute: () => AuthenticatedCoreModulosRoute,
+  } as any)
 const AuthenticatedCoreModulosSlugRoute =
   AuthenticatedCoreModulosSlugRouteImport.update({
     id: '/$slug',
@@ -3335,6 +3342,7 @@ export interface FileRoutesByFullPath {
   '/core/marketplace/fornecedores': typeof AuthenticatedCoreMarketplaceFornecedoresRoute
   '/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
+  '/core/modulos/agenda': typeof AuthenticatedCoreModulosAgendaRoute
   '/core/tenants/dominios': typeof AuthenticatedCoreTenantsDominiosRoute
   '/core/tenants/novo': typeof AuthenticatedCoreTenantsNovoRoute
   '/empresa/talentos/candidatos': typeof AuthenticatedEmpresaTalentosCandidatosRoute
@@ -3771,6 +3779,7 @@ export interface FileRoutesByTo {
   '/core/marketplace/fornecedores': typeof AuthenticatedCoreMarketplaceFornecedoresRoute
   '/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
+  '/core/modulos/agenda': typeof AuthenticatedCoreModulosAgendaRoute
   '/core/tenants/dominios': typeof AuthenticatedCoreTenantsDominiosRoute
   '/core/tenants/novo': typeof AuthenticatedCoreTenantsNovoRoute
   '/empresa/talentos/candidatos': typeof AuthenticatedEmpresaTalentosCandidatosRoute
@@ -4221,6 +4230,7 @@ export interface FileRoutesById {
   '/_authenticated/core/marketplace/fornecedores': typeof AuthenticatedCoreMarketplaceFornecedoresRoute
   '/_authenticated/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/_authenticated/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
+  '/_authenticated/core/modulos/agenda': typeof AuthenticatedCoreModulosAgendaRoute
   '/_authenticated/core/tenants/dominios': typeof AuthenticatedCoreTenantsDominiosRoute
   '/_authenticated/core/tenants/novo': typeof AuthenticatedCoreTenantsNovoRoute
   '/_authenticated/empresa/talentos/candidatos': typeof AuthenticatedEmpresaTalentosCandidatosRoute
@@ -4670,6 +4680,7 @@ export interface FileRouteTypes {
     | '/core/marketplace/fornecedores'
     | '/core/marketplace/pedidos'
     | '/core/modulos/$slug'
+    | '/core/modulos/agenda'
     | '/core/tenants/dominios'
     | '/core/tenants/novo'
     | '/empresa/talentos/candidatos'
@@ -5106,6 +5117,7 @@ export interface FileRouteTypes {
     | '/core/marketplace/fornecedores'
     | '/core/marketplace/pedidos'
     | '/core/modulos/$slug'
+    | '/core/modulos/agenda'
     | '/core/tenants/dominios'
     | '/core/tenants/novo'
     | '/empresa/talentos/candidatos'
@@ -5555,6 +5567,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/marketplace/fornecedores'
     | '/_authenticated/core/marketplace/pedidos'
     | '/_authenticated/core/modulos/$slug'
+    | '/_authenticated/core/modulos/agenda'
     | '/_authenticated/core/tenants/dominios'
     | '/_authenticated/core/tenants/novo'
     | '/_authenticated/empresa/talentos/candidatos'
@@ -8766,6 +8779,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreTenantsDominiosRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/modulos/agenda': {
+      id: '/_authenticated/core/modulos/agenda'
+      path: '/agenda'
+      fullPath: '/core/modulos/agenda'
+      preLoaderRoute: typeof AuthenticatedCoreModulosAgendaRouteImport
+      parentRoute: typeof AuthenticatedCoreModulosRoute
+    }
     '/_authenticated/core/modulos/$slug': {
       id: '/_authenticated/core/modulos/$slug'
       path: '/$slug'
@@ -9072,11 +9092,13 @@ const AuthenticatedCoreMarketplaceRouteWithChildren =
 
 interface AuthenticatedCoreModulosRouteChildren {
   AuthenticatedCoreModulosSlugRoute: typeof AuthenticatedCoreModulosSlugRoute
+  AuthenticatedCoreModulosAgendaRoute: typeof AuthenticatedCoreModulosAgendaRoute
 }
 
 const AuthenticatedCoreModulosRouteChildren: AuthenticatedCoreModulosRouteChildren =
   {
     AuthenticatedCoreModulosSlugRoute: AuthenticatedCoreModulosSlugRoute,
+    AuthenticatedCoreModulosAgendaRoute: AuthenticatedCoreModulosAgendaRoute,
   }
 
 const AuthenticatedCoreModulosRouteWithChildren =
