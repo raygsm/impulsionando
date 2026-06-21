@@ -46,13 +46,30 @@ export const Route = createFileRoute("/api/mercadopago/webhook")({
         let payload: any = {};
         try { payload = body ? JSON.parse(body) : {}; } catch {}
 
-        if (!verifySignature(request, body)) {
-          return new Response("Invalid signature", { status: 401 });
-        }
-
         const { supabaseAdmin } = await import(
           "@/integrations/supabase/client.server"
         );
+
+        const logRuntime = async (
+          level: "info" | "warn" | "error",
+          message: string,
+          context: Record<string, unknown>,
+        ) => {
+          try {
+            await supabaseAdmin.from("runtime_events").insert({
+              level, scope: "mercadopago.webhook", message, context,
+              route: "/api/mercadopago/webhook",
+            } as never);
+          } catch { /* logger silencioso */ }
+        };
+
+        if (!verifySignature(request, body)) {
+          await logRuntime("warn", "assinatura inválida no webhook MP", {
+            topic: payload?.type ?? payload?.topic ?? null,
+          });
+          return new Response("Invalid signature", { status: 401 });
+        }
+
 
         // log do evento
         const { data: logRow } = await supabaseAdmin
@@ -120,9 +137,15 @@ export const Route = createFileRoute("/api/mercadopago/webhook")({
               .update({ error: e?.message ?? String(e) })
               .eq("id", logRow.id);
           }
+          await logRuntime("error", e?.message ?? "erro desconhecido", {
+            stack: e?.stack?.slice(0, 4000) ?? null,
+            topic: payload?.type ?? payload?.topic ?? null,
+            resourceId: payload?.data?.id ?? null,
+          });
           console.error("[MP webhook] error", e);
           return Response.json({ ok: false, error: e?.message }, { status: 500 });
         }
+
       },
       GET: async () =>
         Response.json({
