@@ -395,6 +395,7 @@ import { Route as AuthenticatedAdminPixPendentesRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminPeerBenchmarkRouteImport } from './routes/_authenticated/admin.peer-benchmark'
 import { Route as AuthenticatedAdminNichePlansRouteImport } from './routes/_authenticated/admin.niche-plans'
 import { Route as AuthenticatedAdminNicheMatrixRouteImport } from './routes/_authenticated/admin.niche-matrix'
+import { Route as AuthenticatedAdminN8nConsoleRouteImport } from './routes/_authenticated/admin.n8n-console'
 import { Route as AuthenticatedAdminInboxUnificadaRouteImport } from './routes/_authenticated/admin.inbox-unificada'
 import { Route as AuthenticatedAdminImobiliariaRouteImport } from './routes/_authenticated/admin.imobiliaria'
 import { Route as AuthenticatedAdminHealthRouteImport } from './routes/_authenticated/admin.health'
@@ -2604,6 +2605,12 @@ const AuthenticatedAdminNicheMatrixRoute =
     path: '/admin/niche-matrix',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminN8nConsoleRoute =
+  AuthenticatedAdminN8nConsoleRouteImport.update({
+    id: '/admin/n8n-console',
+    path: '/admin/n8n-console',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminInboxUnificadaRoute =
   AuthenticatedAdminInboxUnificadaRouteImport.update({
     id: '/admin/inbox-unificada',
@@ -3317,6 +3324,7 @@ export interface FileRoutesByFullPath {
   '/admin/health': typeof AuthenticatedAdminHealthRoute
   '/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
+  '/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
@@ -3780,6 +3788,7 @@ export interface FileRoutesByTo {
   '/admin/health': typeof AuthenticatedAdminHealthRoute
   '/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
+  '/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
@@ -4257,6 +4266,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/health': typeof AuthenticatedAdminHealthRoute
   '/_authenticated/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/_authenticated/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
+  '/_authenticated/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/_authenticated/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
   '/_authenticated/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/_authenticated/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
@@ -4733,6 +4743,7 @@ export interface FileRouteTypes {
     | '/admin/health'
     | '/admin/imobiliaria'
     | '/admin/inbox-unificada'
+    | '/admin/n8n-console'
     | '/admin/niche-matrix'
     | '/admin/niche-plans'
     | '/admin/peer-benchmark'
@@ -5196,6 +5207,7 @@ export interface FileRouteTypes {
     | '/admin/health'
     | '/admin/imobiliaria'
     | '/admin/inbox-unificada'
+    | '/admin/n8n-console'
     | '/admin/niche-matrix'
     | '/admin/niche-plans'
     | '/admin/peer-benchmark'
@@ -5672,6 +5684,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/health'
     | '/_authenticated/admin/imobiliaria'
     | '/_authenticated/admin/inbox-unificada'
+    | '/_authenticated/admin/n8n-console'
     | '/_authenticated/admin/niche-matrix'
     | '/_authenticated/admin/niche-plans'
     | '/_authenticated/admin/peer-benchmark'
@@ -8813,6 +8826,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminNicheMatrixRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/n8n-console': {
+      id: '/_authenticated/admin/n8n-console'
+      path: '/admin/n8n-console'
+      fullPath: '/admin/n8n-console'
+      preLoaderRoute: typeof AuthenticatedAdminN8nConsoleRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/inbox-unificada': {
       id: '/_authenticated/admin/inbox-unificada'
       path: '/admin/inbox-unificada'
@@ -10103,6 +10123,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminHealthRoute: typeof AuthenticatedAdminHealthRoute
   AuthenticatedAdminImobiliariaRoute: typeof AuthenticatedAdminImobiliariaRoute
   AuthenticatedAdminInboxUnificadaRoute: typeof AuthenticatedAdminInboxUnificadaRoute
+  AuthenticatedAdminN8nConsoleRoute: typeof AuthenticatedAdminN8nConsoleRoute
   AuthenticatedAdminNicheMatrixRoute: typeof AuthenticatedAdminNicheMatrixRoute
   AuthenticatedAdminNichePlansRoute: typeof AuthenticatedAdminNichePlansRoute
   AuthenticatedAdminPeerBenchmarkRoute: typeof AuthenticatedAdminPeerBenchmarkRoute
@@ -10261,6 +10282,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminHealthRoute: AuthenticatedAdminHealthRoute,
   AuthenticatedAdminImobiliariaRoute: AuthenticatedAdminImobiliariaRoute,
   AuthenticatedAdminInboxUnificadaRoute: AuthenticatedAdminInboxUnificadaRoute,
+  AuthenticatedAdminN8nConsoleRoute: AuthenticatedAdminN8nConsoleRoute,
   AuthenticatedAdminNicheMatrixRoute: AuthenticatedAdminNicheMatrixRoute,
   AuthenticatedAdminNichePlansRoute: AuthenticatedAdminNichePlansRoute,
   AuthenticatedAdminPeerBenchmarkRoute: AuthenticatedAdminPeerBenchmarkRoute,
