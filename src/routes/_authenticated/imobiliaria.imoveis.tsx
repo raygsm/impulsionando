@@ -14,8 +14,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Trash2, Pencil } from "lucide-react";
+import { Plus, Trash2, Pencil, Radio } from "lucide-react";
 import { toast } from "sonner";
+import { useRealtimeAvailability } from "@/hooks/use-realtime-availability";
 
 export const Route = createFileRoute("/_authenticated/imobiliaria/imoveis")({
   head: () => ({ meta: [{ title: "Imóveis — Imobiliária" }] }),
@@ -84,6 +85,13 @@ function Page() {
     queryKey: ["realestate-props", companyId],
     enabled: !!companyId,
     queryFn: () => fetchList({ data: { companyId } }),
+  });
+
+  const { liveOn } = useRealtimeAvailability({
+    table: "realestate_properties",
+    filter: { column: "company_id", value: companyId },
+    queryKey: ["realestate-props", companyId],
+    enabled: !!companyId,
   });
 
   const submitReview = useMutation({
@@ -182,7 +190,12 @@ function Page() {
         title="Imóveis"
         description="Cadastro de imóveis disponíveis. Imóveis aprovados ficam públicos e disparam matching."
         action={
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            {liveOn && (
+              <Badge variant="outline" className="gap-1 text-emerald-600 border-emerald-300">
+                <Radio className="w-3 h-3 animate-pulse" /> Status ao vivo
+              </Badge>
+            )}
             <Button asChild variant="outline" size="sm">
               <Link to="/imobiliaria/aprovacoes">Fila de aprovação</Link>
             </Button>
