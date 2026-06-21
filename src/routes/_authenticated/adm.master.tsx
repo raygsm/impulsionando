@@ -238,6 +238,7 @@ function AdmMasterPage() {
             { to: "/admin/expansion-radar", label: "Expansion Radar", icon: TrendingUp },
             { to: "/admin/attribution", label: "Revenue Attribution", icon: DollarSign },
             { to: "/admin/peer-benchmark", label: "Peer Benchmark", icon: TrendingUp },
+            { to: "/admin/tenant-360", label: "Tenant 360º", icon: Building2 },
           ].map((l) => (
             <Link key={l.to} to={l.to as any} className="block">
               <Card className="p-3 hover:border-primary/40 hover:bg-primary/5 transition flex items-center gap-2">
