@@ -416,6 +416,7 @@ import { Route as ApiPublicOutboxProcessRouteImport } from './routes/api/public/
 import { Route as ApiPublicHooksZapiStatusRouteImport } from './routes/api/public/hooks/zapi-status'
 import { Route as ApiPublicHooksUptimeWhatsappTestRouteImport } from './routes/api/public/hooks/uptime-whatsapp-test'
 import { Route as ApiPublicHooksUptimeCheckRouteImport } from './routes/api/public/hooks/uptime-check'
+import { Route as ApiPublicHooksRetentionSweepRouteImport } from './routes/api/public/hooks/retention-sweep'
 import { Route as ApiPublicHooksNotificationLogCleanupRouteImport } from './routes/api/public/hooks/notification-log-cleanup'
 import { Route as ApiPublicHooksN8nLogRouteImport } from './routes/api/public/hooks/n8n-log'
 import { Route as ApiPublicHooksMpPendingRemindersRouteImport } from './routes/api/public/hooks/mp-pending-reminders'
@@ -2703,6 +2704,12 @@ const ApiPublicHooksUptimeCheckRoute =
     path: '/api/public/hooks/uptime-check',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksRetentionSweepRoute =
+  ApiPublicHooksRetentionSweepRouteImport.update({
+    id: '/api/public/hooks/retention-sweep',
+    path: '/api/public/hooks/retention-sweep',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksNotificationLogCleanupRoute =
   ApiPublicHooksNotificationLogCleanupRouteImport.update({
     id: '/api/public/hooks/notification-log-cleanup',
@@ -3417,6 +3424,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/mp-pending-reminders': typeof ApiPublicHooksMpPendingRemindersRoute
   '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
   '/api/public/hooks/notification-log-cleanup': typeof ApiPublicHooksNotificationLogCleanupRoute
+  '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
@@ -3860,6 +3868,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/mp-pending-reminders': typeof ApiPublicHooksMpPendingRemindersRoute
   '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
   '/api/public/hooks/notification-log-cleanup': typeof ApiPublicHooksNotificationLogCleanupRoute
+  '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
@@ -4317,6 +4326,7 @@ export interface FileRoutesById {
   '/api/public/hooks/mp-pending-reminders': typeof ApiPublicHooksMpPendingRemindersRoute
   '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
   '/api/public/hooks/notification-log-cleanup': typeof ApiPublicHooksNotificationLogCleanupRoute
+  '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
@@ -4773,6 +4783,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/mp-pending-reminders'
     | '/api/public/hooks/n8n-log'
     | '/api/public/hooks/notification-log-cleanup'
+    | '/api/public/hooks/retention-sweep'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
     | '/api/public/hooks/zapi-status'
@@ -5216,6 +5227,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/mp-pending-reminders'
     | '/api/public/hooks/n8n-log'
     | '/api/public/hooks/notification-log-cleanup'
+    | '/api/public/hooks/retention-sweep'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
     | '/api/public/hooks/zapi-status'
@@ -5672,6 +5684,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/mp-pending-reminders'
     | '/api/public/hooks/n8n-log'
     | '/api/public/hooks/notification-log-cleanup'
+    | '/api/public/hooks/retention-sweep'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
     | '/api/public/hooks/zapi-status'
@@ -5829,6 +5842,7 @@ export interface RootRouteChildren {
   ApiPublicHooksMpPendingRemindersRoute: typeof ApiPublicHooksMpPendingRemindersRoute
   ApiPublicHooksN8nLogRoute: typeof ApiPublicHooksN8nLogRoute
   ApiPublicHooksNotificationLogCleanupRoute: typeof ApiPublicHooksNotificationLogCleanupRoute
+  ApiPublicHooksRetentionSweepRoute: typeof ApiPublicHooksRetentionSweepRoute
   ApiPublicHooksUptimeCheckRoute: typeof ApiPublicHooksUptimeCheckRoute
   ApiPublicHooksUptimeWhatsappTestRoute: typeof ApiPublicHooksUptimeWhatsappTestRoute
   ApiPublicHooksZapiStatusRoute: typeof ApiPublicHooksZapiStatusRoute
@@ -8696,6 +8710,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksUptimeCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/retention-sweep': {
+      id: '/api/public/hooks/retention-sweep'
+      path: '/api/public/hooks/retention-sweep'
+      fullPath: '/api/public/hooks/retention-sweep'
+      preLoaderRoute: typeof ApiPublicHooksRetentionSweepRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/notification-log-cleanup': {
       id: '/api/public/hooks/notification-log-cleanup'
       path: '/api/public/hooks/notification-log-cleanup'
@@ -10245,6 +10266,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksN8nLogRoute: ApiPublicHooksN8nLogRoute,
   ApiPublicHooksNotificationLogCleanupRoute:
     ApiPublicHooksNotificationLogCleanupRoute,
+  ApiPublicHooksRetentionSweepRoute: ApiPublicHooksRetentionSweepRoute,
   ApiPublicHooksUptimeCheckRoute: ApiPublicHooksUptimeCheckRoute,
   ApiPublicHooksUptimeWhatsappTestRoute: ApiPublicHooksUptimeWhatsappTestRoute,
   ApiPublicHooksZapiStatusRoute: ApiPublicHooksZapiStatusRoute,
