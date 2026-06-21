@@ -10771,111 +10771,6 @@ export type Database = {
         }
         Relationships: []
       }
-      infinitepay_payments: {
-        Row: {
-          amount: number
-          capture_method: string | null
-          checkout_url: string | null
-          cliente_id: string | null
-          created_at: string
-          customer_email: string | null
-          customer_name: string | null
-          customer_phone: string | null
-          description: string | null
-          empresa_id: string | null
-          environment: string
-          id: string
-          installments: number | null
-          invoice_slug: string | null
-          module_slugs: string[]
-          modulo_id: string | null
-          order_nsu: string
-          paid_amount: number | null
-          paid_at: string | null
-          plano_id: string | null
-          provider: string
-          provisioned_at: string | null
-          provisioning_log: Json
-          provisioning_status: string
-          raw_request: Json | null
-          raw_response: Json | null
-          receipt_url: string | null
-          status: string
-          transaction_nsu: string | null
-          updated_at: string
-          user_id: string | null
-          webhook_payload: Json | null
-        }
-        Insert: {
-          amount: number
-          capture_method?: string | null
-          checkout_url?: string | null
-          cliente_id?: string | null
-          created_at?: string
-          customer_email?: string | null
-          customer_name?: string | null
-          customer_phone?: string | null
-          description?: string | null
-          empresa_id?: string | null
-          environment?: string
-          id?: string
-          installments?: number | null
-          invoice_slug?: string | null
-          module_slugs?: string[]
-          modulo_id?: string | null
-          order_nsu: string
-          paid_amount?: number | null
-          paid_at?: string | null
-          plano_id?: string | null
-          provider?: string
-          provisioned_at?: string | null
-          provisioning_log?: Json
-          provisioning_status?: string
-          raw_request?: Json | null
-          raw_response?: Json | null
-          receipt_url?: string | null
-          status?: string
-          transaction_nsu?: string | null
-          updated_at?: string
-          user_id?: string | null
-          webhook_payload?: Json | null
-        }
-        Update: {
-          amount?: number
-          capture_method?: string | null
-          checkout_url?: string | null
-          cliente_id?: string | null
-          created_at?: string
-          customer_email?: string | null
-          customer_name?: string | null
-          customer_phone?: string | null
-          description?: string | null
-          empresa_id?: string | null
-          environment?: string
-          id?: string
-          installments?: number | null
-          invoice_slug?: string | null
-          module_slugs?: string[]
-          modulo_id?: string | null
-          order_nsu?: string
-          paid_amount?: number | null
-          paid_at?: string | null
-          plano_id?: string | null
-          provider?: string
-          provisioned_at?: string | null
-          provisioning_log?: Json
-          provisioning_status?: string
-          raw_request?: Json | null
-          raw_response?: Json | null
-          receipt_url?: string | null
-          status?: string
-          transaction_nsu?: string | null
-          updated_at?: string
-          user_id?: string | null
-          webhook_payload?: Json | null
-        }
-        Relationships: []
-      }
       inv_categories: {
         Row: {
           company_id: string
@@ -12853,13 +12748,19 @@ export type Database = {
           context_type: string | null
           created_at: string
           currency: string
+          customer_phone: string | null
           description: string | null
+          empresa_id: string | null
+          environment: string
           external_reference: string
           id: string
           installments: number | null
           metadata: Json
+          module_slugs: string[] | null
+          modulo_id: string | null
           mp_payment_id: string | null
           mp_preference_id: string | null
+          paid_at: string | null
           payer_doc: string | null
           payer_email: string | null
           payer_name: string | null
@@ -12867,10 +12768,15 @@ export type Database = {
           pix_expires_at: string | null
           pix_qr_code: string | null
           pix_qr_code_base64: string | null
+          plano_id: string | null
+          provisioned_at: string | null
+          provisioning_log: Json
+          provisioning_status: string
           refunded_at: string | null
           rejected_at: string | null
           status: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           amount_cents: number
@@ -12881,13 +12787,19 @@ export type Database = {
           context_type?: string | null
           created_at?: string
           currency?: string
+          customer_phone?: string | null
           description?: string | null
+          empresa_id?: string | null
+          environment?: string
           external_reference: string
           id?: string
           installments?: number | null
           metadata?: Json
+          module_slugs?: string[] | null
+          modulo_id?: string | null
           mp_payment_id?: string | null
           mp_preference_id?: string | null
+          paid_at?: string | null
           payer_doc?: string | null
           payer_email?: string | null
           payer_name?: string | null
@@ -12895,10 +12807,15 @@ export type Database = {
           pix_expires_at?: string | null
           pix_qr_code?: string | null
           pix_qr_code_base64?: string | null
+          plano_id?: string | null
+          provisioned_at?: string | null
+          provisioning_log?: Json
+          provisioning_status?: string
           refunded_at?: string | null
           rejected_at?: string | null
           status?: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           amount_cents?: number
@@ -12909,13 +12826,19 @@ export type Database = {
           context_type?: string | null
           created_at?: string
           currency?: string
+          customer_phone?: string | null
           description?: string | null
+          empresa_id?: string | null
+          environment?: string
           external_reference?: string
           id?: string
           installments?: number | null
           metadata?: Json
+          module_slugs?: string[] | null
+          modulo_id?: string | null
           mp_payment_id?: string | null
           mp_preference_id?: string | null
+          paid_at?: string | null
           payer_doc?: string | null
           payer_email?: string | null
           payer_name?: string | null
@@ -12923,10 +12846,15 @@ export type Database = {
           pix_expires_at?: string | null
           pix_qr_code?: string | null
           pix_qr_code_base64?: string | null
+          plano_id?: string | null
+          provisioned_at?: string | null
+          provisioning_log?: Json
+          provisioning_status?: string
           refunded_at?: string | null
           rejected_at?: string | null
           status?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
