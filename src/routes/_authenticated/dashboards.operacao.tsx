@@ -255,7 +255,7 @@ function ContadorTab() {
 
 function OperacaoPage() {
   const { data: me } = useCurrentUser();
-  const { activeCompanyId } = useActiveCompany();
+  const { companyId: activeCompanyId } = useActiveCompany();
   const isSuper = !!me?.isSuperAdmin;
   const [tab, setTab] = useState(isSuper ? "super" : "empresa");
   return (
