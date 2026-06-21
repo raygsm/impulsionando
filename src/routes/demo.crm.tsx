@@ -175,7 +175,7 @@ function DemoCRM() {
     <TooltipProvider delayDuration={150}>
       <div className="min-h-screen flex flex-col bg-background">
         <PublicHeader />
-        <DemoModeBanner current="crm" />
+        <DemoModeBanner current="crm" leadNiche="servicos" leadLabel="CRM" leadOrigin="hub-modulo-crm" />
 
         {/* Chancela permanente VERSÃO TESTE */}
         <div className="bg-warning/15 border-y border-warning/30 text-warning-foreground">

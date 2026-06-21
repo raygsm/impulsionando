@@ -367,7 +367,7 @@ function DemoAdvogados() {
     <TooltipProvider delayDuration={150}>
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
-      <DemoModeBanner current="advogados" />
+      <DemoModeBanner current="advogados" leadNiche="servicos" leadLabel="Advogados" leadOrigin="hub-modulo-advogados" />
       <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 w-full">
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
