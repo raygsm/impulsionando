@@ -14,8 +14,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { ShoppingCart, ArrowLeft, Trash2, Plus, Minus } from "lucide-react";
+import { ShoppingCart, ArrowLeft, Trash2, Plus, Minus, Radio, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { useRealtimeAvailability } from "@/hooks/use-realtime-availability";
 
 export const Route = createFileRoute("/_authenticated/bar/marketplace/novo-pedido")({
   component: NewOrderPage,
