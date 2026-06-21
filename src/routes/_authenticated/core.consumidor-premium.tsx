@@ -14,7 +14,8 @@ import { toast } from "sonner";
 import { getConsumerPremiumOverview } from "@/lib/consumer.functions";
 import { listOpenInvoices } from "@/lib/admin-invoices.functions";
 import { adminMarkInvoicePaid } from "@/lib/admin-billing.functions";
-import { Crown, Users, DollarSign, AlertTriangle, Receipt, TrendingUp, RefreshCw, CheckCircle2 } from "lucide-react";
+import { sendInvoiceReminderNow, sendConsumerInvoiceReminderNow } from "@/lib/billing.functions";
+import { Crown, Users, DollarSign, AlertTriangle, Receipt, TrendingUp, RefreshCw, CheckCircle2, Bell } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/core/consumidor-premium")({
   component: Page,
