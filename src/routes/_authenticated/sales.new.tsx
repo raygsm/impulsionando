@@ -80,6 +80,22 @@ function Page() {
 
   const subtotal = useMemo(() => items.reduce((s, i) => s + i.quantity * i.unit_price - i.discount, 0), [items]);
   const total = Math.max(0, subtotal - discount);
+
+  // Validação de estoque em tempo real
+  const stockIssues = useMemo(() => {
+    const issues: { line: number; name: string; available: number; requested: number; blocking: boolean }[] = [];
+    items.forEach((it, idx) => {
+      if (!it.product_id) return;
+      const p = productById.get(it.product_id);
+      if (!p || !p.track_stock) return;
+      const available = Number(p.current_stock ?? 0);
+      if ((it.quantity ?? 0) > available) {
+        issues.push({ line: idx + 1, name: p.name, available, requested: it.quantity, blocking: !p.allow_negative });
+      }
+    });
+    return issues;
+  }, [items, productById]);
+  const hasBlockingStock = stockIssues.some((s) => s.blocking);
   const paid = useMemo(() => pays.reduce((s, p) => s + p.amount, 0), [pays]);
 
   function addProduct(productId: string) {
