@@ -75,6 +75,15 @@ function BillingContractsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const remind = useMutation({
+    mutationFn: (id: string) => remindFn({ data: { invoiceId: id } }),
+    onSuccess: (r) => {
+      const ch = (r?.channels ?? []) as string[];
+      toast.success(`Lembrete enfileirado (${ch.join(" + ") || "—"})`);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const contracts = data?.contracts ?? [];
   const active = contracts.filter((c) => c.status === "active").length;
   const suspended = contracts.filter((c) => c.status === "suspended").length;
