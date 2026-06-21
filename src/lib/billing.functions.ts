@@ -298,7 +298,7 @@ export const sendInvoiceReminderNow = createServerFn({ method: "POST" })
     const { data: staff } = await supabaseAdmin.rpc("is_impulsionando_staff", { _user: userId });
     if (!staff) throw new Error("Apenas equipe Impulsionando.");
 
-    const { data: inv, error } = await supabaseAdmin
+    const { data: invRaw, error } = await supabaseAdmin
       .from("billing_invoices")
       .select(
         "id, company_id, amount, status, due_date, pix_copy_paste, pix_key, contract_id, " +
@@ -307,10 +307,11 @@ export const sendInvoiceReminderNow = createServerFn({ method: "POST" })
       .eq("id", data.invoiceId)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    if (!inv) throw new Error("Fatura não encontrada");
+    if (!invRaw) throw new Error("Fatura não encontrada");
+    const inv = invRaw as any;
     if (inv.status === "paid") throw new Error("Fatura já está paga.");
 
-    const company = (inv as any).companies ?? {};
+    const company = inv.companies ?? {};
     const recipientEmail: string | null = company.email ?? null;
     const recipientPhone: string | null = company.phone ?? null;
     if (!recipientEmail && !recipientPhone) {
