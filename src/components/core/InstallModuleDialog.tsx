@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { installModuleWithTemplate } from "@/lib/modules.functions";
+import { installAgendaModule } from "@/lib/agenda-core.functions";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -44,10 +45,15 @@ export function InstallModuleDialog({ moduleSlug, moduleName, allowedSegments, c
   });
 
   const install = useServerFn(installModuleWithTemplate);
+  const installAgenda = useServerFn(installAgendaModule);
   const mut = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       if (!selectedCompany) throw new Error("Selecione uma empresa");
-      return install({ data: { companyId: selectedCompany, slug: moduleSlug, segment, installDependencies: installDeps } });
+      const res = await install({ data: { companyId: selectedCompany, slug: moduleSlug, segment, installDependencies: installDeps } });
+      if (moduleSlug === "agenda-inteligente") {
+        await installAgenda({ data: { companyId: selectedCompany } });
+      }
+      return res;
     },
     onSuccess: (res) => {
       toast.success(`Módulo instalado em 1 clique (${res.installed.length} módulo(s), ${res.settingsApplied.length} parâmetro(s))`);
