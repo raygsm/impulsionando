@@ -389,6 +389,7 @@ import { Route as AuthenticatedAdminTrialsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminQualidadeRouteImport } from './routes/_authenticated/admin.qualidade'
 import { Route as AuthenticatedAdminPixPendentesRouteImport } from './routes/_authenticated/admin.pix-pendentes'
 import { Route as AuthenticatedAdminNichePlansRouteImport } from './routes/_authenticated/admin.niche-plans'
+import { Route as AuthenticatedAdminInboxUnificadaRouteImport } from './routes/_authenticated/admin.inbox-unificada'
 import { Route as AuthenticatedAdminImobiliariaRouteImport } from './routes/_authenticated/admin.imobiliaria'
 import { Route as AuthenticatedAdminHealthRouteImport } from './routes/_authenticated/admin.health'
 import { Route as AuthenticatedAdminFunil360RouteImport } from './routes/_authenticated/admin.funil-360'
@@ -2549,6 +2550,12 @@ const AuthenticatedAdminNichePlansRoute =
     path: '/admin/niche-plans',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminInboxUnificadaRoute =
+  AuthenticatedAdminInboxUnificadaRouteImport.update({
+    id: '/admin/inbox-unificada',
+    path: '/admin/inbox-unificada',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminImobiliariaRoute =
   AuthenticatedAdminImobiliariaRouteImport.update({
     id: '/admin/imobiliaria',
@@ -3176,6 +3183,7 @@ export interface FileRoutesByFullPath {
   '/admin/funil-360': typeof AuthenticatedAdminFunil360Route
   '/admin/health': typeof AuthenticatedAdminHealthRoute
   '/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
+  '/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
   '/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
@@ -3620,6 +3628,7 @@ export interface FileRoutesByTo {
   '/admin/funil-360': typeof AuthenticatedAdminFunil360Route
   '/admin/health': typeof AuthenticatedAdminHealthRoute
   '/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
+  '/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
   '/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
@@ -4078,6 +4087,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/funil-360': typeof AuthenticatedAdminFunil360Route
   '/_authenticated/admin/health': typeof AuthenticatedAdminHealthRoute
   '/_authenticated/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
+  '/_authenticated/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
   '/_authenticated/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/_authenticated/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
   '/_authenticated/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
@@ -4535,6 +4545,7 @@ export interface FileRouteTypes {
     | '/admin/funil-360'
     | '/admin/health'
     | '/admin/imobiliaria'
+    | '/admin/inbox-unificada'
     | '/admin/niche-plans'
     | '/admin/pix-pendentes'
     | '/admin/qualidade'
@@ -4979,6 +4990,7 @@ export interface FileRouteTypes {
     | '/admin/funil-360'
     | '/admin/health'
     | '/admin/imobiliaria'
+    | '/admin/inbox-unificada'
     | '/admin/niche-plans'
     | '/admin/pix-pendentes'
     | '/admin/qualidade'
@@ -5436,6 +5448,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/funil-360'
     | '/_authenticated/admin/health'
     | '/_authenticated/admin/imobiliaria'
+    | '/_authenticated/admin/inbox-unificada'
     | '/_authenticated/admin/niche-plans'
     | '/_authenticated/admin/pix-pendentes'
     | '/_authenticated/admin/qualidade'
@@ -8521,6 +8534,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminNichePlansRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/inbox-unificada': {
+      id: '/_authenticated/admin/inbox-unificada'
+      path: '/admin/inbox-unificada'
+      fullPath: '/admin/inbox-unificada'
+      preLoaderRoute: typeof AuthenticatedAdminInboxUnificadaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/imobiliaria': {
       id: '/_authenticated/admin/imobiliaria'
       path: '/admin/imobiliaria'
@@ -9711,6 +9731,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminFunil360Route: typeof AuthenticatedAdminFunil360Route
   AuthenticatedAdminHealthRoute: typeof AuthenticatedAdminHealthRoute
   AuthenticatedAdminImobiliariaRoute: typeof AuthenticatedAdminImobiliariaRoute
+  AuthenticatedAdminInboxUnificadaRoute: typeof AuthenticatedAdminInboxUnificadaRoute
   AuthenticatedAdminNichePlansRoute: typeof AuthenticatedAdminNichePlansRoute
   AuthenticatedAdminPixPendentesRoute: typeof AuthenticatedAdminPixPendentesRoute
   AuthenticatedAdminQualidadeRoute: typeof AuthenticatedAdminQualidadeRoute
@@ -9852,6 +9873,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminFunil360Route: AuthenticatedAdminFunil360Route,
   AuthenticatedAdminHealthRoute: AuthenticatedAdminHealthRoute,
   AuthenticatedAdminImobiliariaRoute: AuthenticatedAdminImobiliariaRoute,
+  AuthenticatedAdminInboxUnificadaRoute: AuthenticatedAdminInboxUnificadaRoute,
   AuthenticatedAdminNichePlansRoute: AuthenticatedAdminNichePlansRoute,
   AuthenticatedAdminPixPendentesRoute: AuthenticatedAdminPixPendentesRoute,
   AuthenticatedAdminQualidadeRoute: AuthenticatedAdminQualidadeRoute,
