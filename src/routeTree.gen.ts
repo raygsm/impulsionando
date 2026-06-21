@@ -426,6 +426,7 @@ import { Route as ApiPublicHealthMonetizationRouteImport } from './routes/api/pu
 import { Route as ApiPublicDemoSendTestRouteImport } from './routes/api/public/demo/send-test'
 import { Route as ApiPublicDemoFeiraLeadRouteImport } from './routes/api/public/demo/feira-lead'
 import { Route as ApiPublicCronPayoutsConsolidateRouteImport } from './routes/api/public/cron/payouts-consolidate'
+import { Route as ApiPublicCronAgendaTickRouteImport } from './routes/api/public/cron/agenda-tick'
 import { Route as AuthenticatedTorreRestaurantesDemoAuditoriaRouteImport } from './routes/_authenticated/torre.restaurantes-demo.auditoria'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
 import { Route as AuthenticatedRestauranteSalaoNotificacoesRouteImport } from './routes/_authenticated/restaurante.salao.notificacoes'
@@ -2755,6 +2756,11 @@ const ApiPublicCronPayoutsConsolidateRoute =
     path: '/api/public/cron/payouts-consolidate',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicCronAgendaTickRoute = ApiPublicCronAgendaTickRouteImport.update({
+  id: '/api/public/cron/agenda-tick',
+  path: '/api/public/cron/agenda-tick',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedTorreRestaurantesDemoAuditoriaRoute =
   AuthenticatedTorreRestaurantesDemoAuditoriaRouteImport.update({
     id: '/auditoria',
@@ -3356,6 +3362,7 @@ export interface FileRoutesByFullPath {
   '/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
+  '/api/public/cron/agenda-tick': typeof ApiPublicCronAgendaTickRoute
   '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
@@ -3793,6 +3800,7 @@ export interface FileRoutesByTo {
   '/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
+  '/api/public/cron/agenda-tick': typeof ApiPublicCronAgendaTickRoute
   '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
@@ -4244,6 +4252,7 @@ export interface FileRoutesById {
   '/_authenticated/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/_authenticated/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
+  '/api/public/cron/agenda-tick': typeof ApiPublicCronAgendaTickRoute
   '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
@@ -4694,6 +4703,7 @@ export interface FileRouteTypes {
     | '/restaurante/salao/notificacoes'
     | '/sales/cash/$id'
     | '/torre/restaurantes-demo/auditoria'
+    | '/api/public/cron/agenda-tick'
     | '/api/public/cron/payouts-consolidate'
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
@@ -5131,6 +5141,7 @@ export interface FileRouteTypes {
     | '/restaurante/salao/notificacoes'
     | '/sales/cash/$id'
     | '/torre/restaurantes-demo/auditoria'
+    | '/api/public/cron/agenda-tick'
     | '/api/public/cron/payouts-consolidate'
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
@@ -5581,6 +5592,7 @@ export interface FileRouteTypes {
     | '/_authenticated/restaurante/salao/notificacoes'
     | '/_authenticated/sales/cash/$id'
     | '/_authenticated/torre/restaurantes-demo/auditoria'
+    | '/api/public/cron/agenda-tick'
     | '/api/public/cron/payouts-consolidate'
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
@@ -5737,6 +5749,7 @@ export interface RootRouteChildren {
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   PortalContabilidadeTokenRoute: typeof PortalContabilidadeTokenRoute
   PortalProprietarioTokenRoute: typeof PortalProprietarioTokenRoute
+  ApiPublicCronAgendaTickRoute: typeof ApiPublicCronAgendaTickRoute
   ApiPublicCronPayoutsConsolidateRoute: typeof ApiPublicCronPayoutsConsolidateRoute
   ApiPublicDemoFeiraLeadRoute: typeof ApiPublicDemoFeiraLeadRoute
   ApiPublicDemoSendTestRoute: typeof ApiPublicDemoSendTestRoute
@@ -8688,6 +8701,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicCronPayoutsConsolidateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/cron/agenda-tick': {
+      id: '/api/public/cron/agenda-tick'
+      path: '/api/public/cron/agenda-tick'
+      fullPath: '/api/public/cron/agenda-tick'
+      preLoaderRoute: typeof ApiPublicCronAgendaTickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/torre/restaurantes-demo/auditoria': {
       id: '/_authenticated/torre/restaurantes-demo/auditoria'
       path: '/auditoria'
@@ -10097,6 +10117,7 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   PortalContabilidadeTokenRoute: PortalContabilidadeTokenRoute,
   PortalProprietarioTokenRoute: PortalProprietarioTokenRoute,
+  ApiPublicCronAgendaTickRoute: ApiPublicCronAgendaTickRoute,
   ApiPublicCronPayoutsConsolidateRoute: ApiPublicCronPayoutsConsolidateRoute,
   ApiPublicDemoFeiraLeadRoute: ApiPublicDemoFeiraLeadRoute,
   ApiPublicDemoSendTestRoute: ApiPublicDemoSendTestRoute,
