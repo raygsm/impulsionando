@@ -1,7 +1,7 @@
 /**
  * Auto-provisioning — fluxo de implantação automática após pagamento aprovado.
  *
- * Idempotente. Pode ser chamado pelo webhook InfinitePay e pela verificação
+ * Idempotente. Disparado pelo webhook do Mercado Pago e pela verificação
  * manual de status. Reutiliza 100% da infra existente:
  *  - companies (triggers bootstrap CRM/Financeiro/Estoque já existentes)
  *  - user_profiles + profiles (perfil "gestor-empresa")
@@ -14,17 +14,18 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 type Payment = {
-  order_nsu: string;
+  mp_payment_id: string;
   status: string;
   user_id: string | null;
   empresa_id: string | null;
-  customer_name: string | null;
-  customer_email: string | null;
+  payer_name: string | null;
+  payer_email: string | null;
   customer_phone: string | null;
   modulo_id: string | null;
   module_slugs: string[] | null;
-  amount: number;
+  amount_cents: number;
   paid_at: string | null;
+  approved_at: string | null;
   provisioning_status: string;
 };
 
@@ -38,55 +39,62 @@ function slugify(s: string): string {
     .slice(0, 50);
 }
 
-async function appendLog(orderNsu: string, entry: Record<string, unknown>) {
-  const { data } = await supabaseAdmin
-    .from("infinitepay_payments")
+async function appendLog(mpPaymentId: string, entry: Record<string, unknown>) {
+  const { data } = await (supabaseAdmin as any)
+    .from("mpago_payments")
     .select("provisioning_log")
-    .eq("order_nsu", orderNsu)
+    .eq("mp_payment_id", mpPaymentId)
     .maybeSingle();
   const log = Array.isArray(data?.provisioning_log) ? (data!.provisioning_log as any[]) : [];
   log.push({ at: new Date().toISOString(), ...entry });
-  await supabaseAdmin.from("infinitepay_payments").update({ provisioning_log: log }).eq("order_nsu", orderNsu);
+  await (supabaseAdmin as any)
+    .from("mpago_payments")
+    .update({ provisioning_log: log })
+    .eq("mp_payment_id", mpPaymentId);
 }
 
 /**
  * Faz todo o fluxo de provisionamento. Idempotente: se já provisionou, retorna.
+ *
+ * @param mpPaymentId  ID do pagamento no Mercado Pago (mp_payment_id).
  */
-export async function autoProvisionFromPayment(orderNsu: string): Promise<{
+export async function autoProvisionFromPayment(mpPaymentId: string): Promise<{
   ok: boolean;
   companyId?: string;
   userId?: string;
   installedSlugs: string[];
   skipped?: string;
 }> {
-  const { data: row, error } = await supabaseAdmin
-    .from("infinitepay_payments")
+  const { data: row, error } = await (supabaseAdmin as any)
+    .from("mpago_payments")
     .select(
-      "order_nsu, status, user_id, empresa_id, customer_name, customer_email, customer_phone, modulo_id, module_slugs, amount, paid_at, provisioning_status",
+      "mp_payment_id, status, user_id, empresa_id, payer_name, payer_email, customer_phone, modulo_id, module_slugs, amount_cents, paid_at, approved_at, provisioning_status",
     )
-    .eq("order_nsu", orderNsu)
+    .eq("mp_payment_id", mpPaymentId)
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!row) return { ok: false, installedSlugs: [], skipped: "not_found" };
   const p = row as Payment;
 
-  if (p.status !== "paid") return { ok: false, installedSlugs: [], skipped: "not_paid" };
+  if (p.status !== "approved") return { ok: false, installedSlugs: [], skipped: "not_paid" };
   if (p.provisioning_status === "done") return { ok: true, installedSlugs: [], skipped: "already_done" };
 
-  await supabaseAdmin
-    .from("infinitepay_payments")
+  await (supabaseAdmin as any)
+    .from("mpago_payments")
     .update({ provisioning_status: "running" })
-    .eq("order_nsu", orderNsu);
+    .eq("mp_payment_id", mpPaymentId);
+
+  const paidAt = p.paid_at ?? p.approved_at;
 
   // 1. Empresa
   let companyId = p.empresa_id;
   if (!companyId) {
-    const baseName = p.customer_name || (p.customer_email?.split("@")[0] ?? "Empresa Cliente");
+    const baseName = p.payer_name || (p.payer_email?.split("@")[0] ?? "Empresa Cliente");
     const { data: company, error: cErr } = await supabaseAdmin
       .from("companies")
       .insert({
         name: baseName,
-        email: p.customer_email,
+        email: p.payer_email,
         phone: p.customer_phone,
         is_active: true,
         is_master: false,
@@ -94,39 +102,38 @@ export async function autoProvisionFromPayment(orderNsu: string): Promise<{
       .select("id")
       .single();
     if (cErr) {
-      await appendLog(orderNsu, { step: "company", error: cErr.message });
-      await supabaseAdmin
-        .from("infinitepay_payments")
+      await appendLog(mpPaymentId, { step: "company", error: cErr.message });
+      await (supabaseAdmin as any)
+        .from("mpago_payments")
         .update({ provisioning_status: "error" })
-        .eq("order_nsu", orderNsu);
+        .eq("mp_payment_id", mpPaymentId);
       throw new Error(cErr.message);
     }
     companyId = company.id;
-    await appendLog(orderNsu, { step: "company", id: companyId, slug: slugify(baseName) });
+    await appendLog(mpPaymentId, { step: "company", id: companyId, slug: slugify(baseName) });
   }
 
   // 2. Usuário administrador (se ainda não existe)
   let userId = p.user_id;
-  if (!userId && p.customer_email) {
+  if (!userId && p.payer_email) {
     const { data: existing } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 200 });
-    const found = existing?.users?.find((u: any) => (u.email ?? "").toLowerCase() === p.customer_email!.toLowerCase());
+    const found = existing?.users?.find((u: any) => (u.email ?? "").toLowerCase() === p.payer_email!.toLowerCase());
     if (found) {
       userId = found.id;
     } else {
       const { data: created, error: uErr } = await supabaseAdmin.auth.admin.createUser({
-        email: p.customer_email,
+        email: p.payer_email,
         email_confirm: true,
-        user_metadata: { display_name: p.customer_name, phone: p.customer_phone },
+        user_metadata: { display_name: p.payer_name, phone: p.customer_phone },
       });
       if (uErr) {
-        await appendLog(orderNsu, { step: "user", error: uErr.message });
+        await appendLog(mpPaymentId, { step: "user", error: uErr.message });
       } else {
         userId = created.user?.id ?? null;
-        await appendLog(orderNsu, { step: "user", id: userId });
-        // Convite para definir senha
+        await appendLog(mpPaymentId, { step: "user", id: userId });
         await supabaseAdmin.auth.admin.generateLink({
           type: "magiclink",
-          email: p.customer_email,
+          email: p.payer_email,
         });
       }
     }
@@ -141,13 +148,13 @@ export async function autoProvisionFromPayment(orderNsu: string): Promise<{
           user_id: userId,
           company_id: companyId,
           profile_id: profile.id,
-          display_name: p.customer_name,
-          email: p.customer_email,
+          display_name: p.payer_name,
+          email: p.payer_email,
           is_active: true,
         },
         { onConflict: "user_id,company_id" },
       );
-      await appendLog(orderNsu, { step: "user_profile", profile: "gestor-empresa" });
+      await appendLog(mpPaymentId, { step: "user_profile", profile: "gestor-empresa" });
     }
   }
 
@@ -175,10 +182,10 @@ export async function autoProvisionFromPayment(orderNsu: string): Promise<{
           next_due_date: due.toISOString().slice(0, 10),
           recurring_amount: plan.recurring_amount,
           setup_amount: plan.setup_fee,
-          setup_paid_at: p.paid_at,
+          setup_paid_at: paidAt,
           status: "active",
         });
-        await appendLog(orderNsu, { step: "contract", plan_id: plan.id });
+        await appendLog(mpPaymentId, { step: "contract", plan_id: plan.id });
       }
     }
   }
@@ -187,7 +194,6 @@ export async function autoProvisionFromPayment(orderNsu: string): Promise<{
   const slugs = new Set<string>();
   (p.module_slugs ?? []).forEach((s) => s && slugs.add(s));
   if (p.modulo_id) slugs.add(p.modulo_id);
-  // Mínimo: módulos essenciais para a operação iniciar
   ["dashboard", "configuracoes", "usuarios"].forEach((s) => slugs.add(s));
 
   const installed: string[] = [];
@@ -197,7 +203,6 @@ export async function autoProvisionFromPayment(orderNsu: string): Promise<{
       .select("id, slug, current_version, dependencies")
       .in("slug", Array.from(slugs))
       .eq("is_active", true);
-    // Inclui dependências
     const allSlugs = new Set<string>(Array.from(slugs));
     (mods ?? []).forEach((m: any) => (m.dependencies ?? []).forEach((d: string) => allSlugs.add(d)));
     const { data: allMods } = await supabaseAdmin
@@ -222,19 +227,16 @@ export async function autoProvisionFromPayment(orderNsu: string): Promise<{
         action: "module.auto_installed",
         entity: "company_modules",
         entity_id: m.id,
-        after: { slug: m.slug, version: m.current_version, source: "infinitepay", order_nsu: orderNsu },
+        after: { slug: m.slug, version: m.current_version, source: "mercadopago", mp_payment_id: mpPaymentId },
       } as never);
       installed.push(m.slug);
     }
-    await appendLog(orderNsu, { step: "modules", installed });
+    await appendLog(mpPaymentId, { step: "modules", installed });
   }
 
   // 6. Checklist
   if (companyId) {
-    const items = [
-      "payment_approved",
-      "modules_activated",
-    ];
+    const items = ["payment_approved", "modules_activated"];
     for (const k of items) {
       await supabaseAdmin.from("onboarding_checklist").upsert(
         {
@@ -255,35 +257,36 @@ export async function autoProvisionFromPayment(orderNsu: string): Promise<{
         _event_code: "user_welcome",
         _company_id: companyId,
         _recipient_user_id: userId ?? undefined,
-        _recipient_email: p.customer_email ?? "",
+        _recipient_email: p.payer_email ?? "",
         _recipient_phone: p.customer_phone ?? "",
-        _recipient_name: p.customer_name ?? "Cliente",
+        _recipient_name: p.payer_name ?? "Cliente",
         _payload: {
-          user_name: p.customer_name ?? "Cliente",
-          user_email: p.customer_email ?? "",
+          user_name: p.payer_name ?? "Cliente",
+          user_email: p.payer_email ?? "",
           app_url: "https://impulsionando.com.br/onboarding",
           modules: installed.join(", "),
         },
         _channels: ["email", "whatsapp", "in_app"],
-        _reference_type: "infinitepay_payment",
-        _reference_id: orderNsu,
+        _reference_type: "mpago_payment",
+        _reference_id: mpPaymentId,
       } as never);
-      await appendLog(orderNsu, { step: "comms", ok: true });
+      await appendLog(mpPaymentId, { step: "comms", ok: true });
     } catch (e: any) {
-      await appendLog(orderNsu, { step: "comms", error: e.message });
+      await appendLog(mpPaymentId, { step: "comms", error: e.message });
     }
   }
 
   // 8. Finaliza
-  await supabaseAdmin
-    .from("infinitepay_payments")
+  await (supabaseAdmin as any)
+    .from("mpago_payments")
     .update({
       provisioning_status: "done",
       provisioned_at: new Date().toISOString(),
       empresa_id: companyId,
       user_id: userId,
+      paid_at: paidAt ?? new Date().toISOString(),
     })
-    .eq("order_nsu", orderNsu);
+    .eq("mp_payment_id", mpPaymentId);
 
   return { ok: true, companyId: companyId ?? undefined, userId: userId ?? undefined, installedSlugs: installed };
 }
