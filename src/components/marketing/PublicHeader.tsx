@@ -278,6 +278,8 @@ export function PublicHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <InstallAppButton className="hidden md:inline-flex" />
+
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex gap-1.5">
             <Link to="/auth">
               <LogIn className="w-4 h-4" /> Entrar
