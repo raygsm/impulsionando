@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { KpiCard } from "@/components/insights/KpiCard";
-import { Loader2, TrendingUp, TrendingDown, Banknote, AlertTriangle } from "lucide-react";
+import { Loader2, Banknote, AlertTriangle } from "lucide-react";
 import { fetchFinancialDashboard } from "@/lib/financial-dashboard.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/financeiro-consolidado-v2")({
