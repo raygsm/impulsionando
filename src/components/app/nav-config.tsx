@@ -452,6 +452,7 @@ export const NAV_GROUPS: NavGroup[] = [
           { to: "/core/diagnostico-geral", label: "Diagnóstico Geral", icon: Gauge, superOnly: true },
           { to: "/core/integracoes/diagnostico", label: "Integrações — Diagnóstico", icon: Gauge, superOnly: true },
           { to: "/core/integracoes/n8n", label: "n8n", icon: Workflow, superOnly: true },
+          { to: "/admin/funil-reguas", label: "Réguas de Funil", icon: Workflow, superOnly: true },
           { to: "/core/testes", label: "Testes", icon: FlaskConical, superOnly: true },
           { to: "/core/bi-ecossistema", label: "BI Ecossistema", icon: BarChart3, superOnly: true },
         ],
