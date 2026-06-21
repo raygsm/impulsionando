@@ -27,16 +27,48 @@ type Pay = { payment_method_id: string; account_id: string; amount: number };
 function Page() {
   const { companyId } = useActiveCompany();
   const nav = useNavigate();
+  const qc = useQueryClient();
   const [customerName, setCustomerName] = useState("");
   const [customerDoc, setCustomerDoc] = useState("");
   const [discount, setDiscount] = useState(0);
   const [items, setItems] = useState<Item[]>([]);
   const [pays, setPays] = useState<Pay[]>([]);
+  const [liveOn, setLiveOn] = useState(false);
 
+  const productsKey = ["pdv-products", companyId] as const;
   const { data: products } = useQuery({
-    queryKey: ["pdv-products", companyId], enabled: !!companyId,
-    queryFn: async () => (await supabase.from("inv_products").select("id, name, sale_price, unit").eq("company_id", companyId).eq("is_active", true).order("name").limit(500)).data ?? [],
+    queryKey: productsKey, enabled: !!companyId,
+    queryFn: async () => (await supabase.from("inv_products").select("id, name, sale_price, unit, current_stock, min_stock, track_stock, allow_negative").eq("company_id", companyId).eq("is_active", true).order("name").limit(500)).data ?? [],
+    refetchInterval: 15000,
+    refetchOnWindowFocus: true,
   });
+
+  // Realtime: estoque ao vivo enquanto a venda é montada
+  useEffect(() => {
+    if (!companyId) return;
+    const channel = supabase
+      .channel(`pdv-stock-${companyId}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "inv_products", filter: `company_id=eq.${companyId}` }, (payload) => {
+        const row = payload.new as { id: string; current_stock: number | null };
+        qc.setQueryData(productsKey, (prev: any) => Array.isArray(prev) ? prev.map((p: any) => p.id === row.id ? { ...p, current_stock: row.current_stock } : p) : prev);
+      })
+      .subscribe((status) => setLiveOn(status === "SUBSCRIBED"));
+    return () => { supabase.removeChannel(channel); };
+  }, [companyId, qc]);
+
+  const productById = useMemo(() => {
+    const m = new Map<string, any>();
+    (products ?? []).forEach((p: any) => m.set(p.id, p));
+    return m;
+  }, [products]);
+
+  // Quantidade já alocada nesta venda por produto (para calcular saldo disponível)
+  const reservedByProduct = useMemo(() => {
+    const m = new Map<string, number>();
+    items.forEach((it) => { if (it.product_id) m.set(it.product_id, (m.get(it.product_id) ?? 0) + (Number(it.quantity) || 0)); });
+    return m;
+  }, [items]);
+
   const { data: methods } = useQuery({
     queryKey: ["pdv-methods", companyId], enabled: !!companyId,
     queryFn: async () => (await supabase.from("fin_payment_methods").select("id, name").eq("company_id", companyId).eq("is_active", true).order("name")).data ?? [],
