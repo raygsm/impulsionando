@@ -7,13 +7,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { getKitchenBoard, setItemStatus } from "@/lib/restaurant-kitchen.functions";
-import { ChefHat, Bell, Check, X, RefreshCw, Clock } from "lucide-react";
+import { ChefHat, Bell, Check, X, RefreshCw, Clock, Radio } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useActiveCompany } from "@/hooks/use-active-company";
 
 export const Route = createFileRoute("/_authenticated/restaurante/salao")({
   component: SalaoPage,
@@ -34,15 +36,38 @@ function timeAgo(iso: string) {
 
 function SalaoPage() {
   const qc = useQueryClient();
+  const { companyId } = useActiveCompany();
   const board = useServerFn(getKitchenBoard);
   const setStatus = useServerFn(setItemStatus);
   const prevPendingRef = useRef<number>(0);
+  const [liveOn, setLiveOn] = useState(false);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: ["kitchen-board"],
     queryFn: () => board(),
-    refetchInterval: 5000,
+    // Fallback de polling reduzido — realtime invalida em tempo real abaixo
+    refetchInterval: 30000,
   });
+
+  // Atualização ao vivo: qualquer mudança em sales_order_items ou nas sessões
+  // de mesa desta empresa invalida o board imediatamente.
+  useEffect(() => {
+    if (!companyId) return;
+    const ch = supabase
+      .channel(`kitchen-live-${companyId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "sales_order_items" },
+        () => qc.invalidateQueries({ queryKey: ["kitchen-board"] }),
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "restaurant_table_sessions", filter: `company_id=eq.${companyId}` },
+        () => qc.invalidateQueries({ queryKey: ["kitchen-board"] }),
+      )
+      .subscribe((s) => setLiveOn(s === "SUBSCRIBED"));
+    return () => { supabase.removeChannel(ch); };
+  }, [companyId, qc]);
 
   const tables = (data?.tables ?? []) as TableTicket[];
   const totalPending = tables.reduce(
@@ -80,10 +105,15 @@ function SalaoPage() {
             <ChefHat className="size-8" /> Salão ao Vivo
           </h1>
           <p className="text-muted-foreground mt-1">
-            Fila de pedidos por mesa · atualização automática a cada 5s
+            Fila de pedidos por mesa · sincronização em tempo real
           </p>
         </div>
         <div className="flex items-center gap-3">
+          {liveOn && (
+            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-700 border-emerald-500/30">
+              <Radio className="size-3 mr-1 animate-pulse" /> Ao vivo
+            </Badge>
+          )}
           <Badge variant="outline" className="bg-amber-500/15 text-amber-700 text-base px-3 py-1">
             <Bell className="size-4 mr-1" /> {totalPending} pendente{totalPending === 1 ? "" : "s"}
           </Badge>

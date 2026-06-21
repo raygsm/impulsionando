@@ -1,12 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, EmptyState } from "@/components/app/PageElements";
 import { CompanyPicker } from "@/components/app/CompanyPicker";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Users2, Wrench, Clock, ListChecks, UsersRound } from "lucide-react";
+import { Calendar, Users2, Wrench, Clock, ListChecks, UsersRound, Radio } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/agenda/")({
   head: () => ({ meta: [{ title: "Agenda" }] }),
@@ -63,6 +64,26 @@ function AgendaHome() {
     },
   });
 
+  // Atualização ao vivo: invalida os contadores e a lista quando um agendamento
+  // muda (confirmar/cancelar/no-show) — sem precisar atualizar a tela.
+  const qc = useQueryClient();
+  const [liveOn, setLiveOn] = useState(false);
+  useEffect(() => {
+    if (!companyId) return;
+    const ch = supabase
+      .channel(`agenda-live-${companyId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "agenda_appointments", filter: `company_id=eq.${companyId}` },
+        () => {
+          qc.invalidateQueries({ queryKey: ["agenda-stats", companyId] });
+          qc.invalidateQueries({ queryKey: ["agenda-today", companyId] });
+        },
+      )
+      .subscribe((s) => setLiveOn(s === "SUBSCRIBED"));
+    return () => { supabase.removeChannel(ch); };
+  }, [companyId, qc]);
+
   if (!companyId) return <EmptyState title="Sem empresa ativa" description="Selecione uma empresa para acessar a agenda." />;
 
   const cards = [
@@ -97,7 +118,14 @@ function AgendaHome() {
 
       <Card className="shadow-card">
         <div className="p-4 border-b flex items-center justify-between">
-          <div className="flex items-center gap-2 font-medium"><Clock className="w-4 h-4" />Hoje · {today.toLocaleDateString("pt-BR")}</div>
+          <div className="flex items-center gap-2 font-medium">
+            <Clock className="w-4 h-4" />Hoje · {today.toLocaleDateString("pt-BR")}
+            {liveOn && (
+              <Badge variant="outline" className="ml-2 bg-emerald-500/10 text-emerald-700 border-emerald-500/30 text-[10px]">
+                <Radio className="w-3 h-3 mr-1 animate-pulse" /> Ao vivo
+              </Badge>
+            )}
+          </div>
           <Link to="/agenda/schedules" className="text-xs text-primary inline-flex items-center gap-1"><ListChecks className="w-3 h-3" />Gerenciar horários</Link>
         </div>
         <div className="divide-y">
