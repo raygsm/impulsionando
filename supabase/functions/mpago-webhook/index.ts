@@ -28,6 +28,15 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   );
 
+  const logEvent = async (level: 'info' | 'warn' | 'error', message: string, ctx: Record<string, unknown>, companyId: string | null) => {
+    try {
+      await supabase.from('runtime_events').insert({
+        level, scope: 'mpago.webhook', message, context: ctx, company_id: companyId,
+      });
+    } catch { /* logger silencioso */ }
+  };
+
+
   try {
     const rawBody = await req.text();
     const payload = JSON.parse(rawBody);
@@ -58,12 +67,17 @@ Deno.serve(async (req) => {
       }
     }
 
+    if (signatureValid === false) {
+      await logEvent('warn', 'assinatura inválida', { eventType, resourceId, mpEventId }, companyId);
+    }
+
     // 3. Persiste evento (idempotente)
     const { data: evt, error: evtErr } = await supabase
       .from('mpago_webhook_events')
       .upsert({
         company_id: companyId,
         event_type: eventType,
+
         mp_event_id: mpEventId,
         mp_resource_id: resourceId,
         action,
@@ -198,7 +212,9 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } catch (e) {
     console.error('Webhook error:', e);
+    await logEvent('error', (e as Error)?.message ?? 'erro desconhecido', { stack: (e as Error)?.stack?.slice(0, 4000) ?? null }, null);
     return new Response(JSON.stringify({ error: String(e) }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     // 200 para MP não reenviar infinitamente
   }
 });
+
