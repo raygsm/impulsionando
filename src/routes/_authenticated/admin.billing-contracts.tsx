@@ -5,12 +5,13 @@ import {
   listBillingContracts,
   markInvoicePaid,
   runBillingCycleNow,
+  sendInvoiceReminderNow,
 } from "@/lib/billing.functions";
 import { PageHeader, StatCard } from "@/components/app/PageElements";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, AlertTriangle, Pause, Play, RefreshCw, CreditCard, Receipt } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Pause, Play, RefreshCw, CreditCard, Receipt, Bell } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
 
@@ -46,6 +47,7 @@ function BillingContractsPage() {
   const listFn = useServerFn(listBillingContracts);
   const payFn = useServerFn(markInvoicePaid);
   const runFn = useServerFn(runBillingCycleNow);
+  const remindFn = useServerFn(sendInvoiceReminderNow);
 
   const { data, isLoading } = useQuery({
     queryKey: ["billing-contracts"],
@@ -69,6 +71,15 @@ function BillingContractsPage() {
         `Ciclo executado · ${res.generated ?? 0} fatura(s), ${res.sent ?? 0} cobrança(s), ${res.suspended ?? 0} suspensão(ões)`,
       );
       qc.invalidateQueries({ queryKey: ["billing-contracts"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const remind = useMutation({
+    mutationFn: (id: string) => remindFn({ data: { invoiceId: id } }),
+    onSuccess: (r) => {
+      const ch = (r?.channels ?? []) as string[];
+      toast.success(`Lembrete enfileirado (${ch.join(" + ") || "—"})`);
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -170,9 +181,14 @@ function BillingContractsPage() {
                           </Badge>
                           <span className="text-xs font-medium">{fmt(Number(i.amount))}</span>
                           {i.status !== "paid" && (
-                            <Button size="sm" variant="outline" onClick={() => pay.mutate(i.id)} disabled={pay.isPending}>
-                              <CheckCircle2 className="w-3 h-3 mr-1" /> Marcar pago
-                            </Button>
+                            <>
+                              <Button size="sm" variant="ghost" onClick={() => remind.mutate(i.id)} disabled={remind.isPending}>
+                                <Bell className="w-3 h-3 mr-1" /> Lembrar
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={() => pay.mutate(i.id)} disabled={pay.isPending}>
+                                <CheckCircle2 className="w-3 h-3 mr-1" /> Baixar
+                              </Button>
+                            </>
                           )}
                         </div>
                       ))}

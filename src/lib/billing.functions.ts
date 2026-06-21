@@ -282,3 +282,115 @@ export const listModulesPendingCommercialization = createServerFn({ method: "GET
     const ready = rows.filter((r) => r.ready);
     return { pending, ready, total: rows.length };
   });
+
+/**
+ * Dispara um lembrete IMEDIATO de cobrança (whatsapp + email) para uma fatura.
+ * Usado pelos botões "Lembrar agora" nos painéis de cobrança/inadimplência.
+ * Enfileira no message_outbox; o worker `process-message-outbox` despacha em < 1 min.
+ */
+export const sendInvoiceReminderNow = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { invoiceId: string }) =>
+    z.object({ invoiceId: z.string().uuid() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { userId } = context;
+    const { data: staff } = await supabaseAdmin.rpc("is_impulsionando_staff", { _user: userId });
+    if (!staff) throw new Error("Apenas equipe Impulsionando.");
+
+    const { data: invRaw, error } = await supabaseAdmin
+      .from("billing_invoices")
+      .select(
+        "id, company_id, amount, status, due_date, pix_copy_paste, pix_key, contract_id, " +
+          "companies:company_id(name, email, phone)",
+      )
+      .eq("id", data.invoiceId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!invRaw) throw new Error("Fatura não encontrada");
+    const inv = invRaw as any;
+    if (inv.status === "paid") throw new Error("Fatura já está paga.");
+
+    const company = inv.companies ?? {};
+    const recipientEmail: string | null = company.email ?? null;
+    const recipientPhone: string | null = company.phone ?? null;
+    if (!recipientEmail && !recipientPhone) {
+      throw new Error("Sem e-mail/WhatsApp cadastrado para esta empresa.");
+    }
+
+    const amountStr = Number(inv.amount).toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+    const due = inv.due_date ? new Date(inv.due_date).toLocaleDateString("pt-BR") : "—";
+    const subject = `Lembrete de cobrança — ${amountStr} · vence ${due}`;
+    const lines = [
+      `Olá ${company.name ?? "cliente"},`,
+      ``,
+      `Identificamos que a fatura ${amountStr} com vencimento em ${due} ainda está em aberto.`,
+      inv.pix_copy_paste
+        ? `Pague rapidamente via PIX copia-e-cola:\n${inv.pix_copy_paste}`
+        : `Acesse o painel para gerar o PIX e quitar agora.`,
+      ``,
+      `Após o pagamento, o acesso é reativado automaticamente.`,
+      ``,
+      `— Impulsionando`,
+    ];
+    const body = lines.join("\n");
+    const payload = {
+      invoice_id: inv.id,
+      amount: inv.amount,
+      due_date: inv.due_date,
+      pix_copy_paste: inv.pix_copy_paste ?? null,
+      pix_key: inv.pix_key ?? null,
+      contract_id: inv.contract_id,
+      triggered_by: userId,
+      trigger: "manual_reminder",
+    };
+
+    const rows: any[] = [];
+    if (recipientEmail) {
+      rows.push({
+        company_id: inv.company_id,
+        event_code: "billing.invoice.reminder.manual",
+        channel: "email",
+        recipient_email: recipientEmail,
+        recipient_name: company.name ?? null,
+        subject,
+        body,
+        payload,
+        status: "queued",
+        reference_type: "billing_invoices",
+        reference_id: inv.id,
+      });
+    }
+    if (recipientPhone) {
+      rows.push({
+        company_id: inv.company_id,
+        event_code: "billing.invoice.reminder.manual",
+        channel: "whatsapp",
+        recipient_phone: recipientPhone,
+        recipient_name: company.name ?? null,
+        subject: null,
+        body,
+        payload,
+        status: "queued",
+        reference_type: "billing_invoices",
+        reference_id: inv.id,
+      });
+    }
+
+    const { error: insErr } = await supabaseAdmin.from("message_outbox").insert(rows);
+    if (insErr) throw new Error(insErr.message);
+
+    await supabaseAdmin.from("audit_logs").insert({
+      company_id: inv.company_id,
+      user_id: userId,
+      action: "billing.invoice.manual_reminder",
+      entity: "billing_invoices",
+      entity_id: inv.id,
+      after: { channels: rows.map((r) => r.channel) },
+    });
+
+    return { ok: true, channels: rows.map((r) => r.channel) };
+  });
