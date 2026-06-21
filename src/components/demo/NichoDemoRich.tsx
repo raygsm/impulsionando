@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowRight } from "lucide-react";
 import { useDemoTracker } from "@/hooks/useDemoTracker";
+import { DemoLeadDialog } from "@/components/demo/DemoLeadDialog";
 import type { RichNicheConfig, RichTab } from "@/lib/demoNichoExtras";
 
 export function NichoDemoRich({ config }: { config: RichNicheConfig }) {
@@ -20,11 +21,15 @@ export function NichoDemoRich({ config }: { config: RichNicheConfig }) {
       <DemoModeBanner />
 
       <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 w-full">
-        <div className="mb-8">
-          <Badge className="bg-gradient-primary mb-3">{config.heroEyebrow}</Badge>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{config.heroTitle}</h1>
-          <p className="mt-3 text-muted-foreground max-w-3xl">{config.heroSubtitle}</p>
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div>
+            <Badge className="bg-gradient-primary mb-3">{config.heroEyebrow}</Badge>
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{config.heroTitle}</h1>
+            <p className="mt-3 text-muted-foreground max-w-3xl">{config.heroSubtitle}</p>
+          </div>
+          <DemoLeadDialog niche={config.niche} nicheLabel={config.heroEyebrow} origin="hub-nicho" />
         </div>
+
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
           {config.kpis.map((k) => (
