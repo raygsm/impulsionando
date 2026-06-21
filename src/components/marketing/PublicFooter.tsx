@@ -16,6 +16,7 @@ const COLS = [
       { to: "/demo", label: "Demonstrações" },
       { to: "/escolher-nicho", label: "Planos" },
       { to: "/orcamento", label: "Orçamento automático" },
+      { to: "/app", label: "App Impulsionando" },
     ],
   },
   {
