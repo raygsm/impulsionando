@@ -65,7 +65,7 @@ const LEVELS = [
   { name: "Lenda do Clube", visits: "100 visitas"      },
 ];
 
-function ClubeLanding() {
+export function ClubeLanding() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
