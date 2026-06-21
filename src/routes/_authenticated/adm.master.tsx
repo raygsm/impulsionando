@@ -244,6 +244,7 @@ function AdmMasterPage() {
             { to: "/admin/action-center", label: "Action Center", icon: CheckCircle2 },
             { to: "/admin/cohort-retention", label: "Cohort Retention", icon: TrendingUp },
             { to: "/admin/churn-risk", label: "Churn Risk", icon: AlertTriangle },
+            { to: "/admin/revenue-forecast", label: "Revenue Forecast", icon: DollarSign },
           ].map((l) => (
             <Link key={l.to} to={l.to as any} className="block">
               <Card className="p-3 hover:border-primary/40 hover:bg-primary/5 transition flex items-center gap-2">

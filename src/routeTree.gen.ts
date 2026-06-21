@@ -387,6 +387,7 @@ import { Route as AuthenticatedAdminWhatsappMetricsRouteImport } from './routes/
 import { Route as AuthenticatedAdminUptimeRouteImport } from './routes/_authenticated/admin.uptime'
 import { Route as AuthenticatedAdminTrialsRouteImport } from './routes/_authenticated/admin.trials'
 import { Route as AuthenticatedAdminTenant360RouteImport } from './routes/_authenticated/admin.tenant-360'
+import { Route as AuthenticatedAdminRevenueForecastRouteImport } from './routes/_authenticated/admin.revenue-forecast'
 import { Route as AuthenticatedAdminQualidadeRouteImport } from './routes/_authenticated/admin.qualidade'
 import { Route as AuthenticatedAdminPixPendentesRouteImport } from './routes/_authenticated/admin.pix-pendentes'
 import { Route as AuthenticatedAdminPeerBenchmarkRouteImport } from './routes/_authenticated/admin.peer-benchmark'
@@ -2547,6 +2548,12 @@ const AuthenticatedAdminTenant360Route =
     path: '/admin/tenant-360',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminRevenueForecastRoute =
+  AuthenticatedAdminRevenueForecastRouteImport.update({
+    id: '/admin/revenue-forecast',
+    path: '/admin/revenue-forecast',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminQualidadeRoute =
   AuthenticatedAdminQualidadeRouteImport.update({
     id: '/admin/qualidade',
@@ -3258,6 +3265,7 @@ export interface FileRoutesByFullPath {
   '/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
   '/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
+  '/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
   '/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
@@ -3712,6 +3720,7 @@ export interface FileRoutesByTo {
   '/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
   '/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
+  '/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
   '/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
@@ -4180,6 +4189,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/_authenticated/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
   '/_authenticated/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
+  '/_authenticated/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
   '/_authenticated/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/_authenticated/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/_authenticated/admin/uptime': typeof AuthenticatedAdminUptimeRoute
@@ -4647,6 +4657,7 @@ export interface FileRouteTypes {
     | '/admin/peer-benchmark'
     | '/admin/pix-pendentes'
     | '/admin/qualidade'
+    | '/admin/revenue-forecast'
     | '/admin/tenant-360'
     | '/admin/trials'
     | '/admin/uptime'
@@ -5101,6 +5112,7 @@ export interface FileRouteTypes {
     | '/admin/peer-benchmark'
     | '/admin/pix-pendentes'
     | '/admin/qualidade'
+    | '/admin/revenue-forecast'
     | '/admin/tenant-360'
     | '/admin/trials'
     | '/admin/uptime'
@@ -5568,6 +5580,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/peer-benchmark'
     | '/_authenticated/admin/pix-pendentes'
     | '/_authenticated/admin/qualidade'
+    | '/_authenticated/admin/revenue-forecast'
     | '/_authenticated/admin/tenant-360'
     | '/_authenticated/admin/trials'
     | '/_authenticated/admin/uptime'
@@ -8637,6 +8650,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTenant360RouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/revenue-forecast': {
+      id: '/_authenticated/admin/revenue-forecast'
+      path: '/admin/revenue-forecast'
+      fullPath: '/admin/revenue-forecast'
+      preLoaderRoute: typeof AuthenticatedAdminRevenueForecastRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/qualidade': {
       id: '/_authenticated/admin/qualidade'
       path: '/admin/qualidade'
@@ -9923,6 +9943,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminPeerBenchmarkRoute: typeof AuthenticatedAdminPeerBenchmarkRoute
   AuthenticatedAdminPixPendentesRoute: typeof AuthenticatedAdminPixPendentesRoute
   AuthenticatedAdminQualidadeRoute: typeof AuthenticatedAdminQualidadeRoute
+  AuthenticatedAdminRevenueForecastRoute: typeof AuthenticatedAdminRevenueForecastRoute
   AuthenticatedAdminTenant360Route: typeof AuthenticatedAdminTenant360Route
   AuthenticatedAdminTrialsRoute: typeof AuthenticatedAdminTrialsRoute
   AuthenticatedAdminUptimeRoute: typeof AuthenticatedAdminUptimeRoute
@@ -10076,6 +10097,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminPeerBenchmarkRoute: AuthenticatedAdminPeerBenchmarkRoute,
   AuthenticatedAdminPixPendentesRoute: AuthenticatedAdminPixPendentesRoute,
   AuthenticatedAdminQualidadeRoute: AuthenticatedAdminQualidadeRoute,
+  AuthenticatedAdminRevenueForecastRoute:
+    AuthenticatedAdminRevenueForecastRoute,
   AuthenticatedAdminTenant360Route: AuthenticatedAdminTenant360Route,
   AuthenticatedAdminTrialsRoute: AuthenticatedAdminTrialsRoute,
   AuthenticatedAdminUptimeRoute: AuthenticatedAdminUptimeRoute,
