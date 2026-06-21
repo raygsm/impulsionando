@@ -68,7 +68,7 @@ function FunilReguasPage() {
           {filtered.map((r: any) => (
             <RuleRow key={r.id} rule={r} expanded={expanded === r.id} onExpand={() => setExpanded(expanded === r.id ? null : r.id)}
               onToggle={() => toggle(r)} onDryRun={() => dryRun(r.id)}
-              onSave={async (patch) => { await updateFn({ data: { id: r.id, ...patch } }); toast.success("Salvo"); refetch(); }}
+              onSave={async (patch: any) => { await updateFn({ data: { id: r.id, ...patch } }); toast.success("Salvo"); refetch(); }}
             />
           ))}
         </div>

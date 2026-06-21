@@ -398,6 +398,7 @@ import { Route as AuthenticatedAdminNicheMatrixRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminInboxUnificadaRouteImport } from './routes/_authenticated/admin.inbox-unificada'
 import { Route as AuthenticatedAdminImobiliariaRouteImport } from './routes/_authenticated/admin.imobiliaria'
 import { Route as AuthenticatedAdminHealthRouteImport } from './routes/_authenticated/admin.health'
+import { Route as AuthenticatedAdminFunilReguasRouteImport } from './routes/_authenticated/admin.funil-reguas'
 import { Route as AuthenticatedAdminFunil360RouteImport } from './routes/_authenticated/admin.funil-360'
 import { Route as AuthenticatedAdminFiscalRouteImport } from './routes/_authenticated/admin.fiscal'
 import { Route as AuthenticatedAdminExpansionRadarRouteImport } from './routes/_authenticated/admin.expansion-radar'
@@ -2621,6 +2622,12 @@ const AuthenticatedAdminHealthRoute =
     path: '/admin/health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminFunilReguasRoute =
+  AuthenticatedAdminFunilReguasRouteImport.update({
+    id: '/admin/funil-reguas',
+    path: '/admin/funil-reguas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminFunil360Route =
   AuthenticatedAdminFunil360RouteImport.update({
     id: '/admin/funil-360',
@@ -3306,6 +3313,7 @@ export interface FileRoutesByFullPath {
   '/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
   '/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
   '/admin/funil-360': typeof AuthenticatedAdminFunil360Route
+  '/admin/funil-reguas': typeof AuthenticatedAdminFunilReguasRoute
   '/admin/health': typeof AuthenticatedAdminHealthRoute
   '/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
@@ -3768,6 +3776,7 @@ export interface FileRoutesByTo {
   '/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
   '/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
   '/admin/funil-360': typeof AuthenticatedAdminFunil360Route
+  '/admin/funil-reguas': typeof AuthenticatedAdminFunilReguasRoute
   '/admin/health': typeof AuthenticatedAdminHealthRoute
   '/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
@@ -4244,6 +4253,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
   '/_authenticated/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
   '/_authenticated/admin/funil-360': typeof AuthenticatedAdminFunil360Route
+  '/_authenticated/admin/funil-reguas': typeof AuthenticatedAdminFunilReguasRoute
   '/_authenticated/admin/health': typeof AuthenticatedAdminHealthRoute
   '/_authenticated/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/_authenticated/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
@@ -4719,6 +4729,7 @@ export interface FileRouteTypes {
     | '/admin/expansion-radar'
     | '/admin/fiscal'
     | '/admin/funil-360'
+    | '/admin/funil-reguas'
     | '/admin/health'
     | '/admin/imobiliaria'
     | '/admin/inbox-unificada'
@@ -5181,6 +5192,7 @@ export interface FileRouteTypes {
     | '/admin/expansion-radar'
     | '/admin/fiscal'
     | '/admin/funil-360'
+    | '/admin/funil-reguas'
     | '/admin/health'
     | '/admin/imobiliaria'
     | '/admin/inbox-unificada'
@@ -5656,6 +5668,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/expansion-radar'
     | '/_authenticated/admin/fiscal'
     | '/_authenticated/admin/funil-360'
+    | '/_authenticated/admin/funil-reguas'
     | '/_authenticated/admin/health'
     | '/_authenticated/admin/imobiliaria'
     | '/_authenticated/admin/inbox-unificada'
@@ -8821,6 +8834,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/funil-reguas': {
+      id: '/_authenticated/admin/funil-reguas'
+      path: '/admin/funil-reguas'
+      fullPath: '/admin/funil-reguas'
+      preLoaderRoute: typeof AuthenticatedAdminFunilReguasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/funil-360': {
       id: '/_authenticated/admin/funil-360'
       path: '/admin/funil-360'
@@ -10079,6 +10099,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminExpansionRadarRoute: typeof AuthenticatedAdminExpansionRadarRoute
   AuthenticatedAdminFiscalRoute: typeof AuthenticatedAdminFiscalRoute
   AuthenticatedAdminFunil360Route: typeof AuthenticatedAdminFunil360Route
+  AuthenticatedAdminFunilReguasRoute: typeof AuthenticatedAdminFunilReguasRoute
   AuthenticatedAdminHealthRoute: typeof AuthenticatedAdminHealthRoute
   AuthenticatedAdminImobiliariaRoute: typeof AuthenticatedAdminImobiliariaRoute
   AuthenticatedAdminInboxUnificadaRoute: typeof AuthenticatedAdminInboxUnificadaRoute
@@ -10236,6 +10257,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminExpansionRadarRoute: AuthenticatedAdminExpansionRadarRoute,
   AuthenticatedAdminFiscalRoute: AuthenticatedAdminFiscalRoute,
   AuthenticatedAdminFunil360Route: AuthenticatedAdminFunil360Route,
+  AuthenticatedAdminFunilReguasRoute: AuthenticatedAdminFunilReguasRoute,
   AuthenticatedAdminHealthRoute: AuthenticatedAdminHealthRoute,
   AuthenticatedAdminImobiliariaRoute: AuthenticatedAdminImobiliariaRoute,
   AuthenticatedAdminInboxUnificadaRoute: AuthenticatedAdminInboxUnificadaRoute,
