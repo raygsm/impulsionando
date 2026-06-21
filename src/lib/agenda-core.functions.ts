@@ -557,7 +557,7 @@ export const listMyAppointments = createServerFn({ method: "GET" })
     if (ids.length === 0) return [];
     const { data, error } = await sb
       .from("agenda_appointments")
-      .select("id, company_id, starts_at, ends_at, status, service_id, professional_id, location_id, customer_id, notes")
+      .select("id, company_id, starts_at, ends_at, status, service_id, professional_id, customer_id, notes")
       .in("customer_id", ids)
       .gte("starts_at", new Date(Date.now() - 7 * 86400_000).toISOString())
       .order("starts_at", { ascending: true });
