@@ -87,7 +87,9 @@ export const advanceParallelProject = createServerFn({ method: "POST" })
     const { data: staff } = await supabaseAdmin.rpc("is_impulsionando_staff", { _user: userId });
     if (!staff) throw new Error("Apenas equipe Impulsionando.");
 
-    const patch: Record<string, unknown> = { migration_status: data.newStatus };
+    const patch: { migration_status: typeof data.newStatus; consolidation_started_at?: string; consolidated_at?: string } = {
+      migration_status: data.newStatus,
+    };
     if (data.newStatus === "in_progress") patch.consolidation_started_at = new Date().toISOString();
     if (data.newStatus === "migrated" || data.newStatus === "archived") patch.consolidated_at = new Date().toISOString();
 
