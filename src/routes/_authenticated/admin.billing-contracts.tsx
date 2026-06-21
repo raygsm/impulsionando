@@ -181,9 +181,14 @@ function BillingContractsPage() {
                           </Badge>
                           <span className="text-xs font-medium">{fmt(Number(i.amount))}</span>
                           {i.status !== "paid" && (
-                            <Button size="sm" variant="outline" onClick={() => pay.mutate(i.id)} disabled={pay.isPending}>
-                              <CheckCircle2 className="w-3 h-3 mr-1" /> Marcar pago
-                            </Button>
+                            <>
+                              <Button size="sm" variant="ghost" onClick={() => remind.mutate(i.id)} disabled={remind.isPending}>
+                                <Bell className="w-3 h-3 mr-1" /> Lembrar
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={() => pay.mutate(i.id)} disabled={pay.isPending}>
+                                <CheckCircle2 className="w-3 h-3 mr-1" /> Baixar
+                              </Button>
+                            </>
                           )}
                         </div>
                       ))}
