@@ -397,6 +397,7 @@ import { Route as AuthenticatedAdminHealthRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminFunil360RouteImport } from './routes/_authenticated/admin.funil-360'
 import { Route as AuthenticatedAdminFiscalRouteImport } from './routes/_authenticated/admin.fiscal'
 import { Route as AuthenticatedAdminExpansionRadarRouteImport } from './routes/_authenticated/admin.expansion-radar'
+import { Route as AuthenticatedAdminCohortRetentionRouteImport } from './routes/_authenticated/admin.cohort-retention'
 import { Route as AuthenticatedAdminCobrancasRouteImport } from './routes/_authenticated/admin.cobrancas'
 import { Route as AuthenticatedAdminClubeRouteImport } from './routes/_authenticated/admin.clube'
 import { Route as AuthenticatedAdminCatalogIntentsRouteImport } from './routes/_authenticated/admin.catalog-intents'
@@ -2603,6 +2604,12 @@ const AuthenticatedAdminExpansionRadarRoute =
     path: '/admin/expansion-radar',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminCohortRetentionRoute =
+  AuthenticatedAdminCohortRetentionRouteImport.update({
+    id: '/admin/cohort-retention',
+    path: '/admin/cohort-retention',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminCobrancasRoute =
   AuthenticatedAdminCobrancasRouteImport.update({
     id: '/admin/cobrancas',
@@ -3216,6 +3223,7 @@ export interface FileRoutesByFullPath {
   '/admin/catalog-intents': typeof AuthenticatedAdminCatalogIntentsRoute
   '/admin/clube': typeof AuthenticatedAdminClubeRoute
   '/admin/cobrancas': typeof AuthenticatedAdminCobrancasRoute
+  '/admin/cohort-retention': typeof AuthenticatedAdminCohortRetentionRoute
   '/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
   '/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
   '/admin/funil-360': typeof AuthenticatedAdminFunil360Route
@@ -3666,6 +3674,7 @@ export interface FileRoutesByTo {
   '/admin/catalog-intents': typeof AuthenticatedAdminCatalogIntentsRoute
   '/admin/clube': typeof AuthenticatedAdminClubeRoute
   '/admin/cobrancas': typeof AuthenticatedAdminCobrancasRoute
+  '/admin/cohort-retention': typeof AuthenticatedAdminCohortRetentionRoute
   '/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
   '/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
   '/admin/funil-360': typeof AuthenticatedAdminFunil360Route
@@ -4130,6 +4139,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/catalog-intents': typeof AuthenticatedAdminCatalogIntentsRoute
   '/_authenticated/admin/clube': typeof AuthenticatedAdminClubeRoute
   '/_authenticated/admin/cobrancas': typeof AuthenticatedAdminCobrancasRoute
+  '/_authenticated/admin/cohort-retention': typeof AuthenticatedAdminCohortRetentionRoute
   '/_authenticated/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
   '/_authenticated/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
   '/_authenticated/admin/funil-360': typeof AuthenticatedAdminFunil360Route
@@ -4593,6 +4603,7 @@ export interface FileRouteTypes {
     | '/admin/catalog-intents'
     | '/admin/clube'
     | '/admin/cobrancas'
+    | '/admin/cohort-retention'
     | '/admin/expansion-radar'
     | '/admin/fiscal'
     | '/admin/funil-360'
@@ -5043,6 +5054,7 @@ export interface FileRouteTypes {
     | '/admin/catalog-intents'
     | '/admin/clube'
     | '/admin/cobrancas'
+    | '/admin/cohort-retention'
     | '/admin/expansion-radar'
     | '/admin/fiscal'
     | '/admin/funil-360'
@@ -5506,6 +5518,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/catalog-intents'
     | '/_authenticated/admin/clube'
     | '/_authenticated/admin/cobrancas'
+    | '/_authenticated/admin/cohort-retention'
     | '/_authenticated/admin/expansion-radar'
     | '/_authenticated/admin/fiscal'
     | '/_authenticated/admin/funil-360'
@@ -8655,6 +8668,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminExpansionRadarRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/cohort-retention': {
+      id: '/_authenticated/admin/cohort-retention'
+      path: '/admin/cohort-retention'
+      fullPath: '/admin/cohort-retention'
+      preLoaderRoute: typeof AuthenticatedAdminCohortRetentionRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/cobrancas': {
       id: '/_authenticated/admin/cobrancas'
       path: '/admin/cobrancas'
@@ -9829,6 +9849,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCatalogIntentsRoute: typeof AuthenticatedAdminCatalogIntentsRoute
   AuthenticatedAdminClubeRoute: typeof AuthenticatedAdminClubeRoute
   AuthenticatedAdminCobrancasRoute: typeof AuthenticatedAdminCobrancasRoute
+  AuthenticatedAdminCohortRetentionRoute: typeof AuthenticatedAdminCohortRetentionRoute
   AuthenticatedAdminExpansionRadarRoute: typeof AuthenticatedAdminExpansionRadarRoute
   AuthenticatedAdminFiscalRoute: typeof AuthenticatedAdminFiscalRoute
   AuthenticatedAdminFunil360Route: typeof AuthenticatedAdminFunil360Route
@@ -9976,6 +9997,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminCatalogIntentsRoute: AuthenticatedAdminCatalogIntentsRoute,
   AuthenticatedAdminClubeRoute: AuthenticatedAdminClubeRoute,
   AuthenticatedAdminCobrancasRoute: AuthenticatedAdminCobrancasRoute,
+  AuthenticatedAdminCohortRetentionRoute:
+    AuthenticatedAdminCohortRetentionRoute,
   AuthenticatedAdminExpansionRadarRoute: AuthenticatedAdminExpansionRadarRoute,
   AuthenticatedAdminFiscalRoute: AuthenticatedAdminFiscalRoute,
   AuthenticatedAdminFunil360Route: AuthenticatedAdminFunil360Route,
