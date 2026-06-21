@@ -5085,6 +5085,8 @@ export type Database = {
           commercial_email: string | null
           company_kind: string | null
           company_type: string | null
+          consolidated_at: string | null
+          consolidation_started_at: string | null
           created_at: string
           demo_expires_at: string | null
           demo_niche: string | null
@@ -5092,6 +5094,7 @@ export type Database = {
           domain: string | null
           email: string | null
           environment: Database["public"]["Enums"]["company_environment"]
+          external_url: string | null
           facebook: string | null
           financial_email: string | null
           id: string
@@ -5103,6 +5106,8 @@ export type Database = {
           legal_name: string | null
           logo_url: string | null
           longitude: number | null
+          migration_source_project_id: string | null
+          migration_status: string
           name: string
           niche_id: string | null
           owner_name: string | null
@@ -5114,6 +5119,7 @@ export type Database = {
           release_channel: string
           secondary_color: string | null
           segment: string | null
+          service_radius_km: number | null
           status: string
           status_commercial: string | null
           status_financial: string | null
@@ -5124,6 +5130,7 @@ export type Database = {
           trade_name: string | null
           updated_at: string
           vitrine_enabled: boolean
+          vitrine_show_external: boolean
           website: string | null
           whatsapp: string | null
         }
@@ -5136,6 +5143,8 @@ export type Database = {
           commercial_email?: string | null
           company_kind?: string | null
           company_type?: string | null
+          consolidated_at?: string | null
+          consolidation_started_at?: string | null
           created_at?: string
           demo_expires_at?: string | null
           demo_niche?: string | null
@@ -5143,6 +5152,7 @@ export type Database = {
           domain?: string | null
           email?: string | null
           environment?: Database["public"]["Enums"]["company_environment"]
+          external_url?: string | null
           facebook?: string | null
           financial_email?: string | null
           id?: string
@@ -5154,6 +5164,8 @@ export type Database = {
           legal_name?: string | null
           logo_url?: string | null
           longitude?: number | null
+          migration_source_project_id?: string | null
+          migration_status?: string
           name: string
           niche_id?: string | null
           owner_name?: string | null
@@ -5165,6 +5177,7 @@ export type Database = {
           release_channel?: string
           secondary_color?: string | null
           segment?: string | null
+          service_radius_km?: number | null
           status?: string
           status_commercial?: string | null
           status_financial?: string | null
@@ -5175,6 +5188,7 @@ export type Database = {
           trade_name?: string | null
           updated_at?: string
           vitrine_enabled?: boolean
+          vitrine_show_external?: boolean
           website?: string | null
           whatsapp?: string | null
         }
@@ -5187,6 +5201,8 @@ export type Database = {
           commercial_email?: string | null
           company_kind?: string | null
           company_type?: string | null
+          consolidated_at?: string | null
+          consolidation_started_at?: string | null
           created_at?: string
           demo_expires_at?: string | null
           demo_niche?: string | null
@@ -5194,6 +5210,7 @@ export type Database = {
           domain?: string | null
           email?: string | null
           environment?: Database["public"]["Enums"]["company_environment"]
+          external_url?: string | null
           facebook?: string | null
           financial_email?: string | null
           id?: string
@@ -5205,6 +5222,8 @@ export type Database = {
           legal_name?: string | null
           logo_url?: string | null
           longitude?: number | null
+          migration_source_project_id?: string | null
+          migration_status?: string
           name?: string
           niche_id?: string | null
           owner_name?: string | null
@@ -5216,6 +5235,7 @@ export type Database = {
           release_channel?: string
           secondary_color?: string | null
           segment?: string | null
+          service_radius_km?: number | null
           status?: string
           status_commercial?: string | null
           status_financial?: string | null
@@ -5226,6 +5246,7 @@ export type Database = {
           trade_name?: string | null
           updated_at?: string
           vitrine_enabled?: boolean
+          vitrine_show_external?: boolean
           website?: string | null
           whatsapp?: string | null
         }
@@ -5236,6 +5257,57 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "niches"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      companies_migration_log: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          payload: Json | null
+          status: string
+          step: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          payload?: Json | null
+          status?: string
+          step: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          payload?: Json | null
+          status?: string
+          step?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "companies_migration_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "companies_migration_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
           },
         ]
       }

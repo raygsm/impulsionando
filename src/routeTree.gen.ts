@@ -389,6 +389,7 @@ import { Route as AuthenticatedAdminTrialsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminTenant360RouteImport } from './routes/_authenticated/admin.tenant-360'
 import { Route as AuthenticatedAdminRevenueForecastRouteImport } from './routes/_authenticated/admin.revenue-forecast'
 import { Route as AuthenticatedAdminQualidadeRouteImport } from './routes/_authenticated/admin.qualidade'
+import { Route as AuthenticatedAdminProjetosParalelosRouteImport } from './routes/_authenticated/admin.projetos-paralelos'
 import { Route as AuthenticatedAdminPixPendentesRouteImport } from './routes/_authenticated/admin.pix-pendentes'
 import { Route as AuthenticatedAdminPeerBenchmarkRouteImport } from './routes/_authenticated/admin.peer-benchmark'
 import { Route as AuthenticatedAdminNichePlansRouteImport } from './routes/_authenticated/admin.niche-plans'
@@ -2561,6 +2562,12 @@ const AuthenticatedAdminQualidadeRoute =
     path: '/admin/qualidade',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminProjetosParalelosRoute =
+  AuthenticatedAdminProjetosParalelosRouteImport.update({
+    id: '/admin/projetos-paralelos',
+    path: '/admin/projetos-paralelos',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminPixPendentesRoute =
   AuthenticatedAdminPixPendentesRouteImport.update({
     id: '/admin/pix-pendentes',
@@ -3272,6 +3279,7 @@ export interface FileRoutesByFullPath {
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
+  '/admin/projetos-paralelos': typeof AuthenticatedAdminProjetosParalelosRoute
   '/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
   '/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
   '/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
@@ -3728,6 +3736,7 @@ export interface FileRoutesByTo {
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
+  '/admin/projetos-paralelos': typeof AuthenticatedAdminProjetosParalelosRoute
   '/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
   '/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
   '/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
@@ -4198,6 +4207,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/_authenticated/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/_authenticated/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
+  '/_authenticated/admin/projetos-paralelos': typeof AuthenticatedAdminProjetosParalelosRoute
   '/_authenticated/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
   '/_authenticated/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
   '/_authenticated/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
@@ -4667,6 +4677,7 @@ export interface FileRouteTypes {
     | '/admin/niche-plans'
     | '/admin/peer-benchmark'
     | '/admin/pix-pendentes'
+    | '/admin/projetos-paralelos'
     | '/admin/qualidade'
     | '/admin/revenue-forecast'
     | '/admin/tenant-360'
@@ -5123,6 +5134,7 @@ export interface FileRouteTypes {
     | '/admin/niche-plans'
     | '/admin/peer-benchmark'
     | '/admin/pix-pendentes'
+    | '/admin/projetos-paralelos'
     | '/admin/qualidade'
     | '/admin/revenue-forecast'
     | '/admin/tenant-360'
@@ -5592,6 +5604,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/niche-plans'
     | '/_authenticated/admin/peer-benchmark'
     | '/_authenticated/admin/pix-pendentes'
+    | '/_authenticated/admin/projetos-paralelos'
     | '/_authenticated/admin/qualidade'
     | '/_authenticated/admin/revenue-forecast'
     | '/_authenticated/admin/tenant-360'
@@ -8677,6 +8690,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminQualidadeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/projetos-paralelos': {
+      id: '/_authenticated/admin/projetos-paralelos'
+      path: '/admin/projetos-paralelos'
+      fullPath: '/admin/projetos-paralelos'
+      preLoaderRoute: typeof AuthenticatedAdminProjetosParalelosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/pix-pendentes': {
       id: '/_authenticated/admin/pix-pendentes'
       path: '/admin/pix-pendentes'
@@ -9963,6 +9983,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminNichePlansRoute: typeof AuthenticatedAdminNichePlansRoute
   AuthenticatedAdminPeerBenchmarkRoute: typeof AuthenticatedAdminPeerBenchmarkRoute
   AuthenticatedAdminPixPendentesRoute: typeof AuthenticatedAdminPixPendentesRoute
+  AuthenticatedAdminProjetosParalelosRoute: typeof AuthenticatedAdminProjetosParalelosRoute
   AuthenticatedAdminQualidadeRoute: typeof AuthenticatedAdminQualidadeRoute
   AuthenticatedAdminRevenueForecastRoute: typeof AuthenticatedAdminRevenueForecastRoute
   AuthenticatedAdminTenant360Route: typeof AuthenticatedAdminTenant360Route
@@ -10118,6 +10139,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminNichePlansRoute: AuthenticatedAdminNichePlansRoute,
   AuthenticatedAdminPeerBenchmarkRoute: AuthenticatedAdminPeerBenchmarkRoute,
   AuthenticatedAdminPixPendentesRoute: AuthenticatedAdminPixPendentesRoute,
+  AuthenticatedAdminProjetosParalelosRoute:
+    AuthenticatedAdminProjetosParalelosRoute,
   AuthenticatedAdminQualidadeRoute: AuthenticatedAdminQualidadeRoute,
   AuthenticatedAdminRevenueForecastRoute:
     AuthenticatedAdminRevenueForecastRoute,
