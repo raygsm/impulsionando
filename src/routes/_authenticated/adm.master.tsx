@@ -236,6 +236,7 @@ function AdmMasterPage() {
             { to: "/admin/health", label: "Health Score", icon: Activity },
             { to: "/admin/inbox-unificada", label: "Inbox Omnichannel", icon: Mail },
             { to: "/admin/expansion-radar", label: "Expansion Radar", icon: TrendingUp },
+            { to: "/admin/attribution", label: "Revenue Attribution", icon: DollarSign },
           ].map((l) => (
             <Link key={l.to} to={l.to as any} className="block">
               <Card className="p-3 hover:border-primary/40 hover:bg-primary/5 transition flex items-center gap-2">
