@@ -422,6 +422,7 @@ import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminAuditTrailRouteImport } from './routes/_authenticated/admin.audit-trail'
 import { Route as AuthenticatedAdminAttributionRouteImport } from './routes/_authenticated/admin.attribution'
 import { Route as AuthenticatedAdminActionCenterRouteImport } from './routes/_authenticated/admin.action-center'
+import { Route as AuthenticatedAdminAcoesRouteImport } from './routes/_authenticated/admin.acoes'
 import { Route as AuthenticatedAdmMasterRouteImport } from './routes/_authenticated/adm.master'
 import { Route as AuthenticatedAdmAgentesRouteImport } from './routes/_authenticated/adm.agentes'
 import { Route as AuthenticatedAccessProfilesMatrixRouteImport } from './routes/_authenticated/access-profiles.matrix'
@@ -2773,6 +2774,11 @@ const AuthenticatedAdminActionCenterRoute =
     path: '/admin/action-center',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminAcoesRoute = AuthenticatedAdminAcoesRouteImport.update({
+  id: '/admin/acoes',
+  path: '/admin/acoes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdmMasterRoute = AuthenticatedAdmMasterRouteImport.update({
   id: '/master',
   path: '/master',
@@ -3353,6 +3359,7 @@ export interface FileRoutesByFullPath {
   '/access-profiles/matrix': typeof AuthenticatedAccessProfilesMatrixRoute
   '/adm/agentes': typeof AuthenticatedAdmAgentesRoute
   '/adm/master': typeof AuthenticatedAdmMasterRoute
+  '/admin/acoes': typeof AuthenticatedAdminAcoesRoute
   '/admin/action-center': typeof AuthenticatedAdminActionCenterRoute
   '/admin/attribution': typeof AuthenticatedAdminAttributionRoute
   '/admin/audit-trail': typeof AuthenticatedAdminAuditTrailRoute
@@ -3824,6 +3831,7 @@ export interface FileRoutesByTo {
   '/access-profiles/matrix': typeof AuthenticatedAccessProfilesMatrixRoute
   '/adm/agentes': typeof AuthenticatedAdmAgentesRoute
   '/adm/master': typeof AuthenticatedAdmMasterRoute
+  '/admin/acoes': typeof AuthenticatedAdminAcoesRoute
   '/admin/action-center': typeof AuthenticatedAdminActionCenterRoute
   '/admin/attribution': typeof AuthenticatedAdminAttributionRoute
   '/admin/audit-trail': typeof AuthenticatedAdminAuditTrailRoute
@@ -4309,6 +4317,7 @@ export interface FileRoutesById {
   '/_authenticated/access-profiles/matrix': typeof AuthenticatedAccessProfilesMatrixRoute
   '/_authenticated/adm/agentes': typeof AuthenticatedAdmAgentesRoute
   '/_authenticated/adm/master': typeof AuthenticatedAdmMasterRoute
+  '/_authenticated/admin/acoes': typeof AuthenticatedAdminAcoesRoute
   '/_authenticated/admin/action-center': typeof AuthenticatedAdminActionCenterRoute
   '/_authenticated/admin/attribution': typeof AuthenticatedAdminAttributionRoute
   '/_authenticated/admin/audit-trail': typeof AuthenticatedAdminAuditTrailRoute
@@ -4793,6 +4802,7 @@ export interface FileRouteTypes {
     | '/access-profiles/matrix'
     | '/adm/agentes'
     | '/adm/master'
+    | '/admin/acoes'
     | '/admin/action-center'
     | '/admin/attribution'
     | '/admin/audit-trail'
@@ -5264,6 +5274,7 @@ export interface FileRouteTypes {
     | '/access-profiles/matrix'
     | '/adm/agentes'
     | '/adm/master'
+    | '/admin/acoes'
     | '/admin/action-center'
     | '/admin/attribution'
     | '/admin/audit-trail'
@@ -5748,6 +5759,7 @@ export interface FileRouteTypes {
     | '/_authenticated/access-profiles/matrix'
     | '/_authenticated/adm/agentes'
     | '/_authenticated/adm/master'
+    | '/_authenticated/admin/acoes'
     | '/_authenticated/admin/action-center'
     | '/_authenticated/admin/attribution'
     | '/_authenticated/admin/audit-trail'
@@ -9106,6 +9118,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminActionCenterRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/acoes': {
+      id: '/_authenticated/admin/acoes'
+      path: '/admin/acoes'
+      fullPath: '/admin/acoes'
+      preLoaderRoute: typeof AuthenticatedAdminAcoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/adm/master': {
       id: '/_authenticated/adm/master'
       path: '/master'
@@ -10243,6 +10262,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTalentsRoute: typeof AuthenticatedTalentsRoute
   AuthenticatedUnitsRoute: typeof AuthenticatedUnitsRoute
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRouteWithChildren
+  AuthenticatedAdminAcoesRoute: typeof AuthenticatedAdminAcoesRoute
   AuthenticatedAdminActionCenterRoute: typeof AuthenticatedAdminActionCenterRoute
   AuthenticatedAdminAttributionRoute: typeof AuthenticatedAdminAttributionRoute
   AuthenticatedAdminAuditTrailRoute: typeof AuthenticatedAdminAuditTrailRoute
@@ -10405,6 +10425,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedTalentsRoute: AuthenticatedTalentsRoute,
   AuthenticatedUnitsRoute: AuthenticatedUnitsRoute,
   AuthenticatedUsersRoute: AuthenticatedUsersRouteWithChildren,
+  AuthenticatedAdminAcoesRoute: AuthenticatedAdminAcoesRoute,
   AuthenticatedAdminActionCenterRoute: AuthenticatedAdminActionCenterRoute,
   AuthenticatedAdminAttributionRoute: AuthenticatedAdminAttributionRoute,
   AuthenticatedAdminAuditTrailRoute: AuthenticatedAdminAuditTrailRoute,
