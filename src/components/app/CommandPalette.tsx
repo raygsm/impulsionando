@@ -27,9 +27,16 @@ export function CommandPalette() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const entries = useMemo<Entry[]>(() => {
-    const top: Entry[] = TOP_ITEMS.map((i) => ({ ...i, group: "Geral" }));
-    const rest: Entry[] = NAV_GROUPS.flatMap((g) => g.items.map((i) => ({ ...i, group: g.label })));
+  const entries = useMemo<(Entry & { to: string })[]>(() => {
+    const top = TOP_ITEMS.filter((i) => i.to).map((i) => ({ ...i, to: i.to!, group: "Geral" }));
+    const rest = NAV_GROUPS.flatMap((g) =>
+      g.items.flatMap((i) => {
+        const out: (Entry & { to: string })[] = [];
+        if (i.to) out.push({ ...i, to: i.to, group: g.label });
+        if (i.children) for (const c of i.children) if (c.to) out.push({ ...c, to: c.to, group: g.label });
+        return out;
+      })
+    );
     return [...top, ...rest];
   }, []);
 
