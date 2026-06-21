@@ -105,10 +105,15 @@ function SalaoPage() {
             <ChefHat className="size-8" /> Salão ao Vivo
           </h1>
           <p className="text-muted-foreground mt-1">
-            Fila de pedidos por mesa · atualização automática a cada 5s
+            Fila de pedidos por mesa · sincronização em tempo real
           </p>
         </div>
         <div className="flex items-center gap-3">
+          {liveOn && (
+            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-700 border-emerald-500/30">
+              <Radio className="size-3 mr-1 animate-pulse" /> Ao vivo
+            </Badge>
+          )}
           <Badge variant="outline" className="bg-amber-500/15 text-amber-700 text-base px-3 py-1">
             <Bell className="size-4 mr-1" /> {totalPending} pendente{totalPending === 1 ? "" : "s"}
           </Badge>
