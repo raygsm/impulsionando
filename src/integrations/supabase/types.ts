@@ -21598,6 +21598,52 @@ export type Database = {
           },
         ]
       }
+      v_funnel_conversion: {
+        Row: {
+          capture: number | null
+          capture_to_convert_pct: number | null
+          convert: number | null
+          convert_to_retain_pct: number | null
+          expand: number | null
+          niche_slug: string | null
+          relate: number | null
+          retain: number | null
+        }
+        Relationships: []
+      }
+      v_funnel_dispatch_stats: {
+        Row: {
+          avg_latency_seconds: number | null
+          cancelled: number | null
+          delivery_rate_pct: number | null
+          failed: number | null
+          last_activity_at: string | null
+          niche_slug: string | null
+          queued: number | null
+          sent: number | null
+          skipped: number | null
+          stage: Database["public"]["Enums"]["core_funnel_stage"] | null
+          total: number | null
+          workflow_name: string | null
+        }
+        Relationships: []
+      }
+      v_funnel_recent_failures: {
+        Row: {
+          attempts: number | null
+          entity_id: string | null
+          entity_type: string | null
+          event_name: string | null
+          id: string | null
+          last_error: string | null
+          niche_slug: string | null
+          scheduled_at: string | null
+          stage: Database["public"]["Enums"]["core_funnel_stage"] | null
+          updated_at: string | null
+          workflow_name: string | null
+        }
+        Relationships: []
+      }
       v_marketplace_gmv_summary: {
         Row: {
           company_id: string | null
