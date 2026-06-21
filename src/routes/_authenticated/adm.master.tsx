@@ -240,6 +240,7 @@ function AdmMasterPage() {
             { to: "/admin/peer-benchmark", label: "Peer Benchmark", icon: TrendingUp },
             { to: "/admin/tenant-360", label: "Tenant 360º", icon: Building2 },
             { to: "/admin/command-center", label: "Command Center", icon: Activity },
+            { to: "/admin/executive-briefing", label: "Executive Briefing (IA)", icon: Settings },
             { to: "/admin/action-center", label: "Action Center", icon: CheckCircle2 },
             { to: "/admin/cohort-retention", label: "Cohort Retention", icon: TrendingUp },
           ].map((l) => (
