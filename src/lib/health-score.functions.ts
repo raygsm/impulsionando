@@ -1,118 +1,169 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
-/**
- * Health Score Impulsionando — score 0-100 por tenant com previsão de churn.
- *
- * Composição:
- *   30 pts — Pagamento em dia (sem fatura overdue)
- *   25 pts — Engajamento (msgs enviadas + agendamentos últimos 30d, log)
- *   20 pts — Adoção de módulos ativos (company_modules)
- *   15 pts — Atividade recente (last_paid_at <= 35d)
- *   10 pts — Attach Premium (consumer_memberships ativos)
- *
- * Faixas:
- *   >= 75  HEALTHY
- *   50-74  AT_RISK
- *   < 50   CRITICAL (alta probabilidade de churn em 60d)
- */
-export const getTenantHealthScores = createServerFn({ method: "GET" })
+async function ensureAdmin(ctx: any) {
+  const { data: isAdmin } = await ctx.supabase.rpc("has_role", { _user_id: ctx.userId, _role: "admin" });
+  if (!isAdmin) throw new Error("Forbidden — admin only");
+}
+
+const clamp = (n: number, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, n));
+
+export const fetchHealthScore = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { userId } = context;
-    const { data: staff } = await supabaseAdmin.rpc("is_impulsionando_staff", { _user: userId });
-    if (!staff) throw new Error("Apenas equipe Impulsionando.");
+  .inputValidator((d: { limit?: number } = {}) => d)
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context);
+    const limit = Math.min(data.limit ?? 200, 1000);
 
-    const since30 = new Date(Date.now() - 30 * 86400000).toISOString();
+    const since30 = new Date(Date.now() - 30 * 86400_000).toISOString();
+    const since7 = new Date(Date.now() - 7 * 86400_000).toISOString();
 
-    const [companies, contracts, overdue, msgs, modules, premium] = await Promise.all([
-      supabaseAdmin.from("companies").select("id, name, is_active, created_at").eq("is_active", true).limit(500),
-      supabaseAdmin.from("billing_contracts").select("company_id, status, recurring_amount, last_paid_at"),
-      supabaseAdmin.from("billing_invoices").select("contract_id, status").in("status", ["overdue", "open"]),
-      supabaseAdmin.from("message_outbox").select("company_id").eq("status", "sent").gte("created_at", since30).limit(20000),
-      supabaseAdmin.from("company_modules").select("company_id, is_enabled").eq("is_enabled", true),
-      supabaseAdmin.from("consumer_memberships").select("company_id").eq("status", "active"),
-    ]);
+    const [compsRes, integRes, eventsRes, revRes, invoicesRes, contractsRes, customersRes, eventsPrevRes] =
+      await Promise.all([
+        context.supabase
+          .from("companies" as any)
+          .select("id,name,trade_name,is_active,is_demo,is_master")
+          .eq("is_active", true)
+          .eq("is_demo", false)
+          .order("created_at", { ascending: false })
+          .limit(limit),
+        context.supabase.from("core_integrations" as any).select("company_id,status"),
+        context.supabase
+          .from("runtime_events" as any)
+          .select("company_id,severity,created_at")
+          .gte("created_at", since7),
+        context.supabase
+          .from("core_revenue_calculations" as any)
+          .select("company_id,net_cents,captured_at")
+          .gte("captured_at", since30),
+        context.supabase
+          .from("billing_invoices" as any)
+          .select("company_id,status,due_date,amount")
+          .gte("created_at", since30),
+        context.supabase.from("billing_contracts" as any).select("company_id,status,recurring_amount"),
+        context.supabase.from("customers" as any).select("company_id"),
+        context.supabase
+          .from("runtime_events" as any)
+          .select("company_id,severity")
+          .gte("created_at", new Date(Date.now() - 14 * 86400_000).toISOString())
+          .lt("created_at", since7),
+      ]);
 
-    // Indexes
-    const contractByCompany = new Map<string, { mrr: number; last_paid_at: string | null; ids: Set<string> }>();
-    for (const c of (contracts.data as any[]) ?? []) {
-      const e = contractByCompany.get(c.company_id) ?? { mrr: 0, last_paid_at: null, ids: new Set<string>() };
-      e.mrr += Number(c.recurring_amount ?? 0);
-      if (c.last_paid_at && (!e.last_paid_at || c.last_paid_at > e.last_paid_at)) e.last_paid_at = c.last_paid_at;
-      e.ids.add(c.company_id);
-      contractByCompany.set(c.company_id, e);
-    }
+    const companies = (compsRes.data ?? []) as any[];
+    const ids = new Set(companies.map((c) => c.id));
+    const integ = ((integRes.data ?? []) as any[]).filter((r) => ids.has(r.company_id));
+    const events = ((eventsRes.data ?? []) as any[]).filter((r) => ids.has(r.company_id));
+    const eventsPrev = ((eventsPrevRes.data ?? []) as any[]).filter((r) => ids.has(r.company_id));
+    const rev = ((revRes.data ?? []) as any[]).filter((r) => ids.has(r.company_id));
+    const invs = ((invoicesRes.data ?? []) as any[]).filter((r) => ids.has(r.company_id));
+    const contracts = ((contractsRes.data ?? []) as any[]).filter((r) => ids.has(r.company_id));
+    const customers = ((customersRes.data ?? []) as any[]).filter((r) => ids.has(r.company_id));
 
-    const overdueByCompany = new Map<string, number>();
-    const contractToCompany = new Map<string, string>();
-    for (const c of (contracts.data as any[]) ?? []) contractToCompany.set(c.company_id, c.company_id);
-    for (const o of (overdue.data as any[]) ?? []) {
-      // map via contract_id → company_id by another lookup
-    }
-    // Re-map: build contract id → company id directly
-    const cid2company = new Map<string, string>();
-    for (const c of (contracts.data as any[]) ?? []) cid2company.set((c as any).id ?? "", c.company_id);
+    const today = new Date().toISOString().slice(0, 10);
 
-    const msgByCompany = new Map<string, number>();
-    for (const m of (msgs.data as any[]) ?? []) msgByCompany.set(m.company_id, (msgByCompany.get(m.company_id) ?? 0) + 1);
+    const tenants = companies.map((c) => {
+      const cInteg = integ.filter((i) => i.company_id === c.id);
+      const cIntegErrors = cInteg.filter((i) => i.status && i.status !== "connected" && i.status !== "healthy").length;
+      const cEvents = events.filter((e) => e.company_id === c.id);
+      const cErrors = cEvents.filter((e) => e.severity === "error" || e.severity === "critical").length;
+      const cEventsPrev = eventsPrev.filter((e) => e.company_id === c.id);
+      const cErrorsPrev = cEventsPrev.filter((e) => e.severity === "error" || e.severity === "critical").length;
 
-    const modByCompany = new Map<string, number>();
-    for (const m of (modules.data as any[]) ?? []) modByCompany.set(m.company_id, (modByCompany.get(m.company_id) ?? 0) + 1);
+      const cRev = rev.filter((r) => r.company_id === c.id);
+      const revenue30 = cRev.reduce((s, r) => s + Number(r.net_cents ?? 0), 0);
 
-    const premByCompany = new Map<string, number>();
-    for (const p of (premium.data as any[]) ?? []) premByCompany.set(p.company_id, (premByCompany.get(p.company_id) ?? 0) + 1);
+      const cInvs = invs.filter((i) => i.company_id === c.id);
+      const overdue = cInvs.filter((i) => i.status !== "paid" && i.due_date && i.due_date < today);
+      const overdueCount = overdue.length;
+      const overdueAmount = overdue.reduce((s, i) => s + Number(i.amount ?? 0), 0);
 
-    const today = Date.now();
-    const scores = ((companies.data as any[]) ?? []).map((co) => {
-      const ct = contractByCompany.get(co.id);
-      const hasOverdue = !!ct && Array.from(ct.ids).some((cid) => overdueByCompany.has(cid));
-      const msgCount = msgByCompany.get(co.id) ?? 0;
-      const modCount = modByCompany.get(co.id) ?? 0;
-      const premCount = premByCompany.get(co.id) ?? 0;
+      const cContracts = contracts.filter((k) => k.company_id === c.id);
+      const mrr = cContracts.filter((k) => k.status === "active").reduce((s, k) => s + Number(k.recurring_amount ?? 0), 0);
+      const cCustomers = customers.filter((k) => k.company_id === c.id).length;
 
-      // 30 pts pagamento
-      const payScore = hasOverdue ? 0 : 30;
-      // 25 pts engajamento (saturação em log10(msgs+1)*5, máx 25)
-      const engScore = Math.min(25, Math.round(Math.log10(msgCount + 1) * 12));
-      // 20 pts adoção (4 pts por módulo até 5)
-      const adoptScore = Math.min(20, modCount * 4);
-      // 15 pts atividade recente
-      const lastPaidDays = ct?.last_paid_at ? (today - Date.parse(ct.last_paid_at)) / 86400000 : 999;
-      const activeScore = lastPaidDays <= 7 ? 15 : lastPaidDays <= 35 ? 10 : lastPaidDays <= 60 ? 5 : 0;
-      // 10 pts premium attach
-      const premScore = premCount > 0 ? 10 : 0;
+      // SUB-SCORES (0..100)
+      // Integrations: 100 if all healthy, drops 25 per broken integration
+      const integScore = cInteg.length === 0 ? 80 : clamp(100 - cIntegErrors * 25);
+      // Stability: 100 - errors_7d * 2 (capped at 100)
+      const stabilityScore = clamp(100 - cErrors * 2);
+      // Engagement: based on revenue30 and customer count (logarithmic, capped)
+      const engagementScore = clamp(Math.log10(Math.max(1, revenue30 / 100 + cCustomers * 10)) * 25);
+      // Financial: -30 per overdue invoice, clamp
+      const financialScore = clamp(100 - overdueCount * 30 - (overdueAmount > 1000 ? 20 : 0));
+      // Adoption proxy: has MRR + customers
+      const adoptionScore = clamp((mrr > 0 ? 50 : 0) + (cCustomers > 0 ? 30 : 0) + (cContracts.length > 0 ? 20 : 0));
 
-      const total = payScore + engScore + adoptScore + activeScore + premScore;
-      const band = total >= 75 ? "healthy" : total >= 50 ? "at_risk" : "critical";
+      // Weighted overall
+      const overall = Math.round(
+        integScore * 0.2 +
+        stabilityScore * 0.25 +
+        financialScore * 0.2 +
+        adoptionScore * 0.2 +
+        engagementScore * 0.15,
+      );
+
+      // Trend: errors delta
+      const trend: "up" | "down" | "flat" =
+        cErrors < cErrorsPrev - 2 ? "up" : cErrors > cErrorsPrev + 2 ? "down" : "flat";
+
+      // Tier
+      const tier: "A" | "B" | "C" | "D" =
+        overall >= 85 ? "A" : overall >= 70 ? "B" : overall >= 50 ? "C" : "D";
+
+      // Alerts
+      const alerts: string[] = [];
+      if (cIntegErrors > 0) alerts.push(`${cIntegErrors} integração(ões) com erro`);
+      if (cErrors > 20) alerts.push(`${cErrors} erros nos últimos 7 dias`);
+      if (overdueCount > 0) alerts.push(`${overdueCount} fatura(s) vencida(s)`);
+      if (mrr === 0 && cCustomers > 0) alerts.push("Tem clientes mas MRR zero");
+      if (revenue30 === 0 && mrr > 0) alerts.push("MRR ativo mas sem receita capturada em 30d");
 
       return {
-        company_id: co.id,
-        company_name: co.name,
-        mrr: ct?.mrr ?? 0,
-        score: total,
-        band,
-        breakdown: { pay: payScore, eng: engScore, adopt: adoptScore, active: activeScore, prem: premScore },
-        signals: {
-          has_overdue: hasOverdue,
-          messages_30d: msgCount,
-          active_modules: modCount,
-          premium_active: premCount,
-          last_paid_days: ct?.last_paid_at ? Math.floor(lastPaidDays) : null,
+        id: c.id,
+        name: c.trade_name || c.name,
+        scores: {
+          overall,
+          integrations: Math.round(integScore),
+          stability: Math.round(stabilityScore),
+          financial: Math.round(financialScore),
+          adoption: Math.round(adoptionScore),
+          engagement: Math.round(engagementScore),
         },
+        tier,
+        trend,
+        signals: {
+          integrationsTotal: cInteg.length,
+          integrationsErrors: cIntegErrors,
+          errors7d: cErrors,
+          errors7dPrev: cErrorsPrev,
+          mrrBRL: mrr,
+          revenue30BRL: Math.round(revenue30) / 100,
+          customers: cCustomers,
+          invoicesOverdue: overdueCount,
+          invoicesOverdueBRL: overdueAmount,
+        },
+        alerts,
       };
     });
 
-    scores.sort((a, b) => a.score - b.score); // piores primeiro
+    tenants.sort((a, b) => b.scores.overall - a.scores.overall);
 
-    const summary = {
-      total: scores.length,
-      healthy: scores.filter((s) => s.band === "healthy").length,
-      at_risk: scores.filter((s) => s.band === "at_risk").length,
-      critical: scores.filter((s) => s.band === "critical").length,
-      mrr_at_risk: scores.filter((s) => s.band !== "healthy").reduce((s, r) => s + r.mrr, 0),
+    const distribution = { A: 0, B: 0, C: 0, D: 0 };
+    let total = 0;
+    for (const t of tenants) {
+      distribution[t.tier] += 1;
+      total += t.scores.overall;
+    }
+    const avg = tenants.length > 0 ? Math.round(total / tenants.length) : 0;
+
+    return {
+      kpis: {
+        count: tenants.length,
+        average: avg,
+        distribution,
+        atRisk: tenants.filter((t) => t.tier === "D" || t.tier === "C").length,
+        alerting: tenants.filter((t) => t.alerts.length > 0).length,
+      },
+      tenants,
     };
-
-    return { summary, scores };
   });
