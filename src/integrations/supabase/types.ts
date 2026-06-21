@@ -6919,6 +6919,66 @@ export type Database = {
         }
         Relationships: []
       }
+      core_compliance_requirements: {
+        Row: {
+          active: boolean
+          applies_to: string
+          blocking: boolean
+          company_id: string | null
+          created_at: string
+          document_kind: string
+          id: string
+          label: string
+          min_version: string | null
+          requirement_key: string
+          scope: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          applies_to?: string
+          blocking?: boolean
+          company_id?: string | null
+          created_at?: string
+          document_kind: string
+          id?: string
+          label: string
+          min_version?: string | null
+          requirement_key: string
+          scope?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          applies_to?: string
+          blocking?: boolean
+          company_id?: string | null
+          created_at?: string
+          document_kind?: string
+          id?: string
+          label?: string
+          min_version?: string | null
+          requirement_key?: string
+          scope?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_compliance_requirements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_compliance_requirements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       core_dashboard_widgets: {
         Row: {
           audience: string[]
@@ -18687,6 +18747,19 @@ export type Database = {
         }
         Relationships: []
       }
+      v_company_compliance_status: {
+        Row: {
+          applies_to: string | null
+          blocking: boolean | null
+          company_id: string | null
+          document_kind: string | null
+          label: string | null
+          requirement_key: string | null
+          satisfied: boolean | null
+          satisfied_at: string | null
+        }
+        Relationships: []
+      }
       v_company_macro: {
         Row: {
           company_id: string | null
@@ -18809,6 +18882,10 @@ export type Database = {
         Returns: Json
       }
       assert_billing_finance_rls: { Args: never; Returns: undefined }
+      assert_company_can_transact: {
+        Args: { _company_id: string }
+        Returns: undefined
+      }
       assert_quotes_no_anon_update: { Args: never; Returns: undefined }
       billing_check_company_status: {
         Args: { _company: string }
@@ -18828,6 +18905,7 @@ export type Database = {
         Args: { _source_id: string; _source_table: string }
         Returns: string
       }
+      company_can_transact: { Args: { _company_id: string }; Returns: boolean }
       company_identity_payload: { Args: { _company_id: string }; Returns: Json }
       compute_payout_release_date: {
         Args: {
