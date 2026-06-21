@@ -47,6 +47,7 @@ function BillingContractsPage() {
   const listFn = useServerFn(listBillingContracts);
   const payFn = useServerFn(markInvoicePaid);
   const runFn = useServerFn(runBillingCycleNow);
+  const remindFn = useServerFn(sendInvoiceReminderNow);
 
   const { data, isLoading } = useQuery({
     queryKey: ["billing-contracts"],
