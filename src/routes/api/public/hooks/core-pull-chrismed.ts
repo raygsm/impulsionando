@@ -93,14 +93,29 @@ export const Route = createFileRoute('/api/public/hooks/core-pull-chrismed')({
         })
         if (!resp.ok) {
           const body = await resp.text().catch(() => '')
+          const lower = body.toLowerCase()
+          let reason: 'config_missing' | 'hmac_invalid' | 'http_error' = 'http_error'
+          let message = `falha ao puxar CHRISMED: HTTP ${resp.status}`
+          let hint: string | undefined
+
+          if (resp.status === 503 && lower.includes('core sync') && lower.includes('configurado')) {
+            reason = 'config_missing'
+            message = 'CHRISMED respondeu "Core sync não configurado": o secret IMPULSIONANDO_CORE_SECRET não está presente no projeto CHRISMED.'
+            hint = 'Adicione o secret IMPULSIONANDO_CORE_SECRET no projeto CHRISMED com EXATAMENTE o mesmo valor cadastrado no Core e publique o CHRISMED.'
+          } else if (resp.status === 401 || lower.includes('signature') || lower.includes('hmac') || lower.includes('unauthorized')) {
+            reason = 'hmac_invalid'
+            message = 'CHRISMED rejeitou a assinatura HMAC (401): o valor do secret IMPULSIONANDO_CORE_SECRET no CHRISMED é diferente do cadastrado no Core.'
+            hint = 'Confirme que o secret IMPULSIONANDO_CORE_SECRET tem EXATAMENTE o mesmo valor nos dois projetos (Core e CHRISMED).'
+          }
+
           await supabaseAdmin.from('runtime_events').insert({
             level: 'error',
             scope: SOURCE_SCOPE,
-            message: `falha ao puxar CHRISMED: HTTP ${resp.status}`,
+            message,
             company_id: CHRISMED_COMPANY_ID,
-            context: { status: resp.status, body: body.slice(0, 500) },
+            context: { reason, status: resp.status, hint, body: body.slice(0, 500), url: url.pathname },
           })
-          return Response.json({ ok: false, status: resp.status, body: body.slice(0, 500) }, { status: 502 })
+          return Response.json({ ok: false, reason, status: resp.status, hint, body: body.slice(0, 500) }, { status: 502 })
         }
 
         const payload = (await resp.json()) as { eventos?: RemoteEvent[]; next_since?: string; count?: number }
