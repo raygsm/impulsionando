@@ -531,7 +531,7 @@ function DemoParceiros() {
       <main className="flex-1">
         {/* HERO */}
         <section className="container max-w-6xl mx-auto px-4 pt-10">
-          <DemoModeBanner current="parceiros" />
+          <DemoModeBanner current="parceiros" leadNiche="servicos" leadLabel="Parceiros WMP" leadOrigin="hub-modulo-parceiros" />
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
             <div>
               <Badge variant="outline" className="mb-2">Módulo demonstrativo — WMP</Badge>
