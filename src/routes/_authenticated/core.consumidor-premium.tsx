@@ -114,8 +114,11 @@ function Page() {
                       <div>{BRL(i.amount_cents)}</div>
                       <Badge variant={i.status === "overdue" ? "destructive" : "secondary"}>{i.status}</Badge>
                       <div className="text-xs text-muted-foreground">{new Date(i.due_date).toLocaleDateString("pt-BR")}</div>
+                      <Button size="sm" variant="ghost" disabled={remind.isPending} onClick={() => remind.mutate({ kind: "consumer", invoice_id: i.id })}>
+                        <Bell className="w-4 h-4 mr-1" /> Lembrar
+                      </Button>
                       <Button size="sm" disabled={mut.isPending} onClick={() => mut.mutate({ kind: "consumer", invoice_id: i.id })}>
-                        <CheckCircle2 className="w-4 h-4 mr-1" /> Marcar pago
+                        <CheckCircle2 className="w-4 h-4 mr-1" /> Baixar
                       </Button>
                     </div>
                   ))}
