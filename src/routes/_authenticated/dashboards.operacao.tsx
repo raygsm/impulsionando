@@ -254,6 +254,78 @@ function ContadorTab() {
   );
 }
 
+function SloTab() {
+  const fn = useServerFn(fetchSloDashboard);
+  const resolveFn = useServerFn(resolveIncidentFn);
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ["slo-dashboard"],
+    queryFn: () => fn({ data: {} }),
+    staleTime: 30_000,
+  });
+  if (isLoading || !data) return <Card className="p-6 flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Carregando…</Card>;
+  if (error) return <Card className="p-4 border-rose-200 bg-rose-50 text-rose-900 text-sm">{(error as Error).message}</Card>;
+  const d = data as any;
+  const fmtBps = (b: number | null) => (b == null ? "—" : `${(b / 100).toFixed(2)}%`);
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+        <KpiCard label="Endpoints monitorados" value={d.summary.monitored} />
+        <KpiCard label="Fora do ar agora" value={d.summary.down} hint={d.summary.down > 0 ? "atenção" : "tudo ok"} />
+        <KpiCard label="Incidentes abertos" value={d.summary.openIncidents} />
+        <KpiCard label="Sev1 abertos" value={d.summary.sev1Open} />
+      </div>
+      <Card className="p-4 overflow-x-auto">
+        <h3 className="text-sm font-semibold mb-3">Status por endpoint (24h / 7d)</h3>
+        {d.status.length === 0 ? <p className="text-xs text-muted-foreground">Nenhum endpoint sob monitoramento.</p> : (
+          <table className="w-full text-xs">
+            <thead className="text-left text-muted-foreground"><tr>
+              <th className="py-1">URL</th><th>Status</th>
+              <th className="text-right">Disp 24h</th><th className="text-right">p95 (ms)</th>
+              <th className="text-right">Disp 7d</th><th className="text-right">Budget restante</th><th className="text-right">Alvo</th>
+            </tr></thead>
+            <tbody>
+              {d.status.map((r: any, i: number) => (
+                <tr key={i} className="border-t">
+                  <td className="py-1.5 max-w-[260px] truncate font-mono">{r.url}</td>
+                  <td><Badge variant={r.currently_up ? "secondary" : "destructive"}>{r.currently_up ? "up" : `down (${r.consecutive_failures}x)`}</Badge></td>
+                  <td className="text-right">{fmtBps(r.availability_bps_24h)}</td>
+                  <td className="text-right font-mono">{r.p95_ms_24h ?? "—"}</td>
+                  <td className="text-right">{fmtBps(r.availability_bps_7d)}</td>
+                  <td className="text-right">{fmtBps(r.error_budget_bps_left_7d)}</td>
+                  <td className="text-right text-muted-foreground">{fmtBps(r.availability_target_bps)} / {r.latency_p95_target_ms ?? "—"}ms</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </Card>
+      <Card className="p-4">
+        <h3 className="text-sm font-semibold mb-3">Incidentes recentes</h3>
+        {d.incidents.length === 0 ? <p className="text-xs text-muted-foreground">Sem incidentes registrados.</p> : (
+          <ul className="space-y-1 text-xs">
+            {d.incidents.map((i: any) => (
+              <li key={i.id} className="flex items-center justify-between border-b py-1.5 gap-2">
+                <span className="flex items-center gap-2 min-w-0">
+                  <Badge variant={i.severity === "sev1" ? "destructive" : "outline"}>{i.severity}</Badge>
+                  <Badge variant={i.status === "resolved" ? "secondary" : "default"}>{i.status}</Badge>
+                  <span className="truncate">{i.title}</span>
+                </span>
+                <span className="flex items-center gap-3 text-muted-foreground shrink-0">
+                  <span>{String(i.detected_at).slice(0, 16).replace("T", " ")}</span>
+                  <span>×{i.event_count}</span>
+                  {i.status !== "resolved" && (
+                    <button className="text-xs underline" onClick={async () => { await resolveFn({ data: { id: i.id } }); refetch(); }}>resolver</button>
+                  )}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+    </div>
+  );
+}
+
 function OperacaoPage() {
   const { data: me } = useCurrentUser();
   const { companyId: activeCompanyId } = useActiveCompany();
@@ -261,18 +333,20 @@ function OperacaoPage() {
   const [tab, setTab] = useState(isSuper ? "super" : "empresa");
   return (
     <div className="space-y-6">
-      <PageHeader title="Operação Core" description="Visão consolidada do core Impulsionando: receita, repasses, compliance, identidade, WhatsApp, NF e marketplace B2B." />
+      <PageHeader title="Operação Core" description="Visão consolidada do core Impulsionando: receita, repasses, compliance, identidade, WhatsApp, NF, marketplace B2B e SLO." />
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
           {isSuper && <TabsTrigger value="super">Super Admin</TabsTrigger>}
           <TabsTrigger value="empresa">Empresa</TabsTrigger>
           <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
           {isSuper && <TabsTrigger value="contador">Contador</TabsTrigger>}
+          {isSuper && <TabsTrigger value="slo">SLO</TabsTrigger>}
         </TabsList>
         {isSuper && <TabsContent value="super" className="mt-6"><SuperAdminTab /></TabsContent>}
         <TabsContent value="empresa" className="mt-6"><EmpresaTab /></TabsContent>
         <TabsContent value="marketplace" className="mt-6"><MarketplaceTab companyId={isSuper ? undefined : activeCompanyId ?? undefined} /></TabsContent>
         {isSuper && <TabsContent value="contador" className="mt-6"><ContadorTab /></TabsContent>}
+        {isSuper && <TabsContent value="slo" className="mt-6"><SloTab /></TabsContent>}
       </Tabs>
     </div>
   );
