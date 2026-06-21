@@ -192,7 +192,7 @@ export const upsertRule = createServerFn({ method: "POST" })
         id: data.id,
         company_id: data.companyId,
         kind: data.kind,
-        rule: data.rule,
+        rule: data.rule as never,
         scope_service_id: data.scopeServiceId ?? null,
         scope_specialty: data.scopeSpecialty ?? null,
         scope_plan: data.scopePlan ?? null,
