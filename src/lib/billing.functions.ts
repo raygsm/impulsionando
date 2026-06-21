@@ -302,7 +302,7 @@ export const sendInvoiceReminderNow = createServerFn({ method: "POST" })
       .from("billing_invoices")
       .select(
         "id, company_id, amount, status, due_date, pix_copy_paste, pix_key, contract_id, " +
-          "companies:company_id(name, email, phone, billing_email)",
+          "companies:company_id(name, email, phone)",
       )
       .eq("id", data.invoiceId)
       .maybeSingle();
@@ -311,7 +311,7 @@ export const sendInvoiceReminderNow = createServerFn({ method: "POST" })
     if (inv.status === "paid") throw new Error("Fatura já está paga.");
 
     const company = (inv as any).companies ?? {};
-    const recipientEmail: string | null = company.billing_email ?? company.email ?? null;
+    const recipientEmail: string | null = company.email ?? null;
     const recipientPhone: string | null = company.phone ?? null;
     if (!recipientEmail && !recipientPhone) {
       throw new Error("Sem e-mail/WhatsApp cadastrado para esta empresa.");
