@@ -11,8 +11,104 @@ import { Loader2 } from "lucide-react";
 import { fetchOperationsSnapshot } from "@/lib/operations-snapshot.functions";
 import { fetchMarketplaceGmvSummary } from "@/lib/marketplace-intermediation.functions";
 import { fetchSloDashboard, resolveIncidentFn } from "@/lib/slo-observability.functions";
+import { fetchFunnelTelemetry } from "@/lib/funnel-telemetry.functions";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { useCurrentUser } from "@/hooks/use-current-user";
+
+function FunnelTab() {
+  const fn = useServerFn(fetchFunnelTelemetry);
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["funnel-telemetry"],
+    queryFn: () => fn(),
+    staleTime: 60_000,
+  });
+  if (isLoading || !data) return <Card className="p-6 flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Carregando…</Card>;
+  if (error) return <Card className="p-4 border-rose-200 bg-rose-50 text-rose-900 text-sm">{(error as Error).message}</Card>;
+  const d = data as any;
+  const totals = d.stats.reduce((a: any, r: any) => ({
+    total: a.total + (r.total ?? 0),
+    sent: a.sent + (r.sent ?? 0),
+    failed: a.failed + (r.failed ?? 0),
+    queued: a.queued + (r.queued ?? 0),
+  }), { total: 0, sent: 0, failed: 0, queued: 0 });
+  const delivery = totals.sent + totals.failed > 0 ? ((100 * totals.sent) / (totals.sent + totals.failed)).toFixed(2) : "—";
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+        <KpiCard label="Disparos (30d)" value={totals.total} />
+        <KpiCard label="Entregues" value={totals.sent} hint={`Taxa ${delivery}%`} />
+        <KpiCard label="Falhas" value={totals.failed} />
+        <KpiCard label="Em fila" value={totals.queued} />
+      </div>
+      <Card className="p-4 overflow-x-auto">
+        <h3 className="text-sm font-semibold mb-3">Conversão por nicho (90d)</h3>
+        {d.conversion.length === 0 ? <p className="text-xs text-muted-foreground">Sem dados ainda.</p> : (
+          <table className="w-full text-xs">
+            <thead className="text-left text-muted-foreground"><tr>
+              <th className="py-1">Nicho</th><th className="text-right">Capture</th><th className="text-right">Convert</th><th className="text-right">Relate</th><th className="text-right">Retain</th><th className="text-right">Expand</th><th className="text-right">C→Cv</th><th className="text-right">Cv→Rt</th>
+            </tr></thead>
+            <tbody>
+              {d.conversion.map((r: any, i: number) => (
+                <tr key={i} className="border-t">
+                  <td className="py-1.5 font-mono">{r.niche_slug}</td>
+                  <td className="text-right">{r.capture}</td>
+                  <td className="text-right">{r.convert}</td>
+                  <td className="text-right">{r.relate}</td>
+                  <td className="text-right">{r.retain}</td>
+                  <td className="text-right">{r.expand}</td>
+                  <td className="text-right font-mono">{r.capture_to_convert_pct ?? "—"}%</td>
+                  <td className="text-right font-mono">{r.convert_to_retain_pct ?? "—"}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </Card>
+      <Card className="p-4 overflow-x-auto">
+        <h3 className="text-sm font-semibold mb-3">Réguas N8N — entrega & latência (30d)</h3>
+        {d.stats.length === 0 ? <p className="text-xs text-muted-foreground">Nenhum disparo registrado.</p> : (
+          <table className="w-full text-xs">
+            <thead className="text-left text-muted-foreground"><tr>
+              <th className="py-1">Estágio</th><th>Nicho</th><th>Workflow</th>
+              <th className="text-right">Total</th><th className="text-right">Sent</th><th className="text-right">Fail</th><th className="text-right">Entrega</th><th className="text-right">Latência (s)</th>
+            </tr></thead>
+            <tbody>
+              {d.stats.map((r: any, i: number) => (
+                <tr key={i} className="border-t">
+                  <td className="py-1.5"><Badge variant="outline">{r.stage}</Badge></td>
+                  <td className="font-mono">{r.niche_slug}</td>
+                  <td className="max-w-[220px] truncate">{r.workflow_name}</td>
+                  <td className="text-right">{r.total}</td>
+                  <td className="text-right">{r.sent}</td>
+                  <td className="text-right">{r.failed}</td>
+                  <td className="text-right font-mono">{r.delivery_rate_pct ?? "—"}%</td>
+                  <td className="text-right font-mono">{r.avg_latency_seconds != null ? Number(r.avg_latency_seconds).toFixed(1) : "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </Card>
+      <Card className="p-4">
+        <h3 className="text-sm font-semibold mb-3">Falhas recentes (7d)</h3>
+        {d.failures.length === 0 ? <p className="text-xs text-muted-foreground">Sem falhas — tudo verde.</p> : (
+          <ul className="space-y-1 text-xs">
+            {d.failures.map((f: any) => (
+              <li key={f.id} className="flex items-center justify-between border-b py-1.5 gap-2">
+                <span className="flex items-center gap-2 min-w-0">
+                  <Badge variant="destructive">{f.stage}</Badge>
+                  <span className="font-mono truncate">{f.workflow_name}</span>
+                  <span className="text-muted-foreground truncate">{f.last_error}</span>
+                </span>
+                <span className="text-muted-foreground shrink-0">×{f.attempts} · {String(f.updated_at).slice(0,16).replace("T"," ")}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+    </div>
+  );
+}
 
 function MarketplaceTab({ companyId }: { companyId?: string }) {
   const fn = useServerFn(fetchMarketplaceGmvSummary);
@@ -339,12 +435,14 @@ function OperacaoPage() {
           {isSuper && <TabsTrigger value="super">Super Admin</TabsTrigger>}
           <TabsTrigger value="empresa">Empresa</TabsTrigger>
           <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
+          {isSuper && <TabsTrigger value="funnel">Funil</TabsTrigger>}
           {isSuper && <TabsTrigger value="contador">Contador</TabsTrigger>}
           {isSuper && <TabsTrigger value="slo">SLO</TabsTrigger>}
         </TabsList>
         {isSuper && <TabsContent value="super" className="mt-6"><SuperAdminTab /></TabsContent>}
         <TabsContent value="empresa" className="mt-6"><EmpresaTab /></TabsContent>
         <TabsContent value="marketplace" className="mt-6"><MarketplaceTab companyId={isSuper ? undefined : activeCompanyId ?? undefined} /></TabsContent>
+        {isSuper && <TabsContent value="funnel" className="mt-6"><FunnelTab /></TabsContent>}
         {isSuper && <TabsContent value="contador" className="mt-6"><ContadorTab /></TabsContent>}
         {isSuper && <TabsContent value="slo" className="mt-6"><SloTab /></TabsContent>}
       </Tabs>
