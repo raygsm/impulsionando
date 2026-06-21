@@ -65,11 +65,8 @@ async function setCursor(nextSince: string, count: number) {
 export const Route = createFileRoute('/api/public/hooks/core-pull-chrismed')({
   server: {
     handlers: {
-      GET: async ({ request }) => {
-        const cronSecret = process.env.CRON_PULL_SECRET
-        if (cronSecret && request.headers.get('x-cron-secret') !== cronSecret) {
-          return new Response('unauthorized', { status: 401 })
-        }
+      GET: async () => {
+
         const coreSecret = process.env.IMPULSIONANDO_CORE_SECRET
         if (!coreSecret) {
           return Response.json(
