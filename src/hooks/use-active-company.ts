@@ -23,7 +23,7 @@ export function useActiveCompany() {
   // Empresas-demo disponíveis para qualquer usuário autenticado explorar
   const { data: demoCompanies } = useQuery({
     queryKey: ["companies-demo"],
-    enabled: !!me?.id && !me?.isSuperAdmin,
+    enabled: !!me?.user?.id && !me?.isSuperAdmin,
     queryFn: async () => (await supabase.from("companies").select("id, name, is_master").eq("is_demo", true).eq("is_active", true).order("name")).data ?? [],
   });
 
