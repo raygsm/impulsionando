@@ -2,33 +2,33 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
-/** Reprocessa o provisionamento de um pagamento (idempotente; staff only). */
+/** Reprocessa o provisionamento de um pagamento Mercado Pago (idempotente; staff only). */
 export const reprovisionPayment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { orderNsu: string }) => d)
+  .inputValidator((d: { mpPaymentId: string }) => d)
   .handler(async ({ data, context }) => {
     const { userId } = context;
     const { data: staff } = await supabaseAdmin.rpc("is_impulsionando_staff", { _user: userId });
     if (!staff) throw new Error("Apenas equipe Impulsionando.");
     const { autoProvisionFromPayment } = await import("./auto-provisioning.server");
-    const result = await autoProvisionFromPayment(data.orderNsu);
+    const result = await autoProvisionFromPayment(data.mpPaymentId);
     return result;
   });
 
-/** Lista pagamentos pagos e seu status de provisionamento (staff only). */
+/** Lista pagamentos aprovados e seu status de provisionamento (staff only). */
 export const listProvisioningQueue = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { userId } = context;
     const { data: staff } = await supabaseAdmin.rpc("is_impulsionando_staff", { _user: userId });
     if (!staff) throw new Error("Apenas equipe Impulsionando.");
-    const { data } = await supabaseAdmin
-      .from("infinitepay_payments")
+    const { data } = await (supabaseAdmin as any)
+      .from("mpago_payments")
       .select(
-        "order_nsu, customer_name, customer_email, amount, status, paid_at, provisioning_status, provisioned_at, empresa_id, module_slugs, modulo_id",
+        "mp_payment_id, payer_name, payer_email, amount_cents, status, paid_at, approved_at, provisioning_status, provisioned_at, empresa_id, module_slugs, modulo_id",
       )
-      .eq("status", "paid")
-      .order("paid_at", { ascending: false })
+      .eq("status", "approved")
+      .order("approved_at", { ascending: false })
       .limit(100);
     return { payments: data ?? [] };
   });
@@ -70,8 +70,8 @@ export const coreExecutiveDashboard = createServerFn({ method: "GET" })
       supabaseAdmin.from("billing_contracts").select("status, recurring_amount, plan_id"),
       supabaseAdmin.from("onboarding_checklist").select("company_id, item_key, status"),
       supabaseAdmin.from("onboarding_domain_requests").select("company_id, status"),
-      supabaseAdmin.from("infinitepay_payments").select("provisioning_status, status").eq("status", "paid"),
-      supabaseAdmin.from("infinitepay_payments").select("provisioning_status").eq("status", "paid"),
+      (supabaseAdmin as any).from("mpago_payments").select("provisioning_status, status").eq("status", "approved"),
+      (supabaseAdmin as any).from("mpago_payments").select("provisioning_status").eq("status", "approved"),
       supabaseAdmin.from("niches").select("id, name"),
       supabaseAdmin.from("company_modules").select("module_id, is_enabled").eq("is_enabled", true),
       supabaseAdmin.from("modules").select("id, name"),

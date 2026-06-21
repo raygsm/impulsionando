@@ -231,7 +231,7 @@ const DATA: Record<NicheSlug, Pipeline[]> = {
       color: "bg-amber-500",
       cards: [
         { name: "#7821 Carla", detail: "Aguardando coleta Melhor Envio", value: 389, score: 90, channel: "site", age: "hoje" },
-        { name: "#7822 Felipe", detail: "Parcelado 6x InfinitePay", value: 1280, score: 86, channel: "site", age: "hoje" },
+        { name: "#7822 Felipe", detail: "Parcelado 6x Mercado Pago", value: 1280, score: 86, channel: "site", age: "hoje" },
       ],
     },
     {

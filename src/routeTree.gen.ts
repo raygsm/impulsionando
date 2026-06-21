@@ -13,7 +13,6 @@ import { Route as WhiteLabelRouteImport } from './routes/white-label'
 import { Route as VitrineRouteImport } from './routes/vitrine'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TrialRouteImport } from './routes/trial'
-import { Route as TesteRouteImport } from './routes/teste'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as TalentosRouteImport } from './routes/talentos'
 import { Route as SolucoesRouteImport } from './routes/solucoes'
@@ -100,7 +99,6 @@ import { Route as ShowroomAgendaRouteImport } from './routes/showroom.agenda'
 import { Route as ShowroomAcademiaRouteImport } from './routes/showroom.academia'
 import { Route as RecomendacaoNichoRouteImport } from './routes/recomendacao.$nicho'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
-import { Route as PlanosTesteRouteImport } from './routes/planos.teste'
 import { Route as ParceiroTokenRouteImport } from './routes/parceiro.$token'
 import { Route as ParceiroCorretorTokenRouteImport } from './routes/parceiro-corretor.$token'
 import { Route as PacienteIdRouteImport } from './routes/paciente.$id'
@@ -407,7 +405,6 @@ import { Route as DemoRestauranteTenantQrRouteImport } from './routes/demo.resta
 import { Route as ApiPublicRealestateSavedSearchRouteImport } from './routes/api/public/realestate/saved-search'
 import { Route as ApiPublicRealestateInterestRouteImport } from './routes/api/public/realestate/interest'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
-import { Route as ApiPublicPaymentsCloseInvoiceRouteImport } from './routes/api/public/payments/close-invoice'
 import { Route as ApiPublicOutboxProcessRouteImport } from './routes/api/public/outbox/process'
 import { Route as ApiPublicHooksZapiStatusRouteImport } from './routes/api/public/hooks/zapi-status'
 import { Route as ApiPublicHooksUptimeWhatsappTestRouteImport } from './routes/api/public/hooks/uptime-whatsapp-test'
@@ -427,8 +424,6 @@ import { Route as ApiPublicHealthMonetizationRouteImport } from './routes/api/pu
 import { Route as ApiPublicDemoSendTestRouteImport } from './routes/api/public/demo/send-test'
 import { Route as ApiPublicDemoFeiraLeadRouteImport } from './routes/api/public/demo/feira-lead'
 import { Route as ApiPublicCronPayoutsConsolidateRouteImport } from './routes/api/public/cron/payouts-consolidate'
-import { Route as ApiPaymentsInfinitepayCreateRouteImport } from './routes/api/payments/infinitepay.create'
-import { Route as ApiPaymentsInfinitepayCheckStatusRouteImport } from './routes/api/payments/infinitepay.check-status'
 import { Route as AuthenticatedTorreRestaurantesDemoAuditoriaRouteImport } from './routes/_authenticated/torre.restaurantes-demo.auditoria'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
 import { Route as AuthenticatedRestauranteSalaoNotificacoesRouteImport } from './routes/_authenticated/restaurante.salao.notificacoes'
@@ -454,7 +449,6 @@ import { Route as AuthenticatedCoreClienteIdRouteImport } from './routes/_authen
 import { Route as AuthenticatedBarMarketplaceNovoPedidoRouteImport } from './routes/_authenticated/bar.marketplace.novo-pedido'
 import { Route as AuthenticatedAdminModulosClonagemRouteImport } from './routes/_authenticated/admin.modulos.clonagem'
 import { Route as AuthenticatedAdminIntegracoesMercadoPagoRouteImport } from './routes/_authenticated/admin.integracoes.mercado-pago'
-import { Route as ApiPublicPaymentsInfinitepayWebhookRouteImport } from './routes/api/public/payments/infinitepay.webhook'
 import { Route as ApiPublicPaymentsCloseInvoiceReplayRouteImport } from './routes/api/public/payments/close-invoice.replay'
 import { Route as AuthenticatedImobiliariaAprovacoesIdImprimirRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes.$id.imprimir'
 import { Route as AuthenticatedCoreClienteIdPaginasRouteImport } from './routes/_authenticated/core.cliente.$id.paginas'
@@ -479,11 +473,6 @@ const UnsubscribeRoute = UnsubscribeRouteImport.update({
 const TrialRoute = TrialRouteImport.update({
   id: '/trial',
   path: '/trial',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TesteRoute = TesteRouteImport.update({
-  id: '/teste',
-  path: '/teste',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermosRoute = TermosRouteImport.update({
@@ -919,11 +908,6 @@ const RSlugRoute = RSlugRouteImport.update({
   id: '/r/$slug',
   path: '/r/$slug',
   getParentRoute: () => rootRouteImport,
-} as any)
-const PlanosTesteRoute = PlanosTesteRouteImport.update({
-  id: '/teste',
-  path: '/teste',
-  getParentRoute: () => PlanosRoute,
 } as any)
 const ParceiroTokenRoute = ParceiroTokenRouteImport.update({
   id: '/parceiro/$token',
@@ -2646,12 +2630,6 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicPaymentsCloseInvoiceRoute =
-  ApiPublicPaymentsCloseInvoiceRouteImport.update({
-    id: '/api/public/payments/close-invoice',
-    path: '/api/public/payments/close-invoice',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiPublicOutboxProcessRoute = ApiPublicOutboxProcessRouteImport.update({
   id: '/api/public/outbox/process',
   path: '/api/public/outbox/process',
@@ -2760,18 +2738,6 @@ const ApiPublicCronPayoutsConsolidateRoute =
   ApiPublicCronPayoutsConsolidateRouteImport.update({
     id: '/api/public/cron/payouts-consolidate',
     path: '/api/public/cron/payouts-consolidate',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPaymentsInfinitepayCreateRoute =
-  ApiPaymentsInfinitepayCreateRouteImport.update({
-    id: '/api/payments/infinitepay/create',
-    path: '/api/payments/infinitepay/create',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPaymentsInfinitepayCheckStatusRoute =
-  ApiPaymentsInfinitepayCheckStatusRouteImport.update({
-    id: '/api/payments/infinitepay/check-status',
-    path: '/api/payments/infinitepay/check-status',
     getParentRoute: () => rootRouteImport,
   } as any)
 const AuthenticatedTorreRestaurantesDemoAuditoriaRoute =
@@ -2924,17 +2890,11 @@ const AuthenticatedAdminIntegracoesMercadoPagoRoute =
     path: '/admin/integracoes/mercado-pago',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const ApiPublicPaymentsInfinitepayWebhookRoute =
-  ApiPublicPaymentsInfinitepayWebhookRouteImport.update({
-    id: '/api/public/payments/infinitepay/webhook',
-    path: '/api/public/payments/infinitepay/webhook',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiPublicPaymentsCloseInvoiceReplayRoute =
   ApiPublicPaymentsCloseInvoiceReplayRouteImport.update({
-    id: '/replay',
-    path: '/replay',
-    getParentRoute: () => ApiPublicPaymentsCloseInvoiceRoute,
+    id: '/api/public/payments/close-invoice/replay',
+    path: '/api/public/payments/close-invoice/replay',
+    getParentRoute: () => rootRouteImport,
   } as any)
 const AuthenticatedImobiliariaAprovacoesIdImprimirRoute =
   AuthenticatedImobiliariaAprovacoesIdImprimirRouteImport.update({
@@ -2984,7 +2944,7 @@ export interface FileRoutesByFullPath {
   '/orcamento': typeof OrcamentoRoute
   '/paciente': typeof PacienteRouteWithChildren
   '/pesquisa': typeof PesquisaRoute
-  '/planos': typeof PlanosRouteWithChildren
+  '/planos': typeof PlanosRoute
   '/privacidade': typeof PrivacidadeRoute
   '/reembolso': typeof ReembolsoRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -2993,7 +2953,6 @@ export interface FileRoutesByFullPath {
   '/solucoes': typeof SolucoesRoute
   '/talentos': typeof TalentosRoute
   '/termos': typeof TermosRoute
-  '/teste': typeof TesteRoute
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/vitrine': typeof VitrineRouteWithChildren
@@ -3080,7 +3039,6 @@ export interface FileRoutesByFullPath {
   '/paciente/$id': typeof PacienteIdRoute
   '/parceiro-corretor/$token': typeof ParceiroCorretorTokenRoute
   '/parceiro/$token': typeof ParceiroTokenRoute
-  '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
   '/recomendacao/$nicho': typeof RecomendacaoNichoRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
@@ -3374,8 +3332,6 @@ export interface FileRoutesByFullPath {
   '/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
-  '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
-  '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
   '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
@@ -3395,7 +3351,6 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
   '/api/public/outbox/process': typeof ApiPublicOutboxProcessRoute
-  '/api/public/payments/close-invoice': typeof ApiPublicPaymentsCloseInvoiceRouteWithChildren
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
@@ -3408,7 +3363,6 @@ export interface FileRoutesByFullPath {
   '/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
   '/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
   '/api/public/payments/close-invoice/replay': typeof ApiPublicPaymentsCloseInvoiceReplayRoute
-  '/api/public/payments/infinitepay/webhook': typeof ApiPublicPaymentsInfinitepayWebhookRoute
   '/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
 }
@@ -3433,7 +3387,7 @@ export interface FileRoutesByTo {
   '/marocas': typeof MarocasRouteWithChildren
   '/orcamento': typeof OrcamentoRoute
   '/pesquisa': typeof PesquisaRoute
-  '/planos': typeof PlanosRouteWithChildren
+  '/planos': typeof PlanosRoute
   '/privacidade': typeof PrivacidadeRoute
   '/reembolso': typeof ReembolsoRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -3442,7 +3396,6 @@ export interface FileRoutesByTo {
   '/solucoes': typeof SolucoesRoute
   '/talentos': typeof TalentosRoute
   '/termos': typeof TermosRoute
-  '/teste': typeof TesteRoute
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/vitrine': typeof VitrineRouteWithChildren
@@ -3520,7 +3473,6 @@ export interface FileRoutesByTo {
   '/paciente/$id': typeof PacienteIdRoute
   '/parceiro-corretor/$token': typeof ParceiroCorretorTokenRoute
   '/parceiro/$token': typeof ParceiroTokenRoute
-  '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
   '/recomendacao/$nicho': typeof RecomendacaoNichoRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
@@ -3814,8 +3766,6 @@ export interface FileRoutesByTo {
   '/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
-  '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
-  '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
   '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
@@ -3835,7 +3785,6 @@ export interface FileRoutesByTo {
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
   '/api/public/outbox/process': typeof ApiPublicOutboxProcessRoute
-  '/api/public/payments/close-invoice': typeof ApiPublicPaymentsCloseInvoiceRouteWithChildren
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
@@ -3848,7 +3797,6 @@ export interface FileRoutesByTo {
   '/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
   '/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
   '/api/public/payments/close-invoice/replay': typeof ApiPublicPaymentsCloseInvoiceReplayRoute
-  '/api/public/payments/infinitepay/webhook': typeof ApiPublicPaymentsInfinitepayWebhookRoute
   '/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
 }
@@ -3877,7 +3825,7 @@ export interface FileRoutesById {
   '/orcamento': typeof OrcamentoRoute
   '/paciente': typeof PacienteRouteWithChildren
   '/pesquisa': typeof PesquisaRoute
-  '/planos': typeof PlanosRouteWithChildren
+  '/planos': typeof PlanosRoute
   '/privacidade': typeof PrivacidadeRoute
   '/reembolso': typeof ReembolsoRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -3886,7 +3834,6 @@ export interface FileRoutesById {
   '/solucoes': typeof SolucoesRoute
   '/talentos': typeof TalentosRoute
   '/termos': typeof TermosRoute
-  '/teste': typeof TesteRoute
   '/trial': typeof TrialRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/vitrine': typeof VitrineRouteWithChildren
@@ -3974,7 +3921,6 @@ export interface FileRoutesById {
   '/paciente/$id': typeof PacienteIdRoute
   '/parceiro-corretor/$token': typeof ParceiroCorretorTokenRoute
   '/parceiro/$token': typeof ParceiroTokenRoute
-  '/planos/teste': typeof PlanosTesteRoute
   '/r/$slug': typeof RSlugRoute
   '/recomendacao/$nicho': typeof RecomendacaoNichoRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
@@ -4268,8 +4214,6 @@ export interface FileRoutesById {
   '/_authenticated/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/_authenticated/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
-  '/api/payments/infinitepay/check-status': typeof ApiPaymentsInfinitepayCheckStatusRoute
-  '/api/payments/infinitepay/create': typeof ApiPaymentsInfinitepayCreateRoute
   '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
@@ -4289,7 +4233,6 @@ export interface FileRoutesById {
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
   '/api/public/outbox/process': typeof ApiPublicOutboxProcessRoute
-  '/api/public/payments/close-invoice': typeof ApiPublicPaymentsCloseInvoiceRouteWithChildren
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
@@ -4302,7 +4245,6 @@ export interface FileRoutesById {
   '/_authenticated/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
   '/_authenticated/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
   '/api/public/payments/close-invoice/replay': typeof ApiPublicPaymentsCloseInvoiceReplayRoute
-  '/api/public/payments/infinitepay/webhook': typeof ApiPublicPaymentsInfinitepayWebhookRoute
   '/_authenticated/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/_authenticated/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
 }
@@ -4340,7 +4282,6 @@ export interface FileRouteTypes {
     | '/solucoes'
     | '/talentos'
     | '/termos'
-    | '/teste'
     | '/trial'
     | '/unsubscribe'
     | '/vitrine'
@@ -4427,7 +4368,6 @@ export interface FileRouteTypes {
     | '/paciente/$id'
     | '/parceiro-corretor/$token'
     | '/parceiro/$token'
-    | '/planos/teste'
     | '/r/$slug'
     | '/recomendacao/$nicho'
     | '/showroom/academia'
@@ -4721,8 +4661,6 @@ export interface FileRouteTypes {
     | '/restaurante/salao/notificacoes'
     | '/sales/cash/$id'
     | '/torre/restaurantes-demo/auditoria'
-    | '/api/payments/infinitepay/check-status'
-    | '/api/payments/infinitepay/create'
     | '/api/public/cron/payouts-consolidate'
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
@@ -4742,7 +4680,6 @@ export interface FileRouteTypes {
     | '/api/public/hooks/uptime-whatsapp-test'
     | '/api/public/hooks/zapi-status'
     | '/api/public/outbox/process'
-    | '/api/public/payments/close-invoice'
     | '/api/public/payments/webhook'
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
@@ -4755,7 +4692,6 @@ export interface FileRouteTypes {
     | '/core/cliente/$id/paginas'
     | '/imobiliaria/aprovacoes/$id/imprimir'
     | '/api/public/payments/close-invoice/replay'
-    | '/api/public/payments/infinitepay/webhook'
     | '/core/cliente/$id/paginas/$pageId'
     | '/core/cliente/$id/modulo/$slug/configurar'
   fileRoutesByTo: FileRoutesByTo
@@ -4789,7 +4725,6 @@ export interface FileRouteTypes {
     | '/solucoes'
     | '/talentos'
     | '/termos'
-    | '/teste'
     | '/trial'
     | '/unsubscribe'
     | '/vitrine'
@@ -4867,7 +4802,6 @@ export interface FileRouteTypes {
     | '/paciente/$id'
     | '/parceiro-corretor/$token'
     | '/parceiro/$token'
-    | '/planos/teste'
     | '/r/$slug'
     | '/recomendacao/$nicho'
     | '/showroom/academia'
@@ -5161,8 +5095,6 @@ export interface FileRouteTypes {
     | '/restaurante/salao/notificacoes'
     | '/sales/cash/$id'
     | '/torre/restaurantes-demo/auditoria'
-    | '/api/payments/infinitepay/check-status'
-    | '/api/payments/infinitepay/create'
     | '/api/public/cron/payouts-consolidate'
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
@@ -5182,7 +5114,6 @@ export interface FileRouteTypes {
     | '/api/public/hooks/uptime-whatsapp-test'
     | '/api/public/hooks/zapi-status'
     | '/api/public/outbox/process'
-    | '/api/public/payments/close-invoice'
     | '/api/public/payments/webhook'
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
@@ -5195,7 +5126,6 @@ export interface FileRouteTypes {
     | '/core/cliente/$id/paginas'
     | '/imobiliaria/aprovacoes/$id/imprimir'
     | '/api/public/payments/close-invoice/replay'
-    | '/api/public/payments/infinitepay/webhook'
     | '/core/cliente/$id/paginas/$pageId'
     | '/core/cliente/$id/modulo/$slug/configurar'
   id:
@@ -5232,7 +5162,6 @@ export interface FileRouteTypes {
     | '/solucoes'
     | '/talentos'
     | '/termos'
-    | '/teste'
     | '/trial'
     | '/unsubscribe'
     | '/vitrine'
@@ -5320,7 +5249,6 @@ export interface FileRouteTypes {
     | '/paciente/$id'
     | '/parceiro-corretor/$token'
     | '/parceiro/$token'
-    | '/planos/teste'
     | '/r/$slug'
     | '/recomendacao/$nicho'
     | '/showroom/academia'
@@ -5614,8 +5542,6 @@ export interface FileRouteTypes {
     | '/_authenticated/restaurante/salao/notificacoes'
     | '/_authenticated/sales/cash/$id'
     | '/_authenticated/torre/restaurantes-demo/auditoria'
-    | '/api/payments/infinitepay/check-status'
-    | '/api/payments/infinitepay/create'
     | '/api/public/cron/payouts-consolidate'
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
@@ -5635,7 +5561,6 @@ export interface FileRouteTypes {
     | '/api/public/hooks/uptime-whatsapp-test'
     | '/api/public/hooks/zapi-status'
     | '/api/public/outbox/process'
-    | '/api/public/payments/close-invoice'
     | '/api/public/payments/webhook'
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
@@ -5648,7 +5573,6 @@ export interface FileRouteTypes {
     | '/_authenticated/core/cliente/$id/paginas'
     | '/_authenticated/imobiliaria/aprovacoes/$id/imprimir'
     | '/api/public/payments/close-invoice/replay'
-    | '/api/public/payments/infinitepay/webhook'
     | '/_authenticated/core/cliente/$id/paginas/$pageId'
     | '/_authenticated/core/cliente/$id/modulo/$slug/configurar'
   fileRoutesById: FileRoutesById
@@ -5677,7 +5601,7 @@ export interface RootRouteChildren {
   OrcamentoRoute: typeof OrcamentoRoute
   PacienteRoute: typeof PacienteRouteWithChildren
   PesquisaRoute: typeof PesquisaRoute
-  PlanosRoute: typeof PlanosRouteWithChildren
+  PlanosRoute: typeof PlanosRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   ReembolsoRoute: typeof ReembolsoRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -5686,7 +5610,6 @@ export interface RootRouteChildren {
   SolucoesRoute: typeof SolucoesRoute
   TalentosRoute: typeof TalentosRoute
   TermosRoute: typeof TermosRoute
-  TesteRoute: typeof TesteRoute
   TrialRoute: typeof TrialRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   VitrineRoute: typeof VitrineRouteWithChildren
@@ -5775,8 +5698,6 @@ export interface RootRouteChildren {
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   PortalContabilidadeTokenRoute: typeof PortalContabilidadeTokenRoute
   PortalProprietarioTokenRoute: typeof PortalProprietarioTokenRoute
-  ApiPaymentsInfinitepayCheckStatusRoute: typeof ApiPaymentsInfinitepayCheckStatusRoute
-  ApiPaymentsInfinitepayCreateRoute: typeof ApiPaymentsInfinitepayCreateRoute
   ApiPublicCronPayoutsConsolidateRoute: typeof ApiPublicCronPayoutsConsolidateRoute
   ApiPublicDemoFeiraLeadRoute: typeof ApiPublicDemoFeiraLeadRoute
   ApiPublicDemoSendTestRoute: typeof ApiPublicDemoSendTestRoute
@@ -5795,7 +5716,6 @@ export interface RootRouteChildren {
   ApiPublicHooksUptimeWhatsappTestRoute: typeof ApiPublicHooksUptimeWhatsappTestRoute
   ApiPublicHooksZapiStatusRoute: typeof ApiPublicHooksZapiStatusRoute
   ApiPublicOutboxProcessRoute: typeof ApiPublicOutboxProcessRoute
-  ApiPublicPaymentsCloseInvoiceRoute: typeof ApiPublicPaymentsCloseInvoiceRouteWithChildren
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   ApiPublicRealestateInterestRoute: typeof ApiPublicRealestateInterestRoute
   ApiPublicRealestateSavedSearchRoute: typeof ApiPublicRealestateSavedSearchRoute
@@ -5805,7 +5725,7 @@ export interface RootRouteChildren {
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
-  ApiPublicPaymentsInfinitepayWebhookRoute: typeof ApiPublicPaymentsInfinitepayWebhookRoute
+  ApiPublicPaymentsCloseInvoiceReplayRoute: typeof ApiPublicPaymentsCloseInvoiceReplayRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -5836,13 +5756,6 @@ declare module '@tanstack/react-router' {
       path: '/trial'
       fullPath: '/trial'
       preLoaderRoute: typeof TrialRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/teste': {
-      id: '/teste'
-      path: '/teste'
-      fullPath: '/teste'
-      preLoaderRoute: typeof TesteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/termos': {
@@ -6446,13 +6359,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/r/$slug'
       preLoaderRoute: typeof RSlugRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/planos/teste': {
-      id: '/planos/teste'
-      path: '/teste'
-      fullPath: '/planos/teste'
-      preLoaderRoute: typeof PlanosTesteRouteImport
-      parentRoute: typeof PlanosRoute
     }
     '/parceiro/$token': {
       id: '/parceiro/$token'
@@ -8596,13 +8502,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/payments/close-invoice': {
-      id: '/api/public/payments/close-invoice'
-      path: '/api/public/payments/close-invoice'
-      fullPath: '/api/public/payments/close-invoice'
-      preLoaderRoute: typeof ApiPublicPaymentsCloseInvoiceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/outbox/process': {
       id: '/api/public/outbox/process'
       path: '/api/public/outbox/process'
@@ -8734,20 +8633,6 @@ declare module '@tanstack/react-router' {
       path: '/api/public/cron/payouts-consolidate'
       fullPath: '/api/public/cron/payouts-consolidate'
       preLoaderRoute: typeof ApiPublicCronPayoutsConsolidateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/payments/infinitepay/create': {
-      id: '/api/payments/infinitepay/create'
-      path: '/api/payments/infinitepay/create'
-      fullPath: '/api/payments/infinitepay/create'
-      preLoaderRoute: typeof ApiPaymentsInfinitepayCreateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/payments/infinitepay/check-status': {
-      id: '/api/payments/infinitepay/check-status'
-      path: '/api/payments/infinitepay/check-status'
-      fullPath: '/api/payments/infinitepay/check-status'
-      preLoaderRoute: typeof ApiPaymentsInfinitepayCheckStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/torre/restaurantes-demo/auditoria': {
@@ -8925,19 +8810,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIntegracoesMercadoPagoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/api/public/payments/infinitepay/webhook': {
-      id: '/api/public/payments/infinitepay/webhook'
-      path: '/api/public/payments/infinitepay/webhook'
-      fullPath: '/api/public/payments/infinitepay/webhook'
-      preLoaderRoute: typeof ApiPublicPaymentsInfinitepayWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/payments/close-invoice/replay': {
       id: '/api/public/payments/close-invoice/replay'
-      path: '/replay'
+      path: '/api/public/payments/close-invoice/replay'
       fullPath: '/api/public/payments/close-invoice/replay'
       preLoaderRoute: typeof ApiPublicPaymentsCloseInvoiceReplayRouteImport
-      parentRoute: typeof ApiPublicPaymentsCloseInvoiceRoute
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/imobiliaria/aprovacoes/$id/imprimir': {
       id: '/_authenticated/imobiliaria/aprovacoes/$id/imprimir'
@@ -9985,17 +9863,6 @@ const PacienteRouteWithChildren = PacienteRoute._addFileChildren(
   PacienteRouteChildren,
 )
 
-interface PlanosRouteChildren {
-  PlanosTesteRoute: typeof PlanosTesteRoute
-}
-
-const PlanosRouteChildren: PlanosRouteChildren = {
-  PlanosTesteRoute: PlanosTesteRoute,
-}
-
-const PlanosRouteWithChildren =
-  PlanosRoute._addFileChildren(PlanosRouteChildren)
-
 interface VitrineRouteChildren {
   VitrineSlugRoute: typeof VitrineSlugRoute
 }
@@ -10043,21 +9910,6 @@ const ApiPublicHealthRouteWithChildren = ApiPublicHealthRoute._addFileChildren(
   ApiPublicHealthRouteChildren,
 )
 
-interface ApiPublicPaymentsCloseInvoiceRouteChildren {
-  ApiPublicPaymentsCloseInvoiceReplayRoute: typeof ApiPublicPaymentsCloseInvoiceReplayRoute
-}
-
-const ApiPublicPaymentsCloseInvoiceRouteChildren: ApiPublicPaymentsCloseInvoiceRouteChildren =
-  {
-    ApiPublicPaymentsCloseInvoiceReplayRoute:
-      ApiPublicPaymentsCloseInvoiceReplayRoute,
-  }
-
-const ApiPublicPaymentsCloseInvoiceRouteWithChildren =
-  ApiPublicPaymentsCloseInvoiceRoute._addFileChildren(
-    ApiPublicPaymentsCloseInvoiceRouteChildren,
-  )
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -10082,7 +9934,7 @@ const rootRouteChildren: RootRouteChildren = {
   OrcamentoRoute: OrcamentoRoute,
   PacienteRoute: PacienteRouteWithChildren,
   PesquisaRoute: PesquisaRoute,
-  PlanosRoute: PlanosRouteWithChildren,
+  PlanosRoute: PlanosRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   ReembolsoRoute: ReembolsoRoute,
   ResetPasswordRoute: ResetPasswordRoute,
@@ -10091,7 +9943,6 @@ const rootRouteChildren: RootRouteChildren = {
   SolucoesRoute: SolucoesRoute,
   TalentosRoute: TalentosRoute,
   TermosRoute: TermosRoute,
-  TesteRoute: TesteRoute,
   TrialRoute: TrialRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   VitrineRoute: VitrineRouteWithChildren,
@@ -10180,9 +10031,6 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   PortalContabilidadeTokenRoute: PortalContabilidadeTokenRoute,
   PortalProprietarioTokenRoute: PortalProprietarioTokenRoute,
-  ApiPaymentsInfinitepayCheckStatusRoute:
-    ApiPaymentsInfinitepayCheckStatusRoute,
-  ApiPaymentsInfinitepayCreateRoute: ApiPaymentsInfinitepayCreateRoute,
   ApiPublicCronPayoutsConsolidateRoute: ApiPublicCronPayoutsConsolidateRoute,
   ApiPublicDemoFeiraLeadRoute: ApiPublicDemoFeiraLeadRoute,
   ApiPublicDemoSendTestRoute: ApiPublicDemoSendTestRoute,
@@ -10205,8 +10053,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksUptimeWhatsappTestRoute: ApiPublicHooksUptimeWhatsappTestRoute,
   ApiPublicHooksZapiStatusRoute: ApiPublicHooksZapiStatusRoute,
   ApiPublicOutboxProcessRoute: ApiPublicOutboxProcessRoute,
-  ApiPublicPaymentsCloseInvoiceRoute:
-    ApiPublicPaymentsCloseInvoiceRouteWithChildren,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   ApiPublicRealestateInterestRoute: ApiPublicRealestateInterestRoute,
   ApiPublicRealestateSavedSearchRoute: ApiPublicRealestateSavedSearchRoute,
@@ -10216,8 +10062,8 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
-  ApiPublicPaymentsInfinitepayWebhookRoute:
-    ApiPublicPaymentsInfinitepayWebhookRoute,
+  ApiPublicPaymentsCloseInvoiceReplayRoute:
+    ApiPublicPaymentsCloseInvoiceReplayRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

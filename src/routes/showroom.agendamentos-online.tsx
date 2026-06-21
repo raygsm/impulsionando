@@ -513,7 +513,7 @@ function ShowroomAgendamentos() {
                 </div>
 
                 <p className="mt-4 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-                  <ShieldCheck className="h-3 w-3" /> Pagamento seguro processado pela InfinitePay.
+                  <ShieldCheck className="h-3 w-3" /> Pagamento seguro processado pela Mercado Pago.
                 </p>
               </>
             )}

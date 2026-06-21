@@ -32,7 +32,7 @@ export const Route = createFileRoute("/showroom/pdv")({
       {
         name: "description",
         content:
-          "PDV completo com comanda, mesas, Pix instantâneo, cartão InfinitePay e impressão fiscal — adaptado por nicho.",
+          "PDV completo com comanda, mesas, Pix instantâneo, cartão Mercado Pago e impressão fiscal — adaptado por nicho.",
       },
       { property: "og:title", content: "PDV — Impulsionando" },
       {
@@ -144,7 +144,7 @@ const DATA: Record<NicheSlug, Cfg> = {
 type PayMethod = "pix" | "card" | "cash";
 const PAY: { id: PayMethod; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: "pix", label: "Pix MercadoPago", icon: QrCode },
-  { id: "card", label: "Cartão InfinitePay", icon: CreditCard },
+  { id: "card", label: "Cartão Mercado Pago", icon: CreditCard },
   { id: "cash", label: "Dinheiro", icon: Banknote },
 ];
 
@@ -209,7 +209,7 @@ function ShowroomPDV() {
               Frente de caixa rápida, pronta para o seu negócio
             </h1>
             <p className="mt-4 text-pretty text-lg text-muted-foreground">
-              Comanda, mesas, Pix instantâneo, InfinitePay e fechamento integrado ao financeiro —
+              Comanda, mesas, Pix instantâneo, Mercado Pago e fechamento integrado ao financeiro —
               clique para experimentar.
             </p>
           </div>

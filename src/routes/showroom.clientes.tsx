@@ -235,7 +235,7 @@ const DATA: Record<NicheSlug, Cfg> = {
       nps: 9,
       channels: { wa: true, phone: true },
       contextIcon: Wrench,
-      preferences: ["Box 2 (André)", "Pix InfinitePay", "Retirada após 17h"],
+      preferences: ["Box 2 (André)", "Pix Mercado Pago", "Retirada após 17h"],
       timeline: [
         { date: "hoje", icon: Wrench, title: "OS #4421 finalizada", detail: "Revisão 30k + pastilhas", value: 720 },
         { date: "hoje", icon: CircleDollarSign, title: "Pagamento Pix", detail: "Liquidado · NF emitida" },
@@ -271,7 +271,7 @@ const DATA: Record<NicheSlug, Cfg> = {
       nps: 10,
       channels: { wa: true, email: true },
       contextIcon: ShoppingBag,
-      preferences: ["Origem Run", "Cartão InfinitePay 6x", "Entrega SP D+1"],
+      preferences: ["Origem Run", "Cartão Mercado Pago 6x", "Entrega SP D+1"],
       timeline: [
         { date: "hoje", icon: ShoppingBag, title: "Pedido #7821 entregue", detail: "Origem Run 39 + meias", value: 389 },
         { date: "ontem", icon: MessageCircle, title: "Recuperou carrinho", detail: "Cupom VOLTA10 aplicado" },
@@ -283,7 +283,7 @@ const DATA: Record<NicheSlug, Cfg> = {
     others: [
       { name: "Bruno T.", tier: "Ouro", ltv: 2480, meta: "Troca pendente #7790" },
       { name: "Mariana DM", tier: "Prata", ltv: 580, meta: "Estoque pendente · 37" },
-      { name: "Felipe N.", tier: "Novo", ltv: 320, meta: "1ª compra · InfinitePay" },
+      { name: "Felipe N.", tier: "Novo", ltv: 320, meta: "1ª compra · Mercado Pago" },
     ],
   },
 };

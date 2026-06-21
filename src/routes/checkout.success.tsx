@@ -4,14 +4,13 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
 import { useServerFn } from "@tanstack/react-start";
-import { checkInfinitePayStatus, getInfinitePayPayment } from "@/lib/infinitepay.functions";
+import { getPaymentStatus } from "@/lib/mercadopago.functions";
 
 const SearchSchema = z.object({
-  order_nsu: z.string().optional(),
-  transaction_nsu: z.string().optional(),
-  slug: z.string().optional(),
-  receipt_url: z.string().optional(),
-  capture_method: z.string().optional(),
+  payment_id: z.string().optional(),
+  status: z.string().optional(),
+  collection_id: z.string().optional(),
+  collection_status: z.string().optional(),
 });
 
 export const Route = createFileRoute("/checkout/success")({
@@ -27,33 +26,35 @@ export const Route = createFileRoute("/checkout/success")({
 
 function SuccessPage() {
   const search = useSearch({ from: "/checkout/success" });
-  const checkStatus = useServerFn(checkInfinitePayStatus);
-  const getPayment = useServerFn(getInfinitePayPayment);
+  const fetchStatus = useServerFn(getPaymentStatus);
   const [status, setStatus] = useState<string>("loading");
   const [checking, setChecking] = useState(false);
 
-  useEffect(() => {
-    if (!search.order_nsu) {
+  const paymentId = search.payment_id ?? search.collection_id ?? null;
+
+  async function refresh() {
+    if (!paymentId) {
       setStatus("unknown");
       return;
     }
-    getPayment({ data: { order_nsu: search.order_nsu } })
-      .then((r) => setStatus(r.ok && r.payment ? (r.payment as any).status : "unknown"))
-      .catch(() => setStatus("unknown"));
-  }, [search.order_nsu]);
+    try {
+      const r = await fetchStatus({ data: { payment_id: paymentId } });
+      const s = (r as any)?.status ?? search.collection_status ?? search.status ?? "pending";
+      setStatus(s === "approved" ? "paid" : s);
+    } catch {
+      setStatus(search.collection_status === "approved" ? "paid" : "pending");
+    }
+  }
+
+  useEffect(() => {
+    refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paymentId]);
 
   async function handleCheck() {
-    if (!search.order_nsu) return;
     setChecking(true);
     try {
-      const r = await checkStatus({
-        data: {
-          order_nsu: search.order_nsu,
-          transaction_nsu: search.transaction_nsu,
-          slug: search.slug,
-        },
-      });
-      setStatus(r.status);
+      await refresh();
     } finally {
       setChecking(false);
     }
@@ -73,19 +74,11 @@ function SuccessPage() {
         <p className="text-muted-foreground">
           {isPaid
             ? "Sua assinatura foi ativada. Em instantes você recebe os acessos por e-mail e WhatsApp."
-            : "Estamos aguardando a confirmação automática do pagamento pela InfinitePay. Assim que confirmado, seu acesso é liberado."}
+            : "Estamos aguardando a confirmação automática do pagamento pelo Mercado Pago. Assim que confirmado, seu acesso é liberado."}
         </p>
 
-        {search.receipt_url && (
-          <p className="text-sm">
-            <a className="underline text-primary" href={search.receipt_url} target="_blank" rel="noreferrer">
-              Ver recibo da InfinitePay
-            </a>
-          </p>
-        )}
-
         <div className="flex gap-3 justify-center flex-wrap">
-          {!isPaid && search.order_nsu && (
+          {!isPaid && paymentId && (
             <Button onClick={handleCheck} disabled={checking} variant="default">
               {checking ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Verificando...</> : "Verificar pagamento"}
             </Button>
@@ -95,7 +88,7 @@ function SuccessPage() {
               <Link to="/onboarding">Configurar minha conta</Link>
             </Button>
           )}
-          <Button asChild variant={isPaid ? "outline" : "outline"}>
+          <Button asChild variant="outline">
             <Link to="/">Voltar ao site</Link>
           </Button>
         </div>

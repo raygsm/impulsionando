@@ -94,15 +94,61 @@ export const Route = createFileRoute("/api/mercadopago/webhook")({
             if (r.ok) {
               const p: any = await r.json();
               const internal = STATUS_MAP[p.status] ?? p.status;
+              const paidAt = p.status === "approved" ? new Date().toISOString() : null;
+
               await supabaseAdmin
                 .from("payments")
                 .update({
                   status: internal,
-                  paid_at: p.status === "approved" ? new Date().toISOString() : null,
+                  paid_at: paidAt,
                   raw_response: p,
                   webhook_received_at: new Date().toISOString(),
                 })
                 .eq("payment_id", String(resourceId));
+
+              // Espelha no mpago_payments (criando se faltar) para o provisionamento
+              const meta = p?.metadata ?? {};
+              const moduleSlugs = Array.isArray(meta?.module_slugs) ? meta.module_slugs : null;
+              const payerName = [p?.payer?.first_name, p?.payer?.last_name].filter(Boolean).join(" ") || null;
+              await (supabaseAdmin as any)
+                .from("mpago_payments")
+                .upsert(
+                  {
+                    mp_payment_id: String(resourceId),
+                    status: internal,
+                    amount_cents: Math.round(Number(p?.transaction_amount ?? 0) * 100),
+                    currency: p?.currency_id ?? "BRL",
+                    payment_method: p?.payment_method_id ?? null,
+                    payer_email: p?.payer?.email ?? null,
+                    payer_name: payerName,
+                    user_id: meta?.user_id ?? null,
+                    empresa_id: meta?.empresa_id ?? null,
+                    modulo_id: meta?.modulo_id ?? null,
+                    plano_id: meta?.plan_id ?? meta?.plano_id ?? null,
+                    module_slugs: moduleSlugs,
+                    customer_phone: p?.payer?.phone?.number ?? null,
+                    approved_at: paidAt,
+                    paid_at: paidAt,
+                    environment: "production",
+                    metadata: meta,
+                  },
+                  { onConflict: "mp_payment_id" },
+                );
+
+              if (internal === "approved") {
+                try {
+                  const { autoProvisionFromPayment } = await import(
+                    "@/lib/auto-provisioning.server"
+                  );
+                  await autoProvisionFromPayment(String(resourceId));
+                } catch (provErr: any) {
+                  await logRuntime("error", "auto-provisioning falhou", {
+                    mp_payment_id: String(resourceId),
+                    message: provErr?.message,
+                    stack: provErr?.stack?.slice(0, 4000) ?? null,
+                  });
+                }
+              }
             }
           }
 

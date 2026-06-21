@@ -4,9 +4,8 @@
  *
  * Por enquanto:
  *  - Pix manual (CNPJ) → ATIVO. Painel de baixa em /admin/pix-pendentes.
- *  - Mercado Pago → em configuração (a chave Access Token será adicionada
- *    em Secrets do projeto). Tela de credenciais em /core/integracoes/mercadopago.
- *  - InfinitePay → integração legada já existente.
+ *  - Mercado Pago → checkout transparente, recorrência via assinatura,
+ *    confirmação automática por webhook.
  *
  * Quando um gateway é habilitado aqui, ele aparece no /checkout/$plano.
  */
@@ -76,10 +75,6 @@ function FinanceIntegrationsPage() {
     queryKey: ['integ', 'mp'],
     queryFn: () => getInteg({ data: { slug: 'mercadopago' } }),
   })
-  const { data: ip } = useQuery({
-    queryKey: ['integ', 'infinitepay'],
-    queryFn: () => getInteg({ data: { slug: 'infinitepay' } }),
-  })
 
   const pendingCount = (pixCharges ?? []).filter((c: any) => c.status === 'pending').length
   const paidCount = (pixCharges ?? []).filter((c: any) => c.status === 'paid').length
@@ -90,9 +85,6 @@ function FinanceIntegrationsPage() {
       ? 'active'
       : 'pending'
     : 'pending'
-
-  const ipConfigured = Boolean((ip as any)?.config)
-  const ipStatus: Status = ipConfigured ? 'active' : 'inactive'
 
   return (
     <main className="container max-w-6xl mx-auto py-8 px-4 space-y-6">
@@ -213,37 +205,8 @@ function FinanceIntegrationsPage() {
           </CardContent>
         </Card>
 
-        {/* InfinitePay */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-md bg-blue-500/10">
-                  <CreditCard className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg">InfinitePay</CardTitle>
-                  <CardDescription>
-                    Integração legada (checkout redirect). Usada por contratos antigos.
-                  </CardDescription>
-                </div>
-              </div>
-              <StatusBadge status={ipStatus} />
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-xs text-muted-foreground">
-              Mantida ativa para clientes existentes. Novos checkouts devem usar Pix
-              manual ou Mercado Pago.
-            </p>
-            <Button asChild size="sm" variant="ghost" className="w-full">
-              <Link to="/core/integracoes/diagnostico">
-                Diagnóstico de integrações
-                <ArrowRight className="w-3 h-3 ml-1" />
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
+
+
 
         {/* Roadmap */}
         <Card className="border-dashed">

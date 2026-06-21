@@ -100,20 +100,6 @@ const INTEGRATIONS: Integration[] = [
     },
   },
   {
-    id: "infinitepay",
-    name: "InfinitePay",
-    category: "Pagamentos",
-    icon: CreditCard,
-    description: "Maquininha e link de pagamento integrados.",
-    byNiche: {
-      clinicas: "optional",
-      bares: "ready",
-      microcervejarias: "optional",
-      servicos: "ready",
-      ecommerce: "optional",
-    },
-  },
-  {
     id: "n8n",
     name: "n8n",
     category: "Automação",
