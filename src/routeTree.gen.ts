@@ -388,6 +388,7 @@ import { Route as AuthenticatedAdminUptimeRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminTrialsRouteImport } from './routes/_authenticated/admin.trials'
 import { Route as AuthenticatedAdminQualidadeRouteImport } from './routes/_authenticated/admin.qualidade'
 import { Route as AuthenticatedAdminPixPendentesRouteImport } from './routes/_authenticated/admin.pix-pendentes'
+import { Route as AuthenticatedAdminPeerBenchmarkRouteImport } from './routes/_authenticated/admin.peer-benchmark'
 import { Route as AuthenticatedAdminNichePlansRouteImport } from './routes/_authenticated/admin.niche-plans'
 import { Route as AuthenticatedAdminInboxUnificadaRouteImport } from './routes/_authenticated/admin.inbox-unificada'
 import { Route as AuthenticatedAdminImobiliariaRouteImport } from './routes/_authenticated/admin.imobiliaria'
@@ -2546,6 +2547,12 @@ const AuthenticatedAdminPixPendentesRoute =
     path: '/admin/pix-pendentes',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminPeerBenchmarkRoute =
+  AuthenticatedAdminPeerBenchmarkRouteImport.update({
+    id: '/admin/peer-benchmark',
+    path: '/admin/peer-benchmark',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminNichePlansRoute =
   AuthenticatedAdminNichePlansRouteImport.update({
     id: '/admin/niche-plans',
@@ -3201,6 +3208,7 @@ export interface FileRoutesByFullPath {
   '/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
+  '/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
   '/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
@@ -3648,6 +3656,7 @@ export interface FileRoutesByTo {
   '/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
+  '/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
   '/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
@@ -4109,6 +4118,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/_authenticated/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
   '/_authenticated/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
+  '/_authenticated/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/_authenticated/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
   '/_authenticated/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
   '/_authenticated/admin/trials': typeof AuthenticatedAdminTrialsRoute
@@ -4569,6 +4579,7 @@ export interface FileRouteTypes {
     | '/admin/imobiliaria'
     | '/admin/inbox-unificada'
     | '/admin/niche-plans'
+    | '/admin/peer-benchmark'
     | '/admin/pix-pendentes'
     | '/admin/qualidade'
     | '/admin/trials'
@@ -5016,6 +5027,7 @@ export interface FileRouteTypes {
     | '/admin/imobiliaria'
     | '/admin/inbox-unificada'
     | '/admin/niche-plans'
+    | '/admin/peer-benchmark'
     | '/admin/pix-pendentes'
     | '/admin/qualidade'
     | '/admin/trials'
@@ -5476,6 +5488,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/imobiliaria'
     | '/_authenticated/admin/inbox-unificada'
     | '/_authenticated/admin/niche-plans'
+    | '/_authenticated/admin/peer-benchmark'
     | '/_authenticated/admin/pix-pendentes'
     | '/_authenticated/admin/qualidade'
     | '/_authenticated/admin/trials'
@@ -8553,6 +8566,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPixPendentesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/peer-benchmark': {
+      id: '/_authenticated/admin/peer-benchmark'
+      path: '/admin/peer-benchmark'
+      fullPath: '/admin/peer-benchmark'
+      preLoaderRoute: typeof AuthenticatedAdminPeerBenchmarkRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/niche-plans': {
       id: '/_authenticated/admin/niche-plans'
       path: '/admin/niche-plans'
@@ -9775,6 +9795,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminImobiliariaRoute: typeof AuthenticatedAdminImobiliariaRoute
   AuthenticatedAdminInboxUnificadaRoute: typeof AuthenticatedAdminInboxUnificadaRoute
   AuthenticatedAdminNichePlansRoute: typeof AuthenticatedAdminNichePlansRoute
+  AuthenticatedAdminPeerBenchmarkRoute: typeof AuthenticatedAdminPeerBenchmarkRoute
   AuthenticatedAdminPixPendentesRoute: typeof AuthenticatedAdminPixPendentesRoute
   AuthenticatedAdminQualidadeRoute: typeof AuthenticatedAdminQualidadeRoute
   AuthenticatedAdminTrialsRoute: typeof AuthenticatedAdminTrialsRoute
@@ -9919,6 +9940,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminImobiliariaRoute: AuthenticatedAdminImobiliariaRoute,
   AuthenticatedAdminInboxUnificadaRoute: AuthenticatedAdminInboxUnificadaRoute,
   AuthenticatedAdminNichePlansRoute: AuthenticatedAdminNichePlansRoute,
+  AuthenticatedAdminPeerBenchmarkRoute: AuthenticatedAdminPeerBenchmarkRoute,
   AuthenticatedAdminPixPendentesRoute: AuthenticatedAdminPixPendentesRoute,
   AuthenticatedAdminQualidadeRoute: AuthenticatedAdminQualidadeRoute,
   AuthenticatedAdminTrialsRoute: AuthenticatedAdminTrialsRoute,
