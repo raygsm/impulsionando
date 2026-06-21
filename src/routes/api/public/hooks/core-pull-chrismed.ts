@@ -7,17 +7,18 @@
  * do tenant CHRISMED dentro do Core Impulsionando.
  *
  * Segurança:
- *   - Header `x-cron-secret` deve bater com env CRON_PULL_SECRET.
+ * Segurança:
  *   - O Core assina a query string com HMAC-SHA256 usando
  *     IMPULSIONANDO_CORE_SECRET (mesmo segredo cadastrado no CHRISMED).
+ *   - Endpoint é idempotente (cursor incremental); seguro para ser chamado
+ *     por pg_cron com o apikey padrão do Supabase.
  *
  * Estado:
  *   - O último timestamp processado fica em runtime_events
  *     (scope='core_pull.chrismed.cursor') — pega o último occurred_at.
  *
- * Uso (cron / pg_cron / agendador externo):
+ * Uso (pg_cron a cada 5 min):
  *   GET https://impulsionando.lovable.app/api/public/hooks/core-pull-chrismed
- *     -H "x-cron-secret: $CRON_PULL_SECRET"
  */
 import { createFileRoute } from '@tanstack/react-router'
 import { createHmac } from 'crypto'
