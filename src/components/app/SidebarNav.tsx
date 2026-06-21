@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import type { CurrentUser } from "@/lib/auth";
@@ -24,6 +24,12 @@ function classifyPlanTier(code: string | null | undefined, name: string | null |
 
 function isItemActive(pathname: string, to: string) {
   return pathname === to || pathname.startsWith(to + "/");
+}
+
+function isBranchActive(pathname: string, item: NavItem): boolean {
+  if (item.to && isItemActive(pathname, item.to)) return true;
+  if (item.children) return item.children.some((c) => isBranchActive(pathname, c));
+  return false;
 }
 
 function usePendingPixBadge(enabled: boolean) {
@@ -53,19 +59,23 @@ function NavLinkRow({
   active,
   onNavigate,
   badgeCount,
+  depth = 0,
 }: {
   item: NavItem;
   active: boolean;
   onNavigate?: () => void;
   badgeCount?: number;
+  depth?: number;
 }) {
   const Icon = item.icon;
+  if (!item.to) return null;
   return (
     <Link
       to={item.to}
       onClick={onNavigate}
       className={cn(
         "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
+        depth > 0 && "ml-4 pl-3 border-l border-sidebar-border/40",
         active
           ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-elegant"
           : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
@@ -78,6 +88,65 @@ function NavLinkRow({
   );
 }
 
+function SubMenu({
+  item,
+  pathname,
+  filterItem,
+  onNavigate,
+  pendingPix,
+  groupAudiences,
+}: {
+  item: NavItem;
+  pathname: string;
+  filterItem: (i: NavItem, groupAudiences?: NavAudience[]) => boolean;
+  onNavigate?: () => void;
+  pendingPix: number;
+  groupAudiences?: NavAudience[];
+}) {
+  const visibleChildren = (item.children ?? []).filter((c) => filterItem(c, groupAudiences));
+  const active = isBranchActive(pathname, item);
+  const [open, setOpen] = useState<boolean>(active);
+  const Icon = item.icon;
+
+  if (visibleChildren.length === 0) return null;
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className={cn(
+          "w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
+          active
+            ? "text-sidebar-foreground bg-sidebar-accent/60"
+            : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+        )}
+      >
+        <Icon className="w-4 h-4 shrink-0" />
+        <span className="truncate flex-1 text-left">{item.label}</span>
+        {open ? (
+          <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+        ) : (
+          <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+        )}
+      </button>
+      {open && (
+        <div className="mt-0.5 space-y-0.5">
+          {visibleChildren.map((c) => (
+            <NavLinkRow
+              key={c.to ?? c.label}
+              item={c}
+              active={!!c.to && isItemActive(pathname, c.to)}
+              onNavigate={onNavigate}
+              badgeCount={pendingPix}
+              depth={1}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function Group({
   group,
@@ -92,10 +161,22 @@ function Group({
   onNavigate?: () => void;
   pendingPix: number;
 }) {
-  const items = group.items.filter((i) => filterItem(i, group.audiences));
+  const items = group.items.filter((i) => {
+    // Para itens com children, manter se ao menos um filho passa.
+    if (i.children) {
+      const anyChild = i.children.some((c) => filterItem(c, group.audiences));
+      if (!anyChild) return false;
+      // Também respeita audiences/superOnly do agrupador
+      if (i.superOnly || i.audiences || i.perm || i.requiresPlanTier) {
+        return filterItem(i, group.audiences);
+      }
+      return true;
+    }
+    return filterItem(i, group.audiences);
+  });
   if (items.length === 0) return null;
 
-  const hasActive = items.some((i) => isItemActive(pathname, i.to));
+  const hasActive = items.some((i) => isBranchActive(pathname, i));
   const [open, setOpen] = useState<boolean>(hasActive || !!group.defaultOpen);
 
   return (
@@ -112,15 +193,27 @@ function Group({
       </button>
       {open && (
         <div className="space-y-1">
-          {items.map((it) => (
-            <NavLinkRow
-              key={it.to}
-              item={it}
-              active={isItemActive(pathname, it.to)}
-              onNavigate={onNavigate}
-              badgeCount={pendingPix}
-            />
-          ))}
+          {items.map((it) =>
+            it.children ? (
+              <SubMenu
+                key={it.label}
+                item={it}
+                pathname={pathname}
+                filterItem={filterItem}
+                onNavigate={onNavigate}
+                pendingPix={pendingPix}
+                groupAudiences={group.audiences}
+              />
+            ) : (
+              <NavLinkRow
+                key={it.to ?? it.label}
+                item={it}
+                active={!!it.to && isItemActive(pathname, it.to)}
+                onNavigate={onNavigate}
+                badgeCount={pendingPix}
+              />
+            )
+          )}
         </div>
       )}
     </div>
@@ -153,22 +246,17 @@ export function SidebarNav({
   const matchesAudience = (audiences: NavAudience[] | undefined): boolean => {
     if (!audiences || audiences.length === 0) {
       // Default-deny para consumidor: itens administrativos (sem audience declarada)
-      // jamais aparecem para o consumidor final. Para vê-los, é preciso declarar
-      // explicitamente `audiences: ["consumidor", ...]`.
+      // jamais aparecem para o consumidor final.
       if (audience === "consumidor") return false;
       return true;
     }
     return audiences.includes(audience);
   };
 
-  // Super admin enxerga tudo. Em modo impersonação, comporta-se como o cliente:
-  // esconde itens superOnly e libera os demais (o master tem acesso global).
   const filterItem = (i: NavItem, groupAudiences?: NavAudience[]): boolean => {
-    // Item herda audiences do grupo quando não declarar a sua própria.
     const effective = i.audiences ?? groupAudiences;
     if (!matchesAudience(effective)) return false;
     if (i.superOnly) return isSuper;
-    // Gate por plano: staff/super sempre passa; demais precisam estar no tier.
     if (i.requiresPlanTier && i.requiresPlanTier.length > 0) {
       const bypass = isSuper || planCtx?.isStaff;
       if (!bypass) {
@@ -189,9 +277,9 @@ export function SidebarNav({
       <div className="space-y-1">
         {TOP_ITEMS.filter((it) => filterItem(it)).map((it) => (
           <NavLinkRow
-            key={it.to}
+            key={it.to ?? it.label}
             item={it}
-            active={isItemActive(location.pathname, it.to)}
+            active={!!it.to && isItemActive(location.pathname, it.to)}
             onNavigate={onNavigate}
           />
         ))}
@@ -206,7 +294,6 @@ export function SidebarNav({
           pendingPix={pendingPix}
         />
       ))}
-
     </nav>
   );
 }

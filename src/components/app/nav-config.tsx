@@ -11,12 +11,14 @@ import {
   History as HistoryIcon, Headphones, UserRound, Megaphone,
   Calculator, Activity, RefreshCw, BookOpen,
   Beer, Store, Send,
+  Settings as SettingsIcon, Globe, FlaskConical, Server, Flag, FileCode,
+  Rocket, Gauge, LineChart, ClipboardList, Workflow, ScrollText,
 } from "lucide-react";
 
 export type NavAudience = "core" | "white-label" | "empresa" | "consumidor";
 
 export interface NavItem {
-  to: string;
+  to?: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   superOnly?: boolean;
@@ -28,6 +30,8 @@ export interface NavItem {
   audiences?: NavAudience[];
   /** Tiers de plano que liberam este item. Se ausente = todos. Staff sempre vê. */
   requiresPlanTier?: Array<"essencial" | "profissional" | "completo">;
+  /** Submenu (até 1 nível). Quando presente, o item vira um agrupador colapsável. */
+  children?: NavItem[];
 }
 
 
@@ -41,20 +45,13 @@ export interface NavGroup {
 
 export const TOP_ITEMS: NavItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, perm: "dashboard.read" },
-  { to: "/torre/consumidores", label: "Torre · Consumidor Final", icon: UserRound, superOnly: true },
-  { to: "/showroom/restaurante", label: "Showroom · Bar & Restaurante", icon: QrCode, superOnly: true },
-  { to: "/torre/restaurantes-demo", label: "Torre · Restaurantes Demo", icon: BarChart3, superOnly: true },
   { to: "/dashboards/core", label: "Dashboard Core", icon: LayoutDashboard, audiences: ["core"] },
   { to: "/dashboards/white-label", label: "Dashboard WL", icon: LayoutDashboard, audiences: ["white-label", "core"] },
   { to: "/dashboards/empresa", label: "Dashboard Empresa", icon: LayoutDashboard, audiences: ["empresa"] },
-  // Consumidor: a "Minha Área" é o grupo lateral; nada no topo evita duplicidade.
   { to: "/cockpits", label: "Cockpits", icon: TrendingUp, superOnly: true },
   { to: "/notifications", label: "Notificações", icon: Inbox },
-  { to: "/contabilidade/cockpit", label: "Cockpit Contábil", icon: Calculator, superOnly: true },
   { to: "/onboarding", label: "Começar / Melhorar", icon: Sparkles },
   { to: "/saiba-mais", label: "Saiba Mais", icon: BookOpen },
-  { to: "/adm", label: "/adm — Central Impulsionando", icon: ShieldCheck, superOnly: true },
-  { to: "/adm/agentes", label: "Central de Agentes", icon: Bot, superOnly: true },
 ];
 
 export const NAV_GROUPS: NavGroup[] = [
@@ -101,7 +98,6 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Marketplace B2B",
     audiences: ["core", "white-label", "empresa"],
-    defaultOpen: true,
     items: [
       { to: "/core/marketplace", label: "Visão geral", icon: TrendingUp, superOnly: true },
       { to: "/core/marketplace/fornecedores", label: "Fornecedores", icon: Store, superOnly: true },
@@ -122,14 +118,9 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
 
-
-
-
-
   {
     label: "Captar",
     audiences: ["core", "white-label", "empresa"],
-    defaultOpen: true,
     items: [
       { to: "/commercial/cockpit", label: "Cockpit Comercial", icon: TrendingUp, perm: "crm.opportunity.read" },
       { to: "/crm/board", label: "Kanban de oportunidades", icon: KanbanSquare, perm: "crm.opportunity.read" },
@@ -145,15 +136,22 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Relacionar",
     items: [
       { to: "/customers", label: "Clientes", icon: Contact, perm: "customer.read" },
-      { to: "/agenda", label: "Agenda — hoje", icon: Calendar, perm: "agenda.appointment.read" },
-      { to: "/agenda/appointments", label: "Agendamentos", icon: CalendarClock, perm: "agenda.appointment.read" },
-      { to: "/agenda/professionals", label: "Profissionais", icon: Users2, perm: "agenda.professional.read" },
-      { to: "/agenda/services", label: "Serviços", icon: Wrench, perm: "agenda.service.read" },
-      { to: "/agenda/schedules", label: "Horários", icon: Clock, perm: "agenda.schedule.write" },
-      { to: "/agenda/waitlist", label: "Fila de espera", icon: UsersRound, perm: "agenda.waitlist.write" },
-      { to: "/agenda/gestor", label: "Agenda — gestor", icon: CalendarClock, perm: "agenda.metrics.read" },
-      { to: "/agenda/profissional", label: "Pega-Horário", icon: Calendar, perm: "agenda.slot.claim" },
-      { to: "/agenda/cliente", label: "Meus agendamentos", icon: Calendar },
+      {
+        label: "Agenda",
+        icon: Calendar,
+        perm: "agenda.appointment.read",
+        children: [
+          { to: "/agenda", label: "Agenda — hoje", icon: Calendar, perm: "agenda.appointment.read" },
+          { to: "/agenda/appointments", label: "Agendamentos", icon: CalendarClock, perm: "agenda.appointment.read" },
+          { to: "/agenda/professionals", label: "Profissionais", icon: Users2, perm: "agenda.professional.read" },
+          { to: "/agenda/services", label: "Serviços", icon: Wrench, perm: "agenda.service.read" },
+          { to: "/agenda/schedules", label: "Horários", icon: Clock, perm: "agenda.schedule.write" },
+          { to: "/agenda/waitlist", label: "Fila de espera", icon: UsersRound, perm: "agenda.waitlist.write" },
+          { to: "/agenda/gestor", label: "Agenda — gestor", icon: CalendarClock, perm: "agenda.metrics.read" },
+          { to: "/agenda/profissional", label: "Pega-Horário", icon: Calendar, perm: "agenda.slot.claim" },
+          { to: "/agenda/cliente", label: "Meus agendamentos", icon: Calendar },
+        ],
+      },
       { to: "/ehr", label: "Prontuário Eletrônico", icon: Stethoscope, perm: "ehr.record.read" },
       { to: "/imobiliaria/interessados", label: "Interessados (Imob.)", icon: Users2, perm: "realestate.interest.read" },
       { to: "/clube", label: "Minha área Clube", icon: Sparkles },
@@ -165,23 +163,43 @@ export const NAV_GROUPS: NavGroup[] = [
     audiences: ["core", "white-label", "empresa"],
     items: [
       { to: "/operations/cockpit", label: "Cockpit de Operações", icon: TrendingUp, perm: "sales.order.read" },
-      { to: "/sales", label: "Vendas — visão geral", icon: ShoppingCart, perm: "sales.order.read" },
-      { to: "/sales/new", label: "Nova venda (PDV)", icon: Plus, perm: "sales.order.write" },
-      { to: "/sales/orders", label: "Pedidos", icon: Receipt, perm: "sales.order.read" },
-      { to: "/sales/cash", label: "Fechamento de caixa", icon: WalletIcon, perm: "sales.cashsession.read" },
-      { to: "/inventory", label: "Estoque — visão geral", icon: Package, perm: "inventory.product.read" },
-      { to: "/inventory/products", label: "Produtos", icon: Boxes, perm: "inventory.product.read" },
-      { to: "/inventory/movements", label: "Movimentações", icon: ArrowDownUp, perm: "inventory.movement.read" },
-      { to: "/inventory/categories", label: "Categorias de estoque", icon: FolderTree, perm: "inventory.category.read" },
-      { to: "/inventory/suppliers", label: "Fornecedores", icon: Truck, perm: "inventory.supplier.read" },
-      { to: "/imobiliaria/vitrine", label: "Imobiliária — vitrine", icon: Home },
-      { to: "/realestate/cockpit", label: "Imobiliária — cockpit", icon: Home },
-      { to: "/imobiliaria/imoveis", label: "Imóveis", icon: Home },
-      { to: "/imobiliaria/intencoes", label: "Buscas salvas", icon: SearchIcon },
-      { to: "/imobiliaria/matches", label: "Matches", icon: Zap },
-      { to: "/imobiliaria/campanhas", label: "Campanhas & Disparo", icon: Send, perm: "realestate.property.write" },
-      { to: "/imobiliaria/parceiros", label: "Corretores parceiros", icon: Handshake, perm: "realestate.property.write" },
-      { to: "/imobiliaria/modulos", label: "Módulos do nicho (imob.)", icon: Boxes },
+      {
+        label: "Vendas",
+        icon: ShoppingCart,
+        perm: "sales.order.read",
+        children: [
+          { to: "/sales", label: "Vendas — visão geral", icon: ShoppingCart, perm: "sales.order.read" },
+          { to: "/sales/new", label: "Nova venda (PDV)", icon: Plus, perm: "sales.order.write" },
+          { to: "/sales/orders", label: "Pedidos", icon: Receipt, perm: "sales.order.read" },
+          { to: "/sales/cash", label: "Fechamento de caixa", icon: WalletIcon, perm: "sales.cashsession.read" },
+        ],
+      },
+      {
+        label: "Estoque",
+        icon: Package,
+        perm: "inventory.product.read",
+        children: [
+          { to: "/inventory", label: "Estoque — visão geral", icon: Package, perm: "inventory.product.read" },
+          { to: "/inventory/products", label: "Produtos", icon: Boxes, perm: "inventory.product.read" },
+          { to: "/inventory/movements", label: "Movimentações", icon: ArrowDownUp, perm: "inventory.movement.read" },
+          { to: "/inventory/categories", label: "Categorias", icon: FolderTree, perm: "inventory.category.read" },
+          { to: "/inventory/suppliers", label: "Fornecedores", icon: Truck, perm: "inventory.supplier.read" },
+        ],
+      },
+      {
+        label: "Imobiliária",
+        icon: Home,
+        children: [
+          { to: "/imobiliaria/vitrine", label: "Vitrine", icon: Home },
+          { to: "/realestate/cockpit", label: "Cockpit", icon: Home },
+          { to: "/imobiliaria/imoveis", label: "Imóveis", icon: Home },
+          { to: "/imobiliaria/intencoes", label: "Buscas salvas", icon: SearchIcon },
+          { to: "/imobiliaria/matches", label: "Matches", icon: Zap },
+          { to: "/imobiliaria/campanhas", label: "Campanhas & Disparo", icon: Send, perm: "realestate.property.write" },
+          { to: "/imobiliaria/parceiros", label: "Corretores parceiros", icon: Handshake, perm: "realestate.property.write" },
+          { to: "/imobiliaria/modulos", label: "Módulos do nicho", icon: Boxes },
+        ],
+      },
     ],
   },
   {
@@ -189,25 +207,41 @@ export const NAV_GROUPS: NavGroup[] = [
     audiences: ["core", "white-label", "empresa"],
     items: [
       { to: "/finance/cockpit", label: "Cockpit Financeiro", icon: TrendingUp, perm: "finance.transaction.read" },
-      { to: "/finance", label: "Financeiro — visão geral", icon: Wallet, perm: "finance.transaction.read" },
-      { to: "/finance/transactions", label: "Lançamentos", icon: ArrowLeftRight, perm: "finance.transaction.read" },
-      { to: "/finance/accounts", label: "Contas", icon: Wallet, perm: "finance.account.write" },
-      { to: "/finance/categories", label: "Categorias financeiras", icon: FolderTree, perm: "finance.category.write" },
-      { to: "/finance/methods", label: "Métodos de pagamento", icon: CreditCard, perm: "finance.method.write" },
-      { to: "/finance/integracoes", label: "Integrações de pagamento", icon: Wallet, perm: "finance.method.write", badge: "pendingPix" },
-      { to: "/finance/commissions", label: "Comissões", icon: Percent, perm: "finance.commission.read" },
+      {
+        label: "Financeiro",
+        icon: Wallet,
+        perm: "finance.transaction.read",
+        children: [
+          { to: "/finance", label: "Visão geral", icon: Wallet, perm: "finance.transaction.read" },
+          { to: "/finance/transactions", label: "Lançamentos", icon: ArrowLeftRight, perm: "finance.transaction.read" },
+          { to: "/finance/accounts", label: "Contas", icon: Wallet, perm: "finance.account.write" },
+          { to: "/finance/categories", label: "Categorias", icon: FolderTree, perm: "finance.category.write" },
+          { to: "/finance/methods", label: "Métodos de pagamento", icon: CreditCard, perm: "finance.method.write" },
+          { to: "/finance/integracoes", label: "Integrações de pagamento", icon: Wallet, perm: "finance.method.write", badge: "pendingPix" },
+          { to: "/finance/commissions", label: "Comissões", icon: Percent, perm: "finance.commission.read" },
+        ],
+      },
       { to: "/minha-assinatura", label: "Minha Assinatura", icon: CreditCard },
-      { to: "/affiliates", label: "Afiliados — Dashboard", icon: LayoutDashboard, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"], requiresPlanTier: ["profissional", "completo"] },
-      { to: "/affiliates/sales", label: "Afiliados — Vendas", icon: ShoppingCart, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"], requiresPlanTier: ["profissional", "completo"] },
-      { to: "/affiliates/commissions", label: "Afiliados — Comissões", icon: Percent, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"], requiresPlanTier: ["profissional", "completo"] },
-      { to: "/affiliates/payouts", label: "Saques e Repasses", icon: Banknote, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"], requiresPlanTier: ["profissional", "completo"] },
-      { to: "/affiliates/wallet", label: "Carteira & Alertas", icon: Wallet, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"], requiresPlanTier: ["profissional", "completo"] },
-      { to: "/affiliates/links", label: "Links / Cupons / QR", icon: Link2, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"], requiresPlanTier: ["profissional", "completo"] },
-      { to: "/affiliates/affiliates", label: "Afiliados (cadastro)", icon: Handshake, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"], requiresPlanTier: ["profissional", "completo"] },
-      { to: "/affiliates/coproducers", label: "Coprodutores", icon: Users2, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"], requiresPlanTier: ["profissional", "completo"] },
-      { to: "/affiliates/managers", label: "Gerentes", icon: Briefcase, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"], requiresPlanTier: ["profissional", "completo"] },
-      { to: "/affiliates/products", label: "Produtos (afiliados)", icon: Boxes, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"], requiresPlanTier: ["profissional", "completo"] },
-      { to: "/affiliates/offers", label: "Ofertas", icon: BadgeDollarSign, perm: "aff.module.read", audiences: ["empresa", "core", "white-label"], requiresPlanTier: ["profissional", "completo"] },
+      {
+        label: "Afiliados",
+        icon: Handshake,
+        perm: "aff.module.read",
+        requiresPlanTier: ["profissional", "completo"],
+        children: [
+          { to: "/affiliates", label: "Dashboard", icon: LayoutDashboard, perm: "aff.module.read" },
+          { to: "/affiliates/sales", label: "Vendas", icon: ShoppingCart, perm: "aff.module.read" },
+          { to: "/affiliates/commissions", label: "Comissões", icon: Percent, perm: "aff.module.read" },
+          { to: "/affiliates/payouts", label: "Saques & Repasses", icon: Banknote, perm: "aff.module.read" },
+          { to: "/affiliates/wallet", label: "Carteira & Alertas", icon: Wallet, perm: "aff.module.read" },
+          { to: "/affiliates/links", label: "Links / Cupons / QR", icon: Link2, perm: "aff.module.read" },
+          { to: "/affiliates/affiliates", label: "Afiliados (cadastro)", icon: Handshake, perm: "aff.module.read" },
+          { to: "/affiliates/coproducers", label: "Coprodutores", icon: Users2, perm: "aff.module.read" },
+          { to: "/affiliates/managers", label: "Gerentes", icon: Briefcase, perm: "aff.module.read" },
+          { to: "/affiliates/products", label: "Produtos", icon: Boxes, perm: "aff.module.read" },
+          { to: "/affiliates/offers", label: "Ofertas", icon: BadgeDollarSign, perm: "aff.module.read" },
+          { to: "/affiliates/reports", label: "Relatórios", icon: TrendingUp, perm: "aff.module.read" },
+        ],
+      },
     ],
   },
   {
@@ -226,7 +260,6 @@ export const NAV_GROUPS: NavGroup[] = [
     audiences: ["core", "white-label", "empresa"],
     items: [
       { to: "/ops/versoes", label: "Versões & Atualizações", icon: RefreshCw },
-      { to: "/adm/agentes", label: "Central de Agentes", icon: Bot, superOnly: true },
       { to: "/finance/webhook-log", label: "Log de Webhooks", icon: HistoryIcon, perm: "finance.transaction.read" },
     ],
   },
@@ -238,16 +271,30 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/radar", label: "Radar do Nicho", icon: TrendingUp, superOnly: true },
       { to: "/insights/respostas", label: "Dashboard de Respostas", icon: Sparkles },
       { to: "/insights/oportunidades", label: "Central de Oportunidades", icon: Zap },
-      { to: "/reports", label: "Relatórios — visão geral", icon: BarChart3, perm: "report.read" },
-      { to: "/reports/sales", label: "Vendas", icon: ShoppingCart, perm: "report.read" },
-      { to: "/reports/finance", label: "Financeiro", icon: Wallet, perm: "report.read" },
-      { to: "/reports/inventory", label: "Estoque", icon: Package, perm: "report.read" },
-      { to: "/reports/agenda", label: "Agenda", icon: Calendar, perm: "report.read" },
-      { to: "/reports/crm", label: "CRM", icon: UserPlus, perm: "report.read" },
-      { to: "/bi", label: "BI — visão geral", icon: BarChart3, perm: "bi.read" },
-      { to: "/bi/company", label: "BI por cliente", icon: Building2, perm: "bi.read" },
-      { to: "/bi/master", label: "BI Master", icon: Building2, superOnly: true },
-      { to: "/bi/niches", label: "BI por nicho", icon: Tags, superOnly: true },
+      {
+        label: "Relatórios",
+        icon: BarChart3,
+        perm: "report.read",
+        children: [
+          { to: "/reports", label: "Visão geral", icon: BarChart3, perm: "report.read" },
+          { to: "/reports/sales", label: "Vendas", icon: ShoppingCart, perm: "report.read" },
+          { to: "/reports/finance", label: "Financeiro", icon: Wallet, perm: "report.read" },
+          { to: "/reports/inventory", label: "Estoque", icon: Package, perm: "report.read" },
+          { to: "/reports/agenda", label: "Agenda", icon: Calendar, perm: "report.read" },
+          { to: "/reports/crm", label: "CRM", icon: UserPlus, perm: "report.read" },
+        ],
+      },
+      {
+        label: "BI",
+        icon: BarChart3,
+        perm: "bi.read",
+        children: [
+          { to: "/bi", label: "Visão geral", icon: BarChart3, perm: "bi.read" },
+          { to: "/bi/company", label: "Por cliente", icon: Building2, perm: "bi.read" },
+          { to: "/bi/master", label: "Master", icon: Building2, superOnly: true },
+          { to: "/bi/niches", label: "Por nicho", icon: Tags, superOnly: true },
+        ],
+      },
     ],
   },
   {
@@ -255,37 +302,192 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: "/onboarding", label: "Onboarding / Melhorar", icon: Sparkles },
       { to: "/ops/saude", label: "Saúde da Conta", icon: Activity },
-      { to: "/saiba-mais", label: "Saiba Mais (planos, módulos, nichos)", icon: BookOpen },
-      { to: "/saiba-mais/saude", label: "Saúde — Metodologia", icon: BookOpen },
-      { to: "/saiba-mais/versoes", label: "Versões — Pipeline", icon: RefreshCw },
+      {
+        label: "Saiba Mais",
+        icon: BookOpen,
+        children: [
+          { to: "/saiba-mais", label: "Planos, módulos, nichos", icon: BookOpen },
+          { to: "/saiba-mais/saude", label: "Saúde — Metodologia", icon: BookOpen },
+          { to: "/saiba-mais/versoes", label: "Versões — Pipeline", icon: RefreshCw },
+        ],
+      },
     ],
   },
+
+  // ============================================================
+  // ADMINISTRAÇÃO — reorganizada com submenus por domínio.
+  // Lógica: 1 grupo, 10 submenus coesos, hierarquia previsível.
+  // ============================================================
   {
     label: "Administração",
     audiences: ["empresa", "core"],
     items: [
-      { to: "/companies", label: "Empresas", icon: Building2, superOnly: true },
-      { to: "/niches", label: "Nichos", icon: Tags, superOnly: true },
-      { to: "/units", label: "Unidades", icon: MapPin, perm: "units.read" },
-      { to: "/sectors", label: "Setores", icon: Layers, perm: "sectors.read" },
-      { to: "/users/corporate", label: "Visão Corporativa", icon: Users, perm: "users.read" },
-      { to: "/users", label: "Usuários", icon: Users, perm: "users.read" },
-      { to: "/access-profiles", label: "Perfis de acesso", icon: KeyRound, perm: "profiles.read" },
-      { to: "/access-profiles/matrix", label: "Matriz de Permissões", icon: KeyRound, perm: "profiles.read" },
-      { to: "/permissions", label: "Permissões", icon: KeyRound, superOnly: true },
-      { to: "/modules", label: "Módulos", icon: Boxes, perm: "modules.read" },
-      { to: "/settings", label: "Configurações", icon: SlidersHorizontal, perm: "settings.read" },
-      { to: "/audit", label: "Auditoria", icon: FileSearch, perm: "audit.read" },
-      { to: "/privacy/cockpit", label: "Cockpit LGPD", icon: ShieldCheck, superOnly: true },
-      { to: "/admin/trials", label: "Trials (7 dias)", icon: Sparkles, superOnly: true },
-      { to: "/admin/clube", label: "Clube — Cockpit", icon: Crown, superOnly: true },
-      { to: "/admin/billing", label: "Billing", icon: CreditCard, superOnly: true },
-      { to: "/admin/billing-contracts", label: "Contratos recorrentes", icon: CreditCard, superOnly: true },
-      { to: "/admin/billing-policy", label: "Régua de cobrança", icon: CreditCard, superOnly: true },
-      { to: "/admin/modulos/clonagem", label: "Clonagem de Módulos", icon: Copy, superOnly: true },
-      { to: "/white-label/cockpit", label: "White Label Cockpit", icon: Layers, superOnly: true },
-      { to: "/support/cockpit", label: "Suporte — Cockpit", icon: Headphones, superOnly: true },
-      { to: "/affiliates/reports", label: "Relatórios de afiliados", icon: TrendingUp, perm: "aff.module.read", requiresPlanTier: ["profissional", "completo"] },
+      {
+        label: "Central Impulsionando",
+        icon: ShieldCheck,
+        superOnly: true,
+        children: [
+          { to: "/adm", label: "Central /adm", icon: ShieldCheck, superOnly: true },
+          { to: "/adm/master", label: "Painel Master", icon: Crown, superOnly: true },
+          { to: "/adm/agentes", label: "Central de Agentes", icon: Bot, superOnly: true },
+          { to: "/core", label: "Core — Início", icon: Sparkles, superOnly: true },
+          { to: "/core/master", label: "Core Master", icon: Crown, superOnly: true },
+          { to: "/core/dashboard-macro", label: "Dashboard Macro", icon: LayoutDashboard, superOnly: true },
+          { to: "/core/dashboards", label: "Dashboards Core", icon: LayoutDashboard, superOnly: true },
+          { to: "/contabilidade/cockpit", label: "Cockpit Contábil", icon: Calculator, superOnly: true },
+        ],
+      },
+      {
+        label: "Organização",
+        icon: Building2,
+        children: [
+          { to: "/companies", label: "Empresas", icon: Building2, superOnly: true },
+          { to: "/niches", label: "Nichos", icon: Tags, superOnly: true },
+          { to: "/units", label: "Unidades", icon: MapPin, perm: "units.read" },
+          { to: "/sectors", label: "Setores", icon: Layers, perm: "sectors.read" },
+        ],
+      },
+      {
+        label: "Pessoas & Acessos",
+        icon: Users,
+        children: [
+          { to: "/users", label: "Usuários", icon: Users, perm: "users.read" },
+          { to: "/users/corporate", label: "Visão Corporativa", icon: Users, perm: "users.read" },
+          { to: "/access-profiles", label: "Perfis de acesso", icon: KeyRound, perm: "profiles.read" },
+          { to: "/access-profiles/matrix", label: "Matriz de Permissões", icon: KeyRound, perm: "profiles.read" },
+          { to: "/permissions", label: "Permissões", icon: KeyRound, superOnly: true },
+        ],
+      },
+      {
+        label: "Módulos & Configurações",
+        icon: Boxes,
+        children: [
+          { to: "/modules", label: "Módulos", icon: Boxes, perm: "modules.read" },
+          { to: "/settings", label: "Configurações", icon: SlidersHorizontal, perm: "settings.read" },
+          { to: "/core/modulos", label: "Catálogo de Módulos", icon: Boxes, superOnly: true },
+          { to: "/core/modulos/agenda", label: "Módulo Agenda", icon: Calendar, superOnly: true },
+          { to: "/core/parametros", label: "Parâmetros do Core", icon: SettingsIcon, superOnly: true },
+          { to: "/core/flags", label: "Feature Flags", icon: Flag, superOnly: true },
+          { to: "/core/menus", label: "Menus & Navegação", icon: Layers, superOnly: true },
+          { to: "/admin/modulos/clonagem", label: "Clonagem de Módulos", icon: Copy, superOnly: true },
+        ],
+      },
+      {
+        label: "Tenants & White-Label",
+        icon: Globe,
+        superOnly: true,
+        children: [
+          { to: "/core/clientes", label: "Clientes (Tenants)", icon: Building2, superOnly: true },
+          { to: "/core/tenants/novo", label: "Novo Tenant", icon: Plus, superOnly: true },
+          { to: "/core/dominios", label: "Domínios", icon: Globe, superOnly: true },
+          { to: "/core/tenants/dominios", label: "Domínios por Tenant", icon: Globe, superOnly: true },
+          { to: "/core/implantacoes", label: "Implantações", icon: Rocket, superOnly: true },
+          { to: "/core/nova-implantacao", label: "Nova Implantação", icon: Rocket, superOnly: true },
+          { to: "/core/importar-clientes", label: "Importar Clientes", icon: UserPlus, superOnly: true },
+          { to: "/white-label/cockpit", label: "WL — Cockpit", icon: Layers, superOnly: true },
+          { to: "/white-label/capacidade", label: "WL — Capacidade", icon: Gauge, superOnly: true },
+        ],
+      },
+      {
+        label: "Faturamento & Planos",
+        icon: CreditCard,
+        superOnly: true,
+        children: [
+          { to: "/admin/billing", label: "Billing", icon: CreditCard, superOnly: true },
+          { to: "/admin/billing-contracts", label: "Contratos recorrentes", icon: ScrollText, superOnly: true },
+          { to: "/admin/billing-policy", label: "Régua de cobrança", icon: ClipboardList, superOnly: true },
+          { to: "/admin/niche-plans", label: "Planos por Nicho", icon: Tags, superOnly: true },
+          { to: "/core/planos", label: "Catálogo de Planos", icon: BadgeDollarSign, superOnly: true },
+          { to: "/admin/trials", label: "Trials (7 dias)", icon: Sparkles, superOnly: true },
+          { to: "/admin/pix-pendentes", label: "PIX Pendentes", icon: QrCode, superOnly: true, badge: "pendingPix" },
+          { to: "/admin/integracoes/mercado-pago", label: "Mercado Pago", icon: Wallet, superOnly: true },
+          { to: "/core/integracoes/mercadopago", label: "MP (Core)", icon: Wallet, superOnly: true },
+          { to: "/core/financeiro-consolidado", label: "Financeiro Consolidado", icon: Banknote, superOnly: true },
+          { to: "/core/financeiro-master", label: "Financeiro Master", icon: Banknote, superOnly: true },
+          { to: "/core/repasses", label: "Repasses", icon: ArrowLeftRight, superOnly: true },
+          { to: "/core/monetizacao", label: "Monetização", icon: TrendingUp, superOnly: true },
+          { to: "/core/contratos", label: "Contratos", icon: ScrollText, superOnly: true },
+        ],
+      },
+      {
+        label: "Catálogo & Plataforma",
+        icon: FileCode,
+        superOnly: true,
+        children: [
+          { to: "/core/templates", label: "Templates", icon: FileCode, superOnly: true },
+          { to: "/core/prompts", label: "Prompts (IA)", icon: Bot, superOnly: true },
+          { to: "/core/releases", label: "Releases", icon: RefreshCw, superOnly: true },
+          { to: "/core/metricas-reguas", label: "Métricas & Réguas", icon: LineChart, superOnly: true },
+          { to: "/core/instalar-modulo", label: "Instalar Módulo", icon: Plus, superOnly: true },
+          { to: "/admin/catalog-analytics", label: "Catálogo — Analytics", icon: BarChart3, superOnly: true },
+          { to: "/admin/catalog-intents", label: "Catálogo — Intents", icon: Workflow, superOnly: true },
+        ],
+      },
+      {
+        label: "Marketing & Comercial",
+        icon: Megaphone,
+        superOnly: true,
+        children: [
+          { to: "/core/marketing-leads", label: "Leads (Marketing)", icon: Inbox, superOnly: true },
+          { to: "/core/marketing-pages", label: "Páginas de Marketing", icon: FileCode, superOnly: true },
+          { to: "/core/feira-leads", label: "Feira de Leads", icon: Store, superOnly: true },
+          { to: "/core/briefings", label: "Briefings", icon: ClipboardList, superOnly: true },
+          { to: "/core/finalizacao-comercial", label: "Finalização Comercial", icon: Handshake, superOnly: true },
+          { to: "/core/demos", label: "Demos", icon: FlaskConical, superOnly: true },
+          { to: "/core/demo-insights", label: "Insights de Demos", icon: Sparkles, superOnly: true },
+          { to: "/core/eventos", label: "Eventos", icon: Calendar, superOnly: true },
+          { to: "/core/criar-projeto", label: "Criar Projeto", icon: Plus, superOnly: true },
+        ],
+      },
+      {
+        label: "Qualidade & Observabilidade",
+        icon: Activity,
+        children: [
+          { to: "/admin/qualidade", label: "Qualidade", icon: ShieldCheck, superOnly: true },
+          { to: "/admin/uptime", label: "Uptime", icon: Activity, superOnly: true },
+          { to: "/admin/whatsapp-metrics", label: "WhatsApp — Métricas", icon: MessageSquare, superOnly: true },
+          { to: "/core/observabilidade", label: "Observabilidade", icon: Server, superOnly: true },
+          { to: "/core/saude", label: "Saúde da Plataforma", icon: Activity, superOnly: true },
+          { to: "/core/diagnostico-geral", label: "Diagnóstico Geral", icon: Gauge, superOnly: true },
+          { to: "/core/integracoes/diagnostico", label: "Integrações — Diagnóstico", icon: Gauge, superOnly: true },
+          { to: "/core/integracoes/n8n", label: "n8n", icon: Workflow, superOnly: true },
+          { to: "/core/testes", label: "Testes", icon: FlaskConical, superOnly: true },
+          { to: "/core/bi-ecossistema", label: "BI Ecossistema", icon: BarChart3, superOnly: true },
+        ],
+      },
+      {
+        label: "Clube, Suporte & Consumidor",
+        icon: Crown,
+        superOnly: true,
+        children: [
+          { to: "/admin/clube", label: "Clube — Cockpit", icon: Crown, superOnly: true },
+          { to: "/core/consumidor-premium", label: "Consumidor Premium", icon: UserRound, superOnly: true },
+          { to: "/torre/consumidores", label: "Torre · Consumidor Final", icon: UserRound, superOnly: true },
+          { to: "/torre/restaurantes-demo", label: "Torre · Restaurantes Demo", icon: BarChart3, superOnly: true },
+          { to: "/showroom/restaurante", label: "Showroom · Bar/Restaurante", icon: QrCode, superOnly: true },
+          { to: "/support/cockpit", label: "Suporte — Cockpit", icon: Headphones, superOnly: true },
+        ],
+      },
+      {
+        label: "Compliance & Auditoria",
+        icon: FileSearch,
+        children: [
+          { to: "/audit", label: "Auditoria", icon: FileSearch, perm: "audit.read" },
+          { to: "/privacy/cockpit", label: "Cockpit LGPD", icon: ShieldCheck, superOnly: true },
+        ],
+      },
+      {
+        label: "Verticais Específicas",
+        icon: Stethoscope,
+        superOnly: true,
+        children: [
+          { to: "/admin/fiscal", label: "Fiscal", icon: Receipt, superOnly: true },
+          { to: "/admin/imobiliaria", label: "Imobiliária — Admin", icon: Home, superOnly: true },
+          { to: "/chrismed/admin", label: "ChrisMed — Admin", icon: Stethoscope, superOnly: true },
+          { to: "/chrismed/setup", label: "ChrisMed — Setup", icon: SettingsIcon, superOnly: true },
+          { to: "/chrismed/alertas", label: "ChrisMed — Alertas", icon: Inbox, superOnly: true },
+        ],
+      },
     ],
   },
 ];

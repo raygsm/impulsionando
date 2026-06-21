@@ -10,8 +10,11 @@ interface Crumb {
 
 function buildLabelIndex(): Record<string, string> {
   const idx: Record<string, string> = {};
-  for (const it of TOP_ITEMS) idx[it.to] = it.label;
-  for (const g of NAV_GROUPS) for (const it of g.items) idx[it.to] = it.label;
+  for (const it of TOP_ITEMS) if (it.to) idx[it.to] = it.label;
+  for (const g of NAV_GROUPS) for (const it of g.items) {
+    if (it.to) idx[it.to] = it.label;
+    if (it.children) for (const c of it.children) if (c.to) idx[c.to] = c.label;
+  }
   return idx;
 }
 
