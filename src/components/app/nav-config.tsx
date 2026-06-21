@@ -48,6 +48,7 @@ export const TOP_ITEMS: NavItem[] = [
   { to: "/dashboards/core", label: "Dashboard Core", icon: LayoutDashboard, audiences: ["core"] },
   { to: "/dashboards/white-label", label: "Dashboard WL", icon: LayoutDashboard, audiences: ["white-label", "core"] },
   { to: "/dashboards/empresa", label: "Dashboard Empresa", icon: LayoutDashboard, audiences: ["empresa"] },
+  { to: "/dashboards/operacao", label: "Operação Core", icon: LayoutDashboard, audiences: ["core", "empresa"] },
   { to: "/cockpits", label: "Cockpits", icon: TrendingUp, superOnly: true },
   { to: "/notifications", label: "Notificações", icon: Inbox },
   { to: "/onboarding", label: "Começar / Melhorar", icon: Sparkles },

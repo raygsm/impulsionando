@@ -279,6 +279,7 @@ import { Route as AuthenticatedEducacaoPolosRouteImport } from './routes/_authen
 import { Route as AuthenticatedEducacaoDashboardRouteImport } from './routes/_authenticated/educacao.dashboard'
 import { Route as AuthenticatedEducacaoBrandingRouteImport } from './routes/_authenticated/educacao.branding'
 import { Route as AuthenticatedDashboardsWhiteLabelRouteImport } from './routes/_authenticated/dashboards.white-label'
+import { Route as AuthenticatedDashboardsOperacaoRouteImport } from './routes/_authenticated/dashboards.operacao'
 import { Route as AuthenticatedDashboardsEmpresaRouteImport } from './routes/_authenticated/dashboards.empresa'
 import { Route as AuthenticatedDashboardsCoreRouteImport } from './routes/_authenticated/dashboards.core'
 import { Route as AuthenticatedDashboardsConsumidorRouteImport } from './routes/_authenticated/dashboards.consumidor'
@@ -1916,6 +1917,12 @@ const AuthenticatedDashboardsWhiteLabelRoute =
     path: '/dashboards/white-label',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardsOperacaoRoute =
+  AuthenticatedDashboardsOperacaoRouteImport.update({
+    id: '/dashboards/operacao',
+    path: '/dashboards/operacao',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardsEmpresaRoute =
   AuthenticatedDashboardsEmpresaRouteImport.update({
     id: '/dashboards/empresa',
@@ -3397,6 +3404,7 @@ export interface FileRoutesByFullPath {
   '/dashboards/consumidor': typeof AuthenticatedDashboardsConsumidorRoute
   '/dashboards/core': typeof AuthenticatedDashboardsCoreRoute
   '/dashboards/empresa': typeof AuthenticatedDashboardsEmpresaRoute
+  '/dashboards/operacao': typeof AuthenticatedDashboardsOperacaoRoute
   '/dashboards/white-label': typeof AuthenticatedDashboardsWhiteLabelRoute
   '/educacao/branding': typeof AuthenticatedEducacaoBrandingRoute
   '/educacao/dashboard': typeof AuthenticatedEducacaoDashboardRoute
@@ -3855,6 +3863,7 @@ export interface FileRoutesByTo {
   '/dashboards/consumidor': typeof AuthenticatedDashboardsConsumidorRoute
   '/dashboards/core': typeof AuthenticatedDashboardsCoreRoute
   '/dashboards/empresa': typeof AuthenticatedDashboardsEmpresaRoute
+  '/dashboards/operacao': typeof AuthenticatedDashboardsOperacaoRoute
   '/dashboards/white-label': typeof AuthenticatedDashboardsWhiteLabelRoute
   '/educacao/branding': typeof AuthenticatedEducacaoBrandingRoute
   '/educacao/dashboard': typeof AuthenticatedEducacaoDashboardRoute
@@ -4327,6 +4336,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboards/consumidor': typeof AuthenticatedDashboardsConsumidorRoute
   '/_authenticated/dashboards/core': typeof AuthenticatedDashboardsCoreRoute
   '/_authenticated/dashboards/empresa': typeof AuthenticatedDashboardsEmpresaRoute
+  '/_authenticated/dashboards/operacao': typeof AuthenticatedDashboardsOperacaoRoute
   '/_authenticated/dashboards/white-label': typeof AuthenticatedDashboardsWhiteLabelRoute
   '/_authenticated/educacao/branding': typeof AuthenticatedEducacaoBrandingRoute
   '/_authenticated/educacao/dashboard': typeof AuthenticatedEducacaoDashboardRoute
@@ -4798,6 +4808,7 @@ export interface FileRouteTypes {
     | '/dashboards/consumidor'
     | '/dashboards/core'
     | '/dashboards/empresa'
+    | '/dashboards/operacao'
     | '/dashboards/white-label'
     | '/educacao/branding'
     | '/educacao/dashboard'
@@ -5256,6 +5267,7 @@ export interface FileRouteTypes {
     | '/dashboards/consumidor'
     | '/dashboards/core'
     | '/dashboards/empresa'
+    | '/dashboards/operacao'
     | '/dashboards/white-label'
     | '/educacao/branding'
     | '/educacao/dashboard'
@@ -5727,6 +5739,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboards/consumidor'
     | '/_authenticated/dashboards/core'
     | '/_authenticated/dashboards/empresa'
+    | '/_authenticated/dashboards/operacao'
     | '/_authenticated/dashboards/white-label'
     | '/_authenticated/educacao/branding'
     | '/_authenticated/educacao/dashboard'
@@ -7934,6 +7947,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardsWhiteLabelRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboards/operacao': {
+      id: '/_authenticated/dashboards/operacao'
+      path: '/dashboards/operacao'
+      fullPath: '/dashboards/operacao'
+      preLoaderRoute: typeof AuthenticatedDashboardsOperacaoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboards/empresa': {
       id: '/_authenticated/dashboards/empresa'
       path: '/dashboards/empresa'
@@ -10035,6 +10055,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardsConsumidorRoute: typeof AuthenticatedDashboardsConsumidorRoute
   AuthenticatedDashboardsCoreRoute: typeof AuthenticatedDashboardsCoreRoute
   AuthenticatedDashboardsEmpresaRoute: typeof AuthenticatedDashboardsEmpresaRoute
+  AuthenticatedDashboardsOperacaoRoute: typeof AuthenticatedDashboardsOperacaoRoute
   AuthenticatedDashboardsWhiteLabelRoute: typeof AuthenticatedDashboardsWhiteLabelRoute
   AuthenticatedEducacaoBrandingRoute: typeof AuthenticatedEducacaoBrandingRoute
   AuthenticatedEducacaoDashboardRoute: typeof AuthenticatedEducacaoDashboardRoute
@@ -10206,6 +10227,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardsConsumidorRoute,
   AuthenticatedDashboardsCoreRoute: AuthenticatedDashboardsCoreRoute,
   AuthenticatedDashboardsEmpresaRoute: AuthenticatedDashboardsEmpresaRoute,
+  AuthenticatedDashboardsOperacaoRoute: AuthenticatedDashboardsOperacaoRoute,
   AuthenticatedDashboardsWhiteLabelRoute:
     AuthenticatedDashboardsWhiteLabelRoute,
   AuthenticatedEducacaoBrandingRoute: AuthenticatedEducacaoBrandingRoute,
