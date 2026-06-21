@@ -403,6 +403,7 @@ import { Route as AuthenticatedAdminHealthRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminFunilReguasRouteImport } from './routes/_authenticated/admin.funil-reguas'
 import { Route as AuthenticatedAdminFunil360RouteImport } from './routes/_authenticated/admin.funil-360'
 import { Route as AuthenticatedAdminFiscalRouteImport } from './routes/_authenticated/admin.fiscal'
+import { Route as AuthenticatedAdminFinanceiroConsolidadoV2RouteImport } from './routes/_authenticated/admin.financeiro-consolidado-v2'
 import { Route as AuthenticatedAdminExpansionRadarRouteImport } from './routes/_authenticated/admin.expansion-radar'
 import { Route as AuthenticatedAdminExecutiveBriefingRouteImport } from './routes/_authenticated/admin.executive-briefing'
 import { Route as AuthenticatedAdminCommandCenterRouteImport } from './routes/_authenticated/admin.command-center'
@@ -2656,6 +2657,12 @@ const AuthenticatedAdminFiscalRoute =
     path: '/admin/fiscal',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminFinanceiroConsolidadoV2Route =
+  AuthenticatedAdminFinanceiroConsolidadoV2RouteImport.update({
+    id: '/admin/financeiro-consolidado-v2',
+    path: '/admin/financeiro-consolidado-v2',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminExpansionRadarRoute =
   AuthenticatedAdminExpansionRadarRouteImport.update({
     id: '/admin/expansion-radar',
@@ -3341,6 +3348,7 @@ export interface FileRoutesByFullPath {
   '/admin/command-center': typeof AuthenticatedAdminCommandCenterRoute
   '/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
   '/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
+  '/admin/financeiro-consolidado-v2': typeof AuthenticatedAdminFinanceiroConsolidadoV2Route
   '/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
   '/admin/funil-360': typeof AuthenticatedAdminFunil360Route
   '/admin/funil-reguas': typeof AuthenticatedAdminFunilReguasRoute
@@ -3808,6 +3816,7 @@ export interface FileRoutesByTo {
   '/admin/command-center': typeof AuthenticatedAdminCommandCenterRoute
   '/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
   '/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
+  '/admin/financeiro-consolidado-v2': typeof AuthenticatedAdminFinanceiroConsolidadoV2Route
   '/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
   '/admin/funil-360': typeof AuthenticatedAdminFunil360Route
   '/admin/funil-reguas': typeof AuthenticatedAdminFunilReguasRoute
@@ -4289,6 +4298,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/command-center': typeof AuthenticatedAdminCommandCenterRoute
   '/_authenticated/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
   '/_authenticated/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
+  '/_authenticated/admin/financeiro-consolidado-v2': typeof AuthenticatedAdminFinanceiroConsolidadoV2Route
   '/_authenticated/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
   '/_authenticated/admin/funil-360': typeof AuthenticatedAdminFunil360Route
   '/_authenticated/admin/funil-reguas': typeof AuthenticatedAdminFunilReguasRoute
@@ -4769,6 +4779,7 @@ export interface FileRouteTypes {
     | '/admin/command-center'
     | '/admin/executive-briefing'
     | '/admin/expansion-radar'
+    | '/admin/financeiro-consolidado-v2'
     | '/admin/fiscal'
     | '/admin/funil-360'
     | '/admin/funil-reguas'
@@ -5236,6 +5247,7 @@ export interface FileRouteTypes {
     | '/admin/command-center'
     | '/admin/executive-briefing'
     | '/admin/expansion-radar'
+    | '/admin/financeiro-consolidado-v2'
     | '/admin/fiscal'
     | '/admin/funil-360'
     | '/admin/funil-reguas'
@@ -5716,6 +5728,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/command-center'
     | '/_authenticated/admin/executive-briefing'
     | '/_authenticated/admin/expansion-radar'
+    | '/_authenticated/admin/financeiro-consolidado-v2'
     | '/_authenticated/admin/fiscal'
     | '/_authenticated/admin/funil-360'
     | '/_authenticated/admin/funil-reguas'
@@ -8921,6 +8934,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFiscalRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/financeiro-consolidado-v2': {
+      id: '/_authenticated/admin/financeiro-consolidado-v2'
+      path: '/admin/financeiro-consolidado-v2'
+      fullPath: '/admin/financeiro-consolidado-v2'
+      preLoaderRoute: typeof AuthenticatedAdminFinanceiroConsolidadoV2RouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/expansion-radar': {
       id: '/_authenticated/admin/expansion-radar'
       path: '/admin/expansion-radar'
@@ -10179,6 +10199,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCommandCenterRoute: typeof AuthenticatedAdminCommandCenterRoute
   AuthenticatedAdminExecutiveBriefingRoute: typeof AuthenticatedAdminExecutiveBriefingRoute
   AuthenticatedAdminExpansionRadarRoute: typeof AuthenticatedAdminExpansionRadarRoute
+  AuthenticatedAdminFinanceiroConsolidadoV2Route: typeof AuthenticatedAdminFinanceiroConsolidadoV2Route
   AuthenticatedAdminFiscalRoute: typeof AuthenticatedAdminFiscalRoute
   AuthenticatedAdminFunil360Route: typeof AuthenticatedAdminFunil360Route
   AuthenticatedAdminFunilReguasRoute: typeof AuthenticatedAdminFunilReguasRoute
@@ -10342,6 +10363,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminExecutiveBriefingRoute:
     AuthenticatedAdminExecutiveBriefingRoute,
   AuthenticatedAdminExpansionRadarRoute: AuthenticatedAdminExpansionRadarRoute,
+  AuthenticatedAdminFinanceiroConsolidadoV2Route:
+    AuthenticatedAdminFinanceiroConsolidadoV2Route,
   AuthenticatedAdminFiscalRoute: AuthenticatedAdminFiscalRoute,
   AuthenticatedAdminFunil360Route: AuthenticatedAdminFunil360Route,
   AuthenticatedAdminFunilReguasRoute: AuthenticatedAdminFunilReguasRoute,
