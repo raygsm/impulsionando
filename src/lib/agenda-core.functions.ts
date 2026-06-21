@@ -363,8 +363,8 @@ export const claimSlot = createServerFn({ method: "POST" })
     const { data: row, error } = await context.supabase.rpc("agenda_claim_open_slot", {
       _slot_id: data.slotId,
       _professional_id: data.professionalId,
-      _ip: data.ip ?? null,
-      _user_agent: data.userAgent ?? null,
+      _ip: data.ip ?? undefined,
+      _user_agent: data.userAgent ?? undefined,
     });
     if (error) throw error;
     return row;
