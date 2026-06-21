@@ -50,6 +50,12 @@ export const provisionTenant = createServerFn({ method: 'POST' })
   .handler(async ({ data, context }) => {
     await assertCoreAdmin(context)
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const { captureServerError } = await import('@/lib/runtime-observability.functions')
+    return captureServerError(
+      { scope: 'tenant-provisioning.provisionTenant', userId: context.userId, supabaseAdmin, context: { adminEmail: data.admin.email } },
+      async () => {
+
+
 
     // 1. Cria empresa tenant
     const { data: company, error: cErr } = await supabaseAdmin
@@ -140,7 +146,10 @@ export const provisionTenant = createServerFn({ method: 'POST' })
       adminUserId,
       inviteSent,
     }
+      },
+    )
   })
+
 
 // ============= Gestão pós-provisionamento =============
 

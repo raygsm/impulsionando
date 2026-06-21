@@ -296,6 +296,7 @@ import { Route as AuthenticatedCoreReleasesRouteImport } from './routes/_authent
 import { Route as AuthenticatedCorePromptsRouteImport } from './routes/_authenticated/core.prompts'
 import { Route as AuthenticatedCorePlanosRouteImport } from './routes/_authenticated/core.planos'
 import { Route as AuthenticatedCoreParametrosRouteImport } from './routes/_authenticated/core.parametros'
+import { Route as AuthenticatedCoreObservabilidadeRouteImport } from './routes/_authenticated/core.observabilidade'
 import { Route as AuthenticatedCoreNovaImplantacaoRouteImport } from './routes/_authenticated/core.nova-implantacao'
 import { Route as AuthenticatedCoreMonetizacaoRouteImport } from './routes/_authenticated/core.monetizacao'
 import { Route as AuthenticatedCoreModulosRouteImport } from './routes/_authenticated/core.modulos'
@@ -1993,6 +1994,12 @@ const AuthenticatedCoreParametrosRoute =
     path: '/parametros',
     getParentRoute: () => AuthenticatedCoreRoute,
   } as any)
+const AuthenticatedCoreObservabilidadeRoute =
+  AuthenticatedCoreObservabilidadeRouteImport.update({
+    id: '/observabilidade',
+    path: '/observabilidade',
+    getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
 const AuthenticatedCoreNovaImplantacaoRoute =
   AuthenticatedCoreNovaImplantacaoRouteImport.update({
     id: '/nova-implantacao',
@@ -3229,6 +3236,7 @@ export interface FileRoutesByFullPath {
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/core/monetizacao': typeof AuthenticatedCoreMonetizacaoRoute
   '/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
+  '/core/observabilidade': typeof AuthenticatedCoreObservabilidadeRoute
   '/core/parametros': typeof AuthenticatedCoreParametrosRoute
   '/core/planos': typeof AuthenticatedCorePlanosRoute
   '/core/prompts': typeof AuthenticatedCorePromptsRoute
@@ -3668,6 +3676,7 @@ export interface FileRoutesByTo {
   '/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/core/monetizacao': typeof AuthenticatedCoreMonetizacaoRoute
   '/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
+  '/core/observabilidade': typeof AuthenticatedCoreObservabilidadeRoute
   '/core/parametros': typeof AuthenticatedCoreParametrosRoute
   '/core/planos': typeof AuthenticatedCorePlanosRoute
   '/core/prompts': typeof AuthenticatedCorePromptsRoute
@@ -4121,6 +4130,7 @@ export interface FileRoutesById {
   '/_authenticated/core/modulos': typeof AuthenticatedCoreModulosRouteWithChildren
   '/_authenticated/core/monetizacao': typeof AuthenticatedCoreMonetizacaoRoute
   '/_authenticated/core/nova-implantacao': typeof AuthenticatedCoreNovaImplantacaoRoute
+  '/_authenticated/core/observabilidade': typeof AuthenticatedCoreObservabilidadeRoute
   '/_authenticated/core/parametros': typeof AuthenticatedCoreParametrosRoute
   '/_authenticated/core/planos': typeof AuthenticatedCorePlanosRoute
   '/_authenticated/core/prompts': typeof AuthenticatedCorePromptsRoute
@@ -4573,6 +4583,7 @@ export interface FileRouteTypes {
     | '/core/modulos'
     | '/core/monetizacao'
     | '/core/nova-implantacao'
+    | '/core/observabilidade'
     | '/core/parametros'
     | '/core/planos'
     | '/core/prompts'
@@ -5012,6 +5023,7 @@ export interface FileRouteTypes {
     | '/core/modulos'
     | '/core/monetizacao'
     | '/core/nova-implantacao'
+    | '/core/observabilidade'
     | '/core/parametros'
     | '/core/planos'
     | '/core/prompts'
@@ -5464,6 +5476,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/modulos'
     | '/_authenticated/core/monetizacao'
     | '/_authenticated/core/nova-implantacao'
+    | '/_authenticated/core/observabilidade'
     | '/_authenticated/core/parametros'
     | '/_authenticated/core/planos'
     | '/_authenticated/core/prompts'
@@ -7806,6 +7819,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreParametrosRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
     }
+    '/_authenticated/core/observabilidade': {
+      id: '/_authenticated/core/observabilidade'
+      path: '/observabilidade'
+      fullPath: '/core/observabilidade'
+      preLoaderRoute: typeof AuthenticatedCoreObservabilidadeRouteImport
+      parentRoute: typeof AuthenticatedCoreRoute
+    }
     '/_authenticated/core/nova-implantacao': {
       id: '/_authenticated/core/nova-implantacao'
       path: '/nova-implantacao'
@@ -9208,6 +9228,7 @@ interface AuthenticatedCoreRouteChildren {
   AuthenticatedCoreModulosRoute: typeof AuthenticatedCoreModulosRouteWithChildren
   AuthenticatedCoreMonetizacaoRoute: typeof AuthenticatedCoreMonetizacaoRoute
   AuthenticatedCoreNovaImplantacaoRoute: typeof AuthenticatedCoreNovaImplantacaoRoute
+  AuthenticatedCoreObservabilidadeRoute: typeof AuthenticatedCoreObservabilidadeRoute
   AuthenticatedCoreParametrosRoute: typeof AuthenticatedCoreParametrosRoute
   AuthenticatedCorePlanosRoute: typeof AuthenticatedCorePlanosRoute
   AuthenticatedCorePromptsRoute: typeof AuthenticatedCorePromptsRoute
@@ -9266,6 +9287,7 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
   AuthenticatedCoreModulosRoute: AuthenticatedCoreModulosRouteWithChildren,
   AuthenticatedCoreMonetizacaoRoute: AuthenticatedCoreMonetizacaoRoute,
   AuthenticatedCoreNovaImplantacaoRoute: AuthenticatedCoreNovaImplantacaoRoute,
+  AuthenticatedCoreObservabilidadeRoute: AuthenticatedCoreObservabilidadeRoute,
   AuthenticatedCoreParametrosRoute: AuthenticatedCoreParametrosRoute,
   AuthenticatedCorePlanosRoute: AuthenticatedCorePlanosRoute,
   AuthenticatedCorePromptsRoute: AuthenticatedCorePromptsRoute,
@@ -10200,13 +10222,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
