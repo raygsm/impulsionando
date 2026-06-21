@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Download, Smartphone, X } from "lucide-react";
+import { Download, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
@@ -7,9 +7,6 @@ type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
-
-const HIDE_KEY = "imp.pwa.downloadHiddenAt";
-const HIDE_DAYS = 7;
 
 function detectPlatform(): "android" | "ios" | "desktop" | "other" {
   if (typeof navigator === "undefined") return "other";
@@ -29,13 +26,10 @@ function isStandalone(): boolean {
 }
 
 /**
- * Botão flutuante "Baixar APP" — sempre visível para todos os usuários até
- * o app ser instalado. Trata 3 cenários:
- *   - Android/Desktop com suporte a beforeinstallprompt → instala direto
- *   - iOS Safari → abre diálogo com instruções (Compartilhar → Adicionar à Tela de Início)
- *   - Outros → leva para /app com instruções completas
- *
- * Some quando: já instalado (standalone) ou dispensado nos últimos 7 dias.
+ * Botão flutuante "Baixar APP" — SEMPRE visível para todos os usuários,
+ * sem exceção. Única exceção lógica: quando o próprio app já está rodando
+ * instalado (display-mode: standalone) — nesse caso o usuário já está dentro
+ * do app e não precisa baixá-lo de novo.
  */
 export function DownloadAppFab() {
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
@@ -46,9 +40,6 @@ export function DownloadAppFab() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (isStandalone()) return;
-
-    const hiddenAt = Number(localStorage.getItem(HIDE_KEY) ?? 0);
-    if (hiddenAt && Date.now() - hiddenAt < HIDE_DAYS * 86400_000) return;
 
     setPlatform(detectPlatform());
     setVisible(true);
@@ -76,10 +67,7 @@ export function DownloadAppFab() {
       await deferred.prompt();
       const result = await deferred.userChoice.catch(() => null);
       setDeferred(null);
-      if (!result || result.outcome === "dismissed") {
-        localStorage.setItem(HIDE_KEY, String(Date.now()));
-        setVisible(false);
-      } else {
+      if (result?.outcome === "accepted") {
         setVisible(false);
       }
       return;
@@ -88,19 +76,13 @@ export function DownloadAppFab() {
       setIosOpen(true);
       return;
     }
-    // Sem prompt nativo e não-iOS → leva para /app
+    // Sem prompt nativo e não-iOS → leva para /app com instruções completas
     window.location.href = "/app";
-  }
-
-  function dismiss(e: React.MouseEvent) {
-    e.stopPropagation();
-    localStorage.setItem(HIDE_KEY, String(Date.now()));
-    setVisible(false);
   }
 
   return (
     <>
-      <div className="fixed bottom-4 right-4 z-[60] flex items-center gap-1 print:hidden">
+      <div className="fixed bottom-4 right-4 z-[60] print:hidden">
         <Button
           onClick={handleClick}
           size="lg"
@@ -110,15 +92,8 @@ export function DownloadAppFab() {
           <Download className="w-4 h-4" aria-hidden />
           <span className="font-medium">Baixar APP</span>
         </Button>
-        <button
-          type="button"
-          onClick={dismiss}
-          aria-label="Dispensar por 7 dias"
-          className="h-7 w-7 rounded-full bg-background/90 border border-border text-muted-foreground hover:text-foreground hover:bg-background flex items-center justify-center shadow-sm"
-        >
-          <X className="w-3.5 h-3.5" aria-hidden />
-        </button>
       </div>
+
 
       <Dialog open={iosOpen} onOpenChange={setIosOpen}>
         <DialogContent className="max-w-md">
