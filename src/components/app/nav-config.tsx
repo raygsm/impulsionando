@@ -458,6 +458,7 @@ export const NAV_GROUPS: NavGroup[] = [
           { to: "/admin/audit-trail", label: "Audit Trail", icon: ShieldCheck, superOnly: true },
           { to: "/admin/cofre-credenciais", label: "Cofre de Credenciais", icon: ShieldCheck, superOnly: true },
           { to: "/admin/financeiro-consolidado-v2", label: "Financeiro Consolidado v2", icon: Banknote, superOnly: true },
+          { to: "/admin/catalogo-matriz", label: "Catálogo Unificado", icon: Layers, superOnly: true },
           { to: "/core/testes", label: "Testes", icon: FlaskConical, superOnly: true },
           { to: "/core/bi-ecossistema", label: "BI Ecossistema", icon: BarChart3, superOnly: true },
         ],
