@@ -45,10 +45,15 @@ export function InstallModuleDialog({ moduleSlug, moduleName, allowedSegments, c
   });
 
   const install = useServerFn(installModuleWithTemplate);
+  const installAgenda = useServerFn(installAgendaModule);
   const mut = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       if (!selectedCompany) throw new Error("Selecione uma empresa");
-      return install({ data: { companyId: selectedCompany, slug: moduleSlug, segment, installDependencies: installDeps } });
+      const res = await install({ data: { companyId: selectedCompany, slug: moduleSlug, segment, installDependencies: installDeps } });
+      if (moduleSlug === "agenda-inteligente") {
+        await installAgenda({ data: { companyId: selectedCompany } });
+      }
+      return res;
     },
     onSuccess: (res) => {
       toast.success(`Módulo instalado em 1 clique (${res.installed.length} módulo(s), ${res.settingsApplied.length} parâmetro(s))`);
