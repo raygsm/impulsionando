@@ -27,7 +27,7 @@ function Tenant360Page() {
   const companiesQuery = useQuery({
     queryKey: ["t360-companies"],
     queryFn: async () => {
-      const { data } = await supabase.from("companies").select("id, name, niche_code").eq("is_active", true).order("name").limit(500);
+      const { data } = await supabase.from("companies").select("id, name").eq("is_active", true).order("name").limit(500);
       return data ?? [];
     },
   });
@@ -52,7 +52,7 @@ function Tenant360Page() {
           <SelectTrigger className="max-w-md"><SelectValue placeholder="Escolha um tenant…" /></SelectTrigger>
           <SelectContent>
             {(companiesQuery.data ?? []).map((c) => (
-              <SelectItem key={c.id} value={c.id}>{c.name} {c.niche_code ? `· ${c.niche_code}` : ""}</SelectItem>
+              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
