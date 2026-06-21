@@ -386,6 +386,7 @@ import { Route as AuthenticatedAffiliatesBumpsRouteImport } from './routes/_auth
 import { Route as AuthenticatedAffiliatesAffiliatesRouteImport } from './routes/_authenticated/affiliates.affiliates'
 import { Route as AuthenticatedAdminWhatsappMetricsRouteImport } from './routes/_authenticated/admin.whatsapp-metrics'
 import { Route as AuthenticatedAdminUptimeRouteImport } from './routes/_authenticated/admin.uptime'
+import { Route as AuthenticatedAdminUnitEconomicsRouteImport } from './routes/_authenticated/admin.unit-economics'
 import { Route as AuthenticatedAdminTrialsRouteImport } from './routes/_authenticated/admin.trials'
 import { Route as AuthenticatedAdminTenant360RouteImport } from './routes/_authenticated/admin.tenant-360'
 import { Route as AuthenticatedAdminRevenueForecastRouteImport } from './routes/_authenticated/admin.revenue-forecast'
@@ -2560,6 +2561,12 @@ const AuthenticatedAdminUptimeRoute =
     path: '/admin/uptime',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminUnitEconomicsRoute =
+  AuthenticatedAdminUnitEconomicsRouteImport.update({
+    id: '/admin/unit-economics',
+    path: '/admin/unit-economics',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminTrialsRoute =
   AuthenticatedAdminTrialsRouteImport.update({
     id: '/admin/trials',
@@ -3404,6 +3411,7 @@ export interface FileRoutesByFullPath {
   '/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
   '/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
+  '/admin/unit-economics': typeof AuthenticatedAdminUnitEconomicsRoute
   '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/admin/whatsapp-metrics': typeof AuthenticatedAdminWhatsappMetricsRoute
   '/affiliates/affiliates': typeof AuthenticatedAffiliatesAffiliatesRoute
@@ -3877,6 +3885,7 @@ export interface FileRoutesByTo {
   '/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
   '/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
+  '/admin/unit-economics': typeof AuthenticatedAdminUnitEconomicsRoute
   '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/admin/whatsapp-metrics': typeof AuthenticatedAdminWhatsappMetricsRoute
   '/affiliates/affiliates': typeof AuthenticatedAffiliatesAffiliatesRoute
@@ -4364,6 +4373,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
   '/_authenticated/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/_authenticated/admin/trials': typeof AuthenticatedAdminTrialsRoute
+  '/_authenticated/admin/unit-economics': typeof AuthenticatedAdminUnitEconomicsRoute
   '/_authenticated/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/_authenticated/admin/whatsapp-metrics': typeof AuthenticatedAdminWhatsappMetricsRoute
   '/_authenticated/affiliates/affiliates': typeof AuthenticatedAffiliatesAffiliatesRoute
@@ -4850,6 +4860,7 @@ export interface FileRouteTypes {
     | '/admin/revenue-forecast'
     | '/admin/tenant-360'
     | '/admin/trials'
+    | '/admin/unit-economics'
     | '/admin/uptime'
     | '/admin/whatsapp-metrics'
     | '/affiliates/affiliates'
@@ -5323,6 +5334,7 @@ export interface FileRouteTypes {
     | '/admin/revenue-forecast'
     | '/admin/tenant-360'
     | '/admin/trials'
+    | '/admin/unit-economics'
     | '/admin/uptime'
     | '/admin/whatsapp-metrics'
     | '/affiliates/affiliates'
@@ -5809,6 +5821,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/revenue-forecast'
     | '/_authenticated/admin/tenant-360'
     | '/_authenticated/admin/trials'
+    | '/_authenticated/admin/unit-economics'
     | '/_authenticated/admin/uptime'
     | '/_authenticated/admin/whatsapp-metrics'
     | '/_authenticated/affiliates/affiliates'
@@ -8879,6 +8892,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUptimeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/unit-economics': {
+      id: '/_authenticated/admin/unit-economics'
+      path: '/admin/unit-economics'
+      fullPath: '/admin/unit-economics'
+      preLoaderRoute: typeof AuthenticatedAdminUnitEconomicsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/trials': {
       id: '/_authenticated/admin/trials'
       path: '/admin/trials'
@@ -10320,6 +10340,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRevenueForecastRoute: typeof AuthenticatedAdminRevenueForecastRoute
   AuthenticatedAdminTenant360Route: typeof AuthenticatedAdminTenant360Route
   AuthenticatedAdminTrialsRoute: typeof AuthenticatedAdminTrialsRoute
+  AuthenticatedAdminUnitEconomicsRoute: typeof AuthenticatedAdminUnitEconomicsRoute
   AuthenticatedAdminUptimeRoute: typeof AuthenticatedAdminUptimeRoute
   AuthenticatedAdminWhatsappMetricsRoute: typeof AuthenticatedAdminWhatsappMetricsRoute
   AuthenticatedBarMarketplaceRoute: typeof AuthenticatedBarMarketplaceRouteWithChildren
@@ -10492,6 +10513,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminRevenueForecastRoute,
   AuthenticatedAdminTenant360Route: AuthenticatedAdminTenant360Route,
   AuthenticatedAdminTrialsRoute: AuthenticatedAdminTrialsRoute,
+  AuthenticatedAdminUnitEconomicsRoute: AuthenticatedAdminUnitEconomicsRoute,
   AuthenticatedAdminUptimeRoute: AuthenticatedAdminUptimeRoute,
   AuthenticatedAdminWhatsappMetricsRoute:
     AuthenticatedAdminWhatsappMetricsRoute,
