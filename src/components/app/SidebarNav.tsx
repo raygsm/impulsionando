@@ -149,18 +149,19 @@ function SubMenu({
 }
 
 const GROUP_TONES = [
-  "bg-primary/15 text-primary hover:bg-primary/25 border-primary/30",
-  "bg-accent/20 text-accent-foreground hover:bg-accent/30 border-accent/40",
-  "bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25 border-emerald-500/30",
-  "bg-amber-500/15 text-amber-300 hover:bg-amber-500/25 border-amber-500/30",
-  "bg-sky-500/15 text-sky-300 hover:bg-sky-500/25 border-sky-500/30",
-  "bg-fuchsia-500/15 text-fuchsia-300 hover:bg-fuchsia-500/25 border-fuchsia-500/30",
-  "bg-rose-500/15 text-rose-300 hover:bg-rose-500/25 border-rose-500/30",
-  "bg-indigo-500/15 text-indigo-300 hover:bg-indigo-500/25 border-indigo-500/30",
-  "bg-teal-500/15 text-teal-300 hover:bg-teal-500/25 border-teal-500/30",
-  "bg-orange-500/15 text-orange-300 hover:bg-orange-500/25 border-orange-500/30",
-  "bg-violet-500/15 text-violet-300 hover:bg-violet-500/25 border-violet-500/30",
+  "bg-blue-600 text-white hover:bg-blue-500 border-blue-700",
+  "bg-emerald-600 text-white hover:bg-emerald-500 border-emerald-700",
+  "bg-amber-500 text-slate-900 hover:bg-amber-400 border-amber-600",
+  "bg-rose-600 text-white hover:bg-rose-500 border-rose-700",
+  "bg-violet-600 text-white hover:bg-violet-500 border-violet-700",
+  "bg-sky-600 text-white hover:bg-sky-500 border-sky-700",
+  "bg-orange-600 text-white hover:bg-orange-500 border-orange-700",
+  "bg-teal-600 text-white hover:bg-teal-500 border-teal-700",
+  "bg-fuchsia-600 text-white hover:bg-fuchsia-500 border-fuchsia-700",
+  "bg-indigo-600 text-white hover:bg-indigo-500 border-indigo-700",
+  "bg-lime-500 text-slate-900 hover:bg-lime-400 border-lime-600",
 ];
+
 
 function Group({
   group,
