@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { recordTenantSignupLead } from "./growth-funnel";
 
 const RowSchema = z.object({
   name: z.string().min(1),
@@ -58,9 +59,21 @@ export const importCompaniesCsv = createServerFn({ method: "POST" })
           if (error) throw new Error(error.message);
           results.push({ name: row.name, status: "updated" });
         } else {
-          const { error } = await supabase.from("companies").insert(payload as never);
+          const { data: inserted, error } = await supabase
+            .from("companies").insert(payload as never).select("id,name,email,segment").single();
           if (error) throw new Error(error.message);
           results.push({ name: row.name, status: "created" });
+          // Governança Impulsionando: cada import gera lead no funil corporativo.
+          if (inserted) {
+            await recordTenantSignupLead(supabase, {
+              companyId: (inserted as any).id,
+              name: (inserted as any).name,
+              email: (inserted as any).email ?? row.email ?? null,
+              phone: row.phone ?? null,
+              niche: row.segment ?? null,
+              channel: "import_csv",
+            });
+          }
         }
       } catch (e: any) {
         results.push({ name: row.name, status: "error", message: e?.message ?? "erro" });
