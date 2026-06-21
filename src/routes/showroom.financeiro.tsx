@@ -29,7 +29,7 @@ export const Route = createFileRoute("/showroom/financeiro")({
       {
         name: "description",
         content:
-          "Fluxo de caixa, contas a receber/pagar, DRE simples e conciliação automática com MercadoPago e InfinitePay por nicho.",
+          "Fluxo de caixa, contas a receber/pagar, DRE simples e conciliação automática com MercadoPago e Mercado Pago por nicho.",
       },
       { property: "og:title", content: "Financeiro — Impulsionando" },
       {
@@ -57,7 +57,7 @@ type Receivable = {
   due: string;
   amount: number;
   status: "paid" | "open" | "late";
-  method: "pix" | "card" | "boleto" | "infinitepay" | "mercadopago";
+  method: "pix" | "card" | "boleto" | "mercadopago" | "mercadopago";
 };
 
 type CashRow = { day: string; in: number; out: number };
@@ -97,7 +97,7 @@ const DATA: Record<NicheSlug, NicheData> = {
     ],
     reconciliation: [
       { gateway: "MercadoPago", matched: 124, pending: 3, divergent: 0 },
-      { gateway: "InfinitePay", matched: 58, pending: 1, divergent: 0 },
+      { gateway: "Mercado Pago", matched: 58, pending: 1, divergent: 0 },
     ],
   },
   bares: {
@@ -115,12 +115,12 @@ const DATA: Record<NicheSlug, NicheData> = {
     ],
     receivables: [
       { client: "Rafa A.", desc: "Reserva sábado", due: "21/06", amount: 480, status: "paid", method: "pix" },
-      { client: "Time Acme", desc: "Confra 12 pax", due: "22/06", amount: 2880, status: "open", method: "infinitepay" },
-      { client: "Boda Mendes", desc: "Privê 30 pax", due: "21/06", amount: 9600, status: "paid", method: "infinitepay" },
+      { client: "Time Acme", desc: "Confra 12 pax", due: "22/06", amount: 2880, status: "open", method: "mercadopago" },
+      { client: "Boda Mendes", desc: "Privê 30 pax", due: "21/06", amount: 9600, status: "paid", method: "mercadopago" },
       { client: "iFood", desc: "Repasse semanal", due: "23/06", amount: 8400, status: "open", method: "boleto" },
     ],
     reconciliation: [
-      { gateway: "InfinitePay (maquininhas)", matched: 412, pending: 5, divergent: 1 },
+      { gateway: "Mercado Pago (maquininhas)", matched: 412, pending: 5, divergent: 1 },
       { gateway: "MercadoPago Pix", matched: 218, pending: 0, divergent: 0 },
     ],
   },
@@ -162,11 +162,11 @@ const DATA: Record<NicheSlug, NicheData> = {
     ],
     receivables: [
       { client: "Pedro G.", desc: "OS #4421", due: "17/06", amount: 720, status: "paid", method: "pix" },
-      { client: "Civic 2019", desc: "OS #4438", due: "19/06", amount: 1840, status: "open", method: "infinitepay" },
+      { client: "Civic 2019", desc: "OS #4438", due: "19/06", amount: 1840, status: "open", method: "mercadopago" },
       { client: "Frota Logix", desc: "Contrato mensal", due: "10/06", amount: 8800, status: "late", method: "boleto" },
     ],
     reconciliation: [
-      { gateway: "InfinitePay", matched: 86, pending: 2, divergent: 0 },
+      { gateway: "Mercado Pago", matched: 86, pending: 2, divergent: 0 },
       { gateway: "Pix MercadoPago", matched: 142, pending: 1, divergent: 0 },
     ],
   },
@@ -186,12 +186,12 @@ const DATA: Record<NicheSlug, NicheData> = {
     receivables: [
       { client: "Carla Origem", desc: "Pedido #7821", due: "17/06", amount: 389, status: "paid", method: "card" },
       { client: "MercadoPago D+1", desc: "Repasse 18/06", due: "18/06", amount: 18400, status: "open", method: "mercadopago" },
-      { client: "InfinitePay parcelado", desc: "Antecipação", due: "20/06", amount: 9800, status: "open", method: "infinitepay" },
+      { client: "Mercado Pago parcelado", desc: "Antecipação", due: "20/06", amount: 9800, status: "open", method: "mercadopago" },
       { client: "Bruno T.", desc: "Pedido #7790 (troca)", due: "—", amount: -120, status: "open", method: "card" },
     ],
     reconciliation: [
       { gateway: "MercadoPago Checkout", matched: 1284, pending: 12, divergent: 2 },
-      { gateway: "InfinitePay link", matched: 318, pending: 3, divergent: 0 },
+      { gateway: "Mercado Pago link", matched: 318, pending: 3, divergent: 0 },
     ],
   },
 };
@@ -206,7 +206,7 @@ const METHOD_LABEL: Record<Receivable["method"], string> = {
   pix: "Pix",
   card: "Cartão",
   boleto: "Boleto",
-  infinitepay: "InfinitePay",
+  mercadopago: "Mercado Pago",
   mercadopago: "MercadoPago",
 };
 
@@ -237,7 +237,7 @@ function ShowroomFinanceiro() {
             </h1>
             <p className="mt-4 text-pretty text-lg text-muted-foreground">
               Fluxo de caixa diário, contas a receber, DRE simples e conciliação automática com
-              MercadoPago e InfinitePay — adaptado ao seu nicho.
+              MercadoPago e Mercado Pago — adaptado ao seu nicho.
             </p>
           </div>
         </div>

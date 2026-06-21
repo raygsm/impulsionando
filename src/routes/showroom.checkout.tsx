@@ -34,7 +34,7 @@ export const Route = createFileRoute("/showroom/checkout")({
       {
         name: "description",
         content:
-          "Checkout transparente com Pix, cartão InfinitePay parcelado, order bumps e cupons — adaptado por nicho.",
+          "Checkout transparente com Pix, cartão Mercado Pago parcelado, order bumps e cupons — adaptado por nicho.",
       },
       { property: "og:title", content: "Checkout — Impulsionando" },
       {
@@ -147,7 +147,7 @@ const DATA: Record<NicheSlug, Cfg> = {
 type PayMethod = "pix" | "card" | "boleto";
 const PAY: { id: PayMethod; label: string; icon: React.ComponentType<{ className?: string }>; tag: string }[] = [
   { id: "pix", label: "Pix", icon: QrCode, tag: "5% off à vista" },
-  { id: "card", label: "Cartão InfinitePay", icon: CreditCard, tag: "Parcele sem juros" },
+  { id: "card", label: "Cartão Mercado Pago", icon: CreditCard, tag: "Parcele sem juros" },
   { id: "boleto", label: "Boleto", icon: Banknote, tag: "Compensa em 1 dia útil" },
 ];
 
@@ -204,7 +204,7 @@ function ShowroomCheckout() {
               Checkout transparente, conversão alta
             </h1>
             <p className="mt-4 text-pretty text-lg text-muted-foreground">
-              Pix instantâneo, cartão InfinitePay parcelado, order bumps e cupons — sem redirecionar
+              Pix instantâneo, cartão Mercado Pago parcelado, order bumps e cupons — sem redirecionar
               o cliente para fora do seu site.
             </p>
           </div>
@@ -537,7 +537,7 @@ function ShowroomCheckout() {
         <div className="container mx-auto px-4 py-12 text-center">
           <h2 className="text-2xl font-bold md:text-3xl">Checkout que converte</h2>
           <p className="mx-auto mt-2 max-w-xl text-muted-foreground">
-            Transparente, mobile-first, com Pix instantâneo, antifraude InfinitePay e
+            Transparente, mobile-first, com Pix instantâneo, antifraude Mercado Pago e
             recuperação automática de carrinho integrada — pronto para o seu nicho.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">

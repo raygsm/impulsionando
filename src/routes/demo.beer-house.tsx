@@ -85,7 +85,7 @@ const CHAPTERS: Chapter[] = [
     what: [
       "Fechamento via /api/public/payments/close-invoice",
       "Idempotência garantida por chave única",
-      "InfinitePay como gateway, com fallback de status",
+      "Mercado Pago como gateway, com fallback de status",
     ],
     modules: ["Pagamentos", "Pix", "Cartão"],
   },
