@@ -87,6 +87,13 @@ function Page() {
     queryFn: () => fetchList({ data: { companyId } }),
   });
 
+  const { liveOn } = useRealtimeAvailability({
+    table: "realestate_properties",
+    filter: { column: "company_id", value: companyId },
+    queryKey: ["realestate-props", companyId],
+    enabled: !!companyId,
+  });
+
   const submitReview = useMutation({
     mutationFn: (id: string) => fetchSubmit({ data: { propertyId: id } }),
     onSuccess: () => {
