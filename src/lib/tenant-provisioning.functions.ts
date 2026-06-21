@@ -122,10 +122,87 @@ export const provisionTenant = createServerFn({ method: 'POST' })
       } as never)
     }
 
+    // 5. Registra solicitação de domínio (subdomínio whitelabel)
+    if (data.empresa.subdomain) {
+      await supabaseAdmin.from('onboarding_domain_requests').insert({
+        company_id: companyId,
+        mode: 'subdomain',
+        requested_value: data.empresa.subdomain,
+        contact_name: data.admin.display_name,
+        contact_email: data.admin.email,
+        status: 'reserved',
+      } as never)
+    }
+
     return {
       companyId,
       companyName: (company as any).name as string,
       adminUserId,
       inviteSent,
     }
+  })
+
+// ============= Gestão pós-provisionamento =============
+
+export const listTenantOnboarding = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertCoreAdmin(context)
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const { data: tenants } = await supabaseAdmin
+      .from('companies')
+      .select('id, name, subdomain, email, status, is_active, created_at, company_kind')
+      .eq('company_kind', 'tenant')
+      .order('created_at', { ascending: false })
+      .limit(200)
+    const ids = (tenants ?? []).map((t: any) => t.id)
+    const safeIds = ids.length ? ids : ['00000000-0000-0000-0000-000000000000']
+    const [{ data: domains }, { data: profiles }] = await Promise.all([
+      supabaseAdmin.from('onboarding_domain_requests').select('company_id, mode, requested_value, status, updated_at').in('company_id', safeIds),
+      supabaseAdmin.from('user_profiles').select('company_id, user_id, email, display_name, is_active').in('company_id', safeIds),
+    ])
+    return {
+      tenants: (tenants ?? []).map((t: any) => ({
+        ...t,
+        domain: (domains ?? []).find((d: any) => d.company_id === t.id) ?? null,
+        admins: (profiles ?? []).filter((p: any) => p.company_id === t.id),
+      })),
+    }
+  })
+
+export const resendTenantAdminInvite = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ email: z.string().email(), companyId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertCoreAdmin(context)
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const { data: invited, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(data.email, {
+      data: { tenant_company_id: data.companyId, resend: true },
+    })
+    if (error) throw new Error(`Falha ao reenviar convite: ${error.message}`)
+    return { ok: true, userId: invited?.user?.id ?? null }
+  })
+
+export const updateTenantSubdomain = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({
+    companyId: z.string().uuid(),
+    subdomain: z.string().trim().toLowerCase().regex(/^[a-z0-9-]{3,40}$/),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertCoreAdmin(context)
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const { data: clash } = await supabaseAdmin
+      .from('companies').select('id').eq('subdomain', data.subdomain).neq('id', data.companyId).maybeSingle()
+    if (clash) throw new Error(`Subdomínio "${data.subdomain}" já está em uso.`)
+    const { error: upErr } = await supabaseAdmin
+      .from('companies').update({ subdomain: data.subdomain } as never).eq('id', data.companyId)
+    if (upErr) throw new Error(upErr.message)
+    await supabaseAdmin.from('onboarding_domain_requests').insert({
+      company_id: data.companyId,
+      mode: 'subdomain',
+      requested_value: data.subdomain,
+      status: 'reserved',
+    } as never)
+    return { ok: true, subdomain: data.subdomain }
   })
