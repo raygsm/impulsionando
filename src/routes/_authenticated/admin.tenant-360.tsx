@@ -74,6 +74,23 @@ function Tenant360Page() {
             <Card className="p-4"><div className="flex items-center gap-2 text-sm text-muted-foreground"><Activity className="h-4 w-4" /> Eventos 90d</div><div className="text-2xl font-bold mt-1">{detail.data.runtime.length}</div></Card>
           </div>
 
+          <Card className="p-4 border-primary/30 bg-primary/5">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-semibold flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> Insights de IA</h2>
+              <Button size="sm" onClick={() => insights.mutate(companyId!)} disabled={insights.isPending}>
+                {insights.isPending ? "Analisando…" : insights.data ? "Reanalisar" : "Gerar análise"}
+              </Button>
+            </div>
+            {insights.data?.error && <p className="text-sm text-destructive">{insights.data.error}</p>}
+            {insights.data?.insights && (
+              <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">{insights.data.insights}</div>
+            )}
+            {!insights.data && !insights.isPending && (
+              <p className="text-sm text-muted-foreground">Gere uma análise individual baseada em contrato, módulos, suporte e atividade dos últimos 30 dias.</p>
+            )}
+          </Card>
+
+
           <div className="grid md:grid-cols-2 gap-4">
             <Card className="p-4">
               <h2 className="font-semibold mb-3 flex items-center gap-2"><AlertTriangle className="h-4 w-4" /> Tickets recentes</h2>
