@@ -217,6 +217,12 @@ export const createCardPayment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => CardInput.parse(d))
   .handler(async ({ context, data }) => {
+    const { captureServerError } = await import('@/lib/runtime-observability.functions');
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    return captureServerError(
+      { scope: 'mercadopago.createCardPayment', userId: context.userId, supabaseAdmin, context: { plan_id: data.plan_id, payment_method_id: data.payment_method_id } },
+      async () => {
+
     const { data: plan, error } = await context.supabase
       .from("mp_plans")
       .select("id,name,price_cents,currency")
