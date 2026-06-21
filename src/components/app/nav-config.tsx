@@ -461,6 +461,7 @@ export const NAV_GROUPS: NavGroup[] = [
           { to: "/admin/catalogo-matriz", label: "Catálogo Unificado", icon: Layers, superOnly: true },
           { to: "/admin/cockpit-tenants", label: "Cockpit de Tenants", icon: Building2, superOnly: true },
           { to: "/admin/acoes", label: "Ações Administrativas", icon: ShieldCheck, superOnly: true },
+          { to: "/admin/health-score", label: "Health Score Global", icon: Activity, superOnly: true },
           { to: "/core/testes", label: "Testes", icon: FlaskConical, superOnly: true },
           { to: "/core/bi-ecossistema", label: "BI Ecossistema", icon: BarChart3, superOnly: true },
         ],
