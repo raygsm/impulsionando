@@ -362,6 +362,7 @@ import { Route as AuthenticatedAgendaServicesRouteImport } from './routes/_authe
 import { Route as AuthenticatedAgendaSchedulesRouteImport } from './routes/_authenticated/agenda.schedules'
 import { Route as AuthenticatedAgendaProfissionalRouteImport } from './routes/_authenticated/agenda.profissional'
 import { Route as AuthenticatedAgendaProfessionalsRouteImport } from './routes/_authenticated/agenda.professionals'
+import { Route as AuthenticatedAgendaGestorRouteImport } from './routes/_authenticated/agenda.gestor'
 import { Route as AuthenticatedAgendaAppointmentsRouteImport } from './routes/_authenticated/agenda.appointments'
 import { Route as AuthenticatedAffiliatesWalletRouteImport } from './routes/_authenticated/affiliates.wallet'
 import { Route as AuthenticatedAffiliatesUpsellsRouteImport } from './routes/_authenticated/affiliates.upsells'
@@ -2379,6 +2380,12 @@ const AuthenticatedAgendaProfessionalsRoute =
     path: '/professionals',
     getParentRoute: () => AuthenticatedAgendaRoute,
   } as any)
+const AuthenticatedAgendaGestorRoute =
+  AuthenticatedAgendaGestorRouteImport.update({
+    id: '/gestor',
+    path: '/gestor',
+    getParentRoute: () => AuthenticatedAgendaRoute,
+  } as any)
 const AuthenticatedAgendaAppointmentsRoute =
   AuthenticatedAgendaAppointmentsRouteImport.update({
     id: '/appointments',
@@ -3135,6 +3142,7 @@ export interface FileRoutesByFullPath {
   '/affiliates/upsells': typeof AuthenticatedAffiliatesUpsellsRoute
   '/affiliates/wallet': typeof AuthenticatedAffiliatesWalletRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
+  '/agenda/gestor': typeof AuthenticatedAgendaGestorRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/agenda/profissional': typeof AuthenticatedAgendaProfissionalRoute
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
@@ -3570,6 +3578,7 @@ export interface FileRoutesByTo {
   '/affiliates/upsells': typeof AuthenticatedAffiliatesUpsellsRoute
   '/affiliates/wallet': typeof AuthenticatedAffiliatesWalletRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
+  '/agenda/gestor': typeof AuthenticatedAgendaGestorRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/agenda/profissional': typeof AuthenticatedAgendaProfissionalRoute
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
@@ -4019,6 +4028,7 @@ export interface FileRoutesById {
   '/_authenticated/affiliates/upsells': typeof AuthenticatedAffiliatesUpsellsRoute
   '/_authenticated/affiliates/wallet': typeof AuthenticatedAffiliatesWalletRoute
   '/_authenticated/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
+  '/_authenticated/agenda/gestor': typeof AuthenticatedAgendaGestorRoute
   '/_authenticated/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
   '/_authenticated/agenda/profissional': typeof AuthenticatedAgendaProfissionalRoute
   '/_authenticated/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
@@ -4467,6 +4477,7 @@ export interface FileRouteTypes {
     | '/affiliates/upsells'
     | '/affiliates/wallet'
     | '/agenda/appointments'
+    | '/agenda/gestor'
     | '/agenda/professionals'
     | '/agenda/profissional'
     | '/agenda/schedules'
@@ -4902,6 +4913,7 @@ export interface FileRouteTypes {
     | '/affiliates/upsells'
     | '/affiliates/wallet'
     | '/agenda/appointments'
+    | '/agenda/gestor'
     | '/agenda/professionals'
     | '/agenda/profissional'
     | '/agenda/schedules'
@@ -5350,6 +5362,7 @@ export interface FileRouteTypes {
     | '/_authenticated/affiliates/upsells'
     | '/_authenticated/affiliates/wallet'
     | '/_authenticated/agenda/appointments'
+    | '/_authenticated/agenda/gestor'
     | '/_authenticated/agenda/professionals'
     | '/_authenticated/agenda/profissional'
     | '/_authenticated/agenda/schedules'
@@ -8214,6 +8227,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgendaProfessionalsRouteImport
       parentRoute: typeof AuthenticatedAgendaRoute
     }
+    '/_authenticated/agenda/gestor': {
+      id: '/_authenticated/agenda/gestor'
+      path: '/gestor'
+      fullPath: '/agenda/gestor'
+      preLoaderRoute: typeof AuthenticatedAgendaGestorRouteImport
+      parentRoute: typeof AuthenticatedAgendaRoute
+    }
     '/_authenticated/agenda/appointments': {
       id: '/_authenticated/agenda/appointments'
       path: '/appointments'
@@ -8950,6 +8970,7 @@ const AuthenticatedAffiliatesRouteWithChildren =
 
 interface AuthenticatedAgendaRouteChildren {
   AuthenticatedAgendaAppointmentsRoute: typeof AuthenticatedAgendaAppointmentsRoute
+  AuthenticatedAgendaGestorRoute: typeof AuthenticatedAgendaGestorRoute
   AuthenticatedAgendaProfessionalsRoute: typeof AuthenticatedAgendaProfessionalsRoute
   AuthenticatedAgendaProfissionalRoute: typeof AuthenticatedAgendaProfissionalRoute
   AuthenticatedAgendaSchedulesRoute: typeof AuthenticatedAgendaSchedulesRoute
@@ -8960,6 +8981,7 @@ interface AuthenticatedAgendaRouteChildren {
 
 const AuthenticatedAgendaRouteChildren: AuthenticatedAgendaRouteChildren = {
   AuthenticatedAgendaAppointmentsRoute: AuthenticatedAgendaAppointmentsRoute,
+  AuthenticatedAgendaGestorRoute: AuthenticatedAgendaGestorRoute,
   AuthenticatedAgendaProfessionalsRoute: AuthenticatedAgendaProfessionalsRoute,
   AuthenticatedAgendaProfissionalRoute: AuthenticatedAgendaProfissionalRoute,
   AuthenticatedAgendaSchedulesRoute: AuthenticatedAgendaSchedulesRoute,
