@@ -1,13 +1,15 @@
 import { createFileRoute, useSearch } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { getTenant360 } from "@/lib/tenant-360.functions";
+import { getTenantInsights } from "@/lib/tenant-insights.functions";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, DollarSign, Package, AlertTriangle, Activity, Mail, Users } from "lucide-react";
+import { Building2, DollarSign, Package, AlertTriangle, Activity, Mail, Users, Sparkles } from "lucide-react";
 
 type Search = { companyId?: string };
 
