@@ -18,6 +18,31 @@ import { useDemoTracker } from "@/hooks/useDemoTracker";
 
 const SUPORTADOS: string[] = ["eventos", ...RICH_NICHES];
 
+/**
+ * Aliases: cada slug de NICHO_DETAILS (hub /demo) resolve para uma demo real.
+ * Mantém o hub 100% navegável sem 404, mesmo enquanto demos dedicadas não existem.
+ */
+const NICHO_ALIASES: Record<string, string> = {
+  clinicas: "saude",
+  "bares-restaurantes": "bar",
+  microcervejarias: "bar",
+  fornecedores: "comercio",
+  ecommerce: "comercio",
+  veiculos: "comercio",
+  fitness: "saude",
+  psicologia: "saude",
+  juridico: "servicos",
+  contabilidade: "servicos",
+  "white-label": "servicos",
+  educacao: "comunidade",
+};
+
+function resolveSlug(slug: string): string | null {
+  if (SUPORTADOS.includes(slug)) return slug;
+  const aliased = NICHO_ALIASES[slug];
+  return aliased && SUPORTADOS.includes(aliased) ? aliased : null;
+}
+
 export const Route = createFileRoute("/demo/nicho/$slug")({
   head: ({ params }) => ({
     meta: [
@@ -35,10 +60,9 @@ export const Route = createFileRoute("/demo/nicho/$slug")({
     </div>
   ),
   loader: ({ params }) => {
-    if (!SUPORTADOS.includes(params.slug)) {
-      throw notFound();
-    }
-    return { slug: params.slug };
+    const resolved = resolveSlug(params.slug);
+    if (!resolved) throw notFound();
+    return { slug: resolved, requestedSlug: params.slug };
   },
 });
 
@@ -75,6 +99,7 @@ function DemoNichoPage() {
   if (!cfg) return <NichoNotFound />;
   return <NichoDemoRich config={cfg} />;
 }
+
 
 
 function DemoEventosNicho() {
