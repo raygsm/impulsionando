@@ -129,8 +129,16 @@ function AuthPage() {
     });
     setLoading(false);
     if (error) return toast.error(error.message);
+    // Funil Impulsionando: registra lead self-signup (best-effort)
+    try {
+      const { captureSelfSignupLead } = await import("@/lib/self-signup-lead.functions");
+      await captureSelfSignupLead({ data: { email, name: displayName || null } });
+    } catch {
+      // não bloqueia o fluxo de cadastro
+    }
     toast.success("Conta criada. Verifique seu e-mail se necessário e faça login.");
   }
+
 
   async function handleResetPassword(e: React.FormEvent) {
     e.preventDefault();
