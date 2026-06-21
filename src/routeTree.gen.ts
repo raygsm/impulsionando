@@ -360,7 +360,9 @@ import { Route as AuthenticatedBarMarketplaceRouteImport } from './routes/_authe
 import { Route as AuthenticatedAgendaWaitlistRouteImport } from './routes/_authenticated/agenda.waitlist'
 import { Route as AuthenticatedAgendaServicesRouteImport } from './routes/_authenticated/agenda.services'
 import { Route as AuthenticatedAgendaSchedulesRouteImport } from './routes/_authenticated/agenda.schedules'
+import { Route as AuthenticatedAgendaProfissionalRouteImport } from './routes/_authenticated/agenda.profissional'
 import { Route as AuthenticatedAgendaProfessionalsRouteImport } from './routes/_authenticated/agenda.professionals'
+import { Route as AuthenticatedAgendaGestorRouteImport } from './routes/_authenticated/agenda.gestor'
 import { Route as AuthenticatedAgendaAppointmentsRouteImport } from './routes/_authenticated/agenda.appointments'
 import { Route as AuthenticatedAffiliatesWalletRouteImport } from './routes/_authenticated/affiliates.wallet'
 import { Route as AuthenticatedAffiliatesUpsellsRouteImport } from './routes/_authenticated/affiliates.upsells'
@@ -424,6 +426,7 @@ import { Route as ApiPublicHealthMonetizationRouteImport } from './routes/api/pu
 import { Route as ApiPublicDemoSendTestRouteImport } from './routes/api/public/demo/send-test'
 import { Route as ApiPublicDemoFeiraLeadRouteImport } from './routes/api/public/demo/feira-lead'
 import { Route as ApiPublicCronPayoutsConsolidateRouteImport } from './routes/api/public/cron/payouts-consolidate'
+import { Route as ApiPublicCronAgendaTickRouteImport } from './routes/api/public/cron/agenda-tick'
 import { Route as AuthenticatedTorreRestaurantesDemoAuditoriaRouteImport } from './routes/_authenticated/torre.restaurantes-demo.auditoria'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
 import { Route as AuthenticatedRestauranteSalaoNotificacoesRouteImport } from './routes/_authenticated/restaurante.salao.notificacoes'
@@ -437,6 +440,7 @@ import { Route as AuthenticatedEmpresaTalentosDashboardRouteImport } from './rou
 import { Route as AuthenticatedEmpresaTalentosCandidatosRouteImport } from './routes/_authenticated/empresa.talentos.candidatos'
 import { Route as AuthenticatedCoreTenantsNovoRouteImport } from './routes/_authenticated/core.tenants.novo'
 import { Route as AuthenticatedCoreTenantsDominiosRouteImport } from './routes/_authenticated/core.tenants.dominios'
+import { Route as AuthenticatedCoreModulosAgendaRouteImport } from './routes/_authenticated/core.modulos.agenda'
 import { Route as AuthenticatedCoreModulosSlugRouteImport } from './routes/_authenticated/core.modulos.$slug'
 import { Route as AuthenticatedCoreMarketplacePedidosRouteImport } from './routes/_authenticated/core.marketplace.pedidos'
 import { Route as AuthenticatedCoreMarketplaceFornecedoresRouteImport } from './routes/_authenticated/core.marketplace.fornecedores'
@@ -2366,10 +2370,22 @@ const AuthenticatedAgendaSchedulesRoute =
     path: '/schedules',
     getParentRoute: () => AuthenticatedAgendaRoute,
   } as any)
+const AuthenticatedAgendaProfissionalRoute =
+  AuthenticatedAgendaProfissionalRouteImport.update({
+    id: '/profissional',
+    path: '/profissional',
+    getParentRoute: () => AuthenticatedAgendaRoute,
+  } as any)
 const AuthenticatedAgendaProfessionalsRoute =
   AuthenticatedAgendaProfessionalsRouteImport.update({
     id: '/professionals',
     path: '/professionals',
+    getParentRoute: () => AuthenticatedAgendaRoute,
+  } as any)
+const AuthenticatedAgendaGestorRoute =
+  AuthenticatedAgendaGestorRouteImport.update({
+    id: '/gestor',
+    path: '/gestor',
     getParentRoute: () => AuthenticatedAgendaRoute,
   } as any)
 const AuthenticatedAgendaAppointmentsRoute =
@@ -2740,6 +2756,11 @@ const ApiPublicCronPayoutsConsolidateRoute =
     path: '/api/public/cron/payouts-consolidate',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicCronAgendaTickRoute = ApiPublicCronAgendaTickRouteImport.update({
+  id: '/api/public/cron/agenda-tick',
+  path: '/api/public/cron/agenda-tick',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedTorreRestaurantesDemoAuditoriaRoute =
   AuthenticatedTorreRestaurantesDemoAuditoriaRouteImport.update({
     id: '/auditoria',
@@ -2817,6 +2838,12 @@ const AuthenticatedCoreTenantsDominiosRoute =
     id: '/tenants/dominios',
     path: '/tenants/dominios',
     getParentRoute: () => AuthenticatedCoreRoute,
+  } as any)
+const AuthenticatedCoreModulosAgendaRoute =
+  AuthenticatedCoreModulosAgendaRouteImport.update({
+    id: '/agenda',
+    path: '/agenda',
+    getParentRoute: () => AuthenticatedCoreModulosRoute,
   } as any)
 const AuthenticatedCoreModulosSlugRoute =
   AuthenticatedCoreModulosSlugRouteImport.update({
@@ -3128,7 +3155,9 @@ export interface FileRoutesByFullPath {
   '/affiliates/upsells': typeof AuthenticatedAffiliatesUpsellsRoute
   '/affiliates/wallet': typeof AuthenticatedAffiliatesWalletRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
+  '/agenda/gestor': typeof AuthenticatedAgendaGestorRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
+  '/agenda/profissional': typeof AuthenticatedAgendaProfissionalRoute
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
   '/agenda/services': typeof AuthenticatedAgendaServicesRoute
   '/agenda/waitlist': typeof AuthenticatedAgendaWaitlistRoute
@@ -3319,6 +3348,7 @@ export interface FileRoutesByFullPath {
   '/core/marketplace/fornecedores': typeof AuthenticatedCoreMarketplaceFornecedoresRoute
   '/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
+  '/core/modulos/agenda': typeof AuthenticatedCoreModulosAgendaRoute
   '/core/tenants/dominios': typeof AuthenticatedCoreTenantsDominiosRoute
   '/core/tenants/novo': typeof AuthenticatedCoreTenantsNovoRoute
   '/empresa/talentos/candidatos': typeof AuthenticatedEmpresaTalentosCandidatosRoute
@@ -3332,6 +3362,7 @@ export interface FileRoutesByFullPath {
   '/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
+  '/api/public/cron/agenda-tick': typeof ApiPublicCronAgendaTickRoute
   '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
@@ -3562,7 +3593,9 @@ export interface FileRoutesByTo {
   '/affiliates/upsells': typeof AuthenticatedAffiliatesUpsellsRoute
   '/affiliates/wallet': typeof AuthenticatedAffiliatesWalletRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
+  '/agenda/gestor': typeof AuthenticatedAgendaGestorRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
+  '/agenda/profissional': typeof AuthenticatedAgendaProfissionalRoute
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
   '/agenda/services': typeof AuthenticatedAgendaServicesRoute
   '/agenda/waitlist': typeof AuthenticatedAgendaWaitlistRoute
@@ -3753,6 +3786,7 @@ export interface FileRoutesByTo {
   '/core/marketplace/fornecedores': typeof AuthenticatedCoreMarketplaceFornecedoresRoute
   '/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
+  '/core/modulos/agenda': typeof AuthenticatedCoreModulosAgendaRoute
   '/core/tenants/dominios': typeof AuthenticatedCoreTenantsDominiosRoute
   '/core/tenants/novo': typeof AuthenticatedCoreTenantsNovoRoute
   '/empresa/talentos/candidatos': typeof AuthenticatedEmpresaTalentosCandidatosRoute
@@ -3766,6 +3800,7 @@ export interface FileRoutesByTo {
   '/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
+  '/api/public/cron/agenda-tick': typeof ApiPublicCronAgendaTickRoute
   '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
@@ -4010,7 +4045,9 @@ export interface FileRoutesById {
   '/_authenticated/affiliates/upsells': typeof AuthenticatedAffiliatesUpsellsRoute
   '/_authenticated/affiliates/wallet': typeof AuthenticatedAffiliatesWalletRoute
   '/_authenticated/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
+  '/_authenticated/agenda/gestor': typeof AuthenticatedAgendaGestorRoute
   '/_authenticated/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
+  '/_authenticated/agenda/profissional': typeof AuthenticatedAgendaProfissionalRoute
   '/_authenticated/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
   '/_authenticated/agenda/services': typeof AuthenticatedAgendaServicesRoute
   '/_authenticated/agenda/waitlist': typeof AuthenticatedAgendaWaitlistRoute
@@ -4201,6 +4238,7 @@ export interface FileRoutesById {
   '/_authenticated/core/marketplace/fornecedores': typeof AuthenticatedCoreMarketplaceFornecedoresRoute
   '/_authenticated/core/marketplace/pedidos': typeof AuthenticatedCoreMarketplacePedidosRoute
   '/_authenticated/core/modulos/$slug': typeof AuthenticatedCoreModulosSlugRoute
+  '/_authenticated/core/modulos/agenda': typeof AuthenticatedCoreModulosAgendaRoute
   '/_authenticated/core/tenants/dominios': typeof AuthenticatedCoreTenantsDominiosRoute
   '/_authenticated/core/tenants/novo': typeof AuthenticatedCoreTenantsNovoRoute
   '/_authenticated/empresa/talentos/candidatos': typeof AuthenticatedEmpresaTalentosCandidatosRoute
@@ -4214,6 +4252,7 @@ export interface FileRoutesById {
   '/_authenticated/restaurante/salao/notificacoes': typeof AuthenticatedRestauranteSalaoNotificacoesRoute
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/_authenticated/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
+  '/api/public/cron/agenda-tick': typeof ApiPublicCronAgendaTickRoute
   '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
@@ -4457,7 +4496,9 @@ export interface FileRouteTypes {
     | '/affiliates/upsells'
     | '/affiliates/wallet'
     | '/agenda/appointments'
+    | '/agenda/gestor'
     | '/agenda/professionals'
+    | '/agenda/profissional'
     | '/agenda/schedules'
     | '/agenda/services'
     | '/agenda/waitlist'
@@ -4648,6 +4689,7 @@ export interface FileRouteTypes {
     | '/core/marketplace/fornecedores'
     | '/core/marketplace/pedidos'
     | '/core/modulos/$slug'
+    | '/core/modulos/agenda'
     | '/core/tenants/dominios'
     | '/core/tenants/novo'
     | '/empresa/talentos/candidatos'
@@ -4661,6 +4703,7 @@ export interface FileRouteTypes {
     | '/restaurante/salao/notificacoes'
     | '/sales/cash/$id'
     | '/torre/restaurantes-demo/auditoria'
+    | '/api/public/cron/agenda-tick'
     | '/api/public/cron/payouts-consolidate'
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
@@ -4891,7 +4934,9 @@ export interface FileRouteTypes {
     | '/affiliates/upsells'
     | '/affiliates/wallet'
     | '/agenda/appointments'
+    | '/agenda/gestor'
     | '/agenda/professionals'
+    | '/agenda/profissional'
     | '/agenda/schedules'
     | '/agenda/services'
     | '/agenda/waitlist'
@@ -5082,6 +5127,7 @@ export interface FileRouteTypes {
     | '/core/marketplace/fornecedores'
     | '/core/marketplace/pedidos'
     | '/core/modulos/$slug'
+    | '/core/modulos/agenda'
     | '/core/tenants/dominios'
     | '/core/tenants/novo'
     | '/empresa/talentos/candidatos'
@@ -5095,6 +5141,7 @@ export interface FileRouteTypes {
     | '/restaurante/salao/notificacoes'
     | '/sales/cash/$id'
     | '/torre/restaurantes-demo/auditoria'
+    | '/api/public/cron/agenda-tick'
     | '/api/public/cron/payouts-consolidate'
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
@@ -5338,7 +5385,9 @@ export interface FileRouteTypes {
     | '/_authenticated/affiliates/upsells'
     | '/_authenticated/affiliates/wallet'
     | '/_authenticated/agenda/appointments'
+    | '/_authenticated/agenda/gestor'
     | '/_authenticated/agenda/professionals'
+    | '/_authenticated/agenda/profissional'
     | '/_authenticated/agenda/schedules'
     | '/_authenticated/agenda/services'
     | '/_authenticated/agenda/waitlist'
@@ -5529,6 +5578,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/marketplace/fornecedores'
     | '/_authenticated/core/marketplace/pedidos'
     | '/_authenticated/core/modulos/$slug'
+    | '/_authenticated/core/modulos/agenda'
     | '/_authenticated/core/tenants/dominios'
     | '/_authenticated/core/tenants/novo'
     | '/_authenticated/empresa/talentos/candidatos'
@@ -5542,6 +5592,7 @@ export interface FileRouteTypes {
     | '/_authenticated/restaurante/salao/notificacoes'
     | '/_authenticated/sales/cash/$id'
     | '/_authenticated/torre/restaurantes-demo/auditoria'
+    | '/api/public/cron/agenda-tick'
     | '/api/public/cron/payouts-consolidate'
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
@@ -5698,6 +5749,7 @@ export interface RootRouteChildren {
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   PortalContabilidadeTokenRoute: typeof PortalContabilidadeTokenRoute
   PortalProprietarioTokenRoute: typeof PortalProprietarioTokenRoute
+  ApiPublicCronAgendaTickRoute: typeof ApiPublicCronAgendaTickRoute
   ApiPublicCronPayoutsConsolidateRoute: typeof ApiPublicCronPayoutsConsolidateRoute
   ApiPublicDemoFeiraLeadRoute: typeof ApiPublicDemoFeiraLeadRoute
   ApiPublicDemoSendTestRoute: typeof ApiPublicDemoSendTestRoute
@@ -8187,11 +8239,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgendaSchedulesRouteImport
       parentRoute: typeof AuthenticatedAgendaRoute
     }
+    '/_authenticated/agenda/profissional': {
+      id: '/_authenticated/agenda/profissional'
+      path: '/profissional'
+      fullPath: '/agenda/profissional'
+      preLoaderRoute: typeof AuthenticatedAgendaProfissionalRouteImport
+      parentRoute: typeof AuthenticatedAgendaRoute
+    }
     '/_authenticated/agenda/professionals': {
       id: '/_authenticated/agenda/professionals'
       path: '/professionals'
       fullPath: '/agenda/professionals'
       preLoaderRoute: typeof AuthenticatedAgendaProfessionalsRouteImport
+      parentRoute: typeof AuthenticatedAgendaRoute
+    }
+    '/_authenticated/agenda/gestor': {
+      id: '/_authenticated/agenda/gestor'
+      path: '/gestor'
+      fullPath: '/agenda/gestor'
+      preLoaderRoute: typeof AuthenticatedAgendaGestorRouteImport
       parentRoute: typeof AuthenticatedAgendaRoute
     }
     '/_authenticated/agenda/appointments': {
@@ -8635,6 +8701,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicCronPayoutsConsolidateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/cron/agenda-tick': {
+      id: '/api/public/cron/agenda-tick'
+      path: '/api/public/cron/agenda-tick'
+      fullPath: '/api/public/cron/agenda-tick'
+      preLoaderRoute: typeof ApiPublicCronAgendaTickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/torre/restaurantes-demo/auditoria': {
       id: '/_authenticated/torre/restaurantes-demo/auditoria'
       path: '/auditoria'
@@ -8725,6 +8798,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/core/tenants/dominios'
       preLoaderRoute: typeof AuthenticatedCoreTenantsDominiosRouteImport
       parentRoute: typeof AuthenticatedCoreRoute
+    }
+    '/_authenticated/core/modulos/agenda': {
+      id: '/_authenticated/core/modulos/agenda'
+      path: '/agenda'
+      fullPath: '/core/modulos/agenda'
+      preLoaderRoute: typeof AuthenticatedCoreModulosAgendaRouteImport
+      parentRoute: typeof AuthenticatedCoreModulosRoute
     }
     '/_authenticated/core/modulos/$slug': {
       id: '/_authenticated/core/modulos/$slug'
@@ -8930,7 +9010,9 @@ const AuthenticatedAffiliatesRouteWithChildren =
 
 interface AuthenticatedAgendaRouteChildren {
   AuthenticatedAgendaAppointmentsRoute: typeof AuthenticatedAgendaAppointmentsRoute
+  AuthenticatedAgendaGestorRoute: typeof AuthenticatedAgendaGestorRoute
   AuthenticatedAgendaProfessionalsRoute: typeof AuthenticatedAgendaProfessionalsRoute
+  AuthenticatedAgendaProfissionalRoute: typeof AuthenticatedAgendaProfissionalRoute
   AuthenticatedAgendaSchedulesRoute: typeof AuthenticatedAgendaSchedulesRoute
   AuthenticatedAgendaServicesRoute: typeof AuthenticatedAgendaServicesRoute
   AuthenticatedAgendaWaitlistRoute: typeof AuthenticatedAgendaWaitlistRoute
@@ -8939,7 +9021,9 @@ interface AuthenticatedAgendaRouteChildren {
 
 const AuthenticatedAgendaRouteChildren: AuthenticatedAgendaRouteChildren = {
   AuthenticatedAgendaAppointmentsRoute: AuthenticatedAgendaAppointmentsRoute,
+  AuthenticatedAgendaGestorRoute: AuthenticatedAgendaGestorRoute,
   AuthenticatedAgendaProfessionalsRoute: AuthenticatedAgendaProfessionalsRoute,
+  AuthenticatedAgendaProfissionalRoute: AuthenticatedAgendaProfissionalRoute,
   AuthenticatedAgendaSchedulesRoute: AuthenticatedAgendaSchedulesRoute,
   AuthenticatedAgendaServicesRoute: AuthenticatedAgendaServicesRoute,
   AuthenticatedAgendaWaitlistRoute: AuthenticatedAgendaWaitlistRoute,
@@ -9028,11 +9112,13 @@ const AuthenticatedCoreMarketplaceRouteWithChildren =
 
 interface AuthenticatedCoreModulosRouteChildren {
   AuthenticatedCoreModulosSlugRoute: typeof AuthenticatedCoreModulosSlugRoute
+  AuthenticatedCoreModulosAgendaRoute: typeof AuthenticatedCoreModulosAgendaRoute
 }
 
 const AuthenticatedCoreModulosRouteChildren: AuthenticatedCoreModulosRouteChildren =
   {
     AuthenticatedCoreModulosSlugRoute: AuthenticatedCoreModulosSlugRoute,
+    AuthenticatedCoreModulosAgendaRoute: AuthenticatedCoreModulosAgendaRoute,
   }
 
 const AuthenticatedCoreModulosRouteWithChildren =
@@ -10031,6 +10117,7 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   PortalContabilidadeTokenRoute: PortalContabilidadeTokenRoute,
   PortalProprietarioTokenRoute: PortalProprietarioTokenRoute,
+  ApiPublicCronAgendaTickRoute: ApiPublicCronAgendaTickRoute,
   ApiPublicCronPayoutsConsolidateRoute: ApiPublicCronPayoutsConsolidateRoute,
   ApiPublicDemoFeiraLeadRoute: ApiPublicDemoFeiraLeadRoute,
   ApiPublicDemoSendTestRoute: ApiPublicDemoSendTestRoute,
@@ -10068,13 +10155,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

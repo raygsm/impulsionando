@@ -1609,6 +1609,48 @@ export type Database = {
           },
         ]
       }
+      agenda_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          after: Json | null
+          before: Json | null
+          company_id: string
+          created_at: string
+          entity: string
+          entity_id: string | null
+          id: string
+          ip: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          after?: Json | null
+          before?: Json | null
+          company_id: string
+          created_at?: string
+          entity: string
+          entity_id?: string | null
+          id?: string
+          ip?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          after?: Json | null
+          before?: Json | null
+          company_id?: string
+          created_at?: string
+          entity?: string
+          entity_id?: string | null
+          id?: string
+          ip?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       agenda_blocks: {
         Row: {
           company_id: string
@@ -1642,6 +1684,499 @@ export type Database = {
         }
         Relationships: []
       }
+      agenda_locations: {
+        Row: {
+          address: string | null
+          city: string | null
+          company_id: string
+          created_at: string
+          geo_lat: number | null
+          geo_lng: number | null
+          id: string
+          is_active: boolean
+          metadata: Json
+          name: string
+          state: string | null
+          timezone: string
+          updated_at: string
+          zip: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          company_id: string
+          created_at?: string
+          geo_lat?: number | null
+          geo_lng?: number | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json
+          name: string
+          state?: string | null
+          timezone?: string
+          updated_at?: string
+          zip?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          company_id?: string
+          created_at?: string
+          geo_lat?: number | null
+          geo_lng?: number | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json
+          name?: string
+          state?: string | null
+          timezone?: string
+          updated_at?: string
+          zip?: string | null
+        }
+        Relationships: []
+      }
+      agenda_no_show_events: {
+        Row: {
+          appointment_id: string | null
+          charged_amount: number
+          company_id: string
+          created_at: string
+          created_by: string | null
+          customer_id: string | null
+          id: string
+          kind: string
+          oncall_shift_id: string | null
+          policy_applied: Json
+          professional_id: string | null
+          reason: string | null
+        }
+        Insert: {
+          appointment_id?: string | null
+          charged_amount?: number
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          id?: string
+          kind: string
+          oncall_shift_id?: string | null
+          policy_applied?: Json
+          professional_id?: string | null
+          reason?: string | null
+        }
+        Update: {
+          appointment_id?: string | null
+          charged_amount?: number
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          id?: string
+          kind?: string
+          oncall_shift_id?: string | null
+          policy_applied?: Json
+          professional_id?: string | null
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agenda_no_show_events_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "agenda_appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agenda_no_show_events_oncall_shift_id_fkey"
+            columns: ["oncall_shift_id"]
+            isOneToOne: false
+            referencedRelation: "agenda_oncall_shifts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agenda_no_show_events_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "agenda_professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agenda_oncall_shifts: {
+        Row: {
+          assigned_professional_id: string | null
+          company_id: string
+          created_at: string
+          ends_at: string
+          flat_rate: number | null
+          hourly_rate: number | null
+          id: string
+          location_id: string | null
+          metadata: Json
+          notes: string | null
+          room_id: string | null
+          service_id: string | null
+          specialty: string | null
+          starts_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_professional_id?: string | null
+          company_id: string
+          created_at?: string
+          ends_at: string
+          flat_rate?: number | null
+          hourly_rate?: number | null
+          id?: string
+          location_id?: string | null
+          metadata?: Json
+          notes?: string | null
+          room_id?: string | null
+          service_id?: string | null
+          specialty?: string | null
+          starts_at: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_professional_id?: string | null
+          company_id?: string
+          created_at?: string
+          ends_at?: string
+          flat_rate?: number | null
+          hourly_rate?: number | null
+          id?: string
+          location_id?: string | null
+          metadata?: Json
+          notes?: string | null
+          room_id?: string | null
+          service_id?: string | null
+          specialty?: string | null
+          starts_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agenda_oncall_shifts_assigned_professional_id_fkey"
+            columns: ["assigned_professional_id"]
+            isOneToOne: false
+            referencedRelation: "agenda_professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agenda_oncall_shifts_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "agenda_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agenda_oncall_shifts_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "agenda_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agenda_open_slots: {
+        Row: {
+          appointment_id: string | null
+          claimed_at: string | null
+          claimed_by_professional_id: string | null
+          claimed_ip: string | null
+          claimed_user_agent: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          current_wave: number
+          distribution: Json
+          ends_at: string
+          expires_at: string | null
+          id: string
+          location_id: string | null
+          metadata: Json
+          oncall_shift_id: string | null
+          origin: string
+          payout_amount: number | null
+          room_id: string | null
+          service_id: string | null
+          specialty: string | null
+          starts_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          claimed_at?: string | null
+          claimed_by_professional_id?: string | null
+          claimed_ip?: string | null
+          claimed_user_agent?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          current_wave?: number
+          distribution?: Json
+          ends_at: string
+          expires_at?: string | null
+          id?: string
+          location_id?: string | null
+          metadata?: Json
+          oncall_shift_id?: string | null
+          origin: string
+          payout_amount?: number | null
+          room_id?: string | null
+          service_id?: string | null
+          specialty?: string | null
+          starts_at: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          appointment_id?: string | null
+          claimed_at?: string | null
+          claimed_by_professional_id?: string | null
+          claimed_ip?: string | null
+          claimed_user_agent?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          current_wave?: number
+          distribution?: Json
+          ends_at?: string
+          expires_at?: string | null
+          id?: string
+          location_id?: string | null
+          metadata?: Json
+          oncall_shift_id?: string | null
+          origin?: string
+          payout_amount?: number | null
+          room_id?: string | null
+          service_id?: string | null
+          specialty?: string | null
+          starts_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agenda_open_slots_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "agenda_appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agenda_open_slots_claimed_by_professional_id_fkey"
+            columns: ["claimed_by_professional_id"]
+            isOneToOne: false
+            referencedRelation: "agenda_professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agenda_open_slots_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "agenda_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agenda_open_slots_oncall_shift_id_fkey"
+            columns: ["oncall_shift_id"]
+            isOneToOne: false
+            referencedRelation: "agenda_oncall_shifts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agenda_open_slots_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "agenda_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agenda_penalties: {
+        Row: {
+          amount: number | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          ends_at: string | null
+          id: string
+          is_active: boolean
+          kind: string
+          metadata: Json
+          reason: string | null
+          starts_at: string
+          subject_id: string
+          subject_type: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          kind: string
+          metadata?: Json
+          reason?: string | null
+          starts_at?: string
+          subject_id: string
+          subject_type: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          kind?: string
+          metadata?: Json
+          reason?: string | null
+          starts_at?: string
+          subject_id?: string
+          subject_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      agenda_professional_availability: {
+        Row: {
+          accepts_emergency: boolean
+          accepts_home: boolean
+          accepts_in_person: boolean
+          accepts_oncall: boolean
+          accepts_substitution: boolean
+          accepts_telehealth: boolean
+          accepts_walkin: boolean
+          company_id: string
+          created_at: string
+          id: string
+          max_response_minutes: number
+          metadata: Json
+          min_notice_minutes: number
+          professional_id: string
+          served_regions: string[]
+          travel_radius_km: number | null
+          updated_at: string
+        }
+        Insert: {
+          accepts_emergency?: boolean
+          accepts_home?: boolean
+          accepts_in_person?: boolean
+          accepts_oncall?: boolean
+          accepts_substitution?: boolean
+          accepts_telehealth?: boolean
+          accepts_walkin?: boolean
+          company_id: string
+          created_at?: string
+          id?: string
+          max_response_minutes?: number
+          metadata?: Json
+          min_notice_minutes?: number
+          professional_id: string
+          served_regions?: string[]
+          travel_radius_km?: number | null
+          updated_at?: string
+        }
+        Update: {
+          accepts_emergency?: boolean
+          accepts_home?: boolean
+          accepts_in_person?: boolean
+          accepts_oncall?: boolean
+          accepts_substitution?: boolean
+          accepts_telehealth?: boolean
+          accepts_walkin?: boolean
+          company_id?: string
+          created_at?: string
+          id?: string
+          max_response_minutes?: number
+          metadata?: Json
+          min_notice_minutes?: number
+          professional_id?: string
+          served_regions?: string[]
+          travel_radius_km?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agenda_professional_availability_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: true
+            referencedRelation: "agenda_professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agenda_professional_eligibility: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          location_id: string | null
+          no_show_rate: number
+          performance_score: number
+          priority: number
+          professional_id: string
+          service_id: string | null
+          specialty: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          location_id?: string | null
+          no_show_rate?: number
+          performance_score?: number
+          priority?: number
+          professional_id: string
+          service_id?: string | null
+          specialty?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          location_id?: string | null
+          no_show_rate?: number
+          performance_score?: number
+          priority?: number
+          professional_id?: string
+          service_id?: string | null
+          specialty?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agenda_professional_eligibility_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "agenda_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agenda_professional_eligibility_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "agenda_professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agenda_professional_services: {
         Row: {
           company_id: string
@@ -1665,6 +2200,47 @@ export type Database = {
           service_id?: string
         }
         Relationships: []
+      }
+      agenda_professional_terms: {
+        Row: {
+          accepted_at: string
+          company_id: string
+          created_at: string
+          id: string
+          ip: string | null
+          professional_id: string
+          terms_version: string
+          user_agent: string | null
+        }
+        Insert: {
+          accepted_at?: string
+          company_id: string
+          created_at?: string
+          id?: string
+          ip?: string | null
+          professional_id: string
+          terms_version: string
+          user_agent?: string | null
+        }
+        Update: {
+          accepted_at?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          ip?: string | null
+          professional_id?: string
+          terms_version?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agenda_professional_terms_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "agenda_professionals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       agenda_professionals: {
         Row: {
@@ -1711,6 +2287,95 @@ export type Database = {
           unit_id?: string | null
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      agenda_rooms: {
+        Row: {
+          capacity: number
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          kind: string
+          location_id: string | null
+          metadata: Json
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          capacity?: number
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind?: string
+          location_id?: string | null
+          metadata?: Json
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          capacity?: number
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind?: string
+          location_id?: string | null
+          metadata?: Json
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agenda_rooms_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "agenda_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agenda_rules: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          kind: string
+          rule: Json
+          scope_plan: string | null
+          scope_service_id: string | null
+          scope_specialty: string | null
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind: string
+          rule?: Json
+          scope_plan?: string | null
+          scope_service_id?: string | null
+          scope_specialty?: string | null
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind?: string
+          rule?: Json
+          scope_plan?: string | null
+          scope_service_id?: string | null
+          scope_specialty?: string | null
+          updated_at?: string
+          version?: number
         }
         Relationships: []
       }
@@ -1788,6 +2453,138 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      agenda_settings: {
+        Row: {
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          key: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      agenda_shifts: {
+        Row: {
+          company_id: string
+          created_at: string
+          ends_time: string
+          id: string
+          is_active: boolean
+          name: string
+          starts_time: string
+          updated_at: string
+          weekdays: number[]
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          ends_time: string
+          id?: string
+          is_active?: boolean
+          name: string
+          starts_time: string
+          updated_at?: string
+          weekdays?: number[]
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          ends_time?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          starts_time?: string
+          updated_at?: string
+          weekdays?: number[]
+        }
+        Relationships: []
+      }
+      agenda_slot_offers: {
+        Row: {
+          channel: string[]
+          company_id: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          metadata: Json
+          open_slot_id: string
+          professional_id: string
+          responded_at: string | null
+          seen_at: string | null
+          sent_at: string
+          status: string
+          updated_at: string
+          wave: number
+        }
+        Insert: {
+          channel?: string[]
+          company_id: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          metadata?: Json
+          open_slot_id: string
+          professional_id: string
+          responded_at?: string | null
+          seen_at?: string | null
+          sent_at?: string
+          status?: string
+          updated_at?: string
+          wave?: number
+        }
+        Update: {
+          channel?: string[]
+          company_id?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          metadata?: Json
+          open_slot_id?: string
+          professional_id?: string
+          responded_at?: string | null
+          seen_at?: string | null
+          sent_at?: string
+          status?: string
+          updated_at?: string
+          wave?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agenda_slot_offers_open_slot_id_fkey"
+            columns: ["open_slot_id"]
+            isOneToOne: false
+            referencedRelation: "agenda_open_slots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agenda_slot_offers_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "agenda_professionals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       agenda_waitlist: {
         Row: {
@@ -17624,6 +18421,46 @@ export type Database = {
           _pix_key?: string
         }
         Returns: string
+      }
+      agenda_claim_open_slot: {
+        Args: {
+          _ip?: string
+          _professional_id: string
+          _slot_id: string
+          _user_agent?: string
+        }
+        Returns: {
+          appointment_id: string | null
+          claimed_at: string | null
+          claimed_by_professional_id: string | null
+          claimed_ip: string | null
+          claimed_user_agent: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          current_wave: number
+          distribution: Json
+          ends_at: string
+          expires_at: string | null
+          id: string
+          location_id: string | null
+          metadata: Json
+          oncall_shift_id: string | null
+          origin: string
+          payout_amount: number | null
+          room_id: string | null
+          service_id: string | null
+          specialty: string | null
+          starts_at: string
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "agenda_open_slots"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       apply_niche_template: {
         Args: { p_company_id: string; p_niche_slug: string }
