@@ -126,7 +126,7 @@ function WebhookLogPage() {
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
                 <SelectItem value="close-invoice">close-invoice</SelectItem>
-                <SelectItem value="infinitepay">infinitepay</SelectItem>
+                <SelectItem value="mercadopago">mercadopago</SelectItem>
               </SelectContent>
             </Select>
           </div>
