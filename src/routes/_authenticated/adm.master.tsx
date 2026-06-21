@@ -234,6 +234,7 @@ function AdmMasterPage() {
             { to: "/admin/cobrancas", label: "Central de Cobranças", icon: DollarSign },
             { to: "/admin/funil-360", label: "Funil 360º", icon: TrendingUp },
             { to: "/admin/health", label: "Health Score", icon: Activity },
+            { to: "/admin/inbox-unificada", label: "Inbox Omnichannel", icon: Mail },
           ].map((l) => (
             <Link key={l.to} to={l.to as any} className="block">
               <Card className="p-3 hover:border-primary/40 hover:bg-primary/5 transition flex items-center gap-2">
