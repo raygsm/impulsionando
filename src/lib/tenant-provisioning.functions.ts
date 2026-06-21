@@ -185,12 +185,19 @@ export const resendTenantAdminInvite = createServerFn({ method: 'POST' })
   .handler(async ({ data, context }) => {
     await assertCoreAdmin(context)
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
-    const { data: invited, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(data.email, {
-      data: { tenant_company_id: data.companyId, resend: true },
-    })
-    if (error) throw new Error(`Falha ao reenviar convite: ${error.message}`)
-    return { ok: true, userId: invited?.user?.id ?? null }
+    const { captureServerError } = await import('@/lib/runtime-observability.functions')
+    return captureServerError(
+      { scope: 'tenant-provisioning.resendTenantAdminInvite', userId: context.userId, supabaseAdmin, companyId: data.companyId, context: { email: data.email } },
+      async () => {
+        const { data: invited, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(data.email, {
+          data: { tenant_company_id: data.companyId, resend: true },
+        })
+        if (error) throw new Error(`Falha ao reenviar convite: ${error.message}`)
+        return { ok: true, userId: invited?.user?.id ?? null }
+      },
+    )
   })
+
 
 export const updateTenantSubdomain = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
@@ -201,17 +208,24 @@ export const updateTenantSubdomain = createServerFn({ method: 'POST' })
   .handler(async ({ data, context }) => {
     await assertCoreAdmin(context)
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
-    const { data: clash } = await supabaseAdmin
-      .from('companies').select('id').eq('subdomain', data.subdomain).neq('id', data.companyId).maybeSingle()
-    if (clash) throw new Error(`Subdomínio "${data.subdomain}" já está em uso.`)
-    const { error: upErr } = await supabaseAdmin
-      .from('companies').update({ subdomain: data.subdomain } as never).eq('id', data.companyId)
-    if (upErr) throw new Error(upErr.message)
-    await supabaseAdmin.from('onboarding_domain_requests').insert({
-      company_id: data.companyId,
-      mode: 'subdomain',
-      requested_value: data.subdomain,
-      status: 'reserved',
-    } as never)
-    return { ok: true, subdomain: data.subdomain }
+    const { captureServerError } = await import('@/lib/runtime-observability.functions')
+    return captureServerError(
+      { scope: 'tenant-provisioning.updateTenantSubdomain', userId: context.userId, supabaseAdmin, companyId: data.companyId, context: { subdomain: data.subdomain } },
+      async () => {
+        const { data: clash } = await supabaseAdmin
+          .from('companies').select('id').eq('subdomain', data.subdomain).neq('id', data.companyId).maybeSingle()
+        if (clash) throw new Error(`Subdomínio "${data.subdomain}" já está em uso.`)
+        const { error: upErr } = await supabaseAdmin
+          .from('companies').update({ subdomain: data.subdomain } as never).eq('id', data.companyId)
+        if (upErr) throw new Error(upErr.message)
+        await supabaseAdmin.from('onboarding_domain_requests').insert({
+          company_id: data.companyId,
+          mode: 'subdomain',
+          requested_value: data.subdomain,
+          status: 'reserved',
+        } as never)
+        return { ok: true, subdomain: data.subdomain }
+      },
+    )
   })
+
