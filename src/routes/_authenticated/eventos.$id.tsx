@@ -12,8 +12,9 @@ import {
   getEvent, upsertTicketType, issueTickets, transferTicket, cancelTicket, checkInByQr,
   updateTransferPolicy, listTransfers, decideTransfer,
 } from "@/lib/events.functions";
-import { Ticket, ArrowLeft, QrCode, ShieldCheck, Settings2, Check, X, Download, FileText } from "lucide-react";
+import { Ticket, ArrowLeft, QrCode, ShieldCheck, Settings2, Check, X, Download, FileText, Radio } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { downloadCsv, downloadTablePdf } from "@/lib/exports";
 import { logExport } from "@/lib/core-export-logs.functions";
 
