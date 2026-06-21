@@ -261,6 +261,41 @@ function DemoLanding() {
           </div>
         </div>
 
+        {/* Planos — etapa final da demonstração */}
+        <section className="mb-6 rounded-xl border-2 border-primary/40 bg-gradient-to-br from-primary/5 via-background to-accent/5 p-6 sm:p-8">
+          <div className="text-center mb-6">
+            <Badge className="bg-gradient-primary mb-3 gap-1"><Sparkles className="w-3 h-3" /> Pronto para contratar</Badge>
+            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">Escolha o plano ideal</h2>
+            <p className="text-sm text-muted-foreground mt-2 max-w-2xl mx-auto">
+              Todas as soluções demonstradas estão disponíveis nos planos abaixo — para empresas, white label e consumidor final (Clube).
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            {[
+              { code: "essencial-mensal", name: "Essencial", price: "R$ 759", desc: "Até 3 módulos. Ideal para começar.", cta: "Contratar", featured: false },
+              { code: "completo-mensal", name: "Completo", price: "R$ 1.518", desc: "Até 6 módulos. Operação completa.", cta: "Contratar", featured: true },
+              { code: "full", name: "Full", price: "Sob consulta", desc: "Todos os módulos liberados.", cta: "Falar com vendas", featured: false },
+              { code: "sob-medida", name: "Sob Medida", price: "Sob proposta", desc: "Multi-unidade, white label, integrações.", cta: "Solicitar proposta", featured: false },
+              { code: "clube_premium", name: "Clube Premium", price: "R$ 9,99/mês", desc: "Consumidor final — benefícios em toda a rede.", cta: "Assinar Clube", featured: false },
+            ].map((p) => (
+              <Card key={p.code} className={`p-5 flex flex-col ${p.featured ? "border-2 border-primary shadow-elegant" : ""}`}>
+                {p.featured && <Badge className="self-start mb-2 bg-gradient-primary text-[10px]">Mais escolhido</Badge>}
+                <h3 className="font-semibold text-base">{p.name}</h3>
+                <div className="text-2xl font-bold mt-1">{p.price}</div>
+                <p className="text-xs text-muted-foreground mt-2 leading-relaxed flex-1">{p.desc}</p>
+                <Button asChild size="sm" variant={p.featured ? "default" : "outline"} className="mt-4">
+                  <Link to="/planos" search={{ plano: p.code } as never}>{p.cta} <ArrowRight className="w-3 h-3 ml-1" /></Link>
+                </Button>
+              </Card>
+            ))}
+          </div>
+          <div className="text-center mt-6">
+            <Button asChild size="lg" className="bg-gradient-primary gap-2">
+              <Link to="/planos"><BarChart3 className="w-4 h-4" /> Ver comparativo completo dos planos</Link>
+            </Button>
+          </div>
+        </section>
+
         {/* Especialista */}
         <div className="rounded-xl border border-dashed border-border bg-muted/30 p-6 sm:p-8">
           <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-center">
