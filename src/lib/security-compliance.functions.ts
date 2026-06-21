@@ -35,8 +35,8 @@ export const getSecurityCompliance = createServerFn({ method: "GET" })
       supabaseAdmin.from("core_integrations").select("id, provider, scope, is_active, last_check_at, last_error").limit(500),
       supabaseAdmin.from("core_whatsapp_credentials").select("id, company_id, is_active, status, last_validated_at").limit(500),
       supabaseAdmin.from("onboarding_domain_requests").select("id, domain, status, ssl_expires_at").not("ssl_expires_at", "is", null).limit(500),
-      supabaseAdmin.from("audit_logs").select("id, action, actor_id, created_at").gte("created_at", d7).limit(5000),
-      supabaseAdmin.from("audit_logs").select("id, action, actor_id, created_at").gte("created_at", d30).limit(10000),
+      supabaseAdmin.from("audit_logs").select("id, action, user_id, created_at").gte("created_at", d7).limit(5000),
+      supabaseAdmin.from("audit_logs").select("id, action, user_id, created_at").gte("created_at", d30).limit(10000),
       supabaseAdmin.from("audit_logs").select("id, created_at").gte("created_at", d60).lt("created_at", d30).limit(10000),
       supabaseAdmin.from("user_roles").select("user_id, role").limit(2000),
       supabaseAdmin.from("billing_suspensions").select("id, company_id, resolved_at, created_at").is("resolved_at", null).limit(200),
@@ -111,11 +111,11 @@ export const getSecurityCompliance = createServerFn({ method: "GET" })
     // Top actors 7d
     const actorMap = new Map<string, number>();
     for (const a of audit7) {
-      if (!a.actor_id) continue;
-      actorMap.set(a.actor_id, (actorMap.get(a.actor_id) ?? 0) + 1);
+      if (!a.user_id) continue;
+      actorMap.set(a.user_id, (actorMap.get(a.user_id) ?? 0) + 1);
     }
     const topActors = [...actorMap.entries()]
-      .map(([actor_id, count]) => ({ actor_id, count }))
+      .map(([user_id, count]) => ({ user_id, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
 

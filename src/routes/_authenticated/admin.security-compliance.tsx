@@ -152,8 +152,8 @@ function SecurityCompliancePage() {
           <h3 className="text-xs font-medium text-muted-foreground mb-2">Top atores (7d)</h3>
           <div className="space-y-1">
             {data.topActors.map((a) => (
-              <div key={a.actor_id} className="flex items-center justify-between text-xs">
-                <span className="font-mono truncate max-w-[240px]">{a.actor_id}</span>
+              <div key={a.user_id} className="flex items-center justify-between text-xs">
+                <span className="font-mono truncate max-w-[240px]">{a.user_id}</span>
                 <Badge variant="outline" className="text-xs">{a.count}</Badge>
               </div>
             ))}
