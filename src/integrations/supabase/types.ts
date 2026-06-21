@@ -8129,6 +8129,66 @@ export type Database = {
         }
         Relationships: []
       }
+      core_incidents: {
+        Row: {
+          created_at: string
+          description: string | null
+          detected_at: string
+          event_count: number
+          id: string
+          metadata: Json
+          postmortem: string | null
+          resolved_at: string | null
+          runtime_scope: string | null
+          scope: Database["public"]["Enums"]["core_slo_scope"]
+          severity: Database["public"]["Enums"]["core_incident_severity"]
+          source: string
+          started_at: string
+          status: Database["public"]["Enums"]["core_incident_status"]
+          title: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          detected_at?: string
+          event_count?: number
+          id?: string
+          metadata?: Json
+          postmortem?: string | null
+          resolved_at?: string | null
+          runtime_scope?: string | null
+          scope: Database["public"]["Enums"]["core_slo_scope"]
+          severity?: Database["public"]["Enums"]["core_incident_severity"]
+          source?: string
+          started_at?: string
+          status?: Database["public"]["Enums"]["core_incident_status"]
+          title: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          detected_at?: string
+          event_count?: number
+          id?: string
+          metadata?: Json
+          postmortem?: string | null
+          resolved_at?: string | null
+          runtime_scope?: string | null
+          scope?: Database["public"]["Enums"]["core_slo_scope"]
+          severity?: Database["public"]["Enums"]["core_incident_severity"]
+          source?: string
+          started_at?: string
+          status?: Database["public"]["Enums"]["core_incident_status"]
+          title?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
       core_integration_logs: {
         Row: {
           created_at: string
@@ -9326,6 +9386,51 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
           value?: Json
+        }
+        Relationships: []
+      }
+      core_slo_targets: {
+        Row: {
+          active: boolean
+          availability_target_bps: number
+          created_at: string
+          id: string
+          latency_p95_target_ms: number
+          name: string
+          notes: string | null
+          runtime_scope: string | null
+          scope: Database["public"]["Enums"]["core_slo_scope"]
+          updated_at: string
+          url: string | null
+          window_days: number
+        }
+        Insert: {
+          active?: boolean
+          availability_target_bps?: number
+          created_at?: string
+          id?: string
+          latency_p95_target_ms?: number
+          name: string
+          notes?: string | null
+          runtime_scope?: string | null
+          scope?: Database["public"]["Enums"]["core_slo_scope"]
+          updated_at?: string
+          url?: string | null
+          window_days?: number
+        }
+        Update: {
+          active?: boolean
+          availability_target_bps?: number
+          created_at?: string
+          id?: string
+          latency_p95_target_ms?: number
+          name?: string
+          notes?: string | null
+          runtime_scope?: string | null
+          scope?: Database["public"]["Enums"]["core_slo_scope"]
+          updated_at?: string
+          url?: string | null
+          window_days?: number
         }
         Relationships: []
       }
@@ -21302,6 +21407,25 @@ export type Database = {
         }
         Relationships: []
       }
+      v_core_slo_status: {
+        Row: {
+          availability_bps_24h: number | null
+          availability_bps_7d: number | null
+          availability_target_bps: number | null
+          checks_24h: number | null
+          checks_7d: number | null
+          consecutive_failures: number | null
+          currently_up: boolean | null
+          error_budget_bps_left_7d: number | null
+          latency_p95_target_ms: number | null
+          p95_ms_24h: number | null
+          since: string | null
+          up_24h: number | null
+          up_7d: number | null
+          url: string | null
+        }
+        Relationships: []
+      }
       v_fiscal_invoices_summary: {
         Row: {
           beneficiary_cnpj: string | null
@@ -21811,6 +21935,19 @@ export type Database = {
         }
         Returns: string
       }
+      open_incident: {
+        Args: {
+          _description?: string
+          _metadata?: Json
+          _runtime_scope?: string
+          _scope: Database["public"]["Enums"]["core_slo_scope"]
+          _severity?: Database["public"]["Enums"]["core_incident_severity"]
+          _source?: string
+          _title: string
+          _url?: string
+        }
+        Returns: string
+      }
       permission_matrix: {
         Args: never
         Returns: {
@@ -21935,6 +22072,15 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      resolve_incident: {
+        Args: {
+          _note?: string
+          _runtime_scope?: string
+          _scope: Database["public"]["Enums"]["core_slo_scope"]
+          _url?: string
+        }
+        Returns: string
       }
       resolve_intermediation_bps: {
         Args: { _niche_id?: string; _provider_company_id: string }
@@ -22182,6 +22328,9 @@ export type Database = {
         | "profissional"
         | "consumidor"
       company_environment: "demo" | "teste" | "real"
+      core_incident_severity: "sev1" | "sev2" | "sev3" | "sev4"
+      core_incident_status: "open" | "monitoring" | "resolved"
+      core_slo_scope: "global" | "uptime_url" | "runtime_scope"
       educ_role: "mantenedora" | "polo" | "coordenador" | "consultor" | "aluno"
       fee_rule_scope:
         | "global"
@@ -22520,6 +22669,9 @@ export const Constants = {
         "consumidor",
       ],
       company_environment: ["demo", "teste", "real"],
+      core_incident_severity: ["sev1", "sev2", "sev3", "sev4"],
+      core_incident_status: ["open", "monitoring", "resolved"],
+      core_slo_scope: ["global", "uptime_url", "runtime_scope"],
       educ_role: ["mantenedora", "polo", "coordenador", "consultor", "aluno"],
       fee_rule_scope: [
         "global",
