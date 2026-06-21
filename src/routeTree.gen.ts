@@ -412,6 +412,7 @@ import { Route as AuthenticatedAdminCofreCredenciaisRouteImport } from './routes
 import { Route as AuthenticatedAdminCobrancasRouteImport } from './routes/_authenticated/admin.cobrancas'
 import { Route as AuthenticatedAdminClubeRouteImport } from './routes/_authenticated/admin.clube'
 import { Route as AuthenticatedAdminChurnRiskRouteImport } from './routes/_authenticated/admin.churn-risk'
+import { Route as AuthenticatedAdminCatalogoMatrizRouteImport } from './routes/_authenticated/admin.catalogo-matriz'
 import { Route as AuthenticatedAdminCatalogIntentsRouteImport } from './routes/_authenticated/admin.catalog-intents'
 import { Route as AuthenticatedAdminCatalogAnalyticsRouteImport } from './routes/_authenticated/admin.catalog-analytics'
 import { Route as AuthenticatedAdminBillingPolicyRouteImport } from './routes/_authenticated/admin.billing-policy'
@@ -2710,6 +2711,12 @@ const AuthenticatedAdminChurnRiskRoute =
     path: '/admin/churn-risk',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminCatalogoMatrizRoute =
+  AuthenticatedAdminCatalogoMatrizRouteImport.update({
+    id: '/admin/catalogo-matriz',
+    path: '/admin/catalogo-matriz',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminCatalogIntentsRoute =
   AuthenticatedAdminCatalogIntentsRouteImport.update({
     id: '/admin/catalog-intents',
@@ -3340,6 +3347,7 @@ export interface FileRoutesByFullPath {
   '/admin/billing-policy': typeof AuthenticatedAdminBillingPolicyRoute
   '/admin/catalog-analytics': typeof AuthenticatedAdminCatalogAnalyticsRoute
   '/admin/catalog-intents': typeof AuthenticatedAdminCatalogIntentsRoute
+  '/admin/catalogo-matriz': typeof AuthenticatedAdminCatalogoMatrizRoute
   '/admin/churn-risk': typeof AuthenticatedAdminChurnRiskRoute
   '/admin/clube': typeof AuthenticatedAdminClubeRoute
   '/admin/cobrancas': typeof AuthenticatedAdminCobrancasRoute
@@ -3808,6 +3816,7 @@ export interface FileRoutesByTo {
   '/admin/billing-policy': typeof AuthenticatedAdminBillingPolicyRoute
   '/admin/catalog-analytics': typeof AuthenticatedAdminCatalogAnalyticsRoute
   '/admin/catalog-intents': typeof AuthenticatedAdminCatalogIntentsRoute
+  '/admin/catalogo-matriz': typeof AuthenticatedAdminCatalogoMatrizRoute
   '/admin/churn-risk': typeof AuthenticatedAdminChurnRiskRoute
   '/admin/clube': typeof AuthenticatedAdminClubeRoute
   '/admin/cobrancas': typeof AuthenticatedAdminCobrancasRoute
@@ -4290,6 +4299,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/billing-policy': typeof AuthenticatedAdminBillingPolicyRoute
   '/_authenticated/admin/catalog-analytics': typeof AuthenticatedAdminCatalogAnalyticsRoute
   '/_authenticated/admin/catalog-intents': typeof AuthenticatedAdminCatalogIntentsRoute
+  '/_authenticated/admin/catalogo-matriz': typeof AuthenticatedAdminCatalogoMatrizRoute
   '/_authenticated/admin/churn-risk': typeof AuthenticatedAdminChurnRiskRoute
   '/_authenticated/admin/clube': typeof AuthenticatedAdminClubeRoute
   '/_authenticated/admin/cobrancas': typeof AuthenticatedAdminCobrancasRoute
@@ -4771,6 +4781,7 @@ export interface FileRouteTypes {
     | '/admin/billing-policy'
     | '/admin/catalog-analytics'
     | '/admin/catalog-intents'
+    | '/admin/catalogo-matriz'
     | '/admin/churn-risk'
     | '/admin/clube'
     | '/admin/cobrancas'
@@ -5239,6 +5250,7 @@ export interface FileRouteTypes {
     | '/admin/billing-policy'
     | '/admin/catalog-analytics'
     | '/admin/catalog-intents'
+    | '/admin/catalogo-matriz'
     | '/admin/churn-risk'
     | '/admin/clube'
     | '/admin/cobrancas'
@@ -5720,6 +5732,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/billing-policy'
     | '/_authenticated/admin/catalog-analytics'
     | '/_authenticated/admin/catalog-intents'
+    | '/_authenticated/admin/catalogo-matriz'
     | '/_authenticated/admin/churn-risk'
     | '/_authenticated/admin/clube'
     | '/_authenticated/admin/cobrancas'
@@ -8997,6 +9010,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminChurnRiskRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/catalogo-matriz': {
+      id: '/_authenticated/admin/catalogo-matriz'
+      path: '/admin/catalogo-matriz'
+      fullPath: '/admin/catalogo-matriz'
+      preLoaderRoute: typeof AuthenticatedAdminCatalogoMatrizRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/catalog-intents': {
       id: '/_authenticated/admin/catalog-intents'
       path: '/admin/catalog-intents'
@@ -10191,6 +10211,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminBillingPolicyRoute: typeof AuthenticatedAdminBillingPolicyRoute
   AuthenticatedAdminCatalogAnalyticsRoute: typeof AuthenticatedAdminCatalogAnalyticsRoute
   AuthenticatedAdminCatalogIntentsRoute: typeof AuthenticatedAdminCatalogIntentsRoute
+  AuthenticatedAdminCatalogoMatrizRoute: typeof AuthenticatedAdminCatalogoMatrizRoute
   AuthenticatedAdminChurnRiskRoute: typeof AuthenticatedAdminChurnRiskRoute
   AuthenticatedAdminClubeRoute: typeof AuthenticatedAdminClubeRoute
   AuthenticatedAdminCobrancasRoute: typeof AuthenticatedAdminCobrancasRoute
@@ -10352,6 +10373,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminCatalogAnalyticsRoute:
     AuthenticatedAdminCatalogAnalyticsRoute,
   AuthenticatedAdminCatalogIntentsRoute: AuthenticatedAdminCatalogIntentsRoute,
+  AuthenticatedAdminCatalogoMatrizRoute: AuthenticatedAdminCatalogoMatrizRoute,
   AuthenticatedAdminChurnRiskRoute: AuthenticatedAdminChurnRiskRoute,
   AuthenticatedAdminClubeRoute: AuthenticatedAdminClubeRoute,
   AuthenticatedAdminCobrancasRoute: AuthenticatedAdminCobrancasRoute,
