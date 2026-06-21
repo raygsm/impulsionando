@@ -1,12 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, EmptyState } from "@/components/app/PageElements";
 import { CompanyPicker } from "@/components/app/CompanyPicker";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Users2, Wrench, Clock, ListChecks, UsersRound } from "lucide-react";
+import { Calendar, Users2, Wrench, Clock, ListChecks, UsersRound, Radio } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/agenda/")({
   head: () => ({ meta: [{ title: "Agenda" }] }),
