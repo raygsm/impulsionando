@@ -435,12 +435,14 @@ function OperacaoPage() {
           {isSuper && <TabsTrigger value="super">Super Admin</TabsTrigger>}
           <TabsTrigger value="empresa">Empresa</TabsTrigger>
           <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
+          {isSuper && <TabsTrigger value="funnel">Funil</TabsTrigger>}
           {isSuper && <TabsTrigger value="contador">Contador</TabsTrigger>}
           {isSuper && <TabsTrigger value="slo">SLO</TabsTrigger>}
         </TabsList>
         {isSuper && <TabsContent value="super" className="mt-6"><SuperAdminTab /></TabsContent>}
         <TabsContent value="empresa" className="mt-6"><EmpresaTab /></TabsContent>
         <TabsContent value="marketplace" className="mt-6"><MarketplaceTab companyId={isSuper ? undefined : activeCompanyId ?? undefined} /></TabsContent>
+        {isSuper && <TabsContent value="funnel" className="mt-6"><FunnelTab /></TabsContent>}
         {isSuper && <TabsContent value="contador" className="mt-6"><ContadorTab /></TabsContent>}
         {isSuper && <TabsContent value="slo" className="mt-6"><SloTab /></TabsContent>}
       </Tabs>
