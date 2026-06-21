@@ -409,6 +409,7 @@ import { Route as AuthenticatedAdminExecutiveBriefingRouteImport } from './route
 import { Route as AuthenticatedAdminCommandCenterRouteImport } from './routes/_authenticated/admin.command-center'
 import { Route as AuthenticatedAdminCohortRetentionRouteImport } from './routes/_authenticated/admin.cohort-retention'
 import { Route as AuthenticatedAdminCofreCredenciaisRouteImport } from './routes/_authenticated/admin.cofre-credenciais'
+import { Route as AuthenticatedAdminCockpitTenantsRouteImport } from './routes/_authenticated/admin.cockpit-tenants'
 import { Route as AuthenticatedAdminCobrancasRouteImport } from './routes/_authenticated/admin.cobrancas'
 import { Route as AuthenticatedAdminClubeRouteImport } from './routes/_authenticated/admin.clube'
 import { Route as AuthenticatedAdminChurnRiskRouteImport } from './routes/_authenticated/admin.churn-risk'
@@ -2694,6 +2695,12 @@ const AuthenticatedAdminCofreCredenciaisRoute =
     path: '/admin/cofre-credenciais',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminCockpitTenantsRoute =
+  AuthenticatedAdminCockpitTenantsRouteImport.update({
+    id: '/admin/cockpit-tenants',
+    path: '/admin/cockpit-tenants',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminCobrancasRoute =
   AuthenticatedAdminCobrancasRouteImport.update({
     id: '/admin/cobrancas',
@@ -3351,6 +3358,7 @@ export interface FileRoutesByFullPath {
   '/admin/churn-risk': typeof AuthenticatedAdminChurnRiskRoute
   '/admin/clube': typeof AuthenticatedAdminClubeRoute
   '/admin/cobrancas': typeof AuthenticatedAdminCobrancasRoute
+  '/admin/cockpit-tenants': typeof AuthenticatedAdminCockpitTenantsRoute
   '/admin/cofre-credenciais': typeof AuthenticatedAdminCofreCredenciaisRoute
   '/admin/cohort-retention': typeof AuthenticatedAdminCohortRetentionRoute
   '/admin/command-center': typeof AuthenticatedAdminCommandCenterRoute
@@ -3820,6 +3828,7 @@ export interface FileRoutesByTo {
   '/admin/churn-risk': typeof AuthenticatedAdminChurnRiskRoute
   '/admin/clube': typeof AuthenticatedAdminClubeRoute
   '/admin/cobrancas': typeof AuthenticatedAdminCobrancasRoute
+  '/admin/cockpit-tenants': typeof AuthenticatedAdminCockpitTenantsRoute
   '/admin/cofre-credenciais': typeof AuthenticatedAdminCofreCredenciaisRoute
   '/admin/cohort-retention': typeof AuthenticatedAdminCohortRetentionRoute
   '/admin/command-center': typeof AuthenticatedAdminCommandCenterRoute
@@ -4303,6 +4312,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/churn-risk': typeof AuthenticatedAdminChurnRiskRoute
   '/_authenticated/admin/clube': typeof AuthenticatedAdminClubeRoute
   '/_authenticated/admin/cobrancas': typeof AuthenticatedAdminCobrancasRoute
+  '/_authenticated/admin/cockpit-tenants': typeof AuthenticatedAdminCockpitTenantsRoute
   '/_authenticated/admin/cofre-credenciais': typeof AuthenticatedAdminCofreCredenciaisRoute
   '/_authenticated/admin/cohort-retention': typeof AuthenticatedAdminCohortRetentionRoute
   '/_authenticated/admin/command-center': typeof AuthenticatedAdminCommandCenterRoute
@@ -4785,6 +4795,7 @@ export interface FileRouteTypes {
     | '/admin/churn-risk'
     | '/admin/clube'
     | '/admin/cobrancas'
+    | '/admin/cockpit-tenants'
     | '/admin/cofre-credenciais'
     | '/admin/cohort-retention'
     | '/admin/command-center'
@@ -5254,6 +5265,7 @@ export interface FileRouteTypes {
     | '/admin/churn-risk'
     | '/admin/clube'
     | '/admin/cobrancas'
+    | '/admin/cockpit-tenants'
     | '/admin/cofre-credenciais'
     | '/admin/cohort-retention'
     | '/admin/command-center'
@@ -5736,6 +5748,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/churn-risk'
     | '/_authenticated/admin/clube'
     | '/_authenticated/admin/cobrancas'
+    | '/_authenticated/admin/cockpit-tenants'
     | '/_authenticated/admin/cofre-credenciais'
     | '/_authenticated/admin/cohort-retention'
     | '/_authenticated/admin/command-center'
@@ -8989,6 +9002,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCofreCredenciaisRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/cockpit-tenants': {
+      id: '/_authenticated/admin/cockpit-tenants'
+      path: '/admin/cockpit-tenants'
+      fullPath: '/admin/cockpit-tenants'
+      preLoaderRoute: typeof AuthenticatedAdminCockpitTenantsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/cobrancas': {
       id: '/_authenticated/admin/cobrancas'
       path: '/admin/cobrancas'
@@ -10215,6 +10235,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminChurnRiskRoute: typeof AuthenticatedAdminChurnRiskRoute
   AuthenticatedAdminClubeRoute: typeof AuthenticatedAdminClubeRoute
   AuthenticatedAdminCobrancasRoute: typeof AuthenticatedAdminCobrancasRoute
+  AuthenticatedAdminCockpitTenantsRoute: typeof AuthenticatedAdminCockpitTenantsRoute
   AuthenticatedAdminCofreCredenciaisRoute: typeof AuthenticatedAdminCofreCredenciaisRoute
   AuthenticatedAdminCohortRetentionRoute: typeof AuthenticatedAdminCohortRetentionRoute
   AuthenticatedAdminCommandCenterRoute: typeof AuthenticatedAdminCommandCenterRoute
@@ -10377,6 +10398,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminChurnRiskRoute: AuthenticatedAdminChurnRiskRoute,
   AuthenticatedAdminClubeRoute: AuthenticatedAdminClubeRoute,
   AuthenticatedAdminCobrancasRoute: AuthenticatedAdminCobrancasRoute,
+  AuthenticatedAdminCockpitTenantsRoute: AuthenticatedAdminCockpitTenantsRoute,
   AuthenticatedAdminCofreCredenciaisRoute:
     AuthenticatedAdminCofreCredenciaisRoute,
   AuthenticatedAdminCohortRetentionRoute:
