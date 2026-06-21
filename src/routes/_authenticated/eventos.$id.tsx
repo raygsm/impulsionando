@@ -200,7 +200,13 @@ function EventDetail() {
 
       <div className="grid md:grid-cols-2 gap-4">
         <Card className="p-5 space-y-3">
-          <h2 className="font-semibold">Lotes / Tipos de ingresso</h2>
+          <h2 className="font-semibold flex items-center gap-2">
+            Lotes / Tipos de ingresso
+            <Badge variant="outline" className="gap-1 text-[10px] font-normal">
+              <Radio className={`w-3 h-3 ${liveOn ? "text-emerald-500 animate-pulse" : "text-muted-foreground"}`} />
+              Ao vivo
+            </Badge>
+          </h2>
           <div className="grid grid-cols-2 gap-2">
             <Input placeholder="Nome (ex: Pista)" value={tt.name} onChange={(e) => setTt({ ...tt, name: e.target.value })} />
             <Input placeholder="Preço" type="number" value={tt.price} onChange={(e) => setTt({ ...tt, price: e.target.value })} />
@@ -209,12 +215,36 @@ function EventDetail() {
           </div>
           <Button size="sm" onClick={() => mTt.mutate()} disabled={!tt.name || !tt.quantity}>Adicionar lote</Button>
           <div className="text-sm">
-            {(data?.ticketTypes ?? []).map((t) => (
-              <div key={t.id} className="flex justify-between py-1 border-t">
-                <span>{t.name}</span>
-                <span className="text-muted-foreground">R$ {Number(t.price).toFixed(2)} · {t.quantity_sold}/{t.quantity}</span>
-              </div>
-            ))}
+            {(data?.ticketTypes ?? []).map((t) => {
+              const sold = Number(t.quantity_sold ?? 0);
+              const total = Number(t.quantity ?? 0);
+              const remaining = Math.max(0, total - sold);
+              const pct = total > 0 ? (sold / total) * 100 : 0;
+              const status = remaining <= 0 ? "esgotado" : pct >= 90 ? "ultimos" : pct >= 60 ? "alta" : "ok";
+              const cls =
+                status === "esgotado" ? "bg-destructive/15 text-destructive" :
+                status === "ultimos" ? "bg-amber-500/15 text-amber-700 dark:text-amber-400" :
+                status === "alta" ? "bg-sky-500/15 text-sky-700 dark:text-sky-400" :
+                "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400";
+              const label =
+                status === "esgotado" ? "Esgotado" :
+                status === "ultimos" ? `${remaining} restantes — últimos!` :
+                `${remaining} restantes`;
+              return (
+                <div key={t.id} className="py-2 border-t">
+                  <div className="flex justify-between items-center gap-2">
+                    <span className="font-medium">{t.name}</span>
+                    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${cls}`}>{label}</span>
+                  </div>
+                  <div className="flex justify-between items-center mt-1 text-xs text-muted-foreground">
+                    <span>R$ {Number(t.price).toFixed(2)} · vendidos {sold}/{total}</span>
+                  </div>
+                  <div className="h-1 mt-1 rounded bg-muted overflow-hidden">
+                    <div className={`h-full ${status === "esgotado" ? "bg-destructive" : status === "ultimos" ? "bg-amber-500" : status === "alta" ? "bg-sky-500" : "bg-emerald-500"}`} style={{ width: `${Math.min(100, pct)}%` }} />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </Card>
 
@@ -223,7 +253,10 @@ function EventDetail() {
           <div className="grid grid-cols-2 gap-2">
             <select className="border rounded-md p-2 text-sm bg-background" value={iss.ttId} onChange={(e) => setIss({ ...iss, ttId: e.target.value })}>
               <option value="">Lote…</option>
-              {(data?.ticketTypes ?? []).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+              {(data?.ticketTypes ?? []).map((t) => {
+                const remaining = Math.max(0, Number(t.quantity ?? 0) - Number(t.quantity_sold ?? 0));
+                return <option key={t.id} value={t.id} disabled={remaining <= 0}>{t.name} — {remaining > 0 ? `${remaining} restantes` : "esgotado"}</option>;
+              })}
             </select>
             <Input placeholder="Qtd" type="number" value={iss.qty} onChange={(e) => setIss({ ...iss, qty: e.target.value })} />
             <Input placeholder="Nome do comprador" value={iss.name} onChange={(e) => setIss({ ...iss, name: e.target.value })} />
