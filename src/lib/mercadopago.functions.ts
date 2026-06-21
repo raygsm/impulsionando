@@ -196,7 +196,10 @@ export const createPixPayment = createServerFn({ method: "POST" })
       ticket_url: json.point_of_interaction?.transaction_data?.ticket_url,
       expires_at: json.date_of_expiration,
     };
+      },
+    );
   });
+
 
 const CardInput = z.object({
   plan_id: z.string().uuid(),
