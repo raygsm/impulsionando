@@ -113,6 +113,7 @@ function Page() {
   const confirmSale = useMutation({
     mutationFn: async () => {
       if (!items.length) throw new Error("Adicione ao menos um item");
+      if (hasBlockingStock) throw new Error("Estoque insuficiente para um ou mais itens");
       if (Math.abs(paid - total) > 0.01) throw new Error("Pagamentos não fecham com o total");
       for (const p of pays) if (!p.payment_method_id || !p.account_id) throw new Error("Selecione método e conta");
 
