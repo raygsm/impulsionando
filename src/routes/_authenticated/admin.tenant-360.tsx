@@ -1,13 +1,15 @@
 import { createFileRoute, useSearch } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { getTenant360 } from "@/lib/tenant-360.functions";
+import { getTenantInsights } from "@/lib/tenant-insights.functions";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, DollarSign, Package, AlertTriangle, Activity, Mail, Users } from "lucide-react";
+import { Building2, DollarSign, Package, AlertTriangle, Activity, Mail, Users, Sparkles } from "lucide-react";
 
 type Search = { companyId?: string };
 
@@ -39,6 +41,9 @@ function Tenant360Page() {
     enabled: Boolean(companyId),
   });
 
+  const insightsFn = useServerFn(getTenantInsights);
+  const insights = useMutation({ mutationFn: (cid: string) => insightsFn({ data: { companyId: cid } }) });
+
   return (
     <div className="p-6 space-y-6">
       <div>
@@ -68,6 +73,23 @@ function Tenant360Page() {
             <Card className="p-4"><div className="flex items-center gap-2 text-sm text-muted-foreground"><AlertTriangle className="h-4 w-4" /> Tickets abertos</div><div className="text-2xl font-bold mt-1">{detail.data.tickets.open}</div></Card>
             <Card className="p-4"><div className="flex items-center gap-2 text-sm text-muted-foreground"><Activity className="h-4 w-4" /> Eventos 90d</div><div className="text-2xl font-bold mt-1">{detail.data.runtime.length}</div></Card>
           </div>
+
+          <Card className="p-4 border-primary/30 bg-primary/5">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-semibold flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> Insights de IA</h2>
+              <Button size="sm" onClick={() => insights.mutate(companyId!)} disabled={insights.isPending}>
+                {insights.isPending ? "Analisando…" : insights.data ? "Reanalisar" : "Gerar análise"}
+              </Button>
+            </div>
+            {insights.data?.error && <p className="text-sm text-destructive">{insights.data.error}</p>}
+            {insights.data?.insights && (
+              <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">{insights.data.insights}</div>
+            )}
+            {!insights.data && !insights.isPending && (
+              <p className="text-sm text-muted-foreground">Gere uma análise individual baseada em contrato, módulos, suporte e atividade dos últimos 30 dias.</p>
+            )}
+          </Card>
+
 
           <div className="grid md:grid-cols-2 gap-4">
             <Card className="p-4">
