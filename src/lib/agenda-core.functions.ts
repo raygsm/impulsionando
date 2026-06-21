@@ -543,6 +543,30 @@ export const confirmAttendance = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// ===================== CLIENTE (autoatendimento) =====================
+
+export const listMyAppointments = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const sb = context.supabase;
+    const { data: customers } = await sb
+      .from("customers")
+      .select("id, company_id")
+      .eq("patient_user_id", context.userId);
+    const ids = (customers ?? []).map((c) => c.id);
+    if (ids.length === 0) return [];
+    const { data, error } = await sb
+      .from("agenda_appointments")
+      .select("id, company_id, starts_at, ends_at, status, service_id, professional_id, customer_id, notes")
+      .in("customer_id", ids)
+      .gte("starts_at", new Date(Date.now() - 7 * 86400_000).toISOString())
+      .order("starts_at", { ascending: true });
+    if (error) throw error;
+    return data ?? [];
+  });
+
+
+
 export const startService = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
