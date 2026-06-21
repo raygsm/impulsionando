@@ -110,7 +110,7 @@ function DemoEventosNicho() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
-      <DemoModeBanner />
+      <DemoModeBanner leadNiche="eventos" leadLabel="Eventos / WMP" leadOrigin="hub-nicho" />
 
       <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 w-full">
         <div className="mb-8">
