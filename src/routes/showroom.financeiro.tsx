@@ -57,7 +57,7 @@ type Receivable = {
   due: string;
   amount: number;
   status: "paid" | "open" | "late";
-  method: "pix" | "card" | "boleto" | "mercadopago" | "mercadopago";
+  method: "pix" | "card" | "boleto" | "mercadopago";
 };
 
 type CashRow = { day: string; in: number; out: number };

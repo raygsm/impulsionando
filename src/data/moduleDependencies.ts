@@ -35,7 +35,7 @@ export const MODULE_DEPENDENCIES: Record<string, ModuleDeps> = {
 /** Indica se o módulo precisa de credenciais/serviços externos para operar. */
 export const MODULE_EXTERNAL_REQUIREMENTS: Record<string, string[]> = {
   automacao:    ["WhatsApp Business API ou conector Z-API", "SMTP transacional"],
-  commerce:     ["Gateway de pagamento (Mercado Pago, Mercado Pago, Pix)"],
+  commerce:     ["Gateway de pagamento (Mercado Pago, Pix)"],
   delivery:     ["Gateway de pagamento", "Integração de mapas (opcional)"],
   eventos:      ["Gateway de pagamento"],
   white_label:  ["Domínio próprio", "Certificado SSL gerenciado"],
