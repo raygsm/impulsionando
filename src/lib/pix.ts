@@ -4,8 +4,8 @@
  *
  * Notes:
  *  - Used both by the legacy "Pix fallback" dialog (fixed receiver/CNPJ)
- *    and by the new /teste PixTestGenerator (Pix from lead data).
- *  - Automatic confirmation requires a PSP/Pix API (e.g. InfinitePay).
+ *    and por geradores Pix internos (Pix from lead data).
+ *  - Automatic confirmation requires a PSP/Pix API (e.g. Mercado Pago).
  *    The static code here is valid for visual / functional testing only.
  */
 

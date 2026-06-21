@@ -49,13 +49,8 @@ export const createTableInvoice = createServerFn({ method: "POST" })
     };
     if (!r?.ok) throw new Error(r?.error ?? "fail");
 
-    let pixUrl = r.pix_url ?? null;
-    let configured = !!pixUrl;
-    if (!pixUrl && r.order_nsu && typeof r.amount_cents === "number") {
-      const built = buildPixUrl(r.order_nsu, r.amount_cents);
-      pixUrl = built.pix_url;
-      configured = built.configured;
-    }
+    const pixUrl = r.pix_url ?? null;
+    const configured = !!pixUrl;
     return {
       ok: true,
       invoice_id: r.invoice_id!,
@@ -81,13 +76,8 @@ export const forceNewTableInvoice = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     const r = res as any;
     if (!r?.ok) throw new Error(r?.error ?? "fail");
-    let pixUrl = r.pix_url ?? null;
-    let configured = !!pixUrl;
-    if (!pixUrl && r.order_nsu && typeof r.amount_cents === "number") {
-      const built = buildPixUrl(r.order_nsu, r.amount_cents);
-      pixUrl = built.pix_url;
-      configured = built.configured;
-    }
+    const pixUrl = r.pix_url ?? null;
+    const configured = !!pixUrl;
     return {
       ok: true,
       invoice_id: r.invoice_id,
