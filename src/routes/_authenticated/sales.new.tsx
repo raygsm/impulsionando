@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, EmptyState } from "@/components/app/PageElements";
 import { CompanyPicker } from "@/components/app/CompanyPicker";
@@ -9,8 +9,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, ShoppingCart } from "lucide-react";
+import { Plus, Trash2, ShoppingCart, AlertTriangle, PackageCheck, PackageX, Radio } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/sales/new")({
@@ -26,16 +27,48 @@ type Pay = { payment_method_id: string; account_id: string; amount: number };
 function Page() {
   const { companyId } = useActiveCompany();
   const nav = useNavigate();
+  const qc = useQueryClient();
   const [customerName, setCustomerName] = useState("");
   const [customerDoc, setCustomerDoc] = useState("");
   const [discount, setDiscount] = useState(0);
   const [items, setItems] = useState<Item[]>([]);
   const [pays, setPays] = useState<Pay[]>([]);
+  const [liveOn, setLiveOn] = useState(false);
 
+  const productsKey = ["pdv-products", companyId] as const;
   const { data: products } = useQuery({
-    queryKey: ["pdv-products", companyId], enabled: !!companyId,
-    queryFn: async () => (await supabase.from("inv_products").select("id, name, sale_price, unit").eq("company_id", companyId).eq("is_active", true).order("name").limit(500)).data ?? [],
+    queryKey: productsKey, enabled: !!companyId,
+    queryFn: async () => (await supabase.from("inv_products").select("id, name, sale_price, unit, current_stock, min_stock, track_stock, allow_negative").eq("company_id", companyId).eq("is_active", true).order("name").limit(500)).data ?? [],
+    refetchInterval: 15000,
+    refetchOnWindowFocus: true,
   });
+
+  // Realtime: estoque ao vivo enquanto a venda é montada
+  useEffect(() => {
+    if (!companyId) return;
+    const channel = supabase
+      .channel(`pdv-stock-${companyId}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "inv_products", filter: `company_id=eq.${companyId}` }, (payload) => {
+        const row = payload.new as { id: string; current_stock: number | null };
+        qc.setQueryData(productsKey, (prev: any) => Array.isArray(prev) ? prev.map((p: any) => p.id === row.id ? { ...p, current_stock: row.current_stock } : p) : prev);
+      })
+      .subscribe((status) => setLiveOn(status === "SUBSCRIBED"));
+    return () => { supabase.removeChannel(channel); };
+  }, [companyId, qc]);
+
+  const productById = useMemo(() => {
+    const m = new Map<string, any>();
+    (products ?? []).forEach((p: any) => m.set(p.id, p));
+    return m;
+  }, [products]);
+
+  // Quantidade já alocada nesta venda por produto (para calcular saldo disponível)
+  const reservedByProduct = useMemo(() => {
+    const m = new Map<string, number>();
+    items.forEach((it) => { if (it.product_id) m.set(it.product_id, (m.get(it.product_id) ?? 0) + (Number(it.quantity) || 0)); });
+    return m;
+  }, [items]);
+
   const { data: methods } = useQuery({
     queryKey: ["pdv-methods", companyId], enabled: !!companyId,
     queryFn: async () => (await supabase.from("fin_payment_methods").select("id, name").eq("company_id", companyId).eq("is_active", true).order("name")).data ?? [],
@@ -47,6 +80,22 @@ function Page() {
 
   const subtotal = useMemo(() => items.reduce((s, i) => s + i.quantity * i.unit_price - i.discount, 0), [items]);
   const total = Math.max(0, subtotal - discount);
+
+  // Validação de estoque em tempo real
+  const stockIssues = useMemo(() => {
+    const issues: { line: number; name: string; available: number; requested: number; blocking: boolean }[] = [];
+    items.forEach((it, idx) => {
+      if (!it.product_id) return;
+      const p = productById.get(it.product_id);
+      if (!p || !p.track_stock) return;
+      const available = Number(p.current_stock ?? 0);
+      if ((it.quantity ?? 0) > available) {
+        issues.push({ line: idx + 1, name: p.name, available, requested: it.quantity, blocking: !p.allow_negative });
+      }
+    });
+    return issues;
+  }, [items, productById]);
+  const hasBlockingStock = stockIssues.some((s) => s.blocking);
   const paid = useMemo(() => pays.reduce((s, p) => s + p.amount, 0), [pays]);
 
   function addProduct(productId: string) {
@@ -64,6 +113,7 @@ function Page() {
   const confirmSale = useMutation({
     mutationFn: async () => {
       if (!items.length) throw new Error("Adicione ao menos um item");
+      if (hasBlockingStock) throw new Error("Estoque insuficiente para um ou mais itens");
       if (Math.abs(paid - total) > 0.01) throw new Error("Pagamentos não fecham com o total");
       for (const p of pays) if (!p.payment_method_id || !p.account_id) throw new Error("Selecione método e conta");
 
@@ -117,28 +167,84 @@ function Page() {
           </Card>
 
           <Card className="shadow-card">
-            <div className="p-4 border-b flex items-center justify-between">
-              <h3 className="font-semibold text-sm">Itens</h3>
+            <div className="p-4 border-b flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-sm">Itens</h3>
+                <Badge variant="outline" className="gap-1 text-[10px]">
+                  <Radio className={`w-3 h-3 ${liveOn ? "text-emerald-500 animate-pulse" : "text-muted-foreground"}`} />
+                  Estoque ao vivo
+                </Badge>
+              </div>
               <div className="flex gap-2">
                 <Select onValueChange={addProduct}>
-                  <SelectTrigger className="w-64"><SelectValue placeholder="Adicionar produto" /></SelectTrigger>
-                  <SelectContent>{products?.map((p) => <SelectItem key={p.id} value={p.id}>{p.name} — {fmt(Number(p.sale_price))}</SelectItem>)}</SelectContent>
+                  <SelectTrigger className="w-72"><SelectValue placeholder="Adicionar produto" /></SelectTrigger>
+                  <SelectContent>{products?.map((p: any) => {
+                    const tracks = !!p.track_stock;
+                    const stk = Number(p.current_stock ?? 0);
+                    const low = tracks && stk <= Number(p.min_stock ?? 0);
+                    const out = tracks && stk <= 0;
+                    return (
+                      <SelectItem key={p.id} value={p.id} disabled={out && !p.allow_negative}>
+                        <div className="flex items-center justify-between gap-3 w-full">
+                          <span className="truncate">{p.name} — {fmt(Number(p.sale_price))}</span>
+                          {tracks && (
+                            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${out ? "bg-destructive/15 text-destructive" : low ? "bg-amber-500/15 text-amber-700 dark:text-amber-400" : "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"}`}>
+                              {out ? "sem estoque" : `${stk} ${p.unit ?? "un"}`}
+                            </span>
+                          )}
+                        </div>
+                      </SelectItem>
+                    );
+                  })}</SelectContent>
                 </Select>
                 <Button variant="outline" size="sm" onClick={addFreeLine}><Plus className="w-4 h-4 mr-1" />Item livre</Button>
               </div>
             </div>
             <div className="divide-y">
               {!items.length && <div className="p-6 text-center text-sm text-muted-foreground">Nenhum item.</div>}
-              {items.map((it, i) => (
-                <div key={i} className="p-3 grid grid-cols-12 gap-2 items-end">
-                  <div className="col-span-5"><Label className="text-xs">Descrição</Label><Input value={it.description} onChange={(e) => updateItem(i, { description: e.target.value })} /></div>
-                  <div className="col-span-2"><Label className="text-xs">Qtd</Label><Input type="number" step="0.001" value={it.quantity} onChange={(e) => updateItem(i, { quantity: Number(e.target.value) })} /></div>
-                  <div className="col-span-2"><Label className="text-xs">Preço</Label><Input type="number" step="0.01" value={it.unit_price} onChange={(e) => updateItem(i, { unit_price: Number(e.target.value) })} /></div>
-                  <div className="col-span-2"><Label className="text-xs">Desc.</Label><Input type="number" step="0.01" value={it.discount} onChange={(e) => updateItem(i, { discount: Number(e.target.value) })} /></div>
-                  <Button variant="ghost" size="sm" onClick={() => removeItem(i)}><Trash2 className="w-4 h-4" /></Button>
-                </div>
-              ))}
+              {items.map((it, i) => {
+                const p = it.product_id ? productById.get(it.product_id) : null;
+                const tracks = p?.track_stock;
+                const stk = Number(p?.current_stock ?? 0);
+                const reserved = it.product_id ? (reservedByProduct.get(it.product_id) ?? 0) : 0;
+                const remaining = stk - reserved;
+                const over = tracks && it.quantity > stk;
+                const lowAfter = tracks && remaining >= 0 && remaining <= Number(p?.min_stock ?? 0);
+                return (
+                  <div key={i} className="p-3 grid grid-cols-12 gap-2 items-end">
+                    <div className="col-span-5">
+                      <Label className="text-xs flex items-center gap-2">
+                        Descrição
+                        {tracks && (
+                          over ? (
+                            <Badge variant="destructive" className="gap-1 text-[10px]"><PackageX className="w-3 h-3" />Estoque {stk}</Badge>
+                          ) : lowAfter ? (
+                            <Badge variant="outline" className="gap-1 text-[10px] border-amber-500/40 text-amber-700 dark:text-amber-400"><AlertTriangle className="w-3 h-3" />Saldo {remaining}</Badge>
+                          ) : (
+                            <Badge variant="outline" className="gap-1 text-[10px] border-emerald-500/40 text-emerald-700 dark:text-emerald-400"><PackageCheck className="w-3 h-3" />Saldo {remaining}</Badge>
+                          )
+                        )}
+                      </Label>
+                      <Input value={it.description} onChange={(e) => updateItem(i, { description: e.target.value })} />
+                    </div>
+                    <div className="col-span-2"><Label className="text-xs">Qtd</Label><Input type="number" step="0.001" value={it.quantity} onChange={(e) => updateItem(i, { quantity: Number(e.target.value) })} className={over ? "border-destructive" : ""} /></div>
+                    <div className="col-span-2"><Label className="text-xs">Preço</Label><Input type="number" step="0.01" value={it.unit_price} onChange={(e) => updateItem(i, { unit_price: Number(e.target.value) })} /></div>
+                    <div className="col-span-2"><Label className="text-xs">Desc.</Label><Input type="number" step="0.01" value={it.discount} onChange={(e) => updateItem(i, { discount: Number(e.target.value) })} /></div>
+                    <Button variant="ghost" size="sm" onClick={() => removeItem(i)}><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                );
+              })}
             </div>
+            {stockIssues.length > 0 && (
+              <div className="p-3 border-t bg-amber-500/5 text-xs space-y-1">
+                {stockIssues.map((s, idx) => (
+                  <div key={idx} className={`flex items-center gap-2 ${s.blocking ? "text-destructive" : "text-amber-700 dark:text-amber-400"}`}>
+                    <AlertTriangle className="w-3.5 h-3.5" />
+                    Item {s.line} ({s.name}): pedido {s.requested}, em estoque {s.available}{s.blocking ? " — venda bloqueada" : " — saldo ficará negativo"}.
+                  </div>
+                ))}
+              </div>
+            )}
           </Card>
 
           <Card className="shadow-card">
@@ -178,8 +284,8 @@ function Page() {
             <div className="flex justify-between"><span className="text-muted-foreground">Pago</span><span className={Math.abs(paid - total) > 0.01 ? "text-amber-600" : "text-emerald-600"}>{fmt(paid)}</span></div>
             <div className="flex justify-between text-xs"><span className="text-muted-foreground">Diferença</span><span>{fmt(total - paid)}</span></div>
           </div>
-          <Button className="w-full mt-4" onClick={() => confirmSale.mutate()} disabled={confirmSale.isPending || !items.length}>
-            Confirmar venda
+          <Button className="w-full mt-4" onClick={() => confirmSale.mutate()} disabled={confirmSale.isPending || !items.length || hasBlockingStock}>
+            {hasBlockingStock ? "Estoque insuficiente" : "Confirmar venda"}
           </Button>
         </Card>
       </div>
