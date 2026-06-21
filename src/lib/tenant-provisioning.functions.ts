@@ -146,7 +146,10 @@ export const provisionTenant = createServerFn({ method: 'POST' })
       adminUserId,
       inviteSent,
     }
+      },
+    )
   })
+
 
 // ============= Gestão pós-provisionamento =============
 
