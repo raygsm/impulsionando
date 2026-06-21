@@ -7074,6 +7074,87 @@ export type Database = {
           },
         ]
       }
+      core_fee_rules: {
+        Row: {
+          active: boolean
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          ends_at: string | null
+          fixed_cents: number
+          id: string
+          max_cents: number | null
+          metadata: Json
+          method: Database["public"]["Enums"]["payment_method_kind"] | null
+          min_cents: number
+          niche_id: string | null
+          notes: string | null
+          percent_bps: number
+          priority: number
+          product_id: string | null
+          scope: Database["public"]["Enums"]["fee_rule_scope"]
+          starts_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          fixed_cents?: number
+          id?: string
+          max_cents?: number | null
+          metadata?: Json
+          method?: Database["public"]["Enums"]["payment_method_kind"] | null
+          min_cents?: number
+          niche_id?: string | null
+          notes?: string | null
+          percent_bps?: number
+          priority?: number
+          product_id?: string | null
+          scope: Database["public"]["Enums"]["fee_rule_scope"]
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          fixed_cents?: number
+          id?: string
+          max_cents?: number | null
+          metadata?: Json
+          method?: Database["public"]["Enums"]["payment_method_kind"] | null
+          min_cents?: number
+          niche_id?: string | null
+          notes?: string | null
+          percent_bps?: number
+          priority?: number
+          product_id?: string | null
+          scope?: Database["public"]["Enums"]["fee_rule_scope"]
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_fee_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_fee_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       core_integration_logs: {
         Row: {
           created_at: string
@@ -7722,6 +7803,84 @@ export type Database = {
           },
         ]
       }
+      core_payout_schedule_rules: {
+        Row: {
+          active: boolean
+          basis: Database["public"]["Enums"]["payout_schedule_basis"]
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          delay_days: number
+          ends_at: string | null
+          id: string
+          metadata: Json
+          method: Database["public"]["Enums"]["payment_method_kind"] | null
+          niche_id: string | null
+          notes: string | null
+          priority: number
+          product_id: string | null
+          reserve_bps: number
+          scope: Database["public"]["Enums"]["fee_rule_scope"]
+          starts_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          basis?: Database["public"]["Enums"]["payout_schedule_basis"]
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          delay_days: number
+          ends_at?: string | null
+          id?: string
+          metadata?: Json
+          method?: Database["public"]["Enums"]["payment_method_kind"] | null
+          niche_id?: string | null
+          notes?: string | null
+          priority?: number
+          product_id?: string | null
+          reserve_bps?: number
+          scope: Database["public"]["Enums"]["fee_rule_scope"]
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          basis?: Database["public"]["Enums"]["payout_schedule_basis"]
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          delay_days?: number
+          ends_at?: string | null
+          id?: string
+          metadata?: Json
+          method?: Database["public"]["Enums"]["payment_method_kind"] | null
+          niche_id?: string | null
+          notes?: string | null
+          priority?: number
+          product_id?: string | null
+          reserve_bps?: number
+          scope?: Database["public"]["Enums"]["fee_rule_scope"]
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_payout_schedule_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_payout_schedule_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       core_refund_rules: {
         Row: {
           accepted_reasons: string[]
@@ -7860,6 +8019,113 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "v_company_macro"
             referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      core_revenue_calculations: {
+        Row: {
+          affiliate_commission_cents: number
+          captured_at: string
+          company_id: string
+          coproducer_commission_cents: number
+          coupon_cents: number
+          created_at: string
+          fee_rule_id: string | null
+          gateway_fee_cents: number
+          gross_cents: number
+          id: string
+          impulsionando_fee_cents: number
+          input_hash: string
+          legs: Json
+          metadata: Json
+          method: Database["public"]["Enums"]["payment_method_kind"]
+          net_cents: number
+          release_date: string
+          reserve_cents: number
+          schedule_rule_id: string | null
+          source_id: string
+          source_table: string
+          status: Database["public"]["Enums"]["revenue_calc_status"]
+          version: number
+        }
+        Insert: {
+          affiliate_commission_cents?: number
+          captured_at: string
+          company_id: string
+          coproducer_commission_cents?: number
+          coupon_cents?: number
+          created_at?: string
+          fee_rule_id?: string | null
+          gateway_fee_cents?: number
+          gross_cents: number
+          id?: string
+          impulsionando_fee_cents?: number
+          input_hash: string
+          legs?: Json
+          metadata?: Json
+          method: Database["public"]["Enums"]["payment_method_kind"]
+          net_cents: number
+          release_date: string
+          reserve_cents?: number
+          schedule_rule_id?: string | null
+          source_id: string
+          source_table: string
+          status?: Database["public"]["Enums"]["revenue_calc_status"]
+          version?: number
+        }
+        Update: {
+          affiliate_commission_cents?: number
+          captured_at?: string
+          company_id?: string
+          coproducer_commission_cents?: number
+          coupon_cents?: number
+          created_at?: string
+          fee_rule_id?: string | null
+          gateway_fee_cents?: number
+          gross_cents?: number
+          id?: string
+          impulsionando_fee_cents?: number
+          input_hash?: string
+          legs?: Json
+          metadata?: Json
+          method?: Database["public"]["Enums"]["payment_method_kind"]
+          net_cents?: number
+          release_date?: string
+          reserve_cents?: number
+          schedule_rule_id?: string | null
+          source_id?: string
+          source_table?: string
+          status?: Database["public"]["Enums"]["revenue_calc_status"]
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_revenue_calculations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_revenue_calculations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_revenue_calculations_fee_rule_id_fkey"
+            columns: ["fee_rule_id"]
+            isOneToOne: false
+            referencedRelation: "core_fee_rules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_revenue_calculations_schedule_rule_id_fkey"
+            columns: ["schedule_rule_id"]
+            isOneToOne: false
+            referencedRelation: "core_payout_schedule_rules"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -18472,6 +18738,10 @@ export type Database = {
         Returns: undefined
       }
       _trial_norm: { Args: { _v: string }; Returns: string }
+      add_business_days: {
+        Args: { n_days: number; start_ts: string }
+        Returns: string
+      }
       add_table_order_item: {
         Args: {
           _item_id: string
@@ -18554,7 +18824,21 @@ export type Database = {
         Returns: string
       }
       billing_run_cycle: { Args: never; Returns: Json }
+      calc_transaction_split: {
+        Args: { _source_id: string; _source_table: string }
+        Returns: string
+      }
       company_identity_payload: { Args: { _company_id: string }; Returns: Json }
+      compute_payout_release_date: {
+        Args: {
+          _captured_at: string
+          _company_id: string
+          _method: Database["public"]["Enums"]["payment_method_kind"]
+          _niche_id: string
+          _product_id: string
+        }
+        Returns: string
+      }
       consumer_premium_overview: { Args: never; Returns: Json }
       consumer_upgrade_to_premium: {
         Args: never
@@ -18894,6 +19178,77 @@ export type Database = {
           pdv_state: string
         }[]
       }
+      resolve_fee_rule: {
+        Args: {
+          _at?: string
+          _company_id: string
+          _method: Database["public"]["Enums"]["payment_method_kind"]
+          _niche_id: string
+          _product_id: string
+        }
+        Returns: {
+          active: boolean
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          ends_at: string | null
+          fixed_cents: number
+          id: string
+          max_cents: number | null
+          metadata: Json
+          method: Database["public"]["Enums"]["payment_method_kind"] | null
+          min_cents: number
+          niche_id: string | null
+          notes: string | null
+          percent_bps: number
+          priority: number
+          product_id: string | null
+          scope: Database["public"]["Enums"]["fee_rule_scope"]
+          starts_at: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "core_fee_rules"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      resolve_payout_schedule: {
+        Args: {
+          _at?: string
+          _company_id: string
+          _method: Database["public"]["Enums"]["payment_method_kind"]
+          _niche_id: string
+          _product_id: string
+        }
+        Returns: {
+          active: boolean
+          basis: Database["public"]["Enums"]["payout_schedule_basis"]
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          delay_days: number
+          ends_at: string | null
+          id: string
+          metadata: Json
+          method: Database["public"]["Enums"]["payment_method_kind"] | null
+          niche_id: string | null
+          notes: string | null
+          priority: number
+          product_id: string | null
+          reserve_bps: number
+          scope: Database["public"]["Enums"]["fee_rule_scope"]
+          starts_at: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "core_payout_schedule_rules"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       resolve_realestate_partner_token: {
         Args: { _token: string }
         Returns: Json
@@ -19071,6 +19426,15 @@ export type Database = {
         | "consumidor"
       company_environment: "demo" | "teste" | "real"
       educ_role: "mantenedora" | "polo" | "coordenador" | "consultor" | "aluno"
+      fee_rule_scope:
+        | "global"
+        | "niche"
+        | "company"
+        | "product"
+        | "service"
+        | "subscription"
+        | "affiliate"
+        | "coproducer"
       marocas_apartment_status:
         | "disponivel"
         | "ocupado"
@@ -19098,6 +19462,14 @@ export type Database = {
         | "lavanderia"
         | "manutencao"
         | "vistoria"
+      payment_method_kind:
+        | "pix"
+        | "credit_card"
+        | "boleto"
+        | "debit_card"
+        | "wallet"
+        | "other"
+      payout_schedule_basis: "business_days" | "calendar_days"
       realestate_approval_status:
         | "pending"
         | "approved"
@@ -19126,6 +19498,7 @@ export type Database = {
         | "kitnet"
         | "studio"
         | "outro"
+      revenue_calc_status: "draft" | "final" | "recalculated" | "voided"
       support_ticket_origin:
         | "form"
         | "email"
@@ -19391,6 +19764,16 @@ export const Constants = {
       ],
       company_environment: ["demo", "teste", "real"],
       educ_role: ["mantenedora", "polo", "coordenador", "consultor", "aluno"],
+      fee_rule_scope: [
+        "global",
+        "niche",
+        "company",
+        "product",
+        "service",
+        "subscription",
+        "affiliate",
+        "coproducer",
+      ],
       marocas_apartment_status: [
         "disponivel",
         "ocupado",
@@ -19422,6 +19805,15 @@ export const Constants = {
         "manutencao",
         "vistoria",
       ],
+      payment_method_kind: [
+        "pix",
+        "credit_card",
+        "boleto",
+        "debit_card",
+        "wallet",
+        "other",
+      ],
+      payout_schedule_basis: ["business_days", "calendar_days"],
       realestate_approval_status: [
         "pending",
         "approved",
@@ -19453,6 +19845,7 @@ export const Constants = {
         "studio",
         "outro",
       ],
+      revenue_calc_status: ["draft", "final", "recalculated", "voided"],
       support_ticket_origin: [
         "form",
         "email",
