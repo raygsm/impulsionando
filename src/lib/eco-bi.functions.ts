@@ -17,8 +17,15 @@ export const getEcosystemBI = createServerFn({ method: 'POST' })
   )
   .handler(async ({ data, context }) => {
     await assertCoreAdmin(context)
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const { captureServerError } = await import('@/lib/runtime-observability.functions')
+    return captureServerError(
+      { scope: 'eco-bi.getEcosystemBI', userId: context.userId, supabaseAdmin, context: { days: data.days } },
+      async () => {
     const sb = context.supabase
     const since = new Date(Date.now() - data.days * 24 * 60 * 60 * 1000).toISOString()
+
+
 
     const [
       companies,
@@ -101,6 +108,9 @@ export const getEcosystemBI = createServerFn({ method: 'POST' })
       lgpd: { totalConsentimentos: lgpd.length, concedidos: lgpdGrants },
       monetizacao: { payoutPagoCents: payoutCents, assinaturasAtivas: memActive },
     }
+      },
+    )
   })
+
 
 export type EcosystemBI = Awaited<ReturnType<typeof getEcosystemBI>>
