@@ -190,7 +190,12 @@ function Page() {
         title="Imóveis"
         description="Cadastro de imóveis disponíveis. Imóveis aprovados ficam públicos e disparam matching."
         action={
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            {liveOn && (
+              <Badge variant="outline" className="gap-1 text-emerald-600 border-emerald-300">
+                <Radio className="w-3 h-3 animate-pulse" /> Status ao vivo
+              </Badge>
+            )}
             <Button asChild variant="outline" size="sm">
               <Link to="/imobiliaria/aprovacoes">Fila de aprovação</Link>
             </Button>
