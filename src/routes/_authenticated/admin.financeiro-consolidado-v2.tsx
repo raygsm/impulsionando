@@ -81,7 +81,6 @@ function FinancialDashboardPage() {
                   ? "vs período anterior"
                   : `${d.kpis.netDeltaPct >= 0 ? "+" : ""}${d.kpis.netDeltaPct.toFixed(1)}% vs anterior`
               }
-              icon={d.kpis.netDeltaPct != null && d.kpis.netDeltaPct < 0 ? TrendingDown : TrendingUp}
             />
             <KpiCard label="Taxa Impulsionando" value={fmtBRL(d.kpis.feeBRL)} hint="capturada na janela" />
             <KpiCard label="Taxa de gateway" value={fmtBRL(d.kpis.gatewayFeeBRL)} hint="custo de processamento" />
