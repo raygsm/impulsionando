@@ -390,6 +390,7 @@ import { Route as AuthenticatedAdminUnitEconomicsRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminTrialsRouteImport } from './routes/_authenticated/admin.trials'
 import { Route as AuthenticatedAdminTenant360RouteImport } from './routes/_authenticated/admin.tenant-360'
 import { Route as AuthenticatedAdminSlaComplianceRouteImport } from './routes/_authenticated/admin.sla-compliance'
+import { Route as AuthenticatedAdminSecurityComplianceRouteImport } from './routes/_authenticated/admin.security-compliance'
 import { Route as AuthenticatedAdminRevenueQualityRouteImport } from './routes/_authenticated/admin.revenue-quality'
 import { Route as AuthenticatedAdminRevenueForecastRouteImport } from './routes/_authenticated/admin.revenue-forecast'
 import { Route as AuthenticatedAdminQualidadeRouteImport } from './routes/_authenticated/admin.qualidade'
@@ -2587,6 +2588,12 @@ const AuthenticatedAdminSlaComplianceRoute =
     path: '/admin/sla-compliance',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminSecurityComplianceRoute =
+  AuthenticatedAdminSecurityComplianceRouteImport.update({
+    id: '/admin/security-compliance',
+    path: '/admin/security-compliance',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminRevenueQualityRoute =
   AuthenticatedAdminRevenueQualityRouteImport.update({
     id: '/admin/revenue-quality',
@@ -3424,6 +3431,7 @@ export interface FileRoutesByFullPath {
   '/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
   '/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
   '/admin/revenue-quality': typeof AuthenticatedAdminRevenueQualityRoute
+  '/admin/security-compliance': typeof AuthenticatedAdminSecurityComplianceRoute
   '/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
   '/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
@@ -3900,6 +3908,7 @@ export interface FileRoutesByTo {
   '/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
   '/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
   '/admin/revenue-quality': typeof AuthenticatedAdminRevenueQualityRoute
+  '/admin/security-compliance': typeof AuthenticatedAdminSecurityComplianceRoute
   '/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
   '/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
@@ -4390,6 +4399,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
   '/_authenticated/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
   '/_authenticated/admin/revenue-quality': typeof AuthenticatedAdminRevenueQualityRoute
+  '/_authenticated/admin/security-compliance': typeof AuthenticatedAdminSecurityComplianceRoute
   '/_authenticated/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
   '/_authenticated/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/_authenticated/admin/trials': typeof AuthenticatedAdminTrialsRoute
@@ -4879,6 +4889,7 @@ export interface FileRouteTypes {
     | '/admin/qualidade'
     | '/admin/revenue-forecast'
     | '/admin/revenue-quality'
+    | '/admin/security-compliance'
     | '/admin/sla-compliance'
     | '/admin/tenant-360'
     | '/admin/trials'
@@ -5355,6 +5366,7 @@ export interface FileRouteTypes {
     | '/admin/qualidade'
     | '/admin/revenue-forecast'
     | '/admin/revenue-quality'
+    | '/admin/security-compliance'
     | '/admin/sla-compliance'
     | '/admin/tenant-360'
     | '/admin/trials'
@@ -5844,6 +5856,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/qualidade'
     | '/_authenticated/admin/revenue-forecast'
     | '/_authenticated/admin/revenue-quality'
+    | '/_authenticated/admin/security-compliance'
     | '/_authenticated/admin/sla-compliance'
     | '/_authenticated/admin/tenant-360'
     | '/_authenticated/admin/trials'
@@ -8946,6 +8959,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSlaComplianceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/security-compliance': {
+      id: '/_authenticated/admin/security-compliance'
+      path: '/admin/security-compliance'
+      fullPath: '/admin/security-compliance'
+      preLoaderRoute: typeof AuthenticatedAdminSecurityComplianceRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/revenue-quality': {
       id: '/_authenticated/admin/revenue-quality'
       path: '/admin/revenue-quality'
@@ -10379,6 +10399,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminQualidadeRoute: typeof AuthenticatedAdminQualidadeRoute
   AuthenticatedAdminRevenueForecastRoute: typeof AuthenticatedAdminRevenueForecastRoute
   AuthenticatedAdminRevenueQualityRoute: typeof AuthenticatedAdminRevenueQualityRoute
+  AuthenticatedAdminSecurityComplianceRoute: typeof AuthenticatedAdminSecurityComplianceRoute
   AuthenticatedAdminSlaComplianceRoute: typeof AuthenticatedAdminSlaComplianceRoute
   AuthenticatedAdminTenant360Route: typeof AuthenticatedAdminTenant360Route
   AuthenticatedAdminTrialsRoute: typeof AuthenticatedAdminTrialsRoute
@@ -10554,6 +10575,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRevenueForecastRoute:
     AuthenticatedAdminRevenueForecastRoute,
   AuthenticatedAdminRevenueQualityRoute: AuthenticatedAdminRevenueQualityRoute,
+  AuthenticatedAdminSecurityComplianceRoute:
+    AuthenticatedAdminSecurityComplianceRoute,
   AuthenticatedAdminSlaComplianceRoute: AuthenticatedAdminSlaComplianceRoute,
   AuthenticatedAdminTenant360Route: AuthenticatedAdminTenant360Route,
   AuthenticatedAdminTrialsRoute: AuthenticatedAdminTrialsRoute,
