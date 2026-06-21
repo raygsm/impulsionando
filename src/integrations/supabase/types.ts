@@ -15530,6 +15530,45 @@ export type Database = {
           },
         ]
       }
+      runtime_events: {
+        Row: {
+          company_id: string | null
+          context: Json
+          id: string
+          level: string
+          message: string
+          occurred_at: string
+          request_id: string | null
+          route: string | null
+          scope: string
+          user_id: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          context?: Json
+          id?: string
+          level: string
+          message: string
+          occurred_at?: string
+          request_id?: string | null
+          route?: string | null
+          scope: string
+          user_id?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          context?: Json
+          id?: string
+          level?: string
+          message?: string
+          occurred_at?: string
+          request_id?: string | null
+          route?: string | null
+          scope?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       sales_cash_session_counts: {
         Row: {
           counted_amount: number
