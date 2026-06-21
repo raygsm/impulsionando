@@ -167,28 +167,84 @@ function Page() {
           </Card>
 
           <Card className="shadow-card">
-            <div className="p-4 border-b flex items-center justify-between">
-              <h3 className="font-semibold text-sm">Itens</h3>
+            <div className="p-4 border-b flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-sm">Itens</h3>
+                <Badge variant="outline" className="gap-1 text-[10px]">
+                  <Radio className={`w-3 h-3 ${liveOn ? "text-emerald-500 animate-pulse" : "text-muted-foreground"}`} />
+                  Estoque ao vivo
+                </Badge>
+              </div>
               <div className="flex gap-2">
                 <Select onValueChange={addProduct}>
-                  <SelectTrigger className="w-64"><SelectValue placeholder="Adicionar produto" /></SelectTrigger>
-                  <SelectContent>{products?.map((p) => <SelectItem key={p.id} value={p.id}>{p.name} — {fmt(Number(p.sale_price))}</SelectItem>)}</SelectContent>
+                  <SelectTrigger className="w-72"><SelectValue placeholder="Adicionar produto" /></SelectTrigger>
+                  <SelectContent>{products?.map((p: any) => {
+                    const tracks = !!p.track_stock;
+                    const stk = Number(p.current_stock ?? 0);
+                    const low = tracks && stk <= Number(p.min_stock ?? 0);
+                    const out = tracks && stk <= 0;
+                    return (
+                      <SelectItem key={p.id} value={p.id} disabled={out && !p.allow_negative}>
+                        <div className="flex items-center justify-between gap-3 w-full">
+                          <span className="truncate">{p.name} — {fmt(Number(p.sale_price))}</span>
+                          {tracks && (
+                            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${out ? "bg-destructive/15 text-destructive" : low ? "bg-amber-500/15 text-amber-700 dark:text-amber-400" : "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"}`}>
+                              {out ? "sem estoque" : `${stk} ${p.unit ?? "un"}`}
+                            </span>
+                          )}
+                        </div>
+                      </SelectItem>
+                    );
+                  })}</SelectContent>
                 </Select>
                 <Button variant="outline" size="sm" onClick={addFreeLine}><Plus className="w-4 h-4 mr-1" />Item livre</Button>
               </div>
             </div>
             <div className="divide-y">
               {!items.length && <div className="p-6 text-center text-sm text-muted-foreground">Nenhum item.</div>}
-              {items.map((it, i) => (
-                <div key={i} className="p-3 grid grid-cols-12 gap-2 items-end">
-                  <div className="col-span-5"><Label className="text-xs">Descrição</Label><Input value={it.description} onChange={(e) => updateItem(i, { description: e.target.value })} /></div>
-                  <div className="col-span-2"><Label className="text-xs">Qtd</Label><Input type="number" step="0.001" value={it.quantity} onChange={(e) => updateItem(i, { quantity: Number(e.target.value) })} /></div>
-                  <div className="col-span-2"><Label className="text-xs">Preço</Label><Input type="number" step="0.01" value={it.unit_price} onChange={(e) => updateItem(i, { unit_price: Number(e.target.value) })} /></div>
-                  <div className="col-span-2"><Label className="text-xs">Desc.</Label><Input type="number" step="0.01" value={it.discount} onChange={(e) => updateItem(i, { discount: Number(e.target.value) })} /></div>
-                  <Button variant="ghost" size="sm" onClick={() => removeItem(i)}><Trash2 className="w-4 h-4" /></Button>
-                </div>
-              ))}
+              {items.map((it, i) => {
+                const p = it.product_id ? productById.get(it.product_id) : null;
+                const tracks = p?.track_stock;
+                const stk = Number(p?.current_stock ?? 0);
+                const reserved = it.product_id ? (reservedByProduct.get(it.product_id) ?? 0) : 0;
+                const remaining = stk - reserved;
+                const over = tracks && it.quantity > stk;
+                const lowAfter = tracks && remaining >= 0 && remaining <= Number(p?.min_stock ?? 0);
+                return (
+                  <div key={i} className="p-3 grid grid-cols-12 gap-2 items-end">
+                    <div className="col-span-5">
+                      <Label className="text-xs flex items-center gap-2">
+                        Descrição
+                        {tracks && (
+                          over ? (
+                            <Badge variant="destructive" className="gap-1 text-[10px]"><PackageX className="w-3 h-3" />Estoque {stk}</Badge>
+                          ) : lowAfter ? (
+                            <Badge variant="outline" className="gap-1 text-[10px] border-amber-500/40 text-amber-700 dark:text-amber-400"><AlertTriangle className="w-3 h-3" />Saldo {remaining}</Badge>
+                          ) : (
+                            <Badge variant="outline" className="gap-1 text-[10px] border-emerald-500/40 text-emerald-700 dark:text-emerald-400"><PackageCheck className="w-3 h-3" />Saldo {remaining}</Badge>
+                          )
+                        )}
+                      </Label>
+                      <Input value={it.description} onChange={(e) => updateItem(i, { description: e.target.value })} />
+                    </div>
+                    <div className="col-span-2"><Label className="text-xs">Qtd</Label><Input type="number" step="0.001" value={it.quantity} onChange={(e) => updateItem(i, { quantity: Number(e.target.value) })} className={over ? "border-destructive" : ""} /></div>
+                    <div className="col-span-2"><Label className="text-xs">Preço</Label><Input type="number" step="0.01" value={it.unit_price} onChange={(e) => updateItem(i, { unit_price: Number(e.target.value) })} /></div>
+                    <div className="col-span-2"><Label className="text-xs">Desc.</Label><Input type="number" step="0.01" value={it.discount} onChange={(e) => updateItem(i, { discount: Number(e.target.value) })} /></div>
+                    <Button variant="ghost" size="sm" onClick={() => removeItem(i)}><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                );
+              })}
             </div>
+            {stockIssues.length > 0 && (
+              <div className="p-3 border-t bg-amber-500/5 text-xs space-y-1">
+                {stockIssues.map((s, idx) => (
+                  <div key={idx} className={`flex items-center gap-2 ${s.blocking ? "text-destructive" : "text-amber-700 dark:text-amber-400"}`}>
+                    <AlertTriangle className="w-3.5 h-3.5" />
+                    Item {s.line} ({s.name}): pedido {s.requested}, em estoque {s.available}{s.blocking ? " — venda bloqueada" : " — saldo ficará negativo"}.
+                  </div>
+                ))}
+              </div>
+            )}
           </Card>
 
           <Card className="shadow-card">
