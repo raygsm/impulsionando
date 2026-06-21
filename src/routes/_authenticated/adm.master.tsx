@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Users, PlayCircle, FileText, Package, Layers, Mail, MessageSquare,
-  TrendingUp, AlertTriangle, CheckCircle2, Activity, Settings, DollarSign,
+  TrendingUp, AlertTriangle, CheckCircle2, Activity, Settings, DollarSign, Building2,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/adm/master")({
