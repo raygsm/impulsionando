@@ -360,6 +360,7 @@ import { Route as AuthenticatedBarMarketplaceRouteImport } from './routes/_authe
 import { Route as AuthenticatedAgendaWaitlistRouteImport } from './routes/_authenticated/agenda.waitlist'
 import { Route as AuthenticatedAgendaServicesRouteImport } from './routes/_authenticated/agenda.services'
 import { Route as AuthenticatedAgendaSchedulesRouteImport } from './routes/_authenticated/agenda.schedules'
+import { Route as AuthenticatedAgendaProfissionalRouteImport } from './routes/_authenticated/agenda.profissional'
 import { Route as AuthenticatedAgendaProfessionalsRouteImport } from './routes/_authenticated/agenda.professionals'
 import { Route as AuthenticatedAgendaAppointmentsRouteImport } from './routes/_authenticated/agenda.appointments'
 import { Route as AuthenticatedAffiliatesWalletRouteImport } from './routes/_authenticated/affiliates.wallet'
@@ -2366,6 +2367,12 @@ const AuthenticatedAgendaSchedulesRoute =
     path: '/schedules',
     getParentRoute: () => AuthenticatedAgendaRoute,
   } as any)
+const AuthenticatedAgendaProfissionalRoute =
+  AuthenticatedAgendaProfissionalRouteImport.update({
+    id: '/profissional',
+    path: '/profissional',
+    getParentRoute: () => AuthenticatedAgendaRoute,
+  } as any)
 const AuthenticatedAgendaProfessionalsRoute =
   AuthenticatedAgendaProfessionalsRouteImport.update({
     id: '/professionals',
@@ -3129,6 +3136,7 @@ export interface FileRoutesByFullPath {
   '/affiliates/wallet': typeof AuthenticatedAffiliatesWalletRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
+  '/agenda/profissional': typeof AuthenticatedAgendaProfissionalRoute
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
   '/agenda/services': typeof AuthenticatedAgendaServicesRoute
   '/agenda/waitlist': typeof AuthenticatedAgendaWaitlistRoute
@@ -3563,6 +3571,7 @@ export interface FileRoutesByTo {
   '/affiliates/wallet': typeof AuthenticatedAffiliatesWalletRoute
   '/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
+  '/agenda/profissional': typeof AuthenticatedAgendaProfissionalRoute
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
   '/agenda/services': typeof AuthenticatedAgendaServicesRoute
   '/agenda/waitlist': typeof AuthenticatedAgendaWaitlistRoute
@@ -4011,6 +4020,7 @@ export interface FileRoutesById {
   '/_authenticated/affiliates/wallet': typeof AuthenticatedAffiliatesWalletRoute
   '/_authenticated/agenda/appointments': typeof AuthenticatedAgendaAppointmentsRoute
   '/_authenticated/agenda/professionals': typeof AuthenticatedAgendaProfessionalsRoute
+  '/_authenticated/agenda/profissional': typeof AuthenticatedAgendaProfissionalRoute
   '/_authenticated/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
   '/_authenticated/agenda/services': typeof AuthenticatedAgendaServicesRoute
   '/_authenticated/agenda/waitlist': typeof AuthenticatedAgendaWaitlistRoute
@@ -4458,6 +4468,7 @@ export interface FileRouteTypes {
     | '/affiliates/wallet'
     | '/agenda/appointments'
     | '/agenda/professionals'
+    | '/agenda/profissional'
     | '/agenda/schedules'
     | '/agenda/services'
     | '/agenda/waitlist'
@@ -4892,6 +4903,7 @@ export interface FileRouteTypes {
     | '/affiliates/wallet'
     | '/agenda/appointments'
     | '/agenda/professionals'
+    | '/agenda/profissional'
     | '/agenda/schedules'
     | '/agenda/services'
     | '/agenda/waitlist'
@@ -5339,6 +5351,7 @@ export interface FileRouteTypes {
     | '/_authenticated/affiliates/wallet'
     | '/_authenticated/agenda/appointments'
     | '/_authenticated/agenda/professionals'
+    | '/_authenticated/agenda/profissional'
     | '/_authenticated/agenda/schedules'
     | '/_authenticated/agenda/services'
     | '/_authenticated/agenda/waitlist'
@@ -8187,6 +8200,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgendaSchedulesRouteImport
       parentRoute: typeof AuthenticatedAgendaRoute
     }
+    '/_authenticated/agenda/profissional': {
+      id: '/_authenticated/agenda/profissional'
+      path: '/profissional'
+      fullPath: '/agenda/profissional'
+      preLoaderRoute: typeof AuthenticatedAgendaProfissionalRouteImport
+      parentRoute: typeof AuthenticatedAgendaRoute
+    }
     '/_authenticated/agenda/professionals': {
       id: '/_authenticated/agenda/professionals'
       path: '/professionals'
@@ -8931,6 +8951,7 @@ const AuthenticatedAffiliatesRouteWithChildren =
 interface AuthenticatedAgendaRouteChildren {
   AuthenticatedAgendaAppointmentsRoute: typeof AuthenticatedAgendaAppointmentsRoute
   AuthenticatedAgendaProfessionalsRoute: typeof AuthenticatedAgendaProfessionalsRoute
+  AuthenticatedAgendaProfissionalRoute: typeof AuthenticatedAgendaProfissionalRoute
   AuthenticatedAgendaSchedulesRoute: typeof AuthenticatedAgendaSchedulesRoute
   AuthenticatedAgendaServicesRoute: typeof AuthenticatedAgendaServicesRoute
   AuthenticatedAgendaWaitlistRoute: typeof AuthenticatedAgendaWaitlistRoute
@@ -8940,6 +8961,7 @@ interface AuthenticatedAgendaRouteChildren {
 const AuthenticatedAgendaRouteChildren: AuthenticatedAgendaRouteChildren = {
   AuthenticatedAgendaAppointmentsRoute: AuthenticatedAgendaAppointmentsRoute,
   AuthenticatedAgendaProfessionalsRoute: AuthenticatedAgendaProfessionalsRoute,
+  AuthenticatedAgendaProfissionalRoute: AuthenticatedAgendaProfissionalRoute,
   AuthenticatedAgendaSchedulesRoute: AuthenticatedAgendaSchedulesRoute,
   AuthenticatedAgendaServicesRoute: AuthenticatedAgendaServicesRoute,
   AuthenticatedAgendaWaitlistRoute: AuthenticatedAgendaWaitlistRoute,
