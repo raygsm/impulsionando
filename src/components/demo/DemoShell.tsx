@@ -226,6 +226,22 @@ export function DemoShell({
                 </AlertDescription>
               </Alert>
               {children}
+
+              {/* Fechamento universal: oferta de planos ao fim de toda demo */}
+              <div className="mt-10 rounded-xl border-2 border-primary/40 bg-gradient-to-br from-primary/5 via-background to-accent/5 p-6">
+                <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-center">
+                  <div>
+                    <Badge className="bg-gradient-primary mb-2 text-[10px]">Pronto para contratar</Badge>
+                    <h3 className="font-semibold text-lg tracking-tight">Gostou da demonstração? Veja os planos</h3>
+                    <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                      Essencial (R$ 759), Completo (R$ 1.518), Full, Sob Medida e Clube Premium (R$ 9,99). Todos os recursos demonstrados estão liberados nos planos.
+                    </p>
+                  </div>
+                  <a href="/planos" className="inline-flex items-center justify-center gap-2 rounded-md bg-gradient-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-elegant hover:opacity-90 transition">
+                    Ver planos →
+                  </a>
+                </div>
+              </div>
             </div>
           </main>
         </div>
