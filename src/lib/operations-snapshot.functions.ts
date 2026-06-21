@@ -3,42 +3,30 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
 /**
- * Fase 6 — Snapshot operacional consolidando entregas das Fases 1-5:
- *  - Receita de intermediação (core_revenue_calculations)
- *  - Repasses (core_payout_ledger / core_payout_events)
- *  - Compliance gates (core_compliance_requirements)
- *  - Identidade de tenant (core_tenant_identity / core_tenant_email_aliases)
- *  - Roteamento WhatsApp (v_company_whatsapp_status)
- *  - Notas fiscais (core_fiscal_invoices / v_fiscal_invoices_summary)
- *
- * Scopes:
- *  - super_admin: visão global Impulsionando
- *  - empresa:    visão do tenant ativo (companyId)
- *  - contador:   fila fiscal por status + RPS
- *  - coprodutor: ledger de repasses do participante (auth.uid)
- *  - afiliado:   ledger de repasses do afiliado (auth.uid)
+ * Fase 6 — Snapshot operacional consolidando Fases 1-5.
+ * Scopes: super_admin (global), empresa (tenant), contador (fila fiscal).
  */
 
 const Input = z.object({
-  scope: z.enum(["super_admin", "empresa", "contador", "coprodutor", "afiliado"]),
+  scope: z.enum(["super_admin", "empresa", "contador"]),
   companyId: z.string().uuid().optional(),
 });
 
-type Counts = Record<string, number>;
+type Row = Record<string, any>;
 
-function tally<T extends Record<string, unknown>>(rows: T[] | null | undefined, key: keyof T): Counts {
-  const out: Counts = {};
+function tally(rows: Row[] | null | undefined, key: string): Record<string, number> {
+  const out: Record<string, number> = {};
   for (const r of rows ?? []) {
-    const k = String(r[key] ?? "unknown");
+    const k = String(r?.[key] ?? "unknown");
     out[k] = (out[k] ?? 0) + 1;
   }
   return out;
 }
 
-function sumBy<T extends Record<string, unknown>>(rows: T[] | null | undefined, key: keyof T): number {
+function sumBy(rows: Row[] | null | undefined, key: string): number {
   let s = 0;
   for (const r of rows ?? []) {
-    const v = Number(r[key] ?? 0);
+    const v = Number(r?.[key] ?? 0);
     if (Number.isFinite(v)) s += v;
   }
   return s;
@@ -48,42 +36,43 @@ export const fetchOperationsSnapshot = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => Input.parse(d ?? {}))
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
+    const { supabase } = context;
+    const supa = supabase as any;
     const scope = data.scope;
     const since = new Date(Date.now() - 30 * 86400_000).toISOString();
 
     if (scope === "super_admin") {
       const [calcs, payouts, compliance, whats, invoices, identity] = await Promise.all([
-        supabase.from("core_revenue_calculations").select("status, impulsionando_fee_amount, gross_amount, created_at").gte("created_at", since),
-        supabase.from("core_payout_ledger").select("status, amount, participant_role").gte("created_at", since),
-        supabase.from("core_compliance_requirements").select("status, severity"),
-        supabase.from("v_company_whatsapp_status").select("routing_mode"),
-        supabase.from("core_fiscal_invoices").select("status, total_amount, created_at").gte("created_at", since),
-        supabase.from("core_tenant_identity").select("dns_status, ssl_status"),
+        supa.from("core_revenue_calculations").select("status, impulsionando_fee_cents, gross_cents, created_at").gte("created_at", since),
+        supa.from("core_payout_ledger").select("status, net_cents, gross_cents").gte("created_at", since),
+        supa.from("core_compliance_requirements").select("blocking, active, scope"),
+        supa.from("v_company_whatsapp_status").select("routing_mode"),
+        supa.from("core_fiscal_invoices").select("status, service_amount, net_amount, created_at").gte("created_at", since),
+        supa.from("core_tenant_identity").select("dns_status, ssl_status"),
       ]);
 
       return {
         scope,
         revenue: {
-          totalGross: sumBy(calcs.data, "gross_amount"),
-          totalFee: sumBy(calcs.data, "impulsionando_fee_amount"),
+          totalGross: sumBy(calcs.data, "gross_cents") / 100,
+          totalFee: sumBy(calcs.data, "impulsionando_fee_cents") / 100,
           byStatus: tally(calcs.data, "status"),
           count: calcs.data?.length ?? 0,
         },
         payouts: {
-          totalAmount: sumBy(payouts.data, "amount"),
+          totalNet: sumBy(payouts.data, "net_cents") / 100,
+          totalGross: sumBy(payouts.data, "gross_cents") / 100,
           byStatus: tally(payouts.data, "status"),
-          byRole: tally(payouts.data, "participant_role"),
         },
         compliance: {
-          byStatus: tally(compliance.data, "status"),
-          bySeverity: tally(compliance.data, "severity"),
+          total: compliance.data?.length ?? 0,
+          blocking: (compliance.data ?? []).filter((c: any) => c.blocking).length,
+          byScope: tally(compliance.data, "scope"),
         },
-        whatsapp: {
-          byMode: tally(whats.data, "routing_mode"),
-        },
+        whatsapp: { byMode: tally(whats.data, "routing_mode") },
         fiscal: {
-          totalAmount: sumBy(invoices.data, "total_amount"),
+          totalService: sumBy(invoices.data, "service_amount"),
+          totalNet: sumBy(invoices.data, "net_amount"),
           byStatus: tally(invoices.data, "status"),
           count: invoices.data?.length ?? 0,
         },
@@ -97,62 +86,40 @@ export const fetchOperationsSnapshot = createServerFn({ method: "POST" })
     if (scope === "empresa") {
       if (!data.companyId) throw new Error("companyId obrigatório");
       const cid = data.companyId;
-      const [calcs, payouts, compliance, whats, invoices] = await Promise.all([
-        supabase.from("core_revenue_calculations").select("status, impulsionando_fee_amount, gross_amount, created_at").eq("company_id", cid).gte("created_at", since),
-        supabase.from("core_payout_ledger").select("status, amount, participant_role").eq("company_id", cid).gte("created_at", since),
-        supabase.from("core_compliance_requirements").select("status, severity, requirement_code").eq("company_id", cid),
-        supabase.from("v_company_whatsapp_status").select("routing_mode").eq("company_id", cid).maybeSingle(),
-        supabase.from("core_fiscal_invoices").select("status, total_amount, rps_number, created_at").eq("company_id", cid).gte("created_at", since).order("created_at", { ascending: false }).limit(20),
+      const [calcs, payouts, whats, invoices] = await Promise.all([
+        supa.from("core_revenue_calculations").select("status, impulsionando_fee_cents, gross_cents, created_at").eq("company_id", cid).gte("created_at", since),
+        supa.from("core_payout_ledger").select("status, net_cents, gross_cents, period_start, period_end, paid_at").eq("company_id", cid).gte("created_at", since).order("created_at", { ascending: false }).limit(20),
+        supa.from("v_company_whatsapp_status").select("routing_mode").eq("company_id", cid).maybeSingle(),
+        supa.from("core_fiscal_invoices").select("status, service_amount, rps_number, nf_number, created_at").eq("beneficiary_company_id", cid).gte("created_at", since).order("created_at", { ascending: false }).limit(20),
       ]);
       return {
         scope,
         revenue: {
-          totalGross: sumBy(calcs.data, "gross_amount"),
-          totalFee: sumBy(calcs.data, "impulsionando_fee_amount"),
+          totalGross: sumBy(calcs.data, "gross_cents") / 100,
+          totalFee: sumBy(calcs.data, "impulsionando_fee_cents") / 100,
           byStatus: tally(calcs.data, "status"),
         },
-        payouts: { totalAmount: sumBy(payouts.data, "amount"), byStatus: tally(payouts.data, "status"), byRole: tally(payouts.data, "participant_role") },
-        compliance: {
-          byStatus: tally(compliance.data, "status"),
-          pending: (compliance.data ?? []).filter((c: any) => c.status !== "ok").map((c: any) => ({ code: c.requirement_code, severity: c.severity, status: c.status })),
+        payouts: {
+          totalNet: sumBy(payouts.data, "net_cents") / 100,
+          byStatus: tally(payouts.data, "status"),
+          recent: payouts.data ?? [],
         },
         whatsapp: { mode: (whats.data as any)?.routing_mode ?? "not_configured" },
         fiscal: { recent: invoices.data ?? [], byStatus: tally(invoices.data, "status") },
       };
     }
 
-    if (scope === "contador") {
-      const [queue, issuer, events] = await Promise.all([
-        supabase.from("v_fiscal_invoices_summary").select("*").order("created_at", { ascending: false }).limit(50),
-        supabase.from("core_fiscal_issuer_config").select("legal_name, cnpj, environment, provider, current_rps_number, rps_serie").eq("is_active", true).maybeSingle(),
-        supabase.from("core_fiscal_invoice_events").select("event_type, occurred_at, invoice_id").order("occurred_at", { ascending: false }).limit(30),
-      ]);
-      return {
-        scope,
-        queue: queue.data ?? [],
-        byStatus: tally(queue.data, "status"),
-        issuer: issuer.data,
-        events: events.data ?? [],
-      };
-    }
-
-    if (scope === "coprodutor" || scope === "afiliado") {
-      const role = scope === "coprodutor" ? "coproducer" : "affiliate";
-      const ledger = await supabase
-        .from("core_payout_ledger")
-        .select("amount, status, created_at, calculation_id, payout_method, scheduled_at, paid_at")
-        .eq("participant_user_id", userId)
-        .eq("participant_role", role)
-        .order("created_at", { ascending: false })
-        .limit(50);
-      return {
-        scope,
-        ledger: ledger.data ?? [],
-        totalPaid: sumBy((ledger.data ?? []).filter((r: any) => r.status === "paid"), "amount"),
-        totalPending: sumBy((ledger.data ?? []).filter((r: any) => r.status !== "paid"), "amount"),
-        byStatus: tally(ledger.data, "status"),
-      };
-    }
-
-    return { scope };
+    // contador
+    const [queue, issuer, events] = await Promise.all([
+      supa.from("core_fiscal_invoices").select("id, status, service_amount, iss_amount, rps_serie, rps_number, nf_number, beneficiary_legal_name, created_at, issued_at").order("created_at", { ascending: false }).limit(50),
+      supa.from("core_fiscal_issuer_config").select("legal_name, cnpj, environment, provider, rps_serie, next_rps_number").maybeSingle(),
+      supa.from("core_fiscal_invoice_events").select("event_type, created_at, invoice_id").order("created_at", { ascending: false }).limit(30),
+    ]);
+    return {
+      scope,
+      queue: queue.data ?? [],
+      byStatus: tally(queue.data, "status"),
+      issuer: issuer.data,
+      events: events.data ?? [],
+    };
   });
