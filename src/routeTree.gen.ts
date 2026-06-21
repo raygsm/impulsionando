@@ -389,6 +389,7 @@ import { Route as AuthenticatedAdminUptimeRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminUnitEconomicsRouteImport } from './routes/_authenticated/admin.unit-economics'
 import { Route as AuthenticatedAdminTrialsRouteImport } from './routes/_authenticated/admin.trials'
 import { Route as AuthenticatedAdminTenant360RouteImport } from './routes/_authenticated/admin.tenant-360'
+import { Route as AuthenticatedAdminRevenueQualityRouteImport } from './routes/_authenticated/admin.revenue-quality'
 import { Route as AuthenticatedAdminRevenueForecastRouteImport } from './routes/_authenticated/admin.revenue-forecast'
 import { Route as AuthenticatedAdminQualidadeRouteImport } from './routes/_authenticated/admin.qualidade'
 import { Route as AuthenticatedAdminProjetosParalelosRouteImport } from './routes/_authenticated/admin.projetos-paralelos'
@@ -2579,6 +2580,12 @@ const AuthenticatedAdminTenant360Route =
     path: '/admin/tenant-360',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminRevenueQualityRoute =
+  AuthenticatedAdminRevenueQualityRouteImport.update({
+    id: '/admin/revenue-quality',
+    path: '/admin/revenue-quality',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminRevenueForecastRoute =
   AuthenticatedAdminRevenueForecastRouteImport.update({
     id: '/admin/revenue-forecast',
@@ -3409,6 +3416,7 @@ export interface FileRoutesByFullPath {
   '/admin/projetos-paralelos': typeof AuthenticatedAdminProjetosParalelosRoute
   '/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
   '/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
+  '/admin/revenue-quality': typeof AuthenticatedAdminRevenueQualityRoute
   '/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/admin/unit-economics': typeof AuthenticatedAdminUnitEconomicsRoute
@@ -3883,6 +3891,7 @@ export interface FileRoutesByTo {
   '/admin/projetos-paralelos': typeof AuthenticatedAdminProjetosParalelosRoute
   '/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
   '/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
+  '/admin/revenue-quality': typeof AuthenticatedAdminRevenueQualityRoute
   '/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/admin/unit-economics': typeof AuthenticatedAdminUnitEconomicsRoute
@@ -4371,6 +4380,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/projetos-paralelos': typeof AuthenticatedAdminProjetosParalelosRoute
   '/_authenticated/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
   '/_authenticated/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
+  '/_authenticated/admin/revenue-quality': typeof AuthenticatedAdminRevenueQualityRoute
   '/_authenticated/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/_authenticated/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/_authenticated/admin/unit-economics': typeof AuthenticatedAdminUnitEconomicsRoute
@@ -4858,6 +4868,7 @@ export interface FileRouteTypes {
     | '/admin/projetos-paralelos'
     | '/admin/qualidade'
     | '/admin/revenue-forecast'
+    | '/admin/revenue-quality'
     | '/admin/tenant-360'
     | '/admin/trials'
     | '/admin/unit-economics'
@@ -5332,6 +5343,7 @@ export interface FileRouteTypes {
     | '/admin/projetos-paralelos'
     | '/admin/qualidade'
     | '/admin/revenue-forecast'
+    | '/admin/revenue-quality'
     | '/admin/tenant-360'
     | '/admin/trials'
     | '/admin/unit-economics'
@@ -5819,6 +5831,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/projetos-paralelos'
     | '/_authenticated/admin/qualidade'
     | '/_authenticated/admin/revenue-forecast'
+    | '/_authenticated/admin/revenue-quality'
     | '/_authenticated/admin/tenant-360'
     | '/_authenticated/admin/trials'
     | '/_authenticated/admin/unit-economics'
@@ -8913,6 +8926,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTenant360RouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/revenue-quality': {
+      id: '/_authenticated/admin/revenue-quality'
+      path: '/admin/revenue-quality'
+      fullPath: '/admin/revenue-quality'
+      preLoaderRoute: typeof AuthenticatedAdminRevenueQualityRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/revenue-forecast': {
       id: '/_authenticated/admin/revenue-forecast'
       path: '/admin/revenue-forecast'
@@ -10338,6 +10358,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminProjetosParalelosRoute: typeof AuthenticatedAdminProjetosParalelosRoute
   AuthenticatedAdminQualidadeRoute: typeof AuthenticatedAdminQualidadeRoute
   AuthenticatedAdminRevenueForecastRoute: typeof AuthenticatedAdminRevenueForecastRoute
+  AuthenticatedAdminRevenueQualityRoute: typeof AuthenticatedAdminRevenueQualityRoute
   AuthenticatedAdminTenant360Route: typeof AuthenticatedAdminTenant360Route
   AuthenticatedAdminTrialsRoute: typeof AuthenticatedAdminTrialsRoute
   AuthenticatedAdminUnitEconomicsRoute: typeof AuthenticatedAdminUnitEconomicsRoute
@@ -10511,6 +10532,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminQualidadeRoute: AuthenticatedAdminQualidadeRoute,
   AuthenticatedAdminRevenueForecastRoute:
     AuthenticatedAdminRevenueForecastRoute,
+  AuthenticatedAdminRevenueQualityRoute: AuthenticatedAdminRevenueQualityRoute,
   AuthenticatedAdminTenant360Route: AuthenticatedAdminTenant360Route,
   AuthenticatedAdminTrialsRoute: AuthenticatedAdminTrialsRoute,
   AuthenticatedAdminUnitEconomicsRoute: AuthenticatedAdminUnitEconomicsRoute,
