@@ -402,6 +402,7 @@ import { Route as AuthenticatedAdminCommandCenterRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminCohortRetentionRouteImport } from './routes/_authenticated/admin.cohort-retention'
 import { Route as AuthenticatedAdminCobrancasRouteImport } from './routes/_authenticated/admin.cobrancas'
 import { Route as AuthenticatedAdminClubeRouteImport } from './routes/_authenticated/admin.clube'
+import { Route as AuthenticatedAdminChurnRiskRouteImport } from './routes/_authenticated/admin.churn-risk'
 import { Route as AuthenticatedAdminCatalogIntentsRouteImport } from './routes/_authenticated/admin.catalog-intents'
 import { Route as AuthenticatedAdminCatalogAnalyticsRouteImport } from './routes/_authenticated/admin.catalog-analytics'
 import { Route as AuthenticatedAdminBillingPolicyRouteImport } from './routes/_authenticated/admin.billing-policy'
@@ -2635,6 +2636,12 @@ const AuthenticatedAdminClubeRoute = AuthenticatedAdminClubeRouteImport.update({
   path: '/admin/clube',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminChurnRiskRoute =
+  AuthenticatedAdminChurnRiskRouteImport.update({
+    id: '/admin/churn-risk',
+    path: '/admin/churn-risk',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminCatalogIntentsRoute =
   AuthenticatedAdminCatalogIntentsRouteImport.update({
     id: '/admin/catalog-intents',
@@ -3235,6 +3242,7 @@ export interface FileRoutesByFullPath {
   '/admin/billing-policy': typeof AuthenticatedAdminBillingPolicyRoute
   '/admin/catalog-analytics': typeof AuthenticatedAdminCatalogAnalyticsRoute
   '/admin/catalog-intents': typeof AuthenticatedAdminCatalogIntentsRoute
+  '/admin/churn-risk': typeof AuthenticatedAdminChurnRiskRoute
   '/admin/clube': typeof AuthenticatedAdminClubeRoute
   '/admin/cobrancas': typeof AuthenticatedAdminCobrancasRoute
   '/admin/cohort-retention': typeof AuthenticatedAdminCohortRetentionRoute
@@ -3688,6 +3696,7 @@ export interface FileRoutesByTo {
   '/admin/billing-policy': typeof AuthenticatedAdminBillingPolicyRoute
   '/admin/catalog-analytics': typeof AuthenticatedAdminCatalogAnalyticsRoute
   '/admin/catalog-intents': typeof AuthenticatedAdminCatalogIntentsRoute
+  '/admin/churn-risk': typeof AuthenticatedAdminChurnRiskRoute
   '/admin/clube': typeof AuthenticatedAdminClubeRoute
   '/admin/cobrancas': typeof AuthenticatedAdminCobrancasRoute
   '/admin/cohort-retention': typeof AuthenticatedAdminCohortRetentionRoute
@@ -4155,6 +4164,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/billing-policy': typeof AuthenticatedAdminBillingPolicyRoute
   '/_authenticated/admin/catalog-analytics': typeof AuthenticatedAdminCatalogAnalyticsRoute
   '/_authenticated/admin/catalog-intents': typeof AuthenticatedAdminCatalogIntentsRoute
+  '/_authenticated/admin/churn-risk': typeof AuthenticatedAdminChurnRiskRoute
   '/_authenticated/admin/clube': typeof AuthenticatedAdminClubeRoute
   '/_authenticated/admin/cobrancas': typeof AuthenticatedAdminCobrancasRoute
   '/_authenticated/admin/cohort-retention': typeof AuthenticatedAdminCohortRetentionRoute
@@ -4621,6 +4631,7 @@ export interface FileRouteTypes {
     | '/admin/billing-policy'
     | '/admin/catalog-analytics'
     | '/admin/catalog-intents'
+    | '/admin/churn-risk'
     | '/admin/clube'
     | '/admin/cobrancas'
     | '/admin/cohort-retention'
@@ -5074,6 +5085,7 @@ export interface FileRouteTypes {
     | '/admin/billing-policy'
     | '/admin/catalog-analytics'
     | '/admin/catalog-intents'
+    | '/admin/churn-risk'
     | '/admin/clube'
     | '/admin/cobrancas'
     | '/admin/cohort-retention'
@@ -5540,6 +5552,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/billing-policy'
     | '/_authenticated/admin/catalog-analytics'
     | '/_authenticated/admin/catalog-intents'
+    | '/_authenticated/admin/churn-risk'
     | '/_authenticated/admin/clube'
     | '/_authenticated/admin/cobrancas'
     | '/_authenticated/admin/cohort-retention'
@@ -8729,6 +8742,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClubeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/churn-risk': {
+      id: '/_authenticated/admin/churn-risk'
+      path: '/admin/churn-risk'
+      fullPath: '/admin/churn-risk'
+      preLoaderRoute: typeof AuthenticatedAdminChurnRiskRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/catalog-intents': {
       id: '/_authenticated/admin/catalog-intents'
       path: '/admin/catalog-intents'
@@ -9887,6 +9907,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminBillingPolicyRoute: typeof AuthenticatedAdminBillingPolicyRoute
   AuthenticatedAdminCatalogAnalyticsRoute: typeof AuthenticatedAdminCatalogAnalyticsRoute
   AuthenticatedAdminCatalogIntentsRoute: typeof AuthenticatedAdminCatalogIntentsRoute
+  AuthenticatedAdminChurnRiskRoute: typeof AuthenticatedAdminChurnRiskRoute
   AuthenticatedAdminClubeRoute: typeof AuthenticatedAdminClubeRoute
   AuthenticatedAdminCobrancasRoute: typeof AuthenticatedAdminCobrancasRoute
   AuthenticatedAdminCohortRetentionRoute: typeof AuthenticatedAdminCohortRetentionRoute
@@ -10037,6 +10058,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminCatalogAnalyticsRoute:
     AuthenticatedAdminCatalogAnalyticsRoute,
   AuthenticatedAdminCatalogIntentsRoute: AuthenticatedAdminCatalogIntentsRoute,
+  AuthenticatedAdminChurnRiskRoute: AuthenticatedAdminChurnRiskRoute,
   AuthenticatedAdminClubeRoute: AuthenticatedAdminClubeRoute,
   AuthenticatedAdminCobrancasRoute: AuthenticatedAdminCobrancasRoute,
   AuthenticatedAdminCohortRetentionRoute:
