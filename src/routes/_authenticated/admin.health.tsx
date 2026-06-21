@@ -84,7 +84,7 @@ function HealthPage() {
               </tr>
             </thead>
             <tbody>
-              {scores.slice(0, 100).map((s) => {
+              {scores.slice(0, 100).map((s: any) => {
                 const b = bandStyle[s.band];
                 return (
                   <tr key={s.company_id} className="border-b last:border-0 hover:bg-muted/30">
