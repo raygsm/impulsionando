@@ -167,3 +167,35 @@ export const fetchHealthScore = createServerFn({ method: "POST" })
       tenants,
     };
   });
+
+// Compatibility export for legacy /admin/health page
+export const getTenantHealthScores = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await ensureAdmin(context);
+    const result: any = await (fetchHealthScore as any)({ data: {} });
+    const bandOf = (tier: string) =>
+      tier === "A" || tier === "B" ? "healthy" : tier === "C" ? "at_risk" : "critical";
+    const scores = (result.tenants ?? []).map((t: any) => ({
+      company_id: t.id,
+      company_name: t.name,
+      score: t.scores.overall,
+      band: bandOf(t.tier),
+      mrr: t.signals.mrrBRL,
+      signals: {
+        has_overdue: t.signals.invoicesOverdue > 0,
+        messages_30d: t.signals.customers,
+        active_modules: 0,
+        premium_active: 0,
+        last_paid_days: null as number | null,
+      },
+    }));
+    const healthy = scores.filter((s: any) => s.band === "healthy").length;
+    const at_risk = scores.filter((s: any) => s.band === "at_risk").length;
+    const critical = scores.filter((s: any) => s.band === "critical").length;
+    const mrr_at_risk = scores
+      .filter((s: any) => s.band !== "healthy")
+      .reduce((sum: number, s: any) => sum + Number(s.mrr ?? 0), 0);
+    scores.sort((a: any, b: any) => a.score - b.score);
+    return { summary: { total: scores.length, healthy, at_risk, critical, mrr_at_risk }, scores };
+  });
