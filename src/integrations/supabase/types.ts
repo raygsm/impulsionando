@@ -18644,6 +18644,10 @@ export type Database = {
         }
         Returns: number
       }
+      ensure_impulsionando_test_customer: {
+        Args: { _company_id: string }
+        Returns: string
+      }
       evt_checkin_by_qr: {
         Args: { _gate?: string; _qr_token: string }
         Returns: Json
