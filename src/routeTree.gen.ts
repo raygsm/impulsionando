@@ -391,6 +391,7 @@ import { Route as AuthenticatedAdminPixPendentesRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminNichePlansRouteImport } from './routes/_authenticated/admin.niche-plans'
 import { Route as AuthenticatedAdminImobiliariaRouteImport } from './routes/_authenticated/admin.imobiliaria'
 import { Route as AuthenticatedAdminFiscalRouteImport } from './routes/_authenticated/admin.fiscal'
+import { Route as AuthenticatedAdminCobrancasRouteImport } from './routes/_authenticated/admin.cobrancas'
 import { Route as AuthenticatedAdminClubeRouteImport } from './routes/_authenticated/admin.clube'
 import { Route as AuthenticatedAdminCatalogIntentsRouteImport } from './routes/_authenticated/admin.catalog-intents'
 import { Route as AuthenticatedAdminCatalogAnalyticsRouteImport } from './routes/_authenticated/admin.catalog-analytics'
@@ -2557,6 +2558,12 @@ const AuthenticatedAdminFiscalRoute =
     path: '/admin/fiscal',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminCobrancasRoute =
+  AuthenticatedAdminCobrancasRouteImport.update({
+    id: '/admin/cobrancas',
+    path: '/admin/cobrancas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminClubeRoute = AuthenticatedAdminClubeRouteImport.update({
   id: '/admin/clube',
   path: '/admin/clube',
@@ -3143,6 +3150,7 @@ export interface FileRoutesByFullPath {
   '/admin/catalog-analytics': typeof AuthenticatedAdminCatalogAnalyticsRoute
   '/admin/catalog-intents': typeof AuthenticatedAdminCatalogIntentsRoute
   '/admin/clube': typeof AuthenticatedAdminClubeRoute
+  '/admin/cobrancas': typeof AuthenticatedAdminCobrancasRoute
   '/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
   '/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
@@ -3583,6 +3591,7 @@ export interface FileRoutesByTo {
   '/admin/catalog-analytics': typeof AuthenticatedAdminCatalogAnalyticsRoute
   '/admin/catalog-intents': typeof AuthenticatedAdminCatalogIntentsRoute
   '/admin/clube': typeof AuthenticatedAdminClubeRoute
+  '/admin/cobrancas': typeof AuthenticatedAdminCobrancasRoute
   '/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
   '/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
@@ -4037,6 +4046,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/catalog-analytics': typeof AuthenticatedAdminCatalogAnalyticsRoute
   '/_authenticated/admin/catalog-intents': typeof AuthenticatedAdminCatalogIntentsRoute
   '/_authenticated/admin/clube': typeof AuthenticatedAdminClubeRoute
+  '/_authenticated/admin/cobrancas': typeof AuthenticatedAdminCobrancasRoute
   '/_authenticated/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
   '/_authenticated/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/_authenticated/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
@@ -4490,6 +4500,7 @@ export interface FileRouteTypes {
     | '/admin/catalog-analytics'
     | '/admin/catalog-intents'
     | '/admin/clube'
+    | '/admin/cobrancas'
     | '/admin/fiscal'
     | '/admin/imobiliaria'
     | '/admin/niche-plans'
@@ -4930,6 +4941,7 @@ export interface FileRouteTypes {
     | '/admin/catalog-analytics'
     | '/admin/catalog-intents'
     | '/admin/clube'
+    | '/admin/cobrancas'
     | '/admin/fiscal'
     | '/admin/imobiliaria'
     | '/admin/niche-plans'
@@ -5383,6 +5395,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/catalog-analytics'
     | '/_authenticated/admin/catalog-intents'
     | '/_authenticated/admin/clube'
+    | '/_authenticated/admin/cobrancas'
     | '/_authenticated/admin/fiscal'
     | '/_authenticated/admin/imobiliaria'
     | '/_authenticated/admin/niche-plans'
@@ -8482,6 +8495,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFiscalRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/cobrancas': {
+      id: '/_authenticated/admin/cobrancas'
+      path: '/admin/cobrancas'
+      fullPath: '/admin/cobrancas'
+      preLoaderRoute: typeof AuthenticatedAdminCobrancasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/clube': {
       id: '/_authenticated/admin/clube'
       path: '/admin/clube'
@@ -9625,6 +9645,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCatalogAnalyticsRoute: typeof AuthenticatedAdminCatalogAnalyticsRoute
   AuthenticatedAdminCatalogIntentsRoute: typeof AuthenticatedAdminCatalogIntentsRoute
   AuthenticatedAdminClubeRoute: typeof AuthenticatedAdminClubeRoute
+  AuthenticatedAdminCobrancasRoute: typeof AuthenticatedAdminCobrancasRoute
   AuthenticatedAdminFiscalRoute: typeof AuthenticatedAdminFiscalRoute
   AuthenticatedAdminImobiliariaRoute: typeof AuthenticatedAdminImobiliariaRoute
   AuthenticatedAdminNichePlansRoute: typeof AuthenticatedAdminNichePlansRoute
@@ -9763,6 +9784,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminCatalogAnalyticsRoute,
   AuthenticatedAdminCatalogIntentsRoute: AuthenticatedAdminCatalogIntentsRoute,
   AuthenticatedAdminClubeRoute: AuthenticatedAdminClubeRoute,
+  AuthenticatedAdminCobrancasRoute: AuthenticatedAdminCobrancasRoute,
   AuthenticatedAdminFiscalRoute: AuthenticatedAdminFiscalRoute,
   AuthenticatedAdminImobiliariaRoute: AuthenticatedAdminImobiliariaRoute,
   AuthenticatedAdminNichePlansRoute: AuthenticatedAdminNichePlansRoute,

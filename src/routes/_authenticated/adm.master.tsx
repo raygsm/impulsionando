@@ -231,6 +231,7 @@ function AdmMasterPage() {
             { to: "/adm/agentes", label: "Agentes IA", icon: Settings },
             { to: "/admin/modulos/clonagem", label: "Clonagem módulos", icon: Package },
             { to: "/admin/billing-contracts", label: "Contratos", icon: FileText },
+            { to: "/admin/cobrancas", label: "Central de Cobranças", icon: DollarSign },
           ].map((l) => (
             <Link key={l.to} to={l.to as any} className="block">
               <Card className="p-3 hover:border-primary/40 hover:bg-primary/5 transition flex items-center gap-2">
