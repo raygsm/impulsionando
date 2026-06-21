@@ -255,19 +255,22 @@ function ContadorTab() {
 
 function OperacaoPage() {
   const { data: me } = useCurrentUser();
+  const { activeCompanyId } = useActiveCompany();
   const isSuper = !!me?.isSuperAdmin;
   const [tab, setTab] = useState(isSuper ? "super" : "empresa");
   return (
     <div className="space-y-6">
-      <PageHeader title="Operação Core" description="Visão consolidada das Fases 1-5: receita, repasses, compliance, identidade, WhatsApp e nota fiscal." />
+      <PageHeader title="Operação Core" description="Visão consolidada do core Impulsionando: receita, repasses, compliance, identidade, WhatsApp, NF e marketplace B2B." />
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
           {isSuper && <TabsTrigger value="super">Super Admin</TabsTrigger>}
           <TabsTrigger value="empresa">Empresa</TabsTrigger>
+          <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
           {isSuper && <TabsTrigger value="contador">Contador</TabsTrigger>}
         </TabsList>
         {isSuper && <TabsContent value="super" className="mt-6"><SuperAdminTab /></TabsContent>}
         <TabsContent value="empresa" className="mt-6"><EmpresaTab /></TabsContent>
+        <TabsContent value="marketplace" className="mt-6"><MarketplaceTab companyId={isSuper ? undefined : activeCompanyId ?? undefined} /></TabsContent>
         {isSuper && <TabsContent value="contador" className="mt-6"><ContadorTab /></TabsContent>}
       </Tabs>
     </div>
