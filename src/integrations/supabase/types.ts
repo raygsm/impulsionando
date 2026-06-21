@@ -7817,6 +7817,318 @@ export type Database = {
           },
         ]
       }
+      core_fiscal_invoice_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          invoice_id: string
+          message: string | null
+          payload: Json
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          invoice_id: string
+          message?: string | null
+          payload?: Json
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          invoice_id?: string
+          message?: string | null
+          payload?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_fiscal_invoice_events_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "core_fiscal_invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_fiscal_invoice_events_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "v_fiscal_invoices_summary"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      core_fiscal_invoices: {
+        Row: {
+          attempt_count: number
+          beneficiary_address: Json
+          beneficiary_cnpj: string | null
+          beneficiary_company_id: string
+          beneficiary_legal_name: string
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          cofins_amount: number
+          created_at: string
+          csll_amount: number
+          currency: string
+          environment: string
+          id: string
+          ir_amount: number
+          iss_amount: number
+          iss_withheld: boolean
+          issued_at: string | null
+          issuer_id: string
+          last_attempt_at: string | null
+          metadata: Json
+          net_amount: number
+          nf_number: string | null
+          nf_url: string | null
+          nf_verification_code: string | null
+          nf_xml_url: string | null
+          pis_amount: number
+          provider: string
+          provider_response: Json
+          reference_id: string | null
+          reference_kind: string | null
+          replaced_by_invoice_id: string | null
+          revenue_calculation_id: string | null
+          rps_number: number
+          rps_serie: string
+          service_amount: number
+          service_code: string
+          service_description: string
+          status: string
+          status_message: string | null
+          updated_at: string
+        }
+        Insert: {
+          attempt_count?: number
+          beneficiary_address?: Json
+          beneficiary_cnpj?: string | null
+          beneficiary_company_id: string
+          beneficiary_legal_name: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cofins_amount?: number
+          created_at?: string
+          csll_amount?: number
+          currency?: string
+          environment: string
+          id?: string
+          ir_amount?: number
+          iss_amount?: number
+          iss_withheld?: boolean
+          issued_at?: string | null
+          issuer_id: string
+          last_attempt_at?: string | null
+          metadata?: Json
+          net_amount: number
+          nf_number?: string | null
+          nf_url?: string | null
+          nf_verification_code?: string | null
+          nf_xml_url?: string | null
+          pis_amount?: number
+          provider: string
+          provider_response?: Json
+          reference_id?: string | null
+          reference_kind?: string | null
+          replaced_by_invoice_id?: string | null
+          revenue_calculation_id?: string | null
+          rps_number: number
+          rps_serie: string
+          service_amount: number
+          service_code: string
+          service_description: string
+          status?: string
+          status_message?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attempt_count?: number
+          beneficiary_address?: Json
+          beneficiary_cnpj?: string | null
+          beneficiary_company_id?: string
+          beneficiary_legal_name?: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cofins_amount?: number
+          created_at?: string
+          csll_amount?: number
+          currency?: string
+          environment?: string
+          id?: string
+          ir_amount?: number
+          iss_amount?: number
+          iss_withheld?: boolean
+          issued_at?: string | null
+          issuer_id?: string
+          last_attempt_at?: string | null
+          metadata?: Json
+          net_amount?: number
+          nf_number?: string | null
+          nf_url?: string | null
+          nf_verification_code?: string | null
+          nf_xml_url?: string | null
+          pis_amount?: number
+          provider?: string
+          provider_response?: Json
+          reference_id?: string | null
+          reference_kind?: string | null
+          replaced_by_invoice_id?: string | null
+          revenue_calculation_id?: string | null
+          rps_number?: number
+          rps_serie?: string
+          service_amount?: number
+          service_code?: string
+          service_description?: string
+          status?: string
+          status_message?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_fiscal_invoices_beneficiary_company_id_fkey"
+            columns: ["beneficiary_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_fiscal_invoices_beneficiary_company_id_fkey"
+            columns: ["beneficiary_company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_fiscal_invoices_beneficiary_company_id_fkey"
+            columns: ["beneficiary_company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_fiscal_invoices_beneficiary_company_id_fkey"
+            columns: ["beneficiary_company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_fiscal_invoices_issuer_id_fkey"
+            columns: ["issuer_id"]
+            isOneToOne: false
+            referencedRelation: "core_fiscal_issuer_config"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_fiscal_invoices_replaced_by_invoice_id_fkey"
+            columns: ["replaced_by_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "core_fiscal_invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_fiscal_invoices_replaced_by_invoice_id_fkey"
+            columns: ["replaced_by_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "v_fiscal_invoices_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_fiscal_invoices_revenue_calculation_id_fkey"
+            columns: ["revenue_calculation_id"]
+            isOneToOne: false
+            referencedRelation: "core_revenue_calculations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      core_fiscal_issuer_config: {
+        Row: {
+          address: Json
+          cnae: string | null
+          cnpj: string
+          cofins_rate: number
+          created_at: string
+          csll_rate: number
+          environment: string
+          id: string
+          ie: string | null
+          im: string | null
+          ir_rate: number
+          is_active: boolean
+          iss_rate: number
+          iss_withheld_default: boolean
+          legal_name: string
+          metadata: Json
+          next_rps_number: number
+          pis_rate: number
+          provider: string
+          rps_serie: string
+          service_code: string
+          service_description: string
+          tax_regime: string
+          trade_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: Json
+          cnae?: string | null
+          cnpj: string
+          cofins_rate?: number
+          created_at?: string
+          csll_rate?: number
+          environment?: string
+          id?: string
+          ie?: string | null
+          im?: string | null
+          ir_rate?: number
+          is_active?: boolean
+          iss_rate?: number
+          iss_withheld_default?: boolean
+          legal_name: string
+          metadata?: Json
+          next_rps_number?: number
+          pis_rate?: number
+          provider?: string
+          rps_serie?: string
+          service_code: string
+          service_description?: string
+          tax_regime?: string
+          trade_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: Json
+          cnae?: string | null
+          cnpj?: string
+          cofins_rate?: number
+          created_at?: string
+          csll_rate?: number
+          environment?: string
+          id?: string
+          ie?: string | null
+          im?: string | null
+          ir_rate?: number
+          is_active?: boolean
+          iss_rate?: number
+          iss_withheld_default?: boolean
+          legal_name?: string
+          metadata?: Json
+          next_rps_number?: number
+          pis_rate?: number
+          provider?: string
+          rps_serie?: string
+          service_code?: string
+          service_description?: string
+          tax_regime?: string
+          trade_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       core_integration_logs: {
         Row: {
           created_at: string
@@ -20990,6 +21302,56 @@ export type Database = {
         }
         Relationships: []
       }
+      v_fiscal_invoices_summary: {
+        Row: {
+          beneficiary_cnpj: string | null
+          beneficiary_company_id: string | null
+          beneficiary_name: string | null
+          cancelled_at: string | null
+          created_at: string | null
+          environment: string | null
+          id: string | null
+          iss_amount: number | null
+          issued_at: string | null
+          net_amount: number | null
+          nf_number: string | null
+          nf_url: string | null
+          provider: string | null
+          rps: string | null
+          service_amount: number | null
+          status: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_fiscal_invoices_beneficiary_company_id_fkey"
+            columns: ["beneficiary_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_fiscal_invoices_beneficiary_company_id_fkey"
+            columns: ["beneficiary_company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_fiscal_invoices_beneficiary_company_id_fkey"
+            columns: ["beneficiary_company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_fiscal_invoices_beneficiary_company_id_fkey"
+            columns: ["beneficiary_company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       v_tenant_identity_status: {
         Row: {
           active_aliases_count: number | null
@@ -21209,6 +21571,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      enqueue_fiscal_invoice: { Args: { _calc_id: string }; Returns: string }
       enqueue_message: {
         Args: {
           _channels?: string[]
@@ -21258,6 +21621,10 @@ export type Database = {
             }
             Returns: string
           }
+      finalize_revenue_calculation: {
+        Args: { _calc_id: string }
+        Returns: string
+      }
       get_catalog_intent_by_token: {
         Args: { p_token: string }
         Returns: {
