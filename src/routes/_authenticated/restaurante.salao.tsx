@@ -36,15 +36,38 @@ function timeAgo(iso: string) {
 
 function SalaoPage() {
   const qc = useQueryClient();
+  const { companyId } = useActiveCompany();
   const board = useServerFn(getKitchenBoard);
   const setStatus = useServerFn(setItemStatus);
   const prevPendingRef = useRef<number>(0);
+  const [liveOn, setLiveOn] = useState(false);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: ["kitchen-board"],
     queryFn: () => board(),
-    refetchInterval: 5000,
+    // Fallback de polling reduzido — realtime invalida em tempo real abaixo
+    refetchInterval: 30000,
   });
+
+  // Atualização ao vivo: qualquer mudança em sales_order_items ou nas sessões
+  // de mesa desta empresa invalida o board imediatamente.
+  useEffect(() => {
+    if (!companyId) return;
+    const ch = supabase
+      .channel(`kitchen-live-${companyId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "sales_order_items" },
+        () => qc.invalidateQueries({ queryKey: ["kitchen-board"] }),
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "restaurant_table_sessions", filter: `company_id=eq.${companyId}` },
+        () => qc.invalidateQueries({ queryKey: ["kitchen-board"] }),
+      )
+      .subscribe((s) => setLiveOn(s === "SUBSCRIBED"));
+    return () => { supabase.removeChannel(ch); };
+  }, [companyId, qc]);
 
   const tables = (data?.tables ?? []) as TableTicket[];
   const totalPending = tables.reduce(
