@@ -436,6 +436,7 @@ import { Route as ApiPublicHooksMpPendingRemindersRouteImport } from './routes/a
 import { Route as ApiPublicHooksMarocasReportRouteImport } from './routes/api/public/hooks/marocas-report'
 import { Route as ApiPublicHooksMarketingLeadNotifyRouteImport } from './routes/api/public/hooks/marketing-lead-notify'
 import { Route as ApiPublicHooksFiscalMonthlyEmailRouteImport } from './routes/api/public/hooks/fiscal-monthly-email'
+import { Route as ApiPublicHooksCorePullChrismedRouteImport } from './routes/api/public/hooks/core-pull-chrismed'
 import { Route as ApiPublicHooksCoreNotificationEventRouteImport } from './routes/api/public/hooks/core-notification-event'
 import { Route as ApiPublicHooksCommsSelfTestRouteImport } from './routes/api/public/hooks/comms-self-test'
 import { Route as ApiPublicHooksClubeJourneyTickRouteImport } from './routes/api/public/hooks/clube-journey-tick'
@@ -2836,6 +2837,12 @@ const ApiPublicHooksFiscalMonthlyEmailRoute =
     path: '/api/public/hooks/fiscal-monthly-email',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksCorePullChrismedRoute =
+  ApiPublicHooksCorePullChrismedRouteImport.update({
+    id: '/api/public/hooks/core-pull-chrismed',
+    path: '/api/public/hooks/core-pull-chrismed',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksCoreNotificationEventRoute =
   ApiPublicHooksCoreNotificationEventRouteImport.update({
     id: '/api/public/hooks/core-notification-event',
@@ -3522,6 +3529,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/clube-journey-tick': typeof ApiPublicHooksClubeJourneyTickRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/core-notification-event': typeof ApiPublicHooksCoreNotificationEventRoute
+  '/api/public/hooks/core-pull-chrismed': typeof ApiPublicHooksCorePullChrismedRoute
   '/api/public/hooks/fiscal-monthly-email': typeof ApiPublicHooksFiscalMonthlyEmailRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/marocas-report': typeof ApiPublicHooksMarocasReportRoute
@@ -3979,6 +3987,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/clube-journey-tick': typeof ApiPublicHooksClubeJourneyTickRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/core-notification-event': typeof ApiPublicHooksCoreNotificationEventRoute
+  '/api/public/hooks/core-pull-chrismed': typeof ApiPublicHooksCorePullChrismedRoute
   '/api/public/hooks/fiscal-monthly-email': typeof ApiPublicHooksFiscalMonthlyEmailRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/marocas-report': typeof ApiPublicHooksMarocasReportRoute
@@ -4450,6 +4459,7 @@ export interface FileRoutesById {
   '/api/public/hooks/clube-journey-tick': typeof ApiPublicHooksClubeJourneyTickRoute
   '/api/public/hooks/comms-self-test': typeof ApiPublicHooksCommsSelfTestRoute
   '/api/public/hooks/core-notification-event': typeof ApiPublicHooksCoreNotificationEventRoute
+  '/api/public/hooks/core-pull-chrismed': typeof ApiPublicHooksCorePullChrismedRoute
   '/api/public/hooks/fiscal-monthly-email': typeof ApiPublicHooksFiscalMonthlyEmailRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/marocas-report': typeof ApiPublicHooksMarocasReportRoute
@@ -4920,6 +4930,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/clube-journey-tick'
     | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/core-notification-event'
+    | '/api/public/hooks/core-pull-chrismed'
     | '/api/public/hooks/fiscal-monthly-email'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/marocas-report'
@@ -5377,6 +5388,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/clube-journey-tick'
     | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/core-notification-event'
+    | '/api/public/hooks/core-pull-chrismed'
     | '/api/public/hooks/fiscal-monthly-email'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/marocas-report'
@@ -5847,6 +5859,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/clube-journey-tick'
     | '/api/public/hooks/comms-self-test'
     | '/api/public/hooks/core-notification-event'
+    | '/api/public/hooks/core-pull-chrismed'
     | '/api/public/hooks/fiscal-monthly-email'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/marocas-report'
@@ -6005,6 +6018,7 @@ export interface RootRouteChildren {
   ApiPublicHooksClubeJourneyTickRoute: typeof ApiPublicHooksClubeJourneyTickRoute
   ApiPublicHooksCommsSelfTestRoute: typeof ApiPublicHooksCommsSelfTestRoute
   ApiPublicHooksCoreNotificationEventRoute: typeof ApiPublicHooksCoreNotificationEventRoute
+  ApiPublicHooksCorePullChrismedRoute: typeof ApiPublicHooksCorePullChrismedRoute
   ApiPublicHooksFiscalMonthlyEmailRoute: typeof ApiPublicHooksFiscalMonthlyEmailRoute
   ApiPublicHooksMarketingLeadNotifyRoute: typeof ApiPublicHooksMarketingLeadNotifyRoute
   ApiPublicHooksMarocasReportRoute: typeof ApiPublicHooksMarocasReportRoute
@@ -9019,6 +9033,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksFiscalMonthlyEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/core-pull-chrismed': {
+      id: '/api/public/hooks/core-pull-chrismed'
+      path: '/api/public/hooks/core-pull-chrismed'
+      fullPath: '/api/public/hooks/core-pull-chrismed'
+      preLoaderRoute: typeof ApiPublicHooksCorePullChrismedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/core-notification-event': {
       id: '/api/public/hooks/core-notification-event'
       path: '/api/public/hooks/core-notification-event'
@@ -10548,6 +10569,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksCommsSelfTestRoute: ApiPublicHooksCommsSelfTestRoute,
   ApiPublicHooksCoreNotificationEventRoute:
     ApiPublicHooksCoreNotificationEventRoute,
+  ApiPublicHooksCorePullChrismedRoute: ApiPublicHooksCorePullChrismedRoute,
   ApiPublicHooksFiscalMonthlyEmailRoute: ApiPublicHooksFiscalMonthlyEmailRoute,
   ApiPublicHooksMarketingLeadNotifyRoute:
     ApiPublicHooksMarketingLeadNotifyRoute,
