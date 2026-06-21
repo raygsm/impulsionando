@@ -25,7 +25,7 @@ function ImplantacoesPage() {
   });
 
   const reprovision = useMutation({
-    mutationFn: (orderNsu: string) => repro({ data: { orderNsu } }),
+    mutationFn: (mpPaymentId: string) => repro({ data: { mpPaymentId } }),
     onSuccess: (r) => {
       toast.success(r.ok ? `Provisionamento ok (${r.installedSlugs.join(", ") || "—"})` : `Pulado: ${r.skipped}`);
       qc.invalidateQueries({ queryKey: ["provisioning-queue"] });
@@ -46,17 +46,17 @@ function ImplantacoesPage() {
         )}
         <div className="space-y-2">
           {(data?.payments ?? []).map((p: any) => (
-            <div key={p.order_nsu} className="border-b last:border-0 py-2 text-sm flex flex-wrap items-center gap-2">
+            <div key={p.mp_payment_id} className="border-b last:border-0 py-2 text-sm flex flex-wrap items-center gap-2">
               <div className="flex-1 min-w-0">
-                <div className="font-medium truncate">{p.customer_name ?? "—"} · <span className="text-muted-foreground">{p.customer_email}</span></div>
+                <div className="font-medium truncate">{p.payer_name ?? "—"} · <span className="text-muted-foreground">{p.payer_email}</span></div>
                 <div className="text-xs text-muted-foreground">
-                  R$ {(Number(p.amount) / 100).toFixed(2)} · {p.modulo_id ?? (p.module_slugs ?? []).join(", ") ?? "—"} · {new Date(p.paid_at).toLocaleString("pt-BR")}
+                  R$ {(Number(p.amount_cents) / 100).toFixed(2)} · {p.modulo_id ?? (p.module_slugs ?? []).join(", ") ?? "—"} · {p.paid_at || p.approved_at ? new Date(p.paid_at ?? p.approved_at).toLocaleString("pt-BR") : "—"}
                 </div>
               </div>
               <Badge variant={p.provisioning_status === "done" ? "default" : p.provisioning_status === "error" ? "destructive" : "outline"}>
                 {p.provisioning_status}
               </Badge>
-              <Button size="sm" variant="ghost" onClick={() => reprovision.mutate(p.order_nsu)} disabled={reprovision.isPending}>
+              <Button size="sm" variant="ghost" onClick={() => reprovision.mutate(p.mp_payment_id)} disabled={reprovision.isPending}>
                 <RefreshCw className="w-3.5 h-3.5 mr-1" />Reprocessar
               </Button>
             </div>
