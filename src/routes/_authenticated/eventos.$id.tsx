@@ -169,6 +169,19 @@ function EventDetail() {
     }
   }, [ev, policy]);
 
+  // Ingressos restantes ao vivo: assina mudanças nos tipos de ingresso deste evento
+  const [liveOn, setLiveOn] = useState(false);
+  useEffect(() => {
+    const ch = supabase
+      .channel(`evt-types-${id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "evt_ticket_types", filter: `event_id=eq.${id}` },
+        () => { qc.invalidateQueries({ queryKey: ["evt_event", id] }); })
+      .on("postgres_changes", { event: "*", schema: "public", table: "evt_tickets", filter: `event_id=eq.${id}` },
+        () => { qc.invalidateQueries({ queryKey: ["evt_event", id] }); })
+      .subscribe((s) => setLiveOn(s === "SUBSCRIBED"));
+    return () => { supabase.removeChannel(ch); };
+  }, [id, qc]);
+
 
   return (
     <div className="space-y-4">
