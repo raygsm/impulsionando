@@ -1,5 +1,6 @@
 import type { CurrentUser } from "@/lib/auth";
-import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
+import logoAsset from "@/assets/logo-impulsionando.png.asset.json";
+
 import { SidebarNav } from "./SidebarNav";
 import { useImpersonation } from "@/hooks/use-impersonation";
 import { useAudience } from "@/hooks/use-audience";
@@ -14,7 +15,7 @@ export function Sidebar({ currentUser }: { currentUser: CurrentUser }) {
       <div className="px-4 py-4 flex items-center justify-center border-b border-sidebar-border" data-bg-tone="dark">
         <div className="aspect-square w-40 rounded-xl bg-white shadow-sm flex items-center justify-center p-3">
           <img
-            src={new URL("@/assets/logo-impulsionando.png", import.meta.url).href}
+            src={logoAsset.url}
             alt="Impulsionando Tecnologia"
             className="max-h-full max-w-full object-contain"
             draggable={false}
