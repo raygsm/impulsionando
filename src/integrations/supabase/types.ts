@@ -8129,6 +8129,128 @@ export type Database = {
         }
         Relationships: []
       }
+      core_funnel_dispatch_queue: {
+        Row: {
+          attempts: number
+          company_id: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          event_name: string
+          id: string
+          last_error: string | null
+          last_request_id: string | null
+          lead_id: string | null
+          niche_slug: string | null
+          payload: Json
+          rule_id: string
+          scheduled_at: string
+          sent_at: string | null
+          stage: Database["public"]["Enums"]["core_funnel_stage"]
+          status: string
+          updated_at: string
+          workflow_name: string
+        }
+        Insert: {
+          attempts?: number
+          company_id?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          event_name: string
+          id?: string
+          last_error?: string | null
+          last_request_id?: string | null
+          lead_id?: string | null
+          niche_slug?: string | null
+          payload?: Json
+          rule_id: string
+          scheduled_at?: string
+          sent_at?: string | null
+          stage: Database["public"]["Enums"]["core_funnel_stage"]
+          status?: string
+          updated_at?: string
+          workflow_name: string
+        }
+        Update: {
+          attempts?: number
+          company_id?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          event_name?: string
+          id?: string
+          last_error?: string | null
+          last_request_id?: string | null
+          lead_id?: string | null
+          niche_slug?: string | null
+          payload?: Json
+          rule_id?: string
+          scheduled_at?: string
+          sent_at?: string | null
+          stage?: Database["public"]["Enums"]["core_funnel_stage"]
+          status?: string
+          updated_at?: string
+          workflow_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_funnel_dispatch_queue_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "core_funnel_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      core_funnel_rules: {
+        Row: {
+          active: boolean
+          created_at: string
+          delay_minutes: number
+          description: string | null
+          event_name: string
+          id: string
+          niche_slug: string | null
+          payload_template: Json
+          stage: Database["public"]["Enums"]["core_funnel_stage"]
+          updated_at: string
+          workflow_name: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          delay_minutes?: number
+          description?: string | null
+          event_name: string
+          id?: string
+          niche_slug?: string | null
+          payload_template?: Json
+          stage: Database["public"]["Enums"]["core_funnel_stage"]
+          updated_at?: string
+          workflow_name: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          delay_minutes?: number
+          description?: string | null
+          event_name?: string
+          id?: string
+          niche_slug?: string | null
+          payload_template?: Json
+          stage?: Database["public"]["Enums"]["core_funnel_stage"]
+          updated_at?: string
+          workflow_name?: string
+        }
+        Relationships: []
+      }
       core_incidents: {
         Row: {
           created_at: string
@@ -21746,6 +21868,21 @@ export type Database = {
         Returns: number
       }
       enqueue_fiscal_invoice: { Args: { _calc_id: string }; Returns: string }
+      enqueue_funnel_event: {
+        Args: {
+          _company_id?: string
+          _contact_email?: string
+          _contact_phone?: string
+          _entity_id?: string
+          _entity_type?: string
+          _event_name: string
+          _lead_id?: string
+          _niche_slug?: string
+          _payload?: Json
+          _stage: Database["public"]["Enums"]["core_funnel_stage"]
+        }
+        Returns: number
+      }
       enqueue_marketplace_intermediation: {
         Args: { _engagement_id: string }
         Returns: string
@@ -22328,6 +22465,7 @@ export type Database = {
         | "profissional"
         | "consumidor"
       company_environment: "demo" | "teste" | "real"
+      core_funnel_stage: "capture" | "convert" | "relate" | "retain" | "expand"
       core_incident_severity: "sev1" | "sev2" | "sev3" | "sev4"
       core_incident_status: "open" | "monitoring" | "resolved"
       core_slo_scope: "global" | "uptime_url" | "runtime_scope"
@@ -22669,6 +22807,7 @@ export const Constants = {
         "consumidor",
       ],
       company_environment: ["demo", "teste", "real"],
+      core_funnel_stage: ["capture", "convert", "relate", "retain", "expand"],
       core_incident_severity: ["sev1", "sev2", "sev3", "sev4"],
       core_incident_status: ["open", "monitoring", "resolved"],
       core_slo_scope: ["global", "uptime_url", "runtime_scope"],
