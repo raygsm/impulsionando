@@ -148,25 +148,39 @@ function SubMenu({
   );
 }
 
+const GROUP_TONES = [
+  "bg-primary/15 text-primary hover:bg-primary/25 border-primary/30",
+  "bg-accent/20 text-accent-foreground hover:bg-accent/30 border-accent/40",
+  "bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25 border-emerald-500/30",
+  "bg-amber-500/15 text-amber-300 hover:bg-amber-500/25 border-amber-500/30",
+  "bg-sky-500/15 text-sky-300 hover:bg-sky-500/25 border-sky-500/30",
+  "bg-fuchsia-500/15 text-fuchsia-300 hover:bg-fuchsia-500/25 border-fuchsia-500/30",
+  "bg-rose-500/15 text-rose-300 hover:bg-rose-500/25 border-rose-500/30",
+  "bg-indigo-500/15 text-indigo-300 hover:bg-indigo-500/25 border-indigo-500/30",
+  "bg-teal-500/15 text-teal-300 hover:bg-teal-500/25 border-teal-500/30",
+  "bg-orange-500/15 text-orange-300 hover:bg-orange-500/25 border-orange-500/30",
+  "bg-violet-500/15 text-violet-300 hover:bg-violet-500/25 border-violet-500/30",
+];
+
 function Group({
   group,
+  index,
   pathname,
   filterItem,
   onNavigate,
   pendingPix,
 }: {
   group: NavGroup;
+  index: number;
   pathname: string;
   filterItem: (i: NavItem, groupAudiences?: NavAudience[]) => boolean;
   onNavigate?: () => void;
   pendingPix: number;
 }) {
   const items = group.items.filter((i) => {
-    // Para itens com children, manter se ao menos um filho passa.
     if (i.children) {
       const anyChild = i.children.some((c) => filterItem(c, group.audiences));
       if (!anyChild) return false;
-      // Também respeita audiences/superOnly do agrupador
       if (i.superOnly || i.audiences || i.perm || i.requiresPlanTier) {
         return filterItem(i, group.audiences);
       }
@@ -178,21 +192,25 @@ function Group({
 
   const hasActive = items.some((i) => isBranchActive(pathname, i));
   const [open, setOpen] = useState<boolean>(hasActive || !!group.defaultOpen);
+  const tone = GROUP_TONES[index % GROUP_TONES.length];
 
   return (
-    <div className="mt-2">
+    <div className="mt-3">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] uppercase tracking-wider text-sidebar-foreground/50 hover:text-sidebar-foreground/80 transition-colors"
+        className={cn(
+          "w-full flex items-center justify-between px-3 py-2 rounded-md border text-sm font-bold uppercase tracking-wide transition-colors shadow-sm",
+          tone,
+        )}
       >
-        <span>{group.label}</span>
+        <span className="truncate">{group.label}</span>
         <ChevronDown
-          className={cn("w-3.5 h-3.5 transition-transform", open ? "rotate-0" : "-rotate-90")}
+          className={cn("w-4 h-4 transition-transform", open ? "rotate-0" : "-rotate-90")}
         />
       </button>
       {open && (
-        <div className="space-y-1">
+        <div className="space-y-1 mt-1.5">
           {items.map((it) =>
             it.children ? (
               <SubMenu
@@ -219,6 +237,7 @@ function Group({
     </div>
   );
 }
+
 
 export function SidebarNav({
   currentUser,
@@ -284,16 +303,18 @@ export function SidebarNav({
           />
         ))}
       </div>
-      {visibleGroups.map((g) => (
+      {visibleGroups.map((g, i) => (
         <Group
           key={g.label}
           group={g}
+          index={i}
           pathname={location.pathname}
           filterItem={filterItem}
           onNavigate={onNavigate}
           pendingPix={pendingPix}
         />
       ))}
+
     </nav>
   );
 }
