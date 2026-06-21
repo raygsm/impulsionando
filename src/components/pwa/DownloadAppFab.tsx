@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Download, Smartphone, X } from "lucide-react";
+import { Download, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
@@ -7,9 +7,6 @@ type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
-
-const HIDE_KEY = "imp.pwa.downloadHiddenAt";
-const HIDE_DAYS = 7;
 
 function detectPlatform(): "android" | "ios" | "desktop" | "other" {
   if (typeof navigator === "undefined") return "other";
