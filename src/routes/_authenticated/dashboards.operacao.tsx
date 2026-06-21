@@ -9,8 +9,55 @@ import { KpiCard } from "@/components/insights/KpiCard";
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
 import { fetchOperationsSnapshot } from "@/lib/operations-snapshot.functions";
+import { fetchMarketplaceGmvSummary } from "@/lib/marketplace-intermediation.functions";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { useCurrentUser } from "@/hooks/use-current-user";
+
+function MarketplaceTab({ companyId }: { companyId?: string }) {
+  const fn = useServerFn(fetchMarketplaceGmvSummary);
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["mkt-gmv", companyId ?? "all"],
+    queryFn: () => fn({ data: { companyId, months: 6 } }),
+    staleTime: 60_000,
+  });
+  if (isLoading || !data) return <Card className="p-6 flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Carregando…</Card>;
+  if (error) return <Card className="p-4 border-rose-200 bg-rose-50 text-rose-900 text-sm">{(error as Error).message}</Card>;
+  const d = data as any;
+  const bpsLabel = d.totals.effectiveBps != null ? `${(d.totals.effectiveBps / 100).toFixed(2)}%` : "—";
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+        <KpiCard label="GMV (6m)" value={d.totals.gmv} format="currency" />
+        <KpiCard label="Taxa de Intermediação Digital" value={d.totals.fee} format="currency" hint={`Alíquota efetiva ${bpsLabel}`} />
+        <KpiCard label="Engagements" value={d.totals.engagements} />
+        <KpiCard label="Concluídos" value={d.totals.completed} />
+      </div>
+      <Card className="p-4 overflow-x-auto">
+        <h3 className="text-sm font-semibold mb-3">Histórico mensal por fornecedor</h3>
+        {d.rows.length === 0 ? <p className="text-xs text-muted-foreground">Sem engagements no período.</p> : (
+          <table className="w-full text-xs">
+            <thead className="text-left text-muted-foreground">
+              <tr><th className="py-1">Mês</th><th>Fornecedor</th><th className="text-right">Engagements</th><th className="text-right">Concluídos</th><th className="text-right">GMV</th><th className="text-right">Taxa</th><th className="text-right">bps</th></tr>
+            </thead>
+            <tbody>
+              {d.rows.map((r: any, i: number) => (
+                <tr key={i} className="border-t">
+                  <td className="py-1.5 font-mono">{String(r.period_month).slice(0,7)}</td>
+                  <td className="max-w-[220px] truncate">{r.company_name}</td>
+                  <td className="text-right">{r.engagements_count}</td>
+                  <td className="text-right">{r.completed_count}</td>
+                  <td className="text-right">R$ {(Number(r.gmv_cents)/100).toFixed(2)}</td>
+                  <td className="text-right">R$ {(Number(r.intermediation_fee_cents)/100).toFixed(2)}</td>
+                  <td className="text-right font-mono">{r.effective_bps ?? "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </Card>
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/_authenticated/dashboards/operacao")({
   head: () => ({ meta: [{ title: "Operação Core — Impulsionando" }, { name: "robots", content: "noindex,nofollow" }] }),
@@ -208,19 +255,22 @@ function ContadorTab() {
 
 function OperacaoPage() {
   const { data: me } = useCurrentUser();
+  const { companyId: activeCompanyId } = useActiveCompany();
   const isSuper = !!me?.isSuperAdmin;
   const [tab, setTab] = useState(isSuper ? "super" : "empresa");
   return (
     <div className="space-y-6">
-      <PageHeader title="Operação Core" description="Visão consolidada das Fases 1-5: receita, repasses, compliance, identidade, WhatsApp e nota fiscal." />
+      <PageHeader title="Operação Core" description="Visão consolidada do core Impulsionando: receita, repasses, compliance, identidade, WhatsApp, NF e marketplace B2B." />
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
           {isSuper && <TabsTrigger value="super">Super Admin</TabsTrigger>}
           <TabsTrigger value="empresa">Empresa</TabsTrigger>
+          <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
           {isSuper && <TabsTrigger value="contador">Contador</TabsTrigger>}
         </TabsList>
         {isSuper && <TabsContent value="super" className="mt-6"><SuperAdminTab /></TabsContent>}
         <TabsContent value="empresa" className="mt-6"><EmpresaTab /></TabsContent>
+        <TabsContent value="marketplace" className="mt-6"><MarketplaceTab companyId={isSuper ? undefined : activeCompanyId ?? undefined} /></TabsContent>
         {isSuper && <TabsContent value="contador" className="mt-6"><ContadorTab /></TabsContent>}
       </Tabs>
     </div>
