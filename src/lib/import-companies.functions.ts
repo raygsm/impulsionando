@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { recordTenantSignupLead } from "./growth-funnel";
 
 const RowSchema = z.object({
   name: z.string().min(1),

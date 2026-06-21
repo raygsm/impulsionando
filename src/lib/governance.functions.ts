@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { recordTenantSignupLead } from "./growth-funnel";
 
 /**
  * Governance — Core Master.
@@ -213,6 +214,17 @@ export const cloneCompany = createServerFn({ method: "POST" })
       { source: data.source_company_id, new_name: data.new_name },
       1,
     );
+
+    // Governança Impulsionando: todo tenant novo entra no funil corporativo.
+    await recordTenantSignupLead(supabase, {
+      companyId: created.id,
+      name: created.name,
+      email: created.email ?? null,
+      niche: (created as any).niche ?? (src as any).niche ?? null,
+      channel: "clone",
+      notes: `Clonado de ${data.source_company_id}`,
+    });
+
     return { company_id: created.id, name: created.name };
   });
 
