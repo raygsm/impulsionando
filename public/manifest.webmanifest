@@ -1,18 +1,52 @@
 {
-  "name": "Impulsionando Tecnologia",
+  "name": "Impulsionando — Plataforma multiempresa",
   "short_name": "Impulsionando",
-  "description": "Plataforma SaaS multiempresa: CRM, agenda, ERP, comunicação, BI e Clube Impulsionando.",
-  "start_url": "/",
+  "description": "App único Impulsionando: todos os clientes, nichos e marcas (white label, empresas e Clube do consumidor final) acessam suas operações por aqui — agenda, CRM, vendas, financeiro, prontuário, comunicação, BI e benefícios.",
+  "start_url": "/auth?from=pwa",
   "scope": "/",
+  "id": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#0F172A",
   "categories": ["business", "productivity", "lifestyle"],
   "lang": "pt-BR",
+  "dir": "ltr",
   "icons": [
     { "src": "/pwa-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "/pwa-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "/pwa-icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "Minha torre (início)",
+      "short_name": "Torre",
+      "description": "Painel principal da sua empresa ou marca",
+      "url": "/torre/inicio?from=pwa",
+      "icons": [{ "src": "/pwa-icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Agenda do dia",
+      "short_name": "Agenda",
+      "description": "Próximos atendimentos e compromissos",
+      "url": "/agenda?from=pwa",
+      "icons": [{ "src": "/pwa-icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "CRM",
+      "short_name": "CRM",
+      "description": "Leads e oportunidades",
+      "url": "/crm?from=pwa",
+      "icons": [{ "src": "/pwa-icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Clube Impulsionando",
+      "short_name": "Clube",
+      "description": "Área do consumidor final — benefícios e vantagens",
+      "url": "/clube?from=pwa",
+      "icons": [{ "src": "/pwa-icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "prefer_related_applications": false
 }
