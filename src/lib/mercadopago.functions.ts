@@ -271,7 +271,10 @@ export const createCardPayment = createServerFn({ method: "POST" })
       status: json.status,
       status_detail: json.status_detail,
     };
+      },
+    );
   });
+
 
 export const getPaymentStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
