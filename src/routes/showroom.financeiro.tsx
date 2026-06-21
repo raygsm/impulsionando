@@ -207,7 +207,6 @@ const METHOD_LABEL: Record<Receivable["method"], string> = {
   card: "Cartão",
   boleto: "Boleto",
   mercadopago: "Mercado Pago",
-  mercadopago: "MercadoPago",
 };
 
 function ShowroomFinanceiro() {
