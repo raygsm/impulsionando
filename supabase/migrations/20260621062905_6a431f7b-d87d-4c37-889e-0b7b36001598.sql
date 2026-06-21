@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.enqueue_post_payment_journey() FROM PUBLIC, anon, authenticated;
