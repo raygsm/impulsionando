@@ -1,12 +1,11 @@
 /**
  * Jornada do consumidor final — rota canônica /clube.
- * Aponta para o mesmo componente do `/consumidor` (mantido como alias
- * histórico para links/SEO antigos) e reforça as metatags voltadas
- * ao consumidor.
+ * Reusa o mesmo componente da rota /consumidor (alias histórico),
+ * importando-o diretamente (acessar `Route.options.component` de outra
+ * rota quebra com code-splitting → página renderizava em branco).
  */
-import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Route as ConsumidorRoute } from "./consumidor";
+import { ClubeLanding } from "./consumidor";
 
 export const Route = createFileRoute("/clube")({
   head: () => ({
@@ -24,10 +23,5 @@ export const Route = createFileRoute("/clube")({
     ],
     links: [{ rel: "canonical", href: "https://impulsionando.com.br/clube" }],
   }),
-  component: ClubeRoute,
+  component: ClubeLanding,
 });
-
-function ClubeRoute() {
-  const Comp = ConsumidorRoute.options.component as React.ComponentType;
-  return <Comp />;
-}
