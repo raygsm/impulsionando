@@ -2,6 +2,9 @@
 
 > Todo projeto novo nasce **acoplado ao core Impulsionando**. Não existe projeto "standalone".
 > Clientes (CHRISMED, Marocas, Garrido, etc.) são **tenants/marcas** dentro do core, nunca sistemas isolados.
+>
+> **Crescimento:** todo tenant é também **lead/conta do funil Impulsionando**.
+> Réguas, N8N, agentes IA e dashboards seguem `docs/CORE_GROWTH_GOVERNANCE.md`.
 
 ## 1. Princípio
 
