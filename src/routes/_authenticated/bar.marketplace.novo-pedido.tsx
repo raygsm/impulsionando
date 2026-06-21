@@ -57,6 +57,14 @@ function NewOrderPage() {
     enabled: !!supplierId,
   });
 
+  // Estoque ao vivo: sincroniza mp_catalog_items deste fornecedor sem refetch.
+  const { liveOn } = useRealtimeAvailability({
+    table: "mp_catalog_items",
+    filter: { column: "supplier_id", value: supplierId },
+    queryKey: ["mp-catalog", supplierId],
+    enabled: !!supplierId,
+  });
+
   const subtotal = useMemo(
     () => Object.values(cart).reduce((a, it) => a + Math.round(it.unit_price_cents * it.qty), 0),
     [cart],
