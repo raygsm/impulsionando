@@ -28,6 +28,8 @@ function Page() {
   const fn = useServerFn(getConsumerPremiumOverview);
   const fnInv = useServerFn(listOpenInvoices);
   const markPaid = useServerFn(adminMarkInvoicePaid);
+  const remindErp = useServerFn(sendInvoiceReminderNow);
+  const remindConsumer = useServerFn(sendConsumerInvoiceReminderNow);
   const q = useQuery({ queryKey: ["consumer-premium-overview"], queryFn: () => fn() });
   const inv = useQuery({ queryKey: ["admin-open-invoices"], queryFn: () => fnInv() });
   const d = q.data ?? {};
@@ -39,6 +41,15 @@ function Page() {
       qc.invalidateQueries({ queryKey: ["admin-open-invoices"] });
       qc.invalidateQueries({ queryKey: ["consumer-premium-overview"] });
     },
+    onError: (e: any) => toast.error(e?.message ?? "Falha"),
+  });
+
+  const remind = useMutation({
+    mutationFn: (v: { kind: "consumer" | "erp"; invoice_id: string }) =>
+      v.kind === "consumer"
+        ? remindConsumer({ data: { invoiceId: v.invoice_id } })
+        : remindErp({ data: { invoiceId: v.invoice_id } }),
+    onSuccess: (r: any) => toast.success(`Lembrete enfileirado (${(r?.channels ?? []).join(" + ") || "—"})`),
     onError: (e: any) => toast.error(e?.message ?? "Falha"),
   });
 
