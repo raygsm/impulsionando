@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { MessageCircle, Menu, LogIn, Sparkles, PlayCircle, ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { InstallAppButton } from "@/components/pwa/InstallAppButton";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import {
   NavigationMenu,
