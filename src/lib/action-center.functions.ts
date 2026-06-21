@@ -23,7 +23,7 @@ export const getActionCenter = createServerFn({ method: "GET" })
     const [companies, contracts, tickets, invoices, leads, suspensions] = await Promise.all([
       supabaseAdmin.from("companies").select("id, name, is_active, created_at").eq("is_active", true).limit(2000),
       supabaseAdmin.from("billing_contracts").select("company_id, recurring_amount, status"),
-      supabaseAdmin.from("support_tickets").select("id, company_id, subject, status, priority, created_at").in("status", ["open", "pending", "in_progress"]).order("created_at", { ascending: false }).limit(200),
+      supabaseAdmin.from("support_tickets").select("id, company_id, subject, status, priority, created_at").in("status", ["new", "received", "in_review", "in_development", "waiting_core", "waiting_customer", "waiting_third_party", "reopened"]).order("created_at", { ascending: false }).limit(200),
       supabaseAdmin.from("billing_invoices").select("id, company_id, amount, status, due_at").in("status", ["overdue", "pending"]).limit(200),
       supabaseAdmin.from("marketing_leads").select("id, email, origin, created_at").gte("created_at", since7).is("contacted_at" as any, null).limit(200),
       supabaseAdmin.from("billing_suspensions").select("company_id, reason, created_at").limit(100),
@@ -52,7 +52,7 @@ export const getActionCenter = createServerFn({ method: "GET" })
         priority: Math.round(score),
         category: "Suporte",
         title: t.subject ?? "(sem assunto)",
-        subtitle: `${companyName.get(t.company_id) ?? "—"} · ${Math.floor(ageH)}h aberto · ${t.priority ?? "normal"}`,
+        subtitle: `${companyName.get(t.company_id) ?? "—"} · ${Math.floor(ageH)}h em aberto · ${t.priority ?? "normal"}`,
         tenantId: t.company_id,
         link: `/admin/tenant-360?companyId=${t.company_id}`,
       });

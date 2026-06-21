@@ -405,6 +405,7 @@ import { Route as AuthenticatedAdminBillingPolicyRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminBillingContractsRouteImport } from './routes/_authenticated/admin.billing-contracts'
 import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authenticated/admin.billing'
 import { Route as AuthenticatedAdminAttributionRouteImport } from './routes/_authenticated/admin.attribution'
+import { Route as AuthenticatedAdminActionCenterRouteImport } from './routes/_authenticated/admin.action-center'
 import { Route as AuthenticatedAdmMasterRouteImport } from './routes/_authenticated/adm.master'
 import { Route as AuthenticatedAdmAgentesRouteImport } from './routes/_authenticated/adm.agentes'
 import { Route as AuthenticatedAccessProfilesMatrixRouteImport } from './routes/_authenticated/access-profiles.matrix'
@@ -2649,6 +2650,12 @@ const AuthenticatedAdminAttributionRoute =
     path: '/admin/attribution',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminActionCenterRoute =
+  AuthenticatedAdminActionCenterRouteImport.update({
+    id: '/admin/action-center',
+    path: '/admin/action-center',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdmMasterRoute = AuthenticatedAdmMasterRouteImport.update({
   id: '/master',
   path: '/master',
@@ -3200,6 +3207,7 @@ export interface FileRoutesByFullPath {
   '/access-profiles/matrix': typeof AuthenticatedAccessProfilesMatrixRoute
   '/adm/agentes': typeof AuthenticatedAdmAgentesRoute
   '/adm/master': typeof AuthenticatedAdmMasterRoute
+  '/admin/action-center': typeof AuthenticatedAdminActionCenterRoute
   '/admin/attribution': typeof AuthenticatedAdminAttributionRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/admin/billing-contracts': typeof AuthenticatedAdminBillingContractsRoute
@@ -3649,6 +3657,7 @@ export interface FileRoutesByTo {
   '/access-profiles/matrix': typeof AuthenticatedAccessProfilesMatrixRoute
   '/adm/agentes': typeof AuthenticatedAdmAgentesRoute
   '/adm/master': typeof AuthenticatedAdmMasterRoute
+  '/admin/action-center': typeof AuthenticatedAdminActionCenterRoute
   '/admin/attribution': typeof AuthenticatedAdminAttributionRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/admin/billing-contracts': typeof AuthenticatedAdminBillingContractsRoute
@@ -4112,6 +4121,7 @@ export interface FileRoutesById {
   '/_authenticated/access-profiles/matrix': typeof AuthenticatedAccessProfilesMatrixRoute
   '/_authenticated/adm/agentes': typeof AuthenticatedAdmAgentesRoute
   '/_authenticated/adm/master': typeof AuthenticatedAdmMasterRoute
+  '/_authenticated/admin/action-center': typeof AuthenticatedAdminActionCenterRoute
   '/_authenticated/admin/attribution': typeof AuthenticatedAdminAttributionRoute
   '/_authenticated/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/_authenticated/admin/billing-contracts': typeof AuthenticatedAdminBillingContractsRoute
@@ -4574,6 +4584,7 @@ export interface FileRouteTypes {
     | '/access-profiles/matrix'
     | '/adm/agentes'
     | '/adm/master'
+    | '/admin/action-center'
     | '/admin/attribution'
     | '/admin/billing'
     | '/admin/billing-contracts'
@@ -5023,6 +5034,7 @@ export interface FileRouteTypes {
     | '/access-profiles/matrix'
     | '/adm/agentes'
     | '/adm/master'
+    | '/admin/action-center'
     | '/admin/attribution'
     | '/admin/billing'
     | '/admin/billing-contracts'
@@ -5485,6 +5497,7 @@ export interface FileRouteTypes {
     | '/_authenticated/access-profiles/matrix'
     | '/_authenticated/adm/agentes'
     | '/_authenticated/adm/master'
+    | '/_authenticated/admin/action-center'
     | '/_authenticated/admin/attribution'
     | '/_authenticated/admin/billing'
     | '/_authenticated/admin/billing-contracts'
@@ -8698,6 +8711,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAttributionRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/action-center': {
+      id: '/_authenticated/admin/action-center'
+      path: '/admin/action-center'
+      fullPath: '/admin/action-center'
+      preLoaderRoute: typeof AuthenticatedAdminActionCenterRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/adm/master': {
       id: '/_authenticated/adm/master'
       path: '/master'
@@ -9800,6 +9820,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTalentsRoute: typeof AuthenticatedTalentsRoute
   AuthenticatedUnitsRoute: typeof AuthenticatedUnitsRoute
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRouteWithChildren
+  AuthenticatedAdminActionCenterRoute: typeof AuthenticatedAdminActionCenterRoute
   AuthenticatedAdminAttributionRoute: typeof AuthenticatedAdminAttributionRoute
   AuthenticatedAdminBillingRoute: typeof AuthenticatedAdminBillingRoute
   AuthenticatedAdminBillingContractsRoute: typeof AuthenticatedAdminBillingContractsRoute
@@ -9944,6 +9965,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedTalentsRoute: AuthenticatedTalentsRoute,
   AuthenticatedUnitsRoute: AuthenticatedUnitsRoute,
   AuthenticatedUsersRoute: AuthenticatedUsersRouteWithChildren,
+  AuthenticatedAdminActionCenterRoute: AuthenticatedAdminActionCenterRoute,
   AuthenticatedAdminAttributionRoute: AuthenticatedAdminAttributionRoute,
   AuthenticatedAdminBillingRoute: AuthenticatedAdminBillingRoute,
   AuthenticatedAdminBillingContractsRoute:
