@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
 import { fetchOperationsSnapshot } from "@/lib/operations-snapshot.functions";
 import { fetchMarketplaceGmvSummary } from "@/lib/marketplace-intermediation.functions";
+import { fetchSloDashboard, resolveIncidentFn } from "@/lib/slo-observability.functions";
 import { useActiveCompany } from "@/hooks/use-active-company";
 import { useCurrentUser } from "@/hooks/use-current-user";
 
