@@ -42,7 +42,7 @@ export function CommandPalette() {
 
   const cockpits = entries.filter((e) => e.to.includes("/cockpit") || e.to === "/cockpits");
   const others = entries.filter((e) => !cockpits.includes(e));
-  const grouped = others.reduce<Record<string, Entry[]>>((acc, e) => {
+  const grouped = others.reduce<Record<string, (Entry & { to: string })[]>>((acc, e) => {
     (acc[e.group] ||= []).push(e);
     return acc;
   }, {});
