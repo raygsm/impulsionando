@@ -3,9 +3,9 @@
  *
  * O cliente que está no /mesa/$token aperta "Pagar conta agora". Geramos
  * (ou recuperamos) uma cobrança em `restaurant_table_invoices` via RPC
- * pública, e enriquecemos a resposta com o link de pagamento PIX no
- * handle InfinitePay configurado nos secrets. A confirmação real do
- * pagamento chega depois pelo webhook (que fecha a sessão e libera a
+ * pública. A URL de pagamento PIX (`pix_url`) é fornecida pela própria RPC
+ * quando o gateway estiver configurado (Mercado Pago). A confirmação real
+ * do pagamento chega depois pelo webhook (que fecha a sessão e libera a
  * mesa de forma idempotente).
  */
 import { createServerFn } from "@tanstack/react-start";
@@ -27,17 +27,6 @@ function publicSupabase() {
   });
 }
 
-function buildPixUrl(orderNsu: string, amountCents: number): {
-  pix_url: string | null;
-  configured: boolean;
-} {
-  const handle = (process.env.INFINITEPAY_HANDLE ?? "").replace(/^\$/, "");
-  if (!handle) return { pix_url: null, configured: false };
-  const amount = (amountCents / 100).toFixed(2);
-  // Página de checkout PIX da InfinitePay; o `order_nsu` permite reconciliar via webhook.
-  const url = `https://pix.infinitepay.io/${encodeURIComponent(handle)}?amount=${amount}&order_nsu=${encodeURIComponent(orderNsu)}`;
-  return { pix_url: url, configured: true };
-}
 
 export const createTableInvoice = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => CreateInput.parse(d))
