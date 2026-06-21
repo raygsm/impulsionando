@@ -7,13 +7,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { getKitchenBoard, setItemStatus } from "@/lib/restaurant-kitchen.functions";
-import { ChefHat, Bell, Check, X, RefreshCw, Clock } from "lucide-react";
+import { ChefHat, Bell, Check, X, RefreshCw, Clock, Radio } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useActiveCompany } from "@/hooks/use-active-company";
 
 export const Route = createFileRoute("/_authenticated/restaurante/salao")({
   component: SalaoPage,
