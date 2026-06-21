@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { MessageCircle, Menu, LogIn, Sparkles, PlayCircle, ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { InstallAppButton } from "@/components/pwa/InstallAppButton";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import {
   NavigationMenu,
@@ -278,6 +279,8 @@ export function PublicHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <InstallAppButton className="hidden md:inline-flex" />
+
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex gap-1.5">
             <Link to="/auth">
               <LogIn className="w-4 h-4" /> Entrar
