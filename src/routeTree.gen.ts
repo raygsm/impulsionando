@@ -390,6 +390,7 @@ import { Route as AuthenticatedAdminQualidadeRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminPixPendentesRouteImport } from './routes/_authenticated/admin.pix-pendentes'
 import { Route as AuthenticatedAdminNichePlansRouteImport } from './routes/_authenticated/admin.niche-plans'
 import { Route as AuthenticatedAdminImobiliariaRouteImport } from './routes/_authenticated/admin.imobiliaria'
+import { Route as AuthenticatedAdminFunil360RouteImport } from './routes/_authenticated/admin.funil-360'
 import { Route as AuthenticatedAdminFiscalRouteImport } from './routes/_authenticated/admin.fiscal'
 import { Route as AuthenticatedAdminCobrancasRouteImport } from './routes/_authenticated/admin.cobrancas'
 import { Route as AuthenticatedAdminClubeRouteImport } from './routes/_authenticated/admin.clube'
@@ -2552,6 +2553,12 @@ const AuthenticatedAdminImobiliariaRoute =
     path: '/admin/imobiliaria',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminFunil360Route =
+  AuthenticatedAdminFunil360RouteImport.update({
+    id: '/admin/funil-360',
+    path: '/admin/funil-360',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminFiscalRoute =
   AuthenticatedAdminFiscalRouteImport.update({
     id: '/admin/fiscal',
@@ -3152,6 +3159,7 @@ export interface FileRoutesByFullPath {
   '/admin/clube': typeof AuthenticatedAdminClubeRoute
   '/admin/cobrancas': typeof AuthenticatedAdminCobrancasRoute
   '/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
+  '/admin/funil-360': typeof AuthenticatedAdminFunil360Route
   '/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
@@ -3593,6 +3601,7 @@ export interface FileRoutesByTo {
   '/admin/clube': typeof AuthenticatedAdminClubeRoute
   '/admin/cobrancas': typeof AuthenticatedAdminCobrancasRoute
   '/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
+  '/admin/funil-360': typeof AuthenticatedAdminFunil360Route
   '/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
@@ -4048,6 +4057,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/clube': typeof AuthenticatedAdminClubeRoute
   '/_authenticated/admin/cobrancas': typeof AuthenticatedAdminCobrancasRoute
   '/_authenticated/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
+  '/_authenticated/admin/funil-360': typeof AuthenticatedAdminFunil360Route
   '/_authenticated/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/_authenticated/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/_authenticated/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
@@ -4502,6 +4512,7 @@ export interface FileRouteTypes {
     | '/admin/clube'
     | '/admin/cobrancas'
     | '/admin/fiscal'
+    | '/admin/funil-360'
     | '/admin/imobiliaria'
     | '/admin/niche-plans'
     | '/admin/pix-pendentes'
@@ -4943,6 +4954,7 @@ export interface FileRouteTypes {
     | '/admin/clube'
     | '/admin/cobrancas'
     | '/admin/fiscal'
+    | '/admin/funil-360'
     | '/admin/imobiliaria'
     | '/admin/niche-plans'
     | '/admin/pix-pendentes'
@@ -5397,6 +5409,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/clube'
     | '/_authenticated/admin/cobrancas'
     | '/_authenticated/admin/fiscal'
+    | '/_authenticated/admin/funil-360'
     | '/_authenticated/admin/imobiliaria'
     | '/_authenticated/admin/niche-plans'
     | '/_authenticated/admin/pix-pendentes'
@@ -8488,6 +8501,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminImobiliariaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/funil-360': {
+      id: '/_authenticated/admin/funil-360'
+      path: '/admin/funil-360'
+      fullPath: '/admin/funil-360'
+      preLoaderRoute: typeof AuthenticatedAdminFunil360RouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/fiscal': {
       id: '/_authenticated/admin/fiscal'
       path: '/admin/fiscal'
@@ -9647,6 +9667,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminClubeRoute: typeof AuthenticatedAdminClubeRoute
   AuthenticatedAdminCobrancasRoute: typeof AuthenticatedAdminCobrancasRoute
   AuthenticatedAdminFiscalRoute: typeof AuthenticatedAdminFiscalRoute
+  AuthenticatedAdminFunil360Route: typeof AuthenticatedAdminFunil360Route
   AuthenticatedAdminImobiliariaRoute: typeof AuthenticatedAdminImobiliariaRoute
   AuthenticatedAdminNichePlansRoute: typeof AuthenticatedAdminNichePlansRoute
   AuthenticatedAdminPixPendentesRoute: typeof AuthenticatedAdminPixPendentesRoute
@@ -9786,6 +9807,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminClubeRoute: AuthenticatedAdminClubeRoute,
   AuthenticatedAdminCobrancasRoute: AuthenticatedAdminCobrancasRoute,
   AuthenticatedAdminFiscalRoute: AuthenticatedAdminFiscalRoute,
+  AuthenticatedAdminFunil360Route: AuthenticatedAdminFunil360Route,
   AuthenticatedAdminImobiliariaRoute: AuthenticatedAdminImobiliariaRoute,
   AuthenticatedAdminNichePlansRoute: AuthenticatedAdminNichePlansRoute,
   AuthenticatedAdminPixPendentesRoute: AuthenticatedAdminPixPendentesRoute,
