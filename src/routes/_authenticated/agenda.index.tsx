@@ -64,6 +64,26 @@ function AgendaHome() {
     },
   });
 
+  // Atualização ao vivo: invalida os contadores e a lista quando um agendamento
+  // muda (confirmar/cancelar/no-show) — sem precisar atualizar a tela.
+  const qc = useQueryClient();
+  const [liveOn, setLiveOn] = useState(false);
+  useEffect(() => {
+    if (!companyId) return;
+    const ch = supabase
+      .channel(`agenda-live-${companyId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "agenda_appointments", filter: `company_id=eq.${companyId}` },
+        () => {
+          qc.invalidateQueries({ queryKey: ["agenda-stats", companyId] });
+          qc.invalidateQueries({ queryKey: ["agenda-today", companyId] });
+        },
+      )
+      .subscribe((s) => setLiveOn(s === "SUBSCRIBED"));
+    return () => { supabase.removeChannel(ch); };
+  }, [companyId, qc]);
+
   if (!companyId) return <EmptyState title="Sem empresa ativa" description="Selecione uma empresa para acessar a agenda." />;
 
   const cards = [
