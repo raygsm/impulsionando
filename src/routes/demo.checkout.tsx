@@ -105,7 +105,7 @@ function DemoCheckout() {
     <TooltipProvider delayDuration={150}>
       <div className="min-h-screen flex flex-col bg-background">
         <PublicHeader />
-        <DemoModeBanner leadNiche="servicos" leadLabel="Checkout <DemoModeBanner /> Pagamentos" leadOrigin="hub-modulo-checkout" />
+        <DemoModeBanner leadNiche="servicos" leadLabel="Checkout e Pagamentos" leadOrigin="hub-modulo-checkout" />
         <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 w-full">
           <div className="flex items-start justify-between gap-3 flex-wrap">
             <div>
