@@ -455,6 +455,7 @@ export const NAV_GROUPS: NavGroup[] = [
           { to: "/admin/n8n-console", label: "Console N8N", icon: Workflow, superOnly: true },
           { to: "/admin/funil-reguas", label: "Réguas de Funil", icon: Workflow, superOnly: true },
           { to: "/admin/inbox-eventos", label: "Inbox de Eventos", icon: Activity, superOnly: true },
+          { to: "/admin/audit-trail", label: "Audit Trail", icon: ShieldCheck, superOnly: true },
           { to: "/core/testes", label: "Testes", icon: FlaskConical, superOnly: true },
           { to: "/core/bi-ecossistema", label: "BI Ecossistema", icon: BarChart3, superOnly: true },
         ],
