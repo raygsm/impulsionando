@@ -21352,6 +21352,56 @@ export type Database = {
           },
         ]
       }
+      v_marketplace_gmv_summary: {
+        Row: {
+          company_id: string | null
+          company_name: string | null
+          completed_count: number | null
+          effective_bps: number | null
+          engagements_count: number | null
+          gmv_cents: number | null
+          intermediation_fee_cents: number | null
+          niche_id: string | null
+          period_month: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "companies_niche_id_fkey"
+            columns: ["niche_id"]
+            isOneToOne: false
+            referencedRelation: "niches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eco_marketplace_engagements_provider_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eco_marketplace_engagements_provider_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "eco_marketplace_engagements_provider_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "eco_marketplace_engagements_provider_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       v_tenant_identity_status: {
         Row: {
           active_aliases_count: number | null
@@ -21572,6 +21622,10 @@ export type Database = {
         Returns: number
       }
       enqueue_fiscal_invoice: { Args: { _calc_id: string }; Returns: string }
+      enqueue_marketplace_intermediation: {
+        Args: { _engagement_id: string }
+        Returns: string
+      }
       enqueue_message: {
         Args: {
           _channels?: string[]
@@ -21881,6 +21935,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      resolve_intermediation_bps: {
+        Args: { _niche_id?: string; _provider_company_id: string }
+        Returns: number
       }
       resolve_payout_schedule: {
         Args: {
