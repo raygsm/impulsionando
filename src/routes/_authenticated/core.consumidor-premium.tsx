@@ -14,7 +14,8 @@ import { toast } from "sonner";
 import { getConsumerPremiumOverview } from "@/lib/consumer.functions";
 import { listOpenInvoices } from "@/lib/admin-invoices.functions";
 import { adminMarkInvoicePaid } from "@/lib/admin-billing.functions";
-import { Crown, Users, DollarSign, AlertTriangle, Receipt, TrendingUp, RefreshCw, CheckCircle2 } from "lucide-react";
+import { sendInvoiceReminderNow, sendConsumerInvoiceReminderNow } from "@/lib/billing.functions";
+import { Crown, Users, DollarSign, AlertTriangle, Receipt, TrendingUp, RefreshCw, CheckCircle2, Bell } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/core/consumidor-premium")({
   component: Page,
@@ -27,6 +28,8 @@ function Page() {
   const fn = useServerFn(getConsumerPremiumOverview);
   const fnInv = useServerFn(listOpenInvoices);
   const markPaid = useServerFn(adminMarkInvoicePaid);
+  const remindErp = useServerFn(sendInvoiceReminderNow);
+  const remindConsumer = useServerFn(sendConsumerInvoiceReminderNow);
   const q = useQuery({ queryKey: ["consumer-premium-overview"], queryFn: () => fn() });
   const inv = useQuery({ queryKey: ["admin-open-invoices"], queryFn: () => fnInv() });
   const d = q.data ?? {};
@@ -38,6 +41,15 @@ function Page() {
       qc.invalidateQueries({ queryKey: ["admin-open-invoices"] });
       qc.invalidateQueries({ queryKey: ["consumer-premium-overview"] });
     },
+    onError: (e: any) => toast.error(e?.message ?? "Falha"),
+  });
+
+  const remind = useMutation({
+    mutationFn: (v: { kind: "consumer" | "erp"; invoice_id: string }) =>
+      v.kind === "consumer"
+        ? remindConsumer({ data: { invoiceId: v.invoice_id } })
+        : remindErp({ data: { invoiceId: v.invoice_id } }),
+    onSuccess: (r: any) => toast.success(`Lembrete enfileirado (${(r?.channels ?? []).join(" + ") || "—"})`),
     onError: (e: any) => toast.error(e?.message ?? "Falha"),
   });
 
@@ -102,8 +114,11 @@ function Page() {
                       <div>{BRL(i.amount_cents)}</div>
                       <Badge variant={i.status === "overdue" ? "destructive" : "secondary"}>{i.status}</Badge>
                       <div className="text-xs text-muted-foreground">{new Date(i.due_date).toLocaleDateString("pt-BR")}</div>
+                      <Button size="sm" variant="ghost" disabled={remind.isPending} onClick={() => remind.mutate({ kind: "consumer", invoice_id: i.id })}>
+                        <Bell className="w-4 h-4 mr-1" /> Lembrar
+                      </Button>
                       <Button size="sm" disabled={mut.isPending} onClick={() => mut.mutate({ kind: "consumer", invoice_id: i.id })}>
-                        <CheckCircle2 className="w-4 h-4 mr-1" /> Marcar pago
+                        <CheckCircle2 className="w-4 h-4 mr-1" /> Baixar
                       </Button>
                     </div>
                   ))}
@@ -122,8 +137,11 @@ function Page() {
                       <div>R$ {Number(i.amount).toFixed(2)}</div>
                       <Badge variant={i.status === "overdue" ? "destructive" : "secondary"}>{i.status}</Badge>
                       <div className="text-xs text-muted-foreground">{i.due_date ? new Date(i.due_date).toLocaleDateString("pt-BR") : "—"}</div>
+                      <Button size="sm" variant="ghost" disabled={remind.isPending} onClick={() => remind.mutate({ kind: "erp", invoice_id: i.id })}>
+                        <Bell className="w-4 h-4 mr-1" /> Lembrar
+                      </Button>
                       <Button size="sm" disabled={mut.isPending} onClick={() => mut.mutate({ kind: "erp", invoice_id: i.id })}>
-                        <CheckCircle2 className="w-4 h-4 mr-1" /> Marcar pago
+                        <CheckCircle2 className="w-4 h-4 mr-1" /> Baixar
                       </Button>
                     </div>
                   ))}

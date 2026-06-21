@@ -394,3 +394,115 @@ export const sendInvoiceReminderNow = createServerFn({ method: "POST" })
 
     return { ok: true, channels: rows.map((r) => r.channel) };
   });
+
+/**
+ * Lembrete imediato para fatura do Clube Premium (consumer_membership_invoices).
+ * Multi-canal (whatsapp + email do auth.users) com PIX copia-e-cola embutido.
+ */
+export const sendConsumerInvoiceReminderNow = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { invoiceId: string }) =>
+    z.object({ invoiceId: z.string().uuid() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { userId } = context;
+    const { data: staff } = await supabaseAdmin.rpc("is_impulsionando_staff", { _user: userId });
+    if (!staff) throw new Error("Apenas equipe Impulsionando.");
+
+    const { data: invRaw, error } = await supabaseAdmin
+      .from("consumer_membership_invoices")
+      .select("id, user_id, amount_cents, status, due_date, pix_copy_paste")
+      .eq("id", data.invoiceId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!invRaw) throw new Error("Fatura não encontrada");
+    const inv = invRaw as any;
+    if (inv.status === "paid") throw new Error("Fatura já está paga.");
+
+    const { data: prof } = await supabaseAdmin
+      .from("consumer_profiles")
+      .select("full_name, phone, whatsapp")
+      .eq("user_id", inv.user_id)
+      .maybeSingle();
+    const { data: au } = await supabaseAdmin.auth.admin.getUserById(inv.user_id);
+    const recipientEmail = au?.user?.email ?? null;
+    const recipientPhone = (prof as any)?.whatsapp ?? (prof as any)?.phone ?? null;
+    if (!recipientEmail && !recipientPhone) {
+      throw new Error("Sem e-mail/WhatsApp para esse consumidor.");
+    }
+
+    const amountStr = (Number(inv.amount_cents) / 100).toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+    const due = inv.due_date ? new Date(inv.due_date).toLocaleDateString("pt-BR") : "—";
+    const subject = `Clube Premium — ${amountStr} · vence ${due}`;
+    const body = [
+      `Olá ${(prof as any)?.full_name ?? "membro Premium"},`,
+      ``,
+      `Sua mensalidade do Clube Impulsionando Premium (${amountStr}) com vencimento em ${due} ainda está em aberto.`,
+      inv.pix_copy_paste
+        ? `Pague em segundos via PIX:\n${inv.pix_copy_paste}`
+        : `Acesse /clube para gerar o PIX e renovar seu acesso.`,
+      ``,
+      `Após o pagamento o acesso é reativado automaticamente.`,
+      ``,
+      `— Clube Impulsionando`,
+    ].join("\n");
+    const payload = {
+      invoice_id: inv.id,
+      amount_cents: inv.amount_cents,
+      due_date: inv.due_date,
+      pix_copy_paste: inv.pix_copy_paste ?? null,
+      triggered_by: userId,
+      trigger: "manual_reminder_consumer",
+    };
+
+    const rows: any[] = [];
+    if (recipientEmail) {
+      rows.push({
+        company_id: null,
+        event_code: "consumer.invoice.reminder.manual",
+        channel: "email",
+        recipient_user_id: inv.user_id,
+        recipient_email: recipientEmail,
+        recipient_name: (prof as any)?.full_name ?? null,
+        subject,
+        body,
+        payload,
+        status: "queued",
+        reference_type: "consumer_membership_invoices",
+        reference_id: inv.id,
+      });
+    }
+    if (recipientPhone) {
+      rows.push({
+        company_id: null,
+        event_code: "consumer.invoice.reminder.manual",
+        channel: "whatsapp",
+        recipient_user_id: inv.user_id,
+        recipient_phone: recipientPhone,
+        recipient_name: (prof as any)?.full_name ?? null,
+        subject: null,
+        body,
+        payload,
+        status: "queued",
+        reference_type: "consumer_membership_invoices",
+        reference_id: inv.id,
+      });
+    }
+
+    const { error: insErr } = await supabaseAdmin.from("message_outbox").insert(rows);
+    if (insErr) throw new Error(insErr.message);
+
+    await supabaseAdmin.from("audit_logs").insert({
+      company_id: null,
+      user_id: userId,
+      action: "consumer.invoice.manual_reminder",
+      entity: "consumer_membership_invoices",
+      entity_id: inv.id,
+      after: { channels: rows.map((r) => r.channel) },
+    });
+
+    return { ok: true, channels: rows.map((r) => r.channel) };
+  });
