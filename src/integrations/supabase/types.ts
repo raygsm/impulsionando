@@ -21848,6 +21848,10 @@ export type Database = {
           membership_id: string
         }[]
       }
+      core_schedule_cron: {
+        Args: { p_job_name: string; p_path: string; p_schedule: string }
+        Returns: undefined
+      }
       core_user_belongs_to_company: {
         Args: { _company_id: string; _uid: string }
         Returns: boolean
