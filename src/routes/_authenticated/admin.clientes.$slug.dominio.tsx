@@ -346,7 +346,7 @@ function MarkPublishedButton({
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["tenant-deploy-history", slug] }),
         queryClient.invalidateQueries({ queryKey: ["tenant-domain", slug] }),
-        queryClient.invalidateQueries({ queryKey: ["admin-dominios"] }),
+        queryClient.invalidateQueries({ queryKey: ["admin", "dominios-cockpit"] }),
       ]);
       onDone();
     } catch (e: any) {
