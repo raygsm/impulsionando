@@ -20,7 +20,9 @@ import { DemoAccessGate } from "@/components/demo/DemoAccessGate";
 import { TenantBrandingProvider } from "@/components/app/TenantBrandingProvider";
 import { ImpulsionandoBrasilFAB } from "@/components/marketing/ImpulsionandoBrasilFAB";
 import { DownloadAppFab } from "@/components/pwa/DownloadAppFab";
+import { PoweredByImpulsionando } from "@/components/site/SiteFooter";
 import { isMaintenanceOn, MAINTENANCE_KEY } from "@/lib/maintenance";
+
 
 function MaintenanceGate() {
   const router = useRouter();
@@ -197,6 +199,7 @@ function RootComponent() {
       <TenantBrandingProvider />
       <Toaster richColors position="top-right" />
       <Outlet />
+      <PoweredByImpulsionando />
       <LGPDBanner />
       <OfficialWhatsAppFAB />
       <ImpulsionandoBrasilFAB />
@@ -205,6 +208,7 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
+
 
 function AnalyticsTracker() {
   const router = useRouter();
