@@ -65,14 +65,15 @@ export const getFinancialErp = createServerFn({ method: "POST" })
     let catQuery = sb.from("fin_categories").select("id, name, kind, color");
     let invQuery = sb
       .from("billing_invoices")
-      .select("id, status, total, paid_at, due_at, created_at")
+      .select("id, status, amount, paid_at, due_date, created_at")
       .gte("created_at", fromIso)
       .limit(20000);
     let mpQuery = sb
       .from("mpago_payments")
-      .select("id, status, transaction_amount, date_approved, created_at")
+      .select("id, status, amount_cents, approved_at, created_at")
       .gte("created_at", fromIso)
       .limit(20000);
+
 
     if (data.company_id) {
       txQuery = txQuery.eq("company_id", data.company_id);
@@ -200,10 +201,10 @@ export const getFinancialErp = createServerFn({ method: "POST" })
     // ─────────── Reconciliação gateway (MercadoPago) ───────────
     const mpApprovedTotal = mp
       .filter((p) => p.status === "approved")
-      .reduce((s, p) => s + Number(p.transaction_amount ?? 0), 0);
+      .reduce((s, p) => s + Number(p.amount_cents ?? 0) / 100, 0);
     const mpPendingTotal = mp
       .filter((p) => p.status === "pending" || p.status === "in_process")
-      .reduce((s, p) => s + Number(p.transaction_amount ?? 0), 0);
+      .reduce((s, p) => s + Number(p.amount_cents ?? 0) / 100, 0);
 
     // ─────────── Faturas (billing) ───────────
     const billingSummary = {
@@ -211,11 +212,12 @@ export const getFinancialErp = createServerFn({ method: "POST" })
       paid: invoices.filter((i) => i.status === "paid").length,
       pending: invoices.filter((i) => i.status === "pending" || i.status === "open").length,
       overdue: invoices.filter((i) => i.status === "overdue").length,
-      paid_amount: invoices.filter((i) => i.status === "paid").reduce((s, i) => s + Number(i.total ?? 0), 0),
+      paid_amount: invoices.filter((i) => i.status === "paid").reduce((s, i) => s + Number(i.amount ?? 0), 0),
       pending_amount: invoices
         .filter((i) => i.status === "pending" || i.status === "open" || i.status === "overdue")
-        .reduce((s, i) => s + Number(i.total ?? 0), 0),
+        .reduce((s, i) => s + Number(i.amount ?? 0), 0),
     };
+
 
     // ─────────── KPIs ───────────
     const lastMonth = dre[dre.length - 1];

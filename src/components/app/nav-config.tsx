@@ -498,6 +498,7 @@ export const NAV_GROUPS: NavGroup[] = [
           { to: "/admin/restaurant-health", label: "Restaurant & POS", icon: Utensils, superOnly: true },
           { to: "/admin/inventory-health", label: "Inventory & Stock", icon: Package, superOnly: true },
           { to: "/admin/finance-health", label: "Finance & Cashflow", icon: Wallet, superOnly: true },
+          { to: "/erp-financeiro", label: "ERP Financeiro", icon: Wallet, perm: "financeiro.read" },
           { to: "/admin/crm-health", label: "CRM & Pipeline", icon: KanbanSquare, superOnly: true },
           { to: "/admin/marketing-health", label: "Marketing & Outbox", icon: Megaphone, superOnly: true },
           { to: "/admin/marketplace-b2b-health", label: "Marketplace B2B", icon: Store, superOnly: true },
