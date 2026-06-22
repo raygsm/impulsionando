@@ -605,6 +605,7 @@ import { Route as AuthenticatedAdminClientesRiomedParceirosRouteImport } from '.
 import { Route as AuthenticatedAdminClientesRiomedN8nRouteImport } from './routes/_authenticated/admin.clientes.riomed.n8n'
 import { Route as AuthenticatedAdminClientesRiomedMarketingRouteImport } from './routes/_authenticated/admin.clientes.riomed.marketing'
 import { Route as AuthenticatedAdminClientesRiomedLocacaoRouteImport } from './routes/_authenticated/admin.clientes.riomed.locacao'
+import { Route as AuthenticatedAdminClientesRiomedJornadasRouteImport } from './routes/_authenticated/admin.clientes.riomed.jornadas'
 import { Route as AuthenticatedAdminClientesRiomedImportacoesRouteImport } from './routes/_authenticated/admin.clientes.riomed.importacoes'
 import { Route as AuthenticatedAdminClientesRiomedImplantacaoRouteImport } from './routes/_authenticated/admin.clientes.riomed.implantacao'
 import { Route as AuthenticatedAdminClientesRiomedGovernancaRouteImport } from './routes/_authenticated/admin.clientes.riomed.governanca'
@@ -3976,6 +3977,12 @@ const AuthenticatedAdminClientesRiomedLocacaoRoute =
     path: '/locacao',
     getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
   } as any)
+const AuthenticatedAdminClientesRiomedJornadasRoute =
+  AuthenticatedAdminClientesRiomedJornadasRouteImport.update({
+    id: '/jornadas',
+    path: '/jornadas',
+    getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
+  } as any)
 const AuthenticatedAdminClientesRiomedImportacoesRoute =
   AuthenticatedAdminClientesRiomedImportacoesRouteImport.update({
     id: '/importacoes',
@@ -4682,6 +4689,7 @@ export interface FileRoutesByFullPath {
   '/admin/clientes/riomed/governanca': typeof AuthenticatedAdminClientesRiomedGovernancaRoute
   '/admin/clientes/riomed/implantacao': typeof AuthenticatedAdminClientesRiomedImplantacaoRoute
   '/admin/clientes/riomed/importacoes': typeof AuthenticatedAdminClientesRiomedImportacoesRoute
+  '/admin/clientes/riomed/jornadas': typeof AuthenticatedAdminClientesRiomedJornadasRoute
   '/admin/clientes/riomed/locacao': typeof AuthenticatedAdminClientesRiomedLocacaoRoute
   '/admin/clientes/riomed/marketing': typeof AuthenticatedAdminClientesRiomedMarketingRoute
   '/admin/clientes/riomed/n8n': typeof AuthenticatedAdminClientesRiomedN8nRoute
@@ -5284,6 +5292,7 @@ export interface FileRoutesByTo {
   '/admin/clientes/riomed/governanca': typeof AuthenticatedAdminClientesRiomedGovernancaRoute
   '/admin/clientes/riomed/implantacao': typeof AuthenticatedAdminClientesRiomedImplantacaoRoute
   '/admin/clientes/riomed/importacoes': typeof AuthenticatedAdminClientesRiomedImportacoesRoute
+  '/admin/clientes/riomed/jornadas': typeof AuthenticatedAdminClientesRiomedJornadasRoute
   '/admin/clientes/riomed/locacao': typeof AuthenticatedAdminClientesRiomedLocacaoRoute
   '/admin/clientes/riomed/marketing': typeof AuthenticatedAdminClientesRiomedMarketingRoute
   '/admin/clientes/riomed/n8n': typeof AuthenticatedAdminClientesRiomedN8nRoute
@@ -5901,6 +5910,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/clientes/riomed/governanca': typeof AuthenticatedAdminClientesRiomedGovernancaRoute
   '/_authenticated/admin/clientes/riomed/implantacao': typeof AuthenticatedAdminClientesRiomedImplantacaoRoute
   '/_authenticated/admin/clientes/riomed/importacoes': typeof AuthenticatedAdminClientesRiomedImportacoesRoute
+  '/_authenticated/admin/clientes/riomed/jornadas': typeof AuthenticatedAdminClientesRiomedJornadasRoute
   '/_authenticated/admin/clientes/riomed/locacao': typeof AuthenticatedAdminClientesRiomedLocacaoRoute
   '/_authenticated/admin/clientes/riomed/marketing': typeof AuthenticatedAdminClientesRiomedMarketingRoute
   '/_authenticated/admin/clientes/riomed/n8n': typeof AuthenticatedAdminClientesRiomedN8nRoute
@@ -6517,6 +6527,7 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed/governanca'
     | '/admin/clientes/riomed/implantacao'
     | '/admin/clientes/riomed/importacoes'
+    | '/admin/clientes/riomed/jornadas'
     | '/admin/clientes/riomed/locacao'
     | '/admin/clientes/riomed/marketing'
     | '/admin/clientes/riomed/n8n'
@@ -7119,6 +7130,7 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed/governanca'
     | '/admin/clientes/riomed/implantacao'
     | '/admin/clientes/riomed/importacoes'
+    | '/admin/clientes/riomed/jornadas'
     | '/admin/clientes/riomed/locacao'
     | '/admin/clientes/riomed/marketing'
     | '/admin/clientes/riomed/n8n'
@@ -7735,6 +7747,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/clientes/riomed/governanca'
     | '/_authenticated/admin/clientes/riomed/implantacao'
     | '/_authenticated/admin/clientes/riomed/importacoes'
+    | '/_authenticated/admin/clientes/riomed/jornadas'
     | '/_authenticated/admin/clientes/riomed/locacao'
     | '/_authenticated/admin/clientes/riomed/marketing'
     | '/_authenticated/admin/clientes/riomed/n8n'
@@ -12086,6 +12099,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientesRiomedLocacaoRouteImport
       parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
     }
+    '/_authenticated/admin/clientes/riomed/jornadas': {
+      id: '/_authenticated/admin/clientes/riomed/jornadas'
+      path: '/jornadas'
+      fullPath: '/admin/clientes/riomed/jornadas'
+      preLoaderRoute: typeof AuthenticatedAdminClientesRiomedJornadasRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
+    }
     '/_authenticated/admin/clientes/riomed/importacoes': {
       id: '/_authenticated/admin/clientes/riomed/importacoes'
       path: '/importacoes'
@@ -12846,6 +12866,7 @@ interface AuthenticatedAdminClientesRiomedRouteChildren {
   AuthenticatedAdminClientesRiomedGovernancaRoute: typeof AuthenticatedAdminClientesRiomedGovernancaRoute
   AuthenticatedAdminClientesRiomedImplantacaoRoute: typeof AuthenticatedAdminClientesRiomedImplantacaoRoute
   AuthenticatedAdminClientesRiomedImportacoesRoute: typeof AuthenticatedAdminClientesRiomedImportacoesRoute
+  AuthenticatedAdminClientesRiomedJornadasRoute: typeof AuthenticatedAdminClientesRiomedJornadasRoute
   AuthenticatedAdminClientesRiomedLocacaoRoute: typeof AuthenticatedAdminClientesRiomedLocacaoRoute
   AuthenticatedAdminClientesRiomedMarketingRoute: typeof AuthenticatedAdminClientesRiomedMarketingRoute
   AuthenticatedAdminClientesRiomedN8nRoute: typeof AuthenticatedAdminClientesRiomedN8nRoute
@@ -12893,6 +12914,8 @@ const AuthenticatedAdminClientesRiomedRouteChildren: AuthenticatedAdminClientesR
       AuthenticatedAdminClientesRiomedImplantacaoRoute,
     AuthenticatedAdminClientesRiomedImportacoesRoute:
       AuthenticatedAdminClientesRiomedImportacoesRoute,
+    AuthenticatedAdminClientesRiomedJornadasRoute:
+      AuthenticatedAdminClientesRiomedJornadasRoute,
     AuthenticatedAdminClientesRiomedLocacaoRoute:
       AuthenticatedAdminClientesRiomedLocacaoRoute,
     AuthenticatedAdminClientesRiomedMarketingRoute:
@@ -13880,3 +13903,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
