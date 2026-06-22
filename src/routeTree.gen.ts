@@ -411,6 +411,7 @@ import { Route as AuthenticatedAdminFiscalRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminFinanceiroConsolidadoV2RouteImport } from './routes/_authenticated/admin.financeiro-consolidado-v2'
 import { Route as AuthenticatedAdminExpansionRadarRouteImport } from './routes/_authenticated/admin.expansion-radar'
 import { Route as AuthenticatedAdminExecutiveBriefingRouteImport } from './routes/_authenticated/admin.executive-briefing'
+import { Route as AuthenticatedAdminCustomerSuccessRouteImport } from './routes/_authenticated/admin.customer-success'
 import { Route as AuthenticatedAdminCommandCenterRouteImport } from './routes/_authenticated/admin.command-center'
 import { Route as AuthenticatedAdminCohortRetentionRouteImport } from './routes/_authenticated/admin.cohort-retention'
 import { Route as AuthenticatedAdminCofreCredenciaisRouteImport } from './routes/_authenticated/admin.cofre-credenciais'
@@ -2714,6 +2715,12 @@ const AuthenticatedAdminExecutiveBriefingRoute =
     path: '/admin/executive-briefing',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminCustomerSuccessRoute =
+  AuthenticatedAdminCustomerSuccessRouteImport.update({
+    id: '/admin/customer-success',
+    path: '/admin/customer-success',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminCommandCenterRoute =
   AuthenticatedAdminCommandCenterRouteImport.update({
     id: '/admin/command-center',
@@ -3411,6 +3418,7 @@ export interface FileRoutesByFullPath {
   '/admin/cofre-credenciais': typeof AuthenticatedAdminCofreCredenciaisRoute
   '/admin/cohort-retention': typeof AuthenticatedAdminCohortRetentionRoute
   '/admin/command-center': typeof AuthenticatedAdminCommandCenterRoute
+  '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
   '/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
   '/admin/financeiro-consolidado-v2': typeof AuthenticatedAdminFinanceiroConsolidadoV2Route
@@ -3888,6 +3896,7 @@ export interface FileRoutesByTo {
   '/admin/cofre-credenciais': typeof AuthenticatedAdminCofreCredenciaisRoute
   '/admin/cohort-retention': typeof AuthenticatedAdminCohortRetentionRoute
   '/admin/command-center': typeof AuthenticatedAdminCommandCenterRoute
+  '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
   '/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
   '/admin/financeiro-consolidado-v2': typeof AuthenticatedAdminFinanceiroConsolidadoV2Route
@@ -4379,6 +4388,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/cofre-credenciais': typeof AuthenticatedAdminCofreCredenciaisRoute
   '/_authenticated/admin/cohort-retention': typeof AuthenticatedAdminCohortRetentionRoute
   '/_authenticated/admin/command-center': typeof AuthenticatedAdminCommandCenterRoute
+  '/_authenticated/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/_authenticated/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
   '/_authenticated/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
   '/_authenticated/admin/financeiro-consolidado-v2': typeof AuthenticatedAdminFinanceiroConsolidadoV2Route
@@ -4869,6 +4879,7 @@ export interface FileRouteTypes {
     | '/admin/cofre-credenciais'
     | '/admin/cohort-retention'
     | '/admin/command-center'
+    | '/admin/customer-success'
     | '/admin/executive-briefing'
     | '/admin/expansion-radar'
     | '/admin/financeiro-consolidado-v2'
@@ -5346,6 +5357,7 @@ export interface FileRouteTypes {
     | '/admin/cofre-credenciais'
     | '/admin/cohort-retention'
     | '/admin/command-center'
+    | '/admin/customer-success'
     | '/admin/executive-briefing'
     | '/admin/expansion-radar'
     | '/admin/financeiro-consolidado-v2'
@@ -5836,6 +5848,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/cofre-credenciais'
     | '/_authenticated/admin/cohort-retention'
     | '/_authenticated/admin/command-center'
+    | '/_authenticated/admin/customer-success'
     | '/_authenticated/admin/executive-briefing'
     | '/_authenticated/admin/expansion-radar'
     | '/_authenticated/admin/financeiro-consolidado-v2'
@@ -9106,6 +9119,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminExecutiveBriefingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/customer-success': {
+      id: '/_authenticated/admin/customer-success'
+      path: '/admin/customer-success'
+      fullPath: '/admin/customer-success'
+      preLoaderRoute: typeof AuthenticatedAdminCustomerSuccessRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/command-center': {
       id: '/_authenticated/admin/command-center'
       path: '/admin/command-center'
@@ -10379,6 +10399,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCofreCredenciaisRoute: typeof AuthenticatedAdminCofreCredenciaisRoute
   AuthenticatedAdminCohortRetentionRoute: typeof AuthenticatedAdminCohortRetentionRoute
   AuthenticatedAdminCommandCenterRoute: typeof AuthenticatedAdminCommandCenterRoute
+  AuthenticatedAdminCustomerSuccessRoute: typeof AuthenticatedAdminCustomerSuccessRoute
   AuthenticatedAdminExecutiveBriefingRoute: typeof AuthenticatedAdminExecutiveBriefingRoute
   AuthenticatedAdminExpansionRadarRoute: typeof AuthenticatedAdminExpansionRadarRoute
   AuthenticatedAdminFinanceiroConsolidadoV2Route: typeof AuthenticatedAdminFinanceiroConsolidadoV2Route
@@ -10551,6 +10572,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminCohortRetentionRoute:
     AuthenticatedAdminCohortRetentionRoute,
   AuthenticatedAdminCommandCenterRoute: AuthenticatedAdminCommandCenterRoute,
+  AuthenticatedAdminCustomerSuccessRoute:
+    AuthenticatedAdminCustomerSuccessRoute,
   AuthenticatedAdminExecutiveBriefingRoute:
     AuthenticatedAdminExecutiveBriefingRoute,
   AuthenticatedAdminExpansionRadarRoute: AuthenticatedAdminExpansionRadarRoute,
