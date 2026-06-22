@@ -151,7 +151,7 @@ export const getEcosystemMarketplaceHealth = createServerFn({ method: "POST" })
         ratingAvg,
         qualityAvg,
         deadlineAvg,
-        communicationAvg,
+        communicationAvg: commAvg,
         priceAvg,
         ecoReviews: ecoReviews.length,
         ecoStarsAvg,
