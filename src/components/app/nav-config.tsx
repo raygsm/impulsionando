@@ -12,7 +12,7 @@ import {
   Calculator, Activity, RefreshCw, BookOpen,
   Beer, Store, Send,
   Settings as SettingsIcon, Globe, FlaskConical, Server, Flag, FileCode,
-  Rocket, Gauge, LineChart, ClipboardList, Workflow, ScrollText,
+  Rocket, Gauge, LineChart, ClipboardList, Workflow, ScrollText, Filter,
 } from "lucide-react";
 
 export type NavAudience = "core" | "white-label" | "empresa" | "consumidor";
@@ -468,6 +468,7 @@ export const NAV_GROUPS: NavGroup[] = [
           { to: "/admin/sla-compliance", label: "SLA Compliance", icon: ShieldCheck, superOnly: true },
           { to: "/admin/security-compliance", label: "Security & Compliance", icon: ShieldCheck, superOnly: true },
           { to: "/admin/customer-success", label: "Customer Success", icon: Headphones, superOnly: true },
+          { to: "/admin/conversion-funnel", label: "Conversion Funnel", icon: Filter, superOnly: true },
           { to: "/core/testes", label: "Testes", icon: FlaskConical, superOnly: true },
           { to: "/core/bi-ecossistema", label: "BI Ecossistema", icon: BarChart3, superOnly: true },
         ],
