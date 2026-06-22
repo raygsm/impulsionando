@@ -25,7 +25,7 @@ export const getAffiliatesHealth = createServerFn({ method: "POST" })
         .limit(20000),
       supabaseAdmin
         .from("aff_sales")
-        .select("id, company_id, affiliate_id, gross_amount, net_amount, status, payment_status, refunded_at, chargeback_at, sold_at, created_at")
+        .select("id, company_id, affiliate_id, gross_amount, net_amount, status, payment_status, approved_at, refunded_at, chargeback_at, sold_at, created_at")
         .gte("created_at", sinceIso)
         .limit(50000),
       supabaseAdmin
