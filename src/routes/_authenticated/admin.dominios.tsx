@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Globe, ExternalLink, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BUILD_INFO } from "@/generated/build-info";
+import { useMemo, useState } from "react";
 
 const loadDomainsCockpit = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -63,6 +64,28 @@ function DomainsCockpitPage() {
     queryFn: () => fetchCockpit(),
     staleTime: 60_000,
   });
+  const [filter, setFilter] = useState<"all" | "sync" | "drift" | "none">("all");
+  const currentShort = BUILD_INFO.commit?.slice(0, 7) ?? "";
+  const summary = useMemo(() => {
+    const rows = data?.rows ?? [];
+    let sync = 0, drift = 0, none = 0;
+    for (const r of rows) {
+      if (!r.publishedCommit) none++;
+      else if (r.publishedCommit.startsWith(currentShort)) sync++;
+      else drift++;
+    }
+    return { total: rows.length, sync, drift, none };
+  }, [data, currentShort]);
+  const visibleRows = useMemo(() => {
+    const rows = data?.rows ?? [];
+    if (filter === "all") return rows;
+    return rows.filter((r) => {
+      if (filter === "sync") return r.publishedCommit?.startsWith(currentShort);
+      if (filter === "drift")
+        return r.publishedCommit && !r.publishedCommit.startsWith(currentShort);
+      return !r.publishedCommit;
+    });
+  }, [data, filter, currentShort]);
 
   return (
     <div className="p-6 space-y-4 max-w-6xl">
@@ -86,10 +109,43 @@ function DomainsCockpitPage() {
         </Button>
       </header>
 
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <Chip
+          label={`Todos · ${summary.total}`}
+          active={filter === "all"}
+          onClick={() => setFilter("all")}
+        />
+        <Chip
+          label={`Em dia · ${summary.sync}`}
+          active={filter === "sync"}
+          tone="green"
+          onClick={() => setFilter("sync")}
+        />
+        <Chip
+          label={`Divergente · ${summary.drift}`}
+          active={filter === "drift"}
+          tone="amber"
+          onClick={() => setFilter("drift")}
+        />
+        <Chip
+          label={`Sem registro · ${summary.none}`}
+          active={filter === "none"}
+          tone="muted"
+          onClick={() => setFilter("none")}
+        />
+        <span className="ml-auto text-muted-foreground">
+          build atual <code>{currentShort || "—"}</code>
+        </span>
+      </div>
+
       {isLoading ? (
         <div className="text-sm text-muted-foreground">Carregando tenants…</div>
       ) : !data?.rows.length ? (
         <div className="text-sm text-muted-foreground">Nenhum tenant ativo.</div>
+      ) : !visibleRows.length ? (
+        <div className="text-sm text-muted-foreground">
+          Nenhum tenant nesse filtro.
+        </div>
       ) : (
         <div className="border rounded-md overflow-hidden">
           <table className="w-full text-sm">
@@ -105,7 +161,7 @@ function DomainsCockpitPage() {
               </tr>
             </thead>
             <tbody>
-              {data.rows.map((r) => {
+              {visibleRows.map((r) => {
                 const currentCommit = BUILD_INFO.commit;
                 const inSync =
                   r.publishedCommit &&
@@ -191,5 +247,37 @@ function StatusPill({ value }: { value: string | null }) {
       : "bg-destructive/10 text-destructive";
   return (
     <span className={`text-xs px-1.5 py-0.5 rounded ${cls}`}>{value}</span>
+  );
+}
+
+function Chip({
+  label,
+  active,
+  tone,
+  onClick,
+}: {
+  label: string;
+  active?: boolean;
+  tone?: "green" | "amber" | "muted";
+  onClick: () => void;
+}) {
+  const toneCls =
+    tone === "green"
+      ? "border-green-500/30 text-green-700"
+      : tone === "amber"
+        ? "border-amber-500/30 text-amber-700"
+        : tone === "muted"
+          ? "border-muted text-muted-foreground"
+          : "border-border";
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`px-2 py-0.5 rounded-full border ${toneCls} ${
+        active ? "bg-muted/60 font-medium" : "bg-background"
+      }`}
+    >
+      {label}
+    </button>
   );
 }
