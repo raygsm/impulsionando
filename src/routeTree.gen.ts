@@ -584,6 +584,7 @@ import { Route as ApiPublicPaymentsCloseInvoiceReplayRouteImport } from './route
 import { Route as AuthenticatedImobiliariaAprovacoesIdImprimirRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes.$id.imprimir'
 import { Route as AuthenticatedCoreClienteIdPaginasRouteImport } from './routes/_authenticated/core.cliente.$id.paginas'
 import { Route as AuthenticatedAdminClientesRiomedRoutingRouteImport } from './routes/_authenticated/admin.clientes.riomed.routing'
+import { Route as AuthenticatedAdminClientesRiomedRelatoriosRouteImport } from './routes/_authenticated/admin.clientes.riomed.relatorios'
 import { Route as AuthenticatedAdminClientesRiomedProdutosRouteImport } from './routes/_authenticated/admin.clientes.riomed.produtos'
 import { Route as AuthenticatedAdminClientesRiomedPrecosListasRouteImport } from './routes/_authenticated/admin.clientes.riomed.precos-listas'
 import { Route as AuthenticatedAdminClientesRiomedPortalRouteImport } from './routes/_authenticated/admin.clientes.riomed.portal'
@@ -3838,6 +3839,12 @@ const AuthenticatedAdminClientesRiomedRoutingRoute =
     path: '/routing',
     getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
   } as any)
+const AuthenticatedAdminClientesRiomedRelatoriosRoute =
+  AuthenticatedAdminClientesRiomedRelatoriosRouteImport.update({
+    id: '/relatorios',
+    path: '/relatorios',
+    getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
+  } as any)
 const AuthenticatedAdminClientesRiomedProdutosRoute =
   AuthenticatedAdminClientesRiomedProdutosRouteImport.update({
     id: '/produtos',
@@ -4533,6 +4540,7 @@ export interface FileRoutesByFullPath {
   '/admin/clientes/riomed/portal': typeof AuthenticatedAdminClientesRiomedPortalRoute
   '/admin/clientes/riomed/precos-listas': typeof AuthenticatedAdminClientesRiomedPrecosListasRoute
   '/admin/clientes/riomed/produtos': typeof AuthenticatedAdminClientesRiomedProdutosRoute
+  '/admin/clientes/riomed/relatorios': typeof AuthenticatedAdminClientesRiomedRelatoriosRoute
   '/admin/clientes/riomed/routing': typeof AuthenticatedAdminClientesRiomedRoutingRoute
   '/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
   '/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
@@ -5115,6 +5123,7 @@ export interface FileRoutesByTo {
   '/admin/clientes/riomed/portal': typeof AuthenticatedAdminClientesRiomedPortalRoute
   '/admin/clientes/riomed/precos-listas': typeof AuthenticatedAdminClientesRiomedPrecosListasRoute
   '/admin/clientes/riomed/produtos': typeof AuthenticatedAdminClientesRiomedProdutosRoute
+  '/admin/clientes/riomed/relatorios': typeof AuthenticatedAdminClientesRiomedRelatoriosRoute
   '/admin/clientes/riomed/routing': typeof AuthenticatedAdminClientesRiomedRoutingRoute
   '/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
   '/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
@@ -5711,6 +5720,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/clientes/riomed/portal': typeof AuthenticatedAdminClientesRiomedPortalRoute
   '/_authenticated/admin/clientes/riomed/precos-listas': typeof AuthenticatedAdminClientesRiomedPrecosListasRoute
   '/_authenticated/admin/clientes/riomed/produtos': typeof AuthenticatedAdminClientesRiomedProdutosRoute
+  '/_authenticated/admin/clientes/riomed/relatorios': typeof AuthenticatedAdminClientesRiomedRelatoriosRoute
   '/_authenticated/admin/clientes/riomed/routing': typeof AuthenticatedAdminClientesRiomedRoutingRoute
   '/_authenticated/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
   '/_authenticated/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
@@ -6306,6 +6316,7 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed/portal'
     | '/admin/clientes/riomed/precos-listas'
     | '/admin/clientes/riomed/produtos'
+    | '/admin/clientes/riomed/relatorios'
     | '/admin/clientes/riomed/routing'
     | '/core/cliente/$id/paginas'
     | '/imobiliaria/aprovacoes/$id/imprimir'
@@ -6888,6 +6899,7 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed/portal'
     | '/admin/clientes/riomed/precos-listas'
     | '/admin/clientes/riomed/produtos'
+    | '/admin/clientes/riomed/relatorios'
     | '/admin/clientes/riomed/routing'
     | '/core/cliente/$id/paginas'
     | '/imobiliaria/aprovacoes/$id/imprimir'
@@ -7483,6 +7495,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/clientes/riomed/portal'
     | '/_authenticated/admin/clientes/riomed/precos-listas'
     | '/_authenticated/admin/clientes/riomed/produtos'
+    | '/_authenticated/admin/clientes/riomed/relatorios'
     | '/_authenticated/admin/clientes/riomed/routing'
     | '/_authenticated/core/cliente/$id/paginas'
     | '/_authenticated/imobiliaria/aprovacoes/$id/imprimir'
@@ -11683,6 +11696,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientesRiomedRoutingRouteImport
       parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
     }
+    '/_authenticated/admin/clientes/riomed/relatorios': {
+      id: '/_authenticated/admin/clientes/riomed/relatorios'
+      path: '/relatorios'
+      fullPath: '/admin/clientes/riomed/relatorios'
+      preLoaderRoute: typeof AuthenticatedAdminClientesRiomedRelatoriosRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
+    }
     '/_authenticated/admin/clientes/riomed/produtos': {
       id: '/_authenticated/admin/clientes/riomed/produtos'
       path: '/produtos'
@@ -12443,6 +12463,7 @@ interface AuthenticatedAdminClientesRiomedRouteChildren {
   AuthenticatedAdminClientesRiomedPortalRoute: typeof AuthenticatedAdminClientesRiomedPortalRoute
   AuthenticatedAdminClientesRiomedPrecosListasRoute: typeof AuthenticatedAdminClientesRiomedPrecosListasRoute
   AuthenticatedAdminClientesRiomedProdutosRoute: typeof AuthenticatedAdminClientesRiomedProdutosRoute
+  AuthenticatedAdminClientesRiomedRelatoriosRoute: typeof AuthenticatedAdminClientesRiomedRelatoriosRoute
   AuthenticatedAdminClientesRiomedRoutingRoute: typeof AuthenticatedAdminClientesRiomedRoutingRoute
 }
 
@@ -12480,6 +12501,8 @@ const AuthenticatedAdminClientesRiomedRouteChildren: AuthenticatedAdminClientesR
       AuthenticatedAdminClientesRiomedPrecosListasRoute,
     AuthenticatedAdminClientesRiomedProdutosRoute:
       AuthenticatedAdminClientesRiomedProdutosRoute,
+    AuthenticatedAdminClientesRiomedRelatoriosRoute:
+      AuthenticatedAdminClientesRiomedRelatoriosRoute,
     AuthenticatedAdminClientesRiomedRoutingRoute:
       AuthenticatedAdminClientesRiomedRoutingRoute,
   }
@@ -13410,3 +13433,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
