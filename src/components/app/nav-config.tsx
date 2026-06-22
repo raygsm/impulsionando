@@ -10,7 +10,7 @@ import {
   Home, Search as SearchIcon, Zap, Bot, MessageSquare, QrCode,
   History as HistoryIcon, Headphones, UserRound, Megaphone,
   Calculator, Activity, RefreshCw, BookOpen,
-  Beer, Store, Send, Ticket,
+  Beer, Store, Send, Ticket, Utensils,
   Settings as SettingsIcon, Globe, FlaskConical, Server, Flag, FileCode,
   Rocket, Gauge, LineChart, ClipboardList, Workflow, ScrollText, Filter,
 } from "lucide-react";
@@ -490,6 +490,7 @@ export const NAV_GROUPS: NavGroup[] = [
           { to: "/admin/contab-health", label: "Contábil & Office", icon: Calculator, superOnly: true },
           { to: "/admin/events-health", label: "Eventos & Ticketing", icon: Ticket, superOnly: true },
           { to: "/admin/brewery-clube-health", label: "Brewery & Clube", icon: Beer, superOnly: true },
+          { to: "/admin/restaurant-health", label: "Restaurant & POS", icon: Utensils, superOnly: true },
           { to: "/core/testes", label: "Testes", icon: FlaskConical, superOnly: true },
           { to: "/core/bi-ecossistema", label: "BI Ecossistema", icon: BarChart3, superOnly: true },
         ],
