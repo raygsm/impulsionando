@@ -98,6 +98,7 @@ import { Route as ShowroomApiPublicaRouteImport } from './routes/showroom.api-pu
 import { Route as ShowroomAgendamentosOnlineRouteImport } from './routes/showroom.agendamentos-online'
 import { Route as ShowroomAgendaRouteImport } from './routes/showroom.agenda'
 import { Route as ShowroomAcademiaRouteImport } from './routes/showroom.academia'
+import { Route as RiomedCheckoutRouteImport } from './routes/riomed.checkout'
 import { Route as RiomedCarrinhoRouteImport } from './routes/riomed.carrinho'
 import { Route as RecomendacaoNichoRouteImport } from './routes/recomendacao.$nicho'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
@@ -1042,6 +1043,11 @@ const ShowroomAgendaRoute = ShowroomAgendaRouteImport.update({
 const ShowroomAcademiaRoute = ShowroomAcademiaRouteImport.update({
   id: '/showroom/academia',
   path: '/showroom/academia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RiomedCheckoutRoute = RiomedCheckoutRouteImport.update({
+  id: '/riomed/checkout',
+  path: '/riomed/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RiomedCarrinhoRoute = RiomedCarrinhoRouteImport.update({
@@ -4018,6 +4024,7 @@ export interface FileRoutesByFullPath {
   '/r/$slug': typeof RSlugRoute
   '/recomendacao/$nicho': typeof RecomendacaoNichoRoute
   '/riomed/carrinho': typeof RiomedCarrinhoRoute
+  '/riomed/checkout': typeof RiomedCheckoutRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
   '/showroom/agendamentos-online': typeof ShowroomAgendamentosOnlineRoute
@@ -4592,6 +4599,7 @@ export interface FileRoutesByTo {
   '/r/$slug': typeof RSlugRoute
   '/recomendacao/$nicho': typeof RecomendacaoNichoRoute
   '/riomed/carrinho': typeof RiomedCarrinhoRoute
+  '/riomed/checkout': typeof RiomedCheckoutRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
   '/showroom/agendamentos-online': typeof ShowroomAgendamentosOnlineRoute
@@ -5180,6 +5188,7 @@ export interface FileRoutesById {
   '/r/$slug': typeof RSlugRoute
   '/recomendacao/$nicho': typeof RecomendacaoNichoRoute
   '/riomed/carrinho': typeof RiomedCarrinhoRoute
+  '/riomed/checkout': typeof RiomedCheckoutRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
   '/showroom/agendamentos-online': typeof ShowroomAgendamentosOnlineRoute
@@ -5767,6 +5776,7 @@ export interface FileRouteTypes {
     | '/r/$slug'
     | '/recomendacao/$nicho'
     | '/riomed/carrinho'
+    | '/riomed/checkout'
     | '/showroom/academia'
     | '/showroom/agenda'
     | '/showroom/agendamentos-online'
@@ -6341,6 +6351,7 @@ export interface FileRouteTypes {
     | '/r/$slug'
     | '/recomendacao/$nicho'
     | '/riomed/carrinho'
+    | '/riomed/checkout'
     | '/showroom/academia'
     | '/showroom/agenda'
     | '/showroom/agendamentos-online'
@@ -6928,6 +6939,7 @@ export interface FileRouteTypes {
     | '/r/$slug'
     | '/recomendacao/$nicho'
     | '/riomed/carrinho'
+    | '/riomed/checkout'
     | '/showroom/academia'
     | '/showroom/agenda'
     | '/showroom/agendamentos-online'
@@ -7460,6 +7472,7 @@ export interface RootRouteChildren {
   RSlugRoute: typeof RSlugRoute
   RecomendacaoNichoRoute: typeof RecomendacaoNichoRoute
   RiomedCarrinhoRoute: typeof RiomedCarrinhoRoute
+  RiomedCheckoutRoute: typeof RiomedCheckoutRoute
   ShowroomAcademiaRoute: typeof ShowroomAcademiaRoute
   ShowroomAgendaRoute: typeof ShowroomAgendaRoute
   ShowroomAgendamentosOnlineRoute: typeof ShowroomAgendamentosOnlineRoute
@@ -8174,6 +8187,13 @@ declare module '@tanstack/react-router' {
       path: '/showroom/academia'
       fullPath: '/showroom/academia'
       preLoaderRoute: typeof ShowroomAcademiaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/riomed/checkout': {
+      id: '/riomed/checkout'
+      path: '/riomed/checkout'
+      fullPath: '/riomed/checkout'
+      preLoaderRoute: typeof RiomedCheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/riomed/carrinho': {
@@ -13137,6 +13157,7 @@ const rootRouteChildren: RootRouteChildren = {
   RSlugRoute: RSlugRoute,
   RecomendacaoNichoRoute: RecomendacaoNichoRoute,
   RiomedCarrinhoRoute: RiomedCarrinhoRoute,
+  RiomedCheckoutRoute: RiomedCheckoutRoute,
   ShowroomAcademiaRoute: ShowroomAcademiaRoute,
   ShowroomAgendaRoute: ShowroomAgendaRoute,
   ShowroomAgendamentosOnlineRoute: ShowroomAgendamentosOnlineRoute,
