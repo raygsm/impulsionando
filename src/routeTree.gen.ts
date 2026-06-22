@@ -436,6 +436,7 @@ import { Route as AuthenticatedAdminBillingContractsRouteImport } from './routes
 import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authenticated/admin.billing'
 import { Route as AuthenticatedAdminAuditTrailRouteImport } from './routes/_authenticated/admin.audit-trail'
 import { Route as AuthenticatedAdminAttributionRouteImport } from './routes/_authenticated/admin.attribution'
+import { Route as AuthenticatedAdminAdoptionUsageRouteImport } from './routes/_authenticated/admin.adoption-usage'
 import { Route as AuthenticatedAdminActionCenterRouteImport } from './routes/_authenticated/admin.action-center'
 import { Route as AuthenticatedAdminAcoesRouteImport } from './routes/_authenticated/admin.acoes'
 import { Route as AuthenticatedAdmMasterRouteImport } from './routes/_authenticated/adm.master'
@@ -2873,6 +2874,12 @@ const AuthenticatedAdminAttributionRoute =
     path: '/admin/attribution',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminAdoptionUsageRoute =
+  AuthenticatedAdminAdoptionUsageRouteImport.update({
+    id: '/admin/adoption-usage',
+    path: '/admin/adoption-usage',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminActionCenterRoute =
   AuthenticatedAdminActionCenterRouteImport.update({
     id: '/admin/action-center',
@@ -3466,6 +3473,7 @@ export interface FileRoutesByFullPath {
   '/adm/master': typeof AuthenticatedAdmMasterRoute
   '/admin/acoes': typeof AuthenticatedAdminAcoesRoute
   '/admin/action-center': typeof AuthenticatedAdminActionCenterRoute
+  '/admin/adoption-usage': typeof AuthenticatedAdminAdoptionUsageRoute
   '/admin/attribution': typeof AuthenticatedAdminAttributionRoute
   '/admin/audit-trail': typeof AuthenticatedAdminAuditTrailRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
@@ -3953,6 +3961,7 @@ export interface FileRoutesByTo {
   '/adm/master': typeof AuthenticatedAdmMasterRoute
   '/admin/acoes': typeof AuthenticatedAdminAcoesRoute
   '/admin/action-center': typeof AuthenticatedAdminActionCenterRoute
+  '/admin/adoption-usage': typeof AuthenticatedAdminAdoptionUsageRoute
   '/admin/attribution': typeof AuthenticatedAdminAttributionRoute
   '/admin/audit-trail': typeof AuthenticatedAdminAuditTrailRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
@@ -4454,6 +4463,7 @@ export interface FileRoutesById {
   '/_authenticated/adm/master': typeof AuthenticatedAdmMasterRoute
   '/_authenticated/admin/acoes': typeof AuthenticatedAdminAcoesRoute
   '/_authenticated/admin/action-center': typeof AuthenticatedAdminActionCenterRoute
+  '/_authenticated/admin/adoption-usage': typeof AuthenticatedAdminAdoptionUsageRoute
   '/_authenticated/admin/attribution': typeof AuthenticatedAdminAttributionRoute
   '/_authenticated/admin/audit-trail': typeof AuthenticatedAdminAuditTrailRoute
   '/_authenticated/admin/billing': typeof AuthenticatedAdminBillingRoute
@@ -4954,6 +4964,7 @@ export interface FileRouteTypes {
     | '/adm/master'
     | '/admin/acoes'
     | '/admin/action-center'
+    | '/admin/adoption-usage'
     | '/admin/attribution'
     | '/admin/audit-trail'
     | '/admin/billing'
@@ -5441,6 +5452,7 @@ export interface FileRouteTypes {
     | '/adm/master'
     | '/admin/acoes'
     | '/admin/action-center'
+    | '/admin/adoption-usage'
     | '/admin/attribution'
     | '/admin/audit-trail'
     | '/admin/billing'
@@ -5941,6 +5953,7 @@ export interface FileRouteTypes {
     | '/_authenticated/adm/master'
     | '/_authenticated/admin/acoes'
     | '/_authenticated/admin/action-center'
+    | '/_authenticated/admin/adoption-usage'
     | '/_authenticated/admin/attribution'
     | '/_authenticated/admin/audit-trail'
     | '/_authenticated/admin/billing'
@@ -9411,6 +9424,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAttributionRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/adoption-usage': {
+      id: '/_authenticated/admin/adoption-usage'
+      path: '/admin/adoption-usage'
+      fullPath: '/admin/adoption-usage'
+      preLoaderRoute: typeof AuthenticatedAdminAdoptionUsageRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/action-center': {
       id: '/_authenticated/admin/action-center'
       path: '/admin/action-center'
@@ -10564,6 +10584,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRouteWithChildren
   AuthenticatedAdminAcoesRoute: typeof AuthenticatedAdminAcoesRoute
   AuthenticatedAdminActionCenterRoute: typeof AuthenticatedAdminActionCenterRoute
+  AuthenticatedAdminAdoptionUsageRoute: typeof AuthenticatedAdminAdoptionUsageRoute
   AuthenticatedAdminAttributionRoute: typeof AuthenticatedAdminAttributionRoute
   AuthenticatedAdminAuditTrailRoute: typeof AuthenticatedAdminAuditTrailRoute
   AuthenticatedAdminBillingRoute: typeof AuthenticatedAdminBillingRoute
@@ -10742,6 +10763,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedUsersRoute: AuthenticatedUsersRouteWithChildren,
   AuthenticatedAdminAcoesRoute: AuthenticatedAdminAcoesRoute,
   AuthenticatedAdminActionCenterRoute: AuthenticatedAdminActionCenterRoute,
+  AuthenticatedAdminAdoptionUsageRoute: AuthenticatedAdminAdoptionUsageRoute,
   AuthenticatedAdminAttributionRoute: AuthenticatedAdminAttributionRoute,
   AuthenticatedAdminAuditTrailRoute: AuthenticatedAdminAuditTrailRoute,
   AuthenticatedAdminBillingRoute: AuthenticatedAdminBillingRoute,
