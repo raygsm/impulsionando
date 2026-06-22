@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { TenantModuleShell } from "@/components/core/TenantModuleShell";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -19,7 +20,7 @@ import { toast } from "sonner";
 import { Banknote, TrendingDown, TrendingUp, AlertCircle, Plus, Percent } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/riomed/financeiro")({
-  component: Page,
+  component: () => (<TenantModuleShell tenantSlug="riomed" moduleSlug='finance' title='Financeiro RioMed'><Page /></TenantModuleShell>),
 });
 
 function Page() {
