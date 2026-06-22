@@ -483,6 +483,7 @@ import { Route as AuthenticatedAdminEhrClinicalHealthRouteImport } from './route
 import { Route as AuthenticatedAdminEducationPolosHealthRouteImport } from './routes/_authenticated/admin.education-polos-health'
 import { Route as AuthenticatedAdminEducTalentosRouteImport } from './routes/_authenticated/admin.educ-talentos'
 import { Route as AuthenticatedAdminEcosystemMarketplaceHealthRouteImport } from './routes/_authenticated/admin.ecosystem-marketplace-health'
+import { Route as AuthenticatedAdminDominiosRouteImport } from './routes/_authenticated/admin.dominios'
 import { Route as AuthenticatedAdminDocumentsFilesHealthRouteImport } from './routes/_authenticated/admin.documents-files-health'
 import { Route as AuthenticatedAdminDeployStatusRouteImport } from './routes/_authenticated/admin.deploy-status'
 import { Route as AuthenticatedAdminDataQualityRouteImport } from './routes/_authenticated/admin.data-quality'
@@ -3262,6 +3263,12 @@ const AuthenticatedAdminEcosystemMarketplaceHealthRoute =
     path: '/admin/ecosystem-marketplace-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminDominiosRoute =
+  AuthenticatedAdminDominiosRouteImport.update({
+    id: '/admin/dominios',
+    path: '/admin/dominios',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminDocumentsFilesHealthRoute =
   AuthenticatedAdminDocumentsFilesHealthRouteImport.update({
     id: '/admin/documents-files-health',
@@ -4360,6 +4367,7 @@ export interface FileRoutesByFullPath {
   '/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
   '/admin/deploy-status': typeof AuthenticatedAdminDeployStatusRoute
   '/admin/documents-files-health': typeof AuthenticatedAdminDocumentsFilesHealthRoute
+  '/admin/dominios': typeof AuthenticatedAdminDominiosRoute
   '/admin/ecosystem-marketplace-health': typeof AuthenticatedAdminEcosystemMarketplaceHealthRoute
   '/admin/educ-talentos': typeof AuthenticatedAdminEducTalentosRoute
   '/admin/education-polos-health': typeof AuthenticatedAdminEducationPolosHealthRoute
@@ -4968,6 +4976,7 @@ export interface FileRoutesByTo {
   '/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
   '/admin/deploy-status': typeof AuthenticatedAdminDeployStatusRoute
   '/admin/documents-files-health': typeof AuthenticatedAdminDocumentsFilesHealthRoute
+  '/admin/dominios': typeof AuthenticatedAdminDominiosRoute
   '/admin/ecosystem-marketplace-health': typeof AuthenticatedAdminEcosystemMarketplaceHealthRoute
   '/admin/educ-talentos': typeof AuthenticatedAdminEducTalentosRoute
   '/admin/education-polos-health': typeof AuthenticatedAdminEducationPolosHealthRoute
@@ -5591,6 +5600,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
   '/_authenticated/admin/deploy-status': typeof AuthenticatedAdminDeployStatusRoute
   '/_authenticated/admin/documents-files-health': typeof AuthenticatedAdminDocumentsFilesHealthRoute
+  '/_authenticated/admin/dominios': typeof AuthenticatedAdminDominiosRoute
   '/_authenticated/admin/ecosystem-marketplace-health': typeof AuthenticatedAdminEcosystemMarketplaceHealthRoute
   '/_authenticated/admin/educ-talentos': typeof AuthenticatedAdminEducTalentosRoute
   '/_authenticated/admin/education-polos-health': typeof AuthenticatedAdminEducationPolosHealthRoute
@@ -6213,6 +6223,7 @@ export interface FileRouteTypes {
     | '/admin/data-quality'
     | '/admin/deploy-status'
     | '/admin/documents-files-health'
+    | '/admin/dominios'
     | '/admin/ecosystem-marketplace-health'
     | '/admin/educ-talentos'
     | '/admin/education-polos-health'
@@ -6821,6 +6832,7 @@ export interface FileRouteTypes {
     | '/admin/data-quality'
     | '/admin/deploy-status'
     | '/admin/documents-files-health'
+    | '/admin/dominios'
     | '/admin/ecosystem-marketplace-health'
     | '/admin/educ-talentos'
     | '/admin/education-polos-health'
@@ -7443,6 +7455,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/data-quality'
     | '/_authenticated/admin/deploy-status'
     | '/_authenticated/admin/documents-files-health'
+    | '/_authenticated/admin/dominios'
     | '/_authenticated/admin/ecosystem-marketplace-health'
     | '/_authenticated/admin/educ-talentos'
     | '/_authenticated/admin/education-polos-health'
@@ -11310,6 +11323,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminEcosystemMarketplaceHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/dominios': {
+      id: '/_authenticated/admin/dominios'
+      path: '/admin/dominios'
+      fullPath: '/admin/dominios'
+      preLoaderRoute: typeof AuthenticatedAdminDominiosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/documents-files-health': {
       id: '/_authenticated/admin/documents-files-health'
       path: '/admin/documents-files-health'
@@ -13147,6 +13167,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminDataQualityRoute: typeof AuthenticatedAdminDataQualityRoute
   AuthenticatedAdminDeployStatusRoute: typeof AuthenticatedAdminDeployStatusRoute
   AuthenticatedAdminDocumentsFilesHealthRoute: typeof AuthenticatedAdminDocumentsFilesHealthRoute
+  AuthenticatedAdminDominiosRoute: typeof AuthenticatedAdminDominiosRoute
   AuthenticatedAdminEcosystemMarketplaceHealthRoute: typeof AuthenticatedAdminEcosystemMarketplaceHealthRoute
   AuthenticatedAdminEducTalentosRoute: typeof AuthenticatedAdminEducTalentosRoute
   AuthenticatedAdminEducationPolosHealthRoute: typeof AuthenticatedAdminEducationPolosHealthRoute
@@ -13422,6 +13443,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminDeployStatusRoute: AuthenticatedAdminDeployStatusRoute,
   AuthenticatedAdminDocumentsFilesHealthRoute:
     AuthenticatedAdminDocumentsFilesHealthRoute,
+  AuthenticatedAdminDominiosRoute: AuthenticatedAdminDominiosRoute,
   AuthenticatedAdminEcosystemMarketplaceHealthRoute:
     AuthenticatedAdminEcosystemMarketplaceHealthRoute,
   AuthenticatedAdminEducTalentosRoute: AuthenticatedAdminEducTalentosRoute,
