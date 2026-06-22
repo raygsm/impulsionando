@@ -14,7 +14,9 @@ import {
   Workflow,
   ExternalLink,
   ShieldCheck,
+  Languages,
 } from "lucide-react";
+import { getLocaleProfile, formatMoney, formatDateTime } from "@/lib/tenant-locale";
 
 /**
  * Card unificado por tenant — Onda D do Core Impulsionando.
