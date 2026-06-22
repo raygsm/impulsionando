@@ -47,7 +47,7 @@ export const getPricingIntelligence = createServerFn({ method: "POST" })
       supabaseAdmin
         .from("aff_coproducers")
         .select("id, name, participation_pct, fixed_amount, status, scope")
-        .eq("status", "active")
+        .eq("status", "aprovado")
         .limit(500),
     ]);
 

@@ -395,6 +395,7 @@ import { Route as AuthenticatedAdminRevenueQualityRouteImport } from './routes/_
 import { Route as AuthenticatedAdminRevenueForecastRouteImport } from './routes/_authenticated/admin.revenue-forecast'
 import { Route as AuthenticatedAdminQualidadeRouteImport } from './routes/_authenticated/admin.qualidade'
 import { Route as AuthenticatedAdminProjetosParalelosRouteImport } from './routes/_authenticated/admin.projetos-paralelos'
+import { Route as AuthenticatedAdminPricingIntelligenceRouteImport } from './routes/_authenticated/admin.pricing-intelligence'
 import { Route as AuthenticatedAdminPixPendentesRouteImport } from './routes/_authenticated/admin.pix-pendentes'
 import { Route as AuthenticatedAdminPeerBenchmarkRouteImport } from './routes/_authenticated/admin.peer-benchmark'
 import { Route as AuthenticatedAdminNichePlansRouteImport } from './routes/_authenticated/admin.niche-plans'
@@ -2622,6 +2623,12 @@ const AuthenticatedAdminProjetosParalelosRoute =
     path: '/admin/projetos-paralelos',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminPricingIntelligenceRoute =
+  AuthenticatedAdminPricingIntelligenceRouteImport.update({
+    id: '/admin/pricing-intelligence',
+    path: '/admin/pricing-intelligence',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminPixPendentesRoute =
   AuthenticatedAdminPixPendentesRouteImport.update({
     id: '/admin/pix-pendentes',
@@ -3459,6 +3466,7 @@ export interface FileRoutesByFullPath {
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
+  '/admin/pricing-intelligence': typeof AuthenticatedAdminPricingIntelligenceRoute
   '/admin/projetos-paralelos': typeof AuthenticatedAdminProjetosParalelosRoute
   '/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
   '/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
@@ -3940,6 +3948,7 @@ export interface FileRoutesByTo {
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
+  '/admin/pricing-intelligence': typeof AuthenticatedAdminPricingIntelligenceRoute
   '/admin/projetos-paralelos': typeof AuthenticatedAdminProjetosParalelosRoute
   '/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
   '/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
@@ -4435,6 +4444,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/_authenticated/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/_authenticated/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
+  '/_authenticated/admin/pricing-intelligence': typeof AuthenticatedAdminPricingIntelligenceRoute
   '/_authenticated/admin/projetos-paralelos': typeof AuthenticatedAdminProjetosParalelosRoute
   '/_authenticated/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
   '/_authenticated/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
@@ -4929,6 +4939,7 @@ export interface FileRouteTypes {
     | '/admin/niche-plans'
     | '/admin/peer-benchmark'
     | '/admin/pix-pendentes'
+    | '/admin/pricing-intelligence'
     | '/admin/projetos-paralelos'
     | '/admin/qualidade'
     | '/admin/revenue-forecast'
@@ -5410,6 +5421,7 @@ export interface FileRouteTypes {
     | '/admin/niche-plans'
     | '/admin/peer-benchmark'
     | '/admin/pix-pendentes'
+    | '/admin/pricing-intelligence'
     | '/admin/projetos-paralelos'
     | '/admin/qualidade'
     | '/admin/revenue-forecast'
@@ -5904,6 +5916,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/niche-plans'
     | '/_authenticated/admin/peer-benchmark'
     | '/_authenticated/admin/pix-pendentes'
+    | '/_authenticated/admin/pricing-intelligence'
     | '/_authenticated/admin/projetos-paralelos'
     | '/_authenticated/admin/qualidade'
     | '/_authenticated/admin/revenue-forecast'
@@ -9046,6 +9059,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminProjetosParalelosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/pricing-intelligence': {
+      id: '/_authenticated/admin/pricing-intelligence'
+      path: '/admin/pricing-intelligence'
+      fullPath: '/admin/pricing-intelligence'
+      preLoaderRoute: typeof AuthenticatedAdminPricingIntelligenceRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/pix-pendentes': {
       id: '/_authenticated/admin/pix-pendentes'
       path: '/admin/pix-pendentes'
@@ -10479,6 +10499,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminNichePlansRoute: typeof AuthenticatedAdminNichePlansRoute
   AuthenticatedAdminPeerBenchmarkRoute: typeof AuthenticatedAdminPeerBenchmarkRoute
   AuthenticatedAdminPixPendentesRoute: typeof AuthenticatedAdminPixPendentesRoute
+  AuthenticatedAdminPricingIntelligenceRoute: typeof AuthenticatedAdminPricingIntelligenceRoute
   AuthenticatedAdminProjetosParalelosRoute: typeof AuthenticatedAdminProjetosParalelosRoute
   AuthenticatedAdminQualidadeRoute: typeof AuthenticatedAdminQualidadeRoute
   AuthenticatedAdminRevenueForecastRoute: typeof AuthenticatedAdminRevenueForecastRoute
@@ -10660,6 +10681,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminNichePlansRoute: AuthenticatedAdminNichePlansRoute,
   AuthenticatedAdminPeerBenchmarkRoute: AuthenticatedAdminPeerBenchmarkRoute,
   AuthenticatedAdminPixPendentesRoute: AuthenticatedAdminPixPendentesRoute,
+  AuthenticatedAdminPricingIntelligenceRoute:
+    AuthenticatedAdminPricingIntelligenceRoute,
   AuthenticatedAdminProjetosParalelosRoute:
     AuthenticatedAdminProjetosParalelosRoute,
   AuthenticatedAdminQualidadeRoute: AuthenticatedAdminQualidadeRoute,
