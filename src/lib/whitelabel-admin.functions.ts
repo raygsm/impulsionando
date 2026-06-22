@@ -27,7 +27,7 @@ export const listWhitelabelAdmin = createServerFn({ method: "POST" })
       sb.from("wl_plans").select("*").order("ordem", { ascending: true }),
       sb.from("wl_subscriptions").select("*").order("created_at", { ascending: false }).limit(500),
       sb.from("wl_company_links").select("*").order("created_at", { ascending: false }).limit(2000),
-      sb.from("companies").select("id, name, slug").order("name").limit(2000),
+      sb.from("companies").select("id, name").order("name").limit(2000),
     ]);
     const err = plans.error || subs.error || links.error || owners.error;
     if (err) throw new Error(err.message);
