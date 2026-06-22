@@ -420,6 +420,7 @@ import { Route as AuthenticatedAdminMarocasHealthRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminMarketplaceOpsRouteImport } from './routes/_authenticated/admin.marketplace-ops'
 import { Route as AuthenticatedAdminMarketplaceB2bHealthRouteImport } from './routes/_authenticated/admin.marketplace-b2b-health'
 import { Route as AuthenticatedAdminMarketingHealthRouteImport } from './routes/_authenticated/admin.marketing-health'
+import { Route as AuthenticatedAdminLoyaltyClubeHealthRouteImport } from './routes/_authenticated/admin.loyalty-clube-health'
 import { Route as AuthenticatedAdminInventoryHealthRouteImport } from './routes/_authenticated/admin.inventory-health'
 import { Route as AuthenticatedAdminInboxUnificadaRouteImport } from './routes/_authenticated/admin.inbox-unificada'
 import { Route as AuthenticatedAdminInboxEventosRouteImport } from './routes/_authenticated/admin.inbox-eventos'
@@ -2814,6 +2815,12 @@ const AuthenticatedAdminMarketingHealthRoute =
     path: '/admin/marketing-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminLoyaltyClubeHealthRoute =
+  AuthenticatedAdminLoyaltyClubeHealthRouteImport.update({
+    id: '/admin/loyalty-clube-health',
+    path: '/admin/loyalty-clube-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminInventoryHealthRoute =
   AuthenticatedAdminInventoryHealthRouteImport.update({
     id: '/admin/inventory-health',
@@ -3770,6 +3777,7 @@ export interface FileRoutesByFullPath {
   '/admin/inbox-eventos': typeof AuthenticatedAdminInboxEventosRoute
   '/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
   '/admin/inventory-health': typeof AuthenticatedAdminInventoryHealthRoute
+  '/admin/loyalty-clube-health': typeof AuthenticatedAdminLoyaltyClubeHealthRoute
   '/admin/marketing-health': typeof AuthenticatedAdminMarketingHealthRoute
   '/admin/marketplace-b2b-health': typeof AuthenticatedAdminMarketplaceB2bHealthRoute
   '/admin/marketplace-ops': typeof AuthenticatedAdminMarketplaceOpsRoute
@@ -4293,6 +4301,7 @@ export interface FileRoutesByTo {
   '/admin/inbox-eventos': typeof AuthenticatedAdminInboxEventosRoute
   '/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
   '/admin/inventory-health': typeof AuthenticatedAdminInventoryHealthRoute
+  '/admin/loyalty-clube-health': typeof AuthenticatedAdminLoyaltyClubeHealthRoute
   '/admin/marketing-health': typeof AuthenticatedAdminMarketingHealthRoute
   '/admin/marketplace-b2b-health': typeof AuthenticatedAdminMarketplaceB2bHealthRoute
   '/admin/marketplace-ops': typeof AuthenticatedAdminMarketplaceOpsRoute
@@ -4830,6 +4839,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/inbox-eventos': typeof AuthenticatedAdminInboxEventosRoute
   '/_authenticated/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
   '/_authenticated/admin/inventory-health': typeof AuthenticatedAdminInventoryHealthRoute
+  '/_authenticated/admin/loyalty-clube-health': typeof AuthenticatedAdminLoyaltyClubeHealthRoute
   '/_authenticated/admin/marketing-health': typeof AuthenticatedAdminMarketingHealthRoute
   '/_authenticated/admin/marketplace-b2b-health': typeof AuthenticatedAdminMarketplaceB2bHealthRoute
   '/_authenticated/admin/marketplace-ops': typeof AuthenticatedAdminMarketplaceOpsRoute
@@ -5366,6 +5376,7 @@ export interface FileRouteTypes {
     | '/admin/inbox-eventos'
     | '/admin/inbox-unificada'
     | '/admin/inventory-health'
+    | '/admin/loyalty-clube-health'
     | '/admin/marketing-health'
     | '/admin/marketplace-b2b-health'
     | '/admin/marketplace-ops'
@@ -5889,6 +5900,7 @@ export interface FileRouteTypes {
     | '/admin/inbox-eventos'
     | '/admin/inbox-unificada'
     | '/admin/inventory-health'
+    | '/admin/loyalty-clube-health'
     | '/admin/marketing-health'
     | '/admin/marketplace-b2b-health'
     | '/admin/marketplace-ops'
@@ -6425,6 +6437,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/inbox-eventos'
     | '/_authenticated/admin/inbox-unificada'
     | '/_authenticated/admin/inventory-health'
+    | '/_authenticated/admin/loyalty-clube-health'
     | '/_authenticated/admin/marketing-health'
     | '/_authenticated/admin/marketplace-b2b-health'
     | '/_authenticated/admin/marketplace-ops'
@@ -9767,6 +9780,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMarketingHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/loyalty-clube-health': {
+      id: '/_authenticated/admin/loyalty-clube-health'
+      path: '/admin/loyalty-clube-health'
+      fullPath: '/admin/loyalty-clube-health'
+      preLoaderRoute: typeof AuthenticatedAdminLoyaltyClubeHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/inventory-health': {
       id: '/_authenticated/admin/inventory-health'
       path: '/admin/inventory-health'
@@ -11336,6 +11356,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminInboxEventosRoute: typeof AuthenticatedAdminInboxEventosRoute
   AuthenticatedAdminInboxUnificadaRoute: typeof AuthenticatedAdminInboxUnificadaRoute
   AuthenticatedAdminInventoryHealthRoute: typeof AuthenticatedAdminInventoryHealthRoute
+  AuthenticatedAdminLoyaltyClubeHealthRoute: typeof AuthenticatedAdminLoyaltyClubeHealthRoute
   AuthenticatedAdminMarketingHealthRoute: typeof AuthenticatedAdminMarketingHealthRoute
   AuthenticatedAdminMarketplaceB2bHealthRoute: typeof AuthenticatedAdminMarketplaceB2bHealthRoute
   AuthenticatedAdminMarketplaceOpsRoute: typeof AuthenticatedAdminMarketplaceOpsRoute
@@ -11570,6 +11591,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminInboxUnificadaRoute: AuthenticatedAdminInboxUnificadaRoute,
   AuthenticatedAdminInventoryHealthRoute:
     AuthenticatedAdminInventoryHealthRoute,
+  AuthenticatedAdminLoyaltyClubeHealthRoute:
+    AuthenticatedAdminLoyaltyClubeHealthRoute,
   AuthenticatedAdminMarketingHealthRoute:
     AuthenticatedAdminMarketingHealthRoute,
   AuthenticatedAdminMarketplaceB2bHealthRoute:
