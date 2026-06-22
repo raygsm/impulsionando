@@ -21117,6 +21117,7 @@ export type Database = {
           company_id: string
           created_at: string
           id: string
+          product_id: string | null
           rate_pct: number
           scope: string
           updated_at: string
@@ -21128,6 +21129,7 @@ export type Database = {
           company_id: string
           created_at?: string
           id?: string
+          product_id?: string | null
           rate_pct?: number
           scope?: string
           updated_at?: string
@@ -21139,6 +21141,7 @@ export type Database = {
           company_id?: string
           created_at?: string
           id?: string
+          product_id?: string | null
           rate_pct?: number
           scope?: string
           updated_at?: string
@@ -21172,6 +21175,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_tenant_identity_status"
             referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_commission_rules_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_products"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -22853,6 +22863,8 @@ export type Database = {
       }
       riomed_quotes: {
         Row: {
+          approved_at: string | null
+          approved_by_name: string | null
           channel: string
           code: string
           company_id: string
@@ -22870,6 +22882,10 @@ export type Database = {
           opportunity_id: string | null
           order_id: string | null
           owner_user_id: string | null
+          public_token: string | null
+          public_token_expires_at: string | null
+          rejected_at: string | null
+          rejection_reason: string | null
           sent_at: string | null
           status: string
           subtotal: number
@@ -22878,6 +22894,8 @@ export type Database = {
           won_at: string | null
         }
         Insert: {
+          approved_at?: string | null
+          approved_by_name?: string | null
           channel?: string
           code: string
           company_id: string
@@ -22895,6 +22913,10 @@ export type Database = {
           opportunity_id?: string | null
           order_id?: string | null
           owner_user_id?: string | null
+          public_token?: string | null
+          public_token_expires_at?: string | null
+          rejected_at?: string | null
+          rejection_reason?: string | null
           sent_at?: string | null
           status?: string
           subtotal?: number
@@ -22903,6 +22925,8 @@ export type Database = {
           won_at?: string | null
         }
         Update: {
+          approved_at?: string | null
+          approved_by_name?: string | null
           channel?: string
           code?: string
           company_id?: string
@@ -22920,6 +22944,10 @@ export type Database = {
           opportunity_id?: string | null
           order_id?: string | null
           owner_user_id?: string | null
+          public_token?: string | null
+          public_token_expires_at?: string | null
+          rejected_at?: string | null
+          rejection_reason?: string | null
           sent_at?: string | null
           status?: string
           subtotal?: number
@@ -28004,6 +28032,10 @@ export type Database = {
         Args: { p_due_days?: number; p_order_id: string }
         Returns: string
       }
+      riomed_convert_quote_to_order: {
+        Args: { _quote_id: string }
+        Returns: string
+      }
       riomed_detect_stale_stock: {
         Args: {
           _company_id: string
@@ -28021,6 +28053,15 @@ export type Database = {
           unit_price: number
           variant_id: string
         }[]
+      }
+      riomed_get_commission_rate: {
+        Args: {
+          _category: string
+          _company_id: string
+          _product_id: string
+          _seller_user_id: string
+        }
+        Returns: number
       }
       riomed_has_scope: {
         Args: { _company_id: string; _scope: string; _user_id: string }
