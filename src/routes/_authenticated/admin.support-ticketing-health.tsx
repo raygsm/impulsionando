@@ -48,8 +48,8 @@ function Page() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card><CardHeader><CardTitle className="text-sm">Top Categorias</CardTitle></CardHeader><CardContent>
-          <table className="w-full text-sm"><tbody>{data.tickets.topCategories.map((r:any)=>(<tr key={r.category} className="border-t"><td className="py-1">{r.category}</td><td className="text-right">{fmt(r.count)}</td></tr>))}</tbody></table>
+        <Card><CardHeader><CardTitle className="text-sm">Top Tipos de Ticket</CardTitle></CardHeader><CardContent>
+          <table className="w-full text-sm"><tbody>{data.tickets.topTypes.map((r:any)=>(<tr key={r.type} className="border-t"><td className="py-1">{r.type}</td><td className="text-right">{fmt(r.count)}</td></tr>))}</tbody></table>
         </CardContent></Card>
         <Card><CardHeader><CardTitle className="text-sm">Mensagens por Origem</CardTitle></CardHeader><CardContent>
           <table className="w-full text-sm"><tbody>{data.messages.bySender.map((r:any)=>(<tr key={r.sender} className="border-t"><td className="py-1">{r.sender}</td><td className="text-right">{fmt(r.count)}</td></tr>))}</tbody></table>
