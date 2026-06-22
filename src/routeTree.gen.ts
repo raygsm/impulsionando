@@ -391,6 +391,7 @@ import { Route as AuthenticatedAdminVendorPerformanceRouteImport } from './route
 import { Route as AuthenticatedAdminUptimeRouteImport } from './routes/_authenticated/admin.uptime'
 import { Route as AuthenticatedAdminUnitEconomicsRouteImport } from './routes/_authenticated/admin.unit-economics'
 import { Route as AuthenticatedAdminTrialsRouteImport } from './routes/_authenticated/admin.trials'
+import { Route as AuthenticatedAdminTrialOnboardingHealthRouteImport } from './routes/_authenticated/admin.trial-onboarding-health'
 import { Route as AuthenticatedAdminTrialDemoHealthRouteImport } from './routes/_authenticated/admin.trial-demo-health'
 import { Route as AuthenticatedAdminTreasuryForecastRouteImport } from './routes/_authenticated/admin.treasury-forecast'
 import { Route as AuthenticatedAdminTenantLifecycleRouteImport } from './routes/_authenticated/admin.tenant-lifecycle'
@@ -2665,6 +2666,12 @@ const AuthenticatedAdminTrialsRoute =
     path: '/admin/trials',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminTrialOnboardingHealthRoute =
+  AuthenticatedAdminTrialOnboardingHealthRouteImport.update({
+    id: '/admin/trial-onboarding-health',
+    path: '/admin/trial-onboarding-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminTrialDemoHealthRoute =
   AuthenticatedAdminTrialDemoHealthRouteImport.update({
     id: '/admin/trial-demo-health',
@@ -3999,6 +4006,7 @@ export interface FileRoutesByFullPath {
   '/admin/tenant-lifecycle': typeof AuthenticatedAdminTenantLifecycleRoute
   '/admin/treasury-forecast': typeof AuthenticatedAdminTreasuryForecastRoute
   '/admin/trial-demo-health': typeof AuthenticatedAdminTrialDemoHealthRoute
+  '/admin/trial-onboarding-health': typeof AuthenticatedAdminTrialOnboardingHealthRoute
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/admin/unit-economics': typeof AuthenticatedAdminUnitEconomicsRoute
   '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
@@ -4547,6 +4555,7 @@ export interface FileRoutesByTo {
   '/admin/tenant-lifecycle': typeof AuthenticatedAdminTenantLifecycleRoute
   '/admin/treasury-forecast': typeof AuthenticatedAdminTreasuryForecastRoute
   '/admin/trial-demo-health': typeof AuthenticatedAdminTrialDemoHealthRoute
+  '/admin/trial-onboarding-health': typeof AuthenticatedAdminTrialOnboardingHealthRoute
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/admin/unit-economics': typeof AuthenticatedAdminUnitEconomicsRoute
   '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
@@ -5109,6 +5118,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/tenant-lifecycle': typeof AuthenticatedAdminTenantLifecycleRoute
   '/_authenticated/admin/treasury-forecast': typeof AuthenticatedAdminTreasuryForecastRoute
   '/_authenticated/admin/trial-demo-health': typeof AuthenticatedAdminTrialDemoHealthRoute
+  '/_authenticated/admin/trial-onboarding-health': typeof AuthenticatedAdminTrialOnboardingHealthRoute
   '/_authenticated/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/_authenticated/admin/unit-economics': typeof AuthenticatedAdminUnitEconomicsRoute
   '/_authenticated/admin/uptime': typeof AuthenticatedAdminUptimeRoute
@@ -5670,6 +5680,7 @@ export interface FileRouteTypes {
     | '/admin/tenant-lifecycle'
     | '/admin/treasury-forecast'
     | '/admin/trial-demo-health'
+    | '/admin/trial-onboarding-health'
     | '/admin/trials'
     | '/admin/unit-economics'
     | '/admin/uptime'
@@ -6218,6 +6229,7 @@ export interface FileRouteTypes {
     | '/admin/tenant-lifecycle'
     | '/admin/treasury-forecast'
     | '/admin/trial-demo-health'
+    | '/admin/trial-onboarding-health'
     | '/admin/trials'
     | '/admin/unit-economics'
     | '/admin/uptime'
@@ -6779,6 +6791,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/tenant-lifecycle'
     | '/_authenticated/admin/treasury-forecast'
     | '/_authenticated/admin/trial-demo-health'
+    | '/_authenticated/admin/trial-onboarding-health'
     | '/_authenticated/admin/trials'
     | '/_authenticated/admin/unit-economics'
     | '/_authenticated/admin/uptime'
@@ -9889,6 +9902,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTrialsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/trial-onboarding-health': {
+      id: '/_authenticated/admin/trial-onboarding-health'
+      path: '/admin/trial-onboarding-health'
+      fullPath: '/admin/trial-onboarding-health'
+      preLoaderRoute: typeof AuthenticatedAdminTrialOnboardingHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/trial-demo-health': {
       id: '/_authenticated/admin/trial-demo-health'
       path: '/admin/trial-demo-health'
@@ -11890,6 +11910,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminTenantLifecycleRoute: typeof AuthenticatedAdminTenantLifecycleRoute
   AuthenticatedAdminTreasuryForecastRoute: typeof AuthenticatedAdminTreasuryForecastRoute
   AuthenticatedAdminTrialDemoHealthRoute: typeof AuthenticatedAdminTrialDemoHealthRoute
+  AuthenticatedAdminTrialOnboardingHealthRoute: typeof AuthenticatedAdminTrialOnboardingHealthRoute
   AuthenticatedAdminTrialsRoute: typeof AuthenticatedAdminTrialsRoute
   AuthenticatedAdminUnitEconomicsRoute: typeof AuthenticatedAdminUnitEconomicsRoute
   AuthenticatedAdminUptimeRoute: typeof AuthenticatedAdminUptimeRoute
@@ -12188,6 +12209,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminTreasuryForecastRoute,
   AuthenticatedAdminTrialDemoHealthRoute:
     AuthenticatedAdminTrialDemoHealthRoute,
+  AuthenticatedAdminTrialOnboardingHealthRoute:
+    AuthenticatedAdminTrialOnboardingHealthRoute,
   AuthenticatedAdminTrialsRoute: AuthenticatedAdminTrialsRoute,
   AuthenticatedAdminUnitEconomicsRoute: AuthenticatedAdminUnitEconomicsRoute,
   AuthenticatedAdminUptimeRoute: AuthenticatedAdminUptimeRoute,
