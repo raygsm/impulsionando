@@ -177,3 +177,63 @@ export const trackRiomedWhatsappClick = createServerFn({ method: "POST" })
     });
     return { ok: true };
   });
+
+const sellerSignupSchema = z.object({
+  fullName: z.string().trim().min(2).max(160),
+  email: z.string().trim().email().max(160),
+  phone: z.string().trim().min(6).max(40),
+  territory: z.string().trim().max(160).optional().or(z.literal("")),
+  notes: z.string().trim().max(1000).optional().or(z.literal("")),
+});
+
+export const submitRiomedSellerApplication = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => sellerSignupSchema.parse(d))
+  .handler(async ({ data }) => {
+    const admin = await adminClient();
+    const companyId = await getRiomedCompanyId(admin);
+    if (!companyId) throw new Error("RioMed company not configured");
+
+    const { data: existing } = await admin
+      .from("riomed_sellers")
+      .select("id,status")
+      .eq("company_id", companyId)
+      .eq("email", data.email)
+      .maybeSingle();
+    if (existing) {
+      return { ok: true, alreadyExists: true, status: existing.status };
+    }
+
+    const { data: row, error } = await admin
+      .from("riomed_sellers")
+      .insert({
+        company_id: companyId,
+        full_name: data.fullName,
+        email: data.email,
+        phone: data.phone,
+        territory: data.territory || null,
+        notes: data.notes || null,
+        status: "pending",
+        commission_rate: 0,
+        seller_code: `VEND-${Date.now().toString(36).toUpperCase()}`,
+        metadata: { source: "self_signup" } as any,
+      })
+      .select("id")
+      .single();
+    if (error) throw error;
+
+    try {
+      await admin.from("crm_leads").insert({
+        company_id: companyId,
+        name: data.fullName,
+        email: data.email,
+        phone: data.phone,
+        source: "seller_application",
+        status: "new",
+        tags: ["riomed", "vendedor-aplicacion"],
+        notes: data.notes || null,
+        riomed_origin: "seller_application",
+      });
+    } catch { /* non-blocking */ }
+
+    return { ok: true, sellerId: row.id, status: "pending" };
+  });

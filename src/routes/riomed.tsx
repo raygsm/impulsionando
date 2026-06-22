@@ -19,7 +19,7 @@ const NAV = [
   { to: "/riomed/fornecedor/cadastro", label: "Proveedores" },
   { to: "/riomed/trabalhe-conosco", label: "Trabaja con Nosotros" },
   { to: "/riomed/cotizar", label: "Cotizar" },
-  { to: "/riomed/area-cliente", label: "Área del Cliente" },
+  { to: "/area-cliente", label: "Área del Cliente" },
 ];
 
 function RiomedLayout() {
@@ -84,7 +84,9 @@ function RiomedLayout() {
             <ul className="space-y-1 text-muted-foreground">
               <li><Link to="/riomed/fornecedor/cadastro">Proveedores</Link></li>
               <li><Link to="/riomed/tecnico/cadastro">Técnicos</Link></li>
+              <li><Link to="/riomed/vendedores/cadastro">Vendedores</Link></li>
               <li><Link to="/riomed/trabalhe-conosco">Talentos</Link></li>
+
             </ul>
           </div>
           <div>
