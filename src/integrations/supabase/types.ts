@@ -20252,6 +20252,92 @@ export type Database = {
           },
         ]
       }
+      riomed_candidates: {
+        Row: {
+          city: string | null
+          company_id: string
+          created_at: string
+          email: string
+          expected_salary: number | null
+          experience_summary: string | null
+          full_name: string
+          id: string
+          linkedin_url: string | null
+          notes: string | null
+          phone: string
+          position_interest: string
+          resume_url: string | null
+          source: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          city?: string | null
+          company_id: string
+          created_at?: string
+          email: string
+          expected_salary?: number | null
+          experience_summary?: string | null
+          full_name: string
+          id?: string
+          linkedin_url?: string | null
+          notes?: string | null
+          phone: string
+          position_interest: string
+          resume_url?: string | null
+          source?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          city?: string | null
+          company_id?: string
+          created_at?: string
+          email?: string
+          expected_salary?: number | null
+          experience_summary?: string | null
+          full_name?: string
+          id?: string
+          linkedin_url?: string | null
+          notes?: string | null
+          phone?: string
+          position_interest?: string
+          resume_url?: string | null
+          source?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_candidates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_candidates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_candidates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_candidates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       riomed_cart_items: {
         Row: {
           cart_id: string
@@ -20541,6 +20627,195 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "riomed_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      riomed_hospital_accounts: {
+        Row: {
+          beds_count: number | null
+          city: string | null
+          company_id: string
+          contact_email: string
+          contact_name: string
+          contact_phone: string
+          created_at: string
+          credit_limit: number | null
+          hospital_name: string
+          id: string
+          metadata: Json
+          notes: string | null
+          payment_terms: string | null
+          segment: string | null
+          sla_hours: number | null
+          status: string
+          tax_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          beds_count?: number | null
+          city?: string | null
+          company_id: string
+          contact_email: string
+          contact_name: string
+          contact_phone: string
+          created_at?: string
+          credit_limit?: number | null
+          hospital_name: string
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          payment_terms?: string | null
+          segment?: string | null
+          sla_hours?: number | null
+          status?: string
+          tax_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          beds_count?: number | null
+          city?: string | null
+          company_id?: string
+          contact_email?: string
+          contact_name?: string
+          contact_phone?: string
+          created_at?: string
+          credit_limit?: number | null
+          hospital_name?: string
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          payment_terms?: string | null
+          segment?: string | null
+          sla_hours?: number | null
+          status?: string
+          tax_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_hospital_accounts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_hospital_accounts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_hospital_accounts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_hospital_accounts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      riomed_hospital_requests: {
+        Row: {
+          company_id: string
+          created_at: string
+          description: string | null
+          estimated_value: number | null
+          hospital_id: string | null
+          id: string
+          items: Json
+          needed_by: string | null
+          notes: string | null
+          priority: string
+          quote_id: string | null
+          request_kind: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          description?: string | null
+          estimated_value?: number | null
+          hospital_id?: string | null
+          id?: string
+          items?: Json
+          needed_by?: string | null
+          notes?: string | null
+          priority?: string
+          quote_id?: string | null
+          request_kind: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          estimated_value?: number | null
+          hospital_id?: string | null
+          id?: string
+          items?: Json
+          needed_by?: string | null
+          notes?: string | null
+          priority?: string
+          quote_id?: string | null
+          request_kind?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_hospital_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_hospital_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_hospital_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_hospital_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_hospital_requests_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_hospital_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_hospital_requests_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_quotes"
             referencedColumns: ["id"]
           },
         ]
@@ -22041,6 +22316,394 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "riomed_warehouses"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      riomed_supplier_offers: {
+        Row: {
+          brand: string | null
+          category: string | null
+          company_id: string
+          created_at: string
+          currency: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          lead_time_days: number | null
+          linked_product_id: string | null
+          moq: number | null
+          product_name: string
+          sku: string | null
+          status: string
+          supplier_id: string
+          unit_price: number | null
+          updated_at: string
+        }
+        Insert: {
+          brand?: string | null
+          category?: string | null
+          company_id: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          lead_time_days?: number | null
+          linked_product_id?: string | null
+          moq?: number | null
+          product_name: string
+          sku?: string | null
+          status?: string
+          supplier_id: string
+          unit_price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          brand?: string | null
+          category?: string | null
+          company_id?: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          lead_time_days?: number | null
+          linked_product_id?: string | null
+          moq?: number | null
+          product_name?: string
+          sku?: string | null
+          status?: string
+          supplier_id?: string
+          unit_price?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_supplier_offers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_supplier_offers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_supplier_offers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_supplier_offers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_supplier_offers_linked_product_id_fkey"
+            columns: ["linked_product_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_supplier_offers_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      riomed_suppliers: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          categories: string[] | null
+          company_id: string
+          contact_email: string
+          contact_name: string
+          contact_phone: string
+          country: string | null
+          created_at: string
+          id: string
+          legal_name: string
+          metadata: Json
+          notes: string | null
+          status: string
+          tax_id: string | null
+          trade_name: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          categories?: string[] | null
+          company_id: string
+          contact_email: string
+          contact_name: string
+          contact_phone: string
+          country?: string | null
+          created_at?: string
+          id?: string
+          legal_name: string
+          metadata?: Json
+          notes?: string | null
+          status?: string
+          tax_id?: string | null
+          trade_name?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          categories?: string[] | null
+          company_id?: string
+          contact_email?: string
+          contact_name?: string
+          contact_phone?: string
+          country?: string | null
+          created_at?: string
+          id?: string
+          legal_name?: string
+          metadata?: Json
+          notes?: string | null
+          status?: string
+          tax_id?: string | null
+          trade_name?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_suppliers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_suppliers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_suppliers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_suppliers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      riomed_technician_assignments: {
+        Row: {
+          address: Json | null
+          company_id: string
+          completed_at: string | null
+          created_at: string
+          customer_id: string | null
+          id: string
+          kind: string
+          notes: string | null
+          priority: string
+          product_id: string | null
+          scheduled_for: string | null
+          status: string
+          technician_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          address?: Json | null
+          company_id: string
+          completed_at?: string | null
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          kind: string
+          notes?: string | null
+          priority?: string
+          product_id?: string | null
+          scheduled_for?: string | null
+          status?: string
+          technician_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          address?: Json | null
+          company_id?: string
+          completed_at?: string | null
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          kind?: string
+          notes?: string | null
+          priority?: string
+          product_id?: string | null
+          scheduled_for?: string | null
+          status?: string
+          technician_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_technician_assignments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_technician_assignments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_technician_assignments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_technician_assignments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_technician_assignments_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_technician_assignments_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_technician_assignments_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_technicians"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      riomed_technicians: {
+        Row: {
+          approved_at: string | null
+          available: boolean
+          certifications: string[] | null
+          company_id: string
+          created_at: string
+          document: string | null
+          email: string
+          experience_years: number | null
+          full_name: string
+          id: string
+          notes: string | null
+          phone: string
+          rating: number | null
+          service_areas: string[] | null
+          specialties: string[] | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          available?: boolean
+          certifications?: string[] | null
+          company_id: string
+          created_at?: string
+          document?: string | null
+          email: string
+          experience_years?: number | null
+          full_name: string
+          id?: string
+          notes?: string | null
+          phone: string
+          rating?: number | null
+          service_areas?: string[] | null
+          specialties?: string[] | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          available?: boolean
+          certifications?: string[] | null
+          company_id?: string
+          created_at?: string
+          document?: string | null
+          email?: string
+          experience_years?: number | null
+          full_name?: string
+          id?: string
+          notes?: string | null
+          phone?: string
+          rating?: number | null
+          service_areas?: string[] | null
+          specialties?: string[] | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_technicians_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_technicians_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_technicians_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_technicians_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
           },
         ]
       }
