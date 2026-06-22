@@ -72,7 +72,11 @@ export const getAgendaOpsHealth = createServerFn({ method: "POST" })
     const offByChannel: Record<string, number> = {};
     for (const o of offers) {
       offByStatus[o.status ?? "—"] = (offByStatus[o.status ?? "—"] ?? 0) + 1;
-      offByChannel[o.channel ?? "—"] = (offByChannel[o.channel ?? "—"] ?? 0) + 1;
+      const channels = Array.isArray(o.channel) ? (o.channel as string[]) : [String(o.channel ?? "—")];
+      for (const ch of channels) {
+        const k = ch ?? "—";
+        offByChannel[k] = (offByChannel[k] ?? 0) + 1;
+      }
     }
     const seenOffers = offers.filter((o: any) => o.seen_at).length;
     const respondedOffers = offers.filter((o: any) => o.responded_at).length;
