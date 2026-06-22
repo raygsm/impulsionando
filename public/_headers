@@ -1,0 +1,18 @@
+# Cache-busting: HTML/JSON sempre frescos; assets com hash mantêm long-cache
+# (a regra de /assets/* já é injetada pela infra Lovable; reforçamos aqui
+# garantindo no-store no HTML para que cada Publish apareça imediatamente).
+/*
+  cache-control: public, max-age=0, must-revalidate
+  x-build-commit: see /api/public/version
+
+/index.html
+  cache-control: no-store, must-revalidate
+
+/api/*
+  cache-control: no-store, must-revalidate
+
+/assets/*
+  cache-control: public, max-age=31536000, immutable
+
+/__l5e/*
+  cache-control: public, max-age=31536000, immutable
