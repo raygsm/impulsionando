@@ -576,6 +576,10 @@ import { Route as AuthenticatedAdminClientesRiomedRouteImport } from './routes/_
 import { Route as ApiPublicPaymentsCloseInvoiceReplayRouteImport } from './routes/api/public/payments/close-invoice.replay'
 import { Route as AuthenticatedImobiliariaAprovacoesIdImprimirRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes.$id.imprimir'
 import { Route as AuthenticatedCoreClienteIdPaginasRouteImport } from './routes/_authenticated/core.cliente.$id.paginas'
+import { Route as AuthenticatedAdminClientesRiomedRoutingRouteImport } from './routes/_authenticated/admin.clientes.riomed.routing'
+import { Route as AuthenticatedAdminClientesRiomedLocacaoRouteImport } from './routes/_authenticated/admin.clientes.riomed.locacao'
+import { Route as AuthenticatedAdminClientesRiomedCarrinhosRouteImport } from './routes/_authenticated/admin.clientes.riomed.carrinhos'
+import { Route as AuthenticatedAdminClientesRiomedAssistenciaRouteImport } from './routes/_authenticated/admin.clientes.riomed.assistencia'
 import { Route as AuthenticatedCoreClienteIdPaginasPageIdRouteImport } from './routes/_authenticated/core.cliente.$id.paginas.$pageId'
 import { Route as AuthenticatedCoreClienteIdModuloSlugConfigurarRouteImport } from './routes/_authenticated/core.cliente.$id.modulo.$slug.configurar'
 
@@ -3772,6 +3776,30 @@ const AuthenticatedCoreClienteIdPaginasRoute =
     path: '/paginas',
     getParentRoute: () => AuthenticatedCoreClienteIdRoute,
   } as any)
+const AuthenticatedAdminClientesRiomedRoutingRoute =
+  AuthenticatedAdminClientesRiomedRoutingRouteImport.update({
+    id: '/routing',
+    path: '/routing',
+    getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
+  } as any)
+const AuthenticatedAdminClientesRiomedLocacaoRoute =
+  AuthenticatedAdminClientesRiomedLocacaoRouteImport.update({
+    id: '/locacao',
+    path: '/locacao',
+    getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
+  } as any)
+const AuthenticatedAdminClientesRiomedCarrinhosRoute =
+  AuthenticatedAdminClientesRiomedCarrinhosRouteImport.update({
+    id: '/carrinhos',
+    path: '/carrinhos',
+    getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
+  } as any)
+const AuthenticatedAdminClientesRiomedAssistenciaRoute =
+  AuthenticatedAdminClientesRiomedAssistenciaRouteImport.update({
+    id: '/assistencia',
+    path: '/assistencia',
+    getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
+  } as any)
 const AuthenticatedCoreClienteIdPaginasPageIdRoute =
   AuthenticatedCoreClienteIdPaginasPageIdRouteImport.update({
     id: '/$pageId',
@@ -4286,7 +4314,7 @@ export interface FileRoutesByFullPath {
   '/reports/': typeof AuthenticatedReportsIndexRoute
   '/saiba-mais/': typeof AuthenticatedSaibaMaisIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
-  '/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRoute
+  '/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   '/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/admin/tenant/$id': typeof AuthenticatedAdminTenantIdRoute
@@ -4348,6 +4376,10 @@ export interface FileRoutesByFullPath {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/admin/clientes/riomed/assistencia': typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
+  '/admin/clientes/riomed/carrinhos': typeof AuthenticatedAdminClientesRiomedCarrinhosRoute
+  '/admin/clientes/riomed/locacao': typeof AuthenticatedAdminClientesRiomedLocacaoRoute
+  '/admin/clientes/riomed/routing': typeof AuthenticatedAdminClientesRiomedRoutingRoute
   '/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
   '/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
   '/api/public/payments/close-invoice/replay': typeof ApiPublicPaymentsCloseInvoiceReplayRoute
@@ -4844,7 +4876,7 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedReportsIndexRoute
   '/saiba-mais': typeof AuthenticatedSaibaMaisIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
-  '/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRoute
+  '/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   '/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/admin/tenant/$id': typeof AuthenticatedAdminTenantIdRoute
@@ -4906,6 +4938,10 @@ export interface FileRoutesByTo {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/admin/clientes/riomed/assistencia': typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
+  '/admin/clientes/riomed/carrinhos': typeof AuthenticatedAdminClientesRiomedCarrinhosRoute
+  '/admin/clientes/riomed/locacao': typeof AuthenticatedAdminClientesRiomedLocacaoRoute
+  '/admin/clientes/riomed/routing': typeof AuthenticatedAdminClientesRiomedRoutingRoute
   '/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
   '/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
   '/api/public/payments/close-invoice/replay': typeof ApiPublicPaymentsCloseInvoiceReplayRoute
@@ -5416,7 +5452,7 @@ export interface FileRoutesById {
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
   '/_authenticated/saiba-mais/': typeof AuthenticatedSaibaMaisIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
-  '/_authenticated/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRoute
+  '/_authenticated/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   '/_authenticated/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   '/_authenticated/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/_authenticated/admin/tenant/$id': typeof AuthenticatedAdminTenantIdRoute
@@ -5478,6 +5514,10 @@ export interface FileRoutesById {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/_authenticated/admin/clientes/riomed/assistencia': typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
+  '/_authenticated/admin/clientes/riomed/carrinhos': typeof AuthenticatedAdminClientesRiomedCarrinhosRoute
+  '/_authenticated/admin/clientes/riomed/locacao': typeof AuthenticatedAdminClientesRiomedLocacaoRoute
+  '/_authenticated/admin/clientes/riomed/routing': typeof AuthenticatedAdminClientesRiomedRoutingRoute
   '/_authenticated/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
   '/_authenticated/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
   '/api/public/payments/close-invoice/replay': typeof ApiPublicPaymentsCloseInvoiceReplayRoute
@@ -6049,6 +6089,10 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/admin/clientes/riomed/assistencia'
+    | '/admin/clientes/riomed/carrinhos'
+    | '/admin/clientes/riomed/locacao'
+    | '/admin/clientes/riomed/routing'
     | '/core/cliente/$id/paginas'
     | '/imobiliaria/aprovacoes/$id/imprimir'
     | '/api/public/payments/close-invoice/replay'
@@ -6607,6 +6651,10 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/admin/clientes/riomed/assistencia'
+    | '/admin/clientes/riomed/carrinhos'
+    | '/admin/clientes/riomed/locacao'
+    | '/admin/clientes/riomed/routing'
     | '/core/cliente/$id/paginas'
     | '/imobiliaria/aprovacoes/$id/imprimir'
     | '/api/public/payments/close-invoice/replay'
@@ -7178,6 +7226,10 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/_authenticated/admin/clientes/riomed/assistencia'
+    | '/_authenticated/admin/clientes/riomed/carrinhos'
+    | '/_authenticated/admin/clientes/riomed/locacao'
+    | '/_authenticated/admin/clientes/riomed/routing'
     | '/_authenticated/core/cliente/$id/paginas'
     | '/_authenticated/imobiliaria/aprovacoes/$id/imprimir'
     | '/api/public/payments/close-invoice/replay'
@@ -11314,6 +11366,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreClienteIdPaginasRouteImport
       parentRoute: typeof AuthenticatedCoreClienteIdRoute
     }
+    '/_authenticated/admin/clientes/riomed/routing': {
+      id: '/_authenticated/admin/clientes/riomed/routing'
+      path: '/routing'
+      fullPath: '/admin/clientes/riomed/routing'
+      preLoaderRoute: typeof AuthenticatedAdminClientesRiomedRoutingRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
+    }
+    '/_authenticated/admin/clientes/riomed/locacao': {
+      id: '/_authenticated/admin/clientes/riomed/locacao'
+      path: '/locacao'
+      fullPath: '/admin/clientes/riomed/locacao'
+      preLoaderRoute: typeof AuthenticatedAdminClientesRiomedLocacaoRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
+    }
+    '/_authenticated/admin/clientes/riomed/carrinhos': {
+      id: '/_authenticated/admin/clientes/riomed/carrinhos'
+      path: '/carrinhos'
+      fullPath: '/admin/clientes/riomed/carrinhos'
+      preLoaderRoute: typeof AuthenticatedAdminClientesRiomedCarrinhosRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
+    }
+    '/_authenticated/admin/clientes/riomed/assistencia': {
+      id: '/_authenticated/admin/clientes/riomed/assistencia'
+      path: '/assistencia'
+      fullPath: '/admin/clientes/riomed/assistencia'
+      preLoaderRoute: typeof AuthenticatedAdminClientesRiomedAssistenciaRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
+    }
     '/_authenticated/core/cliente/$id/paginas/$pageId': {
       id: '/_authenticated/core/cliente/$id/paginas/$pageId'
       path: '/$pageId'
@@ -11945,6 +12025,30 @@ const AuthenticatedTorreRestaurantesDemoRouteWithChildren =
     AuthenticatedTorreRestaurantesDemoRouteChildren,
   )
 
+interface AuthenticatedAdminClientesRiomedRouteChildren {
+  AuthenticatedAdminClientesRiomedAssistenciaRoute: typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
+  AuthenticatedAdminClientesRiomedCarrinhosRoute: typeof AuthenticatedAdminClientesRiomedCarrinhosRoute
+  AuthenticatedAdminClientesRiomedLocacaoRoute: typeof AuthenticatedAdminClientesRiomedLocacaoRoute
+  AuthenticatedAdminClientesRiomedRoutingRoute: typeof AuthenticatedAdminClientesRiomedRoutingRoute
+}
+
+const AuthenticatedAdminClientesRiomedRouteChildren: AuthenticatedAdminClientesRiomedRouteChildren =
+  {
+    AuthenticatedAdminClientesRiomedAssistenciaRoute:
+      AuthenticatedAdminClientesRiomedAssistenciaRoute,
+    AuthenticatedAdminClientesRiomedCarrinhosRoute:
+      AuthenticatedAdminClientesRiomedCarrinhosRoute,
+    AuthenticatedAdminClientesRiomedLocacaoRoute:
+      AuthenticatedAdminClientesRiomedLocacaoRoute,
+    AuthenticatedAdminClientesRiomedRoutingRoute:
+      AuthenticatedAdminClientesRiomedRoutingRoute,
+  }
+
+const AuthenticatedAdminClientesRiomedRouteWithChildren =
+  AuthenticatedAdminClientesRiomedRoute._addFileChildren(
+    AuthenticatedAdminClientesRiomedRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccessProfilesRoute: typeof AuthenticatedAccessProfilesRouteWithChildren
   AuthenticatedAdmRoute: typeof AuthenticatedAdmRouteWithChildren
@@ -12187,7 +12291,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEventosIndexRoute: typeof AuthenticatedEventosIndexRoute
   AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
   AuthenticatedSaibaMaisIndexRoute: typeof AuthenticatedSaibaMaisIndexRoute
-  AuthenticatedAdminClientesRiomedRoute: typeof AuthenticatedAdminClientesRiomedRoute
+  AuthenticatedAdminClientesRiomedRoute: typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   AuthenticatedAdminIntegracoesMercadoPagoRoute: typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   AuthenticatedAdminModulosClonagemRoute: typeof AuthenticatedAdminModulosClonagemRoute
   AuthenticatedAdminTenantIdRoute: typeof AuthenticatedAdminTenantIdRoute
@@ -12535,7 +12639,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEventosIndexRoute: AuthenticatedEventosIndexRoute,
   AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
   AuthenticatedSaibaMaisIndexRoute: AuthenticatedSaibaMaisIndexRoute,
-  AuthenticatedAdminClientesRiomedRoute: AuthenticatedAdminClientesRiomedRoute,
+  AuthenticatedAdminClientesRiomedRoute:
+    AuthenticatedAdminClientesRiomedRouteWithChildren,
   AuthenticatedAdminIntegracoesMercadoPagoRoute:
     AuthenticatedAdminIntegracoesMercadoPagoRoute,
   AuthenticatedAdminModulosClonagemRoute:
