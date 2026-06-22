@@ -1,0 +1,46 @@
+// Server fn — marca o tenant como "publicado agora" registrando
+// `published_at` = now() e `published_commit` = BUILD_INFO atual.
+// Usado pelo painel /admin/clientes/{slug}/dominio quando o operador
+// confirma que o último build foi promovido ao tenant.
+import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { z } from "zod";
+
+export const markTenantPublished = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    z
+      .object({
+        slug: z.string().min(1),
+        commit: z.string().min(7).max(64),
+        builtAt: z.string().datetime().optional(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", {
+      _user_id: userId,
+      _role: "admin",
+    });
+    if (!isAdmin) throw new Error("Forbidden");
+
+    const { data: company, error: cErr } = await supabase
+      .from("companies")
+      .select("id")
+      .eq("subdomain", data.slug)
+      .maybeSingle();
+    if (cErr) throw cErr;
+    if (!company) throw new Error("Tenant não encontrado");
+
+    const publishedAt = data.builtAt ?? new Date().toISOString();
+    const { error } = await supabase
+      .from("core_tenant_identity")
+      .update({
+        published_at: publishedAt,
+        published_commit: data.commit,
+      })
+      .eq("company_id", company.id);
+    if (error) throw error;
+    return { ok: true, publishedAt, commit: data.commit };
+  });
