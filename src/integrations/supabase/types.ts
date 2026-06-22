@@ -8003,6 +8003,220 @@ export type Database = {
           },
         ]
       }
+      core_field_definitions: {
+        Row: {
+          company_id: string
+          conditional: Json | null
+          created_at: string
+          default_value: Json | null
+          entity: string
+          example: string | null
+          field_type: string
+          help_text: string | null
+          id: string
+          is_active: boolean
+          is_required: boolean
+          is_system: boolean
+          key: string
+          label: string
+          metadata: Json
+          placeholder: string | null
+          section: string | null
+          sort_order: number
+          updated_at: string
+          validation: Json
+          visibility: string
+        }
+        Insert: {
+          company_id: string
+          conditional?: Json | null
+          created_at?: string
+          default_value?: Json | null
+          entity: string
+          example?: string | null
+          field_type: string
+          help_text?: string | null
+          id?: string
+          is_active?: boolean
+          is_required?: boolean
+          is_system?: boolean
+          key: string
+          label: string
+          metadata?: Json
+          placeholder?: string | null
+          section?: string | null
+          sort_order?: number
+          updated_at?: string
+          validation?: Json
+          visibility?: string
+        }
+        Update: {
+          company_id?: string
+          conditional?: Json | null
+          created_at?: string
+          default_value?: Json | null
+          entity?: string
+          example?: string | null
+          field_type?: string
+          help_text?: string | null
+          id?: string
+          is_active?: boolean
+          is_required?: boolean
+          is_system?: boolean
+          key?: string
+          label?: string
+          metadata?: Json
+          placeholder?: string | null
+          section?: string | null
+          sort_order?: number
+          updated_at?: string
+          validation?: Json
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_field_definitions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_field_definitions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_field_definitions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_field_definitions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      core_field_options: {
+        Row: {
+          created_at: string
+          field_id: string
+          id: string
+          is_active: boolean
+          label: string
+          metadata: Json
+          sort_order: number
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          field_id: string
+          id?: string
+          is_active?: boolean
+          label: string
+          metadata?: Json
+          sort_order?: number
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          field_id?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          metadata?: Json
+          sort_order?: number
+          updated_at?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_field_options_field_id_fkey"
+            columns: ["field_id"]
+            isOneToOne: false
+            referencedRelation: "core_field_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      core_field_values: {
+        Row: {
+          company_id: string
+          created_at: string
+          entity: string
+          field_id: string
+          id: string
+          record_id: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          entity: string
+          field_id: string
+          id?: string
+          record_id: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          entity?: string
+          field_id?: string
+          id?: string
+          record_id?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_field_values_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_field_values_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_field_values_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_field_values_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_field_values_field_id_fkey"
+            columns: ["field_id"]
+            isOneToOne: false
+            referencedRelation: "core_field_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       core_fiscal_invoice_events: {
         Row: {
           created_at: string
@@ -8436,6 +8650,89 @@ export type Database = {
           workflow_name?: string
         }
         Relationships: []
+      }
+      core_implantation_tasks: {
+        Row: {
+          auto_check: Json | null
+          code: string
+          company_id: string
+          created_at: string
+          description: string | null
+          group_name: string | null
+          id: string
+          is_auto: boolean
+          notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          sort_order: number
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          auto_check?: Json | null
+          code: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          group_name?: string | null
+          id?: string
+          is_auto?: boolean
+          notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          sort_order?: number
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          auto_check?: Json | null
+          code?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          group_name?: string | null
+          id?: string
+          is_auto?: boolean
+          notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          sort_order?: number
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_implantation_tasks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_implantation_tasks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_implantation_tasks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_implantation_tasks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
       }
       core_incidents: {
         Row: {
@@ -14285,6 +14582,74 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      geo_bo_cities: {
+        Row: {
+          created_at: string
+          department_code: string
+          id: string
+          is_active: boolean
+          is_capital: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          department_code: string
+          id?: string
+          is_active?: boolean
+          is_capital?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          department_code?: string
+          id?: string
+          is_active?: boolean
+          is_capital?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geo_bo_cities_department_code_fkey"
+            columns: ["department_code"]
+            isOneToOne: false
+            referencedRelation: "geo_bo_departments"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      geo_bo_departments: {
+        Row: {
+          capital: string | null
+          code: string
+          created_at: string
+          is_active: boolean
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          capital?: string | null
+          code: string
+          created_at?: string
+          is_active?: boolean
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          capital?: string | null
+          code?: string
+          created_at?: string
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       governance_applications: {
         Row: {
