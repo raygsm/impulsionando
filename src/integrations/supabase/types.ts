@@ -7306,6 +7306,60 @@ export type Database = {
           },
         ]
       }
+      core_admin_menu: {
+        Row: {
+          created_at: string
+          description: string | null
+          enabled: boolean
+          group_key: string
+          group_label: string
+          group_order: number
+          icon: string | null
+          id: string
+          item_key: string
+          item_label: string
+          item_order: number
+          required_role: string | null
+          route: string
+          updated_at: string
+          vertente: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          group_key: string
+          group_label: string
+          group_order?: number
+          icon?: string | null
+          id?: string
+          item_key: string
+          item_label: string
+          item_order?: number
+          required_role?: string | null
+          route: string
+          updated_at?: string
+          vertente: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          group_key?: string
+          group_label?: string
+          group_order?: number
+          icon?: string | null
+          id?: string
+          item_key?: string
+          item_label?: string
+          item_order?: number
+          required_role?: string | null
+          route?: string
+          updated_at?: string
+          vertente?: string
+        }
+        Relationships: []
+      }
       core_briefings: {
         Row: {
           answers: Json
