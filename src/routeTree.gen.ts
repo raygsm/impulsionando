@@ -602,6 +602,7 @@ import { Route as AuthenticatedAdminClientesRiomedPrecosListasRouteImport } from
 import { Route as AuthenticatedAdminClientesRiomedPortalRouteImport } from './routes/_authenticated/admin.clientes.riomed.portal'
 import { Route as AuthenticatedAdminClientesRiomedPedidosRouteImport } from './routes/_authenticated/admin.clientes.riomed.pedidos'
 import { Route as AuthenticatedAdminClientesRiomedParceirosRouteImport } from './routes/_authenticated/admin.clientes.riomed.parceiros'
+import { Route as AuthenticatedAdminClientesRiomedOperacoesRouteImport } from './routes/_authenticated/admin.clientes.riomed.operacoes'
 import { Route as AuthenticatedAdminClientesRiomedN8nRouteImport } from './routes/_authenticated/admin.clientes.riomed.n8n'
 import { Route as AuthenticatedAdminClientesRiomedMarketingRouteImport } from './routes/_authenticated/admin.clientes.riomed.marketing'
 import { Route as AuthenticatedAdminClientesRiomedLocacaoRouteImport } from './routes/_authenticated/admin.clientes.riomed.locacao'
@@ -3959,6 +3960,12 @@ const AuthenticatedAdminClientesRiomedParceirosRoute =
     path: '/parceiros',
     getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
   } as any)
+const AuthenticatedAdminClientesRiomedOperacoesRoute =
+  AuthenticatedAdminClientesRiomedOperacoesRouteImport.update({
+    id: '/operacoes',
+    path: '/operacoes',
+    getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
+  } as any)
 const AuthenticatedAdminClientesRiomedN8nRoute =
   AuthenticatedAdminClientesRiomedN8nRouteImport.update({
     id: '/n8n',
@@ -4693,6 +4700,7 @@ export interface FileRoutesByFullPath {
   '/admin/clientes/riomed/locacao': typeof AuthenticatedAdminClientesRiomedLocacaoRoute
   '/admin/clientes/riomed/marketing': typeof AuthenticatedAdminClientesRiomedMarketingRoute
   '/admin/clientes/riomed/n8n': typeof AuthenticatedAdminClientesRiomedN8nRoute
+  '/admin/clientes/riomed/operacoes': typeof AuthenticatedAdminClientesRiomedOperacoesRoute
   '/admin/clientes/riomed/parceiros': typeof AuthenticatedAdminClientesRiomedParceirosRoute
   '/admin/clientes/riomed/pedidos': typeof AuthenticatedAdminClientesRiomedPedidosRoute
   '/admin/clientes/riomed/portal': typeof AuthenticatedAdminClientesRiomedPortalRoute
@@ -5296,6 +5304,7 @@ export interface FileRoutesByTo {
   '/admin/clientes/riomed/locacao': typeof AuthenticatedAdminClientesRiomedLocacaoRoute
   '/admin/clientes/riomed/marketing': typeof AuthenticatedAdminClientesRiomedMarketingRoute
   '/admin/clientes/riomed/n8n': typeof AuthenticatedAdminClientesRiomedN8nRoute
+  '/admin/clientes/riomed/operacoes': typeof AuthenticatedAdminClientesRiomedOperacoesRoute
   '/admin/clientes/riomed/parceiros': typeof AuthenticatedAdminClientesRiomedParceirosRoute
   '/admin/clientes/riomed/pedidos': typeof AuthenticatedAdminClientesRiomedPedidosRoute
   '/admin/clientes/riomed/portal': typeof AuthenticatedAdminClientesRiomedPortalRoute
@@ -5914,6 +5923,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/clientes/riomed/locacao': typeof AuthenticatedAdminClientesRiomedLocacaoRoute
   '/_authenticated/admin/clientes/riomed/marketing': typeof AuthenticatedAdminClientesRiomedMarketingRoute
   '/_authenticated/admin/clientes/riomed/n8n': typeof AuthenticatedAdminClientesRiomedN8nRoute
+  '/_authenticated/admin/clientes/riomed/operacoes': typeof AuthenticatedAdminClientesRiomedOperacoesRoute
   '/_authenticated/admin/clientes/riomed/parceiros': typeof AuthenticatedAdminClientesRiomedParceirosRoute
   '/_authenticated/admin/clientes/riomed/pedidos': typeof AuthenticatedAdminClientesRiomedPedidosRoute
   '/_authenticated/admin/clientes/riomed/portal': typeof AuthenticatedAdminClientesRiomedPortalRoute
@@ -6531,6 +6541,7 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed/locacao'
     | '/admin/clientes/riomed/marketing'
     | '/admin/clientes/riomed/n8n'
+    | '/admin/clientes/riomed/operacoes'
     | '/admin/clientes/riomed/parceiros'
     | '/admin/clientes/riomed/pedidos'
     | '/admin/clientes/riomed/portal'
@@ -7134,6 +7145,7 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed/locacao'
     | '/admin/clientes/riomed/marketing'
     | '/admin/clientes/riomed/n8n'
+    | '/admin/clientes/riomed/operacoes'
     | '/admin/clientes/riomed/parceiros'
     | '/admin/clientes/riomed/pedidos'
     | '/admin/clientes/riomed/portal'
@@ -7751,6 +7763,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/clientes/riomed/locacao'
     | '/_authenticated/admin/clientes/riomed/marketing'
     | '/_authenticated/admin/clientes/riomed/n8n'
+    | '/_authenticated/admin/clientes/riomed/operacoes'
     | '/_authenticated/admin/clientes/riomed/parceiros'
     | '/_authenticated/admin/clientes/riomed/pedidos'
     | '/_authenticated/admin/clientes/riomed/portal'
@@ -12078,6 +12091,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientesRiomedParceirosRouteImport
       parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
     }
+    '/_authenticated/admin/clientes/riomed/operacoes': {
+      id: '/_authenticated/admin/clientes/riomed/operacoes'
+      path: '/operacoes'
+      fullPath: '/admin/clientes/riomed/operacoes'
+      preLoaderRoute: typeof AuthenticatedAdminClientesRiomedOperacoesRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
+    }
     '/_authenticated/admin/clientes/riomed/n8n': {
       id: '/_authenticated/admin/clientes/riomed/n8n'
       path: '/n8n'
@@ -12870,6 +12890,7 @@ interface AuthenticatedAdminClientesRiomedRouteChildren {
   AuthenticatedAdminClientesRiomedLocacaoRoute: typeof AuthenticatedAdminClientesRiomedLocacaoRoute
   AuthenticatedAdminClientesRiomedMarketingRoute: typeof AuthenticatedAdminClientesRiomedMarketingRoute
   AuthenticatedAdminClientesRiomedN8nRoute: typeof AuthenticatedAdminClientesRiomedN8nRoute
+  AuthenticatedAdminClientesRiomedOperacoesRoute: typeof AuthenticatedAdminClientesRiomedOperacoesRoute
   AuthenticatedAdminClientesRiomedParceirosRoute: typeof AuthenticatedAdminClientesRiomedParceirosRoute
   AuthenticatedAdminClientesRiomedPedidosRoute: typeof AuthenticatedAdminClientesRiomedPedidosRoute
   AuthenticatedAdminClientesRiomedPortalRoute: typeof AuthenticatedAdminClientesRiomedPortalRoute
@@ -12922,6 +12943,8 @@ const AuthenticatedAdminClientesRiomedRouteChildren: AuthenticatedAdminClientesR
       AuthenticatedAdminClientesRiomedMarketingRoute,
     AuthenticatedAdminClientesRiomedN8nRoute:
       AuthenticatedAdminClientesRiomedN8nRoute,
+    AuthenticatedAdminClientesRiomedOperacoesRoute:
+      AuthenticatedAdminClientesRiomedOperacoesRoute,
     AuthenticatedAdminClientesRiomedParceirosRoute:
       AuthenticatedAdminClientesRiomedParceirosRoute,
     AuthenticatedAdminClientesRiomedPedidosRoute:
