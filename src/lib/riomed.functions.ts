@@ -113,3 +113,66 @@ export const listAbandonedCarts = createServerFn({ method: "GET" })
     };
     return { carts, stats };
   });
+
+// ============ AI ASSISTANT (prompt + catálogo por audiência) ============
+export const loadRioMedAssistant = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const companyId = await getRioMedId(context.supabase);
+    if (!companyId) return { companyId: null, identity: null, assistant: null };
+    const { data: identity } = await context.supabase
+      .from("core_tenant_identity")
+      .select("id,company_id,subdomain,metadata,updated_at")
+      .eq("company_id", companyId)
+      .maybeSingle();
+    const meta = (identity?.metadata as Record<string, any>) ?? {};
+    return {
+      companyId,
+      identity,
+      assistant: meta.ai_assistant ?? null,
+      links: meta.official_links ?? null,
+      sucursal: meta.sucursal ?? null,
+      business_hours: meta.business_hours ?? null,
+      phones: meta.phones ?? null,
+    };
+  });
+
+export const saveRioMedAssistant = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({
+      assistant: z.record(z.string(), z.any()),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    // admin master ou super gating
+    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" as any });
+    const { data: isSuper } = await supabase.rpc("has_role", { _user_id: userId, _role: "super" as any });
+    if (!isAdmin && !isSuper) throw new Error("Forbidden: apenas administradores podem editar o assistente");
+
+    const companyId = await getRioMedId(supabase);
+    if (!companyId) throw new Error("Tenant RioMed não encontrado");
+
+    const next = {
+      ...data.assistant,
+      version: data.assistant.version ?? new Date().toISOString().slice(0, 10),
+      updated_by: userId,
+      updated_at: new Date().toISOString(),
+    };
+
+    const { data: identity } = await supabase
+      .from("core_tenant_identity")
+      .select("metadata")
+      .eq("company_id", companyId)
+      .maybeSingle();
+    const meta = (identity?.metadata as Record<string, any>) ?? {};
+    const mergedMeta = { ...meta, ai_assistant: next, assistant_synced_at: new Date().toISOString() };
+
+    const { error } = await supabase
+      .from("core_tenant_identity")
+      .update({ metadata: mergedMeta })
+      .eq("company_id", companyId);
+    if (error) throw error;
+    return { ok: true, assistant: next };
+  });

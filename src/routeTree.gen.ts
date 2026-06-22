@@ -579,6 +579,7 @@ import { Route as AuthenticatedCoreClienteIdPaginasRouteImport } from './routes/
 import { Route as AuthenticatedAdminClientesRiomedRoutingRouteImport } from './routes/_authenticated/admin.clientes.riomed.routing'
 import { Route as AuthenticatedAdminClientesRiomedLocacaoRouteImport } from './routes/_authenticated/admin.clientes.riomed.locacao'
 import { Route as AuthenticatedAdminClientesRiomedCarrinhosRouteImport } from './routes/_authenticated/admin.clientes.riomed.carrinhos'
+import { Route as AuthenticatedAdminClientesRiomedAssistenteRouteImport } from './routes/_authenticated/admin.clientes.riomed.assistente'
 import { Route as AuthenticatedAdminClientesRiomedAssistenciaRouteImport } from './routes/_authenticated/admin.clientes.riomed.assistencia'
 import { Route as AuthenticatedCoreClienteIdPaginasPageIdRouteImport } from './routes/_authenticated/core.cliente.$id.paginas.$pageId'
 import { Route as AuthenticatedCoreClienteIdModuloSlugConfigurarRouteImport } from './routes/_authenticated/core.cliente.$id.modulo.$slug.configurar'
@@ -3794,6 +3795,12 @@ const AuthenticatedAdminClientesRiomedCarrinhosRoute =
     path: '/carrinhos',
     getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
   } as any)
+const AuthenticatedAdminClientesRiomedAssistenteRoute =
+  AuthenticatedAdminClientesRiomedAssistenteRouteImport.update({
+    id: '/assistente',
+    path: '/assistente',
+    getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
+  } as any)
 const AuthenticatedAdminClientesRiomedAssistenciaRoute =
   AuthenticatedAdminClientesRiomedAssistenciaRouteImport.update({
     id: '/assistencia',
@@ -4377,6 +4384,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/admin/clientes/riomed/assistencia': typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
+  '/admin/clientes/riomed/assistente': typeof AuthenticatedAdminClientesRiomedAssistenteRoute
   '/admin/clientes/riomed/carrinhos': typeof AuthenticatedAdminClientesRiomedCarrinhosRoute
   '/admin/clientes/riomed/locacao': typeof AuthenticatedAdminClientesRiomedLocacaoRoute
   '/admin/clientes/riomed/routing': typeof AuthenticatedAdminClientesRiomedRoutingRoute
@@ -4939,6 +4947,7 @@ export interface FileRoutesByTo {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/admin/clientes/riomed/assistencia': typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
+  '/admin/clientes/riomed/assistente': typeof AuthenticatedAdminClientesRiomedAssistenteRoute
   '/admin/clientes/riomed/carrinhos': typeof AuthenticatedAdminClientesRiomedCarrinhosRoute
   '/admin/clientes/riomed/locacao': typeof AuthenticatedAdminClientesRiomedLocacaoRoute
   '/admin/clientes/riomed/routing': typeof AuthenticatedAdminClientesRiomedRoutingRoute
@@ -5515,6 +5524,7 @@ export interface FileRoutesById {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/_authenticated/admin/clientes/riomed/assistencia': typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
+  '/_authenticated/admin/clientes/riomed/assistente': typeof AuthenticatedAdminClientesRiomedAssistenteRoute
   '/_authenticated/admin/clientes/riomed/carrinhos': typeof AuthenticatedAdminClientesRiomedCarrinhosRoute
   '/_authenticated/admin/clientes/riomed/locacao': typeof AuthenticatedAdminClientesRiomedLocacaoRoute
   '/_authenticated/admin/clientes/riomed/routing': typeof AuthenticatedAdminClientesRiomedRoutingRoute
@@ -6090,6 +6100,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/admin/clientes/riomed/assistencia'
+    | '/admin/clientes/riomed/assistente'
     | '/admin/clientes/riomed/carrinhos'
     | '/admin/clientes/riomed/locacao'
     | '/admin/clientes/riomed/routing'
@@ -6652,6 +6663,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/admin/clientes/riomed/assistencia'
+    | '/admin/clientes/riomed/assistente'
     | '/admin/clientes/riomed/carrinhos'
     | '/admin/clientes/riomed/locacao'
     | '/admin/clientes/riomed/routing'
@@ -7227,6 +7239,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/_authenticated/admin/clientes/riomed/assistencia'
+    | '/_authenticated/admin/clientes/riomed/assistente'
     | '/_authenticated/admin/clientes/riomed/carrinhos'
     | '/_authenticated/admin/clientes/riomed/locacao'
     | '/_authenticated/admin/clientes/riomed/routing'
@@ -11387,6 +11400,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientesRiomedCarrinhosRouteImport
       parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
     }
+    '/_authenticated/admin/clientes/riomed/assistente': {
+      id: '/_authenticated/admin/clientes/riomed/assistente'
+      path: '/assistente'
+      fullPath: '/admin/clientes/riomed/assistente'
+      preLoaderRoute: typeof AuthenticatedAdminClientesRiomedAssistenteRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
+    }
     '/_authenticated/admin/clientes/riomed/assistencia': {
       id: '/_authenticated/admin/clientes/riomed/assistencia'
       path: '/assistencia'
@@ -12027,6 +12047,7 @@ const AuthenticatedTorreRestaurantesDemoRouteWithChildren =
 
 interface AuthenticatedAdminClientesRiomedRouteChildren {
   AuthenticatedAdminClientesRiomedAssistenciaRoute: typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
+  AuthenticatedAdminClientesRiomedAssistenteRoute: typeof AuthenticatedAdminClientesRiomedAssistenteRoute
   AuthenticatedAdminClientesRiomedCarrinhosRoute: typeof AuthenticatedAdminClientesRiomedCarrinhosRoute
   AuthenticatedAdminClientesRiomedLocacaoRoute: typeof AuthenticatedAdminClientesRiomedLocacaoRoute
   AuthenticatedAdminClientesRiomedRoutingRoute: typeof AuthenticatedAdminClientesRiomedRoutingRoute
@@ -12036,6 +12057,8 @@ const AuthenticatedAdminClientesRiomedRouteChildren: AuthenticatedAdminClientesR
   {
     AuthenticatedAdminClientesRiomedAssistenciaRoute:
       AuthenticatedAdminClientesRiomedAssistenciaRoute,
+    AuthenticatedAdminClientesRiomedAssistenteRoute:
+      AuthenticatedAdminClientesRiomedAssistenteRoute,
     AuthenticatedAdminClientesRiomedCarrinhosRoute:
       AuthenticatedAdminClientesRiomedCarrinhosRoute,
     AuthenticatedAdminClientesRiomedLocacaoRoute:
