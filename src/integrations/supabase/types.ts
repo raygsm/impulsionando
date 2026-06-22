@@ -20304,6 +20304,83 @@ export type Database = {
           },
         ]
       }
+      riomed_lead_routing_rules: {
+        Row: {
+          audience: string | null
+          category: string | null
+          channel: string | null
+          company_id: string
+          created_at: string
+          cursor: number
+          id: string
+          is_active: boolean
+          name: string
+          priority: number
+          seller_user_ids: string[]
+          strategy: string
+          updated_at: string
+        }
+        Insert: {
+          audience?: string | null
+          category?: string | null
+          channel?: string | null
+          company_id: string
+          created_at?: string
+          cursor?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          priority?: number
+          seller_user_ids?: string[]
+          strategy?: string
+          updated_at?: string
+        }
+        Update: {
+          audience?: string | null
+          category?: string | null
+          channel?: string | null
+          company_id?: string
+          created_at?: string
+          cursor?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          priority?: number
+          seller_user_ids?: string[]
+          strategy?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_lead_routing_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_lead_routing_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_lead_routing_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_lead_routing_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       riomed_price_lists: {
         Row: {
           audience: string
@@ -20745,6 +20822,229 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_tenant_identity_status"
             referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      riomed_quote_items: {
+        Row: {
+          company_id: string
+          created_at: string
+          description: string
+          discount: number
+          id: string
+          product_id: string
+          qty: number
+          quote_id: string
+          sort_order: number
+          total: number
+          unit_price: number
+          variant_id: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          description: string
+          discount?: number
+          id?: string
+          product_id: string
+          qty: number
+          quote_id: string
+          sort_order?: number
+          total?: number
+          unit_price: number
+          variant_id?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          description?: string
+          discount?: number
+          id?: string
+          product_id?: string
+          qty?: number
+          quote_id?: string
+          sort_order?: number
+          total?: number
+          unit_price?: number
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_quote_items_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_quote_items_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_quote_items_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_quote_items_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_quote_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_quote_items_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_quote_items_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      riomed_quotes: {
+        Row: {
+          channel: string
+          code: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          customer_id: string | null
+          discount_total: number
+          expires_at: string | null
+          id: string
+          lead_id: string | null
+          lost_reason: string | null
+          metadata: Json
+          notes: string | null
+          opportunity_id: string | null
+          order_id: string | null
+          owner_user_id: string | null
+          sent_at: string | null
+          status: string
+          subtotal: number
+          total: number
+          updated_at: string
+          won_at: string | null
+        }
+        Insert: {
+          channel?: string
+          code: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_id?: string | null
+          discount_total?: number
+          expires_at?: string | null
+          id?: string
+          lead_id?: string | null
+          lost_reason?: string | null
+          metadata?: Json
+          notes?: string | null
+          opportunity_id?: string | null
+          order_id?: string | null
+          owner_user_id?: string | null
+          sent_at?: string | null
+          status?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+          won_at?: string | null
+        }
+        Update: {
+          channel?: string
+          code?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_id?: string | null
+          discount_total?: number
+          expires_at?: string | null
+          id?: string
+          lead_id?: string | null
+          lost_reason?: string | null
+          metadata?: Json
+          notes?: string | null
+          opportunity_id?: string | null
+          order_id?: string | null
+          owner_user_id?: string | null
+          sent_at?: string | null
+          status?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+          won_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_quotes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_quotes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_quotes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_quotes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_quotes_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_quotes_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_quotes_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "crm_opportunities"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -24537,6 +24837,7 @@ export type Database = {
         }
         Returns: Json
       }
+      riomed_lead_assign: { Args: { p_lead_id: string }; Returns: string }
       riomed_match_products: {
         Args: {
           p_company_id: string
@@ -24554,6 +24855,11 @@ export type Database = {
           variant_id: string
         }[]
       }
+      riomed_quote_confirm: {
+        Args: { p_quote_id: string; p_user_id: string; p_warehouse_id?: string }
+        Returns: string
+      }
+      riomed_quote_recalc: { Args: { p_quote_id: string }; Returns: undefined }
       sales_cash_session_close: {
         Args: { _counts: Json; _notes?: string; _session_id: string }
         Returns: string
