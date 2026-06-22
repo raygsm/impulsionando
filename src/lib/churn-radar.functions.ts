@@ -58,7 +58,7 @@ export const getChurnRadar = createServerFn({ method: "POST" })
           .limit(10000),
         supabaseAdmin
           .from("onboarding_checklist")
-          .select("company_id, completed, created_at")
+          .select("company_id, status, completed_at, created_at")
           .limit(10000),
         supabaseAdmin
           .from("runtime_events")
@@ -94,13 +94,20 @@ export const getChurnRadar = createServerFn({ method: "POST" })
     const prevByCo = countBy(eventsPrev);
     const suspendedSet = new Set(suspensions.map((s) => s.company_id));
 
-    // Onboarding: pega último checklist por company; incompleto + >30d = travado
-    const onbByCo = new Map<string, { completed: boolean; ageDays: number }>();
+    // Onboarding: agrega itens por company; travado = nenhum item concluído E item mais antigo >30d
+    const onbAgg = new Map<string, { total: number; done: number; oldestDays: number }>();
     for (const o of onboarding) {
       if (!o.company_id) continue;
       const age = Math.floor((now - new Date(o.created_at).getTime()) / 86400000);
-      const prev = onbByCo.get(o.company_id);
-      if (!prev || age < prev.ageDays) onbByCo.set(o.company_id, { completed: !!o.completed, ageDays: age });
+      const cur = onbAgg.get(o.company_id) ?? { total: 0, done: 0, oldestDays: 0 };
+      cur.total += 1;
+      if (o.completed_at || (o.status ?? "").toLowerCase() === "done") cur.done += 1;
+      if (age > cur.oldestDays) cur.oldestDays = age;
+      onbAgg.set(o.company_id, cur);
+    }
+    const onbByCo = new Map<string, { completed: boolean; ageDays: number }>();
+    for (const [coId, v] of onbAgg) {
+      onbByCo.set(coId, { completed: v.total > 0 && v.done >= v.total, ageDays: v.oldestDays });
     }
 
     type Risk = {
