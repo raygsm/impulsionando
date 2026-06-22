@@ -60,7 +60,7 @@ export const getTreasuryForecast = createServerFn({ method: "POST" })
       supabaseAdmin
         .from("aff_payouts")
         .select("id, amount, status, requested_at, approved_at")
-        .in("status", ["requested", "approved", "processing"])
+        .in("status", ["solicitado", "aprovado"])
         .limit(5000),
       supabaseAdmin
         .from("aff_coproducers")
