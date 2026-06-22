@@ -46,10 +46,12 @@ function Page() {
   const [form, setForm] = useState<FormState>({
     name: '', legal_name: '', document: '', email: '', whatsapp: '',
     subdomain: '', niche_id: '',
+    country_code: 'BR',
     plan_id: '',
     primary_color: '#0ea5e9', secondary_color: '#6366f1', logo_url: '',
     admin_email: '', admin_name: '',
   })
+
 
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setForm((f) => ({ ...f, [k]: v }))
 
