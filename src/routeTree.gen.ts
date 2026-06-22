@@ -409,6 +409,7 @@ import { Route as AuthenticatedAdminNichePlansRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminNicheMatrixRouteImport } from './routes/_authenticated/admin.niche-matrix'
 import { Route as AuthenticatedAdminN8nConsoleRouteImport } from './routes/_authenticated/admin.n8n-console'
 import { Route as AuthenticatedAdminMarketplaceOpsRouteImport } from './routes/_authenticated/admin.marketplace-ops'
+import { Route as AuthenticatedAdminMarketplaceB2bHealthRouteImport } from './routes/_authenticated/admin.marketplace-b2b-health'
 import { Route as AuthenticatedAdminMarketingHealthRouteImport } from './routes/_authenticated/admin.marketing-health'
 import { Route as AuthenticatedAdminInventoryHealthRouteImport } from './routes/_authenticated/admin.inventory-health'
 import { Route as AuthenticatedAdminInboxUnificadaRouteImport } from './routes/_authenticated/admin.inbox-unificada'
@@ -2730,6 +2731,12 @@ const AuthenticatedAdminMarketplaceOpsRoute =
     path: '/admin/marketplace-ops',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminMarketplaceB2bHealthRoute =
+  AuthenticatedAdminMarketplaceB2bHealthRouteImport.update({
+    id: '/admin/marketplace-b2b-health',
+    path: '/admin/marketplace-b2b-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminMarketingHealthRoute =
   AuthenticatedAdminMarketingHealthRouteImport.update({
     id: '/admin/marketing-health',
@@ -3637,6 +3644,7 @@ export interface FileRoutesByFullPath {
   '/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
   '/admin/inventory-health': typeof AuthenticatedAdminInventoryHealthRoute
   '/admin/marketing-health': typeof AuthenticatedAdminMarketingHealthRoute
+  '/admin/marketplace-b2b-health': typeof AuthenticatedAdminMarketplaceB2bHealthRoute
   '/admin/marketplace-ops': typeof AuthenticatedAdminMarketplaceOpsRoute
   '/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
@@ -4142,6 +4150,7 @@ export interface FileRoutesByTo {
   '/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
   '/admin/inventory-health': typeof AuthenticatedAdminInventoryHealthRoute
   '/admin/marketing-health': typeof AuthenticatedAdminMarketingHealthRoute
+  '/admin/marketplace-b2b-health': typeof AuthenticatedAdminMarketplaceB2bHealthRoute
   '/admin/marketplace-ops': typeof AuthenticatedAdminMarketplaceOpsRoute
   '/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
@@ -4661,6 +4670,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
   '/_authenticated/admin/inventory-health': typeof AuthenticatedAdminInventoryHealthRoute
   '/_authenticated/admin/marketing-health': typeof AuthenticatedAdminMarketingHealthRoute
+  '/_authenticated/admin/marketplace-b2b-health': typeof AuthenticatedAdminMarketplaceB2bHealthRoute
   '/_authenticated/admin/marketplace-ops': typeof AuthenticatedAdminMarketplaceOpsRoute
   '/_authenticated/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/_authenticated/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
@@ -5179,6 +5189,7 @@ export interface FileRouteTypes {
     | '/admin/inbox-unificada'
     | '/admin/inventory-health'
     | '/admin/marketing-health'
+    | '/admin/marketplace-b2b-health'
     | '/admin/marketplace-ops'
     | '/admin/n8n-console'
     | '/admin/niche-matrix'
@@ -5684,6 +5695,7 @@ export interface FileRouteTypes {
     | '/admin/inbox-unificada'
     | '/admin/inventory-health'
     | '/admin/marketing-health'
+    | '/admin/marketplace-b2b-health'
     | '/admin/marketplace-ops'
     | '/admin/n8n-console'
     | '/admin/niche-matrix'
@@ -6202,6 +6214,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/inbox-unificada'
     | '/_authenticated/admin/inventory-health'
     | '/_authenticated/admin/marketing-health'
+    | '/_authenticated/admin/marketplace-b2b-health'
     | '/_authenticated/admin/marketplace-ops'
     | '/_authenticated/admin/n8n-console'
     | '/_authenticated/admin/niche-matrix'
@@ -9456,6 +9469,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMarketplaceOpsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/marketplace-b2b-health': {
+      id: '/_authenticated/admin/marketplace-b2b-health'
+      path: '/admin/marketplace-b2b-health'
+      fullPath: '/admin/marketplace-b2b-health'
+      preLoaderRoute: typeof AuthenticatedAdminMarketplaceB2bHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/marketing-health': {
       id: '/_authenticated/admin/marketing-health'
       path: '/admin/marketing-health'
@@ -10969,6 +10989,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminInboxUnificadaRoute: typeof AuthenticatedAdminInboxUnificadaRoute
   AuthenticatedAdminInventoryHealthRoute: typeof AuthenticatedAdminInventoryHealthRoute
   AuthenticatedAdminMarketingHealthRoute: typeof AuthenticatedAdminMarketingHealthRoute
+  AuthenticatedAdminMarketplaceB2bHealthRoute: typeof AuthenticatedAdminMarketplaceB2bHealthRoute
   AuthenticatedAdminMarketplaceOpsRoute: typeof AuthenticatedAdminMarketplaceOpsRoute
   AuthenticatedAdminN8nConsoleRoute: typeof AuthenticatedAdminN8nConsoleRoute
   AuthenticatedAdminNicheMatrixRoute: typeof AuthenticatedAdminNicheMatrixRoute
@@ -11178,6 +11199,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminInventoryHealthRoute,
   AuthenticatedAdminMarketingHealthRoute:
     AuthenticatedAdminMarketingHealthRoute,
+  AuthenticatedAdminMarketplaceB2bHealthRoute:
+    AuthenticatedAdminMarketplaceB2bHealthRoute,
   AuthenticatedAdminMarketplaceOpsRoute: AuthenticatedAdminMarketplaceOpsRoute,
   AuthenticatedAdminN8nConsoleRoute: AuthenticatedAdminN8nConsoleRoute,
   AuthenticatedAdminNicheMatrixRoute: AuthenticatedAdminNicheMatrixRoute,
