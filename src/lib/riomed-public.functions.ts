@@ -151,6 +151,15 @@ export const submitRiomedQuote = createServerFn({ method: "POST" })
       } as any);
     } catch { /* non-blocking */ }
 
+    // Auto-assign lead to a seller per distribution config
+    try {
+      await admin.rpc("assign_riomed_lead", {
+        _company_id: companyId,
+        _lead_id: lead.id,
+        _opportunity_id: null as any,
+      } as any);
+    } catch { /* non-blocking */ }
+
     return { leadId: lead.id, ok: true };
   });
 
