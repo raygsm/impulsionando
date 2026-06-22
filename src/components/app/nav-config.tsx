@@ -504,6 +504,7 @@ export const NAV_GROUPS: NavGroup[] = [
           { to: "/admin/marocas-health", label: "Marocas Hospitality", icon: Building2, superOnly: true },
           { to: "/admin/governance-lgpd-health", label: "Governance & LGPD", icon: ShieldCheck, superOnly: true },
           { to: "/admin/support-ticketing-health", label: "Support & Ticketing", icon: Headphones, superOnly: true },
+          { to: "/admin/events-ticketing-health", label: "Eventos & Ticketing", icon: Ticket, superOnly: true },
           { to: "/admin/realestate-cockpit", label: "Imobiliária — Cockpit", icon: Home, superOnly: true },
           { to: "/admin/documents-files-health", label: "Documents & Files", icon: FileCode, superOnly: true },
           { to: "/admin/runtime-uptime-health", label: "Runtime & Uptime", icon: Activity, superOnly: true },
