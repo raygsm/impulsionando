@@ -40,7 +40,7 @@ const loadTenantDomain = createServerFn({ method: "GET" })
     const { data: identity } = await supabase
       .from("core_tenant_identity")
       .select(
-        "full_domain,custom_domain,dns_status,ssl_status,ssl_issued_at,provisioned_at,metadata",
+        "full_domain,custom_domain,dns_status,ssl_status,ssl_issued_at,provisioned_at,published_at,published_commit",
       )
       .eq("company_id", company.id)
       .maybeSingle();
