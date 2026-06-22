@@ -44,7 +44,7 @@ export const getTrialDemoHealth = createServerFn({ method: "POST" })
 
     // Trials
     const trialsNew = trials.filter((t) => t.created_at >= sinceIso);
-    const trialsActive = trials.filter((t) => t.status === "active" || (t.ends_at && t.ends_at >= today && !t.cancelled_at && !t.suspended_at && !t.converted_at));
+    const trialsActive = trials.filter((t) => t.status === "ativo" || (t.ends_at && t.ends_at >= today && !t.cancelled_at && !t.suspended_at && !t.converted_at));
     const trialsConverted = trials.filter((t) => !!t.converted_at);
     const trialsSuspended = trials.filter((t) => !!t.suspended_at);
     const trialsCancelled = trials.filter((t) => !!t.cancelled_at);
