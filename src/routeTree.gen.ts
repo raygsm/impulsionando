@@ -105,6 +105,7 @@ import { Route as RiomedProductosRouteImport } from './routes/riomed.productos'
 import { Route as RiomedCotizarRouteImport } from './routes/riomed.cotizar'
 import { Route as RiomedCheckoutRouteImport } from './routes/riomed.checkout'
 import { Route as RiomedCarrinhoRouteImport } from './routes/riomed.carrinho'
+import { Route as RiomedAlquilerRouteImport } from './routes/riomed.alquiler'
 import { Route as RecomendacaoNichoRouteImport } from './routes/recomendacao.$nicho'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
 import { Route as ParceiroTokenRouteImport } from './routes/parceiro.$token'
@@ -1098,6 +1099,11 @@ const RiomedCheckoutRoute = RiomedCheckoutRouteImport.update({
 const RiomedCarrinhoRoute = RiomedCarrinhoRouteImport.update({
   id: '/carrinho',
   path: '/carrinho',
+  getParentRoute: () => RiomedRoute,
+} as any)
+const RiomedAlquilerRoute = RiomedAlquilerRouteImport.update({
+  id: '/alquiler',
+  path: '/alquiler',
   getParentRoute: () => RiomedRoute,
 } as any)
 const RecomendacaoNichoRoute = RecomendacaoNichoRouteImport.update({
@@ -4157,6 +4163,7 @@ export interface FileRoutesByFullPath {
   '/parceiro/$token': typeof ParceiroTokenRoute
   '/r/$slug': typeof RSlugRoute
   '/recomendacao/$nicho': typeof RecomendacaoNichoRoute
+  '/riomed/alquiler': typeof RiomedAlquilerRoute
   '/riomed/carrinho': typeof RiomedCarrinhoRoute
   '/riomed/checkout': typeof RiomedCheckoutRoute
   '/riomed/cotizar': typeof RiomedCotizarRoute
@@ -4751,6 +4758,7 @@ export interface FileRoutesByTo {
   '/parceiro/$token': typeof ParceiroTokenRoute
   '/r/$slug': typeof RSlugRoute
   '/recomendacao/$nicho': typeof RecomendacaoNichoRoute
+  '/riomed/alquiler': typeof RiomedAlquilerRoute
   '/riomed/carrinho': typeof RiomedCarrinhoRoute
   '/riomed/checkout': typeof RiomedCheckoutRoute
   '/riomed/cotizar': typeof RiomedCotizarRoute
@@ -5360,6 +5368,7 @@ export interface FileRoutesById {
   '/parceiro/$token': typeof ParceiroTokenRoute
   '/r/$slug': typeof RSlugRoute
   '/recomendacao/$nicho': typeof RecomendacaoNichoRoute
+  '/riomed/alquiler': typeof RiomedAlquilerRoute
   '/riomed/carrinho': typeof RiomedCarrinhoRoute
   '/riomed/checkout': typeof RiomedCheckoutRoute
   '/riomed/cotizar': typeof RiomedCotizarRoute
@@ -5968,6 +5977,7 @@ export interface FileRouteTypes {
     | '/parceiro/$token'
     | '/r/$slug'
     | '/recomendacao/$nicho'
+    | '/riomed/alquiler'
     | '/riomed/carrinho'
     | '/riomed/checkout'
     | '/riomed/cotizar'
@@ -6562,6 +6572,7 @@ export interface FileRouteTypes {
     | '/parceiro/$token'
     | '/r/$slug'
     | '/recomendacao/$nicho'
+    | '/riomed/alquiler'
     | '/riomed/carrinho'
     | '/riomed/checkout'
     | '/riomed/cotizar'
@@ -7170,6 +7181,7 @@ export interface FileRouteTypes {
     | '/parceiro/$token'
     | '/r/$slug'
     | '/recomendacao/$nicho'
+    | '/riomed/alquiler'
     | '/riomed/carrinho'
     | '/riomed/checkout'
     | '/riomed/cotizar'
@@ -8484,6 +8496,13 @@ declare module '@tanstack/react-router' {
       path: '/carrinho'
       fullPath: '/riomed/carrinho'
       preLoaderRoute: typeof RiomedCarrinhoRouteImport
+      parentRoute: typeof RiomedRoute
+    }
+    '/riomed/alquiler': {
+      id: '/riomed/alquiler'
+      path: '/alquiler'
+      fullPath: '/riomed/alquiler'
+      preLoaderRoute: typeof RiomedAlquilerRouteImport
       parentRoute: typeof RiomedRoute
     }
     '/recomendacao/$nicho': {
@@ -13462,6 +13481,7 @@ const PacienteRouteWithChildren = PacienteRoute._addFileChildren(
 )
 
 interface RiomedRouteChildren {
+  RiomedAlquilerRoute: typeof RiomedAlquilerRoute
   RiomedCarrinhoRoute: typeof RiomedCarrinhoRoute
   RiomedCheckoutRoute: typeof RiomedCheckoutRoute
   RiomedCotizarRoute: typeof RiomedCotizarRoute
@@ -13476,6 +13496,7 @@ interface RiomedRouteChildren {
 }
 
 const RiomedRouteChildren: RiomedRouteChildren = {
+  RiomedAlquilerRoute: RiomedAlquilerRoute,
   RiomedCarrinhoRoute: RiomedCarrinhoRoute,
   RiomedCheckoutRoute: RiomedCheckoutRoute,
   RiomedCotizarRoute: RiomedCotizarRoute,
