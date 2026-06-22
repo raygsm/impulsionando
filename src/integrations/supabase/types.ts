@@ -20062,6 +20062,215 @@ export type Database = {
           },
         ]
       }
+      riomed_ap_invoices: {
+        Row: {
+          amount: number
+          category: string | null
+          company_id: string
+          created_at: string
+          currency: string
+          description: string
+          due_date: string
+          id: string
+          issue_date: string
+          notes: string | null
+          number: string | null
+          paid_amount: number
+          paid_at: string | null
+          payment_method: string | null
+          status: string
+          supplier_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          category?: string | null
+          company_id: string
+          created_at?: string
+          currency?: string
+          description: string
+          due_date: string
+          id?: string
+          issue_date?: string
+          notes?: string | null
+          number?: string | null
+          paid_amount?: number
+          paid_at?: string | null
+          payment_method?: string | null
+          status?: string
+          supplier_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category?: string | null
+          company_id?: string
+          created_at?: string
+          currency?: string
+          description?: string
+          due_date?: string
+          id?: string
+          issue_date?: string
+          notes?: string | null
+          number?: string | null
+          paid_amount?: number
+          paid_at?: string | null
+          payment_method?: string | null
+          status?: string
+          supplier_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_ap_invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_ap_invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_ap_invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_ap_invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_ap_invoices_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      riomed_ar_invoices: {
+        Row: {
+          amount: number
+          company_id: string
+          created_at: string
+          currency: string
+          customer_id: string | null
+          description: string | null
+          due_date: string
+          hospital_id: string | null
+          id: string
+          issue_date: string
+          notes: string | null
+          number: string | null
+          order_id: string | null
+          paid_amount: number
+          paid_at: string | null
+          payment_method: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          company_id: string
+          created_at?: string
+          currency?: string
+          customer_id?: string | null
+          description?: string | null
+          due_date: string
+          hospital_id?: string | null
+          id?: string
+          issue_date?: string
+          notes?: string | null
+          number?: string | null
+          order_id?: string | null
+          paid_amount?: number
+          paid_at?: string | null
+          payment_method?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          company_id?: string
+          created_at?: string
+          currency?: string
+          customer_id?: string | null
+          description?: string | null
+          due_date?: string
+          hospital_id?: string | null
+          id?: string
+          issue_date?: string
+          notes?: string | null
+          number?: string | null
+          order_id?: string | null
+          paid_amount?: number
+          paid_at?: string | null
+          payment_method?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_ar_invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_ar_invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_ar_invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_ar_invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_ar_invoices_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_ar_invoices_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_hospital_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_ar_invoices_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "sales_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       riomed_campaign_items: {
         Row: {
           campaign_id: string
@@ -20555,6 +20764,152 @@ export type Database = {
             columns: ["quote_id"]
             isOneToOne: false
             referencedRelation: "riomed_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      riomed_commission_rules: {
+        Row: {
+          active: boolean
+          category: string | null
+          company_id: string
+          created_at: string
+          id: string
+          rate_pct: number
+          scope: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          active?: boolean
+          category?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          rate_pct?: number
+          scope?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          category?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          rate_pct?: number
+          scope?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_commission_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_commission_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_commission_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_commission_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      riomed_commissions: {
+        Row: {
+          amount: number
+          base_amount: number
+          company_id: string
+          created_at: string
+          id: string
+          order_id: string | null
+          paid_at: string | null
+          period: string | null
+          rate_pct: number
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          base_amount: number
+          company_id: string
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          paid_at?: string | null
+          period?: string | null
+          rate_pct: number
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          base_amount?: number
+          company_id?: string
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          paid_at?: string | null
+          period?: string | null
+          rate_pct?: number
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_commissions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_commissions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_commissions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_commissions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_commissions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "sales_orders"
             referencedColumns: ["id"]
           },
         ]
@@ -26330,6 +26685,14 @@ export type Database = {
         }
         Returns: Json
       }
+      riomed_accrue_commission: {
+        Args: { p_order_id: string; p_user_id: string }
+        Returns: string
+      }
+      riomed_ar_from_order: {
+        Args: { p_due_days?: number; p_order_id: string }
+        Returns: string
+      }
       riomed_detect_stale_stock: {
         Args: {
           _company_id: string
@@ -26371,6 +26734,10 @@ export type Database = {
         Returns: string
       }
       riomed_quote_recalc: { Args: { p_quote_id: string }; Returns: undefined }
+      riomed_refresh_overdue: {
+        Args: { p_company_id: string }
+        Returns: undefined
+      }
       sales_cash_session_close: {
         Args: { _counts: Json; _notes?: string; _session_id: string }
         Returns: string
