@@ -98,6 +98,7 @@ import { Route as ShowroomApiPublicaRouteImport } from './routes/showroom.api-pu
 import { Route as ShowroomAgendamentosOnlineRouteImport } from './routes/showroom.agendamentos-online'
 import { Route as ShowroomAgendaRouteImport } from './routes/showroom.agenda'
 import { Route as ShowroomAcademiaRouteImport } from './routes/showroom.academia'
+import { Route as RiomedTrabalheConoscoRouteImport } from './routes/riomed.trabalhe-conosco'
 import { Route as RiomedCheckoutRouteImport } from './routes/riomed.checkout'
 import { Route as RiomedCarrinhoRouteImport } from './routes/riomed.carrinho'
 import { Route as RecomendacaoNichoRouteImport } from './routes/recomendacao.$nicho'
@@ -203,6 +204,9 @@ import { Route as AuthenticatedBiIndexRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenticated/agenda.index'
 import { Route as AuthenticatedAffiliatesIndexRouteImport } from './routes/_authenticated/affiliates.index'
 import { Route as RiomedVSlugRouteImport } from './routes/riomed.v.$slug'
+import { Route as RiomedTecnicoCadastroRouteImport } from './routes/riomed.tecnico.cadastro'
+import { Route as RiomedHospitalPortalRouteImport } from './routes/riomed.hospital.portal'
+import { Route as RiomedFornecedorCadastroRouteImport } from './routes/riomed.fornecedor.cadastro'
 import { Route as PortalProprietarioTokenRouteImport } from './routes/portal.proprietario.$token'
 import { Route as PortalContabilidadeTokenRouteImport } from './routes/portal.contabilidade.$token'
 import { Route as MarocasContratarPlanoRouteImport } from './routes/marocas.contratar.$plano'
@@ -583,6 +587,7 @@ import { Route as AuthenticatedAdminClientesRiomedRoutingRouteImport } from './r
 import { Route as AuthenticatedAdminClientesRiomedProdutosRouteImport } from './routes/_authenticated/admin.clientes.riomed.produtos'
 import { Route as AuthenticatedAdminClientesRiomedPrecosListasRouteImport } from './routes/_authenticated/admin.clientes.riomed.precos-listas'
 import { Route as AuthenticatedAdminClientesRiomedPortalRouteImport } from './routes/_authenticated/admin.clientes.riomed.portal'
+import { Route as AuthenticatedAdminClientesRiomedParceirosRouteImport } from './routes/_authenticated/admin.clientes.riomed.parceiros'
 import { Route as AuthenticatedAdminClientesRiomedMarketingRouteImport } from './routes/_authenticated/admin.clientes.riomed.marketing'
 import { Route as AuthenticatedAdminClientesRiomedLocacaoRouteImport } from './routes/_authenticated/admin.clientes.riomed.locacao'
 import { Route as AuthenticatedAdminClientesRiomedImportacoesRouteImport } from './routes/_authenticated/admin.clientes.riomed.importacoes'
@@ -1044,6 +1049,11 @@ const ShowroomAgendaRoute = ShowroomAgendaRouteImport.update({
 const ShowroomAcademiaRoute = ShowroomAcademiaRouteImport.update({
   id: '/showroom/academia',
   path: '/showroom/academia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RiomedTrabalheConoscoRoute = RiomedTrabalheConoscoRouteImport.update({
+  id: '/riomed/trabalhe-conosco',
+  path: '/riomed/trabalhe-conosco',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RiomedCheckoutRoute = RiomedCheckoutRouteImport.update({
@@ -1589,6 +1599,22 @@ const RiomedVSlugRoute = RiomedVSlugRouteImport.update({
   path: '/riomed/v/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RiomedTecnicoCadastroRoute = RiomedTecnicoCadastroRouteImport.update({
+  id: '/riomed/tecnico/cadastro',
+  path: '/riomed/tecnico/cadastro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RiomedHospitalPortalRoute = RiomedHospitalPortalRouteImport.update({
+  id: '/riomed/hospital/portal',
+  path: '/riomed/hospital/portal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RiomedFornecedorCadastroRoute =
+  RiomedFornecedorCadastroRouteImport.update({
+    id: '/riomed/fornecedor/cadastro',
+    path: '/riomed/fornecedor/cadastro',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const PortalProprietarioTokenRoute = PortalProprietarioTokenRouteImport.update({
   id: '/portal/proprietario/$token',
   path: '/portal/proprietario/$token',
@@ -3829,6 +3855,12 @@ const AuthenticatedAdminClientesRiomedPortalRoute =
     path: '/portal',
     getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
   } as any)
+const AuthenticatedAdminClientesRiomedParceirosRoute =
+  AuthenticatedAdminClientesRiomedParceirosRouteImport.update({
+    id: '/parceiros',
+    path: '/parceiros',
+    getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
+  } as any)
 const AuthenticatedAdminClientesRiomedMarketingRoute =
   AuthenticatedAdminClientesRiomedMarketingRouteImport.update({
     id: '/marketing',
@@ -4032,6 +4064,7 @@ export interface FileRoutesByFullPath {
   '/recomendacao/$nicho': typeof RecomendacaoNichoRoute
   '/riomed/carrinho': typeof RiomedCarrinhoRoute
   '/riomed/checkout': typeof RiomedCheckoutRoute
+  '/riomed/trabalhe-conosco': typeof RiomedTrabalheConoscoRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
   '/showroom/agendamentos-online': typeof ShowroomAgendamentosOnlineRoute
@@ -4395,6 +4428,9 @@ export interface FileRoutesByFullPath {
   '/marocas/contratar/$plano': typeof MarocasContratarPlanoRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/portal/proprietario/$token': typeof PortalProprietarioTokenRoute
+  '/riomed/fornecedor/cadastro': typeof RiomedFornecedorCadastroRoute
+  '/riomed/hospital/portal': typeof RiomedHospitalPortalRoute
+  '/riomed/tecnico/cadastro': typeof RiomedTecnicoCadastroRoute
   '/riomed/v/$slug': typeof RiomedVSlugRoute
   '/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda/': typeof AuthenticatedAgendaIndexRoute
@@ -4485,6 +4521,7 @@ export interface FileRoutesByFullPath {
   '/admin/clientes/riomed/importacoes': typeof AuthenticatedAdminClientesRiomedImportacoesRoute
   '/admin/clientes/riomed/locacao': typeof AuthenticatedAdminClientesRiomedLocacaoRoute
   '/admin/clientes/riomed/marketing': typeof AuthenticatedAdminClientesRiomedMarketingRoute
+  '/admin/clientes/riomed/parceiros': typeof AuthenticatedAdminClientesRiomedParceirosRoute
   '/admin/clientes/riomed/portal': typeof AuthenticatedAdminClientesRiomedPortalRoute
   '/admin/clientes/riomed/precos-listas': typeof AuthenticatedAdminClientesRiomedPrecosListasRoute
   '/admin/clientes/riomed/produtos': typeof AuthenticatedAdminClientesRiomedProdutosRoute
@@ -4608,6 +4645,7 @@ export interface FileRoutesByTo {
   '/recomendacao/$nicho': typeof RecomendacaoNichoRoute
   '/riomed/carrinho': typeof RiomedCarrinhoRoute
   '/riomed/checkout': typeof RiomedCheckoutRoute
+  '/riomed/trabalhe-conosco': typeof RiomedTrabalheConoscoRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
   '/showroom/agendamentos-online': typeof ShowroomAgendamentosOnlineRoute
@@ -4971,6 +5009,9 @@ export interface FileRoutesByTo {
   '/marocas/contratar/$plano': typeof MarocasContratarPlanoRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/portal/proprietario/$token': typeof PortalProprietarioTokenRoute
+  '/riomed/fornecedor/cadastro': typeof RiomedFornecedorCadastroRoute
+  '/riomed/hospital/portal': typeof RiomedHospitalPortalRoute
+  '/riomed/tecnico/cadastro': typeof RiomedTecnicoCadastroRoute
   '/riomed/v/$slug': typeof RiomedVSlugRoute
   '/affiliates': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda': typeof AuthenticatedAgendaIndexRoute
@@ -5061,6 +5102,7 @@ export interface FileRoutesByTo {
   '/admin/clientes/riomed/importacoes': typeof AuthenticatedAdminClientesRiomedImportacoesRoute
   '/admin/clientes/riomed/locacao': typeof AuthenticatedAdminClientesRiomedLocacaoRoute
   '/admin/clientes/riomed/marketing': typeof AuthenticatedAdminClientesRiomedMarketingRoute
+  '/admin/clientes/riomed/parceiros': typeof AuthenticatedAdminClientesRiomedParceirosRoute
   '/admin/clientes/riomed/portal': typeof AuthenticatedAdminClientesRiomedPortalRoute
   '/admin/clientes/riomed/precos-listas': typeof AuthenticatedAdminClientesRiomedPrecosListasRoute
   '/admin/clientes/riomed/produtos': typeof AuthenticatedAdminClientesRiomedProdutosRoute
@@ -5198,6 +5240,7 @@ export interface FileRoutesById {
   '/recomendacao/$nicho': typeof RecomendacaoNichoRoute
   '/riomed/carrinho': typeof RiomedCarrinhoRoute
   '/riomed/checkout': typeof RiomedCheckoutRoute
+  '/riomed/trabalhe-conosco': typeof RiomedTrabalheConoscoRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
   '/showroom/agendamentos-online': typeof ShowroomAgendamentosOnlineRoute
@@ -5561,6 +5604,9 @@ export interface FileRoutesById {
   '/marocas/contratar/$plano': typeof MarocasContratarPlanoRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/portal/proprietario/$token': typeof PortalProprietarioTokenRoute
+  '/riomed/fornecedor/cadastro': typeof RiomedFornecedorCadastroRoute
+  '/riomed/hospital/portal': typeof RiomedHospitalPortalRoute
+  '/riomed/tecnico/cadastro': typeof RiomedTecnicoCadastroRoute
   '/riomed/v/$slug': typeof RiomedVSlugRoute
   '/_authenticated/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/_authenticated/agenda/': typeof AuthenticatedAgendaIndexRoute
@@ -5651,6 +5697,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/clientes/riomed/importacoes': typeof AuthenticatedAdminClientesRiomedImportacoesRoute
   '/_authenticated/admin/clientes/riomed/locacao': typeof AuthenticatedAdminClientesRiomedLocacaoRoute
   '/_authenticated/admin/clientes/riomed/marketing': typeof AuthenticatedAdminClientesRiomedMarketingRoute
+  '/_authenticated/admin/clientes/riomed/parceiros': typeof AuthenticatedAdminClientesRiomedParceirosRoute
   '/_authenticated/admin/clientes/riomed/portal': typeof AuthenticatedAdminClientesRiomedPortalRoute
   '/_authenticated/admin/clientes/riomed/precos-listas': typeof AuthenticatedAdminClientesRiomedPrecosListasRoute
   '/_authenticated/admin/clientes/riomed/produtos': typeof AuthenticatedAdminClientesRiomedProdutosRoute
@@ -5787,6 +5834,7 @@ export interface FileRouteTypes {
     | '/recomendacao/$nicho'
     | '/riomed/carrinho'
     | '/riomed/checkout'
+    | '/riomed/trabalhe-conosco'
     | '/showroom/academia'
     | '/showroom/agenda'
     | '/showroom/agendamentos-online'
@@ -6150,6 +6198,9 @@ export interface FileRouteTypes {
     | '/marocas/contratar/$plano'
     | '/portal/contabilidade/$token'
     | '/portal/proprietario/$token'
+    | '/riomed/fornecedor/cadastro'
+    | '/riomed/hospital/portal'
+    | '/riomed/tecnico/cadastro'
     | '/riomed/v/$slug'
     | '/affiliates/'
     | '/agenda/'
@@ -6240,6 +6291,7 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed/importacoes'
     | '/admin/clientes/riomed/locacao'
     | '/admin/clientes/riomed/marketing'
+    | '/admin/clientes/riomed/parceiros'
     | '/admin/clientes/riomed/portal'
     | '/admin/clientes/riomed/precos-listas'
     | '/admin/clientes/riomed/produtos'
@@ -6363,6 +6415,7 @@ export interface FileRouteTypes {
     | '/recomendacao/$nicho'
     | '/riomed/carrinho'
     | '/riomed/checkout'
+    | '/riomed/trabalhe-conosco'
     | '/showroom/academia'
     | '/showroom/agenda'
     | '/showroom/agendamentos-online'
@@ -6726,6 +6779,9 @@ export interface FileRouteTypes {
     | '/marocas/contratar/$plano'
     | '/portal/contabilidade/$token'
     | '/portal/proprietario/$token'
+    | '/riomed/fornecedor/cadastro'
+    | '/riomed/hospital/portal'
+    | '/riomed/tecnico/cadastro'
     | '/riomed/v/$slug'
     | '/affiliates'
     | '/agenda'
@@ -6816,6 +6872,7 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed/importacoes'
     | '/admin/clientes/riomed/locacao'
     | '/admin/clientes/riomed/marketing'
+    | '/admin/clientes/riomed/parceiros'
     | '/admin/clientes/riomed/portal'
     | '/admin/clientes/riomed/precos-listas'
     | '/admin/clientes/riomed/produtos'
@@ -6952,6 +7009,7 @@ export interface FileRouteTypes {
     | '/recomendacao/$nicho'
     | '/riomed/carrinho'
     | '/riomed/checkout'
+    | '/riomed/trabalhe-conosco'
     | '/showroom/academia'
     | '/showroom/agenda'
     | '/showroom/agendamentos-online'
@@ -7315,6 +7373,9 @@ export interface FileRouteTypes {
     | '/marocas/contratar/$plano'
     | '/portal/contabilidade/$token'
     | '/portal/proprietario/$token'
+    | '/riomed/fornecedor/cadastro'
+    | '/riomed/hospital/portal'
+    | '/riomed/tecnico/cadastro'
     | '/riomed/v/$slug'
     | '/_authenticated/affiliates/'
     | '/_authenticated/agenda/'
@@ -7405,6 +7466,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/clientes/riomed/importacoes'
     | '/_authenticated/admin/clientes/riomed/locacao'
     | '/_authenticated/admin/clientes/riomed/marketing'
+    | '/_authenticated/admin/clientes/riomed/parceiros'
     | '/_authenticated/admin/clientes/riomed/portal'
     | '/_authenticated/admin/clientes/riomed/precos-listas'
     | '/_authenticated/admin/clientes/riomed/produtos'
@@ -7486,6 +7548,7 @@ export interface RootRouteChildren {
   RecomendacaoNichoRoute: typeof RecomendacaoNichoRoute
   RiomedCarrinhoRoute: typeof RiomedCarrinhoRoute
   RiomedCheckoutRoute: typeof RiomedCheckoutRoute
+  RiomedTrabalheConoscoRoute: typeof RiomedTrabalheConoscoRoute
   ShowroomAcademiaRoute: typeof ShowroomAcademiaRoute
   ShowroomAgendaRoute: typeof ShowroomAgendaRoute
   ShowroomAgendamentosOnlineRoute: typeof ShowroomAgendamentosOnlineRoute
@@ -7540,6 +7603,9 @@ export interface RootRouteChildren {
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   PortalContabilidadeTokenRoute: typeof PortalContabilidadeTokenRoute
   PortalProprietarioTokenRoute: typeof PortalProprietarioTokenRoute
+  RiomedFornecedorCadastroRoute: typeof RiomedFornecedorCadastroRoute
+  RiomedHospitalPortalRoute: typeof RiomedHospitalPortalRoute
+  RiomedTecnicoCadastroRoute: typeof RiomedTecnicoCadastroRoute
   RiomedVSlugRoute: typeof RiomedVSlugRoute
   ApiPublicCronAgendaTickRoute: typeof ApiPublicCronAgendaTickRoute
   ApiPublicCronFunnelDispatchRoute: typeof ApiPublicCronFunnelDispatchRoute
@@ -8200,6 +8266,13 @@ declare module '@tanstack/react-router' {
       path: '/showroom/academia'
       fullPath: '/showroom/academia'
       preLoaderRoute: typeof ShowroomAcademiaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/riomed/trabalhe-conosco': {
+      id: '/riomed/trabalhe-conosco'
+      path: '/riomed/trabalhe-conosco'
+      fullPath: '/riomed/trabalhe-conosco'
+      preLoaderRoute: typeof RiomedTrabalheConoscoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/riomed/checkout': {
@@ -8935,6 +9008,27 @@ declare module '@tanstack/react-router' {
       path: '/riomed/v/$slug'
       fullPath: '/riomed/v/$slug'
       preLoaderRoute: typeof RiomedVSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/riomed/tecnico/cadastro': {
+      id: '/riomed/tecnico/cadastro'
+      path: '/riomed/tecnico/cadastro'
+      fullPath: '/riomed/tecnico/cadastro'
+      preLoaderRoute: typeof RiomedTecnicoCadastroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/riomed/hospital/portal': {
+      id: '/riomed/hospital/portal'
+      path: '/riomed/hospital/portal'
+      fullPath: '/riomed/hospital/portal'
+      preLoaderRoute: typeof RiomedHospitalPortalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/riomed/fornecedor/cadastro': {
+      id: '/riomed/fornecedor/cadastro'
+      path: '/riomed/fornecedor/cadastro'
+      fullPath: '/riomed/fornecedor/cadastro'
+      preLoaderRoute: typeof RiomedFornecedorCadastroRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/portal/proprietario/$token': {
@@ -11597,6 +11691,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientesRiomedPortalRouteImport
       parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
     }
+    '/_authenticated/admin/clientes/riomed/parceiros': {
+      id: '/_authenticated/admin/clientes/riomed/parceiros'
+      path: '/parceiros'
+      fullPath: '/admin/clientes/riomed/parceiros'
+      preLoaderRoute: typeof AuthenticatedAdminClientesRiomedParceirosRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
+    }
     '/_authenticated/admin/clientes/riomed/marketing': {
       id: '/_authenticated/admin/clientes/riomed/marketing'
       path: '/marketing'
@@ -12317,6 +12418,7 @@ interface AuthenticatedAdminClientesRiomedRouteChildren {
   AuthenticatedAdminClientesRiomedImportacoesRoute: typeof AuthenticatedAdminClientesRiomedImportacoesRoute
   AuthenticatedAdminClientesRiomedLocacaoRoute: typeof AuthenticatedAdminClientesRiomedLocacaoRoute
   AuthenticatedAdminClientesRiomedMarketingRoute: typeof AuthenticatedAdminClientesRiomedMarketingRoute
+  AuthenticatedAdminClientesRiomedParceirosRoute: typeof AuthenticatedAdminClientesRiomedParceirosRoute
   AuthenticatedAdminClientesRiomedPortalRoute: typeof AuthenticatedAdminClientesRiomedPortalRoute
   AuthenticatedAdminClientesRiomedPrecosListasRoute: typeof AuthenticatedAdminClientesRiomedPrecosListasRoute
   AuthenticatedAdminClientesRiomedProdutosRoute: typeof AuthenticatedAdminClientesRiomedProdutosRoute
@@ -12347,6 +12449,8 @@ const AuthenticatedAdminClientesRiomedRouteChildren: AuthenticatedAdminClientesR
       AuthenticatedAdminClientesRiomedLocacaoRoute,
     AuthenticatedAdminClientesRiomedMarketingRoute:
       AuthenticatedAdminClientesRiomedMarketingRoute,
+    AuthenticatedAdminClientesRiomedParceirosRoute:
+      AuthenticatedAdminClientesRiomedParceirosRoute,
     AuthenticatedAdminClientesRiomedPortalRoute:
       AuthenticatedAdminClientesRiomedPortalRoute,
     AuthenticatedAdminClientesRiomedPrecosListasRoute:
@@ -13181,6 +13285,7 @@ const rootRouteChildren: RootRouteChildren = {
   RecomendacaoNichoRoute: RecomendacaoNichoRoute,
   RiomedCarrinhoRoute: RiomedCarrinhoRoute,
   RiomedCheckoutRoute: RiomedCheckoutRoute,
+  RiomedTrabalheConoscoRoute: RiomedTrabalheConoscoRoute,
   ShowroomAcademiaRoute: ShowroomAcademiaRoute,
   ShowroomAgendaRoute: ShowroomAgendaRoute,
   ShowroomAgendamentosOnlineRoute: ShowroomAgendamentosOnlineRoute,
@@ -13235,6 +13340,9 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   PortalContabilidadeTokenRoute: PortalContabilidadeTokenRoute,
   PortalProprietarioTokenRoute: PortalProprietarioTokenRoute,
+  RiomedFornecedorCadastroRoute: RiomedFornecedorCadastroRoute,
+  RiomedHospitalPortalRoute: RiomedHospitalPortalRoute,
+  RiomedTecnicoCadastroRoute: RiomedTecnicoCadastroRoute,
   RiomedVSlugRoute: RiomedVSlugRoute,
   ApiPublicCronAgendaTickRoute: ApiPublicCronAgendaTickRoute,
   ApiPublicCronFunnelDispatchRoute: ApiPublicCronFunnelDispatchRoute,
@@ -13279,13 +13387,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
