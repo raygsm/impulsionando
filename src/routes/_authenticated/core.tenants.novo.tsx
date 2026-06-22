@@ -73,7 +73,9 @@ function Page() {
           whatsapp: form.whatsapp || undefined,
           subdomain: form.subdomain || undefined,
           niche_id: form.niche_id || undefined,
+          country_code: form.country_code,
         },
+
         plano: form.plan_id ? { plan_id: form.plan_id } : undefined,
         branding: {
           primary_color: form.primary_color || undefined,
