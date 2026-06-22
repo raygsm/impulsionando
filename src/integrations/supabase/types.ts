@@ -20062,6 +20062,78 @@ export type Database = {
           },
         ]
       }
+      riomed_embedding_jobs: {
+        Row: {
+          attempts: number
+          company_id: string
+          created_at: string
+          id: string
+          kind: string
+          last_error: string | null
+          product_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          company_id: string
+          created_at?: string
+          id?: string
+          kind: string
+          last_error?: string | null
+          product_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          company_id?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          last_error?: string | null
+          product_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_embedding_jobs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_embedding_jobs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_embedding_jobs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_embedding_jobs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_embedding_jobs_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       riomed_import_jobs: {
         Row: {
           company_id: string
@@ -20397,6 +20469,97 @@ export type Database = {
           },
         ]
       }
+      riomed_product_embeddings: {
+        Row: {
+          company_id: string
+          created_at: string
+          dims: number
+          embedding: string
+          id: string
+          kind: string
+          metadata: Json
+          model: string
+          product_id: string
+          source: string
+          source_hash: string
+          updated_at: string
+          variant_id: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          dims?: number
+          embedding: string
+          id?: string
+          kind: string
+          metadata?: Json
+          model?: string
+          product_id: string
+          source: string
+          source_hash: string
+          updated_at?: string
+          variant_id?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          dims?: number
+          embedding?: string
+          id?: string
+          kind?: string
+          metadata?: Json
+          model?: string
+          product_id?: string
+          source?: string
+          source_hash?: string
+          updated_at?: string
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_product_embeddings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_product_embeddings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_product_embeddings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_product_embeddings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_product_embeddings_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_product_embeddings_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       riomed_product_variants: {
         Row: {
           attributes: Json
@@ -20582,6 +20745,90 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_tenant_identity_status"
             referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      riomed_search_queries: {
+        Row: {
+          channel: string
+          company_id: string
+          created_at: string
+          id: string
+          latency_ms: number | null
+          metadata: Json
+          query_image_url: string | null
+          query_kind: string
+          query_text: string | null
+          results_count: number
+          top_product_id: string | null
+          top_score: number | null
+          user_id: string | null
+        }
+        Insert: {
+          channel?: string
+          company_id: string
+          created_at?: string
+          id?: string
+          latency_ms?: number | null
+          metadata?: Json
+          query_image_url?: string | null
+          query_kind?: string
+          query_text?: string | null
+          results_count?: number
+          top_product_id?: string | null
+          top_score?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          channel?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          latency_ms?: number | null
+          metadata?: Json
+          query_image_url?: string | null
+          query_kind?: string
+          query_text?: string | null
+          results_count?: number
+          top_product_id?: string | null
+          top_score?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_search_queries_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_search_queries_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_search_queries_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_search_queries_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_search_queries_top_product_id_fkey"
+            columns: ["top_product_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_products"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -24289,6 +24536,23 @@ export type Database = {
           _token: string
         }
         Returns: Json
+      }
+      riomed_match_products: {
+        Args: {
+          p_company_id: string
+          p_kind?: string
+          p_match_count?: number
+          p_min_similarity?: number
+          p_query_embedding: string
+        }
+        Returns: {
+          kind: string
+          metadata: Json
+          product_id: string
+          similarity: number
+          source: string
+          variant_id: string
+        }[]
       }
       sales_cash_session_close: {
         Args: { _counts: Json; _notes?: string; _session_id: string }
