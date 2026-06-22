@@ -18,30 +18,34 @@ export const getSalesPosHealth = createServerFn({ method: "POST" })
 
     const sinceIso = new Date(Date.now() - data.days * 86400000).toISOString();
 
-    const [ordersRes, itemsRes, paysRes, cashRes, countsRes] = await Promise.all([
+    const [ordersRes, itemsRes, paysRes, cashRes, countsRes, methodsRes] = await Promise.all([
       supabaseAdmin
         .from("sales_orders")
-        .select("id, company_id, status, total, discount, channel, customer_id, created_at")
+        .select("id, company_id, unit_id, status, subtotal, discount, total, customer_id, confirmed_at, cancelled_at, created_at")
         .gte("created_at", sinceIso)
         .limit(50000),
       supabaseAdmin
         .from("sales_order_items")
-        .select("id, order_id, product_id, product_name, qty, unit_price, total")
+        .select("id, order_id, product_id, description, quantity, unit_price, discount, total, kitchen_status")
         .limit(100000),
       supabaseAdmin
         .from("sales_payments")
-        .select("id, order_id, method, amount, status, created_at")
+        .select("id, order_id, payment_method_id, amount, created_at")
         .gte("created_at", sinceIso)
         .limit(50000),
       supabaseAdmin
         .from("sales_cash_sessions")
-        .select("id, company_id, opened_at, closed_at, opening_amount, closing_amount, expected_amount, difference, status")
+        .select("id, company_id, unit_id, opened_at, closed_at, opening_amount, closing_amount, expected_total, difference_total, status")
         .gte("opened_at", sinceIso)
         .limit(5000),
       supabaseAdmin
         .from("sales_cash_session_counts")
-        .select("id, session_id, denomination, qty, total")
+        .select("id, session_id, payment_method_id, expected_amount, counted_amount, difference")
         .limit(20000),
+      supabaseAdmin
+        .from("fin_payment_methods")
+        .select("id, name")
+        .limit(5000),
     ]);
 
     const orders = ordersRes.data ?? [];
@@ -49,46 +53,45 @@ export const getSalesPosHealth = createServerFn({ method: "POST" })
     const pays = paysRes.data ?? [];
     const cash = cashRes.data ?? [];
     const counts = countsRes.data ?? [];
+    const methods = methodsRes.data ?? [];
+    const methodMap = new Map(methods.map((m: any) => [m.id, m.name ?? "—"]));
 
-    const paidOrders = orders.filter((o) => o.status === "paid" || o.status === "completed");
-    const canceledOrders = orders.filter((o) => o.status === "canceled" || o.status === "cancelled");
-    const pendingOrders = orders.filter((o) => o.status === "pending" || o.status === "open");
-    const gmv = paidOrders.reduce((s, o) => s + Number(o.total ?? 0), 0);
-    const discount = paidOrders.reduce((s, o) => s + Number(o.discount ?? 0), 0);
+    const paidOrders = orders.filter((o: any) => o.status === "paid" || o.status === "completed" || o.status === "confirmed");
+    const canceledOrders = orders.filter((o: any) => o.status === "canceled" || o.status === "cancelled");
+    const pendingOrders = orders.filter((o: any) => o.status === "pending" || o.status === "open" || o.status === "draft");
+    const gmv = paidOrders.reduce((s: number, o: any) => s + Number(o.total ?? 0), 0);
+    const discount = paidOrders.reduce((s: number, o: any) => s + Number(o.discount ?? 0), 0);
     const avgTicket = paidOrders.length ? gmv / paidOrders.length : 0;
 
-    const byChannel: Record<string, { count: number; total: number }> = {};
-    for (const o of paidOrders) {
-      const c = o.channel ?? "unknown";
-      byChannel[c] ??= { count: 0, total: 0 };
-      byChannel[c].count++;
-      byChannel[c].total += Number(o.total ?? 0);
+    const byStatus: Record<string, number> = {};
+    for (const o of orders) {
+      const k = o.status ?? "unknown";
+      byStatus[k] = (byStatus[k] ?? 0) + 1;
     }
 
     const byMethod: Record<string, { count: number; amount: number }> = {};
-    const paidPays = pays.filter((p) => p.status === "paid" || p.status === "approved" || p.status === "completed");
-    for (const p of paidPays) {
-      const m = p.method ?? "unknown";
-      byMethod[m] ??= { count: 0, amount: 0 };
-      byMethod[m].count++;
-      byMethod[m].amount += Number(p.amount ?? 0);
+    for (const p of pays) {
+      const k = methodMap.get(p.payment_method_id) ?? "—";
+      byMethod[k] ??= { count: 0, amount: 0 };
+      byMethod[k].count++;
+      byMethod[k].amount += Number(p.amount ?? 0);
     }
 
     const productAgg: Record<string, { name: string; qty: number; total: number }> = {};
     for (const it of items) {
-      const k = String(it.product_id ?? it.product_name ?? "n/a");
-      productAgg[k] ??= { name: it.product_name ?? "—", qty: 0, total: 0 };
-      productAgg[k].qty += Number(it.qty ?? 0);
+      const k = String(it.product_id ?? it.description ?? "n/a");
+      productAgg[k] ??= { name: it.description ?? "—", qty: 0, total: 0 };
+      productAgg[k].qty += Number(it.quantity ?? 0);
       productAgg[k].total += Number(it.total ?? 0);
     }
     const topProducts = Object.values(productAgg)
       .sort((a, b) => b.total - a.total)
       .slice(0, 10);
 
-    const openCash = cash.filter((c) => c.status === "open").length;
-    const closedCash = cash.filter((c) => c.status === "closed").length;
-    const diffSum = cash.reduce((s, c) => s + Number(c.difference ?? 0), 0);
-    const diffAbs = cash.reduce((s, c) => s + Math.abs(Number(c.difference ?? 0)), 0);
+    const openCash = cash.filter((c: any) => c.status === "open").length;
+    const closedCash = cash.filter((c: any) => c.status === "closed").length;
+    const diffSum = cash.reduce((s: number, c: any) => s + Number(c.difference_total ?? 0), 0);
+    const diffAbs = cash.reduce((s: number, c: any) => s + Math.abs(Number(c.difference_total ?? 0)), 0);
 
     return {
       orders: {
@@ -99,14 +102,13 @@ export const getSalesPosHealth = createServerFn({ method: "POST" })
         gmv,
         discount,
         avgTicket,
+        byStatus: Object.entries(byStatus)
+          .map(([status, count]) => ({ status, count }))
+          .sort((a, b) => b.count - a.count),
       },
-      channels: Object.entries(byChannel)
-        .map(([channel, v]) => ({ channel, ...v }))
-        .sort((a, b) => b.total - a.total),
       payments: {
         total: pays.length,
-        paid: paidPays.length,
-        amount: paidPays.reduce((s, p) => s + Number(p.amount ?? 0), 0),
+        amount: pays.reduce((s: number, p: any) => s + Number(p.amount ?? 0), 0),
         byMethod: Object.entries(byMethod)
           .map(([method, v]) => ({ method, ...v }))
           .sort((a, b) => b.amount - a.amount),
