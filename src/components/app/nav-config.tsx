@@ -507,6 +507,7 @@ export const NAV_GROUPS: NavGroup[] = [
           { to: "/admin/events-ticketing-health", label: "Eventos & Ticketing", icon: Ticket, superOnly: true },
           { to: "/admin/realestate-cockpit", label: "Imobiliária — Cockpit", icon: Home, superOnly: true },
           { to: "/admin/documents-files-health", label: "Documents & Files", icon: FileCode, superOnly: true },
+          { to: "/admin/sales-pos-health", label: "Sales & POS", icon: ShoppingCart, superOnly: true },
           { to: "/admin/runtime-uptime-health", label: "Runtime & Uptime", icon: Activity, superOnly: true },
           { to: "/core/testes", label: "Testes", icon: FlaskConical, superOnly: true },
           { to: "/core/bi-ecossistema", label: "BI Ecossistema", icon: BarChart3, superOnly: true },

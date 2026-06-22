@@ -398,6 +398,7 @@ import { Route as AuthenticatedAdminTaxComplianceRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminSupportTicketingHealthRouteImport } from './routes/_authenticated/admin.support-ticketing-health'
 import { Route as AuthenticatedAdminSlaComplianceRouteImport } from './routes/_authenticated/admin.sla-compliance'
 import { Route as AuthenticatedAdminSecurityComplianceRouteImport } from './routes/_authenticated/admin.security-compliance'
+import { Route as AuthenticatedAdminSalesPosHealthRouteImport } from './routes/_authenticated/admin.sales-pos-health'
 import { Route as AuthenticatedAdminRuntimeUptimeHealthRouteImport } from './routes/_authenticated/admin.runtime-uptime-health'
 import { Route as AuthenticatedAdminRevenueQualityRouteImport } from './routes/_authenticated/admin.revenue-quality'
 import { Route as AuthenticatedAdminRevenueForecastRouteImport } from './routes/_authenticated/admin.revenue-forecast'
@@ -2677,6 +2678,12 @@ const AuthenticatedAdminSecurityComplianceRoute =
     path: '/admin/security-compliance',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminSalesPosHealthRoute =
+  AuthenticatedAdminSalesPosHealthRouteImport.update({
+    id: '/admin/sales-pos-health',
+    path: '/admin/sales-pos-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminRuntimeUptimeHealthRoute =
   AuthenticatedAdminRuntimeUptimeHealthRouteImport.update({
     id: '/admin/runtime-uptime-health',
@@ -3752,6 +3759,7 @@ export interface FileRoutesByFullPath {
   '/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
   '/admin/revenue-quality': typeof AuthenticatedAdminRevenueQualityRoute
   '/admin/runtime-uptime-health': typeof AuthenticatedAdminRuntimeUptimeHealthRoute
+  '/admin/sales-pos-health': typeof AuthenticatedAdminSalesPosHealthRoute
   '/admin/security-compliance': typeof AuthenticatedAdminSecurityComplianceRoute
   '/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
   '/admin/support-ticketing-health': typeof AuthenticatedAdminSupportTicketingHealthRoute
@@ -4270,6 +4278,7 @@ export interface FileRoutesByTo {
   '/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
   '/admin/revenue-quality': typeof AuthenticatedAdminRevenueQualityRoute
   '/admin/runtime-uptime-health': typeof AuthenticatedAdminRuntimeUptimeHealthRoute
+  '/admin/sales-pos-health': typeof AuthenticatedAdminSalesPosHealthRoute
   '/admin/security-compliance': typeof AuthenticatedAdminSecurityComplianceRoute
   '/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
   '/admin/support-ticketing-health': typeof AuthenticatedAdminSupportTicketingHealthRoute
@@ -4802,6 +4811,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
   '/_authenticated/admin/revenue-quality': typeof AuthenticatedAdminRevenueQualityRoute
   '/_authenticated/admin/runtime-uptime-health': typeof AuthenticatedAdminRuntimeUptimeHealthRoute
+  '/_authenticated/admin/sales-pos-health': typeof AuthenticatedAdminSalesPosHealthRoute
   '/_authenticated/admin/security-compliance': typeof AuthenticatedAdminSecurityComplianceRoute
   '/_authenticated/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
   '/_authenticated/admin/support-ticketing-health': typeof AuthenticatedAdminSupportTicketingHealthRoute
@@ -5333,6 +5343,7 @@ export interface FileRouteTypes {
     | '/admin/revenue-forecast'
     | '/admin/revenue-quality'
     | '/admin/runtime-uptime-health'
+    | '/admin/sales-pos-health'
     | '/admin/security-compliance'
     | '/admin/sla-compliance'
     | '/admin/support-ticketing-health'
@@ -5851,6 +5862,7 @@ export interface FileRouteTypes {
     | '/admin/revenue-forecast'
     | '/admin/revenue-quality'
     | '/admin/runtime-uptime-health'
+    | '/admin/sales-pos-health'
     | '/admin/security-compliance'
     | '/admin/sla-compliance'
     | '/admin/support-ticketing-health'
@@ -6382,6 +6394,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/revenue-forecast'
     | '/_authenticated/admin/revenue-quality'
     | '/_authenticated/admin/runtime-uptime-health'
+    | '/_authenticated/admin/sales-pos-health'
     | '/_authenticated/admin/security-compliance'
     | '/_authenticated/admin/sla-compliance'
     | '/_authenticated/admin/support-ticketing-health'
@@ -9548,6 +9561,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSecurityComplianceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/sales-pos-health': {
+      id: '/_authenticated/admin/sales-pos-health'
+      path: '/admin/sales-pos-health'
+      fullPath: '/admin/sales-pos-health'
+      preLoaderRoute: typeof AuthenticatedAdminSalesPosHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/runtime-uptime-health': {
       id: '/_authenticated/admin/runtime-uptime-health'
       path: '/admin/runtime-uptime-health'
@@ -11253,6 +11273,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRevenueForecastRoute: typeof AuthenticatedAdminRevenueForecastRoute
   AuthenticatedAdminRevenueQualityRoute: typeof AuthenticatedAdminRevenueQualityRoute
   AuthenticatedAdminRuntimeUptimeHealthRoute: typeof AuthenticatedAdminRuntimeUptimeHealthRoute
+  AuthenticatedAdminSalesPosHealthRoute: typeof AuthenticatedAdminSalesPosHealthRoute
   AuthenticatedAdminSecurityComplianceRoute: typeof AuthenticatedAdminSecurityComplianceRoute
   AuthenticatedAdminSlaComplianceRoute: typeof AuthenticatedAdminSlaComplianceRoute
   AuthenticatedAdminSupportTicketingHealthRoute: typeof AuthenticatedAdminSupportTicketingHealthRoute
@@ -11490,6 +11511,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRevenueQualityRoute: AuthenticatedAdminRevenueQualityRoute,
   AuthenticatedAdminRuntimeUptimeHealthRoute:
     AuthenticatedAdminRuntimeUptimeHealthRoute,
+  AuthenticatedAdminSalesPosHealthRoute: AuthenticatedAdminSalesPosHealthRoute,
   AuthenticatedAdminSecurityComplianceRoute:
     AuthenticatedAdminSecurityComplianceRoute,
   AuthenticatedAdminSlaComplianceRoute: AuthenticatedAdminSlaComplianceRoute,
