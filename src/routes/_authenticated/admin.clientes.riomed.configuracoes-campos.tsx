@@ -218,10 +218,9 @@ function FieldDialog({
 }) {
   const [form, setForm] = useState<Partial<FieldDefinition>>({});
 
-  // Reset form when opening
-  useState(() => { setForm(field ?? {}); });
-  if (field && form.id !== field.id) setForm(field);
-  if (!field && open && form.id) setForm({});
+  useEffect(() => {
+    if (open) setForm(field ?? {});
+  }, [open, field]);
 
   const save = useMutation({
     mutationFn: async () => {
