@@ -10313,6 +10313,8 @@ export type Database = {
           id: string
           metadata: Json
           provisioned_at: string | null
+          published_at: string | null
+          published_commit: string | null
           root_domain: string
           ssl_expires_at: string | null
           ssl_issued_at: string | null
@@ -10331,6 +10333,8 @@ export type Database = {
           id?: string
           metadata?: Json
           provisioned_at?: string | null
+          published_at?: string | null
+          published_commit?: string | null
           root_domain?: string
           ssl_expires_at?: string | null
           ssl_issued_at?: string | null
@@ -10349,6 +10353,8 @@ export type Database = {
           id?: string
           metadata?: Json
           provisioned_at?: string | null
+          published_at?: string | null
+          published_commit?: string | null
           root_domain?: string
           ssl_expires_at?: string | null
           ssl_issued_at?: string | null
@@ -28224,6 +28230,8 @@ export type Database = {
           id: string
           metadata: Json
           provisioned_at: string | null
+          published_at: string | null
+          published_commit: string | null
           root_domain: string
           ssl_expires_at: string | null
           ssl_issued_at: string | null
