@@ -20337,9 +20337,17 @@ export type Database = {
           customer_id: string | null
           description: string | null
           due_date: string
+          external_reference: string | null
+          fiscal_emitted_at: string | null
+          fiscal_number: string | null
+          fiscal_status: string
+          fiscal_xml_url: string | null
           hospital_id: string | null
           id: string
           issue_date: string
+          mp_init_point: string | null
+          mp_payment_id: string | null
+          mp_preference_id: string | null
           notes: string | null
           number: string | null
           order_id: string | null
@@ -20357,9 +20365,17 @@ export type Database = {
           customer_id?: string | null
           description?: string | null
           due_date: string
+          external_reference?: string | null
+          fiscal_emitted_at?: string | null
+          fiscal_number?: string | null
+          fiscal_status?: string
+          fiscal_xml_url?: string | null
           hospital_id?: string | null
           id?: string
           issue_date?: string
+          mp_init_point?: string | null
+          mp_payment_id?: string | null
+          mp_preference_id?: string | null
           notes?: string | null
           number?: string | null
           order_id?: string | null
@@ -20377,9 +20393,17 @@ export type Database = {
           customer_id?: string | null
           description?: string | null
           due_date?: string
+          external_reference?: string | null
+          fiscal_emitted_at?: string | null
+          fiscal_number?: string | null
+          fiscal_status?: string
+          fiscal_xml_url?: string | null
           hospital_id?: string | null
           id?: string
           issue_date?: string
+          mp_init_point?: string | null
+          mp_payment_id?: string | null
+          mp_preference_id?: string | null
           notes?: string | null
           number?: string | null
           order_id?: string | null
@@ -21423,6 +21447,68 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "riomed_products"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      riomed_fiscal_sequences: {
+        Row: {
+          active: boolean
+          company_id: string
+          created_at: string
+          id: string
+          next_number: number
+          padding: number
+          prefix: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          company_id: string
+          created_at?: string
+          id?: string
+          next_number?: number
+          padding?: number
+          prefix?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          company_id?: string
+          created_at?: string
+          id?: string
+          next_number?: number
+          padding?: number
+          prefix?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_fiscal_sequences_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_fiscal_sequences_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_fiscal_sequences_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_fiscal_sequences_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
           },
         ]
       }
@@ -28054,6 +28140,7 @@ export type Database = {
           variant_id: string
         }[]
       }
+      riomed_emit_fiscal_invoice: { Args: { p_ar_id: string }; Returns: string }
       riomed_get_commission_rate: {
         Args: {
           _category: string
