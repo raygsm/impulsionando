@@ -36,8 +36,8 @@ export const getNotificationDelivery = createServerFn({ method: "POST" })
         .limit(20000),
       supabaseAdmin
         .from("whatsapp_message_events")
-        .select("status, error_code, error_message, created_at")
-        .gte("created_at", sinceIso)
+        .select("status, error_code, error_message, received_at")
+        .gte("received_at", sinceIso)
         .limit(20000),
       supabaseAdmin
         .from("suppressed_emails")
