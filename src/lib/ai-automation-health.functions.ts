@@ -76,8 +76,8 @@ export const getAiAutomationHealth = createServerFn({ method: "POST" })
     const topReguas = Array.from(reguaMap, ([regua, count]) => ({ regua, count })).sort((a, b) => b.count - a.count).slice(0, 10);
 
     // Webhooks
-    const whSuccess = webhooks.filter((w) => w.status === "success" || (w.http_status && w.http_status < 300)).length;
-    const whFailed = webhooks.filter((w) => w.status === "failed" || (w.http_status && w.http_status >= 400)).length;
+    const whSuccess = webhooks.filter((w) => w.status === "success" || (w.response_status && w.response_status < 300)).length;
+    const whFailed = webhooks.filter((w) => w.status === "failed" || (w.response_status && w.response_status >= 400)).length;
     const whSuccessRate = webhooks.length ? (whSuccess / webhooks.length) * 100 : 0;
 
     return {
