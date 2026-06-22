@@ -486,6 +486,7 @@ import { Route as AuthenticatedAdminAuditSecurityHealthRouteImport } from './rou
 import { Route as AuthenticatedAdminAttributionRouteImport } from './routes/_authenticated/admin.attribution'
 import { Route as AuthenticatedAdminAiProjectsHealthRouteImport } from './routes/_authenticated/admin.ai-projects-health'
 import { Route as AuthenticatedAdminAiAutomationHealthRouteImport } from './routes/_authenticated/admin.ai-automation-health'
+import { Route as AuthenticatedAdminAgendaResourcesHealthRouteImport } from './routes/_authenticated/admin.agenda-resources-health'
 import { Route as AuthenticatedAdminAgendaOpsHealthRouteImport } from './routes/_authenticated/admin.agenda-ops-health'
 import { Route as AuthenticatedAdminAgendaHealthRouteImport } from './routes/_authenticated/admin.agenda-health'
 import { Route as AuthenticatedAdminAffiliatesHealthRouteImport } from './routes/_authenticated/admin.affiliates-health'
@@ -3228,6 +3229,12 @@ const AuthenticatedAdminAiAutomationHealthRoute =
     path: '/admin/ai-automation-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminAgendaResourcesHealthRoute =
+  AuthenticatedAdminAgendaResourcesHealthRouteImport.update({
+    id: '/admin/agenda-resources-health',
+    path: '/admin/agenda-resources-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminAgendaOpsHealthRoute =
   AuthenticatedAdminAgendaOpsHealthRouteImport.update({
     id: '/admin/agenda-ops-health',
@@ -3856,6 +3863,7 @@ export interface FileRoutesByFullPath {
   '/admin/affiliates-health': typeof AuthenticatedAdminAffiliatesHealthRoute
   '/admin/agenda-health': typeof AuthenticatedAdminAgendaHealthRoute
   '/admin/agenda-ops-health': typeof AuthenticatedAdminAgendaOpsHealthRoute
+  '/admin/agenda-resources-health': typeof AuthenticatedAdminAgendaResourcesHealthRoute
   '/admin/ai-automation-health': typeof AuthenticatedAdminAiAutomationHealthRoute
   '/admin/ai-projects-health': typeof AuthenticatedAdminAiProjectsHealthRoute
   '/admin/attribution': typeof AuthenticatedAdminAttributionRoute
@@ -4398,6 +4406,7 @@ export interface FileRoutesByTo {
   '/admin/affiliates-health': typeof AuthenticatedAdminAffiliatesHealthRoute
   '/admin/agenda-health': typeof AuthenticatedAdminAgendaHealthRoute
   '/admin/agenda-ops-health': typeof AuthenticatedAdminAgendaOpsHealthRoute
+  '/admin/agenda-resources-health': typeof AuthenticatedAdminAgendaResourcesHealthRoute
   '/admin/ai-automation-health': typeof AuthenticatedAdminAiAutomationHealthRoute
   '/admin/ai-projects-health': typeof AuthenticatedAdminAiProjectsHealthRoute
   '/admin/attribution': typeof AuthenticatedAdminAttributionRoute
@@ -4954,6 +4963,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/affiliates-health': typeof AuthenticatedAdminAffiliatesHealthRoute
   '/_authenticated/admin/agenda-health': typeof AuthenticatedAdminAgendaHealthRoute
   '/_authenticated/admin/agenda-ops-health': typeof AuthenticatedAdminAgendaOpsHealthRoute
+  '/_authenticated/admin/agenda-resources-health': typeof AuthenticatedAdminAgendaResourcesHealthRoute
   '/_authenticated/admin/ai-automation-health': typeof AuthenticatedAdminAiAutomationHealthRoute
   '/_authenticated/admin/ai-projects-health': typeof AuthenticatedAdminAiProjectsHealthRoute
   '/_authenticated/admin/attribution': typeof AuthenticatedAdminAttributionRoute
@@ -5509,6 +5519,7 @@ export interface FileRouteTypes {
     | '/admin/affiliates-health'
     | '/admin/agenda-health'
     | '/admin/agenda-ops-health'
+    | '/admin/agenda-resources-health'
     | '/admin/ai-automation-health'
     | '/admin/ai-projects-health'
     | '/admin/attribution'
@@ -6051,6 +6062,7 @@ export interface FileRouteTypes {
     | '/admin/affiliates-health'
     | '/admin/agenda-health'
     | '/admin/agenda-ops-health'
+    | '/admin/agenda-resources-health'
     | '/admin/ai-automation-health'
     | '/admin/ai-projects-health'
     | '/admin/attribution'
@@ -6606,6 +6618,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/affiliates-health'
     | '/_authenticated/admin/agenda-health'
     | '/_authenticated/admin/agenda-ops-health'
+    | '/_authenticated/admin/agenda-resources-health'
     | '/_authenticated/admin/ai-automation-health'
     | '/_authenticated/admin/ai-projects-health'
     | '/_authenticated/admin/attribution'
@@ -10476,6 +10489,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAiAutomationHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/agenda-resources-health': {
+      id: '/_authenticated/admin/agenda-resources-health'
+      path: '/admin/agenda-resources-health'
+      fullPath: '/admin/agenda-resources-health'
+      preLoaderRoute: typeof AuthenticatedAdminAgendaResourcesHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/agenda-ops-health': {
       id: '/_authenticated/admin/agenda-ops-health'
       path: '/admin/agenda-ops-health'
@@ -11669,6 +11689,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminAffiliatesHealthRoute: typeof AuthenticatedAdminAffiliatesHealthRoute
   AuthenticatedAdminAgendaHealthRoute: typeof AuthenticatedAdminAgendaHealthRoute
   AuthenticatedAdminAgendaOpsHealthRoute: typeof AuthenticatedAdminAgendaOpsHealthRoute
+  AuthenticatedAdminAgendaResourcesHealthRoute: typeof AuthenticatedAdminAgendaResourcesHealthRoute
   AuthenticatedAdminAiAutomationHealthRoute: typeof AuthenticatedAdminAiAutomationHealthRoute
   AuthenticatedAdminAiProjectsHealthRoute: typeof AuthenticatedAdminAiProjectsHealthRoute
   AuthenticatedAdminAttributionRoute: typeof AuthenticatedAdminAttributionRoute
@@ -11905,6 +11926,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminAgendaHealthRoute: AuthenticatedAdminAgendaHealthRoute,
   AuthenticatedAdminAgendaOpsHealthRoute:
     AuthenticatedAdminAgendaOpsHealthRoute,
+  AuthenticatedAdminAgendaResourcesHealthRoute:
+    AuthenticatedAdminAgendaResourcesHealthRoute,
   AuthenticatedAdminAiAutomationHealthRoute:
     AuthenticatedAdminAiAutomationHealthRoute,
   AuthenticatedAdminAiProjectsHealthRoute:
