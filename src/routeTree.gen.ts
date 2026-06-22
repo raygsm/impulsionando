@@ -224,6 +224,7 @@ import { Route as MarocasContratarPlanoRouteImport } from './routes/marocas.cont
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ImoveisSlugPropertyIdRouteImport } from './routes/imoveis.$slug.$propertyId'
 import { Route as DemoNichoSlugRouteImport } from './routes/demo.nicho.$slug'
+import { Route as ApiPublicVersionRouteImport } from './routes/api/public/version'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiMercadopagoWebhookRouteImport } from './routes/api/mercadopago/webhook'
 import { Route as AuthenticatedWhiteLabelCockpitRouteImport } from './routes/_authenticated/white-label.cockpit'
@@ -483,6 +484,7 @@ import { Route as AuthenticatedAdminEducationPolosHealthRouteImport } from './ro
 import { Route as AuthenticatedAdminEducTalentosRouteImport } from './routes/_authenticated/admin.educ-talentos'
 import { Route as AuthenticatedAdminEcosystemMarketplaceHealthRouteImport } from './routes/_authenticated/admin.ecosystem-marketplace-health'
 import { Route as AuthenticatedAdminDocumentsFilesHealthRouteImport } from './routes/_authenticated/admin.documents-files-health'
+import { Route as AuthenticatedAdminDeployStatusRouteImport } from './routes/_authenticated/admin.deploy-status'
 import { Route as AuthenticatedAdminDataQualityRouteImport } from './routes/_authenticated/admin.data-quality'
 import { Route as AuthenticatedAdminCustomerSuccessRouteImport } from './routes/_authenticated/admin.customer-success'
 import { Route as AuthenticatedAdminCrmHealthRouteImport } from './routes/_authenticated/admin.crm-health'
@@ -1725,6 +1727,11 @@ const ImoveisSlugPropertyIdRoute = ImoveisSlugPropertyIdRouteImport.update({
 const DemoNichoSlugRoute = DemoNichoSlugRouteImport.update({
   id: '/demo/nicho/$slug',
   path: '/demo/nicho/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicVersionRoute = ApiPublicVersionRouteImport.update({
+  id: '/api/public/version',
+  path: '/api/public/version',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
@@ -3259,6 +3266,12 @@ const AuthenticatedAdminDocumentsFilesHealthRoute =
     path: '/admin/documents-files-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminDeployStatusRoute =
+  AuthenticatedAdminDeployStatusRouteImport.update({
+    id: '/admin/deploy-status',
+    path: '/admin/deploy-status',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminDataQualityRoute =
   AuthenticatedAdminDataQualityRouteImport.update({
     id: '/admin/data-quality',
@@ -4331,6 +4344,7 @@ export interface FileRoutesByFullPath {
   '/admin/crm-health': typeof AuthenticatedAdminCrmHealthRoute
   '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
+  '/admin/deploy-status': typeof AuthenticatedAdminDeployStatusRoute
   '/admin/documents-files-health': typeof AuthenticatedAdminDocumentsFilesHealthRoute
   '/admin/ecosystem-marketplace-health': typeof AuthenticatedAdminEcosystemMarketplaceHealthRoute
   '/admin/educ-talentos': typeof AuthenticatedAdminEducTalentosRoute
@@ -4590,6 +4604,7 @@ export interface FileRoutesByFullPath {
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
+  '/api/public/version': typeof ApiPublicVersionRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -4935,6 +4950,7 @@ export interface FileRoutesByTo {
   '/admin/crm-health': typeof AuthenticatedAdminCrmHealthRoute
   '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
+  '/admin/deploy-status': typeof AuthenticatedAdminDeployStatusRoute
   '/admin/documents-files-health': typeof AuthenticatedAdminDocumentsFilesHealthRoute
   '/admin/ecosystem-marketplace-health': typeof AuthenticatedAdminEcosystemMarketplaceHealthRoute
   '/admin/educ-talentos': typeof AuthenticatedAdminEducTalentosRoute
@@ -5194,6 +5210,7 @@ export interface FileRoutesByTo {
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
+  '/api/public/version': typeof ApiPublicVersionRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -5554,6 +5571,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/crm-health': typeof AuthenticatedAdminCrmHealthRoute
   '/_authenticated/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/_authenticated/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
+  '/_authenticated/admin/deploy-status': typeof AuthenticatedAdminDeployStatusRoute
   '/_authenticated/admin/documents-files-health': typeof AuthenticatedAdminDocumentsFilesHealthRoute
   '/_authenticated/admin/ecosystem-marketplace-health': typeof AuthenticatedAdminEcosystemMarketplaceHealthRoute
   '/_authenticated/admin/educ-talentos': typeof AuthenticatedAdminEducTalentosRoute
@@ -5813,6 +5831,7 @@ export interface FileRoutesById {
   '/_authenticated/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
+  '/api/public/version': typeof ApiPublicVersionRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -6172,6 +6191,7 @@ export interface FileRouteTypes {
     | '/admin/crm-health'
     | '/admin/customer-success'
     | '/admin/data-quality'
+    | '/admin/deploy-status'
     | '/admin/documents-files-health'
     | '/admin/ecosystem-marketplace-health'
     | '/admin/educ-talentos'
@@ -6431,6 +6451,7 @@ export interface FileRouteTypes {
     | '/white-label/cockpit'
     | '/api/mercadopago/webhook'
     | '/api/public/health'
+    | '/api/public/version'
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
@@ -6776,6 +6797,7 @@ export interface FileRouteTypes {
     | '/admin/crm-health'
     | '/admin/customer-success'
     | '/admin/data-quality'
+    | '/admin/deploy-status'
     | '/admin/documents-files-health'
     | '/admin/ecosystem-marketplace-health'
     | '/admin/educ-talentos'
@@ -7035,6 +7057,7 @@ export interface FileRouteTypes {
     | '/white-label/cockpit'
     | '/api/mercadopago/webhook'
     | '/api/public/health'
+    | '/api/public/version'
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
@@ -7394,6 +7417,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/crm-health'
     | '/_authenticated/admin/customer-success'
     | '/_authenticated/admin/data-quality'
+    | '/_authenticated/admin/deploy-status'
     | '/_authenticated/admin/documents-files-health'
     | '/_authenticated/admin/ecosystem-marketplace-health'
     | '/_authenticated/admin/educ-talentos'
@@ -7653,6 +7677,7 @@ export interface FileRouteTypes {
     | '/_authenticated/white-label/cockpit'
     | '/api/mercadopago/webhook'
     | '/api/public/health'
+    | '/api/public/version'
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
     | '/lovable/email/suppression'
@@ -7898,6 +7923,7 @@ export interface RootRouteChildren {
   TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
   ApiMercadopagoWebhookRoute: typeof ApiMercadopagoWebhookRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRouteWithChildren
+  ApiPublicVersionRoute: typeof ApiPublicVersionRoute
   DemoNichoSlugRoute: typeof DemoNichoSlugRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   PortalContabilidadeTokenRoute: typeof PortalContabilidadeTokenRoute
@@ -9443,6 +9469,13 @@ declare module '@tanstack/react-router' {
       path: '/demo/nicho/$slug'
       fullPath: '/demo/nicho/$slug'
       preLoaderRoute: typeof DemoNichoSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/version': {
+      id: '/api/public/version'
+      path: '/api/public/version'
+      fullPath: '/api/public/version'
+      preLoaderRoute: typeof ApiPublicVersionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/health': {
@@ -11258,6 +11291,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDocumentsFilesHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/deploy-status': {
+      id: '/_authenticated/admin/deploy-status'
+      path: '/admin/deploy-status'
+      fullPath: '/admin/deploy-status'
+      preLoaderRoute: typeof AuthenticatedAdminDeployStatusRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/data-quality': {
       id: '/_authenticated/admin/data-quality'
       path: '/admin/data-quality'
@@ -13050,6 +13090,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCrmHealthRoute: typeof AuthenticatedAdminCrmHealthRoute
   AuthenticatedAdminCustomerSuccessRoute: typeof AuthenticatedAdminCustomerSuccessRoute
   AuthenticatedAdminDataQualityRoute: typeof AuthenticatedAdminDataQualityRoute
+  AuthenticatedAdminDeployStatusRoute: typeof AuthenticatedAdminDeployStatusRoute
   AuthenticatedAdminDocumentsFilesHealthRoute: typeof AuthenticatedAdminDocumentsFilesHealthRoute
   AuthenticatedAdminEcosystemMarketplaceHealthRoute: typeof AuthenticatedAdminEcosystemMarketplaceHealthRoute
   AuthenticatedAdminEducTalentosRoute: typeof AuthenticatedAdminEducTalentosRoute
@@ -13322,6 +13363,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminCustomerSuccessRoute:
     AuthenticatedAdminCustomerSuccessRoute,
   AuthenticatedAdminDataQualityRoute: AuthenticatedAdminDataQualityRoute,
+  AuthenticatedAdminDeployStatusRoute: AuthenticatedAdminDeployStatusRoute,
   AuthenticatedAdminDocumentsFilesHealthRoute:
     AuthenticatedAdminDocumentsFilesHealthRoute,
   AuthenticatedAdminEcosystemMarketplaceHealthRoute:
@@ -13879,6 +13921,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
   ApiMercadopagoWebhookRoute: ApiMercadopagoWebhookRoute,
   ApiPublicHealthRoute: ApiPublicHealthRouteWithChildren,
+  ApiPublicVersionRoute: ApiPublicVersionRoute,
   DemoNichoSlugRoute: DemoNichoSlugRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   PortalContabilidadeTokenRoute: PortalContabilidadeTokenRoute,
@@ -13926,13 +13969,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
