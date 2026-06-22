@@ -442,6 +442,7 @@ import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminAuditTrailRouteImport } from './routes/_authenticated/admin.audit-trail'
 import { Route as AuthenticatedAdminAttributionRouteImport } from './routes/_authenticated/admin.attribution'
 import { Route as AuthenticatedAdminAgendaHealthRouteImport } from './routes/_authenticated/admin.agenda-health'
+import { Route as AuthenticatedAdminAffiliatesHealthRouteImport } from './routes/_authenticated/admin.affiliates-health'
 import { Route as AuthenticatedAdminAdoptionUsageRouteImport } from './routes/_authenticated/admin.adoption-usage'
 import { Route as AuthenticatedAdminActionCenterRouteImport } from './routes/_authenticated/admin.action-center'
 import { Route as AuthenticatedAdminAcoesRouteImport } from './routes/_authenticated/admin.acoes'
@@ -2916,6 +2917,12 @@ const AuthenticatedAdminAgendaHealthRoute =
     path: '/admin/agenda-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminAffiliatesHealthRoute =
+  AuthenticatedAdminAffiliatesHealthRouteImport.update({
+    id: '/admin/affiliates-health',
+    path: '/admin/affiliates-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminAdoptionUsageRoute =
   AuthenticatedAdminAdoptionUsageRouteImport.update({
     id: '/admin/adoption-usage',
@@ -3516,6 +3523,7 @@ export interface FileRoutesByFullPath {
   '/admin/acoes': typeof AuthenticatedAdminAcoesRoute
   '/admin/action-center': typeof AuthenticatedAdminActionCenterRoute
   '/admin/adoption-usage': typeof AuthenticatedAdminAdoptionUsageRoute
+  '/admin/affiliates-health': typeof AuthenticatedAdminAffiliatesHealthRoute
   '/admin/agenda-health': typeof AuthenticatedAdminAgendaHealthRoute
   '/admin/attribution': typeof AuthenticatedAdminAttributionRoute
   '/admin/audit-trail': typeof AuthenticatedAdminAuditTrailRoute
@@ -4010,6 +4018,7 @@ export interface FileRoutesByTo {
   '/admin/acoes': typeof AuthenticatedAdminAcoesRoute
   '/admin/action-center': typeof AuthenticatedAdminActionCenterRoute
   '/admin/adoption-usage': typeof AuthenticatedAdminAdoptionUsageRoute
+  '/admin/affiliates-health': typeof AuthenticatedAdminAffiliatesHealthRoute
   '/admin/agenda-health': typeof AuthenticatedAdminAgendaHealthRoute
   '/admin/attribution': typeof AuthenticatedAdminAttributionRoute
   '/admin/audit-trail': typeof AuthenticatedAdminAuditTrailRoute
@@ -4518,6 +4527,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/acoes': typeof AuthenticatedAdminAcoesRoute
   '/_authenticated/admin/action-center': typeof AuthenticatedAdminActionCenterRoute
   '/_authenticated/admin/adoption-usage': typeof AuthenticatedAdminAdoptionUsageRoute
+  '/_authenticated/admin/affiliates-health': typeof AuthenticatedAdminAffiliatesHealthRoute
   '/_authenticated/admin/agenda-health': typeof AuthenticatedAdminAgendaHealthRoute
   '/_authenticated/admin/attribution': typeof AuthenticatedAdminAttributionRoute
   '/_authenticated/admin/audit-trail': typeof AuthenticatedAdminAuditTrailRoute
@@ -5025,6 +5035,7 @@ export interface FileRouteTypes {
     | '/admin/acoes'
     | '/admin/action-center'
     | '/admin/adoption-usage'
+    | '/admin/affiliates-health'
     | '/admin/agenda-health'
     | '/admin/attribution'
     | '/admin/audit-trail'
@@ -5519,6 +5530,7 @@ export interface FileRouteTypes {
     | '/admin/acoes'
     | '/admin/action-center'
     | '/admin/adoption-usage'
+    | '/admin/affiliates-health'
     | '/admin/agenda-health'
     | '/admin/attribution'
     | '/admin/audit-trail'
@@ -6026,6 +6038,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/acoes'
     | '/_authenticated/admin/action-center'
     | '/_authenticated/admin/adoption-usage'
+    | '/_authenticated/admin/affiliates-health'
     | '/_authenticated/admin/agenda-health'
     | '/_authenticated/admin/attribution'
     | '/_authenticated/admin/audit-trail'
@@ -9544,6 +9557,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAgendaHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/affiliates-health': {
+      id: '/_authenticated/admin/affiliates-health'
+      path: '/admin/affiliates-health'
+      fullPath: '/admin/affiliates-health'
+      preLoaderRoute: typeof AuthenticatedAdminAffiliatesHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/adoption-usage': {
       id: '/_authenticated/admin/adoption-usage'
       path: '/admin/adoption-usage'
@@ -10705,6 +10725,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminAcoesRoute: typeof AuthenticatedAdminAcoesRoute
   AuthenticatedAdminActionCenterRoute: typeof AuthenticatedAdminActionCenterRoute
   AuthenticatedAdminAdoptionUsageRoute: typeof AuthenticatedAdminAdoptionUsageRoute
+  AuthenticatedAdminAffiliatesHealthRoute: typeof AuthenticatedAdminAffiliatesHealthRoute
   AuthenticatedAdminAgendaHealthRoute: typeof AuthenticatedAdminAgendaHealthRoute
   AuthenticatedAdminAttributionRoute: typeof AuthenticatedAdminAttributionRoute
   AuthenticatedAdminAuditTrailRoute: typeof AuthenticatedAdminAuditTrailRoute
@@ -10890,6 +10911,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminAcoesRoute: AuthenticatedAdminAcoesRoute,
   AuthenticatedAdminActionCenterRoute: AuthenticatedAdminActionCenterRoute,
   AuthenticatedAdminAdoptionUsageRoute: AuthenticatedAdminAdoptionUsageRoute,
+  AuthenticatedAdminAffiliatesHealthRoute:
+    AuthenticatedAdminAffiliatesHealthRoute,
   AuthenticatedAdminAgendaHealthRoute: AuthenticatedAdminAgendaHealthRoute,
   AuthenticatedAdminAttributionRoute: AuthenticatedAdminAttributionRoute,
   AuthenticatedAdminAuditTrailRoute: AuthenticatedAdminAuditTrailRoute,
