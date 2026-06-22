@@ -1,4 +1,5 @@
 import { createFileRoute, ErrorComponent } from "@tanstack/react-router";
+import { TenantModuleShell } from "@/components/core/TenantModuleShell";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
@@ -14,7 +15,7 @@ import { toast } from "sonner";
 import { Bot, Play, Trash2, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/riomed/agentes")({
-  component: AgentesPage,
+  component: () => (<TenantModuleShell tenantSlug="riomed" moduleSlug='agents' title='Agentes RioMed'><AgentesPage /></TenantModuleShell>),
   errorComponent: ErrorComponent,
 });
 

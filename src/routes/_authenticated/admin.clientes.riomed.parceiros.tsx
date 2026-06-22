@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { TenantModuleShell } from "@/components/core/TenantModuleShell";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { listPartners, updatePartnerStatus } from "@/lib/riomed-partners.functions";
@@ -11,7 +12,7 @@ import { toast } from "sonner";
 import { Building2, HardHat, Users, Hospital, ClipboardList, Package } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/riomed/parceiros")({
-  component: Page,
+  component: () => (<TenantModuleShell tenantSlug="riomed" moduleSlug='partners' title='Parceiros RioMed'><Page /></TenantModuleShell>),
 });
 
 function Page() {

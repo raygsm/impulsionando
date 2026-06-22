@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { TenantModuleShell } from "@/components/core/TenantModuleShell";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
@@ -13,7 +14,7 @@ import { toast } from "sonner";
 import { ExternalLink, Trash2, Plus, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/riomed/portal")({
-  component: Page,
+  component: () => (<TenantModuleShell tenantSlug="riomed" moduleSlug='portal' title='Portal Cliente RioMed'><Page /></TenantModuleShell>),
 });
 
 function fmt(v?: number | null) { return new Intl.NumberFormat("es-BO",{style:"currency",currency:"BOB"}).format(Number(v ?? 0)); }

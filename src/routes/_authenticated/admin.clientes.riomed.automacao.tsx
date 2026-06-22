@@ -1,4 +1,5 @@
 import { createFileRoute, ErrorComponent } from "@tanstack/react-router";
+import { TenantModuleShell } from "@/components/core/TenantModuleShell";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -24,7 +25,7 @@ import { toast } from "sonner";
 const STAGES = ["captar", "converter", "relacionar", "reter", "expandir"];
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/riomed/automacao")({
-  component: AutomationPage,
+  component: () => (<TenantModuleShell tenantSlug="riomed" moduleSlug='automation' title='Automação RioMed'><AutomationPage /></TenantModuleShell>),
   errorComponent: ErrorComponent,
   notFoundComponent: () => <div>Não encontrado</div>,
 });

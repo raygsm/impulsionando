@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { TenantModuleShell } from "@/components/core/TenantModuleShell";
 import { useState, useMemo } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -16,7 +17,7 @@ import { Upload, FileText, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/riomed/importacoes")({
   head: () => ({ meta: [{ title: "Rio Med · Importações" }] }),
-  component: Page,
+  component: () => (<TenantModuleShell tenantSlug="riomed" moduleSlug='imports' title='Importações RioMed'><Page /></TenantModuleShell>),
 });
 
 const TARGETS: Array<{ value: string; label: string }> = [

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { TenantModuleShell } from "@/components/core/TenantModuleShell";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
@@ -17,7 +18,7 @@ import { Search, Image as ImageIcon, Sparkles, Loader2, RefreshCw } from "lucide
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/riomed/busca-ia")({
   head: () => ({ meta: [{ title: "Rio Med · Busca com IA" }] }),
-  component: Page,
+  component: () => (<TenantModuleShell tenantSlug="riomed" moduleSlug='ai-search' title='Busca IA RioMed'><Page /></TenantModuleShell>),
 });
 
 type Result = {

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { TenantModuleShell } from "@/components/core/TenantModuleShell";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
@@ -6,7 +7,7 @@ import { listServiceOrders, createServiceOrder } from "@/lib/riomed.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/riomed/assistencia")({
   head: () => ({ meta: [{ title: "RioMed — Assistência Técnica · Impulsionando" }] }),
-  component: RioMedAT,
+  component: () => (<TenantModuleShell tenantSlug="riomed" moduleSlug='service' title='Assistência Técnica RioMed'><RioMedAT /></TenantModuleShell>),
 });
 
 function RioMedAT() {

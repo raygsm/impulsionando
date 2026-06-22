@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { TenantModuleShell } from "@/components/core/TenantModuleShell";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
@@ -22,7 +23,7 @@ import { Megaphone, Sparkles, Loader2, Send, PackageX, Eye, EyeOff, Play, CheckC
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/riomed/marketing")({
   head: () => ({ meta: [{ title: "Rio Med · Marketing & Divulgação" }] }),
-  component: Page,
+  component: () => (<TenantModuleShell tenantSlug="riomed" moduleSlug='marketing' title='Marketing RioMed'><Page /></TenantModuleShell>),
 });
 
 function fmt(v: number) { return new Intl.NumberFormat("es-BO", { style: "currency", currency: "BOB" }).format(v || 0); }

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { TenantModuleShell } from "@/components/core/TenantModuleShell";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { getOperationsSummary } from "@/lib/riomed-operations.functions";
@@ -9,7 +10,7 @@ import { Wrench, Users, Package, FileText, AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/riomed/operacoes")({
   head: () => ({ meta: [{ title: "RioMed — Operações · Impulsionando" }] }),
-  component: Page,
+  component: () => (<TenantModuleShell tenantSlug="riomed" moduleSlug='operations' title='Operações RioMed'><Page /></TenantModuleShell>),
 });
 
 function Page() {
