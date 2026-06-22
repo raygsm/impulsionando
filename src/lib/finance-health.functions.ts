@@ -55,7 +55,7 @@ export const getFinanceHealth = createServerFn({ method: "POST" })
     const catAgg = new Map<string, { name: string; kind: string; amount: number; count: number }>();
     for (const t of txs) {
       if (!t.paid_at && t.status !== "paid") continue;
-      const c = catMap.get(t.category_id);
+      const c = t.category_id ? catMap.get(t.category_id) : null;
       const key = t.category_id || "—";
       const cur = catAgg.get(key) ?? { name: c?.name || "Sem categoria", kind: c?.kind || t.kind || "—", amount: 0, count: 0 };
       cur.amount += Number(t.amount || 0);
