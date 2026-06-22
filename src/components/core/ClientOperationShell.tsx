@@ -1,4 +1,5 @@
-import { Link } from "@tanstack/react-router";
+// Client operation shell — uses plain <a> for cross-route navigation to keep
+// the file dynamic-route agnostic.
 import { Lock, AlertTriangle, Loader2 } from "lucide-react";
 import {
   useClientFeatureGate,
