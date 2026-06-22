@@ -267,3 +267,34 @@ function ActionCard({
     </a>
   );
 }
+
+function LocaleStrip({
+  company,
+}: {
+  company: {
+    country_code?: string | null;
+    locale?: string | null;
+    currency_code?: string | null;
+    phone_country_code?: string | null;
+    timezone?: string | null;
+  };
+}) {
+  const profile = getLocaleProfile(company);
+  const now = new Date();
+  return (
+    <section className="border rounded-md p-3 flex flex-wrap items-center gap-x-6 gap-y-1 text-xs bg-muted/30">
+      <span className="inline-flex items-center gap-1 font-medium">
+        <Languages className="h-3.5 w-3.5" /> {profile.countryName} · {profile.locale}
+      </span>
+      <span>
+        Moeda: <code>{profile.currencyCode}</code> · ex {formatMoney(1234.5, profile)}
+      </span>
+      <span>
+        DDI: <code>{profile.phoneCountryCode}</code>
+      </span>
+      <span>
+        Fuso: <code>{profile.timezone}</code> · {formatDateTime(now, profile)}
+      </span>
+    </section>
+  );
+}
