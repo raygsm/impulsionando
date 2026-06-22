@@ -7,6 +7,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { useQuery } from "@tanstack/react-query";
 import { Globe, ExternalLink, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BUILD_INFO } from "@/generated/build-info";
 
 const loadDomainsCockpit = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -99,11 +100,18 @@ function DomainsCockpitPage() {
                 <th className="text-left p-2">DNS</th>
                 <th className="text-left p-2">SSL</th>
                 <th className="text-left p-2">Build</th>
+                <th className="text-left p-2">Status</th>
                 <th className="text-right p-2">Ações</th>
               </tr>
             </thead>
             <tbody>
-              {data.rows.map((r) => (
+              {data.rows.map((r) => {
+                const currentCommit = BUILD_INFO.commit;
+                const inSync =
+                  r.publishedCommit &&
+                  currentCommit &&
+                  r.publishedCommit.startsWith(currentCommit.slice(0, 7));
+                return (
                 <tr key={r.id} className="border-t hover:bg-muted/20">
                   <td className="p-2">
                     <div className="font-medium">{r.name}</div>
@@ -128,6 +136,21 @@ function DomainsCockpitPage() {
                       </code>
                     ) : null}
                   </td>
+                  <td className="p-2">
+                    {!r.publishedCommit ? (
+                      <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                        sem registro
+                      </span>
+                    ) : inSync ? (
+                      <span className="text-xs px-1.5 py-0.5 rounded bg-green-500/10 text-green-700">
+                        em dia
+                      </span>
+                    ) : (
+                      <span className="text-xs px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-700">
+                        divergente
+                      </span>
+                    )}
+                  </td>
                   <td className="p-2 text-right space-x-2">
                     <a
                       href={`/admin/clientes/${r.slug}/dominio`}
@@ -145,7 +168,8 @@ function DomainsCockpitPage() {
                     </a>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
