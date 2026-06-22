@@ -385,6 +385,7 @@ import { Route as AuthenticatedAffiliatesCommissionsRouteImport } from './routes
 import { Route as AuthenticatedAffiliatesBumpsRouteImport } from './routes/_authenticated/affiliates.bumps'
 import { Route as AuthenticatedAffiliatesAffiliatesRouteImport } from './routes/_authenticated/affiliates.affiliates'
 import { Route as AuthenticatedAdminWhitelabelHealthRouteImport } from './routes/_authenticated/admin.whitelabel-health'
+import { Route as AuthenticatedAdminWhiteLabelTenantsRouteImport } from './routes/_authenticated/admin.white-label-tenants'
 import { Route as AuthenticatedAdminWhatsappMetricsRouteImport } from './routes/_authenticated/admin.whatsapp-metrics'
 import { Route as AuthenticatedAdminVitrineLegalHealthRouteImport } from './routes/_authenticated/admin.vitrine-legal-health'
 import { Route as AuthenticatedAdminVendorPerformanceRouteImport } from './routes/_authenticated/admin.vendor-performance'
@@ -2633,6 +2634,12 @@ const AuthenticatedAdminWhitelabelHealthRoute =
     path: '/admin/whitelabel-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminWhiteLabelTenantsRoute =
+  AuthenticatedAdminWhiteLabelTenantsRouteImport.update({
+    id: '/admin/white-label-tenants',
+    path: '/admin/white-label-tenants',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminWhatsappMetricsRoute =
   AuthenticatedAdminWhatsappMetricsRouteImport.update({
     id: '/admin/whatsapp-metrics',
@@ -4037,6 +4044,7 @@ export interface FileRoutesByFullPath {
   '/admin/vendor-performance': typeof AuthenticatedAdminVendorPerformanceRoute
   '/admin/vitrine-legal-health': typeof AuthenticatedAdminVitrineLegalHealthRoute
   '/admin/whatsapp-metrics': typeof AuthenticatedAdminWhatsappMetricsRoute
+  '/admin/white-label-tenants': typeof AuthenticatedAdminWhiteLabelTenantsRoute
   '/admin/whitelabel-health': typeof AuthenticatedAdminWhitelabelHealthRoute
   '/affiliates/affiliates': typeof AuthenticatedAffiliatesAffiliatesRoute
   '/affiliates/bumps': typeof AuthenticatedAffiliatesBumpsRoute
@@ -4589,6 +4597,7 @@ export interface FileRoutesByTo {
   '/admin/vendor-performance': typeof AuthenticatedAdminVendorPerformanceRoute
   '/admin/vitrine-legal-health': typeof AuthenticatedAdminVitrineLegalHealthRoute
   '/admin/whatsapp-metrics': typeof AuthenticatedAdminWhatsappMetricsRoute
+  '/admin/white-label-tenants': typeof AuthenticatedAdminWhiteLabelTenantsRoute
   '/admin/whitelabel-health': typeof AuthenticatedAdminWhitelabelHealthRoute
   '/affiliates/affiliates': typeof AuthenticatedAffiliatesAffiliatesRoute
   '/affiliates/bumps': typeof AuthenticatedAffiliatesBumpsRoute
@@ -5155,6 +5164,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/vendor-performance': typeof AuthenticatedAdminVendorPerformanceRoute
   '/_authenticated/admin/vitrine-legal-health': typeof AuthenticatedAdminVitrineLegalHealthRoute
   '/_authenticated/admin/whatsapp-metrics': typeof AuthenticatedAdminWhatsappMetricsRoute
+  '/_authenticated/admin/white-label-tenants': typeof AuthenticatedAdminWhiteLabelTenantsRoute
   '/_authenticated/admin/whitelabel-health': typeof AuthenticatedAdminWhitelabelHealthRoute
   '/_authenticated/affiliates/affiliates': typeof AuthenticatedAffiliatesAffiliatesRoute
   '/_authenticated/affiliates/bumps': typeof AuthenticatedAffiliatesBumpsRoute
@@ -5720,6 +5730,7 @@ export interface FileRouteTypes {
     | '/admin/vendor-performance'
     | '/admin/vitrine-legal-health'
     | '/admin/whatsapp-metrics'
+    | '/admin/white-label-tenants'
     | '/admin/whitelabel-health'
     | '/affiliates/affiliates'
     | '/affiliates/bumps'
@@ -6272,6 +6283,7 @@ export interface FileRouteTypes {
     | '/admin/vendor-performance'
     | '/admin/vitrine-legal-health'
     | '/admin/whatsapp-metrics'
+    | '/admin/white-label-tenants'
     | '/admin/whitelabel-health'
     | '/affiliates/affiliates'
     | '/affiliates/bumps'
@@ -6837,6 +6849,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/vendor-performance'
     | '/_authenticated/admin/vitrine-legal-health'
     | '/_authenticated/admin/whatsapp-metrics'
+    | '/_authenticated/admin/white-label-tenants'
     | '/_authenticated/admin/whitelabel-health'
     | '/_authenticated/affiliates/affiliates'
     | '/_authenticated/affiliates/bumps'
@@ -9899,6 +9912,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminWhitelabelHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/white-label-tenants': {
+      id: '/_authenticated/admin/white-label-tenants'
+      path: '/admin/white-label-tenants'
+      fullPath: '/admin/white-label-tenants'
+      preLoaderRoute: typeof AuthenticatedAdminWhiteLabelTenantsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/whatsapp-metrics': {
       id: '/_authenticated/admin/whatsapp-metrics'
       path: '/admin/whatsapp-metrics'
@@ -11980,6 +12000,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminVendorPerformanceRoute: typeof AuthenticatedAdminVendorPerformanceRoute
   AuthenticatedAdminVitrineLegalHealthRoute: typeof AuthenticatedAdminVitrineLegalHealthRoute
   AuthenticatedAdminWhatsappMetricsRoute: typeof AuthenticatedAdminWhatsappMetricsRoute
+  AuthenticatedAdminWhiteLabelTenantsRoute: typeof AuthenticatedAdminWhiteLabelTenantsRoute
   AuthenticatedAdminWhitelabelHealthRoute: typeof AuthenticatedAdminWhitelabelHealthRoute
   AuthenticatedBarMarketplaceRoute: typeof AuthenticatedBarMarketplaceRouteWithChildren
   AuthenticatedCheckoutPlanoRoute: typeof AuthenticatedCheckoutPlanoRoute
@@ -12289,6 +12310,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminVitrineLegalHealthRoute,
   AuthenticatedAdminWhatsappMetricsRoute:
     AuthenticatedAdminWhatsappMetricsRoute,
+  AuthenticatedAdminWhiteLabelTenantsRoute:
+    AuthenticatedAdminWhiteLabelTenantsRoute,
   AuthenticatedAdminWhitelabelHealthRoute:
     AuthenticatedAdminWhitelabelHealthRoute,
   AuthenticatedBarMarketplaceRoute:
