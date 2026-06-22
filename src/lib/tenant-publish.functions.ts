@@ -33,6 +33,12 @@ export const markTenantPublished = createServerFn({ method: "POST" })
     if (cErr) throw cErr;
     if (!company) throw new Error("Tenant não encontrado");
 
+    const { data: prev } = await supabase
+      .from("core_tenant_identity")
+      .select("published_at,published_commit")
+      .eq("company_id", company.id)
+      .maybeSingle();
+
     const publishedAt = data.builtAt ?? new Date().toISOString();
     const { error } = await supabase
       .from("core_tenant_identity")
@@ -42,5 +48,17 @@ export const markTenantPublished = createServerFn({ method: "POST" })
       })
       .eq("company_id", company.id);
     if (error) throw error;
+
+    await supabase.from("audit_logs").insert({
+      company_id: company.id,
+      user_id: userId,
+      action: "tenant.deploy.marked",
+      entity: "core_tenant_identity",
+      entity_id: company.id,
+      before: prev ?? null,
+      after: { published_at: publishedAt, published_commit: data.commit },
+      metadata: { slug: data.slug, source: "admin_panel" },
+    });
+
     return { ok: true, publishedAt, commit: data.commit };
   });
