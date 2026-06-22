@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Globe, ExternalLink, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BUILD_INFO } from "@/generated/build-info";
+import { useMemo, useState } from "react";
 
 const loadDomainsCockpit = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
