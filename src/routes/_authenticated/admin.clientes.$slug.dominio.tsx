@@ -164,7 +164,58 @@ function TenantDomainPage() {
       </div>
 
       <LiveBuildCheck url={url} expectedCommit={BUILD_INFO.commit} />
+      <DeployHistory slug={slug} />
     </div>
+  );
+}
+
+function DeployHistory({ slug }: { slug: string }) {
+  const fetchHistory = useServerFn(listTenantDeployHistory);
+  const { data, isLoading } = useQuery({
+    queryKey: ["tenant-deploy-history", slug],
+    queryFn: () => fetchHistory({ data: { slug, limit: 10 } }),
+    staleTime: 30_000,
+  });
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Histórico de deploys</CardTitle>
+      </CardHeader>
+      <CardContent className="text-sm">
+        {isLoading ? (
+          <p className="text-muted-foreground">Carregando…</p>
+        ) : !data?.rows.length ? (
+          <p className="text-muted-foreground">
+            Nenhuma promoção registrada ainda. Use “Marcar deploy agora” após o publish.
+          </p>
+        ) : (
+          <ul className="divide-y">
+            {data.rows.map((r: any) => {
+              const commit = r.after?.published_commit?.slice(0, 7) ?? "—";
+              const prev = r.before?.published_commit?.slice(0, 7);
+              return (
+                <li key={r.id} className="py-2 flex items-baseline gap-3">
+                  <span className="text-xs text-muted-foreground w-40 shrink-0">
+                    {new Date(r.created_at).toLocaleString("pt-BR")}
+                  </span>
+                  <code className="text-xs">{commit}</code>
+                  {prev ? (
+                    <span className="text-xs text-muted-foreground">
+                      (de <code>{prev}</code>)
+                    </span>
+                  ) : null}
+                  {r.user_email ? (
+                    <span className="text-xs text-muted-foreground ml-auto">
+                      {r.user_email}
+                    </span>
+                  ) : null}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
