@@ -2,9 +2,10 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 /**
- * Comunicação Omnichannel Health — Fase 45.
- * Saúde da entrega multicanal (WhatsApp / Email / SMS / Push) usando outbox,
- * eventos do WhatsApp, log de e-mails e lista de supressão.
+ * Comunicação & Mensageria — Fase 101.
+ * Consolida message_outbox, message_templates, notification_attempt_log,
+ * notifications, whatsapp_message_events, email_send_log, suppressed_emails,
+ * webhook_runs, webhook_event_log.
  */
 export const getCommsHealth = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -16,195 +17,104 @@ export const getCommsHealth = createServerFn({ method: "POST" })
     if (!staff) throw new Error("Apenas equipe Impulsionando.");
 
     const sinceIso = new Date(Date.now() - data.days * 86400000).toISOString();
-    const staleIso = new Date(Date.now() - 2 * 3600 * 1000).toISOString();
 
-    const [outboxRes, waRes, emailRes, suppRes, tmplRes, companiesRes] = await Promise.all([
-      supabaseAdmin
-        .from("message_outbox")
-        .select("id, company_id, event_code, channel, status, attempts, max_attempts, scheduled_at, sent_at, last_error, created_at")
-        .gte("created_at", sinceIso)
-        .limit(50000),
-      supabaseAdmin
-        .from("whatsapp_message_events")
-        .select("id, outbox_id, status, error_code, error_message, instance_id, received_at")
-        .gte("received_at", sinceIso)
-        .limit(50000),
-      supabaseAdmin
-        .from("email_send_log")
-        .select("id, template_name, status, error_message, created_at")
-        .gte("created_at", sinceIso)
-        .limit(50000),
-      supabaseAdmin
-        .from("suppressed_emails")
-        .select("id, email, reason, created_at")
-        .gte("created_at", sinceIso)
-        .limit(5000),
-      supabaseAdmin.from("message_templates").select("id, channel, event_code, is_active").limit(2000),
-      supabaseAdmin.from("companies").select("id, name").limit(5000),
+    const [moRes, mtRes, nalRes, nRes, wmeRes, eslRes, seRes, wrRes, welRes] = await Promise.all([
+      supabaseAdmin.from("message_outbox").select("id, channel, status, attempts, event_code, scheduled_at, sent_at, created_at").gte("created_at", sinceIso).limit(300000),
+      supabaseAdmin.from("message_templates").select("id, channel, event_code, is_active").limit(50000),
+      supabaseAdmin.from("notification_attempt_log").select("id, channel, status, event, reason, created_at").gte("created_at", sinceIso).limit(300000),
+      supabaseAdmin.from("notifications").select("id, category, severity, is_read, created_at").gte("created_at", sinceIso).limit(300000),
+      supabaseAdmin.from("whatsapp_message_events").select("id, status, error_code, momment, received_at").gte("received_at", sinceIso).limit(300000),
+      supabaseAdmin.from("email_send_log").select("id, template_name, status, recipient_email, created_at").gte("created_at", sinceIso).limit(300000),
+      supabaseAdmin.from("suppressed_emails").select("id, reason, created_at").gte("created_at", sinceIso).limit(100000),
+      supabaseAdmin.from("webhook_runs").select("id, workflow, event, status, attempts, response_status, started_at, finished_at, created_at").gte("created_at", sinceIso).limit(200000),
+      supabaseAdmin.from("webhook_event_log").select("id, source, status, processed_at").limit(200000),
     ]);
 
-    const err = outboxRes.error || waRes.error || emailRes.error || suppRes.error;
+    const err = moRes.error || mtRes.error || nalRes.error || nRes.error || wmeRes.error || eslRes.error || seRes.error || wrRes.error || welRes.error;
     if (err) throw new Error(err.message);
 
-    const outbox = outboxRes.data ?? [];
-    const wa = waRes.data ?? [];
-    const emails = emailRes.data ?? [];
-    const supp = suppRes.data ?? [];
-    const templates = tmplRes.data ?? [];
-    const companyName = new Map((companiesRes.data ?? []).map((c) => [c.id, c.name]));
+    const mo = moRes.data ?? [];
+    const mt = mtRes.data ?? [];
+    const nal = nalRes.data ?? [];
+    const nn = nRes.data ?? [];
+    const wme = wmeRes.data ?? [];
+    const esl = eslRes.data ?? [];
+    const se = seRes.data ?? [];
+    const wr = wrRes.data ?? [];
+    const wel = welRes.data ?? [];
 
-    const lower = (s: string | null | undefined) => (s ?? "").toLowerCase();
-    const SENT = new Set(["sent", "delivered", "entregue", "enviado", "ok", "read", "lida"]);
-    const FAILED = new Set(["failed", "error", "erro", "falha", "rejected", "bounced"]);
-    const PENDING = new Set(["pending", "queued", "fila", "scheduled", "agendado", "processing"]);
-
-    // ===== Outbox por canal =====
-    type ChannelStat = {
-      channel: string;
-      total: number;
-      sent: number;
-      failed: number;
-      pending: number;
-      stalePending: number;
-      retriesHigh: number;
-      deliveryRate: number;
+    const countBy = <T,>(rows: T[], key: (r: T) => string | null | undefined) => {
+      const m = new Map<string, number>();
+      for (const r of rows) { const k = (key(r) ?? "—") as string; m.set(k, (m.get(k) ?? 0) + 1); }
+      return Array.from(m.entries()).map(([k, count]) => ({ k, count })).sort((a, b) => b.count - a.count);
     };
-    const chMap = new Map<string, ChannelStat>();
-    for (const o of outbox) {
-      const ch = lower(o.channel) || "outros";
-      let s = chMap.get(ch);
-      if (!s) {
-        s = { channel: ch, total: 0, sent: 0, failed: 0, pending: 0, stalePending: 0, retriesHigh: 0, deliveryRate: 0 };
-        chMap.set(ch, s);
-      }
-      s.total++;
-      const st = lower(o.status);
-      if (SENT.has(st) || o.sent_at) s.sent++;
-      else if (FAILED.has(st)) s.failed++;
-      else if (PENDING.has(st)) s.pending++;
-      if (PENDING.has(st) && o.created_at < staleIso) s.stalePending++;
-      if ((o.attempts ?? 0) >= (o.max_attempts ?? 3) && !SENT.has(st) && !o.sent_at) s.retriesHigh++;
-    }
-    const channels = Array.from(chMap.values())
-      .map((c) => ({ ...c, deliveryRate: c.total ? (c.sent / c.total) * 100 : 0 }))
-      .sort((a, b) => b.total - a.total);
 
-    // ===== Totais globais =====
-    const total = outbox.length;
-    const sent = outbox.filter((o) => SENT.has(lower(o.status)) || o.sent_at).length;
-    const failed = outbox.filter((o) => FAILED.has(lower(o.status))).length;
-    const pending = outbox.filter((o) => PENDING.has(lower(o.status))).length;
-    const stalePending = outbox.filter((o) => PENDING.has(lower(o.status)) && o.created_at < staleIso).length;
-    const retriesHigh = outbox.filter((o) => (o.attempts ?? 0) >= (o.max_attempts ?? 3) && !SENT.has(lower(o.status)) && !o.sent_at).length;
-    const deliveryRate = total ? (sent / total) * 100 : 0;
+    // Outbox
+    const moSent = mo.filter((x: any) => x.sent_at || String(x.status) === "sent").length;
+    const moFailed = mo.filter((x: any) => String(x.status) === "failed").length;
+    const moPending = mo.filter((x: any) => ["pending","queued","scheduled","retry"].includes(String(x.status))).length;
+    const moDeliveryRate = mo.length ? (moSent / mo.length) * 100 : 0;
+    const moByChannel = countBy(mo, (x: any) => x.channel);
+    const moByStatus = countBy(mo, (x: any) => x.status);
+    const moByEvent = countBy(mo, (x: any) => x.event_code).slice(0, 15);
 
-    // Tempo médio scheduled→sent
-    const durations = outbox
-      .filter((o) => o.sent_at && (o.scheduled_at ?? o.created_at))
-      .map((o) => (new Date(o.sent_at!).getTime() - new Date(o.scheduled_at ?? o.created_at).getTime()) / 60000)
-      .filter((m) => m >= 0 && m < 60 * 24 * 7);
-    const avgDeliveryMinutes = durations.length ? durations.reduce((a, b) => a + b, 0) / durations.length : 0;
+    // Templates
+    const mtActive = mt.filter((x: any) => x.is_active).length;
+    const mtByChannel = countBy(mt, (x: any) => x.channel);
 
-    // ===== WhatsApp =====
-    const waTotal = wa.length;
-    const waDelivered = wa.filter((e) => ["delivered", "sent", "read"].includes(lower(e.status))).length;
-    const waRead = wa.filter((e) => lower(e.status) === "read").length;
-    const waFailed = wa.filter((e) => ["failed", "error"].includes(lower(e.status))).length;
-    const waReadRate = waDelivered ? (waRead / waDelivered) * 100 : 0;
-    const waErrorMap = new Map<string, number>();
-    for (const e of wa) {
-      if (["failed", "error"].includes(lower(e.status))) {
-        const key = (e.error_code ? `${e.error_code} · ` : "") + (e.error_message ?? "sem mensagem").slice(0, 120);
-        waErrorMap.set(key, (waErrorMap.get(key) ?? 0) + 1);
-      }
-    }
-    const waTopErrors = Array.from(waErrorMap.entries()).map(([message, count]) => ({ message, count })).sort((a, b) => b.count - a.count).slice(0, 10);
+    // Notification attempts
+    const nalSuccess = nal.filter((x: any) => ["sent","delivered","ok","success"].includes(String(x.status))).length;
+    const nalFailed = nal.filter((x: any) => ["failed","error","bounced"].includes(String(x.status))).length;
+    const nalSuccessRate = nal.length ? (nalSuccess / nal.length) * 100 : 0;
+    const nalByChannel = countBy(nal, (x: any) => x.channel);
+    const nalByStatus = countBy(nal, (x: any) => x.status);
+    const nalByReason = countBy(nal.filter((x: any) => x.reason), (x: any) => x.reason).slice(0, 15);
 
-    // ===== Email =====
-    const emTotal = emails.length;
-    const emSent = emails.filter((e) => SENT.has(lower(e.status))).length;
-    const emFailed = emails.filter((e) => FAILED.has(lower(e.status))).length;
-    const emDeliveryRate = emTotal ? (emSent / emTotal) * 100 : 0;
-    const emTplMap = new Map<string, { total: number; sent: number; failed: number }>();
-    for (const e of emails) {
-      const k = e.template_name ?? "sem-template";
-      const v = emTplMap.get(k) ?? { total: 0, sent: 0, failed: 0 };
-      v.total++;
-      if (SENT.has(lower(e.status))) v.sent++;
-      else if (FAILED.has(lower(e.status))) v.failed++;
-      emTplMap.set(k, v);
-    }
-    const emailByTemplate = Array.from(emTplMap.entries()).map(([template, v]) => ({ template, ...v, rate: v.total ? (v.sent / v.total) * 100 : 0 })).sort((a, b) => b.total - a.total).slice(0, 15);
+    // In-app notifications
+    const nRead = nn.filter((x: any) => x.is_read).length;
+    const nReadRate = nn.length ? (nRead / nn.length) * 100 : 0;
+    const nByCategory = countBy(nn, (x: any) => x.category);
+    const nBySeverity = countBy(nn, (x: any) => x.severity);
 
-    // ===== Supressão =====
-    const suppByReason = new Map<string, number>();
-    for (const s of supp) {
-      const r = s.reason ?? "outros";
-      suppByReason.set(r, (suppByReason.get(r) ?? 0) + 1);
-    }
-    const suppressionBreakdown = Array.from(suppByReason.entries()).map(([reason, count]) => ({ reason, count })).sort((a, b) => b.count - a.count);
+    // WhatsApp
+    const wmeDelivered = wme.filter((x: any) => ["delivered","read","sent"].includes(String(x.status))).length;
+    const wmeFailed = wme.filter((x: any) => ["failed","error","undelivered"].includes(String(x.status))).length;
+    const wmeRate = wme.length ? (wmeDelivered / wme.length) * 100 : 0;
+    const wmeByStatus = countBy(wme, (x: any) => x.status);
+    const wmeByError = countBy(wme.filter((x: any) => x.error_code), (x: any) => x.error_code).slice(0, 15);
 
-    // ===== Por tenant =====
-    type TenantRow = {
-      companyId: string;
-      name: string;
-      total: number;
-      sent: number;
-      failed: number;
-      pending: number;
-      deliveryRate: number;
-    };
-    const tMap = new Map<string, TenantRow>();
-    for (const o of outbox) {
-      if (!o.company_id) continue;
-      let t = tMap.get(o.company_id);
-      if (!t) {
-        t = { companyId: o.company_id, name: companyName.get(o.company_id) ?? o.company_id.slice(0, 8), total: 0, sent: 0, failed: 0, pending: 0, deliveryRate: 0 };
-        tMap.set(o.company_id, t);
-      }
-      t.total++;
-      const st = lower(o.status);
-      if (SENT.has(st) || o.sent_at) t.sent++;
-      else if (FAILED.has(st)) t.failed++;
-      else if (PENDING.has(st)) t.pending++;
-    }
-    const tenants = Array.from(tMap.values())
-      .map((t) => ({ ...t, deliveryRate: t.total ? (t.sent / t.total) * 100 : 0 }))
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 25);
+    // Email
+    const eslSent = esl.filter((x: any) => ["sent","delivered","ok"].includes(String(x.status))).length;
+    const eslFailed = esl.filter((x: any) => ["failed","error","bounced"].includes(String(x.status))).length;
+    const eslRate = esl.length ? (eslSent / esl.length) * 100 : 0;
+    const eslByStatus = countBy(esl, (x: any) => x.status);
+    const eslByTemplate = countBy(esl, (x: any) => x.template_name).slice(0, 15);
 
-    // ===== Templates ativos =====
-    const activeTemplates = templates.filter((t) => t.is_active).length;
+    // Suppressed
+    const seByReason = countBy(se, (x: any) => x.reason);
+
+    // Webhooks
+    const wrOk = wr.filter((x: any) => ["ok","success","delivered"].includes(String(x.status)) || (x.response_status >= 200 && x.response_status < 300)).length;
+    const wrFailed = wr.filter((x: any) => ["failed","error"].includes(String(x.status)) || (x.response_status && (x.response_status >= 400))).length;
+    const wrRate = wr.length ? (wrOk / wr.length) * 100 : 0;
+    const wrByStatus = countBy(wr, (x: any) => x.status);
+    const wrByWorkflow = countBy(wr, (x: any) => x.workflow).slice(0, 15);
+
+    // Webhook inbound
+    const welProcessed = wel.filter((x: any) => x.processed_at).length;
+    const welBySource = countBy(wel, (x: any) => x.source).slice(0, 15);
+    const welByStatus = countBy(wel, (x: any) => x.status);
 
     return {
-      generatedAt: new Date().toISOString(),
-      window: { days: data.days, since: sinceIso },
-      kpis: {
-        total,
-        sent,
-        failed,
-        pending,
-        stalePending,
-        retriesHigh,
-        deliveryRate,
-        avgDeliveryMinutes,
-        waTotal,
-        waDelivered,
-        waRead,
-        waFailed,
-        waReadRate,
-        emTotal,
-        emSent,
-        emFailed,
-        emDeliveryRate,
-        suppressedCount: supp.length,
-        templatesActive: activeTemplates,
-        templatesTotal: templates.length,
-      },
-      channels,
-      waTopErrors,
-      emailByTemplate,
-      suppressionBreakdown,
-      tenants,
+      windowDays: data.days,
+      outbox: { total: mo.length, sent: moSent, failed: moFailed, pending: moPending, deliveryRate: moDeliveryRate, byChannel: moByChannel, byStatus: moByStatus, byEvent: moByEvent },
+      templates: { total: mt.length, active: mtActive, byChannel: mtByChannel },
+      notifAttempts: { total: nal.length, success: nalSuccess, failed: nalFailed, successRate: nalSuccessRate, byChannel: nalByChannel, byStatus: nalByStatus, byReason: nalByReason },
+      notifications: { total: nn.length, read: nRead, readRate: nReadRate, byCategory: nByCategory, bySeverity: nBySeverity },
+      whatsapp: { total: wme.length, delivered: wmeDelivered, failed: wmeFailed, deliveryRate: wmeRate, byStatus: wmeByStatus, byError: wmeByError },
+      email: { total: esl.length, sent: eslSent, failed: eslFailed, sentRate: eslRate, byStatus: eslByStatus, byTemplate: eslByTemplate },
+      suppressed: { total: se.length, byReason: seByReason },
+      webhooksOut: { total: wr.length, ok: wrOk, failed: wrFailed, okRate: wrRate, byStatus: wrByStatus, byWorkflow: wrByWorkflow },
+      webhooksIn: { total: wel.length, processed: welProcessed, bySource: welBySource, byStatus: welByStatus },
     };
   });
