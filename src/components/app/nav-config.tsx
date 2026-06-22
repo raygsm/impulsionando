@@ -519,6 +519,7 @@ export const NAV_GROUPS: NavGroup[] = [
           { to: "/admin/config-catalog-health", label: "Config & Catalog", icon: SlidersHorizontal, superOnly: true },
           { to: "/admin/ecosystem-marketplace-health", label: "Ecosystem Marketplace", icon: Handshake, superOnly: true },
           { to: "/admin/growth-funnel-health", label: "Growth Funnel", icon: Filter, superOnly: true },
+          { to: "/admin/tenant-identity-health", label: "Tenant Identity & Branding", icon: Building2, superOnly: true },
           { to: "/admin/runtime-uptime-health", label: "Runtime & Uptime", icon: Activity, superOnly: true },
           { to: "/core/testes", label: "Testes", icon: FlaskConical, superOnly: true },
           { to: "/core/bi-ecossistema", label: "BI Ecossistema", icon: BarChart3, superOnly: true },

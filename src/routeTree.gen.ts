@@ -393,6 +393,7 @@ import { Route as AuthenticatedAdminTrialsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminTrialDemoHealthRouteImport } from './routes/_authenticated/admin.trial-demo-health'
 import { Route as AuthenticatedAdminTreasuryForecastRouteImport } from './routes/_authenticated/admin.treasury-forecast'
 import { Route as AuthenticatedAdminTenantLifecycleRouteImport } from './routes/_authenticated/admin.tenant-lifecycle'
+import { Route as AuthenticatedAdminTenantIdentityHealthRouteImport } from './routes/_authenticated/admin.tenant-identity-health'
 import { Route as AuthenticatedAdminTenant360RouteImport } from './routes/_authenticated/admin.tenant-360'
 import { Route as AuthenticatedAdminTaxComplianceRouteImport } from './routes/_authenticated/admin.tax-compliance'
 import { Route as AuthenticatedAdminSupportTicketingHealthRouteImport } from './routes/_authenticated/admin.support-ticketing-health'
@@ -2659,6 +2660,12 @@ const AuthenticatedAdminTenantLifecycleRoute =
     path: '/admin/tenant-lifecycle',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminTenantIdentityHealthRoute =
+  AuthenticatedAdminTenantIdentityHealthRouteImport.update({
+    id: '/admin/tenant-identity-health',
+    path: '/admin/tenant-identity-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminTenant360Route =
   AuthenticatedAdminTenant360RouteImport.update({
     id: '/admin/tenant-360',
@@ -3853,6 +3860,7 @@ export interface FileRoutesByFullPath {
   '/admin/support-ticketing-health': typeof AuthenticatedAdminSupportTicketingHealthRoute
   '/admin/tax-compliance': typeof AuthenticatedAdminTaxComplianceRoute
   '/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
+  '/admin/tenant-identity-health': typeof AuthenticatedAdminTenantIdentityHealthRoute
   '/admin/tenant-lifecycle': typeof AuthenticatedAdminTenantLifecycleRoute
   '/admin/treasury-forecast': typeof AuthenticatedAdminTreasuryForecastRoute
   '/admin/trial-demo-health': typeof AuthenticatedAdminTrialDemoHealthRoute
@@ -4383,6 +4391,7 @@ export interface FileRoutesByTo {
   '/admin/support-ticketing-health': typeof AuthenticatedAdminSupportTicketingHealthRoute
   '/admin/tax-compliance': typeof AuthenticatedAdminTaxComplianceRoute
   '/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
+  '/admin/tenant-identity-health': typeof AuthenticatedAdminTenantIdentityHealthRoute
   '/admin/tenant-lifecycle': typeof AuthenticatedAdminTenantLifecycleRoute
   '/admin/treasury-forecast': typeof AuthenticatedAdminTreasuryForecastRoute
   '/admin/trial-demo-health': typeof AuthenticatedAdminTrialDemoHealthRoute
@@ -4927,6 +4936,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/support-ticketing-health': typeof AuthenticatedAdminSupportTicketingHealthRoute
   '/_authenticated/admin/tax-compliance': typeof AuthenticatedAdminTaxComplianceRoute
   '/_authenticated/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
+  '/_authenticated/admin/tenant-identity-health': typeof AuthenticatedAdminTenantIdentityHealthRoute
   '/_authenticated/admin/tenant-lifecycle': typeof AuthenticatedAdminTenantLifecycleRoute
   '/_authenticated/admin/treasury-forecast': typeof AuthenticatedAdminTreasuryForecastRoute
   '/_authenticated/admin/trial-demo-health': typeof AuthenticatedAdminTrialDemoHealthRoute
@@ -5470,6 +5480,7 @@ export interface FileRouteTypes {
     | '/admin/support-ticketing-health'
     | '/admin/tax-compliance'
     | '/admin/tenant-360'
+    | '/admin/tenant-identity-health'
     | '/admin/tenant-lifecycle'
     | '/admin/treasury-forecast'
     | '/admin/trial-demo-health'
@@ -6000,6 +6011,7 @@ export interface FileRouteTypes {
     | '/admin/support-ticketing-health'
     | '/admin/tax-compliance'
     | '/admin/tenant-360'
+    | '/admin/tenant-identity-health'
     | '/admin/tenant-lifecycle'
     | '/admin/treasury-forecast'
     | '/admin/trial-demo-health'
@@ -6543,6 +6555,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/support-ticketing-health'
     | '/_authenticated/admin/tax-compliance'
     | '/_authenticated/admin/tenant-360'
+    | '/_authenticated/admin/tenant-identity-health'
     | '/_authenticated/admin/tenant-lifecycle'
     | '/_authenticated/admin/treasury-forecast'
     | '/_authenticated/admin/trial-demo-health'
@@ -9669,6 +9682,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTenantLifecycleRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/tenant-identity-health': {
+      id: '/_authenticated/admin/tenant-identity-health'
+      path: '/admin/tenant-identity-health'
+      fullPath: '/admin/tenant-identity-health'
+      preLoaderRoute: typeof AuthenticatedAdminTenantIdentityHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/tenant-360': {
       id: '/_authenticated/admin/tenant-360'
       path: '/admin/tenant-360'
@@ -11510,6 +11530,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminSupportTicketingHealthRoute: typeof AuthenticatedAdminSupportTicketingHealthRoute
   AuthenticatedAdminTaxComplianceRoute: typeof AuthenticatedAdminTaxComplianceRoute
   AuthenticatedAdminTenant360Route: typeof AuthenticatedAdminTenant360Route
+  AuthenticatedAdminTenantIdentityHealthRoute: typeof AuthenticatedAdminTenantIdentityHealthRoute
   AuthenticatedAdminTenantLifecycleRoute: typeof AuthenticatedAdminTenantLifecycleRoute
   AuthenticatedAdminTreasuryForecastRoute: typeof AuthenticatedAdminTreasuryForecastRoute
   AuthenticatedAdminTrialDemoHealthRoute: typeof AuthenticatedAdminTrialDemoHealthRoute
@@ -11772,6 +11793,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminSupportTicketingHealthRoute,
   AuthenticatedAdminTaxComplianceRoute: AuthenticatedAdminTaxComplianceRoute,
   AuthenticatedAdminTenant360Route: AuthenticatedAdminTenant360Route,
+  AuthenticatedAdminTenantIdentityHealthRoute:
+    AuthenticatedAdminTenantIdentityHealthRoute,
   AuthenticatedAdminTenantLifecycleRoute:
     AuthenticatedAdminTenantLifecycleRoute,
   AuthenticatedAdminTreasuryForecastRoute:
