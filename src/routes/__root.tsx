@@ -209,6 +209,9 @@ function RootComponent() {
 function AnalyticsTracker() {
   const router = useRouter();
   useEffect(() => {
+    // PWA Service Worker (registra apenas em prod, no-op em SSR/dev)
+    import("@/lib/pwa-register").then(({ registerServiceWorker }) => registerServiceWorker());
+
     // Importa lazy para não rodar em SSR e isolar o módulo
     import("@/lib/analytics").then(({ initAnalytics, trackPageView }) => {
       initAnalytics();
@@ -235,6 +238,7 @@ function AnalyticsTracker() {
   }, [router]);
   return null;
 }
+
 
 
 function AuthSync() {

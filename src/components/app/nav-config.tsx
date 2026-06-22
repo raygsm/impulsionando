@@ -504,6 +504,7 @@ export const NAV_GROUPS: NavGroup[] = [
           { to: "/admin/trial-demo-health", label: "Trial & Demo Gov.", icon: FlaskConical, superOnly: true },
           { to: "/admin/ai-automation-health", label: "AI & Automation", icon: Bot, superOnly: true },
           { to: "/admin/whitelabel-health", label: "White-Label & Vitrine", icon: Globe, superOnly: true },
+          { to: "/admin/white-label-tenants", label: "White-Label · Tenants", icon: Globe, superOnly: true },
           { to: "/admin/notifications-cockpit", label: "Notifications Cockpit", icon: Inbox, superOnly: true },
           { to: "/admin/mercadopago-billing-health", label: "MercadoPago & Billing", icon: CreditCard, superOnly: true },
           { to: "/admin/marocas-health", label: "Marocas Hospitality", icon: Building2, superOnly: true },
