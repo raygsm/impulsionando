@@ -98,6 +98,7 @@ import { Route as ShowroomApiPublicaRouteImport } from './routes/showroom.api-pu
 import { Route as ShowroomAgendamentosOnlineRouteImport } from './routes/showroom.agendamentos-online'
 import { Route as ShowroomAgendaRouteImport } from './routes/showroom.agenda'
 import { Route as ShowroomAcademiaRouteImport } from './routes/showroom.academia'
+import { Route as RiomedCarrinhoRouteImport } from './routes/riomed.carrinho'
 import { Route as RecomendacaoNichoRouteImport } from './routes/recomendacao.$nicho'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
 import { Route as ParceiroTokenRouteImport } from './routes/parceiro.$token'
@@ -200,6 +201,7 @@ import { Route as AuthenticatedCockpitsIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedBiIndexRouteImport } from './routes/_authenticated/bi.index'
 import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenticated/agenda.index'
 import { Route as AuthenticatedAffiliatesIndexRouteImport } from './routes/_authenticated/affiliates.index'
+import { Route as RiomedVSlugRouteImport } from './routes/riomed.v.$slug'
 import { Route as PortalProprietarioTokenRouteImport } from './routes/portal.proprietario.$token'
 import { Route as PortalContabilidadeTokenRouteImport } from './routes/portal.contabilidade.$token'
 import { Route as MarocasContratarPlanoRouteImport } from './routes/marocas.contratar.$plano'
@@ -1042,6 +1044,11 @@ const ShowroomAcademiaRoute = ShowroomAcademiaRouteImport.update({
   path: '/showroom/academia',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RiomedCarrinhoRoute = RiomedCarrinhoRouteImport.update({
+  id: '/riomed/carrinho',
+  path: '/riomed/carrinho',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RecomendacaoNichoRoute = RecomendacaoNichoRouteImport.update({
   id: '/recomendacao/$nicho',
   path: '/recomendacao/$nicho',
@@ -1570,6 +1577,11 @@ const AuthenticatedAffiliatesIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedAffiliatesRoute,
   } as any)
+const RiomedVSlugRoute = RiomedVSlugRouteImport.update({
+  id: '/riomed/v/$slug',
+  path: '/riomed/v/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PortalProprietarioTokenRoute = PortalProprietarioTokenRouteImport.update({
   id: '/portal/proprietario/$token',
   path: '/portal/proprietario/$token',
@@ -4005,6 +4017,7 @@ export interface FileRoutesByFullPath {
   '/parceiro/$token': typeof ParceiroTokenRoute
   '/r/$slug': typeof RSlugRoute
   '/recomendacao/$nicho': typeof RecomendacaoNichoRoute
+  '/riomed/carrinho': typeof RiomedCarrinhoRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
   '/showroom/agendamentos-online': typeof ShowroomAgendamentosOnlineRoute
@@ -4368,6 +4381,7 @@ export interface FileRoutesByFullPath {
   '/marocas/contratar/$plano': typeof MarocasContratarPlanoRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/portal/proprietario/$token': typeof PortalProprietarioTokenRoute
+  '/riomed/v/$slug': typeof RiomedVSlugRoute
   '/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/bi/': typeof AuthenticatedBiIndexRoute
@@ -4577,6 +4591,7 @@ export interface FileRoutesByTo {
   '/parceiro/$token': typeof ParceiroTokenRoute
   '/r/$slug': typeof RSlugRoute
   '/recomendacao/$nicho': typeof RecomendacaoNichoRoute
+  '/riomed/carrinho': typeof RiomedCarrinhoRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
   '/showroom/agendamentos-online': typeof ShowroomAgendamentosOnlineRoute
@@ -4940,6 +4955,7 @@ export interface FileRoutesByTo {
   '/marocas/contratar/$plano': typeof MarocasContratarPlanoRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/portal/proprietario/$token': typeof PortalProprietarioTokenRoute
+  '/riomed/v/$slug': typeof RiomedVSlugRoute
   '/affiliates': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda': typeof AuthenticatedAgendaIndexRoute
   '/bi': typeof AuthenticatedBiIndexRoute
@@ -5163,6 +5179,7 @@ export interface FileRoutesById {
   '/parceiro/$token': typeof ParceiroTokenRoute
   '/r/$slug': typeof RSlugRoute
   '/recomendacao/$nicho': typeof RecomendacaoNichoRoute
+  '/riomed/carrinho': typeof RiomedCarrinhoRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
   '/showroom/agendamentos-online': typeof ShowroomAgendamentosOnlineRoute
@@ -5526,6 +5543,7 @@ export interface FileRoutesById {
   '/marocas/contratar/$plano': typeof MarocasContratarPlanoRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/portal/proprietario/$token': typeof PortalProprietarioTokenRoute
+  '/riomed/v/$slug': typeof RiomedVSlugRoute
   '/_authenticated/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/_authenticated/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/_authenticated/bi/': typeof AuthenticatedBiIndexRoute
@@ -5748,6 +5766,7 @@ export interface FileRouteTypes {
     | '/parceiro/$token'
     | '/r/$slug'
     | '/recomendacao/$nicho'
+    | '/riomed/carrinho'
     | '/showroom/academia'
     | '/showroom/agenda'
     | '/showroom/agendamentos-online'
@@ -6111,6 +6130,7 @@ export interface FileRouteTypes {
     | '/marocas/contratar/$plano'
     | '/portal/contabilidade/$token'
     | '/portal/proprietario/$token'
+    | '/riomed/v/$slug'
     | '/affiliates/'
     | '/agenda/'
     | '/bi/'
@@ -6320,6 +6340,7 @@ export interface FileRouteTypes {
     | '/parceiro/$token'
     | '/r/$slug'
     | '/recomendacao/$nicho'
+    | '/riomed/carrinho'
     | '/showroom/academia'
     | '/showroom/agenda'
     | '/showroom/agendamentos-online'
@@ -6683,6 +6704,7 @@ export interface FileRouteTypes {
     | '/marocas/contratar/$plano'
     | '/portal/contabilidade/$token'
     | '/portal/proprietario/$token'
+    | '/riomed/v/$slug'
     | '/affiliates'
     | '/agenda'
     | '/bi'
@@ -6905,6 +6927,7 @@ export interface FileRouteTypes {
     | '/parceiro/$token'
     | '/r/$slug'
     | '/recomendacao/$nicho'
+    | '/riomed/carrinho'
     | '/showroom/academia'
     | '/showroom/agenda'
     | '/showroom/agendamentos-online'
@@ -7268,6 +7291,7 @@ export interface FileRouteTypes {
     | '/marocas/contratar/$plano'
     | '/portal/contabilidade/$token'
     | '/portal/proprietario/$token'
+    | '/riomed/v/$slug'
     | '/_authenticated/affiliates/'
     | '/_authenticated/agenda/'
     | '/_authenticated/bi/'
@@ -7435,6 +7459,7 @@ export interface RootRouteChildren {
   ParceiroTokenRoute: typeof ParceiroTokenRoute
   RSlugRoute: typeof RSlugRoute
   RecomendacaoNichoRoute: typeof RecomendacaoNichoRoute
+  RiomedCarrinhoRoute: typeof RiomedCarrinhoRoute
   ShowroomAcademiaRoute: typeof ShowroomAcademiaRoute
   ShowroomAgendaRoute: typeof ShowroomAgendaRoute
   ShowroomAgendamentosOnlineRoute: typeof ShowroomAgendamentosOnlineRoute
@@ -7489,6 +7514,7 @@ export interface RootRouteChildren {
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   PortalContabilidadeTokenRoute: typeof PortalContabilidadeTokenRoute
   PortalProprietarioTokenRoute: typeof PortalProprietarioTokenRoute
+  RiomedVSlugRoute: typeof RiomedVSlugRoute
   ApiPublicCronAgendaTickRoute: typeof ApiPublicCronAgendaTickRoute
   ApiPublicCronFunnelDispatchRoute: typeof ApiPublicCronFunnelDispatchRoute
   ApiPublicCronPayoutsConsolidateRoute: typeof ApiPublicCronPayoutsConsolidateRoute
@@ -8148,6 +8174,13 @@ declare module '@tanstack/react-router' {
       path: '/showroom/academia'
       fullPath: '/showroom/academia'
       preLoaderRoute: typeof ShowroomAcademiaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/riomed/carrinho': {
+      id: '/riomed/carrinho'
+      path: '/riomed/carrinho'
+      fullPath: '/riomed/carrinho'
+      preLoaderRoute: typeof RiomedCarrinhoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/recomendacao/$nicho': {
@@ -8863,6 +8896,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/affiliates/'
       preLoaderRoute: typeof AuthenticatedAffiliatesIndexRouteImport
       parentRoute: typeof AuthenticatedAffiliatesRoute
+    }
+    '/riomed/v/$slug': {
+      id: '/riomed/v/$slug'
+      path: '/riomed/v/$slug'
+      fullPath: '/riomed/v/$slug'
+      preLoaderRoute: typeof RiomedVSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/portal/proprietario/$token': {
       id: '/portal/proprietario/$token'
@@ -13096,6 +13136,7 @@ const rootRouteChildren: RootRouteChildren = {
   ParceiroTokenRoute: ParceiroTokenRoute,
   RSlugRoute: RSlugRoute,
   RecomendacaoNichoRoute: RecomendacaoNichoRoute,
+  RiomedCarrinhoRoute: RiomedCarrinhoRoute,
   ShowroomAcademiaRoute: ShowroomAcademiaRoute,
   ShowroomAgendaRoute: ShowroomAgendaRoute,
   ShowroomAgendamentosOnlineRoute: ShowroomAgendamentosOnlineRoute,
@@ -13150,6 +13191,7 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   PortalContabilidadeTokenRoute: PortalContabilidadeTokenRoute,
   PortalProprietarioTokenRoute: PortalProprietarioTokenRoute,
+  RiomedVSlugRoute: RiomedVSlugRoute,
   ApiPublicCronAgendaTickRoute: ApiPublicCronAgendaTickRoute,
   ApiPublicCronFunnelDispatchRoute: ApiPublicCronFunnelDispatchRoute,
   ApiPublicCronPayoutsConsolidateRoute: ApiPublicCronPayoutsConsolidateRoute,
