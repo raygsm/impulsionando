@@ -43,11 +43,16 @@ function AdminMasterHub() {
 
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight">Administração Master</h1>
-        <p className="text-sm text-muted-foreground">
-          Navegação parametrizável do Core Impulsionando — agrupada por finalidade real de gestão.
-        </p>
+      <header className="flex items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold tracking-tight">Administração Master</h1>
+          <p className="text-sm text-muted-foreground">
+            Navegação parametrizável do Core Impulsionando — agrupada por finalidade real de gestão.
+          </p>
+        </div>
+        <Link to="/admin/menu-manager">
+          <Button variant="outline" size="sm">Gerenciar menu</Button>
+        </Link>
       </header>
 
       <Tabs defaultValue="impulsionando" className="w-full">
