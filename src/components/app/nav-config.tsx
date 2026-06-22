@@ -10,7 +10,7 @@ import {
   Home, Search as SearchIcon, Zap, Bot, MessageSquare, QrCode,
   History as HistoryIcon, Headphones, UserRound, Megaphone,
   Calculator, Activity, RefreshCw, BookOpen,
-  Beer, Store, Send,
+  Beer, Store, Send, Ticket,
   Settings as SettingsIcon, Globe, FlaskConical, Server, Flag, FileCode,
   Rocket, Gauge, LineChart, ClipboardList, Workflow, ScrollText, Filter,
 } from "lucide-react";
