@@ -104,6 +104,7 @@ function TenantDomainPage() {
           <Button variant="outline" size="sm" onClick={() => refetch()}>
             <RefreshCw className="h-3 w-3 mr-1" /> Atualizar
           </Button>
+          <MarkPublishedButton slug={slug} onDone={() => refetch()} />
           <a
             href={url}
             target="_blank"
