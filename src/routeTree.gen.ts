@@ -402,6 +402,7 @@ import { Route as AuthenticatedAdminRuntimeUptimeHealthRouteImport } from './rou
 import { Route as AuthenticatedAdminRevenueQualityRouteImport } from './routes/_authenticated/admin.revenue-quality'
 import { Route as AuthenticatedAdminRevenueForecastRouteImport } from './routes/_authenticated/admin.revenue-forecast'
 import { Route as AuthenticatedAdminRestaurantHealthRouteImport } from './routes/_authenticated/admin.restaurant-health'
+import { Route as AuthenticatedAdminRealestateCockpitRouteImport } from './routes/_authenticated/admin.realestate-cockpit'
 import { Route as AuthenticatedAdminRealEstateHealthRouteImport } from './routes/_authenticated/admin.real-estate-health'
 import { Route as AuthenticatedAdminQualidadeRouteImport } from './routes/_authenticated/admin.qualidade'
 import { Route as AuthenticatedAdminProjetosParalelosRouteImport } from './routes/_authenticated/admin.projetos-paralelos'
@@ -2699,6 +2700,12 @@ const AuthenticatedAdminRestaurantHealthRoute =
     path: '/admin/restaurant-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminRealestateCockpitRoute =
+  AuthenticatedAdminRealestateCockpitRouteImport.update({
+    id: '/admin/realestate-cockpit',
+    path: '/admin/realestate-cockpit',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminRealEstateHealthRoute =
   AuthenticatedAdminRealEstateHealthRouteImport.update({
     id: '/admin/real-estate-health',
@@ -3732,6 +3739,7 @@ export interface FileRoutesByFullPath {
   '/admin/projetos-paralelos': typeof AuthenticatedAdminProjetosParalelosRoute
   '/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
   '/admin/real-estate-health': typeof AuthenticatedAdminRealEstateHealthRoute
+  '/admin/realestate-cockpit': typeof AuthenticatedAdminRealestateCockpitRoute
   '/admin/restaurant-health': typeof AuthenticatedAdminRestaurantHealthRoute
   '/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
   '/admin/revenue-quality': typeof AuthenticatedAdminRevenueQualityRoute
@@ -4248,6 +4256,7 @@ export interface FileRoutesByTo {
   '/admin/projetos-paralelos': typeof AuthenticatedAdminProjetosParalelosRoute
   '/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
   '/admin/real-estate-health': typeof AuthenticatedAdminRealEstateHealthRoute
+  '/admin/realestate-cockpit': typeof AuthenticatedAdminRealestateCockpitRoute
   '/admin/restaurant-health': typeof AuthenticatedAdminRestaurantHealthRoute
   '/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
   '/admin/revenue-quality': typeof AuthenticatedAdminRevenueQualityRoute
@@ -4778,6 +4787,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/projetos-paralelos': typeof AuthenticatedAdminProjetosParalelosRoute
   '/_authenticated/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
   '/_authenticated/admin/real-estate-health': typeof AuthenticatedAdminRealEstateHealthRoute
+  '/_authenticated/admin/realestate-cockpit': typeof AuthenticatedAdminRealestateCockpitRoute
   '/_authenticated/admin/restaurant-health': typeof AuthenticatedAdminRestaurantHealthRoute
   '/_authenticated/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
   '/_authenticated/admin/revenue-quality': typeof AuthenticatedAdminRevenueQualityRoute
@@ -5307,6 +5317,7 @@ export interface FileRouteTypes {
     | '/admin/projetos-paralelos'
     | '/admin/qualidade'
     | '/admin/real-estate-health'
+    | '/admin/realestate-cockpit'
     | '/admin/restaurant-health'
     | '/admin/revenue-forecast'
     | '/admin/revenue-quality'
@@ -5823,6 +5834,7 @@ export interface FileRouteTypes {
     | '/admin/projetos-paralelos'
     | '/admin/qualidade'
     | '/admin/real-estate-health'
+    | '/admin/realestate-cockpit'
     | '/admin/restaurant-health'
     | '/admin/revenue-forecast'
     | '/admin/revenue-quality'
@@ -6352,6 +6364,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/projetos-paralelos'
     | '/_authenticated/admin/qualidade'
     | '/_authenticated/admin/real-estate-health'
+    | '/_authenticated/admin/realestate-cockpit'
     | '/_authenticated/admin/restaurant-health'
     | '/_authenticated/admin/revenue-forecast'
     | '/_authenticated/admin/revenue-quality'
@@ -9550,6 +9563,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRestaurantHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/realestate-cockpit': {
+      id: '/_authenticated/admin/realestate-cockpit'
+      path: '/admin/realestate-cockpit'
+      fullPath: '/admin/realestate-cockpit'
+      preLoaderRoute: typeof AuthenticatedAdminRealestateCockpitRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/real-estate-health': {
       id: '/_authenticated/admin/real-estate-health'
       path: '/admin/real-estate-health'
@@ -11207,6 +11227,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminProjetosParalelosRoute: typeof AuthenticatedAdminProjetosParalelosRoute
   AuthenticatedAdminQualidadeRoute: typeof AuthenticatedAdminQualidadeRoute
   AuthenticatedAdminRealEstateHealthRoute: typeof AuthenticatedAdminRealEstateHealthRoute
+  AuthenticatedAdminRealestateCockpitRoute: typeof AuthenticatedAdminRealestateCockpitRoute
   AuthenticatedAdminRestaurantHealthRoute: typeof AuthenticatedAdminRestaurantHealthRoute
   AuthenticatedAdminRevenueForecastRoute: typeof AuthenticatedAdminRevenueForecastRoute
   AuthenticatedAdminRevenueQualityRoute: typeof AuthenticatedAdminRevenueQualityRoute
@@ -11437,6 +11458,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminQualidadeRoute: AuthenticatedAdminQualidadeRoute,
   AuthenticatedAdminRealEstateHealthRoute:
     AuthenticatedAdminRealEstateHealthRoute,
+  AuthenticatedAdminRealestateCockpitRoute:
+    AuthenticatedAdminRealestateCockpitRoute,
   AuthenticatedAdminRestaurantHealthRoute:
     AuthenticatedAdminRestaurantHealthRoute,
   AuthenticatedAdminRevenueForecastRoute:
