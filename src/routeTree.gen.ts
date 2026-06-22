@@ -422,6 +422,7 @@ import { Route as AuthenticatedAdminExpansionRadarRouteImport } from './routes/_
 import { Route as AuthenticatedAdminExpansionEngineRouteImport } from './routes/_authenticated/admin.expansion-engine'
 import { Route as AuthenticatedAdminExecutiveBriefingRouteImport } from './routes/_authenticated/admin.executive-briefing'
 import { Route as AuthenticatedAdminEhrComplianceRouteImport } from './routes/_authenticated/admin.ehr-compliance'
+import { Route as AuthenticatedAdminEducTalentosRouteImport } from './routes/_authenticated/admin.educ-talentos'
 import { Route as AuthenticatedAdminDataQualityRouteImport } from './routes/_authenticated/admin.data-quality'
 import { Route as AuthenticatedAdminCustomerSuccessRouteImport } from './routes/_authenticated/admin.customer-success'
 import { Route as AuthenticatedAdminConversionFunnelRouteImport } from './routes/_authenticated/admin.conversion-funnel'
@@ -2799,6 +2800,12 @@ const AuthenticatedAdminEhrComplianceRoute =
     path: '/admin/ehr-compliance',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminEducTalentosRoute =
+  AuthenticatedAdminEducTalentosRouteImport.update({
+    id: '/admin/educ-talentos',
+    path: '/admin/educ-talentos',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminDataQualityRoute =
   AuthenticatedAdminDataQualityRouteImport.update({
     id: '/admin/data-quality',
@@ -3552,6 +3559,7 @@ export interface FileRoutesByFullPath {
   '/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
   '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
+  '/admin/educ-talentos': typeof AuthenticatedAdminEducTalentosRoute
   '/admin/ehr-compliance': typeof AuthenticatedAdminEhrComplianceRoute
   '/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
   '/admin/expansion-engine': typeof AuthenticatedAdminExpansionEngineRoute
@@ -4048,6 +4056,7 @@ export interface FileRoutesByTo {
   '/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
   '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
+  '/admin/educ-talentos': typeof AuthenticatedAdminEducTalentosRoute
   '/admin/ehr-compliance': typeof AuthenticatedAdminEhrComplianceRoute
   '/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
   '/admin/expansion-engine': typeof AuthenticatedAdminExpansionEngineRoute
@@ -4558,6 +4567,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
   '/_authenticated/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/_authenticated/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
+  '/_authenticated/admin/educ-talentos': typeof AuthenticatedAdminEducTalentosRoute
   '/_authenticated/admin/ehr-compliance': typeof AuthenticatedAdminEhrComplianceRoute
   '/_authenticated/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
   '/_authenticated/admin/expansion-engine': typeof AuthenticatedAdminExpansionEngineRoute
@@ -5067,6 +5077,7 @@ export interface FileRouteTypes {
     | '/admin/conversion-funnel'
     | '/admin/customer-success'
     | '/admin/data-quality'
+    | '/admin/educ-talentos'
     | '/admin/ehr-compliance'
     | '/admin/executive-briefing'
     | '/admin/expansion-engine'
@@ -5563,6 +5574,7 @@ export interface FileRouteTypes {
     | '/admin/conversion-funnel'
     | '/admin/customer-success'
     | '/admin/data-quality'
+    | '/admin/educ-talentos'
     | '/admin/ehr-compliance'
     | '/admin/executive-briefing'
     | '/admin/expansion-engine'
@@ -6072,6 +6084,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/conversion-funnel'
     | '/_authenticated/admin/customer-success'
     | '/_authenticated/admin/data-quality'
+    | '/_authenticated/admin/educ-talentos'
     | '/_authenticated/admin/ehr-compliance'
     | '/_authenticated/admin/executive-briefing'
     | '/_authenticated/admin/expansion-engine'
@@ -9430,6 +9443,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminEhrComplianceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/educ-talentos': {
+      id: '/_authenticated/admin/educ-talentos'
+      path: '/admin/educ-talentos'
+      fullPath: '/admin/educ-talentos'
+      preLoaderRoute: typeof AuthenticatedAdminEducTalentosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/data-quality': {
       id: '/_authenticated/admin/data-quality'
       path: '/admin/data-quality'
@@ -10767,6 +10787,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminConversionFunnelRoute: typeof AuthenticatedAdminConversionFunnelRoute
   AuthenticatedAdminCustomerSuccessRoute: typeof AuthenticatedAdminCustomerSuccessRoute
   AuthenticatedAdminDataQualityRoute: typeof AuthenticatedAdminDataQualityRoute
+  AuthenticatedAdminEducTalentosRoute: typeof AuthenticatedAdminEducTalentosRoute
   AuthenticatedAdminEhrComplianceRoute: typeof AuthenticatedAdminEhrComplianceRoute
   AuthenticatedAdminExecutiveBriefingRoute: typeof AuthenticatedAdminExecutiveBriefingRoute
   AuthenticatedAdminExpansionEngineRoute: typeof AuthenticatedAdminExpansionEngineRoute
@@ -10961,6 +10982,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminCustomerSuccessRoute:
     AuthenticatedAdminCustomerSuccessRoute,
   AuthenticatedAdminDataQualityRoute: AuthenticatedAdminDataQualityRoute,
+  AuthenticatedAdminEducTalentosRoute: AuthenticatedAdminEducTalentosRoute,
   AuthenticatedAdminEhrComplianceRoute: AuthenticatedAdminEhrComplianceRoute,
   AuthenticatedAdminExecutiveBriefingRoute:
     AuthenticatedAdminExecutiveBriefingRoute,
