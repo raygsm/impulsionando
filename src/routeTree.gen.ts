@@ -406,6 +406,7 @@ import { Route as AuthenticatedAdminRevenueQualityRouteImport } from './routes/_
 import { Route as AuthenticatedAdminRevenueForecastRouteImport } from './routes/_authenticated/admin.revenue-forecast'
 import { Route as AuthenticatedAdminRestaurantHealthRouteImport } from './routes/_authenticated/admin.restaurant-health'
 import { Route as AuthenticatedAdminRealestateCockpitRouteImport } from './routes/_authenticated/admin.realestate-cockpit'
+import { Route as AuthenticatedAdminRealEstateOpsHealthRouteImport } from './routes/_authenticated/admin.real-estate-ops-health'
 import { Route as AuthenticatedAdminRealEstateHealthRouteImport } from './routes/_authenticated/admin.real-estate-health'
 import { Route as AuthenticatedAdminQualidadeRouteImport } from './routes/_authenticated/admin.qualidade'
 import { Route as AuthenticatedAdminProjetosParalelosRouteImport } from './routes/_authenticated/admin.projetos-paralelos'
@@ -2743,6 +2744,12 @@ const AuthenticatedAdminRealestateCockpitRoute =
     path: '/admin/realestate-cockpit',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminRealEstateOpsHealthRoute =
+  AuthenticatedAdminRealEstateOpsHealthRouteImport.update({
+    id: '/admin/real-estate-ops-health',
+    path: '/admin/real-estate-ops-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminRealEstateHealthRoute =
   AuthenticatedAdminRealEstateHealthRouteImport.update({
     id: '/admin/real-estate-health',
@@ -3888,6 +3895,7 @@ export interface FileRoutesByFullPath {
   '/admin/projetos-paralelos': typeof AuthenticatedAdminProjetosParalelosRoute
   '/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
   '/admin/real-estate-health': typeof AuthenticatedAdminRealEstateHealthRoute
+  '/admin/real-estate-ops-health': typeof AuthenticatedAdminRealEstateOpsHealthRoute
   '/admin/realestate-cockpit': typeof AuthenticatedAdminRealestateCockpitRoute
   '/admin/restaurant-health': typeof AuthenticatedAdminRestaurantHealthRoute
   '/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
@@ -4424,6 +4432,7 @@ export interface FileRoutesByTo {
   '/admin/projetos-paralelos': typeof AuthenticatedAdminProjetosParalelosRoute
   '/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
   '/admin/real-estate-health': typeof AuthenticatedAdminRealEstateHealthRoute
+  '/admin/real-estate-ops-health': typeof AuthenticatedAdminRealEstateOpsHealthRoute
   '/admin/realestate-cockpit': typeof AuthenticatedAdminRealestateCockpitRoute
   '/admin/restaurant-health': typeof AuthenticatedAdminRestaurantHealthRoute
   '/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
@@ -4974,6 +4983,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/projetos-paralelos': typeof AuthenticatedAdminProjetosParalelosRoute
   '/_authenticated/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
   '/_authenticated/admin/real-estate-health': typeof AuthenticatedAdminRealEstateHealthRoute
+  '/_authenticated/admin/real-estate-ops-health': typeof AuthenticatedAdminRealEstateOpsHealthRoute
   '/_authenticated/admin/realestate-cockpit': typeof AuthenticatedAdminRealestateCockpitRoute
   '/_authenticated/admin/restaurant-health': typeof AuthenticatedAdminRestaurantHealthRoute
   '/_authenticated/admin/revenue-forecast': typeof AuthenticatedAdminRevenueForecastRoute
@@ -5523,6 +5533,7 @@ export interface FileRouteTypes {
     | '/admin/projetos-paralelos'
     | '/admin/qualidade'
     | '/admin/real-estate-health'
+    | '/admin/real-estate-ops-health'
     | '/admin/realestate-cockpit'
     | '/admin/restaurant-health'
     | '/admin/revenue-forecast'
@@ -6059,6 +6070,7 @@ export interface FileRouteTypes {
     | '/admin/projetos-paralelos'
     | '/admin/qualidade'
     | '/admin/real-estate-health'
+    | '/admin/real-estate-ops-health'
     | '/admin/realestate-cockpit'
     | '/admin/restaurant-health'
     | '/admin/revenue-forecast'
@@ -6608,6 +6620,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/projetos-paralelos'
     | '/_authenticated/admin/qualidade'
     | '/_authenticated/admin/real-estate-health'
+    | '/_authenticated/admin/real-estate-ops-health'
     | '/_authenticated/admin/realestate-cockpit'
     | '/_authenticated/admin/restaurant-health'
     | '/_authenticated/admin/revenue-forecast'
@@ -9838,6 +9851,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRealestateCockpitRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/real-estate-ops-health': {
+      id: '/_authenticated/admin/real-estate-ops-health'
+      path: '/admin/real-estate-ops-health'
+      fullPath: '/admin/real-estate-ops-health'
+      preLoaderRoute: typeof AuthenticatedAdminRealEstateOpsHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/real-estate-health': {
       id: '/_authenticated/admin/real-estate-health'
       path: '/admin/real-estate-health'
@@ -11623,6 +11643,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminProjetosParalelosRoute: typeof AuthenticatedAdminProjetosParalelosRoute
   AuthenticatedAdminQualidadeRoute: typeof AuthenticatedAdminQualidadeRoute
   AuthenticatedAdminRealEstateHealthRoute: typeof AuthenticatedAdminRealEstateHealthRoute
+  AuthenticatedAdminRealEstateOpsHealthRoute: typeof AuthenticatedAdminRealEstateOpsHealthRoute
   AuthenticatedAdminRealestateCockpitRoute: typeof AuthenticatedAdminRealestateCockpitRoute
   AuthenticatedAdminRestaurantHealthRoute: typeof AuthenticatedAdminRestaurantHealthRoute
   AuthenticatedAdminRevenueForecastRoute: typeof AuthenticatedAdminRevenueForecastRoute
@@ -11889,6 +11910,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminQualidadeRoute: AuthenticatedAdminQualidadeRoute,
   AuthenticatedAdminRealEstateHealthRoute:
     AuthenticatedAdminRealEstateHealthRoute,
+  AuthenticatedAdminRealEstateOpsHealthRoute:
+    AuthenticatedAdminRealEstateOpsHealthRoute,
   AuthenticatedAdminRealestateCockpitRoute:
     AuthenticatedAdminRealestateCockpitRoute,
   AuthenticatedAdminRestaurantHealthRoute:
