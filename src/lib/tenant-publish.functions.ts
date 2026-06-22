@@ -62,3 +62,41 @@ export const markTenantPublished = createServerFn({ method: "POST" })
 
     return { ok: true, publishedAt, commit: data.commit };
   });
+
+// Lista os últimos eventos de deploy do tenant a partir do audit_logs.
+// Usado pelo painel de domínio para mostrar histórico de promoções.
+export const listTenantDeployHistory = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    z
+      .object({
+        slug: z.string().min(1),
+        limit: z.number().int().min(1).max(50).optional(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", {
+      _user_id: userId,
+      _role: "admin",
+    });
+    if (!isAdmin) throw new Error("Forbidden");
+
+    const { data: company } = await supabase
+      .from("companies")
+      .select("id")
+      .eq("subdomain", data.slug)
+      .maybeSingle();
+    if (!company) return { rows: [] };
+
+    const { data: rows, error } = await supabase
+      .from("audit_logs")
+      .select("id,created_at,action,user_email,before,after,metadata")
+      .eq("company_id", company.id)
+      .eq("action", "tenant.deploy.marked")
+      .order("created_at", { ascending: false })
+      .limit(data.limit ?? 10);
+    if (error) throw error;
+    return { rows: rows ?? [] };
+  });
