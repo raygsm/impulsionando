@@ -459,6 +459,7 @@ import { Route as AuthenticatedAdminDocumentsFilesHealthRouteImport } from './ro
 import { Route as AuthenticatedAdminDataQualityRouteImport } from './routes/_authenticated/admin.data-quality'
 import { Route as AuthenticatedAdminCustomerSuccessRouteImport } from './routes/_authenticated/admin.customer-success'
 import { Route as AuthenticatedAdminCrmHealthRouteImport } from './routes/_authenticated/admin.crm-health'
+import { Route as AuthenticatedAdminCrmFunnelHealthRouteImport } from './routes/_authenticated/admin.crm-funnel-health'
 import { Route as AuthenticatedAdminConversionFunnelRouteImport } from './routes/_authenticated/admin.conversion-funnel'
 import { Route as AuthenticatedAdminContabHealthRouteImport } from './routes/_authenticated/admin.contab-health'
 import { Route as AuthenticatedAdminContabCockpitHealthRouteImport } from './routes/_authenticated/admin.contab-cockpit-health'
@@ -3069,6 +3070,12 @@ const AuthenticatedAdminCrmHealthRoute =
     path: '/admin/crm-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminCrmFunnelHealthRoute =
+  AuthenticatedAdminCrmFunnelHealthRouteImport.update({
+    id: '/admin/crm-funnel-health',
+    path: '/admin/crm-funnel-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminConversionFunnelRoute =
   AuthenticatedAdminConversionFunnelRouteImport.update({
     id: '/admin/conversion-funnel',
@@ -3899,6 +3906,7 @@ export interface FileRoutesByFullPath {
   '/admin/contab-cockpit-health': typeof AuthenticatedAdminContabCockpitHealthRoute
   '/admin/contab-health': typeof AuthenticatedAdminContabHealthRoute
   '/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
+  '/admin/crm-funnel-health': typeof AuthenticatedAdminCrmFunnelHealthRoute
   '/admin/crm-health': typeof AuthenticatedAdminCrmHealthRoute
   '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
@@ -4443,6 +4451,7 @@ export interface FileRoutesByTo {
   '/admin/contab-cockpit-health': typeof AuthenticatedAdminContabCockpitHealthRoute
   '/admin/contab-health': typeof AuthenticatedAdminContabHealthRoute
   '/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
+  '/admin/crm-funnel-health': typeof AuthenticatedAdminCrmFunnelHealthRoute
   '/admin/crm-health': typeof AuthenticatedAdminCrmHealthRoute
   '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
@@ -5001,6 +5010,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/contab-cockpit-health': typeof AuthenticatedAdminContabCockpitHealthRoute
   '/_authenticated/admin/contab-health': typeof AuthenticatedAdminContabHealthRoute
   '/_authenticated/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
+  '/_authenticated/admin/crm-funnel-health': typeof AuthenticatedAdminCrmFunnelHealthRoute
   '/_authenticated/admin/crm-health': typeof AuthenticatedAdminCrmHealthRoute
   '/_authenticated/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/_authenticated/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
@@ -5558,6 +5568,7 @@ export interface FileRouteTypes {
     | '/admin/contab-cockpit-health'
     | '/admin/contab-health'
     | '/admin/conversion-funnel'
+    | '/admin/crm-funnel-health'
     | '/admin/crm-health'
     | '/admin/customer-success'
     | '/admin/data-quality'
@@ -6102,6 +6113,7 @@ export interface FileRouteTypes {
     | '/admin/contab-cockpit-health'
     | '/admin/contab-health'
     | '/admin/conversion-funnel'
+    | '/admin/crm-funnel-health'
     | '/admin/crm-health'
     | '/admin/customer-success'
     | '/admin/data-quality'
@@ -6659,6 +6671,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/contab-cockpit-health'
     | '/_authenticated/admin/contab-health'
     | '/_authenticated/admin/conversion-funnel'
+    | '/_authenticated/admin/crm-funnel-health'
     | '/_authenticated/admin/crm-health'
     | '/_authenticated/admin/customer-success'
     | '/_authenticated/admin/data-quality'
@@ -10313,6 +10326,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCrmHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/crm-funnel-health': {
+      id: '/_authenticated/admin/crm-funnel-health'
+      path: '/admin/crm-funnel-health'
+      fullPath: '/admin/crm-funnel-health'
+      preLoaderRoute: typeof AuthenticatedAdminCrmFunnelHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/conversion-funnel': {
       id: '/_authenticated/admin/conversion-funnel'
       path: '/admin/conversion-funnel'
@@ -11738,6 +11758,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminContabCockpitHealthRoute: typeof AuthenticatedAdminContabCockpitHealthRoute
   AuthenticatedAdminContabHealthRoute: typeof AuthenticatedAdminContabHealthRoute
   AuthenticatedAdminConversionFunnelRoute: typeof AuthenticatedAdminConversionFunnelRoute
+  AuthenticatedAdminCrmFunnelHealthRoute: typeof AuthenticatedAdminCrmFunnelHealthRoute
   AuthenticatedAdminCrmHealthRoute: typeof AuthenticatedAdminCrmHealthRoute
   AuthenticatedAdminCustomerSuccessRoute: typeof AuthenticatedAdminCustomerSuccessRoute
   AuthenticatedAdminDataQualityRoute: typeof AuthenticatedAdminDataQualityRoute
@@ -11991,6 +12012,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminContabHealthRoute: AuthenticatedAdminContabHealthRoute,
   AuthenticatedAdminConversionFunnelRoute:
     AuthenticatedAdminConversionFunnelRoute,
+  AuthenticatedAdminCrmFunnelHealthRoute:
+    AuthenticatedAdminCrmFunnelHealthRoute,
   AuthenticatedAdminCrmHealthRoute: AuthenticatedAdminCrmHealthRoute,
   AuthenticatedAdminCustomerSuccessRoute:
     AuthenticatedAdminCustomerSuccessRoute,
