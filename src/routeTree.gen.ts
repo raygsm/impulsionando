@@ -459,6 +459,7 @@ import { Route as AuthenticatedAdminCustomerSuccessRouteImport } from './routes/
 import { Route as AuthenticatedAdminCrmHealthRouteImport } from './routes/_authenticated/admin.crm-health'
 import { Route as AuthenticatedAdminConversionFunnelRouteImport } from './routes/_authenticated/admin.conversion-funnel'
 import { Route as AuthenticatedAdminContabHealthRouteImport } from './routes/_authenticated/admin.contab-health'
+import { Route as AuthenticatedAdminContabCockpitHealthRouteImport } from './routes/_authenticated/admin.contab-cockpit-health'
 import { Route as AuthenticatedAdminConsumerJourneyHealthRouteImport } from './routes/_authenticated/admin.consumer-journey-health'
 import { Route as AuthenticatedAdminConfigCatalogHealthRouteImport } from './routes/_authenticated/admin.config-catalog-health'
 import { Route as AuthenticatedAdminCommunityHealthRouteImport } from './routes/_authenticated/admin.community-health'
@@ -3064,6 +3065,12 @@ const AuthenticatedAdminContabHealthRoute =
     path: '/admin/contab-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminContabCockpitHealthRoute =
+  AuthenticatedAdminContabCockpitHealthRouteImport.update({
+    id: '/admin/contab-cockpit-health',
+    path: '/admin/contab-cockpit-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminConsumerJourneyHealthRoute =
   AuthenticatedAdminConsumerJourneyHealthRouteImport.update({
     id: '/admin/consumer-journey-health',
@@ -3859,6 +3866,7 @@ export interface FileRoutesByFullPath {
   '/admin/community-health': typeof AuthenticatedAdminCommunityHealthRoute
   '/admin/config-catalog-health': typeof AuthenticatedAdminConfigCatalogHealthRoute
   '/admin/consumer-journey-health': typeof AuthenticatedAdminConsumerJourneyHealthRoute
+  '/admin/contab-cockpit-health': typeof AuthenticatedAdminContabCockpitHealthRoute
   '/admin/contab-health': typeof AuthenticatedAdminContabHealthRoute
   '/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
   '/admin/crm-health': typeof AuthenticatedAdminCrmHealthRoute
@@ -4398,6 +4406,7 @@ export interface FileRoutesByTo {
   '/admin/community-health': typeof AuthenticatedAdminCommunityHealthRoute
   '/admin/config-catalog-health': typeof AuthenticatedAdminConfigCatalogHealthRoute
   '/admin/consumer-journey-health': typeof AuthenticatedAdminConsumerJourneyHealthRoute
+  '/admin/contab-cockpit-health': typeof AuthenticatedAdminContabCockpitHealthRoute
   '/admin/contab-health': typeof AuthenticatedAdminContabHealthRoute
   '/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
   '/admin/crm-health': typeof AuthenticatedAdminCrmHealthRoute
@@ -4951,6 +4960,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/community-health': typeof AuthenticatedAdminCommunityHealthRoute
   '/_authenticated/admin/config-catalog-health': typeof AuthenticatedAdminConfigCatalogHealthRoute
   '/_authenticated/admin/consumer-journey-health': typeof AuthenticatedAdminConsumerJourneyHealthRoute
+  '/_authenticated/admin/contab-cockpit-health': typeof AuthenticatedAdminContabCockpitHealthRoute
   '/_authenticated/admin/contab-health': typeof AuthenticatedAdminContabHealthRoute
   '/_authenticated/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
   '/_authenticated/admin/crm-health': typeof AuthenticatedAdminCrmHealthRoute
@@ -5503,6 +5513,7 @@ export interface FileRouteTypes {
     | '/admin/community-health'
     | '/admin/config-catalog-health'
     | '/admin/consumer-journey-health'
+    | '/admin/contab-cockpit-health'
     | '/admin/contab-health'
     | '/admin/conversion-funnel'
     | '/admin/crm-health'
@@ -6042,6 +6053,7 @@ export interface FileRouteTypes {
     | '/admin/community-health'
     | '/admin/config-catalog-health'
     | '/admin/consumer-journey-health'
+    | '/admin/contab-cockpit-health'
     | '/admin/contab-health'
     | '/admin/conversion-funnel'
     | '/admin/crm-health'
@@ -6594,6 +6606,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/community-health'
     | '/_authenticated/admin/config-catalog-health'
     | '/_authenticated/admin/consumer-journey-health'
+    | '/_authenticated/admin/contab-cockpit-health'
     | '/_authenticated/admin/contab-health'
     | '/_authenticated/admin/conversion-funnel'
     | '/_authenticated/admin/crm-health'
@@ -10248,6 +10261,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminContabHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/contab-cockpit-health': {
+      id: '/_authenticated/admin/contab-cockpit-health'
+      path: '/admin/contab-cockpit-health'
+      fullPath: '/admin/contab-cockpit-health'
+      preLoaderRoute: typeof AuthenticatedAdminContabCockpitHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/consumer-journey-health': {
       id: '/_authenticated/admin/consumer-journey-health'
       path: '/admin/consumer-journey-health'
@@ -11633,6 +11653,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCommunityHealthRoute: typeof AuthenticatedAdminCommunityHealthRoute
   AuthenticatedAdminConfigCatalogHealthRoute: typeof AuthenticatedAdminConfigCatalogHealthRoute
   AuthenticatedAdminConsumerJourneyHealthRoute: typeof AuthenticatedAdminConsumerJourneyHealthRoute
+  AuthenticatedAdminContabCockpitHealthRoute: typeof AuthenticatedAdminContabCockpitHealthRoute
   AuthenticatedAdminContabHealthRoute: typeof AuthenticatedAdminContabHealthRoute
   AuthenticatedAdminConversionFunnelRoute: typeof AuthenticatedAdminConversionFunnelRoute
   AuthenticatedAdminCrmHealthRoute: typeof AuthenticatedAdminCrmHealthRoute
@@ -11877,6 +11898,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminConfigCatalogHealthRoute,
   AuthenticatedAdminConsumerJourneyHealthRoute:
     AuthenticatedAdminConsumerJourneyHealthRoute,
+  AuthenticatedAdminContabCockpitHealthRoute:
+    AuthenticatedAdminContabCockpitHealthRoute,
   AuthenticatedAdminContabHealthRoute: AuthenticatedAdminContabHealthRoute,
   AuthenticatedAdminConversionFunnelRoute:
     AuthenticatedAdminConversionFunnelRoute,
