@@ -214,7 +214,8 @@ export const submitRiomedSellerApplication = createServerFn({ method: "POST" })
         notes: data.notes || null,
         status: "pending",
         commission_rate: 0,
-        metadata: { source: "self_signup" },
+        seller_code: `VEND-${Date.now().toString(36).toUpperCase()}`,
+        metadata: { source: "self_signup" } as any,
       })
       .select("id")
       .single();
