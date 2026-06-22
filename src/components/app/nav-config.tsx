@@ -12,7 +12,7 @@ import {
   Calculator, Activity, RefreshCw, BookOpen,
   Beer, Store, Send,
   Settings as SettingsIcon, Globe, FlaskConical, Server, Flag, FileCode,
-  Rocket, Gauge, LineChart, ClipboardList, Workflow, ScrollText,
+  Rocket, Gauge, LineChart, ClipboardList, Workflow, ScrollText, Filter,
 } from "lucide-react";
 
 export type NavAudience = "core" | "white-label" | "empresa" | "consumidor";
