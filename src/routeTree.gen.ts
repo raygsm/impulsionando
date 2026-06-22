@@ -416,6 +416,7 @@ import { Route as AuthenticatedAdminPayoutsMonetizationHealthRouteImport } from 
 import { Route as AuthenticatedAdminOnboardingProvisioningHealthRouteImport } from './routes/_authenticated/admin.onboarding-provisioning-health'
 import { Route as AuthenticatedAdminNotificationsCockpitRouteImport } from './routes/_authenticated/admin.notifications-cockpit'
 import { Route as AuthenticatedAdminNotificationDeliveryRouteImport } from './routes/_authenticated/admin.notification-delivery'
+import { Route as AuthenticatedAdminNotificationDeliverabilityHealthRouteImport } from './routes/_authenticated/admin.notification-deliverability-health'
 import { Route as AuthenticatedAdminNichePlansRouteImport } from './routes/_authenticated/admin.niche-plans'
 import { Route as AuthenticatedAdminNicheMatrixRouteImport } from './routes/_authenticated/admin.niche-matrix'
 import { Route as AuthenticatedAdminN8nConsoleRouteImport } from './routes/_authenticated/admin.n8n-console'
@@ -2802,6 +2803,12 @@ const AuthenticatedAdminNotificationDeliveryRoute =
     path: '/admin/notification-delivery',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminNotificationDeliverabilityHealthRoute =
+  AuthenticatedAdminNotificationDeliverabilityHealthRouteImport.update({
+    id: '/admin/notification-deliverability-health',
+    path: '/admin/notification-deliverability-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminNichePlansRoute =
   AuthenticatedAdminNichePlansRouteImport.update({
     id: '/admin/niche-plans',
@@ -3870,6 +3877,7 @@ export interface FileRoutesByFullPath {
   '/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
+  '/admin/notification-deliverability-health': typeof AuthenticatedAdminNotificationDeliverabilityHealthRoute
   '/admin/notification-delivery': typeof AuthenticatedAdminNotificationDeliveryRoute
   '/admin/notifications-cockpit': typeof AuthenticatedAdminNotificationsCockpitRoute
   '/admin/onboarding-provisioning-health': typeof AuthenticatedAdminOnboardingProvisioningHealthRoute
@@ -4405,6 +4413,7 @@ export interface FileRoutesByTo {
   '/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
+  '/admin/notification-deliverability-health': typeof AuthenticatedAdminNotificationDeliverabilityHealthRoute
   '/admin/notification-delivery': typeof AuthenticatedAdminNotificationDeliveryRoute
   '/admin/notifications-cockpit': typeof AuthenticatedAdminNotificationsCockpitRoute
   '/admin/onboarding-provisioning-health': typeof AuthenticatedAdminOnboardingProvisioningHealthRoute
@@ -4954,6 +4963,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/_authenticated/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
   '/_authenticated/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
+  '/_authenticated/admin/notification-deliverability-health': typeof AuthenticatedAdminNotificationDeliverabilityHealthRoute
   '/_authenticated/admin/notification-delivery': typeof AuthenticatedAdminNotificationDeliveryRoute
   '/_authenticated/admin/notifications-cockpit': typeof AuthenticatedAdminNotificationsCockpitRoute
   '/_authenticated/admin/onboarding-provisioning-health': typeof AuthenticatedAdminOnboardingProvisioningHealthRoute
@@ -5502,6 +5512,7 @@ export interface FileRouteTypes {
     | '/admin/n8n-console'
     | '/admin/niche-matrix'
     | '/admin/niche-plans'
+    | '/admin/notification-deliverability-health'
     | '/admin/notification-delivery'
     | '/admin/notifications-cockpit'
     | '/admin/onboarding-provisioning-health'
@@ -6037,6 +6048,7 @@ export interface FileRouteTypes {
     | '/admin/n8n-console'
     | '/admin/niche-matrix'
     | '/admin/niche-plans'
+    | '/admin/notification-deliverability-health'
     | '/admin/notification-delivery'
     | '/admin/notifications-cockpit'
     | '/admin/onboarding-provisioning-health'
@@ -6585,6 +6597,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/n8n-console'
     | '/_authenticated/admin/niche-matrix'
     | '/_authenticated/admin/niche-plans'
+    | '/_authenticated/admin/notification-deliverability-health'
     | '/_authenticated/admin/notification-delivery'
     | '/_authenticated/admin/notifications-cockpit'
     | '/_authenticated/admin/onboarding-provisioning-health'
@@ -9895,6 +9908,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminNotificationDeliveryRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/notification-deliverability-health': {
+      id: '/_authenticated/admin/notification-deliverability-health'
+      path: '/admin/notification-deliverability-health'
+      fullPath: '/admin/notification-deliverability-health'
+      preLoaderRoute: typeof AuthenticatedAdminNotificationDeliverabilityHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/niche-plans': {
       id: '/_authenticated/admin/niche-plans'
       path: '/admin/niche-plans'
@@ -11592,6 +11612,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminN8nConsoleRoute: typeof AuthenticatedAdminN8nConsoleRoute
   AuthenticatedAdminNicheMatrixRoute: typeof AuthenticatedAdminNicheMatrixRoute
   AuthenticatedAdminNichePlansRoute: typeof AuthenticatedAdminNichePlansRoute
+  AuthenticatedAdminNotificationDeliverabilityHealthRoute: typeof AuthenticatedAdminNotificationDeliverabilityHealthRoute
   AuthenticatedAdminNotificationDeliveryRoute: typeof AuthenticatedAdminNotificationDeliveryRoute
   AuthenticatedAdminNotificationsCockpitRoute: typeof AuthenticatedAdminNotificationsCockpitRoute
   AuthenticatedAdminOnboardingProvisioningHealthRoute: typeof AuthenticatedAdminOnboardingProvisioningHealthRoute
@@ -11849,6 +11870,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminN8nConsoleRoute: AuthenticatedAdminN8nConsoleRoute,
   AuthenticatedAdminNicheMatrixRoute: AuthenticatedAdminNicheMatrixRoute,
   AuthenticatedAdminNichePlansRoute: AuthenticatedAdminNichePlansRoute,
+  AuthenticatedAdminNotificationDeliverabilityHealthRoute:
+    AuthenticatedAdminNotificationDeliverabilityHealthRoute,
   AuthenticatedAdminNotificationDeliveryRoute:
     AuthenticatedAdminNotificationDeliveryRoute,
   AuthenticatedAdminNotificationsCockpitRoute:
