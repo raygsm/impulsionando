@@ -579,6 +579,7 @@ import { Route as AuthenticatedCoreClienteIdPaginasRouteImport } from './routes/
 import { Route as AuthenticatedAdminClientesRiomedRoutingRouteImport } from './routes/_authenticated/admin.clientes.riomed.routing'
 import { Route as AuthenticatedAdminClientesRiomedProdutosRouteImport } from './routes/_authenticated/admin.clientes.riomed.produtos'
 import { Route as AuthenticatedAdminClientesRiomedLocacaoRouteImport } from './routes/_authenticated/admin.clientes.riomed.locacao'
+import { Route as AuthenticatedAdminClientesRiomedConfiguracoesCamposRouteImport } from './routes/_authenticated/admin.clientes.riomed.configuracoes-campos'
 import { Route as AuthenticatedAdminClientesRiomedCarrinhosRouteImport } from './routes/_authenticated/admin.clientes.riomed.carrinhos'
 import { Route as AuthenticatedAdminClientesRiomedAssistenteRouteImport } from './routes/_authenticated/admin.clientes.riomed.assistente'
 import { Route as AuthenticatedAdminClientesRiomedAssistenciaRouteImport } from './routes/_authenticated/admin.clientes.riomed.assistencia'
@@ -3796,6 +3797,12 @@ const AuthenticatedAdminClientesRiomedLocacaoRoute =
     path: '/locacao',
     getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
   } as any)
+const AuthenticatedAdminClientesRiomedConfiguracoesCamposRoute =
+  AuthenticatedAdminClientesRiomedConfiguracoesCamposRouteImport.update({
+    id: '/configuracoes-campos',
+    path: '/configuracoes-campos',
+    getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
+  } as any)
 const AuthenticatedAdminClientesRiomedCarrinhosRoute =
   AuthenticatedAdminClientesRiomedCarrinhosRouteImport.update({
     id: '/carrinhos',
@@ -4393,6 +4400,7 @@ export interface FileRoutesByFullPath {
   '/admin/clientes/riomed/assistencia': typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
   '/admin/clientes/riomed/assistente': typeof AuthenticatedAdminClientesRiomedAssistenteRoute
   '/admin/clientes/riomed/carrinhos': typeof AuthenticatedAdminClientesRiomedCarrinhosRoute
+  '/admin/clientes/riomed/configuracoes-campos': typeof AuthenticatedAdminClientesRiomedConfiguracoesCamposRoute
   '/admin/clientes/riomed/locacao': typeof AuthenticatedAdminClientesRiomedLocacaoRoute
   '/admin/clientes/riomed/produtos': typeof AuthenticatedAdminClientesRiomedProdutosRoute
   '/admin/clientes/riomed/routing': typeof AuthenticatedAdminClientesRiomedRoutingRoute
@@ -4957,6 +4965,7 @@ export interface FileRoutesByTo {
   '/admin/clientes/riomed/assistencia': typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
   '/admin/clientes/riomed/assistente': typeof AuthenticatedAdminClientesRiomedAssistenteRoute
   '/admin/clientes/riomed/carrinhos': typeof AuthenticatedAdminClientesRiomedCarrinhosRoute
+  '/admin/clientes/riomed/configuracoes-campos': typeof AuthenticatedAdminClientesRiomedConfiguracoesCamposRoute
   '/admin/clientes/riomed/locacao': typeof AuthenticatedAdminClientesRiomedLocacaoRoute
   '/admin/clientes/riomed/produtos': typeof AuthenticatedAdminClientesRiomedProdutosRoute
   '/admin/clientes/riomed/routing': typeof AuthenticatedAdminClientesRiomedRoutingRoute
@@ -5535,6 +5544,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/clientes/riomed/assistencia': typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
   '/_authenticated/admin/clientes/riomed/assistente': typeof AuthenticatedAdminClientesRiomedAssistenteRoute
   '/_authenticated/admin/clientes/riomed/carrinhos': typeof AuthenticatedAdminClientesRiomedCarrinhosRoute
+  '/_authenticated/admin/clientes/riomed/configuracoes-campos': typeof AuthenticatedAdminClientesRiomedConfiguracoesCamposRoute
   '/_authenticated/admin/clientes/riomed/locacao': typeof AuthenticatedAdminClientesRiomedLocacaoRoute
   '/_authenticated/admin/clientes/riomed/produtos': typeof AuthenticatedAdminClientesRiomedProdutosRoute
   '/_authenticated/admin/clientes/riomed/routing': typeof AuthenticatedAdminClientesRiomedRoutingRoute
@@ -6112,6 +6122,7 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed/assistencia'
     | '/admin/clientes/riomed/assistente'
     | '/admin/clientes/riomed/carrinhos'
+    | '/admin/clientes/riomed/configuracoes-campos'
     | '/admin/clientes/riomed/locacao'
     | '/admin/clientes/riomed/produtos'
     | '/admin/clientes/riomed/routing'
@@ -6676,6 +6687,7 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed/assistencia'
     | '/admin/clientes/riomed/assistente'
     | '/admin/clientes/riomed/carrinhos'
+    | '/admin/clientes/riomed/configuracoes-campos'
     | '/admin/clientes/riomed/locacao'
     | '/admin/clientes/riomed/produtos'
     | '/admin/clientes/riomed/routing'
@@ -7253,6 +7265,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/clientes/riomed/assistencia'
     | '/_authenticated/admin/clientes/riomed/assistente'
     | '/_authenticated/admin/clientes/riomed/carrinhos'
+    | '/_authenticated/admin/clientes/riomed/configuracoes-campos'
     | '/_authenticated/admin/clientes/riomed/locacao'
     | '/_authenticated/admin/clientes/riomed/produtos'
     | '/_authenticated/admin/clientes/riomed/routing'
@@ -11413,6 +11426,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientesRiomedLocacaoRouteImport
       parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
     }
+    '/_authenticated/admin/clientes/riomed/configuracoes-campos': {
+      id: '/_authenticated/admin/clientes/riomed/configuracoes-campos'
+      path: '/configuracoes-campos'
+      fullPath: '/admin/clientes/riomed/configuracoes-campos'
+      preLoaderRoute: typeof AuthenticatedAdminClientesRiomedConfiguracoesCamposRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
+    }
     '/_authenticated/admin/clientes/riomed/carrinhos': {
       id: '/_authenticated/admin/clientes/riomed/carrinhos'
       path: '/carrinhos'
@@ -12069,6 +12089,7 @@ interface AuthenticatedAdminClientesRiomedRouteChildren {
   AuthenticatedAdminClientesRiomedAssistenciaRoute: typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
   AuthenticatedAdminClientesRiomedAssistenteRoute: typeof AuthenticatedAdminClientesRiomedAssistenteRoute
   AuthenticatedAdminClientesRiomedCarrinhosRoute: typeof AuthenticatedAdminClientesRiomedCarrinhosRoute
+  AuthenticatedAdminClientesRiomedConfiguracoesCamposRoute: typeof AuthenticatedAdminClientesRiomedConfiguracoesCamposRoute
   AuthenticatedAdminClientesRiomedLocacaoRoute: typeof AuthenticatedAdminClientesRiomedLocacaoRoute
   AuthenticatedAdminClientesRiomedProdutosRoute: typeof AuthenticatedAdminClientesRiomedProdutosRoute
   AuthenticatedAdminClientesRiomedRoutingRoute: typeof AuthenticatedAdminClientesRiomedRoutingRoute
@@ -12082,6 +12103,8 @@ const AuthenticatedAdminClientesRiomedRouteChildren: AuthenticatedAdminClientesR
       AuthenticatedAdminClientesRiomedAssistenteRoute,
     AuthenticatedAdminClientesRiomedCarrinhosRoute:
       AuthenticatedAdminClientesRiomedCarrinhosRoute,
+    AuthenticatedAdminClientesRiomedConfiguracoesCamposRoute:
+      AuthenticatedAdminClientesRiomedConfiguracoesCamposRoute,
     AuthenticatedAdminClientesRiomedLocacaoRoute:
       AuthenticatedAdminClientesRiomedLocacaoRoute,
     AuthenticatedAdminClientesRiomedProdutosRoute:
@@ -13009,13 +13032,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
