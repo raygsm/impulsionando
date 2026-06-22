@@ -19697,6 +19697,101 @@ export type Database = {
           },
         ]
       }
+      riomed_products: {
+        Row: {
+          audiences: string[]
+          category: string | null
+          company_id: string
+          created_at: string
+          currency: string
+          description: string | null
+          display_order: number
+          id: string
+          image_url: string | null
+          is_active: boolean
+          metadata: Json
+          modality: string
+          name: string
+          price_rental_daily: number | null
+          price_rental_monthly: number | null
+          price_sale: number | null
+          sku: string | null
+          stock: number
+          updated_at: string
+        }
+        Insert: {
+          audiences?: string[]
+          category?: string | null
+          company_id: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          metadata?: Json
+          modality?: string
+          name: string
+          price_rental_daily?: number | null
+          price_rental_monthly?: number | null
+          price_sale?: number | null
+          sku?: string | null
+          stock?: number
+          updated_at?: string
+        }
+        Update: {
+          audiences?: string[]
+          category?: string | null
+          company_id?: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          metadata?: Json
+          modality?: string
+          name?: string
+          price_rental_daily?: number | null
+          price_rental_monthly?: number | null
+          price_sale?: number | null
+          sku?: string | null
+          stock?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_products_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_products_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_products_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_products_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       runtime_events: {
         Row: {
           company_id: string | null
