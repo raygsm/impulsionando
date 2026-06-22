@@ -109,10 +109,43 @@ function DomainsCockpitPage() {
         </Button>
       </header>
 
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <Chip
+          label={`Todos · ${summary.total}`}
+          active={filter === "all"}
+          onClick={() => setFilter("all")}
+        />
+        <Chip
+          label={`Em dia · ${summary.sync}`}
+          active={filter === "sync"}
+          tone="green"
+          onClick={() => setFilter("sync")}
+        />
+        <Chip
+          label={`Divergente · ${summary.drift}`}
+          active={filter === "drift"}
+          tone="amber"
+          onClick={() => setFilter("drift")}
+        />
+        <Chip
+          label={`Sem registro · ${summary.none}`}
+          active={filter === "none"}
+          tone="muted"
+          onClick={() => setFilter("none")}
+        />
+        <span className="ml-auto text-muted-foreground">
+          build atual <code>{currentShort || "—"}</code>
+        </span>
+      </div>
+
       {isLoading ? (
         <div className="text-sm text-muted-foreground">Carregando tenants…</div>
       ) : !data?.rows.length ? (
         <div className="text-sm text-muted-foreground">Nenhum tenant ativo.</div>
+      ) : !visibleRows.length ? (
+        <div className="text-sm text-muted-foreground">
+          Nenhum tenant nesse filtro.
+        </div>
       ) : (
         <div className="border rounded-md overflow-hidden">
           <table className="w-full text-sm">
