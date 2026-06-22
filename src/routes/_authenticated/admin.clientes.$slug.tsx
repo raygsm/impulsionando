@@ -205,7 +205,7 @@ function TenantOverviewPage() {
         />
       </section>
 
-      <LocaleStrip company={company} />
+      <LocaleStrip company={company} slug={slug} />
 
       <section className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
         <ActionCard
