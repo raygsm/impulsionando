@@ -161,7 +161,7 @@ function DomainsCockpitPage() {
               </tr>
             </thead>
             <tbody>
-              {data.rows.map((r) => {
+              {visibleRows.map((r) => {
                 const currentCommit = BUILD_INFO.commit;
                 const inSync =
                   r.publishedCommit &&
