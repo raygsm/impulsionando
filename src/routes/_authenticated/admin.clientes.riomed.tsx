@@ -59,6 +59,8 @@ function RioMedDossier() {
           </p>
           <p className="text-xs text-muted-foreground mt-1">
             Subdomínio: <code className="px-1 bg-muted rounded">{identity?.full_domain ?? `${company.subdomain}.impulsionando.com.br`}</code>
+            {" · "}
+            <a href="/admin/clientes/riomed/dominio" className="underline text-primary">Domínio &amp; Deploy</a>
           </p>
         </div>
         <div className="text-right text-xs space-y-1">
