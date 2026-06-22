@@ -186,6 +186,7 @@ import { Route as AuthenticatedCervejariaRouteImport } from './routes/_authentic
 import { Route as AuthenticatedBiRouteImport } from './routes/_authenticated/bi'
 import { Route as AuthenticatedAutomacoesRouteImport } from './routes/_authenticated/automacoes'
 import { Route as AuthenticatedAuditRouteImport } from './routes/_authenticated/audit'
+import { Route as AuthenticatedAreaClienteRouteImport } from './routes/_authenticated/area-cliente'
 import { Route as AuthenticatedAjudaRouteImport } from './routes/_authenticated/ajuda'
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
 import { Route as AuthenticatedAffiliatesRouteImport } from './routes/_authenticated/affiliates'
@@ -1509,6 +1510,12 @@ const AuthenticatedAuditRoute = AuthenticatedAuditRouteImport.update({
   path: '/audit',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAreaClienteRoute =
+  AuthenticatedAreaClienteRouteImport.update({
+    id: '/area-cliente',
+    path: '/area-cliente',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAjudaRoute = AuthenticatedAjudaRouteImport.update({
   id: '/ajuda',
   path: '/ajuda',
@@ -4062,6 +4069,7 @@ export interface FileRoutesByFullPath {
   '/affiliates': typeof AuthenticatedAffiliatesRouteWithChildren
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/ajuda': typeof AuthenticatedAjudaRoute
+  '/area-cliente': typeof AuthenticatedAreaClienteRoute
   '/audit': typeof AuthenticatedAuditRoute
   '/automacoes': typeof AuthenticatedAutomacoesRoute
   '/bi': typeof AuthenticatedBiRouteWithChildren
@@ -4661,6 +4669,7 @@ export interface FileRoutesByTo {
   '/access-profiles': typeof AuthenticatedAccessProfilesRouteWithChildren
   '/adm': typeof AuthenticatedAdmRouteWithChildren
   '/ajuda': typeof AuthenticatedAjudaRoute
+  '/area-cliente': typeof AuthenticatedAreaClienteRoute
   '/audit': typeof AuthenticatedAuditRoute
   '/automacoes': typeof AuthenticatedAutomacoesRoute
   '/cervejaria': typeof AuthenticatedCervejariaRouteWithChildren
@@ -5260,6 +5269,7 @@ export interface FileRoutesById {
   '/_authenticated/affiliates': typeof AuthenticatedAffiliatesRouteWithChildren
   '/_authenticated/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/_authenticated/ajuda': typeof AuthenticatedAjudaRoute
+  '/_authenticated/area-cliente': typeof AuthenticatedAreaClienteRoute
   '/_authenticated/audit': typeof AuthenticatedAuditRoute
   '/_authenticated/automacoes': typeof AuthenticatedAutomacoesRoute
   '/_authenticated/bi': typeof AuthenticatedBiRouteWithChildren
@@ -5867,6 +5877,7 @@ export interface FileRouteTypes {
     | '/affiliates'
     | '/agenda'
     | '/ajuda'
+    | '/area-cliente'
     | '/audit'
     | '/automacoes'
     | '/bi'
@@ -6466,6 +6477,7 @@ export interface FileRouteTypes {
     | '/access-profiles'
     | '/adm'
     | '/ajuda'
+    | '/area-cliente'
     | '/audit'
     | '/automacoes'
     | '/cervejaria'
@@ -7064,6 +7076,7 @@ export interface FileRouteTypes {
     | '/_authenticated/affiliates'
     | '/_authenticated/agenda'
     | '/_authenticated/ajuda'
+    | '/_authenticated/area-cliente'
     | '/_authenticated/audit'
     | '/_authenticated/automacoes'
     | '/_authenticated/bi'
@@ -9025,6 +9038,13 @@ declare module '@tanstack/react-router' {
       path: '/audit'
       fullPath: '/audit'
       preLoaderRoute: typeof AuthenticatedAuditRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/area-cliente': {
+      id: '/_authenticated/area-cliente'
+      path: '/area-cliente'
+      fullPath: '/area-cliente'
+      preLoaderRoute: typeof AuthenticatedAreaClienteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/ajuda': {
@@ -12720,6 +12740,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAffiliatesRoute: typeof AuthenticatedAffiliatesRouteWithChildren
   AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRouteWithChildren
   AuthenticatedAjudaRoute: typeof AuthenticatedAjudaRoute
+  AuthenticatedAreaClienteRoute: typeof AuthenticatedAreaClienteRoute
   AuthenticatedAuditRoute: typeof AuthenticatedAuditRoute
   AuthenticatedAutomacoesRoute: typeof AuthenticatedAutomacoesRoute
   AuthenticatedBiRoute: typeof AuthenticatedBiRouteWithChildren
@@ -12969,6 +12990,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAffiliatesRoute: AuthenticatedAffiliatesRouteWithChildren,
   AuthenticatedAgendaRoute: AuthenticatedAgendaRouteWithChildren,
   AuthenticatedAjudaRoute: AuthenticatedAjudaRoute,
+  AuthenticatedAreaClienteRoute: AuthenticatedAreaClienteRoute,
   AuthenticatedAuditRoute: AuthenticatedAuditRoute,
   AuthenticatedAutomacoesRoute: AuthenticatedAutomacoesRoute,
   AuthenticatedBiRoute: AuthenticatedBiRouteWithChildren,
@@ -13660,13 +13682,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
