@@ -226,22 +226,22 @@ function FieldDialog({
   const save = useMutation({
     mutationFn: async () => {
       if (!companyId) throw new Error("Empresa não identificada");
+      if (!form.key || !form.label) throw new Error("Chave e rótulo são obrigatórios");
       const payload = {
         company_id: companyId,
         entity,
         key: form.key,
         label: form.label,
         field_type: form.field_type ?? "text",
-        section: form.section || null,
+        section: form.section ?? null,
         is_required: form.is_required ?? false,
         is_active: form.is_active ?? true,
         visibility: form.visibility ?? "team",
-        help_text: form.help_text || null,
-        placeholder: form.placeholder || null,
-        example: form.example || null,
+        help_text: form.help_text ?? null,
+        placeholder: form.placeholder ?? null,
+        example: form.example ?? null,
         sort_order: form.sort_order ?? maxSortOrder + 10,
       };
-      if (!payload.key || !payload.label) throw new Error("Chave e rótulo são obrigatórios");
       if (field) {
         const { error } = await supabase.from("core_field_definitions").update(payload).eq("id", field.id);
         if (error) throw error;
