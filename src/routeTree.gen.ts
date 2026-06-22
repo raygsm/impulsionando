@@ -102,6 +102,7 @@ import { Route as ShowroomAgendaRouteImport } from './routes/showroom.agenda'
 import { Route as ShowroomAcademiaRouteImport } from './routes/showroom.academia'
 import { Route as RiomedTrabalheConoscoRouteImport } from './routes/riomed.trabalhe-conosco'
 import { Route as RiomedProductosRouteImport } from './routes/riomed.productos'
+import { Route as RiomedPacientesRouteImport } from './routes/riomed.pacientes'
 import { Route as RiomedHospitalesRouteImport } from './routes/riomed.hospitales'
 import { Route as RiomedCotizarRouteImport } from './routes/riomed.cotizar'
 import { Route as RiomedCheckoutRouteImport } from './routes/riomed.checkout'
@@ -1085,6 +1086,11 @@ const RiomedTrabalheConoscoRoute = RiomedTrabalheConoscoRouteImport.update({
 const RiomedProductosRoute = RiomedProductosRouteImport.update({
   id: '/productos',
   path: '/productos',
+  getParentRoute: () => RiomedRoute,
+} as any)
+const RiomedPacientesRoute = RiomedPacientesRouteImport.update({
+  id: '/pacientes',
+  path: '/pacientes',
   getParentRoute: () => RiomedRoute,
 } as any)
 const RiomedHospitalesRoute = RiomedHospitalesRouteImport.update({
@@ -4174,6 +4180,7 @@ export interface FileRoutesByFullPath {
   '/riomed/checkout': typeof RiomedCheckoutRoute
   '/riomed/cotizar': typeof RiomedCotizarRoute
   '/riomed/hospitales': typeof RiomedHospitalesRoute
+  '/riomed/pacientes': typeof RiomedPacientesRoute
   '/riomed/productos': typeof RiomedProductosRoute
   '/riomed/trabalhe-conosco': typeof RiomedTrabalheConoscoRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
@@ -4770,6 +4777,7 @@ export interface FileRoutesByTo {
   '/riomed/checkout': typeof RiomedCheckoutRoute
   '/riomed/cotizar': typeof RiomedCotizarRoute
   '/riomed/hospitales': typeof RiomedHospitalesRoute
+  '/riomed/pacientes': typeof RiomedPacientesRoute
   '/riomed/productos': typeof RiomedProductosRoute
   '/riomed/trabalhe-conosco': typeof RiomedTrabalheConoscoRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
@@ -5381,6 +5389,7 @@ export interface FileRoutesById {
   '/riomed/checkout': typeof RiomedCheckoutRoute
   '/riomed/cotizar': typeof RiomedCotizarRoute
   '/riomed/hospitales': typeof RiomedHospitalesRoute
+  '/riomed/pacientes': typeof RiomedPacientesRoute
   '/riomed/productos': typeof RiomedProductosRoute
   '/riomed/trabalhe-conosco': typeof RiomedTrabalheConoscoRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
@@ -5991,6 +6000,7 @@ export interface FileRouteTypes {
     | '/riomed/checkout'
     | '/riomed/cotizar'
     | '/riomed/hospitales'
+    | '/riomed/pacientes'
     | '/riomed/productos'
     | '/riomed/trabalhe-conosco'
     | '/showroom/academia'
@@ -6587,6 +6597,7 @@ export interface FileRouteTypes {
     | '/riomed/checkout'
     | '/riomed/cotizar'
     | '/riomed/hospitales'
+    | '/riomed/pacientes'
     | '/riomed/productos'
     | '/riomed/trabalhe-conosco'
     | '/showroom/academia'
@@ -7197,6 +7208,7 @@ export interface FileRouteTypes {
     | '/riomed/checkout'
     | '/riomed/cotizar'
     | '/riomed/hospitales'
+    | '/riomed/pacientes'
     | '/riomed/productos'
     | '/riomed/trabalhe-conosco'
     | '/showroom/academia'
@@ -8487,6 +8499,13 @@ declare module '@tanstack/react-router' {
       path: '/productos'
       fullPath: '/riomed/productos'
       preLoaderRoute: typeof RiomedProductosRouteImport
+      parentRoute: typeof RiomedRoute
+    }
+    '/riomed/pacientes': {
+      id: '/riomed/pacientes'
+      path: '/pacientes'
+      fullPath: '/riomed/pacientes'
+      preLoaderRoute: typeof RiomedPacientesRouteImport
       parentRoute: typeof RiomedRoute
     }
     '/riomed/hospitales': {
@@ -13505,6 +13524,7 @@ interface RiomedRouteChildren {
   RiomedCheckoutRoute: typeof RiomedCheckoutRoute
   RiomedCotizarRoute: typeof RiomedCotizarRoute
   RiomedHospitalesRoute: typeof RiomedHospitalesRoute
+  RiomedPacientesRoute: typeof RiomedPacientesRoute
   RiomedProductosRoute: typeof RiomedProductosRoute
   RiomedTrabalheConoscoRoute: typeof RiomedTrabalheConoscoRoute
   RiomedIndexRoute: typeof RiomedIndexRoute
@@ -13521,6 +13541,7 @@ const RiomedRouteChildren: RiomedRouteChildren = {
   RiomedCheckoutRoute: RiomedCheckoutRoute,
   RiomedCotizarRoute: RiomedCotizarRoute,
   RiomedHospitalesRoute: RiomedHospitalesRoute,
+  RiomedPacientesRoute: RiomedPacientesRoute,
   RiomedProductosRoute: RiomedProductosRoute,
   RiomedTrabalheConoscoRoute: RiomedTrabalheConoscoRoute,
   RiomedIndexRoute: RiomedIndexRoute,
