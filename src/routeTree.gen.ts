@@ -451,6 +451,7 @@ import { Route as AuthenticatedAdminCustomerSuccessRouteImport } from './routes/
 import { Route as AuthenticatedAdminCrmHealthRouteImport } from './routes/_authenticated/admin.crm-health'
 import { Route as AuthenticatedAdminConversionFunnelRouteImport } from './routes/_authenticated/admin.conversion-funnel'
 import { Route as AuthenticatedAdminContabHealthRouteImport } from './routes/_authenticated/admin.contab-health'
+import { Route as AuthenticatedAdminConfigCatalogHealthRouteImport } from './routes/_authenticated/admin.config-catalog-health'
 import { Route as AuthenticatedAdminCommunityHealthRouteImport } from './routes/_authenticated/admin.community-health'
 import { Route as AuthenticatedAdminCommsHealthRouteImport } from './routes/_authenticated/admin.comms-health'
 import { Route as AuthenticatedAdminCommandCenterRouteImport } from './routes/_authenticated/admin.command-center'
@@ -3004,6 +3005,12 @@ const AuthenticatedAdminContabHealthRoute =
     path: '/admin/contab-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminConfigCatalogHealthRoute =
+  AuthenticatedAdminConfigCatalogHealthRouteImport.update({
+    id: '/admin/config-catalog-health',
+    path: '/admin/config-catalog-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminCommunityHealthRoute =
   AuthenticatedAdminCommunityHealthRouteImport.update({
     id: '/admin/community-health',
@@ -3771,6 +3778,7 @@ export interface FileRoutesByFullPath {
   '/admin/command-center': typeof AuthenticatedAdminCommandCenterRoute
   '/admin/comms-health': typeof AuthenticatedAdminCommsHealthRoute
   '/admin/community-health': typeof AuthenticatedAdminCommunityHealthRoute
+  '/admin/config-catalog-health': typeof AuthenticatedAdminConfigCatalogHealthRoute
   '/admin/contab-health': typeof AuthenticatedAdminContabHealthRoute
   '/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
   '/admin/crm-health': typeof AuthenticatedAdminCrmHealthRoute
@@ -4298,6 +4306,7 @@ export interface FileRoutesByTo {
   '/admin/command-center': typeof AuthenticatedAdminCommandCenterRoute
   '/admin/comms-health': typeof AuthenticatedAdminCommsHealthRoute
   '/admin/community-health': typeof AuthenticatedAdminCommunityHealthRoute
+  '/admin/config-catalog-health': typeof AuthenticatedAdminConfigCatalogHealthRoute
   '/admin/contab-health': typeof AuthenticatedAdminContabHealthRoute
   '/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
   '/admin/crm-health': typeof AuthenticatedAdminCrmHealthRoute
@@ -4839,6 +4848,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/command-center': typeof AuthenticatedAdminCommandCenterRoute
   '/_authenticated/admin/comms-health': typeof AuthenticatedAdminCommsHealthRoute
   '/_authenticated/admin/community-health': typeof AuthenticatedAdminCommunityHealthRoute
+  '/_authenticated/admin/config-catalog-health': typeof AuthenticatedAdminConfigCatalogHealthRoute
   '/_authenticated/admin/contab-health': typeof AuthenticatedAdminContabHealthRoute
   '/_authenticated/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
   '/_authenticated/admin/crm-health': typeof AuthenticatedAdminCrmHealthRoute
@@ -5379,6 +5389,7 @@ export interface FileRouteTypes {
     | '/admin/command-center'
     | '/admin/comms-health'
     | '/admin/community-health'
+    | '/admin/config-catalog-health'
     | '/admin/contab-health'
     | '/admin/conversion-funnel'
     | '/admin/crm-health'
@@ -5906,6 +5917,7 @@ export interface FileRouteTypes {
     | '/admin/command-center'
     | '/admin/comms-health'
     | '/admin/community-health'
+    | '/admin/config-catalog-health'
     | '/admin/contab-health'
     | '/admin/conversion-funnel'
     | '/admin/crm-health'
@@ -6446,6 +6458,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/command-center'
     | '/_authenticated/admin/comms-health'
     | '/_authenticated/admin/community-health'
+    | '/_authenticated/admin/config-catalog-health'
     | '/_authenticated/admin/contab-health'
     | '/_authenticated/admin/conversion-funnel'
     | '/_authenticated/admin/crm-health'
@@ -10036,6 +10049,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminContabHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/config-catalog-health': {
+      id: '/_authenticated/admin/config-catalog-health'
+      path: '/admin/config-catalog-health'
+      fullPath: '/admin/config-catalog-health'
+      preLoaderRoute: typeof AuthenticatedAdminConfigCatalogHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/community-health': {
       id: '/_authenticated/admin/community-health'
       path: '/admin/community-health'
@@ -11389,6 +11409,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCommandCenterRoute: typeof AuthenticatedAdminCommandCenterRoute
   AuthenticatedAdminCommsHealthRoute: typeof AuthenticatedAdminCommsHealthRoute
   AuthenticatedAdminCommunityHealthRoute: typeof AuthenticatedAdminCommunityHealthRoute
+  AuthenticatedAdminConfigCatalogHealthRoute: typeof AuthenticatedAdminConfigCatalogHealthRoute
   AuthenticatedAdminContabHealthRoute: typeof AuthenticatedAdminContabHealthRoute
   AuthenticatedAdminConversionFunnelRoute: typeof AuthenticatedAdminConversionFunnelRoute
   AuthenticatedAdminCrmHealthRoute: typeof AuthenticatedAdminCrmHealthRoute
@@ -11617,6 +11638,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminCommsHealthRoute: AuthenticatedAdminCommsHealthRoute,
   AuthenticatedAdminCommunityHealthRoute:
     AuthenticatedAdminCommunityHealthRoute,
+  AuthenticatedAdminConfigCatalogHealthRoute:
+    AuthenticatedAdminConfigCatalogHealthRoute,
   AuthenticatedAdminContabHealthRoute: AuthenticatedAdminContabHealthRoute,
   AuthenticatedAdminConversionFunnelRoute:
     AuthenticatedAdminConversionFunnelRoute,
