@@ -430,6 +430,7 @@ import { Route as AuthenticatedAdminInboxEventosRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminImobiliariaRouteImport } from './routes/_authenticated/admin.imobiliaria'
 import { Route as AuthenticatedAdminHealthScoreRouteImport } from './routes/_authenticated/admin.health-score'
 import { Route as AuthenticatedAdminHealthRouteImport } from './routes/_authenticated/admin.health'
+import { Route as AuthenticatedAdminGrowthFunnelHealthRouteImport } from './routes/_authenticated/admin.growth-funnel-health'
 import { Route as AuthenticatedAdminGovernanceLgpdHealthRouteImport } from './routes/_authenticated/admin.governance-lgpd-health'
 import { Route as AuthenticatedAdminFunilReguasRouteImport } from './routes/_authenticated/admin.funil-reguas'
 import { Route as AuthenticatedAdminFunil360RouteImport } from './routes/_authenticated/admin.funil-360'
@@ -2880,6 +2881,12 @@ const AuthenticatedAdminHealthRoute =
     path: '/admin/health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminGrowthFunnelHealthRoute =
+  AuthenticatedAdminGrowthFunnelHealthRouteImport.update({
+    id: '/admin/growth-funnel-health',
+    path: '/admin/growth-funnel-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminGovernanceLgpdHealthRoute =
   AuthenticatedAdminGovernanceLgpdHealthRouteImport.update({
     id: '/admin/governance-lgpd-health',
@@ -3808,6 +3815,7 @@ export interface FileRoutesByFullPath {
   '/admin/funil-360': typeof AuthenticatedAdminFunil360Route
   '/admin/funil-reguas': typeof AuthenticatedAdminFunilReguasRoute
   '/admin/governance-lgpd-health': typeof AuthenticatedAdminGovernanceLgpdHealthRoute
+  '/admin/growth-funnel-health': typeof AuthenticatedAdminGrowthFunnelHealthRoute
   '/admin/health': typeof AuthenticatedAdminHealthRoute
   '/admin/health-score': typeof AuthenticatedAdminHealthScoreRoute
   '/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
@@ -4337,6 +4345,7 @@ export interface FileRoutesByTo {
   '/admin/funil-360': typeof AuthenticatedAdminFunil360Route
   '/admin/funil-reguas': typeof AuthenticatedAdminFunilReguasRoute
   '/admin/governance-lgpd-health': typeof AuthenticatedAdminGovernanceLgpdHealthRoute
+  '/admin/growth-funnel-health': typeof AuthenticatedAdminGrowthFunnelHealthRoute
   '/admin/health': typeof AuthenticatedAdminHealthRoute
   '/admin/health-score': typeof AuthenticatedAdminHealthScoreRoute
   '/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
@@ -4880,6 +4889,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/funil-360': typeof AuthenticatedAdminFunil360Route
   '/_authenticated/admin/funil-reguas': typeof AuthenticatedAdminFunilReguasRoute
   '/_authenticated/admin/governance-lgpd-health': typeof AuthenticatedAdminGovernanceLgpdHealthRoute
+  '/_authenticated/admin/growth-funnel-health': typeof AuthenticatedAdminGrowthFunnelHealthRoute
   '/_authenticated/admin/health': typeof AuthenticatedAdminHealthRoute
   '/_authenticated/admin/health-score': typeof AuthenticatedAdminHealthScoreRoute
   '/_authenticated/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
@@ -5422,6 +5432,7 @@ export interface FileRouteTypes {
     | '/admin/funil-360'
     | '/admin/funil-reguas'
     | '/admin/governance-lgpd-health'
+    | '/admin/growth-funnel-health'
     | '/admin/health'
     | '/admin/health-score'
     | '/admin/imobiliaria'
@@ -5951,6 +5962,7 @@ export interface FileRouteTypes {
     | '/admin/funil-360'
     | '/admin/funil-reguas'
     | '/admin/governance-lgpd-health'
+    | '/admin/growth-funnel-health'
     | '/admin/health'
     | '/admin/health-score'
     | '/admin/imobiliaria'
@@ -6493,6 +6505,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/funil-360'
     | '/_authenticated/admin/funil-reguas'
     | '/_authenticated/admin/governance-lgpd-health'
+    | '/_authenticated/admin/growth-funnel-health'
     | '/_authenticated/admin/health'
     | '/_authenticated/admin/health-score'
     | '/_authenticated/admin/imobiliaria'
@@ -9915,6 +9928,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/growth-funnel-health': {
+      id: '/_authenticated/admin/growth-funnel-health'
+      path: '/admin/growth-funnel-health'
+      fullPath: '/admin/growth-funnel-health'
+      preLoaderRoute: typeof AuthenticatedAdminGrowthFunnelHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/governance-lgpd-health': {
       id: '/_authenticated/admin/governance-lgpd-health'
       path: '/admin/governance-lgpd-health'
@@ -11452,6 +11472,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminFunil360Route: typeof AuthenticatedAdminFunil360Route
   AuthenticatedAdminFunilReguasRoute: typeof AuthenticatedAdminFunilReguasRoute
   AuthenticatedAdminGovernanceLgpdHealthRoute: typeof AuthenticatedAdminGovernanceLgpdHealthRoute
+  AuthenticatedAdminGrowthFunnelHealthRoute: typeof AuthenticatedAdminGrowthFunnelHealthRoute
   AuthenticatedAdminHealthRoute: typeof AuthenticatedAdminHealthRoute
   AuthenticatedAdminHealthScoreRoute: typeof AuthenticatedAdminHealthScoreRoute
   AuthenticatedAdminImobiliariaRoute: typeof AuthenticatedAdminImobiliariaRoute
@@ -11693,6 +11714,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminFunilReguasRoute: AuthenticatedAdminFunilReguasRoute,
   AuthenticatedAdminGovernanceLgpdHealthRoute:
     AuthenticatedAdminGovernanceLgpdHealthRoute,
+  AuthenticatedAdminGrowthFunnelHealthRoute:
+    AuthenticatedAdminGrowthFunnelHealthRoute,
   AuthenticatedAdminHealthRoute: AuthenticatedAdminHealthRoute,
   AuthenticatedAdminHealthScoreRoute: AuthenticatedAdminHealthScoreRoute,
   AuthenticatedAdminImobiliariaRoute: AuthenticatedAdminImobiliariaRoute,
