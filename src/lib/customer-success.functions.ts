@@ -31,7 +31,7 @@ export const getCustomerSuccessCockpit = createServerFn({ method: "GET" })
         .gte("created_at", d90)
         .limit(20000),
       supabaseAdmin.from("onboarding_checklist").select("company_id, status, completed_at, created_at").limit(5000),
-      supabaseAdmin.from("runtime_events").select("company_id, created_at").gte("created_at", d30).limit(20000),
+      supabaseAdmin.from("runtime_events").select("company_id, occurred_at").gte("occurred_at", d30).limit(20000),
       supabaseAdmin.from("billing_contracts").select("company_id, recurring_amount, status").eq("status", "active"),
       supabaseAdmin.from("billing_suspensions").select("company_id, resolved_at").is("resolved_at", null),
     ]);
