@@ -18,7 +18,9 @@ const ProvisionSchema = z.object({
     whatsapp: z.string().trim().max(32).optional(),
     subdomain: z.string().trim().toLowerCase().regex(/^[a-z0-9-]{3,40}$/).optional(),
     niche_id: z.string().uuid().optional(),
+    country_code: z.enum(['BR', 'BO']).optional(),
   }),
+
   plano: z.object({
     plan_id: z.string().uuid().optional(),
   }).optional(),
@@ -72,6 +74,11 @@ export const provisionTenant = createServerFn({ method: 'POST' })
         primary_color: data.branding?.primary_color ?? null,
         secondary_color: data.branding?.secondary_color ?? null,
         logo_url: data.branding?.logo_url ?? null,
+        country_code: data.empresa.country_code ?? 'BR',
+        locale: data.empresa.country_code === 'BO' ? 'es-BO' : 'pt-BR',
+        currency_code: data.empresa.country_code === 'BO' ? 'BOB' : 'BRL',
+        phone_country_code: data.empresa.country_code === 'BO' ? '+591' : '+55',
+        timezone: data.empresa.country_code === 'BO' ? 'America/La_Paz' : 'America/Sao_Paulo',
         is_master: false,
         is_active: true,
         is_demo: false,
@@ -80,6 +87,7 @@ export const provisionTenant = createServerFn({ method: 'POST' })
       } as never)
       .select('id, name')
       .single()
+
     if (cErr || !company) throw new Error(`Falha ao criar empresa: ${cErr?.message ?? 'desconhecido'}`)
     const companyId = (company as any).id as string
 

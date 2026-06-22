@@ -21,10 +21,12 @@ type Step = 0 | 1 | 2 | 3
 interface FormState {
   name: string; legal_name: string; document: string; email: string; whatsapp: string;
   subdomain: string; niche_id: string;
+  country_code: 'BR' | 'BO';
   plan_id: string;
   primary_color: string; secondary_color: string; logo_url: string;
   admin_email: string; admin_name: string;
 }
+
 
 const STEPS = [
   { id: 0, label: 'Empresa', icon: Building2 },
@@ -44,10 +46,12 @@ function Page() {
   const [form, setForm] = useState<FormState>({
     name: '', legal_name: '', document: '', email: '', whatsapp: '',
     subdomain: '', niche_id: '',
+    country_code: 'BR',
     plan_id: '',
     primary_color: '#0ea5e9', secondary_color: '#6366f1', logo_url: '',
     admin_email: '', admin_name: '',
   })
+
 
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setForm((f) => ({ ...f, [k]: v }))
 
@@ -69,7 +73,9 @@ function Page() {
           whatsapp: form.whatsapp || undefined,
           subdomain: form.subdomain || undefined,
           niche_id: form.niche_id || undefined,
+          country_code: form.country_code,
         },
+
         plano: form.plan_id ? { plan_id: form.plan_id } : undefined,
         branding: {
           primary_color: form.primary_color || undefined,
@@ -139,6 +145,16 @@ function Page() {
                 >
                   <option value="">— Selecione —</option>
                   {opts?.niches.map((n: any) => <option key={n.id} value={n.id}>{n.name}</option>)}
+                </select>
+              </Field>
+              <Field label="País / locale" hint="Define moeda, DDI e fuso padrão do tenant.">
+                <select
+                  className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                  value={form.country_code}
+                  onChange={(e) => set('country_code', e.target.value as 'BR' | 'BO')}
+                >
+                  <option value="BR">Brasil (pt-BR · BRL · +55)</option>
+                  <option value="BO">Bolívia (es-BO · BOB · +591)</option>
                 </select>
               </Field>
             </div>
