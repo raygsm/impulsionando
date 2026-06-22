@@ -210,7 +210,7 @@ function DomainsCockpitPage() {
                     )}
                   </td>
                   <td className="p-2 text-right space-x-2 whitespace-nowrap">
-                    {!inSync ? <MarkRowButton slug={r.slug} /> : null}
+                    {!inSync && r.slug ? <MarkRowButton slug={r.slug} /> : null}
                     <a
                       href={`/admin/clientes/${r.slug}/dominio`}
                       className="text-xs underline text-primary"
