@@ -211,6 +211,7 @@ import { Route as RiomedVSlugRouteImport } from './routes/riomed.v.$slug'
 import { Route as RiomedTecnicoCadastroRouteImport } from './routes/riomed.tecnico.cadastro'
 import { Route as RiomedHospitalPortalRouteImport } from './routes/riomed.hospital.portal'
 import { Route as RiomedFornecedorCadastroRouteImport } from './routes/riomed.fornecedor.cadastro'
+import { Route as RiomedCotizacionTokenRouteImport } from './routes/riomed.cotizacion.$token'
 import { Route as PortalProprietarioTokenRouteImport } from './routes/portal.proprietario.$token'
 import { Route as PortalContabilidadeTokenRouteImport } from './routes/portal.contabilidade.$token'
 import { Route as MarocasContratarPlanoRouteImport } from './routes/marocas.contratar.$plano'
@@ -1646,6 +1647,11 @@ const RiomedFornecedorCadastroRoute =
     path: '/fornecedor/cadastro',
     getParentRoute: () => RiomedRoute,
   } as any)
+const RiomedCotizacionTokenRoute = RiomedCotizacionTokenRouteImport.update({
+  id: '/cotizacion/$token',
+  path: '/cotizacion/$token',
+  getParentRoute: () => RiomedRoute,
+} as any)
 const PortalProprietarioTokenRoute = PortalProprietarioTokenRouteImport.update({
   id: '/portal/proprietario/$token',
   path: '/portal/proprietario/$token',
@@ -4505,6 +4511,7 @@ export interface FileRoutesByFullPath {
   '/marocas/contratar/$plano': typeof MarocasContratarPlanoRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/portal/proprietario/$token': typeof PortalProprietarioTokenRoute
+  '/riomed/cotizacion/$token': typeof RiomedCotizacionTokenRoute
   '/riomed/fornecedor/cadastro': typeof RiomedFornecedorCadastroRoute
   '/riomed/hospital/portal': typeof RiomedHospitalPortalRoute
   '/riomed/tecnico/cadastro': typeof RiomedTecnicoCadastroRoute
@@ -5096,6 +5103,7 @@ export interface FileRoutesByTo {
   '/marocas/contratar/$plano': typeof MarocasContratarPlanoRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/portal/proprietario/$token': typeof PortalProprietarioTokenRoute
+  '/riomed/cotizacion/$token': typeof RiomedCotizacionTokenRoute
   '/riomed/fornecedor/cadastro': typeof RiomedFornecedorCadastroRoute
   '/riomed/hospital/portal': typeof RiomedHospitalPortalRoute
   '/riomed/tecnico/cadastro': typeof RiomedTecnicoCadastroRoute
@@ -5702,6 +5710,7 @@ export interface FileRoutesById {
   '/marocas/contratar/$plano': typeof MarocasContratarPlanoRoute
   '/portal/contabilidade/$token': typeof PortalContabilidadeTokenRoute
   '/portal/proprietario/$token': typeof PortalProprietarioTokenRoute
+  '/riomed/cotizacion/$token': typeof RiomedCotizacionTokenRoute
   '/riomed/fornecedor/cadastro': typeof RiomedFornecedorCadastroRoute
   '/riomed/hospital/portal': typeof RiomedHospitalPortalRoute
   '/riomed/tecnico/cadastro': typeof RiomedTecnicoCadastroRoute
@@ -6307,6 +6316,7 @@ export interface FileRouteTypes {
     | '/marocas/contratar/$plano'
     | '/portal/contabilidade/$token'
     | '/portal/proprietario/$token'
+    | '/riomed/cotizacion/$token'
     | '/riomed/fornecedor/cadastro'
     | '/riomed/hospital/portal'
     | '/riomed/tecnico/cadastro'
@@ -6898,6 +6908,7 @@ export interface FileRouteTypes {
     | '/marocas/contratar/$plano'
     | '/portal/contabilidade/$token'
     | '/portal/proprietario/$token'
+    | '/riomed/cotizacion/$token'
     | '/riomed/fornecedor/cadastro'
     | '/riomed/hospital/portal'
     | '/riomed/tecnico/cadastro'
@@ -7503,6 +7514,7 @@ export interface FileRouteTypes {
     | '/marocas/contratar/$plano'
     | '/portal/contabilidade/$token'
     | '/portal/proprietario/$token'
+    | '/riomed/cotizacion/$token'
     | '/riomed/fornecedor/cadastro'
     | '/riomed/hospital/portal'
     | '/riomed/tecnico/cadastro'
@@ -9188,6 +9200,13 @@ declare module '@tanstack/react-router' {
       path: '/fornecedor/cadastro'
       fullPath: '/riomed/fornecedor/cadastro'
       preLoaderRoute: typeof RiomedFornecedorCadastroRouteImport
+      parentRoute: typeof RiomedRoute
+    }
+    '/riomed/cotizacion/$token': {
+      id: '/riomed/cotizacion/$token'
+      path: '/cotizacion/$token'
+      fullPath: '/riomed/cotizacion/$token'
+      preLoaderRoute: typeof RiomedCotizacionTokenRouteImport
       parentRoute: typeof RiomedRoute
     }
     '/portal/proprietario/$token': {
@@ -13404,6 +13423,7 @@ interface RiomedRouteChildren {
   RiomedProductosRoute: typeof RiomedProductosRoute
   RiomedTrabalheConoscoRoute: typeof RiomedTrabalheConoscoRoute
   RiomedIndexRoute: typeof RiomedIndexRoute
+  RiomedCotizacionTokenRoute: typeof RiomedCotizacionTokenRoute
   RiomedFornecedorCadastroRoute: typeof RiomedFornecedorCadastroRoute
   RiomedHospitalPortalRoute: typeof RiomedHospitalPortalRoute
   RiomedTecnicoCadastroRoute: typeof RiomedTecnicoCadastroRoute
@@ -13417,6 +13437,7 @@ const RiomedRouteChildren: RiomedRouteChildren = {
   RiomedProductosRoute: RiomedProductosRoute,
   RiomedTrabalheConoscoRoute: RiomedTrabalheConoscoRoute,
   RiomedIndexRoute: RiomedIndexRoute,
+  RiomedCotizacionTokenRoute: RiomedCotizacionTokenRoute,
   RiomedFornecedorCadastroRoute: RiomedFornecedorCadastroRoute,
   RiomedHospitalPortalRoute: RiomedHospitalPortalRoute,
   RiomedTecnicoCadastroRoute: RiomedTecnicoCadastroRoute,
