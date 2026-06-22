@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { TenantModuleShell } from "@/components/core/TenantModuleShell";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
@@ -16,7 +17,7 @@ import { TrendingUp, Loader2, CheckCircle2, XCircle, Send } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/riomed/crm")({
   head: () => ({ meta: [{ title: "Rio Med · CRM Comercial" }] }),
-  component: Page,
+  component: () => (<TenantModuleShell tenantSlug="riomed" moduleSlug='crm' title='CRM RioMed'><Page /></TenantModuleShell>),
 });
 
 const STAGES = [
