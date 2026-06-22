@@ -426,6 +426,7 @@ import { Route as AuthenticatedAdminEducTalentosRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminDataQualityRouteImport } from './routes/_authenticated/admin.data-quality'
 import { Route as AuthenticatedAdminCustomerSuccessRouteImport } from './routes/_authenticated/admin.customer-success'
 import { Route as AuthenticatedAdminConversionFunnelRouteImport } from './routes/_authenticated/admin.conversion-funnel'
+import { Route as AuthenticatedAdminContabHealthRouteImport } from './routes/_authenticated/admin.contab-health'
 import { Route as AuthenticatedAdminCommsHealthRouteImport } from './routes/_authenticated/admin.comms-health'
 import { Route as AuthenticatedAdminCommandCenterRouteImport } from './routes/_authenticated/admin.command-center'
 import { Route as AuthenticatedAdminCohortRetentionRouteImport } from './routes/_authenticated/admin.cohort-retention'
@@ -2824,6 +2825,12 @@ const AuthenticatedAdminConversionFunnelRoute =
     path: '/admin/conversion-funnel',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminContabHealthRoute =
+  AuthenticatedAdminContabHealthRouteImport.update({
+    id: '/admin/contab-health',
+    path: '/admin/contab-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminCommsHealthRoute =
   AuthenticatedAdminCommsHealthRouteImport.update({
     id: '/admin/comms-health',
@@ -3556,6 +3563,7 @@ export interface FileRoutesByFullPath {
   '/admin/cohort-retention': typeof AuthenticatedAdminCohortRetentionRoute
   '/admin/command-center': typeof AuthenticatedAdminCommandCenterRoute
   '/admin/comms-health': typeof AuthenticatedAdminCommsHealthRoute
+  '/admin/contab-health': typeof AuthenticatedAdminContabHealthRoute
   '/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
   '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
@@ -4053,6 +4061,7 @@ export interface FileRoutesByTo {
   '/admin/cohort-retention': typeof AuthenticatedAdminCohortRetentionRoute
   '/admin/command-center': typeof AuthenticatedAdminCommandCenterRoute
   '/admin/comms-health': typeof AuthenticatedAdminCommsHealthRoute
+  '/admin/contab-health': typeof AuthenticatedAdminContabHealthRoute
   '/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
   '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
@@ -4564,6 +4573,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/cohort-retention': typeof AuthenticatedAdminCohortRetentionRoute
   '/_authenticated/admin/command-center': typeof AuthenticatedAdminCommandCenterRoute
   '/_authenticated/admin/comms-health': typeof AuthenticatedAdminCommsHealthRoute
+  '/_authenticated/admin/contab-health': typeof AuthenticatedAdminContabHealthRoute
   '/_authenticated/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
   '/_authenticated/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/_authenticated/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
@@ -5074,6 +5084,7 @@ export interface FileRouteTypes {
     | '/admin/cohort-retention'
     | '/admin/command-center'
     | '/admin/comms-health'
+    | '/admin/contab-health'
     | '/admin/conversion-funnel'
     | '/admin/customer-success'
     | '/admin/data-quality'
@@ -5571,6 +5582,7 @@ export interface FileRouteTypes {
     | '/admin/cohort-retention'
     | '/admin/command-center'
     | '/admin/comms-health'
+    | '/admin/contab-health'
     | '/admin/conversion-funnel'
     | '/admin/customer-success'
     | '/admin/data-quality'
@@ -6081,6 +6093,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/cohort-retention'
     | '/_authenticated/admin/command-center'
     | '/_authenticated/admin/comms-health'
+    | '/_authenticated/admin/contab-health'
     | '/_authenticated/admin/conversion-funnel'
     | '/_authenticated/admin/customer-success'
     | '/_authenticated/admin/data-quality'
@@ -9471,6 +9484,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminConversionFunnelRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/contab-health': {
+      id: '/_authenticated/admin/contab-health'
+      path: '/admin/contab-health'
+      fullPath: '/admin/contab-health'
+      preLoaderRoute: typeof AuthenticatedAdminContabHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/comms-health': {
       id: '/_authenticated/admin/comms-health'
       path: '/admin/comms-health'
@@ -10784,6 +10804,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCohortRetentionRoute: typeof AuthenticatedAdminCohortRetentionRoute
   AuthenticatedAdminCommandCenterRoute: typeof AuthenticatedAdminCommandCenterRoute
   AuthenticatedAdminCommsHealthRoute: typeof AuthenticatedAdminCommsHealthRoute
+  AuthenticatedAdminContabHealthRoute: typeof AuthenticatedAdminContabHealthRoute
   AuthenticatedAdminConversionFunnelRoute: typeof AuthenticatedAdminConversionFunnelRoute
   AuthenticatedAdminCustomerSuccessRoute: typeof AuthenticatedAdminCustomerSuccessRoute
   AuthenticatedAdminDataQualityRoute: typeof AuthenticatedAdminDataQualityRoute
@@ -10977,6 +10998,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminCohortRetentionRoute,
   AuthenticatedAdminCommandCenterRoute: AuthenticatedAdminCommandCenterRoute,
   AuthenticatedAdminCommsHealthRoute: AuthenticatedAdminCommsHealthRoute,
+  AuthenticatedAdminContabHealthRoute: AuthenticatedAdminContabHealthRoute,
   AuthenticatedAdminConversionFunnelRoute:
     AuthenticatedAdminConversionFunnelRoute,
   AuthenticatedAdminCustomerSuccessRoute:
