@@ -199,6 +199,7 @@ function RootComponent() {
       <TenantBrandingProvider />
       <Toaster richColors position="top-right" />
       <Outlet />
+      <PoweredByImpulsionando />
       <LGPDBanner />
       <OfficialWhatsAppFAB />
       <ImpulsionandoBrasilFAB />
@@ -207,6 +208,7 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
+
 
 function AnalyticsTracker() {
   const router = useRouter();
