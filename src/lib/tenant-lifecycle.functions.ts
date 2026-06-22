@@ -100,9 +100,9 @@ export const getTenantLifecycle = createServerFn({ method: "POST" })
     const onboardingActive = Array.from(checklistByTenant.values()).filter((v) => v.total > 0 && v.done < v.total).length;
 
     // ---- Trials ----
-    const trialsActive = trials.filter((t) => t.status === "active" || t.status === "ongoing");
-    const trialsConverted = trials.filter((t) => t.status === "converted").length;
-    const trialsExpired = trials.filter((t) => t.status === "expired").length;
+    const trialsActive = trials.filter((t) => t.status === "ativo");
+    const trialsConverted = trials.filter((t) => t.status === "convertido").length;
+    const trialsExpired = trials.filter((t) => t.status === "expirado_sem_conversao" || t.status === "encerrado").length;
     const trialsExpiringSoon = trialsActive
       .filter((t) => t.ends_at && t.ends_at <= in7Iso && t.ends_at >= nowIso)
       .sort((a, b) => (a.ends_at ?? "").localeCompare(b.ends_at ?? ""))

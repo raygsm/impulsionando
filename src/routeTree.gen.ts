@@ -390,6 +390,7 @@ import { Route as AuthenticatedAdminUptimeRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminUnitEconomicsRouteImport } from './routes/_authenticated/admin.unit-economics'
 import { Route as AuthenticatedAdminTrialsRouteImport } from './routes/_authenticated/admin.trials'
 import { Route as AuthenticatedAdminTreasuryForecastRouteImport } from './routes/_authenticated/admin.treasury-forecast'
+import { Route as AuthenticatedAdminTenantLifecycleRouteImport } from './routes/_authenticated/admin.tenant-lifecycle'
 import { Route as AuthenticatedAdminTenant360RouteImport } from './routes/_authenticated/admin.tenant-360'
 import { Route as AuthenticatedAdminTaxComplianceRouteImport } from './routes/_authenticated/admin.tax-compliance'
 import { Route as AuthenticatedAdminSlaComplianceRouteImport } from './routes/_authenticated/admin.sla-compliance'
@@ -2599,6 +2600,12 @@ const AuthenticatedAdminTreasuryForecastRoute =
     path: '/admin/treasury-forecast',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminTenantLifecycleRoute =
+  AuthenticatedAdminTenantLifecycleRouteImport.update({
+    id: '/admin/tenant-lifecycle',
+    path: '/admin/tenant-lifecycle',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminTenant360Route =
   AuthenticatedAdminTenant360RouteImport.update({
     id: '/admin/tenant-360',
@@ -3520,6 +3527,7 @@ export interface FileRoutesByFullPath {
   '/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
   '/admin/tax-compliance': typeof AuthenticatedAdminTaxComplianceRoute
   '/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
+  '/admin/tenant-lifecycle': typeof AuthenticatedAdminTenantLifecycleRoute
   '/admin/treasury-forecast': typeof AuthenticatedAdminTreasuryForecastRoute
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/admin/unit-economics': typeof AuthenticatedAdminUnitEconomicsRoute
@@ -4008,6 +4016,7 @@ export interface FileRoutesByTo {
   '/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
   '/admin/tax-compliance': typeof AuthenticatedAdminTaxComplianceRoute
   '/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
+  '/admin/tenant-lifecycle': typeof AuthenticatedAdminTenantLifecycleRoute
   '/admin/treasury-forecast': typeof AuthenticatedAdminTreasuryForecastRoute
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/admin/unit-economics': typeof AuthenticatedAdminUnitEconomicsRoute
@@ -4510,6 +4519,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
   '/_authenticated/admin/tax-compliance': typeof AuthenticatedAdminTaxComplianceRoute
   '/_authenticated/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
+  '/_authenticated/admin/tenant-lifecycle': typeof AuthenticatedAdminTenantLifecycleRoute
   '/_authenticated/admin/treasury-forecast': typeof AuthenticatedAdminTreasuryForecastRoute
   '/_authenticated/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/_authenticated/admin/unit-economics': typeof AuthenticatedAdminUnitEconomicsRoute
@@ -5011,6 +5021,7 @@ export interface FileRouteTypes {
     | '/admin/sla-compliance'
     | '/admin/tax-compliance'
     | '/admin/tenant-360'
+    | '/admin/tenant-lifecycle'
     | '/admin/treasury-forecast'
     | '/admin/trials'
     | '/admin/unit-economics'
@@ -5499,6 +5510,7 @@ export interface FileRouteTypes {
     | '/admin/sla-compliance'
     | '/admin/tax-compliance'
     | '/admin/tenant-360'
+    | '/admin/tenant-lifecycle'
     | '/admin/treasury-forecast'
     | '/admin/trials'
     | '/admin/unit-economics'
@@ -6000,6 +6012,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/sla-compliance'
     | '/_authenticated/admin/tax-compliance'
     | '/_authenticated/admin/tenant-360'
+    | '/_authenticated/admin/tenant-lifecycle'
     | '/_authenticated/admin/treasury-forecast'
     | '/_authenticated/admin/trials'
     | '/_authenticated/admin/unit-economics'
@@ -9102,6 +9115,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTreasuryForecastRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/tenant-lifecycle': {
+      id: '/_authenticated/admin/tenant-lifecycle'
+      path: '/admin/tenant-lifecycle'
+      fullPath: '/admin/tenant-lifecycle'
+      preLoaderRoute: typeof AuthenticatedAdminTenantLifecycleRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/tenant-360': {
       id: '/_authenticated/admin/tenant-360'
       path: '/admin/tenant-360'
@@ -10631,6 +10651,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminSlaComplianceRoute: typeof AuthenticatedAdminSlaComplianceRoute
   AuthenticatedAdminTaxComplianceRoute: typeof AuthenticatedAdminTaxComplianceRoute
   AuthenticatedAdminTenant360Route: typeof AuthenticatedAdminTenant360Route
+  AuthenticatedAdminTenantLifecycleRoute: typeof AuthenticatedAdminTenantLifecycleRoute
   AuthenticatedAdminTreasuryForecastRoute: typeof AuthenticatedAdminTreasuryForecastRoute
   AuthenticatedAdminTrialsRoute: typeof AuthenticatedAdminTrialsRoute
   AuthenticatedAdminUnitEconomicsRoute: typeof AuthenticatedAdminUnitEconomicsRoute
@@ -10824,6 +10845,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminSlaComplianceRoute: AuthenticatedAdminSlaComplianceRoute,
   AuthenticatedAdminTaxComplianceRoute: AuthenticatedAdminTaxComplianceRoute,
   AuthenticatedAdminTenant360Route: AuthenticatedAdminTenant360Route,
+  AuthenticatedAdminTenantLifecycleRoute:
+    AuthenticatedAdminTenantLifecycleRoute,
   AuthenticatedAdminTreasuryForecastRoute:
     AuthenticatedAdminTreasuryForecastRoute,
   AuthenticatedAdminTrialsRoute: AuthenticatedAdminTrialsRoute,
