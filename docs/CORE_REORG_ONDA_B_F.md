@@ -34,19 +34,40 @@ ERP Impulsionando · Catálogo & Produto · Comercial & Crescimento.
 - `RioMed` (`5bdcdef4-f0dc-4453-b935-a192ad514938`, domain `riomed.impulsionando.com.br`)
   → **canônico**, permanece ativo e único.
 
+## Onda C — Gate unificado (executada — scaffolding)
+
+Criados dois primitivos reutilizáveis por qualquer rota operacional de tenant:
+
+- `src/hooks/use-client-feature-gate.ts` — `useClientFeatureGate(companyId, moduleSlug)`
+  cruza status do tenant, financeiro, módulo instalado e bypass de staff Impulsionando.
+  Retorna `{ allowed, reason, tenant, ... }`.
+- `src/components/core/ClientOperationShell.tsx` — wrapper visual padrão para
+  `/admin/clientes/{slug}/operacao/{modulo}`. Renderiza bloqueio explicado quando
+  o gate nega (arquivado, inativo, módulo não instalado, suspenso, sem permissão).
+
+Adoção é progressiva: rotas operacionais novas já nascem dentro do shell; rotas
+existentes serão envelopadas na Onda D.
+
+## Onda G — Domínios provisionados (executada)
+
+7 tenants reais ganharam `domain = <subdomain>.impulsionando.com.br`:
+DQA, Imobiliária Garrido, Impulsionando Brasil, Marocas, Plataforma Saúde,
+Relacionamento, Wagner Miller Produções. CHRISMED mantém domínio próprio
+(`agenda.chrismed.com.br`) e RioMed mantém `riomed.impulsionando.com.br`.
+Tenants `Demo *` e `Impulsionando Sistemas` permanecem sem domínio público
+(propositadamente — sandbox/plataforma).
+
+> DNS/SSL na Lovable: cada subdomínio precisa do registro A → `185.158.133.1`
+> + TXT `_lovable` configurado no DNS de `impulsionando.com.br` antes de
+> publicar. O painel consolidado de status virá na Onda E.
+
 ## Próximas ondas — pendentes
 
-A reorganização total continua em sequência. As ondas abaixo exigem refactor de código
-(420 rotas em `src/routes/_authenticated/`) e serão entregues em PRs separados.
-
-- **Onda C — Gate & Shells**: hook `useClientFeatureGate` (status × nicho × plano ×
-  módulos × financeiro × permissão) + shell dinâmico `/admin/clientes/{slug}/operacao/{modulo}`.
-- **Onda D — Migração de rotas**: mover `admin.ehr-*`, `admin.agenda-*`,
+- **Onda D — Migração de rotas operacionais**: mover `admin.ehr-*`, `admin.agenda-*`,
   `admin.marocas-*`, `admin.realestate-*`, `admin.brewery-*` para
-  `/admin/clientes/{slug}/operacao/{modulo}/...` e aplicar gate em
-  `admin.clientes.riomed.*` (24 rotas já no namespace correto, sem gate).
+  `/admin/clientes/{slug}/operacao/{modulo}/...` e envelopar 24 rotas
+  `admin.clientes.riomed.*` no `ClientOperationShell`.
 - **Onda E — Domínios & Deploy**: consolidar painel único de DNS/SSL/build por
-  cliente (hoje espalhado entre `/core/dominios` e `/admin/deploy-status`).
-- **Onda G — Provisionar subdomínios**: 8 tenants sem subdomain
-  (CHRISMED, DQA, Garrido, Impulsionando Brasil, Marocas, Plataforma Saúde,
-  Relacionamento, Wagner Miller).
+  cliente em `/admin/clientes/{slug}/dominio`, unificando o que hoje vive em
+  `/core/dominios` e `/admin/deploy-status`.
+
