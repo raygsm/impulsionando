@@ -4,11 +4,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn, useServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { useQuery } from "@tanstack/react-query";
-import { Globe, ExternalLink, RefreshCw } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Globe, ExternalLink, RefreshCw, GitCommit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BUILD_INFO } from "@/generated/build-info";
 import { useMemo, useState } from "react";
+import { markTenantPublished } from "@/lib/tenant-publish.functions";
+import { toast } from "sonner";
 
 const loadDomainsCockpit = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -207,7 +209,8 @@ function DomainsCockpitPage() {
                       </span>
                     )}
                   </td>
-                  <td className="p-2 text-right space-x-2">
+                  <td className="p-2 text-right space-x-2 whitespace-nowrap">
+                    {!inSync && r.slug ? <MarkRowButton slug={r.slug} /> : null}
                     <a
                       href={`/admin/clientes/${r.slug}/dominio`}
                       className="text-xs underline text-primary"
@@ -279,5 +282,42 @@ function Chip({
     >
       {label}
     </button>
+  );
+}
+
+function MarkRowButton({ slug }: { slug: string }) {
+  const mark = useServerFn(markTenantPublished);
+  const queryClient = useQueryClient();
+  const [busy, setBusy] = useState(false);
+  async function handle() {
+    setBusy(true);
+    try {
+      const res = await mark({
+        data: { slug, commit: BUILD_INFO.commit, builtAt: BUILD_INFO.builtAt },
+      });
+      toast.success(`${slug} · ${res.commit.slice(0, 7)} marcado`);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["admin", "dominios-cockpit"] }),
+        queryClient.invalidateQueries({ queryKey: ["tenant-domain", slug] }),
+        queryClient.invalidateQueries({ queryKey: ["tenant-deploy-history", slug] }),
+      ]);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao marcar deploy");
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      className="h-6 px-2 text-xs"
+      disabled={busy}
+      onClick={handle}
+      title="Marcar este tenant como publicado no build atual"
+    >
+      <GitCommit className="h-3 w-3 mr-1" />
+      {busy ? "…" : "marcar"}
+    </Button>
   );
 }
