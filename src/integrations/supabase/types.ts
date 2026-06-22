@@ -5453,6 +5453,89 @@ export type Database = {
           },
         ]
       }
+      commerce_abandoned_carts: {
+        Row: {
+          abandoned_at: string
+          cart_value: number
+          company_id: string
+          created_at: string
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          id: string
+          items: Json
+          metadata: Json
+          recovered_at: string | null
+          recovery_attempts: number
+          recovery_order_id: string | null
+          recovery_status: string
+          updated_at: string
+        }
+        Insert: {
+          abandoned_at?: string
+          cart_value?: number
+          company_id: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          items?: Json
+          metadata?: Json
+          recovered_at?: string | null
+          recovery_attempts?: number
+          recovery_order_id?: string | null
+          recovery_status?: string
+          updated_at?: string
+        }
+        Update: {
+          abandoned_at?: string
+          cart_value?: number
+          company_id?: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          items?: Json
+          metadata?: Json
+          recovered_at?: string | null
+          recovery_attempts?: number
+          recovery_order_id?: string | null
+          recovery_status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commerce_abandoned_carts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commerce_abandoned_carts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "commerce_abandoned_carts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "commerce_abandoned_carts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           address_city: string | null
@@ -10234,6 +10317,84 @@ export type Database = {
             columns: ["opportunity_id"]
             isOneToOne: false
             referencedRelation: "crm_opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_lead_routing_rules: {
+        Row: {
+          assign_strategy: string
+          assign_to: string | null
+          company_id: string
+          conditions: Json
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          pipeline_id: string | null
+          priority: number
+          updated_at: string
+        }
+        Insert: {
+          assign_strategy?: string
+          assign_to?: string | null
+          company_id: string
+          conditions?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          pipeline_id?: string | null
+          priority?: number
+          updated_at?: string
+        }
+        Update: {
+          assign_strategy?: string
+          assign_to?: string | null
+          company_id?: string
+          conditions?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          pipeline_id?: string | null
+          priority?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_lead_routing_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_lead_routing_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "crm_lead_routing_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "crm_lead_routing_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "crm_lead_routing_rules_pipeline_id_fkey"
+            columns: ["pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "crm_pipelines"
             referencedColumns: ["id"]
           },
         ]
@@ -18837,6 +18998,229 @@ export type Database = {
           },
         ]
       }
+      rental_assets: {
+        Row: {
+          acquisition_cost: number | null
+          asset_code: string
+          brand: string | null
+          category: string | null
+          company_id: string
+          created_at: string
+          daily_rate: number | null
+          id: string
+          metadata: Json
+          model: string | null
+          monthly_rate: number | null
+          name: string
+          notes: string | null
+          serial_number: string | null
+          status: string
+          updated_at: string
+          warehouse_id: string | null
+        }
+        Insert: {
+          acquisition_cost?: number | null
+          asset_code: string
+          brand?: string | null
+          category?: string | null
+          company_id: string
+          created_at?: string
+          daily_rate?: number | null
+          id?: string
+          metadata?: Json
+          model?: string | null
+          monthly_rate?: number | null
+          name: string
+          notes?: string | null
+          serial_number?: string | null
+          status?: string
+          updated_at?: string
+          warehouse_id?: string | null
+        }
+        Update: {
+          acquisition_cost?: number | null
+          asset_code?: string
+          brand?: string | null
+          category?: string | null
+          company_id?: string
+          created_at?: string
+          daily_rate?: number | null
+          id?: string
+          metadata?: Json
+          model?: string | null
+          monthly_rate?: number | null
+          name?: string
+          notes?: string | null
+          serial_number?: string | null
+          status?: string
+          updated_at?: string
+          warehouse_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rental_assets_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rental_assets_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "rental_assets_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "rental_assets_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      rental_contract_items: {
+        Row: {
+          asset_id: string | null
+          contract_id: string
+          created_at: string
+          description: string
+          id: string
+          quantity: number
+          total: number
+          unit_rate: number
+        }
+        Insert: {
+          asset_id?: string | null
+          contract_id: string
+          created_at?: string
+          description: string
+          id?: string
+          quantity?: number
+          total?: number
+          unit_rate?: number
+        }
+        Update: {
+          asset_id?: string | null
+          contract_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          quantity?: number
+          total?: number
+          unit_rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rental_contract_items_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "rental_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rental_contract_items_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "rental_contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rental_contracts: {
+        Row: {
+          billing_cycle: string
+          company_id: string
+          contract_number: string
+          created_at: string
+          customer_document: string | null
+          customer_id: string | null
+          customer_name: string
+          delivery_address: string | null
+          end_date: string | null
+          id: string
+          metadata: Json
+          notes: string | null
+          start_date: string
+          status: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          billing_cycle?: string
+          company_id: string
+          contract_number: string
+          created_at?: string
+          customer_document?: string | null
+          customer_id?: string | null
+          customer_name: string
+          delivery_address?: string | null
+          end_date?: string | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          start_date: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          billing_cycle?: string
+          company_id?: string
+          contract_number?: string
+          created_at?: string
+          customer_document?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          delivery_address?: string | null
+          end_date?: string | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          start_date?: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rental_contracts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rental_contracts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "rental_contracts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "rental_contracts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       restaurant_menu_categories: {
         Row: {
           company_id: string
@@ -19814,6 +20198,148 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "company_units"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_order_events: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          description: string | null
+          event_type: string
+          id: string
+          metadata: Json
+          order_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          description?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json
+          order_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          description?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json
+          order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_order_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "service_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_orders: {
+        Row: {
+          assigned_to: string | null
+          closed_at: string | null
+          company_id: string
+          created_at: string
+          customer_id: string | null
+          customer_name: string
+          diagnosis: string | null
+          equipment_description: string
+          equipment_serial: string | null
+          id: string
+          labor_cost: number | null
+          metadata: Json
+          opened_at: string
+          order_number: string
+          parts_cost: number | null
+          priority: string
+          resolution: string | null
+          service_type: string
+          sla_due_at: string | null
+          status: string
+          total_cost: number | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          closed_at?: string | null
+          company_id: string
+          created_at?: string
+          customer_id?: string | null
+          customer_name: string
+          diagnosis?: string | null
+          equipment_description: string
+          equipment_serial?: string | null
+          id?: string
+          labor_cost?: number | null
+          metadata?: Json
+          opened_at?: string
+          order_number: string
+          parts_cost?: number | null
+          priority?: string
+          resolution?: string | null
+          service_type?: string
+          sla_due_at?: string | null
+          status?: string
+          total_cost?: number | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          closed_at?: string | null
+          company_id?: string
+          created_at?: string
+          customer_id?: string | null
+          customer_name?: string
+          diagnosis?: string | null
+          equipment_description?: string
+          equipment_serial?: string | null
+          id?: string
+          labor_cost?: number | null
+          metadata?: Json
+          opened_at?: string
+          order_number?: string
+          parts_cost?: number | null
+          priority?: string
+          resolution?: string | null
+          service_type?: string
+          sla_due_at?: string | null
+          status?: string
+          total_cost?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_orders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_orders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "service_orders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "service_orders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
           },
         ]
       }
