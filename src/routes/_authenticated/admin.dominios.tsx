@@ -249,3 +249,35 @@ function StatusPill({ value }: { value: string | null }) {
     <span className={`text-xs px-1.5 py-0.5 rounded ${cls}`}>{value}</span>
   );
 }
+
+function Chip({
+  label,
+  active,
+  tone,
+  onClick,
+}: {
+  label: string;
+  active?: boolean;
+  tone?: "green" | "amber" | "muted";
+  onClick: () => void;
+}) {
+  const toneCls =
+    tone === "green"
+      ? "border-green-500/30 text-green-700"
+      : tone === "amber"
+        ? "border-amber-500/30 text-amber-700"
+        : tone === "muted"
+          ? "border-muted text-muted-foreground"
+          : "border-border";
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`px-2 py-0.5 rounded-full border ${toneCls} ${
+        active ? "bg-muted/60 font-medium" : "bg-background"
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
