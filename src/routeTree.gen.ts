@@ -422,6 +422,7 @@ import { Route as AuthenticatedAdminNichePlansRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminNicheMatrixRouteImport } from './routes/_authenticated/admin.niche-matrix'
 import { Route as AuthenticatedAdminN8nConsoleRouteImport } from './routes/_authenticated/admin.n8n-console'
 import { Route as AuthenticatedAdminMercadopagoBillingHealthRouteImport } from './routes/_authenticated/admin.mercadopago-billing-health'
+import { Route as AuthenticatedAdminMarocasOpsHealthRouteImport } from './routes/_authenticated/admin.marocas-ops-health'
 import { Route as AuthenticatedAdminMarocasHealthRouteImport } from './routes/_authenticated/admin.marocas-health'
 import { Route as AuthenticatedAdminMarketplaceOpsRouteImport } from './routes/_authenticated/admin.marketplace-ops'
 import { Route as AuthenticatedAdminMarketplaceB2bHealthRouteImport } from './routes/_authenticated/admin.marketplace-b2b-health'
@@ -2843,6 +2844,12 @@ const AuthenticatedAdminMercadopagoBillingHealthRoute =
     path: '/admin/mercadopago-billing-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminMarocasOpsHealthRoute =
+  AuthenticatedAdminMarocasOpsHealthRouteImport.update({
+    id: '/admin/marocas-ops-health',
+    path: '/admin/marocas-ops-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminMarocasHealthRoute =
   AuthenticatedAdminMarocasHealthRouteImport.update({
     id: '/admin/marocas-health',
@@ -3904,6 +3911,7 @@ export interface FileRoutesByFullPath {
   '/admin/marketplace-b2b-health': typeof AuthenticatedAdminMarketplaceB2bHealthRoute
   '/admin/marketplace-ops': typeof AuthenticatedAdminMarketplaceOpsRoute
   '/admin/marocas-health': typeof AuthenticatedAdminMarocasHealthRoute
+  '/admin/marocas-ops-health': typeof AuthenticatedAdminMarocasOpsHealthRoute
   '/admin/mercadopago-billing-health': typeof AuthenticatedAdminMercadopagoBillingHealthRoute
   '/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
@@ -4444,6 +4452,7 @@ export interface FileRoutesByTo {
   '/admin/marketplace-b2b-health': typeof AuthenticatedAdminMarketplaceB2bHealthRoute
   '/admin/marketplace-ops': typeof AuthenticatedAdminMarketplaceOpsRoute
   '/admin/marocas-health': typeof AuthenticatedAdminMarocasHealthRoute
+  '/admin/marocas-ops-health': typeof AuthenticatedAdminMarocasOpsHealthRoute
   '/admin/mercadopago-billing-health': typeof AuthenticatedAdminMercadopagoBillingHealthRoute
   '/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
@@ -4998,6 +5007,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/marketplace-b2b-health': typeof AuthenticatedAdminMarketplaceB2bHealthRoute
   '/_authenticated/admin/marketplace-ops': typeof AuthenticatedAdminMarketplaceOpsRoute
   '/_authenticated/admin/marocas-health': typeof AuthenticatedAdminMarocasHealthRoute
+  '/_authenticated/admin/marocas-ops-health': typeof AuthenticatedAdminMarocasOpsHealthRoute
   '/_authenticated/admin/mercadopago-billing-health': typeof AuthenticatedAdminMercadopagoBillingHealthRoute
   '/_authenticated/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/_authenticated/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
@@ -5551,6 +5561,7 @@ export interface FileRouteTypes {
     | '/admin/marketplace-b2b-health'
     | '/admin/marketplace-ops'
     | '/admin/marocas-health'
+    | '/admin/marocas-ops-health'
     | '/admin/mercadopago-billing-health'
     | '/admin/n8n-console'
     | '/admin/niche-matrix'
@@ -6091,6 +6102,7 @@ export interface FileRouteTypes {
     | '/admin/marketplace-b2b-health'
     | '/admin/marketplace-ops'
     | '/admin/marocas-health'
+    | '/admin/marocas-ops-health'
     | '/admin/mercadopago-billing-health'
     | '/admin/n8n-console'
     | '/admin/niche-matrix'
@@ -6644,6 +6656,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/marketplace-b2b-health'
     | '/_authenticated/admin/marketplace-ops'
     | '/_authenticated/admin/marocas-health'
+    | '/_authenticated/admin/marocas-ops-health'
     | '/_authenticated/admin/mercadopago-billing-health'
     | '/_authenticated/admin/n8n-console'
     | '/_authenticated/admin/niche-matrix'
@@ -10002,6 +10015,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMercadopagoBillingHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/marocas-ops-health': {
+      id: '/_authenticated/admin/marocas-ops-health'
+      path: '/admin/marocas-ops-health'
+      fullPath: '/admin/marocas-ops-health'
+      preLoaderRoute: typeof AuthenticatedAdminMarocasOpsHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/marocas-health': {
       id: '/_authenticated/admin/marocas-health'
       path: '/admin/marocas-health'
@@ -11691,6 +11711,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminMarketplaceB2bHealthRoute: typeof AuthenticatedAdminMarketplaceB2bHealthRoute
   AuthenticatedAdminMarketplaceOpsRoute: typeof AuthenticatedAdminMarketplaceOpsRoute
   AuthenticatedAdminMarocasHealthRoute: typeof AuthenticatedAdminMarocasHealthRoute
+  AuthenticatedAdminMarocasOpsHealthRoute: typeof AuthenticatedAdminMarocasOpsHealthRoute
   AuthenticatedAdminMercadopagoBillingHealthRoute: typeof AuthenticatedAdminMercadopagoBillingHealthRoute
   AuthenticatedAdminN8nConsoleRoute: typeof AuthenticatedAdminN8nConsoleRoute
   AuthenticatedAdminNicheMatrixRoute: typeof AuthenticatedAdminNicheMatrixRoute
@@ -11955,6 +11976,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminMarketplaceB2bHealthRoute,
   AuthenticatedAdminMarketplaceOpsRoute: AuthenticatedAdminMarketplaceOpsRoute,
   AuthenticatedAdminMarocasHealthRoute: AuthenticatedAdminMarocasHealthRoute,
+  AuthenticatedAdminMarocasOpsHealthRoute:
+    AuthenticatedAdminMarocasOpsHealthRoute,
   AuthenticatedAdminMercadopagoBillingHealthRoute:
     AuthenticatedAdminMercadopagoBillingHealthRoute,
   AuthenticatedAdminN8nConsoleRoute: AuthenticatedAdminN8nConsoleRoute,
