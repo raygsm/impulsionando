@@ -437,6 +437,7 @@ import { Route as AuthenticatedAdminExecutiveBriefingRouteImport } from './route
 import { Route as AuthenticatedAdminEventsHealthRouteImport } from './routes/_authenticated/admin.events-health'
 import { Route as AuthenticatedAdminEhrComplianceRouteImport } from './routes/_authenticated/admin.ehr-compliance'
 import { Route as AuthenticatedAdminEducTalentosRouteImport } from './routes/_authenticated/admin.educ-talentos'
+import { Route as AuthenticatedAdminDocumentsFilesHealthRouteImport } from './routes/_authenticated/admin.documents-files-health'
 import { Route as AuthenticatedAdminDataQualityRouteImport } from './routes/_authenticated/admin.data-quality'
 import { Route as AuthenticatedAdminCustomerSuccessRouteImport } from './routes/_authenticated/admin.customer-success'
 import { Route as AuthenticatedAdminCrmHealthRouteImport } from './routes/_authenticated/admin.crm-health'
@@ -2908,6 +2909,12 @@ const AuthenticatedAdminEducTalentosRoute =
     path: '/admin/educ-talentos',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminDocumentsFilesHealthRoute =
+  AuthenticatedAdminDocumentsFilesHealthRouteImport.update({
+    id: '/admin/documents-files-health',
+    path: '/admin/documents-files-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminDataQualityRoute =
   AuthenticatedAdminDataQualityRouteImport.update({
     id: '/admin/data-quality',
@@ -3689,6 +3696,7 @@ export interface FileRoutesByFullPath {
   '/admin/crm-health': typeof AuthenticatedAdminCrmHealthRoute
   '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
+  '/admin/documents-files-health': typeof AuthenticatedAdminDocumentsFilesHealthRoute
   '/admin/educ-talentos': typeof AuthenticatedAdminEducTalentosRoute
   '/admin/ehr-compliance': typeof AuthenticatedAdminEhrComplianceRoute
   '/admin/events-health': typeof AuthenticatedAdminEventsHealthRoute
@@ -4204,6 +4212,7 @@ export interface FileRoutesByTo {
   '/admin/crm-health': typeof AuthenticatedAdminCrmHealthRoute
   '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
+  '/admin/documents-files-health': typeof AuthenticatedAdminDocumentsFilesHealthRoute
   '/admin/educ-talentos': typeof AuthenticatedAdminEducTalentosRoute
   '/admin/ehr-compliance': typeof AuthenticatedAdminEhrComplianceRoute
   '/admin/events-health': typeof AuthenticatedAdminEventsHealthRoute
@@ -4733,6 +4742,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/crm-health': typeof AuthenticatedAdminCrmHealthRoute
   '/_authenticated/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/_authenticated/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
+  '/_authenticated/admin/documents-files-health': typeof AuthenticatedAdminDocumentsFilesHealthRoute
   '/_authenticated/admin/educ-talentos': typeof AuthenticatedAdminEducTalentosRoute
   '/_authenticated/admin/ehr-compliance': typeof AuthenticatedAdminEhrComplianceRoute
   '/_authenticated/admin/events-health': typeof AuthenticatedAdminEventsHealthRoute
@@ -5261,6 +5271,7 @@ export interface FileRouteTypes {
     | '/admin/crm-health'
     | '/admin/customer-success'
     | '/admin/data-quality'
+    | '/admin/documents-files-health'
     | '/admin/educ-talentos'
     | '/admin/ehr-compliance'
     | '/admin/events-health'
@@ -5776,6 +5787,7 @@ export interface FileRouteTypes {
     | '/admin/crm-health'
     | '/admin/customer-success'
     | '/admin/data-quality'
+    | '/admin/documents-files-health'
     | '/admin/educ-talentos'
     | '/admin/ehr-compliance'
     | '/admin/events-health'
@@ -6304,6 +6316,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/crm-health'
     | '/_authenticated/admin/customer-success'
     | '/_authenticated/admin/data-quality'
+    | '/_authenticated/admin/documents-files-health'
     | '/_authenticated/admin/educ-talentos'
     | '/_authenticated/admin/ehr-compliance'
     | '/_authenticated/admin/events-health'
@@ -9782,6 +9795,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminEducTalentosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/documents-files-health': {
+      id: '/_authenticated/admin/documents-files-health'
+      path: '/admin/documents-files-health'
+      fullPath: '/admin/documents-files-health'
+      preLoaderRoute: typeof AuthenticatedAdminDocumentsFilesHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/data-quality': {
       id: '/_authenticated/admin/data-quality'
       path: '/admin/data-quality'
@@ -11151,6 +11171,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCrmHealthRoute: typeof AuthenticatedAdminCrmHealthRoute
   AuthenticatedAdminCustomerSuccessRoute: typeof AuthenticatedAdminCustomerSuccessRoute
   AuthenticatedAdminDataQualityRoute: typeof AuthenticatedAdminDataQualityRoute
+  AuthenticatedAdminDocumentsFilesHealthRoute: typeof AuthenticatedAdminDocumentsFilesHealthRoute
   AuthenticatedAdminEducTalentosRoute: typeof AuthenticatedAdminEducTalentosRoute
   AuthenticatedAdminEhrComplianceRoute: typeof AuthenticatedAdminEhrComplianceRoute
   AuthenticatedAdminEventsHealthRoute: typeof AuthenticatedAdminEventsHealthRoute
@@ -11366,6 +11387,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminCustomerSuccessRoute:
     AuthenticatedAdminCustomerSuccessRoute,
   AuthenticatedAdminDataQualityRoute: AuthenticatedAdminDataQualityRoute,
+  AuthenticatedAdminDocumentsFilesHealthRoute:
+    AuthenticatedAdminDocumentsFilesHealthRoute,
   AuthenticatedAdminEducTalentosRoute: AuthenticatedAdminEducTalentosRoute,
   AuthenticatedAdminEhrComplianceRoute: AuthenticatedAdminEhrComplianceRoute,
   AuthenticatedAdminEventsHealthRoute: AuthenticatedAdminEventsHealthRoute,
