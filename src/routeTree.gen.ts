@@ -424,6 +424,7 @@ import { Route as AuthenticatedAdminMarketplaceOpsRouteImport } from './routes/_
 import { Route as AuthenticatedAdminMarketplaceB2bHealthRouteImport } from './routes/_authenticated/admin.marketplace-b2b-health'
 import { Route as AuthenticatedAdminMarketingHealthRouteImport } from './routes/_authenticated/admin.marketing-health'
 import { Route as AuthenticatedAdminLoyaltyClubeHealthRouteImport } from './routes/_authenticated/admin.loyalty-clube-health'
+import { Route as AuthenticatedAdminJobsQueuesReliabilityHealthRouteImport } from './routes/_authenticated/admin.jobs-queues-reliability-health'
 import { Route as AuthenticatedAdminInventoryHealthRouteImport } from './routes/_authenticated/admin.inventory-health'
 import { Route as AuthenticatedAdminIntegrationsAutomationHealthRouteImport } from './routes/_authenticated/admin.integrations-automation-health'
 import { Route as AuthenticatedAdminInboxUnificadaRouteImport } from './routes/_authenticated/admin.inbox-unificada'
@@ -2848,6 +2849,12 @@ const AuthenticatedAdminLoyaltyClubeHealthRoute =
     path: '/admin/loyalty-clube-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminJobsQueuesReliabilityHealthRoute =
+  AuthenticatedAdminJobsQueuesReliabilityHealthRouteImport.update({
+    id: '/admin/jobs-queues-reliability-health',
+    path: '/admin/jobs-queues-reliability-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminInventoryHealthRoute =
   AuthenticatedAdminInventoryHealthRouteImport.update({
     id: '/admin/inventory-health',
@@ -3846,6 +3853,7 @@ export interface FileRoutesByFullPath {
   '/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
   '/admin/integrations-automation-health': typeof AuthenticatedAdminIntegrationsAutomationHealthRoute
   '/admin/inventory-health': typeof AuthenticatedAdminInventoryHealthRoute
+  '/admin/jobs-queues-reliability-health': typeof AuthenticatedAdminJobsQueuesReliabilityHealthRoute
   '/admin/loyalty-clube-health': typeof AuthenticatedAdminLoyaltyClubeHealthRoute
   '/admin/marketing-health': typeof AuthenticatedAdminMarketingHealthRoute
   '/admin/marketplace-b2b-health': typeof AuthenticatedAdminMarketplaceB2bHealthRoute
@@ -4379,6 +4387,7 @@ export interface FileRoutesByTo {
   '/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
   '/admin/integrations-automation-health': typeof AuthenticatedAdminIntegrationsAutomationHealthRoute
   '/admin/inventory-health': typeof AuthenticatedAdminInventoryHealthRoute
+  '/admin/jobs-queues-reliability-health': typeof AuthenticatedAdminJobsQueuesReliabilityHealthRoute
   '/admin/loyalty-clube-health': typeof AuthenticatedAdminLoyaltyClubeHealthRoute
   '/admin/marketing-health': typeof AuthenticatedAdminMarketingHealthRoute
   '/admin/marketplace-b2b-health': typeof AuthenticatedAdminMarketplaceB2bHealthRoute
@@ -4926,6 +4935,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
   '/_authenticated/admin/integrations-automation-health': typeof AuthenticatedAdminIntegrationsAutomationHealthRoute
   '/_authenticated/admin/inventory-health': typeof AuthenticatedAdminInventoryHealthRoute
+  '/_authenticated/admin/jobs-queues-reliability-health': typeof AuthenticatedAdminJobsQueuesReliabilityHealthRoute
   '/_authenticated/admin/loyalty-clube-health': typeof AuthenticatedAdminLoyaltyClubeHealthRoute
   '/_authenticated/admin/marketing-health': typeof AuthenticatedAdminMarketingHealthRoute
   '/_authenticated/admin/marketplace-b2b-health': typeof AuthenticatedAdminMarketplaceB2bHealthRoute
@@ -5472,6 +5482,7 @@ export interface FileRouteTypes {
     | '/admin/inbox-unificada'
     | '/admin/integrations-automation-health'
     | '/admin/inventory-health'
+    | '/admin/jobs-queues-reliability-health'
     | '/admin/loyalty-clube-health'
     | '/admin/marketing-health'
     | '/admin/marketplace-b2b-health'
@@ -6005,6 +6016,7 @@ export interface FileRouteTypes {
     | '/admin/inbox-unificada'
     | '/admin/integrations-automation-health'
     | '/admin/inventory-health'
+    | '/admin/jobs-queues-reliability-health'
     | '/admin/loyalty-clube-health'
     | '/admin/marketing-health'
     | '/admin/marketplace-b2b-health'
@@ -6551,6 +6563,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/inbox-unificada'
     | '/_authenticated/admin/integrations-automation-health'
     | '/_authenticated/admin/inventory-health'
+    | '/_authenticated/admin/jobs-queues-reliability-health'
     | '/_authenticated/admin/loyalty-clube-health'
     | '/_authenticated/admin/marketing-health'
     | '/_authenticated/admin/marketplace-b2b-health'
@@ -9925,6 +9938,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminLoyaltyClubeHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/jobs-queues-reliability-health': {
+      id: '/_authenticated/admin/jobs-queues-reliability-health'
+      path: '/admin/jobs-queues-reliability-health'
+      fullPath: '/admin/jobs-queues-reliability-health'
+      preLoaderRoute: typeof AuthenticatedAdminJobsQueuesReliabilityHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/inventory-health': {
       id: '/_authenticated/admin/inventory-health'
       path: '/admin/inventory-health'
@@ -11542,6 +11562,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminInboxUnificadaRoute: typeof AuthenticatedAdminInboxUnificadaRoute
   AuthenticatedAdminIntegrationsAutomationHealthRoute: typeof AuthenticatedAdminIntegrationsAutomationHealthRoute
   AuthenticatedAdminInventoryHealthRoute: typeof AuthenticatedAdminInventoryHealthRoute
+  AuthenticatedAdminJobsQueuesReliabilityHealthRoute: typeof AuthenticatedAdminJobsQueuesReliabilityHealthRoute
   AuthenticatedAdminLoyaltyClubeHealthRoute: typeof AuthenticatedAdminLoyaltyClubeHealthRoute
   AuthenticatedAdminMarketingHealthRoute: typeof AuthenticatedAdminMarketingHealthRoute
   AuthenticatedAdminMarketplaceB2bHealthRoute: typeof AuthenticatedAdminMarketplaceB2bHealthRoute
@@ -11792,6 +11813,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminIntegrationsAutomationHealthRoute,
   AuthenticatedAdminInventoryHealthRoute:
     AuthenticatedAdminInventoryHealthRoute,
+  AuthenticatedAdminJobsQueuesReliabilityHealthRoute:
+    AuthenticatedAdminJobsQueuesReliabilityHealthRoute,
   AuthenticatedAdminLoyaltyClubeHealthRoute:
     AuthenticatedAdminLoyaltyClubeHealthRoute,
   AuthenticatedAdminMarketingHealthRoute:
