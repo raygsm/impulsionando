@@ -64,6 +64,28 @@ function DomainsCockpitPage() {
     queryFn: () => fetchCockpit(),
     staleTime: 60_000,
   });
+  const [filter, setFilter] = useState<"all" | "sync" | "drift" | "none">("all");
+  const currentShort = BUILD_INFO.commit?.slice(0, 7) ?? "";
+  const summary = useMemo(() => {
+    const rows = data?.rows ?? [];
+    let sync = 0, drift = 0, none = 0;
+    for (const r of rows) {
+      if (!r.publishedCommit) none++;
+      else if (r.publishedCommit.startsWith(currentShort)) sync++;
+      else drift++;
+    }
+    return { total: rows.length, sync, drift, none };
+  }, [data, currentShort]);
+  const visibleRows = useMemo(() => {
+    const rows = data?.rows ?? [];
+    if (filter === "all") return rows;
+    return rows.filter((r) => {
+      if (filter === "sync") return r.publishedCommit?.startsWith(currentShort);
+      if (filter === "drift")
+        return r.publishedCommit && !r.publishedCommit.startsWith(currentShort);
+      return !r.publishedCommit;
+    });
+  }, [data, filter, currentShort]);
 
   return (
     <div className="p-6 space-y-4 max-w-6xl">
