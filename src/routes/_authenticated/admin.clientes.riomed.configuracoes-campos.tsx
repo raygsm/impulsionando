@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useFieldDefinitions, FIELD_TYPE_LABELS, FIELD_TYPES, type FieldType, type FieldDefinition } from "@/hooks/use-field-definitions";
