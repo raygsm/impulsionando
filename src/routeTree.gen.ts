@@ -212,6 +212,7 @@ import { Route as AuthenticatedCockpitsIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedBiIndexRouteImport } from './routes/_authenticated/bi.index'
 import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenticated/agenda.index'
 import { Route as AuthenticatedAffiliatesIndexRouteImport } from './routes/_authenticated/affiliates.index'
+import { Route as RiomedVendedoresCadastroRouteImport } from './routes/riomed.vendedores.cadastro'
 import { Route as RiomedVSlugRouteImport } from './routes/riomed.v.$slug'
 import { Route as RiomedTecnicoCadastroRouteImport } from './routes/riomed.tecnico.cadastro'
 import { Route as RiomedHospitalPortalRouteImport } from './routes/riomed.hospital.portal'
@@ -1657,6 +1658,12 @@ const AuthenticatedAffiliatesIndexRoute =
     id: '/',
     path: '/',
     getParentRoute: () => AuthenticatedAffiliatesRoute,
+  } as any)
+const RiomedVendedoresCadastroRoute =
+  RiomedVendedoresCadastroRouteImport.update({
+    id: '/vendedores/cadastro',
+    path: '/vendedores/cadastro',
+    getParentRoute: () => RiomedRoute,
   } as any)
 const RiomedVSlugRoute = RiomedVSlugRouteImport.update({
   id: '/v/$slug',
@@ -4559,6 +4566,7 @@ export interface FileRoutesByFullPath {
   '/riomed/hospital/portal': typeof RiomedHospitalPortalRoute
   '/riomed/tecnico/cadastro': typeof RiomedTecnicoCadastroRoute
   '/riomed/v/$slug': typeof RiomedVSlugRoute
+  '/riomed/vendedores/cadastro': typeof RiomedVendedoresCadastroRoute
   '/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/bi/': typeof AuthenticatedBiIndexRoute
@@ -5157,6 +5165,7 @@ export interface FileRoutesByTo {
   '/riomed/hospital/portal': typeof RiomedHospitalPortalRoute
   '/riomed/tecnico/cadastro': typeof RiomedTecnicoCadastroRoute
   '/riomed/v/$slug': typeof RiomedVSlugRoute
+  '/riomed/vendedores/cadastro': typeof RiomedVendedoresCadastroRoute
   '/affiliates': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda': typeof AuthenticatedAgendaIndexRoute
   '/bi': typeof AuthenticatedBiIndexRoute
@@ -5770,6 +5779,7 @@ export interface FileRoutesById {
   '/riomed/hospital/portal': typeof RiomedHospitalPortalRoute
   '/riomed/tecnico/cadastro': typeof RiomedTecnicoCadastroRoute
   '/riomed/v/$slug': typeof RiomedVSlugRoute
+  '/riomed/vendedores/cadastro': typeof RiomedVendedoresCadastroRoute
   '/_authenticated/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/_authenticated/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/_authenticated/bi/': typeof AuthenticatedBiIndexRoute
@@ -6382,6 +6392,7 @@ export interface FileRouteTypes {
     | '/riomed/hospital/portal'
     | '/riomed/tecnico/cadastro'
     | '/riomed/v/$slug'
+    | '/riomed/vendedores/cadastro'
     | '/affiliates/'
     | '/agenda/'
     | '/bi/'
@@ -6980,6 +6991,7 @@ export interface FileRouteTypes {
     | '/riomed/hospital/portal'
     | '/riomed/tecnico/cadastro'
     | '/riomed/v/$slug'
+    | '/riomed/vendedores/cadastro'
     | '/affiliates'
     | '/agenda'
     | '/bi'
@@ -7592,6 +7604,7 @@ export interface FileRouteTypes {
     | '/riomed/hospital/portal'
     | '/riomed/tecnico/cadastro'
     | '/riomed/v/$slug'
+    | '/riomed/vendedores/cadastro'
     | '/_authenticated/affiliates/'
     | '/_authenticated/agenda/'
     | '/_authenticated/bi/'
@@ -9282,6 +9295,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/affiliates/'
       preLoaderRoute: typeof AuthenticatedAffiliatesIndexRouteImport
       parentRoute: typeof AuthenticatedAffiliatesRoute
+    }
+    '/riomed/vendedores/cadastro': {
+      id: '/riomed/vendedores/cadastro'
+      path: '/vendedores/cadastro'
+      fullPath: '/riomed/vendedores/cadastro'
+      preLoaderRoute: typeof RiomedVendedoresCadastroRouteImport
+      parentRoute: typeof RiomedRoute
     }
     '/riomed/v/$slug': {
       id: '/riomed/v/$slug'
@@ -13553,6 +13573,7 @@ interface RiomedRouteChildren {
   RiomedHospitalPortalRoute: typeof RiomedHospitalPortalRoute
   RiomedTecnicoCadastroRoute: typeof RiomedTecnicoCadastroRoute
   RiomedVSlugRoute: typeof RiomedVSlugRoute
+  RiomedVendedoresCadastroRoute: typeof RiomedVendedoresCadastroRoute
 }
 
 const RiomedRouteChildren: RiomedRouteChildren = {
@@ -13571,6 +13592,7 @@ const RiomedRouteChildren: RiomedRouteChildren = {
   RiomedHospitalPortalRoute: RiomedHospitalPortalRoute,
   RiomedTecnicoCadastroRoute: RiomedTecnicoCadastroRoute,
   RiomedVSlugRoute: RiomedVSlugRoute,
+  RiomedVendedoresCadastroRoute: RiomedVendedoresCadastroRoute,
 }
 
 const RiomedRouteWithChildren =

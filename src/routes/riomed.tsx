@@ -19,7 +19,7 @@ const NAV = [
   { to: "/riomed/fornecedor/cadastro", label: "Proveedores" },
   { to: "/riomed/trabalhe-conosco", label: "Trabaja con Nosotros" },
   { to: "/riomed/cotizar", label: "Cotizar" },
-  { to: "/riomed/area-cliente", label: "Área del Cliente" },
+  { to: "/area-cliente", label: "Área del Cliente" },
 ];
 
 function RiomedLayout() {
