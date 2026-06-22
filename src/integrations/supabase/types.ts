@@ -20062,6 +20062,170 @@ export type Database = {
           },
         ]
       }
+      riomed_ai_agents: {
+        Row: {
+          agent_key: string
+          company_id: string
+          created_at: string
+          funnel_stage: string
+          id: string
+          is_active: boolean
+          model: string
+          name: string
+          purpose: string
+          system_prompt: string
+          tools: Json
+          updated_at: string
+        }
+        Insert: {
+          agent_key: string
+          company_id: string
+          created_at?: string
+          funnel_stage: string
+          id?: string
+          is_active?: boolean
+          model?: string
+          name: string
+          purpose: string
+          system_prompt: string
+          tools?: Json
+          updated_at?: string
+        }
+        Update: {
+          agent_key?: string
+          company_id?: string
+          created_at?: string
+          funnel_stage?: string
+          id?: string
+          is_active?: boolean
+          model?: string
+          name?: string
+          purpose?: string
+          system_prompt?: string
+          tools?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_ai_agents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_ai_agents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_ai_agents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_ai_agents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      riomed_ai_runs: {
+        Row: {
+          agent_id: string
+          company_id: string
+          cost_credits: number | null
+          created_at: string
+          error_message: string | null
+          finished_at: string | null
+          id: string
+          input: Json
+          output: Json | null
+          related_entity_id: string | null
+          related_entity_type: string | null
+          status: string
+          tokens_input: number | null
+          tokens_output: number | null
+          triggered_by: string | null
+        }
+        Insert: {
+          agent_id: string
+          company_id: string
+          cost_credits?: number | null
+          created_at?: string
+          error_message?: string | null
+          finished_at?: string | null
+          id?: string
+          input?: Json
+          output?: Json | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          status?: string
+          tokens_input?: number | null
+          tokens_output?: number | null
+          triggered_by?: string | null
+        }
+        Update: {
+          agent_id?: string
+          company_id?: string
+          cost_credits?: number | null
+          created_at?: string
+          error_message?: string | null
+          finished_at?: string | null
+          id?: string
+          input?: Json
+          output?: Json | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          status?: string
+          tokens_input?: number | null
+          tokens_output?: number | null
+          triggered_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_ai_runs_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_ai_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_ai_runs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_ai_runs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_ai_runs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_ai_runs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       riomed_ap_invoices: {
         Row: {
           amount: number
@@ -20345,6 +20509,101 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_tenant_identity_status"
             referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      riomed_automation_runs: {
+        Row: {
+          ai_run_id: string | null
+          automation_id: string
+          company_id: string
+          context: Json | null
+          created_at: string
+          error_message: string | null
+          finished_at: string | null
+          id: string
+          n8n_execution_id: string | null
+          status: string
+          steps_completed: number | null
+          trigger_event: string
+        }
+        Insert: {
+          ai_run_id?: string | null
+          automation_id: string
+          company_id: string
+          context?: Json | null
+          created_at?: string
+          error_message?: string | null
+          finished_at?: string | null
+          id?: string
+          n8n_execution_id?: string | null
+          status?: string
+          steps_completed?: number | null
+          trigger_event: string
+        }
+        Update: {
+          ai_run_id?: string | null
+          automation_id?: string
+          company_id?: string
+          context?: Json | null
+          created_at?: string
+          error_message?: string | null
+          finished_at?: string | null
+          id?: string
+          n8n_execution_id?: string | null
+          status?: string
+          steps_completed?: number | null
+          trigger_event?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_automation_runs_ai_run_id_fkey"
+            columns: ["ai_run_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_ai_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_automation_runs_automation_id_fkey"
+            columns: ["automation_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_funnel_automations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_automation_runs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_automation_runs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_automation_runs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_automation_runs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_automation_runs_n8n_execution_id_fkey"
+            columns: ["n8n_execution_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_n8n_executions"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -21063,6 +21322,100 @@ export type Database = {
           },
         ]
       }
+      riomed_funnel_automations: {
+        Row: {
+          actions: Json
+          agent_id: string | null
+          company_id: string
+          conditions: Json
+          created_at: string
+          description: string | null
+          funnel_stage: string
+          id: string
+          is_active: boolean
+          name: string
+          priority: number
+          trigger_event: string
+          updated_at: string
+          workflow_id: string | null
+        }
+        Insert: {
+          actions?: Json
+          agent_id?: string | null
+          company_id: string
+          conditions?: Json
+          created_at?: string
+          description?: string | null
+          funnel_stage: string
+          id?: string
+          is_active?: boolean
+          name: string
+          priority?: number
+          trigger_event: string
+          updated_at?: string
+          workflow_id?: string | null
+        }
+        Update: {
+          actions?: Json
+          agent_id?: string | null
+          company_id?: string
+          conditions?: Json
+          created_at?: string
+          description?: string | null
+          funnel_stage?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          priority?: number
+          trigger_event?: string
+          updated_at?: string
+          workflow_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_funnel_automations_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_ai_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_funnel_automations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_funnel_automations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_funnel_automations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_funnel_automations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_funnel_automations_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_n8n_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       riomed_governance_policies: {
         Row: {
           company_id: string
@@ -21557,6 +21910,155 @@ export type Database = {
           },
           {
             foreignKeyName: "riomed_lead_routing_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      riomed_n8n_executions: {
+        Row: {
+          company_id: string
+          created_at: string
+          duration_ms: number | null
+          error_message: string | null
+          finished_at: string | null
+          id: string
+          response_payload: Json | null
+          status: string
+          trigger_payload: Json | null
+          triggered_by: string | null
+          workflow_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          finished_at?: string | null
+          id?: string
+          response_payload?: Json | null
+          status?: string
+          trigger_payload?: Json | null
+          triggered_by?: string | null
+          workflow_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          finished_at?: string | null
+          id?: string
+          response_payload?: Json | null
+          status?: string
+          trigger_payload?: Json | null
+          triggered_by?: string | null
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_n8n_executions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_n8n_executions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_n8n_executions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_n8n_executions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_n8n_executions_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_n8n_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      riomed_n8n_workflows: {
+        Row: {
+          company_id: string
+          config: Json
+          created_at: string
+          description: string | null
+          funnel_stage: string | null
+          id: string
+          is_active: boolean
+          name: string
+          trigger_event: string | null
+          updated_at: string
+          webhook_url: string | null
+        }
+        Insert: {
+          company_id: string
+          config?: Json
+          created_at?: string
+          description?: string | null
+          funnel_stage?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          trigger_event?: string | null
+          updated_at?: string
+          webhook_url?: string | null
+        }
+        Update: {
+          company_id?: string
+          config?: Json
+          created_at?: string
+          description?: string | null
+          funnel_stage?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          trigger_event?: string | null
+          updated_at?: string
+          webhook_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_n8n_workflows_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_n8n_workflows_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_n8n_workflows_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_n8n_workflows_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "v_tenant_identity_status"
