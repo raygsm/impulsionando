@@ -141,7 +141,7 @@ function SellersPage() {
               <DistributionForm
                 initial={cfg.data?.config}
                 sellers={sellers.data?.sellers ?? []}
-                onSave={(d) => cfgMut.mutate(d)}
+                onSave={(d: any) => cfgMut.mutate(d)}
               />
             </CardContent>
           </Card>

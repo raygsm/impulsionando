@@ -587,6 +587,7 @@ import { Route as AuthenticatedAdminClientesRiomedRouteImport } from './routes/_
 import { Route as ApiPublicPaymentsCloseInvoiceReplayRouteImport } from './routes/api/public/payments/close-invoice.replay'
 import { Route as AuthenticatedImobiliariaAprovacoesIdImprimirRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes.$id.imprimir'
 import { Route as AuthenticatedCoreClienteIdPaginasRouteImport } from './routes/_authenticated/core.cliente.$id.paginas'
+import { Route as AuthenticatedAdminClientesRiomedVendedoresRouteImport } from './routes/_authenticated/admin.clientes.riomed.vendedores'
 import { Route as AuthenticatedAdminClientesRiomedRoutingRouteImport } from './routes/_authenticated/admin.clientes.riomed.routing'
 import { Route as AuthenticatedAdminClientesRiomedRelatoriosRouteImport } from './routes/_authenticated/admin.clientes.riomed.relatorios'
 import { Route as AuthenticatedAdminClientesRiomedProdutosRouteImport } from './routes/_authenticated/admin.clientes.riomed.produtos'
@@ -3859,6 +3860,12 @@ const AuthenticatedCoreClienteIdPaginasRoute =
     path: '/paginas',
     getParentRoute: () => AuthenticatedCoreClienteIdRoute,
   } as any)
+const AuthenticatedAdminClientesRiomedVendedoresRoute =
+  AuthenticatedAdminClientesRiomedVendedoresRouteImport.update({
+    id: '/vendedores',
+    path: '/vendedores',
+    getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
+  } as any)
 const AuthenticatedAdminClientesRiomedRoutingRoute =
   AuthenticatedAdminClientesRiomedRoutingRouteImport.update({
     id: '/routing',
@@ -4586,6 +4593,7 @@ export interface FileRoutesByFullPath {
   '/admin/clientes/riomed/produtos': typeof AuthenticatedAdminClientesRiomedProdutosRoute
   '/admin/clientes/riomed/relatorios': typeof AuthenticatedAdminClientesRiomedRelatoriosRoute
   '/admin/clientes/riomed/routing': typeof AuthenticatedAdminClientesRiomedRoutingRoute
+  '/admin/clientes/riomed/vendedores': typeof AuthenticatedAdminClientesRiomedVendedoresRoute
   '/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
   '/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
   '/api/public/payments/close-invoice/replay': typeof ApiPublicPaymentsCloseInvoiceReplayRoute
@@ -5174,6 +5182,7 @@ export interface FileRoutesByTo {
   '/admin/clientes/riomed/produtos': typeof AuthenticatedAdminClientesRiomedProdutosRoute
   '/admin/clientes/riomed/relatorios': typeof AuthenticatedAdminClientesRiomedRelatoriosRoute
   '/admin/clientes/riomed/routing': typeof AuthenticatedAdminClientesRiomedRoutingRoute
+  '/admin/clientes/riomed/vendedores': typeof AuthenticatedAdminClientesRiomedVendedoresRoute
   '/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
   '/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
   '/api/public/payments/close-invoice/replay': typeof ApiPublicPaymentsCloseInvoiceReplayRoute
@@ -5777,6 +5786,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/clientes/riomed/produtos': typeof AuthenticatedAdminClientesRiomedProdutosRoute
   '/_authenticated/admin/clientes/riomed/relatorios': typeof AuthenticatedAdminClientesRiomedRelatoriosRoute
   '/_authenticated/admin/clientes/riomed/routing': typeof AuthenticatedAdminClientesRiomedRoutingRoute
+  '/_authenticated/admin/clientes/riomed/vendedores': typeof AuthenticatedAdminClientesRiomedVendedoresRoute
   '/_authenticated/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
   '/_authenticated/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
   '/api/public/payments/close-invoice/replay': typeof ApiPublicPaymentsCloseInvoiceReplayRoute
@@ -6379,6 +6389,7 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed/produtos'
     | '/admin/clientes/riomed/relatorios'
     | '/admin/clientes/riomed/routing'
+    | '/admin/clientes/riomed/vendedores'
     | '/core/cliente/$id/paginas'
     | '/imobiliaria/aprovacoes/$id/imprimir'
     | '/api/public/payments/close-invoice/replay'
@@ -6967,6 +6978,7 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed/produtos'
     | '/admin/clientes/riomed/relatorios'
     | '/admin/clientes/riomed/routing'
+    | '/admin/clientes/riomed/vendedores'
     | '/core/cliente/$id/paginas'
     | '/imobiliaria/aprovacoes/$id/imprimir'
     | '/api/public/payments/close-invoice/replay'
@@ -7569,6 +7581,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/clientes/riomed/produtos'
     | '/_authenticated/admin/clientes/riomed/relatorios'
     | '/_authenticated/admin/clientes/riomed/routing'
+    | '/_authenticated/admin/clientes/riomed/vendedores'
     | '/_authenticated/core/cliente/$id/paginas'
     | '/_authenticated/imobiliaria/aprovacoes/$id/imprimir'
     | '/api/public/payments/close-invoice/replay'
@@ -11783,6 +11796,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCoreClienteIdPaginasRouteImport
       parentRoute: typeof AuthenticatedCoreClienteIdRoute
     }
+    '/_authenticated/admin/clientes/riomed/vendedores': {
+      id: '/_authenticated/admin/clientes/riomed/vendedores'
+      path: '/vendedores'
+      fullPath: '/admin/clientes/riomed/vendedores'
+      preLoaderRoute: typeof AuthenticatedAdminClientesRiomedVendedoresRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
+    }
     '/_authenticated/admin/clientes/riomed/routing': {
       id: '/_authenticated/admin/clientes/riomed/routing'
       path: '/routing'
@@ -12575,6 +12595,7 @@ interface AuthenticatedAdminClientesRiomedRouteChildren {
   AuthenticatedAdminClientesRiomedProdutosRoute: typeof AuthenticatedAdminClientesRiomedProdutosRoute
   AuthenticatedAdminClientesRiomedRelatoriosRoute: typeof AuthenticatedAdminClientesRiomedRelatoriosRoute
   AuthenticatedAdminClientesRiomedRoutingRoute: typeof AuthenticatedAdminClientesRiomedRoutingRoute
+  AuthenticatedAdminClientesRiomedVendedoresRoute: typeof AuthenticatedAdminClientesRiomedVendedoresRoute
 }
 
 const AuthenticatedAdminClientesRiomedRouteChildren: AuthenticatedAdminClientesRiomedRouteChildren =
@@ -12619,6 +12640,8 @@ const AuthenticatedAdminClientesRiomedRouteChildren: AuthenticatedAdminClientesR
       AuthenticatedAdminClientesRiomedRelatoriosRoute,
     AuthenticatedAdminClientesRiomedRoutingRoute:
       AuthenticatedAdminClientesRiomedRoutingRoute,
+    AuthenticatedAdminClientesRiomedVendedoresRoute:
+      AuthenticatedAdminClientesRiomedVendedoresRoute,
   }
 
 const AuthenticatedAdminClientesRiomedRouteWithChildren =
