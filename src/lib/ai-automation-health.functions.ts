@@ -23,7 +23,7 @@ export const getAiAutomationHealth = createServerFn({ method: "POST" })
       supabaseAdmin.from("ai_project_generations").select("id, status, ai_model, approved_at, provisioned_at, error_message, created_at").gte("created_at", sinceIso).limit(20000),
       supabaseAdmin.from("ai_prompt_library").select("id, category, niche, status, usage_count").limit(10000),
       supabaseAdmin.from("n8n_workflow_runs").select("id, workflow_name, regua, status, channel, http_status, latency_ms, started_at, finished_at, created_at").gte("created_at", sinceIso).limit(100000),
-      supabaseAdmin.from("webhook_runs").select("id, status, http_status, latency_ms, created_at").gte("created_at", sinceIso).limit(50000),
+      supabaseAdmin.from("webhook_runs").select("id, status, response_status, started_at, finished_at, created_at").gte("created_at", sinceIso).limit(50000),
       supabaseAdmin.from("webhook_event_log").select("id, source, created_at").gte("created_at", sinceIso).limit(50000),
     ]);
 
