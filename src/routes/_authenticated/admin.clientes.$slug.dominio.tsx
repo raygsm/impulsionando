@@ -135,10 +135,10 @@ function TenantDomainPage() {
         <Stat label="DNS" value={identity?.dns_status ?? "—"} />
         <Stat label="SSL" value={identity?.ssl_status ?? "—"} />
         <Stat
-          label="Último deploy"
+          label="Provisionado em"
           value={
-            identity?.published_at
-              ? new Date(identity.published_at as string).toLocaleString("pt-BR")
+            identity?.provisioned_at
+              ? new Date(identity.provisioned_at as string).toLocaleString("pt-BR")
               : "—"
           }
         />
