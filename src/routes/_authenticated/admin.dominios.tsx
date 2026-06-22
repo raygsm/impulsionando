@@ -209,7 +209,8 @@ function DomainsCockpitPage() {
                       </span>
                     )}
                   </td>
-                  <td className="p-2 text-right space-x-2">
+                  <td className="p-2 text-right space-x-2 whitespace-nowrap">
+                    {!inSync ? <MarkRowButton slug={r.slug} /> : null}
                     <a
                       href={`/admin/clientes/${r.slug}/dominio`}
                       className="text-xs underline text-primary"
