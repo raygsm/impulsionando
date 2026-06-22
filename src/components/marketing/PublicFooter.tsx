@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { MessageCircle, Mail, ExternalLink } from "lucide-react";
 import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
+import { BuildStamp } from "@/components/brand/BuildStamp";
 
 const WHATSAPP_URL = "https://wa.me/5521993075000";
 const EMAIL = "sac@impulsionando.com.br";
@@ -120,7 +121,10 @@ export function PublicFooter() {
 
         <div className="border-t border-border pt-6 text-xs text-muted-foreground flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>© {new Date().getFullYear()} Impulsionando Tecnologia. Todos os direitos reservados.</span>
-          <span className="font-medium text-foreground">O limite é onde você quiser chegar.</span>
+          <div className="flex items-center gap-3">
+            <BuildStamp />
+            <span className="font-medium text-foreground">O limite é onde você quiser chegar.</span>
+          </div>
         </div>
       </div>
     </footer>
