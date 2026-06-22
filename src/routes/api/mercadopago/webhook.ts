@@ -148,7 +148,27 @@ export const Route = createFileRoute("/api/mercadopago/webhook")({
                     stack: provErr?.stack?.slice(0, 4000) ?? null,
                   });
                 }
+
+                // Reconciliação RioMed: external_reference no formato "riomed_ar:<uuid>"
+                const extRef: string | null = p?.external_reference ?? null;
+                if (extRef && extRef.startsWith("riomed_ar:")) {
+                  const arId = extRef.slice("riomed_ar:".length);
+                  try {
+                    await supabaseAdmin.from("riomed_ar_invoices").update({
+                      status: "paid",
+                      paid_amount: Number(p?.transaction_amount ?? 0),
+                      paid_at: paidAt,
+                      payment_method: "mercadopago",
+                      mp_payment_id: String(resourceId),
+                    } as never).eq("id", arId);
+                  } catch (recErr: any) {
+                    await logRuntime("warn", "reconciliação RioMed AR falhou", {
+                      ar_id: arId, message: recErr?.message,
+                    });
+                  }
+                }
               }
+
             }
           }
 
