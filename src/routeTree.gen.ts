@@ -604,6 +604,7 @@ import { Route as AuthenticatedAdminClientesRiomedFinanceiroRouteImport } from '
 import { Route as AuthenticatedAdminClientesRiomedEstoqueAlmoxarifadosRouteImport } from './routes/_authenticated/admin.clientes.riomed.estoque-almoxarifados'
 import { Route as AuthenticatedAdminClientesRiomedCrmRouteImport } from './routes/_authenticated/admin.clientes.riomed.crm'
 import { Route as AuthenticatedAdminClientesRiomedConfiguracoesCamposRouteImport } from './routes/_authenticated/admin.clientes.riomed.configuracoes-campos'
+import { Route as AuthenticatedAdminClientesRiomedComissoesRouteImport } from './routes/_authenticated/admin.clientes.riomed.comissoes'
 import { Route as AuthenticatedAdminClientesRiomedCarrinhosRouteImport } from './routes/_authenticated/admin.clientes.riomed.carrinhos'
 import { Route as AuthenticatedAdminClientesRiomedBuscaIaRouteImport } from './routes/_authenticated/admin.clientes.riomed.busca-ia'
 import { Route as AuthenticatedAdminClientesRiomedAutomacaoRouteImport } from './routes/_authenticated/admin.clientes.riomed.automacao'
@@ -3963,6 +3964,12 @@ const AuthenticatedAdminClientesRiomedConfiguracoesCamposRoute =
     path: '/configuracoes-campos',
     getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
   } as any)
+const AuthenticatedAdminClientesRiomedComissoesRoute =
+  AuthenticatedAdminClientesRiomedComissoesRouteImport.update({
+    id: '/comissoes',
+    path: '/comissoes',
+    getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
+  } as any)
 const AuthenticatedAdminClientesRiomedCarrinhosRoute =
   AuthenticatedAdminClientesRiomedCarrinhosRouteImport.update({
     id: '/carrinhos',
@@ -4585,6 +4592,7 @@ export interface FileRoutesByFullPath {
   '/admin/clientes/riomed/automacao': typeof AuthenticatedAdminClientesRiomedAutomacaoRoute
   '/admin/clientes/riomed/busca-ia': typeof AuthenticatedAdminClientesRiomedBuscaIaRoute
   '/admin/clientes/riomed/carrinhos': typeof AuthenticatedAdminClientesRiomedCarrinhosRoute
+  '/admin/clientes/riomed/comissoes': typeof AuthenticatedAdminClientesRiomedComissoesRoute
   '/admin/clientes/riomed/configuracoes-campos': typeof AuthenticatedAdminClientesRiomedConfiguracoesCamposRoute
   '/admin/clientes/riomed/crm': typeof AuthenticatedAdminClientesRiomedCrmRoute
   '/admin/clientes/riomed/estoque-almoxarifados': typeof AuthenticatedAdminClientesRiomedEstoqueAlmoxarifadosRoute
@@ -5175,6 +5183,7 @@ export interface FileRoutesByTo {
   '/admin/clientes/riomed/automacao': typeof AuthenticatedAdminClientesRiomedAutomacaoRoute
   '/admin/clientes/riomed/busca-ia': typeof AuthenticatedAdminClientesRiomedBuscaIaRoute
   '/admin/clientes/riomed/carrinhos': typeof AuthenticatedAdminClientesRiomedCarrinhosRoute
+  '/admin/clientes/riomed/comissoes': typeof AuthenticatedAdminClientesRiomedComissoesRoute
   '/admin/clientes/riomed/configuracoes-campos': typeof AuthenticatedAdminClientesRiomedConfiguracoesCamposRoute
   '/admin/clientes/riomed/crm': typeof AuthenticatedAdminClientesRiomedCrmRoute
   '/admin/clientes/riomed/estoque-almoxarifados': typeof AuthenticatedAdminClientesRiomedEstoqueAlmoxarifadosRoute
@@ -5780,6 +5789,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/clientes/riomed/automacao': typeof AuthenticatedAdminClientesRiomedAutomacaoRoute
   '/_authenticated/admin/clientes/riomed/busca-ia': typeof AuthenticatedAdminClientesRiomedBuscaIaRoute
   '/_authenticated/admin/clientes/riomed/carrinhos': typeof AuthenticatedAdminClientesRiomedCarrinhosRoute
+  '/_authenticated/admin/clientes/riomed/comissoes': typeof AuthenticatedAdminClientesRiomedComissoesRoute
   '/_authenticated/admin/clientes/riomed/configuracoes-campos': typeof AuthenticatedAdminClientesRiomedConfiguracoesCamposRoute
   '/_authenticated/admin/clientes/riomed/crm': typeof AuthenticatedAdminClientesRiomedCrmRoute
   '/_authenticated/admin/clientes/riomed/estoque-almoxarifados': typeof AuthenticatedAdminClientesRiomedEstoqueAlmoxarifadosRoute
@@ -6384,6 +6394,7 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed/automacao'
     | '/admin/clientes/riomed/busca-ia'
     | '/admin/clientes/riomed/carrinhos'
+    | '/admin/clientes/riomed/comissoes'
     | '/admin/clientes/riomed/configuracoes-campos'
     | '/admin/clientes/riomed/crm'
     | '/admin/clientes/riomed/estoque-almoxarifados'
@@ -6974,6 +6985,7 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed/automacao'
     | '/admin/clientes/riomed/busca-ia'
     | '/admin/clientes/riomed/carrinhos'
+    | '/admin/clientes/riomed/comissoes'
     | '/admin/clientes/riomed/configuracoes-campos'
     | '/admin/clientes/riomed/crm'
     | '/admin/clientes/riomed/estoque-almoxarifados'
@@ -7578,6 +7590,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/clientes/riomed/automacao'
     | '/_authenticated/admin/clientes/riomed/busca-ia'
     | '/_authenticated/admin/clientes/riomed/carrinhos'
+    | '/_authenticated/admin/clientes/riomed/comissoes'
     | '/_authenticated/admin/clientes/riomed/configuracoes-campos'
     | '/_authenticated/admin/clientes/riomed/crm'
     | '/_authenticated/admin/clientes/riomed/estoque-almoxarifados'
@@ -11928,6 +11941,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientesRiomedConfiguracoesCamposRouteImport
       parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
     }
+    '/_authenticated/admin/clientes/riomed/comissoes': {
+      id: '/_authenticated/admin/clientes/riomed/comissoes'
+      path: '/comissoes'
+      fullPath: '/admin/clientes/riomed/comissoes'
+      preLoaderRoute: typeof AuthenticatedAdminClientesRiomedComissoesRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
+    }
     '/_authenticated/admin/clientes/riomed/carrinhos': {
       id: '/_authenticated/admin/clientes/riomed/carrinhos'
       path: '/carrinhos'
@@ -12600,6 +12620,7 @@ interface AuthenticatedAdminClientesRiomedRouteChildren {
   AuthenticatedAdminClientesRiomedAutomacaoRoute: typeof AuthenticatedAdminClientesRiomedAutomacaoRoute
   AuthenticatedAdminClientesRiomedBuscaIaRoute: typeof AuthenticatedAdminClientesRiomedBuscaIaRoute
   AuthenticatedAdminClientesRiomedCarrinhosRoute: typeof AuthenticatedAdminClientesRiomedCarrinhosRoute
+  AuthenticatedAdminClientesRiomedComissoesRoute: typeof AuthenticatedAdminClientesRiomedComissoesRoute
   AuthenticatedAdminClientesRiomedConfiguracoesCamposRoute: typeof AuthenticatedAdminClientesRiomedConfiguracoesCamposRoute
   AuthenticatedAdminClientesRiomedCrmRoute: typeof AuthenticatedAdminClientesRiomedCrmRoute
   AuthenticatedAdminClientesRiomedEstoqueAlmoxarifadosRoute: typeof AuthenticatedAdminClientesRiomedEstoqueAlmoxarifadosRoute
@@ -12631,6 +12652,8 @@ const AuthenticatedAdminClientesRiomedRouteChildren: AuthenticatedAdminClientesR
       AuthenticatedAdminClientesRiomedBuscaIaRoute,
     AuthenticatedAdminClientesRiomedCarrinhosRoute:
       AuthenticatedAdminClientesRiomedCarrinhosRoute,
+    AuthenticatedAdminClientesRiomedComissoesRoute:
+      AuthenticatedAdminClientesRiomedComissoesRoute,
     AuthenticatedAdminClientesRiomedConfiguracoesCamposRoute:
       AuthenticatedAdminClientesRiomedConfiguracoesCamposRoute,
     AuthenticatedAdminClientesRiomedCrmRoute:
