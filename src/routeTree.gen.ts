@@ -101,6 +101,7 @@ import { Route as ShowroomAgendamentosOnlineRouteImport } from './routes/showroo
 import { Route as ShowroomAgendaRouteImport } from './routes/showroom.agenda'
 import { Route as ShowroomAcademiaRouteImport } from './routes/showroom.academia'
 import { Route as RiomedTrabalheConoscoRouteImport } from './routes/riomed.trabalhe-conosco'
+import { Route as RiomedServicioTecnicoRouteImport } from './routes/riomed.servicio-tecnico'
 import { Route as RiomedProductosRouteImport } from './routes/riomed.productos'
 import { Route as RiomedPacientesRouteImport } from './routes/riomed.pacientes'
 import { Route as RiomedHospitalesRouteImport } from './routes/riomed.hospitales'
@@ -1081,6 +1082,11 @@ const ShowroomAcademiaRoute = ShowroomAcademiaRouteImport.update({
 const RiomedTrabalheConoscoRoute = RiomedTrabalheConoscoRouteImport.update({
   id: '/trabalhe-conosco',
   path: '/trabalhe-conosco',
+  getParentRoute: () => RiomedRoute,
+} as any)
+const RiomedServicioTecnicoRoute = RiomedServicioTecnicoRouteImport.update({
+  id: '/servicio-tecnico',
+  path: '/servicio-tecnico',
   getParentRoute: () => RiomedRoute,
 } as any)
 const RiomedProductosRoute = RiomedProductosRouteImport.update({
@@ -4182,6 +4188,7 @@ export interface FileRoutesByFullPath {
   '/riomed/hospitales': typeof RiomedHospitalesRoute
   '/riomed/pacientes': typeof RiomedPacientesRoute
   '/riomed/productos': typeof RiomedProductosRoute
+  '/riomed/servicio-tecnico': typeof RiomedServicioTecnicoRoute
   '/riomed/trabalhe-conosco': typeof RiomedTrabalheConoscoRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
@@ -4779,6 +4786,7 @@ export interface FileRoutesByTo {
   '/riomed/hospitales': typeof RiomedHospitalesRoute
   '/riomed/pacientes': typeof RiomedPacientesRoute
   '/riomed/productos': typeof RiomedProductosRoute
+  '/riomed/servicio-tecnico': typeof RiomedServicioTecnicoRoute
   '/riomed/trabalhe-conosco': typeof RiomedTrabalheConoscoRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
@@ -5391,6 +5399,7 @@ export interface FileRoutesById {
   '/riomed/hospitales': typeof RiomedHospitalesRoute
   '/riomed/pacientes': typeof RiomedPacientesRoute
   '/riomed/productos': typeof RiomedProductosRoute
+  '/riomed/servicio-tecnico': typeof RiomedServicioTecnicoRoute
   '/riomed/trabalhe-conosco': typeof RiomedTrabalheConoscoRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
@@ -6002,6 +6011,7 @@ export interface FileRouteTypes {
     | '/riomed/hospitales'
     | '/riomed/pacientes'
     | '/riomed/productos'
+    | '/riomed/servicio-tecnico'
     | '/riomed/trabalhe-conosco'
     | '/showroom/academia'
     | '/showroom/agenda'
@@ -6599,6 +6609,7 @@ export interface FileRouteTypes {
     | '/riomed/hospitales'
     | '/riomed/pacientes'
     | '/riomed/productos'
+    | '/riomed/servicio-tecnico'
     | '/riomed/trabalhe-conosco'
     | '/showroom/academia'
     | '/showroom/agenda'
@@ -7210,6 +7221,7 @@ export interface FileRouteTypes {
     | '/riomed/hospitales'
     | '/riomed/pacientes'
     | '/riomed/productos'
+    | '/riomed/servicio-tecnico'
     | '/riomed/trabalhe-conosco'
     | '/showroom/academia'
     | '/showroom/agenda'
@@ -8492,6 +8504,13 @@ declare module '@tanstack/react-router' {
       path: '/trabalhe-conosco'
       fullPath: '/riomed/trabalhe-conosco'
       preLoaderRoute: typeof RiomedTrabalheConoscoRouteImport
+      parentRoute: typeof RiomedRoute
+    }
+    '/riomed/servicio-tecnico': {
+      id: '/riomed/servicio-tecnico'
+      path: '/servicio-tecnico'
+      fullPath: '/riomed/servicio-tecnico'
+      preLoaderRoute: typeof RiomedServicioTecnicoRouteImport
       parentRoute: typeof RiomedRoute
     }
     '/riomed/productos': {
@@ -13526,6 +13545,7 @@ interface RiomedRouteChildren {
   RiomedHospitalesRoute: typeof RiomedHospitalesRoute
   RiomedPacientesRoute: typeof RiomedPacientesRoute
   RiomedProductosRoute: typeof RiomedProductosRoute
+  RiomedServicioTecnicoRoute: typeof RiomedServicioTecnicoRoute
   RiomedTrabalheConoscoRoute: typeof RiomedTrabalheConoscoRoute
   RiomedIndexRoute: typeof RiomedIndexRoute
   RiomedCotizacionTokenRoute: typeof RiomedCotizacionTokenRoute
@@ -13543,6 +13563,7 @@ const RiomedRouteChildren: RiomedRouteChildren = {
   RiomedHospitalesRoute: RiomedHospitalesRoute,
   RiomedPacientesRoute: RiomedPacientesRoute,
   RiomedProductosRoute: RiomedProductosRoute,
+  RiomedServicioTecnicoRoute: RiomedServicioTecnicoRoute,
   RiomedTrabalheConoscoRoute: RiomedTrabalheConoscoRoute,
   RiomedIndexRoute: RiomedIndexRoute,
   RiomedCotizacionTokenRoute: RiomedCotizacionTokenRoute,
