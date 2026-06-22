@@ -572,6 +572,7 @@ import { Route as AuthenticatedBarMarketplaceNovoPedidoRouteImport } from './rou
 import { Route as AuthenticatedAdminTenantIdRouteImport } from './routes/_authenticated/admin.tenant.$id'
 import { Route as AuthenticatedAdminModulosClonagemRouteImport } from './routes/_authenticated/admin.modulos.clonagem'
 import { Route as AuthenticatedAdminIntegracoesMercadoPagoRouteImport } from './routes/_authenticated/admin.integracoes.mercado-pago'
+import { Route as AuthenticatedAdminClientesRiomedRouteImport } from './routes/_authenticated/admin.clientes.riomed'
 import { Route as ApiPublicPaymentsCloseInvoiceReplayRouteImport } from './routes/api/public/payments/close-invoice.replay'
 import { Route as AuthenticatedImobiliariaAprovacoesIdImprimirRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes.$id.imprimir'
 import { Route as AuthenticatedCoreClienteIdPaginasRouteImport } from './routes/_authenticated/core.cliente.$id.paginas'
@@ -3747,6 +3748,12 @@ const AuthenticatedAdminIntegracoesMercadoPagoRoute =
     path: '/admin/integracoes/mercado-pago',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminClientesRiomedRoute =
+  AuthenticatedAdminClientesRiomedRouteImport.update({
+    id: '/admin/clientes/riomed',
+    path: '/admin/clientes/riomed',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicPaymentsCloseInvoiceReplayRoute =
   ApiPublicPaymentsCloseInvoiceReplayRouteImport.update({
     id: '/api/public/payments/close-invoice/replay',
@@ -4279,6 +4286,7 @@ export interface FileRoutesByFullPath {
   '/reports/': typeof AuthenticatedReportsIndexRoute
   '/saiba-mais/': typeof AuthenticatedSaibaMaisIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
+  '/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRoute
   '/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/admin/tenant/$id': typeof AuthenticatedAdminTenantIdRoute
@@ -4836,6 +4844,7 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedReportsIndexRoute
   '/saiba-mais': typeof AuthenticatedSaibaMaisIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
+  '/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRoute
   '/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/admin/tenant/$id': typeof AuthenticatedAdminTenantIdRoute
@@ -5407,6 +5416,7 @@ export interface FileRoutesById {
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
   '/_authenticated/saiba-mais/': typeof AuthenticatedSaibaMaisIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
+  '/_authenticated/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRoute
   '/_authenticated/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   '/_authenticated/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
   '/_authenticated/admin/tenant/$id': typeof AuthenticatedAdminTenantIdRoute
@@ -5977,6 +5987,7 @@ export interface FileRouteTypes {
     | '/reports/'
     | '/saiba-mais/'
     | '/sales/'
+    | '/admin/clientes/riomed'
     | '/admin/integracoes/mercado-pago'
     | '/admin/modulos/clonagem'
     | '/admin/tenant/$id'
@@ -6534,6 +6545,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/saiba-mais'
     | '/sales'
+    | '/admin/clientes/riomed'
     | '/admin/integracoes/mercado-pago'
     | '/admin/modulos/clonagem'
     | '/admin/tenant/$id'
@@ -7104,6 +7116,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reports/'
     | '/_authenticated/saiba-mais/'
     | '/_authenticated/sales/'
+    | '/_authenticated/admin/clientes/riomed'
     | '/_authenticated/admin/integracoes/mercado-pago'
     | '/_authenticated/admin/modulos/clonagem'
     | '/_authenticated/admin/tenant/$id'
@@ -11273,6 +11286,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIntegracoesMercadoPagoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/clientes/riomed': {
+      id: '/_authenticated/admin/clientes/riomed'
+      path: '/admin/clientes/riomed'
+      fullPath: '/admin/clientes/riomed'
+      preLoaderRoute: typeof AuthenticatedAdminClientesRiomedRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/payments/close-invoice/replay': {
       id: '/api/public/payments/close-invoice/replay'
       path: '/api/public/payments/close-invoice/replay'
@@ -12167,6 +12187,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEventosIndexRoute: typeof AuthenticatedEventosIndexRoute
   AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
   AuthenticatedSaibaMaisIndexRoute: typeof AuthenticatedSaibaMaisIndexRoute
+  AuthenticatedAdminClientesRiomedRoute: typeof AuthenticatedAdminClientesRiomedRoute
   AuthenticatedAdminIntegracoesMercadoPagoRoute: typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   AuthenticatedAdminModulosClonagemRoute: typeof AuthenticatedAdminModulosClonagemRoute
   AuthenticatedAdminTenantIdRoute: typeof AuthenticatedAdminTenantIdRoute
@@ -12514,6 +12535,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEventosIndexRoute: AuthenticatedEventosIndexRoute,
   AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
   AuthenticatedSaibaMaisIndexRoute: AuthenticatedSaibaMaisIndexRoute,
+  AuthenticatedAdminClientesRiomedRoute: AuthenticatedAdminClientesRiomedRoute,
   AuthenticatedAdminIntegracoesMercadoPagoRoute:
     AuthenticatedAdminIntegracoesMercadoPagoRoute,
   AuthenticatedAdminModulosClonagemRoute:
