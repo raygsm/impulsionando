@@ -464,6 +464,7 @@ import { Route as AuthenticatedAdminDataQualityRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminCustomerSuccessRouteImport } from './routes/_authenticated/admin.customer-success'
 import { Route as AuthenticatedAdminCrmHealthRouteImport } from './routes/_authenticated/admin.crm-health'
 import { Route as AuthenticatedAdminCrmFunnelHealthRouteImport } from './routes/_authenticated/admin.crm-funnel-health'
+import { Route as AuthenticatedAdminCredentialsVaultRouteImport } from './routes/_authenticated/admin.credentials-vault'
 import { Route as AuthenticatedAdminConversionFunnelRouteImport } from './routes/_authenticated/admin.conversion-funnel'
 import { Route as AuthenticatedAdminContabHealthRouteImport } from './routes/_authenticated/admin.contab-health'
 import { Route as AuthenticatedAdminContabCockpitHealthRouteImport } from './routes/_authenticated/admin.contab-cockpit-health'
@@ -3106,6 +3107,12 @@ const AuthenticatedAdminCrmFunnelHealthRoute =
     path: '/admin/crm-funnel-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminCredentialsVaultRoute =
+  AuthenticatedAdminCredentialsVaultRouteImport.update({
+    id: '/admin/credentials-vault',
+    path: '/admin/credentials-vault',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminConversionFunnelRoute =
   AuthenticatedAdminConversionFunnelRouteImport.update({
     id: '/admin/conversion-funnel',
@@ -3950,6 +3957,7 @@ export interface FileRoutesByFullPath {
   '/admin/contab-cockpit-health': typeof AuthenticatedAdminContabCockpitHealthRoute
   '/admin/contab-health': typeof AuthenticatedAdminContabHealthRoute
   '/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
+  '/admin/credentials-vault': typeof AuthenticatedAdminCredentialsVaultRoute
   '/admin/crm-funnel-health': typeof AuthenticatedAdminCrmFunnelHealthRoute
   '/admin/crm-health': typeof AuthenticatedAdminCrmHealthRoute
   '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
@@ -4501,6 +4509,7 @@ export interface FileRoutesByTo {
   '/admin/contab-cockpit-health': typeof AuthenticatedAdminContabCockpitHealthRoute
   '/admin/contab-health': typeof AuthenticatedAdminContabHealthRoute
   '/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
+  '/admin/credentials-vault': typeof AuthenticatedAdminCredentialsVaultRoute
   '/admin/crm-funnel-health': typeof AuthenticatedAdminCrmFunnelHealthRoute
   '/admin/crm-health': typeof AuthenticatedAdminCrmHealthRoute
   '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
@@ -5066,6 +5075,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/contab-cockpit-health': typeof AuthenticatedAdminContabCockpitHealthRoute
   '/_authenticated/admin/contab-health': typeof AuthenticatedAdminContabHealthRoute
   '/_authenticated/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
+  '/_authenticated/admin/credentials-vault': typeof AuthenticatedAdminCredentialsVaultRoute
   '/_authenticated/admin/crm-funnel-health': typeof AuthenticatedAdminCrmFunnelHealthRoute
   '/_authenticated/admin/crm-health': typeof AuthenticatedAdminCrmHealthRoute
   '/_authenticated/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
@@ -5630,6 +5640,7 @@ export interface FileRouteTypes {
     | '/admin/contab-cockpit-health'
     | '/admin/contab-health'
     | '/admin/conversion-funnel'
+    | '/admin/credentials-vault'
     | '/admin/crm-funnel-health'
     | '/admin/crm-health'
     | '/admin/customer-success'
@@ -6181,6 +6192,7 @@ export interface FileRouteTypes {
     | '/admin/contab-cockpit-health'
     | '/admin/contab-health'
     | '/admin/conversion-funnel'
+    | '/admin/credentials-vault'
     | '/admin/crm-funnel-health'
     | '/admin/crm-health'
     | '/admin/customer-success'
@@ -6745,6 +6757,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/contab-cockpit-health'
     | '/_authenticated/admin/contab-health'
     | '/_authenticated/admin/conversion-funnel'
+    | '/_authenticated/admin/credentials-vault'
     | '/_authenticated/admin/crm-funnel-health'
     | '/_authenticated/admin/crm-health'
     | '/_authenticated/admin/customer-success'
@@ -10439,6 +10452,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCrmFunnelHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/credentials-vault': {
+      id: '/_authenticated/admin/credentials-vault'
+      path: '/admin/credentials-vault'
+      fullPath: '/admin/credentials-vault'
+      preLoaderRoute: typeof AuthenticatedAdminCredentialsVaultRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/conversion-funnel': {
       id: '/_authenticated/admin/conversion-funnel'
       path: '/admin/conversion-funnel'
@@ -11880,6 +11900,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminContabCockpitHealthRoute: typeof AuthenticatedAdminContabCockpitHealthRoute
   AuthenticatedAdminContabHealthRoute: typeof AuthenticatedAdminContabHealthRoute
   AuthenticatedAdminConversionFunnelRoute: typeof AuthenticatedAdminConversionFunnelRoute
+  AuthenticatedAdminCredentialsVaultRoute: typeof AuthenticatedAdminCredentialsVaultRoute
   AuthenticatedAdminCrmFunnelHealthRoute: typeof AuthenticatedAdminCrmFunnelHealthRoute
   AuthenticatedAdminCrmHealthRoute: typeof AuthenticatedAdminCrmHealthRoute
   AuthenticatedAdminCustomerSuccessRoute: typeof AuthenticatedAdminCustomerSuccessRoute
@@ -12141,6 +12162,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminContabHealthRoute: AuthenticatedAdminContabHealthRoute,
   AuthenticatedAdminConversionFunnelRoute:
     AuthenticatedAdminConversionFunnelRoute,
+  AuthenticatedAdminCredentialsVaultRoute:
+    AuthenticatedAdminCredentialsVaultRoute,
   AuthenticatedAdminCrmFunnelHealthRoute:
     AuthenticatedAdminCrmFunnelHealthRoute,
   AuthenticatedAdminCrmHealthRoute: AuthenticatedAdminCrmHealthRoute,
@@ -12701,13 +12724,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
