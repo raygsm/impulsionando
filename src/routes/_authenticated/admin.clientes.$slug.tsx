@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn, useServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +17,14 @@ import {
   ShieldCheck,
   Languages,
 } from "lucide-react";
-import { getLocaleProfile, formatMoney, formatDateTime } from "@/lib/tenant-locale";
+import {
+  getLocaleProfile,
+  formatMoney,
+  formatDateTime,
+  TENANT_LOCALE_PROFILES,
+  type CountryCode,
+} from "@/lib/tenant-locale";
+
 
 /**
  * Card unificado por tenant — Onda D do Core Impulsionando.
@@ -64,6 +72,39 @@ const loadTenantOverview = createServerFn({ method: "GET" })
       usersCount: usersCount ?? 0,
     };
   });
+
+const updateTenantLocale = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    z
+      .object({
+        companyId: z.string().uuid(),
+        countryCode: z.enum(["BR", "BO"]),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", {
+      _user_id: userId,
+      _role: "admin",
+    });
+    if (!isAdmin) throw new Response("Forbidden", { status: 403 });
+    const profile = TENANT_LOCALE_PROFILES[data.countryCode];
+    const { error } = await supabase
+      .from("companies")
+      .update({
+        country_code: profile.countryCode,
+        locale: profile.locale,
+        currency_code: profile.currencyCode,
+        phone_country_code: profile.phoneCountryCode,
+        timezone: profile.timezone,
+      })
+      .eq("id", data.companyId);
+    if (error) throw new Response(error.message, { status: 500 });
+    return { ok: true };
+  });
+
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/$slug")({
   head: () => ({ meta: [{ title: "Cliente · Impulsionando" }] }),
@@ -164,7 +205,7 @@ function TenantOverviewPage() {
         />
       </section>
 
-      <LocaleStrip company={company} />
+      <LocaleStrip company={company} slug={slug} />
 
       <section className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
         <ActionCard
@@ -270,31 +311,66 @@ function ActionCard({
 
 function LocaleStrip({
   company,
+  slug,
 }: {
   company: {
+    id: string;
     country_code?: string | null;
     locale?: string | null;
     currency_code?: string | null;
     phone_country_code?: string | null;
     timezone?: string | null;
   };
+  slug: string;
 }) {
   const profile = getLocaleProfile(company);
   const now = new Date();
+  const qc = useQueryClient();
+  const update = useServerFn(updateTenantLocale);
+  const mutation = useMutation({
+    mutationFn: (countryCode: CountryCode) =>
+      update({ data: { companyId: company.id, countryCode } }),
+    onSuccess: (_d, countryCode) => {
+      toast.success(`Locale alterado para ${TENANT_LOCALE_PROFILES[countryCode].countryName}`);
+      qc.invalidateQueries({ queryKey: ["tenant-overview", slug] });
+    },
+    onError: (err: unknown) =>
+      toast.error(err instanceof Error ? err.message : "Falha ao atualizar locale"),
+  });
   return (
-    <section className="border rounded-md p-3 flex flex-wrap items-center gap-x-6 gap-y-1 text-xs bg-muted/30">
-      <span className="inline-flex items-center gap-1 font-medium">
-        <Languages className="h-3.5 w-3.5" /> {profile.countryName} · {profile.locale}
-      </span>
-      <span>
-        Moeda: <code>{profile.currencyCode}</code> · ex {formatMoney(1234.5, profile)}
-      </span>
-      <span>
-        DDI: <code>{profile.phoneCountryCode}</code>
-      </span>
-      <span>
-        Fuso: <code>{profile.timezone}</code> · {formatDateTime(now, profile)}
-      </span>
+    <section className="border rounded-md p-3 space-y-2 bg-muted/30">
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-xs">
+        <span className="inline-flex items-center gap-1 font-medium">
+          <Languages className="h-3.5 w-3.5" /> {profile.countryName} · {profile.locale}
+        </span>
+        <span>
+          Moeda: <code>{profile.currencyCode}</code> · ex {formatMoney(1234.5, profile)}
+        </span>
+        <span>
+          DDI: <code>{profile.phoneCountryCode}</code>
+        </span>
+        <span>
+          Fuso: <code>{profile.timezone}</code> · {formatDateTime(now, profile)}
+        </span>
+      </div>
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <span className="text-muted-foreground">Aplicar preset:</span>
+        {(Object.keys(TENANT_LOCALE_PROFILES) as CountryCode[]).map((cc) => {
+          const active = profile.countryCode === cc;
+          return (
+            <Button
+              key={cc}
+              size="sm"
+              variant={active ? "default" : "outline"}
+              disabled={active || mutation.isPending}
+              onClick={() => mutation.mutate(cc)}
+            >
+              {TENANT_LOCALE_PROFILES[cc].countryName} ({TENANT_LOCALE_PROFILES[cc].locale})
+            </Button>
+          );
+        })}
+      </div>
     </section>
   );
 }
+
