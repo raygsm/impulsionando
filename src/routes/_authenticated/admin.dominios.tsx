@@ -4,11 +4,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn, useServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { useQuery } from "@tanstack/react-query";
-import { Globe, ExternalLink, RefreshCw } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Globe, ExternalLink, RefreshCw, GitCommit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BUILD_INFO } from "@/generated/build-info";
 import { useMemo, useState } from "react";
+import { markTenantPublished } from "@/lib/tenant-publish.functions";
+import { toast } from "sonner";
 
 const loadDomainsCockpit = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
