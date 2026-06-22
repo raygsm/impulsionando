@@ -410,6 +410,7 @@ import { Route as AuthenticatedAdminProjetosParalelosRouteImport } from './route
 import { Route as AuthenticatedAdminPricingIntelligenceRouteImport } from './routes/_authenticated/admin.pricing-intelligence'
 import { Route as AuthenticatedAdminPixPendentesRouteImport } from './routes/_authenticated/admin.pix-pendentes'
 import { Route as AuthenticatedAdminPeerBenchmarkRouteImport } from './routes/_authenticated/admin.peer-benchmark'
+import { Route as AuthenticatedAdminPayoutsMonetizationHealthRouteImport } from './routes/_authenticated/admin.payouts-monetization-health'
 import { Route as AuthenticatedAdminOnboardingProvisioningHealthRouteImport } from './routes/_authenticated/admin.onboarding-provisioning-health'
 import { Route as AuthenticatedAdminNotificationsCockpitRouteImport } from './routes/_authenticated/admin.notifications-cockpit'
 import { Route as AuthenticatedAdminNotificationDeliveryRouteImport } from './routes/_authenticated/admin.notification-delivery'
@@ -2757,6 +2758,12 @@ const AuthenticatedAdminPeerBenchmarkRoute =
     path: '/admin/peer-benchmark',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminPayoutsMonetizationHealthRoute =
+  AuthenticatedAdminPayoutsMonetizationHealthRouteImport.update({
+    id: '/admin/payouts-monetization-health',
+    path: '/admin/payouts-monetization-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminOnboardingProvisioningHealthRoute =
   AuthenticatedAdminOnboardingProvisioningHealthRouteImport.update({
     id: '/admin/onboarding-provisioning-health',
@@ -3804,6 +3811,7 @@ export interface FileRoutesByFullPath {
   '/admin/notification-delivery': typeof AuthenticatedAdminNotificationDeliveryRoute
   '/admin/notifications-cockpit': typeof AuthenticatedAdminNotificationsCockpitRoute
   '/admin/onboarding-provisioning-health': typeof AuthenticatedAdminOnboardingProvisioningHealthRoute
+  '/admin/payouts-monetization-health': typeof AuthenticatedAdminPayoutsMonetizationHealthRoute
   '/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
   '/admin/pricing-intelligence': typeof AuthenticatedAdminPricingIntelligenceRoute
@@ -4330,6 +4338,7 @@ export interface FileRoutesByTo {
   '/admin/notification-delivery': typeof AuthenticatedAdminNotificationDeliveryRoute
   '/admin/notifications-cockpit': typeof AuthenticatedAdminNotificationsCockpitRoute
   '/admin/onboarding-provisioning-health': typeof AuthenticatedAdminOnboardingProvisioningHealthRoute
+  '/admin/payouts-monetization-health': typeof AuthenticatedAdminPayoutsMonetizationHealthRoute
   '/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
   '/admin/pricing-intelligence': typeof AuthenticatedAdminPricingIntelligenceRoute
@@ -4870,6 +4879,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/notification-delivery': typeof AuthenticatedAdminNotificationDeliveryRoute
   '/_authenticated/admin/notifications-cockpit': typeof AuthenticatedAdminNotificationsCockpitRoute
   '/_authenticated/admin/onboarding-provisioning-health': typeof AuthenticatedAdminOnboardingProvisioningHealthRoute
+  '/_authenticated/admin/payouts-monetization-health': typeof AuthenticatedAdminPayoutsMonetizationHealthRoute
   '/_authenticated/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/_authenticated/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
   '/_authenticated/admin/pricing-intelligence': typeof AuthenticatedAdminPricingIntelligenceRoute
@@ -5409,6 +5419,7 @@ export interface FileRouteTypes {
     | '/admin/notification-delivery'
     | '/admin/notifications-cockpit'
     | '/admin/onboarding-provisioning-health'
+    | '/admin/payouts-monetization-health'
     | '/admin/peer-benchmark'
     | '/admin/pix-pendentes'
     | '/admin/pricing-intelligence'
@@ -5935,6 +5946,7 @@ export interface FileRouteTypes {
     | '/admin/notification-delivery'
     | '/admin/notifications-cockpit'
     | '/admin/onboarding-provisioning-health'
+    | '/admin/payouts-monetization-health'
     | '/admin/peer-benchmark'
     | '/admin/pix-pendentes'
     | '/admin/pricing-intelligence'
@@ -6474,6 +6486,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/notification-delivery'
     | '/_authenticated/admin/notifications-cockpit'
     | '/_authenticated/admin/onboarding-provisioning-health'
+    | '/_authenticated/admin/payouts-monetization-health'
     | '/_authenticated/admin/peer-benchmark'
     | '/_authenticated/admin/pix-pendentes'
     | '/_authenticated/admin/pricing-intelligence'
@@ -9736,6 +9749,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPeerBenchmarkRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/payouts-monetization-health': {
+      id: '/_authenticated/admin/payouts-monetization-health'
+      path: '/admin/payouts-monetization-health'
+      fullPath: '/admin/payouts-monetization-health'
+      preLoaderRoute: typeof AuthenticatedAdminPayoutsMonetizationHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/onboarding-provisioning-health': {
       id: '/_authenticated/admin/onboarding-provisioning-health'
       path: '/admin/onboarding-provisioning-health'
@@ -11409,6 +11429,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminNotificationDeliveryRoute: typeof AuthenticatedAdminNotificationDeliveryRoute
   AuthenticatedAdminNotificationsCockpitRoute: typeof AuthenticatedAdminNotificationsCockpitRoute
   AuthenticatedAdminOnboardingProvisioningHealthRoute: typeof AuthenticatedAdminOnboardingProvisioningHealthRoute
+  AuthenticatedAdminPayoutsMonetizationHealthRoute: typeof AuthenticatedAdminPayoutsMonetizationHealthRoute
   AuthenticatedAdminPeerBenchmarkRoute: typeof AuthenticatedAdminPeerBenchmarkRoute
   AuthenticatedAdminPixPendentesRoute: typeof AuthenticatedAdminPixPendentesRoute
   AuthenticatedAdminPricingIntelligenceRoute: typeof AuthenticatedAdminPricingIntelligenceRoute
@@ -11654,6 +11675,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminNotificationsCockpitRoute,
   AuthenticatedAdminOnboardingProvisioningHealthRoute:
     AuthenticatedAdminOnboardingProvisioningHealthRoute,
+  AuthenticatedAdminPayoutsMonetizationHealthRoute:
+    AuthenticatedAdminPayoutsMonetizationHealthRoute,
   AuthenticatedAdminPeerBenchmarkRoute: AuthenticatedAdminPeerBenchmarkRoute,
   AuthenticatedAdminPixPendentesRoute: AuthenticatedAdminPixPendentesRoute,
   AuthenticatedAdminPricingIntelligenceRoute:

@@ -515,6 +515,7 @@ export const NAV_GROUPS: NavGroup[] = [
           { to: "/admin/loyalty-clube-health", label: "Loyalty & Clube", icon: Crown, superOnly: true },
           { to: "/admin/onboarding-provisioning-health", label: "Onboarding & Provisioning", icon: Rocket, superOnly: true },
           { to: "/admin/integrations-automation-health", label: "Integrations & Automation", icon: Workflow, superOnly: true },
+          { to: "/admin/payouts-monetization-health", label: "Payouts & Monetization", icon: Banknote, superOnly: true },
           { to: "/admin/runtime-uptime-health", label: "Runtime & Uptime", icon: Activity, superOnly: true },
           { to: "/core/testes", label: "Testes", icon: FlaskConical, superOnly: true },
           { to: "/core/bi-ecossistema", label: "BI Ecossistema", icon: BarChart3, superOnly: true },
