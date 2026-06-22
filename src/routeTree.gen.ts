@@ -435,6 +435,7 @@ import { Route as AuthenticatedAdminFinanceHealthRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminExpansionRadarRouteImport } from './routes/_authenticated/admin.expansion-radar'
 import { Route as AuthenticatedAdminExpansionEngineRouteImport } from './routes/_authenticated/admin.expansion-engine'
 import { Route as AuthenticatedAdminExecutiveBriefingRouteImport } from './routes/_authenticated/admin.executive-briefing'
+import { Route as AuthenticatedAdminEventsTicketingHealthRouteImport } from './routes/_authenticated/admin.events-ticketing-health'
 import { Route as AuthenticatedAdminEventsHealthRouteImport } from './routes/_authenticated/admin.events-health'
 import { Route as AuthenticatedAdminEhrComplianceRouteImport } from './routes/_authenticated/admin.ehr-compliance'
 import { Route as AuthenticatedAdminEducTalentosRouteImport } from './routes/_authenticated/admin.educ-talentos'
@@ -2898,6 +2899,12 @@ const AuthenticatedAdminExecutiveBriefingRoute =
     path: '/admin/executive-briefing',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminEventsTicketingHealthRoute =
+  AuthenticatedAdminEventsTicketingHealthRouteImport.update({
+    id: '/admin/events-ticketing-health',
+    path: '/admin/events-ticketing-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminEventsHealthRoute =
   AuthenticatedAdminEventsHealthRouteImport.update({
     id: '/admin/events-health',
@@ -3707,6 +3714,7 @@ export interface FileRoutesByFullPath {
   '/admin/educ-talentos': typeof AuthenticatedAdminEducTalentosRoute
   '/admin/ehr-compliance': typeof AuthenticatedAdminEhrComplianceRoute
   '/admin/events-health': typeof AuthenticatedAdminEventsHealthRoute
+  '/admin/events-ticketing-health': typeof AuthenticatedAdminEventsTicketingHealthRoute
   '/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
   '/admin/expansion-engine': typeof AuthenticatedAdminExpansionEngineRoute
   '/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
@@ -4224,6 +4232,7 @@ export interface FileRoutesByTo {
   '/admin/educ-talentos': typeof AuthenticatedAdminEducTalentosRoute
   '/admin/ehr-compliance': typeof AuthenticatedAdminEhrComplianceRoute
   '/admin/events-health': typeof AuthenticatedAdminEventsHealthRoute
+  '/admin/events-ticketing-health': typeof AuthenticatedAdminEventsTicketingHealthRoute
   '/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
   '/admin/expansion-engine': typeof AuthenticatedAdminExpansionEngineRoute
   '/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
@@ -4755,6 +4764,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/educ-talentos': typeof AuthenticatedAdminEducTalentosRoute
   '/_authenticated/admin/ehr-compliance': typeof AuthenticatedAdminEhrComplianceRoute
   '/_authenticated/admin/events-health': typeof AuthenticatedAdminEventsHealthRoute
+  '/_authenticated/admin/events-ticketing-health': typeof AuthenticatedAdminEventsTicketingHealthRoute
   '/_authenticated/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
   '/_authenticated/admin/expansion-engine': typeof AuthenticatedAdminExpansionEngineRoute
   '/_authenticated/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
@@ -5285,6 +5295,7 @@ export interface FileRouteTypes {
     | '/admin/educ-talentos'
     | '/admin/ehr-compliance'
     | '/admin/events-health'
+    | '/admin/events-ticketing-health'
     | '/admin/executive-briefing'
     | '/admin/expansion-engine'
     | '/admin/expansion-radar'
@@ -5802,6 +5813,7 @@ export interface FileRouteTypes {
     | '/admin/educ-talentos'
     | '/admin/ehr-compliance'
     | '/admin/events-health'
+    | '/admin/events-ticketing-health'
     | '/admin/executive-briefing'
     | '/admin/expansion-engine'
     | '/admin/expansion-radar'
@@ -6332,6 +6344,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/educ-talentos'
     | '/_authenticated/admin/ehr-compliance'
     | '/_authenticated/admin/events-health'
+    | '/_authenticated/admin/events-ticketing-health'
     | '/_authenticated/admin/executive-briefing'
     | '/_authenticated/admin/expansion-engine'
     | '/_authenticated/admin/expansion-radar'
@@ -9794,6 +9807,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminExecutiveBriefingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/events-ticketing-health': {
+      id: '/_authenticated/admin/events-ticketing-health'
+      path: '/admin/events-ticketing-health'
+      fullPath: '/admin/events-ticketing-health'
+      preLoaderRoute: typeof AuthenticatedAdminEventsTicketingHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/events-health': {
       id: '/_authenticated/admin/events-health'
       path: '/admin/events-health'
@@ -11195,6 +11215,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminEducTalentosRoute: typeof AuthenticatedAdminEducTalentosRoute
   AuthenticatedAdminEhrComplianceRoute: typeof AuthenticatedAdminEhrComplianceRoute
   AuthenticatedAdminEventsHealthRoute: typeof AuthenticatedAdminEventsHealthRoute
+  AuthenticatedAdminEventsTicketingHealthRoute: typeof AuthenticatedAdminEventsTicketingHealthRoute
   AuthenticatedAdminExecutiveBriefingRoute: typeof AuthenticatedAdminExecutiveBriefingRoute
   AuthenticatedAdminExpansionEngineRoute: typeof AuthenticatedAdminExpansionEngineRoute
   AuthenticatedAdminExpansionRadarRoute: typeof AuthenticatedAdminExpansionRadarRoute
@@ -11413,6 +11434,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminEducTalentosRoute: AuthenticatedAdminEducTalentosRoute,
   AuthenticatedAdminEhrComplianceRoute: AuthenticatedAdminEhrComplianceRoute,
   AuthenticatedAdminEventsHealthRoute: AuthenticatedAdminEventsHealthRoute,
+  AuthenticatedAdminEventsTicketingHealthRoute:
+    AuthenticatedAdminEventsTicketingHealthRoute,
   AuthenticatedAdminExecutiveBriefingRoute:
     AuthenticatedAdminExecutiveBriefingRoute,
   AuthenticatedAdminExpansionEngineRoute:
