@@ -39,13 +39,12 @@ export function ClientOperationShell({
             <p className="text-sm text-muted-foreground">{description}</p>
           ) : null}
         </div>
-        <Link
-          to="/admin/clientes/$slug" as any
-          params={{ slug: companySlug } as any}
+        <a
+          href={`/admin/clientes/${companySlug}`}
           className="text-xs text-muted-foreground underline"
         >
           ← Voltar ao card do cliente
-        </Link>
+        </a>
       </header>
       <GateBody gate={gate}>{children}</GateBody>
     </div>
