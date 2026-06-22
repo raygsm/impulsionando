@@ -494,6 +494,7 @@ export const NAV_GROUPS: NavGroup[] = [
           { to: "/admin/inventory-health", label: "Inventory & Stock", icon: Package, superOnly: true },
           { to: "/admin/finance-health", label: "Finance & Cashflow", icon: Wallet, superOnly: true },
           { to: "/admin/crm-health", label: "CRM & Pipeline", icon: KanbanSquare, superOnly: true },
+          { to: "/admin/marketing-health", label: "Marketing & Outbox", icon: Megaphone, superOnly: true },
           { to: "/core/testes", label: "Testes", icon: FlaskConical, superOnly: true },
           { to: "/core/bi-ecossistema", label: "BI Ecossistema", icon: BarChart3, superOnly: true },
         ],
