@@ -334,6 +334,7 @@ function MarkPublishedButton({
   onDone: () => void;
 }) {
   const mark = useServerFn(markTenantPublished);
+  const queryClient = useQueryClient();
   const [busy, setBusy] = useState(false);
   async function handle() {
     setBusy(true);
@@ -342,6 +343,11 @@ function MarkPublishedButton({
         data: { slug, commit: BUILD_INFO.commit, builtAt: BUILD_INFO.builtAt },
       });
       toast.success(`Tenant marcado como publicado · ${res.commit.slice(0, 7)}`);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["tenant-deploy-history", slug] }),
+        queryClient.invalidateQueries({ queryKey: ["tenant-domain", slug] }),
+        queryClient.invalidateQueries({ queryKey: ["admin-dominios"] }),
+      ]);
       onDone();
     } catch (e: any) {
       toast.error(e?.message ?? "Falha ao marcar deploy");
