@@ -428,6 +428,7 @@ import { Route as AuthenticatedAdminNichePlansRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminNicheMatrixRouteImport } from './routes/_authenticated/admin.niche-matrix'
 import { Route as AuthenticatedAdminN8nConsoleRouteImport } from './routes/_authenticated/admin.n8n-console'
 import { Route as AuthenticatedAdminMercadopagoBillingHealthRouteImport } from './routes/_authenticated/admin.mercadopago-billing-health'
+import { Route as AuthenticatedAdminMenuManagerRouteImport } from './routes/_authenticated/admin.menu-manager'
 import { Route as AuthenticatedAdminMasterHubRouteImport } from './routes/_authenticated/admin.master-hub'
 import { Route as AuthenticatedAdminMarocasOpsHealthRouteImport } from './routes/_authenticated/admin.marocas-ops-health'
 import { Route as AuthenticatedAdminMarocasHealthRouteImport } from './routes/_authenticated/admin.marocas-health'
@@ -2894,6 +2895,12 @@ const AuthenticatedAdminMercadopagoBillingHealthRoute =
     path: '/admin/mercadopago-billing-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminMenuManagerRoute =
+  AuthenticatedAdminMenuManagerRouteImport.update({
+    id: '/admin/menu-manager',
+    path: '/admin/menu-manager',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminMasterHubRoute =
   AuthenticatedAdminMasterHubRouteImport.update({
     id: '/admin/master-hub',
@@ -4019,6 +4026,7 @@ export interface FileRoutesByFullPath {
   '/admin/marocas-health': typeof AuthenticatedAdminMarocasHealthRoute
   '/admin/marocas-ops-health': typeof AuthenticatedAdminMarocasOpsHealthRoute
   '/admin/master-hub': typeof AuthenticatedAdminMasterHubRoute
+  '/admin/menu-manager': typeof AuthenticatedAdminMenuManagerRoute
   '/admin/mercadopago-billing-health': typeof AuthenticatedAdminMercadopagoBillingHealthRoute
   '/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
@@ -4574,6 +4582,7 @@ export interface FileRoutesByTo {
   '/admin/marocas-health': typeof AuthenticatedAdminMarocasHealthRoute
   '/admin/marocas-ops-health': typeof AuthenticatedAdminMarocasOpsHealthRoute
   '/admin/master-hub': typeof AuthenticatedAdminMasterHubRoute
+  '/admin/menu-manager': typeof AuthenticatedAdminMenuManagerRoute
   '/admin/mercadopago-billing-health': typeof AuthenticatedAdminMercadopagoBillingHealthRoute
   '/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
@@ -5143,6 +5152,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/marocas-health': typeof AuthenticatedAdminMarocasHealthRoute
   '/_authenticated/admin/marocas-ops-health': typeof AuthenticatedAdminMarocasOpsHealthRoute
   '/_authenticated/admin/master-hub': typeof AuthenticatedAdminMasterHubRoute
+  '/_authenticated/admin/menu-manager': typeof AuthenticatedAdminMenuManagerRoute
   '/_authenticated/admin/mercadopago-billing-health': typeof AuthenticatedAdminMercadopagoBillingHealthRoute
   '/_authenticated/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/_authenticated/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
@@ -5711,6 +5721,7 @@ export interface FileRouteTypes {
     | '/admin/marocas-health'
     | '/admin/marocas-ops-health'
     | '/admin/master-hub'
+    | '/admin/menu-manager'
     | '/admin/mercadopago-billing-health'
     | '/admin/n8n-console'
     | '/admin/niche-matrix'
@@ -6266,6 +6277,7 @@ export interface FileRouteTypes {
     | '/admin/marocas-health'
     | '/admin/marocas-ops-health'
     | '/admin/master-hub'
+    | '/admin/menu-manager'
     | '/admin/mercadopago-billing-health'
     | '/admin/n8n-console'
     | '/admin/niche-matrix'
@@ -6834,6 +6846,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/marocas-health'
     | '/_authenticated/admin/marocas-ops-health'
     | '/_authenticated/admin/master-hub'
+    | '/_authenticated/admin/menu-manager'
     | '/_authenticated/admin/mercadopago-billing-health'
     | '/_authenticated/admin/n8n-console'
     | '/_authenticated/admin/niche-matrix'
@@ -10239,6 +10252,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMercadopagoBillingHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/menu-manager': {
+      id: '/_authenticated/admin/menu-manager'
+      path: '/admin/menu-manager'
+      fullPath: '/admin/menu-manager'
+      preLoaderRoute: typeof AuthenticatedAdminMenuManagerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/master-hub': {
       id: '/_authenticated/admin/master-hub'
       path: '/admin/master-hub'
@@ -12001,6 +12021,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminMarocasHealthRoute: typeof AuthenticatedAdminMarocasHealthRoute
   AuthenticatedAdminMarocasOpsHealthRoute: typeof AuthenticatedAdminMarocasOpsHealthRoute
   AuthenticatedAdminMasterHubRoute: typeof AuthenticatedAdminMasterHubRoute
+  AuthenticatedAdminMenuManagerRoute: typeof AuthenticatedAdminMenuManagerRoute
   AuthenticatedAdminMercadopagoBillingHealthRoute: typeof AuthenticatedAdminMercadopagoBillingHealthRoute
   AuthenticatedAdminN8nConsoleRoute: typeof AuthenticatedAdminN8nConsoleRoute
   AuthenticatedAdminNicheMatrixRoute: typeof AuthenticatedAdminNicheMatrixRoute
@@ -12287,6 +12308,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminMarocasOpsHealthRoute:
     AuthenticatedAdminMarocasOpsHealthRoute,
   AuthenticatedAdminMasterHubRoute: AuthenticatedAdminMasterHubRoute,
+  AuthenticatedAdminMenuManagerRoute: AuthenticatedAdminMenuManagerRoute,
   AuthenticatedAdminMercadopagoBillingHealthRoute:
     AuthenticatedAdminMercadopagoBillingHealthRoute,
   AuthenticatedAdminN8nConsoleRoute: AuthenticatedAdminN8nConsoleRoute,
