@@ -22,7 +22,7 @@ const loadDomainsCockpit = createServerFn({ method: "GET" })
     const { data: identities } = await supabase
       .from("core_tenant_identity")
       .select(
-        "company_id,full_domain,custom_domain,dns_status,ssl_status,provisioned_at,ssl_issued_at,published_at,published_commit",
+        "company_id,full_domain,custom_domain,dns_status,ssl_status,provisioned_at,ssl_issued_at,metadata",
       )
       .in("company_id", ids);
     const idx = new Map((identities ?? []).map((i) => [i.company_id, i]));
