@@ -15,7 +15,7 @@ import {
   GitCommit,
 } from "lucide-react";
 import { BUILD_INFO } from "@/generated/build-info";
-import { markTenantPublished } from "@/lib/tenant-publish.functions";
+import { markTenantPublished, listTenantDeployHistory } from "@/lib/tenant-publish.functions";
 import { toast } from "sonner";
 
 /**
