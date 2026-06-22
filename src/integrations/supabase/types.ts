@@ -20271,6 +20271,83 @@ export type Database = {
           },
         ]
       }
+      riomed_audit_log: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string | null
+          after_data: Json | null
+          before_data: Json | null
+          company_id: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          company_id: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          company_id?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_audit_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_audit_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_audit_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_audit_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       riomed_campaign_items: {
         Row: {
           campaign_id: string
@@ -20986,6 +21063,71 @@ export type Database = {
           },
         ]
       }
+      riomed_governance_policies: {
+        Row: {
+          company_id: string
+          config: Json
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          policy_key: string
+          policy_name: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          config?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          policy_key: string
+          policy_name: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          config?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          policy_key?: string
+          policy_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_governance_policies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_governance_policies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_governance_policies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_governance_policies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       riomed_hospital_accounts: {
         Row: {
           beds_count: number | null
@@ -21415,6 +21557,71 @@ export type Database = {
           },
           {
             foreignKeyName: "riomed_lead_routing_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      riomed_operational_events: {
+        Row: {
+          company_id: string
+          correlation_id: string | null
+          created_at: string
+          event_code: string
+          id: string
+          level: string
+          message: string | null
+          payload: Json | null
+          source: string
+        }
+        Insert: {
+          company_id: string
+          correlation_id?: string | null
+          created_at?: string
+          event_code: string
+          id?: string
+          level?: string
+          message?: string | null
+          payload?: Json | null
+          source: string
+        }
+        Update: {
+          company_id?: string
+          correlation_id?: string | null
+          created_at?: string
+          event_code?: string
+          id?: string
+          level?: string
+          message?: string | null
+          payload?: Json | null
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_operational_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_operational_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_operational_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_operational_events_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "v_tenant_identity_status"
@@ -23055,6 +23262,74 @@ export type Database = {
           },
           {
             foreignKeyName: "riomed_technicians_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      riomed_user_scopes: {
+        Row: {
+          company_id: string
+          created_at: string
+          expires_at: string | null
+          granted_at: string
+          granted_by: string | null
+          id: string
+          notes: string | null
+          scope: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          expires_at?: string | null
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          notes?: string | null
+          scope: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          expires_at?: string | null
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          notes?: string | null
+          scope?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_user_scopes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_user_scopes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_user_scopes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_user_scopes_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "v_tenant_identity_status"
@@ -26711,7 +26986,37 @@ export type Database = {
           variant_id: string
         }[]
       }
+      riomed_has_scope: {
+        Args: { _company_id: string; _scope: string; _user_id: string }
+        Returns: boolean
+      }
       riomed_lead_assign: { Args: { p_lead_id: string }; Returns: string }
+      riomed_log_audit: {
+        Args: {
+          _action: string
+          _actor_email: string
+          _actor_id: string
+          _after: Json
+          _before: Json
+          _company_id: string
+          _entity_id: string
+          _entity_type: string
+          _metadata: Json
+        }
+        Returns: string
+      }
+      riomed_log_event: {
+        Args: {
+          _company_id: string
+          _correlation_id: string
+          _event_code: string
+          _level: string
+          _message: string
+          _payload: Json
+          _source: string
+        }
+        Returns: string
+      }
       riomed_match_products: {
         Args: {
           p_company_id: string
