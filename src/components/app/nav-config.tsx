@@ -483,6 +483,7 @@ export const NAV_GROUPS: NavGroup[] = [
           { to: "/admin/agenda-health", label: "Agenda & Booking Health", icon: Calendar, superOnly: true },
           { to: "/admin/ehr-compliance", label: "EHR & Clinical Compliance", icon: Stethoscope, superOnly: true },
           { to: "/admin/fiscal-health", label: "Fiscal & NF-e Health", icon: Receipt, superOnly: true },
+          { to: "/admin/comms-health", label: "Comunicação Omnichannel", icon: Send, superOnly: true },
           { to: "/core/testes", label: "Testes", icon: FlaskConical, superOnly: true },
           { to: "/core/bi-ecossistema", label: "BI Ecossistema", icon: BarChart3, superOnly: true },
         ],
