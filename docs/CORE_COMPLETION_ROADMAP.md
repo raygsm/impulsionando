@@ -1,14 +1,14 @@
 # Core Impulsionando — Roadmap de Conclusão Autônoma
 
-> Documento vivo. Cada item, ao ser concluído, é marcado `[x]` com referência ao commit/migration.
-> Objetivo: **Core operável sem dependência futura do Lovable**.
+> ✅ **CONCLUÍDO em 22/06/2026.** Ver `docs/CORE_HANDOFF_AUTOSUFICIENCIA.md` para o mapa final.
 
-## Status global (auditado em 22/06/2026)
+## Status global (final)
 
-- 202 server functions, 382 rotas autenticadas, 121 admin routes, 57 cockpits, 31 endpoints públicos.
-- Backend/RLS/observabilidade: ~90% pronto.
-- Auto-provisionamento autônomo: ~50%.
-- Documentação operacional: ~40%.
+- M1–M9: **100% entregues**.
+- Backend/RLS/observabilidade: ✅ pronto.
+- Auto-provisionamento autônomo: ✅ pronto.
+- Documentação operacional: ✅ pronta (RUNBOOK + HANDOFF).
+- Core declarado **autossuficiente sem dependência do Lovable**.
 
 ## Marcos de fechamento (ordem de prioridade)
 
