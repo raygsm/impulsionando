@@ -450,6 +450,7 @@ import { Route as AuthenticatedAdminEventsTicketingHealthRouteImport } from './r
 import { Route as AuthenticatedAdminEventsHealthRouteImport } from './routes/_authenticated/admin.events-health'
 import { Route as AuthenticatedAdminEhrComplianceRouteImport } from './routes/_authenticated/admin.ehr-compliance'
 import { Route as AuthenticatedAdminEhrClinicalHealthRouteImport } from './routes/_authenticated/admin.ehr-clinical-health'
+import { Route as AuthenticatedAdminEducationPolosHealthRouteImport } from './routes/_authenticated/admin.education-polos-health'
 import { Route as AuthenticatedAdminEducTalentosRouteImport } from './routes/_authenticated/admin.educ-talentos'
 import { Route as AuthenticatedAdminEcosystemMarketplaceHealthRouteImport } from './routes/_authenticated/admin.ecosystem-marketplace-health'
 import { Route as AuthenticatedAdminDocumentsFilesHealthRouteImport } from './routes/_authenticated/admin.documents-files-health'
@@ -3008,6 +3009,12 @@ const AuthenticatedAdminEhrClinicalHealthRoute =
     path: '/admin/ehr-clinical-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminEducationPolosHealthRoute =
+  AuthenticatedAdminEducationPolosHealthRouteImport.update({
+    id: '/admin/education-polos-health',
+    path: '/admin/education-polos-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminEducTalentosRoute =
   AuthenticatedAdminEducTalentosRouteImport.update({
     id: '/admin/educ-talentos',
@@ -3852,6 +3859,7 @@ export interface FileRoutesByFullPath {
   '/admin/documents-files-health': typeof AuthenticatedAdminDocumentsFilesHealthRoute
   '/admin/ecosystem-marketplace-health': typeof AuthenticatedAdminEcosystemMarketplaceHealthRoute
   '/admin/educ-talentos': typeof AuthenticatedAdminEducTalentosRoute
+  '/admin/education-polos-health': typeof AuthenticatedAdminEducationPolosHealthRoute
   '/admin/ehr-clinical-health': typeof AuthenticatedAdminEhrClinicalHealthRoute
   '/admin/ehr-compliance': typeof AuthenticatedAdminEhrComplianceRoute
   '/admin/events-health': typeof AuthenticatedAdminEventsHealthRoute
@@ -4389,6 +4397,7 @@ export interface FileRoutesByTo {
   '/admin/documents-files-health': typeof AuthenticatedAdminDocumentsFilesHealthRoute
   '/admin/ecosystem-marketplace-health': typeof AuthenticatedAdminEcosystemMarketplaceHealthRoute
   '/admin/educ-talentos': typeof AuthenticatedAdminEducTalentosRoute
+  '/admin/education-polos-health': typeof AuthenticatedAdminEducationPolosHealthRoute
   '/admin/ehr-clinical-health': typeof AuthenticatedAdminEhrClinicalHealthRoute
   '/admin/ehr-compliance': typeof AuthenticatedAdminEhrComplianceRoute
   '/admin/events-health': typeof AuthenticatedAdminEventsHealthRoute
@@ -4940,6 +4949,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/documents-files-health': typeof AuthenticatedAdminDocumentsFilesHealthRoute
   '/_authenticated/admin/ecosystem-marketplace-health': typeof AuthenticatedAdminEcosystemMarketplaceHealthRoute
   '/_authenticated/admin/educ-talentos': typeof AuthenticatedAdminEducTalentosRoute
+  '/_authenticated/admin/education-polos-health': typeof AuthenticatedAdminEducationPolosHealthRoute
   '/_authenticated/admin/ehr-clinical-health': typeof AuthenticatedAdminEhrClinicalHealthRoute
   '/_authenticated/admin/ehr-compliance': typeof AuthenticatedAdminEhrComplianceRoute
   '/_authenticated/admin/events-health': typeof AuthenticatedAdminEventsHealthRoute
@@ -5490,6 +5500,7 @@ export interface FileRouteTypes {
     | '/admin/documents-files-health'
     | '/admin/ecosystem-marketplace-health'
     | '/admin/educ-talentos'
+    | '/admin/education-polos-health'
     | '/admin/ehr-clinical-health'
     | '/admin/ehr-compliance'
     | '/admin/events-health'
@@ -6027,6 +6038,7 @@ export interface FileRouteTypes {
     | '/admin/documents-files-health'
     | '/admin/ecosystem-marketplace-health'
     | '/admin/educ-talentos'
+    | '/admin/education-polos-health'
     | '/admin/ehr-clinical-health'
     | '/admin/ehr-compliance'
     | '/admin/events-health'
@@ -6577,6 +6589,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/documents-files-health'
     | '/_authenticated/admin/ecosystem-marketplace-health'
     | '/_authenticated/admin/educ-talentos'
+    | '/_authenticated/admin/education-polos-health'
     | '/_authenticated/admin/ehr-clinical-health'
     | '/_authenticated/admin/ehr-compliance'
     | '/_authenticated/admin/events-health'
@@ -10159,6 +10172,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminEhrClinicalHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/education-polos-health': {
+      id: '/_authenticated/admin/education-polos-health'
+      path: '/admin/education-polos-health'
+      fullPath: '/admin/education-polos-health'
+      preLoaderRoute: typeof AuthenticatedAdminEducationPolosHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/educ-talentos': {
       id: '/_authenticated/admin/educ-talentos'
       path: '/admin/educ-talentos'
@@ -11600,6 +11620,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminDocumentsFilesHealthRoute: typeof AuthenticatedAdminDocumentsFilesHealthRoute
   AuthenticatedAdminEcosystemMarketplaceHealthRoute: typeof AuthenticatedAdminEcosystemMarketplaceHealthRoute
   AuthenticatedAdminEducTalentosRoute: typeof AuthenticatedAdminEducTalentosRoute
+  AuthenticatedAdminEducationPolosHealthRoute: typeof AuthenticatedAdminEducationPolosHealthRoute
   AuthenticatedAdminEhrClinicalHealthRoute: typeof AuthenticatedAdminEhrClinicalHealthRoute
   AuthenticatedAdminEhrComplianceRoute: typeof AuthenticatedAdminEhrComplianceRoute
   AuthenticatedAdminEventsHealthRoute: typeof AuthenticatedAdminEventsHealthRoute
@@ -11845,6 +11866,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminEcosystemMarketplaceHealthRoute:
     AuthenticatedAdminEcosystemMarketplaceHealthRoute,
   AuthenticatedAdminEducTalentosRoute: AuthenticatedAdminEducTalentosRoute,
+  AuthenticatedAdminEducationPolosHealthRoute:
+    AuthenticatedAdminEducationPolosHealthRoute,
   AuthenticatedAdminEhrClinicalHealthRoute:
     AuthenticatedAdminEhrClinicalHealthRoute,
   AuthenticatedAdminEhrComplianceRoute: AuthenticatedAdminEhrComplianceRoute,

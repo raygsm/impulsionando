@@ -526,6 +526,7 @@ export const NAV_GROUPS: NavGroup[] = [
           { to: "/admin/vitrine-legal-health", label: "Vitrine, Site Builder & Legal", icon: Globe, superOnly: true },
           { to: "/admin/notification-deliverability-health", label: "Notification & Deliverability", icon: Inbox, superOnly: true },
           { to: "/admin/real-estate-ops-health", label: "Real Estate Ops & Brokerage", icon: Home, superOnly: true },
+          { to: "/admin/education-polos-health", label: "Educação & Polos", icon: GraduationCap, superOnly: true },
           { to: "/admin/runtime-uptime-health", label: "Runtime & Uptime", icon: Activity, superOnly: true },
           { to: "/core/testes", label: "Testes", icon: FlaskConical, superOnly: true },
           { to: "/core/bi-ecossistema", label: "BI Ecossistema", icon: BarChart3, superOnly: true },
