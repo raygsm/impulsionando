@@ -440,6 +440,7 @@ import { Route as AuthenticatedAdminChurnRadarRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminCatalogoMatrizRouteImport } from './routes/_authenticated/admin.catalogo-matriz'
 import { Route as AuthenticatedAdminCatalogIntentsRouteImport } from './routes/_authenticated/admin.catalog-intents'
 import { Route as AuthenticatedAdminCatalogAnalyticsRouteImport } from './routes/_authenticated/admin.catalog-analytics'
+import { Route as AuthenticatedAdminBreweryClubeHealthRouteImport } from './routes/_authenticated/admin.brewery-clube-health'
 import { Route as AuthenticatedAdminBillingPolicyRouteImport } from './routes/_authenticated/admin.billing-policy'
 import { Route as AuthenticatedAdminBillingContractsRouteImport } from './routes/_authenticated/admin.billing-contracts'
 import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authenticated/admin.billing'
@@ -2909,6 +2910,12 @@ const AuthenticatedAdminCatalogAnalyticsRoute =
     path: '/admin/catalog-analytics',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminBreweryClubeHealthRoute =
+  AuthenticatedAdminBreweryClubeHealthRouteImport.update({
+    id: '/admin/brewery-clube-health',
+    path: '/admin/brewery-clube-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminBillingPolicyRoute =
   AuthenticatedAdminBillingPolicyRouteImport.update({
     id: '/admin/billing-policy',
@@ -3558,6 +3565,7 @@ export interface FileRoutesByFullPath {
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/admin/billing-contracts': typeof AuthenticatedAdminBillingContractsRoute
   '/admin/billing-policy': typeof AuthenticatedAdminBillingPolicyRoute
+  '/admin/brewery-clube-health': typeof AuthenticatedAdminBreweryClubeHealthRoute
   '/admin/catalog-analytics': typeof AuthenticatedAdminCatalogAnalyticsRoute
   '/admin/catalog-intents': typeof AuthenticatedAdminCatalogIntentsRoute
   '/admin/catalogo-matriz': typeof AuthenticatedAdminCatalogoMatrizRoute
@@ -4057,6 +4065,7 @@ export interface FileRoutesByTo {
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/admin/billing-contracts': typeof AuthenticatedAdminBillingContractsRoute
   '/admin/billing-policy': typeof AuthenticatedAdminBillingPolicyRoute
+  '/admin/brewery-clube-health': typeof AuthenticatedAdminBreweryClubeHealthRoute
   '/admin/catalog-analytics': typeof AuthenticatedAdminCatalogAnalyticsRoute
   '/admin/catalog-intents': typeof AuthenticatedAdminCatalogIntentsRoute
   '/admin/catalogo-matriz': typeof AuthenticatedAdminCatalogoMatrizRoute
@@ -4570,6 +4579,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/_authenticated/admin/billing-contracts': typeof AuthenticatedAdminBillingContractsRoute
   '/_authenticated/admin/billing-policy': typeof AuthenticatedAdminBillingPolicyRoute
+  '/_authenticated/admin/brewery-clube-health': typeof AuthenticatedAdminBreweryClubeHealthRoute
   '/_authenticated/admin/catalog-analytics': typeof AuthenticatedAdminCatalogAnalyticsRoute
   '/_authenticated/admin/catalog-intents': typeof AuthenticatedAdminCatalogIntentsRoute
   '/_authenticated/admin/catalogo-matriz': typeof AuthenticatedAdminCatalogoMatrizRoute
@@ -5082,6 +5092,7 @@ export interface FileRouteTypes {
     | '/admin/billing'
     | '/admin/billing-contracts'
     | '/admin/billing-policy'
+    | '/admin/brewery-clube-health'
     | '/admin/catalog-analytics'
     | '/admin/catalog-intents'
     | '/admin/catalogo-matriz'
@@ -5581,6 +5592,7 @@ export interface FileRouteTypes {
     | '/admin/billing'
     | '/admin/billing-contracts'
     | '/admin/billing-policy'
+    | '/admin/brewery-clube-health'
     | '/admin/catalog-analytics'
     | '/admin/catalog-intents'
     | '/admin/catalogo-matriz'
@@ -6093,6 +6105,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/billing'
     | '/_authenticated/admin/billing-contracts'
     | '/_authenticated/admin/billing-policy'
+    | '/_authenticated/admin/brewery-clube-health'
     | '/_authenticated/admin/catalog-analytics'
     | '/_authenticated/admin/catalog-intents'
     | '/_authenticated/admin/catalogo-matriz'
@@ -9595,6 +9608,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCatalogAnalyticsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/brewery-clube-health': {
+      id: '/_authenticated/admin/brewery-clube-health'
+      path: '/admin/brewery-clube-health'
+      fullPath: '/admin/brewery-clube-health'
+      preLoaderRoute: typeof AuthenticatedAdminBreweryClubeHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/billing-policy': {
       id: '/_authenticated/admin/billing-policy'
       path: '/admin/billing-policy'
@@ -10812,6 +10832,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminBillingRoute: typeof AuthenticatedAdminBillingRoute
   AuthenticatedAdminBillingContractsRoute: typeof AuthenticatedAdminBillingContractsRoute
   AuthenticatedAdminBillingPolicyRoute: typeof AuthenticatedAdminBillingPolicyRoute
+  AuthenticatedAdminBreweryClubeHealthRoute: typeof AuthenticatedAdminBreweryClubeHealthRoute
   AuthenticatedAdminCatalogAnalyticsRoute: typeof AuthenticatedAdminCatalogAnalyticsRoute
   AuthenticatedAdminCatalogIntentsRoute: typeof AuthenticatedAdminCatalogIntentsRoute
   AuthenticatedAdminCatalogoMatrizRoute: typeof AuthenticatedAdminCatalogoMatrizRoute
@@ -11004,6 +11025,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminBillingContractsRoute:
     AuthenticatedAdminBillingContractsRoute,
   AuthenticatedAdminBillingPolicyRoute: AuthenticatedAdminBillingPolicyRoute,
+  AuthenticatedAdminBreweryClubeHealthRoute:
+    AuthenticatedAdminBreweryClubeHealthRoute,
   AuthenticatedAdminCatalogAnalyticsRoute:
     AuthenticatedAdminCatalogAnalyticsRoute,
   AuthenticatedAdminCatalogIntentsRoute: AuthenticatedAdminCatalogIntentsRoute,
