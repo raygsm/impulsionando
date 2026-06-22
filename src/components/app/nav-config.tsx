@@ -487,6 +487,7 @@ export const NAV_GROUPS: NavGroup[] = [
           { to: "/admin/compliance-health", label: "LGPD & Compliance", icon: ShieldCheck, superOnly: true },
           { to: "/admin/trial-onboarding-health", label: "Trial & Onboarding", icon: Rocket, superOnly: true },
           { to: "/admin/marketplace-health", label: "Marketplace & Afiliados", icon: Store, superOnly: true },
+          { to: "/admin/realestate-health", label: "Imobiliário & Temporada", icon: Home, superOnly: true },
           { to: "/admin/affiliates-health", label: "Affiliates & Co-producer", icon: Handshake, superOnly: true },
           { to: "/admin/real-estate-health", label: "Real Estate Cockpit", icon: Home, superOnly: true },
           { to: "/admin/educ-talentos", label: "Educacional & Talentos", icon: GraduationCap, superOnly: true },
