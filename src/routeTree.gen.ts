@@ -395,6 +395,7 @@ import { Route as AuthenticatedAdminTreasuryForecastRouteImport } from './routes
 import { Route as AuthenticatedAdminTenantLifecycleRouteImport } from './routes/_authenticated/admin.tenant-lifecycle'
 import { Route as AuthenticatedAdminTenant360RouteImport } from './routes/_authenticated/admin.tenant-360'
 import { Route as AuthenticatedAdminTaxComplianceRouteImport } from './routes/_authenticated/admin.tax-compliance'
+import { Route as AuthenticatedAdminSupportTicketingHealthRouteImport } from './routes/_authenticated/admin.support-ticketing-health'
 import { Route as AuthenticatedAdminSlaComplianceRouteImport } from './routes/_authenticated/admin.sla-compliance'
 import { Route as AuthenticatedAdminSecurityComplianceRouteImport } from './routes/_authenticated/admin.security-compliance'
 import { Route as AuthenticatedAdminRevenueQualityRouteImport } from './routes/_authenticated/admin.revenue-quality'
@@ -406,10 +407,13 @@ import { Route as AuthenticatedAdminProjetosParalelosRouteImport } from './route
 import { Route as AuthenticatedAdminPricingIntelligenceRouteImport } from './routes/_authenticated/admin.pricing-intelligence'
 import { Route as AuthenticatedAdminPixPendentesRouteImport } from './routes/_authenticated/admin.pix-pendentes'
 import { Route as AuthenticatedAdminPeerBenchmarkRouteImport } from './routes/_authenticated/admin.peer-benchmark'
+import { Route as AuthenticatedAdminNotificationsCockpitRouteImport } from './routes/_authenticated/admin.notifications-cockpit'
 import { Route as AuthenticatedAdminNotificationDeliveryRouteImport } from './routes/_authenticated/admin.notification-delivery'
 import { Route as AuthenticatedAdminNichePlansRouteImport } from './routes/_authenticated/admin.niche-plans'
 import { Route as AuthenticatedAdminNicheMatrixRouteImport } from './routes/_authenticated/admin.niche-matrix'
 import { Route as AuthenticatedAdminN8nConsoleRouteImport } from './routes/_authenticated/admin.n8n-console'
+import { Route as AuthenticatedAdminMercadopagoBillingHealthRouteImport } from './routes/_authenticated/admin.mercadopago-billing-health'
+import { Route as AuthenticatedAdminMarocasHealthRouteImport } from './routes/_authenticated/admin.marocas-health'
 import { Route as AuthenticatedAdminMarketplaceOpsRouteImport } from './routes/_authenticated/admin.marketplace-ops'
 import { Route as AuthenticatedAdminMarketplaceB2bHealthRouteImport } from './routes/_authenticated/admin.marketplace-b2b-health'
 import { Route as AuthenticatedAdminMarketingHealthRouteImport } from './routes/_authenticated/admin.marketing-health'
@@ -419,6 +423,7 @@ import { Route as AuthenticatedAdminInboxEventosRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminImobiliariaRouteImport } from './routes/_authenticated/admin.imobiliaria'
 import { Route as AuthenticatedAdminHealthScoreRouteImport } from './routes/_authenticated/admin.health-score'
 import { Route as AuthenticatedAdminHealthRouteImport } from './routes/_authenticated/admin.health'
+import { Route as AuthenticatedAdminGovernanceLgpdHealthRouteImport } from './routes/_authenticated/admin.governance-lgpd-health'
 import { Route as AuthenticatedAdminFunilReguasRouteImport } from './routes/_authenticated/admin.funil-reguas'
 import { Route as AuthenticatedAdminFunil360RouteImport } from './routes/_authenticated/admin.funil-360'
 import { Route as AuthenticatedAdminFiscalHealthRouteImport } from './routes/_authenticated/admin.fiscal-health'
@@ -2650,6 +2655,12 @@ const AuthenticatedAdminTaxComplianceRoute =
     path: '/admin/tax-compliance',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminSupportTicketingHealthRoute =
+  AuthenticatedAdminSupportTicketingHealthRouteImport.update({
+    id: '/admin/support-ticketing-health',
+    path: '/admin/support-ticketing-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminSlaComplianceRoute =
   AuthenticatedAdminSlaComplianceRouteImport.update({
     id: '/admin/sla-compliance',
@@ -2716,6 +2727,12 @@ const AuthenticatedAdminPeerBenchmarkRoute =
     path: '/admin/peer-benchmark',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminNotificationsCockpitRoute =
+  AuthenticatedAdminNotificationsCockpitRouteImport.update({
+    id: '/admin/notifications-cockpit',
+    path: '/admin/notifications-cockpit',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminNotificationDeliveryRoute =
   AuthenticatedAdminNotificationDeliveryRouteImport.update({
     id: '/admin/notification-delivery',
@@ -2738,6 +2755,18 @@ const AuthenticatedAdminN8nConsoleRoute =
   AuthenticatedAdminN8nConsoleRouteImport.update({
     id: '/admin/n8n-console',
     path: '/admin/n8n-console',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminMercadopagoBillingHealthRoute =
+  AuthenticatedAdminMercadopagoBillingHealthRouteImport.update({
+    id: '/admin/mercadopago-billing-health',
+    path: '/admin/mercadopago-billing-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminMarocasHealthRoute =
+  AuthenticatedAdminMarocasHealthRouteImport.update({
+    id: '/admin/marocas-health',
+    path: '/admin/marocas-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdminMarketplaceOpsRoute =
@@ -2792,6 +2821,12 @@ const AuthenticatedAdminHealthRoute =
   AuthenticatedAdminHealthRouteImport.update({
     id: '/admin/health',
     path: '/admin/health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminGovernanceLgpdHealthRoute =
+  AuthenticatedAdminGovernanceLgpdHealthRouteImport.update({
+    id: '/admin/governance-lgpd-health',
+    path: '/admin/governance-lgpd-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdminFunilReguasRoute =
@@ -3659,6 +3694,7 @@ export interface FileRoutesByFullPath {
   '/admin/fiscal-health': typeof AuthenticatedAdminFiscalHealthRoute
   '/admin/funil-360': typeof AuthenticatedAdminFunil360Route
   '/admin/funil-reguas': typeof AuthenticatedAdminFunilReguasRoute
+  '/admin/governance-lgpd-health': typeof AuthenticatedAdminGovernanceLgpdHealthRoute
   '/admin/health': typeof AuthenticatedAdminHealthRoute
   '/admin/health-score': typeof AuthenticatedAdminHealthScoreRoute
   '/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
@@ -3668,10 +3704,13 @@ export interface FileRoutesByFullPath {
   '/admin/marketing-health': typeof AuthenticatedAdminMarketingHealthRoute
   '/admin/marketplace-b2b-health': typeof AuthenticatedAdminMarketplaceB2bHealthRoute
   '/admin/marketplace-ops': typeof AuthenticatedAdminMarketplaceOpsRoute
+  '/admin/marocas-health': typeof AuthenticatedAdminMarocasHealthRoute
+  '/admin/mercadopago-billing-health': typeof AuthenticatedAdminMercadopagoBillingHealthRoute
   '/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/admin/notification-delivery': typeof AuthenticatedAdminNotificationDeliveryRoute
+  '/admin/notifications-cockpit': typeof AuthenticatedAdminNotificationsCockpitRoute
   '/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
   '/admin/pricing-intelligence': typeof AuthenticatedAdminPricingIntelligenceRoute
@@ -3683,6 +3722,7 @@ export interface FileRoutesByFullPath {
   '/admin/revenue-quality': typeof AuthenticatedAdminRevenueQualityRoute
   '/admin/security-compliance': typeof AuthenticatedAdminSecurityComplianceRoute
   '/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
+  '/admin/support-ticketing-health': typeof AuthenticatedAdminSupportTicketingHealthRoute
   '/admin/tax-compliance': typeof AuthenticatedAdminTaxComplianceRoute
   '/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/admin/tenant-lifecycle': typeof AuthenticatedAdminTenantLifecycleRoute
@@ -4168,6 +4208,7 @@ export interface FileRoutesByTo {
   '/admin/fiscal-health': typeof AuthenticatedAdminFiscalHealthRoute
   '/admin/funil-360': typeof AuthenticatedAdminFunil360Route
   '/admin/funil-reguas': typeof AuthenticatedAdminFunilReguasRoute
+  '/admin/governance-lgpd-health': typeof AuthenticatedAdminGovernanceLgpdHealthRoute
   '/admin/health': typeof AuthenticatedAdminHealthRoute
   '/admin/health-score': typeof AuthenticatedAdminHealthScoreRoute
   '/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
@@ -4177,10 +4218,13 @@ export interface FileRoutesByTo {
   '/admin/marketing-health': typeof AuthenticatedAdminMarketingHealthRoute
   '/admin/marketplace-b2b-health': typeof AuthenticatedAdminMarketplaceB2bHealthRoute
   '/admin/marketplace-ops': typeof AuthenticatedAdminMarketplaceOpsRoute
+  '/admin/marocas-health': typeof AuthenticatedAdminMarocasHealthRoute
+  '/admin/mercadopago-billing-health': typeof AuthenticatedAdminMercadopagoBillingHealthRoute
   '/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/admin/notification-delivery': typeof AuthenticatedAdminNotificationDeliveryRoute
+  '/admin/notifications-cockpit': typeof AuthenticatedAdminNotificationsCockpitRoute
   '/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
   '/admin/pricing-intelligence': typeof AuthenticatedAdminPricingIntelligenceRoute
@@ -4192,6 +4236,7 @@ export interface FileRoutesByTo {
   '/admin/revenue-quality': typeof AuthenticatedAdminRevenueQualityRoute
   '/admin/security-compliance': typeof AuthenticatedAdminSecurityComplianceRoute
   '/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
+  '/admin/support-ticketing-health': typeof AuthenticatedAdminSupportTicketingHealthRoute
   '/admin/tax-compliance': typeof AuthenticatedAdminTaxComplianceRoute
   '/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/admin/tenant-lifecycle': typeof AuthenticatedAdminTenantLifecycleRoute
@@ -4691,6 +4736,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/fiscal-health': typeof AuthenticatedAdminFiscalHealthRoute
   '/_authenticated/admin/funil-360': typeof AuthenticatedAdminFunil360Route
   '/_authenticated/admin/funil-reguas': typeof AuthenticatedAdminFunilReguasRoute
+  '/_authenticated/admin/governance-lgpd-health': typeof AuthenticatedAdminGovernanceLgpdHealthRoute
   '/_authenticated/admin/health': typeof AuthenticatedAdminHealthRoute
   '/_authenticated/admin/health-score': typeof AuthenticatedAdminHealthScoreRoute
   '/_authenticated/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
@@ -4700,10 +4746,13 @@ export interface FileRoutesById {
   '/_authenticated/admin/marketing-health': typeof AuthenticatedAdminMarketingHealthRoute
   '/_authenticated/admin/marketplace-b2b-health': typeof AuthenticatedAdminMarketplaceB2bHealthRoute
   '/_authenticated/admin/marketplace-ops': typeof AuthenticatedAdminMarketplaceOpsRoute
+  '/_authenticated/admin/marocas-health': typeof AuthenticatedAdminMarocasHealthRoute
+  '/_authenticated/admin/mercadopago-billing-health': typeof AuthenticatedAdminMercadopagoBillingHealthRoute
   '/_authenticated/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/_authenticated/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
   '/_authenticated/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/_authenticated/admin/notification-delivery': typeof AuthenticatedAdminNotificationDeliveryRoute
+  '/_authenticated/admin/notifications-cockpit': typeof AuthenticatedAdminNotificationsCockpitRoute
   '/_authenticated/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/_authenticated/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
   '/_authenticated/admin/pricing-intelligence': typeof AuthenticatedAdminPricingIntelligenceRoute
@@ -4715,6 +4764,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/revenue-quality': typeof AuthenticatedAdminRevenueQualityRoute
   '/_authenticated/admin/security-compliance': typeof AuthenticatedAdminSecurityComplianceRoute
   '/_authenticated/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
+  '/_authenticated/admin/support-ticketing-health': typeof AuthenticatedAdminSupportTicketingHealthRoute
   '/_authenticated/admin/tax-compliance': typeof AuthenticatedAdminTaxComplianceRoute
   '/_authenticated/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/_authenticated/admin/tenant-lifecycle': typeof AuthenticatedAdminTenantLifecycleRoute
@@ -5213,6 +5263,7 @@ export interface FileRouteTypes {
     | '/admin/fiscal-health'
     | '/admin/funil-360'
     | '/admin/funil-reguas'
+    | '/admin/governance-lgpd-health'
     | '/admin/health'
     | '/admin/health-score'
     | '/admin/imobiliaria'
@@ -5222,10 +5273,13 @@ export interface FileRouteTypes {
     | '/admin/marketing-health'
     | '/admin/marketplace-b2b-health'
     | '/admin/marketplace-ops'
+    | '/admin/marocas-health'
+    | '/admin/mercadopago-billing-health'
     | '/admin/n8n-console'
     | '/admin/niche-matrix'
     | '/admin/niche-plans'
     | '/admin/notification-delivery'
+    | '/admin/notifications-cockpit'
     | '/admin/peer-benchmark'
     | '/admin/pix-pendentes'
     | '/admin/pricing-intelligence'
@@ -5237,6 +5291,7 @@ export interface FileRouteTypes {
     | '/admin/revenue-quality'
     | '/admin/security-compliance'
     | '/admin/sla-compliance'
+    | '/admin/support-ticketing-health'
     | '/admin/tax-compliance'
     | '/admin/tenant-360'
     | '/admin/tenant-lifecycle'
@@ -5722,6 +5777,7 @@ export interface FileRouteTypes {
     | '/admin/fiscal-health'
     | '/admin/funil-360'
     | '/admin/funil-reguas'
+    | '/admin/governance-lgpd-health'
     | '/admin/health'
     | '/admin/health-score'
     | '/admin/imobiliaria'
@@ -5731,10 +5787,13 @@ export interface FileRouteTypes {
     | '/admin/marketing-health'
     | '/admin/marketplace-b2b-health'
     | '/admin/marketplace-ops'
+    | '/admin/marocas-health'
+    | '/admin/mercadopago-billing-health'
     | '/admin/n8n-console'
     | '/admin/niche-matrix'
     | '/admin/niche-plans'
     | '/admin/notification-delivery'
+    | '/admin/notifications-cockpit'
     | '/admin/peer-benchmark'
     | '/admin/pix-pendentes'
     | '/admin/pricing-intelligence'
@@ -5746,6 +5805,7 @@ export interface FileRouteTypes {
     | '/admin/revenue-quality'
     | '/admin/security-compliance'
     | '/admin/sla-compliance'
+    | '/admin/support-ticketing-health'
     | '/admin/tax-compliance'
     | '/admin/tenant-360'
     | '/admin/tenant-lifecycle'
@@ -6244,6 +6304,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/fiscal-health'
     | '/_authenticated/admin/funil-360'
     | '/_authenticated/admin/funil-reguas'
+    | '/_authenticated/admin/governance-lgpd-health'
     | '/_authenticated/admin/health'
     | '/_authenticated/admin/health-score'
     | '/_authenticated/admin/imobiliaria'
@@ -6253,10 +6314,13 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/marketing-health'
     | '/_authenticated/admin/marketplace-b2b-health'
     | '/_authenticated/admin/marketplace-ops'
+    | '/_authenticated/admin/marocas-health'
+    | '/_authenticated/admin/mercadopago-billing-health'
     | '/_authenticated/admin/n8n-console'
     | '/_authenticated/admin/niche-matrix'
     | '/_authenticated/admin/niche-plans'
     | '/_authenticated/admin/notification-delivery'
+    | '/_authenticated/admin/notifications-cockpit'
     | '/_authenticated/admin/peer-benchmark'
     | '/_authenticated/admin/pix-pendentes'
     | '/_authenticated/admin/pricing-intelligence'
@@ -6268,6 +6332,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/revenue-quality'
     | '/_authenticated/admin/security-compliance'
     | '/_authenticated/admin/sla-compliance'
+    | '/_authenticated/admin/support-ticketing-health'
     | '/_authenticated/admin/tax-compliance'
     | '/_authenticated/admin/tenant-360'
     | '/_authenticated/admin/tenant-lifecycle'
@@ -9410,6 +9475,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTaxComplianceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/support-ticketing-health': {
+      id: '/_authenticated/admin/support-ticketing-health'
+      path: '/admin/support-ticketing-health'
+      fullPath: '/admin/support-ticketing-health'
+      preLoaderRoute: typeof AuthenticatedAdminSupportTicketingHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/sla-compliance': {
       id: '/_authenticated/admin/sla-compliance'
       path: '/admin/sla-compliance'
@@ -9487,6 +9559,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPeerBenchmarkRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/notifications-cockpit': {
+      id: '/_authenticated/admin/notifications-cockpit'
+      path: '/admin/notifications-cockpit'
+      fullPath: '/admin/notifications-cockpit'
+      preLoaderRoute: typeof AuthenticatedAdminNotificationsCockpitRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/notification-delivery': {
       id: '/_authenticated/admin/notification-delivery'
       path: '/admin/notification-delivery'
@@ -9513,6 +9592,20 @@ declare module '@tanstack/react-router' {
       path: '/admin/n8n-console'
       fullPath: '/admin/n8n-console'
       preLoaderRoute: typeof AuthenticatedAdminN8nConsoleRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/mercadopago-billing-health': {
+      id: '/_authenticated/admin/mercadopago-billing-health'
+      path: '/admin/mercadopago-billing-health'
+      fullPath: '/admin/mercadopago-billing-health'
+      preLoaderRoute: typeof AuthenticatedAdminMercadopagoBillingHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/marocas-health': {
+      id: '/_authenticated/admin/marocas-health'
+      path: '/admin/marocas-health'
+      fullPath: '/admin/marocas-health'
+      preLoaderRoute: typeof AuthenticatedAdminMarocasHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/marketplace-ops': {
@@ -9576,6 +9669,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/health'
       fullPath: '/admin/health'
       preLoaderRoute: typeof AuthenticatedAdminHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/governance-lgpd-health': {
+      id: '/_authenticated/admin/governance-lgpd-health'
+      path: '/admin/governance-lgpd-health'
+      fullPath: '/admin/governance-lgpd-health'
+      preLoaderRoute: typeof AuthenticatedAdminGovernanceLgpdHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/funil-reguas': {
@@ -11043,6 +11143,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminFiscalHealthRoute: typeof AuthenticatedAdminFiscalHealthRoute
   AuthenticatedAdminFunil360Route: typeof AuthenticatedAdminFunil360Route
   AuthenticatedAdminFunilReguasRoute: typeof AuthenticatedAdminFunilReguasRoute
+  AuthenticatedAdminGovernanceLgpdHealthRoute: typeof AuthenticatedAdminGovernanceLgpdHealthRoute
   AuthenticatedAdminHealthRoute: typeof AuthenticatedAdminHealthRoute
   AuthenticatedAdminHealthScoreRoute: typeof AuthenticatedAdminHealthScoreRoute
   AuthenticatedAdminImobiliariaRoute: typeof AuthenticatedAdminImobiliariaRoute
@@ -11052,10 +11153,13 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminMarketingHealthRoute: typeof AuthenticatedAdminMarketingHealthRoute
   AuthenticatedAdminMarketplaceB2bHealthRoute: typeof AuthenticatedAdminMarketplaceB2bHealthRoute
   AuthenticatedAdminMarketplaceOpsRoute: typeof AuthenticatedAdminMarketplaceOpsRoute
+  AuthenticatedAdminMarocasHealthRoute: typeof AuthenticatedAdminMarocasHealthRoute
+  AuthenticatedAdminMercadopagoBillingHealthRoute: typeof AuthenticatedAdminMercadopagoBillingHealthRoute
   AuthenticatedAdminN8nConsoleRoute: typeof AuthenticatedAdminN8nConsoleRoute
   AuthenticatedAdminNicheMatrixRoute: typeof AuthenticatedAdminNicheMatrixRoute
   AuthenticatedAdminNichePlansRoute: typeof AuthenticatedAdminNichePlansRoute
   AuthenticatedAdminNotificationDeliveryRoute: typeof AuthenticatedAdminNotificationDeliveryRoute
+  AuthenticatedAdminNotificationsCockpitRoute: typeof AuthenticatedAdminNotificationsCockpitRoute
   AuthenticatedAdminPeerBenchmarkRoute: typeof AuthenticatedAdminPeerBenchmarkRoute
   AuthenticatedAdminPixPendentesRoute: typeof AuthenticatedAdminPixPendentesRoute
   AuthenticatedAdminPricingIntelligenceRoute: typeof AuthenticatedAdminPricingIntelligenceRoute
@@ -11067,6 +11171,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRevenueQualityRoute: typeof AuthenticatedAdminRevenueQualityRoute
   AuthenticatedAdminSecurityComplianceRoute: typeof AuthenticatedAdminSecurityComplianceRoute
   AuthenticatedAdminSlaComplianceRoute: typeof AuthenticatedAdminSlaComplianceRoute
+  AuthenticatedAdminSupportTicketingHealthRoute: typeof AuthenticatedAdminSupportTicketingHealthRoute
   AuthenticatedAdminTaxComplianceRoute: typeof AuthenticatedAdminTaxComplianceRoute
   AuthenticatedAdminTenant360Route: typeof AuthenticatedAdminTenant360Route
   AuthenticatedAdminTenantLifecycleRoute: typeof AuthenticatedAdminTenantLifecycleRoute
@@ -11255,6 +11360,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminFiscalHealthRoute: AuthenticatedAdminFiscalHealthRoute,
   AuthenticatedAdminFunil360Route: AuthenticatedAdminFunil360Route,
   AuthenticatedAdminFunilReguasRoute: AuthenticatedAdminFunilReguasRoute,
+  AuthenticatedAdminGovernanceLgpdHealthRoute:
+    AuthenticatedAdminGovernanceLgpdHealthRoute,
   AuthenticatedAdminHealthRoute: AuthenticatedAdminHealthRoute,
   AuthenticatedAdminHealthScoreRoute: AuthenticatedAdminHealthScoreRoute,
   AuthenticatedAdminImobiliariaRoute: AuthenticatedAdminImobiliariaRoute,
@@ -11267,11 +11374,16 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminMarketplaceB2bHealthRoute:
     AuthenticatedAdminMarketplaceB2bHealthRoute,
   AuthenticatedAdminMarketplaceOpsRoute: AuthenticatedAdminMarketplaceOpsRoute,
+  AuthenticatedAdminMarocasHealthRoute: AuthenticatedAdminMarocasHealthRoute,
+  AuthenticatedAdminMercadopagoBillingHealthRoute:
+    AuthenticatedAdminMercadopagoBillingHealthRoute,
   AuthenticatedAdminN8nConsoleRoute: AuthenticatedAdminN8nConsoleRoute,
   AuthenticatedAdminNicheMatrixRoute: AuthenticatedAdminNicheMatrixRoute,
   AuthenticatedAdminNichePlansRoute: AuthenticatedAdminNichePlansRoute,
   AuthenticatedAdminNotificationDeliveryRoute:
     AuthenticatedAdminNotificationDeliveryRoute,
+  AuthenticatedAdminNotificationsCockpitRoute:
+    AuthenticatedAdminNotificationsCockpitRoute,
   AuthenticatedAdminPeerBenchmarkRoute: AuthenticatedAdminPeerBenchmarkRoute,
   AuthenticatedAdminPixPendentesRoute: AuthenticatedAdminPixPendentesRoute,
   AuthenticatedAdminPricingIntelligenceRoute:
@@ -11289,6 +11401,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminSecurityComplianceRoute:
     AuthenticatedAdminSecurityComplianceRoute,
   AuthenticatedAdminSlaComplianceRoute: AuthenticatedAdminSlaComplianceRoute,
+  AuthenticatedAdminSupportTicketingHealthRoute:
+    AuthenticatedAdminSupportTicketingHealthRoute,
   AuthenticatedAdminTaxComplianceRoute: AuthenticatedAdminTaxComplianceRoute,
   AuthenticatedAdminTenant360Route: AuthenticatedAdminTenant360Route,
   AuthenticatedAdminTenantLifecycleRoute:
@@ -11739,13 +11853,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
