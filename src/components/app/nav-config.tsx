@@ -484,6 +484,7 @@ export const NAV_GROUPS: NavGroup[] = [
           { to: "/admin/ehr-compliance", label: "EHR & Clinical Compliance", icon: Stethoscope, superOnly: true },
           { to: "/admin/fiscal-health", label: "Fiscal & NF-e Health", icon: Receipt, superOnly: true },
           { to: "/admin/comms-health", label: "Comunicação Omnichannel", icon: Send, superOnly: true },
+          { to: "/admin/compliance-health", label: "LGPD & Compliance", icon: ShieldCheck, superOnly: true },
           { to: "/admin/affiliates-health", label: "Affiliates & Co-producer", icon: Handshake, superOnly: true },
           { to: "/admin/real-estate-health", label: "Real Estate Cockpit", icon: Home, superOnly: true },
           { to: "/admin/educ-talentos", label: "Educacional & Talentos", icon: GraduationCap, superOnly: true },
