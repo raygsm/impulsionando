@@ -445,6 +445,7 @@ import { Route as AuthenticatedAdminEventsHealthRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminEhrComplianceRouteImport } from './routes/_authenticated/admin.ehr-compliance'
 import { Route as AuthenticatedAdminEhrClinicalHealthRouteImport } from './routes/_authenticated/admin.ehr-clinical-health'
 import { Route as AuthenticatedAdminEducTalentosRouteImport } from './routes/_authenticated/admin.educ-talentos'
+import { Route as AuthenticatedAdminEcosystemMarketplaceHealthRouteImport } from './routes/_authenticated/admin.ecosystem-marketplace-health'
 import { Route as AuthenticatedAdminDocumentsFilesHealthRouteImport } from './routes/_authenticated/admin.documents-files-health'
 import { Route as AuthenticatedAdminDataQualityRouteImport } from './routes/_authenticated/admin.data-quality'
 import { Route as AuthenticatedAdminCustomerSuccessRouteImport } from './routes/_authenticated/admin.customer-success'
@@ -2969,6 +2970,12 @@ const AuthenticatedAdminEducTalentosRoute =
     path: '/admin/educ-talentos',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminEcosystemMarketplaceHealthRoute =
+  AuthenticatedAdminEcosystemMarketplaceHealthRouteImport.update({
+    id: '/admin/ecosystem-marketplace-health',
+    path: '/admin/ecosystem-marketplace-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminDocumentsFilesHealthRoute =
   AuthenticatedAdminDocumentsFilesHealthRouteImport.update({
     id: '/admin/documents-files-health',
@@ -3785,6 +3792,7 @@ export interface FileRoutesByFullPath {
   '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
   '/admin/documents-files-health': typeof AuthenticatedAdminDocumentsFilesHealthRoute
+  '/admin/ecosystem-marketplace-health': typeof AuthenticatedAdminEcosystemMarketplaceHealthRoute
   '/admin/educ-talentos': typeof AuthenticatedAdminEducTalentosRoute
   '/admin/ehr-clinical-health': typeof AuthenticatedAdminEhrClinicalHealthRoute
   '/admin/ehr-compliance': typeof AuthenticatedAdminEhrComplianceRoute
@@ -4313,6 +4321,7 @@ export interface FileRoutesByTo {
   '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
   '/admin/documents-files-health': typeof AuthenticatedAdminDocumentsFilesHealthRoute
+  '/admin/ecosystem-marketplace-health': typeof AuthenticatedAdminEcosystemMarketplaceHealthRoute
   '/admin/educ-talentos': typeof AuthenticatedAdminEducTalentosRoute
   '/admin/ehr-clinical-health': typeof AuthenticatedAdminEhrClinicalHealthRoute
   '/admin/ehr-compliance': typeof AuthenticatedAdminEhrComplianceRoute
@@ -4855,6 +4864,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/_authenticated/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
   '/_authenticated/admin/documents-files-health': typeof AuthenticatedAdminDocumentsFilesHealthRoute
+  '/_authenticated/admin/ecosystem-marketplace-health': typeof AuthenticatedAdminEcosystemMarketplaceHealthRoute
   '/_authenticated/admin/educ-talentos': typeof AuthenticatedAdminEducTalentosRoute
   '/_authenticated/admin/ehr-clinical-health': typeof AuthenticatedAdminEhrClinicalHealthRoute
   '/_authenticated/admin/ehr-compliance': typeof AuthenticatedAdminEhrComplianceRoute
@@ -5396,6 +5406,7 @@ export interface FileRouteTypes {
     | '/admin/customer-success'
     | '/admin/data-quality'
     | '/admin/documents-files-health'
+    | '/admin/ecosystem-marketplace-health'
     | '/admin/educ-talentos'
     | '/admin/ehr-clinical-health'
     | '/admin/ehr-compliance'
@@ -5924,6 +5935,7 @@ export interface FileRouteTypes {
     | '/admin/customer-success'
     | '/admin/data-quality'
     | '/admin/documents-files-health'
+    | '/admin/ecosystem-marketplace-health'
     | '/admin/educ-talentos'
     | '/admin/ehr-clinical-health'
     | '/admin/ehr-compliance'
@@ -6465,6 +6477,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/customer-success'
     | '/_authenticated/admin/data-quality'
     | '/_authenticated/admin/documents-files-health'
+    | '/_authenticated/admin/ecosystem-marketplace-health'
     | '/_authenticated/admin/educ-talentos'
     | '/_authenticated/admin/ehr-clinical-health'
     | '/_authenticated/admin/ehr-compliance'
@@ -10007,6 +10020,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminEducTalentosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/ecosystem-marketplace-health': {
+      id: '/_authenticated/admin/ecosystem-marketplace-health'
+      path: '/admin/ecosystem-marketplace-health'
+      fullPath: '/admin/ecosystem-marketplace-health'
+      preLoaderRoute: typeof AuthenticatedAdminEcosystemMarketplaceHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/documents-files-health': {
       id: '/_authenticated/admin/documents-files-health'
       path: '/admin/documents-files-health'
@@ -11416,6 +11436,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCustomerSuccessRoute: typeof AuthenticatedAdminCustomerSuccessRoute
   AuthenticatedAdminDataQualityRoute: typeof AuthenticatedAdminDataQualityRoute
   AuthenticatedAdminDocumentsFilesHealthRoute: typeof AuthenticatedAdminDocumentsFilesHealthRoute
+  AuthenticatedAdminEcosystemMarketplaceHealthRoute: typeof AuthenticatedAdminEcosystemMarketplaceHealthRoute
   AuthenticatedAdminEducTalentosRoute: typeof AuthenticatedAdminEducTalentosRoute
   AuthenticatedAdminEhrClinicalHealthRoute: typeof AuthenticatedAdminEhrClinicalHealthRoute
   AuthenticatedAdminEhrComplianceRoute: typeof AuthenticatedAdminEhrComplianceRoute
@@ -11649,6 +11670,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminDataQualityRoute: AuthenticatedAdminDataQualityRoute,
   AuthenticatedAdminDocumentsFilesHealthRoute:
     AuthenticatedAdminDocumentsFilesHealthRoute,
+  AuthenticatedAdminEcosystemMarketplaceHealthRoute:
+    AuthenticatedAdminEcosystemMarketplaceHealthRoute,
   AuthenticatedAdminEducTalentosRoute: AuthenticatedAdminEducTalentosRoute,
   AuthenticatedAdminEhrClinicalHealthRoute:
     AuthenticatedAdminEhrClinicalHealthRoute,
