@@ -428,6 +428,7 @@ import { Route as AuthenticatedAdminMercadopagoBillingHealthRouteImport } from '
 import { Route as AuthenticatedAdminMarocasOpsHealthRouteImport } from './routes/_authenticated/admin.marocas-ops-health'
 import { Route as AuthenticatedAdminMarocasHealthRouteImport } from './routes/_authenticated/admin.marocas-health'
 import { Route as AuthenticatedAdminMarketplaceOpsRouteImport } from './routes/_authenticated/admin.marketplace-ops'
+import { Route as AuthenticatedAdminMarketplaceHealthRouteImport } from './routes/_authenticated/admin.marketplace-health'
 import { Route as AuthenticatedAdminMarketplaceB2bHealthRouteImport } from './routes/_authenticated/admin.marketplace-b2b-health'
 import { Route as AuthenticatedAdminMarketingHealthRouteImport } from './routes/_authenticated/admin.marketing-health'
 import { Route as AuthenticatedAdminLoyaltyClubeHealthRouteImport } from './routes/_authenticated/admin.loyalty-clube-health'
@@ -2888,6 +2889,12 @@ const AuthenticatedAdminMarketplaceOpsRoute =
     path: '/admin/marketplace-ops',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminMarketplaceHealthRoute =
+  AuthenticatedAdminMarketplaceHealthRouteImport.update({
+    id: '/admin/marketplace-health',
+    path: '/admin/marketplace-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminMarketplaceB2bHealthRoute =
   AuthenticatedAdminMarketplaceB2bHealthRouteImport.update({
     id: '/admin/marketplace-b2b-health',
@@ -3970,6 +3977,7 @@ export interface FileRoutesByFullPath {
   '/admin/loyalty-clube-health': typeof AuthenticatedAdminLoyaltyClubeHealthRoute
   '/admin/marketing-health': typeof AuthenticatedAdminMarketingHealthRoute
   '/admin/marketplace-b2b-health': typeof AuthenticatedAdminMarketplaceB2bHealthRoute
+  '/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
   '/admin/marketplace-ops': typeof AuthenticatedAdminMarketplaceOpsRoute
   '/admin/marocas-health': typeof AuthenticatedAdminMarocasHealthRoute
   '/admin/marocas-ops-health': typeof AuthenticatedAdminMarocasOpsHealthRoute
@@ -4519,6 +4527,7 @@ export interface FileRoutesByTo {
   '/admin/loyalty-clube-health': typeof AuthenticatedAdminLoyaltyClubeHealthRoute
   '/admin/marketing-health': typeof AuthenticatedAdminMarketingHealthRoute
   '/admin/marketplace-b2b-health': typeof AuthenticatedAdminMarketplaceB2bHealthRoute
+  '/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
   '/admin/marketplace-ops': typeof AuthenticatedAdminMarketplaceOpsRoute
   '/admin/marocas-health': typeof AuthenticatedAdminMarocasHealthRoute
   '/admin/marocas-ops-health': typeof AuthenticatedAdminMarocasOpsHealthRoute
@@ -5082,6 +5091,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/loyalty-clube-health': typeof AuthenticatedAdminLoyaltyClubeHealthRoute
   '/_authenticated/admin/marketing-health': typeof AuthenticatedAdminMarketingHealthRoute
   '/_authenticated/admin/marketplace-b2b-health': typeof AuthenticatedAdminMarketplaceB2bHealthRoute
+  '/_authenticated/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
   '/_authenticated/admin/marketplace-ops': typeof AuthenticatedAdminMarketplaceOpsRoute
   '/_authenticated/admin/marocas-health': typeof AuthenticatedAdminMarocasHealthRoute
   '/_authenticated/admin/marocas-ops-health': typeof AuthenticatedAdminMarocasOpsHealthRoute
@@ -5644,6 +5654,7 @@ export interface FileRouteTypes {
     | '/admin/loyalty-clube-health'
     | '/admin/marketing-health'
     | '/admin/marketplace-b2b-health'
+    | '/admin/marketplace-health'
     | '/admin/marketplace-ops'
     | '/admin/marocas-health'
     | '/admin/marocas-ops-health'
@@ -6193,6 +6204,7 @@ export interface FileRouteTypes {
     | '/admin/loyalty-clube-health'
     | '/admin/marketing-health'
     | '/admin/marketplace-b2b-health'
+    | '/admin/marketplace-health'
     | '/admin/marketplace-ops'
     | '/admin/marocas-health'
     | '/admin/marocas-ops-health'
@@ -6755,6 +6767,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/loyalty-clube-health'
     | '/_authenticated/admin/marketing-health'
     | '/_authenticated/admin/marketplace-b2b-health'
+    | '/_authenticated/admin/marketplace-health'
     | '/_authenticated/admin/marketplace-ops'
     | '/_authenticated/admin/marocas-health'
     | '/_authenticated/admin/marocas-ops-health'
@@ -10161,6 +10174,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMarketplaceOpsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/marketplace-health': {
+      id: '/_authenticated/admin/marketplace-health'
+      path: '/admin/marketplace-health'
+      fullPath: '/admin/marketplace-health'
+      preLoaderRoute: typeof AuthenticatedAdminMarketplaceHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/marketplace-b2b-health': {
       id: '/_authenticated/admin/marketplace-b2b-health'
       path: '/admin/marketplace-b2b-health'
@@ -11874,6 +11894,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminLoyaltyClubeHealthRoute: typeof AuthenticatedAdminLoyaltyClubeHealthRoute
   AuthenticatedAdminMarketingHealthRoute: typeof AuthenticatedAdminMarketingHealthRoute
   AuthenticatedAdminMarketplaceB2bHealthRoute: typeof AuthenticatedAdminMarketplaceB2bHealthRoute
+  AuthenticatedAdminMarketplaceHealthRoute: typeof AuthenticatedAdminMarketplaceHealthRoute
   AuthenticatedAdminMarketplaceOpsRoute: typeof AuthenticatedAdminMarketplaceOpsRoute
   AuthenticatedAdminMarocasHealthRoute: typeof AuthenticatedAdminMarocasHealthRoute
   AuthenticatedAdminMarocasOpsHealthRoute: typeof AuthenticatedAdminMarocasOpsHealthRoute
@@ -12151,6 +12172,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminMarketingHealthRoute,
   AuthenticatedAdminMarketplaceB2bHealthRoute:
     AuthenticatedAdminMarketplaceB2bHealthRoute,
+  AuthenticatedAdminMarketplaceHealthRoute:
+    AuthenticatedAdminMarketplaceHealthRoute,
   AuthenticatedAdminMarketplaceOpsRoute: AuthenticatedAdminMarketplaceOpsRoute,
   AuthenticatedAdminMarocasHealthRoute: AuthenticatedAdminMarocasHealthRoute,
   AuthenticatedAdminMarocasOpsHealthRoute:
