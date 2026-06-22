@@ -3,17 +3,13 @@ import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-function pub() {
-  return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
-    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
-  });
-}
 async function admin() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   return supabaseAdmin;
 }
 async function tenantCompanyId(subdomain = "riomed"): Promise<string> {
-  const { data } = await pub().from("core_tenant_identity").select("company_id").eq("subdomain", subdomain).maybeSingle();
+  const sb = await admin();
+  const { data } = await (sb.from("core_tenant_identity") as any).select("company_id").eq("subdomain", subdomain).maybeSingle();
   if (!data?.company_id) throw new Error("Tenant não encontrado");
   return data.company_id as string;
 }
