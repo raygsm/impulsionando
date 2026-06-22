@@ -410,6 +410,7 @@ import { Route as AuthenticatedAdminFunil360RouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminFiscalRouteImport } from './routes/_authenticated/admin.fiscal'
 import { Route as AuthenticatedAdminFinanceiroConsolidadoV2RouteImport } from './routes/_authenticated/admin.financeiro-consolidado-v2'
 import { Route as AuthenticatedAdminExpansionRadarRouteImport } from './routes/_authenticated/admin.expansion-radar'
+import { Route as AuthenticatedAdminExpansionEngineRouteImport } from './routes/_authenticated/admin.expansion-engine'
 import { Route as AuthenticatedAdminExecutiveBriefingRouteImport } from './routes/_authenticated/admin.executive-briefing'
 import { Route as AuthenticatedAdminCustomerSuccessRouteImport } from './routes/_authenticated/admin.customer-success'
 import { Route as AuthenticatedAdminConversionFunnelRouteImport } from './routes/_authenticated/admin.conversion-funnel'
@@ -2710,6 +2711,12 @@ const AuthenticatedAdminExpansionRadarRoute =
     path: '/admin/expansion-radar',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminExpansionEngineRoute =
+  AuthenticatedAdminExpansionEngineRouteImport.update({
+    id: '/admin/expansion-engine',
+    path: '/admin/expansion-engine',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminExecutiveBriefingRoute =
   AuthenticatedAdminExecutiveBriefingRouteImport.update({
     id: '/admin/executive-briefing',
@@ -3428,6 +3435,7 @@ export interface FileRoutesByFullPath {
   '/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
   '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
+  '/admin/expansion-engine': typeof AuthenticatedAdminExpansionEngineRoute
   '/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
   '/admin/financeiro-consolidado-v2': typeof AuthenticatedAdminFinanceiroConsolidadoV2Route
   '/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
@@ -3907,6 +3915,7 @@ export interface FileRoutesByTo {
   '/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
   '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
+  '/admin/expansion-engine': typeof AuthenticatedAdminExpansionEngineRoute
   '/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
   '/admin/financeiro-consolidado-v2': typeof AuthenticatedAdminFinanceiroConsolidadoV2Route
   '/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
@@ -4400,6 +4409,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
   '/_authenticated/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/_authenticated/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
+  '/_authenticated/admin/expansion-engine': typeof AuthenticatedAdminExpansionEngineRoute
   '/_authenticated/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
   '/_authenticated/admin/financeiro-consolidado-v2': typeof AuthenticatedAdminFinanceiroConsolidadoV2Route
   '/_authenticated/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
@@ -4892,6 +4902,7 @@ export interface FileRouteTypes {
     | '/admin/conversion-funnel'
     | '/admin/customer-success'
     | '/admin/executive-briefing'
+    | '/admin/expansion-engine'
     | '/admin/expansion-radar'
     | '/admin/financeiro-consolidado-v2'
     | '/admin/fiscal'
@@ -5371,6 +5382,7 @@ export interface FileRouteTypes {
     | '/admin/conversion-funnel'
     | '/admin/customer-success'
     | '/admin/executive-briefing'
+    | '/admin/expansion-engine'
     | '/admin/expansion-radar'
     | '/admin/financeiro-consolidado-v2'
     | '/admin/fiscal'
@@ -5863,6 +5875,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/conversion-funnel'
     | '/_authenticated/admin/customer-success'
     | '/_authenticated/admin/executive-briefing'
+    | '/_authenticated/admin/expansion-engine'
     | '/_authenticated/admin/expansion-radar'
     | '/_authenticated/admin/financeiro-consolidado-v2'
     | '/_authenticated/admin/fiscal'
@@ -9125,6 +9138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminExpansionRadarRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/expansion-engine': {
+      id: '/_authenticated/admin/expansion-engine'
+      path: '/admin/expansion-engine'
+      fullPath: '/admin/expansion-engine'
+      preLoaderRoute: typeof AuthenticatedAdminExpansionEngineRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/executive-briefing': {
       id: '/_authenticated/admin/executive-briefing'
       path: '/admin/executive-briefing'
@@ -10422,6 +10442,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminConversionFunnelRoute: typeof AuthenticatedAdminConversionFunnelRoute
   AuthenticatedAdminCustomerSuccessRoute: typeof AuthenticatedAdminCustomerSuccessRoute
   AuthenticatedAdminExecutiveBriefingRoute: typeof AuthenticatedAdminExecutiveBriefingRoute
+  AuthenticatedAdminExpansionEngineRoute: typeof AuthenticatedAdminExpansionEngineRoute
   AuthenticatedAdminExpansionRadarRoute: typeof AuthenticatedAdminExpansionRadarRoute
   AuthenticatedAdminFinanceiroConsolidadoV2Route: typeof AuthenticatedAdminFinanceiroConsolidadoV2Route
   AuthenticatedAdminFiscalRoute: typeof AuthenticatedAdminFiscalRoute
@@ -10599,6 +10620,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminCustomerSuccessRoute,
   AuthenticatedAdminExecutiveBriefingRoute:
     AuthenticatedAdminExecutiveBriefingRoute,
+  AuthenticatedAdminExpansionEngineRoute:
+    AuthenticatedAdminExpansionEngineRoute,
   AuthenticatedAdminExpansionRadarRoute: AuthenticatedAdminExpansionRadarRoute,
   AuthenticatedAdminFinanceiroConsolidadoV2Route:
     AuthenticatedAdminFinanceiroConsolidadoV2Route,
