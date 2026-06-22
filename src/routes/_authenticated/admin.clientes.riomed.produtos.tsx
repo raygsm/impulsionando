@@ -134,7 +134,7 @@ function ProductsPage() {
             <p className="text-muted-foreground">Nenhum produto cadastrado. Clique em "Novo produto".</p>
           ) : (
             <div className="space-y-2">
-              {products.map((p: Product) => (
+              {products.map((p) => (
                 <div key={p.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-accent/30">
                   {p.image_url ? (
                     <img src={p.image_url} alt={p.name} className="w-12 h-12 object-cover rounded" />
