@@ -81,6 +81,7 @@
     "jspdf-autotable": "^5.0.8",
     "jszip": "^3.10.1",
     "lucide-react": "^0.575.0",
+    "papaparse": "^5.5.4",
     "pdf-lib": "^1.17.1",
     "qrcode": "^1.5.4",
     "react": "^19.2.0",
