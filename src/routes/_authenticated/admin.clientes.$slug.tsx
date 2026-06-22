@@ -69,7 +69,7 @@ export const Route = createFileRoute("/_authenticated/admin/clientes/$slug")({
 });
 
 // Slugs que têm dossiê dedicado preservado (rota legada).
-const LEGACY_DOSSIER_SLUGS = new Set(["riomed"]);
+const LEGACY_DOSSIER_SLUGS = new Set<string>([]); // /admin/clientes/riomed já é capturado pela rota estática.
 
 function TenantOverviewPage() {
   const { slug } = Route.useParams();
