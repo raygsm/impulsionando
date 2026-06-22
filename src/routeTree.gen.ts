@@ -416,6 +416,7 @@ import { Route as AuthenticatedAdminFinanceiroConsolidadoV2RouteImport } from '.
 import { Route as AuthenticatedAdminExpansionRadarRouteImport } from './routes/_authenticated/admin.expansion-radar'
 import { Route as AuthenticatedAdminExpansionEngineRouteImport } from './routes/_authenticated/admin.expansion-engine'
 import { Route as AuthenticatedAdminExecutiveBriefingRouteImport } from './routes/_authenticated/admin.executive-briefing'
+import { Route as AuthenticatedAdminDataQualityRouteImport } from './routes/_authenticated/admin.data-quality'
 import { Route as AuthenticatedAdminCustomerSuccessRouteImport } from './routes/_authenticated/admin.customer-success'
 import { Route as AuthenticatedAdminConversionFunnelRouteImport } from './routes/_authenticated/admin.conversion-funnel'
 import { Route as AuthenticatedAdminCommandCenterRouteImport } from './routes/_authenticated/admin.command-center'
@@ -2752,6 +2753,12 @@ const AuthenticatedAdminExecutiveBriefingRoute =
     path: '/admin/executive-briefing',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminDataQualityRoute =
+  AuthenticatedAdminDataQualityRouteImport.update({
+    id: '/admin/data-quality',
+    path: '/admin/data-quality',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminCustomerSuccessRoute =
   AuthenticatedAdminCustomerSuccessRouteImport.update({
     id: '/admin/customer-success',
@@ -3470,6 +3477,7 @@ export interface FileRoutesByFullPath {
   '/admin/command-center': typeof AuthenticatedAdminCommandCenterRoute
   '/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
   '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
+  '/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
   '/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
   '/admin/expansion-engine': typeof AuthenticatedAdminExpansionEngineRoute
   '/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
@@ -3955,6 +3963,7 @@ export interface FileRoutesByTo {
   '/admin/command-center': typeof AuthenticatedAdminCommandCenterRoute
   '/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
   '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
+  '/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
   '/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
   '/admin/expansion-engine': typeof AuthenticatedAdminExpansionEngineRoute
   '/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
@@ -4454,6 +4463,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/command-center': typeof AuthenticatedAdminCommandCenterRoute
   '/_authenticated/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
   '/_authenticated/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
+  '/_authenticated/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
   '/_authenticated/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
   '/_authenticated/admin/expansion-engine': typeof AuthenticatedAdminExpansionEngineRoute
   '/_authenticated/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
@@ -4952,6 +4962,7 @@ export interface FileRouteTypes {
     | '/admin/command-center'
     | '/admin/conversion-funnel'
     | '/admin/customer-success'
+    | '/admin/data-quality'
     | '/admin/executive-briefing'
     | '/admin/expansion-engine'
     | '/admin/expansion-radar'
@@ -5437,6 +5448,7 @@ export interface FileRouteTypes {
     | '/admin/command-center'
     | '/admin/conversion-funnel'
     | '/admin/customer-success'
+    | '/admin/data-quality'
     | '/admin/executive-briefing'
     | '/admin/expansion-engine'
     | '/admin/expansion-radar'
@@ -5935,6 +5947,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/command-center'
     | '/_authenticated/admin/conversion-funnel'
     | '/_authenticated/admin/customer-success'
+    | '/_authenticated/admin/data-quality'
     | '/_authenticated/admin/executive-briefing'
     | '/_authenticated/admin/expansion-engine'
     | '/_authenticated/admin/expansion-radar'
@@ -9245,6 +9258,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminExecutiveBriefingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/data-quality': {
+      id: '/_authenticated/admin/data-quality'
+      path: '/admin/data-quality'
+      fullPath: '/admin/data-quality'
+      preLoaderRoute: typeof AuthenticatedAdminDataQualityRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/customer-success': {
       id: '/_authenticated/admin/customer-success'
       path: '/admin/customer-success'
@@ -10542,6 +10562,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCommandCenterRoute: typeof AuthenticatedAdminCommandCenterRoute
   AuthenticatedAdminConversionFunnelRoute: typeof AuthenticatedAdminConversionFunnelRoute
   AuthenticatedAdminCustomerSuccessRoute: typeof AuthenticatedAdminCustomerSuccessRoute
+  AuthenticatedAdminDataQualityRoute: typeof AuthenticatedAdminDataQualityRoute
   AuthenticatedAdminExecutiveBriefingRoute: typeof AuthenticatedAdminExecutiveBriefingRoute
   AuthenticatedAdminExpansionEngineRoute: typeof AuthenticatedAdminExpansionEngineRoute
   AuthenticatedAdminExpansionRadarRoute: typeof AuthenticatedAdminExpansionRadarRoute
@@ -10724,6 +10745,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminConversionFunnelRoute,
   AuthenticatedAdminCustomerSuccessRoute:
     AuthenticatedAdminCustomerSuccessRoute,
+  AuthenticatedAdminDataQualityRoute: AuthenticatedAdminDataQualityRoute,
   AuthenticatedAdminExecutiveBriefingRoute:
     AuthenticatedAdminExecutiveBriefingRoute,
   AuthenticatedAdminExpansionEngineRoute:
