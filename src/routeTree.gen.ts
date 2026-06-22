@@ -480,6 +480,7 @@ import { Route as AuthenticatedAdminCatalogIntentsRouteImport } from './routes/_
 import { Route as AuthenticatedAdminCatalogAnalyticsRouteImport } from './routes/_authenticated/admin.catalog-analytics'
 import { Route as AuthenticatedAdminBreweryClubeHealthRouteImport } from './routes/_authenticated/admin.brewery-clube-health'
 import { Route as AuthenticatedAdminBillingPolicyRouteImport } from './routes/_authenticated/admin.billing-policy'
+import { Route as AuthenticatedAdminBillingHealthRouteImport } from './routes/_authenticated/admin.billing-health'
 import { Route as AuthenticatedAdminBillingContractsRouteImport } from './routes/_authenticated/admin.billing-contracts'
 import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authenticated/admin.billing'
 import { Route as AuthenticatedAdminAuditTrailRouteImport } from './routes/_authenticated/admin.audit-trail'
@@ -3195,6 +3196,12 @@ const AuthenticatedAdminBillingPolicyRoute =
     path: '/admin/billing-policy',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminBillingHealthRoute =
+  AuthenticatedAdminBillingHealthRouteImport.update({
+    id: '/admin/billing-health',
+    path: '/admin/billing-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminBillingContractsRoute =
   AuthenticatedAdminBillingContractsRouteImport.update({
     id: '/admin/billing-contracts',
@@ -3886,6 +3893,7 @@ export interface FileRoutesByFullPath {
   '/admin/audit-trail': typeof AuthenticatedAdminAuditTrailRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/admin/billing-contracts': typeof AuthenticatedAdminBillingContractsRoute
+  '/admin/billing-health': typeof AuthenticatedAdminBillingHealthRoute
   '/admin/billing-policy': typeof AuthenticatedAdminBillingPolicyRoute
   '/admin/brewery-clube-health': typeof AuthenticatedAdminBreweryClubeHealthRoute
   '/admin/catalog-analytics': typeof AuthenticatedAdminCatalogAnalyticsRoute
@@ -4431,6 +4439,7 @@ export interface FileRoutesByTo {
   '/admin/audit-trail': typeof AuthenticatedAdminAuditTrailRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/admin/billing-contracts': typeof AuthenticatedAdminBillingContractsRoute
+  '/admin/billing-health': typeof AuthenticatedAdminBillingHealthRoute
   '/admin/billing-policy': typeof AuthenticatedAdminBillingPolicyRoute
   '/admin/brewery-clube-health': typeof AuthenticatedAdminBreweryClubeHealthRoute
   '/admin/catalog-analytics': typeof AuthenticatedAdminCatalogAnalyticsRoute
@@ -4990,6 +4999,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/audit-trail': typeof AuthenticatedAdminAuditTrailRoute
   '/_authenticated/admin/billing': typeof AuthenticatedAdminBillingRoute
   '/_authenticated/admin/billing-contracts': typeof AuthenticatedAdminBillingContractsRoute
+  '/_authenticated/admin/billing-health': typeof AuthenticatedAdminBillingHealthRoute
   '/_authenticated/admin/billing-policy': typeof AuthenticatedAdminBillingPolicyRoute
   '/_authenticated/admin/brewery-clube-health': typeof AuthenticatedAdminBreweryClubeHealthRoute
   '/_authenticated/admin/catalog-analytics': typeof AuthenticatedAdminCatalogAnalyticsRoute
@@ -5548,6 +5558,7 @@ export interface FileRouteTypes {
     | '/admin/audit-trail'
     | '/admin/billing'
     | '/admin/billing-contracts'
+    | '/admin/billing-health'
     | '/admin/billing-policy'
     | '/admin/brewery-clube-health'
     | '/admin/catalog-analytics'
@@ -6093,6 +6104,7 @@ export interface FileRouteTypes {
     | '/admin/audit-trail'
     | '/admin/billing'
     | '/admin/billing-contracts'
+    | '/admin/billing-health'
     | '/admin/billing-policy'
     | '/admin/brewery-clube-health'
     | '/admin/catalog-analytics'
@@ -6651,6 +6663,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/audit-trail'
     | '/_authenticated/admin/billing'
     | '/_authenticated/admin/billing-contracts'
+    | '/_authenticated/admin/billing-health'
     | '/_authenticated/admin/billing-policy'
     | '/_authenticated/admin/brewery-clube-health'
     | '/_authenticated/admin/catalog-analytics'
@@ -10473,6 +10486,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminBillingPolicyRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/billing-health': {
+      id: '/_authenticated/admin/billing-health'
+      path: '/admin/billing-health'
+      fullPath: '/admin/billing-health'
+      preLoaderRoute: typeof AuthenticatedAdminBillingHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/billing-contracts': {
       id: '/_authenticated/admin/billing-contracts'
       path: '/admin/billing-contracts'
@@ -11738,6 +11758,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminAuditTrailRoute: typeof AuthenticatedAdminAuditTrailRoute
   AuthenticatedAdminBillingRoute: typeof AuthenticatedAdminBillingRoute
   AuthenticatedAdminBillingContractsRoute: typeof AuthenticatedAdminBillingContractsRoute
+  AuthenticatedAdminBillingHealthRoute: typeof AuthenticatedAdminBillingHealthRoute
   AuthenticatedAdminBillingPolicyRoute: typeof AuthenticatedAdminBillingPolicyRoute
   AuthenticatedAdminBreweryClubeHealthRoute: typeof AuthenticatedAdminBreweryClubeHealthRoute
   AuthenticatedAdminCatalogAnalyticsRoute: typeof AuthenticatedAdminCatalogAnalyticsRoute
@@ -11983,6 +12004,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminBillingRoute: AuthenticatedAdminBillingRoute,
   AuthenticatedAdminBillingContractsRoute:
     AuthenticatedAdminBillingContractsRoute,
+  AuthenticatedAdminBillingHealthRoute: AuthenticatedAdminBillingHealthRoute,
   AuthenticatedAdminBillingPolicyRoute: AuthenticatedAdminBillingPolicyRoute,
   AuthenticatedAdminBreweryClubeHealthRoute:
     AuthenticatedAdminBreweryClubeHealthRoute,
