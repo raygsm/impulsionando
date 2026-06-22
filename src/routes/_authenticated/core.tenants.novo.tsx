@@ -21,10 +21,12 @@ type Step = 0 | 1 | 2 | 3
 interface FormState {
   name: string; legal_name: string; document: string; email: string; whatsapp: string;
   subdomain: string; niche_id: string;
+  country_code: 'BR' | 'BO';
   plan_id: string;
   primary_color: string; secondary_color: string; logo_url: string;
   admin_email: string; admin_name: string;
 }
+
 
 const STEPS = [
   { id: 0, label: 'Empresa', icon: Building2 },
