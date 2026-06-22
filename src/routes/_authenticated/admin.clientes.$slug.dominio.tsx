@@ -274,3 +274,34 @@ function Stat({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+function MarkPublishedButton({
+  slug,
+  onDone,
+}: {
+  slug: string;
+  onDone: () => void;
+}) {
+  const mark = useServerFn(markTenantPublished);
+  const [busy, setBusy] = useState(false);
+  async function handle() {
+    setBusy(true);
+    try {
+      const res = await mark({
+        data: { slug, commit: BUILD_INFO.commit, builtAt: BUILD_INFO.builtAt },
+      });
+      toast.success(`Tenant marcado como publicado · ${res.commit.slice(0, 7)}`);
+      onDone();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao marcar deploy");
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <Button variant="default" size="sm" disabled={busy} onClick={handle}>
+      <GitCommit className="h-3 w-3 mr-1" />
+      {busy ? "Marcando…" : "Marcar deploy agora"}
+    </Button>
+  );
+}
