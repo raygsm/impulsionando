@@ -167,6 +167,5 @@ export const getEcosystemMarketplaceHealth = createServerFn({ method: "POST" })
     };
   });
 
-// Workaround for the typo above (TS will catch). Use proper key name:
 type _Fix = { communicationAvg: number };
 void (null as unknown as _Fix);
