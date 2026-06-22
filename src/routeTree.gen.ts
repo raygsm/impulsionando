@@ -412,6 +412,7 @@ import { Route as AuthenticatedAdminRealEstateHealthRouteImport } from './routes
 import { Route as AuthenticatedAdminQualidadeRouteImport } from './routes/_authenticated/admin.qualidade'
 import { Route as AuthenticatedAdminProjetosParalelosRouteImport } from './routes/_authenticated/admin.projetos-paralelos'
 import { Route as AuthenticatedAdminPricingIntelligenceRouteImport } from './routes/_authenticated/admin.pricing-intelligence'
+import { Route as AuthenticatedAdminPresalesHealthRouteImport } from './routes/_authenticated/admin.presales-health'
 import { Route as AuthenticatedAdminPixPendentesRouteImport } from './routes/_authenticated/admin.pix-pendentes'
 import { Route as AuthenticatedAdminPeerBenchmarkRouteImport } from './routes/_authenticated/admin.peer-benchmark'
 import { Route as AuthenticatedAdminPayoutsMonetizationHealthRouteImport } from './routes/_authenticated/admin.payouts-monetization-health'
@@ -2789,6 +2790,12 @@ const AuthenticatedAdminPricingIntelligenceRoute =
     path: '/admin/pricing-intelligence',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminPresalesHealthRoute =
+  AuthenticatedAdminPresalesHealthRouteImport.update({
+    id: '/admin/presales-health',
+    path: '/admin/presales-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminPixPendentesRoute =
   AuthenticatedAdminPixPendentesRouteImport.update({
     id: '/admin/pix-pendentes',
@@ -3962,6 +3969,7 @@ export interface FileRoutesByFullPath {
   '/admin/payouts-monetization-health': typeof AuthenticatedAdminPayoutsMonetizationHealthRoute
   '/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
+  '/admin/presales-health': typeof AuthenticatedAdminPresalesHealthRoute
   '/admin/pricing-intelligence': typeof AuthenticatedAdminPricingIntelligenceRoute
   '/admin/projetos-paralelos': typeof AuthenticatedAdminProjetosParalelosRoute
   '/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
@@ -4508,6 +4516,7 @@ export interface FileRoutesByTo {
   '/admin/payouts-monetization-health': typeof AuthenticatedAdminPayoutsMonetizationHealthRoute
   '/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
+  '/admin/presales-health': typeof AuthenticatedAdminPresalesHealthRoute
   '/admin/pricing-intelligence': typeof AuthenticatedAdminPricingIntelligenceRoute
   '/admin/projetos-paralelos': typeof AuthenticatedAdminProjetosParalelosRoute
   '/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
@@ -5068,6 +5077,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/payouts-monetization-health': typeof AuthenticatedAdminPayoutsMonetizationHealthRoute
   '/_authenticated/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/_authenticated/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
+  '/_authenticated/admin/presales-health': typeof AuthenticatedAdminPresalesHealthRoute
   '/_authenticated/admin/pricing-intelligence': typeof AuthenticatedAdminPricingIntelligenceRoute
   '/_authenticated/admin/projetos-paralelos': typeof AuthenticatedAdminProjetosParalelosRoute
   '/_authenticated/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
@@ -5627,6 +5637,7 @@ export interface FileRouteTypes {
     | '/admin/payouts-monetization-health'
     | '/admin/peer-benchmark'
     | '/admin/pix-pendentes'
+    | '/admin/presales-health'
     | '/admin/pricing-intelligence'
     | '/admin/projetos-paralelos'
     | '/admin/qualidade'
@@ -6173,6 +6184,7 @@ export interface FileRouteTypes {
     | '/admin/payouts-monetization-health'
     | '/admin/peer-benchmark'
     | '/admin/pix-pendentes'
+    | '/admin/presales-health'
     | '/admin/pricing-intelligence'
     | '/admin/projetos-paralelos'
     | '/admin/qualidade'
@@ -6732,6 +6744,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/payouts-monetization-health'
     | '/_authenticated/admin/peer-benchmark'
     | '/_authenticated/admin/pix-pendentes'
+    | '/_authenticated/admin/presales-health'
     | '/_authenticated/admin/pricing-intelligence'
     | '/_authenticated/admin/projetos-paralelos'
     | '/_authenticated/admin/qualidade'
@@ -10010,6 +10023,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPricingIntelligenceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/presales-health': {
+      id: '/_authenticated/admin/presales-health'
+      path: '/admin/presales-health'
+      fullPath: '/admin/presales-health'
+      preLoaderRoute: typeof AuthenticatedAdminPresalesHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/pix-pendentes': {
       id: '/_authenticated/admin/pix-pendentes'
       path: '/admin/pix-pendentes'
@@ -11827,6 +11847,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminPayoutsMonetizationHealthRoute: typeof AuthenticatedAdminPayoutsMonetizationHealthRoute
   AuthenticatedAdminPeerBenchmarkRoute: typeof AuthenticatedAdminPeerBenchmarkRoute
   AuthenticatedAdminPixPendentesRoute: typeof AuthenticatedAdminPixPendentesRoute
+  AuthenticatedAdminPresalesHealthRoute: typeof AuthenticatedAdminPresalesHealthRoute
   AuthenticatedAdminPricingIntelligenceRoute: typeof AuthenticatedAdminPricingIntelligenceRoute
   AuthenticatedAdminProjetosParalelosRoute: typeof AuthenticatedAdminProjetosParalelosRoute
   AuthenticatedAdminQualidadeRoute: typeof AuthenticatedAdminQualidadeRoute
@@ -12107,6 +12128,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminPayoutsMonetizationHealthRoute,
   AuthenticatedAdminPeerBenchmarkRoute: AuthenticatedAdminPeerBenchmarkRoute,
   AuthenticatedAdminPixPendentesRoute: AuthenticatedAdminPixPendentesRoute,
+  AuthenticatedAdminPresalesHealthRoute: AuthenticatedAdminPresalesHealthRoute,
   AuthenticatedAdminPricingIntelligenceRoute:
     AuthenticatedAdminPricingIntelligenceRoute,
   AuthenticatedAdminProjetosParalelosRoute:
