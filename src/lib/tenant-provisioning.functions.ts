@@ -18,7 +18,9 @@ const ProvisionSchema = z.object({
     whatsapp: z.string().trim().max(32).optional(),
     subdomain: z.string().trim().toLowerCase().regex(/^[a-z0-9-]{3,40}$/).optional(),
     niche_id: z.string().uuid().optional(),
+    country_code: z.enum(['BR', 'BO']).optional(),
   }),
+
   plano: z.object({
     plan_id: z.string().uuid().optional(),
   }).optional(),
