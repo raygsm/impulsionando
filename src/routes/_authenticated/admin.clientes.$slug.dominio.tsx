@@ -131,7 +131,7 @@ function TenantDomainPage() {
         </CardContent>
       </Card>
 
-      <div className="grid md:grid-cols-3 gap-3 text-sm">
+      <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-3 text-sm">
         <Stat label="DNS" value={identity?.dns_status ?? "—"} />
         <Stat label="SSL" value={identity?.ssl_status ?? "—"} />
         <Stat
@@ -139,6 +139,22 @@ function TenantDomainPage() {
           value={
             identity?.provisioned_at
               ? new Date(identity.provisioned_at as string).toLocaleString("pt-BR")
+              : "—"
+          }
+        />
+        <Stat
+          label="Último deploy"
+          value={
+            identity?.published_at
+              ? new Date(identity.published_at as string).toLocaleString("pt-BR")
+              : "—"
+          }
+        />
+        <Stat
+          label="Commit publicado"
+          value={
+            identity?.published_commit
+              ? identity.published_commit.slice(0, 7)
               : "—"
           }
         />
