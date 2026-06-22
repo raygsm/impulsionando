@@ -414,6 +414,7 @@ import { Route as AuthenticatedAdminHealthScoreRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminHealthRouteImport } from './routes/_authenticated/admin.health'
 import { Route as AuthenticatedAdminFunilReguasRouteImport } from './routes/_authenticated/admin.funil-reguas'
 import { Route as AuthenticatedAdminFunil360RouteImport } from './routes/_authenticated/admin.funil-360'
+import { Route as AuthenticatedAdminFiscalHealthRouteImport } from './routes/_authenticated/admin.fiscal-health'
 import { Route as AuthenticatedAdminFiscalRouteImport } from './routes/_authenticated/admin.fiscal'
 import { Route as AuthenticatedAdminFinanceiroConsolidadoV2RouteImport } from './routes/_authenticated/admin.financeiro-consolidado-v2'
 import { Route as AuthenticatedAdminExpansionRadarRouteImport } from './routes/_authenticated/admin.expansion-radar'
@@ -2747,6 +2748,12 @@ const AuthenticatedAdminFunil360Route =
     path: '/admin/funil-360',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminFiscalHealthRoute =
+  AuthenticatedAdminFiscalHealthRouteImport.update({
+    id: '/admin/fiscal-health',
+    path: '/admin/fiscal-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminFiscalRoute =
   AuthenticatedAdminFiscalRouteImport.update({
     id: '/admin/fiscal',
@@ -3528,6 +3535,7 @@ export interface FileRoutesByFullPath {
   '/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
   '/admin/financeiro-consolidado-v2': typeof AuthenticatedAdminFinanceiroConsolidadoV2Route
   '/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
+  '/admin/fiscal-health': typeof AuthenticatedAdminFiscalHealthRoute
   '/admin/funil-360': typeof AuthenticatedAdminFunil360Route
   '/admin/funil-reguas': typeof AuthenticatedAdminFunilReguasRoute
   '/admin/health': typeof AuthenticatedAdminHealthRoute
@@ -4020,6 +4028,7 @@ export interface FileRoutesByTo {
   '/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
   '/admin/financeiro-consolidado-v2': typeof AuthenticatedAdminFinanceiroConsolidadoV2Route
   '/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
+  '/admin/fiscal-health': typeof AuthenticatedAdminFiscalHealthRoute
   '/admin/funil-360': typeof AuthenticatedAdminFunil360Route
   '/admin/funil-reguas': typeof AuthenticatedAdminFunilReguasRoute
   '/admin/health': typeof AuthenticatedAdminHealthRoute
@@ -4526,6 +4535,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
   '/_authenticated/admin/financeiro-consolidado-v2': typeof AuthenticatedAdminFinanceiroConsolidadoV2Route
   '/_authenticated/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
+  '/_authenticated/admin/fiscal-health': typeof AuthenticatedAdminFiscalHealthRoute
   '/_authenticated/admin/funil-360': typeof AuthenticatedAdminFunil360Route
   '/_authenticated/admin/funil-reguas': typeof AuthenticatedAdminFunilReguasRoute
   '/_authenticated/admin/health': typeof AuthenticatedAdminHealthRoute
@@ -5031,6 +5041,7 @@ export interface FileRouteTypes {
     | '/admin/expansion-radar'
     | '/admin/financeiro-consolidado-v2'
     | '/admin/fiscal'
+    | '/admin/fiscal-health'
     | '/admin/funil-360'
     | '/admin/funil-reguas'
     | '/admin/health'
@@ -5523,6 +5534,7 @@ export interface FileRouteTypes {
     | '/admin/expansion-radar'
     | '/admin/financeiro-consolidado-v2'
     | '/admin/fiscal'
+    | '/admin/fiscal-health'
     | '/admin/funil-360'
     | '/admin/funil-reguas'
     | '/admin/health'
@@ -6028,6 +6040,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/expansion-radar'
     | '/_authenticated/admin/financeiro-consolidado-v2'
     | '/_authenticated/admin/fiscal'
+    | '/_authenticated/admin/fiscal-health'
     | '/_authenticated/admin/funil-360'
     | '/_authenticated/admin/funil-reguas'
     | '/_authenticated/admin/health'
@@ -9322,6 +9335,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFunil360RouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/fiscal-health': {
+      id: '/_authenticated/admin/fiscal-health'
+      path: '/admin/fiscal-health'
+      fullPath: '/admin/fiscal-health'
+      preLoaderRoute: typeof AuthenticatedAdminFiscalHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/fiscal': {
       id: '/_authenticated/admin/fiscal'
       path: '/admin/fiscal'
@@ -10691,6 +10711,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminExpansionRadarRoute: typeof AuthenticatedAdminExpansionRadarRoute
   AuthenticatedAdminFinanceiroConsolidadoV2Route: typeof AuthenticatedAdminFinanceiroConsolidadoV2Route
   AuthenticatedAdminFiscalRoute: typeof AuthenticatedAdminFiscalRoute
+  AuthenticatedAdminFiscalHealthRoute: typeof AuthenticatedAdminFiscalHealthRoute
   AuthenticatedAdminFunil360Route: typeof AuthenticatedAdminFunil360Route
   AuthenticatedAdminFunilReguasRoute: typeof AuthenticatedAdminFunilReguasRoute
   AuthenticatedAdminHealthRoute: typeof AuthenticatedAdminHealthRoute
@@ -10883,6 +10904,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminFinanceiroConsolidadoV2Route:
     AuthenticatedAdminFinanceiroConsolidadoV2Route,
   AuthenticatedAdminFiscalRoute: AuthenticatedAdminFiscalRoute,
+  AuthenticatedAdminFiscalHealthRoute: AuthenticatedAdminFiscalHealthRoute,
   AuthenticatedAdminFunil360Route: AuthenticatedAdminFunil360Route,
   AuthenticatedAdminFunilReguasRoute: AuthenticatedAdminFunilReguasRoute,
   AuthenticatedAdminHealthRoute: AuthenticatedAdminHealthRoute,
