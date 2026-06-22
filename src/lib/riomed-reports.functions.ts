@@ -79,11 +79,11 @@ export const getExecutiveOverview = createServerFn({ method: "GET" })
       },
       salesByDay,
       leadsBySource: Object.entries(
-        l.reduce((acc: Record<string, number>, x: any) => { acc[x.source ?? "—"] = (acc[x.source ?? "—"] ?? 0) + 1; return acc; }, {})
-      ).map(([source, count]) => ({ source, count })),
+        l.reduce((acc: Record<string, number>, x: any) => { acc[x.source ?? "—"] = (acc[x.source ?? "—"] ?? 0) + 1; return acc; }, {} as Record<string, number>)
+      ).map(([source, count]) => ({ source, count: Number(count) })),
       ordersByStatus: Object.entries(
-        o.reduce((acc: Record<string, number>, x: any) => { acc[x.status] = (acc[x.status] ?? 0) + 1; return acc; }, {})
-      ).map(([status, count]) => ({ status, count })),
+        o.reduce((acc: Record<string, number>, x: any) => { acc[x.status] = (acc[x.status] ?? 0) + 1; return acc; }, {} as Record<string, number>)
+      ).map(([status, count]) => ({ status, count: Number(count) })),
     };
   });
 
