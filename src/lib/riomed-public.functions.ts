@@ -127,35 +127,29 @@ export const submitRiomedQuote = createServerFn({ method: "POST" })
       .single();
     if (error) throw error;
 
-    await admin.from("crm_activities").insert({
-      company_id: companyId,
-      lead_id: lead.id,
-      type: "quote_request",
-      title: "Solicitud de cotización vía sitio",
-      description: `Tipo: ${data.clientType} | Necesidad: ${data.needType}${data.productDesired ? ` | Producto: ${data.productDesired}` : ""}${data.productCode ? ` | Código: ${data.productCode}` : ""}`,
-      metadata: payload,
-    }).catch(() => {});
+    try {
+      await admin.from("crm_activities").insert({
+        company_id: companyId,
+        lead_id: lead.id,
+        activity_type: "quote_request",
+        subject: "Solicitud de cotización vía sitio",
+        content: `Tipo: ${data.clientType} | Necesidad: ${data.needType}${data.productDesired ? ` | Producto: ${data.productDesired}` : ""}${data.productCode ? ` | Código: ${data.productCode}` : ""}`,
+      } as any);
+    } catch { /* non-blocking */ }
 
-    await admin.from("crm_opportunities").insert({
-      company_id: companyId,
-      lead_id: lead.id,
-      title: `Cotización ${data.clientType} — ${data.productDesired || data.needType}`,
-      stage: "qualification",
-      status: "open",
-      source: "site_cotizacion",
-    }).catch(() => {});
-
-    await admin.rpc("riomed_log_audit", {
-      _company_id: companyId,
-      _actor_id: null,
-      _actor_email: data.email || null,
-      _action: "quote.submitted",
-      _entity_type: "lead",
-      _entity_id: lead.id,
-      _before: null,
-      _after: { id: lead.id, ...payload },
-      _metadata: { source: "site_cotizacion" },
-    }).catch(() => {});
+    try {
+      await admin.rpc("riomed_log_audit", {
+        _company_id: companyId,
+        _actor_id: null as any,
+        _actor_email: data.email || "",
+        _action: "quote.submitted",
+        _entity_type: "lead",
+        _entity_id: lead.id,
+        _before: null as any,
+        _after: { id: lead.id, ...payload },
+        _metadata: { source: "site_cotizacion" },
+      } as any);
+    } catch { /* non-blocking */ }
 
     return { leadId: lead.id, ok: true };
   });
