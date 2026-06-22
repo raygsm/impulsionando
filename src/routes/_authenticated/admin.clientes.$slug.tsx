@@ -34,7 +34,7 @@ const loadTenantOverview = createServerFn({ method: "GET" })
     const { data: company } = await supabase
       .from("companies")
       .select(
-        "id,name,legal_name,subdomain,domain,address_city,address_state,status,status_commercial,status_financial,status_technical,is_active,company_kind,is_demo,niche_id",
+        "id,name,legal_name,subdomain,domain,address_city,address_state,status,status_commercial,status_financial,status_technical,is_active,company_kind,is_demo,niche_id,country_code,locale,currency_code,phone_country_code,timezone",
       )
       .eq("subdomain", data.slug)
       .maybeSingle();
