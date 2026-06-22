@@ -73,6 +73,39 @@ const loadTenantOverview = createServerFn({ method: "GET" })
     };
   });
 
+const updateTenantLocale = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    z
+      .object({
+        companyId: z.string().uuid(),
+        countryCode: z.enum(["BR", "BO"]),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", {
+      _user_id: userId,
+      _role: "admin",
+    });
+    if (!isAdmin) throw new Response("Forbidden", { status: 403 });
+    const profile = TENANT_LOCALE_PROFILES[data.countryCode];
+    const { error } = await supabase
+      .from("companies")
+      .update({
+        country_code: profile.countryCode,
+        locale: profile.locale,
+        currency_code: profile.currencyCode,
+        phone_country_code: profile.phoneCountryCode,
+        timezone: profile.timezone,
+      })
+      .eq("id", data.companyId);
+    if (error) throw new Response(error.message, { status: 500 });
+    return { ok: true };
+  });
+
+
 export const Route = createFileRoute("/_authenticated/admin/clientes/$slug")({
   head: () => ({ meta: [{ title: "Cliente · Impulsionando" }] }),
   component: TenantOverviewPage,
