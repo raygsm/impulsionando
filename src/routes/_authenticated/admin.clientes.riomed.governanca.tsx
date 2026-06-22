@@ -1,4 +1,5 @@
 import { createFileRoute, ErrorComponent, useRouter } from "@tanstack/react-router";
+import { TenantModuleShell } from "@/components/core/TenantModuleShell";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -27,7 +28,7 @@ import { Shield, FileSearch, Activity, Key, Settings as SettingsIcon, AlertTrian
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/riomed/governanca")({
-  component: GovernancePage,
+  component: () => (<TenantModuleShell tenantSlug="riomed" moduleSlug='governance' title='Governança RioMed'><GovernancePage /></TenantModuleShell>),
   errorComponent: ErrorComponent,
   notFoundComponent: () => <div>Não encontrado</div>,
 });

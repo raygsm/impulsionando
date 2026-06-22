@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { TenantModuleShell } from "@/components/core/TenantModuleShell";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,7 +37,7 @@ const AUDIENCE_LABEL: Record<string, string> = {
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/riomed/precos-listas")({
   head: () => ({ meta: [{ title: "Rio Med · Listas de Preço" }] }),
-  component: Page,
+  component: () => (<TenantModuleShell tenantSlug="riomed" moduleSlug='pricing' title='Preços & Listas RioMed'><Page /></TenantModuleShell>),
 });
 
 function Page() {

@@ -1,4 +1,5 @@
 import { createFileRoute, ErrorComponent, Link } from "@tanstack/react-router";
+import { TenantModuleShell } from "@/components/core/TenantModuleShell";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { getRiomedManagementDashboard } from "@/lib/riomed-customer-area.functions";
@@ -10,7 +11,7 @@ import {
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/riomed/dashboard")({
-  component: DashboardPage,
+  component: () => (<TenantModuleShell tenantSlug="riomed" moduleSlug='dashboard' title='Dashboard RioMed'><DashboardPage /></TenantModuleShell>),
   errorComponent: ErrorComponent,
   notFoundComponent: () => <div>Não encontrado</div>,
 });

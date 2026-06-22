@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { TenantModuleShell } from "@/components/core/TenantModuleShell";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
@@ -13,7 +14,7 @@ import { Download, FileSpreadsheet, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/riomed/relatorios")({
-  component: Page,
+  component: () => (<TenantModuleShell tenantSlug="riomed" moduleSlug='reports' title='Relatórios RioMed'><Page /></TenantModuleShell>),
 });
 
 function download(filename: string, content: string) {

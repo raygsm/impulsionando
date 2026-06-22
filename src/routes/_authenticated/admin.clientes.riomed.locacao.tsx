@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { TenantModuleShell } from "@/components/core/TenantModuleShell";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
@@ -6,7 +7,7 @@ import { listRentalAssets, createRentalAsset, listRentalContracts } from "@/lib/
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/riomed/locacao")({
   head: () => ({ meta: [{ title: "RioMed — Locação · Impulsionando" }] }),
-  component: RioMedLocacao,
+  component: () => (<TenantModuleShell tenantSlug="riomed" moduleSlug='rental' title='Locação RioMed'><RioMedLocacao /></TenantModuleShell>),
 });
 
 function RioMedLocacao() {

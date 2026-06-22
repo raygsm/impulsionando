@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { TenantModuleShell } from "@/components/core/TenantModuleShell";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listAbandonedCarts } from "@/lib/riomed.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/riomed/carrinhos")({
   head: () => ({ meta: [{ title: "RioMed — Carrinhos Abandonados · Impulsionando" }] }),
-  component: RioMedCarts,
+  component: () => (<TenantModuleShell tenantSlug="riomed" moduleSlug='carts' title='Carrinhos RioMed'><RioMedCarts /></TenantModuleShell>),
 });
 
 function RioMedCarts() {

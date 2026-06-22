@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { TenantModuleShell } from "@/components/core/TenantModuleShell";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, useEffect, useMemo } from "react";
@@ -6,7 +7,7 @@ import { loadRioMedAssistant, saveRioMedAssistant } from "@/lib/riomed.functions
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/riomed/assistente")({
   head: () => ({ meta: [{ title: "RioMed — Assistente Virtual · Impulsionando" }] }),
-  component: RioMedAssistantPage,
+  component: () => (<TenantModuleShell tenantSlug="riomed" moduleSlug='ai-assistant' title='Assistente IA RioMed'><RioMedAssistantPage /></TenantModuleShell>),
 });
 
 type Modality = "venta" | "alquiler";
