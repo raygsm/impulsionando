@@ -64,9 +64,9 @@ export const logOperationalEvent = createServerFn({ method: "POST" })
       _level: data.level ?? "info",
       _source: data.source,
       _event_code: data.eventCode,
-      _message: data.message ?? null,
+      _message: data.message ?? "",
       _payload: data.payload ?? {},
-      _correlation_id: data.correlationId ?? null,
+      _correlation_id: data.correlationId ?? "",
     });
     if (error) throw error;
     return { id: res };
@@ -106,7 +106,7 @@ export const grantUserScope = createServerFn({ method: "POST" })
       .single();
     if (error) throw error;
     await supabase.rpc("riomed_log_audit", {
-      _company_id: companyId, _actor_id: userId, _actor_email: null,
+      _company_id: companyId, _actor_id: userId, _actor_email: "",
       _action: "scope.grant", _entity_type: "user_scope", _entity_id: row.id,
       _before: null, _after: row, _metadata: {},
     });
@@ -123,7 +123,7 @@ export const revokeUserScope = createServerFn({ method: "POST" })
     const { error } = await supabase.from("riomed_user_scopes").delete().eq("id", data.scopeId);
     if (error) throw error;
     await supabase.rpc("riomed_log_audit", {
-      _company_id: companyId, _actor_id: userId, _actor_email: null,
+      _company_id: companyId, _actor_id: userId, _actor_email: "",
       _action: "scope.revoke", _entity_type: "user_scope", _entity_id: data.scopeId,
       _before: before, _after: null, _metadata: {},
     });
