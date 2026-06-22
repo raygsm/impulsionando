@@ -401,6 +401,7 @@ import { Route as AuthenticatedAdminProjetosParalelosRouteImport } from './route
 import { Route as AuthenticatedAdminPricingIntelligenceRouteImport } from './routes/_authenticated/admin.pricing-intelligence'
 import { Route as AuthenticatedAdminPixPendentesRouteImport } from './routes/_authenticated/admin.pix-pendentes'
 import { Route as AuthenticatedAdminPeerBenchmarkRouteImport } from './routes/_authenticated/admin.peer-benchmark'
+import { Route as AuthenticatedAdminNotificationDeliveryRouteImport } from './routes/_authenticated/admin.notification-delivery'
 import { Route as AuthenticatedAdminNichePlansRouteImport } from './routes/_authenticated/admin.niche-plans'
 import { Route as AuthenticatedAdminNicheMatrixRouteImport } from './routes/_authenticated/admin.niche-matrix'
 import { Route as AuthenticatedAdminN8nConsoleRouteImport } from './routes/_authenticated/admin.n8n-console'
@@ -2663,6 +2664,12 @@ const AuthenticatedAdminPeerBenchmarkRoute =
     path: '/admin/peer-benchmark',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminNotificationDeliveryRoute =
+  AuthenticatedAdminNotificationDeliveryRouteImport.update({
+    id: '/admin/notification-delivery',
+    path: '/admin/notification-delivery',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminNichePlansRoute =
   AuthenticatedAdminNichePlansRouteImport.update({
     id: '/admin/niche-plans',
@@ -3493,6 +3500,7 @@ export interface FileRoutesByFullPath {
   '/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
+  '/admin/notification-delivery': typeof AuthenticatedAdminNotificationDeliveryRoute
   '/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
   '/admin/pricing-intelligence': typeof AuthenticatedAdminPricingIntelligenceRoute
@@ -3979,6 +3987,7 @@ export interface FileRoutesByTo {
   '/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
+  '/admin/notification-delivery': typeof AuthenticatedAdminNotificationDeliveryRoute
   '/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
   '/admin/pricing-intelligence': typeof AuthenticatedAdminPricingIntelligenceRoute
@@ -4479,6 +4488,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/_authenticated/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
   '/_authenticated/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
+  '/_authenticated/admin/notification-delivery': typeof AuthenticatedAdminNotificationDeliveryRoute
   '/_authenticated/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/_authenticated/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
   '/_authenticated/admin/pricing-intelligence': typeof AuthenticatedAdminPricingIntelligenceRoute
@@ -4978,6 +4988,7 @@ export interface FileRouteTypes {
     | '/admin/n8n-console'
     | '/admin/niche-matrix'
     | '/admin/niche-plans'
+    | '/admin/notification-delivery'
     | '/admin/peer-benchmark'
     | '/admin/pix-pendentes'
     | '/admin/pricing-intelligence'
@@ -5464,6 +5475,7 @@ export interface FileRouteTypes {
     | '/admin/n8n-console'
     | '/admin/niche-matrix'
     | '/admin/niche-plans'
+    | '/admin/notification-delivery'
     | '/admin/peer-benchmark'
     | '/admin/pix-pendentes'
     | '/admin/pricing-intelligence'
@@ -5963,6 +5975,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/n8n-console'
     | '/_authenticated/admin/niche-matrix'
     | '/_authenticated/admin/niche-plans'
+    | '/_authenticated/admin/notification-delivery'
     | '/_authenticated/admin/peer-benchmark'
     | '/_authenticated/admin/pix-pendentes'
     | '/_authenticated/admin/pricing-intelligence'
@@ -9153,6 +9166,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPeerBenchmarkRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/notification-delivery': {
+      id: '/_authenticated/admin/notification-delivery'
+      path: '/admin/notification-delivery'
+      fullPath: '/admin/notification-delivery'
+      preLoaderRoute: typeof AuthenticatedAdminNotificationDeliveryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/niche-plans': {
       id: '/_authenticated/admin/niche-plans'
       path: '/admin/niche-plans'
@@ -10578,6 +10598,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminN8nConsoleRoute: typeof AuthenticatedAdminN8nConsoleRoute
   AuthenticatedAdminNicheMatrixRoute: typeof AuthenticatedAdminNicheMatrixRoute
   AuthenticatedAdminNichePlansRoute: typeof AuthenticatedAdminNichePlansRoute
+  AuthenticatedAdminNotificationDeliveryRoute: typeof AuthenticatedAdminNotificationDeliveryRoute
   AuthenticatedAdminPeerBenchmarkRoute: typeof AuthenticatedAdminPeerBenchmarkRoute
   AuthenticatedAdminPixPendentesRoute: typeof AuthenticatedAdminPixPendentesRoute
   AuthenticatedAdminPricingIntelligenceRoute: typeof AuthenticatedAdminPricingIntelligenceRoute
@@ -10764,6 +10785,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminN8nConsoleRoute: AuthenticatedAdminN8nConsoleRoute,
   AuthenticatedAdminNicheMatrixRoute: AuthenticatedAdminNicheMatrixRoute,
   AuthenticatedAdminNichePlansRoute: AuthenticatedAdminNichePlansRoute,
+  AuthenticatedAdminNotificationDeliveryRoute:
+    AuthenticatedAdminNotificationDeliveryRoute,
   AuthenticatedAdminPeerBenchmarkRoute: AuthenticatedAdminPeerBenchmarkRoute,
   AuthenticatedAdminPixPendentesRoute: AuthenticatedAdminPixPendentesRoute,
   AuthenticatedAdminPricingIntelligenceRoute:
