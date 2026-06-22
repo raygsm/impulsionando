@@ -168,6 +168,7 @@ import { Route as AuthenticatedMarketplaceEcoRouteImport } from './routes/_authe
 import { Route as AuthenticatedLegalAceitesRouteImport } from './routes/_authenticated/legal-aceites'
 import { Route as AuthenticatedInventoryRouteImport } from './routes/_authenticated/inventory'
 import { Route as AuthenticatedFinanceRouteImport } from './routes/_authenticated/finance'
+import { Route as AuthenticatedErpFinanceiroRouteImport } from './routes/_authenticated/erp-financeiro'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCustomersRouteImport } from './routes/_authenticated/customers'
 import { Route as AuthenticatedCrmRouteImport } from './routes/_authenticated/crm'
@@ -1378,6 +1379,12 @@ const AuthenticatedFinanceRoute = AuthenticatedFinanceRouteImport.update({
   path: '/finance',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedErpFinanceiroRoute =
+  AuthenticatedErpFinanceiroRouteImport.update({
+    id: '/erp-financeiro',
+    path: '/erp-financeiro',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -3801,6 +3808,7 @@ export interface FileRoutesByFullPath {
   '/crm': typeof AuthenticatedCrmRouteWithChildren
   '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/erp-financeiro': typeof AuthenticatedErpFinanceiroRoute
   '/finance': typeof AuthenticatedFinanceRouteWithChildren
   '/inventory': typeof AuthenticatedInventoryRouteWithChildren
   '/legal-aceites': typeof AuthenticatedLegalAceitesRoute
@@ -4358,6 +4366,7 @@ export interface FileRoutesByTo {
   '/companies': typeof AuthenticatedCompaniesRoute
   '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/erp-financeiro': typeof AuthenticatedErpFinanceiroRoute
   '/legal-aceites': typeof AuthenticatedLegalAceitesRoute
   '/marketplace-eco': typeof AuthenticatedMarketplaceEcoRoute
   '/minha-assinatura': typeof AuthenticatedMinhaAssinaturaRoute
@@ -4921,6 +4930,7 @@ export interface FileRoutesById {
   '/_authenticated/crm': typeof AuthenticatedCrmRouteWithChildren
   '/_authenticated/customers': typeof AuthenticatedCustomersRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/erp-financeiro': typeof AuthenticatedErpFinanceiroRoute
   '/_authenticated/finance': typeof AuthenticatedFinanceRouteWithChildren
   '/_authenticated/inventory': typeof AuthenticatedInventoryRouteWithChildren
   '/_authenticated/legal-aceites': typeof AuthenticatedLegalAceitesRoute
@@ -5487,6 +5497,7 @@ export interface FileRouteTypes {
     | '/crm'
     | '/customers'
     | '/dashboard'
+    | '/erp-financeiro'
     | '/finance'
     | '/inventory'
     | '/legal-aceites'
@@ -6044,6 +6055,7 @@ export interface FileRouteTypes {
     | '/companies'
     | '/customers'
     | '/dashboard'
+    | '/erp-financeiro'
     | '/legal-aceites'
     | '/marketplace-eco'
     | '/minha-assinatura'
@@ -6606,6 +6618,7 @@ export interface FileRouteTypes {
     | '/_authenticated/crm'
     | '/_authenticated/customers'
     | '/_authenticated/dashboard'
+    | '/_authenticated/erp-financeiro'
     | '/_authenticated/finance'
     | '/_authenticated/inventory'
     | '/_authenticated/legal-aceites'
@@ -8391,6 +8404,13 @@ declare module '@tanstack/react-router' {
       path: '/finance'
       fullPath: '/finance'
       preLoaderRoute: typeof AuthenticatedFinanceRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/erp-financeiro': {
+      id: '/_authenticated/erp-financeiro'
+      path: '/erp-financeiro'
+      fullPath: '/erp-financeiro'
+      preLoaderRoute: typeof AuthenticatedErpFinanceiroRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -11861,6 +11881,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCrmRoute: typeof AuthenticatedCrmRouteWithChildren
   AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedErpFinanceiroRoute: typeof AuthenticatedErpFinanceiroRoute
   AuthenticatedFinanceRoute: typeof AuthenticatedFinanceRouteWithChildren
   AuthenticatedInventoryRoute: typeof AuthenticatedInventoryRouteWithChildren
   AuthenticatedLegalAceitesRoute: typeof AuthenticatedLegalAceitesRoute
@@ -12105,6 +12126,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCrmRoute: AuthenticatedCrmRouteWithChildren,
   AuthenticatedCustomersRoute: AuthenticatedCustomersRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedErpFinanceiroRoute: AuthenticatedErpFinanceiroRoute,
   AuthenticatedFinanceRoute: AuthenticatedFinanceRouteWithChildren,
   AuthenticatedInventoryRoute: AuthenticatedInventoryRouteWithChildren,
   AuthenticatedLegalAceitesRoute: AuthenticatedLegalAceitesRoute,
