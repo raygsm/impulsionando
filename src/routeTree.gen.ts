@@ -403,6 +403,7 @@ import { Route as AuthenticatedAdminTaxComplianceRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminTalentosCockpitHealthRouteImport } from './routes/_authenticated/admin.talentos-cockpit-health'
 import { Route as AuthenticatedAdminSupportTicketingHealthRouteImport } from './routes/_authenticated/admin.support-ticketing-health'
 import { Route as AuthenticatedAdminSlaComplianceRouteImport } from './routes/_authenticated/admin.sla-compliance'
+import { Route as AuthenticatedAdminSegurancaContinuidadeRouteImport } from './routes/_authenticated/admin.seguranca-continuidade'
 import { Route as AuthenticatedAdminSecurityComplianceRouteImport } from './routes/_authenticated/admin.security-compliance'
 import { Route as AuthenticatedAdminSalesPosHealthRouteImport } from './routes/_authenticated/admin.sales-pos-health'
 import { Route as AuthenticatedAdminRuntimeUptimeHealthRouteImport } from './routes/_authenticated/admin.runtime-uptime-health'
@@ -2745,6 +2746,12 @@ const AuthenticatedAdminSlaComplianceRoute =
     path: '/admin/sla-compliance',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminSegurancaContinuidadeRoute =
+  AuthenticatedAdminSegurancaContinuidadeRouteImport.update({
+    id: '/admin/seguranca-continuidade',
+    path: '/admin/seguranca-continuidade',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminSecurityComplianceRoute =
   AuthenticatedAdminSecurityComplianceRouteImport.update({
     id: '/admin/security-compliance',
@@ -4052,6 +4059,7 @@ export interface FileRoutesByFullPath {
   '/admin/runtime-uptime-health': typeof AuthenticatedAdminRuntimeUptimeHealthRoute
   '/admin/sales-pos-health': typeof AuthenticatedAdminSalesPosHealthRoute
   '/admin/security-compliance': typeof AuthenticatedAdminSecurityComplianceRoute
+  '/admin/seguranca-continuidade': typeof AuthenticatedAdminSegurancaContinuidadeRoute
   '/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
   '/admin/support-ticketing-health': typeof AuthenticatedAdminSupportTicketingHealthRoute
   '/admin/talentos-cockpit-health': typeof AuthenticatedAdminTalentosCockpitHealthRoute
@@ -4608,6 +4616,7 @@ export interface FileRoutesByTo {
   '/admin/runtime-uptime-health': typeof AuthenticatedAdminRuntimeUptimeHealthRoute
   '/admin/sales-pos-health': typeof AuthenticatedAdminSalesPosHealthRoute
   '/admin/security-compliance': typeof AuthenticatedAdminSecurityComplianceRoute
+  '/admin/seguranca-continuidade': typeof AuthenticatedAdminSegurancaContinuidadeRoute
   '/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
   '/admin/support-ticketing-health': typeof AuthenticatedAdminSupportTicketingHealthRoute
   '/admin/talentos-cockpit-health': typeof AuthenticatedAdminTalentosCockpitHealthRoute
@@ -5178,6 +5187,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/runtime-uptime-health': typeof AuthenticatedAdminRuntimeUptimeHealthRoute
   '/_authenticated/admin/sales-pos-health': typeof AuthenticatedAdminSalesPosHealthRoute
   '/_authenticated/admin/security-compliance': typeof AuthenticatedAdminSecurityComplianceRoute
+  '/_authenticated/admin/seguranca-continuidade': typeof AuthenticatedAdminSegurancaContinuidadeRoute
   '/_authenticated/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
   '/_authenticated/admin/support-ticketing-health': typeof AuthenticatedAdminSupportTicketingHealthRoute
   '/_authenticated/admin/talentos-cockpit-health': typeof AuthenticatedAdminTalentosCockpitHealthRoute
@@ -5747,6 +5757,7 @@ export interface FileRouteTypes {
     | '/admin/runtime-uptime-health'
     | '/admin/sales-pos-health'
     | '/admin/security-compliance'
+    | '/admin/seguranca-continuidade'
     | '/admin/sla-compliance'
     | '/admin/support-ticketing-health'
     | '/admin/talentos-cockpit-health'
@@ -6303,6 +6314,7 @@ export interface FileRouteTypes {
     | '/admin/runtime-uptime-health'
     | '/admin/sales-pos-health'
     | '/admin/security-compliance'
+    | '/admin/seguranca-continuidade'
     | '/admin/sla-compliance'
     | '/admin/support-ticketing-health'
     | '/admin/talentos-cockpit-health'
@@ -6872,6 +6884,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/runtime-uptime-health'
     | '/_authenticated/admin/sales-pos-health'
     | '/_authenticated/admin/security-compliance'
+    | '/_authenticated/admin/seguranca-continuidade'
     | '/_authenticated/admin/sla-compliance'
     | '/_authenticated/admin/support-ticketing-health'
     | '/_authenticated/admin/talentos-cockpit-health'
@@ -10077,6 +10090,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSlaComplianceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/seguranca-continuidade': {
+      id: '/_authenticated/admin/seguranca-continuidade'
+      path: '/admin/seguranca-continuidade'
+      fullPath: '/admin/seguranca-continuidade'
+      preLoaderRoute: typeof AuthenticatedAdminSegurancaContinuidadeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/security-compliance': {
       id: '/_authenticated/admin/security-compliance'
       path: '/admin/security-compliance'
@@ -12047,6 +12067,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRuntimeUptimeHealthRoute: typeof AuthenticatedAdminRuntimeUptimeHealthRoute
   AuthenticatedAdminSalesPosHealthRoute: typeof AuthenticatedAdminSalesPosHealthRoute
   AuthenticatedAdminSecurityComplianceRoute: typeof AuthenticatedAdminSecurityComplianceRoute
+  AuthenticatedAdminSegurancaContinuidadeRoute: typeof AuthenticatedAdminSegurancaContinuidadeRoute
   AuthenticatedAdminSlaComplianceRoute: typeof AuthenticatedAdminSlaComplianceRoute
   AuthenticatedAdminSupportTicketingHealthRoute: typeof AuthenticatedAdminSupportTicketingHealthRoute
   AuthenticatedAdminTalentosCockpitHealthRoute: typeof AuthenticatedAdminTalentosCockpitHealthRoute
@@ -12350,6 +12371,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminSalesPosHealthRoute: AuthenticatedAdminSalesPosHealthRoute,
   AuthenticatedAdminSecurityComplianceRoute:
     AuthenticatedAdminSecurityComplianceRoute,
+  AuthenticatedAdminSegurancaContinuidadeRoute:
+    AuthenticatedAdminSegurancaContinuidadeRoute,
   AuthenticatedAdminSlaComplianceRoute: AuthenticatedAdminSlaComplianceRoute,
   AuthenticatedAdminSupportTicketingHealthRoute:
     AuthenticatedAdminSupportTicketingHealthRoute,
