@@ -176,3 +176,57 @@ export const saveRioMedAssistant = createServerFn({ method: "POST" })
     if (error) throw error;
     return { ok: true, assistant: next };
   });
+
+// ============ RIOMED PRODUCTS (catálogo virtual com sync automático) ============
+const productSchema = z.object({
+  id: z.string().uuid().optional(),
+  sku: z.string().optional().nullable(),
+  name: z.string().min(1),
+  description: z.string().optional().nullable(),
+  category: z.string().optional().nullable(),
+  audiences: z.array(z.enum(["paciente", "clinica", "hospital"])).min(1),
+  modality: z.enum(["venta", "alquiler", "ambos"]),
+  price_sale: z.number().nullable().optional(),
+  price_rental_daily: z.number().nullable().optional(),
+  price_rental_monthly: z.number().nullable().optional(),
+  currency: z.string().default("BOB"),
+  image_url: z.string().url().optional().nullable().or(z.literal("")),
+  stock: z.number().int().min(0).default(0),
+  is_active: z.boolean().default(true),
+  display_order: z.number().int().default(0),
+});
+
+export const listRioMedProducts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const companyId = await getRioMedId(context.supabase);
+    if (!companyId) return [];
+    const { data } = await context.supabase
+      .from("riomed_products").select("*").eq("company_id", companyId)
+      .order("display_order").order("name");
+    return data ?? [];
+  });
+
+export const upsertRioMedProduct = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => productSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const companyId = await getRioMedId(context.supabase);
+    if (!companyId) throw new Error("Tenant RioMed não encontrado");
+    const payload: any = { ...data, company_id: companyId };
+    if (payload.image_url === "") payload.image_url = null;
+    const { data: row, error } = data.id
+      ? await context.supabase.from("riomed_products").update(payload).eq("id", data.id).select().single()
+      : await context.supabase.from("riomed_products").insert(payload).select().single();
+    if (error) throw error;
+    return row;
+  });
+
+export const deleteRioMedProduct = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("riomed_products").delete().eq("id", data.id);
+    if (error) throw error;
+    return { ok: true };
+  });
