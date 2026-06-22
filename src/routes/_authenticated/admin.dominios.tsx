@@ -168,7 +168,8 @@ function DomainsCockpitPage() {
                     </a>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
