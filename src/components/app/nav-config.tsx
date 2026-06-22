@@ -532,6 +532,7 @@ export const NAV_GROUPS: NavGroup[] = [
           { to: "/admin/marocas-ops-health", label: "Marocas — Temporada", icon: Building2, superOnly: true },
           { to: "/admin/talentos-cockpit-health", label: "Talentos", icon: Users, superOnly: true },
           { to: "/admin/agenda-resources-health", label: "Agenda — Recursos", icon: Calendar, superOnly: true },
+          { to: "/admin/agenda-operations-health", label: "Agenda — Operações", icon: CalendarClock, superOnly: true },
           { to: "/admin/runtime-uptime-health", label: "Runtime & Uptime", icon: Activity, superOnly: true },
           { to: "/core/testes", label: "Testes", icon: FlaskConical, superOnly: true },
           { to: "/core/bi-ecossistema", label: "BI Ecossistema", icon: BarChart3, superOnly: true },
