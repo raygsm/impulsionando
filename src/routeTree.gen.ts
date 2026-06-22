@@ -421,6 +421,7 @@ import { Route as AuthenticatedAdminCockpitTenantsRouteImport } from './routes/_
 import { Route as AuthenticatedAdminCobrancasRouteImport } from './routes/_authenticated/admin.cobrancas'
 import { Route as AuthenticatedAdminClubeRouteImport } from './routes/_authenticated/admin.clube'
 import { Route as AuthenticatedAdminChurnRiskRouteImport } from './routes/_authenticated/admin.churn-risk'
+import { Route as AuthenticatedAdminChurnRadarRouteImport } from './routes/_authenticated/admin.churn-radar'
 import { Route as AuthenticatedAdminCatalogoMatrizRouteImport } from './routes/_authenticated/admin.catalogo-matriz'
 import { Route as AuthenticatedAdminCatalogIntentsRouteImport } from './routes/_authenticated/admin.catalog-intents'
 import { Route as AuthenticatedAdminCatalogAnalyticsRouteImport } from './routes/_authenticated/admin.catalog-analytics'
@@ -2776,6 +2777,12 @@ const AuthenticatedAdminChurnRiskRoute =
     path: '/admin/churn-risk',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminChurnRadarRoute =
+  AuthenticatedAdminChurnRadarRouteImport.update({
+    id: '/admin/churn-radar',
+    path: '/admin/churn-radar',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminCatalogoMatrizRoute =
   AuthenticatedAdminCatalogoMatrizRouteImport.update({
     id: '/admin/catalogo-matriz',
@@ -3425,6 +3432,7 @@ export interface FileRoutesByFullPath {
   '/admin/catalog-analytics': typeof AuthenticatedAdminCatalogAnalyticsRoute
   '/admin/catalog-intents': typeof AuthenticatedAdminCatalogIntentsRoute
   '/admin/catalogo-matriz': typeof AuthenticatedAdminCatalogoMatrizRoute
+  '/admin/churn-radar': typeof AuthenticatedAdminChurnRadarRoute
   '/admin/churn-risk': typeof AuthenticatedAdminChurnRiskRoute
   '/admin/clube': typeof AuthenticatedAdminClubeRoute
   '/admin/cobrancas': typeof AuthenticatedAdminCobrancasRoute
@@ -3905,6 +3913,7 @@ export interface FileRoutesByTo {
   '/admin/catalog-analytics': typeof AuthenticatedAdminCatalogAnalyticsRoute
   '/admin/catalog-intents': typeof AuthenticatedAdminCatalogIntentsRoute
   '/admin/catalogo-matriz': typeof AuthenticatedAdminCatalogoMatrizRoute
+  '/admin/churn-radar': typeof AuthenticatedAdminChurnRadarRoute
   '/admin/churn-risk': typeof AuthenticatedAdminChurnRiskRoute
   '/admin/clube': typeof AuthenticatedAdminClubeRoute
   '/admin/cobrancas': typeof AuthenticatedAdminCobrancasRoute
@@ -4399,6 +4408,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/catalog-analytics': typeof AuthenticatedAdminCatalogAnalyticsRoute
   '/_authenticated/admin/catalog-intents': typeof AuthenticatedAdminCatalogIntentsRoute
   '/_authenticated/admin/catalogo-matriz': typeof AuthenticatedAdminCatalogoMatrizRoute
+  '/_authenticated/admin/churn-radar': typeof AuthenticatedAdminChurnRadarRoute
   '/_authenticated/admin/churn-risk': typeof AuthenticatedAdminChurnRiskRoute
   '/_authenticated/admin/clube': typeof AuthenticatedAdminClubeRoute
   '/_authenticated/admin/cobrancas': typeof AuthenticatedAdminCobrancasRoute
@@ -4892,6 +4902,7 @@ export interface FileRouteTypes {
     | '/admin/catalog-analytics'
     | '/admin/catalog-intents'
     | '/admin/catalogo-matriz'
+    | '/admin/churn-radar'
     | '/admin/churn-risk'
     | '/admin/clube'
     | '/admin/cobrancas'
@@ -5372,6 +5383,7 @@ export interface FileRouteTypes {
     | '/admin/catalog-analytics'
     | '/admin/catalog-intents'
     | '/admin/catalogo-matriz'
+    | '/admin/churn-radar'
     | '/admin/churn-risk'
     | '/admin/clube'
     | '/admin/cobrancas'
@@ -5865,6 +5877,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/catalog-analytics'
     | '/_authenticated/admin/catalog-intents'
     | '/_authenticated/admin/catalogo-matriz'
+    | '/_authenticated/admin/churn-radar'
     | '/_authenticated/admin/churn-risk'
     | '/_authenticated/admin/clube'
     | '/_authenticated/admin/cobrancas'
@@ -9215,6 +9228,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminChurnRiskRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/churn-radar': {
+      id: '/_authenticated/admin/churn-radar'
+      path: '/admin/churn-radar'
+      fullPath: '/admin/churn-radar'
+      preLoaderRoute: typeof AuthenticatedAdminChurnRadarRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/catalogo-matriz': {
       id: '/_authenticated/admin/catalogo-matriz'
       path: '/admin/catalogo-matriz'
@@ -10432,6 +10452,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCatalogAnalyticsRoute: typeof AuthenticatedAdminCatalogAnalyticsRoute
   AuthenticatedAdminCatalogIntentsRoute: typeof AuthenticatedAdminCatalogIntentsRoute
   AuthenticatedAdminCatalogoMatrizRoute: typeof AuthenticatedAdminCatalogoMatrizRoute
+  AuthenticatedAdminChurnRadarRoute: typeof AuthenticatedAdminChurnRadarRoute
   AuthenticatedAdminChurnRiskRoute: typeof AuthenticatedAdminChurnRiskRoute
   AuthenticatedAdminClubeRoute: typeof AuthenticatedAdminClubeRoute
   AuthenticatedAdminCobrancasRoute: typeof AuthenticatedAdminCobrancasRoute
@@ -10605,6 +10626,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminCatalogAnalyticsRoute,
   AuthenticatedAdminCatalogIntentsRoute: AuthenticatedAdminCatalogIntentsRoute,
   AuthenticatedAdminCatalogoMatrizRoute: AuthenticatedAdminCatalogoMatrizRoute,
+  AuthenticatedAdminChurnRadarRoute: AuthenticatedAdminChurnRadarRoute,
   AuthenticatedAdminChurnRiskRoute: AuthenticatedAdminChurnRiskRoute,
   AuthenticatedAdminClubeRoute: AuthenticatedAdminClubeRoute,
   AuthenticatedAdminCobrancasRoute: AuthenticatedAdminCobrancasRoute,
