@@ -147,6 +147,16 @@ function Page() {
                   {opts?.niches.map((n: any) => <option key={n.id} value={n.id}>{n.name}</option>)}
                 </select>
               </Field>
+              <Field label="País / locale" hint="Define moeda, DDI e fuso padrão do tenant.">
+                <select
+                  className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                  value={form.country_code}
+                  onChange={(e) => set('country_code', e.target.value as 'BR' | 'BO')}
+                >
+                  <option value="BR">Brasil (pt-BR · BRL · +55)</option>
+                  <option value="BO">Bolívia (es-BO · BOB · +591)</option>
+                </select>
+              </Field>
             </div>
           </>
         )}
