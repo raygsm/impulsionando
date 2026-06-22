@@ -618,6 +618,7 @@ import { Route as AuthenticatedAdminClientesRiomedBuscaIaRouteImport } from './r
 import { Route as AuthenticatedAdminClientesRiomedAutomacaoRouteImport } from './routes/_authenticated/admin.clientes.riomed.automacao'
 import { Route as AuthenticatedAdminClientesRiomedAssistenteRouteImport } from './routes/_authenticated/admin.clientes.riomed.assistente'
 import { Route as AuthenticatedAdminClientesRiomedAssistenciaRouteImport } from './routes/_authenticated/admin.clientes.riomed.assistencia'
+import { Route as AuthenticatedAdminClientesRiomedAgentesRouteImport } from './routes/_authenticated/admin.clientes.riomed.agentes'
 import { Route as AuthenticatedCoreClienteIdPaginasPageIdRouteImport } from './routes/_authenticated/core.cliente.$id.paginas.$pageId'
 import { Route as AuthenticatedCoreClienteIdModuloSlugConfigurarRouteImport } from './routes/_authenticated/core.cliente.$id.modulo.$slug.configurar'
 
@@ -4051,6 +4052,12 @@ const AuthenticatedAdminClientesRiomedAssistenciaRoute =
     path: '/assistencia',
     getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
   } as any)
+const AuthenticatedAdminClientesRiomedAgentesRoute =
+  AuthenticatedAdminClientesRiomedAgentesRouteImport.update({
+    id: '/agentes',
+    path: '/agentes',
+    getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
+  } as any)
 const AuthenticatedCoreClienteIdPaginasPageIdRoute =
   AuthenticatedCoreClienteIdPaginasPageIdRouteImport.update({
     id: '/$pageId',
@@ -4645,6 +4652,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/admin/clientes/riomed/agentes': typeof AuthenticatedAdminClientesRiomedAgentesRoute
   '/admin/clientes/riomed/assistencia': typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
   '/admin/clientes/riomed/assistente': typeof AuthenticatedAdminClientesRiomedAssistenteRoute
   '/admin/clientes/riomed/automacao': typeof AuthenticatedAdminClientesRiomedAutomacaoRoute
@@ -5244,6 +5252,7 @@ export interface FileRoutesByTo {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/admin/clientes/riomed/agentes': typeof AuthenticatedAdminClientesRiomedAgentesRoute
   '/admin/clientes/riomed/assistencia': typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
   '/admin/clientes/riomed/assistente': typeof AuthenticatedAdminClientesRiomedAssistenteRoute
   '/admin/clientes/riomed/automacao': typeof AuthenticatedAdminClientesRiomedAutomacaoRoute
@@ -5858,6 +5867,7 @@ export interface FileRoutesById {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/_authenticated/admin/clientes/riomed/agentes': typeof AuthenticatedAdminClientesRiomedAgentesRoute
   '/_authenticated/admin/clientes/riomed/assistencia': typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
   '/_authenticated/admin/clientes/riomed/assistente': typeof AuthenticatedAdminClientesRiomedAssistenteRoute
   '/_authenticated/admin/clientes/riomed/automacao': typeof AuthenticatedAdminClientesRiomedAutomacaoRoute
@@ -6471,6 +6481,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/admin/clientes/riomed/agentes'
     | '/admin/clientes/riomed/assistencia'
     | '/admin/clientes/riomed/assistente'
     | '/admin/clientes/riomed/automacao'
@@ -7070,6 +7081,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/admin/clientes/riomed/agentes'
     | '/admin/clientes/riomed/assistencia'
     | '/admin/clientes/riomed/assistente'
     | '/admin/clientes/riomed/automacao'
@@ -7683,6 +7695,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/_authenticated/admin/clientes/riomed/agentes'
     | '/_authenticated/admin/clientes/riomed/assistencia'
     | '/_authenticated/admin/clientes/riomed/assistente'
     | '/_authenticated/admin/clientes/riomed/automacao'
@@ -12138,6 +12151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientesRiomedAssistenciaRouteImport
       parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
     }
+    '/_authenticated/admin/clientes/riomed/agentes': {
+      id: '/_authenticated/admin/clientes/riomed/agentes'
+      path: '/agentes'
+      fullPath: '/admin/clientes/riomed/agentes'
+      preLoaderRoute: typeof AuthenticatedAdminClientesRiomedAgentesRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
+    }
     '/_authenticated/core/cliente/$id/paginas/$pageId': {
       id: '/_authenticated/core/cliente/$id/paginas/$pageId'
       path: '/$pageId'
@@ -12770,6 +12790,7 @@ const AuthenticatedTorreRestaurantesDemoRouteWithChildren =
   )
 
 interface AuthenticatedAdminClientesRiomedRouteChildren {
+  AuthenticatedAdminClientesRiomedAgentesRoute: typeof AuthenticatedAdminClientesRiomedAgentesRoute
   AuthenticatedAdminClientesRiomedAssistenciaRoute: typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
   AuthenticatedAdminClientesRiomedAssistenteRoute: typeof AuthenticatedAdminClientesRiomedAssistenteRoute
   AuthenticatedAdminClientesRiomedAutomacaoRoute: typeof AuthenticatedAdminClientesRiomedAutomacaoRoute
@@ -12798,6 +12819,8 @@ interface AuthenticatedAdminClientesRiomedRouteChildren {
 
 const AuthenticatedAdminClientesRiomedRouteChildren: AuthenticatedAdminClientesRiomedRouteChildren =
   {
+    AuthenticatedAdminClientesRiomedAgentesRoute:
+      AuthenticatedAdminClientesRiomedAgentesRoute,
     AuthenticatedAdminClientesRiomedAssistenciaRoute:
       AuthenticatedAdminClientesRiomedAssistenciaRoute,
     AuthenticatedAdminClientesRiomedAssistenteRoute:
@@ -13811,13 +13834,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
