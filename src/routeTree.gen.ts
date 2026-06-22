@@ -423,6 +423,7 @@ import { Route as AuthenticatedAdminMarketplaceB2bHealthRouteImport } from './ro
 import { Route as AuthenticatedAdminMarketingHealthRouteImport } from './routes/_authenticated/admin.marketing-health'
 import { Route as AuthenticatedAdminLoyaltyClubeHealthRouteImport } from './routes/_authenticated/admin.loyalty-clube-health'
 import { Route as AuthenticatedAdminInventoryHealthRouteImport } from './routes/_authenticated/admin.inventory-health'
+import { Route as AuthenticatedAdminIntegrationsAutomationHealthRouteImport } from './routes/_authenticated/admin.integrations-automation-health'
 import { Route as AuthenticatedAdminInboxUnificadaRouteImport } from './routes/_authenticated/admin.inbox-unificada'
 import { Route as AuthenticatedAdminInboxEventosRouteImport } from './routes/_authenticated/admin.inbox-eventos'
 import { Route as AuthenticatedAdminImobiliariaRouteImport } from './routes/_authenticated/admin.imobiliaria'
@@ -2834,6 +2835,12 @@ const AuthenticatedAdminInventoryHealthRoute =
     path: '/admin/inventory-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminIntegrationsAutomationHealthRoute =
+  AuthenticatedAdminIntegrationsAutomationHealthRouteImport.update({
+    id: '/admin/integrations-automation-health',
+    path: '/admin/integrations-automation-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminInboxUnificadaRoute =
   AuthenticatedAdminInboxUnificadaRouteImport.update({
     id: '/admin/inbox-unificada',
@@ -3783,6 +3790,7 @@ export interface FileRoutesByFullPath {
   '/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/admin/inbox-eventos': typeof AuthenticatedAdminInboxEventosRoute
   '/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
+  '/admin/integrations-automation-health': typeof AuthenticatedAdminIntegrationsAutomationHealthRoute
   '/admin/inventory-health': typeof AuthenticatedAdminInventoryHealthRoute
   '/admin/loyalty-clube-health': typeof AuthenticatedAdminLoyaltyClubeHealthRoute
   '/admin/marketing-health': typeof AuthenticatedAdminMarketingHealthRoute
@@ -4308,6 +4316,7 @@ export interface FileRoutesByTo {
   '/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/admin/inbox-eventos': typeof AuthenticatedAdminInboxEventosRoute
   '/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
+  '/admin/integrations-automation-health': typeof AuthenticatedAdminIntegrationsAutomationHealthRoute
   '/admin/inventory-health': typeof AuthenticatedAdminInventoryHealthRoute
   '/admin/loyalty-clube-health': typeof AuthenticatedAdminLoyaltyClubeHealthRoute
   '/admin/marketing-health': typeof AuthenticatedAdminMarketingHealthRoute
@@ -4847,6 +4856,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/_authenticated/admin/inbox-eventos': typeof AuthenticatedAdminInboxEventosRoute
   '/_authenticated/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
+  '/_authenticated/admin/integrations-automation-health': typeof AuthenticatedAdminIntegrationsAutomationHealthRoute
   '/_authenticated/admin/inventory-health': typeof AuthenticatedAdminInventoryHealthRoute
   '/_authenticated/admin/loyalty-clube-health': typeof AuthenticatedAdminLoyaltyClubeHealthRoute
   '/_authenticated/admin/marketing-health': typeof AuthenticatedAdminMarketingHealthRoute
@@ -5385,6 +5395,7 @@ export interface FileRouteTypes {
     | '/admin/imobiliaria'
     | '/admin/inbox-eventos'
     | '/admin/inbox-unificada'
+    | '/admin/integrations-automation-health'
     | '/admin/inventory-health'
     | '/admin/loyalty-clube-health'
     | '/admin/marketing-health'
@@ -5910,6 +5921,7 @@ export interface FileRouteTypes {
     | '/admin/imobiliaria'
     | '/admin/inbox-eventos'
     | '/admin/inbox-unificada'
+    | '/admin/integrations-automation-health'
     | '/admin/inventory-health'
     | '/admin/loyalty-clube-health'
     | '/admin/marketing-health'
@@ -6448,6 +6460,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/imobiliaria'
     | '/_authenticated/admin/inbox-eventos'
     | '/_authenticated/admin/inbox-unificada'
+    | '/_authenticated/admin/integrations-automation-health'
     | '/_authenticated/admin/inventory-health'
     | '/_authenticated/admin/loyalty-clube-health'
     | '/_authenticated/admin/marketing-health'
@@ -9814,6 +9827,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminInventoryHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/integrations-automation-health': {
+      id: '/_authenticated/admin/integrations-automation-health'
+      path: '/admin/integrations-automation-health'
+      fullPath: '/admin/integrations-automation-health'
+      preLoaderRoute: typeof AuthenticatedAdminIntegrationsAutomationHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/inbox-unificada': {
       id: '/_authenticated/admin/inbox-unificada'
       path: '/admin/inbox-unificada'
@@ -11375,6 +11395,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminImobiliariaRoute: typeof AuthenticatedAdminImobiliariaRoute
   AuthenticatedAdminInboxEventosRoute: typeof AuthenticatedAdminInboxEventosRoute
   AuthenticatedAdminInboxUnificadaRoute: typeof AuthenticatedAdminInboxUnificadaRoute
+  AuthenticatedAdminIntegrationsAutomationHealthRoute: typeof AuthenticatedAdminIntegrationsAutomationHealthRoute
   AuthenticatedAdminInventoryHealthRoute: typeof AuthenticatedAdminInventoryHealthRoute
   AuthenticatedAdminLoyaltyClubeHealthRoute: typeof AuthenticatedAdminLoyaltyClubeHealthRoute
   AuthenticatedAdminMarketingHealthRoute: typeof AuthenticatedAdminMarketingHealthRoute
@@ -11610,6 +11631,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminImobiliariaRoute: AuthenticatedAdminImobiliariaRoute,
   AuthenticatedAdminInboxEventosRoute: AuthenticatedAdminInboxEventosRoute,
   AuthenticatedAdminInboxUnificadaRoute: AuthenticatedAdminInboxUnificadaRoute,
+  AuthenticatedAdminIntegrationsAutomationHealthRoute:
+    AuthenticatedAdminIntegrationsAutomationHealthRoute,
   AuthenticatedAdminInventoryHealthRoute:
     AuthenticatedAdminInventoryHealthRoute,
   AuthenticatedAdminLoyaltyClubeHealthRoute:
