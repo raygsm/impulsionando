@@ -3765,6 +3765,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "brewery_blasts_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brewery_brands_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "brewery_blasts_campaign_id_fkey"
             columns: ["campaign_id"]
             isOneToOne: false
@@ -3922,6 +3929,13 @@ export type Database = {
             referencedRelation: "brewery_brands"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "brewery_campaigns_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brewery_brands_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       brewery_lead_preferences: {
@@ -3979,6 +3993,13 @@ export type Database = {
             columns: ["brand_id"]
             isOneToOne: false
             referencedRelation: "brewery_brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brewery_lead_preferences_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brewery_brands_public"
             referencedColumns: ["id"]
           },
         ]
@@ -4041,6 +4062,13 @@ export type Database = {
             columns: ["brand_id"]
             isOneToOne: false
             referencedRelation: "brewery_brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brewery_pdv_links_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brewery_brands_public"
             referencedColumns: ["id"]
           },
           {
@@ -4133,6 +4161,13 @@ export type Database = {
             referencedRelation: "brewery_brands"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "brewery_products_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brewery_brands_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       brewery_sellouts: {
@@ -4196,6 +4231,13 @@ export type Database = {
             columns: ["brand_id"]
             isOneToOne: false
             referencedRelation: "brewery_brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brewery_sellouts_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brewery_brands_public"
             referencedColumns: ["id"]
           },
           {
@@ -4270,6 +4312,13 @@ export type Database = {
             columns: ["brand_id"]
             isOneToOne: false
             referencedRelation: "brewery_brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brewery_tastings_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brewery_brands_public"
             referencedColumns: ["id"]
           },
           {
@@ -21969,6 +22018,160 @@ export type Database = {
       }
     }
     Views: {
+      brewery_brands_public: {
+        Row: {
+          bio: string | null
+          brewer_name: string | null
+          city: string | null
+          company_id: string | null
+          cover_url: string | null
+          created_at: string | null
+          founded_year: number | null
+          id: string | null
+          instagram: string | null
+          logo_url: string | null
+          name: string | null
+          slug: string | null
+          state: string | null
+          updated_at: string | null
+          website_url: string | null
+        }
+        Insert: {
+          bio?: string | null
+          brewer_name?: string | null
+          city?: string | null
+          company_id?: string | null
+          cover_url?: string | null
+          created_at?: string | null
+          founded_year?: number | null
+          id?: string | null
+          instagram?: string | null
+          logo_url?: string | null
+          name?: string | null
+          slug?: string | null
+          state?: string | null
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          bio?: string | null
+          brewer_name?: string | null
+          city?: string | null
+          company_id?: string | null
+          cover_url?: string | null
+          created_at?: string | null
+          founded_year?: number | null
+          id?: string | null
+          instagram?: string | null
+          logo_url?: string | null
+          name?: string | null
+          slug?: string | null
+          state?: string | null
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brewery_brands_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brewery_brands_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "brewery_brands_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "brewery_brands_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      chrismed_service_offerings_public: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          duration_minutes: number | null
+          id: string | null
+          modality: string | null
+          name: string | null
+          price_cents: number | null
+          slug: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          duration_minutes?: number | null
+          id?: string | null
+          modality?: string | null
+          name?: string | null
+          price_cents?: number | null
+          slug?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          duration_minutes?: number | null
+          id?: string | null
+          modality?: string | null
+          name?: string | null
+          price_cents?: number | null
+          slug?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chrismed_service_offerings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chrismed_service_offerings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "chrismed_service_offerings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "chrismed_service_offerings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       core_monetization_dashboard: {
         Row: {
           approved_count: number | null
