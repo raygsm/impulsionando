@@ -167,5 +167,4 @@ export const getEcosystemMarketplaceHealth = createServerFn({ method: "POST" })
     };
   });
 
-type _Fix = { communicationAvg: number };
-void (null as unknown as _Fix);
+
