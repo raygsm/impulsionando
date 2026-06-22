@@ -384,6 +384,7 @@ import { Route as AuthenticatedAffiliatesCoproducersRouteImport } from './routes
 import { Route as AuthenticatedAffiliatesCommissionsRouteImport } from './routes/_authenticated/affiliates.commissions'
 import { Route as AuthenticatedAffiliatesBumpsRouteImport } from './routes/_authenticated/affiliates.bumps'
 import { Route as AuthenticatedAffiliatesAffiliatesRouteImport } from './routes/_authenticated/affiliates.affiliates'
+import { Route as AuthenticatedAdminWhitelabelHealthRouteImport } from './routes/_authenticated/admin.whitelabel-health'
 import { Route as AuthenticatedAdminWhatsappMetricsRouteImport } from './routes/_authenticated/admin.whatsapp-metrics'
 import { Route as AuthenticatedAdminVendorPerformanceRouteImport } from './routes/_authenticated/admin.vendor-performance'
 import { Route as AuthenticatedAdminUptimeRouteImport } from './routes/_authenticated/admin.uptime'
@@ -2583,6 +2584,12 @@ const AuthenticatedAffiliatesAffiliatesRoute =
     path: '/affiliates',
     getParentRoute: () => AuthenticatedAffiliatesRoute,
   } as any)
+const AuthenticatedAdminWhitelabelHealthRoute =
+  AuthenticatedAdminWhitelabelHealthRouteImport.update({
+    id: '/admin/whitelabel-health',
+    path: '/admin/whitelabel-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminWhatsappMetricsRoute =
   AuthenticatedAdminWhatsappMetricsRouteImport.update({
     id: '/admin/whatsapp-metrics',
@@ -3686,6 +3693,7 @@ export interface FileRoutesByFullPath {
   '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/admin/vendor-performance': typeof AuthenticatedAdminVendorPerformanceRoute
   '/admin/whatsapp-metrics': typeof AuthenticatedAdminWhatsappMetricsRoute
+  '/admin/whitelabel-health': typeof AuthenticatedAdminWhitelabelHealthRoute
   '/affiliates/affiliates': typeof AuthenticatedAffiliatesAffiliatesRoute
   '/affiliates/bumps': typeof AuthenticatedAffiliatesBumpsRoute
   '/affiliates/commissions': typeof AuthenticatedAffiliatesCommissionsRoute
@@ -4194,6 +4202,7 @@ export interface FileRoutesByTo {
   '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/admin/vendor-performance': typeof AuthenticatedAdminVendorPerformanceRoute
   '/admin/whatsapp-metrics': typeof AuthenticatedAdminWhatsappMetricsRoute
+  '/admin/whitelabel-health': typeof AuthenticatedAdminWhitelabelHealthRoute
   '/affiliates/affiliates': typeof AuthenticatedAffiliatesAffiliatesRoute
   '/affiliates/bumps': typeof AuthenticatedAffiliatesBumpsRoute
   '/affiliates/commissions': typeof AuthenticatedAffiliatesCommissionsRoute
@@ -4716,6 +4725,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/_authenticated/admin/vendor-performance': typeof AuthenticatedAdminVendorPerformanceRoute
   '/_authenticated/admin/whatsapp-metrics': typeof AuthenticatedAdminWhatsappMetricsRoute
+  '/_authenticated/admin/whitelabel-health': typeof AuthenticatedAdminWhitelabelHealthRoute
   '/_authenticated/affiliates/affiliates': typeof AuthenticatedAffiliatesAffiliatesRoute
   '/_authenticated/affiliates/bumps': typeof AuthenticatedAffiliatesBumpsRoute
   '/_authenticated/affiliates/commissions': typeof AuthenticatedAffiliatesCommissionsRoute
@@ -5237,6 +5247,7 @@ export interface FileRouteTypes {
     | '/admin/uptime'
     | '/admin/vendor-performance'
     | '/admin/whatsapp-metrics'
+    | '/admin/whitelabel-health'
     | '/affiliates/affiliates'
     | '/affiliates/bumps'
     | '/affiliates/commissions'
@@ -5745,6 +5756,7 @@ export interface FileRouteTypes {
     | '/admin/uptime'
     | '/admin/vendor-performance'
     | '/admin/whatsapp-metrics'
+    | '/admin/whitelabel-health'
     | '/affiliates/affiliates'
     | '/affiliates/bumps'
     | '/affiliates/commissions'
@@ -6266,6 +6278,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/uptime'
     | '/_authenticated/admin/vendor-performance'
     | '/_authenticated/admin/whatsapp-metrics'
+    | '/_authenticated/admin/whitelabel-health'
     | '/_authenticated/affiliates/affiliates'
     | '/_authenticated/affiliates/bumps'
     | '/_authenticated/affiliates/commissions'
@@ -9320,6 +9333,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAffiliatesAffiliatesRouteImport
       parentRoute: typeof AuthenticatedAffiliatesRoute
     }
+    '/_authenticated/admin/whitelabel-health': {
+      id: '/_authenticated/admin/whitelabel-health'
+      path: '/admin/whitelabel-health'
+      fullPath: '/admin/whitelabel-health'
+      preLoaderRoute: typeof AuthenticatedAdminWhitelabelHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/whatsapp-metrics': {
       id: '/_authenticated/admin/whatsapp-metrics'
       path: '/admin/whatsapp-metrics'
@@ -11057,6 +11077,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminUptimeRoute: typeof AuthenticatedAdminUptimeRoute
   AuthenticatedAdminVendorPerformanceRoute: typeof AuthenticatedAdminVendorPerformanceRoute
   AuthenticatedAdminWhatsappMetricsRoute: typeof AuthenticatedAdminWhatsappMetricsRoute
+  AuthenticatedAdminWhitelabelHealthRoute: typeof AuthenticatedAdminWhitelabelHealthRoute
   AuthenticatedBarMarketplaceRoute: typeof AuthenticatedBarMarketplaceRouteWithChildren
   AuthenticatedCheckoutPlanoRoute: typeof AuthenticatedCheckoutPlanoRoute
   AuthenticatedChrismedAdminRoute: typeof AuthenticatedChrismedAdminRoute
@@ -11283,6 +11304,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminVendorPerformanceRoute,
   AuthenticatedAdminWhatsappMetricsRoute:
     AuthenticatedAdminWhatsappMetricsRoute,
+  AuthenticatedAdminWhitelabelHealthRoute:
+    AuthenticatedAdminWhitelabelHealthRoute,
   AuthenticatedBarMarketplaceRoute:
     AuthenticatedBarMarketplaceRouteWithChildren,
   AuthenticatedCheckoutPlanoRoute: AuthenticatedCheckoutPlanoRoute,

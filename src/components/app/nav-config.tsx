@@ -498,6 +498,7 @@ export const NAV_GROUPS: NavGroup[] = [
           { to: "/admin/marketplace-b2b-health", label: "Marketplace B2B", icon: Store, superOnly: true },
           { to: "/admin/trial-demo-health", label: "Trial & Demo Gov.", icon: FlaskConical, superOnly: true },
           { to: "/admin/ai-automation-health", label: "AI & Automation", icon: Bot, superOnly: true },
+          { to: "/admin/whitelabel-health", label: "White-Label & Vitrine", icon: Globe, superOnly: true },
           { to: "/core/testes", label: "Testes", icon: FlaskConical, superOnly: true },
           { to: "/core/bi-ecossistema", label: "BI Ecossistema", icon: BarChart3, superOnly: true },
         ],
