@@ -56,10 +56,12 @@ function ProductsPage() {
   const saveFn = useServerFn(upsertRioMedProduct);
   const delFn = useServerFn(deleteRioMedProduct);
 
-  const { data: products = [], isLoading } = useQuery({
+  const { data: productsRaw = [], isLoading } = useQuery({
     queryKey: ["riomed-products"],
     queryFn: () => listFn(),
   });
+  const products = productsRaw as unknown as Product[];
+
 
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<Product>(empty);
