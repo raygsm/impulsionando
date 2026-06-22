@@ -114,7 +114,7 @@ export const runRiomedEmbeddingJobs = createServerFn({ method: "POST" })
           source_hash: hash,
           model: EMBEDDING_MODEL,
           dims: EMBEDDING_DIMS,
-          embedding: toVectorLiteral(vec) as unknown as number[],
+          embedding: toVectorLiteral(vec) as unknown as string,
           metadata: { sku: product.sku, name: product.name },
         }, { onConflict: "product_id,variant_id,kind,source_hash", ignoreDuplicates: false });
 
