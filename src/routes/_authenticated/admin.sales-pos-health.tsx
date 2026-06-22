@@ -94,29 +94,28 @@ function Page() {
           <CardContent><div className="text-2xl font-bold">{brl(data.orders.avgTicket)}</div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Pagamentos</CardTitle></CardHeader>
           <CardContent><div className="text-2xl font-bold">{brl(data.payments.amount)}</div>
-            <p className="text-xs text-muted-foreground">{fmt(data.payments.paid)}/{fmt(data.payments.total)} ok</p></CardContent></Card>
+            <p className="text-xs text-muted-foreground">{fmt(data.payments.total)} registros</p></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Caixas abertos</CardTitle></CardHeader>
           <CardContent><div className="text-2xl font-bold">{fmt(data.cash.open)}<span className="text-sm text-muted-foreground">/{fmt(data.cash.total)}</span></div>
             <p className="text-xs text-muted-foreground">{fmt(data.cash.closed)} fechados</p></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Diferença líquida</CardTitle></CardHeader>
           <CardContent><div className="text-2xl font-bold">{brl(data.cash.differenceSum)}</div>
             <p className="text-xs text-muted-foreground">abs. {brl(data.cash.differenceAbs)}</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Canais</CardTitle></CardHeader>
-          <CardContent><div className="text-2xl font-bold">{fmt(data.channels.length)}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Status (pedidos)</CardTitle></CardHeader>
+          <CardContent><div className="text-2xl font-bold">{fmt(data.orders.byStatus.length)}</div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Métodos</CardTitle></CardHeader>
           <CardContent><div className="text-2xl font-bold">{fmt(data.payments.byMethod.length)}</div></CardContent></Card>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card><CardHeader><CardTitle className="text-sm">Pedidos por Canal</CardTitle></CardHeader>
+        <Card><CardHeader><CardTitle className="text-sm">Pedidos por Status</CardTitle></CardHeader>
           <CardContent>
             <table className="w-full text-sm">
               <tbody>
-                {data.channels.map((r: any) => (
-                  <tr key={r.channel} className="border-t">
-                    <td className="py-1">{r.channel}</td>
+                {data.orders.byStatus.map((r: any) => (
+                  <tr key={r.status} className="border-t">
+                    <td className="py-1">{r.status}</td>
                     <td className="text-right">{fmt(r.count)}</td>
-                    <td className="text-right text-muted-foreground">{brl(r.total)}</td>
                   </tr>
                 ))}
               </tbody>
