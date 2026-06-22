@@ -397,6 +397,7 @@ import { Route as AuthenticatedAdminTenantLifecycleRouteImport } from './routes/
 import { Route as AuthenticatedAdminTenantIdentityHealthRouteImport } from './routes/_authenticated/admin.tenant-identity-health'
 import { Route as AuthenticatedAdminTenant360RouteImport } from './routes/_authenticated/admin.tenant-360'
 import { Route as AuthenticatedAdminTaxComplianceRouteImport } from './routes/_authenticated/admin.tax-compliance'
+import { Route as AuthenticatedAdminTalentosCockpitHealthRouteImport } from './routes/_authenticated/admin.talentos-cockpit-health'
 import { Route as AuthenticatedAdminSupportTicketingHealthRouteImport } from './routes/_authenticated/admin.support-ticketing-health'
 import { Route as AuthenticatedAdminSlaComplianceRouteImport } from './routes/_authenticated/admin.sla-compliance'
 import { Route as AuthenticatedAdminSecurityComplianceRouteImport } from './routes/_authenticated/admin.security-compliance'
@@ -2694,6 +2695,12 @@ const AuthenticatedAdminTaxComplianceRoute =
     path: '/admin/tax-compliance',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminTalentosCockpitHealthRoute =
+  AuthenticatedAdminTalentosCockpitHealthRouteImport.update({
+    id: '/admin/talentos-cockpit-health',
+    path: '/admin/talentos-cockpit-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminSupportTicketingHealthRoute =
   AuthenticatedAdminSupportTicketingHealthRouteImport.update({
     id: '/admin/support-ticketing-health',
@@ -3937,6 +3944,7 @@ export interface FileRoutesByFullPath {
   '/admin/security-compliance': typeof AuthenticatedAdminSecurityComplianceRoute
   '/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
   '/admin/support-ticketing-health': typeof AuthenticatedAdminSupportTicketingHealthRoute
+  '/admin/talentos-cockpit-health': typeof AuthenticatedAdminTalentosCockpitHealthRoute
   '/admin/tax-compliance': typeof AuthenticatedAdminTaxComplianceRoute
   '/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/admin/tenant-identity-health': typeof AuthenticatedAdminTenantIdentityHealthRoute
@@ -4478,6 +4486,7 @@ export interface FileRoutesByTo {
   '/admin/security-compliance': typeof AuthenticatedAdminSecurityComplianceRoute
   '/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
   '/admin/support-ticketing-health': typeof AuthenticatedAdminSupportTicketingHealthRoute
+  '/admin/talentos-cockpit-health': typeof AuthenticatedAdminTalentosCockpitHealthRoute
   '/admin/tax-compliance': typeof AuthenticatedAdminTaxComplianceRoute
   '/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/admin/tenant-identity-health': typeof AuthenticatedAdminTenantIdentityHealthRoute
@@ -5033,6 +5042,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/security-compliance': typeof AuthenticatedAdminSecurityComplianceRoute
   '/_authenticated/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
   '/_authenticated/admin/support-ticketing-health': typeof AuthenticatedAdminSupportTicketingHealthRoute
+  '/_authenticated/admin/talentos-cockpit-health': typeof AuthenticatedAdminTalentosCockpitHealthRoute
   '/_authenticated/admin/tax-compliance': typeof AuthenticatedAdminTaxComplianceRoute
   '/_authenticated/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/_authenticated/admin/tenant-identity-health': typeof AuthenticatedAdminTenantIdentityHealthRoute
@@ -5587,6 +5597,7 @@ export interface FileRouteTypes {
     | '/admin/security-compliance'
     | '/admin/sla-compliance'
     | '/admin/support-ticketing-health'
+    | '/admin/talentos-cockpit-health'
     | '/admin/tax-compliance'
     | '/admin/tenant-360'
     | '/admin/tenant-identity-health'
@@ -6128,6 +6139,7 @@ export interface FileRouteTypes {
     | '/admin/security-compliance'
     | '/admin/sla-compliance'
     | '/admin/support-ticketing-health'
+    | '/admin/talentos-cockpit-health'
     | '/admin/tax-compliance'
     | '/admin/tenant-360'
     | '/admin/tenant-identity-health'
@@ -6682,6 +6694,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/security-compliance'
     | '/_authenticated/admin/sla-compliance'
     | '/_authenticated/admin/support-ticketing-health'
+    | '/_authenticated/admin/talentos-cockpit-health'
     | '/_authenticated/admin/tax-compliance'
     | '/_authenticated/admin/tenant-360'
     | '/_authenticated/admin/tenant-identity-health'
@@ -9840,6 +9853,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTaxComplianceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/talentos-cockpit-health': {
+      id: '/_authenticated/admin/talentos-cockpit-health'
+      path: '/admin/talentos-cockpit-health'
+      fullPath: '/admin/talentos-cockpit-health'
+      preLoaderRoute: typeof AuthenticatedAdminTalentosCockpitHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/support-ticketing-health': {
       id: '/_authenticated/admin/support-ticketing-health'
       path: '/admin/support-ticketing-health'
@@ -11737,6 +11757,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminSecurityComplianceRoute: typeof AuthenticatedAdminSecurityComplianceRoute
   AuthenticatedAdminSlaComplianceRoute: typeof AuthenticatedAdminSlaComplianceRoute
   AuthenticatedAdminSupportTicketingHealthRoute: typeof AuthenticatedAdminSupportTicketingHealthRoute
+  AuthenticatedAdminTalentosCockpitHealthRoute: typeof AuthenticatedAdminTalentosCockpitHealthRoute
   AuthenticatedAdminTaxComplianceRoute: typeof AuthenticatedAdminTaxComplianceRoute
   AuthenticatedAdminTenant360Route: typeof AuthenticatedAdminTenant360Route
   AuthenticatedAdminTenantIdentityHealthRoute: typeof AuthenticatedAdminTenantIdentityHealthRoute
@@ -12019,6 +12040,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminSlaComplianceRoute: AuthenticatedAdminSlaComplianceRoute,
   AuthenticatedAdminSupportTicketingHealthRoute:
     AuthenticatedAdminSupportTicketingHealthRoute,
+  AuthenticatedAdminTalentosCockpitHealthRoute:
+    AuthenticatedAdminTalentosCockpitHealthRoute,
   AuthenticatedAdminTaxComplianceRoute: AuthenticatedAdminTaxComplianceRoute,
   AuthenticatedAdminTenant360Route: AuthenticatedAdminTenant360Route,
   AuthenticatedAdminTenantIdentityHealthRoute:
