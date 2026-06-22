@@ -488,6 +488,7 @@ import { Route as AuthenticatedAdminDocumentsFilesHealthRouteImport } from './ro
 import { Route as AuthenticatedAdminDeployStatusRouteImport } from './routes/_authenticated/admin.deploy-status'
 import { Route as AuthenticatedAdminDataQualityRouteImport } from './routes/_authenticated/admin.data-quality'
 import { Route as AuthenticatedAdminCustomerSuccessRouteImport } from './routes/_authenticated/admin.customer-success'
+import { Route as AuthenticatedAdminCronRegistryRouteImport } from './routes/_authenticated/admin.cron-registry'
 import { Route as AuthenticatedAdminCrmHealthRouteImport } from './routes/_authenticated/admin.crm-health'
 import { Route as AuthenticatedAdminCrmFunnelHealthRouteImport } from './routes/_authenticated/admin.crm-funnel-health'
 import { Route as AuthenticatedAdminCredentialsVaultRouteImport } from './routes/_authenticated/admin.credentials-vault'
@@ -3293,6 +3294,12 @@ const AuthenticatedAdminCustomerSuccessRoute =
     path: '/admin/customer-success',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminCronRegistryRoute =
+  AuthenticatedAdminCronRegistryRouteImport.update({
+    id: '/admin/cron-registry',
+    path: '/admin/cron-registry',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminCrmHealthRoute =
   AuthenticatedAdminCrmHealthRouteImport.update({
     id: '/admin/crm-health',
@@ -4363,6 +4370,7 @@ export interface FileRoutesByFullPath {
   '/admin/credentials-vault': typeof AuthenticatedAdminCredentialsVaultRoute
   '/admin/crm-funnel-health': typeof AuthenticatedAdminCrmFunnelHealthRoute
   '/admin/crm-health': typeof AuthenticatedAdminCrmHealthRoute
+  '/admin/cron-registry': typeof AuthenticatedAdminCronRegistryRoute
   '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
   '/admin/deploy-status': typeof AuthenticatedAdminDeployStatusRoute
@@ -4972,6 +4980,7 @@ export interface FileRoutesByTo {
   '/admin/credentials-vault': typeof AuthenticatedAdminCredentialsVaultRoute
   '/admin/crm-funnel-health': typeof AuthenticatedAdminCrmFunnelHealthRoute
   '/admin/crm-health': typeof AuthenticatedAdminCrmHealthRoute
+  '/admin/cron-registry': typeof AuthenticatedAdminCronRegistryRoute
   '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
   '/admin/deploy-status': typeof AuthenticatedAdminDeployStatusRoute
@@ -5596,6 +5605,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/credentials-vault': typeof AuthenticatedAdminCredentialsVaultRoute
   '/_authenticated/admin/crm-funnel-health': typeof AuthenticatedAdminCrmFunnelHealthRoute
   '/_authenticated/admin/crm-health': typeof AuthenticatedAdminCrmHealthRoute
+  '/_authenticated/admin/cron-registry': typeof AuthenticatedAdminCronRegistryRoute
   '/_authenticated/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/_authenticated/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
   '/_authenticated/admin/deploy-status': typeof AuthenticatedAdminDeployStatusRoute
@@ -6219,6 +6229,7 @@ export interface FileRouteTypes {
     | '/admin/credentials-vault'
     | '/admin/crm-funnel-health'
     | '/admin/crm-health'
+    | '/admin/cron-registry'
     | '/admin/customer-success'
     | '/admin/data-quality'
     | '/admin/deploy-status'
@@ -6828,6 +6839,7 @@ export interface FileRouteTypes {
     | '/admin/credentials-vault'
     | '/admin/crm-funnel-health'
     | '/admin/crm-health'
+    | '/admin/cron-registry'
     | '/admin/customer-success'
     | '/admin/data-quality'
     | '/admin/deploy-status'
@@ -7451,6 +7463,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/credentials-vault'
     | '/_authenticated/admin/crm-funnel-health'
     | '/_authenticated/admin/crm-health'
+    | '/_authenticated/admin/cron-registry'
     | '/_authenticated/admin/customer-success'
     | '/_authenticated/admin/data-quality'
     | '/_authenticated/admin/deploy-status'
@@ -11358,6 +11371,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCustomerSuccessRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/cron-registry': {
+      id: '/_authenticated/admin/cron-registry'
+      path: '/admin/cron-registry'
+      fullPath: '/admin/cron-registry'
+      preLoaderRoute: typeof AuthenticatedAdminCronRegistryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/crm-health': {
       id: '/_authenticated/admin/crm-health'
       path: '/admin/crm-health'
@@ -13163,6 +13183,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCredentialsVaultRoute: typeof AuthenticatedAdminCredentialsVaultRoute
   AuthenticatedAdminCrmFunnelHealthRoute: typeof AuthenticatedAdminCrmFunnelHealthRoute
   AuthenticatedAdminCrmHealthRoute: typeof AuthenticatedAdminCrmHealthRoute
+  AuthenticatedAdminCronRegistryRoute: typeof AuthenticatedAdminCronRegistryRoute
   AuthenticatedAdminCustomerSuccessRoute: typeof AuthenticatedAdminCustomerSuccessRoute
   AuthenticatedAdminDataQualityRoute: typeof AuthenticatedAdminDataQualityRoute
   AuthenticatedAdminDeployStatusRoute: typeof AuthenticatedAdminDeployStatusRoute
@@ -13437,6 +13458,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminCrmFunnelHealthRoute:
     AuthenticatedAdminCrmFunnelHealthRoute,
   AuthenticatedAdminCrmHealthRoute: AuthenticatedAdminCrmHealthRoute,
+  AuthenticatedAdminCronRegistryRoute: AuthenticatedAdminCronRegistryRoute,
   AuthenticatedAdminCustomerSuccessRoute:
     AuthenticatedAdminCustomerSuccessRoute,
   AuthenticatedAdminDataQualityRoute: AuthenticatedAdminDataQualityRoute,

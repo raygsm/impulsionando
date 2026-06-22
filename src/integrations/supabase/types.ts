@@ -27595,6 +27595,20 @@ export type Database = {
           membership_id: string
         }[]
       }
+      core_list_cron_jobs: {
+        Args: never
+        Returns: {
+          active: boolean
+          bad_24h: number
+          jobid: number
+          jobname: string
+          last_run: string
+          last_status: string
+          ok_24h: number
+          schedule: string
+          url: string
+        }[]
+      }
       core_schedule_cron: {
         Args: { p_job_name: string; p_path: string; p_schedule: string }
         Returns: undefined
