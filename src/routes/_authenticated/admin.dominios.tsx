@@ -29,6 +29,7 @@ const loadDomainsCockpit = createServerFn({ method: "GET" })
     return {
       rows: companies.map((c) => {
         const ident = idx.get(c.id) ?? null;
+        const meta = (ident?.metadata as Record<string, unknown> | null) ?? {};
         const domain =
           ident?.custom_domain ??
           c.domain ??
@@ -42,8 +43,8 @@ const loadDomainsCockpit = createServerFn({ method: "GET" })
           statusTechnical: c.status_technical,
           dnsStatus: ident?.dns_status ?? null,
           sslStatus: ident?.ssl_status ?? null,
-          publishedAt: ident?.published_at ?? null,
-          publishedCommit: ident?.published_commit ?? null,
+          publishedAt: (meta.published_at as string | undefined) ?? null,
+          publishedCommit: (meta.published_commit as string | undefined) ?? null,
           provisionedAt: ident?.provisioned_at ?? null,
         };
       }),
