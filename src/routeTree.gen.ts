@@ -466,6 +466,7 @@ import { Route as AuthenticatedAdminContabHealthRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminContabCockpitHealthRouteImport } from './routes/_authenticated/admin.contab-cockpit-health'
 import { Route as AuthenticatedAdminConsumerJourneyHealthRouteImport } from './routes/_authenticated/admin.consumer-journey-health'
 import { Route as AuthenticatedAdminConfigCatalogHealthRouteImport } from './routes/_authenticated/admin.config-catalog-health'
+import { Route as AuthenticatedAdminComplianceHealthRouteImport } from './routes/_authenticated/admin.compliance-health'
 import { Route as AuthenticatedAdminCommunityHealthRouteImport } from './routes/_authenticated/admin.community-health'
 import { Route as AuthenticatedAdminCommsHealthRouteImport } from './routes/_authenticated/admin.comms-health'
 import { Route as AuthenticatedAdminCommandCenterRouteImport } from './routes/_authenticated/admin.command-center'
@@ -3114,6 +3115,12 @@ const AuthenticatedAdminConfigCatalogHealthRoute =
     path: '/admin/config-catalog-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminComplianceHealthRoute =
+  AuthenticatedAdminComplianceHealthRouteImport.update({
+    id: '/admin/compliance-health',
+    path: '/admin/compliance-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminCommunityHealthRoute =
   AuthenticatedAdminCommunityHealthRouteImport.update({
     id: '/admin/community-health',
@@ -3916,6 +3923,7 @@ export interface FileRoutesByFullPath {
   '/admin/command-center': typeof AuthenticatedAdminCommandCenterRoute
   '/admin/comms-health': typeof AuthenticatedAdminCommsHealthRoute
   '/admin/community-health': typeof AuthenticatedAdminCommunityHealthRoute
+  '/admin/compliance-health': typeof AuthenticatedAdminComplianceHealthRoute
   '/admin/config-catalog-health': typeof AuthenticatedAdminConfigCatalogHealthRoute
   '/admin/consumer-journey-health': typeof AuthenticatedAdminConsumerJourneyHealthRoute
   '/admin/contab-cockpit-health': typeof AuthenticatedAdminContabCockpitHealthRoute
@@ -4463,6 +4471,7 @@ export interface FileRoutesByTo {
   '/admin/command-center': typeof AuthenticatedAdminCommandCenterRoute
   '/admin/comms-health': typeof AuthenticatedAdminCommsHealthRoute
   '/admin/community-health': typeof AuthenticatedAdminCommunityHealthRoute
+  '/admin/compliance-health': typeof AuthenticatedAdminComplianceHealthRoute
   '/admin/config-catalog-health': typeof AuthenticatedAdminConfigCatalogHealthRoute
   '/admin/consumer-journey-health': typeof AuthenticatedAdminConsumerJourneyHealthRoute
   '/admin/contab-cockpit-health': typeof AuthenticatedAdminContabCockpitHealthRoute
@@ -5024,6 +5033,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/command-center': typeof AuthenticatedAdminCommandCenterRoute
   '/_authenticated/admin/comms-health': typeof AuthenticatedAdminCommsHealthRoute
   '/_authenticated/admin/community-health': typeof AuthenticatedAdminCommunityHealthRoute
+  '/_authenticated/admin/compliance-health': typeof AuthenticatedAdminComplianceHealthRoute
   '/_authenticated/admin/config-catalog-health': typeof AuthenticatedAdminConfigCatalogHealthRoute
   '/_authenticated/admin/consumer-journey-health': typeof AuthenticatedAdminConsumerJourneyHealthRoute
   '/_authenticated/admin/contab-cockpit-health': typeof AuthenticatedAdminContabCockpitHealthRoute
@@ -5584,6 +5594,7 @@ export interface FileRouteTypes {
     | '/admin/command-center'
     | '/admin/comms-health'
     | '/admin/community-health'
+    | '/admin/compliance-health'
     | '/admin/config-catalog-health'
     | '/admin/consumer-journey-health'
     | '/admin/contab-cockpit-health'
@@ -6131,6 +6142,7 @@ export interface FileRouteTypes {
     | '/admin/command-center'
     | '/admin/comms-health'
     | '/admin/community-health'
+    | '/admin/compliance-health'
     | '/admin/config-catalog-health'
     | '/admin/consumer-journey-health'
     | '/admin/contab-cockpit-health'
@@ -6691,6 +6703,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/command-center'
     | '/_authenticated/admin/comms-health'
     | '/_authenticated/admin/community-health'
+    | '/_authenticated/admin/compliance-health'
     | '/_authenticated/admin/config-catalog-health'
     | '/_authenticated/admin/consumer-journey-health'
     | '/_authenticated/admin/contab-cockpit-health'
@@ -10401,6 +10414,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminConfigCatalogHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/compliance-health': {
+      id: '/_authenticated/admin/compliance-health'
+      path: '/admin/compliance-health'
+      fullPath: '/admin/compliance-health'
+      preLoaderRoute: typeof AuthenticatedAdminComplianceHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/community-health': {
       id: '/_authenticated/admin/community-health'
       path: '/admin/community-health'
@@ -11794,6 +11814,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCommandCenterRoute: typeof AuthenticatedAdminCommandCenterRoute
   AuthenticatedAdminCommsHealthRoute: typeof AuthenticatedAdminCommsHealthRoute
   AuthenticatedAdminCommunityHealthRoute: typeof AuthenticatedAdminCommunityHealthRoute
+  AuthenticatedAdminComplianceHealthRoute: typeof AuthenticatedAdminComplianceHealthRoute
   AuthenticatedAdminConfigCatalogHealthRoute: typeof AuthenticatedAdminConfigCatalogHealthRoute
   AuthenticatedAdminConsumerJourneyHealthRoute: typeof AuthenticatedAdminConsumerJourneyHealthRoute
   AuthenticatedAdminContabCockpitHealthRoute: typeof AuthenticatedAdminContabCockpitHealthRoute
@@ -12046,6 +12067,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminCommsHealthRoute: AuthenticatedAdminCommsHealthRoute,
   AuthenticatedAdminCommunityHealthRoute:
     AuthenticatedAdminCommunityHealthRoute,
+  AuthenticatedAdminComplianceHealthRoute:
+    AuthenticatedAdminComplianceHealthRoute,
   AuthenticatedAdminConfigCatalogHealthRoute:
     AuthenticatedAdminConfigCatalogHealthRoute,
   AuthenticatedAdminConsumerJourneyHealthRoute:
@@ -12609,13 +12632,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
