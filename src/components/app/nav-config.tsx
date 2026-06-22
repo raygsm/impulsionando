@@ -328,6 +328,7 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: ShieldCheck,
         superOnly: true,
         children: [
+          { to: "/admin/master-hub", label: "★ Administração Master", icon: Crown, superOnly: true },
           { to: "/adm", label: "Central /adm", icon: ShieldCheck, superOnly: true },
           { to: "/adm/master", label: "Painel Master", icon: Crown, superOnly: true },
           { to: "/adm/agentes", label: "Central de Agentes", icon: Bot, superOnly: true },
