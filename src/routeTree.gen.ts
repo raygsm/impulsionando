@@ -384,11 +384,13 @@ import { Route as AuthenticatedAffiliatesCoproducersRouteImport } from './routes
 import { Route as AuthenticatedAffiliatesCommissionsRouteImport } from './routes/_authenticated/affiliates.commissions'
 import { Route as AuthenticatedAffiliatesBumpsRouteImport } from './routes/_authenticated/affiliates.bumps'
 import { Route as AuthenticatedAffiliatesAffiliatesRouteImport } from './routes/_authenticated/affiliates.affiliates'
+import { Route as AuthenticatedAdminWhitelabelHealthRouteImport } from './routes/_authenticated/admin.whitelabel-health'
 import { Route as AuthenticatedAdminWhatsappMetricsRouteImport } from './routes/_authenticated/admin.whatsapp-metrics'
 import { Route as AuthenticatedAdminVendorPerformanceRouteImport } from './routes/_authenticated/admin.vendor-performance'
 import { Route as AuthenticatedAdminUptimeRouteImport } from './routes/_authenticated/admin.uptime'
 import { Route as AuthenticatedAdminUnitEconomicsRouteImport } from './routes/_authenticated/admin.unit-economics'
 import { Route as AuthenticatedAdminTrialsRouteImport } from './routes/_authenticated/admin.trials'
+import { Route as AuthenticatedAdminTrialDemoHealthRouteImport } from './routes/_authenticated/admin.trial-demo-health'
 import { Route as AuthenticatedAdminTreasuryForecastRouteImport } from './routes/_authenticated/admin.treasury-forecast'
 import { Route as AuthenticatedAdminTenantLifecycleRouteImport } from './routes/_authenticated/admin.tenant-lifecycle'
 import { Route as AuthenticatedAdminTenant360RouteImport } from './routes/_authenticated/admin.tenant-360'
@@ -409,6 +411,9 @@ import { Route as AuthenticatedAdminNichePlansRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminNicheMatrixRouteImport } from './routes/_authenticated/admin.niche-matrix'
 import { Route as AuthenticatedAdminN8nConsoleRouteImport } from './routes/_authenticated/admin.n8n-console'
 import { Route as AuthenticatedAdminMarketplaceOpsRouteImport } from './routes/_authenticated/admin.marketplace-ops'
+import { Route as AuthenticatedAdminMarketplaceB2bHealthRouteImport } from './routes/_authenticated/admin.marketplace-b2b-health'
+import { Route as AuthenticatedAdminMarketingHealthRouteImport } from './routes/_authenticated/admin.marketing-health'
+import { Route as AuthenticatedAdminInventoryHealthRouteImport } from './routes/_authenticated/admin.inventory-health'
 import { Route as AuthenticatedAdminInboxUnificadaRouteImport } from './routes/_authenticated/admin.inbox-unificada'
 import { Route as AuthenticatedAdminInboxEventosRouteImport } from './routes/_authenticated/admin.inbox-eventos'
 import { Route as AuthenticatedAdminImobiliariaRouteImport } from './routes/_authenticated/admin.imobiliaria'
@@ -419,6 +424,7 @@ import { Route as AuthenticatedAdminFunil360RouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminFiscalHealthRouteImport } from './routes/_authenticated/admin.fiscal-health'
 import { Route as AuthenticatedAdminFiscalRouteImport } from './routes/_authenticated/admin.fiscal'
 import { Route as AuthenticatedAdminFinanceiroConsolidadoV2RouteImport } from './routes/_authenticated/admin.financeiro-consolidado-v2'
+import { Route as AuthenticatedAdminFinanceHealthRouteImport } from './routes/_authenticated/admin.finance-health'
 import { Route as AuthenticatedAdminExpansionRadarRouteImport } from './routes/_authenticated/admin.expansion-radar'
 import { Route as AuthenticatedAdminExpansionEngineRouteImport } from './routes/_authenticated/admin.expansion-engine'
 import { Route as AuthenticatedAdminExecutiveBriefingRouteImport } from './routes/_authenticated/admin.executive-briefing'
@@ -427,6 +433,7 @@ import { Route as AuthenticatedAdminEhrComplianceRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminEducTalentosRouteImport } from './routes/_authenticated/admin.educ-talentos'
 import { Route as AuthenticatedAdminDataQualityRouteImport } from './routes/_authenticated/admin.data-quality'
 import { Route as AuthenticatedAdminCustomerSuccessRouteImport } from './routes/_authenticated/admin.customer-success'
+import { Route as AuthenticatedAdminCrmHealthRouteImport } from './routes/_authenticated/admin.crm-health'
 import { Route as AuthenticatedAdminConversionFunnelRouteImport } from './routes/_authenticated/admin.conversion-funnel'
 import { Route as AuthenticatedAdminContabHealthRouteImport } from './routes/_authenticated/admin.contab-health'
 import { Route as AuthenticatedAdminCommsHealthRouteImport } from './routes/_authenticated/admin.comms-health'
@@ -447,6 +454,7 @@ import { Route as AuthenticatedAdminBillingContractsRouteImport } from './routes
 import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authenticated/admin.billing'
 import { Route as AuthenticatedAdminAuditTrailRouteImport } from './routes/_authenticated/admin.audit-trail'
 import { Route as AuthenticatedAdminAttributionRouteImport } from './routes/_authenticated/admin.attribution'
+import { Route as AuthenticatedAdminAiAutomationHealthRouteImport } from './routes/_authenticated/admin.ai-automation-health'
 import { Route as AuthenticatedAdminAgendaHealthRouteImport } from './routes/_authenticated/admin.agenda-health'
 import { Route as AuthenticatedAdminAffiliatesHealthRouteImport } from './routes/_authenticated/admin.affiliates-health'
 import { Route as AuthenticatedAdminAdoptionUsageRouteImport } from './routes/_authenticated/admin.adoption-usage'
@@ -2576,6 +2584,12 @@ const AuthenticatedAffiliatesAffiliatesRoute =
     path: '/affiliates',
     getParentRoute: () => AuthenticatedAffiliatesRoute,
   } as any)
+const AuthenticatedAdminWhitelabelHealthRoute =
+  AuthenticatedAdminWhitelabelHealthRouteImport.update({
+    id: '/admin/whitelabel-health',
+    path: '/admin/whitelabel-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminWhatsappMetricsRoute =
   AuthenticatedAdminWhatsappMetricsRouteImport.update({
     id: '/admin/whatsapp-metrics',
@@ -2604,6 +2618,12 @@ const AuthenticatedAdminTrialsRoute =
   AuthenticatedAdminTrialsRouteImport.update({
     id: '/admin/trials',
     path: '/admin/trials',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminTrialDemoHealthRoute =
+  AuthenticatedAdminTrialDemoHealthRouteImport.update({
+    id: '/admin/trial-demo-health',
+    path: '/admin/trial-demo-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdminTreasuryForecastRoute =
@@ -2726,6 +2746,24 @@ const AuthenticatedAdminMarketplaceOpsRoute =
     path: '/admin/marketplace-ops',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminMarketplaceB2bHealthRoute =
+  AuthenticatedAdminMarketplaceB2bHealthRouteImport.update({
+    id: '/admin/marketplace-b2b-health',
+    path: '/admin/marketplace-b2b-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminMarketingHealthRoute =
+  AuthenticatedAdminMarketingHealthRouteImport.update({
+    id: '/admin/marketing-health',
+    path: '/admin/marketing-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminInventoryHealthRoute =
+  AuthenticatedAdminInventoryHealthRouteImport.update({
+    id: '/admin/inventory-health',
+    path: '/admin/inventory-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminInboxUnificadaRoute =
   AuthenticatedAdminInboxUnificadaRouteImport.update({
     id: '/admin/inbox-unificada',
@@ -2786,6 +2824,12 @@ const AuthenticatedAdminFinanceiroConsolidadoV2Route =
     path: '/admin/financeiro-consolidado-v2',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminFinanceHealthRoute =
+  AuthenticatedAdminFinanceHealthRouteImport.update({
+    id: '/admin/finance-health',
+    path: '/admin/finance-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminExpansionRadarRoute =
   AuthenticatedAdminExpansionRadarRouteImport.update({
     id: '/admin/expansion-radar',
@@ -2832,6 +2876,12 @@ const AuthenticatedAdminCustomerSuccessRoute =
   AuthenticatedAdminCustomerSuccessRouteImport.update({
     id: '/admin/customer-success',
     path: '/admin/customer-success',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminCrmHealthRoute =
+  AuthenticatedAdminCrmHealthRouteImport.update({
+    id: '/admin/crm-health',
+    path: '/admin/crm-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdminConversionFunnelRoute =
@@ -2951,6 +3001,12 @@ const AuthenticatedAdminAttributionRoute =
   AuthenticatedAdminAttributionRouteImport.update({
     id: '/admin/attribution',
     path: '/admin/attribution',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminAiAutomationHealthRoute =
+  AuthenticatedAdminAiAutomationHealthRouteImport.update({
+    id: '/admin/ai-automation-health',
+    path: '/admin/ai-automation-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdminAgendaHealthRoute =
@@ -3567,6 +3623,7 @@ export interface FileRoutesByFullPath {
   '/admin/adoption-usage': typeof AuthenticatedAdminAdoptionUsageRoute
   '/admin/affiliates-health': typeof AuthenticatedAdminAffiliatesHealthRoute
   '/admin/agenda-health': typeof AuthenticatedAdminAgendaHealthRoute
+  '/admin/ai-automation-health': typeof AuthenticatedAdminAiAutomationHealthRoute
   '/admin/attribution': typeof AuthenticatedAdminAttributionRoute
   '/admin/audit-trail': typeof AuthenticatedAdminAuditTrailRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
@@ -3587,6 +3644,7 @@ export interface FileRoutesByFullPath {
   '/admin/comms-health': typeof AuthenticatedAdminCommsHealthRoute
   '/admin/contab-health': typeof AuthenticatedAdminContabHealthRoute
   '/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
+  '/admin/crm-health': typeof AuthenticatedAdminCrmHealthRoute
   '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
   '/admin/educ-talentos': typeof AuthenticatedAdminEducTalentosRoute
@@ -3595,6 +3653,7 @@ export interface FileRoutesByFullPath {
   '/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
   '/admin/expansion-engine': typeof AuthenticatedAdminExpansionEngineRoute
   '/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
+  '/admin/finance-health': typeof AuthenticatedAdminFinanceHealthRoute
   '/admin/financeiro-consolidado-v2': typeof AuthenticatedAdminFinanceiroConsolidadoV2Route
   '/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
   '/admin/fiscal-health': typeof AuthenticatedAdminFiscalHealthRoute
@@ -3605,6 +3664,9 @@ export interface FileRoutesByFullPath {
   '/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/admin/inbox-eventos': typeof AuthenticatedAdminInboxEventosRoute
   '/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
+  '/admin/inventory-health': typeof AuthenticatedAdminInventoryHealthRoute
+  '/admin/marketing-health': typeof AuthenticatedAdminMarketingHealthRoute
+  '/admin/marketplace-b2b-health': typeof AuthenticatedAdminMarketplaceB2bHealthRoute
   '/admin/marketplace-ops': typeof AuthenticatedAdminMarketplaceOpsRoute
   '/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
@@ -3625,11 +3687,13 @@ export interface FileRoutesByFullPath {
   '/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/admin/tenant-lifecycle': typeof AuthenticatedAdminTenantLifecycleRoute
   '/admin/treasury-forecast': typeof AuthenticatedAdminTreasuryForecastRoute
+  '/admin/trial-demo-health': typeof AuthenticatedAdminTrialDemoHealthRoute
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/admin/unit-economics': typeof AuthenticatedAdminUnitEconomicsRoute
   '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/admin/vendor-performance': typeof AuthenticatedAdminVendorPerformanceRoute
   '/admin/whatsapp-metrics': typeof AuthenticatedAdminWhatsappMetricsRoute
+  '/admin/whitelabel-health': typeof AuthenticatedAdminWhitelabelHealthRoute
   '/affiliates/affiliates': typeof AuthenticatedAffiliatesAffiliatesRoute
   '/affiliates/bumps': typeof AuthenticatedAffiliatesBumpsRoute
   '/affiliates/commissions': typeof AuthenticatedAffiliatesCommissionsRoute
@@ -4068,6 +4132,7 @@ export interface FileRoutesByTo {
   '/admin/adoption-usage': typeof AuthenticatedAdminAdoptionUsageRoute
   '/admin/affiliates-health': typeof AuthenticatedAdminAffiliatesHealthRoute
   '/admin/agenda-health': typeof AuthenticatedAdminAgendaHealthRoute
+  '/admin/ai-automation-health': typeof AuthenticatedAdminAiAutomationHealthRoute
   '/admin/attribution': typeof AuthenticatedAdminAttributionRoute
   '/admin/audit-trail': typeof AuthenticatedAdminAuditTrailRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRoute
@@ -4088,6 +4153,7 @@ export interface FileRoutesByTo {
   '/admin/comms-health': typeof AuthenticatedAdminCommsHealthRoute
   '/admin/contab-health': typeof AuthenticatedAdminContabHealthRoute
   '/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
+  '/admin/crm-health': typeof AuthenticatedAdminCrmHealthRoute
   '/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
   '/admin/educ-talentos': typeof AuthenticatedAdminEducTalentosRoute
@@ -4096,6 +4162,7 @@ export interface FileRoutesByTo {
   '/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
   '/admin/expansion-engine': typeof AuthenticatedAdminExpansionEngineRoute
   '/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
+  '/admin/finance-health': typeof AuthenticatedAdminFinanceHealthRoute
   '/admin/financeiro-consolidado-v2': typeof AuthenticatedAdminFinanceiroConsolidadoV2Route
   '/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
   '/admin/fiscal-health': typeof AuthenticatedAdminFiscalHealthRoute
@@ -4106,6 +4173,9 @@ export interface FileRoutesByTo {
   '/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/admin/inbox-eventos': typeof AuthenticatedAdminInboxEventosRoute
   '/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
+  '/admin/inventory-health': typeof AuthenticatedAdminInventoryHealthRoute
+  '/admin/marketing-health': typeof AuthenticatedAdminMarketingHealthRoute
+  '/admin/marketplace-b2b-health': typeof AuthenticatedAdminMarketplaceB2bHealthRoute
   '/admin/marketplace-ops': typeof AuthenticatedAdminMarketplaceOpsRoute
   '/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
@@ -4126,11 +4196,13 @@ export interface FileRoutesByTo {
   '/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/admin/tenant-lifecycle': typeof AuthenticatedAdminTenantLifecycleRoute
   '/admin/treasury-forecast': typeof AuthenticatedAdminTreasuryForecastRoute
+  '/admin/trial-demo-health': typeof AuthenticatedAdminTrialDemoHealthRoute
   '/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/admin/unit-economics': typeof AuthenticatedAdminUnitEconomicsRoute
   '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/admin/vendor-performance': typeof AuthenticatedAdminVendorPerformanceRoute
   '/admin/whatsapp-metrics': typeof AuthenticatedAdminWhatsappMetricsRoute
+  '/admin/whitelabel-health': typeof AuthenticatedAdminWhitelabelHealthRoute
   '/affiliates/affiliates': typeof AuthenticatedAffiliatesAffiliatesRoute
   '/affiliates/bumps': typeof AuthenticatedAffiliatesBumpsRoute
   '/affiliates/commissions': typeof AuthenticatedAffiliatesCommissionsRoute
@@ -4583,6 +4655,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/adoption-usage': typeof AuthenticatedAdminAdoptionUsageRoute
   '/_authenticated/admin/affiliates-health': typeof AuthenticatedAdminAffiliatesHealthRoute
   '/_authenticated/admin/agenda-health': typeof AuthenticatedAdminAgendaHealthRoute
+  '/_authenticated/admin/ai-automation-health': typeof AuthenticatedAdminAiAutomationHealthRoute
   '/_authenticated/admin/attribution': typeof AuthenticatedAdminAttributionRoute
   '/_authenticated/admin/audit-trail': typeof AuthenticatedAdminAuditTrailRoute
   '/_authenticated/admin/billing': typeof AuthenticatedAdminBillingRoute
@@ -4603,6 +4676,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/comms-health': typeof AuthenticatedAdminCommsHealthRoute
   '/_authenticated/admin/contab-health': typeof AuthenticatedAdminContabHealthRoute
   '/_authenticated/admin/conversion-funnel': typeof AuthenticatedAdminConversionFunnelRoute
+  '/_authenticated/admin/crm-health': typeof AuthenticatedAdminCrmHealthRoute
   '/_authenticated/admin/customer-success': typeof AuthenticatedAdminCustomerSuccessRoute
   '/_authenticated/admin/data-quality': typeof AuthenticatedAdminDataQualityRoute
   '/_authenticated/admin/educ-talentos': typeof AuthenticatedAdminEducTalentosRoute
@@ -4611,6 +4685,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
   '/_authenticated/admin/expansion-engine': typeof AuthenticatedAdminExpansionEngineRoute
   '/_authenticated/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
+  '/_authenticated/admin/finance-health': typeof AuthenticatedAdminFinanceHealthRoute
   '/_authenticated/admin/financeiro-consolidado-v2': typeof AuthenticatedAdminFinanceiroConsolidadoV2Route
   '/_authenticated/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
   '/_authenticated/admin/fiscal-health': typeof AuthenticatedAdminFiscalHealthRoute
@@ -4621,6 +4696,9 @@ export interface FileRoutesById {
   '/_authenticated/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/_authenticated/admin/inbox-eventos': typeof AuthenticatedAdminInboxEventosRoute
   '/_authenticated/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
+  '/_authenticated/admin/inventory-health': typeof AuthenticatedAdminInventoryHealthRoute
+  '/_authenticated/admin/marketing-health': typeof AuthenticatedAdminMarketingHealthRoute
+  '/_authenticated/admin/marketplace-b2b-health': typeof AuthenticatedAdminMarketplaceB2bHealthRoute
   '/_authenticated/admin/marketplace-ops': typeof AuthenticatedAdminMarketplaceOpsRoute
   '/_authenticated/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
   '/_authenticated/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
@@ -4641,11 +4719,13 @@ export interface FileRoutesById {
   '/_authenticated/admin/tenant-360': typeof AuthenticatedAdminTenant360Route
   '/_authenticated/admin/tenant-lifecycle': typeof AuthenticatedAdminTenantLifecycleRoute
   '/_authenticated/admin/treasury-forecast': typeof AuthenticatedAdminTreasuryForecastRoute
+  '/_authenticated/admin/trial-demo-health': typeof AuthenticatedAdminTrialDemoHealthRoute
   '/_authenticated/admin/trials': typeof AuthenticatedAdminTrialsRoute
   '/_authenticated/admin/unit-economics': typeof AuthenticatedAdminUnitEconomicsRoute
   '/_authenticated/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/_authenticated/admin/vendor-performance': typeof AuthenticatedAdminVendorPerformanceRoute
   '/_authenticated/admin/whatsapp-metrics': typeof AuthenticatedAdminWhatsappMetricsRoute
+  '/_authenticated/admin/whitelabel-health': typeof AuthenticatedAdminWhitelabelHealthRoute
   '/_authenticated/affiliates/affiliates': typeof AuthenticatedAffiliatesAffiliatesRoute
   '/_authenticated/affiliates/bumps': typeof AuthenticatedAffiliatesBumpsRoute
   '/_authenticated/affiliates/commissions': typeof AuthenticatedAffiliatesCommissionsRoute
@@ -5097,6 +5177,7 @@ export interface FileRouteTypes {
     | '/admin/adoption-usage'
     | '/admin/affiliates-health'
     | '/admin/agenda-health'
+    | '/admin/ai-automation-health'
     | '/admin/attribution'
     | '/admin/audit-trail'
     | '/admin/billing'
@@ -5117,6 +5198,7 @@ export interface FileRouteTypes {
     | '/admin/comms-health'
     | '/admin/contab-health'
     | '/admin/conversion-funnel'
+    | '/admin/crm-health'
     | '/admin/customer-success'
     | '/admin/data-quality'
     | '/admin/educ-talentos'
@@ -5125,6 +5207,7 @@ export interface FileRouteTypes {
     | '/admin/executive-briefing'
     | '/admin/expansion-engine'
     | '/admin/expansion-radar'
+    | '/admin/finance-health'
     | '/admin/financeiro-consolidado-v2'
     | '/admin/fiscal'
     | '/admin/fiscal-health'
@@ -5135,6 +5218,9 @@ export interface FileRouteTypes {
     | '/admin/imobiliaria'
     | '/admin/inbox-eventos'
     | '/admin/inbox-unificada'
+    | '/admin/inventory-health'
+    | '/admin/marketing-health'
+    | '/admin/marketplace-b2b-health'
     | '/admin/marketplace-ops'
     | '/admin/n8n-console'
     | '/admin/niche-matrix'
@@ -5155,11 +5241,13 @@ export interface FileRouteTypes {
     | '/admin/tenant-360'
     | '/admin/tenant-lifecycle'
     | '/admin/treasury-forecast'
+    | '/admin/trial-demo-health'
     | '/admin/trials'
     | '/admin/unit-economics'
     | '/admin/uptime'
     | '/admin/vendor-performance'
     | '/admin/whatsapp-metrics'
+    | '/admin/whitelabel-health'
     | '/affiliates/affiliates'
     | '/affiliates/bumps'
     | '/affiliates/commissions'
@@ -5598,6 +5686,7 @@ export interface FileRouteTypes {
     | '/admin/adoption-usage'
     | '/admin/affiliates-health'
     | '/admin/agenda-health'
+    | '/admin/ai-automation-health'
     | '/admin/attribution'
     | '/admin/audit-trail'
     | '/admin/billing'
@@ -5618,6 +5707,7 @@ export interface FileRouteTypes {
     | '/admin/comms-health'
     | '/admin/contab-health'
     | '/admin/conversion-funnel'
+    | '/admin/crm-health'
     | '/admin/customer-success'
     | '/admin/data-quality'
     | '/admin/educ-talentos'
@@ -5626,6 +5716,7 @@ export interface FileRouteTypes {
     | '/admin/executive-briefing'
     | '/admin/expansion-engine'
     | '/admin/expansion-radar'
+    | '/admin/finance-health'
     | '/admin/financeiro-consolidado-v2'
     | '/admin/fiscal'
     | '/admin/fiscal-health'
@@ -5636,6 +5727,9 @@ export interface FileRouteTypes {
     | '/admin/imobiliaria'
     | '/admin/inbox-eventos'
     | '/admin/inbox-unificada'
+    | '/admin/inventory-health'
+    | '/admin/marketing-health'
+    | '/admin/marketplace-b2b-health'
     | '/admin/marketplace-ops'
     | '/admin/n8n-console'
     | '/admin/niche-matrix'
@@ -5656,11 +5750,13 @@ export interface FileRouteTypes {
     | '/admin/tenant-360'
     | '/admin/tenant-lifecycle'
     | '/admin/treasury-forecast'
+    | '/admin/trial-demo-health'
     | '/admin/trials'
     | '/admin/unit-economics'
     | '/admin/uptime'
     | '/admin/vendor-performance'
     | '/admin/whatsapp-metrics'
+    | '/admin/whitelabel-health'
     | '/affiliates/affiliates'
     | '/affiliates/bumps'
     | '/affiliates/commissions'
@@ -6112,6 +6208,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/adoption-usage'
     | '/_authenticated/admin/affiliates-health'
     | '/_authenticated/admin/agenda-health'
+    | '/_authenticated/admin/ai-automation-health'
     | '/_authenticated/admin/attribution'
     | '/_authenticated/admin/audit-trail'
     | '/_authenticated/admin/billing'
@@ -6132,6 +6229,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/comms-health'
     | '/_authenticated/admin/contab-health'
     | '/_authenticated/admin/conversion-funnel'
+    | '/_authenticated/admin/crm-health'
     | '/_authenticated/admin/customer-success'
     | '/_authenticated/admin/data-quality'
     | '/_authenticated/admin/educ-talentos'
@@ -6140,6 +6238,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/executive-briefing'
     | '/_authenticated/admin/expansion-engine'
     | '/_authenticated/admin/expansion-radar'
+    | '/_authenticated/admin/finance-health'
     | '/_authenticated/admin/financeiro-consolidado-v2'
     | '/_authenticated/admin/fiscal'
     | '/_authenticated/admin/fiscal-health'
@@ -6150,6 +6249,9 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/imobiliaria'
     | '/_authenticated/admin/inbox-eventos'
     | '/_authenticated/admin/inbox-unificada'
+    | '/_authenticated/admin/inventory-health'
+    | '/_authenticated/admin/marketing-health'
+    | '/_authenticated/admin/marketplace-b2b-health'
     | '/_authenticated/admin/marketplace-ops'
     | '/_authenticated/admin/n8n-console'
     | '/_authenticated/admin/niche-matrix'
@@ -6170,11 +6272,13 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/tenant-360'
     | '/_authenticated/admin/tenant-lifecycle'
     | '/_authenticated/admin/treasury-forecast'
+    | '/_authenticated/admin/trial-demo-health'
     | '/_authenticated/admin/trials'
     | '/_authenticated/admin/unit-economics'
     | '/_authenticated/admin/uptime'
     | '/_authenticated/admin/vendor-performance'
     | '/_authenticated/admin/whatsapp-metrics'
+    | '/_authenticated/admin/whitelabel-health'
     | '/_authenticated/affiliates/affiliates'
     | '/_authenticated/affiliates/bumps'
     | '/_authenticated/affiliates/commissions'
@@ -9229,6 +9333,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAffiliatesAffiliatesRouteImport
       parentRoute: typeof AuthenticatedAffiliatesRoute
     }
+    '/_authenticated/admin/whitelabel-health': {
+      id: '/_authenticated/admin/whitelabel-health'
+      path: '/admin/whitelabel-health'
+      fullPath: '/admin/whitelabel-health'
+      preLoaderRoute: typeof AuthenticatedAdminWhitelabelHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/whatsapp-metrics': {
       id: '/_authenticated/admin/whatsapp-metrics'
       path: '/admin/whatsapp-metrics'
@@ -9262,6 +9373,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/trials'
       fullPath: '/admin/trials'
       preLoaderRoute: typeof AuthenticatedAdminTrialsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/trial-demo-health': {
+      id: '/_authenticated/admin/trial-demo-health'
+      path: '/admin/trial-demo-health'
+      fullPath: '/admin/trial-demo-health'
+      preLoaderRoute: typeof AuthenticatedAdminTrialDemoHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/treasury-forecast': {
@@ -9404,6 +9522,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMarketplaceOpsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/marketplace-b2b-health': {
+      id: '/_authenticated/admin/marketplace-b2b-health'
+      path: '/admin/marketplace-b2b-health'
+      fullPath: '/admin/marketplace-b2b-health'
+      preLoaderRoute: typeof AuthenticatedAdminMarketplaceB2bHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/marketing-health': {
+      id: '/_authenticated/admin/marketing-health'
+      path: '/admin/marketing-health'
+      fullPath: '/admin/marketing-health'
+      preLoaderRoute: typeof AuthenticatedAdminMarketingHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/inventory-health': {
+      id: '/_authenticated/admin/inventory-health'
+      path: '/admin/inventory-health'
+      fullPath: '/admin/inventory-health'
+      preLoaderRoute: typeof AuthenticatedAdminInventoryHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/inbox-unificada': {
       id: '/_authenticated/admin/inbox-unificada'
       path: '/admin/inbox-unificada'
@@ -9474,6 +9613,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFinanceiroConsolidadoV2RouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/finance-health': {
+      id: '/_authenticated/admin/finance-health'
+      path: '/admin/finance-health'
+      fullPath: '/admin/finance-health'
+      preLoaderRoute: typeof AuthenticatedAdminFinanceHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/expansion-radar': {
       id: '/_authenticated/admin/expansion-radar'
       path: '/admin/expansion-radar'
@@ -9528,6 +9674,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/customer-success'
       fullPath: '/admin/customer-success'
       preLoaderRoute: typeof AuthenticatedAdminCustomerSuccessRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/crm-health': {
+      id: '/_authenticated/admin/crm-health'
+      path: '/admin/crm-health'
+      fullPath: '/admin/crm-health'
+      preLoaderRoute: typeof AuthenticatedAdminCrmHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/conversion-funnel': {
@@ -9668,6 +9821,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/attribution'
       fullPath: '/admin/attribution'
       preLoaderRoute: typeof AuthenticatedAdminAttributionRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/ai-automation-health': {
+      id: '/_authenticated/admin/ai-automation-health'
+      path: '/admin/ai-automation-health'
+      fullPath: '/admin/ai-automation-health'
+      preLoaderRoute: typeof AuthenticatedAdminAiAutomationHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/agenda-health': {
@@ -10847,6 +11007,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminAdoptionUsageRoute: typeof AuthenticatedAdminAdoptionUsageRoute
   AuthenticatedAdminAffiliatesHealthRoute: typeof AuthenticatedAdminAffiliatesHealthRoute
   AuthenticatedAdminAgendaHealthRoute: typeof AuthenticatedAdminAgendaHealthRoute
+  AuthenticatedAdminAiAutomationHealthRoute: typeof AuthenticatedAdminAiAutomationHealthRoute
   AuthenticatedAdminAttributionRoute: typeof AuthenticatedAdminAttributionRoute
   AuthenticatedAdminAuditTrailRoute: typeof AuthenticatedAdminAuditTrailRoute
   AuthenticatedAdminBillingRoute: typeof AuthenticatedAdminBillingRoute
@@ -10867,6 +11028,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCommsHealthRoute: typeof AuthenticatedAdminCommsHealthRoute
   AuthenticatedAdminContabHealthRoute: typeof AuthenticatedAdminContabHealthRoute
   AuthenticatedAdminConversionFunnelRoute: typeof AuthenticatedAdminConversionFunnelRoute
+  AuthenticatedAdminCrmHealthRoute: typeof AuthenticatedAdminCrmHealthRoute
   AuthenticatedAdminCustomerSuccessRoute: typeof AuthenticatedAdminCustomerSuccessRoute
   AuthenticatedAdminDataQualityRoute: typeof AuthenticatedAdminDataQualityRoute
   AuthenticatedAdminEducTalentosRoute: typeof AuthenticatedAdminEducTalentosRoute
@@ -10875,6 +11037,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminExecutiveBriefingRoute: typeof AuthenticatedAdminExecutiveBriefingRoute
   AuthenticatedAdminExpansionEngineRoute: typeof AuthenticatedAdminExpansionEngineRoute
   AuthenticatedAdminExpansionRadarRoute: typeof AuthenticatedAdminExpansionRadarRoute
+  AuthenticatedAdminFinanceHealthRoute: typeof AuthenticatedAdminFinanceHealthRoute
   AuthenticatedAdminFinanceiroConsolidadoV2Route: typeof AuthenticatedAdminFinanceiroConsolidadoV2Route
   AuthenticatedAdminFiscalRoute: typeof AuthenticatedAdminFiscalRoute
   AuthenticatedAdminFiscalHealthRoute: typeof AuthenticatedAdminFiscalHealthRoute
@@ -10885,6 +11048,9 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminImobiliariaRoute: typeof AuthenticatedAdminImobiliariaRoute
   AuthenticatedAdminInboxEventosRoute: typeof AuthenticatedAdminInboxEventosRoute
   AuthenticatedAdminInboxUnificadaRoute: typeof AuthenticatedAdminInboxUnificadaRoute
+  AuthenticatedAdminInventoryHealthRoute: typeof AuthenticatedAdminInventoryHealthRoute
+  AuthenticatedAdminMarketingHealthRoute: typeof AuthenticatedAdminMarketingHealthRoute
+  AuthenticatedAdminMarketplaceB2bHealthRoute: typeof AuthenticatedAdminMarketplaceB2bHealthRoute
   AuthenticatedAdminMarketplaceOpsRoute: typeof AuthenticatedAdminMarketplaceOpsRoute
   AuthenticatedAdminN8nConsoleRoute: typeof AuthenticatedAdminN8nConsoleRoute
   AuthenticatedAdminNicheMatrixRoute: typeof AuthenticatedAdminNicheMatrixRoute
@@ -10905,11 +11071,13 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminTenant360Route: typeof AuthenticatedAdminTenant360Route
   AuthenticatedAdminTenantLifecycleRoute: typeof AuthenticatedAdminTenantLifecycleRoute
   AuthenticatedAdminTreasuryForecastRoute: typeof AuthenticatedAdminTreasuryForecastRoute
+  AuthenticatedAdminTrialDemoHealthRoute: typeof AuthenticatedAdminTrialDemoHealthRoute
   AuthenticatedAdminTrialsRoute: typeof AuthenticatedAdminTrialsRoute
   AuthenticatedAdminUnitEconomicsRoute: typeof AuthenticatedAdminUnitEconomicsRoute
   AuthenticatedAdminUptimeRoute: typeof AuthenticatedAdminUptimeRoute
   AuthenticatedAdminVendorPerformanceRoute: typeof AuthenticatedAdminVendorPerformanceRoute
   AuthenticatedAdminWhatsappMetricsRoute: typeof AuthenticatedAdminWhatsappMetricsRoute
+  AuthenticatedAdminWhitelabelHealthRoute: typeof AuthenticatedAdminWhitelabelHealthRoute
   AuthenticatedBarMarketplaceRoute: typeof AuthenticatedBarMarketplaceRouteWithChildren
   AuthenticatedCheckoutPlanoRoute: typeof AuthenticatedCheckoutPlanoRoute
   AuthenticatedChrismedAdminRoute: typeof AuthenticatedChrismedAdminRoute
@@ -11040,6 +11208,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminAffiliatesHealthRoute:
     AuthenticatedAdminAffiliatesHealthRoute,
   AuthenticatedAdminAgendaHealthRoute: AuthenticatedAdminAgendaHealthRoute,
+  AuthenticatedAdminAiAutomationHealthRoute:
+    AuthenticatedAdminAiAutomationHealthRoute,
   AuthenticatedAdminAttributionRoute: AuthenticatedAdminAttributionRoute,
   AuthenticatedAdminAuditTrailRoute: AuthenticatedAdminAuditTrailRoute,
   AuthenticatedAdminBillingRoute: AuthenticatedAdminBillingRoute,
@@ -11066,6 +11236,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminContabHealthRoute: AuthenticatedAdminContabHealthRoute,
   AuthenticatedAdminConversionFunnelRoute:
     AuthenticatedAdminConversionFunnelRoute,
+  AuthenticatedAdminCrmHealthRoute: AuthenticatedAdminCrmHealthRoute,
   AuthenticatedAdminCustomerSuccessRoute:
     AuthenticatedAdminCustomerSuccessRoute,
   AuthenticatedAdminDataQualityRoute: AuthenticatedAdminDataQualityRoute,
@@ -11077,6 +11248,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminExpansionEngineRoute:
     AuthenticatedAdminExpansionEngineRoute,
   AuthenticatedAdminExpansionRadarRoute: AuthenticatedAdminExpansionRadarRoute,
+  AuthenticatedAdminFinanceHealthRoute: AuthenticatedAdminFinanceHealthRoute,
   AuthenticatedAdminFinanceiroConsolidadoV2Route:
     AuthenticatedAdminFinanceiroConsolidadoV2Route,
   AuthenticatedAdminFiscalRoute: AuthenticatedAdminFiscalRoute,
@@ -11088,6 +11260,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminImobiliariaRoute: AuthenticatedAdminImobiliariaRoute,
   AuthenticatedAdminInboxEventosRoute: AuthenticatedAdminInboxEventosRoute,
   AuthenticatedAdminInboxUnificadaRoute: AuthenticatedAdminInboxUnificadaRoute,
+  AuthenticatedAdminInventoryHealthRoute:
+    AuthenticatedAdminInventoryHealthRoute,
+  AuthenticatedAdminMarketingHealthRoute:
+    AuthenticatedAdminMarketingHealthRoute,
+  AuthenticatedAdminMarketplaceB2bHealthRoute:
+    AuthenticatedAdminMarketplaceB2bHealthRoute,
   AuthenticatedAdminMarketplaceOpsRoute: AuthenticatedAdminMarketplaceOpsRoute,
   AuthenticatedAdminN8nConsoleRoute: AuthenticatedAdminN8nConsoleRoute,
   AuthenticatedAdminNicheMatrixRoute: AuthenticatedAdminNicheMatrixRoute,
@@ -11117,6 +11295,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminTenantLifecycleRoute,
   AuthenticatedAdminTreasuryForecastRoute:
     AuthenticatedAdminTreasuryForecastRoute,
+  AuthenticatedAdminTrialDemoHealthRoute:
+    AuthenticatedAdminTrialDemoHealthRoute,
   AuthenticatedAdminTrialsRoute: AuthenticatedAdminTrialsRoute,
   AuthenticatedAdminUnitEconomicsRoute: AuthenticatedAdminUnitEconomicsRoute,
   AuthenticatedAdminUptimeRoute: AuthenticatedAdminUptimeRoute,
@@ -11124,6 +11304,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminVendorPerformanceRoute,
   AuthenticatedAdminWhatsappMetricsRoute:
     AuthenticatedAdminWhatsappMetricsRoute,
+  AuthenticatedAdminWhitelabelHealthRoute:
+    AuthenticatedAdminWhitelabelHealthRoute,
   AuthenticatedBarMarketplaceRoute:
     AuthenticatedBarMarketplaceRouteWithChildren,
   AuthenticatedCheckoutPlanoRoute: AuthenticatedCheckoutPlanoRoute,
