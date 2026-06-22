@@ -410,6 +410,7 @@ import { Route as AuthenticatedAdminProjetosParalelosRouteImport } from './route
 import { Route as AuthenticatedAdminPricingIntelligenceRouteImport } from './routes/_authenticated/admin.pricing-intelligence'
 import { Route as AuthenticatedAdminPixPendentesRouteImport } from './routes/_authenticated/admin.pix-pendentes'
 import { Route as AuthenticatedAdminPeerBenchmarkRouteImport } from './routes/_authenticated/admin.peer-benchmark'
+import { Route as AuthenticatedAdminOnboardingProvisioningHealthRouteImport } from './routes/_authenticated/admin.onboarding-provisioning-health'
 import { Route as AuthenticatedAdminNotificationsCockpitRouteImport } from './routes/_authenticated/admin.notifications-cockpit'
 import { Route as AuthenticatedAdminNotificationDeliveryRouteImport } from './routes/_authenticated/admin.notification-delivery'
 import { Route as AuthenticatedAdminNichePlansRouteImport } from './routes/_authenticated/admin.niche-plans'
@@ -2755,6 +2756,12 @@ const AuthenticatedAdminPeerBenchmarkRoute =
     path: '/admin/peer-benchmark',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminOnboardingProvisioningHealthRoute =
+  AuthenticatedAdminOnboardingProvisioningHealthRouteImport.update({
+    id: '/admin/onboarding-provisioning-health',
+    path: '/admin/onboarding-provisioning-health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminNotificationsCockpitRoute =
   AuthenticatedAdminNotificationsCockpitRouteImport.update({
     id: '/admin/notifications-cockpit',
@@ -3788,6 +3795,7 @@ export interface FileRoutesByFullPath {
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/admin/notification-delivery': typeof AuthenticatedAdminNotificationDeliveryRoute
   '/admin/notifications-cockpit': typeof AuthenticatedAdminNotificationsCockpitRoute
+  '/admin/onboarding-provisioning-health': typeof AuthenticatedAdminOnboardingProvisioningHealthRoute
   '/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
   '/admin/pricing-intelligence': typeof AuthenticatedAdminPricingIntelligenceRoute
@@ -4312,6 +4320,7 @@ export interface FileRoutesByTo {
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/admin/notification-delivery': typeof AuthenticatedAdminNotificationDeliveryRoute
   '/admin/notifications-cockpit': typeof AuthenticatedAdminNotificationsCockpitRoute
+  '/admin/onboarding-provisioning-health': typeof AuthenticatedAdminOnboardingProvisioningHealthRoute
   '/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
   '/admin/pricing-intelligence': typeof AuthenticatedAdminPricingIntelligenceRoute
@@ -4850,6 +4859,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/_authenticated/admin/notification-delivery': typeof AuthenticatedAdminNotificationDeliveryRoute
   '/_authenticated/admin/notifications-cockpit': typeof AuthenticatedAdminNotificationsCockpitRoute
+  '/_authenticated/admin/onboarding-provisioning-health': typeof AuthenticatedAdminOnboardingProvisioningHealthRoute
   '/_authenticated/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/_authenticated/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
   '/_authenticated/admin/pricing-intelligence': typeof AuthenticatedAdminPricingIntelligenceRoute
@@ -5387,6 +5397,7 @@ export interface FileRouteTypes {
     | '/admin/niche-plans'
     | '/admin/notification-delivery'
     | '/admin/notifications-cockpit'
+    | '/admin/onboarding-provisioning-health'
     | '/admin/peer-benchmark'
     | '/admin/pix-pendentes'
     | '/admin/pricing-intelligence'
@@ -5911,6 +5922,7 @@ export interface FileRouteTypes {
     | '/admin/niche-plans'
     | '/admin/notification-delivery'
     | '/admin/notifications-cockpit'
+    | '/admin/onboarding-provisioning-health'
     | '/admin/peer-benchmark'
     | '/admin/pix-pendentes'
     | '/admin/pricing-intelligence'
@@ -6448,6 +6460,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/niche-plans'
     | '/_authenticated/admin/notification-delivery'
     | '/_authenticated/admin/notifications-cockpit'
+    | '/_authenticated/admin/onboarding-provisioning-health'
     | '/_authenticated/admin/peer-benchmark'
     | '/_authenticated/admin/pix-pendentes'
     | '/_authenticated/admin/pricing-intelligence'
@@ -9710,6 +9723,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPeerBenchmarkRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/onboarding-provisioning-health': {
+      id: '/_authenticated/admin/onboarding-provisioning-health'
+      path: '/admin/onboarding-provisioning-health'
+      fullPath: '/admin/onboarding-provisioning-health'
+      preLoaderRoute: typeof AuthenticatedAdminOnboardingProvisioningHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/notifications-cockpit': {
       id: '/_authenticated/admin/notifications-cockpit'
       path: '/admin/notifications-cockpit'
@@ -11367,6 +11387,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminNichePlansRoute: typeof AuthenticatedAdminNichePlansRoute
   AuthenticatedAdminNotificationDeliveryRoute: typeof AuthenticatedAdminNotificationDeliveryRoute
   AuthenticatedAdminNotificationsCockpitRoute: typeof AuthenticatedAdminNotificationsCockpitRoute
+  AuthenticatedAdminOnboardingProvisioningHealthRoute: typeof AuthenticatedAdminOnboardingProvisioningHealthRoute
   AuthenticatedAdminPeerBenchmarkRoute: typeof AuthenticatedAdminPeerBenchmarkRoute
   AuthenticatedAdminPixPendentesRoute: typeof AuthenticatedAdminPixPendentesRoute
   AuthenticatedAdminPricingIntelligenceRoute: typeof AuthenticatedAdminPricingIntelligenceRoute
@@ -11608,6 +11629,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminNotificationDeliveryRoute,
   AuthenticatedAdminNotificationsCockpitRoute:
     AuthenticatedAdminNotificationsCockpitRoute,
+  AuthenticatedAdminOnboardingProvisioningHealthRoute:
+    AuthenticatedAdminOnboardingProvisioningHealthRoute,
   AuthenticatedAdminPeerBenchmarkRoute: AuthenticatedAdminPeerBenchmarkRoute,
   AuthenticatedAdminPixPendentesRoute: AuthenticatedAdminPixPendentesRoute,
   AuthenticatedAdminPricingIntelligenceRoute:
