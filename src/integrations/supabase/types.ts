@@ -5597,7 +5597,9 @@ export type Database = {
           company_type: string | null
           consolidated_at: string | null
           consolidation_started_at: string | null
+          country_code: string
           created_at: string
+          currency_code: string
           demo_expires_at: string | null
           demo_niche: string | null
           document: string | null
@@ -5614,6 +5616,7 @@ export type Database = {
           is_master: boolean
           latitude: number | null
           legal_name: string | null
+          locale: string
           logo_url: string | null
           longitude: number | null
           migration_source_project_id: string | null
@@ -5622,6 +5625,7 @@ export type Database = {
           niche_id: string | null
           owner_name: string | null
           phone: string | null
+          phone_country_code: string
           primary_color: string | null
           public_slug: string | null
           rating_avg: number | null
@@ -5637,6 +5641,7 @@ export type Database = {
           subdomain: string | null
           subnicho_slug: string | null
           support_email: string | null
+          timezone: string
           trade_name: string | null
           updated_at: string
           vitrine_enabled: boolean
@@ -5655,7 +5660,9 @@ export type Database = {
           company_type?: string | null
           consolidated_at?: string | null
           consolidation_started_at?: string | null
+          country_code?: string
           created_at?: string
+          currency_code?: string
           demo_expires_at?: string | null
           demo_niche?: string | null
           document?: string | null
@@ -5672,6 +5679,7 @@ export type Database = {
           is_master?: boolean
           latitude?: number | null
           legal_name?: string | null
+          locale?: string
           logo_url?: string | null
           longitude?: number | null
           migration_source_project_id?: string | null
@@ -5680,6 +5688,7 @@ export type Database = {
           niche_id?: string | null
           owner_name?: string | null
           phone?: string | null
+          phone_country_code?: string
           primary_color?: string | null
           public_slug?: string | null
           rating_avg?: number | null
@@ -5695,6 +5704,7 @@ export type Database = {
           subdomain?: string | null
           subnicho_slug?: string | null
           support_email?: string | null
+          timezone?: string
           trade_name?: string | null
           updated_at?: string
           vitrine_enabled?: boolean
@@ -5713,7 +5723,9 @@ export type Database = {
           company_type?: string | null
           consolidated_at?: string | null
           consolidation_started_at?: string | null
+          country_code?: string
           created_at?: string
+          currency_code?: string
           demo_expires_at?: string | null
           demo_niche?: string | null
           document?: string | null
@@ -5730,6 +5742,7 @@ export type Database = {
           is_master?: boolean
           latitude?: number | null
           legal_name?: string | null
+          locale?: string
           logo_url?: string | null
           longitude?: number | null
           migration_source_project_id?: string | null
@@ -5738,6 +5751,7 @@ export type Database = {
           niche_id?: string | null
           owner_name?: string | null
           phone?: string | null
+          phone_country_code?: string
           primary_color?: string | null
           public_slug?: string | null
           rating_avg?: number | null
@@ -5753,6 +5767,7 @@ export type Database = {
           subdomain?: string | null
           subnicho_slug?: string | null
           support_email?: string | null
+          timezone?: string
           trade_name?: string | null
           updated_at?: string
           vitrine_enabled?: boolean

@@ -14,7 +14,9 @@ import {
   Workflow,
   ExternalLink,
   ShieldCheck,
+  Languages,
 } from "lucide-react";
+import { getLocaleProfile, formatMoney, formatDateTime } from "@/lib/tenant-locale";
 
 /**
  * Card unificado por tenant — Onda D do Core Impulsionando.
@@ -34,7 +36,7 @@ const loadTenantOverview = createServerFn({ method: "GET" })
     const { data: company } = await supabase
       .from("companies")
       .select(
-        "id,name,legal_name,subdomain,domain,address_city,address_state,status,status_commercial,status_financial,status_technical,is_active,company_kind,is_demo,niche_id",
+        "id,name,legal_name,subdomain,domain,address_city,address_state,status,status_commercial,status_financial,status_technical,is_active,company_kind,is_demo,niche_id,country_code,locale,currency_code,phone_country_code,timezone",
       )
       .eq("subdomain", data.slug)
       .maybeSingle();
@@ -162,6 +164,8 @@ function TenantOverviewPage() {
         />
       </section>
 
+      <LocaleStrip company={company} />
+
       <section className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
         <ActionCard
           icon={<Globe className="h-5 w-5" />}
@@ -261,5 +265,36 @@ function ActionCard({
       </div>
       <p className="text-xs text-muted-foreground mt-1">{description}</p>
     </a>
+  );
+}
+
+function LocaleStrip({
+  company,
+}: {
+  company: {
+    country_code?: string | null;
+    locale?: string | null;
+    currency_code?: string | null;
+    phone_country_code?: string | null;
+    timezone?: string | null;
+  };
+}) {
+  const profile = getLocaleProfile(company);
+  const now = new Date();
+  return (
+    <section className="border rounded-md p-3 flex flex-wrap items-center gap-x-6 gap-y-1 text-xs bg-muted/30">
+      <span className="inline-flex items-center gap-1 font-medium">
+        <Languages className="h-3.5 w-3.5" /> {profile.countryName} · {profile.locale}
+      </span>
+      <span>
+        Moeda: <code>{profile.currencyCode}</code> · ex {formatMoney(1234.5, profile)}
+      </span>
+      <span>
+        DDI: <code>{profile.phoneCountryCode}</code>
+      </span>
+      <span>
+        Fuso: <code>{profile.timezone}</code> · {formatDateTime(now, profile)}
+      </span>
+    </section>
   );
 }
