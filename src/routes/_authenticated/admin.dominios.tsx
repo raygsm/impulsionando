@@ -284,3 +284,40 @@ function Chip({
     </button>
   );
 }
+
+function MarkRowButton({ slug }: { slug: string }) {
+  const mark = useServerFn(markTenantPublished);
+  const queryClient = useQueryClient();
+  const [busy, setBusy] = useState(false);
+  async function handle() {
+    setBusy(true);
+    try {
+      const res = await mark({
+        data: { slug, commit: BUILD_INFO.commit, builtAt: BUILD_INFO.builtAt },
+      });
+      toast.success(`${slug} · ${res.commit.slice(0, 7)} marcado`);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["admin", "dominios-cockpit"] }),
+        queryClient.invalidateQueries({ queryKey: ["tenant-domain", slug] }),
+        queryClient.invalidateQueries({ queryKey: ["tenant-deploy-history", slug] }),
+      ]);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao marcar deploy");
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      className="h-6 px-2 text-xs"
+      disabled={busy}
+      onClick={handle}
+      title="Marcar este tenant como publicado no build atual"
+    >
+      <GitCommit className="h-3 w-3 mr-1" />
+      {busy ? "…" : "marcar"}
+    </Button>
+  );
+}
