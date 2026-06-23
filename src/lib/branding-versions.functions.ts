@@ -73,7 +73,11 @@ export const saveBrandingDraft = createServerFn({ method: "POST" })
 export const publishBrandingVersion = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ companyId: z.string().uuid(), versionId: z.string().uuid() }).parse(d),
+    z.object({
+      companyId: z.string().uuid(),
+      versionId: z.string().uuid(),
+      changelog: z.string().max(4000).optional(),
+    }).parse(d),
   )
   .handler(async ({ data, context }) => {
     await context.supabase
@@ -82,9 +86,15 @@ export const publishBrandingVersion = createServerFn({ method: "POST" })
       .eq("company_id", data.companyId)
       .eq("status", "published");
 
+    const updatePayload: { status: string; published_at: string; notes?: string } = {
+      status: "published",
+      published_at: new Date().toISOString(),
+    };
+    if (data.changelog !== undefined) updatePayload.notes = data.changelog;
+
     const { data: row, error } = await context.supabase
       .from("core_branding_versions")
-      .update({ status: "published", published_at: new Date().toISOString() })
+      .update(updatePayload)
       .eq("id", data.versionId)
       .eq("company_id", data.companyId)
       .select()

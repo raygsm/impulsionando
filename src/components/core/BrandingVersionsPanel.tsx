@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,8 +23,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { GitBranch, Rocket, RotateCcw, Trash2, Loader2, Save, ArrowRight } from "lucide-react";
+import { GitBranch, Rocket, RotateCcw, Trash2, Loader2, Save, ArrowRight, Download, FileText, Mail } from "lucide-react";
 import { toast } from "sonner";
+import {
+  type BrandingSnapshot,
+  type BrandingFieldDiff,
+  diffBranding,
+  renderSignatureHtml,
+  buildChangelogMarkdown,
+  buildChangelogSummary,
+} from "@/lib/branding-diff";
 
 interface Props { companyId: string }
 
@@ -47,12 +56,36 @@ interface LiveBranding {
   logo_url: string | null;
   primary_color: string | null;
   secondary_color: string | null;
+  domain?: string | null;
+  default_email?: string | null;
 }
 
 type ConfirmKind =
   | { kind: "publish"; version: VersionRow; previousPublished: VersionRow | null }
   | { kind: "restore"; version: VersionRow; live: LiveBranding | null }
   | { kind: "delete"; version: VersionRow };
+
+function toSnapshot(s: LiveBranding | VersionRow | null): BrandingSnapshot | null {
+  if (!s) return null;
+  return {
+    name: (("trade_name" in s && s.trade_name) || ("name" in s && (s as LiveBranding).name) || "") as string,
+    logo_url: s.logo_url ?? null,
+    primary_color: s.primary_color ?? null,
+    secondary_color: s.secondary_color ?? null,
+  };
+}
+
+function downloadText(filename: string, mime: string, text: string) {
+  const blob = new Blob([text], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 
 export function BrandingVersionsPanel({ companyId }: Props) {
   const listFn = useServerFn(listBrandingVersions);
@@ -63,6 +96,7 @@ export function BrandingVersionsPanel({ companyId }: Props) {
   const qc = useQueryClient();
   const [notes, setNotes] = useState("");
   const [confirm, setConfirm] = useState<ConfirmKind | null>(null);
+  const [changelog, setChangelog] = useState("");
 
   const versionsQ = useQuery({
     queryKey: ["branding-versions", companyId],
@@ -75,13 +109,32 @@ export function BrandingVersionsPanel({ companyId }: Props) {
     qc.invalidateQueries({ queryKey: ["my-branding-companies"] });
   };
 
+  const versions: VersionRow[] = (versionsQ.data?.versions ?? []) as VersionRow[];
+  const live: LiveBranding | null = (versionsQ.data?.live ?? null) as LiveBranding | null;
+  const published = versions.find((v) => v.status === "published") ?? null;
+  const liveVsPublished = useMemo(
+    () => diffBranding(toSnapshot(live), toSnapshot(published)),
+    [live, published],
+  );
+
+  // Pré-preenche changelog quando abre o diálogo de Publicar.
+  useEffect(() => {
+    if (confirm?.kind === "publish") {
+      const v = confirm.version;
+      const prev = confirm.previousPublished;
+      const d = diffBranding(toSnapshot(v), toSnapshot(prev));
+      setChangelog(buildChangelogSummary(d));
+    }
+  }, [confirm]);
+
   const saveDraft = useMutation({
     mutationFn: () => saveFn({ data: { companyId, notes: notes || undefined } }),
     onSuccess: () => { setNotes(""); toast.success("Rascunho salvo."); refresh(); },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
   });
   const publish = useMutation({
-    mutationFn: (versionId: string) => publishFn({ data: { companyId, versionId } }),
+    mutationFn: (args: { versionId: string; changelog: string }) =>
+      publishFn({ data: { companyId, versionId: args.versionId, changelog: args.changelog || undefined } }),
     onSuccess: () => { setConfirm(null); toast.success("Versão publicada."); refresh(); },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
   });
@@ -96,12 +149,15 @@ export function BrandingVersionsPanel({ companyId }: Props) {
     onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
   });
 
-  const versions: VersionRow[] = (versionsQ.data?.versions ?? []) as VersionRow[];
-  const live: LiveBranding | null = (versionsQ.data?.live ?? null) as LiveBranding | null;
-  const published = versions.find((v) => v.status === "published") ?? null;
-
-  // Diff live vs published
-  const liveVsPublished = useMemo(() => diffBranding(toSnapshot(live), toSnapshot(published)), [live, published]);
+  function downloadDiffMd() {
+    const md = buildChangelogMarkdown({
+      brandName: live?.trade_name || live?.name || "Marca",
+      fromLabel: published ? `v${published.version_number} (publicada)` : "(sem publicação anterior)",
+      toLabel: "live / rascunho",
+      diffs: liveVsPublished,
+    });
+    downloadText(`branding-diff-${companyId.slice(0, 8)}.md`, "text/markdown", md);
+  }
 
   return (
     <>
@@ -140,14 +196,19 @@ export function BrandingVersionsPanel({ companyId }: Props) {
             </div>
           </div>
 
-          {/* DIFF live vs published */}
           {published && (
             <div className="rounded-md border p-3">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                 <div className="text-sm font-medium">Diferenças: live ↔ v{published.version_number} (publicada)</div>
-                {liveVsPublished.length === 0 && (
-                  <Badge className="bg-emerald-600 hover:bg-emerald-600"><span className="text-[10px]">sincronizado</span></Badge>
-                )}
+                <div className="flex items-center gap-2">
+                  {liveVsPublished.length === 0 ? (
+                    <Badge className="bg-emerald-600 hover:bg-emerald-600"><span className="text-[10px]">sincronizado</span></Badge>
+                  ) : (
+                    <Button size="sm" variant="outline" className="gap-1.5" onClick={downloadDiffMd}>
+                      <FileText className="h-3.5 w-3.5" /> Baixar diff .md
+                    </Button>
+                  )}
+                </div>
               </div>
               {liveVsPublished.length === 0 ? (
                 <p className="text-xs text-muted-foreground">O live está idêntico à versão publicada — nada pendente.</p>
@@ -211,10 +272,13 @@ export function BrandingVersionsPanel({ companyId }: Props) {
 
       <ConfirmDialog
         confirm={confirm}
+        live={live}
+        changelog={changelog}
+        setChangelog={setChangelog}
         onCancel={() => setConfirm(null)}
         onConfirm={() => {
           if (!confirm) return;
-          if (confirm.kind === "publish") publish.mutate(confirm.version.id);
+          if (confirm.kind === "publish") publish.mutate({ versionId: confirm.version.id, changelog });
           if (confirm.kind === "restore") restore.mutate(confirm.version.id);
           if (confirm.kind === "delete") remove.mutate(confirm.version.id);
         }}
@@ -226,11 +290,17 @@ export function BrandingVersionsPanel({ companyId }: Props) {
 
 function ConfirmDialog({
   confirm,
+  live,
+  changelog,
+  setChangelog,
   onCancel,
   onConfirm,
   pending,
 }: {
   confirm: ConfirmKind | null;
+  live: LiveBranding | null;
+  changelog: string;
+  setChangelog: (s: string) => void;
   onCancel: () => void;
   onConfirm: () => void;
   pending: boolean;
@@ -244,17 +314,35 @@ function ConfirmDialog({
   if (confirm.kind === "publish") {
     const v = confirm.version;
     const prev = confirm.previousPublished;
+    const diff = diffBranding(toSnapshot(v), toSnapshot(prev));
     title = `Publicar v${v.version_number}?`;
     actionLabel = "Publicar agora";
     description = (
-      <div className="space-y-2 text-sm">
+      <div className="space-y-3 text-sm">
         <p>Esta versão passa a ser a <strong>oficial</strong>.</p>
         {prev ? (
           <p>A versão <strong>v{prev.version_number}</strong> (atualmente publicada) será <strong>arquivada</strong> automaticamente — fica no histórico, mas perde o selo "publicada".</p>
         ) : (
           <p>Será a primeira versão publicada desta empresa.</p>
         )}
-        <p className="text-muted-foreground">Isto não muda o que aparece nas abas Identidade/E-mails/Domínio (esses leem o live). É um marco de versionamento.</p>
+        <div className="rounded-md border bg-muted/30 p-2">
+          <p className="text-xs text-muted-foreground mb-1">Mudanças detectadas vs. publicada anterior:</p>
+          {diff.length === 0 ? (
+            <p className="text-xs italic text-muted-foreground">Nenhuma (snapshot idêntico).</p>
+          ) : (
+            <ul className="space-y-1">{diff.map((d) => <DiffRow key={d.field} diff={d} fromLabel={prev ? `v${prev.version_number}` : "—"} toLabel={`v${v.version_number}`} />)}</ul>
+          )}
+        </div>
+        <div>
+          <label className="text-xs font-medium block mb-1">Changelog (vai virar nota da versão, editável):</label>
+          <Textarea
+            value={changelog}
+            onChange={(e) => setChangelog(e.target.value)}
+            rows={4}
+            placeholder="Descreva o que mudou nesta publicação…"
+          />
+        </div>
+        <SignaturePreview snapshot={toSnapshot(v)} live={live} label={`Pré-visualização da assinatura — v${v.version_number}`} />
       </div>
     );
   } else if (confirm.kind === "restore") {
@@ -275,6 +363,7 @@ function ConfirmDialog({
             </ul>
           </div>
         )}
+        <SignaturePreview snapshot={toSnapshot(v)} live={live} label={`Pré-visualização da assinatura — v${v.version_number}`} />
         <p className="text-xs text-muted-foreground">O live ainda existe como rascunho; salve um snapshot antes se quiser preservá-lo.</p>
       </div>
     );
@@ -286,7 +375,7 @@ function ConfirmDialog({
 
   return (
     <AlertDialog open onOpenChange={(o) => !o && onCancel()}>
-      <AlertDialogContent>
+      <AlertDialogContent className="max-w-2xl">
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription asChild><div>{description}</div></AlertDialogDescription>
@@ -302,46 +391,25 @@ function ConfirmDialog({
   );
 }
 
-// ---------- Diff helpers ----------
-
-interface Snapshot {
-  name: string;
-  logo_url: string | null;
-  primary_color: string | null;
-  secondary_color: string | null;
-}
-interface FieldDiff {
-  field: "name" | "logo_url" | "primary_color" | "secondary_color";
-  label: string;
-  from: string | null;
-  to: string | null;
-  kind: "text" | "color" | "image";
-}
-
-function toSnapshot(s: LiveBranding | VersionRow | null): Snapshot | null {
-  if (!s) return null;
-  return {
-    name: (("trade_name" in s && s.trade_name) || ("name" in s && (s as LiveBranding).name) || "") as string,
-    logo_url: s.logo_url ?? null,
-    primary_color: s.primary_color ?? null,
-    secondary_color: s.secondary_color ?? null,
-  };
+function SignaturePreview({ snapshot, live, label }: { snapshot: BrandingSnapshot | null; live: LiveBranding | null; label: string }) {
+  if (!snapshot) return null;
+  const html = renderSignatureHtml({
+    brandName: snapshot.name || "Marca",
+    primary: snapshot.primary_color || "#0F172A",
+    domain: live?.domain || "exemplo.com",
+    logoUrl: snapshot.logo_url,
+    defaultEmail: live?.default_email || `contato@${(live?.domain || "exemplo.com")}`,
+  });
+  return (
+    <div className="rounded-md border p-3 bg-background">
+      <div className="text-xs font-medium mb-2 flex items-center gap-1.5"><Mail className="h-3.5 w-3.5" /> {label}</div>
+      <div className="text-xs text-muted-foreground mb-2">Como o e-mail vai aparecer pra quem receber:</div>
+      <div dangerouslySetInnerHTML={{ __html: html }} />
+    </div>
+  );
 }
 
-function diffBranding(a: Snapshot | null, b: Snapshot | null): FieldDiff[] {
-  if (!a || !b) return [];
-  const fields: { field: FieldDiff["field"]; label: string; kind: FieldDiff["kind"] }[] = [
-    { field: "name", label: "Nome comercial", kind: "text" },
-    { field: "logo_url", label: "Logo", kind: "image" },
-    { field: "primary_color", label: "Cor primária", kind: "color" },
-    { field: "secondary_color", label: "Cor secundária", kind: "color" },
-  ];
-  return fields
-    .filter((f) => (a as any)[f.field] !== (b as any)[f.field])
-    .map((f) => ({ ...f, from: (b as any)[f.field], to: (a as any)[f.field] })); // from = publicada/live anterior, to = live atual
-}
-
-function DiffRow({ diff, fromLabel, toLabel }: { diff: FieldDiff; fromLabel: string; toLabel: string }) {
+function DiffRow({ diff, fromLabel, toLabel }: { diff: BrandingFieldDiff; fromLabel: string; toLabel: string }) {
   return (
     <li className="flex items-center gap-2 text-xs flex-wrap">
       <span className="font-medium min-w-[100px]">{diff.label}:</span>
@@ -354,7 +422,7 @@ function DiffRow({ diff, fromLabel, toLabel }: { diff: FieldDiff; fromLabel: str
   );
 }
 
-function DiffValue({ value, kind, muted }: { value: string | null; kind: FieldDiff["kind"]; muted?: boolean }) {
+function DiffValue({ value, kind, muted }: { value: string | null; kind: BrandingFieldDiff["kind"]; muted?: boolean }) {
   if (!value) return <span className={muted ? "text-muted-foreground italic" : "italic"}>(vazio)</span>;
   if (kind === "color") {
     return (
@@ -379,3 +447,6 @@ function Swatch({ color, small }: { color: string | null | undefined; small?: bo
     />
   );
 }
+
+// Suprime warning de variável não usada
+void Download;

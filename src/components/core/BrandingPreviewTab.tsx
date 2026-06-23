@@ -9,17 +9,20 @@ import { Bell, ChevronRight, LayoutDashboard, Users, Settings, Mail, Globe } fro
 import { useMemo } from "react";
 import { BrandKitExport } from "./BrandKitExport";
 import { ContrastReport } from "./ContrastReport";
+import { BrandingPreviewProvider } from "./BrandingPreviewContext";
 
 interface Props { companyId: string }
 
-/**
- * w24 — Pré-visualização ao vivo do branding.
- *
- * Renderiza um mock de app shell (header, sidebar, conteúdo) com as cores,
- * logo e e-mails do time aplicados como CSS inline-scope. NÃO altera o
- * tema global da página — fica isolado ao card.
- */
-export function BrandingPreviewTab({ companyId }: Props) {
+/** w24/w25 — preview ao vivo + provider de parâmetros WCAG compartilhados. */
+export function BrandingPreviewTab(props: Props) {
+  return (
+    <BrandingPreviewProvider>
+      <BrandingPreviewInner {...props} />
+    </BrandingPreviewProvider>
+  );
+}
+
+function BrandingPreviewInner({ companyId }: Props) {
   const listCompanies = useServerFn(listMyBrandingCompanies);
   const listAliases = useServerFn(listEmailAliases);
 
