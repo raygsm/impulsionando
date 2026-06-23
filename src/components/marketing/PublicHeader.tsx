@@ -351,11 +351,11 @@ export function PublicHeader() {
                       <ShoppingCart className="w-4 h-4 mr-2" /> Contratar Agora
                     </Link>
                   </Button>
-                  <InstallAppButton
-                    className="w-full gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white"
-                    label="Baixar App"
-                    icon={<Download className="w-4 h-4" />}
-                  />
+                  <Button asChild className="w-full gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+                    <Link to="/app" onClick={() => setOpen(false)}>
+                      <Download className="w-4 h-4 mr-2" /> Baixar App
+                    </Link>
+                  </Button>
                 </div>
               </div>
             </SheetContent>
