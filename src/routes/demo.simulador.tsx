@@ -67,21 +67,21 @@ type Action =
   | { type: "SEND_CAMPAIGN"; channel: "whatsapp" | "email" }
   | { type: "RESTOCK"; sku: string; qty: number };
 
-const SEED: State = {
-  products: [
-    { sku: "SKU-A", name: "Produto A", price: 120, stock: 24 },
-    { sku: "SKU-B", name: "Produto B", price: 350, stock: 8 },
-    { sku: "SKU-C", name: "Produto C", price: 80, stock: 50 },
-  ],
-  orders: [],
-  leads: [
-    { id: "L-001", name: "Marina Costa", phone: "(11) 98888-1111", stage: "novo", ts: Date.now() },
-  ],
-  appointments: [],
-  invoices: [],
-  campaigns: [],
-  log: [{ id: "evt-0", ts: Date.now(), module: "Sistema", message: "Ambiente de simulação inicializado." }],
-};
+function buildSeed(niche: string | undefined): State {
+  const s = getNicheSimSeed(niche);
+  return {
+    products: s.products.map((p) => ({ ...p })),
+    orders: [],
+    leads: [{ id: "L-001", name: s.leadName, phone: "(11) 98888-1111", stage: "novo", ts: Date.now() }],
+    appointments: [],
+    invoices: [],
+    campaigns: [],
+    log: [
+      { id: "evt-0", ts: Date.now(), module: "Sistema", message: `Simulação iniciada para ${niche ?? "serviços"}.` },
+    ],
+  };
+}
+
 
 let _id = 1;
 const nid = (p: string) => `${p}-${(_id++).toString().padStart(4, "0")}`;
