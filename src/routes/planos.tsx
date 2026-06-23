@@ -50,11 +50,19 @@ export const Route = createFileRoute("/planos")({
       lvl === "essencial" || lvl === "ideal" || lvl === "full" ? lvl : undefined;
     const nichoRaw = typeof search.nicho === "string" ? search.nicho : undefined;
     const trial = search.trial === 1 || search.trial === "1" ? 1 : undefined;
+    const tabRaw = typeof search.tab === "string" ? search.tab : undefined;
+    const tab: "empresas" | "white-label" | "consumidor" | undefined =
+      tabRaw === "empresas" || tabRaw === "white-label" || tabRaw === "consumidor"
+        ? tabRaw
+        : undefined;
+    const plano = typeof search.plano === "string" ? search.plano : undefined;
     return {
       nicho: nichoRaw,
       recomendado,
       trial,
-    } as { nicho?: string; recomendado?: RecLevel; trial?: 1 };
+      tab,
+      plano,
+    } as { nicho?: string; recomendado?: RecLevel; trial?: 1; tab?: "empresas" | "white-label" | "consumidor"; plano?: string };
   },
   head: () => ({
     meta: [
@@ -68,6 +76,7 @@ export const Route = createFileRoute("/planos")({
   }),
   component: PlanosPage,
 });
+
 
 type Plan = {
   name: string;
@@ -248,12 +257,13 @@ type Audience = "empresas" | "white-label" | "consumidor";
 function PlanosPage() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
-  const { nicho, recomendado } = search;
+  const { nicho, recomendado, tab: initialTab } = search;
   const cameFromNiche = Boolean(nicho && recomendado);
 
-  const [audience, setAudience] = useState<Audience>("empresas");
+  const [audience, setAudience] = useState<Audience>(initialTab ?? "empresas");
   const [annual, setAnnual] = useState(false);
   const [showComparison, setShowComparison] = useState<boolean>(false);
+
   const { openCheckout, loading: checkoutLoading } = usePaddleCheckout();
   const { data: user } = useCurrentUser();
   const fetchAvailability = useServerFn(getCommercialAvailability);

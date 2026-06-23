@@ -27,7 +27,12 @@ const WHATSAPP_NICHO_URL =
 const WHATSAPP_URL =
   "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20falar%20com%20o%20Impulsionito.";
 
-type NavItem = { to: string; label: string; exact?: boolean };
+type NavItem = {
+  to: string;
+  label: string;
+  exact?: boolean;
+  search?: Record<string, string>;
+};
 
 /**
  * Menu principal por jornada. "Empresas" abre um submenu com a lista de Nichos
@@ -36,9 +41,13 @@ type NavItem = { to: string; label: string; exact?: boolean };
 const NAV: NavItem[] = [
   { to: "/", label: "Início", exact: true },
   { to: "/clube", label: "Clube" },
+  { to: "/planos", label: "Empresas", search: { tab: "empresas" } },
+  { to: "/planos", label: "White Label", search: { tab: "white-label" } },
   { to: "/demo", label: "Demonstrações" },
   { to: "/escolher-nicho", label: "Planos" },
 ];
+
+
 
 function useActive(path: string, exact?: boolean) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -51,16 +60,19 @@ function NavLink({
   label,
   exact,
   onClick,
+  search,
 }: {
   to: string;
   label: string;
   exact?: boolean;
   onClick?: () => void;
+  search?: Record<string, string>;
 }) {
   const active = useActive(to, exact);
   return (
     <Link
       to={to}
+      search={search as never}
       onClick={onClick}
       className={cn(
         "px-3 py-1.5 text-sm rounded-md transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -73,6 +85,7 @@ function NavLink({
     </Link>
   );
 }
+
 
 function ItemLink({
   item,
@@ -506,8 +519,9 @@ export function PublicHeader() {
           <EmpresasMenu />
           <NichosMenu />
           {NAV.filter((n) => n.to !== "/").map((it) => (
-            <NavLink key={it.to} {...it} />
+            <NavLink key={`${it.to}-${it.label}`} {...it} />
           ))}
+
         </nav>
 
         <div className="flex items-center gap-2">
@@ -660,8 +674,9 @@ export function PublicHeader() {
                 ) : null}
 
                 {NAV.filter((n) => n.to !== "/").map((it) => (
-                  <NavLink key={it.to} {...it} onClick={() => setOpen(false)} />
+                  <NavLink key={`${it.to}-${it.label}`} {...it} onClick={() => setOpen(false)} />
                 ))}
+
 
                 <div className="flex flex-col gap-2 pt-4 mt-3 border-t border-border">
                   <Button asChild className="gap-2 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-violet-500 text-white">
