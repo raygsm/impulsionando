@@ -8,13 +8,19 @@
 import { createFileRoute, Link, useParams } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { useQuery } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
 import { listPublicPlans } from '@/lib/contratar.functions'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { PixCheckoutCard } from '@/components/payments/PixCheckoutCard'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, CreditCard, Info } from 'lucide-react'
+import { ArrowLeft, CreditCard, Info, Package, Sparkles } from 'lucide-react'
+import {
+  readCheckoutCart,
+  summarizeCart,
+  type CheckoutCart,
+} from '@/hooks/useCheckoutCart'
 
 export const Route = createFileRoute('/_authenticated/checkout/$plano')({
   component: CheckoutPage,
@@ -28,6 +34,10 @@ export const Route = createFileRoute('/_authenticated/checkout/$plano')({
 
 function formatBRL(v: number) {
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+
+function formatBRLCents(c: number) {
+  return formatBRL(c / 100)
 }
 
 function CheckoutPage() {
