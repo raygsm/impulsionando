@@ -24,11 +24,11 @@ export const getLead360 = createServerFn({ method: "GET" })
     if (!lead) throw new Error("Lead não encontrado.");
 
     // Autorização: super admin OU pertence à empresa do lead
-    const { data: isStaff } = await supabaseAdmin.rpc("is_super_admin", { _user_id: userId });
+    const { data: isStaff } = await supabaseAdmin.rpc("is_super_admin", { _user: userId });
     if (!isStaff) {
       const { data: belongs } = await supabaseAdmin.rpc("user_belongs_to_company", {
-        _user_id: userId,
-        _company_id: lead.company_id,
+        _user: userId,
+        _company: lead.company_id,
       });
       if (!belongs) throw new Error("Sem acesso a este lead.");
     }
