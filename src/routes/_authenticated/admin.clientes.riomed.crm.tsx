@@ -9,11 +9,19 @@ import {
   confirmRiomedQuote,
   updateRiomedQuoteStatus,
 } from "@/lib/riomed-commercial.functions";
+import {
+  listRiomedSellerLeads,
+  listRiomedTickets,
+  updateRiomedLeadStatus,
+  updateRiomedTicketStatus,
+  getRiomedTeamPerformance,
+} from "@/lib/riomed-public.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { TrendingUp, Loader2, CheckCircle2, XCircle, Send } from "lucide-react";
+import { TrendingUp, Loader2, CheckCircle2, XCircle, Send, Users, LifeBuoy, Award } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/riomed/crm")({
   head: () => ({ meta: [{ title: "Rio Med · CRM Comercial" }] }),
