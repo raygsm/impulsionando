@@ -290,7 +290,7 @@ const supportSchema = z.object({
 export const openRiomedSupportTicket = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => supportSchema.parse(d))
   .handler(async ({ data }) => {
-    const supa = pubClient();
+    const supa = await adminClient();
     const stamp = Date.now().toString(36).toUpperCase();
     const rand = Math.floor(Math.random() * 9000 + 1000).toString();
     const protocol = `RM-${stamp}-${rand}`;
@@ -325,14 +325,16 @@ export const openRiomedSupportTicket = createServerFn({ method: "POST" })
 
 export const listRiomedTeam = createServerFn({ method: "GET" })
   .handler(async () => {
-    const supa = pubClient();
+    const supa = await adminClient();
+    // Public listing — expõe apenas dados não-sensíveis (sem email/phone)
     const { data } = await supa
       .from("riomed_team")
-      .select("id,full_name,email,phone,member_role,specialty,rr_position")
+      .select("id,full_name,member_role,specialty,rr_position")
       .eq("active", true)
       .order("rr_position", { ascending: true });
     return { team: data ?? [] };
   });
+
 
 const leadSchema = z.object({
   customerName: z.string().trim().min(2).max(160),
