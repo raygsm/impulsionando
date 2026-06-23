@@ -1,0 +1,122 @@
+{
+  "name": "Impulsionando — Régua Nicho (Template Parametrizável)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "niche-event",
+        "responseMode": "responseNode",
+        "options": { "rawBody": true }
+      },
+      "id": "wh",
+      "name": "Webhook niche.event",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "const crypto = require('crypto');\nconst sig = $input.first().json.headers['x-impulsionando-signature'] || '';\nconst raw = $input.first().json.body;\nconst h = crypto.createHmac('sha256', $env.IMPULSIONANDO_WEBHOOK_SECRET).update(typeof raw==='string'?raw:JSON.stringify(raw)).digest('hex');\nif (h !== sig) throw new Error('invalid signature');\nreturn [{ json: typeof raw==='string'?JSON.parse(raw):raw }];"
+      },
+      "id": "verify",
+      "name": "Verify HMAC",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [440, 300]
+    },
+    {
+      "parameters": { "responseCode": 200, "responseBody": "ok" },
+      "id": "resp",
+      "name": "Respond 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [640, 180]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{$json.niche_slug}}",
+        "rules": {
+          "rules": [
+            { "value2": "imobiliaria", "output": 0 },
+            { "value2": "clinica", "output": 1 },
+            { "value2": "eventos", "output": 2 },
+            { "value2": "restaurante", "output": 3 },
+            { "value2": "bar", "output": 4 },
+            { "value2": "cervejaria", "output": 5 },
+            { "value2": "contabilidade", "output": 6 },
+            { "value2": "advocacia", "output": 7 },
+            { "value2": "educacao", "output": 8 }
+          ]
+        }
+      },
+      "id": "switch-niche",
+      "name": "Switch by niche_slug",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [820, 380]
+    },
+    {
+      "parameters": {
+        "url": "https://api.z-api.io/instances/{{$env.ZAPI_INSTANCE}}/token/{{$env.ZAPI_TOKEN}}/send-text",
+        "method": "POST",
+        "jsonBody": "={\"phone\":\"{{$json.customer.phone}}\",\"message\":\"{{$json.message}}\"}",
+        "sendBody": true,
+        "specifyBody": "json"
+      },
+      "id": "wa",
+      "name": "WhatsApp (Z-API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1080, 280]
+    },
+    {
+      "parameters": { "amount": 1, "unit": "days" },
+      "id": "wait-1d",
+      "name": "Wait 1d",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [1280, 380]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send",
+        "method": "POST",
+        "jsonBody": "={\"template\":\"{{$json.email_template}}\",\"to\":\"{{$json.customer.email}}\",\"props\":{{JSON.stringify($json.props || {})}}}",
+        "sendBody": true,
+        "specifyBody": "json"
+      },
+      "id": "email",
+      "name": "Email (Resend via backend)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1480, 380]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/webhooks/n8n-callback",
+        "method": "POST",
+        "jsonBody": "={\"workflow\":\"{{$workflow.name}}\",\"event\":\"{{$('Verify HMAC').first().json.event_name}}\",\"niche_slug\":\"{{$('Verify HMAC').first().json.niche_slug}}\",\"status\":\"completed\",\"executionId\":\"{{$execution.id}}\"}",
+        "sendBody": true,
+        "specifyBody": "json"
+      },
+      "id": "callback",
+      "name": "Callback → n8n_workflow_runs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1700, 380]
+    }
+  ],
+  "connections": {
+    "Webhook niche.event": { "main": [[{ "node": "Verify HMAC", "type": "main", "index": 0 }]] },
+    "Verify HMAC": { "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }, { "node": "Switch by niche_slug", "type": "main", "index": 0 }]] },
+    "Switch by niche_slug": { "main": [[{ "node": "WhatsApp (Z-API)", "type": "main", "index": 0 }]] },
+    "WhatsApp (Z-API)": { "main": [[{ "node": "Wait 1d", "type": "main", "index": 0 }]] },
+    "Wait 1d": { "main": [[{ "node": "Email (Resend via backend)", "type": "main", "index": 0 }]] },
+    "Email (Resend via backend)": { "main": [[{ "node": "Callback → n8n_workflow_runs", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "meta": {
+    "description": "Template parametrizável de régua por nicho. Duplique e ajuste o path do webhook (<niche>-<event>), os templates de mensagem e os waits conforme docs/n8n/niches/README.md."
+  }
+}
