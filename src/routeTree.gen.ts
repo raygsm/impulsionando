@@ -419,6 +419,7 @@ import { Route as AuthenticatedAdminWhitelabelHealthRouteImport } from './routes
 import { Route as AuthenticatedAdminWhiteLabelTenantsRouteImport } from './routes/_authenticated/admin.white-label-tenants'
 import { Route as AuthenticatedAdminWhatsappMetricsRouteImport } from './routes/_authenticated/admin.whatsapp-metrics'
 import { Route as AuthenticatedAdminVitrineLegalHealthRouteImport } from './routes/_authenticated/admin.vitrine-legal-health'
+import { Route as AuthenticatedAdminVitrineRouteImport } from './routes/_authenticated/admin.vitrine'
 import { Route as AuthenticatedAdminVendorPerformanceRouteImport } from './routes/_authenticated/admin.vendor-performance'
 import { Route as AuthenticatedAdminUptimeRouteImport } from './routes/_authenticated/admin.uptime'
 import { Route as AuthenticatedAdminUnitEconomicsRouteImport } from './routes/_authenticated/admin.unit-economics'
@@ -2916,6 +2917,12 @@ const AuthenticatedAdminVitrineLegalHealthRoute =
     path: '/admin/vitrine-legal-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminVitrineRoute =
+  AuthenticatedAdminVitrineRouteImport.update({
+    id: '/admin/vitrine',
+    path: '/admin/vitrine',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminVendorPerformanceRoute =
   AuthenticatedAdminVendorPerformanceRouteImport.update({
     id: '/admin/vendor-performance',
@@ -4768,6 +4775,7 @@ export interface FileRoutesByFullPath {
   '/admin/unit-economics': typeof AuthenticatedAdminUnitEconomicsRoute
   '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/admin/vendor-performance': typeof AuthenticatedAdminVendorPerformanceRoute
+  '/admin/vitrine': typeof AuthenticatedAdminVitrineRoute
   '/admin/vitrine-legal-health': typeof AuthenticatedAdminVitrineLegalHealthRoute
   '/admin/whatsapp-metrics': typeof AuthenticatedAdminWhatsappMetricsRoute
   '/admin/white-label-tenants': typeof AuthenticatedAdminWhiteLabelTenantsRoute
@@ -5424,6 +5432,7 @@ export interface FileRoutesByTo {
   '/admin/unit-economics': typeof AuthenticatedAdminUnitEconomicsRoute
   '/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/admin/vendor-performance': typeof AuthenticatedAdminVendorPerformanceRoute
+  '/admin/vitrine': typeof AuthenticatedAdminVitrineRoute
   '/admin/vitrine-legal-health': typeof AuthenticatedAdminVitrineLegalHealthRoute
   '/admin/whatsapp-metrics': typeof AuthenticatedAdminWhatsappMetricsRoute
   '/admin/white-label-tenants': typeof AuthenticatedAdminWhiteLabelTenantsRoute
@@ -6094,6 +6103,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/unit-economics': typeof AuthenticatedAdminUnitEconomicsRoute
   '/_authenticated/admin/uptime': typeof AuthenticatedAdminUptimeRoute
   '/_authenticated/admin/vendor-performance': typeof AuthenticatedAdminVendorPerformanceRoute
+  '/_authenticated/admin/vitrine': typeof AuthenticatedAdminVitrineRoute
   '/_authenticated/admin/vitrine-legal-health': typeof AuthenticatedAdminVitrineLegalHealthRoute
   '/_authenticated/admin/whatsapp-metrics': typeof AuthenticatedAdminWhatsappMetricsRoute
   '/_authenticated/admin/white-label-tenants': typeof AuthenticatedAdminWhiteLabelTenantsRoute
@@ -6764,6 +6774,7 @@ export interface FileRouteTypes {
     | '/admin/unit-economics'
     | '/admin/uptime'
     | '/admin/vendor-performance'
+    | '/admin/vitrine'
     | '/admin/vitrine-legal-health'
     | '/admin/whatsapp-metrics'
     | '/admin/white-label-tenants'
@@ -7420,6 +7431,7 @@ export interface FileRouteTypes {
     | '/admin/unit-economics'
     | '/admin/uptime'
     | '/admin/vendor-performance'
+    | '/admin/vitrine'
     | '/admin/vitrine-legal-health'
     | '/admin/whatsapp-metrics'
     | '/admin/white-label-tenants'
@@ -8089,6 +8101,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/unit-economics'
     | '/_authenticated/admin/uptime'
     | '/_authenticated/admin/vendor-performance'
+    | '/_authenticated/admin/vitrine'
     | '/_authenticated/admin/vitrine-legal-health'
     | '/_authenticated/admin/whatsapp-metrics'
     | '/_authenticated/admin/white-label-tenants'
@@ -11482,6 +11495,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminVitrineLegalHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/vitrine': {
+      id: '/_authenticated/admin/vitrine'
+      path: '/admin/vitrine'
+      fullPath: '/admin/vitrine'
+      preLoaderRoute: typeof AuthenticatedAdminVitrineRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/vendor-performance': {
       id: '/_authenticated/admin/vendor-performance'
       path: '/admin/vendor-performance'
@@ -14245,6 +14265,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminUnitEconomicsRoute: typeof AuthenticatedAdminUnitEconomicsRoute
   AuthenticatedAdminUptimeRoute: typeof AuthenticatedAdminUptimeRoute
   AuthenticatedAdminVendorPerformanceRoute: typeof AuthenticatedAdminVendorPerformanceRoute
+  AuthenticatedAdminVitrineRoute: typeof AuthenticatedAdminVitrineRoute
   AuthenticatedAdminVitrineLegalHealthRoute: typeof AuthenticatedAdminVitrineLegalHealthRoute
   AuthenticatedAdminWhatsappMetricsRoute: typeof AuthenticatedAdminWhatsappMetricsRoute
   AuthenticatedAdminWhiteLabelTenantsRoute: typeof AuthenticatedAdminWhiteLabelTenantsRoute
@@ -14574,6 +14595,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminUptimeRoute: AuthenticatedAdminUptimeRoute,
   AuthenticatedAdminVendorPerformanceRoute:
     AuthenticatedAdminVendorPerformanceRoute,
+  AuthenticatedAdminVitrineRoute: AuthenticatedAdminVitrineRoute,
   AuthenticatedAdminVitrineLegalHealthRoute:
     AuthenticatedAdminVitrineLegalHealthRoute,
   AuthenticatedAdminWhatsappMetricsRoute:
