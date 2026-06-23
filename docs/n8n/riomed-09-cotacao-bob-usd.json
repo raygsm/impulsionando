@@ -1,0 +1,61 @@
+{
+  "name": "RioMed — 09 Operação · Cotação BOB/USD diária",
+  "description": "Cron diário 08h America/La_Paz. Busca cotação oficial (BCB/exchangerate-host) e grava em cotacao_bob_usd. Usado para conversão de preços e relatórios fiscais.",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "cronExpression", "expression": "0 8 * * *" }] },
+        "timezone": "America/La_Paz"
+      },
+      "id": "cron",
+      "name": "Cron 08h La Paz",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.exchangerate.host/latest?base=USD&symbols=BOB",
+        "method": "GET",
+        "options": { "timeout": 15000 }
+      },
+      "id": "fx",
+      "name": "Fetch USD→BOB",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "const r = $json;\nconst bob = r.rates && r.rates.BOB;\nif (!bob) throw new Error('rate missing');\nreturn [{ json: {\n  source: 'exchangerate.host',\n  event_code: 'fx.daily',\n  payload: { base: 'USD', quote: 'BOB', rate: bob, ref_date: r.date }\n} }];"
+      },
+      "id": "norm",
+      "name": "Normalize",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/riomed/fx/upsert",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [
+          { "name": "x-impulsionando-signature", "value": "={{$crypto.createHmac('sha256', $env.IMPULSIONANDO_WEBHOOK_SECRET).update(JSON.stringify($json)).digest('hex')}}" },
+          { "name": "Content-Type", "value": "application/json" }
+        ] },
+        "jsonBody": "={{ JSON.stringify($json) }}"
+      },
+      "id": "save",
+      "name": "POST /fx/upsert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [840, 300]
+    }
+  ],
+  "connections": {
+    "Cron 08h La Paz": { "main": [[{ "node": "Fetch USD→BOB", "type": "main", "index": 0 }]] },
+    "Fetch USD→BOB": { "main": [[{ "node": "Normalize", "type": "main", "index": 0 }]] },
+    "Normalize": { "main": [[{ "node": "POST /fx/upsert", "type": "main", "index": 0 }]] }
+  }
+}

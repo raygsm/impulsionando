@@ -1,0 +1,51 @@
+{
+  "name": "RioMed — 06 Captação · Lead Facebook Ads",
+  "description": "Recebe leads do Facebook Lead Ads (Meta) e injeta em marketing_leads/crm_leads via /api/public/riomed/events. Etapa do funil Impulsionando: captar.",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": { "item": [{ "mode": "everyMinute" }] },
+        "formId": "={{$env.RIOMED_FB_FORM_ID}}",
+        "pageId": "={{$env.RIOMED_FB_PAGE_ID}}"
+      },
+      "id": "fb",
+      "name": "Facebook Lead Ads Trigger",
+      "type": "n8n-nodes-base.facebookLeadAdsTrigger",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "credentials": { "facebookGraphApi": { "id": "fb_main", "name": "Meta Graph API" } }
+    },
+    {
+      "parameters": {
+        "functionCode": "const fields = ($json.field_data || []).reduce((acc, f) => { acc[f.name] = (f.values || [])[0]; return acc; }, {});\nreturn [{ json: {\n  source: 'facebook_ads',\n  event_code: 'lead.created',\n  payload: {\n    customer: { name: fields.full_name || fields.name, phone: fields.phone_number, email: fields.email },\n    interest: fields.interest || fields.product || 'consulta_geral',\n    utm: { source: 'facebook', medium: 'paid', campaign: $json.campaign_name, form: $json.form_name },\n    fb_lead_id: $json.id\n  }\n} }];"
+      },
+      "id": "norm",
+      "name": "Normalize → Impulsionando schema",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/riomed/events",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [
+          { "name": "x-impulsionando-signature", "value": "={{$crypto.createHmac('sha256', $env.IMPULSIONANDO_WEBHOOK_SECRET).update(JSON.stringify($json)).digest('hex')}}" },
+          { "name": "Content-Type", "value": "application/json" }
+        ] },
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": { "timeout": 15000 }
+      },
+      "id": "push",
+      "name": "POST /events (lead.created)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "Facebook Lead Ads Trigger": { "main": [[{ "node": "Normalize → Impulsionando schema", "type": "main", "index": 0 }]] },
+    "Normalize → Impulsionando schema": { "main": [[{ "node": "POST /events (lead.created)", "type": "main", "index": 0 }]] }
+  }
+}
