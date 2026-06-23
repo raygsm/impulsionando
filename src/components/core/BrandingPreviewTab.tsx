@@ -212,6 +212,8 @@ export function BrandingPreviewTab({ companyId }: Props) {
         </CardContent>
       </Card>
 
+      <ContrastReport primary={primary} secondary={secondary} />
+
       <BrandKitExport
         brandName={brandName}
         primary={primary}
