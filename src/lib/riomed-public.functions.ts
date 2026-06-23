@@ -56,18 +56,52 @@ export const getRiomedSiteSettings = createServerFn({ method: "GET" })
   });
 
 export const listRiomedPublicProducts = createServerFn({ method: "GET" })
-  .inputValidator((d: { search?: string; category?: string; limit?: number } = {}) => d)
+  .inputValidator((d: { search?: string; category?: string; condition?: "new"|"used"; modality?: "venta"|"alquiler"|"ambos"; limit?: number } = {}) => d)
   .handler(async ({ data }) => {
     const supa = pubClient();
     let q = supa
       .from("riomed_products")
-      .select("id,sku,name,description,category,brand,model,image_url,is_active,allow_sale,allow_rental")
+      .select("id,sku,name,description,category,brand,model,image_url,is_active,modality,price_sale,price_rental_daily,price_rental_monthly,currency,stock,metadata")
       .eq("is_active", true)
+      .order("display_order", { ascending: true })
       .limit(data.limit ?? 60);
     if (data.search) q = q.or(`name.ilike.%${data.search}%,sku.ilike.%${data.search}%,brand.ilike.%${data.search}%`);
     if (data.category) q = q.eq("category", data.category);
+    if (data.modality) q = q.in("modality", data.modality === "ambos" ? ["ambos"] : [data.modality, "ambos"]);
     const { data: rows } = await q;
-    return { items: rows ?? [] };
+    let items = rows ?? [];
+    if (data.condition) {
+      items = items.filter((r: any) => (r.metadata?.condition ?? "new") === data.condition);
+    }
+    return { items };
+  });
+
+export const getCotacaoBobUsd = createServerFn({ method: "GET" })
+  .handler(async () => {
+    try {
+      const supa = pubClient();
+      const { data } = await supa
+        .from("cotacao_bob_usd")
+        .select("rate,source,captured_at")
+        .eq("is_active", true)
+        .order("captured_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (data?.rate) return { rate: Number(data.rate), source: data.source as string, capturedAt: data.captured_at as string | null };
+    } catch { /* fallback */ }
+    return { rate: 6.96, source: "fallback", capturedAt: null as string | null };
+  });
+
+export const listProductCategories = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const supa = pubClient();
+    const { data } = await supa
+      .from("riomed_products")
+      .select("category")
+      .eq("is_active", true);
+    const set = new Set<string>();
+    (data ?? []).forEach((r: any) => { if (r.category) set.add(r.category); });
+    return { categories: Array.from(set).sort() };
   });
 
 const quoteSchema = z.object({
