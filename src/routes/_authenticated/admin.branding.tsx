@@ -83,6 +83,8 @@ function BrandingPage() {
             </CardHeader>
           </Card>
 
+          {selected && <BrandingCompletenessCard companyId={selected} />}
+
           {selected && (
             <Tabs defaultValue="identity">
               <TabsList>
