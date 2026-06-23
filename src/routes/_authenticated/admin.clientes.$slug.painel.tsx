@@ -196,12 +196,17 @@ function PainelPage() {
           )}
         </div>
 
-        {/* MÓDULOS CONTRATADOS — grid de descoberta */}
+        {/* RECURSOS DO PLANO — menu completo de funcionalidades funcionais */}
+        {features.length > 0 && (
+          <ClientFeatureMenu groups={features} enabledModules={enabledSet} />
+        )}
+
+        {/* MÓDULOS CONTRATADOS — grid de descoberta (catálogo bruto) */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2 text-base">
-                <Activity className="h-4 w-4" /> Módulos do plano ({moduleCount})
+                <Activity className="h-4 w-4" /> Catálogo de módulos ({moduleCount})
               </CardTitle>
               <Badge variant="outline">Plano Full · Impulsionando</Badge>
             </div>
@@ -210,6 +215,7 @@ function PainelPage() {
             <ModulesGrid modules={modules} slug={slug} />
           </CardContent>
         </Card>
+
       </div>
     </div>
   );
