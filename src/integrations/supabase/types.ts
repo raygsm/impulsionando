@@ -23644,6 +23644,77 @@ export type Database = {
           },
         ]
       }
+      riomed_role_templates: {
+        Row: {
+          code: string
+          company_id: string | null
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          is_system: boolean
+          label: string
+          scopes: string[]
+          sector: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_system?: boolean
+          label: string
+          scopes?: string[]
+          sector: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_system?: boolean
+          label?: string
+          scopes?: string[]
+          sector?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_role_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_role_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_role_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_role_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       riomed_search_queries: {
         Row: {
           channel: string
