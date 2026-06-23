@@ -330,43 +330,43 @@ function PlanosPage() {
     const quota = PLAN_QUOTA[plan.name] ?? 1;
     const included = modules.slice(0, quota);
     const extras = modules.slice(quota);
-    const extrasMonthly = extras.length * EXTRA_MODULE_BRL;
+    const extrasMonthlyCents = extras.length * EXTRA_MODULE_BRL * 100;
     const baseMonthly = annual
       ? Math.round((plan.monthly ?? 0) * 10 / 12)
       : (plan.monthly ?? 0);
-    const totalMonthly = baseMonthly + extrasMonthly;
     const setup = PLAN_SETUP_BRL[plan.name] ?? 0;
+    const planCode = PLAN_NAME_TO_CODE[plan.name];
 
-    try {
-      await openCheckout({
-        priceId: PRICE_IDS[plan.name][annual ? "annual" : "monthly"],
-        customerEmail: user?.user?.email ?? undefined,
-        customData: {
-          ...(user?.user?.id ? { userId: user.user.id } : {}),
-          plan: plan.name,
-          modules_included: included.join(","),
-          modules_extra: extras.join(","),
-          extras_monthly_brl: String(extrasMonthly),
-          setup_brl: String(setup),
-          minimum_term_days: "90",
-        },
+    if (!planCode) {
+      // Planos sem código mapeado (ex.: Sob Medida) seguem pelo orçamento.
+      await navigate({
+        to: "/orcamento",
+        search: { plano: plan.name, origem: "planos" } as never,
       });
-    } catch {
-      // Pix fallback espelha o ciclo mínimo cobrado pelo gateway:
-      // - Mensal: setup + 3 mensalidades (mínimo 90 dias)
-      // - Anual: setup + 12× preço/mês no rate anual (= 10× preço cheio, 2 meses grátis)
-      const cycleMonths = annual ? 12 : 3;
-      const cycleValue = totalMonthly * cycleMonths;
-      toast.message(
-        "Instabilidade no checkout. Liberei o pagamento via Pix para você seguir agora.",
-      );
-      setPixState({
-        open: true,
-        amountCents: Math.round((setup + cycleValue) * 100),
-        txid: `PLANO-${plan.name.toUpperCase()}-${annual ? "ANUAL" : "MENSAL"}`,
-        label: `Plano ${plan.name}${modules.length ? ` (${modules.length} mód.)` : ""} — ${annual ? "anual (setup + 12 mensalidades)" : "mensal (setup + 3 mensalidades)"}`,
-      });
+      return;
     }
+
+    // Persiste o carrinho para a tela /checkout/$plano (Mercado Pago).
+    saveCheckoutCart({
+      planCode,
+      planName: plan.displayName ?? plan.name,
+      billing: annual ? "annual" : "monthly",
+      modulesIncluded: included,
+      modulesExtra: extras,
+      setupCents: Math.round(setup * 100),
+      monthlyCents: Math.round(baseMonthly * 100),
+      extrasMonthlyCents,
+      origin: "planos",
+      nicho,
+    });
+
+    toast.success(
+      `Plano ${plan.displayName ?? plan.name} no carrinho. Finalize o pagamento via Pix, cartão ou boleto.`,
+    );
+    await navigate({
+      to: "/checkout/$plano",
+      params: { plano: planCode },
+    });
   }
 
 
