@@ -704,4 +704,3 @@ function DrillView({
   );
 }
 
-export default ShowroomRelatoriosAvancados;

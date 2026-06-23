@@ -655,6 +655,5 @@ function ShowroomAutomacoesIA() {
   );
 }
 
-export default ShowroomAutomacoesIA;
 // touch
 void ACTION_ICONS;

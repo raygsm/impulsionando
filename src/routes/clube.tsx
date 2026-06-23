@@ -5,7 +5,7 @@
  * rota quebra com code-splitting → página renderizava em branco).
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { ClubeLanding } from "./consumidor";
+import { ClubeLanding } from "@/components/clube/ClubeLanding";
 
 export const Route = createFileRoute("/clube")({
   head: () => ({

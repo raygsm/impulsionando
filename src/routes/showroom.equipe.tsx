@@ -549,4 +549,3 @@ function KpiCard({
   );
 }
 
-export default ShowroomEquipe;

@@ -907,5 +907,4 @@ function KpiCard({
   );
 }
 
-export default ShowroomAtendimento;
 
