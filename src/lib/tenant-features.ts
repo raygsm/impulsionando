@@ -30,8 +30,22 @@ export interface FeatureGroup {
 export function getTenantFeatures(slug: string): FeatureGroup[] {
   if (slug === "riomed") return RIOMED_FEATURES;
   if (slug === "chrismed") return CHRISMED_FEATURES;
+  if (slug === "marocas") return MAROCAS_FEATURES;
   return [];
 }
+
+const MAROCAS_FEATURES: FeatureGroup[] = [
+  {
+    category: "Cockpit Marocas",
+    items: [
+      { label: "Cockpit", to: "/marocas/cockpit", icon: Layout, description: "Visão consolidada de apartamentos e proprietários" },
+      { label: "Relatórios", to: "/marocas/cockpit/relatorio", icon: ClipboardList, description: "Relatórios mensais por proprietário" },
+      { label: "Relatórios enviados", to: "/marocas/cockpit/relatorios-enviados", icon: ScrollText, description: "Histórico de envios" },
+      { label: "Notificações", to: "/marocas/cockpit/notificacoes", icon: MessageCircle, description: "Notificações de manutenção e finanças" },
+    ],
+  },
+];
+
 
 const CHRISMED_FEATURES: FeatureGroup[] = [
   {
