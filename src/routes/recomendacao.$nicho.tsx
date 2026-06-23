@@ -439,6 +439,12 @@ const PLAN_META = {
 function RecomendacaoPage() {
   const { nicho } = Route.useLoaderData();
   const r = RECOMENDACOES[nicho]!;
+  const pricing = usePlanPricing();
+  const PRICE_BY_LEVEL: Record<RecPlan["level"], number | null> = {
+    essencial: pricing.essencial,
+    ideal: pricing.integrado,
+    full: pricing.avancado,
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
