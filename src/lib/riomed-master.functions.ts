@@ -239,11 +239,12 @@ export const pingRiomedN8n = createServerFn({ method: "POST" })
     await requireMaster(context as any);
     const sb = (context as any).supabase;
     const cid = await getRiomedCompanyId(sb);
-    const { data: wfs } = await sb
+    let q = sb
       .from("riomed_n8n_workflows")
       .select("id, name, webhook_url, is_active")
-      .eq("company_id", cid)
-      .eq(...(data.workflowId ? (["id", data.workflowId] as const) : (["is_active", true] as const)));
+      .eq("company_id", cid);
+    if (data.workflowId) q = q.eq("id", data.workflowId); else q = q.eq("is_active", true);
+    const { data: wfs } = await q;
 
     const list = (wfs ?? []).filter((w: any) => w.webhook_url);
     if (list.length === 0) {
