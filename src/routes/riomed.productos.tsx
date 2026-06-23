@@ -57,13 +57,21 @@ function ProductosPage() {
 
   const products = useQuery({
     queryKey: ["riomed-products", q, cat, cond, mod],
-    queryFn: () => list({ data: {
-      search: q || undefined,
-      category: cat || undefined,
-      condition: cond || undefined,
-      modality: mod || undefined,
-      limit: 80,
-    } }),
+    queryFn: () =>
+      measureStage(
+        "listProductos",
+        "fetch",
+        () =>
+          list({ data: {
+            search: q || undefined,
+            category: cat || undefined,
+            condition: cond || undefined,
+            modality: mod || undefined,
+            limit: 80,
+          } }),
+        { q, cat, cond, mod },
+      ),
+    retry: 1,
   });
   const categories = useQuery({ queryKey: ["riomed-cats"], queryFn: () => cats() });
   const cotacao = useQuery({ queryKey: ["riomed-cotacao"], queryFn: () => cot(), staleTime: 60_000 });
