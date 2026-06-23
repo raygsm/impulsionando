@@ -45,15 +45,14 @@ export const getLead360 = createServerFn({ method: "GET" })
         .order("created_at", { ascending: false }),
       supabaseAdmin
         .from("crm_activities")
-        .select("id, type, subject, occurred_at, payload")
+        .select("id, activity_type, subject, content, done_at, due_at, created_at")
         .eq("lead_id", leadId)
-        .order("occurred_at", { ascending: false })
+        .order("created_at", { ascending: false })
         .limit(50),
       supabaseAdmin
         .from("support_tickets")
-        .select("id, subject, status, priority, created_at, first_response_at, resolved_at")
-        .eq("company_id", companyId)
-        .or(`requester_email.eq.${email},requester_phone.eq.${phone}`)
+        .select("id, protocol, subject, status, priority, created_at, first_response_at, resolved_at")
+        .eq("crm_lead_id", leadId)
         .order("created_at", { ascending: false })
         .limit(20),
       supabaseAdmin
@@ -77,8 +76,7 @@ export const getLead360 = createServerFn({ method: "GET" })
       supabaseAdmin
         .from("agenda_appointments")
         .select("id, status, starts_at, ends_at, customer_email, customer_phone")
-        .eq("company_id", companyId)
-        .or(`customer_email.eq.${email},customer_phone.eq.${phone}`)
+        .eq("lead_id", leadId)
         .order("starts_at", { ascending: false })
         .limit(20),
     ]);
