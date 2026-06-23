@@ -77,6 +77,7 @@ function ProductosPage() {
       token = cart.sessionToken;
       if (typeof window !== "undefined") localStorage.setItem(TOKEN_KEY, token);
       await add({ data: { sessionToken: token, productId, modality, qty: 1 } });
+      if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("riomed:cart-changed"));
       toast.success(`${name} agregado al carrito`);
     } catch (e: any) {
       toast.error(e?.message ?? "Error");
