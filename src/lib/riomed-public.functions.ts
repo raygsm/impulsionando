@@ -349,7 +349,7 @@ const leadSchema = z.object({
 export const submitRiomedSellerLead = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => leadSchema.parse(d))
   .handler(async ({ data }) => {
-    const supa = pubClient();
+    const supa = await adminClient();
     let assignedId: string | null = null;
     let assignedName = "";
 
@@ -397,6 +397,7 @@ export const submitRiomedSellerLead = createServerFn({ method: "POST" })
     });
     return { ok: true, leadId: row.id, sellerId: assignedId, sellerName: assignedName };
   });
+
 
 // ============================================================
 // Wave 4/5 — admin panels + jornadas (operational events → N8N)
