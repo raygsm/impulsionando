@@ -147,7 +147,7 @@ async function notifyFailure(
   const since = new Date(Date.now() - 30 * 60 * 1000).toISOString();
   const { data: existing } = await supabaseAdmin
     .from("core_incidents")
-    .select("id, event_count")
+    .select("id, event_count, severity")
     .eq("status", "open")
     .eq("title", title)
     .gte("detected_at", since)
