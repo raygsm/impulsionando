@@ -26,7 +26,7 @@ export const Route = createFileRoute("/api/public/hooks/impulsionito-train")({
         // Empresas ativas (não-master) — alvo do treinamento por tenant.
         const { data: companies, error: cErr } = await supabaseAdmin
           .from("companies")
-          .select("id, name, niche_code")
+          .select("id, name, segment")
           .eq("is_active", true)
           .eq("is_master", false)
           .limit(500);
@@ -50,7 +50,7 @@ export const Route = createFileRoute("/api/public/hooks/impulsionito-train")({
 
             const { error: insErr } = await supabaseAdmin.from("impulsionito_training_snapshots").insert({
               company_id: co.id,
-              niche: (co as { niche_code?: string }).niche_code ?? null,
+              niche: (co as { segment?: string }).segment ?? null,
               metrics: {
                 customers: custCount.count ?? 0,
                 products: prodCount.count ?? 0,

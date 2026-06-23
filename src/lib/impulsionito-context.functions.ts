@@ -43,7 +43,7 @@ export const getImpulsionitoTenantContext = createServerFn({ method: "POST" })
     const since30 = new Date(Date.now() - 30 * 86400_000).toISOString();
 
     const [company, custCount, prodCount, apptCount, openTickCount, evtCount, vitrineCount, recentCust, recentAppt, recentTick] = await Promise.all([
-      supabase.from("companies").select("name, niche_code").eq("id", companyId).maybeSingle(),
+      supabase.from("companies").select("name, segment").eq("id", companyId).maybeSingle(),
       supabase.from("customers").select("id", { count: "exact", head: true }).eq("company_id", companyId),
       supabase.from("inv_products").select("id", { count: "exact", head: true }).eq("company_id", companyId),
       supabase.from("agenda_appointments").select("id", { count: "exact", head: true }).eq("company_id", companyId).gte("starts_at", since30),
@@ -58,7 +58,7 @@ export const getImpulsionitoTenantContext = createServerFn({ method: "POST" })
     return {
       companyId,
       companyName: (company.data as { name?: string } | null)?.name ?? null,
-      niche: (company.data as { niche_code?: string } | null)?.niche_code ?? null,
+      niche: (company.data as { segment?: string } | null)?.segment ?? null,
       capturedAt: new Date().toISOString(),
       metrics: {
         customers: custCount.count ?? 0,
