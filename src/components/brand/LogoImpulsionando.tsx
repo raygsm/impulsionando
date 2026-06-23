@@ -35,6 +35,10 @@ export interface LogoImpulsionandoProps {
   alt?: string
   /** Padding interno do cartão branco no modo escuro. */
   padded?: boolean
+  /** Quando true (padrão) envolve a logo num link para a home Impulsionando. */
+  asLink?: boolean
+  /** URL de destino do link (default: home institucional). */
+  href?: string
 }
 
 export function LogoImpulsionando({
@@ -43,6 +47,8 @@ export function LogoImpulsionando({
   className,
   alt = 'Impulsionando Tecnologia',
   padded = true,
+  asLink = true,
+  href = 'https://impulsionando.com.br',
 }: LogoImpulsionandoProps) {
   const wrapRef = useRef<HTMLSpanElement | null>(null)
   const [detected, setDetected] = useState<'light' | 'dark' | null>(null)
@@ -87,24 +93,31 @@ export function LogoImpulsionando({
     />
   )
 
-  if (effective === 'dark') {
-    return (
-      <span
-        ref={wrapRef}
-        className={cn(
-          'inline-flex items-center justify-center rounded-lg bg-white shadow-sm',
-          padded ? 'px-3 py-2' : 'p-1',
-          className,
-        )}
-      >
-        {img}
-      </span>
-    )
-  }
-
-  return (
+  const inner = effective === 'dark' ? (
+    <span
+      ref={wrapRef}
+      className={cn(
+        'inline-flex items-center justify-center rounded-lg bg-white shadow-sm',
+        padded ? 'px-3 py-2' : 'p-1',
+        className,
+      )}
+    >
+      {img}
+    </span>
+  ) : (
     <span ref={wrapRef} className={cn('inline-flex items-center', className)}>
       {img}
     </span>
+  )
+
+  if (!asLink) return inner
+  return (
+    <a
+      href={href}
+      aria-label="Ir para a home Impulsionando"
+      className="inline-flex items-center hover:opacity-90 transition-opacity"
+    >
+      {inner}
+    </a>
   )
 }

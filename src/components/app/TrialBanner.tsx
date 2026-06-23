@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Sparkles, AlertTriangle, Clock } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useMyTrial } from "@/hooks/use-trial";
+import { useAudience } from "@/hooks/use-audience";
 import { Button } from "@/components/ui/button";
 
 function useCountdown(endsAt: string | null | undefined) {
@@ -23,11 +24,14 @@ function useCountdown(endsAt: string | null | undefined) {
 
 export function TrialBanner() {
   const { trial, daysLeft, isActive, needsPayment, isSuspended } = useMyTrial();
+  const { audience } = useAudience();
   const cd = useCountdown(trial?.ends_at);
   if (!trial) return null;
 
-  // Slug de plano escolhido vira parâmetro do checkout (`/checkout/$slug`).
-  const planSlug = trial.chosen_plan || "completo-mensal";
+  // Consumidor final tem trilha própria de Clube — o pagamento é "clube_premium",
+  // não o plano B2B. Banner aponta para o checkout do Clube.
+  const isConsumer = audience === "consumidor";
+  const planSlug = isConsumer ? "clube_premium" : (trial.chosen_plan || "completo-mensal");
 
   if (isSuspended) {
     return (
