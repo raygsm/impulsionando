@@ -510,7 +510,24 @@ function RecomendacaoPage() {
                       <div className="text-xs text-muted-foreground leading-snug">{meta.subtitle}</div>
                     </div>
                   </div>
-                  <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mt-3 mb-2">Módulos recomendados</div>
+                  <div className="mt-4 mb-3 pb-3 border-b">
+                    {PRICE_BY_LEVEL[p.level] != null ? (
+                      <>
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-3xl font-bold tracking-tight">{formatBRL(PRICE_BY_LEVEL[p.level]!)}</span>
+                          <span className="text-sm text-muted-foreground">/mês</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {p.level === "essencial" && "½ salário mínimo · sem fidelidade"}
+                          {p.level === "ideal" && "1 salário mínimo · cancela quando quiser"}
+                          {p.level === "full" && "2 salários mínimos · onboarding guiado incluso"}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-2xl font-bold tracking-tight">Sob consulta</div>
+                    )}
+                  </div>
+                  <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Módulos recomendados</div>
                   <ul className="space-y-1.5 mb-4">
                     {p.modules.map((m) => (
                       <li key={m} className="flex items-start gap-2 text-sm">
