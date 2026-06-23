@@ -286,11 +286,15 @@ export function PublicHeader() {
           </Button>
 
           {/* Baixar App — sempre último item, sempre visível, destacado */}
-          <InstallAppButton
+          <Button
+            asChild
+            size="sm"
             className="hidden md:inline-flex gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md hover:brightness-110"
-            label="Baixar App"
-            icon={<Download className="w-4 h-4" />}
-          />
+          >
+            <Link to="/app">
+              <Download className="w-4 h-4" /> Baixar App
+            </Link>
+          </Button>
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
