@@ -308,6 +308,18 @@ export const openRiomedSupportTicket = createServerFn({ method: "POST" })
       preferred_window: data.preferredWindow || null,
     } as any).select("id,protocol").single();
     if (error) throw error;
+    await emitRiomedEvent({
+      source: "support",
+      eventCode: "ticket.created",
+      message: `Novo ticket ${protocol} (${data.urgency})`,
+      level: data.urgency === "critico" ? "warn" : "info",
+      payload: {
+        ticketId: row.id, protocol, urgency: data.urgency,
+        category: data.issueCategory, city: data.locationCity,
+        customer: { name: data.customerName, phone: data.customerPhone, email: data.customerEmail },
+      },
+      correlationId: row.id,
+    });
     return { ok: true, protocol: row.protocol, id: row.id };
   });
 
