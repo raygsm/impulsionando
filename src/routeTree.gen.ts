@@ -656,6 +656,7 @@ import { Route as AuthenticatedAdminClientesRiomedAutomacaoRouteImport } from '.
 import { Route as AuthenticatedAdminClientesRiomedAssistenteRouteImport } from './routes/_authenticated/admin.clientes.riomed.assistente'
 import { Route as AuthenticatedAdminClientesRiomedAssistenciaRouteImport } from './routes/_authenticated/admin.clientes.riomed.assistencia'
 import { Route as AuthenticatedAdminClientesRiomedAgentesRouteImport } from './routes/_authenticated/admin.clientes.riomed.agentes'
+import { Route as AuthenticatedAdminClientesSlugPainelRouteImport } from './routes/_authenticated/admin.clientes.$slug.painel'
 import { Route as AuthenticatedAdminClientesSlugDominioRouteImport } from './routes/_authenticated/admin.clientes.$slug.dominio'
 import { Route as AuthenticatedCoreClienteIdPaginasPageIdRouteImport } from './routes/_authenticated/core.cliente.$id.paginas.$pageId'
 import { Route as AuthenticatedCoreClienteIdModuloSlugConfigurarRouteImport } from './routes/_authenticated/core.cliente.$id.modulo.$slug.configurar'
@@ -4309,6 +4310,12 @@ const AuthenticatedAdminClientesRiomedAgentesRoute =
     path: '/agentes',
     getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
   } as any)
+const AuthenticatedAdminClientesSlugPainelRoute =
+  AuthenticatedAdminClientesSlugPainelRouteImport.update({
+    id: '/painel',
+    path: '/painel',
+    getParentRoute: () => AuthenticatedAdminClientesSlugRoute,
+  } as any)
 const AuthenticatedAdminClientesSlugDominioRoute =
   AuthenticatedAdminClientesSlugDominioRouteImport.update({
     id: '/dominio',
@@ -4931,6 +4938,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/admin/clientes/$slug/dominio': typeof AuthenticatedAdminClientesSlugDominioRoute
+  '/admin/clientes/$slug/painel': typeof AuthenticatedAdminClientesSlugPainelRoute
   '/admin/clientes/riomed/agentes': typeof AuthenticatedAdminClientesRiomedAgentesRoute
   '/admin/clientes/riomed/assistencia': typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
   '/admin/clientes/riomed/assistente': typeof AuthenticatedAdminClientesRiomedAssistenteRoute
@@ -5569,6 +5577,7 @@ export interface FileRoutesByTo {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/admin/clientes/$slug/dominio': typeof AuthenticatedAdminClientesSlugDominioRoute
+  '/admin/clientes/$slug/painel': typeof AuthenticatedAdminClientesSlugPainelRoute
   '/admin/clientes/riomed/agentes': typeof AuthenticatedAdminClientesRiomedAgentesRoute
   '/admin/clientes/riomed/assistencia': typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
   '/admin/clientes/riomed/assistente': typeof AuthenticatedAdminClientesRiomedAssistenteRoute
@@ -6222,6 +6231,7 @@ export interface FileRoutesById {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/_authenticated/admin/clientes/$slug/dominio': typeof AuthenticatedAdminClientesSlugDominioRoute
+  '/_authenticated/admin/clientes/$slug/painel': typeof AuthenticatedAdminClientesSlugPainelRoute
   '/_authenticated/admin/clientes/riomed/agentes': typeof AuthenticatedAdminClientesRiomedAgentesRoute
   '/_authenticated/admin/clientes/riomed/assistencia': typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
   '/_authenticated/admin/clientes/riomed/assistente': typeof AuthenticatedAdminClientesRiomedAssistenteRoute
@@ -6874,6 +6884,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/admin/clientes/$slug/dominio'
+    | '/admin/clientes/$slug/painel'
     | '/admin/clientes/riomed/agentes'
     | '/admin/clientes/riomed/assistencia'
     | '/admin/clientes/riomed/assistente'
@@ -7512,6 +7523,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/admin/clientes/$slug/dominio'
+    | '/admin/clientes/$slug/painel'
     | '/admin/clientes/riomed/agentes'
     | '/admin/clientes/riomed/assistencia'
     | '/admin/clientes/riomed/assistente'
@@ -8164,6 +8176,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/_authenticated/admin/clientes/$slug/dominio'
+    | '/_authenticated/admin/clientes/$slug/painel'
     | '/_authenticated/admin/clientes/riomed/agentes'
     | '/_authenticated/admin/clientes/riomed/assistencia'
     | '/_authenticated/admin/clientes/riomed/assistente'
@@ -12914,6 +12927,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientesRiomedAgentesRouteImport
       parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
     }
+    '/_authenticated/admin/clientes/$slug/painel': {
+      id: '/_authenticated/admin/clientes/$slug/painel'
+      path: '/painel'
+      fullPath: '/admin/clientes/$slug/painel'
+      preLoaderRoute: typeof AuthenticatedAdminClientesSlugPainelRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesSlugRoute
+    }
     '/_authenticated/admin/clientes/$slug/dominio': {
       id: '/_authenticated/admin/clientes/$slug/dominio'
       path: '/dominio'
@@ -13588,12 +13608,15 @@ const AuthenticatedTorreRestaurantesDemoRouteWithChildren =
 
 interface AuthenticatedAdminClientesSlugRouteChildren {
   AuthenticatedAdminClientesSlugDominioRoute: typeof AuthenticatedAdminClientesSlugDominioRoute
+  AuthenticatedAdminClientesSlugPainelRoute: typeof AuthenticatedAdminClientesSlugPainelRoute
 }
 
 const AuthenticatedAdminClientesSlugRouteChildren: AuthenticatedAdminClientesSlugRouteChildren =
   {
     AuthenticatedAdminClientesSlugDominioRoute:
       AuthenticatedAdminClientesSlugDominioRoute,
+    AuthenticatedAdminClientesSlugPainelRoute:
+      AuthenticatedAdminClientesSlugPainelRoute,
   }
 
 const AuthenticatedAdminClientesSlugRouteWithChildren =
