@@ -504,6 +504,7 @@ export function PublicHeader() {
         <nav className="hidden lg:flex items-center gap-0.5" aria-label="Menu principal">
           <NavLink to="/" label="Início" exact />
           <EmpresasMenu />
+          <NichosMenu />
           {NAV.filter((n) => n.to !== "/").map((it) => (
             <NavLink key={it.to} {...it} />
           ))}
