@@ -10,7 +10,7 @@ sign() {
   if command -v openssl >/dev/null 2>&1; then
     printf '%s' "$1" | openssl dgst -sha256 -hmac "$SECRET" -hex | awk '{print $NF}'
   else
-    SECRET="$SECRET" python3 -c 'import hmac,hashlib,os,sys;print(hmac.new(os.environ["SECRET"].encode(),sys.stdin.buffer.read(),hashlib.sha256).hexdigest())' <<< "$(printf '%s' "$1")"
+    SECRET="$SECRET" PAYLOAD="$1" python3 -c 'import hmac,hashlib,os;print(hmac.new(os.environ["SECRET"].encode(),os.environ["PAYLOAD"].encode(),hashlib.sha256).hexdigest())'
   fi
 }
 
