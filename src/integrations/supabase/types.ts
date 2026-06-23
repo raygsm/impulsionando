@@ -31403,6 +31403,7 @@ export type Database = {
             Args: { _company?: string; _record: string; _user: string }
             Returns: boolean
           }
+      is_riomed_member: { Args: { _user_id: string }; Returns: boolean }
       is_super_admin: { Args: { _user: string }; Returns: boolean }
       log_security_event: {
         Args: {
@@ -31706,6 +31707,7 @@ export type Database = {
         Args: { p_due_days?: number; p_order_id: string }
         Returns: string
       }
+      riomed_company_id: { Args: never; Returns: string }
       riomed_convert_quote_to_order: {
         Args: { _quote_id: string }
         Returns: string
