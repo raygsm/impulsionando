@@ -173,6 +173,7 @@ const RIOMED_FEATURES: FeatureGroup[] = [
     items: [
       { label: "PDV / POS", to: "/admin/clientes/riomed/pos", icon: ShoppingCart, module: "pos" },
       { label: "Relatório POS", to: "/admin/clientes/riomed/pos-relatorio", icon: ScrollText, module: "pos" },
+      { label: "Logística & Entregas", to: "/admin/clientes/riomed/logistica", icon: Truck, description: "Confirmação de entrega e prazo de garantia por item" },
       { label: "Assistência técnica", to: "/admin/clientes/riomed/assistencia", icon: Headphones },
       { label: "Portal do cliente", to: "/admin/clientes/riomed/portal", icon: Globe },
     ],
