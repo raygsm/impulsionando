@@ -555,11 +555,30 @@ function PlanosPage() {
 
                 {plan.monthly !== null && PRICE_IDS[plan.name] ? (
                   <div className="mt-6 space-y-2">
+                    <div className="grid grid-cols-3 gap-1.5 text-[11px]" aria-label="Estrutura de preço">
+                      <div className="rounded border border-border p-2">
+                        <div className="text-muted-foreground">Setup</div>
+                        <div className="font-semibold text-foreground text-xs">
+                          {formatBRL(PLAN_SETUP_BRL[plan.name] ?? 0)}
+                        </div>
+                      </div>
+                      <div className="rounded border border-border p-2">
+                        <div className="text-muted-foreground">1ª mensalidade</div>
+                        <div className="font-semibold text-foreground text-xs">
+                          {formatBRL(monthlyEffective ?? 0)}
+                        </div>
+                      </div>
+                      <div className="rounded border border-primary/30 bg-primary/5 p-2">
+                        <div className="text-muted-foreground">Recorrente/mês</div>
+                        <div className="font-bold text-primary text-xs">
+                          {formatBRL(monthlyEffective ?? 0)}
+                        </div>
+                      </div>
+                    </div>
                     <div className="rounded-md border border-amber-300/70 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800/60 p-2.5 text-[11px] leading-snug text-amber-900 dark:text-amber-100">
-                      <strong>Contrato mínimo 90 dias.</strong> Setup{" "}
-                      {formatBRL(PLAN_SETUP_BRL[plan.name] ?? 0)} (1ª parcela) + 3
-                      mensalidades = <strong>4 pagamentos obrigatórios</strong> no
-                      ciclo inicial. Módulos extras: {formatBRL(EXTRA_MODULE_BRL)}/mês.
+                      <strong>Contrato mínimo 90 dias.</strong> Setup + 3 mensalidades ={" "}
+                      <strong>{formatBRL((PLAN_SETUP_BRL[plan.name] ?? 0) + (monthlyEffective ?? 0) * 3)}</strong>{" "}
+                      no ciclo inicial. Módulos extras: {formatBRL(EXTRA_MODULE_BRL)}/mês.
                     </div>
                     {pickedModules[plan.name]?.length ? (
                       <div className="text-[11px] text-muted-foreground">
