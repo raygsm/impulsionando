@@ -63,6 +63,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       const allowedConsumer =
         path.startsWith("/checkout") ||
         path.startsWith("/clube") ||
+        path.startsWith("/area-clube") ||
         path.startsWith("/auth") ||
         path === "/";
       if (!allowedConsumer) {
