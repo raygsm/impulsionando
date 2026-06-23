@@ -62,46 +62,47 @@ export const getRiomedMasterOverview = createServerFn({ method: "GET" })
     const posSales = posSalesR.data ?? [];
     const stock = stockR.data ?? [];
 
-    const arOpen = ar.filter(a => a.status !== "paid");
-    const arOverdue = arOpen.filter(a => a.due_date && new Date(a.due_date) < new Date());
+    const arOpen = ar.filter((a: any) => a.status !== "paid");
+    const arOverdue = arOpen.filter((a: any) => a.due_date && new Date(a.due_date) < new Date());
     const stockBelowMin = stock.filter((s: any) => Number(s.quantity) <= Number(s.min_quantity ?? 0));
+    const leadsAll = (leadsR.data ?? []) as any[];
 
     // por vendedor
-    const bySeller = sellers.map(s => {
-      const sQuotes = quotes.filter(q => q.seller_id === s.id);
-      const sLeads = (leadsR.data ?? []).filter(l => l.seller_id === s.id);
+    const bySeller = (sellers as any[]).map((s: any) => {
+      const sQuotes = quotes.filter((q: any) => q.seller_id === s.id);
+      const sLeads = leadsAll.filter((l: any) => l.seller_id === s.id);
       return {
         id: s.id, user_id: s.user_id, full_name: s.full_name, email: s.email,
         seller_code: s.seller_code, status: s.status,
         monthly_goal: Number(s.monthly_goal ?? 0),
         leads: sLeads.length,
-        leads_won: sLeads.filter(l => l.status === "won").length,
+        leads_won: sLeads.filter((l: any) => l.status === "won").length,
         quotes: sQuotes.length,
-        quotes_won: sQuotes.filter(q => q.status === "won").length,
-        revenue: sum(sQuotes.filter(q => q.status === "won"), "total"),
+        quotes_won: sQuotes.filter((q: any) => q.status === "won").length,
+        revenue: sum(sQuotes.filter((q: any) => q.status === "won"), "total"),
       };
-    }).sort((a, b) => b.revenue - a.revenue);
+    }).sort((a: any, b: any) => b.revenue - a.revenue);
 
     return {
       kpis: {
-        sellers: sellers.length,
+        sellers: (sellers as any[]).length,
         team: teamR.count ?? 0,
         technicians: techR.count ?? 0,
         scopes: (scopesR.data ?? []).length,
         leads_total: leadsR.count ?? 0,
         quotes_total: quotesR.count ?? 0,
-        quotes_revenue: sum(quotes.filter(q => q.status === "won"), "total"),
+        quotes_revenue: sum(quotes.filter((q: any) => q.status === "won"), "total"),
         orders_total: ordersR.count ?? 0,
-        orders_revenue: sum(orders.filter(o => o.status === "paid" || o.status === "completed"), "total"),
-        tickets_open: (ticketsR.data ?? []).filter(t => t.status !== "closed").length,
+        orders_revenue: sum(orders.filter((o: any) => o.status === "paid" || o.status === "completed"), "total"),
+        tickets_open: ((ticketsR.data ?? []) as any[]).filter((t: any) => t.status !== "closed").length,
         tickets_total: ticketsR.count ?? 0,
         ar_open_count: arOpen.length,
         ar_open_value: sum(arOpen, "amount"),
         ar_overdue_count: arOverdue.length,
         ar_overdue_value: sum(arOverdue, "amount"),
         pos_sales_count: posSalesR.count ?? 0,
-        pos_sales_value: sum(posSales.filter(p => p.status === "completed"), "total"),
-        products_active: (productsR.data ?? []).filter(p => p.active).length,
+        pos_sales_value: sum(posSales.filter((p: any) => p.status === "completed"), "total"),
+        products_active: ((productsR.data ?? []) as any[]).filter((p: any) => p.active).length,
         stock_low: stockBelowMin.length,
       },
       bySeller,
