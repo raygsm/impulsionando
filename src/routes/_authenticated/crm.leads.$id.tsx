@@ -83,17 +83,15 @@ function Lead360Page() {
 
   return (
     <div>
+      <div className="flex items-center gap-2 mb-2">
+        <Link to="/crm/leads" className="text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="w-5 h-5" />
+        </Link>
+        <Badge className={STATUS_COLOR[lead.status] + " text-white"}>{lead.status}</Badge>
+        {summary.isCustomer && <Badge variant="outline" className="border-violet-500 text-violet-700">Cliente</Badge>}
+      </div>
       <PageHeader
-        title={
-          <div className="flex items-center gap-2">
-            <Link to="/crm/leads" className="text-muted-foreground hover:text-foreground">
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-            <span>{lead.name}</span>
-            <Badge className={STATUS_COLOR[lead.status] + " text-white"}>{lead.status}</Badge>
-            {summary.isCustomer && <Badge variant="outline" className="border-violet-500 text-violet-700">Cliente</Badge>}
-          </div>
-        }
+        title={lead.name}
         description="Visão 360° unificada do lead — pipeline, atendimentos, agenda e comunicações."
         action={
           <Button onClick={() => setOpen(true)} className="bg-gradient-primary shadow-elegant">
