@@ -622,42 +622,89 @@ function FavoritesTab({ favorites }: { favorites: any[] }) {
 
 // ---------------------------------------------------------------
 function PlanTab({ membership, invoices, isPremium, onCancel }: { membership: any; invoices: any[]; isPremium: boolean; onCancel: () => Promise<void> }) {
+  const periodEnd = membership?.current_period_end ? new Date(membership.current_period_end) : null;
+  const periodStart = membership?.current_period_start ? new Date(membership.current_period_start) : null;
+  const today = new Date();
+  let proRataInfo: { daysLeft: number; pct: number } | null = null;
+  if (periodEnd && periodStart && today < periodEnd) {
+    const totalMs = periodEnd.getTime() - periodStart.getTime();
+    const leftMs  = periodEnd.getTime() - today.getTime();
+    const daysLeft = Math.max(0, Math.ceil(leftMs / 86_400_000));
+    const pct = totalMs > 0 ? Math.round((leftMs / totalMs) * 100) : 0;
+    proRataInfo = { daysLeft, pct };
+  }
+
   return (
-    <Card className="p-5">
-      <h2 className="font-semibold mb-3 flex items-center gap-2"><Receipt className="w-4 h-4" /> Plano e faturas</h2>
-      {invoices.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Você ainda está no Clube Free. Assine o Premium pra desbloquear histórico, alertas e mais.</p>
-      ) : (
-        <div className="space-y-2">
-          {invoices.map((inv: any) => (
-            <div key={inv.id} className="flex items-center justify-between border rounded-lg p-3">
-              <div>
-                <div className="font-medium text-sm">{BRL(inv.amount_cents)}</div>
-                <div className="text-xs text-muted-foreground">Vence em {new Date(inv.due_date).toLocaleDateString("pt-BR")}</div>
+    <div className="space-y-4">
+      <Card className="p-5 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
+        <div className="flex items-center gap-2 mb-2"><Crown className="w-5 h-5 text-primary" /><h2 className="font-semibold">Minhas finanças do Clube</h2></div>
+        <p className="text-sm text-muted-foreground">
+          Visão completa e transparente do seu plano, faturas e crédito remanescente.
+          Mudanças de plano são calculadas <strong>pro-rata</strong> — você só paga (ou recebe crédito) pelo tempo proporcional restante. Sem letras miúdas.
+        </p>
+      </Card>
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <Card className="p-4">
+          <div className="text-xs text-muted-foreground">Plano atual</div>
+          <div className="text-lg font-semibold mt-1">{isPremium ? "Clube Premium" : "Clube Free"}</div>
+          {isPremium && periodEnd && (
+            <div className="text-xs text-muted-foreground mt-1">Renova em {periodEnd.toLocaleDateString("pt-BR")}</div>
+          )}
+        </Card>
+        <Card className="p-4">
+          <div className="text-xs text-muted-foreground">Dias restantes do ciclo</div>
+          <div className="text-lg font-semibold mt-1">{proRataInfo ? `${proRataInfo.daysLeft} dias` : "—"}</div>
+          {proRataInfo && <Progress value={100 - proRataInfo.pct} className="h-1.5 mt-2" />}
+        </Card>
+        <Card className="p-4">
+          <div className="text-xs text-muted-foreground">Próxima ação</div>
+          {!isPremium ? (
+            <Button asChild size="sm" className="bg-gradient-primary mt-2 w-full">
+              <Link to="/checkout/$plano" params={{ plano: "clube_premium" }}>Upgrade para Premium</Link>
+            </Button>
+          ) : membership?.cancel_at_period_end ? (
+            <p className="text-xs text-amber-700 mt-2">Renovação cancelada. Acesso até {periodEnd?.toLocaleDateString("pt-BR")}.</p>
+          ) : (
+            <Button onClick={onCancel} variant="outline" size="sm" className="mt-2 w-full">
+              Fazer downgrade / cancelar renovação
+            </Button>
+          )}
+        </Card>
+      </div>
+
+      <Card className="p-5">
+        <h3 className="font-semibold mb-3 flex items-center gap-2"><Receipt className="w-4 h-4" /> Histórico de faturas e pagamentos</h3>
+        {invoices.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhuma fatura emitida ainda. Quando você assinar o Premium ou consumir nos PDVs Impulsionando, todos os recibos aparecerão aqui — registro permanente.</p>
+        ) : (
+          <div className="space-y-2">
+            {invoices.map((inv: any) => (
+              <div key={inv.id} className="flex items-center justify-between border rounded-lg p-3">
+                <div>
+                  <div className="font-medium text-sm">{BRL(inv.amount_cents)}</div>
+                  <div className="text-xs text-muted-foreground">Vence em {new Date(inv.due_date).toLocaleDateString("pt-BR")}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant={inv.status === "paid" ? "default" : inv.status === "overdue" ? "destructive" : "secondary"}>{inv.status}</Badge>
+                  {inv.status === "open" && inv.pix_copy_paste && (
+                    <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(inv.pix_copy_paste); toast.success("PIX copiado"); }}>
+                      <Copy className="w-3 h-3 mr-1" /> PIX
+                    </Button>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Badge variant={inv.status === "paid" ? "default" : inv.status === "overdue" ? "destructive" : "secondary"}>{inv.status}</Badge>
-                {inv.status === "open" && inv.pix_copy_paste && (
-                  <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(inv.pix_copy_paste); toast.success("PIX copiado"); }}>
-                    <Copy className="w-3 h-3 mr-1" /> PIX
-                  </Button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-      {isPremium && !membership?.cancel_at_period_end && (
-        <Button onClick={onCancel} variant="ghost" size="sm" className="w-full mt-3 text-destructive">
-          <AlertCircle className="w-3 h-3 mr-1" /> Cancelar renovação
-        </Button>
-      )}
-      {membership?.cancel_at_period_end && (
-        <p className="text-xs text-amber-600 mt-3 text-center">Renovação cancelada. Acesso até {membership.current_period_end && new Date(membership.current_period_end).toLocaleDateString("pt-BR")}.</p>
-      )}
-    </Card>
+            ))}
+          </div>
+        )}
+        <p className="text-xs text-muted-foreground mt-4 border-t pt-3">
+          🔒 Registro permanente: todo consumo seu nos parceiros (via PDV Impulsionando) e toda fatura do Clube ficam aqui para sempre — você nunca perde o histórico.
+        </p>
+      </Card>
+    </div>
   );
 }
+
 
 // ---------------------------------------------------------------
 function DiscoverTab({ defaultCity, fetchPartners }: {
