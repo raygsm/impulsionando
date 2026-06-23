@@ -476,6 +476,7 @@ import { Route as AuthenticatedAdminLoyaltyClubeHealthRouteImport } from './rout
 import { Route as AuthenticatedAdminJobsQueuesReliabilityHealthRouteImport } from './routes/_authenticated/admin.jobs-queues-reliability-health'
 import { Route as AuthenticatedAdminInventoryHealthRouteImport } from './routes/_authenticated/admin.inventory-health'
 import { Route as AuthenticatedAdminIntegrationsAutomationHealthRouteImport } from './routes/_authenticated/admin.integrations-automation-health'
+import { Route as AuthenticatedAdminIncidentsRouteImport } from './routes/_authenticated/admin.incidents'
 import { Route as AuthenticatedAdminInboxUnificadaRouteImport } from './routes/_authenticated/admin.inbox-unificada'
 import { Route as AuthenticatedAdminInboxEventosRouteImport } from './routes/_authenticated/admin.inbox-eventos'
 import { Route as AuthenticatedAdminImobiliariaRouteImport } from './routes/_authenticated/admin.imobiliaria'
@@ -3255,6 +3256,12 @@ const AuthenticatedAdminIntegrationsAutomationHealthRoute =
     path: '/admin/integrations-automation-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminIncidentsRoute =
+  AuthenticatedAdminIncidentsRouteImport.update({
+    id: '/admin/incidents',
+    path: '/admin/incidents',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminInboxUnificadaRoute =
   AuthenticatedAdminInboxUnificadaRouteImport.update({
     id: '/admin/inbox-unificada',
@@ -4696,6 +4703,7 @@ export interface FileRoutesByFullPath {
   '/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/admin/inbox-eventos': typeof AuthenticatedAdminInboxEventosRoute
   '/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
+  '/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
   '/admin/integrations-automation-health': typeof AuthenticatedAdminIntegrationsAutomationHealthRoute
   '/admin/inventory-health': typeof AuthenticatedAdminInventoryHealthRoute
   '/admin/jobs-queues-reliability-health': typeof AuthenticatedAdminJobsQueuesReliabilityHealthRoute
@@ -5350,6 +5358,7 @@ export interface FileRoutesByTo {
   '/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/admin/inbox-eventos': typeof AuthenticatedAdminInboxEventosRoute
   '/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
+  '/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
   '/admin/integrations-automation-health': typeof AuthenticatedAdminIntegrationsAutomationHealthRoute
   '/admin/inventory-health': typeof AuthenticatedAdminInventoryHealthRoute
   '/admin/jobs-queues-reliability-health': typeof AuthenticatedAdminJobsQueuesReliabilityHealthRoute
@@ -6018,6 +6027,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/imobiliaria': typeof AuthenticatedAdminImobiliariaRoute
   '/_authenticated/admin/inbox-eventos': typeof AuthenticatedAdminInboxEventosRoute
   '/_authenticated/admin/inbox-unificada': typeof AuthenticatedAdminInboxUnificadaRoute
+  '/_authenticated/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
   '/_authenticated/admin/integrations-automation-health': typeof AuthenticatedAdminIntegrationsAutomationHealthRoute
   '/_authenticated/admin/inventory-health': typeof AuthenticatedAdminInventoryHealthRoute
   '/_authenticated/admin/jobs-queues-reliability-health': typeof AuthenticatedAdminJobsQueuesReliabilityHealthRoute
@@ -6686,6 +6696,7 @@ export interface FileRouteTypes {
     | '/admin/imobiliaria'
     | '/admin/inbox-eventos'
     | '/admin/inbox-unificada'
+    | '/admin/incidents'
     | '/admin/integrations-automation-health'
     | '/admin/inventory-health'
     | '/admin/jobs-queues-reliability-health'
@@ -7340,6 +7351,7 @@ export interface FileRouteTypes {
     | '/admin/imobiliaria'
     | '/admin/inbox-eventos'
     | '/admin/inbox-unificada'
+    | '/admin/incidents'
     | '/admin/integrations-automation-health'
     | '/admin/inventory-health'
     | '/admin/jobs-queues-reliability-health'
@@ -8007,6 +8019,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/imobiliaria'
     | '/_authenticated/admin/inbox-eventos'
     | '/_authenticated/admin/inbox-unificada'
+    | '/_authenticated/admin/incidents'
     | '/_authenticated/admin/integrations-automation-health'
     | '/_authenticated/admin/inventory-health'
     | '/_authenticated/admin/jobs-queues-reliability-health'
@@ -11853,6 +11866,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIntegrationsAutomationHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/incidents': {
+      id: '/_authenticated/admin/incidents'
+      path: '/admin/incidents'
+      fullPath: '/admin/incidents'
+      preLoaderRoute: typeof AuthenticatedAdminIncidentsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/inbox-unificada': {
       id: '/_authenticated/admin/inbox-unificada'
       path: '/admin/inbox-unificada'
@@ -14146,6 +14166,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminImobiliariaRoute: typeof AuthenticatedAdminImobiliariaRoute
   AuthenticatedAdminInboxEventosRoute: typeof AuthenticatedAdminInboxEventosRoute
   AuthenticatedAdminInboxUnificadaRoute: typeof AuthenticatedAdminInboxUnificadaRoute
+  AuthenticatedAdminIncidentsRoute: typeof AuthenticatedAdminIncidentsRoute
   AuthenticatedAdminIntegrationsAutomationHealthRoute: typeof AuthenticatedAdminIntegrationsAutomationHealthRoute
   AuthenticatedAdminInventoryHealthRoute: typeof AuthenticatedAdminInventoryHealthRoute
   AuthenticatedAdminJobsQueuesReliabilityHealthRoute: typeof AuthenticatedAdminJobsQueuesReliabilityHealthRoute
@@ -14440,6 +14461,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminImobiliariaRoute: AuthenticatedAdminImobiliariaRoute,
   AuthenticatedAdminInboxEventosRoute: AuthenticatedAdminInboxEventosRoute,
   AuthenticatedAdminInboxUnificadaRoute: AuthenticatedAdminInboxUnificadaRoute,
+  AuthenticatedAdminIncidentsRoute: AuthenticatedAdminIncidentsRoute,
   AuthenticatedAdminIntegrationsAutomationHealthRoute:
     AuthenticatedAdminIntegrationsAutomationHealthRoute,
   AuthenticatedAdminInventoryHealthRoute:
