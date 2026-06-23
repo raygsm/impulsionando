@@ -56,7 +56,7 @@ const ITEMS: ItemMeta[] = [
     title: "Subdomínio reservado",
     description: "Sua marca já tem um endereço seu-nome.impulsionando.app.",
     Icon: Sparkles,
-    cta: { label: "Personalizar branding", to: "/_authenticated/admin/branding" as never },
+    cta: { label: "Personalizar branding", to: "/admin/branding" as never },
   },
   {
     key: "domain_requested",
