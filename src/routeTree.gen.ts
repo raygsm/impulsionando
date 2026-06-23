@@ -15,6 +15,7 @@ import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TrialRouteImport } from './routes/trial'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as TalentosRouteImport } from './routes/talentos'
+import { Route as SuporteRouteImport } from './routes/suporte'
 import { Route as SolucoesRouteImport } from './routes/solucoes'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as RiomedRouteImport } from './routes/riomed'
@@ -169,7 +170,6 @@ import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
 import { Route as AuthenticatedUnitsRouteImport } from './routes/_authenticated/units'
 import { Route as AuthenticatedTalentsRouteImport } from './routes/_authenticated/talents'
-import { Route as AuthenticatedSuporteRouteImport } from './routes/_authenticated/suporte'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSectorsRouteImport } from './routes/_authenticated/sectors'
 import { Route as AuthenticatedSalesRouteImport } from './routes/_authenticated/sales'
@@ -704,6 +704,11 @@ const TermosRoute = TermosRouteImport.update({
 const TalentosRoute = TalentosRouteImport.update({
   id: '/talentos',
   path: '/talentos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuporteRoute = SuporteRouteImport.update({
+  id: '/suporte',
+  path: '/suporte',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SolucoesRoute = SolucoesRouteImport.update({
@@ -1479,11 +1484,6 @@ const AuthenticatedUnitsRoute = AuthenticatedUnitsRouteImport.update({
 const AuthenticatedTalentsRoute = AuthenticatedTalentsRouteImport.update({
   id: '/talents',
   path: '/talents',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedSuporteRoute = AuthenticatedSuporteRouteImport.update({
-  id: '/suporte',
-  path: '/suporte',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
@@ -4468,6 +4468,7 @@ export interface FileRoutesByFullPath {
   '/riomed': typeof RiomedRouteWithChildren
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
+  '/suporte': typeof SuporteRoute
   '/talentos': typeof TalentosRoute
   '/termos': typeof TermosRoute
   '/trial': typeof TrialRoute
@@ -4510,7 +4511,6 @@ export interface FileRoutesByFullPath {
   '/sales': typeof AuthenticatedSalesRouteWithChildren
   '/sectors': typeof AuthenticatedSectorsRoute
   '/settings': typeof AuthenticatedSettingsRoute
-  '/suporte': typeof AuthenticatedSuporteRoute
   '/talents': typeof AuthenticatedTalentsRoute
   '/units': typeof AuthenticatedUnitsRoute
   '/users': typeof AuthenticatedUsersRouteWithChildren
@@ -5132,6 +5132,7 @@ export interface FileRoutesByTo {
   '/reset-password-sent': typeof ResetPasswordSentRoute
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
+  '/suporte': typeof SuporteRoute
   '/talentos': typeof TalentosRoute
   '/termos': typeof TermosRoute
   '/trial': typeof TrialRoute
@@ -5165,7 +5166,6 @@ export interface FileRoutesByTo {
   '/repasses': typeof AuthenticatedRepassesRoute
   '/sectors': typeof AuthenticatedSectorsRoute
   '/settings': typeof AuthenticatedSettingsRoute
-  '/suporte': typeof AuthenticatedSuporteRoute
   '/talents': typeof AuthenticatedTalentsRoute
   '/units': typeof AuthenticatedUnitsRoute
   '/users': typeof AuthenticatedUsersRouteWithChildren
@@ -5792,6 +5792,7 @@ export interface FileRoutesById {
   '/riomed': typeof RiomedRouteWithChildren
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
+  '/suporte': typeof SuporteRoute
   '/talentos': typeof TalentosRoute
   '/termos': typeof TermosRoute
   '/trial': typeof TrialRoute
@@ -5834,7 +5835,6 @@ export interface FileRoutesById {
   '/_authenticated/sales': typeof AuthenticatedSalesRouteWithChildren
   '/_authenticated/sectors': typeof AuthenticatedSectorsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
-  '/_authenticated/suporte': typeof AuthenticatedSuporteRoute
   '/_authenticated/talents': typeof AuthenticatedTalentsRoute
   '/_authenticated/units': typeof AuthenticatedUnitsRoute
   '/_authenticated/users': typeof AuthenticatedUsersRouteWithChildren
@@ -6461,6 +6461,7 @@ export interface FileRouteTypes {
     | '/riomed'
     | '/sobre'
     | '/solucoes'
+    | '/suporte'
     | '/talentos'
     | '/termos'
     | '/trial'
@@ -6503,7 +6504,6 @@ export interface FileRouteTypes {
     | '/sales'
     | '/sectors'
     | '/settings'
-    | '/suporte'
     | '/talents'
     | '/units'
     | '/users'
@@ -7125,6 +7125,7 @@ export interface FileRouteTypes {
     | '/reset-password-sent'
     | '/sobre'
     | '/solucoes'
+    | '/suporte'
     | '/talentos'
     | '/termos'
     | '/trial'
@@ -7158,7 +7159,6 @@ export interface FileRouteTypes {
     | '/repasses'
     | '/sectors'
     | '/settings'
-    | '/suporte'
     | '/talents'
     | '/units'
     | '/users'
@@ -7784,6 +7784,7 @@ export interface FileRouteTypes {
     | '/riomed'
     | '/sobre'
     | '/solucoes'
+    | '/suporte'
     | '/talentos'
     | '/termos'
     | '/trial'
@@ -7826,7 +7827,6 @@ export interface FileRouteTypes {
     | '/_authenticated/sales'
     | '/_authenticated/sectors'
     | '/_authenticated/settings'
-    | '/_authenticated/suporte'
     | '/_authenticated/talents'
     | '/_authenticated/units'
     | '/_authenticated/users'
@@ -8453,6 +8453,7 @@ export interface RootRouteChildren {
   RiomedRoute: typeof RiomedRouteWithChildren
   SobreRoute: typeof SobreRoute
   SolucoesRoute: typeof SolucoesRoute
+  SuporteRoute: typeof SuporteRoute
   TalentosRoute: typeof TalentosRoute
   TermosRoute: typeof TermosRoute
   TrialRoute: typeof TrialRoute
@@ -8637,6 +8638,13 @@ declare module '@tanstack/react-router' {
       path: '/talentos'
       fullPath: '/talentos'
       preLoaderRoute: typeof TalentosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/suporte': {
+      id: '/suporte'
+      path: '/suporte'
+      fullPath: '/suporte'
+      preLoaderRoute: typeof SuporteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/solucoes': {
@@ -9715,13 +9723,6 @@ declare module '@tanstack/react-router' {
       path: '/talents'
       fullPath: '/talents'
       preLoaderRoute: typeof AuthenticatedTalentsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/suporte': {
-      id: '/_authenticated/suporte'
-      path: '/suporte'
-      fullPath: '/suporte'
-      preLoaderRoute: typeof AuthenticatedSuporteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/settings': {
@@ -14092,7 +14093,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSalesRoute: typeof AuthenticatedSalesRouteWithChildren
   AuthenticatedSectorsRoute: typeof AuthenticatedSectorsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
-  AuthenticatedSuporteRoute: typeof AuthenticatedSuporteRoute
   AuthenticatedTalentsRoute: typeof AuthenticatedTalentsRoute
   AuthenticatedUnitsRoute: typeof AuthenticatedUnitsRoute
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRouteWithChildren
@@ -14355,7 +14355,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSalesRoute: AuthenticatedSalesRouteWithChildren,
   AuthenticatedSectorsRoute: AuthenticatedSectorsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
-  AuthenticatedSuporteRoute: AuthenticatedSuporteRoute,
   AuthenticatedTalentsRoute: AuthenticatedTalentsRoute,
   AuthenticatedUnitsRoute: AuthenticatedUnitsRoute,
   AuthenticatedUsersRoute: AuthenticatedUsersRouteWithChildren,
@@ -14919,6 +14918,7 @@ const rootRouteChildren: RootRouteChildren = {
   RiomedRoute: RiomedRouteWithChildren,
   SobreRoute: SobreRoute,
   SolucoesRoute: SolucoesRoute,
+  SuporteRoute: SuporteRoute,
   TalentosRoute: TalentosRoute,
   TermosRoute: TermosRoute,
   TrialRoute: TrialRoute,
