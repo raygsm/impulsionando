@@ -24835,6 +24835,24 @@ export type Database = {
           },
         ]
       }
+      riomed_rr_pointer: {
+        Row: {
+          id: number
+          last_position: number
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          last_position?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          last_position?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       riomed_search_queries: {
         Row: {
           channel: string
@@ -25033,6 +25051,56 @@ export type Database = {
             columns: ["seller_id"]
             isOneToOne: false
             referencedRelation: "riomed_sellers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      riomed_seller_leads: {
+        Row: {
+          created_at: string
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string
+          id: string
+          interest: string | null
+          notes: string | null
+          profile: string | null
+          status: string
+          team_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_email?: string | null
+          customer_name: string
+          customer_phone: string
+          id?: string
+          interest?: string | null
+          notes?: string | null
+          profile?: string | null
+          status?: string
+          team_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string
+          id?: string
+          interest?: string | null
+          notes?: string | null
+          profile?: string | null
+          status?: string
+          team_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_seller_leads_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_team"
             referencedColumns: ["id"]
           },
         ]
@@ -25978,6 +26046,99 @@ export type Database = {
             referencedColumns: ["company_id"]
           },
         ]
+      }
+      riomed_support_tickets: {
+        Row: {
+          created_at: string
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string
+          description: string | null
+          equipment_brand: string | null
+          equipment_type: string | null
+          id: string
+          issue_category: string | null
+          location_city: string | null
+          preferred_window: string | null
+          protocol: string
+          status: string
+          updated_at: string
+          urgency: string | null
+        }
+        Insert: {
+          created_at?: string
+          customer_email?: string | null
+          customer_name: string
+          customer_phone: string
+          description?: string | null
+          equipment_brand?: string | null
+          equipment_type?: string | null
+          id?: string
+          issue_category?: string | null
+          location_city?: string | null
+          preferred_window?: string | null
+          protocol: string
+          status?: string
+          updated_at?: string
+          urgency?: string | null
+        }
+        Update: {
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string
+          description?: string | null
+          equipment_brand?: string | null
+          equipment_type?: string | null
+          id?: string
+          issue_category?: string | null
+          location_city?: string | null
+          preferred_window?: string | null
+          protocol?: string
+          status?: string
+          updated_at?: string
+          urgency?: string | null
+        }
+        Relationships: []
+      }
+      riomed_team: {
+        Row: {
+          active: boolean
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          member_role: string
+          phone: string | null
+          rr_position: number
+          specialty: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          member_role?: string
+          phone?: string | null
+          rr_position?: number
+          specialty?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          member_role?: string
+          phone?: string | null
+          rr_position?: number
+          specialty?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       riomed_technician_assignments: {
         Row: {
