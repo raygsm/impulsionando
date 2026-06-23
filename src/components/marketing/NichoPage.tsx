@@ -266,24 +266,41 @@ export function NichoPage({ nicho }: Props) {
 
         {/* JORNADA PRÁTICA */}
         <section>
-          <div className="flex items-center gap-2 mb-5">
-            <Zap className="w-5 h-5 text-primary" />
-            <h2 className="text-2xl font-bold tracking-tight">Jornada prática, passo a passo</h2>
+          <div className="flex items-center gap-3 mb-6">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-primary text-primary-foreground shadow-md">
+              <Zap className="w-5 h-5" />
+            </span>
+            <div>
+              <Badge variant="outline" className="text-[10px] border-primary/30 text-primary bg-primary/5 mb-1">
+                Passo a passo
+              </Badge>
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Jornada prática</h2>
+            </div>
           </div>
-          <ol className="space-y-3">
+          <ol className="relative space-y-4 before:absolute before:left-[19px] before:top-3 before:bottom-3 before:w-px before:bg-gradient-to-b before:from-primary/40 before:via-primary/20 before:to-transparent">
             {nicho.journey.map((s, i) => (
-              <li key={s.step} className="flex gap-4 p-5 rounded-lg border bg-card">
-                <div className="w-9 h-9 rounded-full bg-gradient-primary text-primary-foreground text-sm font-bold flex items-center justify-center shrink-0">
+              <li
+                key={s.step}
+                className="group relative flex gap-4 rounded-xl border bg-card p-5 pl-6 transition-all hover:-translate-y-0.5 hover:shadow-elegant hover:border-primary/40"
+              >
+                <div className="relative z-10 grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-primary text-primary-foreground text-sm font-bold shadow-md ring-4 ring-background">
                   {i + 1}
                 </div>
-                <div className="flex-1">
-                  <div className="font-semibold">{s.step}</div>
-                  <div className="text-sm text-muted-foreground leading-relaxed mt-1">{s.detail}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-2 flex-wrap">
+                    <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-primary/70 tabular-nums">
+                      Etapa {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <div className="font-semibold text-foreground">{s.step}</div>
+                  </div>
+                  <div className="text-sm text-muted-foreground leading-relaxed mt-1.5">{s.detail}</div>
                 </div>
+                <ArrowRight className="hidden sm:block w-4 h-4 text-muted-foreground/40 self-center shrink-0 transition-all group-hover:text-primary group-hover:translate-x-1" />
               </li>
             ))}
           </ol>
         </section>
+
 
         {/* BLOCO EXTRA (ex.: reserva paga em bares) */}
         {nicho.extraBlock && (
