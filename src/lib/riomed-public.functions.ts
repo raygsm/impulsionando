@@ -312,7 +312,7 @@ export const openRiomedSupportTicket = createServerFn({ method: "POST" })
       source: "support",
       eventCode: "ticket.created",
       message: `Novo ticket ${protocol} (${data.urgency})`,
-      level: data.urgency === "critico" ? "warn" : "info",
+      level: data.urgency === "critica" ? "warn" : "info",
       payload: {
         ticketId: row.id, protocol, urgency: data.urgency,
         category: data.issueCategory, city: data.locationCity,
