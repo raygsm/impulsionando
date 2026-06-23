@@ -10,6 +10,7 @@ import {
   sanitizeSlug,
   triggerDownload,
 } from "@/lib/brand-kit-utils";
+import { useBrandingPreview } from "./BrandingPreviewContext";
 import { toast } from "sonner";
 
 interface Props {
@@ -43,6 +44,7 @@ export function BrandKitExport({ brandName, primary, secondary, domain, logoUrl,
   );
 
   const [busy, setBusy] = useState<string | null>(null);
+  const { wcag } = useBrandingPreview();
 
   async function downloadZip() {
     setBusy("zip");
@@ -66,6 +68,7 @@ export function BrandKitExport({ brandName, primary, secondary, domain, logoUrl,
         faviconPng32: fav32,
         faviconIco: ico,
         appleTouchPng: apple,
+        wcag,
       });
       triggerDownload(zip, `${slug}-brand-kit.zip`);
       toast.success("Brand Kit baixado.");

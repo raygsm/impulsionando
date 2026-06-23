@@ -133,6 +133,12 @@ export async function pngBlobToIco(pngBlob: Blob, size: number): Promise<Blob> {
 
 // ---------- ZIP ----------
 
+export interface WcagParams {
+  sampleText: string;
+  fontSize: number;
+  bold: boolean;
+}
+
 export interface BrandKitInput {
   brandName: string;
   domain: string;
@@ -147,6 +153,7 @@ export interface BrandKitInput {
   faviconPng32?: Blob | null;
   faviconIco?: Blob | null;
   appleTouchPng?: Blob | null;
+  wcag?: WcagParams;
 }
 
 export async function buildBrandKitZip(input: BrandKitInput): Promise<Blob> {
@@ -162,8 +169,138 @@ export async function buildBrandKitZip(input: BrandKitInput): Promise<Blob> {
   if (input.appleTouchPng) zip.file("favicon/apple-touch-icon-180.png", input.appleTouchPng);
   if (input.faviconIco) zip.file("favicon/favicon.ico", input.faviconIco);
 
+  if (input.wcag) {
+    const report = buildWcagReport(input);
+    zip.file("accessibility/wcag-report.json", JSON.stringify(report.json, null, 2));
+    zip.file("accessibility/wcag-report.html", report.html);
+  }
+
   return await zip.generateAsync({ type: "blob" });
 }
+
+// ---------- WCAG report ----------
+
+export interface WcagPairResult {
+  label: string;
+  fg: string;
+  bg: string;
+  ratio: number;
+  level: "AAA" | "AA" | "AA Large only" | "Fail";
+}
+
+export function classifyWcag(ratio: number, isLarge: boolean): WcagPairResult["level"] {
+  if (isLarge) {
+    if (ratio >= 4.5) return "AAA";
+    if (ratio >= 3) return "AA";
+    return "Fail";
+  }
+  if (ratio >= 7) return "AAA";
+  if (ratio >= 4.5) return "AA";
+  if (ratio >= 3) return "AA Large only";
+  return "Fail";
+}
+
+export function runWcagPairs(primary: string, secondary: string, isLarge: boolean): WcagPairResult[] {
+  const pairs = [
+    { label: "Texto branco sobre Primária", fg: "#ffffff", bg: primary },
+    { label: "Texto preto sobre Primária", fg: "#0f172a", bg: primary },
+    { label: "Texto branco sobre Secundária", fg: "#ffffff", bg: secondary },
+    { label: "Texto preto sobre Secundária", fg: "#0f172a", bg: secondary },
+    { label: "Primária sobre Secundária", fg: primary, bg: secondary },
+  ];
+  return pairs.map((p) => {
+    const ratio = contrastRatio(p.fg, p.bg);
+    return { ...p, ratio, level: classifyWcag(ratio, isLarge) };
+  });
+}
+
+function buildWcagReport(input: BrandKitInput) {
+  const params = input.wcag!;
+  const isLarge = params.bold ? params.fontSize >= 18.66 : params.fontSize >= 24;
+  const results = runWcagPairs(input.primary, input.secondary, isLarge);
+  const failing = results.filter((r) => r.level === "Fail");
+
+  const json = {
+    brand: input.brandName,
+    generated_at: new Date().toISOString(),
+    parameters: {
+      sample_text: params.sampleText,
+      font_size_px: params.fontSize,
+      bold: params.bold,
+      is_large_text: isLarge,
+      thresholds: isLarge
+        ? { AA: 3, AAA: 4.5, note: "Texto grande (≥18pt regular ou ≥14pt bold)" }
+        : { AA: 4.5, AAA: 7, note: "Texto normal" },
+    },
+    summary: {
+      total: results.length,
+      passing_aaa: results.filter((r) => r.level === "AAA").length,
+      passing_aa: results.filter((r) => r.level === "AA").length,
+      large_only: results.filter((r) => r.level === "AA Large only").length,
+      failing: failing.length,
+    },
+    pairs: results,
+  };
+
+  const rows = results
+    .map(
+      (r) => `<tr>
+  <td>${escapeHtml(r.label)}</td>
+  <td><code>${r.fg}</code></td>
+  <td><code>${r.bg}</code></td>
+  <td><div style="background:${r.bg};color:${r.fg};font-size:${params.fontSize}px;font-weight:${params.bold ? 700 : 400};padding:6px 10px;border-radius:4px;display:inline-block;">${escapeHtml(params.sampleText || "Aa")}</div></td>
+  <td style="text-align:right;font-family:monospace;">${r.ratio.toFixed(2)}:1</td>
+  <td><span class="badge badge-${r.level.replace(/[^a-z]/gi, "")}">${r.level}</span></td>
+</tr>`,
+    )
+    .join("\n");
+
+  const html = `<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Relatório WCAG — ${escapeHtml(input.brandName)}</title>
+  <style>
+    body { font: 14px -apple-system,Segoe UI,Roboto,Arial,sans-serif; color:#0f172a; max-width:900px; margin:32px auto; padding:0 16px; }
+    h1 { font-size: 20px; margin: 0 0 4px; }
+    .muted { color:#64748b; }
+    table { width:100%; border-collapse: collapse; margin-top:16px; }
+    th, td { border-bottom:1px solid #e2e8f0; padding:10px 8px; text-align:left; vertical-align: middle; }
+    th { background:#f8fafc; font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:#475569; }
+    .badge { display:inline-block; padding:2px 8px; border-radius:9999px; font-size:11px; font-weight:600; }
+    .badge-AAA, .badge-AA { background:#16a34a; color:#fff; }
+    .badge-AALargeonly { background:#f59e0b; color:#fff; }
+    .badge-Fail { background:#dc2626; color:#fff; }
+    .params { background:#f1f5f9; border-radius:8px; padding:12px; margin-top:12px; font-size:13px; }
+    .params code { background:#fff; padding:1px 6px; border-radius:4px; }
+  </style>
+</head>
+<body>
+  <h1>Relatório de contraste WCAG — ${escapeHtml(input.brandName)}</h1>
+  <p class="muted">Gerado em ${new Date().toLocaleString("pt-BR")}</p>
+  <div class="params">
+    <strong>Parâmetros do teste:</strong><br>
+    Texto de teste: <code>${escapeHtml(params.sampleText || "Aa")}</code><br>
+    Tamanho: <code>${params.fontSize}px</code> · Peso: <code>${params.bold ? "negrito" : "regular"}</code><br>
+    Classificação: <code>${isLarge ? "texto grande (AA ≥ 3 / AAA ≥ 4.5)" : "texto normal (AA ≥ 4.5 / AAA ≥ 7)"}</code>
+  </div>
+  <table>
+    <thead><tr><th>Combinação</th><th>Cor texto</th><th>Cor fundo</th><th>Amostra</th><th>Razão</th><th>Nível</th></tr></thead>
+    <tbody>
+${rows}
+    </tbody>
+  </table>
+  <p class="muted" style="margin-top:24px;">Resumo: ${json.summary.passing_aaa} AAA · ${json.summary.passing_aa} AA · ${json.summary.large_only} apenas-large · ${json.summary.failing} falha(s).</p>
+</body>
+</html>`;
+
+  return { json, html };
+}
+
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+}
+
 
 function buildReadme(input: BrandKitInput): string {
   const slug = sanitizeSlug(input.brandName);

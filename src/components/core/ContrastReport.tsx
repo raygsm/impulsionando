@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Eye, AlertTriangle, Check } from "lucide-react";
 import { contrastRatio } from "@/lib/brand-kit-utils";
+import { useBrandingPreview } from "./BrandingPreviewContext";
 
 interface Props {
   primary: string;
@@ -14,17 +15,17 @@ interface Props {
 
 /**
  * w25 — Auditoria de contraste WCAG 2.x, ciente de tamanho de fonte.
- *
- * Regra WCAG: texto é "large" quando ≥ 18pt regular OU ≥ 14pt bold (≈ 24px reg / 18.66px bold).
- * Para large: AA = 3, AAA = 4.5. Para normal: AA = 4.5, AAA = 7.
- *
- * O usuário pode editar o texto de teste, alterar o tamanho (px) e marcar bold —
- * a classificação se ajusta em tempo real.
+ * Parâmetros (texto/size/bold) vivem em BrandingPreviewContext pra que o ZIP
+ * do Brand Kit também os exporte como relatório.
  */
 export function ContrastReport({ primary, secondary }: Props) {
-  const [sampleText, setSampleText] = useState("Texto de exemplo");
-  const [fontSize, setFontSize] = useState(16);
-  const [bold, setBold] = useState(false);
+  const { wcag, setWcag } = useBrandingPreview();
+  const sampleText = wcag.sampleText;
+  const fontSize = wcag.fontSize;
+  const bold = wcag.bold;
+  const setSampleText = (sampleText: string) => setWcag({ ...wcag, sampleText });
+  const setFontSize = (fontSize: number) => setWcag({ ...wcag, fontSize });
+  const setBold = (bold: boolean) => setWcag({ ...wcag, bold });
 
   // WCAG: large = 18pt regular (~24px) ou 14pt bold (~18.66px)
   const isLarge = bold ? fontSize >= 18.66 : fontSize >= 24;
