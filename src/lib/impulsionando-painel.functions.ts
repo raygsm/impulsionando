@@ -105,7 +105,7 @@ export const getImpulsionandoPainel = createServerFn({ method: "POST" })
     // ESTOQUE
     if (enabled.has("inventory") || enabled.has("estoque")) {
       try {
-        const { data: low } = await sb.from("riomed_stock_levels").select("id, quantity, reorder_point").eq("company_id", companyId);
+        const { data: low } = await sbAny.from("riomed_stock_levels").select("id, quantity, reorder_point").eq("company_id", companyId);
         const lowCount = (low ?? []).filter((r: any) => Number(r.quantity) <= Number(r.reorder_point ?? 0)).length;
         kpis.inventory = { totalSkus: (low ?? []).length, low: lowCount };
       } catch { kpis.inventory = { totalSkus: 0, low: 0 }; }
