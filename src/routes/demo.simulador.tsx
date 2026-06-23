@@ -14,6 +14,9 @@ import {
   Users, Calendar, MessageSquare, BarChart3, Lightbulb,
 } from "lucide-react";
 import { NICHE_MODULE_SLUGS, type RecLevel } from "@/data/nicheRecommendations";
+import { getNicheSimSeed, DEMO_PLAN_TO_CODE, DEMO_PLAN_DISPLAY } from "@/data/nicheSimSeed";
+import { saveCheckoutCart } from "@/hooks/useCheckoutCart";
+import { useMinimumWage } from "@/hooks/useCoreSetting";
 import { toast } from "sonner";
 
 const SearchSchema = z.object({
