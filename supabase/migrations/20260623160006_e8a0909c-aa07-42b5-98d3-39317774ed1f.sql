@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.resolve_tenant_by_host(text) TO anon, authenticated;
