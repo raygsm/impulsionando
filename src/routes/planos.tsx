@@ -257,12 +257,13 @@ type Audience = "empresas" | "white-label" | "consumidor";
 function PlanosPage() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
-  const { nicho, recomendado } = search;
+  const { nicho, recomendado, tab: initialTab } = search;
   const cameFromNiche = Boolean(nicho && recomendado);
 
-  const [audience, setAudience] = useState<Audience>("empresas");
+  const [audience, setAudience] = useState<Audience>(initialTab ?? "empresas");
   const [annual, setAnnual] = useState(false);
   const [showComparison, setShowComparison] = useState<boolean>(false);
+
   const { openCheckout, loading: checkoutLoading } = usePaddleCheckout();
   const { data: user } = useCurrentUser();
   const fetchAvailability = useServerFn(getCommercialAvailability);
