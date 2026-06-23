@@ -154,13 +154,29 @@ async function notifyFailure(
     .limit(1)
     .maybeSingle();
 
+  let finalSeverity: "sev1" | "sev2" | "sev3" = "sev3";
+  let escalated = false;
+  let newCount = 1;
+
   if (existing?.id) {
+    newCount = (existing.event_count ?? 1) + 1;
+    // Auto-escalation thresholds: >10 → sev2, >50 → sev1
+    const prevSeverity = (existing as any).severity ?? "sev3";
+    finalSeverity = newCount > 50 ? "sev1" : newCount > 10 ? "sev2" : "sev3";
+    escalated = finalSeverity !== prevSeverity;
+
     await supabaseAdmin
       .from("core_incidents")
       .update({
-        event_count: (existing.event_count ?? 1) + 1,
+        event_count: newCount,
+        severity: finalSeverity,
         updated_at: new Date().toISOString(),
-        metadata: { last_error: ctx.error, last_execution: ctx.executionId, tenant_id: ctx.tenant_id },
+        metadata: {
+          last_error: ctx.error,
+          last_execution: ctx.executionId,
+          tenant_id: ctx.tenant_id,
+          ...(escalated ? { escalated_at: new Date().toISOString(), escalated_from: prevSeverity } : {}),
+        },
       })
       .eq("id", existing.id);
   } else {
@@ -183,16 +199,20 @@ async function notifyFailure(
     });
   }
 
-  // 2) Best-effort Slack ping when SLACK_OPS_WEBHOOK is configured
+  // 2) Best-effort Slack ping when SLACK_OPS_WEBHOOK is configured.
+  //    Skip noisy re-pings: only post on first occurrence or escalation.
   const slackWebhook = process.env.SLACK_OPS_WEBHOOK;
-  if (slackWebhook) {
+  const shouldPing = !existing?.id || escalated;
+  if (slackWebhook && shouldPing) {
+    const emoji = finalSeverity === "sev1" ? ":fire:" : finalSeverity === "sev2" ? ":warning:" : ":rotating_light:";
+    const header = escalated
+      ? `${emoji} *[${finalSeverity.toUpperCase()} · escalado]* ${title} — ${newCount} ocorrências`
+      : `${emoji} *${title}*`;
     try {
       await fetch(slackWebhook, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text: `:rotating_light: *${title}*\n${description}`,
-        }),
+        body: JSON.stringify({ text: `${header}\n${description}` }),
       });
     } catch (e) {
       console.error("[n8n-callback] slack post failed", e);
