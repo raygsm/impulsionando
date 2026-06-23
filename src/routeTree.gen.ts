@@ -243,6 +243,7 @@ import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedSalesCashRouteImport } from './routes/_authenticated/sales.cash'
 import { Route as AuthenticatedSaibaMaisVersoesRouteImport } from './routes/_authenticated/saiba-mais.versoes'
 import { Route as AuthenticatedSaibaMaisSaudeRouteImport } from './routes/_authenticated/saiba-mais.saude'
+import { Route as AuthenticatedRiomedMinhasGarantiasRouteImport } from './routes/_authenticated/riomed.minhas-garantias'
 import { Route as AuthenticatedRestauranteSalaoRouteImport } from './routes/_authenticated/restaurante.salao'
 import { Route as AuthenticatedRestauranteMesasRouteImport } from './routes/_authenticated/restaurante.mesas'
 import { Route as AuthenticatedRestauranteCardapioRouteImport } from './routes/_authenticated/restaurante.cardapio'
@@ -637,6 +638,7 @@ import { Route as AuthenticatedAdminClientesRiomedN8nRouteImport } from './route
 import { Route as AuthenticatedAdminClientesRiomedMasterDashboardRouteImport } from './routes/_authenticated/admin.clientes.riomed.master-dashboard'
 import { Route as AuthenticatedAdminClientesRiomedMarketplaceRouteImport } from './routes/_authenticated/admin.clientes.riomed.marketplace'
 import { Route as AuthenticatedAdminClientesRiomedMarketingRouteImport } from './routes/_authenticated/admin.clientes.riomed.marketing'
+import { Route as AuthenticatedAdminClientesRiomedLogisticaRouteImport } from './routes/_authenticated/admin.clientes.riomed.logistica'
 import { Route as AuthenticatedAdminClientesRiomedLocacaoRouteImport } from './routes/_authenticated/admin.clientes.riomed.locacao'
 import { Route as AuthenticatedAdminClientesRiomedJornadasRouteImport } from './routes/_authenticated/admin.clientes.riomed.jornadas'
 import { Route as AuthenticatedAdminClientesRiomedImportacoesRouteImport } from './routes/_authenticated/admin.clientes.riomed.importacoes'
@@ -1868,6 +1870,12 @@ const AuthenticatedSaibaMaisSaudeRoute =
   AuthenticatedSaibaMaisSaudeRouteImport.update({
     id: '/saiba-mais/saude',
     path: '/saiba-mais/saude',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedRiomedMinhasGarantiasRoute =
+  AuthenticatedRiomedMinhasGarantiasRouteImport.update({
+    id: '/riomed/minhas-garantias',
+    path: '/riomed/minhas-garantias',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedRestauranteSalaoRoute =
@@ -4197,6 +4205,12 @@ const AuthenticatedAdminClientesRiomedMarketingRoute =
     path: '/marketing',
     getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
   } as any)
+const AuthenticatedAdminClientesRiomedLogisticaRoute =
+  AuthenticatedAdminClientesRiomedLogisticaRouteImport.update({
+    id: '/logistica',
+    path: '/logistica',
+    getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
+  } as any)
 const AuthenticatedAdminClientesRiomedLocacaoRoute =
   AuthenticatedAdminClientesRiomedLocacaoRouteImport.update({
     id: '/locacao',
@@ -4827,6 +4841,7 @@ export interface FileRoutesByFullPath {
   '/restaurante/cardapio': typeof AuthenticatedRestauranteCardapioRoute
   '/restaurante/mesas': typeof AuthenticatedRestauranteMesasRoute
   '/restaurante/salao': typeof AuthenticatedRestauranteSalaoRouteWithChildren
+  '/riomed/minhas-garantias': typeof AuthenticatedRiomedMinhasGarantiasRoute
   '/saiba-mais/saude': typeof AuthenticatedSaibaMaisSaudeRoute
   '/saiba-mais/versoes': typeof AuthenticatedSaibaMaisVersoesRoute
   '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
@@ -4966,6 +4981,7 @@ export interface FileRoutesByFullPath {
   '/admin/clientes/riomed/importacoes': typeof AuthenticatedAdminClientesRiomedImportacoesRoute
   '/admin/clientes/riomed/jornadas': typeof AuthenticatedAdminClientesRiomedJornadasRoute
   '/admin/clientes/riomed/locacao': typeof AuthenticatedAdminClientesRiomedLocacaoRoute
+  '/admin/clientes/riomed/logistica': typeof AuthenticatedAdminClientesRiomedLogisticaRoute
   '/admin/clientes/riomed/marketing': typeof AuthenticatedAdminClientesRiomedMarketingRoute
   '/admin/clientes/riomed/marketplace': typeof AuthenticatedAdminClientesRiomedMarketplaceRoute
   '/admin/clientes/riomed/master-dashboard': typeof AuthenticatedAdminClientesRiomedMasterDashboardRoute
@@ -5467,6 +5483,7 @@ export interface FileRoutesByTo {
   '/restaurante/cardapio': typeof AuthenticatedRestauranteCardapioRoute
   '/restaurante/mesas': typeof AuthenticatedRestauranteMesasRoute
   '/restaurante/salao': typeof AuthenticatedRestauranteSalaoRouteWithChildren
+  '/riomed/minhas-garantias': typeof AuthenticatedRiomedMinhasGarantiasRoute
   '/saiba-mais/saude': typeof AuthenticatedSaibaMaisSaudeRoute
   '/saiba-mais/versoes': typeof AuthenticatedSaibaMaisVersoesRoute
   '/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
@@ -5606,6 +5623,7 @@ export interface FileRoutesByTo {
   '/admin/clientes/riomed/importacoes': typeof AuthenticatedAdminClientesRiomedImportacoesRoute
   '/admin/clientes/riomed/jornadas': typeof AuthenticatedAdminClientesRiomedJornadasRoute
   '/admin/clientes/riomed/locacao': typeof AuthenticatedAdminClientesRiomedLocacaoRoute
+  '/admin/clientes/riomed/logistica': typeof AuthenticatedAdminClientesRiomedLogisticaRoute
   '/admin/clientes/riomed/marketing': typeof AuthenticatedAdminClientesRiomedMarketingRoute
   '/admin/clientes/riomed/marketplace': typeof AuthenticatedAdminClientesRiomedMarketplaceRoute
   '/admin/clientes/riomed/master-dashboard': typeof AuthenticatedAdminClientesRiomedMasterDashboardRoute
@@ -6122,6 +6140,7 @@ export interface FileRoutesById {
   '/_authenticated/restaurante/cardapio': typeof AuthenticatedRestauranteCardapioRoute
   '/_authenticated/restaurante/mesas': typeof AuthenticatedRestauranteMesasRoute
   '/_authenticated/restaurante/salao': typeof AuthenticatedRestauranteSalaoRouteWithChildren
+  '/_authenticated/riomed/minhas-garantias': typeof AuthenticatedRiomedMinhasGarantiasRoute
   '/_authenticated/saiba-mais/saude': typeof AuthenticatedSaibaMaisSaudeRoute
   '/_authenticated/saiba-mais/versoes': typeof AuthenticatedSaibaMaisVersoesRoute
   '/_authenticated/sales/cash': typeof AuthenticatedSalesCashRouteWithChildren
@@ -6261,6 +6280,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/clientes/riomed/importacoes': typeof AuthenticatedAdminClientesRiomedImportacoesRoute
   '/_authenticated/admin/clientes/riomed/jornadas': typeof AuthenticatedAdminClientesRiomedJornadasRoute
   '/_authenticated/admin/clientes/riomed/locacao': typeof AuthenticatedAdminClientesRiomedLocacaoRoute
+  '/_authenticated/admin/clientes/riomed/logistica': typeof AuthenticatedAdminClientesRiomedLogisticaRoute
   '/_authenticated/admin/clientes/riomed/marketing': typeof AuthenticatedAdminClientesRiomedMarketingRoute
   '/_authenticated/admin/clientes/riomed/marketplace': typeof AuthenticatedAdminClientesRiomedMarketplaceRoute
   '/_authenticated/admin/clientes/riomed/master-dashboard': typeof AuthenticatedAdminClientesRiomedMasterDashboardRoute
@@ -6776,6 +6796,7 @@ export interface FileRouteTypes {
     | '/restaurante/cardapio'
     | '/restaurante/mesas'
     | '/restaurante/salao'
+    | '/riomed/minhas-garantias'
     | '/saiba-mais/saude'
     | '/saiba-mais/versoes'
     | '/sales/cash'
@@ -6915,6 +6936,7 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed/importacoes'
     | '/admin/clientes/riomed/jornadas'
     | '/admin/clientes/riomed/locacao'
+    | '/admin/clientes/riomed/logistica'
     | '/admin/clientes/riomed/marketing'
     | '/admin/clientes/riomed/marketplace'
     | '/admin/clientes/riomed/master-dashboard'
@@ -7416,6 +7438,7 @@ export interface FileRouteTypes {
     | '/restaurante/cardapio'
     | '/restaurante/mesas'
     | '/restaurante/salao'
+    | '/riomed/minhas-garantias'
     | '/saiba-mais/saude'
     | '/saiba-mais/versoes'
     | '/sales/cash'
@@ -7555,6 +7578,7 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed/importacoes'
     | '/admin/clientes/riomed/jornadas'
     | '/admin/clientes/riomed/locacao'
+    | '/admin/clientes/riomed/logistica'
     | '/admin/clientes/riomed/marketing'
     | '/admin/clientes/riomed/marketplace'
     | '/admin/clientes/riomed/master-dashboard'
@@ -8070,6 +8094,7 @@ export interface FileRouteTypes {
     | '/_authenticated/restaurante/cardapio'
     | '/_authenticated/restaurante/mesas'
     | '/_authenticated/restaurante/salao'
+    | '/_authenticated/riomed/minhas-garantias'
     | '/_authenticated/saiba-mais/saude'
     | '/_authenticated/saiba-mais/versoes'
     | '/_authenticated/sales/cash'
@@ -8209,6 +8234,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/clientes/riomed/importacoes'
     | '/_authenticated/admin/clientes/riomed/jornadas'
     | '/_authenticated/admin/clientes/riomed/locacao'
+    | '/_authenticated/admin/clientes/riomed/logistica'
     | '/_authenticated/admin/clientes/riomed/marketing'
     | '/_authenticated/admin/clientes/riomed/marketplace'
     | '/_authenticated/admin/clientes/riomed/master-dashboard'
@@ -10047,6 +10073,13 @@ declare module '@tanstack/react-router' {
       path: '/saiba-mais/saude'
       fullPath: '/saiba-mais/saude'
       preLoaderRoute: typeof AuthenticatedSaibaMaisSaudeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/riomed/minhas-garantias': {
+      id: '/_authenticated/riomed/minhas-garantias'
+      path: '/riomed/minhas-garantias'
+      fullPath: '/riomed/minhas-garantias'
+      preLoaderRoute: typeof AuthenticatedRiomedMinhasGarantiasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/restaurante/salao': {
@@ -12807,6 +12840,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientesRiomedMarketingRouteImport
       parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
     }
+    '/_authenticated/admin/clientes/riomed/logistica': {
+      id: '/_authenticated/admin/clientes/riomed/logistica'
+      path: '/logistica'
+      fullPath: '/admin/clientes/riomed/logistica'
+      preLoaderRoute: typeof AuthenticatedAdminClientesRiomedLogisticaRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
+    }
     '/_authenticated/admin/clientes/riomed/locacao': {
       id: '/_authenticated/admin/clientes/riomed/locacao'
       path: '/locacao'
@@ -13665,6 +13705,7 @@ interface AuthenticatedAdminClientesRiomedRouteChildren {
   AuthenticatedAdminClientesRiomedImportacoesRoute: typeof AuthenticatedAdminClientesRiomedImportacoesRoute
   AuthenticatedAdminClientesRiomedJornadasRoute: typeof AuthenticatedAdminClientesRiomedJornadasRoute
   AuthenticatedAdminClientesRiomedLocacaoRoute: typeof AuthenticatedAdminClientesRiomedLocacaoRoute
+  AuthenticatedAdminClientesRiomedLogisticaRoute: typeof AuthenticatedAdminClientesRiomedLogisticaRoute
   AuthenticatedAdminClientesRiomedMarketingRoute: typeof AuthenticatedAdminClientesRiomedMarketingRoute
   AuthenticatedAdminClientesRiomedMarketplaceRoute: typeof AuthenticatedAdminClientesRiomedMarketplaceRoute
   AuthenticatedAdminClientesRiomedMasterDashboardRoute: typeof AuthenticatedAdminClientesRiomedMasterDashboardRoute
@@ -13725,6 +13766,8 @@ const AuthenticatedAdminClientesRiomedRouteChildren: AuthenticatedAdminClientesR
       AuthenticatedAdminClientesRiomedJornadasRoute,
     AuthenticatedAdminClientesRiomedLocacaoRoute:
       AuthenticatedAdminClientesRiomedLocacaoRoute,
+    AuthenticatedAdminClientesRiomedLogisticaRoute:
+      AuthenticatedAdminClientesRiomedLogisticaRoute,
     AuthenticatedAdminClientesRiomedMarketingRoute:
       AuthenticatedAdminClientesRiomedMarketingRoute,
     AuthenticatedAdminClientesRiomedMarketplaceRoute:
@@ -13997,6 +14040,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRestauranteCardapioRoute: typeof AuthenticatedRestauranteCardapioRoute
   AuthenticatedRestauranteMesasRoute: typeof AuthenticatedRestauranteMesasRoute
   AuthenticatedRestauranteSalaoRoute: typeof AuthenticatedRestauranteSalaoRouteWithChildren
+  AuthenticatedRiomedMinhasGarantiasRoute: typeof AuthenticatedRiomedMinhasGarantiasRoute
   AuthenticatedSaibaMaisSaudeRoute: typeof AuthenticatedSaibaMaisSaudeRoute
   AuthenticatedSaibaMaisVersoesRoute: typeof AuthenticatedSaibaMaisVersoesRoute
   AuthenticatedShowroomRestauranteRoute: typeof AuthenticatedShowroomRestauranteRoute
@@ -14352,6 +14396,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRestauranteMesasRoute: AuthenticatedRestauranteMesasRoute,
   AuthenticatedRestauranteSalaoRoute:
     AuthenticatedRestauranteSalaoRouteWithChildren,
+  AuthenticatedRiomedMinhasGarantiasRoute:
+    AuthenticatedRiomedMinhasGarantiasRoute,
   AuthenticatedSaibaMaisSaudeRoute: AuthenticatedSaibaMaisSaudeRoute,
   AuthenticatedSaibaMaisVersoesRoute: AuthenticatedSaibaMaisVersoesRoute,
   AuthenticatedShowroomRestauranteRoute: AuthenticatedShowroomRestauranteRoute,
