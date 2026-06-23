@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { TenantModuleShell } from "@/components/core/TenantModuleShell";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   listRioMedProducts,
   upsertRioMedProduct,
   deleteRioMedProduct,
+  bulkImportRioMedProducts,
 } from "@/lib/riomed.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,9 +18,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Pencil, Plus, Trash2, Package } from "lucide-react";
+import { Pencil, Plus, Trash2, Package, Upload, Download, FileSpreadsheet } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/riomed/produtos")({
   component: () => (<TenantModuleShell tenantSlug="riomed" moduleSlug='products' title='Produtos RioMed'><ProductsPage /></TenantModuleShell>),
@@ -56,6 +57,7 @@ function ProductsPage() {
   const listFn = useServerFn(listRioMedProducts);
   const saveFn = useServerFn(upsertRioMedProduct);
   const delFn = useServerFn(deleteRioMedProduct);
+  const importFn = useServerFn(bulkImportRioMedProducts);
 
   const { data: productsRaw = [], isLoading } = useQuery({
     queryKey: ["riomed-products"],
@@ -63,9 +65,13 @@ function ProductsPage() {
   });
   const products = productsRaw as unknown as Product[];
 
-
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<Product>(empty);
+  const [importOpen, setImportOpen] = useState(false);
+  const [importPreview, setImportPreview] = useState<Product[] | null>(null);
+  const [importErrors, setImportErrors] = useState<string[]>([]);
+  const [importMode, setImportMode] = useState<"upsert_by_sku" | "insert_only">("upsert_by_sku");
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const save = useMutation({
     mutationFn: (p: Product) => saveFn({ data: p as any }),
@@ -104,9 +110,121 @@ function ProductsPage() {
     }));
   }
 
+  // ============ EXPORT CSV ============
+  function exportCsv() {
+    const headers = [
+      "sku", "name", "description", "category", "audiences", "modality",
+      "price_sale", "price_rental_daily", "price_rental_monthly",
+      "currency", "image_url", "stock", "is_active", "display_order",
+    ];
+    const escape = (v: any) => {
+      if (v === null || v === undefined) return "";
+      const s = Array.isArray(v) ? v.join("|") : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const rows = [
+      headers.join(","),
+      ...products.map((p) => headers.map((h) => escape((p as any)[h])).join(",")),
+    ].join("\n");
+    const blob = new Blob([`\uFEFF${rows}`], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `riomed-produtos-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`${products.length} produtos exportados`);
+  }
+
+  // ============ IMPORT CSV ============
+  function parseCsv(text: string): Product[] {
+    const lines = text.replace(/^\uFEFF/, "").split(/\r?\n/).filter((l) => l.trim());
+    if (lines.length < 2) return [];
+    const splitRow = (line: string) => {
+      const out: string[] = [];
+      let cur = "", inQ = false;
+      for (let i = 0; i < line.length; i++) {
+        const c = line[i];
+        if (c === '"' && line[i + 1] === '"') { cur += '"'; i++; }
+        else if (c === '"') inQ = !inQ;
+        else if (c === "," && !inQ) { out.push(cur); cur = ""; }
+        else cur += c;
+      }
+      out.push(cur);
+      return out;
+    };
+    const headers = splitRow(lines[0]).map((h) => h.trim().toLowerCase());
+    return lines.slice(1).map((line) => {
+      const cells = splitRow(line);
+      const r: any = {};
+      headers.forEach((h, i) => { r[h] = (cells[i] ?? "").trim(); });
+      const auds = (r.audiences || "paciente").split(/[|;]/).map((s: string) => s.trim()).filter(Boolean);
+      return {
+        sku: r.sku || null,
+        name: r.name,
+        description: r.description || null,
+        category: r.category || null,
+        audiences: auds,
+        modality: (r.modality || "venta") as Modality,
+        price_sale: r.price_sale ? Number(r.price_sale) : null,
+        price_rental_daily: r.price_rental_daily ? Number(r.price_rental_daily) : null,
+        price_rental_monthly: r.price_rental_monthly ? Number(r.price_rental_monthly) : null,
+        currency: r.currency || "BOB",
+        image_url: r.image_url || null,
+        stock: r.stock ? Number(r.stock) : 0,
+        is_active: r.is_active ? !/^(false|0|no|inativo)$/i.test(r.is_active) : true,
+        display_order: r.display_order ? Number(r.display_order) : 0,
+      } as Product;
+    });
+  }
+
+  function handleFile(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const items = parseCsv(String(reader.result ?? ""));
+        const errs: string[] = [];
+        items.forEach((p, i) => {
+          if (!p.name) errs.push(`Linha ${i + 2}: nome vazio`);
+          if (!p.audiences?.length) errs.push(`Linha ${i + 2}: sem público`);
+        });
+        setImportPreview(items);
+        setImportErrors(errs);
+        setImportOpen(true);
+      } catch (e: any) {
+        toast.error(`Erro ao ler CSV: ${e?.message ?? e}`);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function downloadTemplate() {
+    const tpl =
+      "sku,name,description,category,audiences,modality,price_sale,price_rental_daily,price_rental_monthly,currency,image_url,stock,is_active,display_order\n" +
+      "SKU-001,Cadeira de rodas,Cadeira dobrável,Mobilidade,paciente|clinica,ambos,1200.00,80.00,1600.00,BOB,https://exemplo.com/img.jpg,5,true,1\n";
+    const blob = new Blob([`\uFEFF${tpl}`], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "riomed-produtos-modelo.csv"; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  const importMut = useMutation({
+    mutationFn: () => importFn({ data: { items: importPreview ?? [], mode: importMode } as any }),
+    onSuccess: (r: any) => {
+      toast.success(`Importação concluída — ${r.inserted} novos, ${r.updated} atualizados${r.errors?.length ? `, ${r.errors.length} com erro` : ""}`);
+      qc.invalidateQueries({ queryKey: ["riomed-products"] });
+      setImportOpen(false);
+      setImportPreview(null);
+      setImportErrors([]);
+      if (fileRef.current) fileRef.current.value = "";
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Erro ao importar"),
+  });
+
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Package className="h-7 w-7" /> RioMed · Produtos
@@ -115,9 +233,27 @@ function ProductsPage() {
             Catálogo virtual. Mudanças sincronizam automaticamente o bot WhatsApp.
           </p>
         </div>
-        <Button onClick={() => { setDraft(empty); setOpen(true); }}>
-          <Plus className="h-4 w-4 mr-2" /> Novo produto
-        </Button>
+        <div className="flex gap-2 items-center flex-wrap">
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".csv,text/csv"
+            className="hidden"
+            onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+          />
+          <Button variant="outline" onClick={downloadTemplate} title="Baixar modelo CSV">
+            <FileSpreadsheet className="h-4 w-4 mr-2" /> Modelo
+          </Button>
+          <Button variant="outline" onClick={() => fileRef.current?.click()}>
+            <Upload className="h-4 w-4 mr-2" /> Importar
+          </Button>
+          <Button variant="outline" onClick={exportCsv} disabled={!products.length}>
+            <Download className="h-4 w-4 mr-2" /> Exportar
+          </Button>
+          <Button onClick={() => { setDraft(empty); setOpen(true); }} className="bg-gradient-primary shadow-elegant">
+            <Plus className="h-4 w-4 mr-2" /> Novo produto
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
@@ -211,6 +347,69 @@ function ProductsPage() {
             <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
             <Button onClick={() => save.mutate(draft)} disabled={save.isPending || !draft.name || draft.audiences.length === 0}>
               {save.isPending ? "Salvando..." : "Salvar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import preview dialog */}
+      <Dialog open={importOpen} onOpenChange={setImportOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Pré-visualização da importação</DialogTitle>
+            <DialogDescription>
+              {importPreview?.length ?? 0} produtos detectados. Confira antes de confirmar.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <Label>Modo:</Label>
+              <Select value={importMode} onValueChange={(v) => setImportMode(v as any)}>
+                <SelectTrigger className="w-72"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="upsert_by_sku">Atualizar por SKU (cria se não existe)</SelectItem>
+                  <SelectItem value="insert_only">Apenas inserir novos</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {importErrors.length > 0 && (
+              <div className="border border-orange-500/50 bg-orange-50 dark:bg-orange-950/20 rounded p-3 text-xs">
+                <div className="font-semibold mb-1 text-orange-700 dark:text-orange-300">Avisos ({importErrors.length}):</div>
+                <ul className="list-disc list-inside space-y-0.5">{importErrors.slice(0, 10).map((e, i) => <li key={i}>{e}</li>)}</ul>
+              </div>
+            )}
+
+            <div className="border rounded max-h-80 overflow-auto">
+              <table className="w-full text-xs">
+                <thead className="bg-muted sticky top-0">
+                  <tr className="text-left"><th className="p-2">SKU</th><th className="p-2">Nome</th><th className="p-2">Modalidade</th><th className="p-2">Preço</th><th className="p-2">Estoque</th></tr>
+                </thead>
+                <tbody>
+                  {(importPreview ?? []).slice(0, 50).map((p, i) => (
+                    <tr key={i} className="border-t">
+                      <td className="p-2 font-mono">{p.sku ?? "—"}</td>
+                      <td className="p-2">{p.name}</td>
+                      <td className="p-2">{p.modality}</td>
+                      <td className="p-2">{p.price_sale ?? "—"}</td>
+                      <td className="p-2">{p.stock}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {(importPreview?.length ?? 0) > 50 && (
+                <div className="p-2 text-center text-xs text-muted-foreground">+ {importPreview!.length - 50} linhas...</div>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setImportOpen(false)}>Cancelar</Button>
+            <Button
+              onClick={() => importMut.mutate()}
+              disabled={!importPreview?.length || importMut.isPending}
+              className="bg-gradient-primary shadow-elegant"
+            >
+              {importMut.isPending ? "Importando..." : `Confirmar (${importPreview?.length ?? 0})`}
             </Button>
           </DialogFooter>
         </DialogContent>
