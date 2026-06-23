@@ -210,6 +210,15 @@ export function BrandingPreviewTab({ companyId }: Props) {
           </div>
         </CardContent>
       </Card>
+
+      <BrandKitExport
+        brandName={brandName}
+        primary={primary}
+        secondary={secondary}
+        domain={domain === "—" ? "" : domain}
+        logoUrl={company?.logo_url ?? null}
+        defaultEmail={defaultAlias?.full_address || (domain && domain !== "—" ? `contato@${domain}` : "")}
+      />
     </div>
   );
 }
