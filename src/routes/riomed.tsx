@@ -116,13 +116,9 @@ function RiomedLayout() {
 
           {/* CTAs principais */}
           <div className="hidden md:flex items-center gap-2">
-            <Link
-              to="/riomed/carrinho"
-              className="relative inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-[color:var(--riomed-primary)] hover:bg-slate-100 transition"
-              aria-label="Carrinho"
-            >
-              <ShoppingCart className="h-5 w-5" />
-            </Link>
+            <CartWidget />
+
+
 
             <Link
               to="/riomed/soporte"
