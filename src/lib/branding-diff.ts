@@ -26,11 +26,11 @@ export function diffBranding(to: BrandingSnapshot | null, from: BrandingSnapshot
     { field: "secondary_color", label: "Cor secundária", kind: "color" },
   ];
   return fields
-    .filter((f) => (to as Record<string, unknown>)[f.field] !== (from as Record<string, unknown>)[f.field])
+    .filter((f) => (to as unknown as Record<string, unknown>)[f.field] !== (from as unknown as Record<string, unknown>)[f.field])
     .map((f) => ({
       ...f,
-      from: (from as Record<string, string | null>)[f.field] ?? null,
-      to: (to as Record<string, string | null>)[f.field] ?? null,
+      from: ((from as unknown as Record<string, string | null>)[f.field]) ?? null,
+      to: ((to as unknown as Record<string, string | null>)[f.field]) ?? null,
     }));
 }
 
