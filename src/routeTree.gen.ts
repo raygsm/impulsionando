@@ -609,7 +609,10 @@ import { Route as AuthenticatedAdminIntegracoesMercadoPagoRouteImport } from './
 import { Route as AuthenticatedAdminClientesRiomedRouteImport } from './routes/_authenticated/admin.clientes.riomed'
 import { Route as AuthenticatedAdminClientesSlugRouteImport } from './routes/_authenticated/admin.clientes.$slug'
 import { Route as ApiPublicRiomedQuotesColdRouteImport } from './routes/api/public/riomed/quotes/cold'
+import { Route as ApiPublicRiomedFxUpsertRouteImport } from './routes/api/public/riomed/fx/upsert'
 import { Route as ApiPublicRiomedCartsAbandonedRouteImport } from './routes/api/public/riomed/carts/abandoned'
+import { Route as ApiPublicRiomedBroadcastsMarkRouteImport } from './routes/api/public/riomed/broadcasts/mark'
+import { Route as ApiPublicRiomedBroadcastsDueRouteImport } from './routes/api/public/riomed/broadcasts/due'
 import { Route as ApiPublicRiomedArOverdueRouteImport } from './routes/api/public/riomed/ar/overdue'
 import { Route as ApiPublicPaymentsCloseInvoiceReplayRouteImport } from './routes/api/public/payments/close-invoice.replay'
 import { Route as AuthenticatedImobiliariaAprovacoesIdImprimirRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes.$id.imprimir'
@@ -4022,10 +4025,27 @@ const ApiPublicRiomedQuotesColdRoute =
     path: '/api/public/riomed/quotes/cold',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicRiomedFxUpsertRoute = ApiPublicRiomedFxUpsertRouteImport.update({
+  id: '/api/public/riomed/fx/upsert',
+  path: '/api/public/riomed/fx/upsert',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicRiomedCartsAbandonedRoute =
   ApiPublicRiomedCartsAbandonedRouteImport.update({
     id: '/api/public/riomed/carts/abandoned',
     path: '/api/public/riomed/carts/abandoned',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicRiomedBroadcastsMarkRoute =
+  ApiPublicRiomedBroadcastsMarkRouteImport.update({
+    id: '/api/public/riomed/broadcasts/mark',
+    path: '/api/public/riomed/broadcasts/mark',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicRiomedBroadcastsDueRoute =
+  ApiPublicRiomedBroadcastsDueRouteImport.update({
+    id: '/api/public/riomed/broadcasts/due',
+    path: '/api/public/riomed/broadcasts/due',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicRiomedArOverdueRoute =
@@ -4919,7 +4939,10 @@ export interface FileRoutesByFullPath {
   '/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
   '/api/public/payments/close-invoice/replay': typeof ApiPublicPaymentsCloseInvoiceReplayRoute
   '/api/public/riomed/ar/overdue': typeof ApiPublicRiomedArOverdueRoute
+  '/api/public/riomed/broadcasts/due': typeof ApiPublicRiomedBroadcastsDueRoute
+  '/api/public/riomed/broadcasts/mark': typeof ApiPublicRiomedBroadcastsMarkRoute
   '/api/public/riomed/carts/abandoned': typeof ApiPublicRiomedCartsAbandonedRoute
+  '/api/public/riomed/fx/upsert': typeof ApiPublicRiomedFxUpsertRoute
   '/api/public/riomed/quotes/cold': typeof ApiPublicRiomedQuotesColdRoute
   '/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
@@ -5550,7 +5573,10 @@ export interface FileRoutesByTo {
   '/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
   '/api/public/payments/close-invoice/replay': typeof ApiPublicPaymentsCloseInvoiceReplayRoute
   '/api/public/riomed/ar/overdue': typeof ApiPublicRiomedArOverdueRoute
+  '/api/public/riomed/broadcasts/due': typeof ApiPublicRiomedBroadcastsDueRoute
+  '/api/public/riomed/broadcasts/mark': typeof ApiPublicRiomedBroadcastsMarkRoute
   '/api/public/riomed/carts/abandoned': typeof ApiPublicRiomedCartsAbandonedRoute
+  '/api/public/riomed/fx/upsert': typeof ApiPublicRiomedFxUpsertRoute
   '/api/public/riomed/quotes/cold': typeof ApiPublicRiomedQuotesColdRoute
   '/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
@@ -6196,7 +6222,10 @@ export interface FileRoutesById {
   '/_authenticated/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
   '/api/public/payments/close-invoice/replay': typeof ApiPublicPaymentsCloseInvoiceReplayRoute
   '/api/public/riomed/ar/overdue': typeof ApiPublicRiomedArOverdueRoute
+  '/api/public/riomed/broadcasts/due': typeof ApiPublicRiomedBroadcastsDueRoute
+  '/api/public/riomed/broadcasts/mark': typeof ApiPublicRiomedBroadcastsMarkRoute
   '/api/public/riomed/carts/abandoned': typeof ApiPublicRiomedCartsAbandonedRoute
+  '/api/public/riomed/fx/upsert': typeof ApiPublicRiomedFxUpsertRoute
   '/api/public/riomed/quotes/cold': typeof ApiPublicRiomedQuotesColdRoute
   '/_authenticated/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/_authenticated/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
@@ -6841,7 +6870,10 @@ export interface FileRouteTypes {
     | '/imobiliaria/aprovacoes/$id/imprimir'
     | '/api/public/payments/close-invoice/replay'
     | '/api/public/riomed/ar/overdue'
+    | '/api/public/riomed/broadcasts/due'
+    | '/api/public/riomed/broadcasts/mark'
     | '/api/public/riomed/carts/abandoned'
+    | '/api/public/riomed/fx/upsert'
     | '/api/public/riomed/quotes/cold'
     | '/core/cliente/$id/paginas/$pageId'
     | '/core/cliente/$id/modulo/$slug/configurar'
@@ -7472,7 +7504,10 @@ export interface FileRouteTypes {
     | '/imobiliaria/aprovacoes/$id/imprimir'
     | '/api/public/payments/close-invoice/replay'
     | '/api/public/riomed/ar/overdue'
+    | '/api/public/riomed/broadcasts/due'
+    | '/api/public/riomed/broadcasts/mark'
     | '/api/public/riomed/carts/abandoned'
+    | '/api/public/riomed/fx/upsert'
     | '/api/public/riomed/quotes/cold'
     | '/core/cliente/$id/paginas/$pageId'
     | '/core/cliente/$id/modulo/$slug/configurar'
@@ -8117,7 +8152,10 @@ export interface FileRouteTypes {
     | '/_authenticated/imobiliaria/aprovacoes/$id/imprimir'
     | '/api/public/payments/close-invoice/replay'
     | '/api/public/riomed/ar/overdue'
+    | '/api/public/riomed/broadcasts/due'
+    | '/api/public/riomed/broadcasts/mark'
     | '/api/public/riomed/carts/abandoned'
+    | '/api/public/riomed/fx/upsert'
     | '/api/public/riomed/quotes/cold'
     | '/_authenticated/core/cliente/$id/paginas/$pageId'
     | '/_authenticated/core/cliente/$id/modulo/$slug/configurar'
@@ -8286,7 +8324,10 @@ export interface RootRouteChildren {
   LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
   ApiPublicPaymentsCloseInvoiceReplayRoute: typeof ApiPublicPaymentsCloseInvoiceReplayRoute
   ApiPublicRiomedArOverdueRoute: typeof ApiPublicRiomedArOverdueRoute
+  ApiPublicRiomedBroadcastsDueRoute: typeof ApiPublicRiomedBroadcastsDueRoute
+  ApiPublicRiomedBroadcastsMarkRoute: typeof ApiPublicRiomedBroadcastsMarkRoute
   ApiPublicRiomedCartsAbandonedRoute: typeof ApiPublicRiomedCartsAbandonedRoute
+  ApiPublicRiomedFxUpsertRoute: typeof ApiPublicRiomedFxUpsertRoute
   ApiPublicRiomedQuotesColdRoute: typeof ApiPublicRiomedQuotesColdRoute
 }
 
@@ -12492,11 +12533,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicRiomedQuotesColdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/riomed/fx/upsert': {
+      id: '/api/public/riomed/fx/upsert'
+      path: '/api/public/riomed/fx/upsert'
+      fullPath: '/api/public/riomed/fx/upsert'
+      preLoaderRoute: typeof ApiPublicRiomedFxUpsertRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/riomed/carts/abandoned': {
       id: '/api/public/riomed/carts/abandoned'
       path: '/api/public/riomed/carts/abandoned'
       fullPath: '/api/public/riomed/carts/abandoned'
       preLoaderRoute: typeof ApiPublicRiomedCartsAbandonedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/riomed/broadcasts/mark': {
+      id: '/api/public/riomed/broadcasts/mark'
+      path: '/api/public/riomed/broadcasts/mark'
+      fullPath: '/api/public/riomed/broadcasts/mark'
+      preLoaderRoute: typeof ApiPublicRiomedBroadcastsMarkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/riomed/broadcasts/due': {
+      id: '/api/public/riomed/broadcasts/due'
+      path: '/api/public/riomed/broadcasts/due'
+      fullPath: '/api/public/riomed/broadcasts/due'
+      preLoaderRoute: typeof ApiPublicRiomedBroadcastsDueRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/riomed/ar/overdue': {
@@ -14541,19 +14603,12 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicPaymentsCloseInvoiceReplayRoute:
     ApiPublicPaymentsCloseInvoiceReplayRoute,
   ApiPublicRiomedArOverdueRoute: ApiPublicRiomedArOverdueRoute,
+  ApiPublicRiomedBroadcastsDueRoute: ApiPublicRiomedBroadcastsDueRoute,
+  ApiPublicRiomedBroadcastsMarkRoute: ApiPublicRiomedBroadcastsMarkRoute,
   ApiPublicRiomedCartsAbandonedRoute: ApiPublicRiomedCartsAbandonedRoute,
+  ApiPublicRiomedFxUpsertRoute: ApiPublicRiomedFxUpsertRoute,
   ApiPublicRiomedQuotesColdRoute: ApiPublicRiomedQuotesColdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
