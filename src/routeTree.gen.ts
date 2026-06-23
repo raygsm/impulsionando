@@ -134,6 +134,7 @@ import { Route as DemoParceirosRouteImport } from './routes/demo.parceiros'
 import { Route as DemoModulosRouteImport } from './routes/demo.modulos'
 import { Route as DemoFeiraRouteImport } from './routes/demo.feira'
 import { Route as DemoEventosRouteImport } from './routes/demo.eventos'
+import { Route as DemoEscolherNichoRouteImport } from './routes/demo.escolher-nicho'
 import { Route as DemoCrmRouteImport } from './routes/demo.crm'
 import { Route as DemoClienteFinalRouteImport } from './routes/demo.cliente-final'
 import { Route as DemoCheckoutRouteImport } from './routes/demo.checkout'
@@ -1293,6 +1294,11 @@ const DemoFeiraRoute = DemoFeiraRouteImport.update({
 const DemoEventosRoute = DemoEventosRouteImport.update({
   id: '/demo/eventos',
   path: '/demo/eventos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoEscolherNichoRoute = DemoEscolherNichoRouteImport.update({
+  id: '/demo/escolher-nicho',
+  path: '/demo/escolher-nicho',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoCrmRoute = DemoCrmRouteImport.update({
@@ -4466,6 +4472,7 @@ export interface FileRoutesByFullPath {
   '/demo/checkout': typeof DemoCheckoutRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/crm': typeof DemoCrmRoute
+  '/demo/escolher-nicho': typeof DemoEscolherNichoRoute
   '/demo/eventos': typeof DemoEventosRoute
   '/demo/feira': typeof DemoFeiraRoute
   '/demo/modulos': typeof DemoModulosRoute
@@ -5110,6 +5117,7 @@ export interface FileRoutesByTo {
   '/demo/checkout': typeof DemoCheckoutRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/crm': typeof DemoCrmRoute
+  '/demo/escolher-nicho': typeof DemoEscolherNichoRoute
   '/demo/eventos': typeof DemoEventosRoute
   '/demo/feira': typeof DemoFeiraRoute
   '/demo/modulos': typeof DemoModulosRoute
@@ -5768,6 +5776,7 @@ export interface FileRoutesById {
   '/demo/checkout': typeof DemoCheckoutRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/crm': typeof DemoCrmRoute
+  '/demo/escolher-nicho': typeof DemoEscolherNichoRoute
   '/demo/eventos': typeof DemoEventosRoute
   '/demo/feira': typeof DemoFeiraRoute
   '/demo/modulos': typeof DemoModulosRoute
@@ -6426,6 +6435,7 @@ export interface FileRouteTypes {
     | '/demo/checkout'
     | '/demo/cliente-final'
     | '/demo/crm'
+    | '/demo/escolher-nicho'
     | '/demo/eventos'
     | '/demo/feira'
     | '/demo/modulos'
@@ -7070,6 +7080,7 @@ export interface FileRouteTypes {
     | '/demo/checkout'
     | '/demo/cliente-final'
     | '/demo/crm'
+    | '/demo/escolher-nicho'
     | '/demo/eventos'
     | '/demo/feira'
     | '/demo/modulos'
@@ -7727,6 +7738,7 @@ export interface FileRouteTypes {
     | '/demo/checkout'
     | '/demo/cliente-final'
     | '/demo/crm'
+    | '/demo/escolher-nicho'
     | '/demo/eventos'
     | '/demo/feira'
     | '/demo/modulos'
@@ -8332,6 +8344,7 @@ export interface RootRouteChildren {
   DemoCheckoutRoute: typeof DemoCheckoutRoute
   DemoClienteFinalRoute: typeof DemoClienteFinalRoute
   DemoCrmRoute: typeof DemoCrmRoute
+  DemoEscolherNichoRoute: typeof DemoEscolherNichoRoute
   DemoEventosRoute: typeof DemoEventosRoute
   DemoFeiraRoute: typeof DemoFeiraRoute
   DemoModulosRoute: typeof DemoModulosRoute
@@ -9326,6 +9339,13 @@ declare module '@tanstack/react-router' {
       path: '/demo/eventos'
       fullPath: '/demo/eventos'
       preLoaderRoute: typeof DemoEventosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo/escolher-nicho': {
+      id: '/demo/escolher-nicho'
+      path: '/demo/escolher-nicho'
+      fullPath: '/demo/escolher-nicho'
+      preLoaderRoute: typeof DemoEscolherNichoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo/crm': {
@@ -14705,6 +14725,7 @@ const rootRouteChildren: RootRouteChildren = {
   DemoCheckoutRoute: DemoCheckoutRoute,
   DemoClienteFinalRoute: DemoClienteFinalRoute,
   DemoCrmRoute: DemoCrmRoute,
+  DemoEscolherNichoRoute: DemoEscolherNichoRoute,
   DemoEventosRoute: DemoEventosRoute,
   DemoFeiraRoute: DemoFeiraRoute,
   DemoModulosRoute: DemoModulosRoute,
@@ -14831,13 +14852,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -85,7 +85,7 @@ function EscolherNicho() {
                 }`}
               >
                 <div className="font-semibold">{n.title}</div>
-                <div className="text-xs text-muted-foreground mt-1 line-clamp-2">{n.tagline ?? n.heroSubtitle ?? ""}</div>
+                <div className="text-xs text-muted-foreground mt-1 line-clamp-2">{n.subtitle ?? ""}</div>
               </button>
             ))}
           </div>
