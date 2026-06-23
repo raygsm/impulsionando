@@ -26169,6 +26169,9 @@ export type Database = {
           shipment_id: string
           unit_label: string | null
           variant_id: string | null
+          warranty_days: number
+          warranty_ends_at: string | null
+          warranty_starts_at: string | null
         }
         Insert: {
           created_at?: string
@@ -26180,6 +26183,9 @@ export type Database = {
           shipment_id: string
           unit_label?: string | null
           variant_id?: string | null
+          warranty_days?: number
+          warranty_ends_at?: string | null
+          warranty_starts_at?: string | null
         }
         Update: {
           created_at?: string
@@ -26191,6 +26197,9 @@ export type Database = {
           shipment_id?: string
           unit_label?: string | null
           variant_id?: string | null
+          warranty_days?: number
+          warranty_ends_at?: string | null
+          warranty_starts_at?: string | null
         }
         Relationships: [
           {
@@ -26199,6 +26208,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "riomed_products"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_shipment_items_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_my_warranties"
+            referencedColumns: ["shipment_id"]
           },
           {
             foreignKeyName: "riomed_shipment_items_shipment_id_fkey"
@@ -27486,6 +27502,13 @@ export type Database = {
           shipment_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "riomed_tracking_events_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_my_warranties"
+            referencedColumns: ["shipment_id"]
+          },
           {
             foreignKeyName: "riomed_tracking_events_shipment_id_fkey"
             columns: ["shipment_id"]
@@ -30875,6 +30898,42 @@ export type Database = {
           workflow_name: string | null
         }
         Relationships: []
+      }
+      riomed_my_warranties: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          days_remaining: number | null
+          delivered_at: string | null
+          ends_at: string | null
+          hospital_id: string | null
+          id: string | null
+          is_finished: boolean | null
+          product_id: string | null
+          product_name: string | null
+          product_sku: string | null
+          serial_number: string | null
+          shipment_code: string | null
+          shipment_id: string | null
+          starts_at: string | null
+          status: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_warranties_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_hospital_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_warranties_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       riomed_user_effective_roles: {
         Row: {
