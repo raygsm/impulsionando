@@ -54,6 +54,16 @@ Veja `_template-niche-regua.json` — esqueleto N8N com:
 Para cada nicho, duplique o template, renomeie o path do webhook para
 `<niche>-<event>` e ajuste templates de mensagem.
 
+### Réguas prontas (wave 15)
+
+| Arquivo | Nicho | Evento | Toques |
+|---|---|---|---|
+| `imob-visit_scheduled.json` | imobiliaria | `realestate.visit_scheduled` | WA confirmação + WA D-1 + WA D-0 2h |
+| `clinica-appointment_confirmed.json` | clinica | `agenda.appointment_confirmed` | WA confirmação + WA D-1 |
+| `eventos-ticket_purchased.json` | eventos | `event.ticket_purchased` | E-mail QR + WA confirmação |
+
+Próximos a gerar (mesmo padrão): `resto.convite_clube`, `bar.aniversario`, `brew.convite_degustacao`, `contab.alerta_obrigacao`, `adv.atualizacao_processual`, `educ.boas_vindas_aluno`.
+
 ## Como ativar uma régua
 
 1. Importar o JSON no N8N → copiar URL do webhook

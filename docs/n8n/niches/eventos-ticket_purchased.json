@@ -1,0 +1,55 @@
+{
+  "name": "Impulsionando — evt.confirmacao_ingresso (event.ticket_purchased)",
+  "nodes": [
+    {
+      "parameters": { "httpMethod": "POST", "path": "eventos-ticket_purchased", "responseMode": "responseNode", "options": { "rawBody": true } },
+      "id": "wh", "name": "Webhook evt.ticket_purchased",
+      "type": "n8n-nodes-base.webhook", "typeVersion": 2, "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "const crypto = require('crypto');\nconst sig = $input.first().json.headers['x-impulsionando-signature'] || '';\nconst raw = $input.first().json.body;\nconst h = crypto.createHmac('sha256', $env.IMPULSIONANDO_WEBHOOK_SECRET).update(typeof raw==='string'?raw:JSON.stringify(raw)).digest('hex');\nif (h !== sig) throw new Error('invalid signature');\nreturn [{ json: typeof raw==='string'?JSON.parse(raw):raw }];"
+      },
+      "id": "verify", "name": "Verify HMAC",
+      "type": "n8n-nodes-base.function", "typeVersion": 1, "position": [440, 300]
+    },
+    { "parameters": { "responseCode": 200, "responseBody": "ok" }, "id": "resp", "name": "Respond 200", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [640, 180] },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send",
+        "method": "POST",
+        "jsonBody": "={\"template\":\"event_ticket_confirmation\",\"to\":\"{{$json.customer.email}}\",\"props\":{\"event_name\":\"{{$json.event.name}}\",\"event_date\":\"{{$json.event.date_human}}\",\"venue\":\"{{$json.event.venue}}\",\"ticket_qr_url\":\"{{$json.ticket.qr_url}}\",\"ticket_code\":\"{{$json.ticket.code}}\"}}",
+        "sendBody": true, "specifyBody": "json"
+      },
+      "id": "email-qr", "name": "Email QR + Ingresso",
+      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [840, 240]
+    },
+    {
+      "parameters": {
+        "url": "https://api.z-api.io/instances/{{$env.ZAPI_INSTANCE}}/token/{{$env.ZAPI_TOKEN}}/send-text",
+        "method": "POST",
+        "jsonBody": "={\"phone\":\"{{$json.customer.phone}}\",\"message\":\"Ingresso confirmado para {{$json.event.name}} em {{$json.event.date_human}}! Enviamos o QR no e-mail. Salve a data 🎉\"}",
+        "sendBody": true, "specifyBody": "json"
+      },
+      "id": "wa-confirm", "name": "WA Confirmação",
+      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [840, 380]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/webhooks/n8n-callback",
+        "method": "POST",
+        "jsonBody": "={\"workflow\":\"evt.confirmacao_ingresso\",\"event\":\"event.ticket_purchased\",\"niche_slug\":\"eventos\",\"status\":\"completed\",\"executionId\":\"{{$execution.id}}\"}",
+        "sendBody": true, "specifyBody": "json"
+      },
+      "id": "callback", "name": "Callback → n8n_workflow_runs",
+      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1080, 310]
+    }
+  ],
+  "connections": {
+    "Webhook evt.ticket_purchased": { "main": [[{ "node": "Verify HMAC", "type": "main", "index": 0 }]] },
+    "Verify HMAC": { "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }, { "node": "Email QR + Ingresso", "type": "main", "index": 0 }, { "node": "WA Confirmação", "type": "main", "index": 0 }]] },
+    "Email QR + Ingresso": { "main": [[{ "node": "Callback → n8n_workflow_runs", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "meta": { "description": "Eventos — confirmação dupla (e-mail com QR + WhatsApp curto) após compra do ingresso." }
+}

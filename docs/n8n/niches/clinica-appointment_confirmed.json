@@ -1,0 +1,58 @@
+{
+  "name": "Impulsionando — clinica.confirmacao_consulta (agenda.appointment_confirmed)",
+  "nodes": [
+    {
+      "parameters": { "httpMethod": "POST", "path": "clinica-appointment_confirmed", "responseMode": "responseNode", "options": { "rawBody": true } },
+      "id": "wh", "name": "Webhook clinica.appointment_confirmed",
+      "type": "n8n-nodes-base.webhook", "typeVersion": 2, "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "const crypto = require('crypto');\nconst sig = $input.first().json.headers['x-impulsionando-signature'] || '';\nconst raw = $input.first().json.body;\nconst h = crypto.createHmac('sha256', $env.IMPULSIONANDO_WEBHOOK_SECRET).update(typeof raw==='string'?raw:JSON.stringify(raw)).digest('hex');\nif (h !== sig) throw new Error('invalid signature');\nreturn [{ json: typeof raw==='string'?JSON.parse(raw):raw }];"
+      },
+      "id": "verify", "name": "Verify HMAC",
+      "type": "n8n-nodes-base.function", "typeVersion": 1, "position": [440, 300]
+    },
+    { "parameters": { "responseCode": 200, "responseBody": "ok" }, "id": "resp", "name": "Respond 200", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [640, 180] },
+    {
+      "parameters": {
+        "url": "https://api.z-api.io/instances/{{$env.ZAPI_INSTANCE}}/token/{{$env.ZAPI_TOKEN}}/send-text",
+        "method": "POST",
+        "jsonBody": "={\"phone\":\"{{$json.customer.phone}}\",\"message\":\"Olá {{$json.customer.first_name}}! Sua consulta com {{$json.professional.name}} está confirmada para {{$json.appointment.date_human}} às {{$json.appointment.time}}. Local: {{$json.location.name}}. Em caso de impedimento, responda CANCELAR.\"}",
+        "sendBody": true, "specifyBody": "json"
+      },
+      "id": "wa-confirm", "name": "WA Confirmação Imediata",
+      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [840, 280]
+    },
+    { "parameters": { "amount": 1, "unit": "days" }, "id": "wait-dm1", "name": "Wait até D-1", "type": "n8n-nodes-base.wait", "typeVersion": 1, "position": [1040, 280] },
+    {
+      "parameters": {
+        "url": "https://api.z-api.io/instances/{{$env.ZAPI_INSTANCE}}/token/{{$env.ZAPI_TOKEN}}/send-text",
+        "method": "POST",
+        "jsonBody": "={\"phone\":\"{{$json.customer.phone}}\",\"message\":\"Lembrete: consulta amanhã às {{$json.appointment.time}} com {{$json.professional.name}}. Chegue 10min antes. {{$json.location.maps_url}}\"}",
+        "sendBody": true, "specifyBody": "json"
+      },
+      "id": "wa-dm1", "name": "WA Lembrete D-1",
+      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1240, 280]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/webhooks/n8n-callback",
+        "method": "POST",
+        "jsonBody": "={\"workflow\":\"clinica.confirmacao_consulta\",\"event\":\"agenda.appointment_confirmed\",\"niche_slug\":\"clinica\",\"status\":\"completed\",\"executionId\":\"{{$execution.id}}\"}",
+        "sendBody": true, "specifyBody": "json"
+      },
+      "id": "callback", "name": "Callback → n8n_workflow_runs",
+      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1440, 280]
+    }
+  ],
+  "connections": {
+    "Webhook clinica.appointment_confirmed": { "main": [[{ "node": "Verify HMAC", "type": "main", "index": 0 }]] },
+    "Verify HMAC": { "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }, { "node": "WA Confirmação Imediata", "type": "main", "index": 0 }]] },
+    "WA Confirmação Imediata": { "main": [[{ "node": "Wait até D-1", "type": "main", "index": 0 }]] },
+    "Wait até D-1": { "main": [[{ "node": "WA Lembrete D-1", "type": "main", "index": 0 }]] },
+    "WA Lembrete D-1": { "main": [[{ "node": "Callback → n8n_workflow_runs", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "meta": { "description": "Clínica — confirmação imediata + lembrete D-1 com link de mapa." }
+}
