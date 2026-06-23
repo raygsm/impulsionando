@@ -1,6 +1,7 @@
 // Painel Impulsionando — dashboard universal módulo-aware (padrão pós-instalação).
 // Renderiza KPIs SOMENTE dos módulos contratados pelo tenant. Mesma rota serve
 // CHRISMED, RioMed e qualquer cliente novo do core Impulsionando.
+// IDENTIDADE: somente Impulsionando (logo + cores + slogan "Seu Dashboard").
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
@@ -15,11 +16,14 @@ import {
   Megaphone, Workflow, ShoppingCart, FileText, ArrowRight, TrendingUp,
   AlertTriangle, Activity, ChevronRight,
 } from "lucide-react";
-import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
+import { ClientDashboardHero } from "@/components/admin/ClientDashboardHero";
+import { ClientFeatureMenu } from "@/components/admin/ClientFeatureMenu";
+import { getTenantFeatures } from "@/lib/tenant-features";
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/$slug/painel")({
   component: PainelPage,
 });
+
 
 const fmtMoney = (v: number, c: string = "BRL") =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: c, maximumFractionDigits: 0 }).format(v ?? 0);
