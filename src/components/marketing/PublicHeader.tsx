@@ -30,7 +30,7 @@ import { NICHO_DETAILS, findNicho } from "@/components/marketing/nichoDetails";
 import { cn } from "@/lib/utils";
 
 const WHATSAPP_NICHO_URL =
-  "https://wa.me/5521972631063?text=Ol%C3%A1%2C%20quero%20ajuda%20para%20escolher%20o%20meu%20nicho%20na%20Impulsionando.";
+  "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20ajuda%20para%20escolher%20o%20meu%20nicho%20na%20Impulsionando.";
 
 type NavItem = {
   to: string;
