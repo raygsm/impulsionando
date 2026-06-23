@@ -202,24 +202,41 @@ function EcossistemaCommercialPage() {
           </div>
         </section>
 
-        {/* CTA FINAL */}
+        {/* CTA FINAL — W17: 3 entradas no ecossistema */}
         <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-          <div className="grid gap-4 lg:grid-cols-2">
-            <Card className="p-8 bg-gradient-hero text-primary-foreground border-0">
+          <div className="text-center mb-8">
+            <Badge variant="outline" className="mb-3">Faça parte do ecossistema</Badge>
+            <h2 className="text-2xl sm:text-3xl font-bold">Três formas de entrar</h2>
+            <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">
+              Empresa, parceiro ou consumidor — cada perfil tem a sua porta de entrada no core Impulsionando.
+            </p>
+          </div>
+          <div className="grid gap-4 lg:grid-cols-3">
+            <Card className="p-8 bg-gradient-hero text-primary-foreground border-0 flex flex-col">
               <Building2 className="w-8 h-8 mb-3" />
-              <h3 className="text-xl font-bold">Sou empresa</h3>
-              <p className="text-white/85 mt-2 text-sm">
-                Coloque sua operação dentro do core Impulsionando e tenha controle total.
+              <h3 className="text-xl font-bold">Empresas</h3>
+              <p className="text-white/85 mt-2 text-sm flex-1">
+                Coloque sua operação dentro do core Impulsionando: CRM, agenda, financeiro, automação e IA — com controle total e dados em tempo real.
               </p>
               <Button asChild className="mt-5 bg-white text-primary hover:bg-white/90 gap-2">
                 <Link to="/orcamento">Quero conhecer <ArrowRight className="w-4 h-4" /></Link>
               </Button>
             </Card>
-            <Card className="p-8 border-primary/30">
+            <Card className="p-8 border-primary/30 flex flex-col">
+              <Globe className="w-8 h-8 text-primary mb-3" />
+              <h3 className="text-xl font-bold">White Label</h3>
+              <p className="text-muted-foreground mt-2 text-sm flex-1">
+                Agências, integradores e revendedores vendem a plataforma inteira com a sua marca, seu domínio e sua tabela de preços — comissão recorrente.
+              </p>
+              <Button asChild variant="outline" className="mt-5 gap-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+                <Link to="/white-label">Ver White Label <ArrowRight className="w-4 h-4" /></Link>
+              </Button>
+            </Card>
+            <Card className="p-8 border-primary/30 flex flex-col bg-gradient-to-br from-primary/5 to-transparent">
               <Crown className="w-8 h-8 text-primary mb-3" />
-              <h3 className="text-xl font-bold">Sou consumidor</h3>
-              <p className="text-muted-foreground mt-2 text-sm">
-                Vire Impulsionito e use a busca para encontrar quem está perto de você, com vantagens.
+              <h3 className="text-xl font-bold">Clube Impulsionito</h3>
+              <p className="text-muted-foreground mt-2 text-sm flex-1">
+                Consumidor final entra grátis no Clube e vira <strong>Impulsionito</strong>: vouchers, cashback, recomendações e busca exclusiva por CEP e benefícios.
               </p>
               <Button asChild className="mt-5 gap-2 bg-gradient-primary text-primary-foreground">
                 <Link to="/clube">Entrar no Clube <ArrowRight className="w-4 h-4" /></Link>
