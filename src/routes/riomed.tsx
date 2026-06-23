@@ -1,10 +1,12 @@
-import { createFileRoute, Outlet, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { FloatingWhatsApp } from "@/components/riomed/FloatingWhatsApp";
 import { getRiomedSiteSettings } from "@/lib/riomed-public.functions";
+import { getCart } from "@/lib/riomed-portal.functions";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   ShoppingCart,
   Headphones,
@@ -21,6 +23,7 @@ import {
   Activity,
   Syringe,
   Bed,
+  Trash2,
 } from "lucide-react";
 
 export const Route = createFileRoute("/riomed")({
@@ -113,13 +116,9 @@ function RiomedLayout() {
 
           {/* CTAs principais */}
           <div className="hidden md:flex items-center gap-2">
-            <Link
-              to="/riomed/carrinho"
-              className="relative inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-[color:var(--riomed-primary)] hover:bg-slate-100 transition"
-              aria-label="Carrinho"
-            >
-              <ShoppingCart className="h-5 w-5" />
-            </Link>
+            <CartWidget />
+
+
 
             <Link
               to="/riomed/soporte"
@@ -424,3 +423,133 @@ export function InlineLoginCard({ compact = false }: { compact?: boolean }) {
 
 // Local import to avoid circular: Users icon
 import { Users } from "lucide-react";
+
+// ===== Cart widget (header) =====
+const CART_TOKEN_KEY = "riomed_cart_token";
+
+function fmtBOB(v: number) {
+  return new Intl.NumberFormat("es-BO", { style: "currency", currency: "BOB" }).format(v || 0);
+}
+
+function CartWidget() {
+  const fetchCart = useServerFn(getCart);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [items, setItems] = useState<any[]>([]);
+  const [open, setOpen] = useState(false);
+
+  async function reload() {
+    const t = typeof window !== "undefined" ? localStorage.getItem(CART_TOKEN_KEY) : null;
+    if (!t) { setItems([]); return; }
+    try {
+      const r = await fetchCart({ data: { sessionToken: t } });
+      setItems(r?.items ?? []);
+    } catch { /* ignore */ }
+  }
+
+  // Recarrega ao mudar de rota e a cada 8s enquanto o popover está aberto
+  useEffect(() => { reload(); /* eslint-disable-next-line */ }, [pathname]);
+  useEffect(() => {
+    if (!open) return;
+    reload();
+    const id = setInterval(reload, 8000);
+    return () => clearInterval(id);
+  }, [open]);
+
+  // Escuta evento global emitido por outras telas após addToCart
+  useEffect(() => {
+    const h = () => reload();
+    if (typeof window !== "undefined") {
+      window.addEventListener("riomed:cart-changed", h);
+      return () => window.removeEventListener("riomed:cart-changed", h);
+    }
+  }, []);
+
+  const count = items.reduce((a, i: any) => a + Number(i.qty || 0), 0);
+  const subtotal = items.reduce((a, i: any) => a + Number(i.total || 0), 0);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          aria-label={`Carrinho (${count} itens)`}
+          className="relative inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-[color:var(--riomed-primary)] hover:bg-slate-100 transition"
+        >
+          <ShoppingCart className="h-5 w-5" />
+          {count > 0 && (
+            <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-[color:var(--riomed-orange)] text-white text-[11px] font-bold flex items-center justify-center shadow">
+              {count > 99 ? "99+" : count}
+            </span>
+          )}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-[360px] p-0 overflow-hidden">
+        <div className="px-4 py-3 border-b bg-slate-50">
+          <div className="flex items-center justify-between">
+            <div className="font-bold text-[color:var(--riomed-primary)]">Mi carrito</div>
+            <div className="text-xs text-slate-500">{count} {count === 1 ? "item" : "items"}</div>
+          </div>
+        </div>
+
+        {items.length === 0 ? (
+          <div className="p-6 text-center space-y-3">
+            <ShoppingCart className="h-10 w-10 mx-auto text-slate-300" />
+            <div className="text-sm text-slate-600">Tu carrito está vacío.</div>
+            <Link
+              to="/riomed/productos"
+              onClick={() => setOpen(false)}
+              className="inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-semibold text-white bg-[color:var(--riomed-primary)] hover:brightness-110"
+            >
+              Ver catálogo
+            </Link>
+          </div>
+        ) : (
+          <>
+            <ul className="max-h-[320px] overflow-y-auto divide-y">
+              {items.map((it: any) => (
+                <li key={it.id} className="px-4 py-3 flex items-start gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-slate-800 truncate">{it.product_name}</div>
+                    <div className="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5">
+                      <span className="capitalize">{(it.modality ?? "sale").replace("_", " ")}</span>
+                      {it.sku && <span>· {it.sku}</span>}
+                      {it.rental_days && <span>· {it.rental_days}d</span>}
+                    </div>
+                    <div className="text-[11px] text-slate-600 mt-0.5">
+                      {it.qty} × {fmtBOB(Number(it.unit_price))}
+                    </div>
+                  </div>
+                  <div className="text-sm font-bold text-[color:var(--riomed-primary)] whitespace-nowrap">
+                    {fmtBOB(Number(it.total))}
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div className="px-4 py-3 border-t bg-slate-50 space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-600">Subtotal</span>
+                <span className="font-extrabold text-[color:var(--riomed-primary)]">{fmtBOB(subtotal)}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Link
+                  to="/riomed/carrinho"
+                  onClick={() => setOpen(false)}
+                  className="inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-semibold border border-[color:var(--riomed-primary)] text-[color:var(--riomed-primary)] hover:bg-slate-100"
+                >
+                  Ver carrito
+                </Link>
+                <Link
+                  to="/riomed/checkout"
+                  onClick={() => setOpen(false)}
+                  className="inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-bold text-white bg-[color:var(--riomed-orange)] hover:brightness-110"
+                >
+                  Finalizar
+                </Link>
+              </div>
+            </div>
+          </>
+        )}
+      </PopoverContent>
+    </Popover>
+  );
+}

@@ -48,7 +48,7 @@ function Page() {
 
   const remove = async (id: string) => {
     const t = localStorage.getItem(TOKEN_KEY)!;
-    try { await removeFn({ data: { sessionToken: t, itemId: id } }); toast.success("Removido"); reload(); }
+    try { await removeFn({ data: { sessionToken: t, itemId: id } }); toast.success("Removido"); window.dispatchEvent(new CustomEvent("riomed:cart-changed")); reload(); }
     catch (e: any) { toast.error(e?.message ?? "Erro"); }
   };
 
