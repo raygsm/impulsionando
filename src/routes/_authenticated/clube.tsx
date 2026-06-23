@@ -253,6 +253,8 @@ function ClubeQuickGrid({ onPick, active }: { onPick: (tab: string) => void; act
 
 // ---------------------------------------------------------------
 function ClubeHeader({ isPremium, level }: { isPremium: boolean; level?: string }) {
+  return (
+
 
     <header className="flex items-center justify-between flex-wrap gap-3">
       <div>
