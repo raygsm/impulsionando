@@ -110,9 +110,121 @@ function ProductsPage() {
     }));
   }
 
+  // ============ EXPORT CSV ============
+  function exportCsv() {
+    const headers = [
+      "sku", "name", "description", "category", "audiences", "modality",
+      "price_sale", "price_rental_daily", "price_rental_monthly",
+      "currency", "image_url", "stock", "is_active", "display_order",
+    ];
+    const escape = (v: any) => {
+      if (v === null || v === undefined) return "";
+      const s = Array.isArray(v) ? v.join("|") : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const rows = [
+      headers.join(","),
+      ...products.map((p) => headers.map((h) => escape((p as any)[h])).join(",")),
+    ].join("\n");
+    const blob = new Blob([`\uFEFF${rows}`], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `riomed-produtos-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`${products.length} produtos exportados`);
+  }
+
+  // ============ IMPORT CSV ============
+  function parseCsv(text: string): Product[] {
+    const lines = text.replace(/^\uFEFF/, "").split(/\r?\n/).filter((l) => l.trim());
+    if (lines.length < 2) return [];
+    const splitRow = (line: string) => {
+      const out: string[] = [];
+      let cur = "", inQ = false;
+      for (let i = 0; i < line.length; i++) {
+        const c = line[i];
+        if (c === '"' && line[i + 1] === '"') { cur += '"'; i++; }
+        else if (c === '"') inQ = !inQ;
+        else if (c === "," && !inQ) { out.push(cur); cur = ""; }
+        else cur += c;
+      }
+      out.push(cur);
+      return out;
+    };
+    const headers = splitRow(lines[0]).map((h) => h.trim().toLowerCase());
+    return lines.slice(1).map((line) => {
+      const cells = splitRow(line);
+      const r: any = {};
+      headers.forEach((h, i) => { r[h] = (cells[i] ?? "").trim(); });
+      const auds = (r.audiences || "paciente").split(/[|;]/).map((s: string) => s.trim()).filter(Boolean);
+      return {
+        sku: r.sku || null,
+        name: r.name,
+        description: r.description || null,
+        category: r.category || null,
+        audiences: auds,
+        modality: (r.modality || "venta") as Modality,
+        price_sale: r.price_sale ? Number(r.price_sale) : null,
+        price_rental_daily: r.price_rental_daily ? Number(r.price_rental_daily) : null,
+        price_rental_monthly: r.price_rental_monthly ? Number(r.price_rental_monthly) : null,
+        currency: r.currency || "BOB",
+        image_url: r.image_url || null,
+        stock: r.stock ? Number(r.stock) : 0,
+        is_active: r.is_active ? !/^(false|0|no|inativo)$/i.test(r.is_active) : true,
+        display_order: r.display_order ? Number(r.display_order) : 0,
+      } as Product;
+    });
+  }
+
+  function handleFile(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const items = parseCsv(String(reader.result ?? ""));
+        const errs: string[] = [];
+        items.forEach((p, i) => {
+          if (!p.name) errs.push(`Linha ${i + 2}: nome vazio`);
+          if (!p.audiences?.length) errs.push(`Linha ${i + 2}: sem público`);
+        });
+        setImportPreview(items);
+        setImportErrors(errs);
+        setImportOpen(true);
+      } catch (e: any) {
+        toast.error(`Erro ao ler CSV: ${e?.message ?? e}`);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function downloadTemplate() {
+    const tpl =
+      "sku,name,description,category,audiences,modality,price_sale,price_rental_daily,price_rental_monthly,currency,image_url,stock,is_active,display_order\n" +
+      "SKU-001,Cadeira de rodas,Cadeira dobrável,Mobilidade,paciente|clinica,ambos,1200.00,80.00,1600.00,BOB,https://exemplo.com/img.jpg,5,true,1\n";
+    const blob = new Blob([`\uFEFF${tpl}`], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "riomed-produtos-modelo.csv"; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  const importMut = useMutation({
+    mutationFn: () => importFn({ data: { items: importPreview ?? [], mode: importMode } as any }),
+    onSuccess: (r: any) => {
+      toast.success(`Importação concluída — ${r.inserted} novos, ${r.updated} atualizados${r.errors?.length ? `, ${r.errors.length} com erro` : ""}`);
+      qc.invalidateQueries({ queryKey: ["riomed-products"] });
+      setImportOpen(false);
+      setImportPreview(null);
+      setImportErrors([]);
+      if (fileRef.current) fileRef.current.value = "";
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Erro ao importar"),
+  });
+
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Package className="h-7 w-7" /> RioMed · Produtos
@@ -121,9 +233,27 @@ function ProductsPage() {
             Catálogo virtual. Mudanças sincronizam automaticamente o bot WhatsApp.
           </p>
         </div>
-        <Button onClick={() => { setDraft(empty); setOpen(true); }}>
-          <Plus className="h-4 w-4 mr-2" /> Novo produto
-        </Button>
+        <div className="flex gap-2 items-center flex-wrap">
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".csv,text/csv"
+            className="hidden"
+            onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+          />
+          <Button variant="outline" onClick={downloadTemplate} title="Baixar modelo CSV">
+            <FileSpreadsheet className="h-4 w-4 mr-2" /> Modelo
+          </Button>
+          <Button variant="outline" onClick={() => fileRef.current?.click()}>
+            <Upload className="h-4 w-4 mr-2" /> Importar
+          </Button>
+          <Button variant="outline" onClick={exportCsv} disabled={!products.length}>
+            <Download className="h-4 w-4 mr-2" /> Exportar
+          </Button>
+          <Button onClick={() => { setDraft(empty); setOpen(true); }} className="bg-gradient-primary shadow-elegant">
+            <Plus className="h-4 w-4 mr-2" /> Novo produto
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
