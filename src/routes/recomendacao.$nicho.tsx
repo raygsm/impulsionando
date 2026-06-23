@@ -5,8 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
+import { usePlanPricing } from "@/hooks/useCoreSetting";
 import ogEducacaoAsset from "@/assets/og-recomendacao-educacao.jpg.asset.json";
 import ogDefaultAsset from "@/assets/og-recomendacao-default.jpg.asset.json";
+
+const formatBRL = (v: number) =>
+  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(v);
 
 // Mapeamento nicho → og:image. Hoje temos arte dedicada para Educação
 // (White Label Acadêmico) e um fallback de marca para os demais nichos.
