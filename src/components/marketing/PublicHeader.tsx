@@ -695,17 +695,6 @@ export function PublicHeader() {
                     </Link>
                   </Button>
                 </div>
-                  <Button asChild className="btn-whatsapp">
-                    <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                      <MessageCircle className="w-4 h-4 mr-2" /> Falar com Impulsionito
-                    </a>
-                  </Button>
-                  <Button asChild variant="ghost">
-                    <Link to="/auth" onClick={() => setOpen(false)}>
-                      <LogIn className="w-4 h-4 mr-2" /> Entrar
-                    </Link>
-                  </Button>
-                </div>
               </div>
             </SheetContent>
           </Sheet>
