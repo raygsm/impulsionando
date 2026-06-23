@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Bell, ChevronRight, LayoutDashboard, Users, Settings, Mail, Globe } from "lucide-react";
 import { useMemo } from "react";
+import { BrandKitExport } from "./BrandKitExport";
 
 interface Props { companyId: string }
 
@@ -209,6 +210,15 @@ export function BrandingPreviewTab({ companyId }: Props) {
           </div>
         </CardContent>
       </Card>
+
+      <BrandKitExport
+        brandName={brandName}
+        primary={primary}
+        secondary={secondary}
+        domain={domain === "—" ? "" : domain}
+        logoUrl={company?.logo_url ?? null}
+        defaultEmail={defaultAlias?.full_address || (domain && domain !== "—" ? `contato@${domain}` : "")}
+      />
     </div>
   );
 }
