@@ -164,18 +164,22 @@ export const sendFollowUp = createServerFn({ method: 'POST' })
       .eq('id', data.ticket_id).single()
     if (tErr) throw tErr
 
-    const to = data.to ?? t.requester_email
+    const to = data.to ?? t.requester_email ?? undefined
     if (!to) throw new Error('Destinatário não disponível para este ticket.')
 
     const { error } = await context.supabase.from('message_outbox').insert({
       company_id: t.company_id,
       channel: data.channel,
-      to_address: to,
+      event_code: `support_followup_${data.channel}`,
+      recipient_email: data.channel === 'email' ? to : null,
+      recipient_phone: data.channel === 'whatsapp' ? to : null,
+      recipient_name: t.requester_name ?? null,
       subject: data.channel === 'email' ? `[${t.protocol}] ${t.subject}` : null,
       body: data.body,
-      template_key: `support_followup_${data.channel}`,
-      metadata: { ticket_id: t.id, protocol: t.protocol },
+      payload: { ticket_id: t.id, protocol: t.protocol },
       status: 'queued',
+      reference_type: 'support_ticket',
+      reference_id: t.id,
     })
     if (error) throw error
 
