@@ -120,7 +120,9 @@ function LeadsPage() {
             {leads?.map((l) => (
               <TableRow key={l.id}>
                 <TableCell>
-                  <div className="font-medium">{l.name}</div>
+                  <Link to="/crm/leads/$id" params={{ id: l.id }} className="font-medium hover:text-primary hover:underline">
+                    {l.name}
+                  </Link>
                   {!!l.tags?.length && <div className="flex gap-1 mt-1">{l.tags.map((t) => <Badge key={t} variant="outline" className="text-[9px]">{t}</Badge>)}</div>}
                 </TableCell>
                 <TableCell className="text-xs">
