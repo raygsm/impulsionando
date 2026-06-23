@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { MessageCircle, Menu, LogIn, Sparkles, PlayCircle, ChevronDown, ChevronRight } from "lucide-react";
+import { MessageCircle, Menu, LogIn, Sparkles, PlayCircle, ChevronDown, ChevronRight, Target, HelpCircle, Building2, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { InstallAppButton } from "@/components/pwa/InstallAppButton";
@@ -18,7 +18,11 @@ import {
   type EmpresasItem,
   type EmpresasMacro,
 } from "@/components/marketing/empresasMacros";
+import { NICHO_DETAILS } from "@/components/marketing/nichoDetails";
 import { cn } from "@/lib/utils";
+
+const WHATSAPP_NICHO_URL =
+  "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20ajuda%20para%20escolher%20o%20meu%20nicho%20na%20Impulsionando.";
 
 const WHATSAPP_URL =
   "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20falar%20com%20o%20Impulsionito.";
@@ -321,6 +325,171 @@ function EmpresasMenu() {
   );
 }
 
+function NichosMenu() {
+  const active = useActive("/nichos") || useActive("/escolher-nicho");
+  return (
+    <NavigationMenu>
+      <NavigationMenuList>
+        <NavigationMenuItem>
+          <NavigationMenuTrigger
+            className={cn(
+              "h-auto px-3 py-1.5 text-sm rounded-md bg-transparent",
+              active
+                ? "text-foreground font-semibold bg-accent"
+                : "text-muted-foreground hover:text-foreground hover:bg-accent/60",
+            )}
+          >
+            Nichos
+          </NavigationMenuTrigger>
+          <NavigationMenuContent>
+            <div className="grid grid-cols-[240px_minmax(0,1fr)] w-[780px]">
+              {/* Rail de jornada do lead — CTA-first */}
+              <div className="border-r border-border/60 p-3 bg-gradient-to-br from-primary/10 via-muted/30 to-accent/5 rounded-l-md flex flex-col gap-2">
+                <div className="px-1">
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-primary">
+                    Sua jornada
+                  </div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5 leading-tight">
+                    Escolha por onde começar:
+                  </div>
+                </div>
+
+                <NavigationMenuLink asChild>
+                  <Link
+                    to="/nichos"
+                    className="group rounded-lg border border-primary/20 bg-background/80 backdrop-blur p-3 hover:border-primary hover:shadow-sm transition-all"
+                  >
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <Target className="h-3.5 w-3.5 text-primary" />
+                      <span className="text-xs font-semibold text-foreground">Já sei meu nicho</span>
+                    </div>
+                    <div className="text-[10px] text-muted-foreground leading-snug">
+                      Ver soluções, jornada e demo do meu segmento.
+                    </div>
+                    <div className="flex items-center gap-1 mt-1.5 text-[10px] font-semibold text-primary group-hover:gap-1.5 transition-all">
+                      Explorar nichos <ArrowRight className="h-3 w-3" />
+                    </div>
+                  </Link>
+                </NavigationMenuLink>
+
+                <NavigationMenuLink asChild>
+                  <Link
+                    to="/escolher-nicho"
+                    className="group rounded-lg border bg-background/80 backdrop-blur p-3 hover:border-primary hover:shadow-sm transition-all"
+                  >
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <HelpCircle className="h-3.5 w-3.5 text-accent" />
+                      <span className="text-xs font-semibold text-foreground">Não sei ainda</span>
+                    </div>
+                    <div className="text-[10px] text-muted-foreground leading-snug">
+                      Te ajudamos a descobrir em 2 minutos.
+                    </div>
+                    <div className="flex items-center gap-1 mt-1.5 text-[10px] font-semibold text-accent group-hover:gap-1.5 transition-all">
+                      Descobrir meu nicho <ArrowRight className="h-3 w-3" />
+                    </div>
+                  </Link>
+                </NavigationMenuLink>
+
+                <NavigationMenuLink asChild>
+                  <Link
+                    to="/white-label"
+                    className="group rounded-lg border border-primary/30 bg-gradient-primary text-primary-foreground p-3 hover:brightness-110 hover:shadow-md transition-all"
+                  >
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <Building2 className="h-3.5 w-3.5" />
+                      <span className="text-xs font-semibold">Sou parceiro / agência</span>
+                    </div>
+                    <div className="text-[10px] text-primary-foreground/85 leading-snug">
+                      Venda com sua marca via White Label.
+                    </div>
+                    <div className="flex items-center gap-1 mt-1.5 text-[10px] font-semibold group-hover:gap-1.5 transition-all">
+                      Ver White Label <ArrowRight className="h-3 w-3" />
+                    </div>
+                  </Link>
+                </NavigationMenuLink>
+
+                <div className="mt-auto pt-2 border-t border-border/60">
+                  <a
+                    href={WHATSAPP_NICHO_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-1.5 rounded-md btn-whatsapp px-2 py-1.5 text-[11px] font-semibold"
+                  >
+                    <MessageCircle className="h-3.5 w-3.5" /> Falar com consultor
+                  </a>
+                </div>
+              </div>
+
+              {/* Grid de nichos — todos, navegação direta */}
+              <div className="p-3 flex flex-col">
+                <div className="flex items-center justify-between px-1 pb-2">
+                  <div>
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      Todos os nichos
+                    </div>
+                    <div className="text-[10px] text-muted-foreground/70 tabular-nums">
+                      {NICHO_DETAILS.length} segmentos prontos
+                    </div>
+                  </div>
+                  <NavigationMenuLink asChild>
+                    <Link
+                      to="/nichos"
+                      className="text-[10px] font-semibold text-primary hover:underline flex items-center gap-0.5"
+                    >
+                      Ver todos <ChevronRight className="h-3 w-3" />
+                    </Link>
+                  </NavigationMenuLink>
+                </div>
+                <div className="grid grid-cols-3 gap-1.5 flex-1 content-start">
+                  {NICHO_DETAILS.map((n) => {
+                    const Icon = n.icon;
+                    return (
+                      <NavigationMenuLink asChild key={n.slug}>
+                        <Link
+                          to="/nichos/$slug"
+                          params={{ slug: n.slug }}
+                          className="group flex items-center gap-2 rounded-md border border-transparent px-2 py-1.5 hover:border-primary/30 hover:bg-accent/40 transition-colors min-w-0"
+                        >
+                          <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-primary/10 text-primary group-hover:bg-gradient-primary group-hover:text-primary-foreground transition-colors">
+                            <Icon className="h-3 w-3" />
+                          </span>
+                          <span className="text-[11px] font-medium text-foreground truncate">
+                            {n.shortLabel}
+                          </span>
+                        </Link>
+                      </NavigationMenuLink>
+                    );
+                  })}
+                </div>
+
+                {/* CTA inferior */}
+                <div className="mt-3 pt-3 border-t border-border/60 grid grid-cols-2 gap-2">
+                  <NavigationMenuLink asChild>
+                    <Link
+                      to="/demo"
+                      className="flex items-center justify-center gap-1.5 rounded-md border border-border bg-background px-2 py-1.5 text-[11px] font-semibold text-foreground hover:border-primary hover:text-primary transition-colors"
+                    >
+                      <PlayCircle className="h-3.5 w-3.5" /> Ver demonstrações
+                    </Link>
+                  </NavigationMenuLink>
+                  <NavigationMenuLink asChild>
+                    <Link
+                      to="/orcamento"
+                      className="flex items-center justify-center gap-1.5 rounded-md bg-gradient-primary text-primary-foreground px-2 py-1.5 text-[11px] font-semibold shadow-sm hover:brightness-110 transition-all"
+                    >
+                      <Sparkles className="h-3.5 w-3.5" /> Começar agora
+                    </Link>
+                  </NavigationMenuLink>
+                </div>
+              </div>
+            </div>
+          </NavigationMenuContent>
+        </NavigationMenuItem>
+      </NavigationMenuList>
+    </NavigationMenu>
+  );
+}
+
 export function PublicHeader() {
   const [open, setOpen] = useState(false);
   const [nichosOpen, setNichosOpen] = useState(false);
@@ -335,6 +504,7 @@ export function PublicHeader() {
         <nav className="hidden lg:flex items-center gap-0.5" aria-label="Menu principal">
           <NavLink to="/" label="Início" exact />
           <EmpresasMenu />
+          <NichosMenu />
           {NAV.filter((n) => n.to !== "/").map((it) => (
             <NavLink key={it.to} {...it} />
           ))}
