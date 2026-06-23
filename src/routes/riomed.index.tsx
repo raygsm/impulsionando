@@ -6,9 +6,9 @@ import {
   getRiomedSiteSettings,
   listRiomedPublicProducts,
 } from "@/lib/riomed-public.functions";
-import { measureStage } from "@/lib/riomed-telemetry";
-import { SectionScrollNav } from "@/components/riomed/SectionScrollNav";
-import { ProductsErrorBanner } from "@/components/riomed/ProductsErrorBanner";
+import { measureStage } from "@/lib/core-telemetry";
+import { ScrollSpyNav } from "@/components/core/ScrollSpyNav";
+import { DataErrorBanner } from "@/components/core/DataErrorBanner";
 import { InlineLoginCard } from "./riomed";
 import {
   Stethoscope,

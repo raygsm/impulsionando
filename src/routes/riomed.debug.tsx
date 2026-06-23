@@ -9,7 +9,7 @@ import {
   getTelemetry,
   subscribeTelemetry,
   type TelemetryEntry,
-} from "@/lib/riomed-telemetry";
+} from "@/lib/core-telemetry";
 import {
   Bug,
   Download,

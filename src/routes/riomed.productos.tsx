@@ -10,8 +10,8 @@ import {
 import { addToCart, getOrCreateCart } from "@/lib/riomed-portal.functions";
 import { Search, Stethoscope, ShoppingCart, Tag, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { measureStage } from "@/lib/riomed-telemetry";
-import { ProductsErrorBanner } from "@/components/riomed/ProductsErrorBanner";
+import { measureStage } from "@/lib/core-telemetry";
+import { DataErrorBanner } from "@/components/core/DataErrorBanner";
 
 const TOKEN_KEY = "riomed_cart_token";
 
