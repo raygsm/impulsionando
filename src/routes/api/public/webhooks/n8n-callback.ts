@@ -101,6 +101,22 @@ export const Route = createFileRoute("/api/public/webhooks/n8n-callback")({
           return Response.json({ error: "db_insert_failed", detail: error.message }, { status: 500 });
         }
 
+        // Alert on failure (incident row + optional Slack ping)
+        if (parsed.status === "failed") {
+          try {
+            await notifyFailure(supabaseAdmin, {
+              workflow: parsed.workflow,
+              event: parsed.event,
+              niche_slug: parsed.niche_slug ?? null,
+              error: parsed.error ?? null,
+              tenant_id: parsed.tenant_id ?? null,
+              executionId: parsed.executionId ?? null,
+            });
+          } catch (e) {
+            console.error("[n8n-callback] notifyFailure failed", e);
+          }
+        }
+
         return Response.json({ ok: true });
       },
     },
