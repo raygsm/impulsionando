@@ -111,6 +111,7 @@ import { Route as RiomedServicioTecnicoRouteImport } from './routes/riomed.servi
 import { Route as RiomedProductosRouteImport } from './routes/riomed.productos'
 import { Route as RiomedPacientesRouteImport } from './routes/riomed.pacientes'
 import { Route as RiomedHospitalesRouteImport } from './routes/riomed.hospitales'
+import { Route as RiomedDebugRouteImport } from './routes/riomed.debug'
 import { Route as RiomedCotizarRouteImport } from './routes/riomed.cotizar'
 import { Route as RiomedCheckoutRouteImport } from './routes/riomed.checkout'
 import { Route as RiomedCarrinhoRouteImport } from './routes/riomed.carrinho'
@@ -1194,6 +1195,11 @@ const RiomedPacientesRoute = RiomedPacientesRouteImport.update({
 const RiomedHospitalesRoute = RiomedHospitalesRouteImport.update({
   id: '/hospitales',
   path: '/hospitales',
+  getParentRoute: () => RiomedRoute,
+} as any)
+const RiomedDebugRoute = RiomedDebugRouteImport.update({
+  id: '/debug',
+  path: '/debug',
   getParentRoute: () => RiomedRoute,
 } as any)
 const RiomedCotizarRoute = RiomedCotizarRouteImport.update({
@@ -4612,6 +4618,7 @@ export interface FileRoutesByFullPath {
   '/riomed/carrinho': typeof RiomedCarrinhoRoute
   '/riomed/checkout': typeof RiomedCheckoutRoute
   '/riomed/cotizar': typeof RiomedCotizarRoute
+  '/riomed/debug': typeof RiomedDebugRoute
   '/riomed/hospitales': typeof RiomedHospitalesRoute
   '/riomed/pacientes': typeof RiomedPacientesRoute
   '/riomed/productos': typeof RiomedProductosRoute
@@ -5273,6 +5280,7 @@ export interface FileRoutesByTo {
   '/riomed/carrinho': typeof RiomedCarrinhoRoute
   '/riomed/checkout': typeof RiomedCheckoutRoute
   '/riomed/cotizar': typeof RiomedCotizarRoute
+  '/riomed/debug': typeof RiomedDebugRoute
   '/riomed/hospitales': typeof RiomedHospitalesRoute
   '/riomed/pacientes': typeof RiomedPacientesRoute
   '/riomed/productos': typeof RiomedProductosRoute
@@ -5948,6 +5956,7 @@ export interface FileRoutesById {
   '/riomed/carrinho': typeof RiomedCarrinhoRoute
   '/riomed/checkout': typeof RiomedCheckoutRoute
   '/riomed/cotizar': typeof RiomedCotizarRoute
+  '/riomed/debug': typeof RiomedDebugRoute
   '/riomed/hospitales': typeof RiomedHospitalesRoute
   '/riomed/pacientes': typeof RiomedPacientesRoute
   '/riomed/productos': typeof RiomedProductosRoute
@@ -6623,6 +6632,7 @@ export interface FileRouteTypes {
     | '/riomed/carrinho'
     | '/riomed/checkout'
     | '/riomed/cotizar'
+    | '/riomed/debug'
     | '/riomed/hospitales'
     | '/riomed/pacientes'
     | '/riomed/productos'
@@ -7284,6 +7294,7 @@ export interface FileRouteTypes {
     | '/riomed/carrinho'
     | '/riomed/checkout'
     | '/riomed/cotizar'
+    | '/riomed/debug'
     | '/riomed/hospitales'
     | '/riomed/pacientes'
     | '/riomed/productos'
@@ -7958,6 +7969,7 @@ export interface FileRouteTypes {
     | '/riomed/carrinho'
     | '/riomed/checkout'
     | '/riomed/cotizar'
+    | '/riomed/debug'
     | '/riomed/hospitales'
     | '/riomed/pacientes'
     | '/riomed/productos'
@@ -9390,6 +9402,13 @@ declare module '@tanstack/react-router' {
       path: '/hospitales'
       fullPath: '/riomed/hospitales'
       preLoaderRoute: typeof RiomedHospitalesRouteImport
+      parentRoute: typeof RiomedRoute
+    }
+    '/riomed/debug': {
+      id: '/riomed/debug'
+      path: '/debug'
+      fullPath: '/riomed/debug'
+      preLoaderRoute: typeof RiomedDebugRouteImport
       parentRoute: typeof RiomedRoute
     }
     '/riomed/cotizar': {
@@ -14925,6 +14944,7 @@ interface RiomedRouteChildren {
   RiomedCarrinhoRoute: typeof RiomedCarrinhoRoute
   RiomedCheckoutRoute: typeof RiomedCheckoutRoute
   RiomedCotizarRoute: typeof RiomedCotizarRoute
+  RiomedDebugRoute: typeof RiomedDebugRoute
   RiomedHospitalesRoute: typeof RiomedHospitalesRoute
   RiomedPacientesRoute: typeof RiomedPacientesRoute
   RiomedProductosRoute: typeof RiomedProductosRoute
@@ -14946,6 +14966,7 @@ const RiomedRouteChildren: RiomedRouteChildren = {
   RiomedCarrinhoRoute: RiomedCarrinhoRoute,
   RiomedCheckoutRoute: RiomedCheckoutRoute,
   RiomedCotizarRoute: RiomedCotizarRoute,
+  RiomedDebugRoute: RiomedDebugRoute,
   RiomedHospitalesRoute: RiomedHospitalesRoute,
   RiomedPacientesRoute: RiomedPacientesRoute,
   RiomedProductosRoute: RiomedProductosRoute,
@@ -15200,13 +15221,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

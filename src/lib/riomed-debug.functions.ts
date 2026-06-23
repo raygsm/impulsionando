@@ -20,13 +20,14 @@ function pubClient() {
   );
 }
 
+type StageMeta = Record<string, string | number | boolean | null>;
 type Stage = {
   name: string;
   status: "ok" | "error" | "skipped";
   durationMs: number;
   message?: string;
   stack?: string;
-  meta?: Record<string, unknown>;
+  meta?: StageMeta;
 };
 
 async function timed<T>(
