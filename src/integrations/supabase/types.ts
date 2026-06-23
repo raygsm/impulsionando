@@ -5609,6 +5609,8 @@ export type Database = {
           external_url: string | null
           facebook: string | null
           financial_email: string | null
+          fiscal_auto_emit: boolean
+          fiscal_provider: string | null
           id: string
           instagram: string | null
           is_active: boolean
@@ -5617,6 +5619,9 @@ export type Database = {
           latitude: number | null
           legal_name: string | null
           locale: string
+          logistics_default_origin_cep: string | null
+          logistics_dispatch_enabled: boolean
+          logistics_pickup_enabled: boolean
           logo_url: string | null
           longitude: number | null
           migration_source_project_id: string | null
@@ -5672,6 +5677,8 @@ export type Database = {
           external_url?: string | null
           facebook?: string | null
           financial_email?: string | null
+          fiscal_auto_emit?: boolean
+          fiscal_provider?: string | null
           id?: string
           instagram?: string | null
           is_active?: boolean
@@ -5680,6 +5687,9 @@ export type Database = {
           latitude?: number | null
           legal_name?: string | null
           locale?: string
+          logistics_default_origin_cep?: string | null
+          logistics_dispatch_enabled?: boolean
+          logistics_pickup_enabled?: boolean
           logo_url?: string | null
           longitude?: number | null
           migration_source_project_id?: string | null
@@ -5735,6 +5745,8 @@ export type Database = {
           external_url?: string | null
           facebook?: string | null
           financial_email?: string | null
+          fiscal_auto_emit?: boolean
+          fiscal_provider?: string | null
           id?: string
           instagram?: string | null
           is_active?: boolean
@@ -5743,6 +5755,9 @@ export type Database = {
           latitude?: number | null
           legal_name?: string | null
           locale?: string
+          logistics_default_origin_cep?: string | null
+          logistics_dispatch_enabled?: boolean
+          logistics_pickup_enabled?: boolean
           logo_url?: string | null
           longitude?: number | null
           migration_source_project_id?: string | null
@@ -10991,6 +11006,176 @@ export type Database = {
           },
         ]
       }
+      crm_touch_queue: {
+        Row: {
+          assignee_user_id: string | null
+          channel: string
+          company_id: string
+          created_at: string
+          customer_id: string | null
+          error: string | null
+          id: string
+          lead_id: string | null
+          opportunity_id: string | null
+          payload: Json
+          quote_id: string | null
+          rule_code: string | null
+          rule_id: string | null
+          scheduled_for: string
+          sent_at: string | null
+          status: string
+        }
+        Insert: {
+          assignee_user_id?: string | null
+          channel?: string
+          company_id: string
+          created_at?: string
+          customer_id?: string | null
+          error?: string | null
+          id?: string
+          lead_id?: string | null
+          opportunity_id?: string | null
+          payload?: Json
+          quote_id?: string | null
+          rule_code?: string | null
+          rule_id?: string | null
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: string
+        }
+        Update: {
+          assignee_user_id?: string | null
+          channel?: string
+          company_id?: string
+          created_at?: string
+          customer_id?: string | null
+          error?: string | null
+          id?: string
+          lead_id?: string | null
+          opportunity_id?: string | null
+          payload?: Json
+          quote_id?: string | null
+          rule_code?: string | null
+          rule_id?: string | null
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_touch_queue_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_touch_queue_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "crm_touch_queue_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "crm_touch_queue_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "crm_touch_queue_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "crm_touch_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_touch_rules: {
+        Row: {
+          assign_to: string
+          channel: string
+          code: string
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          offset_days: number
+          sector_code: string | null
+          template_code: string | null
+          trigger_event: string
+          updated_at: string
+        }
+        Insert: {
+          assign_to?: string
+          channel?: string
+          code: string
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          offset_days?: number
+          sector_code?: string | null
+          template_code?: string | null
+          trigger_event: string
+          updated_at?: string
+        }
+        Update: {
+          assign_to?: string
+          channel?: string
+          code?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          offset_days?: number
+          sector_code?: string | null
+          template_code?: string | null
+          trigger_event?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_touch_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_touch_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "crm_touch_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "crm_touch_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       customers: {
         Row: {
           address_city: string | null
@@ -15076,6 +15261,83 @@ export type Database = {
         }
         Relationships: []
       }
+      logistics_shipping_rates: {
+        Row: {
+          base_amount: number
+          company_id: string
+          created_at: string
+          eta_days_max: number
+          eta_days_min: number
+          id: string
+          is_active: boolean
+          max_weight_g: number
+          min_weight_g: number
+          modality: string
+          per_kg_amount: number
+          region_code: string
+          updated_at: string
+        }
+        Insert: {
+          base_amount?: number
+          company_id: string
+          created_at?: string
+          eta_days_max?: number
+          eta_days_min?: number
+          id?: string
+          is_active?: boolean
+          max_weight_g?: number
+          min_weight_g?: number
+          modality: string
+          per_kg_amount?: number
+          region_code: string
+          updated_at?: string
+        }
+        Update: {
+          base_amount?: number
+          company_id?: string
+          created_at?: string
+          eta_days_max?: number
+          eta_days_min?: number
+          id?: string
+          is_active?: boolean
+          max_weight_g?: number
+          min_weight_g?: number
+          modality?: string
+          per_kg_amount?: number
+          region_code?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "logistics_shipping_rates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "logistics_shipping_rates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "logistics_shipping_rates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "logistics_shipping_rates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       marketing_leads: {
         Row: {
           answers: Json | null
@@ -15904,6 +16166,93 @@ export type Database = {
           },
           {
             foreignKeyName: "message_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      module_change_log: {
+        Row: {
+          applied_to_invoice_id: string | null
+          change_type: string
+          changed_by: string | null
+          company_id: string
+          created_at: string
+          cycle_days: number
+          id: string
+          module_id: string | null
+          module_slug: string | null
+          new_amount: number | null
+          notes: string | null
+          previous_amount: number | null
+          prorata_amount: number
+          prorata_days: number
+        }
+        Insert: {
+          applied_to_invoice_id?: string | null
+          change_type: string
+          changed_by?: string | null
+          company_id: string
+          created_at?: string
+          cycle_days?: number
+          id?: string
+          module_id?: string | null
+          module_slug?: string | null
+          new_amount?: number | null
+          notes?: string | null
+          previous_amount?: number | null
+          prorata_amount?: number
+          prorata_days?: number
+        }
+        Update: {
+          applied_to_invoice_id?: string | null
+          change_type?: string
+          changed_by?: string | null
+          company_id?: string
+          created_at?: string
+          cycle_days?: number
+          id?: string
+          module_id?: string | null
+          module_slug?: string | null
+          new_amount?: number | null
+          notes?: string | null
+          previous_amount?: number | null
+          prorata_amount?: number
+          prorata_days?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_change_log_applied_to_invoice_id_fkey"
+            columns: ["applied_to_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "billing_invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "module_change_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "module_change_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "module_change_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "module_change_log_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "v_tenant_identity_status"
@@ -17748,6 +18097,187 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_tenant_identity_status"
             referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      order_events: {
+        Row: {
+          actor: string | null
+          company_id: string
+          created_at: string
+          event_type: string
+          id: string
+          order_logistics_id: string | null
+          payload: Json
+          quote_id: string | null
+        }
+        Insert: {
+          actor?: string | null
+          company_id: string
+          created_at?: string
+          event_type: string
+          id?: string
+          order_logistics_id?: string | null
+          payload?: Json
+          quote_id?: string | null
+        }
+        Update: {
+          actor?: string | null
+          company_id?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          order_logistics_id?: string | null
+          payload?: Json
+          quote_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "order_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "order_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "order_events_order_logistics_id_fkey"
+            columns: ["order_logistics_id"]
+            isOneToOne: false
+            referencedRelation: "order_logistics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_logistics: {
+        Row: {
+          carrier: string | null
+          company_id: string
+          created_at: string
+          customer_id: string | null
+          delivered_at: string | null
+          dispatched_at: string | null
+          fulfillment_mode: string
+          id: string
+          notes: string | null
+          picked_up_at: string | null
+          quote_id: string | null
+          seller_id: string | null
+          shipping_address: Json | null
+          shipping_amount: number
+          shipping_modality: string | null
+          shipping_rate_id: string | null
+          status: string
+          tracking_code: string | null
+          updated_at: string
+          weight_g: number
+        }
+        Insert: {
+          carrier?: string | null
+          company_id: string
+          created_at?: string
+          customer_id?: string | null
+          delivered_at?: string | null
+          dispatched_at?: string | null
+          fulfillment_mode: string
+          id?: string
+          notes?: string | null
+          picked_up_at?: string | null
+          quote_id?: string | null
+          seller_id?: string | null
+          shipping_address?: Json | null
+          shipping_amount?: number
+          shipping_modality?: string | null
+          shipping_rate_id?: string | null
+          status?: string
+          tracking_code?: string | null
+          updated_at?: string
+          weight_g?: number
+        }
+        Update: {
+          carrier?: string | null
+          company_id?: string
+          created_at?: string
+          customer_id?: string | null
+          delivered_at?: string | null
+          dispatched_at?: string | null
+          fulfillment_mode?: string
+          id?: string
+          notes?: string | null
+          picked_up_at?: string | null
+          quote_id?: string | null
+          seller_id?: string | null
+          shipping_address?: Json | null
+          shipping_amount?: number
+          shipping_modality?: string | null
+          shipping_rate_id?: string | null
+          status?: string
+          tracking_code?: string | null
+          updated_at?: string
+          weight_g?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_logistics_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_logistics_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "order_logistics_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "order_logistics_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "order_logistics_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_logistics_shipping_rate_id_fkey"
+            columns: ["shipping_rate_id"]
+            isOneToOne: false
+            referencedRelation: "logistics_shipping_rates"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -25152,8 +25682,81 @@ export type Database = {
           },
         ]
       }
+      sector_members: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          notify_channels: string[]
+          role_in_sector: string
+          sector_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          notify_channels?: string[]
+          role_in_sector?: string
+          sector_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          notify_channels?: string[]
+          role_in_sector?: string
+          sector_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sector_members_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sector_members_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "sector_members_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "sector_members_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "sector_members_sector_id_fkey"
+            columns: ["sector_id"]
+            isOneToOne: false
+            referencedRelation: "sectors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sectors: {
         Row: {
+          code: string | null
           company_id: string
           created_at: string
           description: string | null
@@ -25164,6 +25767,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          code?: string | null
           company_id: string
           created_at?: string
           description?: string | null
@@ -25174,6 +25778,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          code?: string | null
           company_id?: string
           created_at?: string
           description?: string | null
@@ -28328,6 +28933,10 @@ export type Database = {
       user_has_permission: {
         Args: { _company: string; _perm: string; _user: string }
         Returns: boolean
+      }
+      user_sector_codes: {
+        Args: { _company: string; _user: string }
+        Returns: string[]
       }
       webhook_log_register_replay: {
         Args: { _id: string; _reason: string; _user: string }
