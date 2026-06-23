@@ -57,6 +57,7 @@ function ProductsPage() {
   const listFn = useServerFn(listRioMedProducts);
   const saveFn = useServerFn(upsertRioMedProduct);
   const delFn = useServerFn(deleteRioMedProduct);
+  const importFn = useServerFn(bulkImportRioMedProducts);
 
   const { data: productsRaw = [], isLoading } = useQuery({
     queryKey: ["riomed-products"],
@@ -64,9 +65,13 @@ function ProductsPage() {
   });
   const products = productsRaw as unknown as Product[];
 
-
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<Product>(empty);
+  const [importOpen, setImportOpen] = useState(false);
+  const [importPreview, setImportPreview] = useState<Product[] | null>(null);
+  const [importErrors, setImportErrors] = useState<string[]>([]);
+  const [importMode, setImportMode] = useState<"upsert_by_sku" | "insert_only">("upsert_by_sku");
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const save = useMutation({
     mutationFn: (p: Product) => saveFn({ data: p as any }),
