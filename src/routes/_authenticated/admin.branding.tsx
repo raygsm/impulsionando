@@ -87,9 +87,11 @@ function BrandingPage() {
               <TabsList>
                 <TabsTrigger value="identity">Identidade & Marca</TabsTrigger>
                 <TabsTrigger value="emails">E-mails do time</TabsTrigger>
+                <TabsTrigger value="domain">Domínio próprio</TabsTrigger>
               </TabsList>
               <TabsContent value="identity" className="mt-4"><IdentityTab companyId={selected} /></TabsContent>
               <TabsContent value="emails" className="mt-4"><EmailAliasesTab companyId={selected} /></TabsContent>
+              <TabsContent value="domain" className="mt-4"><DomainTab companyId={selected} /></TabsContent>
             </Tabs>
           )}
         </>
