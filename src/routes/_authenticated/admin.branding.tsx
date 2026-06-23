@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { listMyBrandingCompanies } from "@/lib/my-branding.functions";
 import { IdentityTab } from "@/components/core/IdentityTab";
+import { EmailAliasesTab } from "@/components/core/EmailAliasesTab";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -79,7 +81,16 @@ function BrandingPage() {
             </CardHeader>
           </Card>
 
-          {selected && <IdentityTab companyId={selected} />}
+          {selected && (
+            <Tabs defaultValue="identity">
+              <TabsList>
+                <TabsTrigger value="identity">Identidade & Marca</TabsTrigger>
+                <TabsTrigger value="emails">E-mails do time</TabsTrigger>
+              </TabsList>
+              <TabsContent value="identity" className="mt-4"><IdentityTab companyId={selected} /></TabsContent>
+              <TabsContent value="emails" className="mt-4"><EmailAliasesTab companyId={selected} /></TabsContent>
+            </Tabs>
+          )}
         </>
       )}
     </div>
