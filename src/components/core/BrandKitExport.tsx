@@ -1,7 +1,16 @@
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, Copy, Check, Palette as PaletteIcon } from "lucide-react";
+import { Download, Copy, Check, Palette as PaletteIcon, Loader2, Package } from "lucide-react";
+import {
+  buildBrandKitZip,
+  fetchAsBlob,
+  pngBlobToIco,
+  renderFaviconPng,
+  sanitizeSlug,
+  triggerDownload,
+} from "@/lib/brand-kit-utils";
+import { toast } from "sonner";
 
 interface Props {
   brandName: string;
@@ -12,41 +21,81 @@ interface Props {
   defaultEmail: string;
 }
 
-/**
- * w25 — Brand Kit export.
- *
- * Empacota a identidade do tenant em arquivos prontos pra time/agência:
- *   - logo (download direto via fetch + blob)
- *   - paleta como CSS custom properties + JSON
- *   - assinatura HTML pronta pra colar no cliente de e-mail
- */
 export function BrandKitExport({ brandName, primary, secondary, domain, logoUrl, defaultEmail }: Props) {
+  const slug = sanitizeSlug(brandName);
   const cssVars = useMemo(
     () =>
       `:root {\n  --brand-primary: ${primary};\n  --brand-secondary: ${secondary};\n  --brand-name: "${brandName}";\n  --brand-domain: "${domain}";\n}\n`,
     [primary, secondary, brandName, domain],
   );
-
   const jsonTokens = useMemo(
     () =>
       JSON.stringify(
-        {
-          name: brandName,
-          domain,
-          email: defaultEmail,
-          logo: logoUrl,
-          colors: { primary, secondary },
-        },
+        { name: brandName, domain, email: defaultEmail, logo: logoUrl, colors: { primary, secondary } },
         null,
         2,
       ),
     [brandName, domain, defaultEmail, logoUrl, primary, secondary],
   );
-
   const signatureHtml = useMemo(
     () => buildSignatureHtml({ brandName, primary, domain, logoUrl, defaultEmail }),
     [brandName, primary, domain, logoUrl, defaultEmail],
   );
+
+  const [busy, setBusy] = useState<string | null>(null);
+
+  async function downloadZip() {
+    setBusy("zip");
+    try {
+      const logo = logoUrl ? await fetchAsBlob(logoUrl) : null;
+      const fav32 = await renderFaviconPng({ logoUrl, brandName, primary, size: 32, background: "#ffffff" }).catch(() => null);
+      const fav256 = await renderFaviconPng({ logoUrl, brandName, primary, size: 256, background: "#ffffff" }).catch(() => null);
+      const apple = await renderFaviconPng({ logoUrl, brandName, primary, size: 180, background: primary }).catch(() => null);
+      const ico = fav256 ? await pngBlobToIco(fav256, 256).catch(() => null) : null;
+      const zip = await buildBrandKitZip({
+        brandName,
+        domain,
+        defaultEmail,
+        primary,
+        secondary,
+        logoBlob: logo?.blob ?? null,
+        logoExt: logo?.ext ?? ".png",
+        cssTokens: cssVars,
+        jsonTokens,
+        signatureHtml,
+        faviconPng32: fav32,
+        faviconIco: ico,
+        appleTouchPng: apple,
+      });
+      triggerDownload(zip, `${slug}-brand-kit.zip`);
+      toast.success("Brand Kit baixado.");
+    } catch (e) {
+      toast.error("Falha ao gerar o ZIP: " + (e instanceof Error ? e.message : "erro"));
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function downloadFavicon(kind: "png32" | "ico" | "apple") {
+    setBusy(kind);
+    try {
+      if (kind === "png32") {
+        const blob = await renderFaviconPng({ logoUrl, brandName, primary, size: 32, background: "#ffffff" });
+        triggerDownload(blob, `${slug}-favicon-32.png`);
+      } else if (kind === "apple") {
+        const blob = await renderFaviconPng({ logoUrl, brandName, primary, size: 180, background: primary });
+        triggerDownload(blob, `${slug}-apple-touch-icon.png`);
+      } else {
+        const png = await renderFaviconPng({ logoUrl, brandName, primary, size: 256, background: "#ffffff" });
+        const ico = await pngBlobToIco(png, 256);
+        triggerDownload(ico, `${slug}-favicon.ico`);
+      }
+    } catch (e) {
+      toast.error("Falha ao gerar favicon: " + (e instanceof Error ? e.message : "erro") + ". O logo pode estar bloqueando CORS.");
+    } finally {
+      setBusy(null);
+    }
+  }
 
   return (
     <Card>
@@ -55,27 +104,46 @@ export function BrandKitExport({ brandName, primary, secondary, domain, logoUrl,
           <PaletteIcon className="h-4 w-4" /> Brand Kit (download)
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Arquivos prontos pra entregar pro time, agência ou parceiros — paleta, logo e assinatura.
+          Arquivos prontos pra time, agência ou parceiros — paleta, logo, favicons e assinatura.
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
+        <Button
+          size="lg"
+          className="w-full sm:w-auto gap-2"
+          onClick={downloadZip}
+          disabled={busy !== null}
+        >
+          {busy === "zip" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Package className="h-4 w-4" />}
+          Baixar Brand Kit completo (.zip)
+        </Button>
+
         <div className="grid sm:grid-cols-2 gap-3">
           <KitAction
-            label="Logo (arquivo original)"
+            label="Logo (original)"
             disabled={!logoUrl}
-            onClick={() => logoUrl && downloadUrl(logoUrl, sanitize(brandName) + "-logo")}
+            onClick={() => logoUrl && downloadLogo(logoUrl, slug)}
+          />
+          <KitAction label="Paleta (.css)" onClick={() => downloadText(cssVars, `${slug}-tokens.css`, "text/css")} />
+          <KitAction label="Tokens (.json)" onClick={() => downloadText(jsonTokens, `${slug}-brand.json`, "application/json")} />
+          <KitAction
+            label="Assinatura (.html)"
+            onClick={() => downloadText(signatureHtml, `${slug}-signature.html`, "text/html")}
           />
           <KitAction
-            label="Paleta (.css)"
-            onClick={() => downloadText(cssVars, sanitize(brandName) + "-tokens.css", "text/css")}
+            label={busy === "png32" ? "Gerando…" : "Favicon 32×32 (.png)"}
+            disabled={busy !== null}
+            onClick={() => downloadFavicon("png32")}
           />
           <KitAction
-            label="Tokens (.json)"
-            onClick={() => downloadText(jsonTokens, sanitize(brandName) + "-brand.json", "application/json")}
+            label={busy === "ico" ? "Gerando…" : "Favicon (.ico)"}
+            disabled={busy !== null}
+            onClick={() => downloadFavicon("ico")}
           />
           <KitAction
-            label="Assinatura de e-mail (.html)"
-            onClick={() => downloadText(signatureHtml, sanitize(brandName) + "-signature.html", "text/html")}
+            label={busy === "apple" ? "Gerando…" : "Apple touch icon 180×180"}
+            disabled={busy !== null}
+            onClick={() => downloadFavicon("apple")}
           />
         </div>
 
@@ -121,52 +189,15 @@ function CopyBlock({ title, content }: { title: string; content: string }) {
   );
 }
 
-function sanitize(s: string) {
-  return s
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "") || "brand";
-}
-
 function downloadText(content: string, filename: string, mime: string) {
   const blob = new Blob([content], { type: mime });
-  const url = URL.createObjectURL(blob);
-  triggerDownload(url, filename);
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  triggerDownload(blob, filename);
 }
 
-async function downloadUrl(src: string, baseName: string) {
-  try {
-    const res = await fetch(src, { mode: "cors" });
-    const blob = await res.blob();
-    const ext = guessExt(blob.type, src);
-    const url = URL.createObjectURL(blob);
-    triggerDownload(url, baseName + ext);
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  } catch {
-    // Fallback: abre em nova aba (download direto pode ser bloqueado por CORS)
-    window.open(src, "_blank", "noopener");
-  }
-}
-
-function guessExt(mime: string, url: string): string {
-  if (mime.includes("svg")) return ".svg";
-  if (mime.includes("png")) return ".png";
-  if (mime.includes("webp")) return ".webp";
-  if (mime.includes("jpeg") || mime.includes("jpg")) return ".jpg";
-  const m = url.match(/\.(svg|png|webp|jpe?g|gif)(?:\?|$)/i);
-  return m ? "." + m[1].toLowerCase().replace("jpeg", "jpg") : ".png";
-}
-
-function triggerDownload(url: string, filename: string) {
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+async function downloadLogo(src: string, slug: string) {
+  const got = await fetchAsBlob(src);
+  if (got) triggerDownload(got.blob, `${slug}-logo${got.ext}`);
+  else window.open(src, "_blank", "noopener");
 }
 
 function buildSignatureHtml(p: {
@@ -177,23 +208,20 @@ function buildSignatureHtml(p: {
   defaultEmail: string;
 }): string {
   const logo = p.logoUrl
-    ? `<img src="${escapeAttr(p.logoUrl)}" alt="${escapeAttr(p.brandName)}" height="48" style="height:48px;width:auto;display:block;border:0;" />`
-    : `<div style="height:48px;width:48px;background:${p.primary};color:#fff;font:bold 14px Arial,sans-serif;display:inline-block;text-align:center;line-height:48px;border-radius:6px;">${escapeText(p.brandName.slice(0, 2).toUpperCase())}</div>`;
+    ? `<img src="${esc(p.logoUrl)}" alt="${esc(p.brandName)}" height="48" style="height:48px;width:auto;display:block;border:0;" />`
+    : `<div style="height:48px;width:48px;background:${p.primary};color:#fff;font:bold 14px Arial,sans-serif;display:inline-block;text-align:center;line-height:48px;border-radius:6px;">${esc(p.brandName.slice(0, 2).toUpperCase())}</div>`;
   return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,sans-serif;font-size:13px;color:#0f172a;">
   <tr>
     <td style="padding-right:14px;vertical-align:top;">${logo}</td>
     <td style="vertical-align:top;border-left:2px solid ${p.primary};padding-left:14px;">
-      <div style="font-weight:bold;color:${p.primary};font-size:14px;">${escapeText(p.brandName)}</div>
-      <div style="color:#475569;margin-top:2px;">${escapeText(p.defaultEmail)}</div>
-      <div style="color:#475569;">${escapeText(p.domain)}</div>
+      <div style="font-weight:bold;color:${p.primary};font-size:14px;">${esc(p.brandName)}</div>
+      <div style="color:#475569;margin-top:2px;">${esc(p.defaultEmail)}</div>
+      <div style="color:#475569;">${esc(p.domain)}</div>
     </td>
   </tr>
 </table>`;
 }
 
-function escapeText(s: string) {
+function esc(s: string) {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
-}
-function escapeAttr(s: string) {
-  return escapeText(s);
 }

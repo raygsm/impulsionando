@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Bell, ChevronRight, LayoutDashboard, Users, Settings, Mail, Globe } from "lucide-react";
 import { useMemo } from "react";
 import { BrandKitExport } from "./BrandKitExport";
+import { ContrastReport } from "./ContrastReport";
 
 interface Props { companyId: string }
 
@@ -210,6 +211,8 @@ export function BrandingPreviewTab({ companyId }: Props) {
           </div>
         </CardContent>
       </Card>
+
+      <ContrastReport primary={primary} secondary={secondary} />
 
       <BrandKitExport
         brandName={brandName}
