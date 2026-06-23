@@ -550,6 +550,7 @@ import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/em
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as DemoRestauranteTenantQrRouteImport } from './routes/demo.restaurante.$tenant.$qr'
 import { Route as ApiPublicWhatsappSendRouteImport } from './routes/api/public/whatsapp/send'
+import { Route as ApiPublicSupportCreateTicketRouteImport } from './routes/api/public/support/create-ticket'
 import { Route as ApiPublicRiomedEventsRouteImport } from './routes/api/public/riomed/events'
 import { Route as ApiPublicRealestateSavedSearchRouteImport } from './routes/api/public/realestate/saved-search'
 import { Route as ApiPublicRealestateInterestRouteImport } from './routes/api/public/realestate/interest'
@@ -3687,6 +3688,12 @@ const ApiPublicWhatsappSendRoute = ApiPublicWhatsappSendRouteImport.update({
   path: '/api/public/whatsapp/send',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicSupportCreateTicketRoute =
+  ApiPublicSupportCreateTicketRouteImport.update({
+    id: '/api/public/support/create-ticket',
+    path: '/api/public/support/create-ticket',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicRiomedEventsRoute = ApiPublicRiomedEventsRouteImport.update({
   id: '/api/public/riomed/events',
   path: '/api/public/riomed/events',
@@ -4974,6 +4981,7 @@ export interface FileRoutesByFullPath {
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
   '/api/public/riomed/events': typeof ApiPublicRiomedEventsRoute
+  '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
   '/api/public/whatsapp/send': typeof ApiPublicWhatsappSendRoute
   '/demo/restaurante/$tenant/$qr': typeof DemoRestauranteTenantQrRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -5620,6 +5628,7 @@ export interface FileRoutesByTo {
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
   '/api/public/riomed/events': typeof ApiPublicRiomedEventsRoute
+  '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
   '/api/public/whatsapp/send': typeof ApiPublicWhatsappSendRoute
   '/demo/restaurante/$tenant/$qr': typeof DemoRestauranteTenantQrRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -6280,6 +6289,7 @@ export interface FileRoutesById {
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
   '/api/public/riomed/events': typeof ApiPublicRiomedEventsRoute
+  '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
   '/api/public/whatsapp/send': typeof ApiPublicWhatsappSendRoute
   '/demo/restaurante/$tenant/$qr': typeof DemoRestauranteTenantQrRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -6940,6 +6950,7 @@ export interface FileRouteTypes {
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
     | '/api/public/riomed/events'
+    | '/api/public/support/create-ticket'
     | '/api/public/whatsapp/send'
     | '/demo/restaurante/$tenant/$qr'
     | '/lovable/email/auth/preview'
@@ -7586,6 +7597,7 @@ export interface FileRouteTypes {
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
     | '/api/public/riomed/events'
+    | '/api/public/support/create-ticket'
     | '/api/public/whatsapp/send'
     | '/demo/restaurante/$tenant/$qr'
     | '/lovable/email/auth/preview'
@@ -8245,6 +8257,7 @@ export interface FileRouteTypes {
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
     | '/api/public/riomed/events'
+    | '/api/public/support/create-ticket'
     | '/api/public/whatsapp/send'
     | '/demo/restaurante/$tenant/$qr'
     | '/lovable/email/auth/preview'
@@ -8461,6 +8474,7 @@ export interface RootRouteChildren {
   ApiPublicRealestateInterestRoute: typeof ApiPublicRealestateInterestRoute
   ApiPublicRealestateSavedSearchRoute: typeof ApiPublicRealestateSavedSearchRoute
   ApiPublicRiomedEventsRoute: typeof ApiPublicRiomedEventsRoute
+  ApiPublicSupportCreateTicketRoute: typeof ApiPublicSupportCreateTicketRoute
   ApiPublicWhatsappSendRoute: typeof ApiPublicWhatsappSendRoute
   DemoRestauranteTenantQrRoute: typeof DemoRestauranteTenantQrRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -12266,6 +12280,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWhatsappSendRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/support/create-ticket': {
+      id: '/api/public/support/create-ticket'
+      path: '/api/public/support/create-ticket'
+      fullPath: '/api/public/support/create-ticket'
+      preLoaderRoute: typeof ApiPublicSupportCreateTicketRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/riomed/events': {
       id: '/api/public/riomed/events'
       path: '/api/public/riomed/events'
@@ -14854,6 +14875,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicRealestateInterestRoute: ApiPublicRealestateInterestRoute,
   ApiPublicRealestateSavedSearchRoute: ApiPublicRealestateSavedSearchRoute,
   ApiPublicRiomedEventsRoute: ApiPublicRiomedEventsRoute,
+  ApiPublicSupportCreateTicketRoute: ApiPublicSupportCreateTicketRoute,
   ApiPublicWhatsappSendRoute: ApiPublicWhatsappSendRoute,
   DemoRestauranteTenantQrRoute: DemoRestauranteTenantQrRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,

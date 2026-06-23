@@ -4,8 +4,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
 
-type TicketType = 'question' | 'bug' | 'request' | 'incident' | 'billing'
-type TicketPriority = 'low' | 'medium' | 'high' | 'urgent'
+type TicketType = 'question' | 'bug' | 'request' | 'incident' | 'financial'
+type TicketPriority = 'low' | 'medium' | 'high' | 'critical'
 
 interface Input {
   name: string
@@ -19,8 +19,8 @@ interface Input {
   page?: string
 }
 
-const TYPES: TicketType[] = ['question', 'bug', 'request', 'incident', 'billing']
-const PRIORITIES: TicketPriority[] = ['low', 'medium', 'high', 'urgent']
+const TYPES: TicketType[] = ['question', 'bug', 'request', 'incident', 'financial']
+const PRIORITIES: TicketPriority[] = ['low', 'medium', 'high', 'critical']
 
 function validate(raw: any): { ok: true; value: Input } | { ok: false; error: string } {
   if (!raw || typeof raw !== 'object') return { ok: false, error: 'invalid_body' }
