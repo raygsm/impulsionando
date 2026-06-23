@@ -26,6 +26,9 @@ export function TrialBanner() {
   const cd = useCountdown(trial?.ends_at);
   if (!trial) return null;
 
+  // Slug de plano escolhido vira parâmetro do checkout (`/checkout/$slug`).
+  const planSlug = trial.chosen_plan || "completo-mensal";
+
   if (isSuspended) {
     return (
       <div className="w-full bg-destructive/10 border-b border-destructive/40 px-4 py-3 text-sm">
@@ -35,10 +38,10 @@ export function TrialBanner() {
             Acesso suspenso — Trial expirado sem pagamento.
           </span>
           <span className="text-muted-foreground">
-            Regularize sua conta na área financeira para retomar o acesso.
+            Conclua o pagamento para retomar o acesso ao seu plano.
           </span>
           <Button asChild size="sm" variant="destructive" className="ml-auto">
-            <Link to="/finance">Regularizar agora</Link>
+            <Link to="/checkout/$slug" params={{ slug: planSlug }}>Regularizar agora</Link>
           </Button>
         </div>
       </div>
@@ -52,10 +55,10 @@ export function TrialBanner() {
           <Clock className="w-4 h-4 text-orange-700 shrink-0" />
           <span className="font-medium text-orange-900">Seu Trial terminou.</span>
           <span className="text-orange-900/80">
-            Você tem até 24h para regularizar antes da suspensão automática.
+            Você tem até 24h para concluir o pagamento antes da suspensão automática.
           </span>
           <Button asChild size="sm" className="ml-auto">
-            <Link to="/finance">Pagar agora</Link>
+            <Link to="/checkout/$slug" params={{ slug: planSlug }}>Pagar agora</Link>
           </Button>
         </div>
       </div>
@@ -90,13 +93,16 @@ export function TrialBanner() {
               <Link to="/planos">Ver planos</Link>
             </Button>
             <Button asChild size="sm">
-              <Link to="/finance">Ir para financeiro</Link>
+              <Link to="/checkout/$slug" params={{ slug: planSlug }}>
+                {isLast ? "Pagar agora" : "Confirmar plano"}
+              </Link>
             </Button>
           </div>
         </div>
       </div>
     );
   }
+
 
   return null;
 }
