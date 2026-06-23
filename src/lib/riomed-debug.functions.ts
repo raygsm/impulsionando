@@ -34,7 +34,7 @@ async function timed<T>(
   name: string,
   stages: Stage[],
   fn: () => Promise<T>,
-  meta?: Record<string, unknown>,
+  meta?: StageMeta,
 ): Promise<{ ok: boolean; value: T | null }> {
   const t0 = Date.now();
   try {
