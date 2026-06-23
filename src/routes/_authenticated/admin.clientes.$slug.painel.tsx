@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Sparkles, Users, MessageCircle, Calendar, Wallet, Package,
+  Users, MessageCircle, Calendar, Wallet, Package,
   Megaphone, Workflow, ShoppingCart, FileText, ArrowRight, TrendingUp,
   AlertTriangle, Activity, ChevronRight,
 } from "lucide-react";
