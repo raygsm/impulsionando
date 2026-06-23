@@ -85,6 +85,21 @@ export const CATALOG_MODULES: CatalogModule[] = [
     requiresExternalCredentials: false,
     motherSlug: "automacao",
   },
+  {
+    slug: "suporte_inteligente",
+    name: "Suporte Inteligente (Tickets)",
+    category: "Atendimento & Comunicação",
+    description:
+      "Tickets integrados ao CRM, com follow-up automático WhatsApp e Email, SLA por plano, reabertura no mesmo protocolo e IA que agrupa problemas recorrentes em %.",
+    tooltip:
+      "Muito mais que help desk: vive dentro do ecossistema. Cada ticket conversa com o lead, dispara comunicação por status e a IA mostra os temas mais frequentes para a gestão.",
+    priceCents: MODULE_PRICE_CENTS,
+    recommendedFor: ["Todos", "Clínicas", "Marketplace", "Eventos", "SaaS"],
+    combinesWith: ["crm", "whatsapp", "followups", "bi"],
+    requiresExternalCredentials: false,
+    motherSlug: "automacao",
+  },
+
 
   // ---------- Agenda, Reservas e Eventos ----------
   {

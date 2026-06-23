@@ -117,6 +117,7 @@ import { Route as ParceiroTokenRouteImport } from './routes/parceiro.$token'
 import { Route as ParceiroCorretorTokenRouteImport } from './routes/parceiro-corretor.$token'
 import { Route as PacienteIdRouteImport } from './routes/paciente.$id'
 import { Route as NichosSlugRouteImport } from './routes/nichos.$slug'
+import { Route as ModulosSuporteInteligenteRouteImport } from './routes/modulos.suporte-inteligente'
 import { Route as ModulosSlugRouteImport } from './routes/modulos.$slug'
 import { Route as MesaTokenRouteImport } from './routes/mesa.$token'
 import { Route as MarocasPlanosRouteImport } from './routes/marocas.planos'
@@ -423,6 +424,7 @@ import { Route as AuthenticatedAdminTenant360RouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminTaxComplianceRouteImport } from './routes/_authenticated/admin.tax-compliance'
 import { Route as AuthenticatedAdminTalentosCockpitHealthRouteImport } from './routes/_authenticated/admin.talentos-cockpit-health'
 import { Route as AuthenticatedAdminSupportTicketingHealthRouteImport } from './routes/_authenticated/admin.support-ticketing-health'
+import { Route as AuthenticatedAdminSuporteProRouteImport } from './routes/_authenticated/admin.suporte-pro'
 import { Route as AuthenticatedAdminSlaComplianceRouteImport } from './routes/_authenticated/admin.sla-compliance'
 import { Route as AuthenticatedAdminSegurancaContinuidadeRouteImport } from './routes/_authenticated/admin.seguranca-continuidade'
 import { Route as AuthenticatedAdminSecurityComplianceRouteImport } from './routes/_authenticated/admin.security-compliance'
@@ -571,6 +573,7 @@ import { Route as ApiPublicHealthMonetizationRouteImport } from './routes/api/pu
 import { Route as ApiPublicEmailSendRouteImport } from './routes/api/public/email/send'
 import { Route as ApiPublicDemoSendTestRouteImport } from './routes/api/public/demo/send-test'
 import { Route as ApiPublicDemoFeiraLeadRouteImport } from './routes/api/public/demo/feira-lead'
+import { Route as ApiPublicCronSupportTickRouteImport } from './routes/api/public/cron/support-tick'
 import { Route as ApiPublicCronPayoutsConsolidateRouteImport } from './routes/api/public/cron/payouts-consolidate'
 import { Route as ApiPublicCronFunnelDispatchRouteImport } from './routes/api/public/cron/funnel-dispatch'
 import { Route as ApiPublicCronCrmTouchDispatchRouteImport } from './routes/api/public/cron/crm-touch-dispatch'
@@ -1200,6 +1203,12 @@ const NichosSlugRoute = NichosSlugRouteImport.update({
   path: '/nichos/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ModulosSuporteInteligenteRoute =
+  ModulosSuporteInteligenteRouteImport.update({
+    id: '/suporte-inteligente',
+    path: '/suporte-inteligente',
+    getParentRoute: () => ModulosRoute,
+  } as any)
 const ModulosSlugRoute = ModulosSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -2926,6 +2935,12 @@ const AuthenticatedAdminSupportTicketingHealthRoute =
     path: '/admin/support-ticketing-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminSuporteProRoute =
+  AuthenticatedAdminSuporteProRouteImport.update({
+    id: '/admin/suporte-pro',
+    path: '/admin/suporte-pro',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminSlaComplianceRoute =
   AuthenticatedAdminSlaComplianceRouteImport.update({
     id: '/admin/sla-compliance',
@@ -3798,6 +3813,12 @@ const ApiPublicDemoFeiraLeadRoute = ApiPublicDemoFeiraLeadRouteImport.update({
   path: '/api/public/demo/feira-lead',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicCronSupportTickRoute =
+  ApiPublicCronSupportTickRouteImport.update({
+    id: '/api/public/cron/support-tick',
+    path: '/api/public/cron/support-tick',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicCronPayoutsConsolidateRoute =
   ApiPublicCronPayoutsConsolidateRouteImport.update({
     id: '/api/public/cron/payouts-consolidate',
@@ -4419,6 +4440,7 @@ export interface FileRoutesByFullPath {
   '/marocas/planos': typeof MarocasPlanosRoute
   '/mesa/$token': typeof MesaTokenRoute
   '/modulos/$slug': typeof ModulosSlugRoute
+  '/modulos/suporte-inteligente': typeof ModulosSuporteInteligenteRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
   '/parceiro-corretor/$token': typeof ParceiroCorretorTokenRoute
@@ -4603,6 +4625,7 @@ export interface FileRoutesByFullPath {
   '/admin/security-compliance': typeof AuthenticatedAdminSecurityComplianceRoute
   '/admin/seguranca-continuidade': typeof AuthenticatedAdminSegurancaContinuidadeRoute
   '/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
+  '/admin/suporte-pro': typeof AuthenticatedAdminSuporteProRoute
   '/admin/support-ticketing-health': typeof AuthenticatedAdminSupportTicketingHealthRoute
   '/admin/talentos-cockpit-health': typeof AuthenticatedAdminTalentosCockpitHealthRoute
   '/admin/tax-compliance': typeof AuthenticatedAdminTaxComplianceRoute
@@ -4865,6 +4888,7 @@ export interface FileRoutesByFullPath {
   '/api/public/cron/crm-touch-dispatch': typeof ApiPublicCronCrmTouchDispatchRoute
   '/api/public/cron/funnel-dispatch': typeof ApiPublicCronFunnelDispatchRoute
   '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
+  '/api/public/cron/support-tick': typeof ApiPublicCronSupportTickRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/email/send': typeof ApiPublicEmailSendRoute
@@ -5053,6 +5077,7 @@ export interface FileRoutesByTo {
   '/marocas/planos': typeof MarocasPlanosRoute
   '/mesa/$token': typeof MesaTokenRoute
   '/modulos/$slug': typeof ModulosSlugRoute
+  '/modulos/suporte-inteligente': typeof ModulosSuporteInteligenteRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
   '/parceiro-corretor/$token': typeof ParceiroCorretorTokenRoute
@@ -5237,6 +5262,7 @@ export interface FileRoutesByTo {
   '/admin/security-compliance': typeof AuthenticatedAdminSecurityComplianceRoute
   '/admin/seguranca-continuidade': typeof AuthenticatedAdminSegurancaContinuidadeRoute
   '/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
+  '/admin/suporte-pro': typeof AuthenticatedAdminSuporteProRoute
   '/admin/support-ticketing-health': typeof AuthenticatedAdminSupportTicketingHealthRoute
   '/admin/talentos-cockpit-health': typeof AuthenticatedAdminTalentosCockpitHealthRoute
   '/admin/tax-compliance': typeof AuthenticatedAdminTaxComplianceRoute
@@ -5499,6 +5525,7 @@ export interface FileRoutesByTo {
   '/api/public/cron/crm-touch-dispatch': typeof ApiPublicCronCrmTouchDispatchRoute
   '/api/public/cron/funnel-dispatch': typeof ApiPublicCronFunnelDispatchRoute
   '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
+  '/api/public/cron/support-tick': typeof ApiPublicCronSupportTickRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/email/send': typeof ApiPublicEmailSendRoute
@@ -5702,6 +5729,7 @@ export interface FileRoutesById {
   '/marocas/planos': typeof MarocasPlanosRoute
   '/mesa/$token': typeof MesaTokenRoute
   '/modulos/$slug': typeof ModulosSlugRoute
+  '/modulos/suporte-inteligente': typeof ModulosSuporteInteligenteRoute
   '/nichos/$slug': typeof NichosSlugRoute
   '/paciente/$id': typeof PacienteIdRoute
   '/parceiro-corretor/$token': typeof ParceiroCorretorTokenRoute
@@ -5886,6 +5914,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/security-compliance': typeof AuthenticatedAdminSecurityComplianceRoute
   '/_authenticated/admin/seguranca-continuidade': typeof AuthenticatedAdminSegurancaContinuidadeRoute
   '/_authenticated/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
+  '/_authenticated/admin/suporte-pro': typeof AuthenticatedAdminSuporteProRoute
   '/_authenticated/admin/support-ticketing-health': typeof AuthenticatedAdminSupportTicketingHealthRoute
   '/_authenticated/admin/talentos-cockpit-health': typeof AuthenticatedAdminTalentosCockpitHealthRoute
   '/_authenticated/admin/tax-compliance': typeof AuthenticatedAdminTaxComplianceRoute
@@ -6148,6 +6177,7 @@ export interface FileRoutesById {
   '/api/public/cron/crm-touch-dispatch': typeof ApiPublicCronCrmTouchDispatchRoute
   '/api/public/cron/funnel-dispatch': typeof ApiPublicCronFunnelDispatchRoute
   '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
+  '/api/public/cron/support-tick': typeof ApiPublicCronSupportTickRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
   '/api/public/email/send': typeof ApiPublicEmailSendRoute
@@ -6350,6 +6380,7 @@ export interface FileRouteTypes {
     | '/marocas/planos'
     | '/mesa/$token'
     | '/modulos/$slug'
+    | '/modulos/suporte-inteligente'
     | '/nichos/$slug'
     | '/paciente/$id'
     | '/parceiro-corretor/$token'
@@ -6534,6 +6565,7 @@ export interface FileRouteTypes {
     | '/admin/security-compliance'
     | '/admin/seguranca-continuidade'
     | '/admin/sla-compliance'
+    | '/admin/suporte-pro'
     | '/admin/support-ticketing-health'
     | '/admin/talentos-cockpit-health'
     | '/admin/tax-compliance'
@@ -6796,6 +6828,7 @@ export interface FileRouteTypes {
     | '/api/public/cron/crm-touch-dispatch'
     | '/api/public/cron/funnel-dispatch'
     | '/api/public/cron/payouts-consolidate'
+    | '/api/public/cron/support-tick'
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
     | '/api/public/email/send'
@@ -6984,6 +7017,7 @@ export interface FileRouteTypes {
     | '/marocas/planos'
     | '/mesa/$token'
     | '/modulos/$slug'
+    | '/modulos/suporte-inteligente'
     | '/nichos/$slug'
     | '/paciente/$id'
     | '/parceiro-corretor/$token'
@@ -7168,6 +7202,7 @@ export interface FileRouteTypes {
     | '/admin/security-compliance'
     | '/admin/seguranca-continuidade'
     | '/admin/sla-compliance'
+    | '/admin/suporte-pro'
     | '/admin/support-ticketing-health'
     | '/admin/talentos-cockpit-health'
     | '/admin/tax-compliance'
@@ -7430,6 +7465,7 @@ export interface FileRouteTypes {
     | '/api/public/cron/crm-touch-dispatch'
     | '/api/public/cron/funnel-dispatch'
     | '/api/public/cron/payouts-consolidate'
+    | '/api/public/cron/support-tick'
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
     | '/api/public/email/send'
@@ -7632,6 +7668,7 @@ export interface FileRouteTypes {
     | '/marocas/planos'
     | '/mesa/$token'
     | '/modulos/$slug'
+    | '/modulos/suporte-inteligente'
     | '/nichos/$slug'
     | '/paciente/$id'
     | '/parceiro-corretor/$token'
@@ -7816,6 +7853,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/security-compliance'
     | '/_authenticated/admin/seguranca-continuidade'
     | '/_authenticated/admin/sla-compliance'
+    | '/_authenticated/admin/suporte-pro'
     | '/_authenticated/admin/support-ticketing-health'
     | '/_authenticated/admin/talentos-cockpit-health'
     | '/_authenticated/admin/tax-compliance'
@@ -8078,6 +8116,7 @@ export interface FileRouteTypes {
     | '/api/public/cron/crm-touch-dispatch'
     | '/api/public/cron/funnel-dispatch'
     | '/api/public/cron/payouts-consolidate'
+    | '/api/public/cron/support-tick'
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
     | '/api/public/email/send'
@@ -8289,6 +8328,7 @@ export interface RootRouteChildren {
   ApiPublicCronCrmTouchDispatchRoute: typeof ApiPublicCronCrmTouchDispatchRoute
   ApiPublicCronFunnelDispatchRoute: typeof ApiPublicCronFunnelDispatchRoute
   ApiPublicCronPayoutsConsolidateRoute: typeof ApiPublicCronPayoutsConsolidateRoute
+  ApiPublicCronSupportTickRoute: typeof ApiPublicCronSupportTickRoute
   ApiPublicDemoFeiraLeadRoute: typeof ApiPublicDemoFeiraLeadRoute
   ApiPublicDemoSendTestRoute: typeof ApiPublicDemoSendTestRoute
   ApiPublicEmailSendRoute: typeof ApiPublicEmailSendRoute
@@ -9088,6 +9128,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/nichos/$slug'
       preLoaderRoute: typeof NichosSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/modulos/suporte-inteligente': {
+      id: '/modulos/suporte-inteligente'
+      path: '/suporte-inteligente'
+      fullPath: '/modulos/suporte-inteligente'
+      preLoaderRoute: typeof ModulosSuporteInteligenteRouteImport
+      parentRoute: typeof ModulosRoute
     }
     '/modulos/$slug': {
       id: '/modulos/$slug'
@@ -11231,6 +11278,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSupportTicketingHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/suporte-pro': {
+      id: '/_authenticated/admin/suporte-pro'
+      path: '/admin/suporte-pro'
+      fullPath: '/admin/suporte-pro'
+      preLoaderRoute: typeof AuthenticatedAdminSuporteProRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/sla-compliance': {
       id: '/_authenticated/admin/sla-compliance'
       path: '/admin/sla-compliance'
@@ -12265,6 +12319,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/demo/feira-lead'
       fullPath: '/api/public/demo/feira-lead'
       preLoaderRoute: typeof ApiPublicDemoFeiraLeadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/cron/support-tick': {
+      id: '/api/public/cron/support-tick'
+      path: '/api/public/cron/support-tick'
+      fullPath: '/api/public/cron/support-tick'
+      preLoaderRoute: typeof ApiPublicCronSupportTickRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/cron/payouts-consolidate': {
@@ -13775,6 +13836,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminSecurityComplianceRoute: typeof AuthenticatedAdminSecurityComplianceRoute
   AuthenticatedAdminSegurancaContinuidadeRoute: typeof AuthenticatedAdminSegurancaContinuidadeRoute
   AuthenticatedAdminSlaComplianceRoute: typeof AuthenticatedAdminSlaComplianceRoute
+  AuthenticatedAdminSuporteProRoute: typeof AuthenticatedAdminSuporteProRoute
   AuthenticatedAdminSupportTicketingHealthRoute: typeof AuthenticatedAdminSupportTicketingHealthRoute
   AuthenticatedAdminTalentosCockpitHealthRoute: typeof AuthenticatedAdminTalentosCockpitHealthRoute
   AuthenticatedAdminTaxComplianceRoute: typeof AuthenticatedAdminTaxComplianceRoute
@@ -14089,6 +14151,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminSegurancaContinuidadeRoute:
     AuthenticatedAdminSegurancaContinuidadeRoute,
   AuthenticatedAdminSlaComplianceRoute: AuthenticatedAdminSlaComplianceRoute,
+  AuthenticatedAdminSuporteProRoute: AuthenticatedAdminSuporteProRoute,
   AuthenticatedAdminSupportTicketingHealthRoute:
     AuthenticatedAdminSupportTicketingHealthRoute,
   AuthenticatedAdminTalentosCockpitHealthRoute:
@@ -14318,11 +14381,13 @@ const MarocasRouteWithChildren =
 
 interface ModulosRouteChildren {
   ModulosSlugRoute: typeof ModulosSlugRoute
+  ModulosSuporteInteligenteRoute: typeof ModulosSuporteInteligenteRoute
   ModulosIndexRoute: typeof ModulosIndexRoute
 }
 
 const ModulosRouteChildren: ModulosRouteChildren = {
   ModulosSlugRoute: ModulosSlugRoute,
+  ModulosSuporteInteligenteRoute: ModulosSuporteInteligenteRoute,
   ModulosIndexRoute: ModulosIndexRoute,
 }
 
@@ -14563,6 +14628,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicCronCrmTouchDispatchRoute: ApiPublicCronCrmTouchDispatchRoute,
   ApiPublicCronFunnelDispatchRoute: ApiPublicCronFunnelDispatchRoute,
   ApiPublicCronPayoutsConsolidateRoute: ApiPublicCronPayoutsConsolidateRoute,
+  ApiPublicCronSupportTickRoute: ApiPublicCronSupportTickRoute,
   ApiPublicDemoFeiraLeadRoute: ApiPublicDemoFeiraLeadRoute,
   ApiPublicDemoSendTestRoute: ApiPublicDemoSendTestRoute,
   ApiPublicEmailSendRoute: ApiPublicEmailSendRoute,
