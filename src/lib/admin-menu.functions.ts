@@ -212,3 +212,79 @@ export const reorderAdminMenu = createServerFn({ method: "POST" })
     });
     return { ok: true };
   });
+
+// === TENANTS ATIVOS PARA O HUB ===
+export type AdminHubTenant = {
+  id: string;
+  name: string;
+  slug: string;
+  logo_url: string | null;
+  status: string | null;
+  status_commercial: string | null;
+  status_financial: string | null;
+  status_technical: string | null;
+  is_active: boolean;
+  is_demo: boolean | null;
+  company_kind: string | null;
+  modules_count: number;
+  users_count: number;
+  customers_count: number;
+};
+
+export const listAdminHubTenants = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const supa = context.supabase as any;
+    const { userId } = context;
+    const { data: staff } = await supa.rpc("is_impulsionando_staff", { _user: userId });
+    if (!staff) throw new Error("Apenas equipe Impulsionando.");
+
+    const { data: companies, error } = await supa
+      .from("companies")
+      .select(
+        "id,name,public_slug,subdomain,logo_url,status,status_commercial,status_financial,status_technical,is_active,is_demo,company_kind",
+      )
+      .eq("is_active", true)
+      .neq("status", "archived")
+      .order("name", { ascending: true });
+    if (error) throw new Error(error.message);
+
+    const list = (companies ?? []) as any[];
+    const ids = list.map((c) => c.id);
+    if (ids.length === 0) return { tenants: [] as AdminHubTenant[] };
+
+    // contagens em paralelo (head/count) por tenant — usar agregados em lote
+    const [modulesRes, usersRes, customersRes] = await Promise.all([
+      supa.from("company_modules").select("company_id").in("company_id", ids).eq("is_enabled", true),
+      supa.from("user_profiles").select("company_id").in("company_id", ids),
+      supa.from("customers").select("company_id").in("company_id", ids),
+    ]);
+
+    const tally = (rows: any[] | null | undefined) => {
+      const m = new Map<string, number>();
+      for (const r of rows ?? []) m.set(r.company_id, (m.get(r.company_id) ?? 0) + 1);
+      return m;
+    };
+    const modCount = tally(modulesRes.data);
+    const usrCount = tally(usersRes.data);
+    const cstCount = tally(customersRes.data);
+
+    const tenants: AdminHubTenant[] = list.map((c) => ({
+      id: c.id,
+      name: c.name,
+      slug: c.public_slug ?? c.subdomain ?? c.id,
+      logo_url: c.logo_url ?? null,
+      status: c.status ?? null,
+      status_commercial: c.status_commercial ?? null,
+      status_financial: c.status_financial ?? null,
+      status_technical: c.status_technical ?? null,
+      is_active: !!c.is_active,
+      is_demo: c.is_demo ?? null,
+      company_kind: c.company_kind ?? null,
+      modules_count: modCount.get(c.id) ?? 0,
+      users_count: usrCount.get(c.id) ?? 0,
+      customers_count: cstCount.get(c.id) ?? 0,
+    }));
+
+    return { tenants };
+  });
