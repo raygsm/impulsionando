@@ -101,8 +101,101 @@ export const Route = createFileRoute("/api/public/webhooks/n8n-callback")({
           return Response.json({ error: "db_insert_failed", detail: error.message }, { status: 500 });
         }
 
+        // Alert on failure (incident row + optional Slack ping)
+        if (parsed.status === "failed") {
+          try {
+            await notifyFailure(supabaseAdmin, {
+              workflow: parsed.workflow,
+              event: parsed.event,
+              niche_slug: parsed.niche_slug ?? null,
+              error: parsed.error ?? null,
+              tenant_id: parsed.tenant_id ?? null,
+              executionId: parsed.executionId ?? null,
+            });
+          } catch (e) {
+            console.error("[n8n-callback] notifyFailure failed", e);
+          }
+        }
+
         return Response.json({ ok: true });
       },
     },
   },
 });
+
+async function notifyFailure(
+  supabaseAdmin: any,
+  ctx: {
+    workflow: string;
+    event: string;
+    niche_slug: string | null;
+    error: string | null;
+    tenant_id: string | null;
+    executionId: string | null;
+  },
+) {
+  const title = `N8N failure: ${ctx.workflow} (${ctx.event})`;
+  const description = [
+    ctx.niche_slug ? `Nicho: ${ctx.niche_slug}` : "Global",
+    ctx.error ? `Erro: ${ctx.error}` : null,
+    ctx.executionId ? `Execução: ${ctx.executionId}` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  // 1) Persist incident (dedupe by open+title within 30min via metadata)
+  const since = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+  const { data: existing } = await supabaseAdmin
+    .from("core_incidents")
+    .select("id, event_count")
+    .eq("status", "open")
+    .eq("title", title)
+    .gte("detected_at", since)
+    .limit(1)
+    .maybeSingle();
+
+  if (existing?.id) {
+    await supabaseAdmin
+      .from("core_incidents")
+      .update({
+        event_count: (existing.event_count ?? 1) + 1,
+        updated_at: new Date().toISOString(),
+        metadata: { last_error: ctx.error, last_execution: ctx.executionId, tenant_id: ctx.tenant_id },
+      })
+      .eq("id", existing.id);
+  } else {
+    await supabaseAdmin.from("core_incidents").insert({
+      scope: "runtime_scope",
+      runtime_scope: `n8n:${ctx.niche_slug ?? "global"}:${ctx.event}`,
+      severity: "sev3",
+      status: "open",
+      title,
+      description,
+      source: "n8n",
+      metadata: {
+        workflow: ctx.workflow,
+        event: ctx.event,
+        niche_slug: ctx.niche_slug,
+        error: ctx.error,
+        executionId: ctx.executionId,
+        tenant_id: ctx.tenant_id,
+      },
+    });
+  }
+
+  // 2) Best-effort Slack ping when SLACK_OPS_WEBHOOK is configured
+  const slackWebhook = process.env.SLACK_OPS_WEBHOOK;
+  if (slackWebhook) {
+    try {
+      await fetch(slackWebhook, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: `:rotating_light: *${title}*\n${description}`,
+        }),
+      });
+    } catch (e) {
+      console.error("[n8n-callback] slack post failed", e);
+    }
+  }
+}
