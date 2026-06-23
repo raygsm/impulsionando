@@ -519,8 +519,9 @@ export function PublicHeader() {
           <EmpresasMenu />
           <NichosMenu />
           {NAV.filter((n) => n.to !== "/").map((it) => (
-            <NavLink key={it.to} {...it} />
+            <NavLink key={`${it.to}-${it.label}`} {...it} />
           ))}
+
         </nav>
 
         <div className="flex items-center gap-2">
