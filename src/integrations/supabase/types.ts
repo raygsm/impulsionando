@@ -10971,6 +10971,39 @@ export type Database = {
           },
         ]
       }
+      cotacao_bob_usd: {
+        Row: {
+          captured_at: string
+          created_at: string
+          id: string
+          is_active: boolean
+          metadata: Json
+          rate: number
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          captured_at?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          metadata?: Json
+          rate: number
+          source?: string
+          updated_at?: string
+        }
+        Update: {
+          captured_at?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          metadata?: Json
+          rate?: number
+          source?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       crm_activities: {
         Row: {
           activity_type: string
