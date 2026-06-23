@@ -57,14 +57,28 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isSuspended) return;
     const path = location.pathname;
+    // Consumidor final: pagamento é do Clube, redireciona para o checkout do Clube,
+    // NÃO para a área financeira B2B (/minha-assinatura).
+    if (audience === "consumidor") {
+      const allowedConsumer =
+        path.startsWith("/checkout") ||
+        path.startsWith("/clube") ||
+        path.startsWith("/auth") ||
+        path === "/";
+      if (!allowedConsumer) {
+        navigate({ to: "/checkout/$plano", params: { plano: "clube_premium" } });
+      }
+      return;
+    }
     const allowed =
       path.startsWith("/finance") ||
       path.startsWith("/minha-assinatura") ||
+      path.startsWith("/checkout") ||
       path.startsWith("/auth") ||
       path === "/dashboard" ||
       path === "/";
     if (!allowed) navigate({ to: "/minha-assinatura" });
-  }, [isSuspended, location.pathname, navigate]);
+  }, [isSuspended, location.pathname, navigate, audience]);
 
   // Gate por módulo: aplicado APENAS para assinantes pagantes ativos.
   // Durante trial ativo (sem assinatura), todos os módulos ficam acessíveis.
