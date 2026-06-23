@@ -83,7 +83,7 @@ export function ImpulsionitoFab() {
             data-cta="impulsionito-fab"
             data-ctx={ctx.id}
             onClick={() =>
-              trackWhatsAppCTA("impulsionito_fab_click", {
+              trackWhatsAppCTA("whatsapp_fab_click", {
                 origin: "impulsionito",
                 path: pathname,
                 ctx: ctx.id,
