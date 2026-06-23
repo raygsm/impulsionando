@@ -148,8 +148,8 @@ export const convertQuoteToOrder = createServerFn({ method: "POST" })
 export const getPublicQuote = createServerFn({ method: "GET" })
   .inputValidator((i: unknown) => z.object({ token: z.string().min(8) }).parse(i))
   .handler(async ({ data }) => {
-    const supa = pubClient();
-    const { data: q } = await supa
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: q } = await supabaseAdmin
       .from("riomed_quotes")
       .select("id,code,status,currency,subtotal,discount_total,total,expires_at,notes,public_token_expires_at,approved_at,rejected_at,company_id")
       .eq("public_token", data.token)
@@ -158,13 +158,14 @@ export const getPublicQuote = createServerFn({ method: "GET" })
     if (q.public_token_expires_at && new Date(q.public_token_expires_at) < new Date()) {
       return { quote: null, items: [], expired: true };
     }
-    const { data: items } = await supa
+    const { data: items } = await supabaseAdmin
       .from("riomed_quote_items")
       .select("description,qty,unit_price,discount,total,sort_order")
       .eq("quote_id", q.id)
       .order("sort_order");
     return { quote: q, items: items ?? [] };
   });
+
 
 export const approvePublicQuote = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) =>
