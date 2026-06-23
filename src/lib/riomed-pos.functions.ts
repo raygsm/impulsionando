@@ -341,3 +341,73 @@ export const getPosOverview = createServerFn({ method: "GET" })
       recentSales: recentSales.data ?? [],
     };
   });
+
+// ---- Relatório Z/X (fechamento de caixa) ----
+export const getPosZReport = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      sessionId: z.string().uuid().optional(),
+      terminalId: z.string().uuid().optional(),
+      from: z.string().optional(),
+      to: z.string().optional(),
+    }).parse(d ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    const sb = (context as any).supabase;
+    const cid = await companyId(context as any);
+
+    let salesQ = sb.from("riomed_pos_sales").select("*").eq("company_id", cid);
+    let movsQ = sb.from("riomed_pos_movements").select("*").eq("company_id", cid);
+    let sesQ = sb.from("riomed_pos_sessions")
+      .select("*, terminal:riomed_pos_terminals(code,name)")
+      .eq("company_id", cid);
+
+    if (data.sessionId) {
+      salesQ = salesQ.eq("session_id", data.sessionId);
+      movsQ = movsQ.eq("session_id", data.sessionId);
+      sesQ = sesQ.eq("id", data.sessionId);
+    }
+    if (data.terminalId) {
+      salesQ = salesQ.eq("terminal_id", data.terminalId);
+      sesQ = sesQ.eq("terminal_id", data.terminalId);
+    }
+    if (data.from) { salesQ = salesQ.gte("created_at", data.from); movsQ = movsQ.gte("created_at", data.from); sesQ = sesQ.gte("opened_at", data.from); }
+    if (data.to) { salesQ = salesQ.lte("created_at", data.to); movsQ = movsQ.lte("created_at", data.to); sesQ = sesQ.lte("opened_at", data.to); }
+
+    const [sales, movs, sessions] = await Promise.all([salesQ, movsQ, sesQ.order("opened_at", { ascending: false }).limit(200)]);
+    const completed = (sales.data ?? []).filter((s: any) => s.status === "completed");
+
+    const byMethod: Record<string, { count: number; total: number }> = {};
+    let total = 0, cash = 0, fiscalEmitted = 0;
+    for (const s of completed) {
+      const m = s.payment_method ?? "cash";
+      byMethod[m] = byMethod[m] ?? { count: 0, total: 0 };
+      byMethod[m].count += 1;
+      byMethod[m].total += Number(s.total);
+      total += Number(s.total);
+      if (m === "cash") cash += Number(s.total);
+      if (s.fiscal_number) fiscalEmitted += 1;
+    }
+    const cashIn = (movs.data ?? []).filter((m: any) => m.kind === "cash_in").reduce((a: number, m: any) => a + Number(m.amount), 0);
+    const cashOut = (movs.data ?? []).filter((m: any) => m.kind === "cash_out").reduce((a: number, m: any) => a + Number(m.amount), 0);
+    const openingSum = (sessions.data ?? []).reduce((a: number, s: any) => a + Number(s.opening_amount ?? 0), 0);
+    const expected = openingSum + cash + cashIn - cashOut;
+
+    return {
+      sessions: sessions.data ?? [],
+      summary: {
+        salesCount: completed.length,
+        salesTotal: total,
+        cashTotal: cash,
+        cashIn, cashOut,
+        openingSum,
+        expectedCash: expected,
+        fiscalEmitted,
+        fiscalPending: completed.length - fiscalEmitted,
+        byMethod,
+      },
+      sales: completed,
+      movements: movs.data ?? [],
+    };
+  });
