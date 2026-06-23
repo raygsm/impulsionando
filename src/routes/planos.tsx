@@ -15,6 +15,7 @@ import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
+import { saveCheckoutCart, PLAN_NAME_TO_CODE } from "@/hooks/useCheckoutCart";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMinimumWage } from "@/hooks/useCoreSetting";
 
@@ -330,43 +331,43 @@ function PlanosPage() {
     const quota = PLAN_QUOTA[plan.name] ?? 1;
     const included = modules.slice(0, quota);
     const extras = modules.slice(quota);
-    const extrasMonthly = extras.length * EXTRA_MODULE_BRL;
+    const extrasMonthlyCents = extras.length * EXTRA_MODULE_BRL * 100;
     const baseMonthly = annual
       ? Math.round((plan.monthly ?? 0) * 10 / 12)
       : (plan.monthly ?? 0);
-    const totalMonthly = baseMonthly + extrasMonthly;
     const setup = PLAN_SETUP_BRL[plan.name] ?? 0;
+    const planCode = PLAN_NAME_TO_CODE[plan.name];
 
-    try {
-      await openCheckout({
-        priceId: PRICE_IDS[plan.name][annual ? "annual" : "monthly"],
-        customerEmail: user?.user?.email ?? undefined,
-        customData: {
-          ...(user?.user?.id ? { userId: user.user.id } : {}),
-          plan: plan.name,
-          modules_included: included.join(","),
-          modules_extra: extras.join(","),
-          extras_monthly_brl: String(extrasMonthly),
-          setup_brl: String(setup),
-          minimum_term_days: "90",
-        },
+    if (!planCode) {
+      // Planos sem código mapeado (ex.: Sob Medida) seguem pelo orçamento.
+      await navigate({
+        to: "/orcamento",
+        search: { plano: plan.name, origem: "planos" } as never,
       });
-    } catch {
-      // Pix fallback espelha o ciclo mínimo cobrado pelo gateway:
-      // - Mensal: setup + 3 mensalidades (mínimo 90 dias)
-      // - Anual: setup + 12× preço/mês no rate anual (= 10× preço cheio, 2 meses grátis)
-      const cycleMonths = annual ? 12 : 3;
-      const cycleValue = totalMonthly * cycleMonths;
-      toast.message(
-        "Instabilidade no checkout. Liberei o pagamento via Pix para você seguir agora.",
-      );
-      setPixState({
-        open: true,
-        amountCents: Math.round((setup + cycleValue) * 100),
-        txid: `PLANO-${plan.name.toUpperCase()}-${annual ? "ANUAL" : "MENSAL"}`,
-        label: `Plano ${plan.name}${modules.length ? ` (${modules.length} mód.)` : ""} — ${annual ? "anual (setup + 12 mensalidades)" : "mensal (setup + 3 mensalidades)"}`,
-      });
+      return;
     }
+
+    // Persiste o carrinho para a tela /checkout/$plano (Mercado Pago).
+    saveCheckoutCart({
+      planCode,
+      planName: plan.displayName ?? plan.name,
+      billing: annual ? "annual" : "monthly",
+      modulesIncluded: included,
+      modulesExtra: extras,
+      setupCents: Math.round(setup * 100),
+      monthlyCents: Math.round(baseMonthly * 100),
+      extrasMonthlyCents,
+      origin: "planos",
+      nicho,
+    });
+
+    toast.success(
+      `Plano ${plan.displayName ?? plan.name} no carrinho. Finalize o pagamento via Pix, cartão ou boleto.`,
+    );
+    await navigate({
+      to: "/checkout/$plano",
+      params: { plano: planCode },
+    });
   }
 
 
@@ -554,11 +555,30 @@ function PlanosPage() {
 
                 {plan.monthly !== null && PRICE_IDS[plan.name] ? (
                   <div className="mt-6 space-y-2">
+                    <div className="grid grid-cols-3 gap-1.5 text-[11px]" aria-label="Estrutura de preço">
+                      <div className="rounded border border-border p-2">
+                        <div className="text-muted-foreground">Setup</div>
+                        <div className="font-semibold text-foreground text-xs">
+                          {formatBRL(PLAN_SETUP_BRL[plan.name] ?? 0)}
+                        </div>
+                      </div>
+                      <div className="rounded border border-border p-2">
+                        <div className="text-muted-foreground">1ª mensalidade</div>
+                        <div className="font-semibold text-foreground text-xs">
+                          {formatBRL(monthlyEffective ?? 0)}
+                        </div>
+                      </div>
+                      <div className="rounded border border-primary/30 bg-primary/5 p-2">
+                        <div className="text-muted-foreground">Recorrente/mês</div>
+                        <div className="font-bold text-primary text-xs">
+                          {formatBRL(monthlyEffective ?? 0)}
+                        </div>
+                      </div>
+                    </div>
                     <div className="rounded-md border border-amber-300/70 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800/60 p-2.5 text-[11px] leading-snug text-amber-900 dark:text-amber-100">
-                      <strong>Contrato mínimo 90 dias.</strong> Setup{" "}
-                      {formatBRL(PLAN_SETUP_BRL[plan.name] ?? 0)} (1ª parcela) + 3
-                      mensalidades = <strong>4 pagamentos obrigatórios</strong> no
-                      ciclo inicial. Módulos extras: {formatBRL(EXTRA_MODULE_BRL)}/mês.
+                      <strong>Contrato mínimo 90 dias.</strong> Setup + 3 mensalidades ={" "}
+                      <strong>{formatBRL((PLAN_SETUP_BRL[plan.name] ?? 0) + (monthlyEffective ?? 0) * 3)}</strong>{" "}
+                      no ciclo inicial. Módulos extras: {formatBRL(EXTRA_MODULE_BRL)}/mês.
                     </div>
                     {pickedModules[plan.name]?.length ? (
                       <div className="text-[11px] text-muted-foreground">
