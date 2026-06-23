@@ -305,7 +305,7 @@ function SimuladorPerda() {
               <Link to="/orcamento">Quero parar de perder dinheiro <ArrowRight className="w-4 h-4 ml-1" /></Link>
             </Button>
             <Button asChild variant="outline" className="flex-1">
-              <Link to="/demo"><PlayCircle className="w-4 h-4 mr-1" /> Ver demo</Link>
+              <Link to="/demo/escolher-nicho"><PlayCircle className="w-4 h-4 mr-1" /> Ver demo</Link>
             </Button>
           </div>
         </Card>
@@ -595,7 +595,7 @@ export function HomePage() {
                 className="bg-white text-primary border border-primary hover:bg-primary/10 hover:text-primary gap-1.5"
                 onClick={() => trackHeroCta("ver_demonstracoes")}
               >
-                <Link to="/demo" data-analytics="hero-ver-demos">
+                <Link to="/demo/escolher-nicho" data-analytics="hero-ver-demos">
                   <PlayCircle className="w-4 h-4" /> Ver demonstrações
                 </Link>
               </Button>

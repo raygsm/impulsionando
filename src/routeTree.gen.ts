@@ -134,10 +134,12 @@ import { Route as DemoParceirosRouteImport } from './routes/demo.parceiros'
 import { Route as DemoModulosRouteImport } from './routes/demo.modulos'
 import { Route as DemoFeiraRouteImport } from './routes/demo.feira'
 import { Route as DemoEventosRouteImport } from './routes/demo.eventos'
+import { Route as DemoEscolherNichoRouteImport } from './routes/demo.escolher-nicho'
 import { Route as DemoCrmRouteImport } from './routes/demo.crm'
 import { Route as DemoClienteFinalRouteImport } from './routes/demo.cliente-final'
 import { Route as DemoCheckoutRouteImport } from './routes/demo.checkout'
 import { Route as DemoChecklistRouteImport } from './routes/demo.checklist'
+import { Route as DemoCadastroRouteImport } from './routes/demo.cadastro'
 import { Route as DemoBeerHouseRouteImport } from './routes/demo.beer-house'
 import { Route as DemoAgendaRouteImport } from './routes/demo.agenda'
 import { Route as DemoAfiliadosRouteImport } from './routes/demo.afiliados'
@@ -1295,6 +1297,11 @@ const DemoEventosRoute = DemoEventosRouteImport.update({
   path: '/demo/eventos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DemoEscolherNichoRoute = DemoEscolherNichoRouteImport.update({
+  id: '/demo/escolher-nicho',
+  path: '/demo/escolher-nicho',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DemoCrmRoute = DemoCrmRouteImport.update({
   id: '/demo/crm',
   path: '/demo/crm',
@@ -1313,6 +1320,11 @@ const DemoCheckoutRoute = DemoCheckoutRouteImport.update({
 const DemoChecklistRoute = DemoChecklistRouteImport.update({
   id: '/demo/checklist',
   path: '/demo/checklist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoCadastroRoute = DemoCadastroRouteImport.update({
+  id: '/demo/cadastro',
+  path: '/demo/cadastro',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoBeerHouseRoute = DemoBeerHouseRouteImport.update({
@@ -4462,10 +4474,12 @@ export interface FileRoutesByFullPath {
   '/demo/afiliados': typeof DemoAfiliadosRoute
   '/demo/agenda': typeof DemoAgendaRoute
   '/demo/beer-house': typeof DemoBeerHouseRoute
+  '/demo/cadastro': typeof DemoCadastroRoute
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/checkout': typeof DemoCheckoutRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/crm': typeof DemoCrmRoute
+  '/demo/escolher-nicho': typeof DemoEscolherNichoRoute
   '/demo/eventos': typeof DemoEventosRoute
   '/demo/feira': typeof DemoFeiraRoute
   '/demo/modulos': typeof DemoModulosRoute
@@ -5106,10 +5120,12 @@ export interface FileRoutesByTo {
   '/demo/afiliados': typeof DemoAfiliadosRoute
   '/demo/agenda': typeof DemoAgendaRoute
   '/demo/beer-house': typeof DemoBeerHouseRoute
+  '/demo/cadastro': typeof DemoCadastroRoute
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/checkout': typeof DemoCheckoutRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/crm': typeof DemoCrmRoute
+  '/demo/escolher-nicho': typeof DemoEscolherNichoRoute
   '/demo/eventos': typeof DemoEventosRoute
   '/demo/feira': typeof DemoFeiraRoute
   '/demo/modulos': typeof DemoModulosRoute
@@ -5764,10 +5780,12 @@ export interface FileRoutesById {
   '/demo/afiliados': typeof DemoAfiliadosRoute
   '/demo/agenda': typeof DemoAgendaRoute
   '/demo/beer-house': typeof DemoBeerHouseRoute
+  '/demo/cadastro': typeof DemoCadastroRoute
   '/demo/checklist': typeof DemoChecklistRoute
   '/demo/checkout': typeof DemoCheckoutRoute
   '/demo/cliente-final': typeof DemoClienteFinalRoute
   '/demo/crm': typeof DemoCrmRoute
+  '/demo/escolher-nicho': typeof DemoEscolherNichoRoute
   '/demo/eventos': typeof DemoEventosRoute
   '/demo/feira': typeof DemoFeiraRoute
   '/demo/modulos': typeof DemoModulosRoute
@@ -6422,10 +6440,12 @@ export interface FileRouteTypes {
     | '/demo/afiliados'
     | '/demo/agenda'
     | '/demo/beer-house'
+    | '/demo/cadastro'
     | '/demo/checklist'
     | '/demo/checkout'
     | '/demo/cliente-final'
     | '/demo/crm'
+    | '/demo/escolher-nicho'
     | '/demo/eventos'
     | '/demo/feira'
     | '/demo/modulos'
@@ -7066,10 +7086,12 @@ export interface FileRouteTypes {
     | '/demo/afiliados'
     | '/demo/agenda'
     | '/demo/beer-house'
+    | '/demo/cadastro'
     | '/demo/checklist'
     | '/demo/checkout'
     | '/demo/cliente-final'
     | '/demo/crm'
+    | '/demo/escolher-nicho'
     | '/demo/eventos'
     | '/demo/feira'
     | '/demo/modulos'
@@ -7723,10 +7745,12 @@ export interface FileRouteTypes {
     | '/demo/afiliados'
     | '/demo/agenda'
     | '/demo/beer-house'
+    | '/demo/cadastro'
     | '/demo/checklist'
     | '/demo/checkout'
     | '/demo/cliente-final'
     | '/demo/crm'
+    | '/demo/escolher-nicho'
     | '/demo/eventos'
     | '/demo/feira'
     | '/demo/modulos'
@@ -8328,10 +8352,12 @@ export interface RootRouteChildren {
   DemoAfiliadosRoute: typeof DemoAfiliadosRoute
   DemoAgendaRoute: typeof DemoAgendaRoute
   DemoBeerHouseRoute: typeof DemoBeerHouseRoute
+  DemoCadastroRoute: typeof DemoCadastroRoute
   DemoChecklistRoute: typeof DemoChecklistRoute
   DemoCheckoutRoute: typeof DemoCheckoutRoute
   DemoClienteFinalRoute: typeof DemoClienteFinalRoute
   DemoCrmRoute: typeof DemoCrmRoute
+  DemoEscolherNichoRoute: typeof DemoEscolherNichoRoute
   DemoEventosRoute: typeof DemoEventosRoute
   DemoFeiraRoute: typeof DemoFeiraRoute
   DemoModulosRoute: typeof DemoModulosRoute
@@ -9328,6 +9354,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoEventosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/demo/escolher-nicho': {
+      id: '/demo/escolher-nicho'
+      path: '/demo/escolher-nicho'
+      fullPath: '/demo/escolher-nicho'
+      preLoaderRoute: typeof DemoEscolherNichoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/demo/crm': {
       id: '/demo/crm'
       path: '/demo/crm'
@@ -9354,6 +9387,13 @@ declare module '@tanstack/react-router' {
       path: '/demo/checklist'
       fullPath: '/demo/checklist'
       preLoaderRoute: typeof DemoChecklistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo/cadastro': {
+      id: '/demo/cadastro'
+      path: '/demo/cadastro'
+      fullPath: '/demo/cadastro'
+      preLoaderRoute: typeof DemoCadastroRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo/beer-house': {
@@ -14701,10 +14741,12 @@ const rootRouteChildren: RootRouteChildren = {
   DemoAfiliadosRoute: DemoAfiliadosRoute,
   DemoAgendaRoute: DemoAgendaRoute,
   DemoBeerHouseRoute: DemoBeerHouseRoute,
+  DemoCadastroRoute: DemoCadastroRoute,
   DemoChecklistRoute: DemoChecklistRoute,
   DemoCheckoutRoute: DemoCheckoutRoute,
   DemoClienteFinalRoute: DemoClienteFinalRoute,
   DemoCrmRoute: DemoCrmRoute,
+  DemoEscolherNichoRoute: DemoEscolherNichoRoute,
   DemoEventosRoute: DemoEventosRoute,
   DemoFeiraRoute: DemoFeiraRoute,
   DemoModulosRoute: DemoModulosRoute,
@@ -14831,13 +14873,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
