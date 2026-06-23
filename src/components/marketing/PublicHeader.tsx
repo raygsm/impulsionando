@@ -247,14 +247,23 @@ function EmpresasMenu() {
             Empresas
           </NavigationMenuTrigger>
           <NavigationMenuContent>
-            <div className="grid grid-cols-[240px_minmax(0,1fr)] w-[820px]">
+            <div className="grid grid-cols-[220px_minmax(0,1fr)] w-[760px]">
               <ul
-                className="border-r border-border/60 p-2 bg-muted/30 rounded-l-md"
+                className="border-r border-border/60 p-2 bg-muted/30 rounded-l-md flex flex-col"
                 aria-label="Macrocategorias"
               >
+                <li className="px-2 pt-1 pb-2">
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Setores
+                  </div>
+                  <div className="text-[10px] text-muted-foreground/70 tabular-nums">
+                    {EMPRESAS_MACROS.length} verticais
+                  </div>
+                </li>
                 {EMPRESAS_MACROS.map((m) => {
                   const Icon = m.icon;
                   const isActive = m.slug === activeMacro.slug;
+                  const count = groupItems(m.items).length;
                   return (
                     <li key={m.slug}>
                       <button
@@ -262,38 +271,43 @@ function EmpresasMenu() {
                         onMouseEnter={() => setActiveSlug(m.slug)}
                         onFocus={() => setActiveSlug(m.slug)}
                         className={cn(
-                          "w-full flex items-center gap-2 rounded-md px-2 py-2 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                          "w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                           isActive
                             ? "bg-background text-foreground shadow-sm"
                             : "text-muted-foreground hover:bg-background/60 hover:text-foreground",
-                          m.highlight && "border border-primary/30",
+                          m.highlight && !isActive && "ring-1 ring-primary/20",
                         )}
                         aria-current={isActive ? "true" : undefined}
                       >
                         <span
                           aria-hidden="true"
                           className={cn(
-                            "grid h-7 w-7 shrink-0 place-items-center rounded-md",
+                            "grid h-6 w-6 shrink-0 place-items-center rounded-md",
                             m.highlight
                               ? "bg-gradient-primary text-primary-foreground"
-                              : "bg-primary/10 text-primary",
+                              : isActive
+                                ? "bg-primary/15 text-primary"
+                                : "bg-primary/10 text-primary",
                           )}
                         >
-                          <Icon className="h-3.5 w-3.5" />
+                          <Icon className="h-3 w-3" />
                         </span>
-                        <span className="flex-1 truncate font-medium">{m.label}</span>
-                        <ChevronRight className="h-3.5 w-3.5 opacity-50" />
+                        <span className="flex-1 truncate font-medium text-xs">{m.label}</span>
+                        <span className="text-[10px] tabular-nums text-muted-foreground/70">
+                          {count}
+                        </span>
                       </button>
                     </li>
                   );
                 })}
-                <li className="mt-2 pt-2 border-t border-border/60">
+                <li className="mt-auto pt-2 border-t border-border/60">
                   <NavigationMenuLink asChild>
                     <Link
                       to="/empresas"
-                      className="block rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-background/60"
+                      className="flex items-center justify-between rounded-md px-2 py-1.5 text-[11px] text-muted-foreground hover:text-foreground hover:bg-background/60"
                     >
-                      Ver visão geral →
+                      Visão geral
+                      <ChevronRight className="h-3 w-3" />
                     </Link>
                   </NavigationMenuLink>
                 </li>
