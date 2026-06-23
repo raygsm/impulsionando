@@ -45,6 +45,7 @@ import { Route as CatalogoRouteImport } from './routes/catalogo'
 import { Route as CanalOficialRouteImport } from './routes/canal-oficial'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/app'
+import { Route as AbrirTicketRouteImport } from './routes/abrir-ticket'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TrabalheConoscoIndexRouteImport } from './routes/trabalhe-conosco.index'
@@ -846,6 +847,11 @@ const AuthRoute = AuthRouteImport.update({
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AbrirTicketRoute = AbrirTicketRouteImport.update({
+  id: '/abrir-ticket',
+  path: '/abrir-ticket',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
@@ -4383,6 +4389,7 @@ const AuthenticatedCoreClienteIdModuloSlugConfigurarRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/abrir-ticket': typeof AbrirTicketRoute
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
   '/canal-oficial': typeof CanalOficialRoute
@@ -5042,6 +5049,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/abrir-ticket': typeof AbrirTicketRoute
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
   '/canal-oficial': typeof CanalOficialRoute
@@ -5691,6 +5699,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/abrir-ticket': typeof AbrirTicketRoute
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
   '/canal-oficial': typeof CanalOficialRoute
@@ -6352,6 +6361,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/abrir-ticket'
     | '/app'
     | '/auth'
     | '/canal-oficial'
@@ -7011,6 +7021,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/abrir-ticket'
     | '/app'
     | '/auth'
     | '/canal-oficial'
@@ -7659,6 +7670,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/abrir-ticket'
     | '/app'
     | '/auth'
     | '/canal-oficial'
@@ -8320,6 +8332,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AbrirTicketRoute: typeof AbrirTicketRoute
   AppRoute: typeof AppRoute
   AuthRoute: typeof AuthRoute
   CanalOficialRoute: typeof CanalOficialRoute
@@ -8743,6 +8756,13 @@ declare module '@tanstack/react-router' {
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/abrir-ticket': {
+      id: '/abrir-ticket'
+      path: '/abrir-ticket'
+      fullPath: '/abrir-ticket'
+      preLoaderRoute: typeof AbrirTicketRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -14717,6 +14737,7 @@ const ApiPublicHealthRouteWithChildren = ApiPublicHealthRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AbrirTicketRoute: AbrirTicketRoute,
   AppRoute: AppRoute,
   AuthRoute: AuthRoute,
   CanalOficialRoute: CanalOficialRoute,

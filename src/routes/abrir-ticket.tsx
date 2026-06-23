@@ -155,7 +155,7 @@ function SuportePage() {
   );
 }
 
-export const Route = createFileRoute("/suporte")({
+export const Route = createFileRoute("/abrir-ticket")({
   head: () => ({
     meta: [
       { title: "Suporte | Impulsionando" },
