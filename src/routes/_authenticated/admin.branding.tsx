@@ -94,11 +94,13 @@ function BrandingPage() {
                 <TabsTrigger value="emails">E-mails do time</TabsTrigger>
                 <TabsTrigger value="domain">Domínio próprio</TabsTrigger>
                 <TabsTrigger value="preview">Pré-visualização</TabsTrigger>
+                <TabsTrigger value="versions">Versões</TabsTrigger>
               </TabsList>
               <TabsContent value="identity" className="mt-4"><IdentityTab companyId={selected} /></TabsContent>
               <TabsContent value="emails" className="mt-4"><EmailAliasesTab companyId={selected} /></TabsContent>
               <TabsContent value="domain" className="mt-4"><DomainTab companyId={selected} /></TabsContent>
               <TabsContent value="preview" className="mt-4"><BrandingPreviewTab companyId={selected} /></TabsContent>
+              <TabsContent value="versions" className="mt-4"><BrandingVersionsPanel companyId={selected} /></TabsContent>
             </Tabs>
           )}
         </>
