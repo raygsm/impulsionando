@@ -556,6 +556,7 @@ import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/em
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as DemoRestauranteTenantQrRouteImport } from './routes/demo.restaurante.$tenant.$qr'
 import { Route as ApiPublicWhatsappSendRouteImport } from './routes/api/public/whatsapp/send'
+import { Route as ApiPublicWebhooksN8nCallbackRouteImport } from './routes/api/public/webhooks/n8n-callback'
 import { Route as ApiPublicSupportCreateTicketRouteImport } from './routes/api/public/support/create-ticket'
 import { Route as ApiPublicRiomedEventsRouteImport } from './routes/api/public/riomed/events'
 import { Route as ApiPublicRealestateSavedSearchRouteImport } from './routes/api/public/realestate/saved-search'
@@ -3726,6 +3727,12 @@ const ApiPublicWhatsappSendRoute = ApiPublicWhatsappSendRouteImport.update({
   path: '/api/public/whatsapp/send',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicWebhooksN8nCallbackRoute =
+  ApiPublicWebhooksN8nCallbackRouteImport.update({
+    id: '/api/public/webhooks/n8n-callback',
+    path: '/api/public/webhooks/n8n-callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicSupportCreateTicketRoute =
   ApiPublicSupportCreateTicketRouteImport.update({
     id: '/api/public/support/create-ticket',
@@ -5026,6 +5033,7 @@ export interface FileRoutesByFullPath {
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
   '/api/public/riomed/events': typeof ApiPublicRiomedEventsRoute
   '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
+  '/api/public/webhooks/n8n-callback': typeof ApiPublicWebhooksN8nCallbackRoute
   '/api/public/whatsapp/send': typeof ApiPublicWhatsappSendRoute
   '/demo/restaurante/$tenant/$qr': typeof DemoRestauranteTenantQrRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -5679,6 +5687,7 @@ export interface FileRoutesByTo {
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
   '/api/public/riomed/events': typeof ApiPublicRiomedEventsRoute
   '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
+  '/api/public/webhooks/n8n-callback': typeof ApiPublicWebhooksN8nCallbackRoute
   '/api/public/whatsapp/send': typeof ApiPublicWhatsappSendRoute
   '/demo/restaurante/$tenant/$qr': typeof DemoRestauranteTenantQrRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -6346,6 +6355,7 @@ export interface FileRoutesById {
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
   '/api/public/riomed/events': typeof ApiPublicRiomedEventsRoute
   '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
+  '/api/public/webhooks/n8n-callback': typeof ApiPublicWebhooksN8nCallbackRoute
   '/api/public/whatsapp/send': typeof ApiPublicWhatsappSendRoute
   '/demo/restaurante/$tenant/$qr': typeof DemoRestauranteTenantQrRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -7013,6 +7023,7 @@ export interface FileRouteTypes {
     | '/api/public/realestate/saved-search'
     | '/api/public/riomed/events'
     | '/api/public/support/create-ticket'
+    | '/api/public/webhooks/n8n-callback'
     | '/api/public/whatsapp/send'
     | '/demo/restaurante/$tenant/$qr'
     | '/lovable/email/auth/preview'
@@ -7666,6 +7677,7 @@ export interface FileRouteTypes {
     | '/api/public/realestate/saved-search'
     | '/api/public/riomed/events'
     | '/api/public/support/create-ticket'
+    | '/api/public/webhooks/n8n-callback'
     | '/api/public/whatsapp/send'
     | '/demo/restaurante/$tenant/$qr'
     | '/lovable/email/auth/preview'
@@ -8332,6 +8344,7 @@ export interface FileRouteTypes {
     | '/api/public/realestate/saved-search'
     | '/api/public/riomed/events'
     | '/api/public/support/create-ticket'
+    | '/api/public/webhooks/n8n-callback'
     | '/api/public/whatsapp/send'
     | '/demo/restaurante/$tenant/$qr'
     | '/lovable/email/auth/preview'
@@ -8552,6 +8565,7 @@ export interface RootRouteChildren {
   ApiPublicRealestateSavedSearchRoute: typeof ApiPublicRealestateSavedSearchRoute
   ApiPublicRiomedEventsRoute: typeof ApiPublicRiomedEventsRoute
   ApiPublicSupportCreateTicketRoute: typeof ApiPublicSupportCreateTicketRoute
+  ApiPublicWebhooksN8nCallbackRoute: typeof ApiPublicWebhooksN8nCallbackRoute
   ApiPublicWhatsappSendRoute: typeof ApiPublicWhatsappSendRoute
   DemoRestauranteTenantQrRoute: typeof DemoRestauranteTenantQrRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -12399,6 +12413,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWhatsappSendRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/webhooks/n8n-callback': {
+      id: '/api/public/webhooks/n8n-callback'
+      path: '/api/public/webhooks/n8n-callback'
+      fullPath: '/api/public/webhooks/n8n-callback'
+      preLoaderRoute: typeof ApiPublicWebhooksN8nCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/support/create-ticket': {
       id: '/api/public/support/create-ticket'
       path: '/api/public/support/create-ticket'
@@ -15005,6 +15026,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicRealestateSavedSearchRoute: ApiPublicRealestateSavedSearchRoute,
   ApiPublicRiomedEventsRoute: ApiPublicRiomedEventsRoute,
   ApiPublicSupportCreateTicketRoute: ApiPublicSupportCreateTicketRoute,
+  ApiPublicWebhooksN8nCallbackRoute: ApiPublicWebhooksN8nCallbackRoute,
   ApiPublicWhatsappSendRoute: ApiPublicWhatsappSendRoute,
   DemoRestauranteTenantQrRoute: DemoRestauranteTenantQrRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
