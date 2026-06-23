@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 
-const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20automatizar%20minha%20empresa%20com%20a%20Impulsionando.";
+const WHATSAPP_URL = "https://wa.me/5521972631063?text=Ol%C3%A1%2C%20quero%20automatizar%20minha%20empresa%20com%20a%20Impulsionando.";
 
 const APLICACOES = [
   { icon: HeartPulse, title: "Saúde", desc: "Clínicas, consultórios e terapias — agenda, prontuário, lembretes e área do paciente." },

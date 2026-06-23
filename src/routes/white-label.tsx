@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 
-const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20uma%20apresenta%C3%A7%C3%A3o%20da%20plataforma%20White%20Label.";
+const WHATSAPP_URL = "https://wa.me/5521972631063?text=Ol%C3%A1%2C%20quero%20uma%20apresenta%C3%A7%C3%A3o%20da%20plataforma%20White%20Label.";
 
 const RECEIVES = [
   { icon: Layers, title: "Plataforma pronta", desc: "Stack completa com agenda, CRM, financeiro, WhatsApp, PDV, BI e área do cliente." },

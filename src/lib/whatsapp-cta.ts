@@ -11,8 +11,8 @@
 import { trackEvent } from "@/lib/analytics";
 
 export const OFFICIAL_WHATSAPP_PHONE_DISPLAY = "(21) 99307-5000";
-export const OFFICIAL_WHATSAPP_PHONE_E164 = "+5521993075000";
-export const OFFICIAL_WHATSAPP_DIGITS = "5521993075000";
+export const OFFICIAL_WHATSAPP_PHONE_E164 = "+5521972631063";
+export const OFFICIAL_WHATSAPP_DIGITS = "5521972631063";
 export const OFFICIAL_EMAIL_DOMAIN = "impulsionando.com.br";
 
 export type WhatsAppCTAVariant = "A" | "B" | "control" | string;

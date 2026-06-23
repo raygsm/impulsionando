@@ -18,7 +18,7 @@ export const Route = createFileRoute('/modulos/suporte-inteligente')({
   component: SuporteIntelLanding,
 })
 
-const WHATSAPP = 'https://wa.me/5521993075000?text=Quero%20contratar%20o%20m%C3%B3dulo%20Suporte%20Inteligente'
+const WHATSAPP = 'https://wa.me/5521972631063?text=Quero%20contratar%20o%20m%C3%B3dulo%20Suporte%20Inteligente'
 
 function SuporteIntelLanding() {
   return (

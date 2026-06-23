@@ -32,7 +32,7 @@ const CHANNELS: Channel[] = [
     title: "WhatsApp do Impulsionito",
     description: "Atendimento humano + IA, das 8h às 22h (BRT). Resposta em até 5 min em horário comercial.",
     cta: "Falar agora",
-    href: "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20preciso%20de%20suporte%20Impulsionando.",
+    href: "https://wa.me/5521972631063?text=Ol%C3%A1%2C%20preciso%20de%20suporte%20Impulsionando.",
     external: true,
   },
   {
