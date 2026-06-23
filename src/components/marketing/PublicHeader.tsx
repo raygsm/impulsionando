@@ -362,5 +362,3 @@ export function PublicHeader() {
   );
 }
 
-// Sparkles/Store/LifeBuoy retidos para futuras variações; evita falso "unused" no tree-shake.
-void Sparkles; void Store; void LifeBuoy;
