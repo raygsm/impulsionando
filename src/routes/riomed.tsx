@@ -1,10 +1,12 @@
-import { createFileRoute, Outlet, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { FloatingWhatsApp } from "@/components/riomed/FloatingWhatsApp";
 import { getRiomedSiteSettings } from "@/lib/riomed-public.functions";
+import { getCart } from "@/lib/riomed-portal.functions";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   ShoppingCart,
   Headphones,
@@ -21,6 +23,7 @@ import {
   Activity,
   Syringe,
   Bed,
+  Trash2,
 } from "lucide-react";
 
 export const Route = createFileRoute("/riomed")({
