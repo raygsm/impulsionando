@@ -1,0 +1,97 @@
+{
+  "name": "RioMed 03 — Cotação Fria (reativação)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "riomed-quote-cold",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook · quote.cold",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 300],
+      "webhookId": "riomed-quote-cold"
+    },
+    {
+      "parameters": {
+        "url": "https://impulsionando.com.br/api/public/riomed/quotes/cold",
+        "options": { "timeout": 15000 },
+        "sendQuery": true,
+        "queryParameters": { "parameters": [{ "name": "hours", "value": "48" }] }
+      },
+      "name": "Buscar cotações sem resposta 48h",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": { "fieldToSplitOut": "quotes", "options": {} },
+      "name": "Split por cotação",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "model": "google/gemini-2.5-flash",
+        "messages": {
+          "values": [
+            { "role": "system", "content": "Você é um SDR técnico da RioMed (equipamentos hospitalares Bolívia). Gere 1 mensagem curta de WhatsApp em espanhol, no máximo 3 linhas, mencionando o produto cotado, valor e oferecendo agendar demonstração. Tom consultivo, não agressivo." },
+            { "role": "user", "content": "Cotação {{$json.id}} para {{$json.customer_name}} ({{$json.product_title}}, BOB {{$json.total}}). Gere a mensagem." }
+          ]
+        }
+      },
+      "name": "IA · gerar mensagem",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1,
+      "position": [920, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://impulsionando.com.br/api/public/whatsapp/send",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "to", "value": "={{$json.customer_phone}}" },
+            { "name": "message", "value": "={{$node['IA · gerar mensagem'].json.choices[0].message.content}}" },
+            { "name": "tag", "value": "riomed.quote.cold" }
+          ]
+        }
+      },
+      "name": "Enviar WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1160, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://impulsionando.com.br/api/public/riomed/events",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "source", "value": "automation" },
+            { "name": "event_code", "value": "quote.cold.touch" },
+            { "name": "level", "value": "info" },
+            { "name": "ref_id", "value": "={{$json.id}}" }
+          ]
+        }
+      },
+      "name": "Registrar evento",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1400, 300]
+    }
+  ],
+  "connections": {
+    "Webhook · quote.cold": { "main": [[{ "node": "Buscar cotações sem resposta 48h", "type": "main", "index": 0 }]] },
+    "Buscar cotações sem resposta 48h": { "main": [[{ "node": "Split por cotação", "type": "main", "index": 0 }]] },
+    "Split por cotação": { "main": [[{ "node": "IA · gerar mensagem", "type": "main", "index": 0 }]] },
+    "IA · gerar mensagem": { "main": [[{ "node": "Enviar WhatsApp", "type": "main", "index": 0 }]] },
+    "Enviar WhatsApp": { "main": [[{ "node": "Registrar evento", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }
+}

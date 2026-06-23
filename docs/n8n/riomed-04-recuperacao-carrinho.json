@@ -1,0 +1,96 @@
+{
+  "name": "RioMed 04 — Recuperação de Carrinho B2B",
+  "nodes": [
+    {
+      "parameters": { "rule": { "interval": [{ "field": "hours", "hoursInterval": 2 }] } },
+      "name": "A cada 2h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://impulsionando.com.br/api/public/riomed/carts/abandoned",
+        "options": { "timeout": 15000 },
+        "sendQuery": true,
+        "queryParameters": { "parameters": [{ "name": "min_value", "value": "500" }, { "name": "hours", "value": "4" }] }
+      },
+      "name": "Carrinhos B2B abandonados >4h",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [420, 300]
+    },
+    { "parameters": { "fieldToSplitOut": "carts", "options": {} }, "name": "Split", "type": "n8n-nodes-base.splitOut", "typeVersion": 1, "position": [640, 300] },
+    {
+      "parameters": {
+        "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" }, "conditions": [{ "leftValue": "={{$json.total}}", "rightValue": 5000, "operator": { "type": "number", "operation": "gte" } }] }
+      },
+      "name": "Valor alto? (>5000 BOB)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [860, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://impulsionando.com.br/api/public/whatsapp/send",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "to", "value": "={{$json.seller_phone}}" },
+            { "name": "message", "value": "🚨 Carrinho B2B alto valor abandonado\\nCliente: {{$json.customer_name}}\\nTotal: BOB {{$json.total}}\\nItens: {{$json.items_count}}\\nLigar agora: {{$json.customer_phone}}" }
+          ]
+        }
+      },
+      "name": "WhatsApp ao VENDEDOR",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1100, 200]
+    },
+    {
+      "parameters": {
+        "url": "https://impulsionando.com.br/api/public/email/send",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "to", "value": "={{$json.customer_email}}" },
+            { "name": "subject", "value": "Tu carrito en RioMed te espera" },
+            { "name": "template", "value": "riomed_cart_recovery" },
+            { "name": "vars", "value": "={{ { \"name\": $json.customer_name, \"total\": $json.total, \"checkout_url\": $json.checkout_url, \"items\": $json.items } }}" }
+          ]
+        }
+      },
+      "name": "E-mail ao CLIENTE",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1100, 400]
+    },
+    {
+      "parameters": {
+        "url": "https://impulsionando.com.br/api/public/riomed/events",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": { "parameters": [
+          { "name": "source", "value": "automation" },
+          { "name": "event_code", "value": "cart.recovery.sent" },
+          { "name": "level", "value": "info" },
+          { "name": "ref_id", "value": "={{$json.id}}" }
+        ] }
+      },
+      "name": "Evento",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1340, 300]
+    }
+  ],
+  "connections": {
+    "A cada 2h": { "main": [[{ "node": "Carrinhos B2B abandonados >4h", "type": "main", "index": 0 }]] },
+    "Carrinhos B2B abandonados >4h": { "main": [[{ "node": "Split", "type": "main", "index": 0 }]] },
+    "Split": { "main": [[{ "node": "Valor alto? (>5000 BOB)", "type": "main", "index": 0 }]] },
+    "Valor alto? (>5000 BOB)": { "main": [[{ "node": "WhatsApp ao VENDEDOR", "type": "main", "index": 0 }], [{ "node": "E-mail ao CLIENTE", "type": "main", "index": 0 }]] },
+    "WhatsApp ao VENDEDOR": { "main": [[{ "node": "Evento", "type": "main", "index": 0 }]] },
+    "E-mail ao CLIENTE": { "main": [[{ "node": "Evento", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }
+}
