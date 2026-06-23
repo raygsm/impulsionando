@@ -23929,6 +23929,411 @@ export type Database = {
           },
         ]
       }
+      riomed_pos_movements: {
+        Row: {
+          amount: number
+          company_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          kind: string
+          reason: string | null
+          session_id: string
+        }
+        Insert: {
+          amount: number
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind: string
+          reason?: string | null
+          session_id: string
+        }
+        Update: {
+          amount?: number
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          reason?: string | null
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_pos_movements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_pos_movements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_pos_movements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_pos_movements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_pos_movements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_pos_movements_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_pos_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      riomed_pos_sale_items: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          product_id: string | null
+          qty: number
+          sale_id: string
+          total: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          product_id?: string | null
+          qty?: number
+          sale_id: string
+          total: number
+          unit_price: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          product_id?: string | null
+          qty?: number
+          sale_id?: string
+          total?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_pos_sale_items_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_pos_sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      riomed_pos_sales: {
+        Row: {
+          change_amount: number
+          company_id: string
+          created_at: string
+          currency: string
+          customer_doc: string | null
+          customer_name: string | null
+          discount: number
+          fiscal_invoice_id: string | null
+          fiscal_number: string | null
+          id: string
+          notes: string | null
+          paid_amount: number
+          payment_method: string
+          seller_id: string | null
+          session_id: string
+          status: string
+          subtotal: number
+          terminal_id: string
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          change_amount?: number
+          company_id: string
+          created_at?: string
+          currency?: string
+          customer_doc?: string | null
+          customer_name?: string | null
+          discount?: number
+          fiscal_invoice_id?: string | null
+          fiscal_number?: string | null
+          id?: string
+          notes?: string | null
+          paid_amount?: number
+          payment_method?: string
+          seller_id?: string | null
+          session_id: string
+          status?: string
+          subtotal?: number
+          terminal_id: string
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          change_amount?: number
+          company_id?: string
+          created_at?: string
+          currency?: string
+          customer_doc?: string | null
+          customer_name?: string | null
+          discount?: number
+          fiscal_invoice_id?: string | null
+          fiscal_number?: string | null
+          id?: string
+          notes?: string | null
+          paid_amount?: number
+          payment_method?: string
+          seller_id?: string | null
+          session_id?: string
+          status?: string
+          subtotal?: number
+          terminal_id?: string
+          total?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_pos_sales_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_pos_sales_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_pos_sales_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_pos_sales_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_pos_sales_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_pos_sales_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_pos_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_pos_sales_terminal_id_fkey"
+            columns: ["terminal_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_pos_terminals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      riomed_pos_sessions: {
+        Row: {
+          closed_at: string | null
+          closed_by: string | null
+          closing_amount: number | null
+          company_id: string
+          created_at: string
+          difference: number | null
+          expected_amount: number | null
+          id: string
+          notes: string | null
+          opened_at: string
+          opened_by: string
+          opening_amount: number
+          status: string
+          terminal_id: string
+          updated_at: string
+        }
+        Insert: {
+          closed_at?: string | null
+          closed_by?: string | null
+          closing_amount?: number | null
+          company_id: string
+          created_at?: string
+          difference?: number | null
+          expected_amount?: number | null
+          id?: string
+          notes?: string | null
+          opened_at?: string
+          opened_by: string
+          opening_amount?: number
+          status?: string
+          terminal_id: string
+          updated_at?: string
+        }
+        Update: {
+          closed_at?: string | null
+          closed_by?: string | null
+          closing_amount?: number | null
+          company_id?: string
+          created_at?: string
+          difference?: number | null
+          expected_amount?: number | null
+          id?: string
+          notes?: string | null
+          opened_at?: string
+          opened_by?: string
+          opening_amount?: number
+          status?: string
+          terminal_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_pos_sessions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_pos_sessions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_pos_sessions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_pos_sessions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_pos_sessions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_pos_sessions_terminal_id_fkey"
+            columns: ["terminal_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_pos_terminals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      riomed_pos_terminals: {
+        Row: {
+          active: boolean
+          code: string
+          company_id: string
+          created_at: string
+          currency: string
+          id: string
+          location: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          company_id: string
+          created_at?: string
+          currency?: string
+          id?: string
+          location?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          company_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          location?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_pos_terminals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_pos_terminals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_pos_terminals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_pos_terminals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "riomed_pos_terminals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       riomed_price_lists: {
         Row: {
           audience: string
