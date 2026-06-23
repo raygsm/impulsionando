@@ -10,7 +10,7 @@ import { Card } from "@/components/ui/card";
 import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 
-const WHATSAPP_URL = "https://wa.me/5521972631063?text=Ol%C3%A1%2C%20quero%20conhecer%20as%20solu%C3%A7%C3%B5es%20da%20Impulsionando.";
+const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20conhecer%20as%20solu%C3%A7%C3%B5es%20da%20Impulsionando.";
 
 // Reusable placeholder for routes that still want the simple coming-soon shell.
 function ComingSoon({ title, description }: { title: string; description: string }) {

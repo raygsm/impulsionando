@@ -22,7 +22,7 @@ import {
 import type { ComponentType, ReactNode } from "react";
 
 const WHATSAPP_URL =
-  "https://wa.me/5521972631063?text=Ol%C3%A1%2C%20quero%20contratar%20o%20m%C3%B3dulo%20";
+  "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20contratar%20o%20m%C3%B3dulo%20";
 
 export interface ModuleDetail {
   id: string;

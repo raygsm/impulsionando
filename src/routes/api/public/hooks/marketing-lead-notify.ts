@@ -11,7 +11,7 @@ const SENDER_DOMAIN = 'notify.www.impulsionando.com.br'
 const FROM_DOMAIN = 'www.impulsionando.com.br'
 
 // Equipe interna que recebe alertas de novo lead.
-const ALERT_WHATSAPPS = ['5521995077375', '5521972631063']
+const ALERT_WHATSAPPS = ['5521995077375', '5521993075000']
 
 const BodySchema = z.object({
   leadId: z.string().uuid(),

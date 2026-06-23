@@ -153,7 +153,7 @@ export const Route = createFileRoute('/api/public/demo/feira-lead')({
         const demoUrl = input.niche
           ? `https://impulsionando.com.br/demo/nicho/${input.niche}`
           : 'https://impulsionando.com.br/demo'
-        const whatsappUrl = 'https://wa.me/5521972631063'
+        const whatsappUrl = 'https://wa.me/5521993075000'
 
         // 3) e-mail interno para o time comercial
         await queueEmail('marketing-lead-new', 'sac@impulsionando.com.br', {
