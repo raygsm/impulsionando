@@ -3,13 +3,15 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 async function resolveCompanyId(supabase: any, userId: string): Promise<string> {
+  // Sempre resolve o tenant RioMed via core_tenant_identity (master Impulsionando
+  // pode ter user_profiles.company_id != RioMed).
+  const { data: tenant } = await supabase
+    .from("core_tenant_identity").select("company_id").eq("subdomain", "riomed").maybeSingle();
+  if (tenant?.company_id) return tenant.company_id;
   const { data: profile } = await supabase
     .from("user_profiles").select("company_id").eq("user_id", userId).maybeSingle();
   if (profile?.company_id) return profile.company_id;
-  const { data: tenant } = await supabase
-    .from("core_tenant_identity").select("company_id").eq("subdomain", "riomed").maybeSingle();
-  if (!tenant?.company_id) throw new Error("Empresa não identificada.");
-  return tenant.company_id;
+  throw new Error("Empresa RioMed não identificada.");
 }
 
 async function nextCampaignCode(supabase: any, companyId: string): Promise<string> {
