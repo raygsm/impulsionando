@@ -18,10 +18,14 @@ export function CheckoutShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen flex flex-col bg-background">
       <header className="border-b border-border bg-card/60 backdrop-blur sticky top-0 z-30">
         <div className="container mx-auto max-w-5xl flex items-center justify-between px-4 py-3">
-          <Link to="/" className="flex items-center gap-2 font-semibold">
+          <a
+            href="https://impulsionando.com.br"
+            aria-label="Ir para a home Impulsionando"
+            className="flex items-center gap-2 font-semibold hover:opacity-90"
+          >
             <Sparkles className="w-5 h-5 text-primary" />
             <span>Impulsionando</span>
-          </Link>
+          </a>
           <nav className="hidden md:flex items-center gap-1 text-sm">
             <Link
               to="/minha-assinatura"
