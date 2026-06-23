@@ -674,8 +674,9 @@ export function PublicHeader() {
                 ) : null}
 
                 {NAV.filter((n) => n.to !== "/").map((it) => (
-                  <NavLink key={it.to} {...it} onClick={() => setOpen(false)} />
+                  <NavLink key={`${it.to}-${it.label}`} {...it} onClick={() => setOpen(false)} />
                 ))}
+
 
                 <div className="flex flex-col gap-2 pt-4 mt-3 border-t border-border">
                   <Button asChild className="gap-2 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-violet-500 text-white">
