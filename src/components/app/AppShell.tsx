@@ -30,6 +30,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { isSuspended: trialSuspended } = useMyTrial();
   const { isSuspended: subSuspended, isActive: subActive } = useSubscription();
   const { hasModule, bypass, isLoading: modulesLoading } = useCompanyModules();
+  const { audience } = useAudience();
+  const { data: hasActiveMembership } = useConsumerHasActiveMembership();
   useAppearance();
 
   useEffect(() => {
