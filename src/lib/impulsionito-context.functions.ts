@@ -46,12 +46,12 @@ export const getImpulsionitoTenantContext = createServerFn({ method: "POST" })
       supabase.from("companies").select("name, niche_code").eq("id", companyId).maybeSingle(),
       supabase.from("customers").select("id", { count: "exact", head: true }).eq("company_id", companyId),
       supabase.from("inv_products").select("id", { count: "exact", head: true }).eq("company_id", companyId),
-      supabase.from("agenda_appointments").select("id", { count: "exact", head: true }).eq("company_id", companyId).gte("start_at", since30),
-      supabase.from("support_tickets").select("id", { count: "exact", head: true }).eq("company_id", companyId).in("status", ["open", "pending", "in_progress"]),
+      supabase.from("agenda_appointments").select("id", { count: "exact", head: true }).eq("company_id", companyId).gte("starts_at", since30),
+      supabase.from("support_tickets").select("id", { count: "exact", head: true }).eq("company_id", companyId).in("status", ["new", "received", "waiting_customer", "waiting_core", "in_review", "in_development", "reopened"]),
       supabase.from("evt_tickets").select("id", { count: "exact", head: true }).eq("company_id", companyId).in("status", ["sold", "paid", "checked_in"]),
-      supabase.from("companies_vitrine_public").select("company_id", { count: "exact", head: true }).eq("company_id", companyId),
+      supabase.from("companies_vitrine_public").select("id", { count: "exact", head: true }).eq("id", companyId),
       supabase.from("customers").select("id, name, created_at").eq("company_id", companyId).order("created_at", { ascending: false }).limit(5),
-      supabase.from("agenda_appointments").select("id, start_at, status").eq("company_id", companyId).order("start_at", { ascending: false }).limit(5),
+      supabase.from("agenda_appointments").select("id, starts_at, status").eq("company_id", companyId).order("starts_at", { ascending: false }).limit(5),
       supabase.from("support_tickets").select("id, subject, status, created_at").eq("company_id", companyId).order("created_at", { ascending: false }).limit(5),
     ]);
 
@@ -69,9 +69,10 @@ export const getImpulsionitoTenantContext = createServerFn({ method: "POST" })
         vitrineActive: vitrineCount.count ?? 0,
       },
       recent: {
-        customers: (recentCust.data ?? []) as ImpulsionitoTenantContext["recent"]["customers"],
-        appointments: (recentAppt.data ?? []) as ImpulsionitoTenantContext["recent"]["appointments"],
-        tickets: (recentTick.data ?? []) as ImpulsionitoTenantContext["recent"]["tickets"],
+        customers: ((recentCust.data ?? []) as unknown) as ImpulsionitoTenantContext["recent"]["customers"],
+        appointments: (((recentAppt.data ?? []) as unknown) as Array<{ id: string; starts_at: string | null; status: string | null }>)
+          .map((a) => ({ id: a.id, start_at: a.starts_at, status: a.status })),
+        tickets: ((recentTick.data ?? []) as unknown) as ImpulsionitoTenantContext["recent"]["tickets"],
       },
     };
   });
