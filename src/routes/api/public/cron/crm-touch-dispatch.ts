@@ -24,25 +24,27 @@ export const Route = createFileRoute('/api/public/cron/crm-touch-dispatch')({
         let failed = 0;
         for (const t of due ?? []) {
           try {
+            const payload: any = t.payload ?? {};
             if (t.channel === 'inapp' || t.channel === 'task') {
               if (t.assignee_user_id) {
                 await sb.from('notifications').insert({
                   user_id: t.assignee_user_id,
                   company_id: t.company_id,
-                  title: t.payload?.template || 'Tarefa de relacionamento',
-                  body: `Toque CRM: ${t.rule_code}`,
+                  title: payload.template || 'Tarefa de relacionamento',
+                  message: `Toque CRM: ${t.rule_code}`,
                   category: 'crm',
-                  link: t.quote_id ? `/admin/pedidos/${t.quote_id}` : t.lead_id ? `/admin/crm/leads/${t.lead_id}` : null,
-                });
+                  action_url: t.quote_id ? `/admin/pedidos/${t.quote_id}` : t.lead_id ? `/admin/crm/leads/${t.lead_id}` : null,
+                } as any);
               }
             } else {
               await sb.from('message_outbox').insert({
                 company_id: t.company_id,
                 channel: t.channel,
-                template_code: t.payload?.template ?? t.rule_code,
-                payload: t.payload ?? {},
+                event_code: payload.template ?? t.rule_code ?? 'crm_touch',
+                body: `Toque CRM: ${t.rule_code}`,
+                payload: payload,
                 status: 'pending',
-              });
+              } as any);
             }
             await sb.from('crm_touch_queue').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', t.id);
             processed++;
