@@ -167,3 +167,64 @@ export const listClientsOverview = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false });
     return { companies: companies ?? [] };
   });
+
+export const listChecklistOverview = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" as never });
+    if (!isAdmin) throw new Error("Forbidden");
+
+    const [companiesRes, checklistRes] = await Promise.all([
+      supabase
+        .from("companies")
+        .select("id, name, slug, is_active, created_at, niche_code")
+        .eq("is_master", false)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("onboarding_checklist")
+        .select("company_id, item_key, status, completed_at"),
+    ]);
+
+    const byCompany = new Map<string, { done: number; skipped: number; pending: number; total: number; lastCompleted: string | null }>();
+    for (const c of checklistRes.data ?? []) {
+      const cur = byCompany.get(c.company_id) ?? { done: 0, skipped: 0, pending: 0, total: 0, lastCompleted: null };
+      cur.total += 1;
+      if (c.status === "done") cur.done += 1;
+      else if (c.status === "skipped") cur.skipped += 1;
+      else cur.pending += 1;
+      if (c.completed_at && (!cur.lastCompleted || c.completed_at > cur.lastCompleted)) cur.lastCompleted = c.completed_at;
+      byCompany.set(c.company_id, cur);
+    }
+
+    const rows = (companiesRes.data ?? []).map((co: any) => {
+      const agg = byCompany.get(co.id) ?? { done: 0, skipped: 0, pending: 0, total: 0, lastCompleted: null };
+      const expected = 8;
+      const total = Math.max(agg.total, expected);
+      const pct = total === 0 ? 0 : Math.round((agg.done / total) * 100);
+      return {
+        company_id: co.id,
+        company_name: co.name,
+        slug: co.slug,
+        is_active: co.is_active,
+        niche_code: co.niche_code,
+        created_at: co.created_at,
+        done: agg.done,
+        skipped: agg.skipped,
+        pending: total - agg.done - agg.skipped,
+        total,
+        pct,
+        last_completed_at: agg.lastCompleted,
+      };
+    });
+
+    const summary = {
+      tenants: rows.length,
+      completed: rows.filter((r) => r.pct === 100).length,
+      in_progress: rows.filter((r) => r.pct > 0 && r.pct < 100).length,
+      not_started: rows.filter((r) => r.pct === 0).length,
+      avg_pct: rows.length ? Math.round(rows.reduce((s, r) => s + r.pct, 0) / rows.length) : 0,
+    };
+
+    return { rows, summary };
+  });

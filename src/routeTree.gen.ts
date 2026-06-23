@@ -455,6 +455,7 @@ import { Route as AuthenticatedAdminPayoutsMonetizationHealthRouteImport } from 
 import { Route as AuthenticatedAdminOperacoesAutomacoesRouteImport } from './routes/_authenticated/admin.operacoes-automacoes'
 import { Route as AuthenticatedAdminOndaYRouteImport } from './routes/_authenticated/admin.onda-y'
 import { Route as AuthenticatedAdminOnboardingProvisioningHealthRouteImport } from './routes/_authenticated/admin.onboarding-provisioning-health'
+import { Route as AuthenticatedAdminOnboardingChecklistRouteImport } from './routes/_authenticated/admin.onboarding-checklist'
 import { Route as AuthenticatedAdminNotificationsCockpitRouteImport } from './routes/_authenticated/admin.notifications-cockpit'
 import { Route as AuthenticatedAdminNotificationDeliveryRouteImport } from './routes/_authenticated/admin.notification-delivery'
 import { Route as AuthenticatedAdminNotificationDeliverabilityHealthRouteImport } from './routes/_authenticated/admin.notification-deliverability-health'
@@ -3126,6 +3127,12 @@ const AuthenticatedAdminOnboardingProvisioningHealthRoute =
     path: '/admin/onboarding-provisioning-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminOnboardingChecklistRoute =
+  AuthenticatedAdminOnboardingChecklistRouteImport.update({
+    id: '/admin/onboarding-checklist',
+    path: '/admin/onboarding-checklist',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminNotificationsCockpitRoute =
   AuthenticatedAdminNotificationsCockpitRouteImport.update({
     id: '/admin/notifications-cockpit',
@@ -4694,6 +4701,7 @@ export interface FileRoutesByFullPath {
   '/admin/notification-deliverability-health': typeof AuthenticatedAdminNotificationDeliverabilityHealthRoute
   '/admin/notification-delivery': typeof AuthenticatedAdminNotificationDeliveryRoute
   '/admin/notifications-cockpit': typeof AuthenticatedAdminNotificationsCockpitRoute
+  '/admin/onboarding-checklist': typeof AuthenticatedAdminOnboardingChecklistRoute
   '/admin/onboarding-provisioning-health': typeof AuthenticatedAdminOnboardingProvisioningHealthRoute
   '/admin/onda-y': typeof AuthenticatedAdminOndaYRouteWithChildren
   '/admin/operacoes-automacoes': typeof AuthenticatedAdminOperacoesAutomacoesRoute
@@ -5345,6 +5353,7 @@ export interface FileRoutesByTo {
   '/admin/notification-deliverability-health': typeof AuthenticatedAdminNotificationDeliverabilityHealthRoute
   '/admin/notification-delivery': typeof AuthenticatedAdminNotificationDeliveryRoute
   '/admin/notifications-cockpit': typeof AuthenticatedAdminNotificationsCockpitRoute
+  '/admin/onboarding-checklist': typeof AuthenticatedAdminOnboardingChecklistRoute
   '/admin/onboarding-provisioning-health': typeof AuthenticatedAdminOnboardingProvisioningHealthRoute
   '/admin/onda-y': typeof AuthenticatedAdminOndaYRouteWithChildren
   '/admin/operacoes-automacoes': typeof AuthenticatedAdminOperacoesAutomacoesRoute
@@ -6010,6 +6019,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/notification-deliverability-health': typeof AuthenticatedAdminNotificationDeliverabilityHealthRoute
   '/_authenticated/admin/notification-delivery': typeof AuthenticatedAdminNotificationDeliveryRoute
   '/_authenticated/admin/notifications-cockpit': typeof AuthenticatedAdminNotificationsCockpitRoute
+  '/_authenticated/admin/onboarding-checklist': typeof AuthenticatedAdminOnboardingChecklistRoute
   '/_authenticated/admin/onboarding-provisioning-health': typeof AuthenticatedAdminOnboardingProvisioningHealthRoute
   '/_authenticated/admin/onda-y': typeof AuthenticatedAdminOndaYRouteWithChildren
   '/_authenticated/admin/operacoes-automacoes': typeof AuthenticatedAdminOperacoesAutomacoesRoute
@@ -6675,6 +6685,7 @@ export interface FileRouteTypes {
     | '/admin/notification-deliverability-health'
     | '/admin/notification-delivery'
     | '/admin/notifications-cockpit'
+    | '/admin/onboarding-checklist'
     | '/admin/onboarding-provisioning-health'
     | '/admin/onda-y'
     | '/admin/operacoes-automacoes'
@@ -7326,6 +7337,7 @@ export interface FileRouteTypes {
     | '/admin/notification-deliverability-health'
     | '/admin/notification-delivery'
     | '/admin/notifications-cockpit'
+    | '/admin/onboarding-checklist'
     | '/admin/onboarding-provisioning-health'
     | '/admin/onda-y'
     | '/admin/operacoes-automacoes'
@@ -7990,6 +8002,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/notification-deliverability-health'
     | '/_authenticated/admin/notification-delivery'
     | '/_authenticated/admin/notifications-cockpit'
+    | '/_authenticated/admin/onboarding-checklist'
     | '/_authenticated/admin/onboarding-provisioning-health'
     | '/_authenticated/admin/onda-y'
     | '/_authenticated/admin/operacoes-automacoes'
@@ -11666,6 +11679,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminOnboardingProvisioningHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/onboarding-checklist': {
+      id: '/_authenticated/admin/onboarding-checklist'
+      path: '/admin/onboarding-checklist'
+      fullPath: '/admin/onboarding-checklist'
+      preLoaderRoute: typeof AuthenticatedAdminOnboardingChecklistRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/notifications-cockpit': {
       id: '/_authenticated/admin/notifications-cockpit'
       path: '/admin/notifications-cockpit'
@@ -14104,6 +14124,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminNotificationDeliverabilityHealthRoute: typeof AuthenticatedAdminNotificationDeliverabilityHealthRoute
   AuthenticatedAdminNotificationDeliveryRoute: typeof AuthenticatedAdminNotificationDeliveryRoute
   AuthenticatedAdminNotificationsCockpitRoute: typeof AuthenticatedAdminNotificationsCockpitRoute
+  AuthenticatedAdminOnboardingChecklistRoute: typeof AuthenticatedAdminOnboardingChecklistRoute
   AuthenticatedAdminOnboardingProvisioningHealthRoute: typeof AuthenticatedAdminOnboardingProvisioningHealthRoute
   AuthenticatedAdminOndaYRoute: typeof AuthenticatedAdminOndaYRouteWithChildren
   AuthenticatedAdminOperacoesAutomacoesRoute: typeof AuthenticatedAdminOperacoesAutomacoesRoute
@@ -14408,6 +14429,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminNotificationDeliveryRoute,
   AuthenticatedAdminNotificationsCockpitRoute:
     AuthenticatedAdminNotificationsCockpitRoute,
+  AuthenticatedAdminOnboardingChecklistRoute:
+    AuthenticatedAdminOnboardingChecklistRoute,
   AuthenticatedAdminOnboardingProvisioningHealthRoute:
     AuthenticatedAdminOnboardingProvisioningHealthRoute,
   AuthenticatedAdminOndaYRoute: AuthenticatedAdminOndaYRouteWithChildren,
