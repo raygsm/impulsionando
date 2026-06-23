@@ -130,10 +130,10 @@ export const addLead360Activity = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin.from("crm_activities").insert({
       lead_id: data.leadId,
       company_id: lead.company_id,
-      type: data.type,
+      activity_type: data.type,
       subject: data.subject,
-      payload: data.notes ? { notes: data.notes } : null,
-      occurred_at: new Date().toISOString(),
+      content: data.notes ?? null,
+      done_at: new Date().toISOString(),
       created_by: context.userId,
     });
     if (error) throw error;
