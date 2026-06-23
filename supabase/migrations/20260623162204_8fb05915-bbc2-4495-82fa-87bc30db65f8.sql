@@ -1,0 +1,1 @@
+ALTER VIEW public.riomed_my_warranties SET (security_invoker = on);
