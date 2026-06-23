@@ -53,7 +53,6 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TrabalheConoscoIndexRouteImport } from './routes/trabalhe-conosco.index'
 import { Route as ShowroomIndexRouteImport } from './routes/showroom.index'
-import { Route as RiomedIndexRouteImport } from './routes/riomed.index'
 import { Route as PacienteIndexRouteImport } from './routes/paciente.index'
 import { Route as NichosIndexRouteImport } from './routes/nichos.index'
 import { Route as ModulosIndexRouteImport } from './routes/modulos.index'
@@ -108,10 +107,8 @@ import { Route as RiomedVendedorRouteImport } from './routes/riomed.vendedor'
 import { Route as RiomedTrabalheConoscoRouteImport } from './routes/riomed.trabalhe-conosco'
 import { Route as RiomedSoporteRouteImport } from './routes/riomed.soporte'
 import { Route as RiomedServicioTecnicoRouteImport } from './routes/riomed.servicio-tecnico'
-import { Route as RiomedProductosRouteImport } from './routes/riomed.productos'
 import { Route as RiomedPacientesRouteImport } from './routes/riomed.pacientes'
 import { Route as RiomedHospitalesRouteImport } from './routes/riomed.hospitales'
-import { Route as RiomedDebugRouteImport } from './routes/riomed.debug'
 import { Route as RiomedCotizarRouteImport } from './routes/riomed.cotizar'
 import { Route as RiomedCheckoutRouteImport } from './routes/riomed.checkout'
 import { Route as RiomedCarrinhoRouteImport } from './routes/riomed.carrinho'
@@ -902,11 +899,6 @@ const ShowroomIndexRoute = ShowroomIndexRouteImport.update({
   path: '/showroom/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RiomedIndexRoute = RiomedIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => RiomedRoute,
-} as any)
 const PacienteIndexRoute = PacienteIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -1182,11 +1174,6 @@ const RiomedServicioTecnicoRoute = RiomedServicioTecnicoRouteImport.update({
   path: '/servicio-tecnico',
   getParentRoute: () => RiomedRoute,
 } as any)
-const RiomedProductosRoute = RiomedProductosRouteImport.update({
-  id: '/productos',
-  path: '/productos',
-  getParentRoute: () => RiomedRoute,
-} as any)
 const RiomedPacientesRoute = RiomedPacientesRouteImport.update({
   id: '/pacientes',
   path: '/pacientes',
@@ -1195,11 +1182,6 @@ const RiomedPacientesRoute = RiomedPacientesRouteImport.update({
 const RiomedHospitalesRoute = RiomedHospitalesRouteImport.update({
   id: '/hospitales',
   path: '/hospitales',
-  getParentRoute: () => RiomedRoute,
-} as any)
-const RiomedDebugRoute = RiomedDebugRouteImport.update({
-  id: '/debug',
-  path: '/debug',
   getParentRoute: () => RiomedRoute,
 } as any)
 const RiomedCotizarRoute = RiomedCotizarRouteImport.update({
@@ -4618,10 +4600,8 @@ export interface FileRoutesByFullPath {
   '/riomed/carrinho': typeof RiomedCarrinhoRoute
   '/riomed/checkout': typeof RiomedCheckoutRoute
   '/riomed/cotizar': typeof RiomedCotizarRoute
-  '/riomed/debug': typeof RiomedDebugRoute
   '/riomed/hospitales': typeof RiomedHospitalesRoute
   '/riomed/pacientes': typeof RiomedPacientesRoute
-  '/riomed/productos': typeof RiomedProductosRoute
   '/riomed/servicio-tecnico': typeof RiomedServicioTecnicoRoute
   '/riomed/soporte': typeof RiomedSoporteRoute
   '/riomed/trabalhe-conosco': typeof RiomedTrabalheConoscoRoute
@@ -4676,7 +4656,6 @@ export interface FileRoutesByFullPath {
   '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
   '/paciente/': typeof PacienteIndexRoute
-  '/riomed/': typeof RiomedIndexRoute
   '/showroom/': typeof ShowroomIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/access-profiles/matrix': typeof AuthenticatedAccessProfilesMatrixRoute
@@ -5185,6 +5164,7 @@ export interface FileRoutesByTo {
   '/reembolso': typeof ReembolsoRoute
   '/reset-password': typeof ResetPasswordRoute
   '/reset-password-sent': typeof ResetPasswordSentRoute
+  '/riomed': typeof RiomedRouteWithChildren
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
   '/suporte': typeof SuporteRoute
@@ -5280,10 +5260,8 @@ export interface FileRoutesByTo {
   '/riomed/carrinho': typeof RiomedCarrinhoRoute
   '/riomed/checkout': typeof RiomedCheckoutRoute
   '/riomed/cotizar': typeof RiomedCotizarRoute
-  '/riomed/debug': typeof RiomedDebugRoute
   '/riomed/hospitales': typeof RiomedHospitalesRoute
   '/riomed/pacientes': typeof RiomedPacientesRoute
-  '/riomed/productos': typeof RiomedProductosRoute
   '/riomed/servicio-tecnico': typeof RiomedServicioTecnicoRoute
   '/riomed/soporte': typeof RiomedSoporteRoute
   '/riomed/trabalhe-conosco': typeof RiomedTrabalheConoscoRoute
@@ -5338,7 +5316,6 @@ export interface FileRoutesByTo {
   '/modulos': typeof ModulosIndexRoute
   '/nichos': typeof NichosIndexRoute
   '/paciente': typeof PacienteIndexRoute
-  '/riomed': typeof RiomedIndexRoute
   '/showroom': typeof ShowroomIndexRoute
   '/trabalhe-conosco': typeof TrabalheConoscoIndexRoute
   '/access-profiles/matrix': typeof AuthenticatedAccessProfilesMatrixRoute
@@ -5956,10 +5933,8 @@ export interface FileRoutesById {
   '/riomed/carrinho': typeof RiomedCarrinhoRoute
   '/riomed/checkout': typeof RiomedCheckoutRoute
   '/riomed/cotizar': typeof RiomedCotizarRoute
-  '/riomed/debug': typeof RiomedDebugRoute
   '/riomed/hospitales': typeof RiomedHospitalesRoute
   '/riomed/pacientes': typeof RiomedPacientesRoute
-  '/riomed/productos': typeof RiomedProductosRoute
   '/riomed/servicio-tecnico': typeof RiomedServicioTecnicoRoute
   '/riomed/soporte': typeof RiomedSoporteRoute
   '/riomed/trabalhe-conosco': typeof RiomedTrabalheConoscoRoute
@@ -6014,7 +5989,6 @@ export interface FileRoutesById {
   '/modulos/': typeof ModulosIndexRoute
   '/nichos/': typeof NichosIndexRoute
   '/paciente/': typeof PacienteIndexRoute
-  '/riomed/': typeof RiomedIndexRoute
   '/showroom/': typeof ShowroomIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
   '/_authenticated/access-profiles/matrix': typeof AuthenticatedAccessProfilesMatrixRoute
@@ -6632,10 +6606,8 @@ export interface FileRouteTypes {
     | '/riomed/carrinho'
     | '/riomed/checkout'
     | '/riomed/cotizar'
-    | '/riomed/debug'
     | '/riomed/hospitales'
     | '/riomed/pacientes'
-    | '/riomed/productos'
     | '/riomed/servicio-tecnico'
     | '/riomed/soporte'
     | '/riomed/trabalhe-conosco'
@@ -6690,7 +6662,6 @@ export interface FileRouteTypes {
     | '/modulos/'
     | '/nichos/'
     | '/paciente/'
-    | '/riomed/'
     | '/showroom/'
     | '/trabalhe-conosco/'
     | '/access-profiles/matrix'
@@ -7199,6 +7170,7 @@ export interface FileRouteTypes {
     | '/reembolso'
     | '/reset-password'
     | '/reset-password-sent'
+    | '/riomed'
     | '/sobre'
     | '/solucoes'
     | '/suporte'
@@ -7294,10 +7266,8 @@ export interface FileRouteTypes {
     | '/riomed/carrinho'
     | '/riomed/checkout'
     | '/riomed/cotizar'
-    | '/riomed/debug'
     | '/riomed/hospitales'
     | '/riomed/pacientes'
-    | '/riomed/productos'
     | '/riomed/servicio-tecnico'
     | '/riomed/soporte'
     | '/riomed/trabalhe-conosco'
@@ -7352,7 +7322,6 @@ export interface FileRouteTypes {
     | '/modulos'
     | '/nichos'
     | '/paciente'
-    | '/riomed'
     | '/showroom'
     | '/trabalhe-conosco'
     | '/access-profiles/matrix'
@@ -7969,10 +7938,8 @@ export interface FileRouteTypes {
     | '/riomed/carrinho'
     | '/riomed/checkout'
     | '/riomed/cotizar'
-    | '/riomed/debug'
     | '/riomed/hospitales'
     | '/riomed/pacientes'
-    | '/riomed/productos'
     | '/riomed/servicio-tecnico'
     | '/riomed/soporte'
     | '/riomed/trabalhe-conosco'
@@ -8027,7 +7994,6 @@ export interface FileRouteTypes {
     | '/modulos/'
     | '/nichos/'
     | '/paciente/'
-    | '/riomed/'
     | '/showroom/'
     | '/trabalhe-conosco/'
     | '/_authenticated/access-profiles/matrix'
@@ -8998,13 +8964,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShowroomIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/riomed/': {
-      id: '/riomed/'
-      path: '/'
-      fullPath: '/riomed/'
-      preLoaderRoute: typeof RiomedIndexRouteImport
-      parentRoute: typeof RiomedRoute
-    }
     '/paciente/': {
       id: '/paciente/'
       path: '/'
@@ -9383,13 +9342,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RiomedServicioTecnicoRouteImport
       parentRoute: typeof RiomedRoute
     }
-    '/riomed/productos': {
-      id: '/riomed/productos'
-      path: '/productos'
-      fullPath: '/riomed/productos'
-      preLoaderRoute: typeof RiomedProductosRouteImport
-      parentRoute: typeof RiomedRoute
-    }
     '/riomed/pacientes': {
       id: '/riomed/pacientes'
       path: '/pacientes'
@@ -9402,13 +9354,6 @@ declare module '@tanstack/react-router' {
       path: '/hospitales'
       fullPath: '/riomed/hospitales'
       preLoaderRoute: typeof RiomedHospitalesRouteImport
-      parentRoute: typeof RiomedRoute
-    }
-    '/riomed/debug': {
-      id: '/riomed/debug'
-      path: '/debug'
-      fullPath: '/riomed/debug'
-      preLoaderRoute: typeof RiomedDebugRouteImport
       parentRoute: typeof RiomedRoute
     }
     '/riomed/cotizar': {
@@ -14944,15 +14889,12 @@ interface RiomedRouteChildren {
   RiomedCarrinhoRoute: typeof RiomedCarrinhoRoute
   RiomedCheckoutRoute: typeof RiomedCheckoutRoute
   RiomedCotizarRoute: typeof RiomedCotizarRoute
-  RiomedDebugRoute: typeof RiomedDebugRoute
   RiomedHospitalesRoute: typeof RiomedHospitalesRoute
   RiomedPacientesRoute: typeof RiomedPacientesRoute
-  RiomedProductosRoute: typeof RiomedProductosRoute
   RiomedServicioTecnicoRoute: typeof RiomedServicioTecnicoRoute
   RiomedSoporteRoute: typeof RiomedSoporteRoute
   RiomedTrabalheConoscoRoute: typeof RiomedTrabalheConoscoRoute
   RiomedVendedorRoute: typeof RiomedVendedorRoute
-  RiomedIndexRoute: typeof RiomedIndexRoute
   RiomedCotizacionTokenRoute: typeof RiomedCotizacionTokenRoute
   RiomedFornecedorCadastroRoute: typeof RiomedFornecedorCadastroRoute
   RiomedHospitalPortalRoute: typeof RiomedHospitalPortalRoute
@@ -14966,15 +14908,12 @@ const RiomedRouteChildren: RiomedRouteChildren = {
   RiomedCarrinhoRoute: RiomedCarrinhoRoute,
   RiomedCheckoutRoute: RiomedCheckoutRoute,
   RiomedCotizarRoute: RiomedCotizarRoute,
-  RiomedDebugRoute: RiomedDebugRoute,
   RiomedHospitalesRoute: RiomedHospitalesRoute,
   RiomedPacientesRoute: RiomedPacientesRoute,
-  RiomedProductosRoute: RiomedProductosRoute,
   RiomedServicioTecnicoRoute: RiomedServicioTecnicoRoute,
   RiomedSoporteRoute: RiomedSoporteRoute,
   RiomedTrabalheConoscoRoute: RiomedTrabalheConoscoRoute,
   RiomedVendedorRoute: RiomedVendedorRoute,
-  RiomedIndexRoute: RiomedIndexRoute,
   RiomedCotizacionTokenRoute: RiomedCotizacionTokenRoute,
   RiomedFornecedorCadastroRoute: RiomedFornecedorCadastroRoute,
   RiomedHospitalPortalRoute: RiomedHospitalPortalRoute,
