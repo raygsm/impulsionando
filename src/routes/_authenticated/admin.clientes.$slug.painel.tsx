@@ -52,42 +52,18 @@ function PainelPage() {
   const { company, modules, kpis } = data;
   const moduleCount = modules.length;
 
+  const enabledSet = new Set<string>(data.enabled ?? []);
+  const features = useMemo(() => getTenantFeatures(slug), [slug]);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      {/* HERO */}
-      <div className="border-b bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
-        <div className="container mx-auto px-6 py-8">
-          <div className="flex items-start justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-4">
-              {/* IDENTIDADE IMPULSIONANDO — nunca a logo do tenant.
-                  Todo painel de cliente exibe o padrão visual do core. */}
-              <LogoImpulsionando variant="light" size="sm" />
-              <div className="h-10 w-px bg-border" aria-hidden />
-              <div>
-                <div className="flex items-center gap-2 text-[11px] text-muted-foreground uppercase tracking-wider">
-                  <span>Painel Impulsionando</span>
-                  <span>·</span>
-                  <span>Cliente</span>
-                  <span>·</span>
-                  <span>{company.subdomain}</span>
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-bold mt-0.5">{company.name}</h1>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Visão proporcional ao plano contratado · {moduleCount} módulos ativos
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-col items-end gap-2">
-              <Badge className="bg-gradient-primary text-primary-foreground border-0 shadow-elegant">
-                Plano Full
-              </Badge>
-              <span className="text-xs text-muted-foreground">
-                Atualizado {new Date(data.generatedAt).toLocaleTimeString("pt-BR")}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ClientDashboardHero
+        tenantName={company.name}
+        subdomain={company.subdomain}
+        moduleCount={moduleCount}
+        generatedAt={data.generatedAt}
+      />
+
 
       <div className="container mx-auto px-6 py-6 space-y-6">
         {/* MÓDULOS — KPIs proporcionais ao plano */}
