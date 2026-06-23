@@ -203,6 +203,7 @@ function RootComponent() {
       <PoweredByImpulsionando />
       <LGPDBanner />
       <OfficialWhatsAppFAB />
+      <ImpulsionitoFab />
       <ImpulsionandoBrasilFAB />
       <DownloadAppFab />
       <DemoAccessGate />
