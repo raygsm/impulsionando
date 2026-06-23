@@ -589,6 +589,7 @@ import { Route as AuthenticatedImobiliariaAprovacoesImprimirFilaRouteImport } fr
 import { Route as AuthenticatedEmpresaTalentosRedeRouteImport } from './routes/_authenticated/empresa.talentos.rede'
 import { Route as AuthenticatedEmpresaTalentosDashboardRouteImport } from './routes/_authenticated/empresa.talentos.dashboard'
 import { Route as AuthenticatedEmpresaTalentosCandidatosRouteImport } from './routes/_authenticated/empresa.talentos.candidatos'
+import { Route as AuthenticatedCrmLeadsIdRouteImport } from './routes/_authenticated/crm.leads.$id'
 import { Route as AuthenticatedCoreTenantsNovoRouteImport } from './routes/_authenticated/core.tenants.novo'
 import { Route as AuthenticatedCoreTenantsDominiosRouteImport } from './routes/_authenticated/core.tenants.dominios'
 import { Route as AuthenticatedCoreModulosAgendaRouteImport } from './routes/_authenticated/core.modulos.agenda'
@@ -3908,6 +3909,11 @@ const AuthenticatedEmpresaTalentosCandidatosRoute =
     path: '/candidatos',
     getParentRoute: () => AuthenticatedEmpresaTalentosRoute,
   } as any)
+const AuthenticatedCrmLeadsIdRoute = AuthenticatedCrmLeadsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AuthenticatedCrmLeadsRoute,
+} as any)
 const AuthenticatedCoreTenantsNovoRoute =
   AuthenticatedCoreTenantsNovoRouteImport.update({
     id: '/tenants/novo',
@@ -4742,7 +4748,7 @@ export interface FileRoutesByFullPath {
   '/core/testes': typeof AuthenticatedCoreTestesRoute
   '/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/crm/board': typeof AuthenticatedCrmBoardRoute
-  '/crm/leads': typeof AuthenticatedCrmLeadsRoute
+  '/crm/leads': typeof AuthenticatedCrmLeadsRouteWithChildren
   '/crm/pipelines': typeof AuthenticatedCrmPipelinesRoute
   '/dashboards/consumidor': typeof AuthenticatedDashboardsConsumidorRoute
   '/dashboards/core': typeof AuthenticatedDashboardsCoreRoute
@@ -4873,6 +4879,7 @@ export interface FileRoutesByFullPath {
   '/core/modulos/agenda': typeof AuthenticatedCoreModulosAgendaRoute
   '/core/tenants/dominios': typeof AuthenticatedCoreTenantsDominiosRoute
   '/core/tenants/novo': typeof AuthenticatedCoreTenantsNovoRoute
+  '/crm/leads/$id': typeof AuthenticatedCrmLeadsIdRoute
   '/empresa/talentos/candidatos': typeof AuthenticatedEmpresaTalentosCandidatosRoute
   '/empresa/talentos/dashboard': typeof AuthenticatedEmpresaTalentosDashboardRoute
   '/empresa/talentos/rede': typeof AuthenticatedEmpresaTalentosRedeRoute
@@ -5379,7 +5386,7 @@ export interface FileRoutesByTo {
   '/core/testes': typeof AuthenticatedCoreTestesRoute
   '/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/crm/board': typeof AuthenticatedCrmBoardRoute
-  '/crm/leads': typeof AuthenticatedCrmLeadsRoute
+  '/crm/leads': typeof AuthenticatedCrmLeadsRouteWithChildren
   '/crm/pipelines': typeof AuthenticatedCrmPipelinesRoute
   '/dashboards/consumidor': typeof AuthenticatedDashboardsConsumidorRoute
   '/dashboards/core': typeof AuthenticatedDashboardsCoreRoute
@@ -5510,6 +5517,7 @@ export interface FileRoutesByTo {
   '/core/modulos/agenda': typeof AuthenticatedCoreModulosAgendaRoute
   '/core/tenants/dominios': typeof AuthenticatedCoreTenantsDominiosRoute
   '/core/tenants/novo': typeof AuthenticatedCoreTenantsNovoRoute
+  '/crm/leads/$id': typeof AuthenticatedCrmLeadsIdRoute
   '/empresa/talentos/candidatos': typeof AuthenticatedEmpresaTalentosCandidatosRoute
   '/empresa/talentos/dashboard': typeof AuthenticatedEmpresaTalentosDashboardRoute
   '/empresa/talentos/rede': typeof AuthenticatedEmpresaTalentosRedeRoute
@@ -6031,7 +6039,7 @@ export interface FileRoutesById {
   '/_authenticated/core/testes': typeof AuthenticatedCoreTestesRoute
   '/_authenticated/crm/activities': typeof AuthenticatedCrmActivitiesRoute
   '/_authenticated/crm/board': typeof AuthenticatedCrmBoardRoute
-  '/_authenticated/crm/leads': typeof AuthenticatedCrmLeadsRoute
+  '/_authenticated/crm/leads': typeof AuthenticatedCrmLeadsRouteWithChildren
   '/_authenticated/crm/pipelines': typeof AuthenticatedCrmPipelinesRoute
   '/_authenticated/dashboards/consumidor': typeof AuthenticatedDashboardsConsumidorRoute
   '/_authenticated/dashboards/core': typeof AuthenticatedDashboardsCoreRoute
@@ -6162,6 +6170,7 @@ export interface FileRoutesById {
   '/_authenticated/core/modulos/agenda': typeof AuthenticatedCoreModulosAgendaRoute
   '/_authenticated/core/tenants/dominios': typeof AuthenticatedCoreTenantsDominiosRoute
   '/_authenticated/core/tenants/novo': typeof AuthenticatedCoreTenantsNovoRoute
+  '/_authenticated/crm/leads/$id': typeof AuthenticatedCrmLeadsIdRoute
   '/_authenticated/empresa/talentos/candidatos': typeof AuthenticatedEmpresaTalentosCandidatosRoute
   '/_authenticated/empresa/talentos/dashboard': typeof AuthenticatedEmpresaTalentosDashboardRoute
   '/_authenticated/empresa/talentos/rede': typeof AuthenticatedEmpresaTalentosRedeRoute
@@ -6813,6 +6822,7 @@ export interface FileRouteTypes {
     | '/core/modulos/agenda'
     | '/core/tenants/dominios'
     | '/core/tenants/novo'
+    | '/crm/leads/$id'
     | '/empresa/talentos/candidatos'
     | '/empresa/talentos/dashboard'
     | '/empresa/talentos/rede'
@@ -7450,6 +7460,7 @@ export interface FileRouteTypes {
     | '/core/modulos/agenda'
     | '/core/tenants/dominios'
     | '/core/tenants/novo'
+    | '/crm/leads/$id'
     | '/empresa/talentos/candidatos'
     | '/empresa/talentos/dashboard'
     | '/empresa/talentos/rede'
@@ -8101,6 +8112,7 @@ export interface FileRouteTypes {
     | '/_authenticated/core/modulos/agenda'
     | '/_authenticated/core/tenants/dominios'
     | '/_authenticated/core/tenants/novo'
+    | '/_authenticated/crm/leads/$id'
     | '/_authenticated/empresa/talentos/candidatos'
     | '/_authenticated/empresa/talentos/dashboard'
     | '/_authenticated/empresa/talentos/rede'
@@ -12433,6 +12445,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEmpresaTalentosCandidatosRouteImport
       parentRoute: typeof AuthenticatedEmpresaTalentosRoute
     }
+    '/_authenticated/crm/leads/$id': {
+      id: '/_authenticated/crm/leads/$id'
+      path: '/$id'
+      fullPath: '/crm/leads/$id'
+      preLoaderRoute: typeof AuthenticatedCrmLeadsIdRouteImport
+      parentRoute: typeof AuthenticatedCrmLeadsRoute
+    }
     '/_authenticated/core/tenants/novo': {
       id: '/_authenticated/core/tenants/novo'
       path: '/tenants/novo'
@@ -13268,10 +13287,23 @@ const AuthenticatedCoreRouteChildren: AuthenticatedCoreRouteChildren = {
 const AuthenticatedCoreRouteWithChildren =
   AuthenticatedCoreRoute._addFileChildren(AuthenticatedCoreRouteChildren)
 
+interface AuthenticatedCrmLeadsRouteChildren {
+  AuthenticatedCrmLeadsIdRoute: typeof AuthenticatedCrmLeadsIdRoute
+}
+
+const AuthenticatedCrmLeadsRouteChildren: AuthenticatedCrmLeadsRouteChildren = {
+  AuthenticatedCrmLeadsIdRoute: AuthenticatedCrmLeadsIdRoute,
+}
+
+const AuthenticatedCrmLeadsRouteWithChildren =
+  AuthenticatedCrmLeadsRoute._addFileChildren(
+    AuthenticatedCrmLeadsRouteChildren,
+  )
+
 interface AuthenticatedCrmRouteChildren {
   AuthenticatedCrmActivitiesRoute: typeof AuthenticatedCrmActivitiesRoute
   AuthenticatedCrmBoardRoute: typeof AuthenticatedCrmBoardRoute
-  AuthenticatedCrmLeadsRoute: typeof AuthenticatedCrmLeadsRoute
+  AuthenticatedCrmLeadsRoute: typeof AuthenticatedCrmLeadsRouteWithChildren
   AuthenticatedCrmPipelinesRoute: typeof AuthenticatedCrmPipelinesRoute
   AuthenticatedCrmIndexRoute: typeof AuthenticatedCrmIndexRoute
 }
@@ -13279,7 +13311,7 @@ interface AuthenticatedCrmRouteChildren {
 const AuthenticatedCrmRouteChildren: AuthenticatedCrmRouteChildren = {
   AuthenticatedCrmActivitiesRoute: AuthenticatedCrmActivitiesRoute,
   AuthenticatedCrmBoardRoute: AuthenticatedCrmBoardRoute,
-  AuthenticatedCrmLeadsRoute: AuthenticatedCrmLeadsRoute,
+  AuthenticatedCrmLeadsRoute: AuthenticatedCrmLeadsRouteWithChildren,
   AuthenticatedCrmPipelinesRoute: AuthenticatedCrmPipelinesRoute,
   AuthenticatedCrmIndexRoute: AuthenticatedCrmIndexRoute,
 }

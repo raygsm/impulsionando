@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -120,7 +120,9 @@ function LeadsPage() {
             {leads?.map((l) => (
               <TableRow key={l.id}>
                 <TableCell>
-                  <div className="font-medium">{l.name}</div>
+                  <Link to="/crm/leads/$id" params={{ id: l.id }} className="font-medium hover:text-primary hover:underline">
+                    {l.name}
+                  </Link>
                   {!!l.tags?.length && <div className="flex gap-1 mt-1">{l.tags.map((t) => <Badge key={t} variant="outline" className="text-[9px]">{t}</Badge>)}</div>}
                 </TableCell>
                 <TableCell className="text-xs">
