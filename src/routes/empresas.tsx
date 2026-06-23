@@ -89,7 +89,7 @@ function EmpresasPage() {
                   <a href="#planos">Quero automatizar minha empresa <ArrowRight className="w-4 h-4" /></a>
                 </Button>
                 <Button asChild size="lg" variant="outline" className="gap-2 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white w-full sm:w-auto">
-                  <a href="#demonstracoes"><PlayCircle className="w-4 h-4" /> Ver demonstração</a>
+                  <Link to="/demo/escolher-nicho"><PlayCircle className="w-4 h-4" /> Ver demonstração</Link>
                 </Button>
               </div>
             </div>
