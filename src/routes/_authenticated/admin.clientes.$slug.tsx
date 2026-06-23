@@ -178,8 +178,11 @@ function TenantOverviewPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button asChild variant="default" size="sm" className="bg-gradient-primary text-primary-foreground border-0 shadow-elegant">
+            <a href={`/admin/clientes/${slug}/painel`}>Abrir Dashboard →</a>
+          </Button>
           {hasLegacyDossier ? (
-            <Button asChild variant="default" size="sm">
+            <Button asChild variant="outline" size="sm">
               <a href={`/admin/clientes/${slug}`}>Dossiê detalhado →</a>
             </Button>
           ) : null}
@@ -189,6 +192,7 @@ function TenantOverviewPage() {
             </a>
           </Button>
         </div>
+
       </header>
 
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">

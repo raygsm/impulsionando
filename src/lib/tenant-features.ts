@@ -29,8 +29,21 @@ export interface FeatureGroup {
  */
 export function getTenantFeatures(slug: string): FeatureGroup[] {
   if (slug === "riomed") return RIOMED_FEATURES;
+  if (slug === "chrismed") return CHRISMED_FEATURES;
   return [];
 }
+
+const CHRISMED_FEATURES: FeatureGroup[] = [
+  {
+    category: "Operação CHRISMED",
+    items: [
+      { label: "Admin CHRISMED", to: "/chrismed/admin", icon: Settings, description: "Cockpit operacional do tenant" },
+      { label: "Alertas clínicos", to: "/chrismed/alertas", icon: MessageCircle, description: "Alertas de SLA e plantão" },
+      { label: "Setup & Onboarding", to: "/chrismed/setup", icon: BookOpen, description: "Configuração inicial guiada" },
+    ],
+  },
+];
+
 
 const RIOMED_FEATURES: FeatureGroup[] = [
   {
