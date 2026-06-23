@@ -29,8 +29,8 @@ export const listMpagoEvents = createServerFn({ method: "GET" })
         .limit(50),
       supabaseAdmin
         .from("mpago_payments")
-        .select("id, status, amount_cents, description, payer_email, mp_payment_id, received_at, approved_at, company_id")
-        .order("received_at", { ascending: false })
+        .select("id, status, amount_cents, description, payer_email, mp_payment_id, created_at, approved_at, company_id")
+        .order("created_at", { ascending: false })
         .limit(20),
     ]);
 
