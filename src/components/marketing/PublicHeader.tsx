@@ -27,7 +27,12 @@ const WHATSAPP_NICHO_URL =
 const WHATSAPP_URL =
   "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20falar%20com%20o%20Impulsionito.";
 
-type NavItem = { to: string; label: string; exact?: boolean };
+type NavItem = {
+  to: string;
+  label: string;
+  exact?: boolean;
+  search?: Record<string, string>;
+};
 
 /**
  * Menu principal por jornada. "Empresas" abre um submenu com a lista de Nichos
@@ -36,11 +41,12 @@ type NavItem = { to: string; label: string; exact?: boolean };
 const NAV: NavItem[] = [
   { to: "/", label: "Início", exact: true },
   { to: "/clube", label: "Clube" },
-  { to: "/planos?tab=empresas", label: "Empresas" },
-  { to: "/planos?tab=white-label", label: "White Label" },
+  { to: "/planos", label: "Empresas", search: { tab: "empresas" } },
+  { to: "/planos", label: "White Label", search: { tab: "white-label" } },
   { to: "/demo", label: "Demonstrações" },
   { to: "/escolher-nicho", label: "Planos" },
 ];
+
 
 
 function useActive(path: string, exact?: boolean) {
