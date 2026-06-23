@@ -20,7 +20,7 @@ export const Route = createFileRoute("/sobre")({
   component: SobrePage,
 });
 
-const WHATSAPP_URL = "https://wa.me/5521972631063";
+const WHATSAPP_URL = "https://wa.me/5521993075000";
 
 function SobrePage() {
   return (

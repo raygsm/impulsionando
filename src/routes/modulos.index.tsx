@@ -11,7 +11,7 @@ import {
 import { getDeps } from "@/data/moduleDependencies";
 
 const WHATSAPP_URL =
-  "https://wa.me/5521972631063?text=Ol%C3%A1%2C%20quero%20conhecer%20os%20m%C3%B3dulos%20da%20Impulsionando.";
+  "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20conhecer%20os%20m%C3%B3dulos%20da%20Impulsionando.";
 
 export const Route = createFileRoute("/modulos/")({
   head: () => ({

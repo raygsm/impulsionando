@@ -254,7 +254,7 @@ function FeiraLanding() {
                 Abrir demonstração agora <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <a href="https://wa.me/5521972631063" target="_blank" rel="noreferrer">
+                <a href="https://wa.me/5521993075000" target="_blank" rel="noreferrer">
                   Falar com consultor no WhatsApp
                 </a>
               </Button>
