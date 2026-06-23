@@ -325,8 +325,6 @@ function EmpresasMenu() {
   );
 }
 
-}
-
 function NichosMenu() {
   const active = useActive("/nichos") || useActive("/escolher-nicho");
   return (
