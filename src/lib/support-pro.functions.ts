@@ -138,7 +138,7 @@ export const reopenTicket = createServerFn({ method: 'POST' })
     z.object({ ticket_id: z.string().uuid(), reason: z.string().max(500).optional() }).parse(d))
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
-      .rpc('support_reopen_ticket', { _ticket_id: data.ticket_id, _reason: data.reason ?? null })
+      .rpc('support_reopen_ticket', { _ticket_id: data.ticket_id, _reason: data.reason })
     if (error) throw error
     return row
   })
