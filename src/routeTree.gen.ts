@@ -543,6 +543,8 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as DemoRestauranteTenantQrRouteImport } from './routes/demo.restaurante.$tenant.$qr'
+import { Route as ApiPublicWhatsappSendRouteImport } from './routes/api/public/whatsapp/send'
+import { Route as ApiPublicRiomedEventsRouteImport } from './routes/api/public/riomed/events'
 import { Route as ApiPublicRealestateSavedSearchRouteImport } from './routes/api/public/realestate/saved-search'
 import { Route as ApiPublicRealestateInterestRouteImport } from './routes/api/public/realestate/interest'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
@@ -566,6 +568,7 @@ import { Route as ApiPublicHooksClubeJourneyTickRouteImport } from './routes/api
 import { Route as ApiPublicHooksBillingTickRouteImport } from './routes/api/public/hooks/billing-tick'
 import { Route as ApiPublicHooksAffAdvanceCommissionsRouteImport } from './routes/api/public/hooks/aff-advance-commissions'
 import { Route as ApiPublicHealthMonetizationRouteImport } from './routes/api/public/health/monetization'
+import { Route as ApiPublicEmailSendRouteImport } from './routes/api/public/email/send'
 import { Route as ApiPublicDemoSendTestRouteImport } from './routes/api/public/demo/send-test'
 import { Route as ApiPublicDemoFeiraLeadRouteImport } from './routes/api/public/demo/feira-lead'
 import { Route as ApiPublicCronPayoutsConsolidateRouteImport } from './routes/api/public/cron/payouts-consolidate'
@@ -605,6 +608,9 @@ import { Route as AuthenticatedAdminModulosClonagemRouteImport } from './routes/
 import { Route as AuthenticatedAdminIntegracoesMercadoPagoRouteImport } from './routes/_authenticated/admin.integracoes.mercado-pago'
 import { Route as AuthenticatedAdminClientesRiomedRouteImport } from './routes/_authenticated/admin.clientes.riomed'
 import { Route as AuthenticatedAdminClientesSlugRouteImport } from './routes/_authenticated/admin.clientes.$slug'
+import { Route as ApiPublicRiomedQuotesColdRouteImport } from './routes/api/public/riomed/quotes/cold'
+import { Route as ApiPublicRiomedCartsAbandonedRouteImport } from './routes/api/public/riomed/carts/abandoned'
+import { Route as ApiPublicRiomedArOverdueRouteImport } from './routes/api/public/riomed/ar/overdue'
 import { Route as ApiPublicPaymentsCloseInvoiceReplayRouteImport } from './routes/api/public/payments/close-invoice.replay'
 import { Route as AuthenticatedImobiliariaAprovacoesIdImprimirRouteImport } from './routes/_authenticated/imobiliaria.aprovacoes.$id.imprimir'
 import { Route as AuthenticatedCoreClienteIdPaginasRouteImport } from './routes/_authenticated/core.cliente.$id.paginas'
@@ -3629,6 +3635,16 @@ const DemoRestauranteTenantQrRoute = DemoRestauranteTenantQrRouteImport.update({
   path: '/demo/restaurante/$tenant/$qr',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicWhatsappSendRoute = ApiPublicWhatsappSendRouteImport.update({
+  id: '/api/public/whatsapp/send',
+  path: '/api/public/whatsapp/send',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicRiomedEventsRoute = ApiPublicRiomedEventsRouteImport.update({
+  id: '/api/public/riomed/events',
+  path: '/api/public/riomed/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicRealestateSavedSearchRoute =
   ApiPublicRealestateSavedSearchRouteImport.update({
     id: '/api/public/realestate/saved-search',
@@ -3764,6 +3780,11 @@ const ApiPublicHealthMonetizationRoute =
     path: '/monetization',
     getParentRoute: () => ApiPublicHealthRoute,
   } as any)
+const ApiPublicEmailSendRoute = ApiPublicEmailSendRouteImport.update({
+  id: '/api/public/email/send',
+  path: '/api/public/email/send',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicDemoSendTestRoute = ApiPublicDemoSendTestRouteImport.update({
   id: '/api/public/demo/send-test',
   path: '/api/public/demo/send-test',
@@ -3994,6 +4015,24 @@ const AuthenticatedAdminClientesSlugRoute =
     id: '/admin/clientes/$slug',
     path: '/admin/clientes/$slug',
     getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const ApiPublicRiomedQuotesColdRoute =
+  ApiPublicRiomedQuotesColdRouteImport.update({
+    id: '/api/public/riomed/quotes/cold',
+    path: '/api/public/riomed/quotes/cold',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicRiomedCartsAbandonedRoute =
+  ApiPublicRiomedCartsAbandonedRouteImport.update({
+    id: '/api/public/riomed/carts/abandoned',
+    path: '/api/public/riomed/carts/abandoned',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicRiomedArOverdueRoute =
+  ApiPublicRiomedArOverdueRouteImport.update({
+    id: '/api/public/riomed/ar/overdue',
+    path: '/api/public/riomed/ar/overdue',
+    getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicPaymentsCloseInvoiceReplayRoute =
   ApiPublicPaymentsCloseInvoiceReplayRouteImport.update({
@@ -4808,6 +4847,7 @@ export interface FileRoutesByFullPath {
   '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
+  '/api/public/email/send': typeof ApiPublicEmailSendRoute
   '/api/public/health/monetization': typeof ApiPublicHealthMonetizationRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
@@ -4831,6 +4871,8 @@ export interface FileRoutesByFullPath {
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
+  '/api/public/riomed/events': typeof ApiPublicRiomedEventsRoute
+  '/api/public/whatsapp/send': typeof ApiPublicWhatsappSendRoute
   '/demo/restaurante/$tenant/$qr': typeof DemoRestauranteTenantQrRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -4876,6 +4918,9 @@ export interface FileRoutesByFullPath {
   '/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
   '/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
   '/api/public/payments/close-invoice/replay': typeof ApiPublicPaymentsCloseInvoiceReplayRoute
+  '/api/public/riomed/ar/overdue': typeof ApiPublicRiomedArOverdueRoute
+  '/api/public/riomed/carts/abandoned': typeof ApiPublicRiomedCartsAbandonedRoute
+  '/api/public/riomed/quotes/cold': typeof ApiPublicRiomedQuotesColdRoute
   '/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
 }
@@ -5433,6 +5478,7 @@ export interface FileRoutesByTo {
   '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
+  '/api/public/email/send': typeof ApiPublicEmailSendRoute
   '/api/public/health/monetization': typeof ApiPublicHealthMonetizationRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
@@ -5456,6 +5502,8 @@ export interface FileRoutesByTo {
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
+  '/api/public/riomed/events': typeof ApiPublicRiomedEventsRoute
+  '/api/public/whatsapp/send': typeof ApiPublicWhatsappSendRoute
   '/demo/restaurante/$tenant/$qr': typeof DemoRestauranteTenantQrRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -5501,6 +5549,9 @@ export interface FileRoutesByTo {
   '/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
   '/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
   '/api/public/payments/close-invoice/replay': typeof ApiPublicPaymentsCloseInvoiceReplayRoute
+  '/api/public/riomed/ar/overdue': typeof ApiPublicRiomedArOverdueRoute
+  '/api/public/riomed/carts/abandoned': typeof ApiPublicRiomedCartsAbandonedRoute
+  '/api/public/riomed/quotes/cold': typeof ApiPublicRiomedQuotesColdRoute
   '/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
 }
@@ -6073,6 +6124,7 @@ export interface FileRoutesById {
   '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
   '/api/public/demo/send-test': typeof ApiPublicDemoSendTestRoute
+  '/api/public/email/send': typeof ApiPublicEmailSendRoute
   '/api/public/health/monetization': typeof ApiPublicHealthMonetizationRoute
   '/api/public/hooks/aff-advance-commissions': typeof ApiPublicHooksAffAdvanceCommissionsRoute
   '/api/public/hooks/billing-tick': typeof ApiPublicHooksBillingTickRoute
@@ -6096,6 +6148,8 @@ export interface FileRoutesById {
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
+  '/api/public/riomed/events': typeof ApiPublicRiomedEventsRoute
+  '/api/public/whatsapp/send': typeof ApiPublicWhatsappSendRoute
   '/demo/restaurante/$tenant/$qr': typeof DemoRestauranteTenantQrRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -6141,6 +6195,9 @@ export interface FileRoutesById {
   '/_authenticated/core/cliente/$id/paginas': typeof AuthenticatedCoreClienteIdPaginasRouteWithChildren
   '/_authenticated/imobiliaria/aprovacoes/$id/imprimir': typeof AuthenticatedImobiliariaAprovacoesIdImprimirRoute
   '/api/public/payments/close-invoice/replay': typeof ApiPublicPaymentsCloseInvoiceReplayRoute
+  '/api/public/riomed/ar/overdue': typeof ApiPublicRiomedArOverdueRoute
+  '/api/public/riomed/carts/abandoned': typeof ApiPublicRiomedCartsAbandonedRoute
+  '/api/public/riomed/quotes/cold': typeof ApiPublicRiomedQuotesColdRoute
   '/_authenticated/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/_authenticated/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
 }
@@ -6712,6 +6769,7 @@ export interface FileRouteTypes {
     | '/api/public/cron/payouts-consolidate'
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
+    | '/api/public/email/send'
     | '/api/public/health/monetization'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/billing-tick'
@@ -6735,6 +6793,8 @@ export interface FileRouteTypes {
     | '/api/public/payments/webhook'
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
+    | '/api/public/riomed/events'
+    | '/api/public/whatsapp/send'
     | '/demo/restaurante/$tenant/$qr'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -6780,6 +6840,9 @@ export interface FileRouteTypes {
     | '/core/cliente/$id/paginas'
     | '/imobiliaria/aprovacoes/$id/imprimir'
     | '/api/public/payments/close-invoice/replay'
+    | '/api/public/riomed/ar/overdue'
+    | '/api/public/riomed/carts/abandoned'
+    | '/api/public/riomed/quotes/cold'
     | '/core/cliente/$id/paginas/$pageId'
     | '/core/cliente/$id/modulo/$slug/configurar'
   fileRoutesByTo: FileRoutesByTo
@@ -7337,6 +7400,7 @@ export interface FileRouteTypes {
     | '/api/public/cron/payouts-consolidate'
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
+    | '/api/public/email/send'
     | '/api/public/health/monetization'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/billing-tick'
@@ -7360,6 +7424,8 @@ export interface FileRouteTypes {
     | '/api/public/payments/webhook'
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
+    | '/api/public/riomed/events'
+    | '/api/public/whatsapp/send'
     | '/demo/restaurante/$tenant/$qr'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -7405,6 +7471,9 @@ export interface FileRouteTypes {
     | '/core/cliente/$id/paginas'
     | '/imobiliaria/aprovacoes/$id/imprimir'
     | '/api/public/payments/close-invoice/replay'
+    | '/api/public/riomed/ar/overdue'
+    | '/api/public/riomed/carts/abandoned'
+    | '/api/public/riomed/quotes/cold'
     | '/core/cliente/$id/paginas/$pageId'
     | '/core/cliente/$id/modulo/$slug/configurar'
   id:
@@ -7976,6 +8045,7 @@ export interface FileRouteTypes {
     | '/api/public/cron/payouts-consolidate'
     | '/api/public/demo/feira-lead'
     | '/api/public/demo/send-test'
+    | '/api/public/email/send'
     | '/api/public/health/monetization'
     | '/api/public/hooks/aff-advance-commissions'
     | '/api/public/hooks/billing-tick'
@@ -7999,6 +8069,8 @@ export interface FileRouteTypes {
     | '/api/public/payments/webhook'
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
+    | '/api/public/riomed/events'
+    | '/api/public/whatsapp/send'
     | '/demo/restaurante/$tenant/$qr'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -8044,6 +8116,9 @@ export interface FileRouteTypes {
     | '/_authenticated/core/cliente/$id/paginas'
     | '/_authenticated/imobiliaria/aprovacoes/$id/imprimir'
     | '/api/public/payments/close-invoice/replay'
+    | '/api/public/riomed/ar/overdue'
+    | '/api/public/riomed/carts/abandoned'
+    | '/api/public/riomed/quotes/cold'
     | '/_authenticated/core/cliente/$id/paginas/$pageId'
     | '/_authenticated/core/cliente/$id/modulo/$slug/configurar'
   fileRoutesById: FileRoutesById
@@ -8178,6 +8253,7 @@ export interface RootRouteChildren {
   ApiPublicCronPayoutsConsolidateRoute: typeof ApiPublicCronPayoutsConsolidateRoute
   ApiPublicDemoFeiraLeadRoute: typeof ApiPublicDemoFeiraLeadRoute
   ApiPublicDemoSendTestRoute: typeof ApiPublicDemoSendTestRoute
+  ApiPublicEmailSendRoute: typeof ApiPublicEmailSendRoute
   ApiPublicHooksAffAdvanceCommissionsRoute: typeof ApiPublicHooksAffAdvanceCommissionsRoute
   ApiPublicHooksBillingTickRoute: typeof ApiPublicHooksBillingTickRoute
   ApiPublicHooksClubeJourneyTickRoute: typeof ApiPublicHooksClubeJourneyTickRoute
@@ -8200,6 +8276,8 @@ export interface RootRouteChildren {
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   ApiPublicRealestateInterestRoute: typeof ApiPublicRealestateInterestRoute
   ApiPublicRealestateSavedSearchRoute: typeof ApiPublicRealestateSavedSearchRoute
+  ApiPublicRiomedEventsRoute: typeof ApiPublicRiomedEventsRoute
+  ApiPublicWhatsappSendRoute: typeof ApiPublicWhatsappSendRoute
   DemoRestauranteTenantQrRoute: typeof DemoRestauranteTenantQrRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -8207,6 +8285,9 @@ export interface RootRouteChildren {
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
   ApiPublicPaymentsCloseInvoiceReplayRoute: typeof ApiPublicPaymentsCloseInvoiceReplayRoute
+  ApiPublicRiomedArOverdueRoute: typeof ApiPublicRiomedArOverdueRoute
+  ApiPublicRiomedCartsAbandonedRoute: typeof ApiPublicRiomedCartsAbandonedRoute
+  ApiPublicRiomedQuotesColdRoute: typeof ApiPublicRiomedQuotesColdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -11949,6 +12030,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoRestauranteTenantQrRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/whatsapp/send': {
+      id: '/api/public/whatsapp/send'
+      path: '/api/public/whatsapp/send'
+      fullPath: '/api/public/whatsapp/send'
+      preLoaderRoute: typeof ApiPublicWhatsappSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/riomed/events': {
+      id: '/api/public/riomed/events'
+      path: '/api/public/riomed/events'
+      fullPath: '/api/public/riomed/events'
+      preLoaderRoute: typeof ApiPublicRiomedEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/realestate/saved-search': {
       id: '/api/public/realestate/saved-search'
       path: '/api/public/realestate/saved-search'
@@ -12109,6 +12204,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/public/health/monetization'
       preLoaderRoute: typeof ApiPublicHealthMonetizationRouteImport
       parentRoute: typeof ApiPublicHealthRoute
+    }
+    '/api/public/email/send': {
+      id: '/api/public/email/send'
+      path: '/api/public/email/send'
+      fullPath: '/api/public/email/send'
+      preLoaderRoute: typeof ApiPublicEmailSendRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/demo/send-test': {
       id: '/api/public/demo/send-test'
@@ -12382,6 +12484,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/clientes/$slug'
       preLoaderRoute: typeof AuthenticatedAdminClientesSlugRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/public/riomed/quotes/cold': {
+      id: '/api/public/riomed/quotes/cold'
+      path: '/api/public/riomed/quotes/cold'
+      fullPath: '/api/public/riomed/quotes/cold'
+      preLoaderRoute: typeof ApiPublicRiomedQuotesColdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/riomed/carts/abandoned': {
+      id: '/api/public/riomed/carts/abandoned'
+      path: '/api/public/riomed/carts/abandoned'
+      fullPath: '/api/public/riomed/carts/abandoned'
+      preLoaderRoute: typeof ApiPublicRiomedCartsAbandonedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/riomed/ar/overdue': {
+      id: '/api/public/riomed/ar/overdue'
+      path: '/api/public/riomed/ar/overdue'
+      fullPath: '/api/public/riomed/ar/overdue'
+      preLoaderRoute: typeof ApiPublicRiomedArOverdueRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/payments/close-invoice/replay': {
       id: '/api/public/payments/close-invoice/replay'
@@ -14380,6 +14503,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicCronPayoutsConsolidateRoute: ApiPublicCronPayoutsConsolidateRoute,
   ApiPublicDemoFeiraLeadRoute: ApiPublicDemoFeiraLeadRoute,
   ApiPublicDemoSendTestRoute: ApiPublicDemoSendTestRoute,
+  ApiPublicEmailSendRoute: ApiPublicEmailSendRoute,
   ApiPublicHooksAffAdvanceCommissionsRoute:
     ApiPublicHooksAffAdvanceCommissionsRoute,
   ApiPublicHooksBillingTickRoute: ApiPublicHooksBillingTickRoute,
@@ -14406,6 +14530,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   ApiPublicRealestateInterestRoute: ApiPublicRealestateInterestRoute,
   ApiPublicRealestateSavedSearchRoute: ApiPublicRealestateSavedSearchRoute,
+  ApiPublicRiomedEventsRoute: ApiPublicRiomedEventsRoute,
+  ApiPublicWhatsappSendRoute: ApiPublicWhatsappSendRoute,
   DemoRestauranteTenantQrRoute: DemoRestauranteTenantQrRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
@@ -14414,17 +14540,10 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
   ApiPublicPaymentsCloseInvoiceReplayRoute:
     ApiPublicPaymentsCloseInvoiceReplayRoute,
+  ApiPublicRiomedArOverdueRoute: ApiPublicRiomedArOverdueRoute,
+  ApiPublicRiomedCartsAbandonedRoute: ApiPublicRiomedCartsAbandonedRoute,
+  ApiPublicRiomedQuotesColdRoute: ApiPublicRiomedQuotesColdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
