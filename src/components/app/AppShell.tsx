@@ -117,8 +117,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Consumidor Final SEM assinatura ativa também recebe o shell enxuto em
   // qualquer rota — antes de assinar, o menu é só: Meu Plano · Benefícios ·
   // Checkout · Ajuda.
-  const { audience } = useAudience();
-  const { data: hasActiveMembership } = useConsumerHasActiveMembership();
   const isPreSubConsumer = audience === "consumidor" && !hasActiveMembership;
   if (isCheckoutPath(location.pathname) || isPreSubConsumer) {
     return <CheckoutShell>{children}</CheckoutShell>;
