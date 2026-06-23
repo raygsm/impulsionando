@@ -269,7 +269,7 @@ function RiomedHome() {
       </section>
 
       {/* ============================ DESTAQUES ============================ */}
-      <section className="bg-gradient-to-b from-slate-50 to-white py-16">
+      <section id="productos" className="bg-gradient-to-b from-slate-50 to-white py-16 scroll-mt-32">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-end justify-between mb-8">
             <div>
@@ -287,6 +287,15 @@ function RiomedHome() {
               Ver catálogo completo <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
+
+          {products.isError && (
+            <ProductsErrorBanner
+              message={(products.error as Error)?.message}
+              onRetry={() => products.refetch()}
+              isRetrying={products.isFetching}
+            />
+          )}
+
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {(products.data?.items ?? []).slice(0, 8).map((p: any) => (
