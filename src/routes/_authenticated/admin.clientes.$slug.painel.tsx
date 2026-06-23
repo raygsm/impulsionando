@@ -15,6 +15,7 @@ import {
   Megaphone, Workflow, ShoppingCart, FileText, ArrowRight, TrendingUp,
   AlertTriangle, Activity, ChevronRight,
 } from "lucide-react";
+import { LogoImpulsionando } from "@/components/brand/LogoImpulsionando";
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/$slug/painel")({
   component: PainelPage,
