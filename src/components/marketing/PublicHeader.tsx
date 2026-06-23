@@ -98,78 +98,126 @@ function ItemLink({
   );
 }
 
+function groupItems(items: EmpresasItem[]) {
+  const map = new Map<string, { key: string; nichoSlug?: string; to?: string; labels: string[] }>();
+  for (const it of items) {
+    const key = it.nichoSlug ? `n:${it.nichoSlug}` : `t:${it.to ?? "/empresas"}`;
+    const existing = map.get(key);
+    if (existing) {
+      if (!existing.labels.includes(it.label)) existing.labels.push(it.label);
+    } else {
+      map.set(key, { key, nichoSlug: it.nichoSlug, to: it.to, labels: [it.label] });
+    }
+  }
+  return Array.from(map.values());
+}
+
 function MacroDetail({ macro }: { macro: EmpresasMacro }) {
   const Icon = macro.icon;
+  const groups = groupItems(macro.items);
   return (
-    <div className="flex h-full flex-col gap-3 p-4">
-      <div className="flex items-start gap-3">
+    <div className="flex h-full flex-col p-4">
+      {/* Header */}
+      <div className="flex items-start gap-3 pb-3 border-b border-border/60">
         <span
           aria-hidden="true"
           className={cn(
-            "grid h-10 w-10 shrink-0 place-items-center rounded-md",
+            "grid h-9 w-9 shrink-0 place-items-center rounded-lg",
             macro.highlight
-              ? "bg-gradient-primary text-primary-foreground"
+              ? "bg-gradient-primary text-primary-foreground shadow-sm"
               : "bg-primary/10 text-primary",
           )}
         >
-          <Icon className="h-5 w-5" />
+          <Icon className="h-4 w-4" />
         </span>
-        <div className="min-w-0">
-          <div className="text-sm font-semibold text-foreground">{macro.label}</div>
-          <p className="text-xs text-muted-foreground leading-snug">{macro.message}</p>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="text-sm font-semibold text-foreground">{macro.label}</h3>
+            <span className="text-[10px] font-medium text-muted-foreground tabular-nums">
+              {groups.length} {groups.length === 1 ? "destino" : "destinos"} · {macro.modules.length} módulos
+            </span>
+          </div>
+          <p className="mt-0.5 text-xs text-muted-foreground leading-snug line-clamp-2">
+            {macro.message}
+          </p>
         </div>
       </div>
 
-      <div className="grid gap-2">
-        <div>
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-            Principais benefícios
+      {/* Conteúdo: 2 colunas (destinos + insights) */}
+      <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-4 py-3 flex-1 min-h-0">
+        <div className="min-w-0">
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+            Nichos atendidos
           </div>
-          <ul className="space-y-0.5 text-xs text-foreground/90">
-            {macro.benefits.map((b) => (
-              <li key={b} className="flex gap-1.5">
-                <ChevronRight className="h-3 w-3 shrink-0 mt-0.5 text-primary" />
-                <span>{b}</span>
-              </li>
-            ))}
+          <ul className="space-y-0.5">
+            {groups.map((g) => {
+              const primary = g.labels[0]!;
+              const synonyms = g.labels.slice(1);
+              const item: EmpresasItem = { label: primary, nichoSlug: g.nichoSlug, to: g.to };
+              return (
+                <li key={g.key}>
+                  <ItemLink
+                    item={item}
+                    className="flex items-center gap-2 rounded-md px-2 py-1 text-xs font-medium text-foreground hover:bg-accent/60 hover:text-primary transition-colors"
+                  />
+                  {synonyms.length > 0 ? (
+                    <div className="px-2 -mt-0.5 pb-0.5 text-[10px] text-muted-foreground/80 leading-tight">
+                      {synonyms.join(" · ")}
+                    </div>
+                  ) : null}
+                </li>
+              );
+            })}
           </ul>
         </div>
 
-        <div>
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-            Subnichos
+        <div className="min-w-0 flex flex-col gap-3">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+              Por que escolher
+            </div>
+            <ul className="space-y-1 text-xs text-foreground/90">
+              {macro.benefits.map((b) => (
+                <li key={b} className="flex gap-1.5">
+                  <ChevronRight className="h-3 w-3 shrink-0 mt-0.5 text-primary" />
+                  <span className="leading-snug">{b}</span>
+                </li>
+              ))}
+            </ul>
           </div>
-          <div className="flex flex-wrap gap-1">
-            {macro.items.map((it) => (
-              <ItemLink
-                key={`${it.label}-${it.nichoSlug ?? it.to ?? ""}`}
-                item={it}
-                className="rounded-full border border-border bg-background px-2 py-0.5 text-[11px] text-muted-foreground hover:border-primary hover:text-foreground hover:bg-accent transition-colors"
-              />
-            ))}
-          </div>
-        </div>
 
-        <div className="grid grid-cols-2 gap-2 text-[11px] text-muted-foreground">
           <div>
-            <span className="font-semibold text-foreground">Exemplos: </span>
-            {macro.examples}
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+              Módulos
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {macro.modules.map((m) => (
+                <span
+                  key={m}
+                  className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground"
+                >
+                  {m}
+                </span>
+              ))}
+            </div>
           </div>
-          <div>
-            <span className="font-semibold text-foreground">Módulos: </span>
-            {macro.modules.join(" · ")}
+
+          <div className="text-[10px] text-muted-foreground/80 leading-snug">
+            <span className="font-semibold text-foreground/80">Exemplos: </span>
+            {macro.examples}
           </div>
         </div>
       </div>
 
-      <div className="mt-auto flex gap-2 pt-2">
-        <Button asChild size="sm" variant="outline" className="flex-1">
+      {/* CTAs */}
+      <div className="flex gap-2 pt-3 border-t border-border/60">
+        <Button asChild size="sm" variant="outline" className="flex-1 h-8 text-xs">
           <Link to={macro.demoTo as string}>
             <PlayCircle className="h-3.5 w-3.5 mr-1" /> Ver demonstração
           </Link>
         </Button>
-        <Button asChild size="sm" className="flex-1 bg-gradient-primary text-primary-foreground">
-          <Link to={macro.solutionTo as string}>Conhecer solução</Link>
+        <Button asChild size="sm" className="flex-1 h-8 text-xs bg-gradient-primary text-primary-foreground">
+          <Link to={macro.solutionTo as string}>Conhecer solução →</Link>
         </Button>
       </div>
     </div>
