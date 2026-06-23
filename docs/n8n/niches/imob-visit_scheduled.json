@@ -1,0 +1,71 @@
+{
+  "name": "Impulsionando — imob.regua_visita (realestate.visit_scheduled)",
+  "nodes": [
+    {
+      "parameters": { "httpMethod": "POST", "path": "imobiliaria-visit_scheduled", "responseMode": "responseNode", "options": { "rawBody": true } },
+      "id": "wh", "name": "Webhook imob.visit_scheduled",
+      "type": "n8n-nodes-base.webhook", "typeVersion": 2, "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "const crypto = require('crypto');\nconst sig = $input.first().json.headers['x-impulsionando-signature'] || '';\nconst raw = $input.first().json.body;\nconst h = crypto.createHmac('sha256', $env.IMPULSIONANDO_WEBHOOK_SECRET).update(typeof raw==='string'?raw:JSON.stringify(raw)).digest('hex');\nif (h !== sig) throw new Error('invalid signature');\nreturn [{ json: typeof raw==='string'?JSON.parse(raw):raw }];"
+      },
+      "id": "verify", "name": "Verify HMAC",
+      "type": "n8n-nodes-base.function", "typeVersion": 1, "position": [440, 300]
+    },
+    { "parameters": { "responseCode": 200, "responseBody": "ok" }, "id": "resp", "name": "Respond 200", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [640, 180] },
+    {
+      "parameters": {
+        "url": "https://api.z-api.io/instances/{{$env.ZAPI_INSTANCE}}/token/{{$env.ZAPI_TOKEN}}/send-text",
+        "method": "POST",
+        "jsonBody": "={\"phone\":\"{{$json.customer.phone}}\",\"message\":\"Olá {{$json.customer.first_name}}! Confirmando sua visita ao imóvel {{$json.property.code}} em {{$json.visit.date_human}} às {{$json.visit.time}}. Endereço: {{$json.property.address}}. Qualquer imprevisto, responda por aqui. — {{$json.tenant.name}}\"}",
+        "sendBody": true, "specifyBody": "json"
+      },
+      "id": "wa-confirm", "name": "WA Confirmação Imediata",
+      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [840, 280]
+    },
+    { "parameters": { "amount": 1, "unit": "days" }, "id": "wait-dm1", "name": "Wait até D-1", "type": "n8n-nodes-base.wait", "typeVersion": 1, "position": [1040, 280] },
+    {
+      "parameters": {
+        "url": "https://api.z-api.io/instances/{{$env.ZAPI_INSTANCE}}/token/{{$env.ZAPI_TOKEN}}/send-text",
+        "method": "POST",
+        "jsonBody": "={\"phone\":\"{{$json.customer.phone}}\",\"message\":\"Oi {{$json.customer.first_name}}, lembrete: visita amanhã ao imóvel {{$json.property.code}} às {{$json.visit.time}}. Mapa: {{$json.property.maps_url}}\"}",
+        "sendBody": true, "specifyBody": "json"
+      },
+      "id": "wa-dm1", "name": "WA Lembrete D-1",
+      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1240, 280]
+    },
+    { "parameters": { "amount": 22, "unit": "hours" }, "id": "wait-d0", "name": "Wait até D-0 2h antes", "type": "n8n-nodes-base.wait", "typeVersion": 1, "position": [1440, 280] },
+    {
+      "parameters": {
+        "url": "https://api.z-api.io/instances/{{$env.ZAPI_INSTANCE}}/token/{{$env.ZAPI_TOKEN}}/send-text",
+        "method": "POST",
+        "jsonBody": "={\"phone\":\"{{$json.customer.phone}}\",\"message\":\"Hoje é o dia! Te encontro às {{$json.visit.time}} no {{$json.property.address}}. Corretor: {{$json.broker.name}} ({{$json.broker.phone}})\"}",
+        "sendBody": true, "specifyBody": "json"
+      },
+      "id": "wa-d0", "name": "WA D-0 2h antes",
+      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1640, 280]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/webhooks/n8n-callback",
+        "method": "POST",
+        "jsonBody": "={\"workflow\":\"imob.regua_visita\",\"event\":\"realestate.visit_scheduled\",\"niche_slug\":\"imobiliaria\",\"status\":\"completed\",\"executionId\":\"{{$execution.id}}\"}",
+        "sendBody": true, "specifyBody": "json"
+      },
+      "id": "callback", "name": "Callback → n8n_workflow_runs",
+      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1840, 280]
+    }
+  ],
+  "connections": {
+    "Webhook imob.visit_scheduled": { "main": [[{ "node": "Verify HMAC", "type": "main", "index": 0 }]] },
+    "Verify HMAC": { "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }, { "node": "WA Confirmação Imediata", "type": "main", "index": 0 }]] },
+    "WA Confirmação Imediata": { "main": [[{ "node": "Wait até D-1", "type": "main", "index": 0 }]] },
+    "Wait até D-1": { "main": [[{ "node": "WA Lembrete D-1", "type": "main", "index": 0 }]] },
+    "WA Lembrete D-1": { "main": [[{ "node": "Wait até D-0 2h antes", "type": "main", "index": 0 }]] },
+    "Wait até D-0 2h antes": { "main": [[{ "node": "WA D-0 2h antes", "type": "main", "index": 0 }]] },
+    "WA D-0 2h antes": { "main": [[{ "node": "Callback → n8n_workflow_runs", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "meta": { "description": "Imobiliária — régua de visita: confirmação imediata + lembrete D-1 + recado D-0 2h antes." }
+}
