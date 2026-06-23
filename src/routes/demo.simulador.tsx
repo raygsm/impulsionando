@@ -223,7 +223,7 @@ function DemoSimulador() {
     pendente: state.invoices.filter((i) => !i.paid).reduce((s, i) => s + i.amount, 0),
   }), [state]);
 
-  const planRank = PLAN_RANK[plan];
+  const planRank = PLAN_RANK[plan as RecLevel];
   const isAvailable = (m: ModKey) => PLAN_RANK[MODULES.find((x) => x.key === m)!.minPlan] <= planRank;
 
   return (
