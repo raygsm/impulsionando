@@ -153,7 +153,7 @@ export async function buildBrandKitZip(input: BrandKitInput): Promise<Blob> {
   const zip = new JSZip();
   const slug = sanitizeSlug(input.brandName);
 
-  zip.file("README.txt", buildReadme(input));
+  zip.file("README.md", buildReadme(input));
   zip.file(`${slug}-tokens.css`, input.cssTokens);
   zip.file(`${slug}-brand.json`, input.jsonTokens);
   zip.file(`${slug}-signature.html`, input.signatureHtml);
@@ -166,24 +166,95 @@ export async function buildBrandKitZip(input: BrandKitInput): Promise<Blob> {
 }
 
 function buildReadme(input: BrandKitInput): string {
-  return `Brand Kit — ${input.brandName}
-Gerado em ${new Date().toISOString()}
+  const slug = sanitizeSlug(input.brandName);
+  return `# Brand Kit — ${input.brandName}
 
-Conteúdo:
-  /logo/                        — logo original (quando disponível)
-  /favicon/favicon.ico          — favicon multi-resolução (PNG embutido)
-  /favicon/favicon-32.png       — favicon 32x32
-  /favicon/apple-touch-icon-180.png — touch icon iOS
-  ${sanitizeSlug(input.brandName)}-tokens.css      — paleta em CSS custom properties
-  ${sanitizeSlug(input.brandName)}-brand.json      — tokens em JSON
-  ${sanitizeSlug(input.brandName)}-signature.html  — assinatura de e-mail
+> Gerado em ${new Date().toLocaleString("pt-BR")} pelo Core Impulsionando.
 
-Identidade:
-  Marca:    ${input.brandName}
-  Domínio:  ${input.domain || "—"}
-  E-mail:   ${input.defaultEmail || "—"}
-  Primária: ${input.primary}
-  Secund.:  ${input.secondary}
+Este pacote contém tudo que você precisa pra aplicar a identidade visual de **${input.brandName}** em sites, e-mails, navegador e materiais do time.
+
+---
+
+## 📁 Conteúdo do ZIP
+
+| Arquivo | Pra que serve | Onde usar |
+|---|---|---|
+| \`logo/${slug}-logo.*\` | Logo original (PNG/SVG/JPG) | Site, apresentações, papel timbrado |
+| \`favicon/favicon.ico\` | Ícone do navegador (multi-resolução) | Raiz do site |
+| \`favicon/favicon-32.png\` | Favicon 32×32 PNG | \`<link rel="icon">\` moderno |
+| \`favicon/apple-touch-icon-180.png\` | Ícone iOS na tela inicial | \`<link rel="apple-touch-icon">\` |
+| \`${slug}-tokens.css\` | Paleta como CSS custom properties | Importar no CSS global do site |
+| \`${slug}-brand.json\` | Tokens estruturados | Design tools, Figma plugins, scripts |
+| \`${slug}-signature.html\` | Assinatura de e-mail HTML | Gmail, Outlook, Apple Mail |
+
+---
+
+## 🎨 Identidade
+
+- **Marca:** ${input.brandName}
+- **Domínio:** ${input.domain || "—"}
+- **E-mail principal:** ${input.defaultEmail || "—"}
+- **Cor primária:** \`${input.primary}\`
+- **Cor secundária:** \`${input.secondary}\`
+
+---
+
+## 🌐 Como aplicar no site
+
+1. Copie \`${slug}-tokens.css\` para sua pasta de CSS.
+2. Importe no topo do seu CSS global: \`@import "./${slug}-tokens.css";\`
+3. Use as variáveis: \`background: var(--brand-primary);\`
+4. Coloque os arquivos de \`favicon/\` na raiz do site público e adicione no \`<head>\`:
+
+\`\`\`html
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180.png">
+\`\`\`
+
+---
+
+## ✉️ Como instalar a assinatura no Gmail
+
+1. Abra o arquivo \`${slug}-signature.html\` em um navegador.
+2. Selecione tudo (Ctrl/Cmd + A) e copie (Ctrl/Cmd + C).
+3. No Gmail, vá em **Configurações → Ver todas as configurações → Geral → Assinatura**.
+4. Crie uma nova assinatura, cole (Ctrl/Cmd + V) no editor.
+5. Defina como padrão pra novos e-mails e respostas. Salve.
+
+> ⚠️ Importante: o Gmail só aceita assinaturas com links públicos para a imagem do logo. Se a imagem não aparecer, hospede-a em um domínio público (ex.: o próprio site) e edite o \`src\` no HTML.
+
+---
+
+## ✉️ Como instalar a assinatura no Outlook
+
+### Outlook desktop (Windows)
+1. Abra \`${slug}-signature.html\` em um navegador, selecione tudo e copie.
+2. No Outlook: **Arquivo → Opções → Email → Assinaturas → Novo**.
+3. Cole no editor e salve.
+
+### Outlook Web / Microsoft 365
+1. Abra a engrenagem (⚙️) → **Exibir todas as configurações do Outlook → Email → Compor e responder**.
+2. Em "Assinatura de email", cole o conteúdo copiado do HTML.
+3. Escolha quando aplicar (novos e-mails / respostas). Salve.
+
+---
+
+## 🍎 Apple Mail
+
+1. **Mail → Preferências → Assinaturas**.
+2. Crie uma nova assinatura na conta desejada.
+3. Cole o conteúdo de \`${slug}-signature.html\` (abra o HTML no Safari, selecione e copie primeiro).
+
+---
+
+## 🔄 Atualizar o kit
+
+Sempre que mudar logo/cores em \`/admin/branding\`, gere um novo ZIP — os arquivos têm data de geração no topo deste README.
+
+---
+
+_Core Impulsionando · branding management_
 `;
 }
 
