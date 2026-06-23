@@ -440,6 +440,7 @@ import { Route as AuthenticatedAdminPresalesHealthRouteImport } from './routes/_
 import { Route as AuthenticatedAdminPixPendentesRouteImport } from './routes/_authenticated/admin.pix-pendentes'
 import { Route as AuthenticatedAdminPeerBenchmarkRouteImport } from './routes/_authenticated/admin.peer-benchmark'
 import { Route as AuthenticatedAdminPayoutsMonetizationHealthRouteImport } from './routes/_authenticated/admin.payouts-monetization-health'
+import { Route as AuthenticatedAdminOperacoesAutomacoesRouteImport } from './routes/_authenticated/admin.operacoes-automacoes'
 import { Route as AuthenticatedAdminOndaYRouteImport } from './routes/_authenticated/admin.onda-y'
 import { Route as AuthenticatedAdminOnboardingProvisioningHealthRouteImport } from './routes/_authenticated/admin.onboarding-provisioning-health'
 import { Route as AuthenticatedAdminNotificationsCockpitRouteImport } from './routes/_authenticated/admin.notifications-cockpit'
@@ -3015,6 +3016,12 @@ const AuthenticatedAdminPayoutsMonetizationHealthRoute =
     path: '/admin/payouts-monetization-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminOperacoesAutomacoesRoute =
+  AuthenticatedAdminOperacoesAutomacoesRouteImport.update({
+    id: '/admin/operacoes-automacoes',
+    path: '/admin/operacoes-automacoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminOndaYRoute = AuthenticatedAdminOndaYRouteImport.update({
   id: '/admin/onda-y',
   path: '/admin/onda-y',
@@ -4482,6 +4489,7 @@ export interface FileRoutesByFullPath {
   '/admin/notifications-cockpit': typeof AuthenticatedAdminNotificationsCockpitRoute
   '/admin/onboarding-provisioning-health': typeof AuthenticatedAdminOnboardingProvisioningHealthRoute
   '/admin/onda-y': typeof AuthenticatedAdminOndaYRouteWithChildren
+  '/admin/operacoes-automacoes': typeof AuthenticatedAdminOperacoesAutomacoesRoute
   '/admin/payouts-monetization-health': typeof AuthenticatedAdminPayoutsMonetizationHealthRoute
   '/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
@@ -5101,6 +5109,7 @@ export interface FileRoutesByTo {
   '/admin/notifications-cockpit': typeof AuthenticatedAdminNotificationsCockpitRoute
   '/admin/onboarding-provisioning-health': typeof AuthenticatedAdminOnboardingProvisioningHealthRoute
   '/admin/onda-y': typeof AuthenticatedAdminOndaYRouteWithChildren
+  '/admin/operacoes-automacoes': typeof AuthenticatedAdminOperacoesAutomacoesRoute
   '/admin/payouts-monetization-health': typeof AuthenticatedAdminPayoutsMonetizationHealthRoute
   '/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
@@ -5735,6 +5744,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/notifications-cockpit': typeof AuthenticatedAdminNotificationsCockpitRoute
   '/_authenticated/admin/onboarding-provisioning-health': typeof AuthenticatedAdminOnboardingProvisioningHealthRoute
   '/_authenticated/admin/onda-y': typeof AuthenticatedAdminOndaYRouteWithChildren
+  '/_authenticated/admin/operacoes-automacoes': typeof AuthenticatedAdminOperacoesAutomacoesRoute
   '/_authenticated/admin/payouts-monetization-health': typeof AuthenticatedAdminPayoutsMonetizationHealthRoute
   '/_authenticated/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/_authenticated/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
@@ -6368,6 +6378,7 @@ export interface FileRouteTypes {
     | '/admin/notifications-cockpit'
     | '/admin/onboarding-provisioning-health'
     | '/admin/onda-y'
+    | '/admin/operacoes-automacoes'
     | '/admin/payouts-monetization-health'
     | '/admin/peer-benchmark'
     | '/admin/pix-pendentes'
@@ -6987,6 +6998,7 @@ export interface FileRouteTypes {
     | '/admin/notifications-cockpit'
     | '/admin/onboarding-provisioning-health'
     | '/admin/onda-y'
+    | '/admin/operacoes-automacoes'
     | '/admin/payouts-monetization-health'
     | '/admin/peer-benchmark'
     | '/admin/pix-pendentes'
@@ -7620,6 +7632,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/notifications-cockpit'
     | '/_authenticated/admin/onboarding-provisioning-health'
     | '/_authenticated/admin/onda-y'
+    | '/_authenticated/admin/operacoes-automacoes'
     | '/_authenticated/admin/payouts-monetization-health'
     | '/_authenticated/admin/peer-benchmark'
     | '/_authenticated/admin/pix-pendentes'
@@ -11152,6 +11165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPayoutsMonetizationHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/operacoes-automacoes': {
+      id: '/_authenticated/admin/operacoes-automacoes'
+      path: '/admin/operacoes-automacoes'
+      fullPath: '/admin/operacoes-automacoes'
+      preLoaderRoute: typeof AuthenticatedAdminOperacoesAutomacoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/onda-y': {
       id: '/_authenticated/admin/onda-y'
       path: '/admin/onda-y'
@@ -13443,6 +13463,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminNotificationsCockpitRoute: typeof AuthenticatedAdminNotificationsCockpitRoute
   AuthenticatedAdminOnboardingProvisioningHealthRoute: typeof AuthenticatedAdminOnboardingProvisioningHealthRoute
   AuthenticatedAdminOndaYRoute: typeof AuthenticatedAdminOndaYRouteWithChildren
+  AuthenticatedAdminOperacoesAutomacoesRoute: typeof AuthenticatedAdminOperacoesAutomacoesRoute
   AuthenticatedAdminPayoutsMonetizationHealthRoute: typeof AuthenticatedAdminPayoutsMonetizationHealthRoute
   AuthenticatedAdminPeerBenchmarkRoute: typeof AuthenticatedAdminPeerBenchmarkRoute
   AuthenticatedAdminPixPendentesRoute: typeof AuthenticatedAdminPixPendentesRoute
@@ -13743,6 +13764,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminOnboardingProvisioningHealthRoute:
     AuthenticatedAdminOnboardingProvisioningHealthRoute,
   AuthenticatedAdminOndaYRoute: AuthenticatedAdminOndaYRouteWithChildren,
+  AuthenticatedAdminOperacoesAutomacoesRoute:
+    AuthenticatedAdminOperacoesAutomacoesRoute,
   AuthenticatedAdminPayoutsMonetizationHealthRoute:
     AuthenticatedAdminPayoutsMonetizationHealthRoute,
   AuthenticatedAdminPeerBenchmarkRoute: AuthenticatedAdminPeerBenchmarkRoute,
