@@ -199,10 +199,8 @@ function RootComponent() {
       <Outlet />
       <PoweredByImpulsionando />
       <LGPDBanner />
-      <OfficialWhatsAppFAB />
+      {/* W16: FAB único — apenas Impulsionito (WhatsApp/Brasil/Download FABs removidos). */}
       <ImpulsionitoFab />
-      <ImpulsionandoBrasilFAB />
-      <DownloadAppFab />
       <DemoAccessGate />
     </QueryClientProvider>
   );
