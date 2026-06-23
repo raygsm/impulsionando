@@ -1,0 +1,89 @@
+{
+  "name": "RioMed — 02 Suporte · Ticket Técnico (triagem por urgência)",
+  "description": "Listener do evento riomed_operational_events { source=support, event_code=ticket.created }. Encaminha ao técnico de plantão por SLA, notifica gerente em urgência crítica. Régua de relacionamento Impulsionando (etapa: reter).",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "riomed-ticket-created",
+        "responseMode": "responseNode",
+        "options": { "rawBody": true }
+      },
+      "id": "wh",
+      "name": "Webhook riomed.ticket.created",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "const crypto = require('crypto');\nconst sig = $input.first().json.headers['x-impulsionando-signature'] || '';\nconst raw = $input.first().json.body;\nconst h = crypto.createHmac('sha256', $env.IMPULSIONANDO_WEBHOOK_SECRET).update(typeof raw==='string'?raw:JSON.stringify(raw)).digest('hex');\nif (h !== sig) throw new Error('invalid signature');\nconst body = typeof raw==='string'?JSON.parse(raw):raw;\nif (body.event_code !== 'ticket.created' || body.source !== 'support') throw new Error('skip');\nconst sla = body.payload.urgency === 'critica' ? 2 : body.payload.urgency === 'alta' ? 8 : 24;\nreturn [{ json: { ...body, sla_hours: sla } }];"
+      },
+      "id": "verify",
+      "name": "Verify HMAC + SLA",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [440, 300]
+    },
+    { "parameters": { "responseCode": 200, "responseBody": "ok" }, "id": "resp", "name": "Respond 200", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [640, 180] },
+    {
+      "parameters": {
+        "conditions": { "string": [{ "value1": "={{$json.payload.urgency}}", "operation": "equals", "value2": "critica" }] }
+      },
+      "id": "ifcrit",
+      "name": "Urgência crítica?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [640, 380]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/whatsapp/send",
+        "method": "POST",
+        "jsonBody": "={\n  \"to\": \"{{$env.RIOMED_MANAGER_PHONE}}\",\n  \"template\": \"riomed_ticket_critico\",\n  \"props\": {\n    \"protocol\": \"{{$json.payload.protocol}}\",\n    \"customer\": \"{{$json.payload.customer.name}}\",\n    \"phone\": \"{{$json.payload.customer.phone}}\",\n    \"city\": \"{{$json.payload.city || '—'}}\",\n    \"category\": \"{{$json.payload.category}}\",\n    \"sla\": \"{{$json.sla_hours}}h\"\n  }\n}",
+        "sendBody": true
+      },
+      "id": "wa-mgr",
+      "name": "WhatsApp → Gerente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [880, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/whatsapp/send",
+        "method": "POST",
+        "jsonBody": "={\n  \"to\": \"{{$env.RIOMED_TECH_DUTY_PHONE}}\",\n  \"template\": \"riomed_ticket_atribuido\",\n  \"props\": {\n    \"protocol\": \"{{$json.payload.protocol}}\",\n    \"urgency\": \"{{$json.payload.urgency}}\",\n    \"customer\": \"{{$json.payload.customer.name}}\",\n    \"phone\": \"{{$json.payload.customer.phone}}\",\n    \"city\": \"{{$json.payload.city || '—'}}\",\n    \"category\": \"{{$json.payload.category}}\",\n    \"sla\": \"{{$json.sla_hours}}h\",\n    \"link\": \"{{$env.IMPULSIONANDO_APP_BASE}}/admin/clientes/riomed/crm\"\n  }\n}",
+        "sendBody": true
+      },
+      "id": "wa-tech",
+      "name": "WhatsApp → Técnico de plantão",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [880, 460]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send",
+        "method": "POST",
+        "jsonBody": "={\n  \"template\": \"riomed-ticket-acknowledged\",\n  \"to\": \"{{$json.payload.customer.email || ''}}\",\n  \"props\": {\n    \"protocol\": \"{{$json.payload.protocol}}\",\n    \"sla\": \"{{$json.sla_hours}}h\"\n  }\n}",
+        "sendBody": true
+      },
+      "id": "em-ack",
+      "name": "Email confirmação cliente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [880, 600]
+    }
+  ],
+  "connections": {
+    "Webhook riomed.ticket.created": { "main": [[{ "node": "Verify HMAC + SLA", "type": "main", "index": 0 }]] },
+    "Verify HMAC + SLA": { "main": [[
+      { "node": "Respond 200", "type": "main", "index": 0 },
+      { "node": "Urgência crítica?", "type": "main", "index": 0 },
+      { "node": "WhatsApp → Técnico de plantão", "type": "main", "index": 0 },
+      { "node": "Email confirmação cliente", "type": "main", "index": 0 }
+    ]] },
+    "Urgência crítica?": { "main": [[{ "node": "WhatsApp → Gerente", "type": "main", "index": 0 }], []] }
+  }
+}
