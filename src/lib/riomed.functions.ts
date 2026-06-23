@@ -230,3 +230,52 @@ export const deleteRioMedProduct = createServerFn({ method: "POST" })
     if (error) throw error;
     return { ok: true };
   });
+
+// ============ BULK IMPORT (CSV/JSON) — products ============
+const productBulkSchema = z.object({
+  items: z.array(productSchema.omit({ id: true })).min(1).max(2000),
+  mode: z.enum(["upsert_by_sku", "insert_only"]).default("upsert_by_sku"),
+});
+
+export const bulkImportRioMedProducts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => productBulkSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const companyId = await getRioMedId(context.supabase);
+    if (!companyId) throw new Error("Tenant RioMed não encontrado");
+
+    let inserted = 0;
+    let updated = 0;
+    const errors: { row: number; error: string }[] = [];
+
+    for (let i = 0; i < data.items.length; i++) {
+      const raw = data.items[i];
+      const payload: any = { ...raw, company_id: companyId };
+      if (payload.image_url === "") payload.image_url = null;
+
+      try {
+        if (data.mode === "upsert_by_sku" && raw.sku) {
+          const { data: existing } = await context.supabase
+            .from("riomed_products")
+            .select("id")
+            .eq("company_id", companyId)
+            .eq("sku", raw.sku)
+            .maybeSingle();
+          if (existing?.id) {
+            const { error } = await context.supabase
+              .from("riomed_products").update(payload).eq("id", existing.id);
+            if (error) throw error;
+            updated++;
+            continue;
+          }
+        }
+        const { error } = await context.supabase
+          .from("riomed_products").insert(payload);
+        if (error) throw error;
+        inserted++;
+      } catch (e: any) {
+        errors.push({ row: i + 1, error: e?.message ?? "erro" });
+      }
+    }
+    return { inserted, updated, errors, total: data.items.length };
+  });
