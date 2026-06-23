@@ -12678,6 +12678,7 @@ export type Database = {
           created_at: string
           currency: string
           description: string
+          discount_pct: number | null
           id: string
           max_price_cents: number | null
           min_price_cents: number | null
@@ -12690,6 +12691,9 @@ export type Database = {
           title: string
           updated_at: string
           visibility: string
+          vitrine_approved_at: string | null
+          vitrine_approved_by: string | null
+          vitrine_opt_in: boolean
         }
         Insert: {
           audience?: string
@@ -12698,6 +12702,7 @@ export type Database = {
           created_at?: string
           currency?: string
           description: string
+          discount_pct?: number | null
           id?: string
           max_price_cents?: number | null
           min_price_cents?: number | null
@@ -12710,6 +12715,9 @@ export type Database = {
           title: string
           updated_at?: string
           visibility?: string
+          vitrine_approved_at?: string | null
+          vitrine_approved_by?: string | null
+          vitrine_opt_in?: boolean
         }
         Update: {
           audience?: string
@@ -12718,6 +12726,7 @@ export type Database = {
           created_at?: string
           currency?: string
           description?: string
+          discount_pct?: number | null
           id?: string
           max_price_cents?: number | null
           min_price_cents?: number | null
@@ -12730,6 +12739,9 @@ export type Database = {
           title?: string
           updated_at?: string
           visibility?: string
+          vitrine_approved_at?: string | null
+          vitrine_approved_by?: string | null
+          vitrine_opt_in?: boolean
         }
         Relationships: [
           {
