@@ -41,7 +41,7 @@ import {
 } from "lucide-react";
 
 
-export const Route = createFileRoute("/_authenticated/clube")({
+export const Route = createFileRoute("/_authenticated/area-clube")({
   component: ClubePage,
 });
 

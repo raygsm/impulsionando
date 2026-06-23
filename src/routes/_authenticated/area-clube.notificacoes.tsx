@@ -14,7 +14,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Bell, Check, CheckCheck, Trash2, ExternalLink, Inbox, Receipt, CalendarDays, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_authenticated/clube/notificacoes")({
+export const Route = createFileRoute("/_authenticated/area-clube/notificacoes")({
   component: ClubeNotificationsPage,
 });
 
@@ -53,7 +53,7 @@ function ClubeNotificationsPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button asChild variant="outline" size="sm"><Link to="/clube">← Voltar ao Clube</Link></Button>
+          <Button asChild variant="outline" size="sm"><Link to="/area-clube">← Voltar à área Clube</Link></Button>
           <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isRefetching}>
             <RefreshCw className={`w-3 h-3 mr-1 ${isRefetching ? "animate-spin" : ""}`} /> Atualizar
           </Button>
