@@ -1,0 +1,90 @@
+{
+  "name": "RioMed 05 — Cobrança de A/R atrasado",
+  "nodes": [
+    { "parameters": { "rule": { "interval": [{ "field": "hours", "triggerAtHour": 9 }] } }, "name": "Diário 09h", "type": "n8n-nodes-base.scheduleTrigger", "typeVersion": 1.2, "position": [200, 300] },
+    {
+      "parameters": {
+        "url": "https://impulsionando.com.br/api/public/riomed/ar/overdue",
+        "options": { "timeout": 15000 }
+      },
+      "name": "A/R vencidos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [420, 300]
+    },
+    { "parameters": { "fieldToSplitOut": "invoices", "options": {} }, "name": "Split", "type": "n8n-nodes-base.splitOut", "typeVersion": 1, "position": [640, 300] },
+    {
+      "parameters": {
+        "rules": { "values": [
+          { "conditions": { "options": { "caseSensitive": true }, "conditions": [{ "leftValue": "={{$json.days_overdue}}", "rightValue": 3, "operator": { "type": "number", "operation": "lte" } }] }, "outputKey": "lembrete" },
+          { "conditions": { "options": { "caseSensitive": true }, "conditions": [{ "leftValue": "={{$json.days_overdue}}", "rightValue": 10, "operator": { "type": "number", "operation": "lte" } }] }, "outputKey": "cobranca" },
+          { "conditions": { "options": { "caseSensitive": true }, "conditions": [{ "leftValue": "={{$json.days_overdue}}", "rightValue": 11, "operator": { "type": "number", "operation": "gte" } }] }, "outputKey": "escalada" }
+        ] }
+      },
+      "name": "Régua de cobrança",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [860, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://impulsionando.com.br/api/public/whatsapp/send", "method": "POST", "sendBody": true,
+        "bodyParameters": { "parameters": [
+          { "name": "to", "value": "={{$json.customer_phone}}" },
+          { "name": "message", "value": "Hola {{$json.customer_name}}, te recordamos que la factura {{$json.fiscal_number || $json.id}} por BOB {{$json.amount}} venció hace {{$json.days_overdue}} día(s). Pagar: {{$json.payment_link}}" }
+        ] }
+      },
+      "name": "Lembrete suave",
+      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [1100, 160]
+    },
+    {
+      "parameters": {
+        "url": "https://impulsionando.com.br/api/public/whatsapp/send", "method": "POST", "sendBody": true,
+        "bodyParameters": { "parameters": [
+          { "name": "to", "value": "={{$json.customer_phone}}" },
+          { "name": "message", "value": "⚠️ {{$json.customer_name}}, su cuenta tiene {{$json.days_overdue}} días de atraso (BOB {{$json.amount}}). Para evitar suspensión del crédito, pague hoy: {{$json.payment_link}}" }
+        ] }
+      },
+      "name": "Cobrança firme",
+      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [1100, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://impulsionando.com.br/api/public/whatsapp/send", "method": "POST", "sendBody": true,
+        "bodyParameters": { "parameters": [
+          { "name": "to", "value": "={{$json.finance_manager_phone}}" },
+          { "name": "message", "value": "🚨 ESCALADA — Cliente {{$json.customer_name}} (NIT {{$json.customer_doc}}) com {{$json.days_overdue}} dias de atraso. Valor: BOB {{$json.amount}}. Sugerir bloqueio e protesto." }
+        ] }
+      },
+      "name": "Escalada ao gestor",
+      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [1100, 440]
+    },
+    {
+      "parameters": {
+        "url": "https://impulsionando.com.br/api/public/riomed/events", "method": "POST", "sendBody": true,
+        "bodyParameters": { "parameters": [
+          { "name": "source", "value": "automation" },
+          { "name": "event_code", "value": "ar.collection.touch" },
+          { "name": "level", "value": "warn" },
+          { "name": "ref_id", "value": "={{$json.id}}" },
+          { "name": "metadata", "value": "={{ { days: $json.days_overdue, amount: $json.amount } }}" }
+        ] }
+      },
+      "name": "Evento", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [1380, 300]
+    }
+  ],
+  "connections": {
+    "Diário 09h": { "main": [[{ "node": "A/R vencidos", "type": "main", "index": 0 }]] },
+    "A/R vencidos": { "main": [[{ "node": "Split", "type": "main", "index": 0 }]] },
+    "Split": { "main": [[{ "node": "Régua de cobrança", "type": "main", "index": 0 }]] },
+    "Régua de cobrança": { "main": [
+      [{ "node": "Lembrete suave", "type": "main", "index": 0 }],
+      [{ "node": "Cobrança firme", "type": "main", "index": 0 }],
+      [{ "node": "Escalada ao gestor", "type": "main", "index": 0 }]
+    ] },
+    "Lembrete suave": { "main": [[{ "node": "Evento", "type": "main", "index": 0 }]] },
+    "Cobrança firme": { "main": [[{ "node": "Evento", "type": "main", "index": 0 }]] },
+    "Escalada ao gestor": { "main": [[{ "node": "Evento", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }
+}
