@@ -454,6 +454,13 @@ export const updateRiomedLeadStatus = createServerFn({ method: "POST" })
     if (data.notes) patch.notes = data.notes;
     const { error } = await supa.from("riomed_seller_leads").update(patch).eq("id", data.leadId);
     if (error) throw error;
+    await emitRiomedEvent({
+      source: "crm",
+      eventCode: `lead.${data.status}`,
+      message: `Lead movido para ${data.status}`,
+      payload: { leadId: data.leadId, status: data.status },
+      correlationId: data.leadId,
+    });
     return { ok: true };
   });
 
@@ -467,6 +474,14 @@ export const updateRiomedTicketStatus = createServerFn({ method: "POST" })
     const { error } = await supa.from("riomed_support_tickets")
       .update({ status: data.status, updated_at: new Date().toISOString() }).eq("id", data.ticketId);
     if (error) throw error;
+    await emitRiomedEvent({
+      source: "support",
+      eventCode: `ticket.${data.status}`,
+      message: `Ticket movido para ${data.status}`,
+      level: data.status === "resolvido" ? "info" : data.status === "cancelado" ? "warn" : "info",
+      payload: { ticketId: data.ticketId, status: data.status },
+      correlationId: data.ticketId,
+    });
     return { ok: true };
   });
 
