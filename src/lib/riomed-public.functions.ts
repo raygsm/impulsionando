@@ -374,8 +374,33 @@ export const submitRiomedSellerLead = createServerFn({ method: "POST" })
   });
 
 // ============================================================
-// Wave 4 — admin/seller/manager panels
+// Wave 4/5 — admin panels + jornadas (operational events → N8N)
 // ============================================================
+
+async function emitRiomedEvent(opts: {
+  source: string;
+  eventCode: string;
+  message: string;
+  level?: "info" | "warn" | "error";
+  payload?: Record<string, unknown>;
+  correlationId?: string;
+}) {
+  try {
+    const supa = await adminClient();
+    const companyId = await getRiomedCompanyId(supa);
+    if (!companyId) return;
+    await supa.from("riomed_operational_events").insert({
+      company_id: companyId,
+      level: opts.level ?? "info",
+      source: opts.source,
+      event_code: opts.eventCode,
+      message: opts.message,
+      payload: opts.payload ?? {},
+      correlation_id: opts.correlationId ?? null,
+    } as any);
+  } catch { /* não bloquear fluxo principal */ }
+}
+
 
 export const listRiomedSellerLeads = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) => z.object({
