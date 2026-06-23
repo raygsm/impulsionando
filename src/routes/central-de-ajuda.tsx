@@ -250,7 +250,7 @@ function AjudaPage() {
   );
 }
 
-export const Route = createFileRoute("/ajuda")({
+export const Route = createFileRoute("/central-de-ajuda")({
   head: () => ({
     meta: [
       { title: "Central de Ajuda | Impulsionando" },

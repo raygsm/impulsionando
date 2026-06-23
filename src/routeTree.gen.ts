@@ -42,6 +42,7 @@ import { Route as ContaSuspensaRouteImport } from './routes/conta-suspensa'
 import { Route as ConsumidorRouteImport } from './routes/consumidor'
 import { Route as ClubeRouteImport } from './routes/clube'
 import { Route as ChrismedRouteImport } from './routes/chrismed'
+import { Route as CentralDeAjudaRouteImport } from './routes/central-de-ajuda'
 import { Route as CatalogoRouteImport } from './routes/catalogo'
 import { Route as CanalOficialRouteImport } from './routes/canal-oficial'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -833,6 +834,11 @@ const ClubeRoute = ClubeRouteImport.update({
 const ChrismedRoute = ChrismedRouteImport.update({
   id: '/chrismed',
   path: '/chrismed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CentralDeAjudaRoute = CentralDeAjudaRouteImport.update({
+  id: '/central-de-ajuda',
+  path: '/central-de-ajuda',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CatalogoRoute = CatalogoRouteImport.update({
@@ -4400,6 +4406,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/canal-oficial': typeof CanalOficialRoute
   '/catalogo': typeof CatalogoRoute
+  '/central-de-ajuda': typeof CentralDeAjudaRoute
   '/chrismed': typeof ChrismedRouteWithChildren
   '/clube': typeof ClubeRouteWithChildren
   '/consumidor': typeof ConsumidorRoute
@@ -5061,6 +5068,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/canal-oficial': typeof CanalOficialRoute
   '/catalogo': typeof CatalogoRoute
+  '/central-de-ajuda': typeof CentralDeAjudaRoute
   '/chrismed': typeof ChrismedRouteWithChildren
   '/clube': typeof ClubeRouteWithChildren
   '/consumidor': typeof ConsumidorRoute
@@ -5712,6 +5720,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/canal-oficial': typeof CanalOficialRoute
   '/catalogo': typeof CatalogoRoute
+  '/central-de-ajuda': typeof CentralDeAjudaRoute
   '/chrismed': typeof ChrismedRouteWithChildren
   '/clube': typeof ClubeRouteWithChildren
   '/consumidor': typeof ConsumidorRoute
@@ -6375,6 +6384,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/canal-oficial'
     | '/catalogo'
+    | '/central-de-ajuda'
     | '/chrismed'
     | '/clube'
     | '/consumidor'
@@ -7036,6 +7046,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/canal-oficial'
     | '/catalogo'
+    | '/central-de-ajuda'
     | '/chrismed'
     | '/clube'
     | '/consumidor'
@@ -7686,6 +7697,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/canal-oficial'
     | '/catalogo'
+    | '/central-de-ajuda'
     | '/chrismed'
     | '/clube'
     | '/consumidor'
@@ -8349,6 +8361,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CanalOficialRoute: typeof CanalOficialRoute
   CatalogoRoute: typeof CatalogoRoute
+  CentralDeAjudaRoute: typeof CentralDeAjudaRoute
   ChrismedRoute: typeof ChrismedRouteWithChildren
   ClubeRoute: typeof ClubeRouteWithChildren
   ConsumidorRoute: typeof ConsumidorRoute
@@ -8748,6 +8761,13 @@ declare module '@tanstack/react-router' {
       path: '/chrismed'
       fullPath: '/chrismed'
       preLoaderRoute: typeof ChrismedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/central-de-ajuda': {
+      id: '/central-de-ajuda'
+      path: '/central-de-ajuda'
+      fullPath: '/central-de-ajuda'
+      preLoaderRoute: typeof CentralDeAjudaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/catalogo': {
@@ -14762,6 +14782,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CanalOficialRoute: CanalOficialRoute,
   CatalogoRoute: CatalogoRoute,
+  CentralDeAjudaRoute: CentralDeAjudaRoute,
   ChrismedRoute: ChrismedRouteWithChildren,
   ClubeRoute: ClubeRouteWithChildren,
   ConsumidorRoute: ConsumidorRoute,
