@@ -23,14 +23,14 @@ export const listMpagoEvents = createServerFn({ method: "GET" })
       supabaseAdmin
         .from("mpago_webhook_events")
         .select(
-          "id, event_type, action, mp_resource_id, signature_valid, processed, processed_at, created_at, company_id",
+          "id, event_type, action, mp_resource_id, signature_valid, processed, processed_at, received_at, company_id",
         )
-        .order("created_at", { ascending: false })
+        .order("received_at", { ascending: false })
         .limit(50),
       supabaseAdmin
         .from("mpago_payments")
-        .select("id, status, amount_cents, description, payer_email, mp_payment_id, created_at, approved_at, company_id")
-        .order("created_at", { ascending: false })
+        .select("id, status, amount_cents, description, payer_email, mp_payment_id, received_at, approved_at, company_id")
+        .order("received_at", { ascending: false })
         .limit(20),
     ]);
 
@@ -109,7 +109,7 @@ function MpagoEventsPage() {
                       <div className="text-xs text-muted-foreground">
                         {p.payer_email ?? "sem e-mail"} · MP {p.mp_payment_id ?? "—"}
                       </div>
-                      <div className="text-xs text-muted-foreground">{fmtDate(p.created_at)}</div>
+                      <div className="text-xs text-muted-foreground">{fmtDate(p.received_at)}</div>
                     </div>
                     <div className="text-right shrink-0 ml-3">
                       <div className="font-semibold">{brl(p.amount_cents)}</div>
@@ -151,7 +151,7 @@ function MpagoEventsPage() {
                         {e.action && <span className="text-muted-foreground">· {e.action}</span>}
                       </div>
                       <div className="text-muted-foreground truncate">
-                        {e.mp_resource_id} · {fmtDate(e.created_at)}
+                        {e.mp_resource_id} · {fmtDate(e.received_at)}
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0 ml-2">
