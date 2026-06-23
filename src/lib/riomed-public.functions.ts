@@ -532,3 +532,20 @@ export const getRiomedTeamPerformance = createServerFn({ method: "GET" })
       })),
     };
   });
+
+export const listRiomedOperationalEvents = createServerFn({ method: "GET" })
+  .inputValidator((d: unknown) => z.object({
+    source: z.string().optional(),
+    limit: z.number().int().min(1).max(500).optional(),
+  }).optional().parse(d))
+  .handler(async ({ data }) => {
+    const supa = await adminClient();
+    let q = supa.from("riomed_operational_events")
+      .select("id,level,source,event_code,message,payload,correlation_id,created_at")
+      .order("created_at", { ascending: false })
+      .limit(data?.limit ?? 100);
+    if (data?.source) q = q.eq("source", data.source);
+    const { data: rows, error } = await q;
+    if (error) throw error;
+    return { events: rows ?? [] };
+  });

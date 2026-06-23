@@ -1,0 +1,90 @@
+{
+  "name": "RioMed — 01 Captação · Novo Lead Comercial",
+  "description": "Listener do evento riomed_operational_events { source=crm, event_code=lead.created }. Notifica o vendedor por WhatsApp e dispara boas-vindas ao cliente. Régua de relacionamento Impulsionando (etapa: captar→converter).",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "riomed-lead-created",
+        "responseMode": "responseNode",
+        "options": { "rawBody": true }
+      },
+      "id": "wh",
+      "name": "Webhook riomed.lead.created",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "const crypto = require('crypto');\nconst sig = $input.first().json.headers['x-impulsionando-signature'] || '';\nconst raw = $input.first().json.body;\nconst h = crypto.createHmac('sha256', $env.IMPULSIONANDO_WEBHOOK_SECRET).update(typeof raw==='string'?raw:JSON.stringify(raw)).digest('hex');\nif (h !== sig) throw new Error('invalid signature');\nconst body = typeof raw==='string'?JSON.parse(raw):raw;\nif (body.event_code !== 'lead.created' || body.source !== 'crm') throw new Error('skip');\nreturn [{ json: body }];"
+      },
+      "id": "verify",
+      "name": "Verify HMAC + filter",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [440, 300]
+    },
+    {
+      "parameters": { "responseCode": 200, "responseBody": "ok" },
+      "id": "resp",
+      "name": "Respond 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [640, 180]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/whatsapp/send",
+        "method": "POST",
+        "jsonBody": "={\n  \"to\": \"{{$json.payload.sellerPhone || $env.RIOMED_FALLBACK_MANAGER_PHONE}}\",\n  \"template\": \"riomed_lead_assigned\",\n  \"props\": {\n    \"seller\": \"{{$json.payload.sellerName || 'equipe'}}\",\n    \"customer\": \"{{$json.payload.customer.name}}\",\n    \"phone\": \"{{$json.payload.customer.phone}}\",\n    \"profile\": \"{{$json.payload.profile || '—'}}\",\n    \"interest\": \"{{$json.payload.interest || '—'}}\",\n    \"link\": \"{{$env.IMPULSIONANDO_APP_BASE}}/admin/clientes/riomed/crm\"\n  }\n}",
+        "sendBody": true,
+        "options": { "timeout": 15000 }
+      },
+      "id": "wa-seller",
+      "name": "WhatsApp → Vendedor",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [640, 380]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/email/send",
+        "method": "POST",
+        "jsonBody": "={\n  \"template\": \"riomed-lead-welcome\",\n  \"to\": \"{{$json.payload.customer.email}}\",\n  \"props\": {\n    \"name\": \"{{$json.payload.customer.name}}\",\n    \"seller\": \"{{$json.payload.sellerName || 'nuestro equipo'}}\",\n    \"catalog\": \"{{$env.RIOMED_PUBLIC_BASE}}/productos\"\n  }\n}",
+        "sendBody": true
+      },
+      "id": "em-customer",
+      "name": "Email boas-vindas cliente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [640, 540]
+    },
+    { "parameters": { "amount": 1, "unit": "days" }, "id": "wait1", "name": "Aguardar 1 dia", "type": "n8n-nodes-base.wait", "typeVersion": 1, "position": [880, 540] },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/whatsapp/send",
+        "method": "POST",
+        "jsonBody": "={\n  \"to\": \"{{$json.payload.customer.phone}}\",\n  \"template\": \"riomed_followup_1d\",\n  \"props\": { \"name\": \"{{$json.payload.customer.name}}\" }\n}",
+        "sendBody": true
+      },
+      "id": "wa-fu1",
+      "name": "Follow-up cliente (1d)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1080, 540]
+    }
+  ],
+  "connections": {
+    "Webhook riomed.lead.created": { "main": [[{ "node": "Verify HMAC + filter", "type": "main", "index": 0 }]] },
+    "Verify HMAC + filter": {
+      "main": [[
+        { "node": "Respond 200", "type": "main", "index": 0 },
+        { "node": "WhatsApp → Vendedor", "type": "main", "index": 0 },
+        { "node": "Email boas-vindas cliente", "type": "main", "index": 0 }
+      ]]
+    },
+    "Email boas-vindas cliente": { "main": [[{ "node": "Aguardar 1 dia", "type": "main", "index": 0 }]] },
+    "Aguardar 1 dia": { "main": [[{ "node": "Follow-up cliente (1d)", "type": "main", "index": 0 }]] }
+  }
+}
