@@ -23,6 +23,8 @@ async function verifySignature(secret: string, dataId: string, requestId: string
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
+  console.log('[mpago-webhook] hit', req.method, req.url);
+
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
