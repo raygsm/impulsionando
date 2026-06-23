@@ -26,18 +26,29 @@ export const getPublicVitrine = createServerFn({ method: "GET" })
     z.object({
       segment: z.string().optional(),
       city: z.string().optional(),
+      state: z.string().optional(),
+      q: z.string().optional(),
       sort: z.enum(["rating", "recent", "name"]).default("rating"),
-      limit: z.number().int().min(1).max(200).default(60),
+      limit: z.number().int().min(1).max(200).default(120),
     }).parse(d ?? {}),
   )
   .handler(async ({ data }) => {
     const sb = publicClient();
     let query = sb
       .from("companies_vitrine_public")
-      .select("id, name, trade_name, segment, logo_url, public_slug, address_city, address_state, rating_avg, rating_count")
+      .select(
+        "id, name, trade_name, segment, logo_url, cover_image_url, tagline, description, public_slug, address_city, address_state, address_neighborhood, primary_color, website, instagram, whatsapp, rating_avg, rating_count, updated_at",
+      )
       .limit(data.limit);
     if (data.segment) query = query.eq("segment", data.segment);
     if (data.city) query = query.ilike("address_city", `%${data.city}%`);
+    if (data.state) query = query.ilike("address_state", `%${data.state}%`);
+    if (data.q) {
+      const term = `%${data.q}%`;
+      query = query.or(
+        `name.ilike.${term},trade_name.ilike.${term},tagline.ilike.${term},description.ilike.${term},address_city.ilike.${term}`,
+      );
+    }
     if (data.sort === "rating") {
       query = query.order("rating_avg", { ascending: false, nullsFirst: false }).order("rating_count", { ascending: false });
     } else if (data.sort === "recent") {
