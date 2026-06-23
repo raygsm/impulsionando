@@ -1,0 +1,77 @@
+{
+  "name": "RioMed — 08 Relacionamento · Broadcast WhatsApp",
+  "description": "Dispara campanhas registradas em riomed_whatsapp_broadcasts (status=scheduled). Itera segmento, respeita opt-out e marca status=sent. Etapa: relacionar/reter.",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "minutes", "minutesInterval": 10 }] }
+      },
+      "id": "cron",
+      "name": "A cada 10 min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/riomed/broadcasts/due",
+        "method": "GET",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [
+          { "name": "x-impulsionando-signature", "value": "={{$crypto.createHmac('sha256', $env.IMPULSIONANDO_WEBHOOK_SECRET).update('').digest('hex')}}" }
+        ] }
+      },
+      "id": "fetch",
+      "name": "GET broadcasts due",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [400, 300]
+    },
+    {
+      "parameters": { "batchSize": 1, "options": {} },
+      "id": "split",
+      "name": "Split broadcasts",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 2,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/whatsapp/send-bulk",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [
+          { "name": "x-impulsionando-signature", "value": "={{$crypto.createHmac('sha256', $env.IMPULSIONANDO_WEBHOOK_SECRET).update(JSON.stringify($json)).digest('hex')}}" },
+          { "name": "Content-Type", "value": "application/json" }
+        ] },
+        "jsonBody": "={\n  \"broadcast_id\": \"{{$json.id}}\",\n  \"template\": \"{{$json.template_code}}\",\n  \"segment\": {{JSON.stringify($json.segment)}},\n  \"throttle_per_minute\": 60,\n  \"respect_opt_out\": true\n}"
+      },
+      "id": "send",
+      "name": "POST send-bulk",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [800, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/riomed/broadcasts/{{$json.broadcast_id}}/mark-sent",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [
+          { "name": "x-impulsionando-signature", "value": "={{$crypto.createHmac('sha256', $env.IMPULSIONANDO_WEBHOOK_SECRET).update(JSON.stringify($json)).digest('hex')}}" }
+        ] }
+      },
+      "id": "mark",
+      "name": "Mark sent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1000, 300]
+    }
+  ],
+  "connections": {
+    "A cada 10 min": { "main": [[{ "node": "GET broadcasts due", "type": "main", "index": 0 }]] },
+    "GET broadcasts due": { "main": [[{ "node": "Split broadcasts", "type": "main", "index": 0 }]] },
+    "Split broadcasts": { "main": [[{ "node": "POST send-bulk", "type": "main", "index": 0 }]] },
+    "POST send-bulk": { "main": [[{ "node": "Mark sent", "type": "main", "index": 0 }]] }
+  }
+}

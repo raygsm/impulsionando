@@ -1,0 +1,60 @@
+{
+  "name": "RioMed — 07 Captação · Lead Instagram DM",
+  "description": "Recebe DMs/comentários classificados como intenção comercial via webhook Meta e cria lead no Impulsionando. Etapa: captar.",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "riomed-instagram-lead",
+        "responseMode": "responseNode"
+      },
+      "id": "wh",
+      "name": "Webhook Instagram Graph",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": { "responseCode": 200, "responseBody": "ok" },
+      "id": "ack",
+      "name": "Respond 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [440, 180]
+    },
+    {
+      "parameters": {
+        "functionCode": "const entry = ($json.body && $json.body.entry) || [];\nconst out = [];\nfor (const e of entry) {\n  for (const m of (e.messaging || [])) {\n    if (!m.message || !m.message.text) continue;\n    out.push({ json: {\n      source: 'instagram_dm',\n      event_code: 'lead.created',\n      payload: {\n        customer: { ig_user_id: m.sender.id, name: m.sender.name || 'Instagram user' },\n        message: m.message.text,\n        interest: 'instagram_dm',\n        utm: { source: 'instagram', medium: 'organic' }\n      }\n    }});\n  }\n}\nreturn out;"
+      },
+      "id": "extract",
+      "name": "Extract DMs",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [460, 380]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.IMPULSIONANDO_API_BASE}}/api/public/riomed/events",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [
+          { "name": "x-impulsionando-signature", "value": "={{$crypto.createHmac('sha256', $env.IMPULSIONANDO_WEBHOOK_SECRET).update(JSON.stringify($json)).digest('hex')}}" },
+          { "name": "Content-Type", "value": "application/json" }
+        ] },
+        "jsonBody": "={{ JSON.stringify($json) }}"
+      },
+      "id": "push",
+      "name": "POST /events",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [680, 380]
+    }
+  ],
+  "connections": {
+    "Webhook Instagram Graph": { "main": [[
+      { "node": "Respond 200", "type": "main", "index": 0 },
+      { "node": "Extract DMs", "type": "main", "index": 0 }
+    ]] },
+    "Extract DMs": { "main": [[{ "node": "POST /events", "type": "main", "index": 0 }]] }
+  }
+}
