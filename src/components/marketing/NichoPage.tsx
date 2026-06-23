@@ -325,19 +325,37 @@ export function NichoPage({ nicho }: Props) {
             <>
               {extra.logisticsExamples && extra.logisticsExamples.length > 0 && (
                 <section>
-                  <div className="flex items-center gap-2 mb-5">
-                    <Zap className="w-5 h-5 text-primary" />
-                    <h2 className="text-2xl font-bold tracking-tight">Como a operação funciona, na prática</h2>
+                  <div className="flex items-center gap-3 mb-6">
+                    <span className="grid h-10 w-10 place-items-center rounded-xl bg-accent/15 text-accent ring-1 ring-accent/30">
+                      <Zap className="w-5 h-5" />
+                    </span>
+                    <div>
+                      <Badge variant="outline" className="text-[10px] border-accent/40 text-accent bg-accent/5 mb-1">
+                        Operação na prática
+                      </Badge>
+                      <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                        Como a operação funciona, na prática
+                      </h2>
+                    </div>
                   </div>
                   <div className="grid md:grid-cols-2 gap-4">
-                    {extra.logisticsExamples.map((g) => (
-                      <Card key={g.title} className="p-6">
-                        <h3 className="font-semibold mb-3">{g.title}</h3>
-                        <ul className="space-y-2 text-sm leading-relaxed">
+                    {extra.logisticsExamples.map((g, gi) => (
+                      <Card
+                        key={g.title}
+                        className="group relative overflow-hidden p-6 transition-all hover:-translate-y-0.5 hover:shadow-elegant hover:border-primary/40"
+                      >
+                        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-accent to-primary opacity-60" />
+                        <div className="flex items-center gap-3 mb-4">
+                          <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-primary text-primary-foreground text-xs font-bold shadow-sm">
+                            {String(gi + 1).padStart(2, "0")}
+                          </span>
+                          <h3 className="font-semibold text-base">{g.title}</h3>
+                        </div>
+                        <ul className="space-y-2.5 text-sm leading-relaxed">
                           {g.items.map((it) => (
-                            <li key={it} className="flex gap-2">
-                              <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                              <span>{it}</span>
+                            <li key={it} className="flex gap-2.5 items-start">
+                              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary group-hover:scale-125 transition-transform" />
+                              <span className="text-foreground/90">{it}</span>
                             </li>
                           ))}
                         </ul>
@@ -350,33 +368,63 @@ export function NichoPage({ nicho }: Props) {
               {(extra.formExample || extra.dashboardExample) && (
                 <section className="grid md:grid-cols-2 gap-4">
                   {extra.formExample && (
-                    <Card className="p-6">
-                      <h3 className="font-semibold mb-3 flex items-center gap-2">
-                        <Lightbulb className="w-4 h-4 text-primary" /> {extra.formExample.title}
-                      </h3>
-                      <ul className="space-y-1.5 text-sm">
-                        {extra.formExample.fields.map((f) => (
-                          <li key={f} className="text-muted-foreground">• {f}</li>
-                        ))}
-                      </ul>
+                    <Card className="relative overflow-hidden p-6 bg-gradient-to-br from-card to-primary/5">
+                      <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/10 blur-2xl" />
+                      <div className="relative">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant="outline" className="text-[10px] border-primary/30 text-primary bg-background">
+                            Formulário
+                          </Badge>
+                        </div>
+                        <h3 className="font-semibold mb-4 flex items-center gap-2 text-base">
+                          <Lightbulb className="w-4 h-4 text-primary" /> {extra.formExample.title}
+                        </h3>
+                        <ul className="space-y-2 text-sm">
+                          {extra.formExample.fields.map((f) => (
+                            <li
+                              key={f}
+                              className="flex items-center gap-2 rounded-md border border-border/60 bg-background/60 backdrop-blur px-3 py-2"
+                            >
+                              <span className="h-2 w-2 rounded-sm bg-primary/60" />
+                              <span className="text-foreground/90">{f}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     </Card>
                   )}
                   {extra.dashboardExample && (
-                    <Card className="p-6">
-                      <h3 className="font-semibold mb-3 flex items-center gap-2">
-                        <Target className="w-4 h-4 text-primary" /> {extra.dashboardExample.title}
-                      </h3>
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        {extra.dashboardExample.cards.map((c) => (
-                          <div key={c} className="rounded-md border bg-muted/30 px-3 py-2 text-xs font-medium">
-                            {c}
-                          </div>
-                        ))}
+                    <Card className="relative overflow-hidden p-6 bg-gradient-to-br from-card to-accent/5">
+                      <div className="absolute -left-10 -bottom-10 h-32 w-32 rounded-full bg-accent/10 blur-2xl" />
+                      <div className="relative">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant="outline" className="text-[10px] border-accent/40 text-accent bg-background">
+                            Dashboard
+                          </Badge>
+                        </div>
+                        <h3 className="font-semibold mb-4 flex items-center gap-2 text-base">
+                          <Target className="w-4 h-4 text-accent" /> {extra.dashboardExample.title}
+                        </h3>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          {extra.dashboardExample.cards.map((c, ci) => (
+                            <div
+                              key={c}
+                              className="group relative rounded-lg border bg-background/70 backdrop-blur px-3 py-3 text-xs font-medium overflow-hidden hover:border-primary/40 transition-colors"
+                            >
+                              <div className="absolute top-1 right-1.5 text-[9px] font-mono text-muted-foreground/50 tabular-nums">
+                                {String(ci + 1).padStart(2, "0")}
+                              </div>
+                              <div className="h-1 w-6 rounded-full bg-gradient-primary mb-1.5" />
+                              <div className="text-foreground/90 leading-tight">{c}</div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </Card>
                   )}
                 </section>
               )}
+
 
               {extra.closingPitch && (
                 <section className="rounded-xl border bg-gradient-to-br from-primary/5 to-accent/5 p-6">
