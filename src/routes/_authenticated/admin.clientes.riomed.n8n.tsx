@@ -169,6 +169,46 @@ function N8nPage() {
           </div>
         </CardContent>
       </Card>
+
+      <OperationalEventsPanel />
     </div>
+  );
+}
+
+function OperationalEventsPanel() {
+  const fn = useServerFn(listRiomedOperationalEvents);
+  const q = useQuery({
+    queryKey: ["riomed-op-events"],
+    queryFn: () => fn({ data: { limit: 80 } }),
+    refetchInterval: 15000,
+  });
+  const events = q.data?.events ?? [];
+  const levelVariant: Record<string, any> = { info: "secondary", warn: "default", error: "destructive" };
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base flex items-center justify-between">
+          <span>Eventos operacionais (jornadas → N8N)</span>
+          <Badge variant="outline" className="text-[10px]">últimos {events.length}</Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-1 text-sm max-h-[420px] overflow-y-auto">
+          {events.map((e: any) => (
+            <div key={e.id} className="flex items-start justify-between gap-3 border-b py-2">
+              <div className="flex items-start gap-2 min-w-0 flex-1">
+                <Badge variant={levelVariant[e.level] ?? "outline"} className="text-[10px] shrink-0">{e.level}</Badge>
+                <div className="min-w-0">
+                  <div className="font-mono text-[11px] text-muted-foreground">{e.source} · {e.event_code}</div>
+                  <div className="text-xs truncate">{e.message}</div>
+                </div>
+              </div>
+              <div className="text-[10px] text-muted-foreground whitespace-nowrap">{new Date(e.created_at).toLocaleString()}</div>
+            </div>
+          ))}
+          {events.length === 0 && <div className="text-muted-foreground text-xs">Nenhum evento ainda. Crie um lead/ticket para ver o stream em tempo real.</div>}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
