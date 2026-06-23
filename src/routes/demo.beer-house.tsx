@@ -9,7 +9,7 @@ import {
   TrendingUp, Users, ArrowRight, CheckCircle2, Clock, AlertTriangle,
 } from "lucide-react";
 
-const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20vi%20a%20hist%C3%B3ria%20da%20Beer%20House%20e%20quero%20uma%20demo.";
+const WHATSAPP_URL = "https://wa.me/5521972631063?text=Ol%C3%A1%2C%20vi%20a%20hist%C3%B3ria%20da%20Beer%20House%20e%20quero%20uma%20demo.";
 
 export const Route = createFileRoute("/demo/beer-house")({
   head: () => ({

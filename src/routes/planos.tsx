@@ -41,7 +41,7 @@ const PLAN_QUOTA: Record<string, number> = {
 /** Preço por módulo adicional além da quota do plano. */
 const EXTRA_MODULE_BRL = 497;
 
-const WHATSAPP_URL = "https://wa.me/5521993075000?text=Ol%C3%A1%2C%20quero%20entender%20melhor%20os%20planos%20da%20Impulsionando.";
+const WHATSAPP_URL = "https://wa.me/5521972631063?text=Ol%C3%A1%2C%20quero%20entender%20melhor%20os%20planos%20da%20Impulsionando.";
 
 export const Route = createFileRoute("/planos")({
   ssr: false,
