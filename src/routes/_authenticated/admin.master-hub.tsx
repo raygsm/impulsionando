@@ -82,7 +82,7 @@ function AdminMasterHub() {
   });
   const tenantsQ = useQuery({
     queryKey: ["admin-master-hub", "tenants"],
-    queryFn: () => fetchTenants({ data: {} }),
+    queryFn: () => fetchTenants(),
     staleTime: 30_000,
   });
 
