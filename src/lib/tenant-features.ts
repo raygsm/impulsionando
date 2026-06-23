@@ -31,8 +31,84 @@ export function getTenantFeatures(slug: string): FeatureGroup[] {
   if (slug === "riomed") return RIOMED_FEATURES;
   if (slug === "chrismed") return CHRISMED_FEATURES;
   if (slug === "marocas") return MAROCAS_FEATURES;
+  if (slug === "garrido") return IMOBILIARIA_FEATURES;
+  if (slug.startsWith("demo-imobiliar")) return IMOBILIARIA_FEATURES;
+  if (slug.startsWith("demo-microcervejarias")) return CERVEJARIA_FEATURES;
+  if (slug.startsWith("demo-bares")) return BARES_FEATURES;
   return [];
 }
+
+const IMOBILIARIA_FEATURES: FeatureGroup[] = [
+  {
+    category: "Captação & Catálogo",
+    items: [
+      { label: "Imóveis", to: "/imobiliaria/imoveis", icon: Package },
+      { label: "Vitrine pública", to: "/imobiliaria/vitrine", icon: Globe },
+      { label: "Proprietários", to: "/imobiliaria/proprietarios", icon: Users },
+      { label: "Documentos", to: "/imobiliaria/documentos", icon: FileText },
+    ],
+  },
+  {
+    category: "Funil & Atendimento",
+    items: [
+      { label: "Interessados", to: "/imobiliaria/interessados", icon: Users, module: "crm" },
+      { label: "Intenções", to: "/imobiliaria/intencoes", icon: Search, module: "crm" },
+      { label: "Matches", to: "/imobiliaria/matches", icon: GitBranch },
+      { label: "Visitas", to: "/imobiliaria/visitas", icon: Calendar },
+      { label: "Mensagens", to: "/imobiliaria/mensagens", icon: MessageCircle },
+      { label: "Distribuição de leads", to: "/imobiliaria/distribuicao", icon: GitBranch, module: "crm" },
+    ],
+  },
+  {
+    category: "Contratos & Aprovações",
+    items: [
+      { label: "Aprovações", to: "/imobiliaria/aprovacoes", icon: ShieldCheck },
+      { label: "Contratos", to: "/imobiliaria/contratos", icon: FileText },
+      { label: "Financiamento", to: "/imobiliaria/financiamento", icon: Wallet, module: "finance" },
+    ],
+  },
+  {
+    category: "Marketing & Parcerias",
+    items: [
+      { label: "Campanhas", to: "/imobiliaria/campanhas", icon: Megaphone, module: "marketing" },
+      { label: "Parceiros", to: "/imobiliaria/parceiros", icon: Users },
+      { label: "Equipes", to: "/imobiliaria/equipes", icon: Briefcase },
+      { label: "Módulos", to: "/imobiliaria/modulos", icon: Layers },
+    ],
+  },
+];
+
+const CERVEJARIA_FEATURES: FeatureGroup[] = [
+  {
+    category: "Operação Cervejaria",
+    items: [
+      { label: "Catálogo", to: "/cervejaria/catalogo", icon: Package, module: "inventory" },
+      { label: "Marketplace B2B", to: "/cervejaria/marketplace", icon: ShoppingCart, module: "marketplace" },
+      { label: "PDVs parceiros", to: "/cervejaria/pdvs", icon: Briefcase },
+      { label: "Relacionamento", to: "/cervejaria/relacionamento", icon: MessageCircle, module: "crm" },
+      { label: "Logística reversa", to: "/cervejaria/retorno", icon: Truck },
+    ],
+  },
+];
+
+const BARES_FEATURES: FeatureGroup[] = [
+  {
+    category: "Salão & Cardápio",
+    items: [
+      { label: "Cardápio", to: "/restaurante/cardapio", icon: BookOpen },
+      { label: "Mesas", to: "/restaurante/mesas", icon: Layout },
+      { label: "Salão", to: "/restaurante/salao", icon: ListChecks },
+      { label: "Notificações", to: "/restaurante/salao/notificacoes", icon: MessageCircle },
+    ],
+  },
+  {
+    category: "Compras & Marketplace",
+    items: [
+      { label: "Marketplace B2B", to: "/bar/marketplace", icon: ShoppingCart, module: "marketplace" },
+      { label: "Novo pedido", to: "/bar/marketplace/novo-pedido", icon: HandCoins, module: "marketplace" },
+    ],
+  },
+];
 
 const MAROCAS_FEATURES: FeatureGroup[] = [
   {
