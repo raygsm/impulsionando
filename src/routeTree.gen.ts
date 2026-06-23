@@ -461,6 +461,7 @@ import { Route as AuthenticatedAdminNotificationDeliveryRouteImport } from './ro
 import { Route as AuthenticatedAdminNotificationDeliverabilityHealthRouteImport } from './routes/_authenticated/admin.notification-deliverability-health'
 import { Route as AuthenticatedAdminNichePlansRouteImport } from './routes/_authenticated/admin.niche-plans'
 import { Route as AuthenticatedAdminNicheMatrixRouteImport } from './routes/_authenticated/admin.niche-matrix'
+import { Route as AuthenticatedAdminN8nNichesRouteImport } from './routes/_authenticated/admin.n8n-niches'
 import { Route as AuthenticatedAdminN8nConsoleRouteImport } from './routes/_authenticated/admin.n8n-console'
 import { Route as AuthenticatedAdminMercadopagoBillingHealthRouteImport } from './routes/_authenticated/admin.mercadopago-billing-health'
 import { Route as AuthenticatedAdminMenuManagerRouteImport } from './routes/_authenticated/admin.menu-manager'
@@ -3163,6 +3164,12 @@ const AuthenticatedAdminNicheMatrixRoute =
     path: '/admin/niche-matrix',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminN8nNichesRoute =
+  AuthenticatedAdminN8nNichesRouteImport.update({
+    id: '/admin/n8n-niches',
+    path: '/admin/n8n-niches',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminN8nConsoleRoute =
   AuthenticatedAdminN8nConsoleRouteImport.update({
     id: '/admin/n8n-console',
@@ -4696,6 +4703,7 @@ export interface FileRoutesByFullPath {
   '/admin/menu-manager': typeof AuthenticatedAdminMenuManagerRoute
   '/admin/mercadopago-billing-health': typeof AuthenticatedAdminMercadopagoBillingHealthRoute
   '/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
+  '/admin/n8n-niches': typeof AuthenticatedAdminN8nNichesRoute
   '/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/admin/notification-deliverability-health': typeof AuthenticatedAdminNotificationDeliverabilityHealthRoute
@@ -5348,6 +5356,7 @@ export interface FileRoutesByTo {
   '/admin/menu-manager': typeof AuthenticatedAdminMenuManagerRoute
   '/admin/mercadopago-billing-health': typeof AuthenticatedAdminMercadopagoBillingHealthRoute
   '/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
+  '/admin/n8n-niches': typeof AuthenticatedAdminN8nNichesRoute
   '/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/admin/notification-deliverability-health': typeof AuthenticatedAdminNotificationDeliverabilityHealthRoute
@@ -6014,6 +6023,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/menu-manager': typeof AuthenticatedAdminMenuManagerRoute
   '/_authenticated/admin/mercadopago-billing-health': typeof AuthenticatedAdminMercadopagoBillingHealthRoute
   '/_authenticated/admin/n8n-console': typeof AuthenticatedAdminN8nConsoleRoute
+  '/_authenticated/admin/n8n-niches': typeof AuthenticatedAdminN8nNichesRoute
   '/_authenticated/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
   '/_authenticated/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
   '/_authenticated/admin/notification-deliverability-health': typeof AuthenticatedAdminNotificationDeliverabilityHealthRoute
@@ -6680,6 +6690,7 @@ export interface FileRouteTypes {
     | '/admin/menu-manager'
     | '/admin/mercadopago-billing-health'
     | '/admin/n8n-console'
+    | '/admin/n8n-niches'
     | '/admin/niche-matrix'
     | '/admin/niche-plans'
     | '/admin/notification-deliverability-health'
@@ -7332,6 +7343,7 @@ export interface FileRouteTypes {
     | '/admin/menu-manager'
     | '/admin/mercadopago-billing-health'
     | '/admin/n8n-console'
+    | '/admin/n8n-niches'
     | '/admin/niche-matrix'
     | '/admin/niche-plans'
     | '/admin/notification-deliverability-health'
@@ -7997,6 +8009,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/menu-manager'
     | '/_authenticated/admin/mercadopago-billing-health'
     | '/_authenticated/admin/n8n-console'
+    | '/_authenticated/admin/n8n-niches'
     | '/_authenticated/admin/niche-matrix'
     | '/_authenticated/admin/niche-plans'
     | '/_authenticated/admin/notification-deliverability-health'
@@ -11721,6 +11734,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminNicheMatrixRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/n8n-niches': {
+      id: '/_authenticated/admin/n8n-niches'
+      path: '/admin/n8n-niches'
+      fullPath: '/admin/n8n-niches'
+      preLoaderRoute: typeof AuthenticatedAdminN8nNichesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/n8n-console': {
       id: '/_authenticated/admin/n8n-console'
       path: '/admin/n8n-console'
@@ -14119,6 +14139,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminMenuManagerRoute: typeof AuthenticatedAdminMenuManagerRoute
   AuthenticatedAdminMercadopagoBillingHealthRoute: typeof AuthenticatedAdminMercadopagoBillingHealthRoute
   AuthenticatedAdminN8nConsoleRoute: typeof AuthenticatedAdminN8nConsoleRoute
+  AuthenticatedAdminN8nNichesRoute: typeof AuthenticatedAdminN8nNichesRoute
   AuthenticatedAdminNicheMatrixRoute: typeof AuthenticatedAdminNicheMatrixRoute
   AuthenticatedAdminNichePlansRoute: typeof AuthenticatedAdminNichePlansRoute
   AuthenticatedAdminNotificationDeliverabilityHealthRoute: typeof AuthenticatedAdminNotificationDeliverabilityHealthRoute
@@ -14421,6 +14442,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminMercadopagoBillingHealthRoute:
     AuthenticatedAdminMercadopagoBillingHealthRoute,
   AuthenticatedAdminN8nConsoleRoute: AuthenticatedAdminN8nConsoleRoute,
+  AuthenticatedAdminN8nNichesRoute: AuthenticatedAdminN8nNichesRoute,
   AuthenticatedAdminNicheMatrixRoute: AuthenticatedAdminNicheMatrixRoute,
   AuthenticatedAdminNichePlansRoute: AuthenticatedAdminNichePlansRoute,
   AuthenticatedAdminNotificationDeliverabilityHealthRoute:
