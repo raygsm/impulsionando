@@ -41,16 +41,17 @@ export const getImpulsionandoPainel = createServerFn({ method: "POST" })
     const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
 
     // Helper: safe count
+    const sbAny = sb as any;
     const count = async (table: string, build: (q: any) => any) => {
       try {
-        const q = build(sb.from(table).select("*", { count: "exact", head: true }).eq("company_id", companyId));
+        const q = build(sbAny.from(table).select("*", { count: "exact", head: true }).eq("company_id", companyId));
         const { count: c } = await q;
         return c ?? 0;
       } catch { return 0; }
     };
     const sum = async (table: string, col: string, build: (q: any) => any) => {
       try {
-        const q = build(sb.from(table).select(col).eq("company_id", companyId));
+        const q = build(sbAny.from(table).select(col).eq("company_id", companyId));
         const { data } = await q;
         return (data ?? []).reduce((a: number, r: any) => a + Number(r?.[col] ?? 0), 0);
       } catch { return 0; }
