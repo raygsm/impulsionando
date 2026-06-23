@@ -203,9 +203,11 @@ const MODULES: { key: ModKey; label: string; icon: typeof ShoppingCart; minPlan:
 function DemoSimulador() {
   const { niche, plan } = Route.useSearch();
   const navigate = useNavigate();
-  const [state, dispatch] = useReducer(reducer, SEED);
+  const story = useMemo(() => getNicheSimSeed(niche), [niche]);
+  const [state, dispatch] = useReducer(reducer, undefined as unknown as State, () => buildSeed(niche));
   const [activeModule, setActiveModule] = useState<ModKey>("vendas");
   const [session, setSession] = useState<{ name: string } | null>(null);
+  const wage = useMinimumWage();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -229,6 +231,33 @@ function DemoSimulador() {
   const planRank = PLAN_RANK[plan as RecLevel];
   const isAvailable = (m: ModKey) => PLAN_RANK[MODULES.find((x) => x.key === m)!.minPlan] <= planRank;
 
+  /** Transfere o setup atual da demo (plano + módulos do nicho) para o
+   *  carrinho real e leva o lead direto ao checkout via Mercado Pago. */
+  async function contratarSetupAtual() {
+    const planCode = DEMO_PLAN_TO_CODE[plan as RecLevel];
+    const planName = DEMO_PLAN_DISPLAY[plan as RecLevel];
+    const monthlyBase = plan === "essencial" ? wage / 2 : plan === "ideal" ? wage : wage * 2;
+    const setupBase = monthlyBase;
+    const modules = NICHE_MODULE_SLUGS[niche]?.[plan as RecLevel] ?? [];
+    const quota = plan === "essencial" ? 3 : plan === "ideal" ? 6 : 99;
+    const included = modules.slice(0, quota);
+    const extras = modules.slice(quota);
+    saveCheckoutCart({
+      planCode,
+      planName,
+      billing: "monthly",
+      modulesIncluded: included,
+      modulesExtra: extras,
+      setupCents: Math.round(setupBase * 100),
+      monthlyCents: Math.round(monthlyBase * 100),
+      extrasMonthlyCents: extras.length * 497 * 100,
+      origin: "simulador",
+      nicho: niche,
+    });
+    toast.success(`Setup do simulador (${planName} · ${niche}) movido para o checkout.`);
+    await navigate({ to: "/checkout/$plano", params: { plano: planCode } });
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <PublicHeader />
@@ -242,14 +271,28 @@ function DemoSimulador() {
               {session?.name ? `Olá ${session.name.split(" ")[0]}, ` : ""}explore tudo da Impulsionando
             </h1>
             <p className="text-sm text-muted-foreground">
-              Nicho <strong>{niche}</strong> · Plano <strong>{plan}</strong> — cada ação afeta os outros módulos em tempo real.
+              Nicho <strong>{niche}</strong> · Plano <strong>{DEMO_PLAN_DISPLAY[plan as RecLevel]}</strong> — cada ação afeta os outros módulos em tempo real.
             </p>
           </div>
           <div className="flex gap-2">
             <Button asChild variant="outline" size="sm"><Link to="/demo/escolher-nicho" search={{ niche, plan }}>Trocar plano</Link></Button>
-            <Button asChild size="sm" className="bg-gradient-primary"><Link to="/planos">Contratar agora <ArrowRight className="w-4 h-4 ml-1" /></Link></Button>
+            <Button size="sm" className="bg-gradient-primary" onClick={contratarSetupAtual}>
+              Contratar este setup <ArrowRight className="w-4 h-4 ml-1" />
+            </Button>
           </div>
         </div>
+
+        {/* Story / roteiro do nicho */}
+        <Card className="mb-4 border-primary/30 bg-primary/5">
+          <CardContent className="py-3 px-4">
+            <div className="text-xs uppercase tracking-wider text-primary font-semibold mb-0.5">
+              {story.storyTitle}
+            </div>
+            <p className="text-sm text-foreground/85 leading-snug">{story.storyBody}</p>
+          </CardContent>
+        </Card>
+
+
 
         {/* KPI strip */}
         <div className="grid grid-cols-2 md:grid-cols-6 gap-2 mb-4">
