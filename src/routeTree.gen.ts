@@ -26,6 +26,7 @@ import { Route as PlanosRouteImport } from './routes/planos'
 import { Route as PesquisaRouteImport } from './routes/pesquisa'
 import { Route as PacienteRouteImport } from './routes/paciente'
 import { Route as OrcamentoRouteImport } from './routes/orcamento'
+import { Route as OnboardingGuiadoRouteImport } from './routes/onboarding-guiado'
 import { Route as ModulosRouteImport } from './routes/modulos'
 import { Route as MarocasRouteImport } from './routes/marocas'
 import { Route as MarketingRouteImport } from './routes/marketing'
@@ -752,6 +753,11 @@ const PacienteRoute = PacienteRouteImport.update({
 const OrcamentoRoute = OrcamentoRouteImport.update({
   id: '/orcamento',
   path: '/orcamento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingGuiadoRoute = OnboardingGuiadoRouteImport.update({
+  id: '/onboarding-guiado',
+  path: '/onboarding-guiado',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ModulosRoute = ModulosRouteImport.update({
@@ -4409,6 +4415,7 @@ export interface FileRoutesByFullPath {
   '/marketing': typeof MarketingRoute
   '/marocas': typeof MarocasRouteWithChildren
   '/modulos': typeof ModulosRouteWithChildren
+  '/onboarding-guiado': typeof OnboardingGuiadoRoute
   '/orcamento': typeof OrcamentoRoute
   '/paciente': typeof PacienteRouteWithChildren
   '/pesquisa': typeof PesquisaRoute
@@ -5068,6 +5075,7 @@ export interface FileRoutesByTo {
   '/manutencao': typeof ManutencaoRoute
   '/marketing': typeof MarketingRoute
   '/marocas': typeof MarocasRouteWithChildren
+  '/onboarding-guiado': typeof OnboardingGuiadoRoute
   '/orcamento': typeof OrcamentoRoute
   '/pesquisa': typeof PesquisaRoute
   '/planos': typeof PlanosRoute
@@ -5719,6 +5727,7 @@ export interface FileRoutesById {
   '/marketing': typeof MarketingRoute
   '/marocas': typeof MarocasRouteWithChildren
   '/modulos': typeof ModulosRouteWithChildren
+  '/onboarding-guiado': typeof OnboardingGuiadoRoute
   '/orcamento': typeof OrcamentoRoute
   '/paciente': typeof PacienteRouteWithChildren
   '/pesquisa': typeof PesquisaRoute
@@ -6381,6 +6390,7 @@ export interface FileRouteTypes {
     | '/marketing'
     | '/marocas'
     | '/modulos'
+    | '/onboarding-guiado'
     | '/orcamento'
     | '/paciente'
     | '/pesquisa'
@@ -7040,6 +7050,7 @@ export interface FileRouteTypes {
     | '/manutencao'
     | '/marketing'
     | '/marocas'
+    | '/onboarding-guiado'
     | '/orcamento'
     | '/pesquisa'
     | '/planos'
@@ -7690,6 +7701,7 @@ export interface FileRouteTypes {
     | '/marketing'
     | '/marocas'
     | '/modulos'
+    | '/onboarding-guiado'
     | '/orcamento'
     | '/paciente'
     | '/pesquisa'
@@ -8352,6 +8364,7 @@ export interface RootRouteChildren {
   MarketingRoute: typeof MarketingRoute
   MarocasRoute: typeof MarocasRouteWithChildren
   ModulosRoute: typeof ModulosRouteWithChildren
+  OnboardingGuiadoRoute: typeof OnboardingGuiadoRoute
   OrcamentoRoute: typeof OrcamentoRoute
   PacienteRoute: typeof PacienteRouteWithChildren
   PesquisaRoute: typeof PesquisaRoute
@@ -8623,6 +8636,13 @@ declare module '@tanstack/react-router' {
       path: '/orcamento'
       fullPath: '/orcamento'
       preLoaderRoute: typeof OrcamentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding-guiado': {
+      id: '/onboarding-guiado'
+      path: '/onboarding-guiado'
+      fullPath: '/onboarding-guiado'
+      preLoaderRoute: typeof OnboardingGuiadoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/modulos': {
@@ -14757,6 +14777,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketingRoute: MarketingRoute,
   MarocasRoute: MarocasRouteWithChildren,
   ModulosRoute: ModulosRouteWithChildren,
+  OnboardingGuiadoRoute: OnboardingGuiadoRoute,
   OrcamentoRoute: OrcamentoRoute,
   PacienteRoute: PacienteRouteWithChildren,
   PesquisaRoute: PesquisaRoute,
