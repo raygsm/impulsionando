@@ -82,7 +82,7 @@ export const Route = createFileRoute("/api/public/hooks/trial-regua")({
           if (dayDiffStart === 1) events.push("trial.welcome");
           if (dayDiffEnd === 3) events.push("trial.midway");
           if (dayDiffEnd === 1) events.push("trial.last_call");
-          if (t.status === "expired" && dayDiffEnd <= 0 && dayDiffEnd >= -7) {
+          if (t.status === "expirado_sem_conversao" && dayDiffEnd <= 0 && dayDiffEnd >= -7) {
             events.push("trial.expired");
           }
 
