@@ -205,8 +205,55 @@ function ClubePage() {
 }
 
 // ---------------------------------------------------------------
-function ClubeHeader({ isPremium, level }: { isPremium: boolean; level?: string }) {
+// Hub colorido — botões em gradiente Impulsionando que navegam às tabs
+function ClubeQuickGrid({ onPick, active }: { onPick: (tab: string) => void; active: string }) {
+  const tiles: { id: string; label: string; sub: string; icon: any; tone: string }[] = [
+    { id: "favoritos",    label: "Meus favoritos",     sub: "Lugares que você ama",        icon: Heart,    tone: "from-rose-500 to-pink-600" },
+    { id: "historico",    label: "Histórico de visitas", sub: "Onde, quando, quanto",       icon: History,  tone: "from-violet-500 to-indigo-600" },
+    { id: "recomendacoes",label: "Meus cupons",         sub: "Descontos liberados",         icon: Gift,     tone: "from-emerald-500 to-teal-600" },
+    { id: "recomendacoes",label: "Meus vouchers",       sub: "Brindes e experiências",      icon: Sparkles, tone: "from-amber-500 to-orange-600" },
+    { id: "descobrir",    label: "Minhas reservas",     sub: "Eventos e mesas reservadas",  icon: Compass,  tone: "from-sky-500 to-blue-600" },
+    { id: "comprovantes", label: "Minhas avaliações",   sub: "O que você disse dos lugares",icon: Star,     tone: "from-yellow-500 to-amber-600" },
+    { id: "comprovantes", label: "Comprovantes",        sub: "Recibos e Pix da assinatura", icon: Receipt,  tone: "from-cyan-500 to-sky-600" },
+    { id: "comprovantes", label: "Minhas notas",        sub: "NF-e do seu consumo (PDV)",   icon: Download, tone: "from-fuchsia-500 to-purple-600" },
+    { id: "plano",        label: "Meus créditos",       sub: "Cashback, pontos e saldo",    icon: Crown,    tone: "from-primary to-accent" },
+  ];
   return (
+    <section aria-label="Acesso rápido do Clube">
+      <h2 className="sr-only">Acesso rápido</h2>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3">
+        {tiles.map((t) => {
+          const Icon = t.icon;
+          const isActive = active === t.id;
+          return (
+            <button
+              key={t.label}
+              type="button"
+              onClick={() => onPick(t.id)}
+              className={`group relative overflow-hidden rounded-2xl bg-gradient-to-br ${t.tone} p-4 text-left text-white shadow-elegant transition-all hover:brightness-110 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${isActive ? "ring-2 ring-white/80 scale-[1.02]" : ""}`}
+              aria-pressed={isActive}
+            >
+              <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/15 blur-xl" />
+              <div className="relative flex items-center gap-3">
+                <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
+                  <Icon className="h-5 w-5" />
+                </span>
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-semibold tracking-tight">{t.label}</div>
+                  <div className="truncate text-[11px] text-white/85">{t.sub}</div>
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------
+function ClubeHeader({ isPremium, level }: { isPremium: boolean; level?: string }) {
+
     <header className="flex items-center justify-between flex-wrap gap-3">
       <div>
         <Badge className={isPremium ? "bg-gradient-primary mb-2" : "mb-2"}>
