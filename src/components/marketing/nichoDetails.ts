@@ -40,7 +40,7 @@ export interface NichoDetail {
   demoRoute?: string;
 }
 
-const WA_BASE = "https://wa.me/5521993075000?text=";
+const WA_BASE = "https://wa.me/5521972631063?text=";
 export const ctaWaUrl = (msg: string) => WA_BASE + encodeURIComponent(msg);
 
 export const NICHO_DETAILS: NichoDetail[] = [

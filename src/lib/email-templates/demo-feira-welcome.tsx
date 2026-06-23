@@ -51,7 +51,7 @@ export const template = {
     name: 'Maria',
     nicheName: 'Bares e Restaurantes',
     demoUrl: 'https://impulsionando.com.br/demo/nicho/bares',
-    whatsappUrl: 'https://wa.me/5521993075000',
+    whatsappUrl: 'https://wa.me/5521972631063',
   },
 } satisfies TemplateEntry
 
