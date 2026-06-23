@@ -47,8 +47,17 @@ export function EmailAliasesTab({ companyId }: { companyId: string }) {
     is_default: false,
   });
 
+  type UpsertVars = {
+    companyId: string;
+    id?: string;
+    alias: string;
+    purpose: "contato" | "financeiro" | "suporte" | "comercial" | "no-reply" | "custom";
+    forward_to?: string | null;
+    is_active: boolean;
+    is_default: boolean;
+  };
   const upsert = useMutation({
-    mutationFn: (vars: Parameters<typeof upsertFn>[0]["data"]) => upsertFn({ data: vars }),
+    mutationFn: (vars: UpsertVars) => upsertFn({ data: vars }),
     onSuccess: () => {
       toast.success("E-mail do time salvo.");
       qc.invalidateQueries({ queryKey: ["tenant-email-aliases", companyId] });
