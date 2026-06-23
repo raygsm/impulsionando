@@ -12,14 +12,10 @@ import {
   Download,
   ShoppingCart,
   MessageCircle,
-  Sparkles,
-  Store,
   Network,
-  LifeBuoy,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { InstallAppButton } from "@/components/pwa/InstallAppButton";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import {
   NavigationMenu,
