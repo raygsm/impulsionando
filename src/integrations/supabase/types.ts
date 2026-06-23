@@ -22105,6 +22105,60 @@ export type Database = {
           },
         ]
       }
+      riomed_bank_reconciliation: {
+        Row: {
+          amount: number
+          bank_account: string
+          company_id: string
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          matched_id: string | null
+          matched_type: string | null
+          metadata: Json | null
+          reconciled_at: string | null
+          reconciled_by: string | null
+          statement_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          bank_account: string
+          company_id: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          matched_id?: string | null
+          matched_type?: string | null
+          metadata?: Json | null
+          reconciled_at?: string | null
+          reconciled_by?: string | null
+          statement_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          bank_account?: string
+          company_id?: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          matched_id?: string | null
+          matched_type?: string | null
+          metadata?: Json | null
+          reconciled_at?: string | null
+          reconciled_by?: string | null
+          statement_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       riomed_campaign_items: {
         Row: {
           campaign_id: string
@@ -22402,6 +22456,48 @@ export type Database = {
           },
         ]
       }
+      riomed_carriers: {
+        Row: {
+          company_id: string
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          doc_id: string | null
+          id: string
+          is_active: boolean
+          metadata: Json | null
+          name: string
+          service_types: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          doc_id?: string | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json | null
+          name: string
+          service_types?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          doc_id?: string | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json | null
+          name?: string
+          service_types?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       riomed_cart_items: {
         Row: {
           cart_id: string
@@ -22509,6 +22605,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      riomed_cash_flow_forecast: {
+        Row: {
+          amount: number
+          category: string | null
+          company_id: string
+          created_at: string
+          currency: string
+          direction: string
+          forecast_date: string
+          id: string
+          metadata: Json | null
+          notes: string | null
+          source_id: string | null
+          source_type: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          category?: string | null
+          company_id: string
+          created_at?: string
+          currency?: string
+          direction: string
+          forecast_date: string
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          source_id?: string | null
+          source_type?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category?: string | null
+          company_id?: string
+          created_at?: string
+          currency?: string
+          direction?: string
+          forecast_date?: string
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          source_id?: string | null
+          source_type?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       riomed_checkout_sessions: {
         Row: {
@@ -22807,6 +22954,56 @@ export type Database = {
           },
         ]
       }
+      riomed_credit_limits: {
+        Row: {
+          company_id: string
+          created_at: string
+          credit_limit: number
+          currency: string
+          hospital_id: string
+          id: string
+          notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          updated_at: string
+          used_amount: number
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          credit_limit?: number
+          currency?: string
+          hospital_id: string
+          id?: string
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          updated_at?: string
+          used_amount?: number
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          credit_limit?: number
+          currency?: string
+          hospital_id?: string
+          id?: string
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          updated_at?: string
+          used_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_credit_limits_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_hospital_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       riomed_distribution_config: {
         Row: {
           active: boolean
@@ -22977,6 +23174,133 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "riomed_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      riomed_fiscal_invoices_bo: {
+        Row: {
+          authorization_code: string | null
+          buyer_name: string | null
+          buyer_nit: string | null
+          company_id: string
+          control_code: string | null
+          created_at: string
+          cuf: string | null
+          currency: string
+          error_message: string | null
+          hospital_id: string | null
+          id: string
+          invoice_number: string | null
+          issue_date: string | null
+          metadata: Json | null
+          pdf_url: string | null
+          source_id: string | null
+          source_type: string
+          status: string
+          tax_amount: number
+          total_amount: number
+          updated_at: string
+          xml_payload: string | null
+        }
+        Insert: {
+          authorization_code?: string | null
+          buyer_name?: string | null
+          buyer_nit?: string | null
+          company_id: string
+          control_code?: string | null
+          created_at?: string
+          cuf?: string | null
+          currency?: string
+          error_message?: string | null
+          hospital_id?: string | null
+          id?: string
+          invoice_number?: string | null
+          issue_date?: string | null
+          metadata?: Json | null
+          pdf_url?: string | null
+          source_id?: string | null
+          source_type?: string
+          status?: string
+          tax_amount?: number
+          total_amount?: number
+          updated_at?: string
+          xml_payload?: string | null
+        }
+        Update: {
+          authorization_code?: string | null
+          buyer_name?: string | null
+          buyer_nit?: string | null
+          company_id?: string
+          control_code?: string | null
+          created_at?: string
+          cuf?: string | null
+          currency?: string
+          error_message?: string | null
+          hospital_id?: string | null
+          id?: string
+          invoice_number?: string | null
+          issue_date?: string | null
+          metadata?: Json | null
+          pdf_url?: string | null
+          source_id?: string | null
+          source_type?: string
+          status?: string
+          tax_amount?: number
+          total_amount?: number
+          updated_at?: string
+          xml_payload?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_fiscal_invoices_bo_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_hospital_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      riomed_fiscal_log: {
+        Row: {
+          action: string
+          company_id: string
+          error_message: string | null
+          fiscal_invoice_id: string | null
+          id: string
+          occurred_at: string
+          request_payload: Json | null
+          response_payload: Json | null
+          status: string
+        }
+        Insert: {
+          action: string
+          company_id: string
+          error_message?: string | null
+          fiscal_invoice_id?: string | null
+          id?: string
+          occurred_at?: string
+          request_payload?: Json | null
+          response_payload?: Json | null
+          status: string
+        }
+        Update: {
+          action?: string
+          company_id?: string
+          error_message?: string | null
+          fiscal_invoice_id?: string | null
+          id?: string
+          occurred_at?: string
+          request_payload?: Json | null
+          response_payload?: Json | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_fiscal_log_fiscal_invoice_id_fkey"
+            columns: ["fiscal_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_fiscal_invoices_bo"
             referencedColumns: ["id"]
           },
         ]
@@ -23233,11 +23557,15 @@ export type Database = {
           contact_phone: string
           created_at: string
           credit_limit: number | null
+          departamento_id: string | null
+          direccion_fiscal: string | null
           hospital_name: string
           id: string
           metadata: Json
+          municipio_id: string | null
           notes: string | null
           payment_terms: string | null
+          razon_social: string | null
           segment: string | null
           sla_hours: number | null
           status: string
@@ -23253,11 +23581,15 @@ export type Database = {
           contact_phone: string
           created_at?: string
           credit_limit?: number | null
+          departamento_id?: string | null
+          direccion_fiscal?: string | null
           hospital_name: string
           id?: string
           metadata?: Json
+          municipio_id?: string | null
           notes?: string | null
           payment_terms?: string | null
+          razon_social?: string | null
           segment?: string | null
           sla_hours?: number | null
           status?: string
@@ -23273,11 +23605,15 @@ export type Database = {
           contact_phone?: string
           created_at?: string
           credit_limit?: number | null
+          departamento_id?: string | null
+          direccion_fiscal?: string | null
           hospital_name?: string
           id?: string
           metadata?: Json
+          municipio_id?: string | null
           notes?: string | null
           payment_terms?: string | null
+          razon_social?: string | null
           segment?: string | null
           sla_hours?: number | null
           status?: string
@@ -24513,6 +24849,54 @@ export type Database = {
           },
         ]
       }
+      riomed_product_compatibility: {
+        Row: {
+          company_id: string
+          compatibility_type: string
+          compatible_with_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          product_id: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          compatibility_type?: string
+          compatible_with_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          compatibility_type?: string
+          compatible_with_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_product_compatibility_compatible_with_id_fkey"
+            columns: ["compatible_with_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_product_compatibility_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       riomed_product_embeddings: {
         Row: {
           company_id: string
@@ -24607,6 +24991,64 @@ export type Database = {
             columns: ["variant_id"]
             isOneToOne: false
             referencedRelation: "riomed_product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      riomed_product_equivalence: {
+        Row: {
+          company_id: string
+          confidence: number | null
+          created_at: string
+          equivalent_id: string
+          id: string
+          notes: string | null
+          product_id: string
+          supplier_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          confidence?: number | null
+          created_at?: string
+          equivalent_id: string
+          id?: string
+          notes?: string | null
+          product_id: string
+          supplier_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          confidence?: number | null
+          created_at?: string
+          equivalent_id?: string
+          id?: string
+          notes?: string | null
+          product_id?: string
+          supplier_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_product_equivalence_equivalent_id_fkey"
+            columns: ["equivalent_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_product_equivalence_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_product_equivalence_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_suppliers"
             referencedColumns: ["id"]
           },
         ]
@@ -24715,10 +25157,12 @@ export type Database = {
         Row: {
           audiences: string[]
           category: string | null
+          codigo_sin: string | null
           company_id: string
           created_at: string
           currency: string
           description: string | null
+          dimensoes: Json | null
           display_order: number
           id: string
           image_url: string | null
@@ -24726,20 +25170,24 @@ export type Database = {
           metadata: Json
           modality: string
           name: string
+          peso_kg: number | null
           price_rental_daily: number | null
           price_rental_monthly: number | null
           price_sale: number | null
           sku: string | null
           stock: number
+          unidad_medida_fiscal: string | null
           updated_at: string
         }
         Insert: {
           audiences?: string[]
           category?: string | null
+          codigo_sin?: string | null
           company_id: string
           created_at?: string
           currency?: string
           description?: string | null
+          dimensoes?: Json | null
           display_order?: number
           id?: string
           image_url?: string | null
@@ -24747,20 +25195,24 @@ export type Database = {
           metadata?: Json
           modality?: string
           name: string
+          peso_kg?: number | null
           price_rental_daily?: number | null
           price_rental_monthly?: number | null
           price_sale?: number | null
           sku?: string | null
           stock?: number
+          unidad_medida_fiscal?: string | null
           updated_at?: string
         }
         Update: {
           audiences?: string[]
           category?: string | null
+          codigo_sin?: string | null
           company_id?: string
           created_at?: string
           currency?: string
           description?: string | null
+          dimensoes?: Json | null
           display_order?: number
           id?: string
           image_url?: string | null
@@ -24768,11 +25220,13 @@ export type Database = {
           metadata?: Json
           modality?: string
           name?: string
+          peso_kg?: number | null
           price_rental_daily?: number | null
           price_rental_monthly?: number | null
           price_sale?: number | null
           sku?: string | null
           stock?: number
+          unidad_medida_fiscal?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -25016,6 +25470,7 @@ export type Database = {
           channel: string
           code: string
           company_id: string
+          condicao_pagamento: string | null
           created_at: string
           created_by: string | null
           currency: string
@@ -25023,6 +25478,7 @@ export type Database = {
           discount_total: number
           expires_at: string | null
           id: string
+          incoterm: string | null
           lead_id: string | null
           lost_reason: string | null
           metadata: Json
@@ -25030,6 +25486,7 @@ export type Database = {
           opportunity_id: string | null
           order_id: string | null
           owner_user_id: string | null
+          prazo_entrega_dias: number | null
           public_token: string | null
           public_token_expires_at: string | null
           rejected_at: string | null
@@ -25039,6 +25496,7 @@ export type Database = {
           subtotal: number
           total: number
           updated_at: string
+          validade_dias: number | null
           won_at: string | null
         }
         Insert: {
@@ -25047,6 +25505,7 @@ export type Database = {
           channel?: string
           code: string
           company_id: string
+          condicao_pagamento?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
@@ -25054,6 +25513,7 @@ export type Database = {
           discount_total?: number
           expires_at?: string | null
           id?: string
+          incoterm?: string | null
           lead_id?: string | null
           lost_reason?: string | null
           metadata?: Json
@@ -25061,6 +25521,7 @@ export type Database = {
           opportunity_id?: string | null
           order_id?: string | null
           owner_user_id?: string | null
+          prazo_entrega_dias?: number | null
           public_token?: string | null
           public_token_expires_at?: string | null
           rejected_at?: string | null
@@ -25070,6 +25531,7 @@ export type Database = {
           subtotal?: number
           total?: number
           updated_at?: string
+          validade_dias?: number | null
           won_at?: string | null
         }
         Update: {
@@ -25078,6 +25540,7 @@ export type Database = {
           channel?: string
           code?: string
           company_id?: string
+          condicao_pagamento?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
@@ -25085,6 +25548,7 @@ export type Database = {
           discount_total?: number
           expires_at?: string | null
           id?: string
+          incoterm?: string | null
           lead_id?: string | null
           lost_reason?: string | null
           metadata?: Json
@@ -25092,6 +25556,7 @@ export type Database = {
           opportunity_id?: string | null
           order_id?: string | null
           owner_user_id?: string | null
+          prazo_entrega_dias?: number | null
           public_token?: string | null
           public_token_expires_at?: string | null
           rejected_at?: string | null
@@ -25101,6 +25566,7 @@ export type Database = {
           subtotal?: number
           total?: number
           updated_at?: string
+          validade_dias?: number | null
           won_at?: string | null
         }
         Relationships: [
@@ -25692,6 +26158,158 @@ export type Database = {
           },
         ]
       }
+      riomed_shipment_items: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          product_id: string | null
+          quantity: number
+          serial_number: string | null
+          shipment_id: string
+          unit_label: string | null
+          variant_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id?: string | null
+          quantity?: number
+          serial_number?: string | null
+          shipment_id: string
+          unit_label?: string | null
+          variant_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id?: string | null
+          quantity?: number
+          serial_number?: string | null
+          shipment_id?: string
+          unit_label?: string | null
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_shipment_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_shipment_items_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_shipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_shipment_items_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      riomed_shipments: {
+        Row: {
+          carrier_id: string | null
+          company_id: string
+          created_at: string
+          delivered_at: string | null
+          dispatched_at: string | null
+          expected_at: string | null
+          freight_cost: number | null
+          hospital_id: string | null
+          id: string
+          metadata: Json | null
+          notes: string | null
+          recipient_doc: string | null
+          recipient_name: string | null
+          shipment_code: string
+          shipping_address: Json | null
+          source_id: string | null
+          source_type: string
+          status: string
+          tracking_code: string | null
+          updated_at: string
+          warehouse_id: string | null
+        }
+        Insert: {
+          carrier_id?: string | null
+          company_id: string
+          created_at?: string
+          delivered_at?: string | null
+          dispatched_at?: string | null
+          expected_at?: string | null
+          freight_cost?: number | null
+          hospital_id?: string | null
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          recipient_doc?: string | null
+          recipient_name?: string | null
+          shipment_code: string
+          shipping_address?: Json | null
+          source_id?: string | null
+          source_type?: string
+          status?: string
+          tracking_code?: string | null
+          updated_at?: string
+          warehouse_id?: string | null
+        }
+        Update: {
+          carrier_id?: string | null
+          company_id?: string
+          created_at?: string
+          delivered_at?: string | null
+          dispatched_at?: string | null
+          expected_at?: string | null
+          freight_cost?: number | null
+          hospital_id?: string | null
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          recipient_doc?: string | null
+          recipient_name?: string | null
+          shipment_code?: string
+          shipping_address?: Json | null
+          source_id?: string | null
+          source_type?: string
+          status?: string
+          tracking_code?: string | null
+          updated_at?: string
+          warehouse_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_shipments_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_shipments_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_hospital_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_shipments_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       riomed_showcase: {
         Row: {
           banner_url: string | null
@@ -25977,6 +26595,45 @@ export type Database = {
             referencedColumns: ["company_id"]
           },
         ]
+      }
+      riomed_sla_policies: {
+        Row: {
+          business_hours: Json | null
+          company_id: string
+          created_at: string
+          first_response_minutes: number
+          id: string
+          is_active: boolean
+          name: string
+          resolution_minutes: number
+          scope: string
+          updated_at: string
+        }
+        Insert: {
+          business_hours?: Json | null
+          company_id: string
+          created_at?: string
+          first_response_minutes?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          resolution_minutes?: number
+          scope?: string
+          updated_at?: string
+        }
+        Update: {
+          business_hours?: Json | null
+          company_id?: string
+          created_at?: string
+          first_response_minutes?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          resolution_minutes?: number
+          scope?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       riomed_stale_stock_rules: {
         Row: {
@@ -26752,6 +27409,92 @@ export type Database = {
           },
         ]
       }
+      riomed_ticket_sla_events: {
+        Row: {
+          breached: boolean | null
+          created_at: string
+          event_type: string
+          id: string
+          occurred_at: string
+          payload: Json | null
+          policy_id: string | null
+          ticket_id: string
+        }
+        Insert: {
+          breached?: boolean | null
+          created_at?: string
+          event_type: string
+          id?: string
+          occurred_at?: string
+          payload?: Json | null
+          policy_id?: string | null
+          ticket_id: string
+        }
+        Update: {
+          breached?: boolean | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          occurred_at?: string
+          payload?: Json | null
+          policy_id?: string | null
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_ticket_sla_events_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_sla_policies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_ticket_sla_events_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      riomed_tracking_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          location: string | null
+          occurred_at: string
+          payload: Json | null
+          shipment_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          location?: string | null
+          occurred_at?: string
+          payload?: Json | null
+          shipment_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          location?: string | null
+          occurred_at?: string
+          payload?: Json | null
+          shipment_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_tracking_events_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       riomed_user_scopes: {
         Row: {
           company_id: string
@@ -26905,6 +27648,72 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_tenant_identity_status"
             referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      riomed_warranties: {
+        Row: {
+          company_id: string
+          created_at: string
+          ends_at: string
+          hospital_id: string | null
+          id: string
+          metadata: Json | null
+          product_id: string | null
+          serial_number: string | null
+          source_id: string | null
+          source_type: string
+          starts_at: string
+          status: string
+          terms: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          ends_at: string
+          hospital_id?: string | null
+          id?: string
+          metadata?: Json | null
+          product_id?: string | null
+          serial_number?: string | null
+          source_id?: string | null
+          source_type?: string
+          starts_at?: string
+          status?: string
+          terms?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          ends_at?: string
+          hospital_id?: string | null
+          id?: string
+          metadata?: Json | null
+          product_id?: string | null
+          serial_number?: string | null
+          source_id?: string | null
+          source_type?: string
+          starts_at?: string
+          status?: string
+          terms?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "riomed_warranties_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_hospital_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "riomed_warranties_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "riomed_products"
+            referencedColumns: ["id"]
           },
         ]
       }
