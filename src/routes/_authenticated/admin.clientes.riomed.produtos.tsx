@@ -351,6 +351,69 @@ function ProductsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Import preview dialog */}
+      <Dialog open={importOpen} onOpenChange={setImportOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Pré-visualização da importação</DialogTitle>
+            <DialogDescription>
+              {importPreview?.length ?? 0} produtos detectados. Confira antes de confirmar.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <Label>Modo:</Label>
+              <Select value={importMode} onValueChange={(v) => setImportMode(v as any)}>
+                <SelectTrigger className="w-72"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="upsert_by_sku">Atualizar por SKU (cria se não existe)</SelectItem>
+                  <SelectItem value="insert_only">Apenas inserir novos</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {importErrors.length > 0 && (
+              <div className="border border-orange-500/50 bg-orange-50 dark:bg-orange-950/20 rounded p-3 text-xs">
+                <div className="font-semibold mb-1 text-orange-700 dark:text-orange-300">Avisos ({importErrors.length}):</div>
+                <ul className="list-disc list-inside space-y-0.5">{importErrors.slice(0, 10).map((e, i) => <li key={i}>{e}</li>)}</ul>
+              </div>
+            )}
+
+            <div className="border rounded max-h-80 overflow-auto">
+              <table className="w-full text-xs">
+                <thead className="bg-muted sticky top-0">
+                  <tr className="text-left"><th className="p-2">SKU</th><th className="p-2">Nome</th><th className="p-2">Modalidade</th><th className="p-2">Preço</th><th className="p-2">Estoque</th></tr>
+                </thead>
+                <tbody>
+                  {(importPreview ?? []).slice(0, 50).map((p, i) => (
+                    <tr key={i} className="border-t">
+                      <td className="p-2 font-mono">{p.sku ?? "—"}</td>
+                      <td className="p-2">{p.name}</td>
+                      <td className="p-2">{p.modality}</td>
+                      <td className="p-2">{p.price_sale ?? "—"}</td>
+                      <td className="p-2">{p.stock}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {(importPreview?.length ?? 0) > 50 && (
+                <div className="p-2 text-center text-xs text-muted-foreground">+ {importPreview!.length - 50} linhas...</div>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setImportOpen(false)}>Cancelar</Button>
+            <Button
+              onClick={() => importMut.mutate()}
+              disabled={!importPreview?.length || importMut.isPending}
+              className="bg-gradient-primary shadow-elegant"
+            >
+              {importMut.isPending ? "Importando..." : `Confirmar (${importPreview?.length ?? 0})`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
