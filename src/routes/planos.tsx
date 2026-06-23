@@ -15,6 +15,7 @@ import { PublicHeader } from "@/components/marketing/PublicHeader";
 import { PublicFooter } from "@/components/marketing/PublicFooter";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
+import { saveCheckoutCart, PLAN_NAME_TO_CODE } from "@/hooks/useCheckoutCart";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMinimumWage } from "@/hooks/useCoreSetting";
 
