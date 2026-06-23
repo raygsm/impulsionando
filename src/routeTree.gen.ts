@@ -516,6 +516,7 @@ import { Route as AuthenticatedAdminContabHealthRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminContabCockpitHealthRouteImport } from './routes/_authenticated/admin.contab-cockpit-health'
 import { Route as AuthenticatedAdminConsumerJourneyHealthRouteImport } from './routes/_authenticated/admin.consumer-journey-health'
 import { Route as AuthenticatedAdminConfigCatalogHealthRouteImport } from './routes/_authenticated/admin.config-catalog-health'
+import { Route as AuthenticatedAdminComunicacaoRouteImport } from './routes/_authenticated/admin.comunicacao'
 import { Route as AuthenticatedAdminComplianceHealthRouteImport } from './routes/_authenticated/admin.compliance-health'
 import { Route as AuthenticatedAdminCommunityHealthRouteImport } from './routes/_authenticated/admin.community-health'
 import { Route as AuthenticatedAdminCommsHealthRouteImport } from './routes/_authenticated/admin.comms-health'
@@ -3500,6 +3501,12 @@ const AuthenticatedAdminConfigCatalogHealthRoute =
     path: '/admin/config-catalog-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminComunicacaoRoute =
+  AuthenticatedAdminComunicacaoRouteImport.update({
+    id: '/admin/comunicacao',
+    path: '/admin/comunicacao',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminComplianceHealthRoute =
   AuthenticatedAdminComplianceHealthRouteImport.update({
     id: '/admin/compliance-health',
@@ -4694,6 +4701,7 @@ export interface FileRoutesByFullPath {
   '/admin/comms-health': typeof AuthenticatedAdminCommsHealthRoute
   '/admin/community-health': typeof AuthenticatedAdminCommunityHealthRoute
   '/admin/compliance-health': typeof AuthenticatedAdminComplianceHealthRoute
+  '/admin/comunicacao': typeof AuthenticatedAdminComunicacaoRoute
   '/admin/config-catalog-health': typeof AuthenticatedAdminConfigCatalogHealthRoute
   '/admin/consumer-journey-health': typeof AuthenticatedAdminConsumerJourneyHealthRoute
   '/admin/contab-cockpit-health': typeof AuthenticatedAdminContabCockpitHealthRoute
@@ -5353,6 +5361,7 @@ export interface FileRoutesByTo {
   '/admin/comms-health': typeof AuthenticatedAdminCommsHealthRoute
   '/admin/community-health': typeof AuthenticatedAdminCommunityHealthRoute
   '/admin/compliance-health': typeof AuthenticatedAdminComplianceHealthRoute
+  '/admin/comunicacao': typeof AuthenticatedAdminComunicacaoRoute
   '/admin/config-catalog-health': typeof AuthenticatedAdminConfigCatalogHealthRoute
   '/admin/consumer-journey-health': typeof AuthenticatedAdminConsumerJourneyHealthRoute
   '/admin/contab-cockpit-health': typeof AuthenticatedAdminContabCockpitHealthRoute
@@ -6026,6 +6035,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/comms-health': typeof AuthenticatedAdminCommsHealthRoute
   '/_authenticated/admin/community-health': typeof AuthenticatedAdminCommunityHealthRoute
   '/_authenticated/admin/compliance-health': typeof AuthenticatedAdminComplianceHealthRoute
+  '/_authenticated/admin/comunicacao': typeof AuthenticatedAdminComunicacaoRoute
   '/_authenticated/admin/config-catalog-health': typeof AuthenticatedAdminConfigCatalogHealthRoute
   '/_authenticated/admin/consumer-journey-health': typeof AuthenticatedAdminConsumerJourneyHealthRoute
   '/_authenticated/admin/contab-cockpit-health': typeof AuthenticatedAdminContabCockpitHealthRoute
@@ -6699,6 +6709,7 @@ export interface FileRouteTypes {
     | '/admin/comms-health'
     | '/admin/community-health'
     | '/admin/compliance-health'
+    | '/admin/comunicacao'
     | '/admin/config-catalog-health'
     | '/admin/consumer-journey-health'
     | '/admin/contab-cockpit-health'
@@ -7358,6 +7369,7 @@ export interface FileRouteTypes {
     | '/admin/comms-health'
     | '/admin/community-health'
     | '/admin/compliance-health'
+    | '/admin/comunicacao'
     | '/admin/config-catalog-health'
     | '/admin/consumer-journey-health'
     | '/admin/contab-cockpit-health'
@@ -8030,6 +8042,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/comms-health'
     | '/_authenticated/admin/community-health'
     | '/_authenticated/admin/compliance-health'
+    | '/_authenticated/admin/comunicacao'
     | '/_authenticated/admin/config-catalog-health'
     | '/_authenticated/admin/consumer-journey-health'
     | '/_authenticated/admin/contab-cockpit-health'
@@ -12201,6 +12214,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminConfigCatalogHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/comunicacao': {
+      id: '/_authenticated/admin/comunicacao'
+      path: '/admin/comunicacao'
+      fullPath: '/admin/comunicacao'
+      preLoaderRoute: typeof AuthenticatedAdminComunicacaoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/compliance-health': {
       id: '/_authenticated/admin/compliance-health'
       path: '/admin/compliance-health'
@@ -14211,6 +14231,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCommsHealthRoute: typeof AuthenticatedAdminCommsHealthRoute
   AuthenticatedAdminCommunityHealthRoute: typeof AuthenticatedAdminCommunityHealthRoute
   AuthenticatedAdminComplianceHealthRoute: typeof AuthenticatedAdminComplianceHealthRoute
+  AuthenticatedAdminComunicacaoRoute: typeof AuthenticatedAdminComunicacaoRoute
   AuthenticatedAdminConfigCatalogHealthRoute: typeof AuthenticatedAdminConfigCatalogHealthRoute
   AuthenticatedAdminConsumerJourneyHealthRoute: typeof AuthenticatedAdminConsumerJourneyHealthRoute
   AuthenticatedAdminContabCockpitHealthRoute: typeof AuthenticatedAdminContabCockpitHealthRoute
@@ -14490,6 +14511,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminCommunityHealthRoute,
   AuthenticatedAdminComplianceHealthRoute:
     AuthenticatedAdminComplianceHealthRoute,
+  AuthenticatedAdminComunicacaoRoute: AuthenticatedAdminComunicacaoRoute,
   AuthenticatedAdminConfigCatalogHealthRoute:
     AuthenticatedAdminConfigCatalogHealthRoute,
   AuthenticatedAdminConsumerJourneyHealthRoute:
