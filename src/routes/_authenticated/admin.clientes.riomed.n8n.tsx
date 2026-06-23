@@ -7,6 +7,7 @@ import {
   listRiomedN8nWorkflows, upsertRiomedN8nWorkflow, deleteRiomedN8nWorkflow,
   triggerRiomedN8nWorkflow, listRiomedN8nExecutions,
 } from "@/lib/riomed-n8n.functions";
+import { listRiomedOperationalEvents } from "@/lib/riomed-public.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
