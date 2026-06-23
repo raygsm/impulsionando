@@ -213,7 +213,7 @@ function RiomedHome() {
       </section>
 
       {/* ============================== CATEGORIAS ============================== */}
-      <section className="bg-slate-50 border-y border-slate-200">
+      <section id="lineas" className="bg-slate-50 border-y border-slate-200 scroll-mt-32">
         <div className="max-w-7xl mx-auto px-4 py-14">
           <div className="flex items-end justify-between mb-8">
             <div>
