@@ -120,7 +120,6 @@ export const Route = createFileRoute("/api/public/webhooks/n8n-callback")({
         return Response.json({ ok: true });
       },
     },
-    },
   },
 });
 
