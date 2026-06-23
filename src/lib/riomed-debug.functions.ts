@@ -120,7 +120,7 @@ export const debugListProductos = createServerFn({ method: "GET" })
         if (error) throw new Error(error.message);
         return rows ?? [];
       },
-      { search, category, limit },
+      { search: search ?? "", category: category ?? "", limit },
     );
 
     // Stage 3 — Transform (compute USD prices using FX rate)
