@@ -42,7 +42,7 @@ export const getRiomedSiteSettings = createServerFn({ method: "GET" })
         logo_url: null,
         primary_color: "#0E7C66",
         accent_color: "#0AB1A0",
-        whatsapp_official: "+595000000000",
+        whatsapp_official: "+59172631063",
         whatsapp_message: "Hola RioMed, me gustaría más información.",
         country_code: "PY",
         default_language: "es",
