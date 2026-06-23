@@ -20,14 +20,18 @@ export function MobileSidebar({ currentUser }: { currentUser: CurrentUser }) {
         className="p-0 w-72 bg-sidebar text-sidebar-foreground border-sidebar-border flex flex-col"
       >
         <div className="px-4 py-4 flex items-center justify-center border-b border-sidebar-border" data-bg-tone="dark">
-          <div className="aspect-square w-40 rounded-xl bg-white shadow-sm flex items-center justify-center p-3">
+          <a
+            href="https://impulsionando.com.br"
+            aria-label="Ir para a home Impulsionando"
+            className="aspect-square w-40 rounded-xl bg-white shadow-sm flex items-center justify-center p-3 hover:opacity-90 transition-opacity"
+          >
             <img
               src={logoAsset.url}
               alt="Impulsionando Tecnologia"
               className="max-h-full max-w-full object-contain"
               draggable={false}
             />
-          </div>
+          </a>
         </div>
 
         <SidebarNav currentUser={currentUser} onNavigate={() => setOpen(false)} />
