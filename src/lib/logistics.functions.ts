@@ -99,7 +99,7 @@ export const commitOrder = createServerFn({ method: 'POST' })
       actor: `user:${context.userId}`,
     };
 
-    const events = [
+    const events: Array<{ company_id: string; quote_id: string; order_logistics_id: string; actor: string; event_type: string; payload: Record<string, unknown> }> = [
       { ...baseEvent, event_type: 'stock_decremented', payload: { mode: 'auto' } },
       {
         ...baseEvent,
