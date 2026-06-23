@@ -566,6 +566,7 @@ import { Route as ApiPublicDemoSendTestRouteImport } from './routes/api/public/d
 import { Route as ApiPublicDemoFeiraLeadRouteImport } from './routes/api/public/demo/feira-lead'
 import { Route as ApiPublicCronPayoutsConsolidateRouteImport } from './routes/api/public/cron/payouts-consolidate'
 import { Route as ApiPublicCronFunnelDispatchRouteImport } from './routes/api/public/cron/funnel-dispatch'
+import { Route as ApiPublicCronCrmTouchDispatchRouteImport } from './routes/api/public/cron/crm-touch-dispatch'
 import { Route as ApiPublicCronAgendaTickRouteImport } from './routes/api/public/cron/agenda-tick'
 import { Route as AuthenticatedTorreRestaurantesDemoAuditoriaRouteImport } from './routes/_authenticated/torre.restaurantes-demo.auditoria'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
@@ -3750,6 +3751,12 @@ const ApiPublicCronFunnelDispatchRoute =
     path: '/api/public/cron/funnel-dispatch',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicCronCrmTouchDispatchRoute =
+  ApiPublicCronCrmTouchDispatchRouteImport.update({
+    id: '/api/public/cron/crm-touch-dispatch',
+    path: '/api/public/cron/crm-touch-dispatch',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicCronAgendaTickRoute = ApiPublicCronAgendaTickRouteImport.update({
   id: '/api/public/cron/agenda-tick',
   path: '/api/public/cron/agenda-tick',
@@ -4693,6 +4700,7 @@ export interface FileRoutesByFullPath {
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
   '/api/public/cron/agenda-tick': typeof ApiPublicCronAgendaTickRoute
+  '/api/public/cron/crm-touch-dispatch': typeof ApiPublicCronCrmTouchDispatchRoute
   '/api/public/cron/funnel-dispatch': typeof ApiPublicCronFunnelDispatchRoute
   '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
@@ -5303,6 +5311,7 @@ export interface FileRoutesByTo {
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
   '/api/public/cron/agenda-tick': typeof ApiPublicCronAgendaTickRoute
+  '/api/public/cron/crm-touch-dispatch': typeof ApiPublicCronCrmTouchDispatchRoute
   '/api/public/cron/funnel-dispatch': typeof ApiPublicCronFunnelDispatchRoute
   '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
@@ -5928,6 +5937,7 @@ export interface FileRoutesById {
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/_authenticated/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
   '/api/public/cron/agenda-tick': typeof ApiPublicCronAgendaTickRoute
+  '/api/public/cron/crm-touch-dispatch': typeof ApiPublicCronCrmTouchDispatchRoute
   '/api/public/cron/funnel-dispatch': typeof ApiPublicCronFunnelDispatchRoute
   '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
@@ -6552,6 +6562,7 @@ export interface FileRouteTypes {
     | '/sales/cash/$id'
     | '/torre/restaurantes-demo/auditoria'
     | '/api/public/cron/agenda-tick'
+    | '/api/public/cron/crm-touch-dispatch'
     | '/api/public/cron/funnel-dispatch'
     | '/api/public/cron/payouts-consolidate'
     | '/api/public/demo/feira-lead'
@@ -7162,6 +7173,7 @@ export interface FileRouteTypes {
     | '/sales/cash/$id'
     | '/torre/restaurantes-demo/auditoria'
     | '/api/public/cron/agenda-tick'
+    | '/api/public/cron/crm-touch-dispatch'
     | '/api/public/cron/funnel-dispatch'
     | '/api/public/cron/payouts-consolidate'
     | '/api/public/demo/feira-lead'
@@ -7786,6 +7798,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sales/cash/$id'
     | '/_authenticated/torre/restaurantes-demo/auditoria'
     | '/api/public/cron/agenda-tick'
+    | '/api/public/cron/crm-touch-dispatch'
     | '/api/public/cron/funnel-dispatch'
     | '/api/public/cron/payouts-consolidate'
     | '/api/public/demo/feira-lead'
@@ -7981,6 +7994,7 @@ export interface RootRouteChildren {
   PortalContabilidadeTokenRoute: typeof PortalContabilidadeTokenRoute
   PortalProprietarioTokenRoute: typeof PortalProprietarioTokenRoute
   ApiPublicCronAgendaTickRoute: typeof ApiPublicCronAgendaTickRoute
+  ApiPublicCronCrmTouchDispatchRoute: typeof ApiPublicCronCrmTouchDispatchRoute
   ApiPublicCronFunnelDispatchRoute: typeof ApiPublicCronFunnelDispatchRoute
   ApiPublicCronPayoutsConsolidateRoute: typeof ApiPublicCronPayoutsConsolidateRoute
   ApiPublicDemoFeiraLeadRoute: typeof ApiPublicDemoFeiraLeadRoute
@@ -11917,6 +11931,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicCronFunnelDispatchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/cron/crm-touch-dispatch': {
+      id: '/api/public/cron/crm-touch-dispatch'
+      path: '/api/public/cron/crm-touch-dispatch'
+      fullPath: '/api/public/cron/crm-touch-dispatch'
+      preLoaderRoute: typeof ApiPublicCronCrmTouchDispatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/cron/agenda-tick': {
       id: '/api/public/cron/agenda-tick'
       path: '/api/public/cron/agenda-tick'
@@ -14029,6 +14050,7 @@ const rootRouteChildren: RootRouteChildren = {
   PortalContabilidadeTokenRoute: PortalContabilidadeTokenRoute,
   PortalProprietarioTokenRoute: PortalProprietarioTokenRoute,
   ApiPublicCronAgendaTickRoute: ApiPublicCronAgendaTickRoute,
+  ApiPublicCronCrmTouchDispatchRoute: ApiPublicCronCrmTouchDispatchRoute,
   ApiPublicCronFunnelDispatchRoute: ApiPublicCronFunnelDispatchRoute,
   ApiPublicCronPayoutsConsolidateRoute: ApiPublicCronPayoutsConsolidateRoute,
   ApiPublicDemoFeiraLeadRoute: ApiPublicDemoFeiraLeadRoute,
