@@ -6,6 +6,7 @@ import { listMyBrandingCompanies } from "@/lib/my-branding.functions";
 import { IdentityTab } from "@/components/core/IdentityTab";
 import { EmailAliasesTab } from "@/components/core/EmailAliasesTab";
 import { DomainTab } from "@/components/core/DomainTab";
+import { BrandingCompletenessCard } from "@/components/core/BrandingCompletenessCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -81,6 +82,8 @@ function BrandingPage() {
               </div>
             </CardHeader>
           </Card>
+
+          {selected && <BrandingCompletenessCard companyId={selected} />}
 
           {selected && (
             <Tabs defaultValue="identity">

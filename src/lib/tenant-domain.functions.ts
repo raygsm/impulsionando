@@ -81,6 +81,15 @@ export const requestCustomDomain = createServerFn({ method: "POST" })
       metadata: { source: "admin/branding" },
     });
 
+    if (value) {
+      await supabase
+        .from("onboarding_checklist")
+        .upsert(
+          { company_id: data.companyId, item_key: "domain_requested", status: "done", completed_at: new Date().toISOString() },
+          { onConflict: "company_id,item_key" },
+        );
+    }
+
     return { ok: true, identity: updated };
   });
 
