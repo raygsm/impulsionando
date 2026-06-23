@@ -667,4 +667,3 @@ function Row({
   );
 }
 
-export default ShowroomAgendamentos;

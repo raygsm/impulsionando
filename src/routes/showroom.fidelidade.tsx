@@ -551,4 +551,3 @@ function KpiCard({
   );
 }
 
-export default ShowroomFidelidade;

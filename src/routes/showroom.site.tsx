@@ -817,4 +817,3 @@ function SectionRenderer({
   }
 }
 
-export default ShowroomSite;
