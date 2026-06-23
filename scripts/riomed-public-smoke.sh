@@ -6,7 +6,13 @@ set -euo pipefail
 BASE="${1:-https://impulsionando.lovable.app}"
 SECRET="${IMPULSIONANDO_WEBHOOK_SECRET:?defina IMPULSIONANDO_WEBHOOK_SECRET}"
 
-sign() { printf '%s' "$1" | openssl dgst -sha256 -hmac "$SECRET" -hex | awk '{print $2}'; }
+sign() {
+  if command -v openssl >/dev/null 2>&1; then
+    printf '%s' "$1" | openssl dgst -sha256 -hmac "$SECRET" -hex | awk '{print $NF}'
+  else
+    SECRET="$SECRET" PAYLOAD="$1" python3 -c 'import hmac,hashlib,os;print(hmac.new(os.environ["SECRET"].encode(),os.environ["PAYLOAD"].encode(),hashlib.sha256).hexdigest())'
+  fi
+}
 
 post() {
   local path="$1" body="$2"
