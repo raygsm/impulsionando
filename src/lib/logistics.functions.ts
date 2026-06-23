@@ -99,20 +99,20 @@ export const commitOrder = createServerFn({ method: 'POST' })
       actor: `user:${context.userId}`,
     };
 
-    const events: Array<{ company_id: string; quote_id: string; order_logistics_id: string; actor: string; event_type: string; payload: Record<string, unknown> }> = [
-      { ...baseEvent, event_type: 'stock_decremented', payload: { mode: 'auto' } },
+    const events = [
+      { ...baseEvent, event_type: 'stock_decremented', payload: { mode: 'auto' } as any },
       {
         ...baseEvent,
         event_type: company.fiscal_auto_emit ? 'invoice_intent_auto' : 'invoice_intent_manual',
-        payload: { provider: company.fiscal_provider ?? null },
+        payload: { provider: company.fiscal_provider ?? null } as any,
       },
-      { ...baseEvent, event_type: 'stock_notified', payload: { sector: 'estoque' } },
-      { ...baseEvent, event_type: 'finance_notified', payload: { sector: 'financeiro' } },
+      { ...baseEvent, event_type: 'stock_notified', payload: { sector: 'estoque' } as any },
+      { ...baseEvent, event_type: 'finance_notified', payload: { sector: 'financeiro' } as any },
     ];
     if (data.sellerId) {
-      events.push({ ...baseEvent, event_type: 'seller_notified', payload: { seller_id: data.sellerId } });
+      events.push({ ...baseEvent, event_type: 'seller_notified', payload: { seller_id: data.sellerId } as any });
     }
-    await sb.from('order_events').insert(events);
+    await sb.from('order_events').insert(events as any);
 
     // notificações in-app para membros dos setores estoque/financeiro
     const { data: sectorMembers } = await sb
@@ -122,23 +122,25 @@ export const commitOrder = createServerFn({ method: 'POST' })
       .eq('is_active', true)
       .in('sectors.code', ['estoque', 'financeiro']);
 
-    const notifs =
+    const notifs: any[] =
       (sectorMembers ?? []).map((m: any) => ({
         user_id: m.user_id,
         company_id: data.companyId,
         title: 'Novo pedido confirmado',
-        body: `Pedido ${data.quoteId.slice(0, 8)} - ${data.fulfillmentMode === 'pickup' ? 'Retirada' : 'Despacho'}`,
+        message: `Pedido ${data.quoteId.slice(0, 8)} - ${data.fulfillmentMode === 'pickup' ? 'Retirada' : 'Despacho'}`,
         category: 'order',
-        link: `/admin/pedidos/${data.quoteId}`,
+        action_url: `/admin/pedidos/${data.quoteId}`,
+        action_label: 'Ver pedido',
       })) ?? [];
     if (data.sellerId) {
       notifs.push({
         user_id: data.sellerId,
         company_id: data.companyId,
         title: 'Sua venda foi confirmada',
-        body: `Pedido ${data.quoteId.slice(0, 8)}`,
+        message: `Pedido ${data.quoteId.slice(0, 8)}`,
         category: 'sales',
-        link: `/admin/pedidos/${data.quoteId}`,
+        action_url: `/admin/pedidos/${data.quoteId}`,
+        action_label: 'Ver pedido',
       });
     }
     if (notifs.length) await sb.from('notifications').insert(notifs);
