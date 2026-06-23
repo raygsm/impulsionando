@@ -372,3 +372,100 @@ export const submitRiomedSellerLead = createServerFn({ method: "POST" })
     if (error) throw error;
     return { ok: true, leadId: row.id, sellerId: assignedId, sellerName: assignedName };
   });
+
+// ============================================================
+// Wave 4 — admin/seller/manager panels
+// ============================================================
+
+export const listRiomedSellerLeads = createServerFn({ method: "GET" })
+  .inputValidator((d: unknown) => z.object({
+    status: z.string().optional(),
+    sellerId: z.string().uuid().optional(),
+    limit: z.number().int().min(1).max(500).optional(),
+  }).optional().parse(d))
+  .handler(async ({ data }) => {
+    const supa = await adminClient();
+    let q = supa.from("riomed_seller_leads")
+      .select("id,team_id,customer_name,customer_phone,customer_email,interest,profile,notes,status,created_at")
+      .order("created_at", { ascending: false })
+      .limit(data?.limit ?? 200);
+    if (data?.status) q = q.eq("status", data.status);
+    if (data?.sellerId) q = q.eq("team_id", data.sellerId);
+    const { data: rows, error } = await q;
+    if (error) throw error;
+    const { data: team } = await supa.from("riomed_team").select("id,full_name,member_role");
+    const map = new Map((team ?? []).map((t: any) => [t.id, t]));
+    return { leads: (rows ?? []).map((r: any) => ({ ...r, seller: map.get(r.team_id) ?? null })) };
+  });
+
+export const listRiomedTickets = createServerFn({ method: "GET" })
+  .inputValidator((d: unknown) => z.object({
+    status: z.string().optional(),
+    urgency: z.string().optional(),
+    limit: z.number().int().min(1).max(500).optional(),
+  }).optional().parse(d))
+  .handler(async ({ data }) => {
+    const supa = await adminClient();
+    let q = supa.from("riomed_support_tickets")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(data?.limit ?? 200);
+    if (data?.status) q = q.eq("status", data.status);
+    if (data?.urgency) q = q.eq("urgency", data.urgency);
+    const { data: rows, error } = await q;
+    if (error) throw error;
+    return { tickets: rows ?? [] };
+  });
+
+export const updateRiomedLeadStatus = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({
+    leadId: z.string().uuid(),
+    status: z.enum(["novo","em_contato","qualificado","ganho","perdido"]),
+    notes: z.string().max(2000).optional(),
+  }).parse(d))
+  .handler(async ({ data }) => {
+    const supa = await adminClient();
+    const patch: any = { status: data.status, updated_at: new Date().toISOString() };
+    if (data.notes) patch.notes = data.notes;
+    const { error } = await supa.from("riomed_seller_leads").update(patch).eq("id", data.leadId);
+    if (error) throw error;
+    return { ok: true };
+  });
+
+export const updateRiomedTicketStatus = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({
+    ticketId: z.string().uuid(),
+    status: z.enum(["aberto","triagem","em_atendimento","aguardando_peca","resolvido","cancelado"]),
+  }).parse(d))
+  .handler(async ({ data }) => {
+    const supa = await adminClient();
+    const { error } = await supa.from("riomed_support_tickets")
+      .update({ status: data.status, updated_at: new Date().toISOString() }).eq("id", data.ticketId);
+    if (error) throw error;
+    return { ok: true };
+  });
+
+export const getRiomedTeamPerformance = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const supa = await adminClient();
+    const { data: team } = await supa.from("riomed_team")
+      .select("id,full_name,member_role,specialty,phone,email,rr_position")
+      .eq("active", true).order("rr_position", { ascending: true });
+    const { data: leads } = await supa.from("riomed_seller_leads").select("team_id,status");
+    const stats = new Map<string, { total: number; novo: number; em_contato: number; qualificado: number; ganho: number; perdido: number }>();
+    for (const l of (leads ?? [])) {
+      const k = (l as any).team_id;
+      if (!k) continue;
+      const s = stats.get(k) ?? { total: 0, novo: 0, em_contato: 0, qualificado: 0, ganho: 0, perdido: 0 };
+      s.total++;
+      const st = ((l as any).status ?? "novo") as keyof typeof s;
+      if (st in s) (s as any)[st]++;
+      stats.set(k, s);
+    }
+    return {
+      team: (team ?? []).map((t: any) => ({
+        ...t,
+        stats: stats.get(t.id) ?? { total: 0, novo: 0, em_contato: 0, qualificado: 0, ganho: 0, perdido: 0 },
+      })),
+    };
+  });
