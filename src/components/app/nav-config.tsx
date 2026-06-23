@@ -155,7 +155,7 @@ export const NAV_GROUPS: NavGroup[] = [
       },
       { to: "/ehr", label: "Prontuário Eletrônico", icon: Stethoscope, perm: "ehr.record.read" },
       { to: "/imobiliaria/interessados", label: "Interessados (Imob.)", icon: Users2, perm: "realestate.interest.read" },
-      { to: "/clube", label: "Minha área Clube", icon: Sparkles },
+      { to: "/area-clube", label: "Minha área Clube", icon: Sparkles },
       { to: "/consumer/unified", label: "Clube — Membros", icon: UserRound, perm: "users.read" },
     ],
   },
