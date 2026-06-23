@@ -65,12 +65,21 @@ function RiomedHome() {
   const [q, setQ] = useState("");
   const products = useQuery({
     queryKey: ["riomed-public-products", q],
-    queryFn: () => listProducts({ data: { search: q || undefined, limit: 8 } }),
+    queryFn: () =>
+      measureStage(
+        "listProductos",
+        "home-featured",
+        () => listProducts({ data: { search: q || undefined, limit: 8 } }),
+        { search: q },
+      ),
+    retry: 1,
   });
   const s = settings.data?.settings;
 
   return (
     <div className="bg-white">
+      <SectionScrollNav />
+
       {/* ============================== HERO ============================== */}
       <section className="relative overflow-hidden bg-gradient-to-br from-[color:var(--riomed-deep)] via-[color:var(--riomed-primary)] to-[#0a4a8a] text-white">
         <div
