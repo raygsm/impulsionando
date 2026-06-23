@@ -17,8 +17,8 @@ export const listIncidents = createServerFn({ method: "POST" })
       .order("detected_at", { ascending: false })
       .limit(Math.min(data.limit ?? 100, 500));
     if (data.source) q = q.eq("source", data.source);
-    if (data.status) q = q.eq("status", data.status);
-    if (data.severity) q = q.eq("severity", data.severity);
+    if (data.status) q = q.eq("status", data.status as any);
+    if (data.severity) q = q.eq("severity", data.severity as any);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
 
