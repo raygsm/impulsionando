@@ -122,8 +122,8 @@ export const NICHO_DETAILS: NichoDetail[] = [
       whatsappMsg:
         "Olá, sou de uma clínica/consultório e quero conhecer a Impulsionando para agenda online, pagamento, WhatsApp 24h e CRM de pacientes.",
     },
-    ctaSecondary: { label: "Teste agora a jornada completa de uma clínica digital", href: "/demo/cliente-final" },
-    demoRoute: "/demo/cliente-final",
+    ctaSecondary: { label: "Teste agora a jornada completa de uma clínica digital", href: "/demo/escolher-nicho" },
+    demoRoute: "/demo/escolher-nicho",
   },
 
   // ============================================================
@@ -219,8 +219,8 @@ export const NICHO_DETAILS: NichoDetail[] = [
       whatsappMsg:
         "Olá, tenho bar/restaurante e quero conhecer a Impulsionando para reservas pagas, CRM, clube de vantagens e campanhas segmentadas.",
     },
-    ctaSecondary: { label: "Teste a demonstração para bares e restaurantes", href: "/demo/cliente-final" },
-    demoRoute: "/demo/cliente-final",
+    ctaSecondary: { label: "Teste a demonstração para bares e restaurantes", href: "/demo/escolher-nicho" },
+    demoRoute: "/demo/escolher-nicho",
   },
 
   // ============================================================
@@ -293,8 +293,8 @@ export const NICHO_DETAILS: NichoDetail[] = [
       whatsappMsg:
         "Olá, tenho microcervejaria e quero conhecer a Impulsionando para pedidos B2B, estoque por rótulo, recompra e campanhas para bares.",
     },
-    ctaSecondary: { label: "Simule uma microcervejaria vendendo para bares", href: "/demo/cliente-final" },
-    demoRoute: "/demo/cliente-final",
+    ctaSecondary: { label: "Simule uma microcervejaria vendendo para bares", href: "/demo/escolher-nicho" },
+    demoRoute: "/demo/escolher-nicho",
   },
 
   // ============================================================
@@ -362,8 +362,8 @@ export const NICHO_DETAILS: NichoDetail[] = [
       whatsappMsg:
         "Olá, sou fornecedor/distribuidor e quero conhecer a Impulsionando para pedidos, estoque, recompra e CRM B2B.",
     },
-    ctaSecondary: { label: "Teste como vender e reativar clientes B2B", href: "/demo/cliente-final" },
-    demoRoute: "/demo/cliente-final",
+    ctaSecondary: { label: "Teste como vender e reativar clientes B2B", href: "/demo/escolher-nicho" },
+    demoRoute: "/demo/escolher-nicho",
   },
 
   // ============================================================
@@ -434,8 +434,8 @@ export const NICHO_DETAILS: NichoDetail[] = [
       whatsappMsg:
         "Olá, tenho empresa de serviços e quero conhecer a Impulsionando para CRM, briefing automático, proposta, agenda e follow-up.",
     },
-    ctaSecondary: { label: "Teste a demo comercial completa", href: "/demo/cliente-final" },
-    demoRoute: "/demo/cliente-final",
+    ctaSecondary: { label: "Teste a demo comercial completa", href: "/demo/escolher-nicho" },
+    demoRoute: "/demo/escolher-nicho",
   },
 
   // ============================================================
@@ -504,8 +504,8 @@ export const NICHO_DETAILS: NichoDetail[] = [
       whatsappMsg:
         "Olá, tenho e-commerce/varejo e quero conhecer a Impulsionando para CRM, follow-up, clube de vantagens e campanhas segmentadas.",
     },
-    ctaSecondary: { label: "Veja a demo de recompra e relacionamento", href: "/demo/cliente-final" },
-    demoRoute: "/demo/cliente-final",
+    ctaSecondary: { label: "Veja a demo de recompra e relacionamento", href: "/demo/escolher-nicho" },
+    demoRoute: "/demo/escolher-nicho",
   },
 
   // ============================================================
@@ -770,8 +770,8 @@ export const NICHO_DETAILS: NichoDetail[] = [
       label: "Quero organizar minha operação de saúde",
       whatsappMsg: "Olá, quero conhecer a Impulsionando para a minha operação de saúde.",
     },
-    ctaSecondary: { label: "Ver demonstração", href: "/demo/cliente-final" },
-    demoRoute: "/demo/cliente-final",
+    ctaSecondary: { label: "Ver demonstração", href: "/demo/escolher-nicho" },
+    demoRoute: "/demo/escolher-nicho",
   },
 
   {
@@ -810,7 +810,7 @@ export const NICHO_DETAILS: NichoDetail[] = [
       label: "Quero a clínica de psicologia organizada",
       whatsappMsg: "Olá, sou psicólogo(a)/terapeuta e quero conhecer a Impulsionando.",
     },
-    ctaSecondary: { label: "Ver demonstração", href: "/demo/cliente-final" },
+    ctaSecondary: { label: "Ver demonstração", href: "/demo/escolher-nicho" },
   },
 
   {
@@ -848,7 +848,7 @@ export const NICHO_DETAILS: NichoDetail[] = [
       label: "Quero o escritório organizado",
       whatsappMsg: "Olá, sou advogado(a) e quero conhecer a Impulsionando para o meu escritório.",
     },
-    ctaSecondary: { label: "Ver demonstração", href: "/demo/cliente-final" },
+    ctaSecondary: { label: "Ver demonstração", href: "/demo/escolher-nicho" },
   },
 
   {
@@ -886,7 +886,7 @@ export const NICHO_DETAILS: NichoDetail[] = [
       label: "Quero a contabilidade organizada",
       whatsappMsg: "Olá, sou de uma contabilidade e quero conhecer a Impulsionando.",
     },
-    ctaSecondary: { label: "Ver demonstração", href: "/demo/cliente-final" },
+    ctaSecondary: { label: "Ver demonstração", href: "/demo/escolher-nicho" },
   },
 
   {

@@ -937,7 +937,7 @@ function WhiteLabelPlansPanel() {
             </a>
           </Button>
           <Button asChild size="lg" variant="outline" className="gap-2 w-full sm:w-auto">
-            <Link to="/demo"><PlayCircle className="w-4 h-4" /> Ver demonstração</Link>
+            <Link to="/demo/escolher-nicho"><PlayCircle className="w-4 h-4" /> Ver demonstração</Link>
           </Button>
         </div>
       </section>
