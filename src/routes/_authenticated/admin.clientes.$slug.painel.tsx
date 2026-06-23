@@ -55,20 +55,19 @@ function PainelPage() {
         <div className="container mx-auto px-6 py-8">
           <div className="flex items-start justify-between flex-wrap gap-4">
             <div className="flex items-center gap-4">
-              {company.logo_url ? (
-                <img src={company.logo_url} alt={company.name} className="h-14 w-14 rounded-xl object-cover ring-2 ring-primary/20" />
-              ) : (
-                <div className="h-14 w-14 rounded-xl bg-gradient-primary flex items-center justify-center shadow-elegant">
-                  <Sparkles className="h-7 w-7 text-primary-foreground" />
-                </div>
-              )}
+              {/* IDENTIDADE IMPULSIONANDO — nunca a logo do tenant.
+                  Todo painel de cliente exibe o padrão visual do core. */}
+              <LogoImpulsionando variant="light" size="sm" />
+              <div className="h-10 w-px bg-border" aria-hidden />
               <div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase tracking-wider">
+                <div className="flex items-center gap-2 text-[11px] text-muted-foreground uppercase tracking-wider">
                   <span>Painel Impulsionando</span>
+                  <span>·</span>
+                  <span>Cliente</span>
                   <span>·</span>
                   <span>{company.subdomain}</span>
                 </div>
-                <h1 className="text-3xl font-bold mt-0.5">{company.name}</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold mt-0.5">{company.name}</h1>
                 <p className="text-sm text-muted-foreground mt-1">
                   Visão proporcional ao plano contratado · {moduleCount} módulos ativos
                 </p>
