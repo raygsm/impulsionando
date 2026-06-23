@@ -10,6 +10,8 @@ import {
 import { addToCart, getOrCreateCart } from "@/lib/riomed-portal.functions";
 import { Search, Stethoscope, ShoppingCart, Tag, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { measureStage } from "@/lib/riomed-telemetry";
+import { ProductsErrorBanner } from "@/components/riomed/ProductsErrorBanner";
 
 const TOKEN_KEY = "riomed_cart_token";
 
@@ -55,13 +57,21 @@ function ProductosPage() {
 
   const products = useQuery({
     queryKey: ["riomed-products", q, cat, cond, mod],
-    queryFn: () => list({ data: {
-      search: q || undefined,
-      category: cat || undefined,
-      condition: cond || undefined,
-      modality: mod || undefined,
-      limit: 80,
-    } }),
+    queryFn: () =>
+      measureStage(
+        "listProductos",
+        "fetch",
+        () =>
+          list({ data: {
+            search: q || undefined,
+            category: cat || undefined,
+            condition: cond || undefined,
+            modality: mod || undefined,
+            limit: 80,
+          } }),
+        { q, cat, cond, mod },
+      ),
+    retry: 1,
   });
   const categories = useQuery({ queryKey: ["riomed-cats"], queryFn: () => cats() });
   const cotacao = useQuery({ queryKey: ["riomed-cotacao"], queryFn: () => cot(), staleTime: 60_000 });
@@ -139,6 +149,14 @@ function ProductosPage() {
           </button>
         )}
       </div>
+
+      {products.isError && (
+        <ProductsErrorBanner
+          message={(products.error as Error)?.message}
+          onRetry={() => products.refetch()}
+          isRetrying={products.isFetching}
+        />
+      )}
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {items.map((p: any) => {

@@ -6,6 +6,9 @@ import {
   getRiomedSiteSettings,
   listRiomedPublicProducts,
 } from "@/lib/riomed-public.functions";
+import { measureStage } from "@/lib/riomed-telemetry";
+import { SectionScrollNav } from "@/components/riomed/SectionScrollNav";
+import { ProductsErrorBanner } from "@/components/riomed/ProductsErrorBanner";
 import { InlineLoginCard } from "./riomed";
 import {
   Stethoscope,
@@ -62,12 +65,21 @@ function RiomedHome() {
   const [q, setQ] = useState("");
   const products = useQuery({
     queryKey: ["riomed-public-products", q],
-    queryFn: () => listProducts({ data: { search: q || undefined, limit: 8 } }),
+    queryFn: () =>
+      measureStage(
+        "listProductos",
+        "home-featured",
+        () => listProducts({ data: { search: q || undefined, limit: 8 } }),
+        { search: q },
+      ),
+    retry: 1,
   });
   const s = settings.data?.settings;
 
   return (
     <div className="bg-white">
+      <SectionScrollNav />
+
       {/* ============================== HERO ============================== */}
       <section className="relative overflow-hidden bg-gradient-to-br from-[color:var(--riomed-deep)] via-[color:var(--riomed-primary)] to-[#0a4a8a] text-white">
         <div
@@ -160,7 +172,7 @@ function RiomedHome() {
       </section>
 
       {/* ===================== JORNADAS POR TIPO DE CLIENTE ===================== */}
-      <section className="max-w-7xl mx-auto px-4 py-16">
+      <section id="publicos" className="max-w-7xl mx-auto px-4 py-16 scroll-mt-32">
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-2">
             Atendimento por perfil
@@ -201,7 +213,7 @@ function RiomedHome() {
       </section>
 
       {/* ============================== CATEGORIAS ============================== */}
-      <section className="bg-slate-50 border-y border-slate-200">
+      <section id="lineas" className="bg-slate-50 border-y border-slate-200 scroll-mt-32">
         <div className="max-w-7xl mx-auto px-4 py-14">
           <div className="flex items-end justify-between mb-8">
             <div>
@@ -257,7 +269,7 @@ function RiomedHome() {
       </section>
 
       {/* ============================ DESTAQUES ============================ */}
-      <section className="bg-gradient-to-b from-slate-50 to-white py-16">
+      <section id="productos" className="bg-gradient-to-b from-slate-50 to-white py-16 scroll-mt-32">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-end justify-between mb-8">
             <div>
@@ -275,6 +287,15 @@ function RiomedHome() {
               Ver catálogo completo <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
+
+          {products.isError && (
+            <ProductsErrorBanner
+              message={(products.error as Error)?.message}
+              onRetry={() => products.refetch()}
+              isRetrying={products.isFetching}
+            />
+          )}
+
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {(products.data?.items ?? []).slice(0, 8).map((p: any) => (
