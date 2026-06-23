@@ -7706,6 +7706,87 @@ export type Database = {
         }
         Relationships: []
       }
+      core_branding_versions: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          logo_url: string | null
+          notes: string | null
+          primary_color: string | null
+          published_at: string | null
+          secondary_color: string | null
+          status: string
+          trade_name: string | null
+          version_number: number
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          logo_url?: string | null
+          notes?: string | null
+          primary_color?: string | null
+          published_at?: string | null
+          secondary_color?: string | null
+          status: string
+          trade_name?: string | null
+          version_number: number
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          logo_url?: string | null
+          notes?: string | null
+          primary_color?: string | null
+          published_at?: string | null
+          secondary_color?: string | null
+          status?: string
+          trade_name?: string | null
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_branding_versions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_branding_versions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_branding_versions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_branding_versions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "core_branding_versions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       core_briefings: {
         Row: {
           answers: Json
