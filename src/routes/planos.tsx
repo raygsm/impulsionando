@@ -585,20 +585,22 @@ function PlanosPage() {
                         {pickedModules[plan.name].length} módulo(s) selecionado(s)
                       </div>
                     ) : null}
-                    <Button
-                      className={cn("w-full", plan.highlight && "bg-gradient-primary shadow-elegant")}
-                      variant={plan.highlight ? "default" : "outline"}
-                      disabled={checkoutLoading}
-                      onClick={() => setPicker({ open: true, plan })}
-                    >
-                      {checkoutLoading
-                        ? "Abrindo checkout..."
-                        : `Escolher módulos e assinar ${annual ? "anual" : "mensal"}`}
-                    </Button>
-
-                    <Button asChild variant="ghost" size="sm" className="w-full text-xs">
-                      <Link to="/trial/cadastro">ou começar Trial de 7 dias</Link>
-                    </Button>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        className={cn(plan.highlight && "bg-gradient-primary shadow-elegant")}
+                        variant={plan.highlight ? "default" : "outline"}
+                        disabled={checkoutLoading}
+                        onClick={() => setPicker({ open: true, plan })}
+                      >
+                        {checkoutLoading ? "Abrindo..." : "Contratar agora"}
+                      </Button>
+                      <Button asChild variant="secondary">
+                        <Link to="/trial/cadastro">Trial 7 dias grátis</Link>
+                      </Button>
+                    </div>
+                    <p className="text-[11px] text-center text-muted-foreground">
+                      Sem cartão no trial · cancele quando quiser
+                    </p>
                   </div>
                 ) : (
                   <Button
