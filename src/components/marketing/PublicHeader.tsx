@@ -60,16 +60,19 @@ function NavLink({
   label,
   exact,
   onClick,
+  search,
 }: {
   to: string;
   label: string;
   exact?: boolean;
   onClick?: () => void;
+  search?: Record<string, string>;
 }) {
   const active = useActive(to, exact);
   return (
     <Link
       to={to}
+      search={search as never}
       onClick={onClick}
       className={cn(
         "px-3 py-1.5 text-sm rounded-md transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -82,6 +85,7 @@ function NavLink({
     </Link>
   );
 }
+
 
 function ItemLink({
   item,
