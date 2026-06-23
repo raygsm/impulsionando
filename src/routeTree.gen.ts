@@ -440,6 +440,7 @@ import { Route as AuthenticatedAdminPresalesHealthRouteImport } from './routes/_
 import { Route as AuthenticatedAdminPixPendentesRouteImport } from './routes/_authenticated/admin.pix-pendentes'
 import { Route as AuthenticatedAdminPeerBenchmarkRouteImport } from './routes/_authenticated/admin.peer-benchmark'
 import { Route as AuthenticatedAdminPayoutsMonetizationHealthRouteImport } from './routes/_authenticated/admin.payouts-monetization-health'
+import { Route as AuthenticatedAdminOndaYRouteImport } from './routes/_authenticated/admin.onda-y'
 import { Route as AuthenticatedAdminOnboardingProvisioningHealthRouteImport } from './routes/_authenticated/admin.onboarding-provisioning-health'
 import { Route as AuthenticatedAdminNotificationsCockpitRouteImport } from './routes/_authenticated/admin.notifications-cockpit'
 import { Route as AuthenticatedAdminNotificationDeliveryRouteImport } from './routes/_authenticated/admin.notification-delivery'
@@ -566,6 +567,7 @@ import { Route as ApiPublicDemoSendTestRouteImport } from './routes/api/public/d
 import { Route as ApiPublicDemoFeiraLeadRouteImport } from './routes/api/public/demo/feira-lead'
 import { Route as ApiPublicCronPayoutsConsolidateRouteImport } from './routes/api/public/cron/payouts-consolidate'
 import { Route as ApiPublicCronFunnelDispatchRouteImport } from './routes/api/public/cron/funnel-dispatch'
+import { Route as ApiPublicCronCrmTouchDispatchRouteImport } from './routes/api/public/cron/crm-touch-dispatch'
 import { Route as ApiPublicCronAgendaTickRouteImport } from './routes/api/public/cron/agenda-tick'
 import { Route as AuthenticatedTorreRestaurantesDemoAuditoriaRouteImport } from './routes/_authenticated/torre.restaurantes-demo.auditoria'
 import { Route as AuthenticatedSalesCashIdRouteImport } from './routes/_authenticated/sales.cash.$id'
@@ -592,6 +594,10 @@ import { Route as AuthenticatedCoreIntegracoesDiagnosticoRouteImport } from './r
 import { Route as AuthenticatedCoreClienteIdRouteImport } from './routes/_authenticated/core.cliente.$id'
 import { Route as AuthenticatedBarMarketplaceNovoPedidoRouteImport } from './routes/_authenticated/bar.marketplace.novo-pedido'
 import { Route as AuthenticatedAdminTenantIdRouteImport } from './routes/_authenticated/admin.tenant.$id'
+import { Route as AuthenticatedAdminOndaYSetoresRouteImport } from './routes/_authenticated/admin.onda-y.setores'
+import { Route as AuthenticatedAdminOndaYProrataRouteImport } from './routes/_authenticated/admin.onda-y.prorata'
+import { Route as AuthenticatedAdminOndaYFretesRouteImport } from './routes/_authenticated/admin.onda-y.fretes'
+import { Route as AuthenticatedAdminOndaYCrmReguasRouteImport } from './routes/_authenticated/admin.onda-y.crm-reguas'
 import { Route as AuthenticatedAdminModulosClonagemRouteImport } from './routes/_authenticated/admin.modulos.clonagem'
 import { Route as AuthenticatedAdminIntegracoesMercadoPagoRouteImport } from './routes/_authenticated/admin.integracoes.mercado-pago'
 import { Route as AuthenticatedAdminClientesRiomedRouteImport } from './routes/_authenticated/admin.clientes.riomed'
@@ -3006,6 +3012,11 @@ const AuthenticatedAdminPayoutsMonetizationHealthRoute =
     path: '/admin/payouts-monetization-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminOndaYRoute = AuthenticatedAdminOndaYRouteImport.update({
+  id: '/admin/onda-y',
+  path: '/admin/onda-y',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminOnboardingProvisioningHealthRoute =
   AuthenticatedAdminOnboardingProvisioningHealthRouteImport.update({
     id: '/admin/onboarding-provisioning-health',
@@ -3750,6 +3761,12 @@ const ApiPublicCronFunnelDispatchRoute =
     path: '/api/public/cron/funnel-dispatch',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicCronCrmTouchDispatchRoute =
+  ApiPublicCronCrmTouchDispatchRouteImport.update({
+    id: '/api/public/cron/crm-touch-dispatch',
+    path: '/api/public/cron/crm-touch-dispatch',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicCronAgendaTickRoute = ApiPublicCronAgendaTickRouteImport.update({
   id: '/api/public/cron/agenda-tick',
   path: '/api/public/cron/agenda-tick',
@@ -3904,6 +3921,30 @@ const AuthenticatedAdminTenantIdRoute =
     id: '/admin/tenant/$id',
     path: '/admin/tenant/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminOndaYSetoresRoute =
+  AuthenticatedAdminOndaYSetoresRouteImport.update({
+    id: '/setores',
+    path: '/setores',
+    getParentRoute: () => AuthenticatedAdminOndaYRoute,
+  } as any)
+const AuthenticatedAdminOndaYProrataRoute =
+  AuthenticatedAdminOndaYProrataRouteImport.update({
+    id: '/prorata',
+    path: '/prorata',
+    getParentRoute: () => AuthenticatedAdminOndaYRoute,
+  } as any)
+const AuthenticatedAdminOndaYFretesRoute =
+  AuthenticatedAdminOndaYFretesRouteImport.update({
+    id: '/fretes',
+    path: '/fretes',
+    getParentRoute: () => AuthenticatedAdminOndaYRoute,
+  } as any)
+const AuthenticatedAdminOndaYCrmReguasRoute =
+  AuthenticatedAdminOndaYCrmReguasRouteImport.update({
+    id: '/crm-reguas',
+    path: '/crm-reguas',
+    getParentRoute: () => AuthenticatedAdminOndaYRoute,
   } as any)
 const AuthenticatedAdminModulosClonagemRoute =
   AuthenticatedAdminModulosClonagemRouteImport.update({
@@ -4419,6 +4460,7 @@ export interface FileRoutesByFullPath {
   '/admin/notification-delivery': typeof AuthenticatedAdminNotificationDeliveryRoute
   '/admin/notifications-cockpit': typeof AuthenticatedAdminNotificationsCockpitRoute
   '/admin/onboarding-provisioning-health': typeof AuthenticatedAdminOnboardingProvisioningHealthRoute
+  '/admin/onda-y': typeof AuthenticatedAdminOndaYRouteWithChildren
   '/admin/payouts-monetization-health': typeof AuthenticatedAdminPayoutsMonetizationHealthRoute
   '/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
@@ -4667,6 +4709,10 @@ export interface FileRoutesByFullPath {
   '/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   '/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
+  '/admin/onda-y/crm-reguas': typeof AuthenticatedAdminOndaYCrmReguasRoute
+  '/admin/onda-y/fretes': typeof AuthenticatedAdminOndaYFretesRoute
+  '/admin/onda-y/prorata': typeof AuthenticatedAdminOndaYProrataRoute
+  '/admin/onda-y/setores': typeof AuthenticatedAdminOndaYSetoresRoute
   '/admin/tenant/$id': typeof AuthenticatedAdminTenantIdRoute
   '/bar/marketplace/novo-pedido': typeof AuthenticatedBarMarketplaceNovoPedidoRoute
   '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
@@ -4693,6 +4739,7 @@ export interface FileRoutesByFullPath {
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
   '/api/public/cron/agenda-tick': typeof ApiPublicCronAgendaTickRoute
+  '/api/public/cron/crm-touch-dispatch': typeof ApiPublicCronCrmTouchDispatchRoute
   '/api/public/cron/funnel-dispatch': typeof ApiPublicCronFunnelDispatchRoute
   '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
@@ -5029,6 +5076,7 @@ export interface FileRoutesByTo {
   '/admin/notification-delivery': typeof AuthenticatedAdminNotificationDeliveryRoute
   '/admin/notifications-cockpit': typeof AuthenticatedAdminNotificationsCockpitRoute
   '/admin/onboarding-provisioning-health': typeof AuthenticatedAdminOnboardingProvisioningHealthRoute
+  '/admin/onda-y': typeof AuthenticatedAdminOndaYRouteWithChildren
   '/admin/payouts-monetization-health': typeof AuthenticatedAdminPayoutsMonetizationHealthRoute
   '/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
@@ -5277,6 +5325,10 @@ export interface FileRoutesByTo {
   '/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   '/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
+  '/admin/onda-y/crm-reguas': typeof AuthenticatedAdminOndaYCrmReguasRoute
+  '/admin/onda-y/fretes': typeof AuthenticatedAdminOndaYFretesRoute
+  '/admin/onda-y/prorata': typeof AuthenticatedAdminOndaYProrataRoute
+  '/admin/onda-y/setores': typeof AuthenticatedAdminOndaYSetoresRoute
   '/admin/tenant/$id': typeof AuthenticatedAdminTenantIdRoute
   '/bar/marketplace/novo-pedido': typeof AuthenticatedBarMarketplaceNovoPedidoRoute
   '/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
@@ -5303,6 +5355,7 @@ export interface FileRoutesByTo {
   '/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
   '/api/public/cron/agenda-tick': typeof ApiPublicCronAgendaTickRoute
+  '/api/public/cron/crm-touch-dispatch': typeof ApiPublicCronCrmTouchDispatchRoute
   '/api/public/cron/funnel-dispatch': typeof ApiPublicCronFunnelDispatchRoute
   '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
@@ -5654,6 +5707,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/notification-delivery': typeof AuthenticatedAdminNotificationDeliveryRoute
   '/_authenticated/admin/notifications-cockpit': typeof AuthenticatedAdminNotificationsCockpitRoute
   '/_authenticated/admin/onboarding-provisioning-health': typeof AuthenticatedAdminOnboardingProvisioningHealthRoute
+  '/_authenticated/admin/onda-y': typeof AuthenticatedAdminOndaYRouteWithChildren
   '/_authenticated/admin/payouts-monetization-health': typeof AuthenticatedAdminPayoutsMonetizationHealthRoute
   '/_authenticated/admin/peer-benchmark': typeof AuthenticatedAdminPeerBenchmarkRoute
   '/_authenticated/admin/pix-pendentes': typeof AuthenticatedAdminPixPendentesRoute
@@ -5902,6 +5956,10 @@ export interface FileRoutesById {
   '/_authenticated/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   '/_authenticated/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   '/_authenticated/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
+  '/_authenticated/admin/onda-y/crm-reguas': typeof AuthenticatedAdminOndaYCrmReguasRoute
+  '/_authenticated/admin/onda-y/fretes': typeof AuthenticatedAdminOndaYFretesRoute
+  '/_authenticated/admin/onda-y/prorata': typeof AuthenticatedAdminOndaYProrataRoute
+  '/_authenticated/admin/onda-y/setores': typeof AuthenticatedAdminOndaYSetoresRoute
   '/_authenticated/admin/tenant/$id': typeof AuthenticatedAdminTenantIdRoute
   '/_authenticated/bar/marketplace/novo-pedido': typeof AuthenticatedBarMarketplaceNovoPedidoRoute
   '/_authenticated/core/cliente/$id': typeof AuthenticatedCoreClienteIdRouteWithChildren
@@ -5928,6 +5986,7 @@ export interface FileRoutesById {
   '/_authenticated/sales/cash/$id': typeof AuthenticatedSalesCashIdRoute
   '/_authenticated/torre/restaurantes-demo/auditoria': typeof AuthenticatedTorreRestaurantesDemoAuditoriaRoute
   '/api/public/cron/agenda-tick': typeof ApiPublicCronAgendaTickRoute
+  '/api/public/cron/crm-touch-dispatch': typeof ApiPublicCronCrmTouchDispatchRoute
   '/api/public/cron/funnel-dispatch': typeof ApiPublicCronFunnelDispatchRoute
   '/api/public/cron/payouts-consolidate': typeof ApiPublicCronPayoutsConsolidateRoute
   '/api/public/demo/feira-lead': typeof ApiPublicDemoFeiraLeadRoute
@@ -6278,6 +6337,7 @@ export interface FileRouteTypes {
     | '/admin/notification-delivery'
     | '/admin/notifications-cockpit'
     | '/admin/onboarding-provisioning-health'
+    | '/admin/onda-y'
     | '/admin/payouts-monetization-health'
     | '/admin/peer-benchmark'
     | '/admin/pix-pendentes'
@@ -6526,6 +6586,10 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed'
     | '/admin/integracoes/mercado-pago'
     | '/admin/modulos/clonagem'
+    | '/admin/onda-y/crm-reguas'
+    | '/admin/onda-y/fretes'
+    | '/admin/onda-y/prorata'
+    | '/admin/onda-y/setores'
     | '/admin/tenant/$id'
     | '/bar/marketplace/novo-pedido'
     | '/core/cliente/$id'
@@ -6552,6 +6616,7 @@ export interface FileRouteTypes {
     | '/sales/cash/$id'
     | '/torre/restaurantes-demo/auditoria'
     | '/api/public/cron/agenda-tick'
+    | '/api/public/cron/crm-touch-dispatch'
     | '/api/public/cron/funnel-dispatch'
     | '/api/public/cron/payouts-consolidate'
     | '/api/public/demo/feira-lead'
@@ -6888,6 +6953,7 @@ export interface FileRouteTypes {
     | '/admin/notification-delivery'
     | '/admin/notifications-cockpit'
     | '/admin/onboarding-provisioning-health'
+    | '/admin/onda-y'
     | '/admin/payouts-monetization-health'
     | '/admin/peer-benchmark'
     | '/admin/pix-pendentes'
@@ -7136,6 +7202,10 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed'
     | '/admin/integracoes/mercado-pago'
     | '/admin/modulos/clonagem'
+    | '/admin/onda-y/crm-reguas'
+    | '/admin/onda-y/fretes'
+    | '/admin/onda-y/prorata'
+    | '/admin/onda-y/setores'
     | '/admin/tenant/$id'
     | '/bar/marketplace/novo-pedido'
     | '/core/cliente/$id'
@@ -7162,6 +7232,7 @@ export interface FileRouteTypes {
     | '/sales/cash/$id'
     | '/torre/restaurantes-demo/auditoria'
     | '/api/public/cron/agenda-tick'
+    | '/api/public/cron/crm-touch-dispatch'
     | '/api/public/cron/funnel-dispatch'
     | '/api/public/cron/payouts-consolidate'
     | '/api/public/demo/feira-lead'
@@ -7512,6 +7583,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/notification-delivery'
     | '/_authenticated/admin/notifications-cockpit'
     | '/_authenticated/admin/onboarding-provisioning-health'
+    | '/_authenticated/admin/onda-y'
     | '/_authenticated/admin/payouts-monetization-health'
     | '/_authenticated/admin/peer-benchmark'
     | '/_authenticated/admin/pix-pendentes'
@@ -7760,6 +7832,10 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/clientes/riomed'
     | '/_authenticated/admin/integracoes/mercado-pago'
     | '/_authenticated/admin/modulos/clonagem'
+    | '/_authenticated/admin/onda-y/crm-reguas'
+    | '/_authenticated/admin/onda-y/fretes'
+    | '/_authenticated/admin/onda-y/prorata'
+    | '/_authenticated/admin/onda-y/setores'
     | '/_authenticated/admin/tenant/$id'
     | '/_authenticated/bar/marketplace/novo-pedido'
     | '/_authenticated/core/cliente/$id'
@@ -7786,6 +7862,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sales/cash/$id'
     | '/_authenticated/torre/restaurantes-demo/auditoria'
     | '/api/public/cron/agenda-tick'
+    | '/api/public/cron/crm-touch-dispatch'
     | '/api/public/cron/funnel-dispatch'
     | '/api/public/cron/payouts-consolidate'
     | '/api/public/demo/feira-lead'
@@ -7981,6 +8058,7 @@ export interface RootRouteChildren {
   PortalContabilidadeTokenRoute: typeof PortalContabilidadeTokenRoute
   PortalProprietarioTokenRoute: typeof PortalProprietarioTokenRoute
   ApiPublicCronAgendaTickRoute: typeof ApiPublicCronAgendaTickRoute
+  ApiPublicCronCrmTouchDispatchRoute: typeof ApiPublicCronCrmTouchDispatchRoute
   ApiPublicCronFunnelDispatchRoute: typeof ApiPublicCronFunnelDispatchRoute
   ApiPublicCronPayoutsConsolidateRoute: typeof ApiPublicCronPayoutsConsolidateRoute
   ApiPublicDemoFeiraLeadRoute: typeof ApiPublicDemoFeiraLeadRoute
@@ -11035,6 +11113,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPayoutsMonetizationHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/onda-y': {
+      id: '/_authenticated/admin/onda-y'
+      path: '/admin/onda-y'
+      fullPath: '/admin/onda-y'
+      preLoaderRoute: typeof AuthenticatedAdminOndaYRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/onboarding-provisioning-health': {
       id: '/_authenticated/admin/onboarding-provisioning-health'
       path: '/admin/onboarding-provisioning-health'
@@ -11917,6 +12002,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicCronFunnelDispatchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/cron/crm-touch-dispatch': {
+      id: '/api/public/cron/crm-touch-dispatch'
+      path: '/api/public/cron/crm-touch-dispatch'
+      fullPath: '/api/public/cron/crm-touch-dispatch'
+      preLoaderRoute: typeof ApiPublicCronCrmTouchDispatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/cron/agenda-tick': {
       id: '/api/public/cron/agenda-tick'
       path: '/api/public/cron/agenda-tick'
@@ -12098,6 +12190,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/tenant/$id'
       preLoaderRoute: typeof AuthenticatedAdminTenantIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/onda-y/setores': {
+      id: '/_authenticated/admin/onda-y/setores'
+      path: '/setores'
+      fullPath: '/admin/onda-y/setores'
+      preLoaderRoute: typeof AuthenticatedAdminOndaYSetoresRouteImport
+      parentRoute: typeof AuthenticatedAdminOndaYRoute
+    }
+    '/_authenticated/admin/onda-y/prorata': {
+      id: '/_authenticated/admin/onda-y/prorata'
+      path: '/prorata'
+      fullPath: '/admin/onda-y/prorata'
+      preLoaderRoute: typeof AuthenticatedAdminOndaYProrataRouteImport
+      parentRoute: typeof AuthenticatedAdminOndaYRoute
+    }
+    '/_authenticated/admin/onda-y/fretes': {
+      id: '/_authenticated/admin/onda-y/fretes'
+      path: '/fretes'
+      fullPath: '/admin/onda-y/fretes'
+      preLoaderRoute: typeof AuthenticatedAdminOndaYFretesRouteImport
+      parentRoute: typeof AuthenticatedAdminOndaYRoute
+    }
+    '/_authenticated/admin/onda-y/crm-reguas': {
+      id: '/_authenticated/admin/onda-y/crm-reguas'
+      path: '/crm-reguas'
+      fullPath: '/admin/onda-y/crm-reguas'
+      preLoaderRoute: typeof AuthenticatedAdminOndaYCrmReguasRouteImport
+      parentRoute: typeof AuthenticatedAdminOndaYRoute
     }
     '/_authenticated/admin/modulos/clonagem': {
       id: '/_authenticated/admin/modulos/clonagem'
@@ -12881,6 +13001,27 @@ const AuthenticatedUsersRouteChildren: AuthenticatedUsersRouteChildren = {
 const AuthenticatedUsersRouteWithChildren =
   AuthenticatedUsersRoute._addFileChildren(AuthenticatedUsersRouteChildren)
 
+interface AuthenticatedAdminOndaYRouteChildren {
+  AuthenticatedAdminOndaYCrmReguasRoute: typeof AuthenticatedAdminOndaYCrmReguasRoute
+  AuthenticatedAdminOndaYFretesRoute: typeof AuthenticatedAdminOndaYFretesRoute
+  AuthenticatedAdminOndaYProrataRoute: typeof AuthenticatedAdminOndaYProrataRoute
+  AuthenticatedAdminOndaYSetoresRoute: typeof AuthenticatedAdminOndaYSetoresRoute
+}
+
+const AuthenticatedAdminOndaYRouteChildren: AuthenticatedAdminOndaYRouteChildren =
+  {
+    AuthenticatedAdminOndaYCrmReguasRoute:
+      AuthenticatedAdminOndaYCrmReguasRoute,
+    AuthenticatedAdminOndaYFretesRoute: AuthenticatedAdminOndaYFretesRoute,
+    AuthenticatedAdminOndaYProrataRoute: AuthenticatedAdminOndaYProrataRoute,
+    AuthenticatedAdminOndaYSetoresRoute: AuthenticatedAdminOndaYSetoresRoute,
+  }
+
+const AuthenticatedAdminOndaYRouteWithChildren =
+  AuthenticatedAdminOndaYRoute._addFileChildren(
+    AuthenticatedAdminOndaYRouteChildren,
+  )
+
 interface AuthenticatedBarMarketplaceRouteChildren {
   AuthenticatedBarMarketplaceNovoPedidoRoute: typeof AuthenticatedBarMarketplaceNovoPedidoRoute
 }
@@ -13232,6 +13373,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminNotificationDeliveryRoute: typeof AuthenticatedAdminNotificationDeliveryRoute
   AuthenticatedAdminNotificationsCockpitRoute: typeof AuthenticatedAdminNotificationsCockpitRoute
   AuthenticatedAdminOnboardingProvisioningHealthRoute: typeof AuthenticatedAdminOnboardingProvisioningHealthRoute
+  AuthenticatedAdminOndaYRoute: typeof AuthenticatedAdminOndaYRouteWithChildren
   AuthenticatedAdminPayoutsMonetizationHealthRoute: typeof AuthenticatedAdminPayoutsMonetizationHealthRoute
   AuthenticatedAdminPeerBenchmarkRoute: typeof AuthenticatedAdminPeerBenchmarkRoute
   AuthenticatedAdminPixPendentesRoute: typeof AuthenticatedAdminPixPendentesRoute
@@ -13531,6 +13673,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminNotificationsCockpitRoute,
   AuthenticatedAdminOnboardingProvisioningHealthRoute:
     AuthenticatedAdminOnboardingProvisioningHealthRoute,
+  AuthenticatedAdminOndaYRoute: AuthenticatedAdminOndaYRouteWithChildren,
   AuthenticatedAdminPayoutsMonetizationHealthRoute:
     AuthenticatedAdminPayoutsMonetizationHealthRoute,
   AuthenticatedAdminPeerBenchmarkRoute: AuthenticatedAdminPeerBenchmarkRoute,
@@ -14029,6 +14172,7 @@ const rootRouteChildren: RootRouteChildren = {
   PortalContabilidadeTokenRoute: PortalContabilidadeTokenRoute,
   PortalProprietarioTokenRoute: PortalProprietarioTokenRoute,
   ApiPublicCronAgendaTickRoute: ApiPublicCronAgendaTickRoute,
+  ApiPublicCronCrmTouchDispatchRoute: ApiPublicCronCrmTouchDispatchRoute,
   ApiPublicCronFunnelDispatchRoute: ApiPublicCronFunnelDispatchRoute,
   ApiPublicCronPayoutsConsolidateRoute: ApiPublicCronPayoutsConsolidateRoute,
   ApiPublicDemoFeiraLeadRoute: ApiPublicDemoFeiraLeadRoute,
