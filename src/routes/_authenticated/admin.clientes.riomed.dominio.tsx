@@ -21,7 +21,7 @@ function Page() {
     queryFn: async () => {
       const { data } = await supabase
         .from("core_tenant_identity")
-        .select("subdomain, custom_domain, brand_name, company_id")
+        .select("subdomain, custom_domain, company_id")
         .eq("subdomain", "riomed")
         .maybeSingle();
       return data;

@@ -645,6 +645,7 @@ import { Route as AuthenticatedAdminClientesRiomedGovernancaRouteImport } from '
 import { Route as AuthenticatedAdminClientesRiomedFiscalRouteImport } from './routes/_authenticated/admin.clientes.riomed.fiscal'
 import { Route as AuthenticatedAdminClientesRiomedFinanceiroRouteImport } from './routes/_authenticated/admin.clientes.riomed.financeiro'
 import { Route as AuthenticatedAdminClientesRiomedEstoqueAlmoxarifadosRouteImport } from './routes/_authenticated/admin.clientes.riomed.estoque-almoxarifados'
+import { Route as AuthenticatedAdminClientesRiomedDominioRouteImport } from './routes/_authenticated/admin.clientes.riomed.dominio'
 import { Route as AuthenticatedAdminClientesRiomedDashboardsRouteImport } from './routes/_authenticated/admin.clientes.riomed.dashboards'
 import { Route as AuthenticatedAdminClientesRiomedDashboardRouteImport } from './routes/_authenticated/admin.clientes.riomed.dashboard'
 import { Route as AuthenticatedAdminClientesRiomedCrmRouteImport } from './routes/_authenticated/admin.clientes.riomed.crm'
@@ -4244,6 +4245,12 @@ const AuthenticatedAdminClientesRiomedEstoqueAlmoxarifadosRoute =
     path: '/estoque-almoxarifados',
     getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
   } as any)
+const AuthenticatedAdminClientesRiomedDominioRoute =
+  AuthenticatedAdminClientesRiomedDominioRouteImport.update({
+    id: '/dominio',
+    path: '/dominio',
+    getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
+  } as any)
 const AuthenticatedAdminClientesRiomedDashboardsRoute =
   AuthenticatedAdminClientesRiomedDashboardsRouteImport.update({
     id: '/dashboards',
@@ -4950,6 +4957,7 @@ export interface FileRoutesByFullPath {
   '/admin/clientes/riomed/crm': typeof AuthenticatedAdminClientesRiomedCrmRoute
   '/admin/clientes/riomed/dashboard': typeof AuthenticatedAdminClientesRiomedDashboardRoute
   '/admin/clientes/riomed/dashboards': typeof AuthenticatedAdminClientesRiomedDashboardsRoute
+  '/admin/clientes/riomed/dominio': typeof AuthenticatedAdminClientesRiomedDominioRoute
   '/admin/clientes/riomed/estoque-almoxarifados': typeof AuthenticatedAdminClientesRiomedEstoqueAlmoxarifadosRoute
   '/admin/clientes/riomed/financeiro': typeof AuthenticatedAdminClientesRiomedFinanceiroRoute
   '/admin/clientes/riomed/fiscal': typeof AuthenticatedAdminClientesRiomedFiscalRoute
@@ -5589,6 +5597,7 @@ export interface FileRoutesByTo {
   '/admin/clientes/riomed/crm': typeof AuthenticatedAdminClientesRiomedCrmRoute
   '/admin/clientes/riomed/dashboard': typeof AuthenticatedAdminClientesRiomedDashboardRoute
   '/admin/clientes/riomed/dashboards': typeof AuthenticatedAdminClientesRiomedDashboardsRoute
+  '/admin/clientes/riomed/dominio': typeof AuthenticatedAdminClientesRiomedDominioRoute
   '/admin/clientes/riomed/estoque-almoxarifados': typeof AuthenticatedAdminClientesRiomedEstoqueAlmoxarifadosRoute
   '/admin/clientes/riomed/financeiro': typeof AuthenticatedAdminClientesRiomedFinanceiroRoute
   '/admin/clientes/riomed/fiscal': typeof AuthenticatedAdminClientesRiomedFiscalRoute
@@ -6243,6 +6252,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/clientes/riomed/crm': typeof AuthenticatedAdminClientesRiomedCrmRoute
   '/_authenticated/admin/clientes/riomed/dashboard': typeof AuthenticatedAdminClientesRiomedDashboardRoute
   '/_authenticated/admin/clientes/riomed/dashboards': typeof AuthenticatedAdminClientesRiomedDashboardsRoute
+  '/_authenticated/admin/clientes/riomed/dominio': typeof AuthenticatedAdminClientesRiomedDominioRoute
   '/_authenticated/admin/clientes/riomed/estoque-almoxarifados': typeof AuthenticatedAdminClientesRiomedEstoqueAlmoxarifadosRoute
   '/_authenticated/admin/clientes/riomed/financeiro': typeof AuthenticatedAdminClientesRiomedFinanceiroRoute
   '/_authenticated/admin/clientes/riomed/fiscal': typeof AuthenticatedAdminClientesRiomedFiscalRoute
@@ -6896,6 +6906,7 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed/crm'
     | '/admin/clientes/riomed/dashboard'
     | '/admin/clientes/riomed/dashboards'
+    | '/admin/clientes/riomed/dominio'
     | '/admin/clientes/riomed/estoque-almoxarifados'
     | '/admin/clientes/riomed/financeiro'
     | '/admin/clientes/riomed/fiscal'
@@ -7535,6 +7546,7 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed/crm'
     | '/admin/clientes/riomed/dashboard'
     | '/admin/clientes/riomed/dashboards'
+    | '/admin/clientes/riomed/dominio'
     | '/admin/clientes/riomed/estoque-almoxarifados'
     | '/admin/clientes/riomed/financeiro'
     | '/admin/clientes/riomed/fiscal'
@@ -8188,6 +8200,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/clientes/riomed/crm'
     | '/_authenticated/admin/clientes/riomed/dashboard'
     | '/_authenticated/admin/clientes/riomed/dashboards'
+    | '/_authenticated/admin/clientes/riomed/dominio'
     | '/_authenticated/admin/clientes/riomed/estoque-almoxarifados'
     | '/_authenticated/admin/clientes/riomed/financeiro'
     | '/_authenticated/admin/clientes/riomed/fiscal'
@@ -12850,6 +12863,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientesRiomedEstoqueAlmoxarifadosRouteImport
       parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
     }
+    '/_authenticated/admin/clientes/riomed/dominio': {
+      id: '/_authenticated/admin/clientes/riomed/dominio'
+      path: '/dominio'
+      fullPath: '/admin/clientes/riomed/dominio'
+      preLoaderRoute: typeof AuthenticatedAdminClientesRiomedDominioRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
+    }
     '/_authenticated/admin/clientes/riomed/dashboards': {
       id: '/_authenticated/admin/clientes/riomed/dashboards'
       path: '/dashboards'
@@ -13636,6 +13656,7 @@ interface AuthenticatedAdminClientesRiomedRouteChildren {
   AuthenticatedAdminClientesRiomedCrmRoute: typeof AuthenticatedAdminClientesRiomedCrmRoute
   AuthenticatedAdminClientesRiomedDashboardRoute: typeof AuthenticatedAdminClientesRiomedDashboardRoute
   AuthenticatedAdminClientesRiomedDashboardsRoute: typeof AuthenticatedAdminClientesRiomedDashboardsRoute
+  AuthenticatedAdminClientesRiomedDominioRoute: typeof AuthenticatedAdminClientesRiomedDominioRoute
   AuthenticatedAdminClientesRiomedEstoqueAlmoxarifadosRoute: typeof AuthenticatedAdminClientesRiomedEstoqueAlmoxarifadosRoute
   AuthenticatedAdminClientesRiomedFinanceiroRoute: typeof AuthenticatedAdminClientesRiomedFinanceiroRoute
   AuthenticatedAdminClientesRiomedFiscalRoute: typeof AuthenticatedAdminClientesRiomedFiscalRoute
@@ -13686,6 +13707,8 @@ const AuthenticatedAdminClientesRiomedRouteChildren: AuthenticatedAdminClientesR
       AuthenticatedAdminClientesRiomedDashboardRoute,
     AuthenticatedAdminClientesRiomedDashboardsRoute:
       AuthenticatedAdminClientesRiomedDashboardsRoute,
+    AuthenticatedAdminClientesRiomedDominioRoute:
+      AuthenticatedAdminClientesRiomedDominioRoute,
     AuthenticatedAdminClientesRiomedEstoqueAlmoxarifadosRoute:
       AuthenticatedAdminClientesRiomedEstoqueAlmoxarifadosRoute,
     AuthenticatedAdminClientesRiomedFinanceiroRoute:
@@ -14733,13 +14756,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
