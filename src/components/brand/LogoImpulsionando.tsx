@@ -93,24 +93,31 @@ export function LogoImpulsionando({
     />
   )
 
-  if (effective === 'dark') {
-    return (
-      <span
-        ref={wrapRef}
-        className={cn(
-          'inline-flex items-center justify-center rounded-lg bg-white shadow-sm',
-          padded ? 'px-3 py-2' : 'p-1',
-          className,
-        )}
-      >
-        {img}
-      </span>
-    )
-  }
-
-  return (
+  const inner = effective === 'dark' ? (
+    <span
+      ref={wrapRef}
+      className={cn(
+        'inline-flex items-center justify-center rounded-lg bg-white shadow-sm',
+        padded ? 'px-3 py-2' : 'p-1',
+        className,
+      )}
+    >
+      {img}
+    </span>
+  ) : (
     <span ref={wrapRef} className={cn('inline-flex items-center', className)}>
       {img}
     </span>
+  )
+
+  if (!asLink) return inner
+  return (
+    <a
+      href={href}
+      aria-label="Ir para a home Impulsionando"
+      className="inline-flex items-center hover:opacity-90 transition-opacity"
+    >
+      {inner}
+    </a>
   )
 }
