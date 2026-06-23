@@ -568,6 +568,7 @@ import { Route as ApiPublicOutboxProcessRouteImport } from './routes/api/public/
 import { Route as ApiPublicHooksZapiStatusRouteImport } from './routes/api/public/hooks/zapi-status'
 import { Route as ApiPublicHooksUptimeWhatsappTestRouteImport } from './routes/api/public/hooks/uptime-whatsapp-test'
 import { Route as ApiPublicHooksUptimeCheckRouteImport } from './routes/api/public/hooks/uptime-check'
+import { Route as ApiPublicHooksTrialReguaRouteImport } from './routes/api/public/hooks/trial-regua'
 import { Route as ApiPublicHooksRetentionSweepRouteImport } from './routes/api/public/hooks/retention-sweep'
 import { Route as ApiPublicHooksNotificationLogCleanupRouteImport } from './routes/api/public/hooks/notification-log-cleanup'
 import { Route as ApiPublicHooksN8nLogRouteImport } from './routes/api/public/hooks/n8n-log'
@@ -3800,6 +3801,12 @@ const ApiPublicHooksUptimeCheckRoute =
     path: '/api/public/hooks/uptime-check',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksTrialReguaRoute =
+  ApiPublicHooksTrialReguaRouteImport.update({
+    id: '/api/public/hooks/trial-regua',
+    path: '/api/public/hooks/trial-regua',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksRetentionSweepRoute =
   ApiPublicHooksRetentionSweepRouteImport.update({
     id: '/api/public/hooks/retention-sweep',
@@ -5048,6 +5055,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
   '/api/public/hooks/notification-log-cleanup': typeof ApiPublicHooksNotificationLogCleanupRoute
   '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
+  '/api/public/hooks/trial-regua': typeof ApiPublicHooksTrialReguaRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
@@ -5705,6 +5713,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
   '/api/public/hooks/notification-log-cleanup': typeof ApiPublicHooksNotificationLogCleanupRoute
   '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
+  '/api/public/hooks/trial-regua': typeof ApiPublicHooksTrialReguaRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
@@ -6376,6 +6385,7 @@ export interface FileRoutesById {
   '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
   '/api/public/hooks/notification-log-cleanup': typeof ApiPublicHooksNotificationLogCleanupRoute
   '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
+  '/api/public/hooks/trial-regua': typeof ApiPublicHooksTrialReguaRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
   '/api/public/hooks/zapi-status': typeof ApiPublicHooksZapiStatusRoute
@@ -7047,6 +7057,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/n8n-log'
     | '/api/public/hooks/notification-log-cleanup'
     | '/api/public/hooks/retention-sweep'
+    | '/api/public/hooks/trial-regua'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
     | '/api/public/hooks/zapi-status'
@@ -7704,6 +7715,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/n8n-log'
     | '/api/public/hooks/notification-log-cleanup'
     | '/api/public/hooks/retention-sweep'
+    | '/api/public/hooks/trial-regua'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
     | '/api/public/hooks/zapi-status'
@@ -8374,6 +8386,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/n8n-log'
     | '/api/public/hooks/notification-log-cleanup'
     | '/api/public/hooks/retention-sweep'
+    | '/api/public/hooks/trial-regua'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
     | '/api/public/hooks/zapi-status'
@@ -8597,6 +8610,7 @@ export interface RootRouteChildren {
   ApiPublicHooksN8nLogRoute: typeof ApiPublicHooksN8nLogRoute
   ApiPublicHooksNotificationLogCleanupRoute: typeof ApiPublicHooksNotificationLogCleanupRoute
   ApiPublicHooksRetentionSweepRoute: typeof ApiPublicHooksRetentionSweepRoute
+  ApiPublicHooksTrialReguaRoute: typeof ApiPublicHooksTrialReguaRoute
   ApiPublicHooksUptimeCheckRoute: typeof ApiPublicHooksUptimeCheckRoute
   ApiPublicHooksUptimeWhatsappTestRoute: typeof ApiPublicHooksUptimeWhatsappTestRoute
   ApiPublicHooksZapiStatusRoute: typeof ApiPublicHooksZapiStatusRoute
@@ -12538,6 +12552,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksUptimeCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/trial-regua': {
+      id: '/api/public/hooks/trial-regua'
+      path: '/api/public/hooks/trial-regua'
+      fullPath: '/api/public/hooks/trial-regua'
+      preLoaderRoute: typeof ApiPublicHooksTrialReguaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/retention-sweep': {
       id: '/api/public/hooks/retention-sweep'
       path: '/api/public/hooks/retention-sweep'
@@ -15083,6 +15104,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksNotificationLogCleanupRoute:
     ApiPublicHooksNotificationLogCleanupRoute,
   ApiPublicHooksRetentionSweepRoute: ApiPublicHooksRetentionSweepRoute,
+  ApiPublicHooksTrialReguaRoute: ApiPublicHooksTrialReguaRoute,
   ApiPublicHooksUptimeCheckRoute: ApiPublicHooksUptimeCheckRoute,
   ApiPublicHooksUptimeWhatsappTestRoute: ApiPublicHooksUptimeWhatsappTestRoute,
   ApiPublicHooksZapiStatusRoute: ApiPublicHooksZapiStatusRoute,

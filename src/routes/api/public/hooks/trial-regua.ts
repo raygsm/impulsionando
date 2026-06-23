@@ -39,8 +39,8 @@ export const Route = createFileRoute("/api/public/hooks/trial-regua")({
         // 1) Expira trials vencidos
         const { error: expErr } = await supabaseAdmin
           .from("trial_subscriptions")
-          .update({ status: "expired" })
-          .eq("status", "active")
+          .update({ status: "expirado_sem_conversao" })
+          .eq("status", "ativo")
           .is("converted_at", null)
           .lt("ends_at", now.toISOString());
         if (expErr) {
@@ -53,7 +53,7 @@ export const Route = createFileRoute("/api/public/hooks/trial-regua")({
           .select(
             "id, company_id, lead_id, contact_email, contact_whatsapp, contact_name, contact_company, started_at, ends_at, status",
           )
-          .in("status", ["active", "expired"])
+          .in("status", ["ativo", "expirado_sem_conversao"])
           .not("ends_at", "is", null);
 
         if (error) {
