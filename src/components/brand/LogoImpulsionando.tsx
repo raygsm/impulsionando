@@ -35,6 +35,10 @@ export interface LogoImpulsionandoProps {
   alt?: string
   /** Padding interno do cartão branco no modo escuro. */
   padded?: boolean
+  /** Quando true (padrão) envolve a logo num link para a home Impulsionando. */
+  asLink?: boolean
+  /** URL de destino do link (default: home institucional). */
+  href?: string
 }
 
 export function LogoImpulsionando({
@@ -43,6 +47,8 @@ export function LogoImpulsionando({
   className,
   alt = 'Impulsionando Tecnologia',
   padded = true,
+  asLink = true,
+  href = 'https://impulsionando.com.br',
 }: LogoImpulsionandoProps) {
   const wrapRef = useRef<HTMLSpanElement | null>(null)
   const [detected, setDetected] = useState<'light' | 'dark' | null>(null)
