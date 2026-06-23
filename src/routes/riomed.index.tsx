@@ -78,7 +78,7 @@ function RiomedHome() {
 
   return (
     <div className="bg-white">
-      <SectionScrollNav />
+      <ScrollSpyNav sections={[{id:"publicos",label:"Públicos"},{id:"lineas",label:"Líneas"},{id:"productos",label:"Productos"}]} activeColorVar="--riomed-primary" />
 
       {/* ============================== HERO ============================== */}
       <section className="relative overflow-hidden bg-gradient-to-br from-[color:var(--riomed-deep)] via-[color:var(--riomed-primary)] to-[#0a4a8a] text-white">
@@ -289,7 +289,7 @@ function RiomedHome() {
           </div>
 
           {products.isError && (
-            <ProductsErrorBanner
+            <DataErrorBanner title="Não foi possível carregar os produtos agora."
               message={(products.error as Error)?.message}
               onRetry={() => products.refetch()}
               isRetrying={products.isFetching}

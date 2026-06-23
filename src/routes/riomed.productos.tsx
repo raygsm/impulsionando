@@ -151,7 +151,7 @@ function ProductosPage() {
       </div>
 
       {products.isError && (
-        <ProductsErrorBanner
+        <DataErrorBanner title="Não foi possível carregar os produtos agora."
           message={(products.error as Error)?.message}
           onRetry={() => products.refetch()}
           isRetrying={products.isFetching}
