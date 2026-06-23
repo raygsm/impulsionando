@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { TenantModuleShell } from "@/components/core/TenantModuleShell";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   listRioMedProducts,
   upsertRioMedProduct,
   deleteRioMedProduct,
+  bulkImportRioMedProducts,
 } from "@/lib/riomed.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,9 +18,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Pencil, Plus, Trash2, Package } from "lucide-react";
+import { Pencil, Plus, Trash2, Package, Upload, Download, FileSpreadsheet } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/riomed/produtos")({
   component: () => (<TenantModuleShell tenantSlug="riomed" moduleSlug='products' title='Produtos RioMed'><ProductsPage /></TenantModuleShell>),
