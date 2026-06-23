@@ -511,6 +511,29 @@ export function PublicHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
+          {/* Busque o que Precisa — botão colorido + "?" para o Clube */}
+          <div className="hidden md:inline-flex items-center gap-1">
+            <Button
+              asChild
+              size="sm"
+              className="gap-1.5 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-violet-500 text-white shadow-md hover:shadow-lg hover:brightness-110 transition-all animate-in"
+            >
+              <Link to="/busca">
+                <Search className="w-4 h-4" />
+                <span className="hidden lg:inline">Busque o que Precisa</span>
+                <span className="lg:hidden">Buscar</span>
+              </Link>
+            </Button>
+            <Link
+              to="/clube"
+              aria-label="O que é o Clube de Vantagens? (necessário para buscar)"
+              title="O que é o Clube de Vantagens?"
+              className="grid h-8 w-8 place-items-center rounded-full border border-primary/40 text-primary text-sm font-bold hover:bg-primary/10 transition-colors"
+            >
+              ?
+            </Link>
+          </div>
+
           <InstallAppButton className="hidden md:inline-flex" />
 
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex gap-1.5">
