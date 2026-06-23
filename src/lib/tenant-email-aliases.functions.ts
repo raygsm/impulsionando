@@ -69,6 +69,16 @@ export const upsertEmailAlias = createServerFn({ method: "POST" })
       : context.supabase.from("core_tenant_email_aliases").insert(payload).select().single();
     const { data: row, error } = await q;
     if (error) throw new Error(error.message);
+
+    if (data.is_active) {
+      await context.supabase
+        .from("onboarding_checklist")
+        .upsert(
+          { company_id: data.companyId, item_key: "emails_requested", status: "done", completed_at: new Date().toISOString() },
+          { onConflict: "company_id,item_key" },
+        );
+    }
+
     return { alias: row };
   });
 
