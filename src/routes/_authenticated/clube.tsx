@@ -89,6 +89,8 @@ function ClubePage() {
   const isPremium = overview.data?.isPremium ?? false;
   const isPending = area.data?.membership?.plan === "premium" && area.data?.membership?.status === "pending";
 
+  const [tab, setTab] = useState<string>("visao");
+
   return (
     <div className="space-y-6 p-4 sm:p-6 max-w-6xl mx-auto">
       <ClubeHeader isPremium={isPremium} level={overview.data?.gamification?.levelLabel} />
@@ -97,7 +99,9 @@ function ClubePage() {
 
       {!isPremium && <UpgradeBanner isPending={isPending} />}
 
-      <Tabs defaultValue="visao" className="w-full">
+      <ClubeQuickGrid onPick={setTab} active={tab} />
+
+      <Tabs value={tab} onValueChange={setTab} className="w-full">
         <TabsList className="flex flex-wrap h-auto">
           <TabsTrigger value="visao">Visão geral</TabsTrigger>
           <TabsTrigger value="descobrir">Descobrir</TabsTrigger>
@@ -108,8 +112,9 @@ function ClubePage() {
           <TabsTrigger value="favoritos">Favoritos</TabsTrigger>
           <TabsTrigger value="historico">Histórico {isPremium ? "" : "🔒"}</TabsTrigger>
           <TabsTrigger value="comprovantes">Comprovantes</TabsTrigger>
-          <TabsTrigger value="plano">Plano e faturas</TabsTrigger>
+          <TabsTrigger value="plano">Minhas finanças</TabsTrigger>
         </TabsList>
+
 
         <TabsContent value="visao" className="mt-6 space-y-6">
           <LevelCard gamification={overview.data?.gamification} />
