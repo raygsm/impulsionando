@@ -57,7 +57,7 @@ export const getLead360 = createServerFn({ method: "GET" })
         .limit(20),
       supabaseAdmin
         .from("customers")
-        .select("id, name, email, status, created_at")
+        .select("id, name, email, created_at")
         .eq("lead_id", leadId)
         .maybeSingle(),
       supabaseAdmin
