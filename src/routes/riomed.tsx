@@ -122,7 +122,7 @@ function RiomedLayout() {
             </Link>
 
             <Link
-              to="/riomed/servicio-tecnico"
+              to="/riomed/soporte"
               className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-bold text-white bg-[color:var(--riomed-orange)] shadow-md shadow-orange-500/20 hover:brightness-110 hover:-translate-y-px active:translate-y-0 transition"
             >
               <Headphones className="h-4 w-4" />
@@ -130,7 +130,7 @@ function RiomedLayout() {
             </Link>
 
             <Link
-              to="/riomed/cotizar"
+              to="/riomed/vendedor"
               className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-bold text-white bg-[color:var(--riomed-accent)] shadow-md shadow-teal-500/20 hover:brightness-110 hover:-translate-y-px active:translate-y-0 transition"
             >
               <MessageCircle className="h-4 w-4" />
@@ -163,14 +163,14 @@ function RiomedLayout() {
               ))}
               <div className="pt-3 grid grid-cols-1 gap-2">
                 <Link
-                  to="/riomed/servicio-tecnico"
+                  to="/riomed/soporte"
                   className="text-center rounded-lg px-3 py-2.5 font-bold text-white bg-[color:var(--riomed-orange)]"
                   onClick={() => setMobileOpen(false)}
                 >
                   Quero suporte técnico
                 </Link>
                 <Link
-                  to="/riomed/cotizar"
+                  to="/riomed/vendedor"
                   className="text-center rounded-lg px-3 py-2.5 font-bold text-white bg-[color:var(--riomed-accent)]"
                   onClick={() => setMobileOpen(false)}
                 >

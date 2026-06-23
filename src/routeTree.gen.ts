@@ -100,7 +100,9 @@ import { Route as ShowroomApiPublicaRouteImport } from './routes/showroom.api-pu
 import { Route as ShowroomAgendamentosOnlineRouteImport } from './routes/showroom.agendamentos-online'
 import { Route as ShowroomAgendaRouteImport } from './routes/showroom.agenda'
 import { Route as ShowroomAcademiaRouteImport } from './routes/showroom.academia'
+import { Route as RiomedVendedorRouteImport } from './routes/riomed.vendedor'
 import { Route as RiomedTrabalheConoscoRouteImport } from './routes/riomed.trabalhe-conosco'
+import { Route as RiomedSoporteRouteImport } from './routes/riomed.soporte'
 import { Route as RiomedServicioTecnicoRouteImport } from './routes/riomed.servicio-tecnico'
 import { Route as RiomedProductosRouteImport } from './routes/riomed.productos'
 import { Route as RiomedPacientesRouteImport } from './routes/riomed.pacientes'
@@ -1101,9 +1103,19 @@ const ShowroomAcademiaRoute = ShowroomAcademiaRouteImport.update({
   path: '/showroom/academia',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RiomedVendedorRoute = RiomedVendedorRouteImport.update({
+  id: '/vendedor',
+  path: '/vendedor',
+  getParentRoute: () => RiomedRoute,
+} as any)
 const RiomedTrabalheConoscoRoute = RiomedTrabalheConoscoRouteImport.update({
   id: '/trabalhe-conosco',
   path: '/trabalhe-conosco',
+  getParentRoute: () => RiomedRoute,
+} as any)
+const RiomedSoporteRoute = RiomedSoporteRouteImport.update({
+  id: '/soporte',
+  path: '/soporte',
   getParentRoute: () => RiomedRoute,
 } as any)
 const RiomedServicioTecnicoRoute = RiomedServicioTecnicoRouteImport.update({
@@ -4341,7 +4353,9 @@ export interface FileRoutesByFullPath {
   '/riomed/pacientes': typeof RiomedPacientesRoute
   '/riomed/productos': typeof RiomedProductosRoute
   '/riomed/servicio-tecnico': typeof RiomedServicioTecnicoRoute
+  '/riomed/soporte': typeof RiomedSoporteRoute
   '/riomed/trabalhe-conosco': typeof RiomedTrabalheConoscoRoute
+  '/riomed/vendedor': typeof RiomedVendedorRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
   '/showroom/agendamentos-online': typeof ShowroomAgendamentosOnlineRoute
@@ -4961,7 +4975,9 @@ export interface FileRoutesByTo {
   '/riomed/pacientes': typeof RiomedPacientesRoute
   '/riomed/productos': typeof RiomedProductosRoute
   '/riomed/servicio-tecnico': typeof RiomedServicioTecnicoRoute
+  '/riomed/soporte': typeof RiomedSoporteRoute
   '/riomed/trabalhe-conosco': typeof RiomedTrabalheConoscoRoute
+  '/riomed/vendedor': typeof RiomedVendedorRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
   '/showroom/agendamentos-online': typeof ShowroomAgendamentosOnlineRoute
@@ -5596,7 +5612,9 @@ export interface FileRoutesById {
   '/riomed/pacientes': typeof RiomedPacientesRoute
   '/riomed/productos': typeof RiomedProductosRoute
   '/riomed/servicio-tecnico': typeof RiomedServicioTecnicoRoute
+  '/riomed/soporte': typeof RiomedSoporteRoute
   '/riomed/trabalhe-conosco': typeof RiomedTrabalheConoscoRoute
+  '/riomed/vendedor': typeof RiomedVendedorRoute
   '/showroom/academia': typeof ShowroomAcademiaRoute
   '/showroom/agenda': typeof ShowroomAgendaRoute
   '/showroom/agendamentos-online': typeof ShowroomAgendamentosOnlineRoute
@@ -6230,7 +6248,9 @@ export interface FileRouteTypes {
     | '/riomed/pacientes'
     | '/riomed/productos'
     | '/riomed/servicio-tecnico'
+    | '/riomed/soporte'
     | '/riomed/trabalhe-conosco'
+    | '/riomed/vendedor'
     | '/showroom/academia'
     | '/showroom/agenda'
     | '/showroom/agendamentos-online'
@@ -6850,7 +6870,9 @@ export interface FileRouteTypes {
     | '/riomed/pacientes'
     | '/riomed/productos'
     | '/riomed/servicio-tecnico'
+    | '/riomed/soporte'
     | '/riomed/trabalhe-conosco'
+    | '/riomed/vendedor'
     | '/showroom/academia'
     | '/showroom/agenda'
     | '/showroom/agendamentos-online'
@@ -7484,7 +7506,9 @@ export interface FileRouteTypes {
     | '/riomed/pacientes'
     | '/riomed/productos'
     | '/riomed/servicio-tecnico'
+    | '/riomed/soporte'
     | '/riomed/trabalhe-conosco'
+    | '/riomed/vendedor'
     | '/showroom/academia'
     | '/showroom/agenda'
     | '/showroom/agendamentos-online'
@@ -8785,11 +8809,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShowroomAcademiaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/riomed/vendedor': {
+      id: '/riomed/vendedor'
+      path: '/vendedor'
+      fullPath: '/riomed/vendedor'
+      preLoaderRoute: typeof RiomedVendedorRouteImport
+      parentRoute: typeof RiomedRoute
+    }
     '/riomed/trabalhe-conosco': {
       id: '/riomed/trabalhe-conosco'
       path: '/trabalhe-conosco'
       fullPath: '/riomed/trabalhe-conosco'
       preLoaderRoute: typeof RiomedTrabalheConoscoRouteImport
+      parentRoute: typeof RiomedRoute
+    }
+    '/riomed/soporte': {
+      id: '/riomed/soporte'
+      path: '/soporte'
+      fullPath: '/riomed/soporte'
+      preLoaderRoute: typeof RiomedSoporteRouteImport
       parentRoute: typeof RiomedRoute
     }
     '/riomed/servicio-tecnico': {
@@ -14060,7 +14098,9 @@ interface RiomedRouteChildren {
   RiomedPacientesRoute: typeof RiomedPacientesRoute
   RiomedProductosRoute: typeof RiomedProductosRoute
   RiomedServicioTecnicoRoute: typeof RiomedServicioTecnicoRoute
+  RiomedSoporteRoute: typeof RiomedSoporteRoute
   RiomedTrabalheConoscoRoute: typeof RiomedTrabalheConoscoRoute
+  RiomedVendedorRoute: typeof RiomedVendedorRoute
   RiomedIndexRoute: typeof RiomedIndexRoute
   RiomedCotizacionTokenRoute: typeof RiomedCotizacionTokenRoute
   RiomedFornecedorCadastroRoute: typeof RiomedFornecedorCadastroRoute
@@ -14079,7 +14119,9 @@ const RiomedRouteChildren: RiomedRouteChildren = {
   RiomedPacientesRoute: RiomedPacientesRoute,
   RiomedProductosRoute: RiomedProductosRoute,
   RiomedServicioTecnicoRoute: RiomedServicioTecnicoRoute,
+  RiomedSoporteRoute: RiomedSoporteRoute,
   RiomedTrabalheConoscoRoute: RiomedTrabalheConoscoRoute,
+  RiomedVendedorRoute: RiomedVendedorRoute,
   RiomedIndexRoute: RiomedIndexRoute,
   RiomedCotizacionTokenRoute: RiomedCotizacionTokenRoute,
   RiomedFornecedorCadastroRoute: RiomedFornecedorCadastroRoute,

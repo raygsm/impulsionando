@@ -271,3 +271,104 @@ export const submitRiomedSellerApplication = createServerFn({ method: "POST" })
 
     return { ok: true, sellerId: row.id, status: "pending" };
   });
+
+// ─── Wave 3: Support tickets + Seller round-robin ──────────────────────────
+
+const supportSchema = z.object({
+  customerName: z.string().trim().min(2).max(160),
+  customerPhone: z.string().trim().min(6).max(40),
+  customerEmail: z.string().trim().email().max(160).optional().or(z.literal("")),
+  equipmentType: z.string().trim().max(160).optional().or(z.literal("")),
+  equipmentBrand: z.string().trim().max(160).optional().or(z.literal("")),
+  issueCategory: z.enum(["mantenimiento_preventivo","correctivo","calibracion","instalacion","capacitacion","otro"]),
+  urgency: z.enum(["baja","media","alta","critica"]),
+  description: z.string().trim().max(2000).optional().or(z.literal("")),
+  locationCity: z.string().trim().max(120).optional().or(z.literal("")),
+  preferredWindow: z.string().trim().max(120).optional().or(z.literal("")),
+});
+
+export const openRiomedSupportTicket = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => supportSchema.parse(d))
+  .handler(async ({ data }) => {
+    const supa = pubClient();
+    const stamp = Date.now().toString(36).toUpperCase();
+    const rand = Math.floor(Math.random() * 9000 + 1000).toString();
+    const protocol = `RM-${stamp}-${rand}`;
+    const { data: row, error } = await supa.from("riomed_support_tickets").insert({
+      protocol,
+      customer_name: data.customerName,
+      customer_phone: data.customerPhone,
+      customer_email: data.customerEmail || null,
+      equipment_type: data.equipmentType || null,
+      equipment_brand: data.equipmentBrand || null,
+      issue_category: data.issueCategory,
+      urgency: data.urgency,
+      description: data.description || null,
+      location_city: data.locationCity || null,
+      preferred_window: data.preferredWindow || null,
+    } as any).select("id,protocol").single();
+    if (error) throw error;
+    return { ok: true, protocol: row.protocol, id: row.id };
+  });
+
+export const listRiomedTeam = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const supa = pubClient();
+    const { data } = await supa
+      .from("riomed_team")
+      .select("id,full_name,email,phone,member_role,specialty,rr_position")
+      .eq("active", true)
+      .order("rr_position", { ascending: true });
+    return { team: data ?? [] };
+  });
+
+const leadSchema = z.object({
+  customerName: z.string().trim().min(2).max(160),
+  customerPhone: z.string().trim().min(6).max(40),
+  customerEmail: z.string().trim().email().max(160).optional().or(z.literal("")),
+  interest: z.string().trim().max(300).optional().or(z.literal("")),
+  profile: z.enum(["hospital","clinica","consultorio","ambulancia","home_care","profesional","periferico","otro"]).optional(),
+  notes: z.string().trim().max(2000).optional().or(z.literal("")),
+  preferredSellerId: z.string().uuid().optional(),
+});
+
+export const submitRiomedSellerLead = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => leadSchema.parse(d))
+  .handler(async ({ data }) => {
+    const supa = pubClient();
+    let assignedId: string | null = null;
+    let assignedName = "";
+
+    if (data.preferredSellerId) {
+      const { data: chosen } = await supa
+        .from("riomed_team").select("id,full_name").eq("id", data.preferredSellerId).eq("member_role","vendedor").maybeSingle();
+      if (chosen) { assignedId = chosen.id; assignedName = chosen.full_name; }
+    }
+
+    if (!assignedId) {
+      const { data: sellers } = await supa
+        .from("riomed_team").select("id,full_name,rr_position")
+        .eq("active", true).eq("member_role","vendedor")
+        .order("rr_position", { ascending: true });
+      const list = sellers ?? [];
+      if (list.length > 0) {
+        const { data: ptr } = await supa.from("riomed_rr_pointer").select("last_position").eq("id",1).maybeSingle();
+        const last = ptr?.last_position ?? 0;
+        const next = list.find((s: any) => s.rr_position > last) ?? list[0];
+        assignedId = next.id; assignedName = next.full_name;
+        await supa.from("riomed_rr_pointer").update({ last_position: next.rr_position, updated_at: new Date().toISOString() }).eq("id",1);
+      }
+    }
+
+    const { data: row, error } = await supa.from("riomed_seller_leads").insert({
+      team_id: assignedId,
+      customer_name: data.customerName,
+      customer_phone: data.customerPhone,
+      customer_email: data.customerEmail || null,
+      interest: data.interest || null,
+      profile: data.profile || null,
+      notes: data.notes || null,
+    } as any).select("id").single();
+    if (error) throw error;
+    return { ok: true, leadId: row.id, sellerId: assignedId, sellerName: assignedName };
+  });
