@@ -188,12 +188,12 @@ import { Route as AuthenticatedCustomersRouteImport } from './routes/_authentica
 import { Route as AuthenticatedCrmRouteImport } from './routes/_authenticated/crm'
 import { Route as AuthenticatedCoreRouteImport } from './routes/_authenticated/core'
 import { Route as AuthenticatedCompaniesRouteImport } from './routes/_authenticated/companies'
-import { Route as AuthenticatedClubeRouteImport } from './routes/_authenticated/clube'
 import { Route as AuthenticatedCervejariaRouteImport } from './routes/_authenticated/cervejaria'
 import { Route as AuthenticatedBuscaRouteImport } from './routes/_authenticated/busca'
 import { Route as AuthenticatedBiRouteImport } from './routes/_authenticated/bi'
 import { Route as AuthenticatedAutomacoesRouteImport } from './routes/_authenticated/automacoes'
 import { Route as AuthenticatedAuditRouteImport } from './routes/_authenticated/audit'
+import { Route as AuthenticatedAreaClubeRouteImport } from './routes/_authenticated/area-clube'
 import { Route as AuthenticatedAreaClienteRouteImport } from './routes/_authenticated/area-cliente'
 import { Route as AuthenticatedAjudaRouteImport } from './routes/_authenticated/ajuda'
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
@@ -370,7 +370,6 @@ import { Route as AuthenticatedContabilidadeAtendimentoRouteImport } from './rou
 import { Route as AuthenticatedConsumerUnifiedRouteImport } from './routes/_authenticated/consumer.unified'
 import { Route as AuthenticatedComunidadeIdRouteImport } from './routes/_authenticated/comunidade.$id'
 import { Route as AuthenticatedCommercialCockpitRouteImport } from './routes/_authenticated/commercial.cockpit'
-import { Route as AuthenticatedClubeNotificacoesRouteImport } from './routes/_authenticated/clube.notificacoes'
 import { Route as AuthenticatedChrismedSetupRouteImport } from './routes/_authenticated/chrismed.setup'
 import { Route as AuthenticatedChrismedAlertasRouteImport } from './routes/_authenticated/chrismed.alertas'
 import { Route as AuthenticatedChrismedAdminRouteImport } from './routes/_authenticated/chrismed.admin'
@@ -384,6 +383,7 @@ import { Route as AuthenticatedBiNichesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedBiMasterRouteImport } from './routes/_authenticated/bi.master'
 import { Route as AuthenticatedBiCompanyRouteImport } from './routes/_authenticated/bi.company'
 import { Route as AuthenticatedBarMarketplaceRouteImport } from './routes/_authenticated/bar.marketplace'
+import { Route as AuthenticatedAreaClubeNotificacoesRouteImport } from './routes/_authenticated/area-clube.notificacoes'
 import { Route as AuthenticatedAgendaWaitlistRouteImport } from './routes/_authenticated/agenda.waitlist'
 import { Route as AuthenticatedAgendaServicesRouteImport } from './routes/_authenticated/agenda.services'
 import { Route as AuthenticatedAgendaSchedulesRouteImport } from './routes/_authenticated/agenda.schedules'
@@ -1571,11 +1571,6 @@ const AuthenticatedCompaniesRoute = AuthenticatedCompaniesRouteImport.update({
   path: '/companies',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedClubeRoute = AuthenticatedClubeRouteImport.update({
-  id: '/clube',
-  path: '/clube',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedCervejariaRoute = AuthenticatedCervejariaRouteImport.update({
   id: '/cervejaria',
   path: '/cervejaria',
@@ -1599,6 +1594,11 @@ const AuthenticatedAutomacoesRoute = AuthenticatedAutomacoesRouteImport.update({
 const AuthenticatedAuditRoute = AuthenticatedAuditRouteImport.update({
   id: '/audit',
   path: '/audit',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAreaClubeRoute = AuthenticatedAreaClubeRouteImport.update({
+  id: '/area-clube',
+  path: '/area-clube',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAreaClienteRoute =
@@ -2619,12 +2619,6 @@ const AuthenticatedCommercialCockpitRoute =
     path: '/commercial/cockpit',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedClubeNotificacoesRoute =
-  AuthenticatedClubeNotificacoesRouteImport.update({
-    id: '/notificacoes',
-    path: '/notificacoes',
-    getParentRoute: () => AuthenticatedClubeRoute,
-  } as any)
 const AuthenticatedChrismedSetupRoute =
   AuthenticatedChrismedSetupRouteImport.update({
     id: '/chrismed/setup',
@@ -2699,6 +2693,12 @@ const AuthenticatedBarMarketplaceRoute =
     id: '/bar/marketplace',
     path: '/bar/marketplace',
     getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAreaClubeNotificacoesRoute =
+  AuthenticatedAreaClubeNotificacoesRouteImport.update({
+    id: '/notificacoes',
+    path: '/notificacoes',
+    getParentRoute: () => AuthenticatedAreaClubeRoute,
   } as any)
 const AuthenticatedAgendaWaitlistRoute =
   AuthenticatedAgendaWaitlistRouteImport.update({
@@ -4369,7 +4369,7 @@ export interface FileRoutesByFullPath {
   '/canal-oficial': typeof CanalOficialRoute
   '/catalogo': typeof CatalogoRoute
   '/chrismed': typeof ChrismedRouteWithChildren
-  '/clube': typeof AuthenticatedClubeRouteWithChildren
+  '/clube': typeof ClubeRouteWithChildren
   '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
@@ -4406,6 +4406,7 @@ export interface FileRoutesByFullPath {
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/ajuda': typeof AuthenticatedAjudaRoute
   '/area-cliente': typeof AuthenticatedAreaClienteRoute
+  '/area-clube': typeof AuthenticatedAreaClubeRouteWithChildren
   '/audit': typeof AuthenticatedAuditRoute
   '/automacoes': typeof AuthenticatedAutomacoesRoute
   '/bi': typeof AuthenticatedBiRouteWithChildren
@@ -4709,6 +4710,7 @@ export interface FileRoutesByFullPath {
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
   '/agenda/services': typeof AuthenticatedAgendaServicesRoute
   '/agenda/waitlist': typeof AuthenticatedAgendaWaitlistRoute
+  '/area-clube/notificacoes': typeof AuthenticatedAreaClubeNotificacoesRoute
   '/bar/marketplace': typeof AuthenticatedBarMarketplaceRouteWithChildren
   '/bi/company': typeof AuthenticatedBiCompanyRoute
   '/bi/master': typeof AuthenticatedBiMasterRoute
@@ -4722,7 +4724,6 @@ export interface FileRoutesByFullPath {
   '/chrismed/admin': typeof AuthenticatedChrismedAdminRoute
   '/chrismed/alertas': typeof AuthenticatedChrismedAlertasRoute
   '/chrismed/setup': typeof AuthenticatedChrismedSetupRoute
-  '/clube/notificacoes': typeof AuthenticatedClubeNotificacoesRoute
   '/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
   '/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
   '/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
@@ -5024,7 +5025,7 @@ export interface FileRoutesByTo {
   '/canal-oficial': typeof CanalOficialRoute
   '/catalogo': typeof CatalogoRoute
   '/chrismed': typeof ChrismedRouteWithChildren
-  '/clube': typeof AuthenticatedClubeRouteWithChildren
+  '/clube': typeof ClubeRouteWithChildren
   '/consumidor': typeof ConsumidorRoute
   '/conta-suspensa': typeof ContaSuspensaRoute
   '/contato': typeof ContatoRoute
@@ -5056,6 +5057,7 @@ export interface FileRoutesByTo {
   '/adm': typeof AuthenticatedAdmRouteWithChildren
   '/ajuda': typeof AuthenticatedAjudaRoute
   '/area-cliente': typeof AuthenticatedAreaClienteRoute
+  '/area-clube': typeof AuthenticatedAreaClubeRouteWithChildren
   '/audit': typeof AuthenticatedAuditRoute
   '/automacoes': typeof AuthenticatedAutomacoesRoute
   '/busca': typeof AuthenticatedBuscaRoute
@@ -5352,6 +5354,7 @@ export interface FileRoutesByTo {
   '/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
   '/agenda/services': typeof AuthenticatedAgendaServicesRoute
   '/agenda/waitlist': typeof AuthenticatedAgendaWaitlistRoute
+  '/area-clube/notificacoes': typeof AuthenticatedAreaClubeNotificacoesRoute
   '/bar/marketplace': typeof AuthenticatedBarMarketplaceRouteWithChildren
   '/bi/company': typeof AuthenticatedBiCompanyRoute
   '/bi/master': typeof AuthenticatedBiMasterRoute
@@ -5365,7 +5368,6 @@ export interface FileRoutesByTo {
   '/chrismed/admin': typeof AuthenticatedChrismedAdminRoute
   '/chrismed/alertas': typeof AuthenticatedChrismedAlertasRoute
   '/chrismed/setup': typeof AuthenticatedChrismedSetupRoute
-  '/clube/notificacoes': typeof AuthenticatedClubeNotificacoesRoute
   '/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
   '/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
   '/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
@@ -5706,12 +5708,12 @@ export interface FileRoutesById {
   '/_authenticated/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/_authenticated/ajuda': typeof AuthenticatedAjudaRoute
   '/_authenticated/area-cliente': typeof AuthenticatedAreaClienteRoute
+  '/_authenticated/area-clube': typeof AuthenticatedAreaClubeRouteWithChildren
   '/_authenticated/audit': typeof AuthenticatedAuditRoute
   '/_authenticated/automacoes': typeof AuthenticatedAutomacoesRoute
   '/_authenticated/bi': typeof AuthenticatedBiRouteWithChildren
   '/_authenticated/busca': typeof AuthenticatedBuscaRoute
   '/_authenticated/cervejaria': typeof AuthenticatedCervejariaRouteWithChildren
-  '/_authenticated/clube': typeof AuthenticatedClubeRouteWithChildren
   '/_authenticated/companies': typeof AuthenticatedCompaniesRoute
   '/_authenticated/core': typeof AuthenticatedCoreRouteWithChildren
   '/_authenticated/crm': typeof AuthenticatedCrmRouteWithChildren
@@ -6010,6 +6012,7 @@ export interface FileRoutesById {
   '/_authenticated/agenda/schedules': typeof AuthenticatedAgendaSchedulesRoute
   '/_authenticated/agenda/services': typeof AuthenticatedAgendaServicesRoute
   '/_authenticated/agenda/waitlist': typeof AuthenticatedAgendaWaitlistRoute
+  '/_authenticated/area-clube/notificacoes': typeof AuthenticatedAreaClubeNotificacoesRoute
   '/_authenticated/bar/marketplace': typeof AuthenticatedBarMarketplaceRouteWithChildren
   '/_authenticated/bi/company': typeof AuthenticatedBiCompanyRoute
   '/_authenticated/bi/master': typeof AuthenticatedBiMasterRoute
@@ -6023,7 +6026,6 @@ export interface FileRoutesById {
   '/_authenticated/chrismed/admin': typeof AuthenticatedChrismedAdminRoute
   '/_authenticated/chrismed/alertas': typeof AuthenticatedChrismedAlertasRoute
   '/_authenticated/chrismed/setup': typeof AuthenticatedChrismedSetupRoute
-  '/_authenticated/clube/notificacoes': typeof AuthenticatedClubeNotificacoesRoute
   '/_authenticated/commercial/cockpit': typeof AuthenticatedCommercialCockpitRoute
   '/_authenticated/comunidade/$id': typeof AuthenticatedComunidadeIdRoute
   '/_authenticated/consumer/unified': typeof AuthenticatedConsumerUnifiedRoute
@@ -6364,6 +6366,7 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/ajuda'
     | '/area-cliente'
+    | '/area-clube'
     | '/audit'
     | '/automacoes'
     | '/bi'
@@ -6667,6 +6670,7 @@ export interface FileRouteTypes {
     | '/agenda/schedules'
     | '/agenda/services'
     | '/agenda/waitlist'
+    | '/area-clube/notificacoes'
     | '/bar/marketplace'
     | '/bi/company'
     | '/bi/master'
@@ -6680,7 +6684,6 @@ export interface FileRouteTypes {
     | '/chrismed/admin'
     | '/chrismed/alertas'
     | '/chrismed/setup'
-    | '/clube/notificacoes'
     | '/commercial/cockpit'
     | '/comunidade/$id'
     | '/consumer/unified'
@@ -7014,6 +7017,7 @@ export interface FileRouteTypes {
     | '/adm'
     | '/ajuda'
     | '/area-cliente'
+    | '/area-clube'
     | '/audit'
     | '/automacoes'
     | '/busca'
@@ -7310,6 +7314,7 @@ export interface FileRouteTypes {
     | '/agenda/schedules'
     | '/agenda/services'
     | '/agenda/waitlist'
+    | '/area-clube/notificacoes'
     | '/bar/marketplace'
     | '/bi/company'
     | '/bi/master'
@@ -7323,7 +7328,6 @@ export interface FileRouteTypes {
     | '/chrismed/admin'
     | '/chrismed/alertas'
     | '/chrismed/setup'
-    | '/clube/notificacoes'
     | '/commercial/cockpit'
     | '/comunidade/$id'
     | '/consumer/unified'
@@ -7663,12 +7667,12 @@ export interface FileRouteTypes {
     | '/_authenticated/agenda'
     | '/_authenticated/ajuda'
     | '/_authenticated/area-cliente'
+    | '/_authenticated/area-clube'
     | '/_authenticated/audit'
     | '/_authenticated/automacoes'
     | '/_authenticated/bi'
     | '/_authenticated/busca'
     | '/_authenticated/cervejaria'
-    | '/_authenticated/clube'
     | '/_authenticated/companies'
     | '/_authenticated/core'
     | '/_authenticated/crm'
@@ -7967,6 +7971,7 @@ export interface FileRouteTypes {
     | '/_authenticated/agenda/schedules'
     | '/_authenticated/agenda/services'
     | '/_authenticated/agenda/waitlist'
+    | '/_authenticated/area-clube/notificacoes'
     | '/_authenticated/bar/marketplace'
     | '/_authenticated/bi/company'
     | '/_authenticated/bi/master'
@@ -7980,7 +7985,6 @@ export interface FileRouteTypes {
     | '/_authenticated/chrismed/admin'
     | '/_authenticated/chrismed/alertas'
     | '/_authenticated/chrismed/setup'
-    | '/_authenticated/clube/notificacoes'
     | '/_authenticated/commercial/cockpit'
     | '/_authenticated/comunidade/$id'
     | '/_authenticated/consumer/unified'
@@ -9702,13 +9706,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCompaniesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/clube': {
-      id: '/_authenticated/clube'
-      path: '/clube'
-      fullPath: '/clube'
-      preLoaderRoute: typeof AuthenticatedClubeRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/cervejaria': {
       id: '/_authenticated/cervejaria'
       path: '/cervejaria'
@@ -9742,6 +9739,13 @@ declare module '@tanstack/react-router' {
       path: '/audit'
       fullPath: '/audit'
       preLoaderRoute: typeof AuthenticatedAuditRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/area-clube': {
+      id: '/_authenticated/area-clube'
+      path: '/area-clube'
+      fullPath: '/area-clube'
+      preLoaderRoute: typeof AuthenticatedAreaClubeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/area-cliente': {
@@ -10976,13 +10980,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCommercialCockpitRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/clube/notificacoes': {
-      id: '/_authenticated/clube/notificacoes'
-      path: '/notificacoes'
-      fullPath: '/clube/notificacoes'
-      preLoaderRoute: typeof AuthenticatedClubeNotificacoesRouteImport
-      parentRoute: typeof AuthenticatedClubeRoute
-    }
     '/_authenticated/chrismed/setup': {
       id: '/_authenticated/chrismed/setup'
       path: '/chrismed/setup'
@@ -11073,6 +11070,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/bar/marketplace'
       preLoaderRoute: typeof AuthenticatedBarMarketplaceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/area-clube/notificacoes': {
+      id: '/_authenticated/area-clube/notificacoes'
+      path: '/notificacoes'
+      fullPath: '/area-clube/notificacoes'
+      preLoaderRoute: typeof AuthenticatedAreaClubeNotificacoesRouteImport
+      parentRoute: typeof AuthenticatedAreaClubeRoute
     }
     '/_authenticated/agenda/waitlist': {
       id: '/_authenticated/agenda/waitlist'
@@ -13144,6 +13148,21 @@ const AuthenticatedAgendaRouteChildren: AuthenticatedAgendaRouteChildren = {
 const AuthenticatedAgendaRouteWithChildren =
   AuthenticatedAgendaRoute._addFileChildren(AuthenticatedAgendaRouteChildren)
 
+interface AuthenticatedAreaClubeRouteChildren {
+  AuthenticatedAreaClubeNotificacoesRoute: typeof AuthenticatedAreaClubeNotificacoesRoute
+}
+
+const AuthenticatedAreaClubeRouteChildren: AuthenticatedAreaClubeRouteChildren =
+  {
+    AuthenticatedAreaClubeNotificacoesRoute:
+      AuthenticatedAreaClubeNotificacoesRoute,
+  }
+
+const AuthenticatedAreaClubeRouteWithChildren =
+  AuthenticatedAreaClubeRoute._addFileChildren(
+    AuthenticatedAreaClubeRouteChildren,
+  )
+
 interface AuthenticatedBiRouteChildren {
   AuthenticatedBiCompanyRoute: typeof AuthenticatedBiCompanyRoute
   AuthenticatedBiMasterRoute: typeof AuthenticatedBiMasterRoute
@@ -13185,17 +13204,6 @@ const AuthenticatedCervejariaRouteWithChildren =
   AuthenticatedCervejariaRoute._addFileChildren(
     AuthenticatedCervejariaRouteChildren,
   )
-
-interface AuthenticatedClubeRouteChildren {
-  AuthenticatedClubeNotificacoesRoute: typeof AuthenticatedClubeNotificacoesRoute
-}
-
-const AuthenticatedClubeRouteChildren: AuthenticatedClubeRouteChildren = {
-  AuthenticatedClubeNotificacoesRoute: AuthenticatedClubeNotificacoesRoute,
-}
-
-const AuthenticatedClubeRouteWithChildren =
-  AuthenticatedClubeRoute._addFileChildren(AuthenticatedClubeRouteChildren)
 
 interface AuthenticatedCoreMarketplaceRouteChildren {
   AuthenticatedCoreMarketplaceCompradoresRoute: typeof AuthenticatedCoreMarketplaceCompradoresRoute
@@ -13833,12 +13841,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRouteWithChildren
   AuthenticatedAjudaRoute: typeof AuthenticatedAjudaRoute
   AuthenticatedAreaClienteRoute: typeof AuthenticatedAreaClienteRoute
+  AuthenticatedAreaClubeRoute: typeof AuthenticatedAreaClubeRouteWithChildren
   AuthenticatedAuditRoute: typeof AuthenticatedAuditRoute
   AuthenticatedAutomacoesRoute: typeof AuthenticatedAutomacoesRoute
   AuthenticatedBiRoute: typeof AuthenticatedBiRouteWithChildren
   AuthenticatedBuscaRoute: typeof AuthenticatedBuscaRoute
   AuthenticatedCervejariaRoute: typeof AuthenticatedCervejariaRouteWithChildren
-  AuthenticatedClubeRoute: typeof AuthenticatedClubeRouteWithChildren
   AuthenticatedCompaniesRoute: typeof AuthenticatedCompaniesRoute
   AuthenticatedCoreRoute: typeof AuthenticatedCoreRouteWithChildren
   AuthenticatedCrmRoute: typeof AuthenticatedCrmRouteWithChildren
@@ -14092,12 +14100,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAgendaRoute: AuthenticatedAgendaRouteWithChildren,
   AuthenticatedAjudaRoute: AuthenticatedAjudaRoute,
   AuthenticatedAreaClienteRoute: AuthenticatedAreaClienteRoute,
+  AuthenticatedAreaClubeRoute: AuthenticatedAreaClubeRouteWithChildren,
   AuthenticatedAuditRoute: AuthenticatedAuditRoute,
   AuthenticatedAutomacoesRoute: AuthenticatedAutomacoesRoute,
   AuthenticatedBiRoute: AuthenticatedBiRouteWithChildren,
   AuthenticatedBuscaRoute: AuthenticatedBuscaRoute,
   AuthenticatedCervejariaRoute: AuthenticatedCervejariaRouteWithChildren,
-  AuthenticatedClubeRoute: AuthenticatedClubeRouteWithChildren,
   AuthenticatedCompaniesRoute: AuthenticatedCompaniesRoute,
   AuthenticatedCoreRoute: AuthenticatedCoreRouteWithChildren,
   AuthenticatedCrmRoute: AuthenticatedCrmRouteWithChildren,
@@ -14823,13 +14831,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
