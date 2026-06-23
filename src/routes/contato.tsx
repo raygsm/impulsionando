@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/contato")({
+  ssr: false,
   head: () => ({
     meta: [
       { title: "Contato — Impulsionando Tecnologia" },
@@ -21,12 +22,13 @@ export const Route = createFileRoute("/contato")({
       { property: "og:title", content: "Contato — Impulsionando Tecnologia" },
       { property: "og:description", content: "WhatsApp, e-mail e orçamento personalizado. Fale com nosso time." },
       { property: "og:url", content: "https://impulsionando.com.br/contato" },
-    
+
     ],
     links: [{ rel: "canonical", href: "https://impulsionando.com.br/contato" }],
   }),
   component: ContatoPage,
 });
+
 
 const WHATSAPP_URL = "https://wa.me/5521993075000";
 const EMAIL = "sac@impulsionando.com.br";
