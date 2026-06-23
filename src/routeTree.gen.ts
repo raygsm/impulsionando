@@ -613,6 +613,7 @@ import { Route as AuthenticatedAdminClientesRiomedRoutingRouteImport } from './r
 import { Route as AuthenticatedAdminClientesRiomedRelatoriosRouteImport } from './routes/_authenticated/admin.clientes.riomed.relatorios'
 import { Route as AuthenticatedAdminClientesRiomedProdutosRouteImport } from './routes/_authenticated/admin.clientes.riomed.produtos'
 import { Route as AuthenticatedAdminClientesRiomedPrecosListasRouteImport } from './routes/_authenticated/admin.clientes.riomed.precos-listas'
+import { Route as AuthenticatedAdminClientesRiomedPosRelatorioRouteImport } from './routes/_authenticated/admin.clientes.riomed.pos-relatorio'
 import { Route as AuthenticatedAdminClientesRiomedPosRouteImport } from './routes/_authenticated/admin.clientes.riomed.pos'
 import { Route as AuthenticatedAdminClientesRiomedPortalRouteImport } from './routes/_authenticated/admin.clientes.riomed.portal'
 import { Route as AuthenticatedAdminClientesRiomedPermissoesRouteImport } from './routes/_authenticated/admin.clientes.riomed.permissoes'
@@ -4041,6 +4042,12 @@ const AuthenticatedAdminClientesRiomedPrecosListasRoute =
     path: '/precos-listas',
     getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
   } as any)
+const AuthenticatedAdminClientesRiomedPosRelatorioRoute =
+  AuthenticatedAdminClientesRiomedPosRelatorioRouteImport.update({
+    id: '/pos-relatorio',
+    path: '/pos-relatorio',
+    getParentRoute: () => AuthenticatedAdminClientesRiomedRoute,
+  } as any)
 const AuthenticatedAdminClientesRiomedPosRoute =
   AuthenticatedAdminClientesRiomedPosRouteImport.update({
     id: '/pos',
@@ -4852,6 +4859,7 @@ export interface FileRoutesByFullPath {
   '/admin/clientes/riomed/permissoes': typeof AuthenticatedAdminClientesRiomedPermissoesRoute
   '/admin/clientes/riomed/portal': typeof AuthenticatedAdminClientesRiomedPortalRoute
   '/admin/clientes/riomed/pos': typeof AuthenticatedAdminClientesRiomedPosRoute
+  '/admin/clientes/riomed/pos-relatorio': typeof AuthenticatedAdminClientesRiomedPosRelatorioRoute
   '/admin/clientes/riomed/precos-listas': typeof AuthenticatedAdminClientesRiomedPrecosListasRoute
   '/admin/clientes/riomed/produtos': typeof AuthenticatedAdminClientesRiomedProdutosRoute
   '/admin/clientes/riomed/relatorios': typeof AuthenticatedAdminClientesRiomedRelatoriosRoute
@@ -5475,6 +5483,7 @@ export interface FileRoutesByTo {
   '/admin/clientes/riomed/permissoes': typeof AuthenticatedAdminClientesRiomedPermissoesRoute
   '/admin/clientes/riomed/portal': typeof AuthenticatedAdminClientesRiomedPortalRoute
   '/admin/clientes/riomed/pos': typeof AuthenticatedAdminClientesRiomedPosRoute
+  '/admin/clientes/riomed/pos-relatorio': typeof AuthenticatedAdminClientesRiomedPosRelatorioRoute
   '/admin/clientes/riomed/precos-listas': typeof AuthenticatedAdminClientesRiomedPrecosListasRoute
   '/admin/clientes/riomed/produtos': typeof AuthenticatedAdminClientesRiomedProdutosRoute
   '/admin/clientes/riomed/relatorios': typeof AuthenticatedAdminClientesRiomedRelatoriosRoute
@@ -6113,6 +6122,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/clientes/riomed/permissoes': typeof AuthenticatedAdminClientesRiomedPermissoesRoute
   '/_authenticated/admin/clientes/riomed/portal': typeof AuthenticatedAdminClientesRiomedPortalRoute
   '/_authenticated/admin/clientes/riomed/pos': typeof AuthenticatedAdminClientesRiomedPosRoute
+  '/_authenticated/admin/clientes/riomed/pos-relatorio': typeof AuthenticatedAdminClientesRiomedPosRelatorioRoute
   '/_authenticated/admin/clientes/riomed/precos-listas': typeof AuthenticatedAdminClientesRiomedPrecosListasRoute
   '/_authenticated/admin/clientes/riomed/produtos': typeof AuthenticatedAdminClientesRiomedProdutosRoute
   '/_authenticated/admin/clientes/riomed/relatorios': typeof AuthenticatedAdminClientesRiomedRelatoriosRoute
@@ -6750,6 +6760,7 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed/permissoes'
     | '/admin/clientes/riomed/portal'
     | '/admin/clientes/riomed/pos'
+    | '/admin/clientes/riomed/pos-relatorio'
     | '/admin/clientes/riomed/precos-listas'
     | '/admin/clientes/riomed/produtos'
     | '/admin/clientes/riomed/relatorios'
@@ -7373,6 +7384,7 @@ export interface FileRouteTypes {
     | '/admin/clientes/riomed/permissoes'
     | '/admin/clientes/riomed/portal'
     | '/admin/clientes/riomed/pos'
+    | '/admin/clientes/riomed/pos-relatorio'
     | '/admin/clientes/riomed/precos-listas'
     | '/admin/clientes/riomed/produtos'
     | '/admin/clientes/riomed/relatorios'
@@ -8010,6 +8022,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/clientes/riomed/permissoes'
     | '/_authenticated/admin/clientes/riomed/portal'
     | '/_authenticated/admin/clientes/riomed/pos'
+    | '/_authenticated/admin/clientes/riomed/pos-relatorio'
     | '/_authenticated/admin/clientes/riomed/precos-listas'
     | '/_authenticated/admin/clientes/riomed/produtos'
     | '/_authenticated/admin/clientes/riomed/relatorios'
@@ -12413,6 +12426,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientesRiomedPrecosListasRouteImport
       parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
     }
+    '/_authenticated/admin/clientes/riomed/pos-relatorio': {
+      id: '/_authenticated/admin/clientes/riomed/pos-relatorio'
+      path: '/pos-relatorio'
+      fullPath: '/admin/clientes/riomed/pos-relatorio'
+      preLoaderRoute: typeof AuthenticatedAdminClientesRiomedPosRelatorioRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesRiomedRoute
+    }
     '/_authenticated/admin/clientes/riomed/pos': {
       id: '/_authenticated/admin/clientes/riomed/pos'
       path: '/pos'
@@ -13312,6 +13332,7 @@ interface AuthenticatedAdminClientesRiomedRouteChildren {
   AuthenticatedAdminClientesRiomedPermissoesRoute: typeof AuthenticatedAdminClientesRiomedPermissoesRoute
   AuthenticatedAdminClientesRiomedPortalRoute: typeof AuthenticatedAdminClientesRiomedPortalRoute
   AuthenticatedAdminClientesRiomedPosRoute: typeof AuthenticatedAdminClientesRiomedPosRoute
+  AuthenticatedAdminClientesRiomedPosRelatorioRoute: typeof AuthenticatedAdminClientesRiomedPosRelatorioRoute
   AuthenticatedAdminClientesRiomedPrecosListasRoute: typeof AuthenticatedAdminClientesRiomedPrecosListasRoute
   AuthenticatedAdminClientesRiomedProdutosRoute: typeof AuthenticatedAdminClientesRiomedProdutosRoute
   AuthenticatedAdminClientesRiomedRelatoriosRoute: typeof AuthenticatedAdminClientesRiomedRelatoriosRoute
@@ -13377,6 +13398,8 @@ const AuthenticatedAdminClientesRiomedRouteChildren: AuthenticatedAdminClientesR
       AuthenticatedAdminClientesRiomedPortalRoute,
     AuthenticatedAdminClientesRiomedPosRoute:
       AuthenticatedAdminClientesRiomedPosRoute,
+    AuthenticatedAdminClientesRiomedPosRelatorioRoute:
+      AuthenticatedAdminClientesRiomedPosRelatorioRoute,
     AuthenticatedAdminClientesRiomedPrecosListasRoute:
       AuthenticatedAdminClientesRiomedPrecosListasRoute,
     AuthenticatedAdminClientesRiomedProdutosRoute:
