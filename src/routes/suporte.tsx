@@ -16,7 +16,17 @@ export const Route = createFileRoute("/suporte")({
   component: SuportePage,
 });
 
-const CHANNELS = [
+type Channel = {
+  icon: typeof MessageCircle;
+  title: string;
+  description: string;
+  cta: string;
+  href?: string;
+  to?: string;
+  external?: boolean;
+};
+
+const CHANNELS: Channel[] = [
   {
     icon: MessageCircle,
     title: "WhatsApp do Impulsionito",
@@ -47,7 +57,7 @@ const CHANNELS = [
     cta: "Explorar",
     to: "/nichos",
   },
-] as const;
+];
 
 function SuportePage() {
   return (
