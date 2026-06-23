@@ -150,6 +150,14 @@ function ProductosPage() {
         )}
       </div>
 
+      {products.isError && (
+        <ProductsErrorBanner
+          message={(products.error as Error)?.message}
+          onRetry={() => products.refetch()}
+          isRetrying={products.isFetching}
+        />
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {items.map((p: any) => {
           const sale = Number(p.price_sale ?? 0);
