@@ -27,13 +27,14 @@ export const Route = createFileRoute("/riomed")({
   component: RiomedLayout,
 });
 
-const MAIN_NAV = [
+type NavItem = { to: string; label: string; mega?: "catalog" | "rental" | "services" };
+const MAIN_NAV: NavItem[] = [
   { to: "/riomed", label: "Início" },
   { to: "/riomed/productos", label: "Catálogo", mega: "catalog" },
   { to: "/riomed/alquiler", label: "Locações", mega: "rental" },
   { to: "/riomed/servicio-tecnico", label: "Serviços", mega: "services" },
   { to: "/riomed/productos", label: "Comprar" },
-] as const;
+];
 
 function RiomedLayout() {
   const getSettings = useServerFn(getRiomedSiteSettings);
