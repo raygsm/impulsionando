@@ -36,9 +36,12 @@ type NavItem = { to: string; label: string; exact?: boolean };
 const NAV: NavItem[] = [
   { to: "/", label: "Início", exact: true },
   { to: "/clube", label: "Clube" },
+  { to: "/planos?tab=empresas", label: "Empresas" },
+  { to: "/planos?tab=white-label", label: "White Label" },
   { to: "/demo", label: "Demonstrações" },
   { to: "/escolher-nicho", label: "Planos" },
 ];
+
 
 function useActive(path: string, exact?: boolean) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
