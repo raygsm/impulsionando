@@ -51,7 +51,7 @@ function BrandingPage() {
                   <SelectContent>
                     {companies.map((c) => (
                       <SelectItem key={c.id} value={c.id}>
-                        {c.trade_name || c.name} {c.niche_code ? `· ${c.niche_code}` : ""}
+                        {c.trade_name || c.name}
                       </SelectItem>
                     ))}
                   </SelectContent>

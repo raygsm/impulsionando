@@ -7,7 +7,7 @@ export const listMyBrandingCompanies = createServerFn({ method: "GET" })
     // RLS-scoped: returns only companies the user can read
     const { data, error } = await context.supabase
       .from("companies")
-      .select("id, name, trade_name, logo_url, primary_color, secondary_color, niche_code, is_active")
+      .select("id, name, trade_name, logo_url, primary_color, secondary_color, is_active")
       .order("name", { ascending: true })
       .limit(200);
     if (error) throw new Error(error.message);
