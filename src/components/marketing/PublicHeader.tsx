@@ -664,6 +664,16 @@ export function PublicHeader() {
                 ))}
 
                 <div className="flex flex-col gap-2 pt-4 mt-3 border-t border-border">
+                  <Button asChild className="gap-2 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-violet-500 text-white">
+                    <Link to="/busca" onClick={() => setOpen(false)}>
+                      <Search className="w-4 h-4 mr-1" /> Busque o que Precisa
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" className="gap-2">
+                    <Link to="/clube" onClick={() => setOpen(false)}>
+                      <HelpCircle className="w-4 h-4 mr-1" /> O que é o Clube? (necessário p/ buscar)
+                    </Link>
+                  </Button>
                   <Button asChild className="bg-gradient-primary">
                     <Link to="/orcamento" onClick={() => setOpen(false)}>
                       <Sparkles className="w-4 h-4 mr-2" /> Começar Agora
@@ -674,6 +684,17 @@ export function PublicHeader() {
                       <PlayCircle className="w-4 h-4 mr-2" /> Ver Demonstrações
                     </Link>
                   </Button>
+                  <Button asChild className="btn-whatsapp">
+                    <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+                      <MessageCircle className="w-4 h-4 mr-2" /> Falar com Impulsionito
+                    </a>
+                  </Button>
+                  <Button asChild variant="ghost">
+                    <Link to="/auth" onClick={() => setOpen(false)}>
+                      <LogIn className="w-4 h-4 mr-2" /> Entrar
+                    </Link>
+                  </Button>
+                </div>
                   <Button asChild className="btn-whatsapp">
                     <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
                       <MessageCircle className="w-4 h-4 mr-2" /> Falar com Impulsionito
