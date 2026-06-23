@@ -302,24 +302,18 @@ function TenantCard({
   tenant: AdminHubTenant;
   legacyGroups: AdminMenuGroup[];
 }) {
+  const painelHref = `/admin/clientes/${tenant.slug}/painel` as const;
   const cockpitHref = `/admin/clientes/${tenant.slug}` as const;
   const siteHref = `https://${tenant.slug}.impulsionando.com.br`;
+  const initial = (tenant.name?.[0] ?? "?").toUpperCase();
   return (
     <Card className="overflow-hidden border-muted-foreground/10 hover:border-primary/40 hover:shadow-elegant transition-all">
       <CardHeader className="pb-3">
         <div className="flex items-start gap-3">
-          <div className="h-10 w-10 rounded-md bg-muted/60 border flex items-center justify-center overflow-hidden flex-shrink-0">
-            {tenant.logo_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={tenant.logo_url}
-                alt={`${tenant.name} logo`}
-                className="h-full w-full object-cover"
-                loading="lazy"
-              />
-            ) : (
-              <Building2 className="h-5 w-5 text-muted-foreground" />
-            )}
+          {/* Padrão Impulsionando: nunca exibir a logo do tenant em áreas
+              administrativas. Usar inicial com gradiente Impulsionando. */}
+          <div className="h-10 w-10 rounded-md bg-gradient-primary text-primary-foreground flex items-center justify-center flex-shrink-0 font-semibold shadow-sm">
+            {initial}
           </div>
           <div className="min-w-0 flex-1">
             <CardTitle className="text-base leading-tight truncate flex items-center gap-2">
@@ -347,9 +341,14 @@ function TenantCard({
         </div>
 
         <div className="flex items-center gap-2">
-          <Link to={cockpitHref} className="flex-1">
-            <Button size="sm" className="w-full gap-1">
-              Abrir cockpit <ArrowRight className="h-3.5 w-3.5" />
+          <Link to={painelHref} className="flex-1">
+            <Button size="sm" className="w-full gap-1 bg-gradient-primary text-primary-foreground border-0 shadow-elegant">
+              Abrir Dashboard <ArrowRight className="h-3.5 w-3.5" />
+            </Button>
+          </Link>
+          <Link to={cockpitHref}>
+            <Button size="sm" variant="outline" className="px-2" title="Overview do tenant">
+              <Building2 className="h-3.5 w-3.5" />
             </Button>
           </Link>
           <a href={siteHref} target="_blank" rel="noreferrer">
@@ -358,6 +357,7 @@ function TenantCard({
             </Button>
           </a>
         </div>
+
 
         {legacyGroups.length > 0 ? (
           <Accordion type="single" collapsible className="-mx-1">
