@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Bell, ChevronRight, LayoutDashboard, Users, Settings, Mail, Globe } from "lucide-react";
 import { useMemo } from "react";
+import { BrandKitExport } from "./BrandKitExport";
 
 interface Props { companyId: string }
 
