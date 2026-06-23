@@ -26,6 +26,7 @@ import { Route as PlanosRouteImport } from './routes/planos'
 import { Route as PesquisaRouteImport } from './routes/pesquisa'
 import { Route as PacienteRouteImport } from './routes/paciente'
 import { Route as OrcamentoRouteImport } from './routes/orcamento'
+import { Route as OnboardingGuiadoRouteImport } from './routes/onboarding-guiado'
 import { Route as ModulosRouteImport } from './routes/modulos'
 import { Route as MarocasRouteImport } from './routes/marocas'
 import { Route as MarketingRouteImport } from './routes/marketing'
@@ -45,6 +46,7 @@ import { Route as CatalogoRouteImport } from './routes/catalogo'
 import { Route as CanalOficialRouteImport } from './routes/canal-oficial'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/app'
+import { Route as AbrirTicketRouteImport } from './routes/abrir-ticket'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TrabalheConoscoIndexRouteImport } from './routes/trabalhe-conosco.index'
@@ -550,6 +552,7 @@ import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/em
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as DemoRestauranteTenantQrRouteImport } from './routes/demo.restaurante.$tenant.$qr'
 import { Route as ApiPublicWhatsappSendRouteImport } from './routes/api/public/whatsapp/send'
+import { Route as ApiPublicSupportCreateTicketRouteImport } from './routes/api/public/support/create-ticket'
 import { Route as ApiPublicRiomedEventsRouteImport } from './routes/api/public/riomed/events'
 import { Route as ApiPublicRealestateSavedSearchRouteImport } from './routes/api/public/realestate/saved-search'
 import { Route as ApiPublicRealestateInterestRouteImport } from './routes/api/public/realestate/interest'
@@ -752,6 +755,11 @@ const OrcamentoRoute = OrcamentoRouteImport.update({
   path: '/orcamento',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OnboardingGuiadoRoute = OnboardingGuiadoRouteImport.update({
+  id: '/onboarding-guiado',
+  path: '/onboarding-guiado',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ModulosRoute = ModulosRouteImport.update({
   id: '/modulos',
   path: '/modulos',
@@ -845,6 +853,11 @@ const AuthRoute = AuthRouteImport.update({
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AbrirTicketRoute = AbrirTicketRouteImport.update({
+  id: '/abrir-ticket',
+  path: '/abrir-ticket',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
@@ -3687,6 +3700,12 @@ const ApiPublicWhatsappSendRoute = ApiPublicWhatsappSendRouteImport.update({
   path: '/api/public/whatsapp/send',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicSupportCreateTicketRoute =
+  ApiPublicSupportCreateTicketRouteImport.update({
+    id: '/api/public/support/create-ticket',
+    path: '/api/public/support/create-ticket',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicRiomedEventsRoute = ApiPublicRiomedEventsRouteImport.update({
   id: '/api/public/riomed/events',
   path: '/api/public/riomed/events',
@@ -4376,6 +4395,7 @@ const AuthenticatedCoreClienteIdModuloSlugConfigurarRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/abrir-ticket': typeof AbrirTicketRoute
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
   '/canal-oficial': typeof CanalOficialRoute
@@ -4395,6 +4415,7 @@ export interface FileRoutesByFullPath {
   '/marketing': typeof MarketingRoute
   '/marocas': typeof MarocasRouteWithChildren
   '/modulos': typeof ModulosRouteWithChildren
+  '/onboarding-guiado': typeof OnboardingGuiadoRoute
   '/orcamento': typeof OrcamentoRoute
   '/paciente': typeof PacienteRouteWithChildren
   '/pesquisa': typeof PesquisaRoute
@@ -4974,6 +4995,7 @@ export interface FileRoutesByFullPath {
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
   '/api/public/riomed/events': typeof ApiPublicRiomedEventsRoute
+  '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
   '/api/public/whatsapp/send': typeof ApiPublicWhatsappSendRoute
   '/demo/restaurante/$tenant/$qr': typeof DemoRestauranteTenantQrRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -5034,6 +5056,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/abrir-ticket': typeof AbrirTicketRoute
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
   '/canal-oficial': typeof CanalOficialRoute
@@ -5052,6 +5075,7 @@ export interface FileRoutesByTo {
   '/manutencao': typeof ManutencaoRoute
   '/marketing': typeof MarketingRoute
   '/marocas': typeof MarocasRouteWithChildren
+  '/onboarding-guiado': typeof OnboardingGuiadoRoute
   '/orcamento': typeof OrcamentoRoute
   '/pesquisa': typeof PesquisaRoute
   '/planos': typeof PlanosRoute
@@ -5620,6 +5644,7 @@ export interface FileRoutesByTo {
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
   '/api/public/riomed/events': typeof ApiPublicRiomedEventsRoute
+  '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
   '/api/public/whatsapp/send': typeof ApiPublicWhatsappSendRoute
   '/demo/restaurante/$tenant/$qr': typeof DemoRestauranteTenantQrRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -5682,6 +5707,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/abrir-ticket': typeof AbrirTicketRoute
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
   '/canal-oficial': typeof CanalOficialRoute
@@ -5701,6 +5727,7 @@ export interface FileRoutesById {
   '/marketing': typeof MarketingRoute
   '/marocas': typeof MarocasRouteWithChildren
   '/modulos': typeof ModulosRouteWithChildren
+  '/onboarding-guiado': typeof OnboardingGuiadoRoute
   '/orcamento': typeof OrcamentoRoute
   '/paciente': typeof PacienteRouteWithChildren
   '/pesquisa': typeof PesquisaRoute
@@ -6280,6 +6307,7 @@ export interface FileRoutesById {
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
   '/api/public/riomed/events': typeof ApiPublicRiomedEventsRoute
+  '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
   '/api/public/whatsapp/send': typeof ApiPublicWhatsappSendRoute
   '/demo/restaurante/$tenant/$qr': typeof DemoRestauranteTenantQrRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -6342,6 +6370,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/abrir-ticket'
     | '/app'
     | '/auth'
     | '/canal-oficial'
@@ -6361,6 +6390,7 @@ export interface FileRouteTypes {
     | '/marketing'
     | '/marocas'
     | '/modulos'
+    | '/onboarding-guiado'
     | '/orcamento'
     | '/paciente'
     | '/pesquisa'
@@ -6940,6 +6970,7 @@ export interface FileRouteTypes {
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
     | '/api/public/riomed/events'
+    | '/api/public/support/create-ticket'
     | '/api/public/whatsapp/send'
     | '/demo/restaurante/$tenant/$qr'
     | '/lovable/email/auth/preview'
@@ -7000,6 +7031,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/abrir-ticket'
     | '/app'
     | '/auth'
     | '/canal-oficial'
@@ -7018,6 +7050,7 @@ export interface FileRouteTypes {
     | '/manutencao'
     | '/marketing'
     | '/marocas'
+    | '/onboarding-guiado'
     | '/orcamento'
     | '/pesquisa'
     | '/planos'
@@ -7586,6 +7619,7 @@ export interface FileRouteTypes {
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
     | '/api/public/riomed/events'
+    | '/api/public/support/create-ticket'
     | '/api/public/whatsapp/send'
     | '/demo/restaurante/$tenant/$qr'
     | '/lovable/email/auth/preview'
@@ -7647,6 +7681,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/abrir-ticket'
     | '/app'
     | '/auth'
     | '/canal-oficial'
@@ -7666,6 +7701,7 @@ export interface FileRouteTypes {
     | '/marketing'
     | '/marocas'
     | '/modulos'
+    | '/onboarding-guiado'
     | '/orcamento'
     | '/paciente'
     | '/pesquisa'
@@ -8245,6 +8281,7 @@ export interface FileRouteTypes {
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
     | '/api/public/riomed/events'
+    | '/api/public/support/create-ticket'
     | '/api/public/whatsapp/send'
     | '/demo/restaurante/$tenant/$qr'
     | '/lovable/email/auth/preview'
@@ -8307,6 +8344,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AbrirTicketRoute: typeof AbrirTicketRoute
   AppRoute: typeof AppRoute
   AuthRoute: typeof AuthRoute
   CanalOficialRoute: typeof CanalOficialRoute
@@ -8326,6 +8364,7 @@ export interface RootRouteChildren {
   MarketingRoute: typeof MarketingRoute
   MarocasRoute: typeof MarocasRouteWithChildren
   ModulosRoute: typeof ModulosRouteWithChildren
+  OnboardingGuiadoRoute: typeof OnboardingGuiadoRoute
   OrcamentoRoute: typeof OrcamentoRoute
   PacienteRoute: typeof PacienteRouteWithChildren
   PesquisaRoute: typeof PesquisaRoute
@@ -8461,6 +8500,7 @@ export interface RootRouteChildren {
   ApiPublicRealestateInterestRoute: typeof ApiPublicRealestateInterestRoute
   ApiPublicRealestateSavedSearchRoute: typeof ApiPublicRealestateSavedSearchRoute
   ApiPublicRiomedEventsRoute: typeof ApiPublicRiomedEventsRoute
+  ApiPublicSupportCreateTicketRoute: typeof ApiPublicSupportCreateTicketRoute
   ApiPublicWhatsappSendRoute: typeof ApiPublicWhatsappSendRoute
   DemoRestauranteTenantQrRoute: typeof DemoRestauranteTenantQrRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -8598,6 +8638,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrcamentoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/onboarding-guiado': {
+      id: '/onboarding-guiado'
+      path: '/onboarding-guiado'
+      fullPath: '/onboarding-guiado'
+      preLoaderRoute: typeof OnboardingGuiadoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/modulos': {
       id: '/modulos'
       path: '/modulos'
@@ -8729,6 +8776,13 @@ declare module '@tanstack/react-router' {
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/abrir-ticket': {
+      id: '/abrir-ticket'
+      path: '/abrir-ticket'
+      fullPath: '/abrir-ticket'
+      preLoaderRoute: typeof AbrirTicketRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -12266,6 +12320,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWhatsappSendRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/support/create-ticket': {
+      id: '/api/public/support/create-ticket'
+      path: '/api/public/support/create-ticket'
+      fullPath: '/api/public/support/create-ticket'
+      preLoaderRoute: typeof ApiPublicSupportCreateTicketRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/riomed/events': {
       id: '/api/public/riomed/events'
       path: '/api/public/riomed/events'
@@ -14696,6 +14757,7 @@ const ApiPublicHealthRouteWithChildren = ApiPublicHealthRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AbrirTicketRoute: AbrirTicketRoute,
   AppRoute: AppRoute,
   AuthRoute: AuthRoute,
   CanalOficialRoute: CanalOficialRoute,
@@ -14715,6 +14777,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketingRoute: MarketingRoute,
   MarocasRoute: MarocasRouteWithChildren,
   ModulosRoute: ModulosRouteWithChildren,
+  OnboardingGuiadoRoute: OnboardingGuiadoRoute,
   OrcamentoRoute: OrcamentoRoute,
   PacienteRoute: PacienteRouteWithChildren,
   PesquisaRoute: PesquisaRoute,
@@ -14854,6 +14917,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicRealestateInterestRoute: ApiPublicRealestateInterestRoute,
   ApiPublicRealestateSavedSearchRoute: ApiPublicRealestateSavedSearchRoute,
   ApiPublicRiomedEventsRoute: ApiPublicRiomedEventsRoute,
+  ApiPublicSupportCreateTicketRoute: ApiPublicSupportCreateTicketRoute,
   ApiPublicWhatsappSendRoute: ApiPublicWhatsappSendRoute,
   DemoRestauranteTenantQrRoute: DemoRestauranteTenantQrRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
