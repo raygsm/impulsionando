@@ -62,8 +62,8 @@ export const NAV_GROUPS: NavGroup[] = [
     defaultOpen: true,
     items: [
       { to: "/dashboards/consumidor", label: "Início", icon: Home, audiences: ["consumidor"] },
-      { to: "/clube", label: "Clube — Benefícios", icon: Sparkles, audiences: ["consumidor"] },
-      { to: "/clube/notificacoes", label: "Notificações do Clube", icon: Inbox, audiences: ["consumidor"] },
+      { to: "/area-clube", label: "Clube — Benefícios", icon: Sparkles, audiences: ["consumidor"] },
+      { to: "/area-clube/notificacoes", label: "Notificações do Clube", icon: Inbox, audiences: ["consumidor"] },
       { to: "/minha-assinatura", label: "Minha Assinatura", icon: CreditCard, audiences: ["consumidor"] },
     ],
   },
