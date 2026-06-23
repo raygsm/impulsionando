@@ -382,6 +382,17 @@ export const submitRiomedSellerLead = createServerFn({ method: "POST" })
       notes: data.notes || null,
     } as any).select("id").single();
     if (error) throw error;
+    await emitRiomedEvent({
+      source: "crm",
+      eventCode: "lead.created",
+      message: `Novo lead de ${data.customerName}${assignedName ? " → " + assignedName : ""}`,
+      payload: {
+        leadId: row.id, sellerId: assignedId, sellerName: assignedName,
+        profile: data.profile, interest: data.interest,
+        customer: { name: data.customerName, phone: data.customerPhone, email: data.customerEmail },
+      },
+      correlationId: row.id,
+    });
     return { ok: true, leadId: row.id, sellerId: assignedId, sellerName: assignedName };
   });
 
