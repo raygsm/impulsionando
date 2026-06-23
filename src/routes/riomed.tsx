@@ -163,14 +163,14 @@ function RiomedLayout() {
               ))}
               <div className="pt-3 grid grid-cols-1 gap-2">
                 <Link
-                  to="/riomed/servicio-tecnico"
+                  to="/riomed/soporte"
                   className="text-center rounded-lg px-3 py-2.5 font-bold text-white bg-[color:var(--riomed-orange)]"
                   onClick={() => setMobileOpen(false)}
                 >
                   Quero suporte técnico
                 </Link>
                 <Link
-                  to="/riomed/cotizar"
+                  to="/riomed/vendedor"
                   className="text-center rounded-lg px-3 py-2.5 font-bold text-white bg-[color:var(--riomed-accent)]"
                   onClick={() => setMobileOpen(false)}
                 >
