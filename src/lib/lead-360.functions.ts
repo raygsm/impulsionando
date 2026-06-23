@@ -62,7 +62,7 @@ export const getLead360 = createServerFn({ method: "GET" })
         .maybeSingle(),
       supabaseAdmin
         .from("riomed_quotes")
-        .select("id, status, total_value, created_at")
+        .select("id, code, status, total, created_at")
         .eq("lead_id", leadId)
         .order("created_at", { ascending: false })
         .limit(10),
