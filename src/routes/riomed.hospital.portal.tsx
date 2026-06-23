@@ -1,9 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { submitHospitalRequest } from "@/lib/riomed-partners.functions";
 import { PublicFormShell, PublicFormCard, Field, Input, Textarea } from "@/components/riomed/PublicForm";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/riomed/hospital/portal")({
@@ -37,6 +38,18 @@ function Page() {
   };
   return (
     <PublicFormShell title="Portal Hospitalar Rio Med" subtitle="Pedidos urgentes, comodato, locação e cotações com prioridade.">
+      <div className="mb-4">
+        <Link
+          to="/riomed/minhas-garantias"
+          className="flex items-center justify-between gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 transition hover:bg-primary/10"
+        >
+          <span className="flex items-center gap-2 text-sm font-medium">
+            <ShieldCheck className="h-4 w-4 text-primary" />
+            Minhas garantias — acompanhe seus produtos e prazos
+          </span>
+          <span className="text-xs text-primary">Abrir →</span>
+        </Link>
+      </div>
       <PublicFormCard title="Sua solicitação" busy={busy} done={done}
         disabled={!f.hospitalName || !f.contactEmail || !f.contactPhone || !f.title}
         doneText="Solicitação registrada. Nosso time hospitalar entra em contato no SLA combinado." onSubmit={submit}>
