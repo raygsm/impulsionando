@@ -573,6 +573,7 @@ import { Route as ApiPublicHooksN8nLogRouteImport } from './routes/api/public/ho
 import { Route as ApiPublicHooksMpPendingRemindersRouteImport } from './routes/api/public/hooks/mp-pending-reminders'
 import { Route as ApiPublicHooksMarocasReportRouteImport } from './routes/api/public/hooks/marocas-report'
 import { Route as ApiPublicHooksMarketingLeadNotifyRouteImport } from './routes/api/public/hooks/marketing-lead-notify'
+import { Route as ApiPublicHooksImpulsionitoTrainRouteImport } from './routes/api/public/hooks/impulsionito-train'
 import { Route as ApiPublicHooksFocusNfeRouteImport } from './routes/api/public/hooks/focus-nfe'
 import { Route as ApiPublicHooksFiscalMonthlyEmailRouteImport } from './routes/api/public/hooks/fiscal-monthly-email'
 import { Route as ApiPublicHooksDispatchFiscalRouteImport } from './routes/api/public/hooks/dispatch-fiscal'
@@ -3827,6 +3828,12 @@ const ApiPublicHooksMarketingLeadNotifyRoute =
     path: '/api/public/hooks/marketing-lead-notify',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksImpulsionitoTrainRoute =
+  ApiPublicHooksImpulsionitoTrainRouteImport.update({
+    id: '/api/public/hooks/impulsionito-train',
+    path: '/api/public/hooks/impulsionito-train',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksFocusNfeRoute = ApiPublicHooksFocusNfeRouteImport.update({
   id: '/api/public/hooks/focus-nfe',
   path: '/api/public/hooks/focus-nfe',
@@ -5026,6 +5033,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/dispatch-fiscal': typeof ApiPublicHooksDispatchFiscalRoute
   '/api/public/hooks/fiscal-monthly-email': typeof ApiPublicHooksFiscalMonthlyEmailRoute
   '/api/public/hooks/focus-nfe': typeof ApiPublicHooksFocusNfeRoute
+  '/api/public/hooks/impulsionito-train': typeof ApiPublicHooksImpulsionitoTrainRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/marocas-report': typeof ApiPublicHooksMarocasReportRoute
   '/api/public/hooks/mp-pending-reminders': typeof ApiPublicHooksMpPendingRemindersRoute
@@ -5681,6 +5689,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/dispatch-fiscal': typeof ApiPublicHooksDispatchFiscalRoute
   '/api/public/hooks/fiscal-monthly-email': typeof ApiPublicHooksFiscalMonthlyEmailRoute
   '/api/public/hooks/focus-nfe': typeof ApiPublicHooksFocusNfeRoute
+  '/api/public/hooks/impulsionito-train': typeof ApiPublicHooksImpulsionitoTrainRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/marocas-report': typeof ApiPublicHooksMarocasReportRoute
   '/api/public/hooks/mp-pending-reminders': typeof ApiPublicHooksMpPendingRemindersRoute
@@ -6350,6 +6359,7 @@ export interface FileRoutesById {
   '/api/public/hooks/dispatch-fiscal': typeof ApiPublicHooksDispatchFiscalRoute
   '/api/public/hooks/fiscal-monthly-email': typeof ApiPublicHooksFiscalMonthlyEmailRoute
   '/api/public/hooks/focus-nfe': typeof ApiPublicHooksFocusNfeRoute
+  '/api/public/hooks/impulsionito-train': typeof ApiPublicHooksImpulsionitoTrainRoute
   '/api/public/hooks/marketing-lead-notify': typeof ApiPublicHooksMarketingLeadNotifyRoute
   '/api/public/hooks/marocas-report': typeof ApiPublicHooksMarocasReportRoute
   '/api/public/hooks/mp-pending-reminders': typeof ApiPublicHooksMpPendingRemindersRoute
@@ -7019,6 +7029,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/dispatch-fiscal'
     | '/api/public/hooks/fiscal-monthly-email'
     | '/api/public/hooks/focus-nfe'
+    | '/api/public/hooks/impulsionito-train'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/marocas-report'
     | '/api/public/hooks/mp-pending-reminders'
@@ -7674,6 +7685,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/dispatch-fiscal'
     | '/api/public/hooks/fiscal-monthly-email'
     | '/api/public/hooks/focus-nfe'
+    | '/api/public/hooks/impulsionito-train'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/marocas-report'
     | '/api/public/hooks/mp-pending-reminders'
@@ -8342,6 +8354,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/dispatch-fiscal'
     | '/api/public/hooks/fiscal-monthly-email'
     | '/api/public/hooks/focus-nfe'
+    | '/api/public/hooks/impulsionito-train'
     | '/api/public/hooks/marketing-lead-notify'
     | '/api/public/hooks/marocas-report'
     | '/api/public/hooks/mp-pending-reminders'
@@ -8564,6 +8577,7 @@ export interface RootRouteChildren {
   ApiPublicHooksDispatchFiscalRoute: typeof ApiPublicHooksDispatchFiscalRoute
   ApiPublicHooksFiscalMonthlyEmailRoute: typeof ApiPublicHooksFiscalMonthlyEmailRoute
   ApiPublicHooksFocusNfeRoute: typeof ApiPublicHooksFocusNfeRoute
+  ApiPublicHooksImpulsionitoTrainRoute: typeof ApiPublicHooksImpulsionitoTrainRoute
   ApiPublicHooksMarketingLeadNotifyRoute: typeof ApiPublicHooksMarketingLeadNotifyRoute
   ApiPublicHooksMarocasReportRoute: typeof ApiPublicHooksMarocasReportRoute
   ApiPublicHooksMpPendingRemindersRoute: typeof ApiPublicHooksMpPendingRemindersRoute
@@ -12546,6 +12560,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksMarketingLeadNotifyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/impulsionito-train': {
+      id: '/api/public/hooks/impulsionito-train'
+      path: '/api/public/hooks/impulsionito-train'
+      fullPath: '/api/public/hooks/impulsionito-train'
+      preLoaderRoute: typeof ApiPublicHooksImpulsionitoTrainRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/focus-nfe': {
       id: '/api/public/hooks/focus-nfe'
       path: '/api/public/hooks/focus-nfe'
@@ -15031,6 +15052,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksDispatchFiscalRoute: ApiPublicHooksDispatchFiscalRoute,
   ApiPublicHooksFiscalMonthlyEmailRoute: ApiPublicHooksFiscalMonthlyEmailRoute,
   ApiPublicHooksFocusNfeRoute: ApiPublicHooksFocusNfeRoute,
+  ApiPublicHooksImpulsionitoTrainRoute: ApiPublicHooksImpulsionitoTrainRoute,
   ApiPublicHooksMarketingLeadNotifyRoute:
     ApiPublicHooksMarketingLeadNotifyRoute,
   ApiPublicHooksMarocasReportRoute: ApiPublicHooksMarocasReportRoute,

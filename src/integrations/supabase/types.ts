@@ -15504,6 +15504,72 @@ export type Database = {
         }
         Relationships: []
       }
+      impulsionito_training_snapshots: {
+        Row: {
+          captured_at: string
+          company_id: string
+          id: string
+          metrics: Json
+          niche: string | null
+          sample: Json
+          source: string
+        }
+        Insert: {
+          captured_at?: string
+          company_id: string
+          id?: string
+          metrics?: Json
+          niche?: string | null
+          sample?: Json
+          source?: string
+        }
+        Update: {
+          captured_at?: string
+          company_id?: string
+          id?: string
+          metrics?: Json
+          niche?: string | null
+          sample?: Json
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "impulsionito_training_snapshots_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "impulsionito_training_snapshots_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "impulsionito_training_snapshots_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "impulsionito_training_snapshots_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "impulsionito_training_snapshots_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       inv_categories: {
         Row: {
           company_id: string
