@@ -19,9 +19,13 @@
 |---|---|---|
 | `riomed-01-novo-lead.json` | Webhook `lead.created` | WhatsApp ao vendedor + e-mail boas-vindas + follow-up D+1 |
 | `riomed-02-ticket-tecnico.json` | Webhook `ticket.created` | Roteia por SLA (crítica → gerente, alta → técnico on-call, baixa → e-mail) |
-| `riomed-03-cotacao-fria.json` | Webhook `quote.cold` | Busca cotações sem resposta há 48h, gera mensagem com IA e envia WhatsApp |
-| `riomed-04-recuperacao-carrinho.json` | Schedule (2/2h) | Recupera carrinhos B2B abandonados — alto valor (>5k BOB) aciona vendedor; demais recebem e-mail |
-| `riomed-05-cobranca-ar.json` | Schedule diário 09h | Régua de cobrança: lembrete (≤3 dias), firme (≤10 dias), escalada ao gestor (>10) |
+| `riomed-03-cotacao-fria.json` | Schedule 2/2h | Cotações sem resposta há 48h, mensagem com IA + WhatsApp |
+| `riomed-04-recuperacao-carrinho.json` | Schedule 2/2h | Carrinhos B2B abandonados — alto valor (>5k BOB) → vendedor; demais → e-mail |
+| `riomed-05-cobranca-ar.json` | Cron diário 09h | Régua: lembrete (≤3d), firme (≤10d), escalada gestor (>10d) |
+| `riomed-06-lead-facebook.json` | Facebook Lead Ads | Normaliza lead Meta → POST `/api/public/riomed/events` |
+| `riomed-07-lead-instagram.json` | Webhook Meta (IG DM) | Extrai DMs, classifica como lead e injeta no CRM |
+| `riomed-08-broadcast-whatsapp.json` | Schedule 10/10min | Dispara `riomed_whatsapp_broadcasts` agendados (respeita opt-out) |
+| `riomed-09-cotacao-bob-usd.json` | Cron 08h La Paz | Atualiza `cotacao_bob_usd` via exchangerate.host |
 
 ## Endpoints públicos que os flows consomem
 
