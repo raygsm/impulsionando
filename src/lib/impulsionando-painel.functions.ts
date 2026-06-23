@@ -14,7 +14,7 @@ export const getImpulsionandoPainel = createServerFn({ method: "POST" })
     // ── tenant ──
     const { data: company } = await sb
       .from("companies")
-      .select("id,name,subdomain,niche_code,created_at,logo_url,primary_color")
+      .select("id,name,subdomain,created_at,logo_url,primary_color")
       .eq("subdomain", data.slug)
       .maybeSingle();
     if (!company) throw new Error("Tenant não encontrado");
