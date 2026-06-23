@@ -59,10 +59,11 @@ function PainelPage() {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <ClientDashboardHero
         tenantName={company.name}
-        subdomain={company.subdomain}
+        subdomain={company.subdomain ?? slug}
         moduleCount={moduleCount}
         generatedAt={data.generatedAt}
       />
+
 
 
       <div className="container mx-auto px-6 py-6 space-y-6">
