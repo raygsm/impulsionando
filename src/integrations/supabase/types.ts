@@ -30701,6 +30701,52 @@ export type Database = {
         }
         Relationships: []
       }
+      riomed_user_effective_roles: {
+        Row: {
+          company_id: string | null
+          core_role: string | null
+          scopes: string[] | null
+          template_codes: string[] | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_roles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_vitrine_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_roles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_macro"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "user_roles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_company_whatsapp_status"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "user_roles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "v_tenant_identity_status"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       v_company_compliance_status: {
         Row: {
           applies_to: string | null
@@ -31335,6 +31381,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["educ_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      has_riomed_scope: {
+        Args: { _scope: string; _user_id: string }
         Returns: boolean
       }
       has_role: {
