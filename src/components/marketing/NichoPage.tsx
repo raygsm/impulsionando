@@ -472,20 +472,53 @@ export function NichoPage({ nicho }: Props) {
         </section>
 
         {/* BENEFÍCIOS */}
-        <section className="rounded-xl border border-primary/30 bg-primary/5 p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Sparkles className="w-5 h-5 text-primary" />
-            <h2 className="text-xl font-bold tracking-tight">Ganhos diretos para o seu negócio</h2>
+        <section className="relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-background to-accent/5 p-7">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary/15 blur-3xl"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-accent/15 blur-3xl"
+          />
+          <div className="relative">
+            <div className="flex items-center gap-3 mb-6">
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-primary text-primary-foreground shadow-md">
+                <Sparkles className="w-5 h-5" />
+              </span>
+              <div>
+                <Badge variant="outline" className="text-[10px] border-primary/40 text-primary bg-background mb-1">
+                  Resultados
+                </Badge>
+                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                  Ganhos diretos para o seu negócio
+                </h2>
+              </div>
+            </div>
+            <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {nicho.benefits.map((b, i) => (
+                <li
+                  key={b}
+                  className="group relative overflow-hidden rounded-xl border bg-background/70 backdrop-blur p-4 transition-all hover:-translate-y-0.5 hover:shadow-elegant hover:border-primary/50"
+                >
+                  <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-primary via-accent to-primary opacity-70" />
+                  <div className="flex items-start gap-3">
+                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20 group-hover:bg-gradient-primary group-hover:text-primary-foreground group-hover:ring-primary/40 transition-all">
+                      <CheckCircle2 className="w-4 h-4" />
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[10px] font-mono font-semibold tabular-nums text-primary/70 mb-0.5">
+                        +{String(i + 1).padStart(2, "0")}
+                      </div>
+                      <span className="text-sm font-medium leading-snug text-foreground">{b}</span>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul className="grid sm:grid-cols-2 gap-2.5">
-            {nicho.benefits.map((b) => (
-              <li key={b} className="flex items-start gap-2.5">
-                <CheckCircle2 className="w-4 h-4 text-primary mt-1 shrink-0" />
-                <span className="text-sm leading-relaxed">{b}</span>
-              </li>
-            ))}
-          </ul>
         </section>
+
 
         {/* CTA FINAL EM CARD */}
         <Card className="p-8 lg:p-10 bg-gradient-primary text-primary-foreground border-0 shadow-elegant overflow-hidden relative">
