@@ -308,6 +308,18 @@ export const openRiomedSupportTicket = createServerFn({ method: "POST" })
       preferred_window: data.preferredWindow || null,
     } as any).select("id,protocol").single();
     if (error) throw error;
+    await emitRiomedEvent({
+      source: "support",
+      eventCode: "ticket.created",
+      message: `Novo ticket ${protocol} (${data.urgency})`,
+      level: data.urgency === "critica" ? "warn" : "info",
+      payload: {
+        ticketId: row.id, protocol, urgency: data.urgency,
+        category: data.issueCategory, city: data.locationCity,
+        customer: { name: data.customerName, phone: data.customerPhone, email: data.customerEmail },
+      },
+      correlationId: row.id,
+    });
     return { ok: true, protocol: row.protocol, id: row.id };
   });
 
@@ -370,12 +382,48 @@ export const submitRiomedSellerLead = createServerFn({ method: "POST" })
       notes: data.notes || null,
     } as any).select("id").single();
     if (error) throw error;
+    await emitRiomedEvent({
+      source: "crm",
+      eventCode: "lead.created",
+      message: `Novo lead de ${data.customerName}${assignedName ? " → " + assignedName : ""}`,
+      payload: {
+        leadId: row.id, sellerId: assignedId, sellerName: assignedName,
+        profile: data.profile, interest: data.interest,
+        customer: { name: data.customerName, phone: data.customerPhone, email: data.customerEmail },
+      },
+      correlationId: row.id,
+    });
     return { ok: true, leadId: row.id, sellerId: assignedId, sellerName: assignedName };
   });
 
 // ============================================================
-// Wave 4 — admin/seller/manager panels
+// Wave 4/5 — admin panels + jornadas (operational events → N8N)
 // ============================================================
+
+async function emitRiomedEvent(opts: {
+  source: string;
+  eventCode: string;
+  message: string;
+  level?: "info" | "warn" | "error";
+  payload?: Record<string, unknown>;
+  correlationId?: string;
+}) {
+  try {
+    const supa = await adminClient();
+    const companyId = await getRiomedCompanyId(supa);
+    if (!companyId) return;
+    await supa.from("riomed_operational_events").insert({
+      company_id: companyId,
+      level: opts.level ?? "info",
+      source: opts.source,
+      event_code: opts.eventCode,
+      message: opts.message,
+      payload: opts.payload ?? {},
+      correlation_id: opts.correlationId ?? null,
+    } as any);
+  } catch { /* não bloquear fluxo principal */ }
+}
+
 
 export const listRiomedSellerLeads = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) => z.object({
@@ -429,6 +477,13 @@ export const updateRiomedLeadStatus = createServerFn({ method: "POST" })
     if (data.notes) patch.notes = data.notes;
     const { error } = await supa.from("riomed_seller_leads").update(patch).eq("id", data.leadId);
     if (error) throw error;
+    await emitRiomedEvent({
+      source: "crm",
+      eventCode: `lead.${data.status}`,
+      message: `Lead movido para ${data.status}`,
+      payload: { leadId: data.leadId, status: data.status },
+      correlationId: data.leadId,
+    });
     return { ok: true };
   });
 
@@ -442,6 +497,14 @@ export const updateRiomedTicketStatus = createServerFn({ method: "POST" })
     const { error } = await supa.from("riomed_support_tickets")
       .update({ status: data.status, updated_at: new Date().toISOString() }).eq("id", data.ticketId);
     if (error) throw error;
+    await emitRiomedEvent({
+      source: "support",
+      eventCode: `ticket.${data.status}`,
+      message: `Ticket movido para ${data.status}`,
+      level: data.status === "resolvido" ? "info" : data.status === "cancelado" ? "warn" : "info",
+      payload: { ticketId: data.ticketId, status: data.status },
+      correlationId: data.ticketId,
+    });
     return { ok: true };
   });
 
