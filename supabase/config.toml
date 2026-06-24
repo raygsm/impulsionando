@@ -1,4 +1,4 @@
-project_id = "fpywvlhsfdtztkbncmdt"
+project_id = "arygtqrdpcdkwnuwsgmm"
 
 [functions.mpago-webhook]
 verify_jwt = false
