@@ -65,14 +65,14 @@ function Page() {
       <header className="border-b bg-white">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <h1 className="font-bold text-lg flex items-center gap-2"><ShoppingBag className="h-5 w-5" /> Meu carrinho</h1>
-          <Link to="/riomed/cotizar"><Button variant="ghost" size="sm">Solicitar cotización</Button></Link>
+          <Link to="/riomed/cotizar"><Button variant="ghost" size="sm">Continuar comprando</Button></Link>
         </div>
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-6">
         {items.length === 0 ? (
           <Card><CardContent className="py-16 text-center text-muted-foreground">
-            Seu carrinho está vazio. <Link to="/riomed/cotizar" className="text-primary underline ml-1">Solicitar cotización</Link>
+            Seu carrinho está vazio. <Link to="/riomed/cotizar" className="text-primary underline ml-1">Ver catálogo</Link>
           </CardContent></Card>
         ) : (
           <div className="grid md:grid-cols-3 gap-4">

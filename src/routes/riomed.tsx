@@ -33,7 +33,7 @@ export const Route = createFileRoute("/riomed")({
 type NavItem = { to: string; label: string; mega?: "catalog" | "rental" | "services" };
 const MAIN_NAV: NavItem[] = [
   { to: "/riomed", label: "Início" },
-  { to: "/riomed/cotizar", label: "Cotizar", mega: "catalog" },
+  { to: "/riomed/cotizar", label: "Catálogo", mega: "catalog" },
   { to: "/riomed/alquiler", label: "Locações", mega: "rental" },
   { to: "/riomed/servicio-tecnico", label: "Serviços", mega: "services" },
   { to: "/riomed/cotizar", label: "Comprar" },
@@ -211,7 +211,7 @@ function RiomedLayout() {
           <div>
             <div className="font-bold text-white mb-3">Plataforma</div>
             <ul className="space-y-1.5 text-white/70">
-              <li><Link to="/riomed/cotizar" className="hover:text-white">Cotizar</Link></li>
+              <li><Link to="/riomed/cotizar" className="hover:text-white">Catálogo</Link></li>
               <li><Link to="/riomed/alquiler" className="hover:text-white">Locações</Link></li>
               <li><Link to="/riomed/servicio-tecnico" className="hover:text-white">Serviços</Link></li>
               <li><Link to="/riomed/carrinho" className="hover:text-white">Carrinho</Link></li>
@@ -500,7 +500,7 @@ function CartWidget() {
               onClick={() => setOpen(false)}
               className="inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-semibold text-white bg-[color:var(--riomed-primary)] hover:brightness-110"
             >
-              Solicitar cotización
+              Ver catálogo
             </Link>
           </div>
         ) : (

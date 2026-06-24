@@ -118,7 +118,7 @@ function Page() {
             </div>
 
             <div className="flex gap-2 justify-center pt-2">
-              <Button variant="outline" onClick={() => navigate({ to: "/riomed/cotizar" })}>Solicitar otra cotización</Button>
+              <Button variant="outline" onClick={() => navigate({ to: "/riomed/cotizar" })}>Seguir comprando</Button>
               <Button onClick={() => navigate({ to: "/riomed" })}>Ir al inicio</Button>
             </div>
           </CardContent>
