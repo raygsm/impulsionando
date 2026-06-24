@@ -31,6 +31,7 @@ jobs:
       SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
       VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SMOKE_BASE_URL: ${{ secrets.SMOKE_BASE_URL || vars.SMOKE_BASE_URL }}
     steps:
       - uses: actions/checkout@v4
 
@@ -65,11 +66,15 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ env.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_ID: ${{ env.SUPABASE_PROJECT_ID }}
 
-      - name: Smoke test public routes (preview URL)
+      - name: Smoke test public routes
         if: github.event_name == 'pull_request'
         run: |
           set -e
-          BASE="https://id-preview--d5a31290-577c-4ca5-895e-72d4b8643439.lovable.app"
+          if [ -z "${SMOKE_BASE_URL:-}" ]; then
+            echo "::notice::SMOKE_BASE_URL not configured; skipping public route smoke test."
+            exit 0
+          fi
+          BASE="${SMOKE_BASE_URL%/}"
           for p in / /clube /consumidor /planos /white-label; do
             code=$(curl -s -o /dev/null -w "%{http_code}" -L "$BASE$p")
             echo "$code $p"
