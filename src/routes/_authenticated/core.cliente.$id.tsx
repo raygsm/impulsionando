@@ -19,7 +19,7 @@ import { CopySettingsDialog } from "@/components/core/CopySettingsDialog";
 import { useImpersonation } from "@/hooks/use-impersonation";
 import { useNavigate } from "@tanstack/react-router";
 import { enterAsClient } from "@/lib/governance.functions";
-import { CheckCircle2, Circle, Building2, Download, RefreshCw, Trash2, Eye } from "lucide-react";
+import { CheckCircle2, Circle, Building2, Download, RefreshCw, Trash2, Eye, ExternalLink, Route as RouteIcon } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/core/cliente/$id")({
@@ -36,6 +36,23 @@ const CHECKLIST_LABELS: Record<string, string> = {
   modules_activated: "Módulos ativados",
   client_released: "Cliente liberado",
 };
+
+type TenantOperationRoute = {
+  label: string;
+  href: string;
+  group: string;
+};
+
+const RIOMED_OPERATION_ROUTES: TenantOperationRoute[] = [
+  { label: "Painel RioMed", href: "/admin/clientes/riomed", group: "Resumo" },
+  { label: "Dashboard master", href: "/admin/clientes/riomed/master-dashboard", group: "Resumo" },
+  { label: "CRM comercial", href: "/admin/clientes/riomed/crm", group: "Comercial" },
+  { label: "Produtos", href: "/admin/clientes/riomed/produtos", group: "Operacao" },
+  { label: "Pedidos", href: "/admin/clientes/riomed/pedidos", group: "Operacao" },
+  { label: "Financeiro", href: "/admin/clientes/riomed/financeiro", group: "Financeiro" },
+  { label: "N8N", href: "/admin/clientes/riomed/n8n", group: "Automacoes" },
+  { label: "Governanca", href: "/admin/clientes/riomed/governanca", group: "Governanca" },
+];
 
 function ClientePage() {
   const { id } = Route.useParams();
@@ -64,6 +81,7 @@ function ClientePage() {
   if (!data?.company) return <Card className="p-6">Cliente não encontrado.</Card>;
 
   const c = data.company;
+  const tenantSlug = normalizeTenantSlug(c.subdomain ?? c.slug ?? c.public_slug ?? c.name);
 
   return (
     <div className="space-y-4">
@@ -100,6 +118,8 @@ function ClientePage() {
           )}
         </div>
       </Card>
+
+      <TenantRoutesPanel companyId={id} tenantSlug={tenantSlug} />
 
       <Tabs defaultValue="pendencias">
         <TabsList className="flex-wrap h-auto">
@@ -235,6 +255,73 @@ function ClientePage() {
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+function normalizeTenantSlug(value: unknown) {
+  const raw = String(value ?? "").trim().toLowerCase();
+  if (!raw) return "";
+  return raw.split(".")[0].replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+}
+
+function TenantRoutesPanel({ companyId, tenantSlug }: { companyId: string; tenantSlug: string }) {
+  const isRioMed = tenantSlug === "riomed";
+  const routes: TenantOperationRoute[] = isRioMed
+    ? RIOMED_OPERATION_ROUTES
+    : [
+        { label: "Cliente 360", href: `/core/cliente/${companyId}`, group: "Core" },
+        { label: "Paginas do projeto", href: `/core/cliente/${companyId}/paginas`, group: "Core" },
+        { label: "Instalar modulo", href: "/core/instalar-modulo", group: "Core" },
+        { label: "Parametros globais", href: "/core/parametros", group: "Core" },
+      ];
+
+  const grouped = routes.reduce<Record<string, TenantOperationRoute[]>>((acc, route) => {
+    acc[route.group] = acc[route.group] ?? [];
+    acc[route.group].push(route);
+    return acc;
+  }, {});
+
+  return (
+    <Card className="p-4">
+      <div className="flex items-start gap-3">
+        <div className="mt-0.5 rounded-md bg-primary/10 p-2 text-primary">
+          <RouteIcon className="h-4 w-4" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="font-semibold">Rotas operacionais do tenant</h2>
+            <Badge variant="outline">{tenantSlug || "sem slug"}</Badge>
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Use este mapa para operar o cliente a partir do Core. Rotas legadas ficam listadas aqui para evitar atalhos soltos fora do admin mestre.
+          </p>
+          <div className="mt-3 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+            {Object.entries(grouped).map(([group, items]) => (
+              <div key={group} className="rounded-md border p-3">
+                <div className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">{group}</div>
+                <div className="space-y-1.5">
+                  {items.map((item) => (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      className="flex items-center justify-between gap-2 rounded px-2 py-1.5 text-sm hover:bg-muted"
+                    >
+                      <span className="truncate">{item.label}</span>
+                      <ExternalLink className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          {!isRioMed && (
+            <p className="mt-3 text-xs text-muted-foreground">
+              Para expor rotas operacionais especificas, registre o modulo no catalogo do Core e envolva a tela com TenantModuleShell.
+            </p>
+          )}
+        </div>
+      </div>
+    </Card>
   );
 }
 
