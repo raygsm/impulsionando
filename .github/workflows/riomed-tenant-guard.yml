@@ -1,0 +1,60 @@
+name: riomed-tenant-guard
+
+# Enforces mem://core/riomed-tenant-policy:
+# Impulsionando = core/master, RioMed = tenant. Direct edits to
+# riomed.* routes / riomed-*.functions.ts / riomed_* migrations
+# must happen in the parallel Rio Med project, NOT in this core repo.
+#
+# PRs that touch those files fail this check unless the commit message
+# (or PR title) carries the override token [riomed-core-ok], which is
+# reserved for legitimate cases (core promotion, redirect preservation,
+# import cleanup) and must be reviewed by a core maintainer.
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  guard:
+    name: Block direct RioMed edits in core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect RioMed file changes
+        id: detect
+        run: |
+          set -e
+          base="${{ github.event.pull_request.base.sha }}"
+          head="${{ github.event.pull_request.head.sha }}"
+          changed=$(git diff --name-only "$base" "$head" || true)
+          echo "Changed files:"
+          echo "$changed"
+          riomed=$(echo "$changed" | grep -E '(^|/)(riomed[._-]|.*riomed_)' || true)
+          if [ -n "$riomed" ]; then
+            echo "riomed_files<<EOF" >> "$GITHUB_OUTPUT"
+            echo "$riomed" >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Enforce policy
+        if: steps.detect.outputs.riomed_files != ''
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if echo "$PR_TITLE $PR_BODY" | grep -q '\[riomed-core-ok\]'; then
+            echo "::notice::Override token [riomed-core-ok] present — allowing RioMed edits in core."
+            exit 0
+          fi
+          echo "::error::Direct RioMed edits are not allowed in the Impulsionando core."
+          echo "Policy: mem://core/riomed-tenant-policy — RioMed is a tenant, edits live in the parallel Rio Med project."
+          echo ""
+          echo "Files flagged:"
+          echo "${{ steps.detect.outputs.riomed_files }}"
+          echo ""
+          echo "If this PR is a legitimate core change (promote-to-core, redirect, import cleanup),"
+          echo "add the token [riomed-core-ok] to the PR title or body and re-run."
+          exit 1

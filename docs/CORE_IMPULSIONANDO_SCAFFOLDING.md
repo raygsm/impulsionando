@@ -61,3 +61,27 @@ Assuma o core como dado. Pergunte APENAS o que é específico do cliente:
 Esta regra é **global e retroativa**: qualquer refatoração de projeto existente
 deve migrar para esta camada-mãe assim que houver oportunidade. Qualquer PR
 que crie projeto/cliente novo fora deste padrão deve ser rejeitado.
+
+## 6. Componentes Core promovidos (API pública para tenants)
+
+Componentes/utilitários genéricos consumidos por tenants via import. **Não
+duplicar no tenant** — reusar daqui. Promoções vêm sempre de um tenant real
+(ex.: Rio Med) depois de provar valor.
+
+| Import | Origem | Uso |
+|---|---|---|
+| `@/components/core/ScrollSpyNav` | Rio Med `SectionScrollNav` | Sub-nav in-page com highlight via IntersectionObserver. Props: `sections`, `topOffsetClass?`, `activeColorVar?`. Tenant-agnostic. |
+| `@/components/core/DataErrorBanner` | Rio Med `ProductsErrorBanner` | Banner de erro de carregamento com retry. Props: `title?`, `message?`, `onRetry`, `isRetrying?`. Reusável em catálogo, listagens, dashboards. |
+| `@/lib/core-telemetry` | Rio Med `riomed-telemetry` | Buffer client-side de eventos (stage timings, erros, stack) com export JSON/CSV. API: `recordTelemetry`, `withTelemetry`, `subscribeTelemetry`, `clearTelemetry`. |
+
+**Regra:** ao notar que um componente `riomed-*` / `chrismed-*` / `marocas-*`
+é genérico, promover para `@/components/core/*` ou `@/lib/core-*` e ajustar
+o tenant para importar daqui. **Não apagar arquivos do tenant em lote** —
+seguir `mem://core/riomed-tenant-policy`.
+
+## 7. Guard-rail de CI
+
+`.github/workflows/riomed-tenant-guard.yml` bloqueia PRs que editem arquivos
+`riomed.*` / `riomed-*.functions.ts` / migrações `riomed_*` diretamente neste
+core. Override legítimo (promoção/redirect/cleanup) exige token
+`[riomed-core-ok]` no título ou corpo do PR.

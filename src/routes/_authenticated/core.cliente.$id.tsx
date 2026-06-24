@@ -81,7 +81,7 @@ function ClientePage() {
   if (!data?.company) return <Card className="p-6">Cliente não encontrado.</Card>;
 
   const c = data.company;
-  const tenantSlug = normalizeTenantSlug(c.subdomain ?? c.slug ?? c.public_slug ?? c.name);
+  const tenantSlug = normalizeTenantSlug(c.subdomain ?? c.public_slug ?? c.name);
 
   return (
     <div className="space-y-4">
