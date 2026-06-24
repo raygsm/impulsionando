@@ -24,7 +24,7 @@ PGDATABASE=postgres
 Para o Core Impulsionando, o `<project-ref>` esperado pelo repositorio e:
 
 ```text
-fpywvlhsfdtztkbncmdt
+arygtqrdpcdkwnuwsgmm
 ```
 
 Nao use:

@@ -116,7 +116,7 @@ Deno.serve(async (req) => {
   }
 
   // 5. Webhook URL esperada
-  const webhookUrl = `https://fpywvlhsfdtztkbncmdt.supabase.co/functions/v1/mpago-webhook?company_id=${companyId}`;
+  const webhookUrl = `${Deno.env.get("SUPABASE_URL")!.replace(".supabase.co", ".functions.supabase.co")}/mpago-webhook?company_id=${companyId}`;
   const { data: lastWh } = await sb
     .from("mpago_webhook_events")
     .select("created_at,event_type")

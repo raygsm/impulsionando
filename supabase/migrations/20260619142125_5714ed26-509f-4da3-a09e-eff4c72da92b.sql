@@ -15,7 +15,7 @@ SELECT cron.schedule(
   '* * * * *',
   $$
   SELECT net.http_post(
-    url := 'https://fpywvlhsfdtztkbncmdt.supabase.co/functions/v1/outbox-dispatcher',
+    url := 'https://arygtqrdpcdkwnuwsgmm.supabase.co/functions/v1/outbox-dispatcher',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
       'x-outbox-secret', (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'OUTBOX_PROCESS_SECRET' LIMIT 1)
