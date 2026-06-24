@@ -3,6 +3,10 @@ name: Apply Supabase Migrations
 on:
   workflow_dispatch:
 
+concurrency:
+  group: apply-supabase-migrations
+  cancel-in-progress: false
+
 jobs:
   apply:
     name: Apply

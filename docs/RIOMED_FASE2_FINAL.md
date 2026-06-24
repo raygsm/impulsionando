@@ -51,12 +51,12 @@ Todos com verificação HMAC `x-impulsionando-signature` (segredo `IMPULSIONANDO
 
 > Endpoints que ainda não existem devem ser criados sob `src/routes/api/public/riomed/*.ts` com validação Zod + HMAC. Peça "criar endpoint público X" quando necessário.
 
-## Migração de dados (Supabase externo `arygtqrpdcdkwnuwsgmm`)
+## Migração de dados (Supabase externo `arygtqrdpcdkwnuwsgmm`)
 
 **Pendente.** A chave fornecida é apenas `publishable/anon` — não permite leitura das tabelas privadas (RLS bloqueia).
 
 Para destravar, fornecer **uma** das opções:
-- Connection string Postgres (`postgresql://postgres:<senha>@db.arygtqrpdcdkwnuwsgmm.supabase.co:5432/postgres`)
+- Connection string Postgres via Transaction pooler IPv4 (`postgresql://postgres.arygtqrdpcdkwnuwsgmm:<senha>@<host>.pooler.supabase.com:6543/postgres`)
 - Service role key (`sb_secret_…` ou JWT `service_role`)
 
 Assim que disponível, ETL roda em batch para `riomed_*` mapeando por `company_id = 5bdcdef4…`.
