@@ -33,10 +33,10 @@ export const Route = createFileRoute("/riomed")({
 type NavItem = { to: string; label: string; mega?: "catalog" | "rental" | "services" };
 const MAIN_NAV: NavItem[] = [
   { to: "/riomed", label: "Início" },
-  { to: "/riomed/productos", label: "Catálogo", mega: "catalog" },
+  { to: "/riomed/cotizar", label: "Catálogo", mega: "catalog" },
   { to: "/riomed/alquiler", label: "Locações", mega: "rental" },
   { to: "/riomed/servicio-tecnico", label: "Serviços", mega: "services" },
-  { to: "/riomed/productos", label: "Comprar" },
+  { to: "/riomed/cotizar", label: "Comprar" },
 ];
 
 function RiomedLayout() {
@@ -211,7 +211,7 @@ function RiomedLayout() {
           <div>
             <div className="font-bold text-white mb-3">Plataforma</div>
             <ul className="space-y-1.5 text-white/70">
-              <li><Link to="/riomed/productos" className="hover:text-white">Catálogo</Link></li>
+              <li><Link to="/riomed/cotizar" className="hover:text-white">Catálogo</Link></li>
               <li><Link to="/riomed/alquiler" className="hover:text-white">Locações</Link></li>
               <li><Link to="/riomed/servicio-tecnico" className="hover:text-white">Serviços</Link></li>
               <li><Link to="/riomed/carrinho" className="hover:text-white">Carrinho</Link></li>
@@ -284,21 +284,21 @@ const MEGA_SECTIONS: Record<
     {
       title: "Equipamentos",
       items: [
-        { label: "Monitores multiparam.", to: "/riomed/productos", icon: Activity },
-        { label: "Ventiladores", to: "/riomed/productos", icon: HeartPulse },
-        { label: "Desfibriladores", to: "/riomed/productos", icon: HeartPulse },
-        { label: "Bombas de infusão", to: "/riomed/productos", icon: Syringe },
-        { label: "Camas hospitalares", to: "/riomed/productos", icon: Bed },
+        { label: "Monitores multiparam.", to: "/riomed/cotizar", icon: Activity },
+        { label: "Ventiladores", to: "/riomed/cotizar", icon: HeartPulse },
+        { label: "Desfibriladores", to: "/riomed/cotizar", icon: HeartPulse },
+        { label: "Bombas de infusão", to: "/riomed/cotizar", icon: Syringe },
+        { label: "Camas hospitalares", to: "/riomed/cotizar", icon: Bed },
       ],
     },
     {
       title: "Diagnóstico & Insumos",
       items: [
-        { label: "Eletrocardiógrafos", to: "/riomed/productos", icon: Activity },
-        { label: "Oxímetros", to: "/riomed/productos", icon: Activity },
-        { label: "Autoclaves", to: "/riomed/productos", icon: Wrench },
-        { label: "Insumos e acessórios", to: "/riomed/productos", icon: Stethoscope },
-        { label: "Novos e usados", to: "/riomed/productos", icon: Stethoscope },
+        { label: "Eletrocardiógrafos", to: "/riomed/cotizar", icon: Activity },
+        { label: "Oxímetros", to: "/riomed/cotizar", icon: Activity },
+        { label: "Autoclaves", to: "/riomed/cotizar", icon: Wrench },
+        { label: "Insumos e acessórios", to: "/riomed/cotizar", icon: Stethoscope },
+        { label: "Novos e usados", to: "/riomed/cotizar", icon: Stethoscope },
       ],
     },
   ],
@@ -496,7 +496,7 @@ function CartWidget() {
             <ShoppingCart className="h-10 w-10 mx-auto text-slate-300" />
             <div className="text-sm text-slate-600">Tu carrito está vacío.</div>
             <Link
-              to="/riomed/productos"
+              to="/riomed/cotizar"
               onClick={() => setOpen(false)}
               className="inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-semibold text-white bg-[color:var(--riomed-primary)] hover:brightness-110"
             >

@@ -75,7 +75,7 @@ function SoportePage() {
           </div>
           <div className="flex gap-3 justify-center flex-wrap">
             <Link to="/riomed" className="rounded-full border px-5 py-2.5 font-medium">Volver al inicio</Link>
-            <Link to="/riomed/productos" className="rounded-full px-5 py-2.5 text-white font-semibold" style={{ background: "var(--riomed-primary, #0B3D74)" }}>Ver catálogo</Link>
+            <Link to="/riomed/cotizar" className="rounded-full px-5 py-2.5 text-white font-semibold" style={{ background: "var(--riomed-primary, #0B3D74)" }}>Ver catálogo</Link>
           </div>
         </div>
       </div>

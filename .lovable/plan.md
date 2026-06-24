@@ -1,51 +1,34 @@
-# Módulo CORE — Agenda Inteligente / Plantões / Pega Horário — ✅ ENTREGUE
+# Plano Mestre Lovable - Impulsionando Core
 
-Status: **completo e publicado em produção** (https://impulsionando.com.br).
+Status: este repositorio deve ser mantido como **Impulsionando Core**, o sistema mae/master. Todo cliente, vertical, marca ou projeto especifico deve entrar como tenant/projeto administrado pelo core.
 
-## O que foi entregue
+## Prioridade permanente
 
-### Schema (migração única)
-14 tabelas com `company_id`, RLS por tenant, GRANTs corretos:
-`agenda_locations`, `agenda_rooms`, `agenda_shifts`, `agenda_oncall_shifts`,
-`agenda_professional_eligibility`, `agenda_professional_availability`,
-`agenda_professional_terms`, `agenda_rules` (JSONB versionado),
-`agenda_open_slots`, `agenda_slot_offers`, `agenda_no_show_events`,
-`agenda_penalties`, `agenda_settings`, `agenda_audit_log`.
-RPC atômica `agenda_claim_open_slot` (FOR UPDATE SKIP LOCKED).
+1. Preservar e fortalecer `/core` como centro de comando global.
+2. Garantir que qualquer cliente/projeto seja operavel pelo Admin Global da Impulsionando.
+3. Manter RioMed e demais marcas como tenants, nao como identidade principal do produto.
+4. Reaproveitar modulos, templates, prompts, permissoes, billing, auditoria e integracoes globais.
+5. Corrigir qualquer criacao standalone para o padrao multi-tenant com `company_id`, RLS e auditoria.
 
-### Server functions (`src/lib/agenda-core.functions.ts`)
-CRUD completo, `openSlot`, `claimSlot`, `declineSlotOffer`,
-`cancelAppointment`, `registerNoShow`, `confirmAttendance`, `startService`,
-`finishService`, `dashboardMetrics`, `listMyOpenOffers`,
-`listMyAppointments`, `installAgendaModule`.
+## Contrato obrigatorio para novas alteracoes
 
-### UIs
-- `_authenticated/agenda.gestor.tsx` — dashboard + abertura de vagas.
-- `_authenticated/agenda.profissional.tsx` — Pega-Horário com realtime.
-- `_authenticated/agenda.cliente.tsx` — autoatendimento.
-- `_authenticated/core.modulos.agenda.tsx` — edição das regras JSONB.
+- Auth, RBAC, billing, menu, auditoria, integracoes e templates pertencem ao core.
+- Dados especificos de cliente usam `company_id`; dados especificos de projeto usam tambem `project_id` ou metadados equivalentes.
+- Toda acao sensivel passa por permissao backend/banco e gera `audit_logs`.
+- Toda nova tela admin deve indicar claramente o contexto: Global, Cliente ou Projeto.
+- Prompts de IA devem reforcar que o core e a fonte da verdade e que clientes sao filhos administraveis.
 
-### Catálogo & instalação
-- Linha `agenda-inteligente` em `core_module_catalog`.
-- `InstallModuleDialog` chama `installAgendaModule` ao instalar — semeia
-  regras default (no-show, cancelamento, distribuição em ondas, lembretes,
-  pagamento) e settings.
+## Areas que o Lovable deve revisar antes de novas entregas
 
-### Permissões
-11 entradas `agenda.*` em `permissions`, distribuídas a:
-Super Admin / Admin Impulsionando / Suporte / Gestor / Admin Unidade (full),
-Profissional (claim/decline/oncall/metrics/no_show.read),
-Recepção (slot.open/no_show.register/no_show.read/metrics.read).
+- `.lovable/master-prompt.md`
+- `docs/CORE_IMPULSIONANDO_SCAFFOLDING.md`
+- `docs/FABRICA_PROJETOS.md`
+- `src/lib/ai-generator.functions.ts`
+- `src/lib/factory.functions.ts`
+- `src/routes/_authenticated/core.*`
+- `src/components/app/nav-config.tsx`
+- `supabase/migrations/*` relacionadas a RBAC, RLS, `ai_prompt_library`, `companies`, `company_modules`, `audit_logs`
 
-### Automação
-- Endpoint `/api/public/cron/agenda-tick`.
-- Cron `agenda-tick-every-minute` ativo (expira ofertas, promove próxima
-  onda de distribuição).
+## Regra para RioMed
 
-### Menu
-`/agenda/gestor`, `/agenda/profissional`, `/agenda/cliente` no nav lateral
-com perms por audience.
-
-## Próximos módulos sugeridos
-Financeiro · Estoque · Contratos · PWA do profissional · Templates de
-WhatsApp para o módulo Agenda.
+RioMed e um tenant medico-hospitalar dentro da Impulsionando. Manter rotas, funcoes e workflows RioMed quando forem especificos do cliente, mas nunca promover RioMed a nome do produto, repositorio, app ou sistema mae.
