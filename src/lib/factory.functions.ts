@@ -218,6 +218,12 @@ const CreateProjectSchema = z.object({
   confirm: z.literal(true),
 });
 
+function companyKindForEnvironment(environment: "demo" | "teste" | "real") {
+  if (environment === "demo") return "demo";
+  if (environment === "teste") return "sandbox";
+  return "real";
+}
+
 export const createProjectFromFactory = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => CreateProjectSchema.parse(d))
@@ -252,6 +258,10 @@ export const createProjectFromFactory = createServerFn({ method: "POST" })
       domain: data.project.domain || null,
       subdomain: data.project.subdomain || null,
       status: data.project.status || "active",
+      company_kind: companyKindForEnvironment(data.project.environment),
+      is_demo: data.project.environment === "demo",
+      is_master: false,
+      is_active: true,
     };
     if (companyId) {
       const { error } = await supabase.from("companies").update(companyPayload as never).eq("id", companyId);
@@ -271,6 +281,13 @@ export const createProjectFromFactory = createServerFn({ method: "POST" })
     push("ambiente_definido", true, data.project.environment);
     if (data.project.niche) push("nicho_escolhido", true, data.project.niche);
     push("template_escolhido", true, data.model.kind);
+
+    try {
+      await supabase.rpc("provision_tenant_identity", { _company_id: companyId });
+      push("identidade_tenant_criada", true);
+    } catch (e) {
+      push("identidade_tenant_falhou", false, (e as Error).message);
+    }
 
     // 2) Generation row for log/timeline (reuses existing table)
     const { data: gen } = await supabase

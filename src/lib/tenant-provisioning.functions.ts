@@ -1,5 +1,6 @@
-// Onboarding self-service de novos tenants do core Impulsionando.
-// Gate: somente admin do core.
+// Onboarding self-service legado de novos tenants do core Impulsionando.
+// O caminho canonico e a Fabrica de Projetos; este fluxo fica compatibilizado
+// com o schema atual para telas antigas nao criarem tenants invalidos.
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
@@ -7,6 +8,17 @@ import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
 async function assertCoreAdmin(ctx: { supabase: any; userId: string }) {
   const { data: isAdmin } = await ctx.supabase.rpc('has_role', { _user_id: ctx.userId, _role: 'admin' })
   if (!isAdmin) throw new Error('Forbidden: requer admin do core')
+}
+
+function tenantDefaults(countryCode?: 'BR' | 'BO') {
+  const isBolivia = countryCode === 'BO'
+  return {
+    country_code: countryCode ?? 'BR',
+    locale: isBolivia ? 'es-BO' : 'pt-BR',
+    currency_code: isBolivia ? 'BOB' : 'BRL',
+    phone_country_code: isBolivia ? '+591' : '+55',
+    timezone: isBolivia ? 'America/La_Paz' : 'America/Sao_Paulo',
+  }
 }
 
 const ProvisionSchema = z.object({
@@ -59,7 +71,9 @@ export const provisionTenant = createServerFn({ method: 'POST' })
 
 
 
-    // 1. Cria empresa tenant
+    const defaults = tenantDefaults(data.empresa.country_code)
+
+    // 1. Cria empresa tenant com company_kind valido no schema atual.
     const { data: company, error: cErr } = await supabaseAdmin
       .from('companies')
       .insert({
@@ -74,16 +88,17 @@ export const provisionTenant = createServerFn({ method: 'POST' })
         primary_color: data.branding?.primary_color ?? null,
         secondary_color: data.branding?.secondary_color ?? null,
         logo_url: data.branding?.logo_url ?? null,
-        country_code: data.empresa.country_code ?? 'BR',
-        locale: data.empresa.country_code === 'BO' ? 'es-BO' : 'pt-BR',
-        currency_code: data.empresa.country_code === 'BO' ? 'BOB' : 'BRL',
-        phone_country_code: data.empresa.country_code === 'BO' ? '+591' : '+55',
-        timezone: data.empresa.country_code === 'BO' ? 'America/La_Paz' : 'America/Sao_Paulo',
+        country_code: defaults.country_code,
+        locale: defaults.locale,
+        currency_code: defaults.currency_code,
+        phone_country_code: defaults.phone_country_code,
+        timezone: defaults.timezone,
         is_master: false,
         is_active: true,
         is_demo: false,
         status: 'active',
-        company_kind: 'tenant',
+        company_kind: 'real',
+        environment: 'real',
       } as never)
       .select('id, name')
       .single()
@@ -91,14 +106,32 @@ export const provisionTenant = createServerFn({ method: 'POST' })
     if (cErr || !company) throw new Error(`Falha ao criar empresa: ${cErr?.message ?? 'desconhecido'}`)
     const companyId = (company as any).id as string
 
+    await supabaseAdmin.rpc('provision_tenant_identity', { _company_id: companyId })
+
     // 2. Vincula plano (se informado)
     if (data.plano?.plan_id) {
-      await supabaseAdmin.from('core_company_plans').insert({
-        company_id: companyId,
-        plan_id: data.plano.plan_id,
-        status: 'active',
-        started_at: new Date().toISOString(),
-      } as never)
+      const { data: plan } = await supabaseAdmin
+        .from('billing_plans')
+        .select('id, recurring_amount, setup_fee, due_day')
+        .eq('id', data.plano.plan_id)
+        .maybeSingle()
+
+      if (plan) {
+        const today = new Date()
+        const dueDay = Number(plan.due_day ?? 5)
+        const dueDate = new Date(today.getFullYear(), today.getMonth() + 1, dueDay)
+
+        await supabaseAdmin.from('billing_contracts').upsert({
+          company_id: companyId,
+          plan_id: plan.id,
+          start_date: today.toISOString().slice(0, 10),
+          due_day: dueDay,
+          next_due_date: dueDate.toISOString().slice(0, 10),
+          recurring_amount: Number(plan.recurring_amount ?? 0),
+          setup_amount: Number(plan.setup_fee ?? 0),
+          status: 'active',
+        } as never, { onConflict: 'company_id' })
+      }
     }
 
     // 3. Resolve usuário admin: existente ou convite
@@ -122,13 +155,23 @@ export const provisionTenant = createServerFn({ method: 'POST' })
 
     // 4. Vincula admin à empresa
     if (adminUserId) {
-      await supabaseAdmin.from('user_profiles').insert({
-        user_id: adminUserId,
-        company_id: companyId,
-        display_name: data.admin.display_name,
-        email: data.admin.email,
-        is_active: true,
-      } as never)
+      const { data: gestor } = await supabaseAdmin
+        .from('profiles')
+        .select('id')
+        .eq('slug', 'gestor-empresa')
+        .maybeSingle()
+
+      if (gestor?.id) {
+        await supabaseAdmin.from('user_profiles').upsert({
+          user_id: adminUserId,
+          company_id: companyId,
+          profile_id: gestor.id,
+          display_name: data.admin.display_name,
+          email: data.admin.email,
+          is_active: true,
+        } as never, { onConflict: 'user_id,company_id,profile_id' })
+      }
+
       await supabaseAdmin.from('user_roles').insert({
         user_id: adminUserId,
         role: 'admin',
@@ -169,7 +212,8 @@ export const listTenantOnboarding = createServerFn({ method: 'GET' })
     const { data: tenants } = await supabaseAdmin
       .from('companies')
       .select('id, name, subdomain, email, status, is_active, created_at, company_kind')
-      .eq('company_kind', 'tenant')
+      .eq('is_master', false)
+      .in('company_kind', ['real', 'demo', 'sandbox'])
       .order('created_at', { ascending: false })
       .limit(200)
     const ids = (tenants ?? []).map((t: any) => t.id)
