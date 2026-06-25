@@ -90,6 +90,43 @@ const InstallSchema = z.object({
   slug: z.string().min(1).max(100),
 });
 
+const RollbackSchema = z.object({
+  companyId: z.string().uuid(),
+  slug: z.string().min(1).max(100),
+  version: z.string().min(1).max(50).regex(/^[a-zA-Z0-9.\-_]+$/),
+  reason: z.string().min(3).max(500),
+});
+
+export function moduleMonthlyPriceCents(module: { monthly_price?: number | string | null; base_price_cents?: number | string | null }) {
+  if (module.base_price_cents != null && Number.isFinite(Number(module.base_price_cents))) {
+    return Math.max(0, Math.round(Number(module.base_price_cents)));
+  }
+  return Math.max(0, Math.round(Number(module.monthly_price ?? 0) * 100));
+}
+
+export const listModuleMarketplacePricing = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase } = context;
+    const { data: modules, error } = await supabase
+      .from("modules")
+      .select(
+        "id, slug, name, category, description, status_tecnico, status_comercial, monthly_price, setup_fee, min_contract_days, min_installments, show_on_site, show_in_checkout, show_in_plans, show_price, allow_standalone, allow_combo, allow_white_label, allow_trial, current_version, readiness_status",
+      )
+      .eq("is_active", true)
+      .order("sort_order");
+    if (error) throw new Error(error.message);
+
+    return {
+      modules: (modules ?? []).map((m: any) => ({
+        ...m,
+        monthly_price_cents: moduleMonthlyPriceCents(m),
+        setup_fee_cents: Math.max(0, Math.round(Number(m.setup_fee ?? 0) * 100)),
+        is_contractable: m.status_comercial === "disponivel_contratacao" && m.show_in_checkout !== false,
+      })),
+    };
+  });
+
 export const installModule = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => InstallSchema.parse(d))
@@ -196,6 +233,69 @@ export const updateClientModuleToLatest = createServerFn({ method: "POST" })
       metadata: { company_id: data.companyId, slug: m.slug, to_version: m.current_version },
     } as never);
     return { ok: true, version: m.current_version };
+  });
+
+export const rollbackClientModuleVersion = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => RollbackSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: m } = await supabase
+      .from("modules")
+      .select("id, slug, current_version")
+      .eq("slug", data.slug)
+      .maybeSingle();
+    if (!m) throw new Error("MÃ³dulo nÃ£o encontrado");
+
+    const { data: targetVersion } = await supabase
+      .from("module_versions")
+      .select("id, version")
+      .eq("module_id", m.id)
+      .eq("version", data.version)
+      .maybeSingle();
+    if (!targetVersion) {
+      throw new Error(`VersÃ£o ${data.version} nÃ£o existe no histÃ³rico do mÃ³dulo ${m.slug}.`);
+    }
+
+    const { data: currentInstall } = await supabase
+      .from("company_modules")
+      .select("installed_version, is_enabled")
+      .eq("company_id", data.companyId)
+      .eq("module_id", m.id)
+      .maybeSingle();
+    if (!currentInstall?.is_enabled) {
+      throw new Error(`MÃ³dulo ${m.slug} nÃ£o estÃ¡ ativo para este cliente.`);
+    }
+
+    const { error } = await supabase
+      .from("company_modules")
+      .update({
+        installed_version: data.version,
+        installed_at: new Date().toISOString(),
+      })
+      .eq("company_id", data.companyId)
+      .eq("module_id", m.id);
+    if (error) throw new Error(error.message);
+
+    await supabase.from("audit_logs").insert({
+      action: "module.rollback",
+      entity_type: "company_modules",
+      entity_id: m.id,
+      before: {
+        company_id: data.companyId,
+        slug: m.slug,
+        installed_version: currentInstall.installed_version,
+        current_version: m.current_version,
+      } as never,
+      after: {
+        company_id: data.companyId,
+        slug: m.slug,
+        installed_version: data.version,
+        reason: data.reason,
+      } as never,
+    } as never);
+
+    return { ok: true, version: data.version, previousVersion: currentInstall.installed_version ?? null };
   });
 
 export const getClientModules = createServerFn({ method: "GET" })
