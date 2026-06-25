@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WmpRouteImport } from './routes/wmp'
 import { Route as WhiteLabelRouteImport } from './routes/white-label'
 import { Route as VitrineRouteImport } from './routes/vitrine'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
@@ -51,6 +52,7 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as AbrirTicketRouteImport } from './routes/abrir-ticket'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as WmpIndexRouteImport } from './routes/wmp.index'
 import { Route as TrabalheConoscoIndexRouteImport } from './routes/trabalhe-conosco.index'
 import { Route as ShowroomIndexRouteImport } from './routes/showroom.index'
 import { Route as PacienteIndexRouteImport } from './routes/paciente.index'
@@ -58,6 +60,8 @@ import { Route as NichosIndexRouteImport } from './routes/nichos.index'
 import { Route as ModulosIndexRouteImport } from './routes/modulos.index'
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
 import { Route as CheckoutIndexRouteImport } from './routes/checkout.index'
+import { Route as WmpParceiroRouteImport } from './routes/wmp.parceiro'
+import { Route as WmpOrcamentoRouteImport } from './routes/wmp.orcamento'
 import { Route as WhiteLabelLoginRouteImport } from './routes/white-label.login'
 import { Route as VitrineSlugRouteImport } from './routes/vitrine.$slug'
 import { Route as TrialCadastroRouteImport } from './routes/trial_.cadastro'
@@ -221,6 +225,8 @@ import { Route as AuthenticatedCockpitsIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedBiIndexRouteImport } from './routes/_authenticated/bi.index'
 import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenticated/agenda.index'
 import { Route as AuthenticatedAffiliatesIndexRouteImport } from './routes/_authenticated/affiliates.index'
+import { Route as WmpParceiroCadastroRouteImport } from './routes/wmp.parceiro.cadastro'
+import { Route as WmpObrigadoTipoRouteImport } from './routes/wmp.obrigado.$tipo'
 import { Route as RiomedVendedoresCadastroRouteImport } from './routes/riomed.vendedores.cadastro'
 import { Route as RiomedVSlugRouteImport } from './routes/riomed.v.$slug'
 import { Route as RiomedTecnicoCadastroRouteImport } from './routes/riomed.tecnico.cadastro'
@@ -681,6 +687,11 @@ import { Route as AuthenticatedAdminClientesSlugDominioRouteImport } from './rou
 import { Route as AuthenticatedCoreClienteIdPaginasPageIdRouteImport } from './routes/_authenticated/core.cliente.$id.paginas.$pageId'
 import { Route as AuthenticatedCoreClienteIdModuloSlugConfigurarRouteImport } from './routes/_authenticated/core.cliente.$id.modulo.$slug.configurar'
 
+const WmpRoute = WmpRouteImport.update({
+  id: '/wmp',
+  path: '/wmp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WhiteLabelRoute = WhiteLabelRouteImport.update({
   id: '/white-label',
   path: '/white-label',
@@ -890,6 +901,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WmpIndexRoute = WmpIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => WmpRoute,
+} as any)
 const TrabalheConoscoIndexRoute = TrabalheConoscoIndexRouteImport.update({
   id: '/trabalhe-conosco/',
   path: '/trabalhe-conosco/',
@@ -924,6 +940,16 @@ const CheckoutIndexRoute = CheckoutIndexRouteImport.update({
   id: '/checkout/',
   path: '/checkout/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const WmpParceiroRoute = WmpParceiroRouteImport.update({
+  id: '/parceiro',
+  path: '/parceiro',
+  getParentRoute: () => WmpRoute,
+} as any)
+const WmpOrcamentoRoute = WmpOrcamentoRouteImport.update({
+  id: '/orcamento',
+  path: '/orcamento',
+  getParentRoute: () => WmpRoute,
 } as any)
 const WhiteLabelLoginRoute = WhiteLabelLoginRouteImport.update({
   id: '/login',
@@ -1765,6 +1791,16 @@ const AuthenticatedAffiliatesIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedAffiliatesRoute,
   } as any)
+const WmpParceiroCadastroRoute = WmpParceiroCadastroRouteImport.update({
+  id: '/cadastro',
+  path: '/cadastro',
+  getParentRoute: () => WmpParceiroRoute,
+} as any)
+const WmpObrigadoTipoRoute = WmpObrigadoTipoRouteImport.update({
+  id: '/obrigado/$tipo',
+  path: '/obrigado/$tipo',
+  getParentRoute: () => WmpRoute,
+} as any)
 const RiomedVendedoresCadastroRoute =
   RiomedVendedoresCadastroRouteImport.update({
     id: '/vendedores/cadastro',
@@ -4511,6 +4547,7 @@ export interface FileRoutesByFullPath {
   '/unsubscribe': typeof UnsubscribeRoute
   '/vitrine': typeof VitrineRouteWithChildren
   '/white-label': typeof WhiteLabelRouteWithChildren
+  '/wmp': typeof WmpRouteWithChildren
   '/access-profiles': typeof AuthenticatedAccessProfilesRouteWithChildren
   '/adm': typeof AuthenticatedAdmRouteWithChildren
   '/affiliates': typeof AuthenticatedAffiliatesRouteWithChildren
@@ -4658,6 +4695,8 @@ export interface FileRoutesByFullPath {
   '/trial/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
   '/white-label/login': typeof WhiteLabelLoginRoute
+  '/wmp/orcamento': typeof WmpOrcamentoRoute
+  '/wmp/parceiro': typeof WmpParceiroRouteWithChildren
   '/checkout/': typeof CheckoutIndexRoute
   '/demo/': typeof DemoIndexRoute
   '/modulos/': typeof ModulosIndexRoute
@@ -4665,6 +4704,7 @@ export interface FileRoutesByFullPath {
   '/paciente/': typeof PacienteIndexRoute
   '/showroom/': typeof ShowroomIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
+  '/wmp/': typeof WmpIndexRoute
   '/access-profiles/matrix': typeof AuthenticatedAccessProfilesMatrixRoute
   '/adm/agentes': typeof AuthenticatedAdmAgentesRoute
   '/adm/master': typeof AuthenticatedAdmMasterRoute
@@ -4997,6 +5037,8 @@ export interface FileRoutesByFullPath {
   '/riomed/tecnico/cadastro': typeof RiomedTecnicoCadastroRoute
   '/riomed/v/$slug': typeof RiomedVSlugRoute
   '/riomed/vendedores/cadastro': typeof RiomedVendedoresCadastroRoute
+  '/wmp/obrigado/$tipo': typeof WmpObrigadoTipoRoute
+  '/wmp/parceiro/cadastro': typeof WmpParceiroCadastroRoute
   '/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/bi/': typeof AuthenticatedBiIndexRoute
@@ -5319,6 +5361,8 @@ export interface FileRoutesByTo {
   '/trial/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
   '/white-label/login': typeof WhiteLabelLoginRoute
+  '/wmp/orcamento': typeof WmpOrcamentoRoute
+  '/wmp/parceiro': typeof WmpParceiroRouteWithChildren
   '/checkout': typeof CheckoutIndexRoute
   '/demo': typeof DemoIndexRoute
   '/modulos': typeof ModulosIndexRoute
@@ -5326,6 +5370,7 @@ export interface FileRoutesByTo {
   '/paciente': typeof PacienteIndexRoute
   '/showroom': typeof ShowroomIndexRoute
   '/trabalhe-conosco': typeof TrabalheConoscoIndexRoute
+  '/wmp': typeof WmpIndexRoute
   '/access-profiles/matrix': typeof AuthenticatedAccessProfilesMatrixRoute
   '/adm/agentes': typeof AuthenticatedAdmAgentesRoute
   '/adm/master': typeof AuthenticatedAdmMasterRoute
@@ -5658,6 +5703,8 @@ export interface FileRoutesByTo {
   '/riomed/tecnico/cadastro': typeof RiomedTecnicoCadastroRoute
   '/riomed/v/$slug': typeof RiomedVSlugRoute
   '/riomed/vendedores/cadastro': typeof RiomedVendedoresCadastroRoute
+  '/wmp/obrigado/$tipo': typeof WmpObrigadoTipoRoute
+  '/wmp/parceiro/cadastro': typeof WmpParceiroCadastroRoute
   '/affiliates': typeof AuthenticatedAffiliatesIndexRoute
   '/agenda': typeof AuthenticatedAgendaIndexRoute
   '/bi': typeof AuthenticatedBiIndexRoute
@@ -5846,6 +5893,7 @@ export interface FileRoutesById {
   '/unsubscribe': typeof UnsubscribeRoute
   '/vitrine': typeof VitrineRouteWithChildren
   '/white-label': typeof WhiteLabelRouteWithChildren
+  '/wmp': typeof WmpRouteWithChildren
   '/_authenticated/access-profiles': typeof AuthenticatedAccessProfilesRouteWithChildren
   '/_authenticated/adm': typeof AuthenticatedAdmRouteWithChildren
   '/_authenticated/affiliates': typeof AuthenticatedAffiliatesRouteWithChildren
@@ -5993,6 +6041,8 @@ export interface FileRoutesById {
   '/trial_/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
   '/white-label/login': typeof WhiteLabelLoginRoute
+  '/wmp/orcamento': typeof WmpOrcamentoRoute
+  '/wmp/parceiro': typeof WmpParceiroRouteWithChildren
   '/checkout/': typeof CheckoutIndexRoute
   '/demo/': typeof DemoIndexRoute
   '/modulos/': typeof ModulosIndexRoute
@@ -6000,6 +6050,7 @@ export interface FileRoutesById {
   '/paciente/': typeof PacienteIndexRoute
   '/showroom/': typeof ShowroomIndexRoute
   '/trabalhe-conosco/': typeof TrabalheConoscoIndexRoute
+  '/wmp/': typeof WmpIndexRoute
   '/_authenticated/access-profiles/matrix': typeof AuthenticatedAccessProfilesMatrixRoute
   '/_authenticated/adm/agentes': typeof AuthenticatedAdmAgentesRoute
   '/_authenticated/adm/master': typeof AuthenticatedAdmMasterRoute
@@ -6332,6 +6383,8 @@ export interface FileRoutesById {
   '/riomed/tecnico/cadastro': typeof RiomedTecnicoCadastroRoute
   '/riomed/v/$slug': typeof RiomedVSlugRoute
   '/riomed/vendedores/cadastro': typeof RiomedVendedoresCadastroRoute
+  '/wmp/obrigado/$tipo': typeof WmpObrigadoTipoRoute
+  '/wmp/parceiro/cadastro': typeof WmpParceiroCadastroRoute
   '/_authenticated/affiliates/': typeof AuthenticatedAffiliatesIndexRoute
   '/_authenticated/agenda/': typeof AuthenticatedAgendaIndexRoute
   '/_authenticated/bi/': typeof AuthenticatedBiIndexRoute
@@ -6520,6 +6573,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/vitrine'
     | '/white-label'
+    | '/wmp'
     | '/access-profiles'
     | '/adm'
     | '/affiliates'
@@ -6667,6 +6721,8 @@ export interface FileRouteTypes {
     | '/trial/cadastro'
     | '/vitrine/$slug'
     | '/white-label/login'
+    | '/wmp/orcamento'
+    | '/wmp/parceiro'
     | '/checkout/'
     | '/demo/'
     | '/modulos/'
@@ -6674,6 +6730,7 @@ export interface FileRouteTypes {
     | '/paciente/'
     | '/showroom/'
     | '/trabalhe-conosco/'
+    | '/wmp/'
     | '/access-profiles/matrix'
     | '/adm/agentes'
     | '/adm/master'
@@ -7006,6 +7063,8 @@ export interface FileRouteTypes {
     | '/riomed/tecnico/cadastro'
     | '/riomed/v/$slug'
     | '/riomed/vendedores/cadastro'
+    | '/wmp/obrigado/$tipo'
+    | '/wmp/parceiro/cadastro'
     | '/affiliates/'
     | '/agenda/'
     | '/bi/'
@@ -7328,6 +7387,8 @@ export interface FileRouteTypes {
     | '/trial/cadastro'
     | '/vitrine/$slug'
     | '/white-label/login'
+    | '/wmp/orcamento'
+    | '/wmp/parceiro'
     | '/checkout'
     | '/demo'
     | '/modulos'
@@ -7335,6 +7396,7 @@ export interface FileRouteTypes {
     | '/paciente'
     | '/showroom'
     | '/trabalhe-conosco'
+    | '/wmp'
     | '/access-profiles/matrix'
     | '/adm/agentes'
     | '/adm/master'
@@ -7667,6 +7729,8 @@ export interface FileRouteTypes {
     | '/riomed/tecnico/cadastro'
     | '/riomed/v/$slug'
     | '/riomed/vendedores/cadastro'
+    | '/wmp/obrigado/$tipo'
+    | '/wmp/parceiro/cadastro'
     | '/affiliates'
     | '/agenda'
     | '/bi'
@@ -7854,6 +7918,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/vitrine'
     | '/white-label'
+    | '/wmp'
     | '/_authenticated/access-profiles'
     | '/_authenticated/adm'
     | '/_authenticated/affiliates'
@@ -8001,6 +8066,8 @@ export interface FileRouteTypes {
     | '/trial_/cadastro'
     | '/vitrine/$slug'
     | '/white-label/login'
+    | '/wmp/orcamento'
+    | '/wmp/parceiro'
     | '/checkout/'
     | '/demo/'
     | '/modulos/'
@@ -8008,6 +8075,7 @@ export interface FileRouteTypes {
     | '/paciente/'
     | '/showroom/'
     | '/trabalhe-conosco/'
+    | '/wmp/'
     | '/_authenticated/access-profiles/matrix'
     | '/_authenticated/adm/agentes'
     | '/_authenticated/adm/master'
@@ -8340,6 +8408,8 @@ export interface FileRouteTypes {
     | '/riomed/tecnico/cadastro'
     | '/riomed/v/$slug'
     | '/riomed/vendedores/cadastro'
+    | '/wmp/obrigado/$tipo'
+    | '/wmp/parceiro/cadastro'
     | '/_authenticated/affiliates/'
     | '/_authenticated/agenda/'
     | '/_authenticated/bi/'
@@ -8528,6 +8598,7 @@ export interface RootRouteChildren {
   UnsubscribeRoute: typeof UnsubscribeRoute
   VitrineRoute: typeof VitrineRouteWithChildren
   WhiteLabelRoute: typeof WhiteLabelRouteWithChildren
+  WmpRoute: typeof WmpRouteWithChildren
   AdminLoginRoute: typeof AdminLoginRoute
   AdminManutencaoRoute: typeof AdminManutencaoRoute
   CheckoutSlugRoute: typeof CheckoutSlugRoute
@@ -8668,6 +8739,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/wmp': {
+      id: '/wmp'
+      path: '/wmp'
+      fullPath: '/wmp'
+      preLoaderRoute: typeof WmpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/white-label': {
       id: '/white-label'
       path: '/white-label'
@@ -8962,6 +9040,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/wmp/': {
+      id: '/wmp/'
+      path: '/'
+      fullPath: '/wmp/'
+      preLoaderRoute: typeof WmpIndexRouteImport
+      parentRoute: typeof WmpRoute
+    }
     '/trabalhe-conosco/': {
       id: '/trabalhe-conosco/'
       path: '/trabalhe-conosco'
@@ -9010,6 +9095,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/checkout/'
       preLoaderRoute: typeof CheckoutIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/wmp/parceiro': {
+      id: '/wmp/parceiro'
+      path: '/parceiro'
+      fullPath: '/wmp/parceiro'
+      preLoaderRoute: typeof WmpParceiroRouteImport
+      parentRoute: typeof WmpRoute
+    }
+    '/wmp/orcamento': {
+      id: '/wmp/orcamento'
+      path: '/orcamento'
+      fullPath: '/wmp/orcamento'
+      preLoaderRoute: typeof WmpOrcamentoRouteImport
+      parentRoute: typeof WmpRoute
     }
     '/white-label/login': {
       id: '/white-label/login'
@@ -10151,6 +10250,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/affiliates/'
       preLoaderRoute: typeof AuthenticatedAffiliatesIndexRouteImport
       parentRoute: typeof AuthenticatedAffiliatesRoute
+    }
+    '/wmp/parceiro/cadastro': {
+      id: '/wmp/parceiro/cadastro'
+      path: '/cadastro'
+      fullPath: '/wmp/parceiro/cadastro'
+      preLoaderRoute: typeof WmpParceiroCadastroRouteImport
+      parentRoute: typeof WmpParceiroRoute
+    }
+    '/wmp/obrigado/$tipo': {
+      id: '/wmp/obrigado/$tipo'
+      path: '/obrigado/$tipo'
+      fullPath: '/wmp/obrigado/$tipo'
+      preLoaderRoute: typeof WmpObrigadoTipoRouteImport
+      parentRoute: typeof WmpRoute
     }
     '/riomed/vendedores/cadastro': {
       id: '/riomed/vendedores/cadastro'
@@ -14969,6 +15082,34 @@ const WhiteLabelRouteWithChildren = WhiteLabelRoute._addFileChildren(
   WhiteLabelRouteChildren,
 )
 
+interface WmpParceiroRouteChildren {
+  WmpParceiroCadastroRoute: typeof WmpParceiroCadastroRoute
+}
+
+const WmpParceiroRouteChildren: WmpParceiroRouteChildren = {
+  WmpParceiroCadastroRoute: WmpParceiroCadastroRoute,
+}
+
+const WmpParceiroRouteWithChildren = WmpParceiroRoute._addFileChildren(
+  WmpParceiroRouteChildren,
+)
+
+interface WmpRouteChildren {
+  WmpOrcamentoRoute: typeof WmpOrcamentoRoute
+  WmpParceiroRoute: typeof WmpParceiroRouteWithChildren
+  WmpIndexRoute: typeof WmpIndexRoute
+  WmpObrigadoTipoRoute: typeof WmpObrigadoTipoRoute
+}
+
+const WmpRouteChildren: WmpRouteChildren = {
+  WmpOrcamentoRoute: WmpOrcamentoRoute,
+  WmpParceiroRoute: WmpParceiroRouteWithChildren,
+  WmpIndexRoute: WmpIndexRoute,
+  WmpObrigadoTipoRoute: WmpObrigadoTipoRoute,
+}
+
+const WmpRouteWithChildren = WmpRoute._addFileChildren(WmpRouteChildren)
+
 interface ImoveisSlugRouteChildren {
   ImoveisSlugPropertyIdRoute: typeof ImoveisSlugPropertyIdRoute
 }
@@ -15036,6 +15177,7 @@ const rootRouteChildren: RootRouteChildren = {
   UnsubscribeRoute: UnsubscribeRoute,
   VitrineRoute: VitrineRouteWithChildren,
   WhiteLabelRoute: WhiteLabelRouteWithChildren,
+  WmpRoute: WmpRouteWithChildren,
   AdminLoginRoute: AdminLoginRoute,
   AdminManutencaoRoute: AdminManutencaoRoute,
   CheckoutSlugRoute: CheckoutSlugRoute,
@@ -15181,13 +15323,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

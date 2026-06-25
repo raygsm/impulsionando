@@ -30725,6 +30725,159 @@ export type Database = {
           },
         ]
       }
+      wmp_briefings: {
+        Row: {
+          acustica: Json
+          ambiente: Json
+          arquivos: Json
+          contratante_email: string
+          contratante_empresa: string | null
+          contratante_nome: string
+          contratante_telefone: string
+          created_at: string
+          evento_cidade: string | null
+          evento_data: string | null
+          evento_endereco: string | null
+          evento_estado: string | null
+          evento_horario_fim: string | null
+          evento_horario_inicio: string | null
+          evento_perfil_publico: string | null
+          evento_publico_estimado: number | null
+          evento_tipo: string
+          id: string
+          ip_hash: string | null
+          medidas: Json
+          origem: string | null
+          pre_diagnostico: Json | null
+          status: string
+          updated_at: string
+          user_agent: string | null
+          utm: Json | null
+        }
+        Insert: {
+          acustica?: Json
+          ambiente?: Json
+          arquivos?: Json
+          contratante_email: string
+          contratante_empresa?: string | null
+          contratante_nome: string
+          contratante_telefone: string
+          created_at?: string
+          evento_cidade?: string | null
+          evento_data?: string | null
+          evento_endereco?: string | null
+          evento_estado?: string | null
+          evento_horario_fim?: string | null
+          evento_horario_inicio?: string | null
+          evento_perfil_publico?: string | null
+          evento_publico_estimado?: number | null
+          evento_tipo: string
+          id?: string
+          ip_hash?: string | null
+          medidas?: Json
+          origem?: string | null
+          pre_diagnostico?: Json | null
+          status?: string
+          updated_at?: string
+          user_agent?: string | null
+          utm?: Json | null
+        }
+        Update: {
+          acustica?: Json
+          ambiente?: Json
+          arquivos?: Json
+          contratante_email?: string
+          contratante_empresa?: string | null
+          contratante_nome?: string
+          contratante_telefone?: string
+          created_at?: string
+          evento_cidade?: string | null
+          evento_data?: string | null
+          evento_endereco?: string | null
+          evento_estado?: string | null
+          evento_horario_fim?: string | null
+          evento_horario_inicio?: string | null
+          evento_perfil_publico?: string | null
+          evento_publico_estimado?: number | null
+          evento_tipo?: string
+          id?: string
+          ip_hash?: string | null
+          medidas?: Json
+          origem?: string | null
+          pre_diagnostico?: Json | null
+          status?: string
+          updated_at?: string
+          user_agent?: string | null
+          utm?: Json | null
+        }
+        Relationships: []
+      }
+      wmp_parceiros: {
+        Row: {
+          arquivos: Json
+          bio: string | null
+          categoria: string
+          cidade: string | null
+          created_at: string
+          email: string
+          estado: string | null
+          experiencia_anos: number | null
+          id: string
+          ip_hash: string | null
+          nome: string
+          nome_artistico: string | null
+          origem: string | null
+          portfolio_links: Json
+          status: string
+          telefone: string
+          updated_at: string
+          user_agent: string | null
+          utm: Json | null
+        }
+        Insert: {
+          arquivos?: Json
+          bio?: string | null
+          categoria: string
+          cidade?: string | null
+          created_at?: string
+          email: string
+          estado?: string | null
+          experiencia_anos?: number | null
+          id?: string
+          ip_hash?: string | null
+          nome: string
+          nome_artistico?: string | null
+          origem?: string | null
+          portfolio_links?: Json
+          status?: string
+          telefone: string
+          updated_at?: string
+          user_agent?: string | null
+          utm?: Json | null
+        }
+        Update: {
+          arquivos?: Json
+          bio?: string | null
+          categoria?: string
+          cidade?: string | null
+          created_at?: string
+          email?: string
+          estado?: string | null
+          experiencia_anos?: number | null
+          id?: string
+          ip_hash?: string | null
+          nome?: string
+          nome_artistico?: string | null
+          origem?: string | null
+          portfolio_links?: Json
+          status?: string
+          telefone?: string
+          updated_at?: string
+          user_agent?: string | null
+          utm?: Json | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       brewery_brands_public: {
