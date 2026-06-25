@@ -45,9 +45,10 @@ export const Route = createFileRoute('/api/public/cron/support-tick')({
         }
 
         // 3) IA — categorização de até 20 tickets sem ai_topic
-        const key = process.env.LOVABLE_API_KEY
+        const { resolveCoreAiGateway } = await import('@/lib/ai-gateway.server')
+        const { provider: gateway } = resolveCoreAiGateway()
         let aiProcessed = 0
-        if (key) {
+        if (gateway) {
           const { data: pending } = await supabaseAdmin
             .from('support_tickets')
             .select('id, subject, description, type, company_id')
@@ -58,8 +59,6 @@ export const Route = createFileRoute('/api/public/cron/support-tick')({
 
           if (pending?.length) {
             const { generateText } = await import('ai')
-            const { createLovableAiGatewayProvider } = await import('@/lib/ai-gateway.server')
-            const gateway = createLovableAiGatewayProvider(key)
             const model = gateway('google/gemini-2.5-flash')
 
             for (const t of pending) {

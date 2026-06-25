@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { resolveCoreAiRestConfig } from "@/lib/ai-gateway.server";
 
 async function resolveCompanyId(supabase: any, userId: string): Promise<string> {
   // Sempre resolve o tenant RioMed via core_tenant_identity (master Impulsionando
@@ -127,12 +128,12 @@ export const createRiomedCampaignFromStale = createServerFn({ method: "POST" })
     await supabase.from("riomed_campaign_items").insert(itemRows);
 
     // 4. Generate copy with Gemini
-    const apiKey = process.env.LOVABLE_API_KEY;
+    const aiConfig = resolveCoreAiRestConfig();
     let headline = data.name;
     let body = `Aproveite descontos especiais de até ${data.discountPct}% em equipamentos médicos selecionados.`;
     let cta = "Solicite seu orçamento agora!";
 
-    if (apiKey) {
+    if (aiConfig) {
       try {
         const productList = items.slice(0, 10)
           .map((it) => `- ${it.product_name} (SKU ${it.sku}, estoque ${it.qty})`).join("\n");
@@ -148,9 +149,9 @@ ${productList}
 Responda APENAS um JSON válido no formato exato:
 {"headline":"título curto e impactante (até 60 chars)","body":"corpo de mensagem WhatsApp (até 400 chars, usando emojis com moderação)","cta":"call-to-action curto"}`;
 
-        const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        const aiRes = await fetch(`${aiConfig.baseURL}/chat/completions`, {
           method: "POST",
-          headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...aiConfig.headers },
           body: JSON.stringify({
             model: "google/gemini-3-flash-preview",
             messages: [

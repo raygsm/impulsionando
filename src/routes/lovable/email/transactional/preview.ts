@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { render as renderAsync } from '@react-email/components'
 import { createFileRoute } from '@tanstack/react-router'
+import { assertLovableLegacyEnabled, getRequiredLovableLegacyApiKey } from '@/lib/lovable-legacy.server'
 import { TEMPLATES } from '@/lib/email-templates/registry'
 
 // Renders all registered templates with their previewData.
@@ -10,7 +11,12 @@ export const Route = createFileRoute("/lovable/email/transactional/preview")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const apiKey = process.env.LOVABLE_API_KEY
+        try {
+          assertLovableLegacyEnabled()
+        } catch {
+          return Response.json({ error: 'Lovable legacy disabled' }, { status: 410 })
+        }
+        const apiKey = getRequiredLovableLegacyApiKey()
         if (!apiKey) {
           return Response.json(
             { error: 'Server configuration error' },

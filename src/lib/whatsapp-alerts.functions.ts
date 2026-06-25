@@ -10,6 +10,7 @@
  *  - LOVABLE_API_KEY           → autenticação do gateway
  */
 import { createServerFn } from "@tanstack/react-start";
+import { getLovableLegacyApiKey } from "@/lib/lovable-legacy.server";
 
 export interface WhatsAppAlertInput {
   ctr: number;
@@ -70,7 +71,7 @@ async function sendSlack(webhook: string, title: string, body: string) {
 }
 
 async function sendEmail(to: string, from: string, title: string, body: string) {
-  const lovableKey = process.env.LOVABLE_API_KEY;
+  const lovableKey = getLovableLegacyApiKey();
   const resendKey = process.env.RESEND_API_KEY;
   if (!lovableKey || !resendKey) throw new Error("RESEND not configured");
   const r = await fetch("https://connector-gateway.lovable.dev/resend/emails", {

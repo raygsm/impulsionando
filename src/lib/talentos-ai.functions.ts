@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { resolveCoreAiGateway } from "@/lib/ai-gateway.server";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 
@@ -56,9 +56,8 @@ export const extractCurriculo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => ExtractInput.parse(input))
   .handler(async ({ data, context }) => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("LOVABLE_API_KEY ausente");
-    const gateway = createLovableAiGatewayProvider(key);
+    const { provider: gateway } = resolveCoreAiGateway();
+    if (!gateway) throw new Error("CORE_AI_API_KEY ausente");
     const { output } = await generateText({
       model: gateway("google/gemini-3-flash-preview"),
       output: Output.object({ schema: ExtractSchema }),
@@ -74,9 +73,8 @@ export const extractCurriculoFromFile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => ExtractFileInput.parse(input))
   .handler(async ({ data, context }) => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("LOVABLE_API_KEY ausente");
-    const gateway = createLovableAiGatewayProvider(key);
+    const { provider: gateway } = resolveCoreAiGateway();
+    if (!gateway) throw new Error("CORE_AI_API_KEY ausente");
 
     const match = /^data:([^;]+);base64,(.+)$/.exec(data.file_data_url);
     if (!match) throw new Error("Arquivo inválido");

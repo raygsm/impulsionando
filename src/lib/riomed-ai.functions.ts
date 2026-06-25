@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { resolveCoreAiRestConfig } from "@/lib/ai-gateway.server";
 
 async function getRiomedCompanyId(supabase: any) {
   const { data } = await supabase.from("companies").select("id").ilike("name", "%riomed%").limit(1).maybeSingle();
@@ -110,18 +111,18 @@ export const runRiomedAgent = createServerFn({ method: "POST" })
       .single();
     if (runErr) throw runErr;
 
-    const apiKey = process.env.LOVABLE_API_KEY;
-    if (!apiKey) {
+    const aiConfig = resolveCoreAiRestConfig();
+    if (!aiConfig) {
       await context.supabase.from("riomed_ai_runs").update({
-        status: "error", error_message: "LOVABLE_API_KEY ausente", finished_at: new Date().toISOString(),
+        status: "error", error_message: "CORE_AI_API_KEY ausente", finished_at: new Date().toISOString(),
       }).eq("id", run.id);
-      throw new Error("LOVABLE_API_KEY ausente");
+      throw new Error("CORE_AI_API_KEY ausente");
     }
 
     try {
-      const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      const resp = await fetch(`${aiConfig.baseURL}/chat/completions`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+        headers: { "Content-Type": "application/json", ...aiConfig.headers },
         body: JSON.stringify({
           model: agent.model,
           messages: [

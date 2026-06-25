@@ -4,6 +4,7 @@ import { parseEmailWebhookPayload } from '@lovable.dev/email-js'
 import { WebhookError, verifyWebhookRequest } from '@lovable.dev/webhooks-js'
 import { createClient } from '@supabase/supabase-js'
 import { createFileRoute } from '@tanstack/react-router'
+import { assertLovableLegacyEnabled, getRequiredLovableLegacyApiKey } from '@/lib/lovable-legacy.server'
 import { SignupEmail } from '@/lib/email-templates/signup'
 import { InviteEmail } from '@/lib/email-templates/invite'
 import { MagicLinkEmail } from '@/lib/email-templates/magic-link'
@@ -47,7 +48,12 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const apiKey = process.env.LOVABLE_API_KEY
+        try {
+          assertLovableLegacyEnabled()
+        } catch {
+          return Response.json({ error: 'Lovable legacy disabled' }, { status: 410 })
+        }
+        const apiKey = getRequiredLovableLegacyApiKey()
 
         if (!apiKey) {
           console.error('LOVABLE_API_KEY not configured')

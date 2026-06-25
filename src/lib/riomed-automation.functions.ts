@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { resolveCoreAiRestConfig } from "@/lib/ai-gateway.server";
 
 async function getCompanyId(supabase: any, userId: string): Promise<string> {
   const { data } = await supabase.from("companies").select("id").eq("owner_id", userId).maybeSingle();
@@ -173,7 +174,7 @@ export const runAiAgent = createServerFn({ method: "POST" })
     const { data: agent, error } = await supabase.from("riomed_ai_agents").select("*").eq("id", data.agentId).single();
     if (error || !agent) throw new Error("Agente não encontrado");
 
-    const apiKey = process.env.LOVABLE_API_KEY;
+    const aiConfig = resolveCoreAiRestConfig();
     let status = "success";
     let output: any = null;
     let errorMsg: string | null = null;
@@ -181,9 +182,9 @@ export const runAiAgent = createServerFn({ method: "POST" })
 
     try {
       if (!apiKey) throw new Error("LOVABLE_API_KEY não configurada");
-      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      const res = await fetch(`${aiConfig.baseURL}/chat/completions`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Lovable-API-Key": apiKey },
+        headers: { "Content-Type": "application/json", ...aiConfig.headers },
         body: JSON.stringify({
           model: agent.model,
           messages: [

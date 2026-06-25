@@ -1,23 +1,23 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { resolveCoreAiRestConfig } from "@/lib/ai-gateway.server";
 
 const EMBEDDING_MODEL = "google/gemini-embedding-001";
 const EMBEDDING_DIMS = 1536;
-const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/embeddings";
 
 type GatewayInput =
   | string
   | { content: Array<{ type: "text"; text: string } | { type: "image_url"; image_url: { url: string } }> };
 
 async function embed(input: GatewayInput): Promise<number[]> {
-  const key = process.env.LOVABLE_API_KEY;
-  if (!key) throw new Error("LOVABLE_API_KEY ausente");
-  const res = await fetch(GATEWAY_URL, {
+  const aiConfig = resolveCoreAiRestConfig();
+  if (!aiConfig) throw new Error("CORE_AI_API_KEY ausente");
+  const res = await fetch(`${aiConfig.baseURL}/embeddings`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Lovable-API-Key": key,
+      ...aiConfig.headers,
     },
     body: JSON.stringify({
       model: EMBEDDING_MODEL,

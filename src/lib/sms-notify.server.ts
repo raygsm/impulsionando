@@ -10,6 +10,8 @@
  * em vez de lançar — não derruba o fluxo principal.
  */
 
+import { getLovableLegacyApiKey } from "@/lib/lovable-legacy.server";
+
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/twilio";
 
 function digitsOnly(s: string): string {
@@ -41,10 +43,10 @@ export async function sendSms(args: {
   to: string;
   body: string;
 }): Promise<SmsResult> {
-  const lovableKey = process.env.LOVABLE_API_KEY;
+  const lovableKey = getLovableLegacyApiKey();
   const twilioKey = process.env.TWILIO_API_KEY;
   const fromPhone = process.env.TWILIO_FROM_PHONE;
-  if (!lovableKey) return { ok: false, skipped: "lovable_api_key_missing" };
+  if (!lovableKey) return { ok: false, skipped: "lovable_legacy_disabled" };
   if (!twilioKey) return { ok: false, skipped: "twilio_api_key_missing" };
   if (!fromPhone) return { ok: false, skipped: "twilio_from_missing" };
 

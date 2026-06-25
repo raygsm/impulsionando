@@ -2,6 +2,7 @@ import * as React from 'react'
 import { render as renderAsync } from '@react-email/components'
 import { createClient } from '@supabase/supabase-js'
 import { createFileRoute } from '@tanstack/react-router'
+import { assertLovableLegacyEnabled } from '@/lib/lovable-legacy.server'
 import { TEMPLATES } from '@/lib/email-templates/registry'
 
 // Configuration baked in at scaffold time
@@ -33,6 +34,11 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        try {
+          assertLovableLegacyEnabled()
+        } catch {
+          return Response.json({ error: 'Lovable legacy disabled' }, { status: 410 })
+        }
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
         const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 

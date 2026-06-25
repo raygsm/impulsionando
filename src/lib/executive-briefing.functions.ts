@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { resolveCoreAiGateway } from "@/lib/ai-gateway.server";
 import { generateText } from "ai";
 
 /**
@@ -60,11 +60,10 @@ export const getExecutiveBriefing = createServerFn({ method: "GET" })
       automacoes_falharam_7d: runsFailed,
     };
 
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) return { snapshot, briefing: null, error: "LOVABLE_API_KEY ausente" };
+    const { provider: gateway } = resolveCoreAiGateway();
+    if (!gateway) return { snapshot, briefing: null, error: "CORE_AI_API_KEY ausente" };
 
     try {
-      const gateway = createLovableAiGatewayProvider(key);
       const { text } = await generateText({
         model: gateway("google/gemini-3-flash-preview"),
         system: "Você é o analista-chefe de operações da plataforma SaaS Impulsionando. Escreva em PT-BR, tom executivo, direto, sem clichês. Sempre cite números do snapshot.",

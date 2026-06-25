@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { WebhookError, verifyWebhookRequest } from '@lovable.dev/webhooks-js'
 import { createFileRoute } from '@tanstack/react-router'
+import { assertLovableLegacyEnabled, getRequiredLovableLegacyApiKey } from '@/lib/lovable-legacy.server'
 
 // Suppression event payload sent by the Go API when Mailgun reports
 // a bounce, complaint, or unsubscribe.
@@ -55,7 +56,12 @@ export const Route = createFileRoute("/lovable/email/suppression")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const apiKey = process.env.LOVABLE_API_KEY
+        try {
+          assertLovableLegacyEnabled()
+        } catch {
+          return Response.json({ error: 'Lovable legacy disabled' }, { status: 410 })
+        }
+        const apiKey = getRequiredLovableLegacyApiKey()
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
         const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 

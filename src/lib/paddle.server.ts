@@ -1,4 +1,5 @@
 import { Environment, Paddle, EventName } from '@paddle/paddle-node-sdk';
+import { getRequiredLovableLegacyApiKey } from '@/lib/lovable-legacy.server';
 
 const getEnv = (key: string): string => {
   const value = process.env[key];
@@ -19,7 +20,7 @@ export function getConnectionApiKey(env: PaddleEnv): string {
 
 export function getPaddleClient(env: PaddleEnv): Paddle {
   const connectionApiKey = getConnectionApiKey(env);
-  const lovableApiKey = getEnv('LOVABLE_API_KEY');
+  const lovableApiKey = getRequiredLovableLegacyApiKey();
   return new Paddle(connectionApiKey, {
     environment: GATEWAY_BASE_URL as unknown as Environment,
     customHeaders: {
@@ -31,7 +32,7 @@ export function getPaddleClient(env: PaddleEnv): Paddle {
 
 export async function gatewayFetch(env: PaddleEnv, path: string, init?: RequestInit): Promise<Response> {
   const connectionApiKey = getConnectionApiKey(env);
-  const lovableApiKey = getEnv('LOVABLE_API_KEY');
+  const lovableApiKey = getRequiredLovableLegacyApiKey();
   return fetch(`${GATEWAY_BASE_URL}${path}`, {
     ...init,
     headers: {

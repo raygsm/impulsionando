@@ -3,6 +3,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
+import { resolveCoreAiGateway } from './ai-gateway.server'
 
 const STATUSES = [
   'new','received','in_review','waiting_customer','waiting_core',
@@ -199,8 +200,8 @@ export const summarizeRecentTickets = createServerFn({ method: 'POST' })
   .inputValidator((d: { company_id?: string; limit?: number }) =>
     z.object({ company_id: z.string().uuid().optional(), limit: z.number().min(1).max(50).optional() }).parse(d))
   .handler(async ({ data, context }) => {
-    const key = process.env.LOVABLE_API_KEY
-    if (!key) return { ok: false, error: 'LOVABLE_API_KEY ausente', processed: 0 }
+    const { provider: gateway } = resolveCoreAiGateway()
+    if (!gateway) return { ok: false, error: 'CORE_AI_API_KEY ausente', processed: 0 }
 
     let q = context.supabase
       .from('support_tickets')
@@ -215,8 +216,6 @@ export const summarizeRecentTickets = createServerFn({ method: 'POST' })
     if (!rows?.length) return { ok: true, processed: 0 }
 
     const { generateText } = await import('ai')
-    const { createLovableAiGatewayProvider } = await import('./ai-gateway.server')
-    const gateway = createLovableAiGatewayProvider(key)
     const model = gateway('google/gemini-2.5-flash')
 
     let processed = 0
