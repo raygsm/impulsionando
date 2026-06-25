@@ -1,8 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createHmac, timingSafeEqual } from "crypto";
 import { z } from "zod";
+import {
+  assertN8nTenantScope,
+  N8N_SIGNATURE_HEADER,
+  verifyN8nSignature,
+} from "@/lib/n8n-webhook-security.server";
 
 const Body = z.object({
+  scope: z.enum(["tenant", "core"]).optional(),
   workflow: z.string().min(1),
   workflow_version: z.string().optional(),
   event: z.string().min(1),
@@ -52,11 +57,8 @@ export const Route = createFileRoute("/api/public/webhooks/n8n-callback")({
         }
 
         const raw = await request.text();
-        const signature = request.headers.get("x-impulsionando-signature") ?? "";
-        const expected = createHmac("sha256", secret).update(raw).digest("hex");
-        const sigBuf = Buffer.from(signature);
-        const expBuf = Buffer.from(expected);
-        if (sigBuf.length !== expBuf.length || !timingSafeEqual(sigBuf, expBuf)) {
+        const signature = request.headers.get(N8N_SIGNATURE_HEADER);
+        if (!verifyN8nSignature(raw, signature, secret)) {
           return new Response("Invalid signature", { status: 401 });
         }
 
@@ -65,6 +67,13 @@ export const Route = createFileRoute("/api/public/webhooks/n8n-callback")({
           parsed = Body.parse(JSON.parse(raw));
         } catch (err: any) {
           return Response.json({ error: "invalid_body", detail: err?.message }, { status: 400 });
+        }
+
+        let tenantScope;
+        try {
+          tenantScope = assertN8nTenantScope(parsed);
+        } catch {
+          return Response.json({ error: "tenant_id_required" }, { status: 422 });
         }
 
         const regua = STAGE_TO_REGUA[parsed.niche_slug ?? ""] ?? inferRegua(parsed.event);
@@ -83,10 +92,10 @@ export const Route = createFileRoute("/api/public/webhooks/n8n-callback")({
           contact_email: parsed.contact_email ?? null,
           contact_phone: parsed.contact_phone ?? null,
           lead_id: parsed.lead_id ?? null,
-          tenant_id: parsed.tenant_id ?? null,
+          tenant_id: tenantScope.tenantId,
           entity_type: parsed.entity_type ?? null,
           entity_id: parsed.entity_id ?? null,
-          payload: { ...(parsed.payload ?? {}), niche_slug: parsed.niche_slug ?? null, executionId: parsed.executionId ?? null },
+          payload: { ...(parsed.payload ?? {}), scope: tenantScope.scope, niche_slug: parsed.niche_slug ?? null, executionId: parsed.executionId ?? null },
           error: parsed.error ?? null,
           idempotency_key: parsed.idempotency_key ?? parsed.executionId ?? null,
           finished_at: parsed.finished_at ?? new Date().toISOString(),

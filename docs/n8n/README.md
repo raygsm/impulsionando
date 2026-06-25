@@ -91,7 +91,8 @@ x-impulsionando-signature: <hmac-sha256(rawBody, IMPULSIONANDO_WEBHOOK_SECRET)>
   "http_status": 202,
   "latency_ms": 318,
   "contact_email": "fulano@empresa.com",
-  "tenant_id": "uuid-opcional",
+  "scope": "tenant",
+  "tenant_id": "uuid-obrigatorio-para-fluxos-de-cliente",
   "entity_type": "trial",
   "entity_id": "uuid-do-trial",
   "payload": { "template": "trial-started", "plan": "Integrado" },
@@ -116,6 +117,7 @@ const crypto = require('crypto');
 const body = JSON.stringify({
   workflow_name: $workflow.name,
   workflow_version: 'v1.0.0',
+  scope: 'tenant',
   regua: $vars.regua,
   event_name: $vars.event,
   step: $node.name,
@@ -157,7 +159,9 @@ O script usa a chave **anon** (publishable) e confirma que:
 - O endpoint faz `upsert ON CONFLICT (workflow_name, step, idempotency_key)`,
   então o N8N pode reexecutar sem duplicar trilha.
 - Assinatura HMAC-SHA256 sobre o **body cru** em `x-impulsionando-signature`
-  (segredo `IMPULSIONANDO_WEBHOOK_SECRET`). Fallback: `apikey: <anon>`.
+  (segredo `IMPULSIONANDO_WEBHOOK_SECRET`). Nao existe fallback por chave anon.
+- Fluxos de cliente precisam enviar `scope: "tenant"` e `tenant_id`.
+- Fluxos internos do Core podem enviar `scope: "core"` e deixar `tenant_id` vazio.
 
 ## Módulos novos disponíveis
 

@@ -1,9 +1,11 @@
 // Fase 10 — Despachador da régua de funil: dispara workflows N8N a partir
 // da fila `core_funnel_dispatch_queue`. Chamado por pg_cron a cada minuto.
 import { createFileRoute } from "@tanstack/react-router";
+import { N8N_SIGNATURE_HEADER, signN8nPayload } from "@/lib/n8n-webhook-security.server";
 
 const N8N_BASE = process.env.N8N_BASE_URL ?? "";
 const N8N_TOKEN = process.env.N8N_WEBHOOK_TOKEN ?? "";
+const WEBHOOK_SECRET = process.env.IMPULSIONANDO_WEBHOOK_SECRET ?? "";
 const MAX_BATCH = 25;
 const MAX_ATTEMPTS = 5;
 
@@ -26,8 +28,12 @@ export const Route = createFileRoute("/api/public/cron/funnel-dispatch")({
           return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 500, headers: { "content-type": "application/json" } });
         }
 
-        if (!N8N_BASE) {
-          return Response.json({ ok: false, reason: "N8N_BASE_URL not configured", pending: due?.length ?? 0 });
+        if (!N8N_BASE || !WEBHOOK_SECRET) {
+          return Response.json({
+            ok: false,
+            reason: !N8N_BASE ? "N8N_BASE_URL not configured" : "IMPULSIONANDO_WEBHOOK_SECRET not configured",
+            pending: due?.length ?? 0,
+          });
         }
 
         let sent = 0, failed = 0;
@@ -39,6 +45,8 @@ export const Route = createFileRoute("/api/public/cron/funnel-dispatch")({
             stage: row.stage,
             event: row.event_name,
             niche_slug: row.niche_slug,
+            scope: "tenant",
+            tenant_id: row.company_id,
             company_id: row.company_id,
             lead_id: row.lead_id,
             entity_type: row.entity_type,
@@ -52,12 +60,14 @@ export const Route = createFileRoute("/api/public/cron/funnel-dispatch")({
           let http = 0; let errMsg: string | null = null;
 
           try {
+            const body = JSON.stringify(payload);
             const headers: Record<string, string> = {
               "content-type": "application/json",
               "x-idempotency-key": idempotencyKey,
+              [N8N_SIGNATURE_HEADER]: signN8nPayload(body, WEBHOOK_SECRET),
             };
             if (N8N_TOKEN) headers["authorization"] = `Bearer ${N8N_TOKEN}`;
-            const res = await fetch(url, { method: "POST", headers, body: JSON.stringify(payload) });
+            const res = await fetch(url, { method: "POST", headers, body });
             http = res.status;
             if (res.ok) { status = "sent"; sent++; }
             else { errMsg = `HTTP ${res.status}: ${(await res.text()).slice(0, 500)}`; failed++; }
@@ -78,8 +88,8 @@ export const Route = createFileRoute("/api/public/cron/funnel-dispatch")({
             regua: row.stage,
             event_name: row.event_name,
             step: "dispatch",
-            status,
-            channel: "http",
+            status: status === "sent" ? "ok" : "failed",
+            channel: "api",
             http_status: http || null,
             latency_ms: Date.now() - started,
             contact_email: row.contact_email,

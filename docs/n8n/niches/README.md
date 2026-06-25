@@ -14,6 +14,8 @@ Body:   payload renderizado a partir de payload_template (Mustache simples {{pat
 
 Todo workflow N8N deve **validar a assinatura HMAC** antes de processar (vide `01-captacao-lead-nurturing.json` como referência).
 
+Todo workflow de cliente deve carregar `scope: "tenant"` e `tenant_id`. Eventos sem tenant so podem ser usados quando forem automacoes internas do Core com `scope: "core"`.
+
 ## Mapa Nicho × Estágio × Evento × Workflow
 
 | Nicho | Estágio | Evento | Workflow N8N | Canal principal |

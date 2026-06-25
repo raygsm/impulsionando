@@ -1,21 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createHmac, timingSafeEqual } from "crypto";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import {
+  assertN8nTenantScope,
+  N8N_SIGNATURE_HEADER,
+  verifyN8nSignature,
+} from "@/lib/n8n-webhook-security.server";
 
 /**
  * Endpoint público chamado pelos workflows N8N a cada step para registrar
  * trilha de auditoria (eventos, HMAC, chamadas de API/Z-API, sucessos e falhas).
  *
  * Auth: HMAC-SHA256 sobre o body cru, header `x-impulsionando-signature`,
- * chave em `IMPULSIONANDO_WEBHOOK_SECRET`. Fallback: apikey anon (compatível
- * com nosso padrão de hooks internos).
+ * chave em `IMPULSIONANDO_WEBHOOK_SECRET`.
  *
  * Idempotência: `idempotency_key` (workflow_name + step + key) evita duplicar
  * quando o N8N reexecuta o mesmo node.
  */
 
 const BodySchema = z.object({
+  scope: z.enum(["tenant", "core"]).optional(),
   workflow_name: z.string().min(1).max(200),
   workflow_version: z.string().max(50).optional(),
   regua: z.enum(["captacao", "conversao", "relacionamento", "retencao", "outro"]),
@@ -38,32 +42,14 @@ const BodySchema = z.object({
   finished_at: z.string().datetime().optional(),
 });
 
-function verifySignature(rawBody: string, signature: string | null, secret: string): boolean {
-  if (!signature) return false;
-  const expected = createHmac("sha256", secret).update(rawBody).digest("hex");
-  const a = Buffer.from(signature);
-  const b = Buffer.from(expected);
-  return a.length === b.length && timingSafeEqual(a, b);
-}
-
-function fallbackApiKey(request: Request): boolean {
-  const anon = process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY ?? "";
-  if (!anon) return false;
-  const apikey = request.headers.get("apikey") ?? request.headers.get("x-apikey");
-  const auth = request.headers.get("authorization");
-  return apikey === anon || (auth?.toLowerCase() === `bearer ${anon.toLowerCase()}`);
-}
-
 export const Route = createFileRoute("/api/public/hooks/n8n-log")({
   server: {
     handlers: {
       POST: async ({ request }) => {
         const raw = await request.text();
         const secret = process.env.IMPULSIONANDO_WEBHOOK_SECRET ?? "";
-        const sig = request.headers.get("x-impulsionando-signature");
-        const okHmac = !!secret && verifySignature(raw, sig, secret);
-        const okKey = !okHmac && fallbackApiKey(request);
-        if (!okHmac && !okKey) {
+        const sig = request.headers.get(N8N_SIGNATURE_HEADER);
+        if (!verifyN8nSignature(raw, sig, secret)) {
           return new Response("Unauthorized", { status: 401 });
         }
 
@@ -75,6 +61,13 @@ export const Route = createFileRoute("/api/public/hooks/n8n-log")({
             { ok: false, error: "invalid_body", detail: (e as Error).message },
             { status: 422 },
           );
+        }
+
+        let tenantScope;
+        try {
+          tenantScope = assertN8nTenantScope(parsed);
+        } catch {
+          return Response.json({ ok: false, error: "tenant_id_required" }, { status: 422 });
         }
 
         try {
@@ -91,10 +84,10 @@ export const Route = createFileRoute("/api/public/hooks/n8n-log")({
             contact_email: parsed.contact_email?.toLowerCase() ?? null,
             contact_phone: parsed.contact_phone ?? null,
             lead_id: parsed.lead_id ?? null,
-            tenant_id: parsed.tenant_id ?? null,
+            tenant_id: tenantScope.tenantId,
             entity_type: parsed.entity_type ?? null,
             entity_id: parsed.entity_id ?? null,
-            payload: parsed.payload as Record<string, unknown>,
+            payload: { ...(parsed.payload as Record<string, unknown>), scope: tenantScope.scope },
             error: parsed.error ?? null,
             idempotency_key: parsed.idempotency_key ?? null,
             started_at: parsed.started_at ?? new Date().toISOString(),
@@ -149,7 +142,7 @@ export const Route = createFileRoute("/api/public/hooks/n8n-log")({
         Response.json({
           ok: true,
           usage:
-            "POST with x-impulsionando-signature (HMAC-SHA256 over raw body) and the schema documented in docs/n8n/README.md",
+            "POST with x-impulsionando-signature (HMAC-SHA256 over raw body), tenant_id for tenant workflows, and the schema documented in docs/n8n/README.md",
         }),
     },
   },
