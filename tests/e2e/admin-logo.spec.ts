@@ -31,6 +31,11 @@ async function login(page: Page) {
 }
 
 test.describe("Admin shell — correct logo across main routes", () => {
+  test.skip(
+    !EMAIL || !PASSWORD,
+    "E2E_EMAIL/E2E_PASSWORD not configured; skipping authenticated admin logo checks.",
+  );
+
   test.beforeEach(async ({ page }) => {
     await login(page);
   });

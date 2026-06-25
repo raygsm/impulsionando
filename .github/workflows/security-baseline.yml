@@ -31,6 +31,8 @@ jobs:
       PGUSER: ${{ secrets.PGUSER }}
       PGPASSWORD: ${{ secrets.PGPASSWORD }}
       PGDATABASE: ${{ secrets.PGDATABASE }}
+      SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+      SUPABASE_POOLER_HOST: ${{ secrets.SUPABASE_POOLER_HOST || vars.SUPABASE_POOLER_HOST }}
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -44,6 +46,23 @@ jobs:
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
+
+      - name: Normalize Supabase pooler credentials
+        run: |
+          PROJECT_ID="$(node -e "const fs=require('fs'); const m=fs.readFileSync('supabase/config.toml','utf8').match(/^\\s*project_id\\s*=\\s*\"([^\"]+)\"/m); if(!m) process.exit(1); process.stdout.write(m[1]);")"
+          POOLER_HOST="${SUPABASE_POOLER_HOST:-$PGHOST}"
+          if [ -z "$POOLER_HOST" ] || [[ "$POOLER_HOST" != *".pooler.supabase.com" ]]; then
+            if [ "$PROJECT_ID" = "arygtqrdpcdkwnuwsgmm" ]; then
+              POOLER_HOST="aws-0-us-east-2.pooler.supabase.com"
+            fi
+          fi
+          {
+            echo "SUPABASE_PROJECT_ID=$PROJECT_ID"
+            echo "PGHOST=$POOLER_HOST"
+            echo "PGPORT=6543"
+            echo "PGUSER=postgres.$PROJECT_ID"
+            echo "PGDATABASE=postgres"
+          } >> "$GITHUB_ENV"
 
       - name: Verify DB credentials are configured
         run: |

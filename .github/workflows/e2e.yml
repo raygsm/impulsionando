@@ -23,7 +23,7 @@ jobs:
       CI: "true"
       # --- Build-time (Vite client bundle) ---
       VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_PUBLISHABLE_KEY }}
       VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
       # --- Runtime (server functions) ---
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -50,12 +50,15 @@ jobs:
       - name: Sanity-check required secrets
         run: |
           missing=0
-          for var in VITE_SUPABASE_URL VITE_SUPABASE_PUBLISHABLE_KEY E2E_EMAIL E2E_PASSWORD; do
+          for var in VITE_SUPABASE_URL VITE_SUPABASE_PUBLISHABLE_KEY; do
             if [ -z "${!var}" ]; then
               echo "::error::Missing required secret: $var"
               missing=1
             fi
           done
+          if [ -z "${E2E_EMAIL:-}" ] || [ -z "${E2E_PASSWORD:-}" ]; then
+            echo "::notice::E2E_EMAIL/E2E_PASSWORD not configured; authenticated specs will skip themselves."
+          fi
           test "$missing" = "0"
 
       - name: Install dependencies
