@@ -23,6 +23,7 @@ import {
   PIX_KEY,
   PIX_RECEBEDOR,
 } from "@/lib/pix";
+import { buildWhatsappUrl, configuredCoreWhatsapp } from "@/lib/payment-fallback";
 
 type Props = {
   open: boolean;
@@ -48,7 +49,7 @@ export function PixFallbackDialog({
   amountCents,
   txid,
   label,
-  whatsappPhone = "5521972554500",
+  whatsappPhone,
 }: Props) {
   const payload = useMemo(
     () => buildPixPayload(amountCents, txid),
@@ -57,6 +58,10 @@ export function PixFallbackDialog({
   const qr = pixQrUrl(payload);
   const [comprovante, setComprovante] = useState<{ name: string } | null>(null);
   const [confirmed, setConfirmed] = useState(false);
+  const whatsappUrl = buildWhatsappUrl(
+    whatsappPhone ?? configuredCoreWhatsapp(),
+    `Olá! Paguei via Pix (${label ?? txid} — ${formatBRL(amountCents)}). Segue o comprovante.`,
+  );
 
   async function copy(value: string, what: string) {
     try {
@@ -211,18 +216,14 @@ export function PixFallbackDialog({
               </div>
             )}
 
-            <Button asChild variant="outline" size="sm" className="w-full">
-              <a
-                href={`https://wa.me/${whatsappPhone}?text=${encodeURIComponent(
-                  `Olá! Paguei via Pix (${label ?? txid} — ${formatBRL(amountCents)}). Segue o comprovante.`,
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <MessageCircle className="h-4 w-4 mr-1" />
-                Enviar comprovante por WhatsApp
-              </a>
-            </Button>
+            {whatsappUrl ? (
+              <Button asChild variant="outline" size="sm" className="w-full">
+                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
+                  <MessageCircle className="h-4 w-4 mr-1" />
+                  Enviar comprovante por WhatsApp
+                </a>
+              </Button>
+            ) : null}
           </div>
         </div>
       </DialogContent>

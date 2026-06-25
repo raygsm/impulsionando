@@ -192,10 +192,10 @@ Lacunas:
    - Existe `src/data/moduleCatalog.ts` com `MODULE_PRICE_CENTS = 49700`.
    - Para SaaS master, preco precisa vir do banco/painel master, nao de constante fixa de frontend/dados locais.
 
-4. WhatsApp e fallback manual ainda nao estao totalmente parametrizados
-   - `src/components/payments/PixFallbackDialog.tsx` usa telefone padrao `5521972554500`.
-   - `src/components/payments/PixCheckoutCard.tsx` tambem usa `5521972554500`.
-   - Isto deve virar configuracao por tenant/core, nao valor fixo.
+4. WhatsApp e fallback manual foram parametrizados na Fase 4
+   - `src/components/payments/PixFallbackDialog.tsx` deixou de usar telefone fixo.
+   - `src/components/payments/PixCheckoutCard.tsx` deixou de usar telefone fixo.
+   - A configuracao agora vem do tenant/Core via `VITE_IMPULSIONANDO_SUPPORT_WHATSAPP`.
 
 5. N8N nao esta comprovadamente auto-provisionado por tenant
    - Existem arquivos e callbacks.

@@ -22,6 +22,7 @@ import {
   Loader2,
 } from 'lucide-react'
 import { createPixCharge, getPixChargeStatus } from '@/lib/pix-charges.functions'
+import { buildWhatsappUrl, configuredCoreWhatsapp } from '@/lib/payment-fallback'
 
 type Props = {
   planCode: string
@@ -44,7 +45,7 @@ export function PixCheckoutCard({
   description,
   contractId,
   companyId,
-  whatsappPhone = '5521972554500',
+  whatsappPhone,
   initialPayer,
   onPaid,
 }: Props) {
@@ -94,12 +95,12 @@ export function PixCheckoutCard({
   }, [status.data?.status, onPaid])
 
   const wppLink = useMemo(() => {
-    if (!charge) return ''
-    const msg = encodeURIComponent(
+    if (!charge) return null
+    return buildWhatsappUrl(
+      whatsappPhone ?? configuredCoreWhatsapp(),
       `Olá! Acabei de pagar o Pix de ${charge.amountFormatted} para o plano ${planCode}. ` +
         `Identificador: ${charge.txid}. Segue o comprovante.`,
     )
-    return `https://wa.me/${whatsappPhone}?text=${msg}`
   }, [charge, planCode, whatsappPhone])
 
   async function copy(value: string, what: string) {
@@ -263,12 +264,14 @@ export function PixCheckoutCard({
                 </div>
               </div>
 
-              <Button asChild variant="outline" className="w-full">
-                <a href={wppLink} target="_blank" rel="noreferrer">
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Enviar comprovante por WhatsApp
-                </a>
-              </Button>
+              {wppLink ? (
+                <Button asChild variant="outline" className="w-full">
+                  <a href={wppLink} target="_blank" rel="noreferrer">
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Enviar comprovante por WhatsApp
+                  </a>
+                </Button>
+              ) : null}
 
               <p className="text-xs text-muted-foreground text-center">
                 Status atualiza automaticamente a cada 15s. Pagamentos costumam ser

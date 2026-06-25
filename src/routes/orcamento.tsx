@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { buildWhatsappUrl, configuredCoreWhatsapp } from "@/lib/payment-fallback";
 
 import {
   CATALOG_MODULES, getModule, modulesByCategory,
@@ -1131,8 +1132,13 @@ function StepPagamento({ state, dispatch, totals, onReset }: StepProps) {
     }
   }
 
-  const whatsappMsg = encodeURIComponent(
+  const paymentLinkWhatsappUrl = buildWhatsappUrl(
+    configuredCoreWhatsapp(),
     `Olá! Acabei de fechar o orçamento ${state.quoteNumber} no site (${totals.lineItems.length} módulos, ${formatBRL(totals.totalCents)}/mês). Quero receber o link de pagamento.`,
+  );
+  const pixReceiptWhatsappUrl = buildWhatsappUrl(
+    configuredCoreWhatsapp(),
+    `Olá! Paguei via Pix o orçamento ${state.quoteNumber} (${formatBRL(totals.totalCents)}). Segue o comprovante.`,
   );
 
   return (
@@ -1175,15 +1181,14 @@ function StepPagamento({ state, dispatch, totals, onReset }: StepProps) {
                 {loading && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
                 Solicitar link de pagamento
               </Button>
-              <Button asChild variant="outline">
-                <a
-                  href={`https://wa.me/5521972554500?text=${whatsappMsg}`}
-                  target="_blank" rel="noopener noreferrer"
-                >
-                  <MessageCircle className="h-4 w-4 mr-1" />
-                  Falar no WhatsApp
-                </a>
-              </Button>
+              {paymentLinkWhatsappUrl ? (
+                <Button asChild variant="outline">
+                  <a href={paymentLinkWhatsappUrl} target="_blank" rel="noopener noreferrer">
+                    <MessageCircle className="h-4 w-4 mr-1" />
+                    Falar no WhatsApp
+                  </a>
+                </Button>
+              ) : null}
             </div>
           )}
         </div>
@@ -1337,17 +1342,13 @@ function StepPagamento({ state, dispatch, totals, onReset }: StepProps) {
                   </div>
                 )}
 
-                <Button asChild variant="outline" size="sm" className="w-full">
-                  <a
-                    href={`https://wa.me/5521972554500?text=${encodeURIComponent(
-                      `Olá! Paguei via Pix o orçamento ${state.quoteNumber} (${formatBRL(totals.totalCents)}). Segue o comprovante.`,
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <MessageCircle className="h-4 w-4 mr-1" /> Enviar comprovante por WhatsApp
-                  </a>
-                </Button>
+                {pixReceiptWhatsappUrl ? (
+                  <Button asChild variant="outline" size="sm" className="w-full">
+                    <a href={pixReceiptWhatsappUrl} target="_blank" rel="noopener noreferrer">
+                      <MessageCircle className="h-4 w-4 mr-1" /> Enviar comprovante por WhatsApp
+                    </a>
+                  </Button>
+                ) : null}
               </div>
             </div>
           )}

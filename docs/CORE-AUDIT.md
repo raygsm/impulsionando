@@ -19,7 +19,7 @@
 | empresa_modulos    | `company_modules`                               | ✅ |
 | assinaturas        | `subscriptions` + `billing_contracts`           | ✅ |
 | faturas            | `billing_invoices`                              | ✅ |
-| pagamentos         | `infinitepay_payments` + `fin_payments`         | ✅ |
+| pagamentos         | `mpago_payments` + `fin_payments`               | ✅ |
 | setups             | Coberto por `billing_contracts.setup_amount`    | ✅ |
 | templates_email    | `message_templates`                             | ✅ |
 | automacoes         | `billing_dunning_policy` + triggers + pgmq      | ✅ |
@@ -130,7 +130,7 @@ Prioridade média (polimento):
 - Flag `is_demo` em `companies` + função `core_provision_demo` para 1-click demo.
 
 Prioridade baixa:
-- Mercado Pago (prompt mencionou, mas o gateway ativo é InfinitePay — confirmar antes de tocar).
+- Mercado Pago ja e o gateway oficial do Core. InfinitePay permanece apenas como legado historico removido pelas migrations mais recentes.
 
 ---
 
