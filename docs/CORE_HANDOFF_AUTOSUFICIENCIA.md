@@ -36,9 +36,10 @@
 ## 2. Como operar sem Lovable
 
 ### 2.1 Deploy
-- **Workflow:** `.github/workflows/*` já contém pipeline de build/deploy.
-- **Frontend:** Cloudflare Workers (TanStack Start SSR).
-- **Backend:** Supabase gerido (sem painel via Lovable Cloud → manter projeto Supabase próprio se sair da plataforma).
+- **Workflow:** `.github/workflows/*` contém os gates de build, testes, RLS, segurança e migrations.
+- **Publicacao:** GitHub `main` e a fonte de verdade; a VPS/Hostinger consome o build validado.
+- **Frontend/SSR:** TanStack Start publicado fora do Lovable.
+- **Backend:** Supabase oficial `arygtqrdpcdkwnuwsgmm`, validado por `scripts/verify-supabase-target.mjs`.
 
 ### 2.2 Migrations
 ```bash
@@ -48,9 +49,10 @@ supabase db reset --linked       # restaura ambiente
 ```
 
 ### 2.3 Secrets & rotação
-- Definidos em `Project Settings → Edge Function Secrets` no Supabase.
-- Para rotação: `add_secret` (Lovable) **ou** `supabase secrets set NAME=value`.
-- `LOVABLE_API_KEY` é gerido pelo gateway — substituir por chamadas diretas a OpenAI/Anthropic se sair da plataforma.
+- Definidos em GitHub Secrets, Supabase Secrets e/ou secrets da VPS/Hostinger.
+- Para rotação Supabase: `supabase secrets set NAME=value`.
+- IA do Core usa `CORE_AI_API_KEY` e `CORE_AI_BASE_URL`.
+- `LOVABLE_LEGACY_ENABLED=true` deve existir apenas durante migração temporária de endpoints/conectores legados.
 
 ### 2.4 Cron & jobs
 - 12 jobs nativos em `cron.job` (ver `SELECT * FROM cron.job;`).

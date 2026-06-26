@@ -134,7 +134,8 @@ jobs:
 | `RESEND_API_KEY` | e-mail transacional | ✅ |
 | `TWILIO_API_KEY` + `TWILIO_FROM_PHONE` | SMS (opcional) | opcional |
 | `SMS_SIMULATE=true` | dev sem Twilio | dev |
-| `LOVABLE_API_KEY` | AI Gateway (talentos, IA) | quando IA ativa |
+| `CORE_AI_API_KEY` + `CORE_AI_BASE_URL` | IA do Core | quando IA ativa |
+| `LOVABLE_LEGACY_ENABLED` + `LOVABLE_API_KEY` | rotas/conectores Lovable legados | somente migração temporária |
 | `SENTRY_DSN` + `SENTRY_ENVIRONMENT` + `SENTRY_RELEASE` | observabilidade | recomendado |
 | `GIT_SHA` | exposto no /health | recomendado |
 | `APP_BASE_URL` + `PUBLIC_APP_URL` + `PUBLIC_SITE_URL` | links em e-mails | ✅ |
@@ -202,16 +203,70 @@ mpago_payments.provisioning_status = 'completed'
 
 ---
 
-## 6. Deploy / Rollback
+## 6. Deploy / Rollback independente do Lovable
 
-```bash
-# Deploy: push para main (Lovable publica automaticamente)
-# Rollback: na UI Lovable → Histórico → "Revert to this version"
-# Ou via git: identificar SHA bom em /api/public/health → revert
+A fonte de verdade de publicação é o GitHub. Lovable não deve ser usado para publicar, reverter ou aplicar migrations do Core.
+
+### 6.1 Pre-flight obrigatório
+
+1. Abrir PR contra `main`.
+2. Conferir que os checks obrigatórios passaram:
+   - `Production build + security gate`
+   - `Vitest full suite (456/456 must pass)`
+   - `Security scan + RLS regression`
+   - `Tenant isolation + email delivery`
+   - `Playwright E2E + a11y + visual`
+3. Confirmar que `scripts/verify-supabase-target.mjs` aponta para o projeto oficial `arygtqrdpcdkwnuwsgmm`.
+4. Confirmar que `scripts/verify-supabase-pooler.mjs` usa o pooler IPv4 do Supabase.
+5. Conferir que `LOVABLE_LEGACY_ENABLED` está vazio/desligado em produção.
+
+### 6.2 Aplicar migrations Supabase
+
+1. GitHub -> Actions -> `Apply Supabase Migrations`.
+2. Clicar em `Run workflow` na branch `main`.
+3. O workflow deve:
+   - normalizar `SUPABASE_PROJECT_ID` a partir de `supabase/config.toml`;
+   - validar `SUPABASE_URL` e `VITE_SUPABASE_URL`;
+   - validar pooler IPv4;
+   - executar `supabase db push --include-all`.
+4. Depois de migrations estruturais, rodar no SQL Editor se necessário:
+
+```sql
+notify pgrst, 'reload schema';
 ```
 
-Migrations Supabase rodam automaticamente no push.
-**Antes de migration destrutiva:** snapshot via Supabase Dashboard → Database → Backups.
+### 6.3 Publicar app na VPS/Hostinger
+
+1. Atualizar o código no servidor a partir de `main`.
+2. Instalar dependências com lockfile.
+3. Executar build de produção.
+4. Reiniciar o processo do app no gerenciador da VPS.
+5. Confirmar healthcheck:
+
+```bash
+curl -fsS https://app.impulsionando.com/api/public/health
+```
+
+6. Confirmar rotas críticas: `/`, `/admin`, `/core/clientes`, `/white-label/cockpit`.
+
+### 6.4 Validar N8N
+
+1. Acessar o N8N na VPS Hostinger.
+2. Confirmar variáveis do N8N:
+   - `IMPULSIONANDO_API_BASE`
+   - `IMPULSIONANDO_WEBHOOK_SECRET`
+   - `N8N_WEBHOOK_TOKEN`
+3. Confirmar workflows importados de `docs/n8n/`.
+4. Rodar um fluxo de teste por tenant ativo.
+5. Conferir logs em `n8n_workflow_runs` ou `webhook_runs`.
+
+### 6.5 Rollback seguro
+
+1. Se o problema for apenas app: reverter o commit no GitHub e republicar a VPS.
+2. Se o problema envolver migration: criar migration corretiva; não editar migration já aplicada.
+3. Se houver risco de dados: parar jobs N8N/crons, exportar tabelas afetadas e somente depois aplicar correção.
+4. Se o Supabase estiver indisponível: manter app em modo manutenção e validar restauração pelo painel Supabase.
+5. Lovable nao e mecanismo de rollback do Core.
 
 ---
 
