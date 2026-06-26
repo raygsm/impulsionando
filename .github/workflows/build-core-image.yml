@@ -37,8 +37,8 @@ permissions:
 
 env:
   IMAGE_NAME: ghcr.io/raygsm/impulsionando-core
-  SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://arygtqrdpcdkwnuwsgmm.supabase.co' }}
-  SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+  SUPABASE_URL: https://arygtqrdpcdkwnuwsgmm.supabase.co
+  SUPABASE_PUBLISHABLE_KEY: sb_publishable_2LwKeCKN7nZccPxZeHp36w_4Rbfx2JX
 
 jobs:
   build:
@@ -48,7 +48,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Validate required public Supabase values
+      - name: Validate official Core Supabase target
         run: |
           test -n "$SUPABASE_URL"
           test -n "$SUPABASE_PUBLISHABLE_KEY"
