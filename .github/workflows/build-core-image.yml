@@ -1,0 +1,89 @@
+name: Build Core Docker Image
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - codex/security-autonomy-audit
+    paths:
+      - Dockerfile
+      - package.json
+      - bun.lock
+      - app/**
+      - components/**
+      - composables/**
+      - content/**
+      - layouts/**
+      - lib/**
+      - middleware/**
+      - modules/**
+      - pages/**
+      - plugins/**
+      - public/**
+      - server/**
+      - src/**
+      - stores/**
+      - utils/**
+      - nuxt.config.*
+      - vite.config.*
+      - tailwind.config.*
+      - tsconfig.json
+      - .github/workflows/build-core-image.yml
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_NAME: ghcr.io/raygsm/impulsionando-core
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://arygtqrdpcdkwnuwsgmm.supabase.co' }}
+  SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+
+jobs:
+  build:
+    name: Build and publish Core image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate required public Supabase values
+        run: |
+          test -n "$SUPABASE_URL"
+          test -n "$SUPABASE_PUBLISHABLE_KEY"
+          case "$SUPABASE_URL" in
+            https://arygtqrdpcdkwnuwsgmm.supabase.co) ;;
+            *) echo "::error::SUPABASE_URL must point to the official Core project arygtqrdpcdkwnuwsgmm"; exit 1 ;;
+          esac
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ github.ref_name == 'main' && 'latest' || 'security-autonomy-audit' }}
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          build-args: |
+            APP_BASE_URL=https://app.impulsionando.com.br
+            PUBLIC_APP_URL=https://app.impulsionando.com.br
+            PUBLIC_SITE_URL=https://impulsionando.com.br
+            SITE_URL=https://impulsionando.com.br
+            VITE_PUBLIC_SITE_URL=https://impulsionando.com.br
+            SUPABASE_URL=${{ env.SUPABASE_URL }}
+            SUPABASE_PUBLISHABLE_KEY=${{ env.SUPABASE_PUBLISHABLE_KEY }}
+            SUPABASE_ANON_KEY=${{ env.SUPABASE_PUBLISHABLE_KEY }}
+            VITE_SUPABASE_URL=${{ env.SUPABASE_URL }}
+            VITE_SUPABASE_PUBLISHABLE_KEY=${{ env.SUPABASE_PUBLISHABLE_KEY }}

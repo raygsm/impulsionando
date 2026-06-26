@@ -1,0 +1,38 @@
+services:
+  impulsionando-core:
+    image: ghcr.io/raygsm/impulsionando-core:security-autonomy-audit
+    container_name: impulsionando-core
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      LOVABLE_LEGACY_ENABLED: "false"
+      APP_BASE_URL: https://app.impulsionando.com.br
+      PUBLIC_APP_URL: https://app.impulsionando.com.br
+      PUBLIC_SITE_URL: https://impulsionando.com.br
+      SITE_URL: https://impulsionando.com.br
+      VITE_PUBLIC_SITE_URL: https://impulsionando.com.br
+      SUPABASE_URL: https://arygtqrdpcdkwnuwsgmm.supabase.co
+      SUPABASE_PUBLISHABLE_KEY: COLE_AQUI_A_CHAVE_PUBLICAVEL_DO_SUPABASE
+      SUPABASE_ANON_KEY: COLE_AQUI_A_CHAVE_PUBLICAVEL_DO_SUPABASE
+      VITE_SUPABASE_URL: https://arygtqrdpcdkwnuwsgmm.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: COLE_AQUI_A_CHAVE_PUBLICAVEL_DO_SUPABASE
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=n8n-umlg_default
+      - traefik.http.services.impulsionando-core.loadbalancer.server.port=3000
+      - traefik.http.middlewares.impulsionando-core-https.redirectscheme.scheme=https
+      - traefik.http.routers.impulsionando-core-web.entrypoints=web
+      - traefik.http.routers.impulsionando-core-web.rule=Host(`impulsionando.com.br`) || Host(`www.impulsionando.com.br`) || Host(`app.impulsionando.com.br`) || HostRegexp(`{tenant:[a-z0-9-]+}.impulsionando.com.br`) || HostRegexp(`{tenant:[a-z0-9-]+}.{group:[a-z0-9-]+}.impulsionando.com.br`)
+      - traefik.http.routers.impulsionando-core-web.middlewares=impulsionando-core-https
+      - traefik.http.routers.impulsionando-core.entrypoints=websecure
+      - traefik.http.routers.impulsionando-core.rule=Host(`impulsionando.com.br`) || Host(`www.impulsionando.com.br`) || Host(`app.impulsionando.com.br`) || HostRegexp(`{tenant:[a-z0-9-]+}.impulsionando.com.br`) || HostRegexp(`{tenant:[a-z0-9-]+}.{group:[a-z0-9-]+}.impulsionando.com.br`)
+      - traefik.http.routers.impulsionando-core.tls=true
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
+    name: n8n-umlg_default
