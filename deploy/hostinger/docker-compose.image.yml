@@ -28,6 +28,7 @@ services:
       - traefik.http.routers.impulsionando-core.entrypoints=websecure
       - traefik.http.routers.impulsionando-core.rule=Host(`impulsionando.com.br`) || Host(`www.impulsionando.com.br`) || Host(`app.impulsionando.com.br`) || HostRegexp(`{tenant:[a-z0-9-]+}.impulsionando.com.br`) || HostRegexp(`{tenant:[a-z0-9-]+}.{group:[a-z0-9-]+}.impulsionando.com.br`)
       - traefik.http.routers.impulsionando-core.tls=true
+      - traefik.http.routers.impulsionando-core.tls.certresolver=letsencrypt
     networks:
       - proxy
 
