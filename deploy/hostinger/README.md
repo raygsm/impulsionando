@@ -66,3 +66,4 @@ Resultado esperado:
 - As URLs respondem por HTTPS.
 - Nao aparece erro de certificado.
 - O Core continua com `LOVABLE_LEGACY_ENABLED=false`.
+- O Traefik encaminha para a porta interna `80` do Nginx.

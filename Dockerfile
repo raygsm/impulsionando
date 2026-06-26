@@ -36,17 +36,14 @@ ENV VITE_SUPABASE_PUBLISHABLE_KEY=$VITE_SUPABASE_PUBLISHABLE_KEY
 COPY . .
 RUN bun run build
 
-FROM oven/bun:1-slim AS runner
-WORKDIR /app
+FROM nginx:1.27-alpine AS runner
 
 ENV NODE_ENV=production
-ENV HOST=0.0.0.0
-ENV PORT=3000
 ENV LOVABLE_LEGACY_ENABLED=false
 
-COPY --from=build /app/.output ./.output
-COPY --from=build /app/package.json ./package.json
+COPY deploy/hostinger/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/dist /usr/share/nginx/html
 
-EXPOSE 3000
+EXPOSE 80
 
-CMD ["bun", ".output/server/index.mjs"]
+CMD ["nginx", "-g", "daemon off;"]

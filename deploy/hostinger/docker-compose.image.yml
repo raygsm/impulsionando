@@ -6,7 +6,6 @@ services:
     environment:
       NODE_ENV: production
       HOST: 0.0.0.0
-      PORT: 3000
       LOVABLE_LEGACY_ENABLED: "false"
       APP_BASE_URL: https://app.impulsionando.com.br
       PUBLIC_APP_URL: https://app.impulsionando.com.br
@@ -21,7 +20,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=n8n-umlg_default
-      - traefik.http.services.impulsionando-core.loadbalancer.server.port=3000
+      - traefik.http.services.impulsionando-core.loadbalancer.server.port=80
       - traefik.http.middlewares.impulsionando-core-https.redirectscheme.scheme=https
       - traefik.http.routers.impulsionando-core-web.entrypoints=web
       - traefik.http.routers.impulsionando-core-web.rule=Host(`impulsionando.com.br`) || Host(`www.impulsionando.com.br`) || Host(`app.impulsionando.com.br`) || HostRegexp(`{tenant:[a-z0-9-]+}.impulsionando.com.br`) || HostRegexp(`{tenant:[a-z0-9-]+}.{group:[a-z0-9-]+}.impulsionando.com.br`)
