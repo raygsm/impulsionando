@@ -18,6 +18,13 @@ describe("Hostinger deployment package", () => {
     expect(compose).toContain("HostRegexp");
   });
 
+  it("passes public Supabase values to both build and runtime", () => {
+    expect(dockerfile).toContain("ARG VITE_SUPABASE_URL");
+    expect(dockerfile).toContain("ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL");
+    expect(compose).toContain("VITE_SUPABASE_URL:");
+    expect(compose).toContain("VITE_SUPABASE_PUBLISHABLE_KEY:");
+  });
+
   it("does not copy local env files into the Docker build context", () => {
     expect(dockerignore).toContain(".env");
     expect(dockerignore).toContain(".env.*");
