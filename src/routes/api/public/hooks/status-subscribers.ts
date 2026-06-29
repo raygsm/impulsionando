@@ -164,8 +164,10 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
           const isResolved = i.resolved_at ? Date.parse(i.resolved_at) >= sinceMs : false
           const isPM = i.postmortem_published_at ? Date.parse(i.postmortem_published_at) >= sinceMs : false
           const scope = i.scope ?? '—'
+          const slug = slugForIncident(i.id)
 
           for (const s of confirmed) {
+            if (!subscriberWantsService(s.id, slug)) continue
             if (isOpened) {
               events.push({
                 subscriber: s,
