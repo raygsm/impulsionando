@@ -130,6 +130,26 @@ function StatusPage() {
   const overall = data?.overall ?? "unknown";
   const badge = OVERALL_LABEL[overall];
 
+  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const toggle = (cat: string) =>
+    setCollapsed((prev) => ({ ...prev, [cat]: !prev[cat] }));
+
+  const categories = (() => {
+    const set = new Set<string>();
+    for (const s of data?.services ?? []) {
+      const k = s.category && s.category.trim() ? s.category : "Geral";
+      set.add(k);
+    }
+    return Array.from(set).sort((a, b) => {
+      if (a === "Geral") return 1;
+      if (b === "Geral") return -1;
+      return a.localeCompare(b);
+    });
+  })();
+
+
+
   return (
     <main className="min-h-screen bg-background">
       <div className="mx-auto max-w-5xl px-4 py-10 space-y-8">
@@ -191,10 +211,40 @@ function StatusPage() {
 
         {/* Services */}
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle className="text-base">Serviços monitorados (uptime 90 dias)</CardTitle>
+            {categories.length > 1 ? (
+              <div className="flex flex-wrap gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setActiveCategory("all")}
+                  className={`text-xs px-2.5 py-1 rounded-full border transition ${
+                    activeCategory === "all"
+                      ? "bg-foreground text-background border-foreground"
+                      : "bg-background hover:bg-muted border-border text-muted-foreground"
+                  }`}
+                >
+                  Todas
+                </button>
+                {categories.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setActiveCategory(c)}
+                    className={`text-xs px-2.5 py-1 rounded-full border transition ${
+                      activeCategory === c
+                        ? "bg-foreground text-background border-foreground"
+                        : "bg-background hover:bg-muted border-border text-muted-foreground"
+                    }`}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </CardHeader>
           <CardContent>
+
             {isLoading ? (
               <p className="text-sm text-muted-foreground">Carregando…</p>
             ) : !data?.services.length ? (
@@ -208,21 +258,34 @@ function StatusPage() {
                   arr.push(s);
                   groups.set(k, arr);
                 }
-                const ordered = Array.from(groups.entries()).sort(([a], [b]) => {
-                  if (a === "Geral") return 1;
-                  if (b === "Geral") return -1;
-                  return a.localeCompare(b);
-                });
+                const ordered = Array.from(groups.entries())
+                  .filter(([cat]) => activeCategory === "all" || cat === activeCategory)
+                  .sort(([a], [b]) => {
+                    if (a === "Geral") return 1;
+                    if (b === "Geral") return -1;
+                    return a.localeCompare(b);
+                  });
+
                 return (
                   <div className="space-y-6">
                     {ordered.map(([cat, rows]) => {
                       const allUp = rows.every((s) => s.currently_up !== false);
+                      const isCollapsed = collapsed[cat] === true;
                       return (
                         <section key={cat}>
-                          <header className="flex items-center justify-between mb-2">
-                            <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                              {cat}
-                            </h3>
+                          <header className="flex items-center justify-between mb-2 gap-2">
+                            <button
+                              type="button"
+                              onClick={() => toggle(cat)}
+                              className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground hover:text-foreground"
+                              aria-expanded={!isCollapsed}
+                            >
+                              <span className="inline-block w-3 text-center">{isCollapsed ? "▸" : "▾"}</span>
+                              <span>{cat}</span>
+                              <span className="text-[10px] font-normal normal-case text-muted-foreground/70">
+                                ({rows.length})
+                              </span>
+                            </button>
                             <span
                               className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${
                                 allUp
@@ -233,7 +296,9 @@ function StatusPage() {
                               {allUp ? "Operacional" : "Com incidentes"}
                             </span>
                           </header>
+                          {!isCollapsed && (
                           <ul className="divide-y border rounded-md">
+
                             {rows.map((s, i) => {
                               const up = s.currently_up !== false;
                               const history = s.history ?? [];
@@ -297,7 +362,9 @@ function StatusPage() {
                               );
                             })}
                           </ul>
+                          )}
                         </section>
+
                       );
                     })}
                   </div>
