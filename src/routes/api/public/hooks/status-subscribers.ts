@@ -249,6 +249,7 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
           for (const s of confirmed) {
             if (!subscriberWantsService(s.id, slug)) continue
             if (!subscriberWantsCategory(s, cat)) continue
+            if (!severityAllowed(s, inc?.severity ?? null)) continue
             events.push({
               subscriber: s,
               incident_id: u.incident_id,
