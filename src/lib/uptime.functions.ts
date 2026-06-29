@@ -14,7 +14,7 @@ export const getUptimeOverview = createServerFn({ method: 'GET' })
 
     const { data: state } = await supabaseAdmin
       .from('uptime_state')
-      .select('url, label, public_slug, paused, show_on_public, sort_order, is_up, since, last_check_at, last_alert_at, consecutive_failures, last_error, alert_emails, alert_whatsapps, alert_after_seconds')
+      .select('url, label, public_slug, category, paused, show_on_public, sort_order, is_up, since, last_check_at, last_alert_at, consecutive_failures, last_error, alert_emails, alert_whatsapps, alert_after_seconds')
       .order('url')
 
     const { data: recent } = await supabaseAdmin
@@ -66,6 +66,7 @@ export const upsertUptimeTarget = createServerFn({ method: 'POST' })
     url: string
     original_url?: string | null
     label?: string | null
+    category?: string | null
     alert_emails?: string[] | string
     alert_whatsapps?: string[] | string
     alert_after_seconds?: number | null
@@ -81,6 +82,7 @@ export const upsertUptimeTarget = createServerFn({ method: 'POST' })
     const payload = {
       url,
       label: data.label?.trim() || null,
+      category: data.category?.trim() || null,
       alert_emails: parseList(data.alert_emails),
       alert_whatsapps: parseList(data.alert_whatsapps),
       alert_after_seconds: data.alert_after_seconds ?? undefined,
