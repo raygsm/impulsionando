@@ -77,7 +77,7 @@ export function TenantSwitcher() {
             <div className="px-3 py-4 text-sm text-muted-foreground">Nenhum tenant.</div>
           )}
           {tenants.map((t) => {
-            const active = t.id === (useImpersonation as any).companyId;
+            const active = t.id === impersonatedCompanyId;
             return (
               <button
                 key={t.id}
