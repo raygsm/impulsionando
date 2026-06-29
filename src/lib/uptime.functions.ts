@@ -14,7 +14,7 @@ export const getUptimeOverview = createServerFn({ method: 'GET' })
 
     const { data: state } = await supabaseAdmin
       .from('uptime_state')
-      .select('url, is_up, since, last_check_at, last_alert_at, consecutive_failures, last_error, alert_emails, alert_whatsapps, alert_after_seconds')
+      .select('url, label, paused, show_on_public, sort_order, is_up, since, last_check_at, last_alert_at, consecutive_failures, last_error, alert_emails, alert_whatsapps, alert_after_seconds')
       .order('url')
 
     const { data: recent } = await supabaseAdmin
