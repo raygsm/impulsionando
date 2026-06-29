@@ -285,6 +285,22 @@ function AdminStatusSubscribers() {
                     </div>
 
                     <Badge variant={state.variant}>{state.label}</Badge>
+                    <Select
+                      value={(s.min_severity ?? "info") as string}
+                      onValueChange={(v) =>
+                        severityMut.mutate({ id: s.id, min_severity: v as any })
+                      }
+                    >
+                      <SelectTrigger className="w-32 h-8 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="info">Tudo (info)</SelectItem>
+                        <SelectItem value="minor">Minor+</SelectItem>
+                        <SelectItem value="major">Major+</SelectItem>
+                        <SelectItem value="critical">Crítico</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <Button
                       size="sm"
                       variant="outline"
