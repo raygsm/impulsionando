@@ -47,7 +47,7 @@ function unknownBadge(label: string) {
   })
 }
 
-export const Route = createFileRoute('/api/public/status/$slug/badge[.]svg')({
+export const Route = createFileRoute('/api/public/status/$slug/badge.svg')({
   server: {
     handlers: {
       GET: async ({ params }) => {
