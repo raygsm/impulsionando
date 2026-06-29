@@ -183,6 +183,11 @@ function AdminStatusWebhooksPage() {
                           ? 'todos'
                           : (h.services ?? []).join(', ')}
                       </td>
+                      <td className="py-2 pr-3 text-xs">
+                        {(h.categories ?? []).length === 0
+                          ? 'todas'
+                          : (h.categories ?? []).join(', ')}
+                      </td>
                       <td className="py-2 pr-3">
                         {h.last_status_code ? (
                           <Badge variant={h.last_error ? 'destructive' : 'default'}>
