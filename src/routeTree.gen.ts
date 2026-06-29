@@ -67,6 +67,7 @@ import { Route as WhiteLabelLoginRouteImport } from './routes/white-label.login'
 import { Route as VitrineSlugRouteImport } from './routes/vitrine.$slug'
 import { Route as TrialCadastroRouteImport } from './routes/trial_.cadastro'
 import { Route as TrabalheConoscoNichoRouteImport } from './routes/trabalhe-conosco.$nicho'
+import { Route as StatusEmbedRouteImport } from './routes/status.embed'
 import { Route as ShowroomWhatsappRouteImport } from './routes/showroom.whatsapp'
 import { Route as ShowroomSiteRouteImport } from './routes/showroom.site'
 import { Route as ShowroomSegurancaRouteImport } from './routes/showroom.seguranca'
@@ -1003,6 +1004,11 @@ const TrabalheConoscoNichoRoute = TrabalheConoscoNichoRouteImport.update({
   id: '/trabalhe-conosco/$nicho',
   path: '/trabalhe-conosco/$nicho',
   getParentRoute: () => rootRouteImport,
+} as any)
+const StatusEmbedRoute = StatusEmbedRouteImport.update({
+  id: '/embed',
+  path: '/embed',
+  getParentRoute: () => StatusRoute,
 } as any)
 const ShowroomWhatsappRoute = ShowroomWhatsappRouteImport.update({
   id: '/showroom/whatsapp',
@@ -4731,7 +4737,7 @@ export interface FileRoutesByFullPath {
   '/riomed': typeof RiomedRouteWithChildren
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
-  '/status': typeof StatusRoute
+  '/status': typeof StatusRouteWithChildren
   '/suporte': typeof SuporteRoute
   '/talentos': typeof TalentosRoute
   '/termos': typeof TermosRoute
@@ -4883,6 +4889,7 @@ export interface FileRoutesByFullPath {
   '/showroom/seguranca': typeof ShowroomSegurancaRoute
   '/showroom/site': typeof ShowroomSiteRoute
   '/showroom/whatsapp': typeof ShowroomWhatsappRoute
+  '/status/embed': typeof StatusEmbedRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
@@ -5435,7 +5442,7 @@ export interface FileRoutesByTo {
   '/riomed': typeof RiomedRouteWithChildren
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
-  '/status': typeof StatusRoute
+  '/status': typeof StatusRouteWithChildren
   '/suporte': typeof SuporteRoute
   '/talentos': typeof TalentosRoute
   '/termos': typeof TermosRoute
@@ -5577,6 +5584,7 @@ export interface FileRoutesByTo {
   '/showroom/seguranca': typeof ShowroomSegurancaRoute
   '/showroom/site': typeof ShowroomSiteRoute
   '/showroom/whatsapp': typeof ShowroomWhatsappRoute
+  '/status/embed': typeof StatusEmbedRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
@@ -6132,7 +6140,7 @@ export interface FileRoutesById {
   '/riomed': typeof RiomedRouteWithChildren
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
-  '/status': typeof StatusRoute
+  '/status': typeof StatusRouteWithChildren
   '/suporte': typeof SuporteRoute
   '/talentos': typeof TalentosRoute
   '/termos': typeof TermosRoute
@@ -6284,6 +6292,7 @@ export interface FileRoutesById {
   '/showroom/seguranca': typeof ShowroomSegurancaRoute
   '/showroom/site': typeof ShowroomSiteRoute
   '/showroom/whatsapp': typeof ShowroomWhatsappRoute
+  '/status/embed': typeof StatusEmbedRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial_/cadastro': typeof TrialCadastroRoute
   '/vitrine/$slug': typeof VitrineSlugRoute
@@ -6992,6 +7001,7 @@ export interface FileRouteTypes {
     | '/showroom/seguranca'
     | '/showroom/site'
     | '/showroom/whatsapp'
+    | '/status/embed'
     | '/trabalhe-conosco/$nicho'
     | '/trial/cadastro'
     | '/vitrine/$slug'
@@ -7686,6 +7696,7 @@ export interface FileRouteTypes {
     | '/showroom/seguranca'
     | '/showroom/site'
     | '/showroom/whatsapp'
+    | '/status/embed'
     | '/trabalhe-conosco/$nicho'
     | '/trial/cadastro'
     | '/vitrine/$slug'
@@ -8392,6 +8403,7 @@ export interface FileRouteTypes {
     | '/showroom/seguranca'
     | '/showroom/site'
     | '/showroom/whatsapp'
+    | '/status/embed'
     | '/trabalhe-conosco/$nicho'
     | '/trial_/cadastro'
     | '/vitrine/$slug'
@@ -8948,7 +8960,7 @@ export interface RootRouteChildren {
   RiomedRoute: typeof RiomedRouteWithChildren
   SobreRoute: typeof SobreRoute
   SolucoesRoute: typeof SolucoesRoute
-  StatusRoute: typeof StatusRoute
+  StatusRoute: typeof StatusRouteWithChildren
   SuporteRoute: typeof SuporteRoute
   TalentosRoute: typeof TalentosRoute
   TermosRoute: typeof TermosRoute
@@ -9509,6 +9521,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/trabalhe-conosco/$nicho'
       preLoaderRoute: typeof TrabalheConoscoNichoRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/status/embed': {
+      id: '/status/embed'
+      path: '/embed'
+      fullPath: '/status/embed'
+      preLoaderRoute: typeof StatusEmbedRouteImport
+      parentRoute: typeof StatusRoute
     }
     '/showroom/whatsapp': {
       id: '/showroom/whatsapp'
@@ -15668,6 +15687,17 @@ const RiomedRouteChildren: RiomedRouteChildren = {
 const RiomedRouteWithChildren =
   RiomedRoute._addFileChildren(RiomedRouteChildren)
 
+interface StatusRouteChildren {
+  StatusEmbedRoute: typeof StatusEmbedRoute
+}
+
+const StatusRouteChildren: StatusRouteChildren = {
+  StatusEmbedRoute: StatusEmbedRoute,
+}
+
+const StatusRouteWithChildren =
+  StatusRoute._addFileChildren(StatusRouteChildren)
+
 interface VitrineRouteChildren {
   VitrineSlugRoute: typeof VitrineSlugRoute
 }
@@ -15791,7 +15821,7 @@ const rootRouteChildren: RootRouteChildren = {
   RiomedRoute: RiomedRouteWithChildren,
   SobreRoute: SobreRoute,
   SolucoesRoute: SolucoesRoute,
-  StatusRoute: StatusRoute,
+  StatusRoute: StatusRouteWithChildren,
   SuporteRoute: SuporteRoute,
   TalentosRoute: TalentosRoute,
   TermosRoute: TermosRoute,
