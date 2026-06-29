@@ -493,6 +493,7 @@ import { Route as AuthenticatedAdminMarketplaceOpsRouteImport } from './routes/_
 import { Route as AuthenticatedAdminMarketplaceHealthRouteImport } from './routes/_authenticated/admin.marketplace-health'
 import { Route as AuthenticatedAdminMarketplaceB2bHealthRouteImport } from './routes/_authenticated/admin.marketplace-b2b-health'
 import { Route as AuthenticatedAdminMarketingHealthRouteImport } from './routes/_authenticated/admin.marketing-health'
+import { Route as AuthenticatedAdminMaintenanceRouteImport } from './routes/_authenticated/admin.maintenance'
 import { Route as AuthenticatedAdminLoyaltyClubeHealthRouteImport } from './routes/_authenticated/admin.loyalty-clube-health'
 import { Route as AuthenticatedAdminLifecycleRouteImport } from './routes/_authenticated/admin.lifecycle'
 import { Route as AuthenticatedAdminJobsQueuesReliabilityHealthRouteImport } from './routes/_authenticated/admin.jobs-queues-reliability-health'
@@ -3389,6 +3390,12 @@ const AuthenticatedAdminMarketingHealthRoute =
     path: '/admin/marketing-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminMaintenanceRoute =
+  AuthenticatedAdminMaintenanceRouteImport.update({
+    id: '/admin/maintenance',
+    path: '/admin/maintenance',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminLoyaltyClubeHealthRoute =
   AuthenticatedAdminLoyaltyClubeHealthRouteImport.update({
     id: '/admin/loyalty-clube-health',
@@ -4996,6 +5003,7 @@ export interface FileRoutesByFullPath {
   '/admin/jobs-queues-reliability-health': typeof AuthenticatedAdminJobsQueuesReliabilityHealthRoute
   '/admin/lifecycle': typeof AuthenticatedAdminLifecycleRoute
   '/admin/loyalty-clube-health': typeof AuthenticatedAdminLoyaltyClubeHealthRoute
+  '/admin/maintenance': typeof AuthenticatedAdminMaintenanceRoute
   '/admin/marketing-health': typeof AuthenticatedAdminMarketingHealthRoute
   '/admin/marketplace-b2b-health': typeof AuthenticatedAdminMarketplaceB2bHealthRoute
   '/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
@@ -5692,6 +5700,7 @@ export interface FileRoutesByTo {
   '/admin/jobs-queues-reliability-health': typeof AuthenticatedAdminJobsQueuesReliabilityHealthRoute
   '/admin/lifecycle': typeof AuthenticatedAdminLifecycleRoute
   '/admin/loyalty-clube-health': typeof AuthenticatedAdminLoyaltyClubeHealthRoute
+  '/admin/maintenance': typeof AuthenticatedAdminMaintenanceRoute
   '/admin/marketing-health': typeof AuthenticatedAdminMarketingHealthRoute
   '/admin/marketplace-b2b-health': typeof AuthenticatedAdminMarketplaceB2bHealthRoute
   '/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
@@ -6401,6 +6410,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/jobs-queues-reliability-health': typeof AuthenticatedAdminJobsQueuesReliabilityHealthRoute
   '/_authenticated/admin/lifecycle': typeof AuthenticatedAdminLifecycleRoute
   '/_authenticated/admin/loyalty-clube-health': typeof AuthenticatedAdminLoyaltyClubeHealthRoute
+  '/_authenticated/admin/maintenance': typeof AuthenticatedAdminMaintenanceRoute
   '/_authenticated/admin/marketing-health': typeof AuthenticatedAdminMarketingHealthRoute
   '/_authenticated/admin/marketplace-b2b-health': typeof AuthenticatedAdminMarketplaceB2bHealthRoute
   '/_authenticated/admin/marketplace-health': typeof AuthenticatedAdminMarketplaceHealthRoute
@@ -7111,6 +7121,7 @@ export interface FileRouteTypes {
     | '/admin/jobs-queues-reliability-health'
     | '/admin/lifecycle'
     | '/admin/loyalty-clube-health'
+    | '/admin/maintenance'
     | '/admin/marketing-health'
     | '/admin/marketplace-b2b-health'
     | '/admin/marketplace-health'
@@ -7807,6 +7818,7 @@ export interface FileRouteTypes {
     | '/admin/jobs-queues-reliability-health'
     | '/admin/lifecycle'
     | '/admin/loyalty-clube-health'
+    | '/admin/maintenance'
     | '/admin/marketing-health'
     | '/admin/marketplace-b2b-health'
     | '/admin/marketplace-health'
@@ -8515,6 +8527,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/jobs-queues-reliability-health'
     | '/_authenticated/admin/lifecycle'
     | '/_authenticated/admin/loyalty-clube-health'
+    | '/_authenticated/admin/maintenance'
     | '/_authenticated/admin/marketing-health'
     | '/_authenticated/admin/marketplace-b2b-health'
     | '/_authenticated/admin/marketplace-health'
@@ -12518,6 +12531,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMarketingHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/maintenance': {
+      id: '/_authenticated/admin/maintenance'
+      path: '/admin/maintenance'
+      fullPath: '/admin/maintenance'
+      preLoaderRoute: typeof AuthenticatedAdminMaintenanceRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/loyalty-clube-health': {
       id: '/_authenticated/admin/loyalty-clube-health'
       path: '/admin/loyalty-clube-health'
@@ -15018,6 +15038,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminJobsQueuesReliabilityHealthRoute: typeof AuthenticatedAdminJobsQueuesReliabilityHealthRoute
   AuthenticatedAdminLifecycleRoute: typeof AuthenticatedAdminLifecycleRoute
   AuthenticatedAdminLoyaltyClubeHealthRoute: typeof AuthenticatedAdminLoyaltyClubeHealthRoute
+  AuthenticatedAdminMaintenanceRoute: typeof AuthenticatedAdminMaintenanceRoute
   AuthenticatedAdminMarketingHealthRoute: typeof AuthenticatedAdminMarketingHealthRoute
   AuthenticatedAdminMarketplaceB2bHealthRoute: typeof AuthenticatedAdminMarketplaceB2bHealthRoute
   AuthenticatedAdminMarketplaceHealthRoute: typeof AuthenticatedAdminMarketplaceHealthRoute
@@ -15333,6 +15354,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminLifecycleRoute: AuthenticatedAdminLifecycleRoute,
   AuthenticatedAdminLoyaltyClubeHealthRoute:
     AuthenticatedAdminLoyaltyClubeHealthRoute,
+  AuthenticatedAdminMaintenanceRoute: AuthenticatedAdminMaintenanceRoute,
   AuthenticatedAdminMarketingHealthRoute:
     AuthenticatedAdminMarketingHealthRoute,
   AuthenticatedAdminMarketplaceB2bHealthRoute:
