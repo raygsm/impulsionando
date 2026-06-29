@@ -13,7 +13,7 @@ import {
   listAllInvoices,
   type BillingOverviewRow,
   type BillingInvoiceRow,
-} from "@/lib/billing-admin.functions";
+} from "@/lib/billing-overview.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/faturamento")({
   head: () => ({
