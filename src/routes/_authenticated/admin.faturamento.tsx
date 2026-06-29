@@ -116,7 +116,7 @@ function FaturamentoPage() {
                       <td className="px-3 py-2">
                         {r.public_slug ? (
                           <Link
-                            to="/admin/clientes/$slug" as any
+                            to="/admin/clientes/$slug"
                             params={{ slug: r.public_slug }}
                             className="hover:underline font-medium"
                           >
