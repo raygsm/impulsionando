@@ -75,6 +75,7 @@ jobs:
           push: true
           tags: |
             ${{ env.IMAGE_NAME }}:security-autonomy-audit
+            ${{ env.IMAGE_NAME }}:hostinger-stable
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
           build-args: |
             APP_BASE_URL=https://app.impulsionando.com.br

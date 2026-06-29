@@ -27,7 +27,8 @@ describe("Hostinger deployment package", () => {
 
   it("serves Vite output through Nginx in production", () => {
     expect(dockerfile).toContain("FROM nginx:");
-    expect(dockerfile).toContain("COPY --from=build /app/dist /usr/share/nginx/html");
+    expect(dockerfile).toContain("COPY --from=build /app/docker-public/ /usr/share/nginx/html/");
+    expect(dockerfile).toContain('! grep -qi "Welcome to nginx" /usr/share/nginx/html/index.html');
     expect(compose).toContain("loadbalancer.server.port=80");
   });
 

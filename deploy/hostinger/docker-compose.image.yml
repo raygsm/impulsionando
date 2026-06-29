@@ -1,6 +1,6 @@
 services:
   impulsionando-core:
-    image: ghcr.io/raygsm/impulsionando-core:security-autonomy-audit
+    image: ghcr.io/raygsm/impulsionando-core:hostinger-stable
     container_name: impulsionando-core
     restart: unless-stopped
     environment:

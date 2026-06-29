@@ -26,7 +26,7 @@ Use `docker-compose.image.yml` no Gerenciador Docker da Hostinger. Esse modo nao
 Antes de implantar:
 
 1. Execute o workflow `Build Core Docker Image` no GitHub.
-2. Confirme que a imagem `ghcr.io/raygsm/impulsionando-core:security-autonomy-audit` foi publicada.
+2. Confirme que a imagem `ghcr.io/raygsm/impulsionando-core:hostinger-stable` foi publicada.
 3. No Compose da Hostinger, substitua `COLE_AQUI_A_CHAVE_PUBLICAVEL_DO_SUPABASE` pela chave `Publishable key` do projeto Supabase oficial.
 
 ### Opcao por terminal
