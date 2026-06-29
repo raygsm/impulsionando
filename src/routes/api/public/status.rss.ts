@@ -73,7 +73,9 @@ export const Route = createFileRoute('/api/public/status/rss')({
         const items: Item[] = []
 
         for (const i of incidents ?? []) {
+          if (!matchesFilter(i.affected_service)) continue
           const status = i.resolved_at ? 'Resolvido' : (i.status ?? 'Em andamento')
+          const cat = resolveCategory(i.affected_service)
           items.push({
             guid: `incident:${i.id}:${i.resolved_at ?? i.started_at}`,
             title: `[${(i.severity ?? 'sev?').toString().toUpperCase()}] ${i.title} — ${status}`,
@@ -81,15 +83,18 @@ export const Route = createFileRoute('/api/public/status/rss')({
             pubDate: rfc822(i.resolved_at ?? i.started_at),
             description: [
               i.affected_service ? `Serviço: ${i.affected_service}` : '',
+              `Categoria: ${cat}`,
               i.summary ?? '',
             ]
               .filter(Boolean)
               .join('\n\n'),
-            category: 'incident',
+            category: `incident/${cat}`,
           })
         }
 
         for (const p of postmortems ?? []) {
+          if (!matchesFilter(p.affected_service)) continue
+          const cat = resolveCategory(p.affected_service)
           items.push({
             guid: `postmortem:${p.id}:${p.postmortem_published_at}`,
             title: `Postmortem: ${p.title}`,
@@ -97,13 +102,15 @@ export const Route = createFileRoute('/api/public/status/rss')({
             pubDate: rfc822(p.postmortem_published_at as string),
             description: [
               p.affected_service ? `Serviço: ${p.affected_service}` : '',
+              `Categoria: ${cat}`,
               p.postmortem_summary ?? '',
             ]
               .filter(Boolean)
               .join('\n\n'),
-            category: 'postmortem',
+            category: `postmortem/${cat}`,
           })
         }
+
 
         items.sort((a, b) => +new Date(b.pubDate) - +new Date(a.pubDate))
 
