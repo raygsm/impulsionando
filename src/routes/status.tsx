@@ -24,6 +24,13 @@ type ServiceRow = {
   last_check_at: string | null;
 };
 
+type IncidentUpdate = {
+  id: string;
+  status: string;
+  body: string;
+  created_at: string;
+};
+
 type IncidentRow = {
   id: string;
   scope: string;
@@ -33,6 +40,7 @@ type IncidentRow = {
   title: string;
   detected_at: string;
   resolved_at: string | null;
+  updates?: IncidentUpdate[];
 };
 
 type PostmortemRow = {
