@@ -5,6 +5,7 @@ import { useState } from "react";
 import {
   listStatusSubscribers,
   listStatusDispatchLog,
+  listStatusServiceBreakdown,
   forceUnsubscribeStatusSubscriber,
   resendStatusConfirmation,
   broadcastStatusAnnouncement,
@@ -33,6 +34,7 @@ type StatusFilter = "all" | "confirmed" | "pending" | "unsubscribed" | "bounced"
 function AdminStatusSubscribers() {
   const list = useServerFn(listStatusSubscribers);
   const logFn = useServerFn(listStatusDispatchLog);
+  const breakdownFn = useServerFn(listStatusServiceBreakdown);
   const unsubFn = useServerFn(forceUnsubscribeStatusSubscriber);
   const resendFn = useServerFn(resendStatusConfirmation);
   const broadcastFn = useServerFn(broadcastStatusAnnouncement);
@@ -51,6 +53,11 @@ function AdminStatusSubscribers() {
     queryKey: ["admin-status-dispatch", selectedId],
     queryFn: () =>
       logFn({ data: { subscriber_id: selectedId ?? undefined, limit: 100 } }),
+  });
+
+  const { data: breakdown } = useQuery({
+    queryKey: ["admin-status-breakdown"],
+    queryFn: () => breakdownFn(),
   });
 
   const unsubMut = useMutation({
@@ -110,6 +117,37 @@ function AdminStatusSubscribers() {
           </Card>
         ))}
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Cobertura por serviço</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <p className="text-xs text-muted-foreground">
+            Inscritos ativos: <strong>{breakdown?.activeSubscribers ?? 0}</strong>
+            {" • "}Sem filtro (recebem tudo): <strong>{breakdown?.subsAllServices ?? 0}</strong>
+            {" • "}Com filtro: <strong>{breakdown?.subsWithFilter ?? 0}</strong>
+          </p>
+          {(breakdown?.breakdown ?? []).length === 0 ? (
+            <p className="text-muted-foreground text-sm">Nenhum serviço público configurado.</p>
+          ) : (
+            <div className="border rounded-md divide-y text-sm">
+              {(breakdown?.breakdown ?? []).map((b: any) => (
+                <div key={b.slug} className="p-2 flex flex-wrap items-center gap-3">
+                  <span className="font-medium flex-1 min-w-48">{b.label}</span>
+                  <code className="text-xs text-muted-foreground">{b.slug}</code>
+                  {!b.show_on_public && <Badge variant="secondary">oculto</Badge>}
+                  <span className="text-xs text-muted-foreground">
+                    explícito: <strong>{b.explicit_subscribers}</strong>
+                  </span>
+                  <Badge>{b.effective_subscribers} efetivos</Badge>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
 
       <Card>
         <CardHeader>
@@ -219,7 +257,21 @@ function AdminStatusSubscribers() {
                           : ""}
                         {s.source ? ` • origem ${s.source}` : ""}
                       </div>
+                      {(s.services?.length ?? 0) > 0 ? (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {s.services.map((slug: string) => (
+                            <Badge key={slug} variant="outline" className="text-[10px]">
+                              {slug}
+                            </Badge>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-[11px] text-muted-foreground mt-1">
+                          recebe todos os serviços
+                        </div>
+                      )}
                     </div>
+
                     <Badge variant={state.variant}>{state.label}</Badge>
                     <Button
                       size="sm"
