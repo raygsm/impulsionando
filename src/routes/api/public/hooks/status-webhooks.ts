@@ -317,11 +317,16 @@ export const Route = createFileRoute('/api/public/hooks/status-webhooks')({
         let failed = 0
         for (const h of hooks) {
           const filter = Array.isArray(h.services) ? h.services : []
+          const catFilter = Array.isArray(h.categories) ? h.categories : []
           for (const ev of events) {
             if (ev.category === 'incident' && !h.notify_incidents) continue
             if (ev.category === 'maintenance' && !h.notify_maintenance) continue
             if (filter.length > 0 && (!ev.service_slug || !filter.includes(ev.service_slug)))
               continue
+            if (catFilter.length > 0) {
+              const cat = categoryOf(ev.service_slug)
+              if (!cat || !catFilter.includes(cat)) continue
+            }
             const key = `${h.id}::${ev.reference_key}`
             if (seen.has(key)) continue
 
