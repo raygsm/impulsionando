@@ -84,7 +84,7 @@ function Page() {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.rows.map((r) => (
+                  {data.rows.map((r: PostmortemRow) => (
                     <tr key={r.id} className="border-b last:border-0">
                       <td className="px-4 py-2 max-w-[320px] truncate">{r.title}</td>
                       <td className="text-xs">{r.scope}</td>
@@ -95,7 +95,7 @@ function Page() {
                       </td>
                       <td>{statusBadge(r)}</td>
                       <td className="text-right tabular-nums">
-                        {r.postmortem_action_items.filter((a) => !a.done).length} /{" "}
+                        {r.postmortem_action_items.filter((a: ActionItem) => !a.done).length} /{" "}
                         {r.postmortem_action_items.length}
                       </td>
                       <td className="text-right pr-4">
