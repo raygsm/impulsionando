@@ -64,7 +64,7 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
           supabaseAdmin
             .from('core_incidents')
             .select(
-              'id,title,severity,status,detected_at,resolved_at,description,scope,postmortem_published_at,postmortem_summary',
+              'id,title,severity,status,detected_at,resolved_at,description,scope,url,postmortem_published_at,postmortem_summary',
             )
             .or(`detected_at.gte.${since},resolved_at.gte.${since},postmortem_published_at.gte.${since}`)
             .order('detected_at', { ascending: false })
