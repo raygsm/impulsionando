@@ -254,6 +254,7 @@ function ServiceEmbed({ slug }: { slug: string }) {
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   const badgeUrl = `${origin}/api/public/status/${slug}/badge.svg`;
   const pageUrl = `${origin}/status/${slug}`;
+  const rssUrl = `${origin}/api/public/status/${slug}/rss`;
   const md = `[![status](${badgeUrl})](${pageUrl})`;
   const html = `<a href="${pageUrl}"><img src="${badgeUrl}" alt="status" /></a>`;
   const copy = (txt: string) => {
@@ -264,7 +265,7 @@ function ServiceEmbed({ slug }: { slug: string }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Badge & embed</CardTitle>
+        <CardTitle className="text-base">Badge, embed & RSS</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex items-center gap-3">
@@ -282,6 +283,14 @@ function ServiceEmbed({ slug }: { slug: string }) {
           <div className="flex gap-2">
             <input readOnly value={html} className="flex-1 rounded border px-2 py-1 text-xs font-mono" />
             <button type="button" onClick={() => copy(html)} className="text-xs px-2 py-1 rounded border hover:bg-muted">Copiar</button>
+          </div>
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs text-muted-foreground">Feed RSS deste serviço</label>
+          <div className="flex gap-2">
+            <input readOnly value={rssUrl} className="flex-1 rounded border px-2 py-1 text-xs font-mono" />
+            <button type="button" onClick={() => copy(rssUrl)} className="text-xs px-2 py-1 rounded border hover:bg-muted">Copiar</button>
+            <a href={rssUrl} target="_blank" rel="noopener noreferrer" className="text-xs px-2 py-1 rounded border hover:bg-muted">Abrir</a>
           </div>
         </div>
       </CardContent>

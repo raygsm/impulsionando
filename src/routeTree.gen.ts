@@ -665,6 +665,7 @@ import { Route as AuthenticatedAdminIntegracoesMercadoPagoRouteImport } from './
 import { Route as AuthenticatedAdminClientesRiomedRouteImport } from './routes/_authenticated/admin.clientes.riomed'
 import { Route as AuthenticatedAdminClientesSlugRouteImport } from './routes/_authenticated/admin.clientes.$slug'
 import { Route as AuthenticatedAdminClientesSlugIndexRouteImport } from './routes/_authenticated/admin.clientes.$slug.index'
+import { Route as ApiPublicStatusSlugRssRouteImport } from './routes/api/public/status.$slug.rss'
 import { Route as ApiPublicStatusSlugBadgeDotsvgRouteImport } from './routes/api/public/status.$slug.badge[.]svg'
 import { Route as ApiPublicRiomedQuotesColdRouteImport } from './routes/api/public/riomed/quotes/cold'
 import { Route as ApiPublicRiomedFxUpsertRouteImport } from './routes/api/public/riomed/fx/upsert'
@@ -4407,6 +4408,11 @@ const AuthenticatedAdminClientesSlugIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedAdminClientesSlugRoute,
   } as any)
+const ApiPublicStatusSlugRssRoute = ApiPublicStatusSlugRssRouteImport.update({
+  id: '/rss',
+  path: '/rss',
+  getParentRoute: () => ApiPublicStatusSlugRoute,
+} as any)
 const ApiPublicStatusSlugBadgeDotsvgRoute =
   ApiPublicStatusSlugBadgeDotsvgRouteImport.update({
     id: '/badge.svg',
@@ -5459,6 +5465,7 @@ export interface FileRoutesByFullPath {
   '/api/public/riomed/fx/upsert': typeof ApiPublicRiomedFxUpsertRoute
   '/api/public/riomed/quotes/cold': typeof ApiPublicRiomedQuotesColdRoute
   '/api/public/status/$slug/badge.svg': typeof ApiPublicStatusSlugBadgeDotsvgRoute
+  '/api/public/status/$slug/rss': typeof ApiPublicStatusSlugRssRoute
   '/admin/clientes/$slug/': typeof AuthenticatedAdminClientesSlugIndexRoute
   '/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
@@ -6160,6 +6167,7 @@ export interface FileRoutesByTo {
   '/api/public/riomed/fx/upsert': typeof ApiPublicRiomedFxUpsertRoute
   '/api/public/riomed/quotes/cold': typeof ApiPublicRiomedQuotesColdRoute
   '/api/public/status/$slug/badge.svg': typeof ApiPublicStatusSlugBadgeDotsvgRoute
+  '/api/public/status/$slug/rss': typeof ApiPublicStatusSlugRssRoute
   '/admin/clientes/$slug': typeof AuthenticatedAdminClientesSlugIndexRoute
   '/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
@@ -6876,6 +6884,7 @@ export interface FileRoutesById {
   '/api/public/riomed/fx/upsert': typeof ApiPublicRiomedFxUpsertRoute
   '/api/public/riomed/quotes/cold': typeof ApiPublicRiomedQuotesColdRoute
   '/api/public/status/$slug/badge.svg': typeof ApiPublicStatusSlugBadgeDotsvgRoute
+  '/api/public/status/$slug/rss': typeof ApiPublicStatusSlugRssRoute
   '/_authenticated/admin/clientes/$slug/': typeof AuthenticatedAdminClientesSlugIndexRoute
   '/_authenticated/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/_authenticated/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
@@ -7592,6 +7601,7 @@ export interface FileRouteTypes {
     | '/api/public/riomed/fx/upsert'
     | '/api/public/riomed/quotes/cold'
     | '/api/public/status/$slug/badge.svg'
+    | '/api/public/status/$slug/rss'
     | '/admin/clientes/$slug/'
     | '/core/cliente/$id/paginas/$pageId'
     | '/core/cliente/$id/modulo/$slug/configurar'
@@ -8293,6 +8303,7 @@ export interface FileRouteTypes {
     | '/api/public/riomed/fx/upsert'
     | '/api/public/riomed/quotes/cold'
     | '/api/public/status/$slug/badge.svg'
+    | '/api/public/status/$slug/rss'
     | '/admin/clientes/$slug'
     | '/core/cliente/$id/paginas/$pageId'
     | '/core/cliente/$id/modulo/$slug/configurar'
@@ -9008,6 +9019,7 @@ export interface FileRouteTypes {
     | '/api/public/riomed/fx/upsert'
     | '/api/public/riomed/quotes/cold'
     | '/api/public/status/$slug/badge.svg'
+    | '/api/public/status/$slug/rss'
     | '/_authenticated/admin/clientes/$slug/'
     | '/_authenticated/core/cliente/$id/paginas/$pageId'
     | '/_authenticated/core/cliente/$id/modulo/$slug/configurar'
@@ -13799,6 +13811,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientesSlugIndexRouteImport
       parentRoute: typeof AuthenticatedAdminClientesSlugRoute
     }
+    '/api/public/status/$slug/rss': {
+      id: '/api/public/status/$slug/rss'
+      path: '/rss'
+      fullPath: '/api/public/status/$slug/rss'
+      preLoaderRoute: typeof ApiPublicStatusSlugRssRouteImport
+      parentRoute: typeof ApiPublicStatusSlugRoute
+    }
     '/api/public/status/$slug/badge.svg': {
       id: '/api/public/status/$slug/badge.svg'
       path: '/badge.svg'
@@ -15922,10 +15941,12 @@ const ApiPublicHealthRouteWithChildren = ApiPublicHealthRoute._addFileChildren(
 
 interface ApiPublicStatusSlugRouteChildren {
   ApiPublicStatusSlugBadgeDotsvgRoute: typeof ApiPublicStatusSlugBadgeDotsvgRoute
+  ApiPublicStatusSlugRssRoute: typeof ApiPublicStatusSlugRssRoute
 }
 
 const ApiPublicStatusSlugRouteChildren: ApiPublicStatusSlugRouteChildren = {
   ApiPublicStatusSlugBadgeDotsvgRoute: ApiPublicStatusSlugBadgeDotsvgRoute,
+  ApiPublicStatusSlugRssRoute: ApiPublicStatusSlugRssRoute,
 }
 
 const ApiPublicStatusSlugRouteWithChildren =
