@@ -2,8 +2,8 @@ import { createFileRoute } from '@tanstack/react-router'
 
 /**
  * Cron tick (every 5min): enqueues confirmation emails for new subscribers
- * and incident/postmortem notifications for confirmed subscribers, via
- * the existing `message_outbox` (channel `email`, status `queued`).
+ * and incident/postmortem/update notifications for confirmed subscribers,
+ * via the existing `message_outbox` (channel `email`, status `queued`).
  *
  * Dedup is enforced by `core_status_dispatch_log (subscriber_id, reference_key)`
  * unique index.
@@ -14,12 +14,20 @@ type IncidentRow = {
   title: string
   severity: string | null
   status: string | null
-  started_at: string
+  detected_at: string
   resolved_at: string | null
   description: string | null
   scope: string | null
   postmortem_published_at: string | null
   postmortem_summary: string | null
+}
+
+type IncidentUpdateRow = {
+  id: string
+  incident_id: string
+  status: string | null
+  body: string | null
+  created_at: string
 }
 
 type SubscriberRow = {
@@ -55,20 +63,40 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
           supabaseAdmin
             .from('core_incidents')
             .select(
-              'id,title,severity,status,started_at,resolved_at,description,scope,postmortem_published_at,postmortem_summary',
+              'id,title,severity,status,detected_at,resolved_at,description,scope,postmortem_published_at,postmortem_summary',
             )
-            .or(`started_at.gte.${since},resolved_at.gte.${since},postmortem_published_at.gte.${since}`)
-            .order('started_at', { ascending: false })
+            .or(`detected_at.gte.${since},resolved_at.gte.${since},postmortem_published_at.gte.${since}`)
+            .order('detected_at', { ascending: false })
             .limit(50),
         ])
 
         const subscribers = (subsRes.data ?? []) as unknown as SubscriberRow[]
         const incidentsList = (incRes.data ?? []) as unknown as IncidentRow[]
 
+        // Fetch recent incident updates (last 72h) for all listed incidents
+        const incIds = incidentsList.map((i) => i.id)
+        let updatesList: IncidentUpdateRow[] = []
+        if (incIds.length > 0) {
+          const upRes = await supabaseAdmin
+            .from('core_incident_updates' as any)
+            .select('id,incident_id,status,body,created_at')
+            .in('incident_id', incIds)
+            .gte('created_at', since)
+            .order('created_at', { ascending: false })
+            .limit(500)
+          updatesList = ((upRes.data ?? []) as unknown) as IncidentUpdateRow[]
+        }
+        const incidentById = new Map(incidentsList.map((i) => [i.id, i]))
+
         const events: Array<{
           subscriber: SubscriberRow
           incident_id: string | null
-          event_kind: 'confirm' | 'incident_opened' | 'incident_resolved' | 'postmortem_published'
+          event_kind:
+            | 'confirm'
+            | 'incident_opened'
+            | 'incident_resolved'
+            | 'incident_update'
+            | 'postmortem_published'
           reference_key: string
           subject: string
           body: string
@@ -88,10 +116,10 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
           })
         }
 
-        // 2) Incident updates for confirmed subscribers
+        // 2) Incident open/resolve/postmortem for confirmed subscribers
         const confirmed = subscribers.filter((x) => x.confirmed_at)
         for (const i of incidentsList) {
-          const isOpened = Date.parse(i.started_at) >= sinceMs
+          const isOpened = Date.parse(i.detected_at) >= sinceMs
           const isResolved = i.resolved_at ? Date.parse(i.resolved_at) >= sinceMs : false
           const isPM = i.postmortem_published_at ? Date.parse(i.postmortem_published_at) >= sinceMs : false
           const scope = i.scope ?? '—'
@@ -105,7 +133,7 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
                 reference_key: `incident_opened:${i.id}`,
                 subject: `[${(i.severity ?? 'sev?').toString().toUpperCase()}] Incidente aberto: ${i.title}`,
                 body:
-                  `Um novo incidente foi aberto no Status Impulsionando.\n\nEscopo: ${scope}\nSeveridade: ${i.severity ?? '—'}\nAberto em: ${i.started_at}\n\nResumo: ${i.description ?? '(sem descrição)'}\n\nAcompanhe em: ${SITE}/status#incident-${i.id}` +
+                  `Um novo incidente foi aberto no Status Impulsionando.\n\nEscopo: ${scope}\nSeveridade: ${i.severity ?? '—'}\nAberto em: ${i.detected_at}\n\nResumo: ${i.description ?? '(sem descrição)'}\n\nAcompanhe em: ${SITE}/status#incident-${i.id}` +
                   unsubFooter(s.unsubscribe_token),
               })
             }
@@ -117,7 +145,7 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
                 reference_key: `incident_resolved:${i.id}`,
                 subject: `Resolvido: ${i.title}`,
                 body:
-                  `O incidente foi marcado como resolvido.\n\nEscopo: ${scope}\nAberto em: ${i.started_at}\nResolvido em: ${i.resolved_at}\n\nResumo: ${i.description ?? '—'}\n\nDetalhes: ${SITE}/status#incident-${i.id}` +
+                  `O incidente foi marcado como resolvido.\n\nEscopo: ${scope}\nAberto em: ${i.detected_at}\nResolvido em: ${i.resolved_at}\n\nResumo: ${i.description ?? '—'}\n\nDetalhes: ${SITE}/status#incident-${i.id}` +
                   unsubFooter(s.unsubscribe_token),
               })
             }
@@ -136,7 +164,27 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
           }
         }
 
-        // 3) Dedup against dispatch log; enqueue new ones
+        // 3) Incident timeline updates (last 72h)
+        for (const u of updatesList) {
+          const inc = incidentById.get(u.incident_id)
+          const title = inc?.title ?? 'Incidente'
+          const scope = inc?.scope ?? '—'
+          const statusLabel = (u.status ?? 'update').toString().toUpperCase()
+          for (const s of confirmed) {
+            events.push({
+              subscriber: s,
+              incident_id: u.incident_id,
+              event_kind: 'incident_update',
+              reference_key: `incident_update:${u.id}`,
+              subject: `[${statusLabel}] Atualização: ${title}`,
+              body:
+                `Nova atualização sobre o incidente.\n\nEscopo: ${scope}\nStatus: ${u.status ?? '—'}\nQuando: ${u.created_at}\n\n${u.body ?? '(sem detalhes)'}\n\nTimeline: ${SITE}/status#incident-${u.incident_id}` +
+                unsubFooter(s.unsubscribe_token),
+            })
+          }
+        }
+
+        // 4) Dedup against dispatch log; enqueue new ones
         let enqueued = 0
         let skipped = 0
         for (const ev of events) {
@@ -179,6 +227,7 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
           ok: true,
           subscribers: subscribers.length,
           incidents: incidentsList.length,
+          updates: updatesList.length,
           enqueued,
           skipped,
         })
