@@ -94,19 +94,31 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
         // Resolve service slug per incident (via uptime_state.url)
         const urls = Array.from(new Set(incidentsList.map((i) => i.url).filter(Boolean) as string[]))
         const slugByUrl = new Map<string, string>()
+        const categoryBySlug = new Map<string, string>()
         if (urls.length > 0) {
           const slugRes = await supabaseAdmin
             .from('uptime_state')
-            .select('url,public_slug')
+            .select('url,public_slug,category')
             .in('url', urls)
-          for (const r of (slugRes.data ?? []) as Array<{ url: string; public_slug: string | null }>) {
-            if (r.public_slug) slugByUrl.set(r.url, r.public_slug)
+          for (const r of (slugRes.data ?? []) as Array<{
+            url: string
+            public_slug: string | null
+            category: string | null
+          }>) {
+            if (r.public_slug) {
+              slugByUrl.set(r.url, r.public_slug)
+              if (r.category) categoryBySlug.set(r.public_slug, r.category)
+            }
           }
         }
         const slugForIncident = (id: string): string | null => {
           const inc = incidentById.get(id)
           if (!inc?.url) return null
           return slugByUrl.get(inc.url) ?? null
+        }
+        const categoryForIncident = (id: string): string | null => {
+          const slug = slugForIncident(id)
+          return slug ? categoryBySlug.get(slug) ?? null : null
         }
 
         // Subscriber service filters: subscriber_id -> set of slugs (empty set = all)
