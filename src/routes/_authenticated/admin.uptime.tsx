@@ -32,6 +32,7 @@ type EditState = {
   original_url: string | null
   url: string
   label: string
+  category: string
   alert_emails: string
   alert_whatsapps: string
   alert_after_seconds: string
@@ -64,6 +65,7 @@ function AdminUptimePage() {
           url: p.url,
           original_url: p.original_url,
           label: p.label,
+          category: p.category,
           alert_emails: p.alert_emails,
           alert_whatsapps: p.alert_whatsapps,
           alert_after_seconds: p.alert_after_seconds ? Number(p.alert_after_seconds) : null,
@@ -133,6 +135,7 @@ function AdminUptimePage() {
                 original_url: null,
                 url: 'https://',
                 label: '',
+                category: '',
                 alert_emails: '',
                 alert_whatsapps: '',
                 alert_after_seconds: '',
@@ -206,6 +209,7 @@ function AdminUptimePage() {
                         original_url: s.url,
                         url: s.url,
                         label: s.label ?? '',
+                        category: (s as any).category ?? '',
                         alert_emails: (s.alert_emails ?? []).join(', '),
                         alert_whatsapps: (s.alert_whatsapps ?? []).join(', '),
                         alert_after_seconds: s.alert_after_seconds ? String(s.alert_after_seconds) : '',
@@ -257,6 +261,14 @@ function AdminUptimePage() {
                 value={edit.label}
                 onChange={(e) => setEdit({ ...edit, label: e.target.value })}
                 placeholder="Ex.: API Pública, Site Marketing"
+              />
+            </div>
+            <div>
+              <Label>Categoria / seção (agrupamento em /status)</Label>
+              <Input
+                value={edit.category}
+                onChange={(e) => setEdit({ ...edit, category: e.target.value })}
+                placeholder="Ex.: Core, Pagamentos, WhatsApp"
               />
             </div>
             <div>
