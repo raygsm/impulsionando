@@ -69,7 +69,7 @@ export const Route = createFileRoute('/api/public/hooks/maintenance-notifier')({
         // Confirmed subscribers
         const { data: subsRaw } = await supabaseAdmin
           .from('core_status_subscribers')
-          .select('id,email,unsubscribe_token')
+          .select('id,email,unsubscribe_token,categories')
           .not('confirmed_at', 'is', null)
           .is('unsubscribed_at', null)
           .is('bounced_at', null)
