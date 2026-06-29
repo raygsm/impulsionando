@@ -77,6 +77,16 @@ function AdminStatusSubscribers() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const severityMut = useMutation({
+    mutationFn: (vars: { id: string; min_severity: "info" | "minor" | "major" | "critical" }) =>
+      severityFn({ data: vars }),
+    onSuccess: () => {
+      toast.success("Severidade mínima atualizada");
+      refetch();
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   const [bSubject, setBSubject] = useState("");
   const [bBody, setBBody] = useState("");
   const [bTag, setBTag] = useState("manual_broadcast");
