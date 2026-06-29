@@ -593,6 +593,7 @@ import { Route as ApiPublicHooksUptimeCheckRouteImport } from './routes/api/publ
 import { Route as ApiPublicHooksTrialReguaRouteImport } from './routes/api/public/hooks/trial-regua'
 import { Route as ApiPublicHooksRetentionSweepRouteImport } from './routes/api/public/hooks/retention-sweep'
 import { Route as ApiPublicHooksReliabilityAlertsRouteImport } from './routes/api/public/hooks/reliability-alerts'
+import { Route as ApiPublicHooksPostmortemActionsRouteImport } from './routes/api/public/hooks/postmortem-actions'
 import { Route as ApiPublicHooksNotificationLogCleanupRouteImport } from './routes/api/public/hooks/notification-log-cleanup'
 import { Route as ApiPublicHooksN8nLogRouteImport } from './routes/api/public/hooks/n8n-log'
 import { Route as ApiPublicHooksMpPendingRemindersRouteImport } from './routes/api/public/hooks/mp-pending-reminders'
@@ -3973,6 +3974,12 @@ const ApiPublicHooksReliabilityAlertsRoute =
     path: '/api/public/hooks/reliability-alerts',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksPostmortemActionsRoute =
+  ApiPublicHooksPostmortemActionsRouteImport.update({
+    id: '/api/public/hooks/postmortem-actions',
+    path: '/api/public/hooks/postmortem-actions',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksNotificationLogCleanupRoute =
   ApiPublicHooksNotificationLogCleanupRouteImport.update({
     id: '/api/public/hooks/notification-log-cleanup',
@@ -5278,6 +5285,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/mp-pending-reminders': typeof ApiPublicHooksMpPendingRemindersRoute
   '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
   '/api/public/hooks/notification-log-cleanup': typeof ApiPublicHooksNotificationLogCleanupRoute
+  '/api/public/hooks/postmortem-actions': typeof ApiPublicHooksPostmortemActionsRoute
   '/api/public/hooks/reliability-alerts': typeof ApiPublicHooksReliabilityAlertsRoute
   '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
   '/api/public/hooks/trial-regua': typeof ApiPublicHooksTrialReguaRoute
@@ -5965,6 +5973,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/mp-pending-reminders': typeof ApiPublicHooksMpPendingRemindersRoute
   '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
   '/api/public/hooks/notification-log-cleanup': typeof ApiPublicHooksNotificationLogCleanupRoute
+  '/api/public/hooks/postmortem-actions': typeof ApiPublicHooksPostmortemActionsRoute
   '/api/public/hooks/reliability-alerts': typeof ApiPublicHooksReliabilityAlertsRoute
   '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
   '/api/public/hooks/trial-regua': typeof ApiPublicHooksTrialReguaRoute
@@ -6667,6 +6676,7 @@ export interface FileRoutesById {
   '/api/public/hooks/mp-pending-reminders': typeof ApiPublicHooksMpPendingRemindersRoute
   '/api/public/hooks/n8n-log': typeof ApiPublicHooksN8nLogRoute
   '/api/public/hooks/notification-log-cleanup': typeof ApiPublicHooksNotificationLogCleanupRoute
+  '/api/public/hooks/postmortem-actions': typeof ApiPublicHooksPostmortemActionsRoute
   '/api/public/hooks/reliability-alerts': typeof ApiPublicHooksReliabilityAlertsRoute
   '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
   '/api/public/hooks/trial-regua': typeof ApiPublicHooksTrialReguaRoute
@@ -7369,6 +7379,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/mp-pending-reminders'
     | '/api/public/hooks/n8n-log'
     | '/api/public/hooks/notification-log-cleanup'
+    | '/api/public/hooks/postmortem-actions'
     | '/api/public/hooks/reliability-alerts'
     | '/api/public/hooks/retention-sweep'
     | '/api/public/hooks/trial-regua'
@@ -8056,6 +8067,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/mp-pending-reminders'
     | '/api/public/hooks/n8n-log'
     | '/api/public/hooks/notification-log-cleanup'
+    | '/api/public/hooks/postmortem-actions'
     | '/api/public/hooks/reliability-alerts'
     | '/api/public/hooks/retention-sweep'
     | '/api/public/hooks/trial-regua'
@@ -8757,6 +8769,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/mp-pending-reminders'
     | '/api/public/hooks/n8n-log'
     | '/api/public/hooks/notification-log-cleanup'
+    | '/api/public/hooks/postmortem-actions'
     | '/api/public/hooks/reliability-alerts'
     | '/api/public/hooks/retention-sweep'
     | '/api/public/hooks/trial-regua'
@@ -8992,6 +9005,7 @@ export interface RootRouteChildren {
   ApiPublicHooksMpPendingRemindersRoute: typeof ApiPublicHooksMpPendingRemindersRoute
   ApiPublicHooksN8nLogRoute: typeof ApiPublicHooksN8nLogRoute
   ApiPublicHooksNotificationLogCleanupRoute: typeof ApiPublicHooksNotificationLogCleanupRoute
+  ApiPublicHooksPostmortemActionsRoute: typeof ApiPublicHooksPostmortemActionsRoute
   ApiPublicHooksReliabilityAlertsRoute: typeof ApiPublicHooksReliabilityAlertsRoute
   ApiPublicHooksRetentionSweepRoute: typeof ApiPublicHooksRetentionSweepRoute
   ApiPublicHooksTrialReguaRoute: typeof ApiPublicHooksTrialReguaRoute
@@ -13111,6 +13125,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksReliabilityAlertsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/postmortem-actions': {
+      id: '/api/public/hooks/postmortem-actions'
+      path: '/api/public/hooks/postmortem-actions'
+      fullPath: '/api/public/hooks/postmortem-actions'
+      preLoaderRoute: typeof ApiPublicHooksPostmortemActionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/notification-log-cleanup': {
       id: '/api/public/hooks/notification-log-cleanup'
       path: '/api/public/hooks/notification-log-cleanup'
@@ -15780,6 +15801,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksN8nLogRoute: ApiPublicHooksN8nLogRoute,
   ApiPublicHooksNotificationLogCleanupRoute:
     ApiPublicHooksNotificationLogCleanupRoute,
+  ApiPublicHooksPostmortemActionsRoute: ApiPublicHooksPostmortemActionsRoute,
   ApiPublicHooksReliabilityAlertsRoute: ApiPublicHooksReliabilityAlertsRoute,
   ApiPublicHooksRetentionSweepRoute: ApiPublicHooksRetentionSweepRoute,
   ApiPublicHooksTrialReguaRoute: ApiPublicHooksTrialReguaRoute,
