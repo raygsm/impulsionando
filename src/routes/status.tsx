@@ -48,14 +48,28 @@ type PostmortemRow = {
   postmortem_published_at: string | null;
 };
 
+type MaintenanceRow = {
+  id: string;
+  title: string;
+  description: string | null;
+  scope: string;
+  url: string | null;
+  severity: "info" | "minor" | "major";
+  starts_at: string;
+  ends_at: string;
+  status: "scheduled" | "in_progress" | "completed" | "cancelled";
+};
+
 type StatusPayload = {
-  overall: "operational" | "degraded" | "outage" | "unknown";
+  overall: "operational" | "degraded" | "outage" | "maintenance" | "unknown";
   updated_at: string;
-  summary: { monitored: number; up: number; down: number; openIncidents: number; sev1Open: number };
+  summary: { monitored: number; up: number; down: number; openIncidents: number; sev1Open: number; maintenance?: number };
   services: ServiceRow[];
   incidents: IncidentRow[];
   postmortems: PostmortemRow[];
+  maintenance?: MaintenanceRow[];
 };
+
 
 async function fetchStatus(): Promise<StatusPayload> {
   const res = await fetch("/api/public/status", { headers: { accept: "application/json" } });
