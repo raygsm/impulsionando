@@ -15,8 +15,8 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 
 export function TenantSwitcher() {
   const { data: me } = useCurrentUser();
-  const isStaff = !!me?.isImpulsionandoStaff || !!(me as any)?.is_impulsionando_staff;
-  const { isImpersonating, impersonatedCompanyName, startImpersonation, stopImpersonation } =
+  const isStaff = !!me?.isImpulsionandoStaff || !!me?.isSuperAdmin;
+  const { isImpersonating, impersonatedCompanyId, impersonatedCompanyName, startImpersonation, stopImpersonation } =
     useImpersonation();
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
