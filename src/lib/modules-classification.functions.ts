@@ -31,16 +31,17 @@ export const updateModuleClassification = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => UpdateSchema.parse(d))
   .handler(async ({ data, context }) => {
     await ensureAdmin(context);
-    const patch: Record<string, unknown> = { kind: data.kind };
-    patch.parent_module_id = data.kind === "resource" ? data.parent_module_id ?? null : null;
-    const { error } = await context.supabase.from("modules").update(patch).eq("id", data.id);
+    const parent = data.kind === "resource" ? data.parent_module_id ?? null : null;
+    const { error } = await (context.supabase.from("modules") as any)
+      .update({ kind: data.kind, parent_module_id: parent })
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     await context.supabase.from("audit_logs").insert({
       action: "module.classification.updated",
-      target_type: "module",
-      target_id: data.id,
-      actor_user_id: context.userId,
-      payload: { kind: data.kind, parent_module_id: patch.parent_module_id },
+      entity: "module",
+      entity_id: data.id,
+      user_email: null,
+      metadata: { kind: data.kind, parent_module_id: parent },
     });
     return { ok: true };
   });
