@@ -167,7 +167,9 @@ function AdminStatusWebhooksPage() {
                     <th className="py-2 pr-3">Filtros</th>
                     <th className="py-2 pr-3">Serviços</th>
                     <th className="py-2 pr-3">Categorias</th>
+                    <th className="py-2 pr-3">Sev. mín.</th>
                     <th className="py-2 pr-3">Status</th>
+
                     <th className="py-2 pr-3">Último envio</th>
                     <th className="py-2 pr-3 text-right">Ações</th>
                   </tr>
