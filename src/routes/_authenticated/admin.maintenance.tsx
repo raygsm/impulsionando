@@ -98,23 +98,40 @@ function AdminMaintenance() {
             Janelas exibidas em <a href="/status" className="underline">/status</a> quando publicadas.
           </p>
         </div>
-        <Button
-          onClick={() => {
-            const start = new Date(Date.now() + 60 * 60 * 1000);
-            const end = new Date(start.getTime() + 60 * 60 * 1000);
-            setEditing({
-              title: "",
-              scope: "platform",
-              severity: "info",
-              status: "scheduled",
-              published: true,
-              starts_at: start.toISOString(),
-              ends_at: end.toISOString(),
-            });
-          }}
-        >
-          Nova janela
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            onClick={async () => {
+              try {
+                const r = await fetch("/api/public/hooks/maintenance-notifier", { method: "POST" });
+                const j = await r.json();
+                toast.success(`Notificações: ${j.enqueued ?? 0} enfileiradas / ${j.skipped ?? 0} já enviadas`);
+              } catch (e: any) {
+                toast.error(e?.message ?? "Falha ao acionar");
+              }
+            }}
+          >
+            Notificar inscritos agora
+          </Button>
+          <Button
+            onClick={() => {
+              const start = new Date(Date.now() + 60 * 60 * 1000);
+              const end = new Date(start.getTime() + 60 * 60 * 1000);
+              setEditing({
+                title: "",
+                scope: "platform",
+                severity: "info",
+                status: "scheduled",
+                published: true,
+                starts_at: start.toISOString(),
+                ends_at: end.toISOString(),
+              });
+            }}
+          >
+            Nova janela
+          </Button>
+        </div>
+
       </header>
 
       {editing ? (
