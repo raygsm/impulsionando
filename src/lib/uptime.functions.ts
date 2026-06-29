@@ -132,3 +132,15 @@ export const deleteUptimeTarget = createServerFn({ method: 'POST' })
     return { ok: true }
   })
 
+export const toggleUptimeTargetPaused = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { url: string; paused: boolean }) => input)
+  .handler(async ({ data, context }) => {
+    await assertStaff(context.userId)
+    const { error } = await supabaseAdmin
+      .from('uptime_state')
+      .update({ paused: data.paused })
+      .eq('url', data.url)
+    if (error) throw error
+    return { ok: true }
+  })
