@@ -21,6 +21,7 @@ type Webhook = {
   notify_incidents: boolean
   notify_maintenance: boolean
   services: string[] | null
+  categories: string[] | null
   active: boolean
 }
 
@@ -112,7 +113,7 @@ export const Route = createFileRoute('/api/public/hooks/status-webhooks')({
           supabaseAdmin
             .from('core_status_webhooks')
             .select(
-              'id,label,url,kind,secret,notify_incidents,notify_maintenance,services,active',
+              'id,label,url,kind,secret,notify_incidents,notify_maintenance,services,categories,active',
             )
             .eq('active', true)
             .limit(200),
@@ -182,16 +183,26 @@ export const Route = createFileRoute('/api/public/hooks/status-webhooks')({
           ),
         )
         const slugByUrl = new Map<string, string>()
+        const categoryBySlug = new Map<string, string>()
         if (urls.length > 0) {
           const r = await supabaseAdmin
             .from('uptime_state')
-            .select('url,public_slug')
+            .select('url,public_slug,category')
             .in('url', urls)
-          for (const row of (r.data ?? []) as Array<{ url: string; public_slug: string | null }>) {
-            if (row.public_slug) slugByUrl.set(row.url, row.public_slug)
+          for (const row of (r.data ?? []) as Array<{
+            url: string
+            public_slug: string | null
+            category: string | null
+          }>) {
+            if (row.public_slug) {
+              slugByUrl.set(row.url, row.public_slug)
+              if (row.category) categoryBySlug.set(row.public_slug, row.category)
+            }
           }
         }
         const slugOf = (u: string | null): string | null => (u ? slugByUrl.get(u) ?? null : null)
+        const categoryOf = (slug: string | null): string | null =>
+          slug ? categoryBySlug.get(slug) ?? null : null
 
         const incById = new Map(incidents.map((i) => [i.id, i]))
 
@@ -306,11 +317,16 @@ export const Route = createFileRoute('/api/public/hooks/status-webhooks')({
         let failed = 0
         for (const h of hooks) {
           const filter = Array.isArray(h.services) ? h.services : []
+          const catFilter = Array.isArray(h.categories) ? h.categories : []
           for (const ev of events) {
             if (ev.category === 'incident' && !h.notify_incidents) continue
             if (ev.category === 'maintenance' && !h.notify_maintenance) continue
             if (filter.length > 0 && (!ev.service_slug || !filter.includes(ev.service_slug)))
               continue
+            if (catFilter.length > 0) {
+              const cat = categoryOf(ev.service_slug)
+              if (!cat || !catFilter.includes(cat)) continue
+            }
             const key = `${h.id}::${ev.reference_key}`
             if (seen.has(key)) continue
 

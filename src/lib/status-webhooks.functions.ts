@@ -32,6 +32,7 @@ const upsertSchema = z.object({
   notify_incidents: z.boolean().default(true),
   notify_maintenance: z.boolean().default(true),
   services: z.array(z.string().max(80)).default([]),
+  categories: z.array(z.string().max(80)).default([]),
   active: z.boolean().default(true),
 })
 
@@ -48,6 +49,7 @@ export const upsertStatusWebhook = createServerFn({ method: 'POST' })
       notify_incidents: data.notify_incidents,
       notify_maintenance: data.notify_maintenance,
       services: data.services,
+      categories: data.categories,
       active: data.active,
       updated_at: new Date().toISOString(),
     }

@@ -44,6 +44,7 @@ type Hook = {
   notify_incidents: boolean
   notify_maintenance: boolean
   services: string[] | null
+  categories: string[] | null
   active: boolean
   last_dispatch_at: string | null
   last_status_code: number | null
@@ -118,6 +119,7 @@ function AdminStatusWebhooksPage() {
                 notify_incidents: true,
                 notify_maintenance: true,
                 services: [],
+                categories: [],
                 active: true,
               })
             }
@@ -148,6 +150,7 @@ function AdminStatusWebhooksPage() {
                     <th className="py-2 pr-3">Tipo</th>
                     <th className="py-2 pr-3">Filtros</th>
                     <th className="py-2 pr-3">Serviços</th>
+                    <th className="py-2 pr-3">Categorias</th>
                     <th className="py-2 pr-3">Status</th>
                     <th className="py-2 pr-3">Último envio</th>
                     <th className="py-2 pr-3 text-right">Ações</th>
@@ -179,6 +182,11 @@ function AdminStatusWebhooksPage() {
                         {(h.services ?? []).length === 0
                           ? 'todos'
                           : (h.services ?? []).join(', ')}
+                      </td>
+                      <td className="py-2 pr-3 text-xs">
+                        {(h.categories ?? []).length === 0
+                          ? 'todas'
+                          : (h.categories ?? []).join(', ')}
                       </td>
                       <td className="py-2 pr-3">
                         {h.last_status_code ? (
@@ -338,6 +346,22 @@ function EditDialog({
               placeholder="vazio = todos"
             />
           </div>
+          <div>
+            <Label>Filtro de categorias (seções, separadas por vírgula)</Label>
+            <Input
+              value={(v.categories ?? []).join(',')}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  categories: e.target.value
+                    .split(',')
+                    .map((s) => s.trim())
+                    .filter(Boolean),
+                })
+              }
+              placeholder="vazio = todas (ex: API, Site, Pagamentos)"
+            />
+          </div>
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={onClose}>
@@ -354,6 +378,7 @@ function EditDialog({
                 notify_incidents: v.notify_incidents ?? true,
                 notify_maintenance: v.notify_maintenance ?? true,
                 services: v.services ?? [],
+                categories: v.categories ?? [],
                 active: v.active ?? true,
               })
             }
