@@ -114,7 +114,7 @@ export const addIncidentUpdate = createServerFn({ method: "POST" })
     } else if (data.status === "monitoring" || data.status === "identified") {
       await context.supabase
         .from("core_incidents")
-        .update({ status: "acknowledged" })
+        .update({ status: "monitoring" })
         .eq("id", data.incident_id)
         .eq("status", "open");
     }
