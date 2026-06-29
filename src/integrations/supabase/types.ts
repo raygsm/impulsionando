@@ -9313,6 +9313,54 @@ export type Database = {
         }
         Relationships: []
       }
+      core_maintenance_windows: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          ends_at: string
+          id: string
+          published: boolean
+          scope: string
+          severity: string
+          starts_at: string
+          status: string
+          title: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at: string
+          id?: string
+          published?: boolean
+          scope?: string
+          severity?: string
+          starts_at: string
+          status?: string
+          title: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string
+          id?: string
+          published?: boolean
+          scope?: string
+          severity?: string
+          starts_at?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
       core_master_data: {
         Row: {
           active: boolean
