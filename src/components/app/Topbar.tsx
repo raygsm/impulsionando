@@ -15,6 +15,7 @@ import { OnboardingStatusPill } from "./OnboardingStatusPill";
 import { AppearanceMenu } from "./AppearanceMenu";
 import { QuickActionsButton } from "./QuickActions";
 import { AudienceBadge } from "./AudienceBadge";
+import { TenantSwitcher } from "./TenantSwitcher";
 import { globalEntitySearch, type GlobalEntityHit } from "@/lib/core-consumidores.functions";
 
 type NavItem = { label: string; to: string; group: string; keywords?: string };
