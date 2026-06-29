@@ -17,6 +17,7 @@ import { Route as TrialRouteImport } from './routes/trial'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as TalentosRouteImport } from './routes/talentos'
 import { Route as SuporteRouteImport } from './routes/suporte'
+import { Route as StatusRouteImport } from './routes/status'
 import { Route as SolucoesRouteImport } from './routes/solucoes'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as RiomedRouteImport } from './routes/riomed'
@@ -746,6 +747,11 @@ const TalentosRoute = TalentosRouteImport.update({
 const SuporteRoute = SuporteRouteImport.update({
   id: '/suporte',
   path: '/suporte',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatusRoute = StatusRouteImport.update({
+  id: '/status',
+  path: '/status',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SolucoesRoute = SolucoesRouteImport.update({
@@ -4685,6 +4691,7 @@ export interface FileRoutesByFullPath {
   '/riomed': typeof RiomedRouteWithChildren
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
+  '/status': typeof StatusRoute
   '/suporte': typeof SuporteRoute
   '/talentos': typeof TalentosRoute
   '/termos': typeof TermosRoute
@@ -5382,6 +5389,7 @@ export interface FileRoutesByTo {
   '/riomed': typeof RiomedRouteWithChildren
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
+  '/status': typeof StatusRoute
   '/suporte': typeof SuporteRoute
   '/talentos': typeof TalentosRoute
   '/termos': typeof TermosRoute
@@ -6072,6 +6080,7 @@ export interface FileRoutesById {
   '/riomed': typeof RiomedRouteWithChildren
   '/sobre': typeof SobreRoute
   '/solucoes': typeof SolucoesRoute
+  '/status': typeof StatusRoute
   '/suporte': typeof SuporteRoute
   '/talentos': typeof TalentosRoute
   '/termos': typeof TermosRoute
@@ -6773,6 +6782,7 @@ export interface FileRouteTypes {
     | '/riomed'
     | '/sobre'
     | '/solucoes'
+    | '/status'
     | '/suporte'
     | '/talentos'
     | '/termos'
@@ -7470,6 +7480,7 @@ export interface FileRouteTypes {
     | '/riomed'
     | '/sobre'
     | '/solucoes'
+    | '/status'
     | '/suporte'
     | '/talentos'
     | '/termos'
@@ -8159,6 +8170,7 @@ export interface FileRouteTypes {
     | '/riomed'
     | '/sobre'
     | '/solucoes'
+    | '/status'
     | '/suporte'
     | '/talentos'
     | '/termos'
@@ -8860,6 +8872,7 @@ export interface RootRouteChildren {
   RiomedRoute: typeof RiomedRouteWithChildren
   SobreRoute: typeof SobreRoute
   SolucoesRoute: typeof SolucoesRoute
+  StatusRoute: typeof StatusRoute
   SuporteRoute: typeof SuporteRoute
   TalentosRoute: typeof TalentosRoute
   TermosRoute: typeof TermosRoute
@@ -9064,6 +9077,13 @@ declare module '@tanstack/react-router' {
       path: '/suporte'
       fullPath: '/suporte'
       preLoaderRoute: typeof SuporteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/status': {
+      id: '/status'
+      path: '/status'
+      fullPath: '/status'
+      preLoaderRoute: typeof StatusRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/solucoes': {
@@ -15636,6 +15656,7 @@ const rootRouteChildren: RootRouteChildren = {
   RiomedRoute: RiomedRouteWithChildren,
   SobreRoute: SobreRoute,
   SolucoesRoute: SolucoesRoute,
+  StatusRoute: StatusRoute,
   SuporteRoute: SuporteRoute,
   TalentosRoute: TalentosRoute,
   TermosRoute: TermosRoute,
