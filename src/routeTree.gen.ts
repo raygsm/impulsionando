@@ -501,6 +501,7 @@ import { Route as AuthenticatedAdminFiscalHealthRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminFiscalRouteImport } from './routes/_authenticated/admin.fiscal'
 import { Route as AuthenticatedAdminFinanceiroConsolidadoV2RouteImport } from './routes/_authenticated/admin.financeiro-consolidado-v2'
 import { Route as AuthenticatedAdminFinanceHealthRouteImport } from './routes/_authenticated/admin.finance-health'
+import { Route as AuthenticatedAdminFaturamentoRouteImport } from './routes/_authenticated/admin.faturamento'
 import { Route as AuthenticatedAdminExpansionRadarRouteImport } from './routes/_authenticated/admin.expansion-radar'
 import { Route as AuthenticatedAdminExpansionEngineRouteImport } from './routes/_authenticated/admin.expansion-engine'
 import { Route as AuthenticatedAdminExecutivoRouteImport } from './routes/_authenticated/admin.executivo'
@@ -3424,6 +3425,12 @@ const AuthenticatedAdminFinanceHealthRoute =
     path: '/admin/finance-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminFaturamentoRoute =
+  AuthenticatedAdminFaturamentoRouteImport.update({
+    id: '/admin/faturamento',
+    path: '/admin/faturamento',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminExpansionRadarRoute =
   AuthenticatedAdminExpansionRadarRouteImport.update({
     id: '/admin/expansion-radar',
@@ -4852,6 +4859,7 @@ export interface FileRoutesByFullPath {
   '/admin/executivo': typeof AuthenticatedAdminExecutivoRoute
   '/admin/expansion-engine': typeof AuthenticatedAdminExpansionEngineRoute
   '/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
+  '/admin/faturamento': typeof AuthenticatedAdminFaturamentoRoute
   '/admin/finance-health': typeof AuthenticatedAdminFinanceHealthRoute
   '/admin/financeiro-consolidado-v2': typeof AuthenticatedAdminFinanceiroConsolidadoV2Route
   '/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
@@ -5530,6 +5538,7 @@ export interface FileRoutesByTo {
   '/admin/executivo': typeof AuthenticatedAdminExecutivoRoute
   '/admin/expansion-engine': typeof AuthenticatedAdminExpansionEngineRoute
   '/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
+  '/admin/faturamento': typeof AuthenticatedAdminFaturamentoRoute
   '/admin/finance-health': typeof AuthenticatedAdminFinanceHealthRoute
   '/admin/financeiro-consolidado-v2': typeof AuthenticatedAdminFinanceiroConsolidadoV2Route
   '/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
@@ -6221,6 +6230,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/executivo': typeof AuthenticatedAdminExecutivoRoute
   '/_authenticated/admin/expansion-engine': typeof AuthenticatedAdminExpansionEngineRoute
   '/_authenticated/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
+  '/_authenticated/admin/faturamento': typeof AuthenticatedAdminFaturamentoRoute
   '/_authenticated/admin/finance-health': typeof AuthenticatedAdminFinanceHealthRoute
   '/_authenticated/admin/financeiro-consolidado-v2': typeof AuthenticatedAdminFinanceiroConsolidadoV2Route
   '/_authenticated/admin/fiscal': typeof AuthenticatedAdminFiscalRoute
@@ -6913,6 +6923,7 @@ export interface FileRouteTypes {
     | '/admin/executivo'
     | '/admin/expansion-engine'
     | '/admin/expansion-radar'
+    | '/admin/faturamento'
     | '/admin/finance-health'
     | '/admin/financeiro-consolidado-v2'
     | '/admin/fiscal'
@@ -7591,6 +7602,7 @@ export interface FileRouteTypes {
     | '/admin/executivo'
     | '/admin/expansion-engine'
     | '/admin/expansion-radar'
+    | '/admin/faturamento'
     | '/admin/finance-health'
     | '/admin/financeiro-consolidado-v2'
     | '/admin/fiscal'
@@ -8281,6 +8293,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/executivo'
     | '/_authenticated/admin/expansion-engine'
     | '/_authenticated/admin/expansion-radar'
+    | '/_authenticated/admin/faturamento'
     | '/_authenticated/admin/finance-health'
     | '/_authenticated/admin/financeiro-consolidado-v2'
     | '/_authenticated/admin/fiscal'
@@ -12337,6 +12350,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFinanceHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/faturamento': {
+      id: '/_authenticated/admin/faturamento'
+      path: '/admin/faturamento'
+      fullPath: '/admin/faturamento'
+      preLoaderRoute: typeof AuthenticatedAdminFaturamentoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/expansion-radar': {
       id: '/_authenticated/admin/expansion-radar'
       path: '/admin/expansion-radar'
@@ -14633,6 +14653,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminExecutivoRoute: typeof AuthenticatedAdminExecutivoRoute
   AuthenticatedAdminExpansionEngineRoute: typeof AuthenticatedAdminExpansionEngineRoute
   AuthenticatedAdminExpansionRadarRoute: typeof AuthenticatedAdminExpansionRadarRoute
+  AuthenticatedAdminFaturamentoRoute: typeof AuthenticatedAdminFaturamentoRoute
   AuthenticatedAdminFinanceHealthRoute: typeof AuthenticatedAdminFinanceHealthRoute
   AuthenticatedAdminFinanceiroConsolidadoV2Route: typeof AuthenticatedAdminFinanceiroConsolidadoV2Route
   AuthenticatedAdminFiscalRoute: typeof AuthenticatedAdminFiscalRoute
@@ -14933,6 +14954,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminExpansionEngineRoute:
     AuthenticatedAdminExpansionEngineRoute,
   AuthenticatedAdminExpansionRadarRoute: AuthenticatedAdminExpansionRadarRoute,
+  AuthenticatedAdminFaturamentoRoute: AuthenticatedAdminFaturamentoRoute,
   AuthenticatedAdminFinanceHealthRoute: AuthenticatedAdminFinanceHealthRoute,
   AuthenticatedAdminFinanceiroConsolidadoV2Route:
     AuthenticatedAdminFinanceiroConsolidadoV2Route,
