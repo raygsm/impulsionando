@@ -18,7 +18,7 @@ export const Route = createFileRoute("/api/public/status")({
           const since = new Date(Date.now() - 90 * 86400000).toISOString();
           const sinceDay = since.slice(0, 10);
           const horizonEnd = new Date(Date.now() + 30 * 86400000).toISOString();
-          const [statusRes, incRes, pmRes, mwRes, histRes] = await Promise.all([
+          const [statusRes, incRes, pmRes, mwRes, histRes, visRes] = await Promise.all([
             supabaseAdmin
               .from("v_core_slo_status" as any)
               .select(
@@ -57,7 +57,12 @@ export const Route = createFileRoute("/api/public/status")({
               .gte("day", sinceDay)
               .order("day", { ascending: true })
               .limit(20000),
+            supabaseAdmin
+              .from("uptime_state")
+              .select("url,label,show_on_public,sort_order,paused")
+              .order("sort_order", { ascending: true }),
           ]);
+
 
 
           const status = (statusRes.data ?? []) as any[];
@@ -65,6 +70,16 @@ export const Route = createFileRoute("/api/public/status")({
           const postmortems = (pmRes.data ?? []) as any[];
           const maintenance = (mwRes.data ?? []) as any[];
           const historyRows = (histRes.data ?? []) as any[];
+          const visRows = (visRes.data ?? []) as any[];
+          const visibility = new Map<string, { label: string | null; show: boolean; sort: number; paused: boolean }>();
+          for (const v of visRows) {
+            visibility.set(v.url, {
+              label: v.label ?? null,
+              show: v.show_on_public !== false,
+              sort: typeof v.sort_order === "number" ? v.sort_order : 100,
+              paused: !!v.paused,
+            });
+          }
 
           // Build 90-day history per url, padding missing days with null
           const historyByUrl: Record<string, Map<string, number | null>> = {};
@@ -73,6 +88,7 @@ export const Route = createFileRoute("/api/public/status")({
             const day = String(h.day).slice(0, 10);
             (historyByUrl[url] ||= new Map()).set(day, h.up_ratio == null ? null : Number(h.up_ratio));
           }
+
           const today = new Date();
           today.setUTCHours(0, 0, 0, 0);
           const days: string[] = [];
@@ -80,14 +96,29 @@ export const Route = createFileRoute("/api/public/status")({
             const d = new Date(today.getTime() - i * 86400000);
             days.push(d.toISOString().slice(0, 10));
           }
-          const servicesWithHistory = status.map((s) => {
-            const map = (s.url && historyByUrl[s.url]) || null;
-            const history = days.map((day) => ({
-              day,
-              up_ratio: map ? (map.has(day) ? map.get(day)! : null) : null,
-            }));
-            return { ...s, history };
-          });
+          const servicesWithHistory = status
+            .filter((s) => {
+              if (!s.url) return true;
+              const v = visibility.get(s.url);
+              if (!v) return true; // unknown URL: keep visible
+              return v.show && !v.paused;
+            })
+            .map((s) => {
+              const v = s.url ? visibility.get(s.url) : null;
+              const map = (s.url && historyByUrl[s.url]) || null;
+              const history = days.map((day) => ({
+                day,
+                up_ratio: map ? (map.has(day) ? map.get(day)! : null) : null,
+              }));
+              return {
+                ...s,
+                name: v?.label || s.name || s.url,
+                sort_order: v?.sort ?? 100,
+                history,
+              };
+            })
+            .sort((a, b) => (a.sort_order ?? 100) - (b.sort_order ?? 100));
+
 
           // Fetch updates for open incidents (last 90d)
           const openIds = incidents.filter((i) => i.status !== "resolved").map((i) => i.id);

@@ -30494,10 +30494,14 @@ export type Database = {
           consecutive_failures: number
           first_failure_at: string | null
           is_up: boolean
+          label: string | null
           last_alert_at: string | null
           last_check_at: string
           last_error: string | null
+          paused: boolean
+          show_on_public: boolean
           since: string
+          sort_order: number
           url: string
         }
         Insert: {
@@ -30507,10 +30511,14 @@ export type Database = {
           consecutive_failures?: number
           first_failure_at?: string | null
           is_up: boolean
+          label?: string | null
           last_alert_at?: string | null
           last_check_at?: string
           last_error?: string | null
+          paused?: boolean
+          show_on_public?: boolean
           since?: string
+          sort_order?: number
           url: string
         }
         Update: {
@@ -30520,10 +30528,14 @@ export type Database = {
           consecutive_failures?: number
           first_failure_at?: string | null
           is_up?: boolean
+          label?: string | null
           last_alert_at?: string | null
           last_check_at?: string
           last_error?: string | null
+          paused?: boolean
+          show_on_public?: boolean
           since?: string
+          sort_order?: number
           url?: string
         }
         Relationships: []
