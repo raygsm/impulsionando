@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 
+type HistoryPoint = { day: string; up_ratio: number | null };
+
 type ServiceRow = {
   scope: string;
   url: string | null;
@@ -22,7 +24,9 @@ type ServiceRow = {
   availability_bps_30d: number | null;
   latency_p95_ms_30d: number | null;
   last_check_at: string | null;
+  history?: HistoryPoint[];
 };
+
 
 type IncidentUpdate = {
   id: string;
