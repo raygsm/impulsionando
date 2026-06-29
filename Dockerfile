@@ -36,12 +36,11 @@ ENV VITE_SUPABASE_PUBLISHABLE_KEY=$VITE_SUPABASE_PUBLISHABLE_KEY
 COPY . .
 RUN bun run build
 RUN set -eux; \
-  find /app -maxdepth 4 \( -name index.html -o -name index.mjs -o -name server.mjs \) -print; \
-  test -f /app/.output/server/index.mjs \
-    -o -f /app/dist/server/index.mjs \
-    -o -f /app/dist/index.html \
-    -o -f /app/dist/client/index.html \
-    -o -f /app/.output/public/index.html
+  artifacts="$(find /app/.output /app/dist /app/.vinxi /app/.tanstack /app/build \
+    -maxdepth 8 \( -name index.html -o -name index.mjs -o -name index.js -o -name server.mjs -o -name nitro.mjs \) \
+    -print 2>/dev/null || true)"; \
+  printf '%s\n' "$artifacts"; \
+  test -n "$artifacts"
 
 FROM oven/bun:1-slim AS runner
 WORKDIR /app

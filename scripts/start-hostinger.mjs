@@ -1,4 +1,4 @@
-import { createReadStream, existsSync, statSync } from "node:fs";
+import { createReadStream, existsSync, readdirSync, statSync } from "node:fs";
 import { extname, join, normalize, resolve } from "node:path";
 
 const host = process.env.HOST || "0.0.0.0";
@@ -6,7 +6,10 @@ const port = Number(process.env.PORT || 3000);
 
 const serverEntrypoints = [
   ".output/server/index.mjs",
+  ".output/server/index.js",
+  ".output/server/chunks/nitro/nitro.mjs",
   "dist/server/index.mjs",
+  "dist/server/index.js",
   "dist/server/server.mjs",
 ];
 
@@ -26,11 +29,28 @@ if (!startedServerEntrypoint) {
     "dist",
     "dist/client",
     ".output/public",
+    ".vinxi/build/client",
+    ".tanstack/start/build/client",
     "build",
     "build/client",
   ];
 
-  const root = staticRoots.find((candidate) => existsSync(join(candidate, "index.html")));
+  function findIndexRoot(candidate, depth = 0) {
+    if (!existsSync(candidate) || depth > 5) return undefined;
+    if (existsSync(join(candidate, "index.html"))) return candidate;
+
+    for (const item of readdirSync(candidate)) {
+      const child = join(candidate, item);
+      if (statSync(child).isDirectory()) {
+        const found = findIndexRoot(child, depth + 1);
+        if (found) return found;
+      }
+    }
+
+    return undefined;
+  }
+
+  const root = staticRoots.map((candidate) => findIndexRoot(candidate)).find(Boolean);
 
   if (!root) {
     console.error("No runnable Hostinger artifact found after build.");
