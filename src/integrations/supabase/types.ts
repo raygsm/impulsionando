@@ -10872,6 +10872,7 @@ export type Database = {
           email: string
           id: string
           last_notified_at: string | null
+          min_severity: string
           notify_incidents: boolean
           notify_maintenance: boolean
           source: string | null
@@ -10888,6 +10889,7 @@ export type Database = {
           email: string
           id?: string
           last_notified_at?: string | null
+          min_severity?: string
           notify_incidents?: boolean
           notify_maintenance?: boolean
           source?: string | null
@@ -10904,6 +10906,7 @@ export type Database = {
           email?: string
           id?: string
           last_notified_at?: string | null
+          min_severity?: string
           notify_incidents?: boolean
           notify_maintenance?: boolean
           source?: string | null
