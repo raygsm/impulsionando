@@ -20,12 +20,14 @@ type ServiceRow = {
   scope: string;
   url: string | null;
   name: string | null;
+  slug?: string | null;
   currently_up: boolean | null;
   availability_bps_30d: number | null;
   latency_p95_ms_30d: number | null;
   last_check_at: string | null;
   history?: HistoryPoint[];
 };
+
 
 
 type IncidentUpdate = {
