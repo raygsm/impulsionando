@@ -89,6 +89,46 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
         }
         const incidentById = new Map(incidentsList.map((i) => [i.id, i]))
 
+        // Resolve service slug per incident (via uptime_state.url)
+        const urls = Array.from(new Set(incidentsList.map((i) => i.url).filter(Boolean) as string[]))
+        const slugByUrl = new Map<string, string>()
+        if (urls.length > 0) {
+          const slugRes = await supabaseAdmin
+            .from('uptime_state')
+            .select('url,public_slug')
+            .in('url', urls)
+          for (const r of (slugRes.data ?? []) as Array<{ url: string; public_slug: string | null }>) {
+            if (r.public_slug) slugByUrl.set(r.url, r.public_slug)
+          }
+        }
+        const slugForIncident = (id: string): string | null => {
+          const inc = incidentById.get(id)
+          if (!inc?.url) return null
+          return slugByUrl.get(inc.url) ?? null
+        }
+
+        // Subscriber service filters: subscriber_id -> set of slugs (empty set = all)
+        const subIds = subscribers.map((s) => s.id)
+        const filterBySub = new Map<string, Set<string>>()
+        if (subIds.length > 0) {
+          const filtRes = await supabaseAdmin
+            .from('core_status_subscriber_services' as any)
+            .select('subscriber_id,service_slug')
+            .in('subscriber_id', subIds)
+          for (const r of (filtRes.data ?? []) as Array<{ subscriber_id: string; service_slug: string }>) {
+            const set = filterBySub.get(r.subscriber_id) ?? new Set<string>()
+            set.add(r.service_slug)
+            filterBySub.set(r.subscriber_id, set)
+          }
+        }
+        const subscriberWantsService = (subId: string, slug: string | null): boolean => {
+          const filter = filterBySub.get(subId)
+          if (!filter || filter.size === 0) return true // no filter = receives everything
+          if (!slug) return false // incident without resolvable slug → skip filtered subs
+          return filter.has(slug)
+        }
+
+
         const events: Array<{
           subscriber: SubscriberRow
           incident_id: string | null
