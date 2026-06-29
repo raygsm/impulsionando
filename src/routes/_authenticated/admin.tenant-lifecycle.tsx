@@ -117,7 +117,7 @@ function Page() {
                   <tr><th className="py-2">Tenant</th><th>Plano</th><th>Termina em</th><th className="text-right">Dias</th></tr>
                 </thead>
                 <tbody>
-                  {d.trialsExpiringSoon.map((t) => {
+                  {d.trialsExpiringSoon.map((t: any) => {
                     const dd = daysFromNow(t.endsAt);
                     return (
                       <tr key={t.id} className="border-b last:border-0">
@@ -144,7 +144,7 @@ function Page() {
                 <tr><th className="py-2">Tenant</th><th>Vencimento</th><th>Último pagto</th><th className="text-right">Recorrente</th></tr>
               </thead>
               <tbody>
-                {d.dueSoonContracts.map((c) => {
+                {d.dueSoonContracts.map((c: any) => {
                   const dd = daysFromNow(c.nextDueDate);
                   return (
                     <tr key={c.id} className="border-b last:border-0">
@@ -171,7 +171,7 @@ function Page() {
                   <tr><th className="py-2">Tenant</th><th>Motivo</th><th>Suspenso em</th></tr>
                 </thead>
                 <tbody>
-                  {d.recentSusp.map((s) => (
+                  {d.recentSusp.map((s: any) => (
                     <tr key={s.id} className="border-b last:border-0">
                       <td className="py-2 truncate max-w-[200px]">{s.companyName}</td>
                       <td className="text-xs truncate max-w-[180px]">{s.reason}</td>
@@ -214,7 +214,7 @@ function Page() {
           <CardContent>
             {d.onboardingRequests.domains.length === 0 ? <p className="text-sm text-muted-foreground">Nenhuma pendência.</p> : (
               <ul className="space-y-2 text-sm">
-                {d.onboardingRequests.domains.map((r) => (
+                {d.onboardingRequests.domains.map((r: any) => (
                   <li key={r.id} className="flex items-center justify-between border-b last:border-0 pb-2">
                     <div className="min-w-0">
                       <div className="truncate">{r.companyName}</div>
@@ -232,7 +232,7 @@ function Page() {
           <CardContent>
             {d.onboardingRequests.emails.length === 0 ? <p className="text-sm text-muted-foreground">Nenhuma pendência.</p> : (
               <ul className="space-y-2 text-sm">
-                {d.onboardingRequests.emails.map((r) => (
+                {d.onboardingRequests.emails.map((r: any) => (
                   <li key={r.id} className="flex items-center justify-between border-b last:border-0 pb-2">
                     <div className="min-w-0">
                       <div className="truncate">{r.companyName}</div>
