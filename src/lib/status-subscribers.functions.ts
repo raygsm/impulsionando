@@ -61,8 +61,77 @@ export const listStatusSubscribers = createServerFn({ method: 'POST' })
       bounced: rows.filter((r) => r.bounced_at).length,
     }
 
-    return { items: items ?? [], counts }
+    // Per-subscriber service filters (admin view)
+    const ids = ((items ?? []) as Array<{ id: string }>).map((r) => r.id)
+    const servicesBySub: Record<string, string[]> = {}
+    if (ids.length > 0) {
+      const { data: svcRows } = await context.supabase
+        .from('core_status_subscriber_services')
+        .select('subscriber_id,service_slug')
+        .in('subscriber_id', ids)
+      for (const r of ((svcRows ?? []) as Array<{ subscriber_id: string; service_slug: string }>)) {
+        ;(servicesBySub[r.subscriber_id] ||= []).push(r.service_slug)
+      }
+    }
+    const itemsWithSvcs = ((items ?? []) as Array<{ id: string }>).map((r) => ({
+      ...r,
+      services: servicesBySub[r.id] ?? [],
+    }))
+
+    return { items: itemsWithSvcs, counts }
   })
+
+export const listStatusServiceBreakdown = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context)
+
+    const [{ data: targets }, { data: filters }, { data: activeSubs }] = await Promise.all([
+      context.supabase
+        .from('uptime_state')
+        .select('public_slug,label,show_on_public,sort_order')
+        .not('public_slug', 'is', null)
+        .order('sort_order', { ascending: true }),
+      context.supabase
+        .from('core_status_subscriber_services')
+        .select('subscriber_id,service_slug')
+        .limit(50000),
+      context.supabase
+        .from('core_status_subscribers')
+        .select('id')
+        .not('confirmed_at', 'is', null)
+        .is('unsubscribed_at', null)
+        .is('bounced_at', null)
+        .limit(50000),
+    ])
+
+    const activeIds = new Set(((activeSubs ?? []) as Array<{ id: string }>).map((r) => r.id))
+    const filtersBySub: Record<string, Set<string>> = {}
+    for (const r of ((filters ?? []) as Array<{ subscriber_id: string; service_slug: string }>)) {
+      if (!activeIds.has(r.subscriber_id)) continue
+      ;(filtersBySub[r.subscriber_id] ||= new Set()).add(r.service_slug)
+    }
+
+    const subsWithFilter = Object.keys(filtersBySub).length
+    const subsAllServices = activeIds.size - subsWithFilter
+
+    const breakdown = ((targets ?? []) as Array<{ public_slug: string; label: string | null; show_on_public: boolean }>).map((t) => {
+      const explicit = Object.values(filtersBySub).reduce(
+        (n, set) => n + (set.has(t.public_slug) ? 1 : 0),
+        0,
+      )
+      return {
+        slug: t.public_slug,
+        label: t.label ?? t.public_slug,
+        show_on_public: !!t.show_on_public,
+        explicit_subscribers: explicit,
+        effective_subscribers: explicit + subsAllServices,
+      }
+    })
+
+    return { breakdown, subsWithFilter, subsAllServices, activeSubscribers: activeIds.size }
+  })
+
 
 export const listStatusDispatchLog = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
