@@ -57,9 +57,10 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
         const [subsRes, incRes] = await Promise.all([
           supabaseAdmin
             .from('core_status_subscribers')
-            .select('id,email,confirm_token,unsubscribe_token,confirmed_at')
+            .select('id,email,confirm_token,unsubscribe_token,confirmed_at,notify_incidents')
             .is('unsubscribed_at', null)
             .is('bounced_at', null)
+            .neq('notify_incidents', false)
             .limit(5000),
           supabaseAdmin
             .from('core_incidents')
