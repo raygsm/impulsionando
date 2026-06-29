@@ -249,3 +249,43 @@ function StatusDetailPage() {
     </main>
   );
 }
+
+function ServiceEmbed({ slug }: { slug: string }) {
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const badgeUrl = `${origin}/api/public/status/${slug}/badge.svg`;
+  const pageUrl = `${origin}/status/${slug}`;
+  const md = `[![status](${badgeUrl})](${pageUrl})`;
+  const html = `<a href="${pageUrl}"><img src="${badgeUrl}" alt="status" /></a>`;
+  const copy = (txt: string) => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(txt).catch(() => {});
+    }
+  };
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Badge & embed</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="flex items-center gap-3">
+          <img src={badgeUrl} alt="badge de status" />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs text-muted-foreground">Markdown</label>
+          <div className="flex gap-2">
+            <input readOnly value={md} className="flex-1 rounded border px-2 py-1 text-xs font-mono" />
+            <button type="button" onClick={() => copy(md)} className="text-xs px-2 py-1 rounded border hover:bg-muted">Copiar</button>
+          </div>
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs text-muted-foreground">HTML</label>
+          <div className="flex gap-2">
+            <input readOnly value={html} className="flex-1 rounded border px-2 py-1 text-xs font-mono" />
+            <button type="button" onClick={() => copy(html)} className="text-xs px-2 py-1 rounded border hover:bg-muted">Copiar</button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
