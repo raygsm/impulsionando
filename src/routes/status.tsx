@@ -172,13 +172,14 @@ function StatusPage() {
             </button>
             {" · "}
             <a
-              href="/api/public/status.rss"
+              href={activeCategory === "all" ? "/api/public/status.rss" : `/api/public/status.rss?category=${encodeURIComponent(activeCategory)}`}
               className="underline underline-offset-2 hover:text-foreground"
               target="_blank"
               rel="noopener noreferrer"
             >
-              RSS
+              RSS{activeCategory !== "all" ? ` (${activeCategory})` : ""}
             </a>
+
           </p>
 
         </header>
