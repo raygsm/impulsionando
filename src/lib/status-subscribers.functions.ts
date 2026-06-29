@@ -164,6 +164,26 @@ export const forceUnsubscribeStatusSubscriber = createServerFn({ method: 'POST' 
     return { ok: true }
   })
 
+export const setStatusSubscriberSeverity = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        min_severity: z.enum(['info', 'minor', 'major', 'critical']),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const { error } = await context.supabase
+      .from('core_status_subscribers')
+      .update({ min_severity: data.min_severity })
+      .eq('id', data.id)
+    if (error) throw new Error(error.message)
+    return { ok: true }
+  })
+
 export const resendStatusConfirmation = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
