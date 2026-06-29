@@ -30618,6 +30618,7 @@ export type Database = {
           alert_after_seconds: number
           alert_emails: string[]
           alert_whatsapps: string[]
+          category: string | null
           consecutive_failures: number
           first_failure_at: string | null
           is_up: boolean
@@ -30636,6 +30637,7 @@ export type Database = {
           alert_after_seconds?: number
           alert_emails?: string[]
           alert_whatsapps?: string[]
+          category?: string | null
           consecutive_failures?: number
           first_failure_at?: string | null
           is_up: boolean
@@ -30654,6 +30656,7 @@ export type Database = {
           alert_after_seconds?: number
           alert_emails?: string[]
           alert_whatsapps?: string[]
+          category?: string | null
           consecutive_failures?: number
           first_failure_at?: string | null
           is_up?: boolean
