@@ -24,7 +24,7 @@ export const listStatusSubscribers = createServerFn({ method: 'POST' })
     let q = context.supabase
       .from('core_status_subscribers')
       .select(
-        'id,email,source,confirmed_at,unsubscribed_at,bounced_at,last_notified_at,created_at',
+        'id,email,source,confirmed_at,unsubscribed_at,bounced_at,last_notified_at,created_at,min_severity',
       )
       .order('created_at', { ascending: false })
       .limit(data.limit)
