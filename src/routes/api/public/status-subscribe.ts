@@ -5,6 +5,10 @@ import { z } from 'zod'
 const BodySchema = z.object({
   email: z.string().email().max(320),
   source: z.string().max(60).optional(),
+  services: z
+    .array(z.string().regex(/^[a-z0-9-]{1,80}$/))
+    .max(50)
+    .optional(),
 })
 
 export const Route = createFileRoute('/api/public/status-subscribe')({
