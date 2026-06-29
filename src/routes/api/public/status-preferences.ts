@@ -83,6 +83,17 @@ export const Route = createFileRoute('/api/public/status-preferences')({
         const notifInc = (sub as any).notify_incidents !== false
         const notifMan = (sub as any).notify_maintenance !== false
 
+        const subCats = new Set<string>(((sub as any).categories ?? []) as string[])
+        const allCategories = Array.from(
+          new Set(((services as any[]) ?? []).map((s) => s.category).filter(Boolean) as string[]),
+        ).sort()
+        const catBoxes = allCategories
+          .map((c) => {
+            const checked = subCats.has(c) ? 'checked' : ''
+            return `<label><input type="checkbox" name="categories" value="${escapeHtml(c)}" ${checked}/> <span>${escapeHtml(c)}</span></label>`
+          })
+          .join('')
+
         const body = `
 ${banner}
 <h1>Preferências de notificação</h1>
@@ -94,6 +105,9 @@ ${banner}
     <label><input type="checkbox" name="notify_incidents" value="1" ${notifInc ? 'checked' : ''}/> <span>Incidentes (abertura, atualizações, resolução, postmortem)</span></label>
     <label><input type="checkbox" name="notify_maintenance" value="1" ${notifMan ? 'checked' : ''}/> <span>Manutenções programadas (lembrete, início, fim)</span></label>
   </div>
+  ${allCategories.length > 0 ? `<h2 style="font-size:15px;margin:18px 0 8px">Categorias / seções</h2>
+  <p class="muted" style="margin:-4px 0 8px;font-size:12px">Marque para receber apenas dessas seções — nenhuma marcada equivale a "todas".</p>
+  <div class="list">${catBoxes}</div>` : ''}
   <h2 style="font-size:15px;margin:18px 0 8px">Serviços</h2>
   <p class="muted" style="margin:-4px 0 8px;font-size:12px">Marque os serviços desejados — nenhum marcado equivale a "todos".</p>
   <div class="list">${checkboxes || '<p class="muted" style="margin:0">Nenhum serviço público disponível.</p>'}</div>
