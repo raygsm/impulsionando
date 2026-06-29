@@ -10,17 +10,18 @@ const getEmbedStatus = createServerFn({ method: 'GET' }).handler(async () => {
     process.env.SUPABASE_PUBLISHABLE_KEY!,
     { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
   )
-  const [{ data: slo }, { data: incidents }] = await Promise.all([
+  const [sloRes, incRes] = await Promise.all([
     supabase.from('v_core_slo_status' as any).select('service,uptime_30d,p95_ms').limit(50),
     supabase
       .from('core_incidents')
-      .select('id,title,severity,status,opened_at,resolved_at')
+      .select('id,title,severity,status,started_at,resolved_at')
       .is('resolved_at', null)
-      .order('opened_at', { ascending: false })
+      .order('started_at', { ascending: false })
       .limit(3),
   ])
-  const services = (slo ?? []) as Array<{ service: string; uptime_30d: number | null; p95_ms: number | null }>
-  const open = (incidents ?? []) as Array<{ id: string; title: string; severity: string | null; status: string | null; opened_at: string; resolved_at: string | null }>
+  const services = ((sloRes.data ?? []) as unknown) as Array<{ service: string; uptime_30d: number | null; p95_ms: number | null }>
+  const open = ((incRes.data ?? []) as unknown) as Array<{ id: string; title: string; severity: string | null; status: string | null; started_at: string; resolved_at: string | null }>
+
   const hasOutage = open.some((i) => (i.severity ?? '').toLowerCase() === 'critical' || (i.severity ?? '').toLowerCase() === 'sev1')
   const overall = open.length === 0 ? 'operational' : hasOutage ? 'outage' : 'degraded'
   const avgUptime = services.length
