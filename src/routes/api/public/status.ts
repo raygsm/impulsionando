@@ -59,7 +59,7 @@ export const Route = createFileRoute("/api/public/status")({
               .limit(20000),
             supabaseAdmin
               .from("uptime_state")
-              .select("url,label,show_on_public,sort_order,paused,public_slug")
+              .select("url,label,show_on_public,sort_order,paused,public_slug,category")
               .order("sort_order", { ascending: true }),
           ]);
 
@@ -71,7 +71,7 @@ export const Route = createFileRoute("/api/public/status")({
           const maintenance = (mwRes.data ?? []) as any[];
           const historyRows = (histRes.data ?? []) as any[];
           const visRows = (visRes.data ?? []) as any[];
-          const visibility = new Map<string, { label: string | null; show: boolean; sort: number; paused: boolean; slug: string | null }>();
+          const visibility = new Map<string, { label: string | null; show: boolean; sort: number; paused: boolean; slug: string | null; category: string | null }>();
           for (const v of visRows) {
             visibility.set(v.url, {
               label: v.label ?? null,
@@ -79,6 +79,7 @@ export const Route = createFileRoute("/api/public/status")({
               sort: typeof v.sort_order === "number" ? v.sort_order : 100,
               paused: !!v.paused,
               slug: v.public_slug ?? null,
+              category: (v as any).category ?? null,
             });
           }
 
@@ -117,6 +118,7 @@ export const Route = createFileRoute("/api/public/status")({
                 name: v?.label || s.name || s.url,
                 slug: v?.slug ?? null,
                 sort_order: v?.sort ?? 100,
+                category: v?.category ?? null,
                 history,
               };
             })
