@@ -346,6 +346,22 @@ function EditDialog({
               placeholder="vazio = todos"
             />
           </div>
+          <div>
+            <Label>Filtro de categorias (seções, separadas por vírgula)</Label>
+            <Input
+              value={(v.categories ?? []).join(',')}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  categories: e.target.value
+                    .split(',')
+                    .map((s) => s.trim())
+                    .filter(Boolean),
+                })
+              }
+              placeholder="vazio = todas (ex: API, Site, Pagamentos)"
+            />
+          </div>
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={onClose}>
