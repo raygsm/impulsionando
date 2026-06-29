@@ -18,6 +18,7 @@ type IncidentRow = {
   resolved_at: string | null
   description: string | null
   scope: string | null
+  url: string | null
   postmortem_published_at: string | null
   postmortem_summary: string | null
 }
@@ -63,7 +64,7 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
           supabaseAdmin
             .from('core_incidents')
             .select(
-              'id,title,severity,status,detected_at,resolved_at,description,scope,postmortem_published_at,postmortem_summary',
+              'id,title,severity,status,detected_at,resolved_at,description,scope,url,postmortem_published_at,postmortem_summary',
             )
             .or(`detected_at.gte.${since},resolved_at.gte.${since},postmortem_published_at.gte.${since}`)
             .order('detected_at', { ascending: false })
@@ -87,6 +88,46 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
           updatesList = ((upRes.data ?? []) as unknown) as IncidentUpdateRow[]
         }
         const incidentById = new Map(incidentsList.map((i) => [i.id, i]))
+
+        // Resolve service slug per incident (via uptime_state.url)
+        const urls = Array.from(new Set(incidentsList.map((i) => i.url).filter(Boolean) as string[]))
+        const slugByUrl = new Map<string, string>()
+        if (urls.length > 0) {
+          const slugRes = await supabaseAdmin
+            .from('uptime_state')
+            .select('url,public_slug')
+            .in('url', urls)
+          for (const r of (slugRes.data ?? []) as Array<{ url: string; public_slug: string | null }>) {
+            if (r.public_slug) slugByUrl.set(r.url, r.public_slug)
+          }
+        }
+        const slugForIncident = (id: string): string | null => {
+          const inc = incidentById.get(id)
+          if (!inc?.url) return null
+          return slugByUrl.get(inc.url) ?? null
+        }
+
+        // Subscriber service filters: subscriber_id -> set of slugs (empty set = all)
+        const subIds = subscribers.map((s) => s.id)
+        const filterBySub = new Map<string, Set<string>>()
+        if (subIds.length > 0) {
+          const filtRes = await supabaseAdmin
+            .from('core_status_subscriber_services' as any)
+            .select('subscriber_id,service_slug')
+            .in('subscriber_id', subIds)
+          for (const r of ((filtRes.data ?? []) as unknown) as Array<{ subscriber_id: string; service_slug: string }>) {
+            const set = filterBySub.get(r.subscriber_id) ?? new Set<string>()
+            set.add(r.service_slug)
+            filterBySub.set(r.subscriber_id, set)
+          }
+        }
+        const subscriberWantsService = (subId: string, slug: string | null): boolean => {
+          const filter = filterBySub.get(subId)
+          if (!filter || filter.size === 0) return true // no filter = receives everything
+          if (!slug) return false // incident without resolvable slug → skip filtered subs
+          return filter.has(slug)
+        }
+
 
         const events: Array<{
           subscriber: SubscriberRow
@@ -123,8 +164,10 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
           const isResolved = i.resolved_at ? Date.parse(i.resolved_at) >= sinceMs : false
           const isPM = i.postmortem_published_at ? Date.parse(i.postmortem_published_at) >= sinceMs : false
           const scope = i.scope ?? '—'
+          const slug = slugForIncident(i.id)
 
           for (const s of confirmed) {
+            if (!subscriberWantsService(s.id, slug)) continue
             if (isOpened) {
               events.push({
                 subscriber: s,
@@ -170,7 +213,9 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
           const title = inc?.title ?? 'Incidente'
           const scope = inc?.scope ?? '—'
           const statusLabel = (u.status ?? 'update').toString().toUpperCase()
+          const slug = slugForIncident(u.incident_id)
           for (const s of confirmed) {
+            if (!subscriberWantsService(s.id, slug)) continue
             events.push({
               subscriber: s,
               incident_id: u.incident_id,
