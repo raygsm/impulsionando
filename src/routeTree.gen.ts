@@ -636,6 +636,7 @@ import { Route as AuthenticatedAdminOndaYCrmReguasRouteImport } from './routes/_
 import { Route as AuthenticatedAdminModulosClonagemRouteImport } from './routes/_authenticated/admin.modulos.clonagem'
 import { Route as AuthenticatedAdminIntegracoesMercadoPagoRouteImport } from './routes/_authenticated/admin.integracoes.mercado-pago'
 import { Route as AuthenticatedAdminClientesRiomedRouteImport } from './routes/_authenticated/admin.clientes.riomed'
+import { Route as AuthenticatedAdminClientesSlugRouteImport } from './routes/_authenticated/admin.clientes.$slug'
 import { Route as AuthenticatedAdminClientesSlugIndexRouteImport } from './routes/_authenticated/admin.clientes.$slug.index'
 import { Route as ApiPublicRiomedQuotesColdRouteImport } from './routes/api/public/riomed/quotes/cold'
 import { Route as ApiPublicRiomedFxUpsertRouteImport } from './routes/api/public/riomed/fx/upsert'
@@ -4206,11 +4207,17 @@ const AuthenticatedAdminClientesRiomedRoute =
     path: '/admin/clientes/riomed',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminClientesSlugRoute =
+  AuthenticatedAdminClientesSlugRouteImport.update({
+    id: '/admin/clientes/$slug',
+    path: '/admin/clientes/$slug',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminClientesSlugIndexRoute =
   AuthenticatedAdminClientesSlugIndexRouteImport.update({
-    id: '/admin/clientes/$slug/',
-    path: '/admin/clientes/$slug/',
-    getParentRoute: () => AuthenticatedRouteRoute,
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAdminClientesSlugRoute,
   } as any)
 const ApiPublicRiomedQuotesColdRoute =
   ApiPublicRiomedQuotesColdRouteImport.update({
@@ -4489,15 +4496,15 @@ const AuthenticatedAdminClientesRiomedAgentesRoute =
   } as any)
 const AuthenticatedAdminClientesSlugPainelRoute =
   AuthenticatedAdminClientesSlugPainelRouteImport.update({
-    id: '/admin/clientes/$slug/painel',
-    path: '/admin/clientes/$slug/painel',
-    getParentRoute: () => AuthenticatedRouteRoute,
+    id: '/painel',
+    path: '/painel',
+    getParentRoute: () => AuthenticatedAdminClientesSlugRoute,
   } as any)
 const AuthenticatedAdminClientesSlugDominioRoute =
   AuthenticatedAdminClientesSlugDominioRouteImport.update({
-    id: '/admin/clientes/$slug/dominio',
-    path: '/admin/clientes/$slug/dominio',
-    getParentRoute: () => AuthenticatedRouteRoute,
+    id: '/dominio',
+    path: '/dominio',
+    getParentRoute: () => AuthenticatedAdminClientesSlugRoute,
   } as any)
 const AuthenticatedCoreClienteIdPaginasPageIdRoute =
   AuthenticatedCoreClienteIdPaginasPageIdRouteImport.update({
@@ -5063,6 +5070,7 @@ export interface FileRoutesByFullPath {
   '/reports/': typeof AuthenticatedReportsIndexRoute
   '/saiba-mais/': typeof AuthenticatedSaibaMaisIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
+  '/admin/clientes/$slug': typeof AuthenticatedAdminClientesSlugRouteWithChildren
   '/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   '/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
@@ -6411,6 +6419,7 @@ export interface FileRoutesById {
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
   '/_authenticated/saiba-mais/': typeof AuthenticatedSaibaMaisIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
+  '/_authenticated/admin/clientes/$slug': typeof AuthenticatedAdminClientesSlugRouteWithChildren
   '/_authenticated/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   '/_authenticated/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   '/_authenticated/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
@@ -7092,6 +7101,7 @@ export interface FileRouteTypes {
     | '/reports/'
     | '/saiba-mais/'
     | '/sales/'
+    | '/admin/clientes/$slug'
     | '/admin/clientes/riomed'
     | '/admin/integracoes/mercado-pago'
     | '/admin/modulos/clonagem'
@@ -8439,6 +8449,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reports/'
     | '/_authenticated/saiba-mais/'
     | '/_authenticated/sales/'
+    | '/_authenticated/admin/clientes/$slug'
     | '/_authenticated/admin/clientes/riomed'
     | '/_authenticated/admin/integracoes/mercado-pago'
     | '/_authenticated/admin/modulos/clonagem'
@@ -13141,12 +13152,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientesRiomedRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/clientes/$slug': {
+      id: '/_authenticated/admin/clientes/$slug'
+      path: '/admin/clientes/$slug'
+      fullPath: '/admin/clientes/$slug'
+      preLoaderRoute: typeof AuthenticatedAdminClientesSlugRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/clientes/$slug/': {
       id: '/_authenticated/admin/clientes/$slug/'
-      path: '/admin/clientes/$slug'
+      path: '/'
       fullPath: '/admin/clientes/$slug/'
       preLoaderRoute: typeof AuthenticatedAdminClientesSlugIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      parentRoute: typeof AuthenticatedAdminClientesSlugRoute
     }
     '/api/public/riomed/quotes/cold': {
       id: '/api/public/riomed/quotes/cold'
@@ -13472,17 +13490,17 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/admin/clientes/$slug/painel': {
       id: '/_authenticated/admin/clientes/$slug/painel'
-      path: '/admin/clientes/$slug/painel'
+      path: '/painel'
       fullPath: '/admin/clientes/$slug/painel'
       preLoaderRoute: typeof AuthenticatedAdminClientesSlugPainelRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      parentRoute: typeof AuthenticatedAdminClientesSlugRoute
     }
     '/_authenticated/admin/clientes/$slug/dominio': {
       id: '/_authenticated/admin/clientes/$slug/dominio'
-      path: '/admin/clientes/$slug/dominio'
+      path: '/dominio'
       fullPath: '/admin/clientes/$slug/dominio'
       preLoaderRoute: typeof AuthenticatedAdminClientesSlugDominioRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      parentRoute: typeof AuthenticatedAdminClientesSlugRoute
     }
     '/_authenticated/core/cliente/$id/paginas/$pageId': {
       id: '/_authenticated/core/cliente/$id/paginas/$pageId'
@@ -14153,6 +14171,27 @@ const AuthenticatedTorreRestaurantesDemoRouteWithChildren =
     AuthenticatedTorreRestaurantesDemoRouteChildren,
   )
 
+interface AuthenticatedAdminClientesSlugRouteChildren {
+  AuthenticatedAdminClientesSlugDominioRoute: typeof AuthenticatedAdminClientesSlugDominioRoute
+  AuthenticatedAdminClientesSlugPainelRoute: typeof AuthenticatedAdminClientesSlugPainelRoute
+  AuthenticatedAdminClientesSlugIndexRoute: typeof AuthenticatedAdminClientesSlugIndexRoute
+}
+
+const AuthenticatedAdminClientesSlugRouteChildren: AuthenticatedAdminClientesSlugRouteChildren =
+  {
+    AuthenticatedAdminClientesSlugDominioRoute:
+      AuthenticatedAdminClientesSlugDominioRoute,
+    AuthenticatedAdminClientesSlugPainelRoute:
+      AuthenticatedAdminClientesSlugPainelRoute,
+    AuthenticatedAdminClientesSlugIndexRoute:
+      AuthenticatedAdminClientesSlugIndexRoute,
+  }
+
+const AuthenticatedAdminClientesSlugRouteWithChildren =
+  AuthenticatedAdminClientesSlugRoute._addFileChildren(
+    AuthenticatedAdminClientesSlugRouteChildren,
+  )
+
 interface AuthenticatedAdminClientesRiomedRouteChildren {
   AuthenticatedAdminClientesRiomedAgentesRoute: typeof AuthenticatedAdminClientesRiomedAgentesRoute
   AuthenticatedAdminClientesRiomedAssistenciaRoute: typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
@@ -14535,13 +14574,11 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEventosIndexRoute: typeof AuthenticatedEventosIndexRoute
   AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
   AuthenticatedSaibaMaisIndexRoute: typeof AuthenticatedSaibaMaisIndexRoute
+  AuthenticatedAdminClientesSlugRoute: typeof AuthenticatedAdminClientesSlugRouteWithChildren
   AuthenticatedAdminClientesRiomedRoute: typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   AuthenticatedAdminIntegracoesMercadoPagoRoute: typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   AuthenticatedAdminModulosClonagemRoute: typeof AuthenticatedAdminModulosClonagemRoute
   AuthenticatedAdminTenantIdRoute: typeof AuthenticatedAdminTenantIdRoute
-  AuthenticatedAdminClientesSlugDominioRoute: typeof AuthenticatedAdminClientesSlugDominioRoute
-  AuthenticatedAdminClientesSlugPainelRoute: typeof AuthenticatedAdminClientesSlugPainelRoute
-  AuthenticatedAdminClientesSlugIndexRoute: typeof AuthenticatedAdminClientesSlugIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -14906,6 +14943,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEventosIndexRoute: AuthenticatedEventosIndexRoute,
   AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
   AuthenticatedSaibaMaisIndexRoute: AuthenticatedSaibaMaisIndexRoute,
+  AuthenticatedAdminClientesSlugRoute:
+    AuthenticatedAdminClientesSlugRouteWithChildren,
   AuthenticatedAdminClientesRiomedRoute:
     AuthenticatedAdminClientesRiomedRouteWithChildren,
   AuthenticatedAdminIntegracoesMercadoPagoRoute:
@@ -14913,12 +14952,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminModulosClonagemRoute:
     AuthenticatedAdminModulosClonagemRoute,
   AuthenticatedAdminTenantIdRoute: AuthenticatedAdminTenantIdRoute,
-  AuthenticatedAdminClientesSlugDominioRoute:
-    AuthenticatedAdminClientesSlugDominioRoute,
-  AuthenticatedAdminClientesSlugPainelRoute:
-    AuthenticatedAdminClientesSlugPainelRoute,
-  AuthenticatedAdminClientesSlugIndexRoute:
-    AuthenticatedAdminClientesSlugIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
