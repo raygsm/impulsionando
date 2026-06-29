@@ -74,12 +74,13 @@ export const upsertUptimeTarget = createServerFn({ method: 'POST' })
     const url = data.url?.trim()
     if (!url || !/^https?:\/\//i.test(url)) throw new Error('URL inválida (http/https obrigatório)')
 
-    const payload: Record<string, any> = {
+    const payload = {
       url,
       alert_emails: parseList(data.alert_emails),
       alert_whatsapps: parseList(data.alert_whatsapps),
-      alert_after_seconds: data.alert_after_seconds ?? null,
+      alert_after_seconds: data.alert_after_seconds ?? undefined,
     }
+
 
     const original = data.original_url?.trim()
     if (original && original !== url) {
