@@ -44,7 +44,7 @@ export const Route = createFileRoute('/api/public/status-preferences')({
         const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
         const { data: sub } = await supabaseAdmin
           .from('core_status_subscribers')
-          .select('id, email, unsubscribed_at, notify_incidents, notify_maintenance')
+          .select('id, email, unsubscribed_at, notify_incidents, notify_maintenance, categories')
           .eq('unsubscribe_token', token)
           .maybeSingle()
 
