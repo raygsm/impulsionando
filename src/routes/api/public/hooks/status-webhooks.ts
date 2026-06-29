@@ -183,16 +183,26 @@ export const Route = createFileRoute('/api/public/hooks/status-webhooks')({
           ),
         )
         const slugByUrl = new Map<string, string>()
+        const categoryBySlug = new Map<string, string>()
         if (urls.length > 0) {
           const r = await supabaseAdmin
             .from('uptime_state')
-            .select('url,public_slug')
+            .select('url,public_slug,category')
             .in('url', urls)
-          for (const row of (r.data ?? []) as Array<{ url: string; public_slug: string | null }>) {
-            if (row.public_slug) slugByUrl.set(row.url, row.public_slug)
+          for (const row of (r.data ?? []) as Array<{
+            url: string
+            public_slug: string | null
+            category: string | null
+          }>) {
+            if (row.public_slug) {
+              slugByUrl.set(row.url, row.public_slug)
+              if (row.category) categoryBySlug.set(row.public_slug, row.category)
+            }
           }
         }
         const slugOf = (u: string | null): string | null => (u ? slugByUrl.get(u) ?? null : null)
+        const categoryOf = (slug: string | null): string | null =>
+          slug ? categoryBySlug.get(slug) ?? null : null
 
         const incById = new Map(incidents.map((i) => [i.id, i]))
 
