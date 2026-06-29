@@ -33,8 +33,10 @@ const upsertSchema = z.object({
   notify_maintenance: z.boolean().default(true),
   services: z.array(z.string().max(80)).default([]),
   categories: z.array(z.string().max(80)).default([]),
+  min_severity: z.enum(['info', 'minor', 'major', 'critical']).default('info'),
   active: z.boolean().default(true),
 })
+
 
 export const upsertStatusWebhook = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
