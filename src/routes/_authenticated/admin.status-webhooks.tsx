@@ -59,6 +59,7 @@ function AdminStatusWebhooksPage() {
   const upsert = useServerFn(upsertStatusWebhook)
   const remove = useServerFn(deleteStatusWebhook)
   const trigger = useServerFn(triggerStatusWebhooksTick)
+  const testFn = useServerFn(testStatusWebhook)
 
   const { data, isLoading } = useQuery({
     queryKey: ['status-webhooks'],
