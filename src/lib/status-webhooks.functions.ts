@@ -33,8 +33,10 @@ const upsertSchema = z.object({
   notify_maintenance: z.boolean().default(true),
   services: z.array(z.string().max(80)).default([]),
   categories: z.array(z.string().max(80)).default([]),
+  min_severity: z.enum(['info', 'minor', 'major', 'critical']).default('info'),
   active: z.boolean().default(true),
 })
+
 
 export const upsertStatusWebhook = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
@@ -50,7 +52,9 @@ export const upsertStatusWebhook = createServerFn({ method: 'POST' })
       notify_maintenance: data.notify_maintenance,
       services: data.services,
       categories: data.categories,
+      min_severity: data.min_severity,
       active: data.active,
+
       updated_at: new Date().toISOString(),
     }
     if (data.id) {

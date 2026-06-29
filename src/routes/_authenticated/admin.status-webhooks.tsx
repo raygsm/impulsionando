@@ -46,7 +46,9 @@ type Hook = {
   notify_maintenance: boolean
   services: string[] | null
   categories: string[] | null
+  min_severity: 'info' | 'minor' | 'major' | 'critical' | null
   active: boolean
+
   last_dispatch_at: string | null
   last_status_code: number | null
   last_error: string | null
@@ -132,7 +134,9 @@ function AdminStatusWebhooksPage() {
                 notify_maintenance: true,
                 services: [],
                 categories: [],
+                min_severity: 'info',
                 active: true,
+
               })
             }
           >
@@ -163,7 +167,9 @@ function AdminStatusWebhooksPage() {
                     <th className="py-2 pr-3">Filtros</th>
                     <th className="py-2 pr-3">Serviços</th>
                     <th className="py-2 pr-3">Categorias</th>
+                    <th className="py-2 pr-3">Sev. mín.</th>
                     <th className="py-2 pr-3">Status</th>
+
                     <th className="py-2 pr-3">Último envio</th>
                     <th className="py-2 pr-3 text-right">Ações</th>
                   </tr>
@@ -200,7 +206,9 @@ function AdminStatusWebhooksPage() {
                           ? 'todas'
                           : (h.categories ?? []).join(', ')}
                       </td>
+                      <td className="py-2 pr-3 text-xs uppercase">{h.min_severity ?? 'info'}</td>
                       <td className="py-2 pr-3">
+
                         {h.last_status_code ? (
                           <Badge variant={h.last_error ? 'destructive' : 'default'}>
                             HTTP {h.last_status_code}
@@ -382,7 +390,28 @@ function EditDialog({
               placeholder="vazio = todas (ex: API, Site, Pagamentos)"
             />
           </div>
+          <div>
+            <Label>Severidade mínima (incidentes)</Label>
+            <Select
+              value={v.min_severity ?? 'info'}
+              onValueChange={(s) => setForm({ ...form, min_severity: s })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="info">info — tudo</SelectItem>
+                <SelectItem value="minor">minor ou acima</SelectItem>
+                <SelectItem value="major">major ou acima</SelectItem>
+                <SelectItem value="critical">apenas critical</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground mt-1">
+              Atualizações, manutenções e resoluções sempre são entregues.
+            </p>
+          </div>
         </div>
+
         <DialogFooter>
           <Button variant="ghost" onClick={onClose}>
             Cancelar
@@ -399,7 +428,9 @@ function EditDialog({
                 notify_maintenance: v.notify_maintenance ?? true,
                 services: v.services ?? [],
                 categories: v.categories ?? [],
+                min_severity: v.min_severity ?? 'info',
                 active: v.active ?? true,
+
               })
             }
             disabled={saving || !v.label || !v.url}

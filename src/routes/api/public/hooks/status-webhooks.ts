@@ -22,8 +22,24 @@ type Webhook = {
   notify_maintenance: boolean
   services: string[] | null
   categories: string[] | null
+  min_severity: 'info' | 'minor' | 'major' | 'critical' | null
   active: boolean
 }
+
+const SEVERITY_RANK: Record<string, number> = {
+  info: 0,
+  minor: 1,
+  low: 1,
+  major: 2,
+  high: 2,
+  critical: 3,
+  sev1: 3,
+}
+function severityRank(sev: string | null | undefined): number {
+  if (!sev) return 0
+  return SEVERITY_RANK[sev.toLowerCase()] ?? 0
+}
+
 
 type EventPayload = {
   reference_key: string
@@ -113,7 +129,7 @@ export const Route = createFileRoute('/api/public/hooks/status-webhooks')({
           supabaseAdmin
             .from('core_status_webhooks')
             .select(
-              'id,label,url,kind,secret,notify_incidents,notify_maintenance,services,categories,active',
+              'id,label,url,kind,secret,notify_incidents,notify_maintenance,services,categories,min_severity,active',
             )
             .eq('active', true)
             .limit(200),
@@ -327,6 +343,12 @@ export const Route = createFileRoute('/api/public/hooks/status-webhooks')({
               const cat = categoryOf(ev.service_slug)
               if (!cat || !catFilter.includes(cat)) continue
             }
+            // Severity gate: only applies to incident_opened events (which carry severity).
+            // Maintenance/updates/resolved/postmortem always pass.
+            if (ev.event_kind === 'incident_opened' && h.min_severity) {
+              if (severityRank(ev.severity) < severityRank(h.min_severity)) continue
+            }
+
             const key = `${h.id}::${ev.reference_key}`
             if (seen.has(key)) continue
 

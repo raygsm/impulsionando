@@ -10966,6 +10966,7 @@ export type Database = {
           last_dispatch_at: string | null
           last_error: string | null
           last_status_code: number | null
+          min_severity: string
           notify_incidents: boolean
           notify_maintenance: boolean
           secret: string | null
@@ -10984,6 +10985,7 @@ export type Database = {
           last_dispatch_at?: string | null
           last_error?: string | null
           last_status_code?: number | null
+          min_severity?: string
           notify_incidents?: boolean
           notify_maintenance?: boolean
           secret?: string | null
@@ -11002,6 +11004,7 @@ export type Database = {
           last_dispatch_at?: string | null
           last_error?: string | null
           last_status_code?: number | null
+          min_severity?: string
           notify_incidents?: boolean
           notify_maintenance?: boolean
           secret?: string | null
