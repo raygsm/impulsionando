@@ -124,6 +124,12 @@ export const Route = createFileRoute('/api/public/hooks/maintenance-notifier')({
           if (!slug) return false
           return f.has(slug)
         }
+        const wantsCat = (sub: SubscriberRow, cat: string | null): boolean => {
+          const cats = Array.isArray(sub.categories) ? sub.categories : []
+          if (cats.length === 0) return true
+          if (!cat) return false
+          return cats.includes(cat)
+        }
 
         type Event = {
           subscriber: SubscriberRow
