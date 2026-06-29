@@ -68,6 +68,7 @@ import { Route as VitrineSlugRouteImport } from './routes/vitrine.$slug'
 import { Route as TrialCadastroRouteImport } from './routes/trial_.cadastro'
 import { Route as TrabalheConoscoNichoRouteImport } from './routes/trabalhe-conosco.$nicho'
 import { Route as StatusEmbedRouteImport } from './routes/status.embed'
+import { Route as StatusSlugRouteImport } from './routes/status.$slug'
 import { Route as ShowroomWhatsappRouteImport } from './routes/showroom.whatsapp'
 import { Route as ShowroomSiteRouteImport } from './routes/showroom.site'
 import { Route as ShowroomSegurancaRouteImport } from './routes/showroom.seguranca'
@@ -1013,6 +1014,11 @@ const TrabalheConoscoNichoRoute = TrabalheConoscoNichoRouteImport.update({
 const StatusEmbedRoute = StatusEmbedRouteImport.update({
   id: '/embed',
   path: '/embed',
+  getParentRoute: () => StatusRoute,
+} as any)
+const StatusSlugRoute = StatusSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
   getParentRoute: () => StatusRoute,
 } as any)
 const ShowroomWhatsappRoute = ShowroomWhatsappRouteImport.update({
@@ -4923,6 +4929,7 @@ export interface FileRoutesByFullPath {
   '/showroom/seguranca': typeof ShowroomSegurancaRoute
   '/showroom/site': typeof ShowroomSiteRoute
   '/showroom/whatsapp': typeof ShowroomWhatsappRoute
+  '/status/$slug': typeof StatusSlugRoute
   '/status/embed': typeof StatusEmbedRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial/cadastro': typeof TrialCadastroRoute
@@ -5623,6 +5630,7 @@ export interface FileRoutesByTo {
   '/showroom/seguranca': typeof ShowroomSegurancaRoute
   '/showroom/site': typeof ShowroomSiteRoute
   '/showroom/whatsapp': typeof ShowroomWhatsappRoute
+  '/status/$slug': typeof StatusSlugRoute
   '/status/embed': typeof StatusEmbedRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial/cadastro': typeof TrialCadastroRoute
@@ -6336,6 +6344,7 @@ export interface FileRoutesById {
   '/showroom/seguranca': typeof ShowroomSegurancaRoute
   '/showroom/site': typeof ShowroomSiteRoute
   '/showroom/whatsapp': typeof ShowroomWhatsappRoute
+  '/status/$slug': typeof StatusSlugRoute
   '/status/embed': typeof StatusEmbedRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial_/cadastro': typeof TrialCadastroRoute
@@ -7050,6 +7059,7 @@ export interface FileRouteTypes {
     | '/showroom/seguranca'
     | '/showroom/site'
     | '/showroom/whatsapp'
+    | '/status/$slug'
     | '/status/embed'
     | '/trabalhe-conosco/$nicho'
     | '/trial/cadastro'
@@ -7750,6 +7760,7 @@ export interface FileRouteTypes {
     | '/showroom/seguranca'
     | '/showroom/site'
     | '/showroom/whatsapp'
+    | '/status/$slug'
     | '/status/embed'
     | '/trabalhe-conosco/$nicho'
     | '/trial/cadastro'
@@ -8462,6 +8473,7 @@ export interface FileRouteTypes {
     | '/showroom/seguranca'
     | '/showroom/site'
     | '/showroom/whatsapp'
+    | '/status/$slug'
     | '/status/embed'
     | '/trabalhe-conosco/$nicho'
     | '/trial_/cadastro'
@@ -9593,6 +9605,13 @@ declare module '@tanstack/react-router' {
       path: '/embed'
       fullPath: '/status/embed'
       preLoaderRoute: typeof StatusEmbedRouteImport
+      parentRoute: typeof StatusRoute
+    }
+    '/status/$slug': {
+      id: '/status/$slug'
+      path: '/$slug'
+      fullPath: '/status/$slug'
+      preLoaderRoute: typeof StatusSlugRouteImport
       parentRoute: typeof StatusRoute
     }
     '/showroom/whatsapp': {
@@ -15794,10 +15813,12 @@ const RiomedRouteWithChildren =
   RiomedRoute._addFileChildren(RiomedRouteChildren)
 
 interface StatusRouteChildren {
+  StatusSlugRoute: typeof StatusSlugRoute
   StatusEmbedRoute: typeof StatusEmbedRoute
 }
 
 const StatusRouteChildren: StatusRouteChildren = {
+  StatusSlugRoute: StatusSlugRoute,
   StatusEmbedRoute: StatusEmbedRoute,
 }
 
