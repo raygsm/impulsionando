@@ -599,6 +599,7 @@ import { Route as ApiPublicHooksZapiStatusRouteImport } from './routes/api/publi
 import { Route as ApiPublicHooksUptimeWhatsappTestRouteImport } from './routes/api/public/hooks/uptime-whatsapp-test'
 import { Route as ApiPublicHooksUptimeCheckRouteImport } from './routes/api/public/hooks/uptime-check'
 import { Route as ApiPublicHooksTrialReguaRouteImport } from './routes/api/public/hooks/trial-regua'
+import { Route as ApiPublicHooksStatusSubscribersMaintenanceRouteImport } from './routes/api/public/hooks/status-subscribers-maintenance'
 import { Route as ApiPublicHooksStatusSubscribersRouteImport } from './routes/api/public/hooks/status-subscribers'
 import { Route as ApiPublicHooksRetentionSweepRouteImport } from './routes/api/public/hooks/retention-sweep'
 import { Route as ApiPublicHooksReliabilityAlertsRouteImport } from './routes/api/public/hooks/reliability-alerts'
@@ -4016,6 +4017,12 @@ const ApiPublicHooksTrialReguaRoute =
     path: '/api/public/hooks/trial-regua',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksStatusSubscribersMaintenanceRoute =
+  ApiPublicHooksStatusSubscribersMaintenanceRouteImport.update({
+    id: '/api/public/hooks/status-subscribers-maintenance',
+    path: '/api/public/hooks/status-subscribers-maintenance',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksStatusSubscribersRoute =
   ApiPublicHooksStatusSubscribersRouteImport.update({
     id: '/api/public/hooks/status-subscribers',
@@ -5356,6 +5363,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/reliability-alerts': typeof ApiPublicHooksReliabilityAlertsRoute
   '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
   '/api/public/hooks/status-subscribers': typeof ApiPublicHooksStatusSubscribersRoute
+  '/api/public/hooks/status-subscribers-maintenance': typeof ApiPublicHooksStatusSubscribersMaintenanceRoute
   '/api/public/hooks/trial-regua': typeof ApiPublicHooksTrialReguaRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
@@ -6053,6 +6061,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/reliability-alerts': typeof ApiPublicHooksReliabilityAlertsRoute
   '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
   '/api/public/hooks/status-subscribers': typeof ApiPublicHooksStatusSubscribersRoute
+  '/api/public/hooks/status-subscribers-maintenance': typeof ApiPublicHooksStatusSubscribersMaintenanceRoute
   '/api/public/hooks/trial-regua': typeof ApiPublicHooksTrialReguaRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
@@ -6765,6 +6774,7 @@ export interface FileRoutesById {
   '/api/public/hooks/reliability-alerts': typeof ApiPublicHooksReliabilityAlertsRoute
   '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
   '/api/public/hooks/status-subscribers': typeof ApiPublicHooksStatusSubscribersRoute
+  '/api/public/hooks/status-subscribers-maintenance': typeof ApiPublicHooksStatusSubscribersMaintenanceRoute
   '/api/public/hooks/trial-regua': typeof ApiPublicHooksTrialReguaRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
@@ -7477,6 +7487,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/reliability-alerts'
     | '/api/public/hooks/retention-sweep'
     | '/api/public/hooks/status-subscribers'
+    | '/api/public/hooks/status-subscribers-maintenance'
     | '/api/public/hooks/trial-regua'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
@@ -8174,6 +8185,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/reliability-alerts'
     | '/api/public/hooks/retention-sweep'
     | '/api/public/hooks/status-subscribers'
+    | '/api/public/hooks/status-subscribers-maintenance'
     | '/api/public/hooks/trial-regua'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
@@ -8885,6 +8897,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/reliability-alerts'
     | '/api/public/hooks/retention-sweep'
     | '/api/public/hooks/status-subscribers'
+    | '/api/public/hooks/status-subscribers-maintenance'
     | '/api/public/hooks/trial-regua'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
@@ -9127,6 +9140,7 @@ export interface RootRouteChildren {
   ApiPublicHooksReliabilityAlertsRoute: typeof ApiPublicHooksReliabilityAlertsRoute
   ApiPublicHooksRetentionSweepRoute: typeof ApiPublicHooksRetentionSweepRoute
   ApiPublicHooksStatusSubscribersRoute: typeof ApiPublicHooksStatusSubscribersRoute
+  ApiPublicHooksStatusSubscribersMaintenanceRoute: typeof ApiPublicHooksStatusSubscribersMaintenanceRoute
   ApiPublicHooksTrialReguaRoute: typeof ApiPublicHooksTrialReguaRoute
   ApiPublicHooksUptimeCheckRoute: typeof ApiPublicHooksUptimeCheckRoute
   ApiPublicHooksUptimeWhatsappTestRoute: typeof ApiPublicHooksUptimeWhatsappTestRoute
@@ -13286,6 +13300,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksTrialReguaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/status-subscribers-maintenance': {
+      id: '/api/public/hooks/status-subscribers-maintenance'
+      path: '/api/public/hooks/status-subscribers-maintenance'
+      fullPath: '/api/public/hooks/status-subscribers-maintenance'
+      preLoaderRoute: typeof ApiPublicHooksStatusSubscribersMaintenanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/status-subscribers': {
       id: '/api/public/hooks/status-subscribers'
       path: '/api/public/hooks/status-subscribers'
@@ -16019,6 +16040,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksReliabilityAlertsRoute: ApiPublicHooksReliabilityAlertsRoute,
   ApiPublicHooksRetentionSweepRoute: ApiPublicHooksRetentionSweepRoute,
   ApiPublicHooksStatusSubscribersRoute: ApiPublicHooksStatusSubscribersRoute,
+  ApiPublicHooksStatusSubscribersMaintenanceRoute:
+    ApiPublicHooksStatusSubscribersMaintenanceRoute,
   ApiPublicHooksTrialReguaRoute: ApiPublicHooksTrialReguaRoute,
   ApiPublicHooksUptimeCheckRoute: ApiPublicHooksUptimeCheckRoute,
   ApiPublicHooksUptimeWhatsappTestRoute: ApiPublicHooksUptimeWhatsappTestRoute,
