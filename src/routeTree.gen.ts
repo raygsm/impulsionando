@@ -465,6 +465,7 @@ import { Route as AuthenticatedAdminOnboardingChecklistRouteImport } from './rou
 import { Route as AuthenticatedAdminNotificationsCockpitRouteImport } from './routes/_authenticated/admin.notifications-cockpit'
 import { Route as AuthenticatedAdminNotificationDeliveryRouteImport } from './routes/_authenticated/admin.notification-delivery'
 import { Route as AuthenticatedAdminNotificationDeliverabilityHealthRouteImport } from './routes/_authenticated/admin.notification-deliverability-health'
+import { Route as AuthenticatedAdminNichosRouteImport } from './routes/_authenticated/admin.nichos'
 import { Route as AuthenticatedAdminNichePlansRouteImport } from './routes/_authenticated/admin.niche-plans'
 import { Route as AuthenticatedAdminNicheMatrixRouteImport } from './routes/_authenticated/admin.niche-matrix'
 import { Route as AuthenticatedAdminN8nNichesRouteImport } from './routes/_authenticated/admin.n8n-niches'
@@ -3196,6 +3197,12 @@ const AuthenticatedAdminNotificationDeliverabilityHealthRoute =
     path: '/admin/notification-deliverability-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminNichosRoute =
+  AuthenticatedAdminNichosRouteImport.update({
+    id: '/admin/nichos',
+    path: '/admin/nichos',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminNichePlansRoute =
   AuthenticatedAdminNichePlansRouteImport.update({
     id: '/admin/niche-plans',
@@ -4799,6 +4806,7 @@ export interface FileRoutesByFullPath {
   '/admin/n8n-niches': typeof AuthenticatedAdminN8nNichesRoute
   '/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
+  '/admin/nichos': typeof AuthenticatedAdminNichosRoute
   '/admin/notification-deliverability-health': typeof AuthenticatedAdminNotificationDeliverabilityHealthRoute
   '/admin/notification-delivery': typeof AuthenticatedAdminNotificationDeliveryRoute
   '/admin/notifications-cockpit': typeof AuthenticatedAdminNotificationsCockpitRoute
@@ -5465,6 +5473,7 @@ export interface FileRoutesByTo {
   '/admin/n8n-niches': typeof AuthenticatedAdminN8nNichesRoute
   '/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
   '/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
+  '/admin/nichos': typeof AuthenticatedAdminNichosRoute
   '/admin/notification-deliverability-health': typeof AuthenticatedAdminNotificationDeliverabilityHealthRoute
   '/admin/notification-delivery': typeof AuthenticatedAdminNotificationDeliveryRoute
   '/admin/notifications-cockpit': typeof AuthenticatedAdminNotificationsCockpitRoute
@@ -6145,6 +6154,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/n8n-niches': typeof AuthenticatedAdminN8nNichesRoute
   '/_authenticated/admin/niche-matrix': typeof AuthenticatedAdminNicheMatrixRoute
   '/_authenticated/admin/niche-plans': typeof AuthenticatedAdminNichePlansRoute
+  '/_authenticated/admin/nichos': typeof AuthenticatedAdminNichosRoute
   '/_authenticated/admin/notification-deliverability-health': typeof AuthenticatedAdminNotificationDeliverabilityHealthRoute
   '/_authenticated/admin/notification-delivery': typeof AuthenticatedAdminNotificationDeliveryRoute
   '/_authenticated/admin/notifications-cockpit': typeof AuthenticatedAdminNotificationsCockpitRoute
@@ -6825,6 +6835,7 @@ export interface FileRouteTypes {
     | '/admin/n8n-niches'
     | '/admin/niche-matrix'
     | '/admin/niche-plans'
+    | '/admin/nichos'
     | '/admin/notification-deliverability-health'
     | '/admin/notification-delivery'
     | '/admin/notifications-cockpit'
@@ -7491,6 +7502,7 @@ export interface FileRouteTypes {
     | '/admin/n8n-niches'
     | '/admin/niche-matrix'
     | '/admin/niche-plans'
+    | '/admin/nichos'
     | '/admin/notification-deliverability-health'
     | '/admin/notification-delivery'
     | '/admin/notifications-cockpit'
@@ -8170,6 +8182,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/n8n-niches'
     | '/_authenticated/admin/niche-matrix'
     | '/_authenticated/admin/niche-plans'
+    | '/_authenticated/admin/nichos'
     | '/_authenticated/admin/notification-deliverability-health'
     | '/_authenticated/admin/notification-delivery'
     | '/_authenticated/admin/notifications-cockpit'
@@ -11931,6 +11944,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminNotificationDeliverabilityHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/nichos': {
+      id: '/_authenticated/admin/nichos'
+      path: '/admin/nichos'
+      fullPath: '/admin/nichos'
+      preLoaderRoute: typeof AuthenticatedAdminNichosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/niche-plans': {
       id: '/_authenticated/admin/niche-plans'
       path: '/admin/niche-plans'
@@ -14405,6 +14425,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminN8nNichesRoute: typeof AuthenticatedAdminN8nNichesRoute
   AuthenticatedAdminNicheMatrixRoute: typeof AuthenticatedAdminNicheMatrixRoute
   AuthenticatedAdminNichePlansRoute: typeof AuthenticatedAdminNichePlansRoute
+  AuthenticatedAdminNichosRoute: typeof AuthenticatedAdminNichosRoute
   AuthenticatedAdminNotificationDeliverabilityHealthRoute: typeof AuthenticatedAdminNotificationDeliverabilityHealthRoute
   AuthenticatedAdminNotificationDeliveryRoute: typeof AuthenticatedAdminNotificationDeliveryRoute
   AuthenticatedAdminNotificationsCockpitRoute: typeof AuthenticatedAdminNotificationsCockpitRoute
@@ -14712,6 +14733,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminN8nNichesRoute: AuthenticatedAdminN8nNichesRoute,
   AuthenticatedAdminNicheMatrixRoute: AuthenticatedAdminNicheMatrixRoute,
   AuthenticatedAdminNichePlansRoute: AuthenticatedAdminNichePlansRoute,
+  AuthenticatedAdminNichosRoute: AuthenticatedAdminNichosRoute,
   AuthenticatedAdminNotificationDeliverabilityHealthRoute:
     AuthenticatedAdminNotificationDeliverabilityHealthRoute,
   AuthenticatedAdminNotificationDeliveryRoute:
@@ -15323,13 +15345,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
