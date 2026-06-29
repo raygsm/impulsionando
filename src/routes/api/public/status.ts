@@ -18,7 +18,7 @@ export const Route = createFileRoute("/api/public/status")({
           const since = new Date(Date.now() - 90 * 86400000).toISOString();
           const sinceDay = since.slice(0, 10);
           const horizonEnd = new Date(Date.now() + 30 * 86400000).toISOString();
-          const [statusRes, incRes, pmRes, mwRes, histRes] = await Promise.all([
+          const [statusRes, incRes, pmRes, mwRes, histRes, visRes] = await Promise.all([
             supabaseAdmin
               .from("v_core_slo_status" as any)
               .select(
