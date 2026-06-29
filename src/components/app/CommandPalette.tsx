@@ -91,11 +91,22 @@ export function CommandPalette() {
             <CommandGroup heading="Cockpits & KPIs">
               {cockpits.map((e) => {
                 const Icon = e.icon;
+                const fav = isFavorite(e.to);
                 return (
                   <CommandItem key={e.to} value={`${e.label} ${e.to}`} onSelect={() => go(e.to)}>
                     <Icon className="mr-2 size-4" />
                     <span>{e.label}</span>
                     <span className="ml-auto text-xs text-muted-foreground">{e.to}</span>
+                    <button
+                      type="button"
+                      aria-label={fav ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+                      className="ml-2 rounded p-1 hover:bg-accent"
+                      onClick={(ev) => { ev.preventDefault(); ev.stopPropagation(); toggle(e.to, e.label); }}
+                    >
+                      {fav
+                        ? <Star className="size-4 fill-amber-400 text-amber-400" />
+                        : <StarOff className="size-4 text-muted-foreground" />}
+                    </button>
                   </CommandItem>
                 );
               })}
@@ -107,11 +118,22 @@ export function CommandPalette() {
           <CommandGroup key={group} heading={group}>
             {items.map((e) => {
               const Icon = e.icon;
+              const fav = isFavorite(e.to);
               return (
                 <CommandItem key={e.to} value={`${e.label} ${e.to} ${group}`} onSelect={() => go(e.to)}>
                   <Icon className="mr-2 size-4" />
                   <span>{e.label}</span>
                   <span className="ml-auto text-xs text-muted-foreground">{e.to}</span>
+                  <button
+                    type="button"
+                    aria-label={fav ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+                    className="ml-2 rounded p-1 hover:bg-accent"
+                    onClick={(ev) => { ev.preventDefault(); ev.stopPropagation(); toggle(e.to, e.label); }}
+                  >
+                    {fav
+                      ? <Star className="size-4 fill-amber-400 text-amber-400" />
+                      : <StarOff className="size-4 text-muted-foreground" />}
+                  </button>
                 </CommandItem>
               );
             })}
