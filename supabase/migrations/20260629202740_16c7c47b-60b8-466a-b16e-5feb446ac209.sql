@@ -1,0 +1,3 @@
+INSERT INTO public.core_admin_menu (vertente, group_key, group_label, group_order, item_key, item_label, item_order, route, icon, description, required_role, enabled)
+VALUES ('impulsionando', 'seguranca_governanca', 'Segurança & Governança', 90, 'sla_mttr', 'SLA & MTTR por Tenant', 95, '/admin/sla-mttr', 'Clock', 'Tempo médio de recuperação e incidentes por cliente (90d).', 'staff', true)
+ON CONFLICT DO NOTHING;
