@@ -83,13 +83,28 @@ export const Route = createFileRoute('/api/public/hooks/maintenance-notifier')({
         // Resolve slug per window URL
         const urls = Array.from(new Set(windows.map((w) => w.url).filter(Boolean) as string[]))
         const slugByUrl = new Map<string, string>()
+        const categoryBySlug = new Map<string, string>()
         if (urls.length > 0) {
-          const r = await supabaseAdmin.from('uptime_state').select('url,public_slug').in('url', urls)
-          for (const row of (r.data ?? []) as Array<{ url: string; public_slug: string | null }>) {
-            if (row.public_slug) slugByUrl.set(row.url, row.public_slug)
+          const r = await supabaseAdmin
+            .from('uptime_state')
+            .select('url,public_slug,category')
+            .in('url', urls)
+          for (const row of (r.data ?? []) as Array<{
+            url: string
+            public_slug: string | null
+            category: string | null
+          }>) {
+            if (row.public_slug) {
+              slugByUrl.set(row.url, row.public_slug)
+              if (row.category) categoryBySlug.set(row.public_slug, row.category)
+            }
           }
         }
         const slugFor = (w: WindowRow): string | null => (w.url ? slugByUrl.get(w.url) ?? null : null)
+        const categoryFor = (w: WindowRow): string | null => {
+          const s = slugFor(w)
+          return s ? categoryBySlug.get(s) ?? null : null
+        }
 
         // Per-subscriber service filter
         const subIds = subscribers.map((s) => s.id)
