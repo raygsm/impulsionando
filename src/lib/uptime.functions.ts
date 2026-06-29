@@ -44,3 +44,81 @@ export const getUptimeOverview = createServerFn({ method: 'GET' })
 
     return { state: state ?? [], recent: recent ?? [], uptime24h }
   })
+
+async function assertStaff(userId: string) {
+  const { data: staff } = await supabaseAdmin.rpc('is_impulsionando_staff', { _user: userId })
+  if (!staff) throw new Error('Forbidden: staff only')
+}
+
+function parseList(v: unknown): string[] {
+  if (Array.isArray(v)) return v.map((s) => String(s).trim()).filter(Boolean)
+  if (typeof v === 'string')
+    return v
+      .split(/[\s,;]+/)
+      .map((s) => s.trim())
+      .filter(Boolean)
+  return []
+}
+
+export const upsertUptimeTarget = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: {
+    url: string
+    original_url?: string | null
+    alert_emails?: string[] | string
+    alert_whatsapps?: string[] | string
+    alert_after_seconds?: number | null
+  }) => input)
+  .handler(async ({ data, context }) => {
+    await assertStaff(context.userId)
+    const url = data.url?.trim()
+    if (!url || !/^https?:\/\//i.test(url)) throw new Error('URL inválida (http/https obrigatório)')
+
+    const payload: Record<string, any> = {
+      url,
+      alert_emails: parseList(data.alert_emails),
+      alert_whatsapps: parseList(data.alert_whatsapps),
+      alert_after_seconds: data.alert_after_seconds ?? null,
+    }
+
+    const original = data.original_url?.trim()
+    if (original && original !== url) {
+      const { error } = await supabaseAdmin
+        .from('uptime_state')
+        .update(payload)
+        .eq('url', original)
+      if (error) throw error
+      return { ok: true, url }
+    }
+
+    const { data: existing } = await supabaseAdmin
+      .from('uptime_state')
+      .select('url')
+      .eq('url', url)
+      .maybeSingle()
+
+    if (existing) {
+      const { error } = await supabaseAdmin.from('uptime_state').update(payload).eq('url', url)
+      if (error) throw error
+    } else {
+      const { error } = await supabaseAdmin.from('uptime_state').insert({
+        ...payload,
+        is_up: true,
+        since: new Date().toISOString(),
+        consecutive_failures: 0,
+      })
+      if (error) throw error
+    }
+    return { ok: true, url }
+  })
+
+export const deleteUptimeTarget = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { url: string }) => input)
+  .handler(async ({ data, context }) => {
+    await assertStaff(context.userId)
+    const { error } = await supabaseAdmin.from('uptime_state').delete().eq('url', data.url)
+    if (error) throw error
+    return { ok: true }
+  })
+
