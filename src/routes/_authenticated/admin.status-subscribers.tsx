@@ -34,6 +34,7 @@ type StatusFilter = "all" | "confirmed" | "pending" | "unsubscribed" | "bounced"
 function AdminStatusSubscribers() {
   const list = useServerFn(listStatusSubscribers);
   const logFn = useServerFn(listStatusDispatchLog);
+  const breakdownFn = useServerFn(listStatusServiceBreakdown);
   const unsubFn = useServerFn(forceUnsubscribeStatusSubscriber);
   const resendFn = useServerFn(resendStatusConfirmation);
   const broadcastFn = useServerFn(broadcastStatusAnnouncement);
