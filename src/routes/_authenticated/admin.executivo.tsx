@@ -71,7 +71,7 @@ function ExecutivoPage() {
             </div>
             <div className="flex gap-2">
               <Link to="/admin/executive-briefing"><Button variant="outline" size="sm"><Sparkles className="h-4 w-4 mr-2" />Briefing IA</Button></Link>
-              <Link to="/admin/core/dashboard-macro" as any><Button variant="outline" size="sm"><Activity className="h-4 w-4 mr-2" />Macro detalhado</Button></Link>
+              <Link to={"/admin/core/dashboard-macro" as any}><Button variant="outline" size="sm"><Activity className="h-4 w-4 mr-2" />Macro detalhado</Button></Link>
             </div>
           </div>
         </div>
@@ -115,7 +115,7 @@ function ExecutivoPage() {
               {data.topCompanies.slice(0, 8).map((c) => (
                 <Link
                   key={c.companyId}
-                  to="/admin/clientes/$slug" as any
+                  to={"/admin/clientes/$slug" as any}
                   params={{ slug: c.companyId }}
                   className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-accent transition-colors"
                 >

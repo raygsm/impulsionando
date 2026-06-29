@@ -500,6 +500,7 @@ import { Route as AuthenticatedAdminFinanceiroConsolidadoV2RouteImport } from '.
 import { Route as AuthenticatedAdminFinanceHealthRouteImport } from './routes/_authenticated/admin.finance-health'
 import { Route as AuthenticatedAdminExpansionRadarRouteImport } from './routes/_authenticated/admin.expansion-radar'
 import { Route as AuthenticatedAdminExpansionEngineRouteImport } from './routes/_authenticated/admin.expansion-engine'
+import { Route as AuthenticatedAdminExecutivoRouteImport } from './routes/_authenticated/admin.executivo'
 import { Route as AuthenticatedAdminExecutiveBriefingRouteImport } from './routes/_authenticated/admin.executive-briefing'
 import { Route as AuthenticatedAdminEventsTicketingHealthRouteImport } from './routes/_authenticated/admin.events-ticketing-health'
 import { Route as AuthenticatedAdminEventsHealthRouteImport } from './routes/_authenticated/admin.events-health'
@@ -3414,6 +3415,12 @@ const AuthenticatedAdminExpansionEngineRoute =
     path: '/admin/expansion-engine',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminExecutivoRoute =
+  AuthenticatedAdminExecutivoRouteImport.update({
+    id: '/admin/executivo',
+    path: '/admin/executivo',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminExecutiveBriefingRoute =
   AuthenticatedAdminExecutiveBriefingRouteImport.update({
     id: '/admin/executive-briefing',
@@ -4821,6 +4828,7 @@ export interface FileRoutesByFullPath {
   '/admin/events-health': typeof AuthenticatedAdminEventsHealthRoute
   '/admin/events-ticketing-health': typeof AuthenticatedAdminEventsTicketingHealthRoute
   '/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
+  '/admin/executivo': typeof AuthenticatedAdminExecutivoRoute
   '/admin/expansion-engine': typeof AuthenticatedAdminExpansionEngineRoute
   '/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
   '/admin/finance-health': typeof AuthenticatedAdminFinanceHealthRoute
@@ -5495,6 +5503,7 @@ export interface FileRoutesByTo {
   '/admin/events-health': typeof AuthenticatedAdminEventsHealthRoute
   '/admin/events-ticketing-health': typeof AuthenticatedAdminEventsTicketingHealthRoute
   '/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
+  '/admin/executivo': typeof AuthenticatedAdminExecutivoRoute
   '/admin/expansion-engine': typeof AuthenticatedAdminExpansionEngineRoute
   '/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
   '/admin/finance-health': typeof AuthenticatedAdminFinanceHealthRoute
@@ -6182,6 +6191,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/events-health': typeof AuthenticatedAdminEventsHealthRoute
   '/_authenticated/admin/events-ticketing-health': typeof AuthenticatedAdminEventsTicketingHealthRoute
   '/_authenticated/admin/executive-briefing': typeof AuthenticatedAdminExecutiveBriefingRoute
+  '/_authenticated/admin/executivo': typeof AuthenticatedAdminExecutivoRoute
   '/_authenticated/admin/expansion-engine': typeof AuthenticatedAdminExpansionEngineRoute
   '/_authenticated/admin/expansion-radar': typeof AuthenticatedAdminExpansionRadarRoute
   '/_authenticated/admin/finance-health': typeof AuthenticatedAdminFinanceHealthRoute
@@ -6870,6 +6880,7 @@ export interface FileRouteTypes {
     | '/admin/events-health'
     | '/admin/events-ticketing-health'
     | '/admin/executive-briefing'
+    | '/admin/executivo'
     | '/admin/expansion-engine'
     | '/admin/expansion-radar'
     | '/admin/finance-health'
@@ -7544,6 +7555,7 @@ export interface FileRouteTypes {
     | '/admin/events-health'
     | '/admin/events-ticketing-health'
     | '/admin/executive-briefing'
+    | '/admin/executivo'
     | '/admin/expansion-engine'
     | '/admin/expansion-radar'
     | '/admin/finance-health'
@@ -8230,6 +8242,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/events-health'
     | '/_authenticated/admin/events-ticketing-health'
     | '/_authenticated/admin/executive-briefing'
+    | '/_authenticated/admin/executivo'
     | '/_authenticated/admin/expansion-engine'
     | '/_authenticated/admin/expansion-radar'
     | '/_authenticated/admin/finance-health'
@@ -12278,6 +12291,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminExpansionEngineRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/executivo': {
+      id: '/_authenticated/admin/executivo'
+      path: '/admin/executivo'
+      fullPath: '/admin/executivo'
+      preLoaderRoute: typeof AuthenticatedAdminExecutivoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/executive-briefing': {
       id: '/_authenticated/admin/executive-briefing'
       path: '/admin/executive-briefing'
@@ -14550,6 +14570,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminEventsHealthRoute: typeof AuthenticatedAdminEventsHealthRoute
   AuthenticatedAdminEventsTicketingHealthRoute: typeof AuthenticatedAdminEventsTicketingHealthRoute
   AuthenticatedAdminExecutiveBriefingRoute: typeof AuthenticatedAdminExecutiveBriefingRoute
+  AuthenticatedAdminExecutivoRoute: typeof AuthenticatedAdminExecutivoRoute
   AuthenticatedAdminExpansionEngineRoute: typeof AuthenticatedAdminExpansionEngineRoute
   AuthenticatedAdminExpansionRadarRoute: typeof AuthenticatedAdminExpansionRadarRoute
   AuthenticatedAdminFinanceHealthRoute: typeof AuthenticatedAdminFinanceHealthRoute
@@ -14845,6 +14866,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminEventsTicketingHealthRoute,
   AuthenticatedAdminExecutiveBriefingRoute:
     AuthenticatedAdminExecutiveBriefingRoute,
+  AuthenticatedAdminExecutivoRoute: AuthenticatedAdminExecutivoRoute,
   AuthenticatedAdminExpansionEngineRoute:
     AuthenticatedAdminExpansionEngineRoute,
   AuthenticatedAdminExpansionRadarRoute: AuthenticatedAdminExpansionRadarRoute,
