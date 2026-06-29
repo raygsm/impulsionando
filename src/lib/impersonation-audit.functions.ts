@@ -15,7 +15,7 @@ export const logImpersonation = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => logSchema.parse(data))
   .handler(async ({ data, context }) => {
     const { supabase, userId, claims } = context;
-    const { error } = await supabase.from("core_impersonation_audit").insert({
+    const { error } = await (supabase as any).from("core_impersonation_audit").insert({
       actor_user_id: userId,
       actor_email: (claims as any)?.email ?? null,
       target_company_id: data.targetCompanyId,
@@ -27,6 +27,7 @@ export const logImpersonation = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
 
 const listSchema = z.object({
   limit: z.number().int().min(1).max(500).optional(),
