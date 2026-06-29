@@ -21,6 +21,7 @@ type Webhook = {
   notify_incidents: boolean
   notify_maintenance: boolean
   services: string[] | null
+  categories: string[] | null
   active: boolean
 }
 
