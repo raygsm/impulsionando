@@ -125,6 +125,7 @@ ${banner}
         if (token.length < 16) return page('Token inválido', `<h1>Token inválido</h1>`, 400)
 
         const services = Array.from(new Set(form.getAll('services').map((v) => String(v).toLowerCase()).filter((s) => /^[a-z0-9-]{1,80}$/.test(s)))).slice(0, 100)
+        const categories = Array.from(new Set(form.getAll('categories').map((v) => String(v)).filter((s) => /^[\w\s\-./&+]{1,80}$/.test(s)))).slice(0, 50)
 
         const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
         const { data: sub } = await supabaseAdmin
