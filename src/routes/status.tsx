@@ -371,6 +371,8 @@ function SubscribeCard() {
 function EmbedCard() {
   const origin = typeof window !== "undefined" ? window.location.origin : "https://impulsionando.com.br";
   const iframe = `<iframe src="${origin}/status/embed" title="Status Impulsionando" style="width:100%;max-width:480px;height:80px;border:0" loading="lazy"></iframe>`;
+  const badgeMd = `[![Status](${origin}/api/public/status-badge.svg)](${origin}/status)`;
+
   
   const [copied, setCopied] = useState<string>("");
   async function copy(text: string, key: string) {
@@ -408,6 +410,16 @@ function EmbedCard() {
             </Button>
           </div>
           <pre className="overflow-x-auto rounded-md bg-muted/40 p-3 text-xs"><code>{origin}/api/public/status.rss</code></pre>
+        </div>
+        <div>
+          <div className="mb-1 flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase text-muted-foreground">Badge (Markdown)</span>
+            <Button size="sm" variant="outline" onClick={() => copy(badgeMd, "badge")}>
+              {copied === "badge" ? "Copiado!" : "Copiar"}
+            </Button>
+          </div>
+          <pre className="overflow-x-auto rounded-md bg-muted/40 p-3 text-xs"><code>{badgeMd}</code></pre>
+          <img src="/api/public/status-badge.svg" alt="Status badge preview" className="mt-2 h-5" />
         </div>
         <div className="pt-2">
           <a

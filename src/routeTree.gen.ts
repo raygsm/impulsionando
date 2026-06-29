@@ -245,6 +245,7 @@ import { Route as ApiPublicVersionRouteImport } from './routes/api/public/versio
 import { Route as ApiPublicStatusUnsubscribeRouteImport } from './routes/api/public/status-unsubscribe'
 import { Route as ApiPublicStatusSubscribeRouteImport } from './routes/api/public/status-subscribe'
 import { Route as ApiPublicStatusConfirmRouteImport } from './routes/api/public/status-confirm'
+import { Route as ApiPublicStatusBadgeDotsvgRouteImport } from './routes/api/public/status-badge[.]svg'
 import { Route as ApiPublicStatusRouteImport } from './routes/api/public/status'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiMercadopagoWebhookRouteImport } from './routes/api/mercadopago/webhook'
@@ -1925,6 +1926,12 @@ const ApiPublicStatusConfirmRoute = ApiPublicStatusConfirmRouteImport.update({
   path: '/api/public/status-confirm',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicStatusBadgeDotsvgRoute =
+  ApiPublicStatusBadgeDotsvgRouteImport.update({
+    id: '/api/public/status-badge.svg',
+    path: '/api/public/status-badge.svg',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicStatusRoute = ApiPublicStatusRouteImport.update({
   id: '/api/public/status',
   path: '/api/public/status',
@@ -5236,6 +5243,7 @@ export interface FileRoutesByFullPath {
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/status': typeof ApiPublicStatusRouteWithChildren
+  '/api/public/status-badge.svg': typeof ApiPublicStatusBadgeDotsvgRoute
   '/api/public/status-confirm': typeof ApiPublicStatusConfirmRoute
   '/api/public/status-subscribe': typeof ApiPublicStatusSubscribeRoute
   '/api/public/status-unsubscribe': typeof ApiPublicStatusUnsubscribeRoute
@@ -5931,6 +5939,7 @@ export interface FileRoutesByTo {
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/status': typeof ApiPublicStatusRouteWithChildren
+  '/api/public/status-badge.svg': typeof ApiPublicStatusBadgeDotsvgRoute
   '/api/public/status-confirm': typeof ApiPublicStatusConfirmRoute
   '/api/public/status-subscribe': typeof ApiPublicStatusSubscribeRoute
   '/api/public/status-unsubscribe': typeof ApiPublicStatusUnsubscribeRoute
@@ -6639,6 +6648,7 @@ export interface FileRoutesById {
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
   '/api/public/status': typeof ApiPublicStatusRouteWithChildren
+  '/api/public/status-badge.svg': typeof ApiPublicStatusBadgeDotsvgRoute
   '/api/public/status-confirm': typeof ApiPublicStatusConfirmRoute
   '/api/public/status-subscribe': typeof ApiPublicStatusSubscribeRoute
   '/api/public/status-unsubscribe': typeof ApiPublicStatusUnsubscribeRoute
@@ -7348,6 +7358,7 @@ export interface FileRouteTypes {
     | '/api/mercadopago/webhook'
     | '/api/public/health'
     | '/api/public/status'
+    | '/api/public/status-badge.svg'
     | '/api/public/status-confirm'
     | '/api/public/status-subscribe'
     | '/api/public/status-unsubscribe'
@@ -8043,6 +8054,7 @@ export interface FileRouteTypes {
     | '/api/mercadopago/webhook'
     | '/api/public/health'
     | '/api/public/status'
+    | '/api/public/status-badge.svg'
     | '/api/public/status-confirm'
     | '/api/public/status-subscribe'
     | '/api/public/status-unsubscribe'
@@ -8750,6 +8762,7 @@ export interface FileRouteTypes {
     | '/api/mercadopago/webhook'
     | '/api/public/health'
     | '/api/public/status'
+    | '/api/public/status-badge.svg'
     | '/api/public/status-confirm'
     | '/api/public/status-subscribe'
     | '/api/public/status-unsubscribe'
@@ -9052,6 +9065,7 @@ export interface RootRouteChildren {
   ApiMercadopagoWebhookRoute: typeof ApiMercadopagoWebhookRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRouteWithChildren
   ApiPublicStatusRoute: typeof ApiPublicStatusRouteWithChildren
+  ApiPublicStatusBadgeDotsvgRoute: typeof ApiPublicStatusBadgeDotsvgRoute
   ApiPublicStatusConfirmRoute: typeof ApiPublicStatusConfirmRoute
   ApiPublicStatusSubscribeRoute: typeof ApiPublicStatusSubscribeRoute
   ApiPublicStatusUnsubscribeRoute: typeof ApiPublicStatusUnsubscribeRoute
@@ -10766,6 +10780,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/status-confirm'
       fullPath: '/api/public/status-confirm'
       preLoaderRoute: typeof ApiPublicStatusConfirmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/status-badge.svg': {
+      id: '/api/public/status-badge.svg'
+      path: '/api/public/status-badge.svg'
+      fullPath: '/api/public/status-badge.svg'
+      preLoaderRoute: typeof ApiPublicStatusBadgeDotsvgRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/status': {
@@ -15913,6 +15934,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiMercadopagoWebhookRoute: ApiMercadopagoWebhookRoute,
   ApiPublicHealthRoute: ApiPublicHealthRouteWithChildren,
   ApiPublicStatusRoute: ApiPublicStatusRouteWithChildren,
+  ApiPublicStatusBadgeDotsvgRoute: ApiPublicStatusBadgeDotsvgRoute,
   ApiPublicStatusConfirmRoute: ApiPublicStatusConfirmRoute,
   ApiPublicStatusSubscribeRoute: ApiPublicStatusSubscribeRoute,
   ApiPublicStatusUnsubscribeRoute: ApiPublicStatusUnsubscribeRoute,
