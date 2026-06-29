@@ -10836,6 +10836,32 @@ export type Database = {
           },
         ]
       }
+      core_status_subscriber_services: {
+        Row: {
+          created_at: string
+          service_slug: string
+          subscriber_id: string
+        }
+        Insert: {
+          created_at?: string
+          service_slug: string
+          subscriber_id: string
+        }
+        Update: {
+          created_at?: string
+          service_slug?: string
+          subscriber_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_status_subscriber_services_subscriber_id_fkey"
+            columns: ["subscriber_id"]
+            isOneToOne: false
+            referencedRelation: "core_status_subscribers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       core_status_subscribers: {
         Row: {
           bounced_at: string | null
