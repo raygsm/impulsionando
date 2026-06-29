@@ -68,6 +68,7 @@ import { Route as VitrineSlugRouteImport } from './routes/vitrine.$slug'
 import { Route as TrialCadastroRouteImport } from './routes/trial_.cadastro'
 import { Route as TrabalheConoscoNichoRouteImport } from './routes/trabalhe-conosco.$nicho'
 import { Route as StatusEmbedRouteImport } from './routes/status.embed'
+import { Route as StatusSlugRouteImport } from './routes/status.$slug'
 import { Route as ShowroomWhatsappRouteImport } from './routes/showroom.whatsapp'
 import { Route as ShowroomSiteRouteImport } from './routes/showroom.site'
 import { Route as ShowroomSegurancaRouteImport } from './routes/showroom.seguranca'
@@ -590,6 +591,7 @@ import { Route as ApiPublicWhatsappSendRouteImport } from './routes/api/public/w
 import { Route as ApiPublicWebhooksN8nCallbackRouteImport } from './routes/api/public/webhooks/n8n-callback'
 import { Route as ApiPublicSupportCreateTicketRouteImport } from './routes/api/public/support/create-ticket'
 import { Route as ApiPublicStatusRssRouteImport } from './routes/api/public/status.rss'
+import { Route as ApiPublicStatusSlugRouteImport } from './routes/api/public/status.$slug'
 import { Route as ApiPublicRiomedEventsRouteImport } from './routes/api/public/riomed/events'
 import { Route as ApiPublicRealestateSavedSearchRouteImport } from './routes/api/public/realestate/saved-search'
 import { Route as ApiPublicRealestateInterestRouteImport } from './routes/api/public/realestate/interest'
@@ -1012,6 +1014,11 @@ const TrabalheConoscoNichoRoute = TrabalheConoscoNichoRouteImport.update({
 const StatusEmbedRoute = StatusEmbedRouteImport.update({
   id: '/embed',
   path: '/embed',
+  getParentRoute: () => StatusRoute,
+} as any)
+const StatusSlugRoute = StatusSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
   getParentRoute: () => StatusRoute,
 } as any)
 const ShowroomWhatsappRoute = ShowroomWhatsappRouteImport.update({
@@ -3965,6 +3972,11 @@ const ApiPublicStatusRssRoute = ApiPublicStatusRssRouteImport.update({
   path: '/rss',
   getParentRoute: () => ApiPublicStatusRoute,
 } as any)
+const ApiPublicStatusSlugRoute = ApiPublicStatusSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ApiPublicStatusRoute,
+} as any)
 const ApiPublicRiomedEventsRoute = ApiPublicRiomedEventsRouteImport.update({
   id: '/api/public/riomed/events',
   path: '/api/public/riomed/events',
@@ -4917,6 +4929,7 @@ export interface FileRoutesByFullPath {
   '/showroom/seguranca': typeof ShowroomSegurancaRoute
   '/showroom/site': typeof ShowroomSiteRoute
   '/showroom/whatsapp': typeof ShowroomWhatsappRoute
+  '/status/$slug': typeof StatusSlugRoute
   '/status/embed': typeof StatusEmbedRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial/cadastro': typeof TrialCadastroRoute
@@ -5373,6 +5386,7 @@ export interface FileRoutesByFullPath {
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
   '/api/public/riomed/events': typeof ApiPublicRiomedEventsRoute
+  '/api/public/status/$slug': typeof ApiPublicStatusSlugRoute
   '/api/public/status/rss': typeof ApiPublicStatusRssRoute
   '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
   '/api/public/webhooks/n8n-callback': typeof ApiPublicWebhooksN8nCallbackRoute
@@ -5616,6 +5630,7 @@ export interface FileRoutesByTo {
   '/showroom/seguranca': typeof ShowroomSegurancaRoute
   '/showroom/site': typeof ShowroomSiteRoute
   '/showroom/whatsapp': typeof ShowroomWhatsappRoute
+  '/status/$slug': typeof StatusSlugRoute
   '/status/embed': typeof StatusEmbedRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial/cadastro': typeof TrialCadastroRoute
@@ -6071,6 +6086,7 @@ export interface FileRoutesByTo {
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
   '/api/public/riomed/events': typeof ApiPublicRiomedEventsRoute
+  '/api/public/status/$slug': typeof ApiPublicStatusSlugRoute
   '/api/public/status/rss': typeof ApiPublicStatusRssRoute
   '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
   '/api/public/webhooks/n8n-callback': typeof ApiPublicWebhooksN8nCallbackRoute
@@ -6328,6 +6344,7 @@ export interface FileRoutesById {
   '/showroom/seguranca': typeof ShowroomSegurancaRoute
   '/showroom/site': typeof ShowroomSiteRoute
   '/showroom/whatsapp': typeof ShowroomWhatsappRoute
+  '/status/$slug': typeof StatusSlugRoute
   '/status/embed': typeof StatusEmbedRoute
   '/trabalhe-conosco/$nicho': typeof TrabalheConoscoNichoRoute
   '/trial_/cadastro': typeof TrialCadastroRoute
@@ -6784,6 +6801,7 @@ export interface FileRoutesById {
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
   '/api/public/riomed/events': typeof ApiPublicRiomedEventsRoute
+  '/api/public/status/$slug': typeof ApiPublicStatusSlugRoute
   '/api/public/status/rss': typeof ApiPublicStatusRssRoute
   '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
   '/api/public/webhooks/n8n-callback': typeof ApiPublicWebhooksN8nCallbackRoute
@@ -7041,6 +7059,7 @@ export interface FileRouteTypes {
     | '/showroom/seguranca'
     | '/showroom/site'
     | '/showroom/whatsapp'
+    | '/status/$slug'
     | '/status/embed'
     | '/trabalhe-conosco/$nicho'
     | '/trial/cadastro'
@@ -7497,6 +7516,7 @@ export interface FileRouteTypes {
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
     | '/api/public/riomed/events'
+    | '/api/public/status/$slug'
     | '/api/public/status/rss'
     | '/api/public/support/create-ticket'
     | '/api/public/webhooks/n8n-callback'
@@ -7740,6 +7760,7 @@ export interface FileRouteTypes {
     | '/showroom/seguranca'
     | '/showroom/site'
     | '/showroom/whatsapp'
+    | '/status/$slug'
     | '/status/embed'
     | '/trabalhe-conosco/$nicho'
     | '/trial/cadastro'
@@ -8195,6 +8216,7 @@ export interface FileRouteTypes {
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
     | '/api/public/riomed/events'
+    | '/api/public/status/$slug'
     | '/api/public/status/rss'
     | '/api/public/support/create-ticket'
     | '/api/public/webhooks/n8n-callback'
@@ -8451,6 +8473,7 @@ export interface FileRouteTypes {
     | '/showroom/seguranca'
     | '/showroom/site'
     | '/showroom/whatsapp'
+    | '/status/$slug'
     | '/status/embed'
     | '/trabalhe-conosco/$nicho'
     | '/trial_/cadastro'
@@ -8907,6 +8930,7 @@ export interface FileRouteTypes {
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
     | '/api/public/riomed/events'
+    | '/api/public/status/$slug'
     | '/api/public/status/rss'
     | '/api/public/support/create-ticket'
     | '/api/public/webhooks/n8n-callback'
@@ -9581,6 +9605,13 @@ declare module '@tanstack/react-router' {
       path: '/embed'
       fullPath: '/status/embed'
       preLoaderRoute: typeof StatusEmbedRouteImport
+      parentRoute: typeof StatusRoute
+    }
+    '/status/$slug': {
+      id: '/status/$slug'
+      path: '/$slug'
+      fullPath: '/status/$slug'
+      preLoaderRoute: typeof StatusSlugRouteImport
       parentRoute: typeof StatusRoute
     }
     '/showroom/whatsapp': {
@@ -13237,6 +13268,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicStatusRssRouteImport
       parentRoute: typeof ApiPublicStatusRoute
     }
+    '/api/public/status/$slug': {
+      id: '/api/public/status/$slug'
+      path: '/$slug'
+      fullPath: '/api/public/status/$slug'
+      preLoaderRoute: typeof ApiPublicStatusSlugRouteImport
+      parentRoute: typeof ApiPublicStatusRoute
+    }
     '/api/public/riomed/events': {
       id: '/api/public/riomed/events'
       path: '/api/public/riomed/events'
@@ -15775,10 +15813,12 @@ const RiomedRouteWithChildren =
   RiomedRoute._addFileChildren(RiomedRouteChildren)
 
 interface StatusRouteChildren {
+  StatusSlugRoute: typeof StatusSlugRoute
   StatusEmbedRoute: typeof StatusEmbedRoute
 }
 
 const StatusRouteChildren: StatusRouteChildren = {
+  StatusSlugRoute: StatusSlugRoute,
   StatusEmbedRoute: StatusEmbedRoute,
 }
 
@@ -15861,10 +15901,12 @@ const ApiPublicHealthRouteWithChildren = ApiPublicHealthRoute._addFileChildren(
 )
 
 interface ApiPublicStatusRouteChildren {
+  ApiPublicStatusSlugRoute: typeof ApiPublicStatusSlugRoute
   ApiPublicStatusRssRoute: typeof ApiPublicStatusRssRoute
 }
 
 const ApiPublicStatusRouteChildren: ApiPublicStatusRouteChildren = {
+  ApiPublicStatusSlugRoute: ApiPublicStatusSlugRoute,
   ApiPublicStatusRssRoute: ApiPublicStatusRssRoute,
 }
 
