@@ -428,7 +428,9 @@ function EditDialog({
                 notify_maintenance: v.notify_maintenance ?? true,
                 services: v.services ?? [],
                 categories: v.categories ?? [],
+                min_severity: v.min_severity ?? 'info',
                 active: v.active ?? true,
+
               })
             }
             disabled={saving || !v.label || !v.url}
