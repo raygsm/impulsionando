@@ -29,6 +29,7 @@ import {
   deleteStatusWebhook,
   listStatusWebhookDispatches,
   triggerStatusWebhooksTick,
+  testStatusWebhook,
 } from '@/lib/status-webhooks.functions'
 
 export const Route = createFileRoute('/_authenticated/admin/status-webhooks')({
@@ -58,6 +59,7 @@ function AdminStatusWebhooksPage() {
   const upsert = useServerFn(upsertStatusWebhook)
   const remove = useServerFn(deleteStatusWebhook)
   const trigger = useServerFn(triggerStatusWebhooksTick)
+  const testFn = useServerFn(testStatusWebhook)
 
   const { data, isLoading } = useQuery({
     queryKey: ['status-webhooks'],
@@ -92,6 +94,16 @@ function AdminStatusWebhooksPage() {
       r?.ok
         ? toast.success(`Disparo executado (HTTP ${r.status})`)
         : toast.error(`Falhou (HTTP ${r?.status ?? 'n/a'})`),
+    onError: (e: any) => toast.error(e.message),
+  })
+
+  const test = useMutation({
+    mutationFn: (id: string) => testFn({ data: { id } }),
+    onSuccess: (r: any) => {
+      if (r?.ok) toast.success(`Ping enviado (HTTP ${r.status})`)
+      else toast.error(`Ping falhou (HTTP ${r?.status ?? 'n/a'}) — ${r?.error ?? ''}`)
+      qc.invalidateQueries({ queryKey: ['status-webhooks'] })
+    },
     onError: (e: any) => toast.error(e.message),
   })
 
@@ -203,6 +215,14 @@ function AdminStatusWebhooksPage() {
                           : '—'}
                       </td>
                       <td className="py-2 pr-3 text-right space-x-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => test.mutate(h.id)}
+                          disabled={test.isPending}
+                        >
+                          {test.isPending ? '…' : 'Testar'}
+                        </Button>
                         <Button size="sm" variant="ghost" onClick={() => setLogsFor(h)}>
                           Logs
                         </Button>

@@ -110,3 +110,78 @@ export const triggerStatusWebhooksTick = createServerFn({ method: 'POST' })
     )
     return { ok: res.ok, status: res.status }
   })
+
+export const testStatusWebhook = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const { createHmac } = await import('crypto')
+
+    const { data: hook, error } = await supabaseAdmin
+      .from('core_status_webhooks')
+      .select('id,label,url,kind,secret')
+      .eq('id', data.id)
+      .single()
+    if (error || !hook) throw new Error(error?.message ?? 'Webhook não encontrado')
+
+    const nowIso = new Date().toISOString()
+    const ev = {
+      reference_key: `test:${Date.now()}`,
+      event_kind: 'test_ping' as const,
+      category: 'incident' as const,
+      service_slug: null as string | null,
+      title: `[TESTE] Ping de Status — ${hook.label}`,
+      text: `Disparo manual enviado por ${context.userId} em ${nowIso}.`,
+      url: 'https://impulsionando.com.br/status',
+      severity: 'info',
+    }
+
+    let body: unknown
+    if (hook.kind === 'slack') {
+      body = { text: `*${ev.title}*\n${ev.text}\n${ev.url}` }
+    } else if (hook.kind === 'discord') {
+      body = { content: `**${ev.title}**\n${ev.text}\n${ev.url}` }
+    } else {
+      body = { ...ev, sent_at: nowIso }
+    }
+    const json = JSON.stringify(body)
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    if (hook.secret && hook.kind === 'generic') {
+      headers['X-Impulsionando-Signature'] = createHmac('sha256', hook.secret)
+        .update(json)
+        .digest('hex')
+    }
+
+    let status = 0
+    let ok = false
+    let err: string | null = null
+    try {
+      const res = await fetch(hook.url, { method: 'POST', headers, body: json })
+      status = res.status
+      ok = res.ok
+      if (!ok) err = (await res.text()).slice(0, 500)
+    } catch (e) {
+      err = e instanceof Error ? e.message.slice(0, 500) : 'unknown error'
+    }
+
+    await supabaseAdmin.from('core_status_webhook_dispatches').insert({
+      webhook_id: hook.id,
+      reference_key: ev.reference_key,
+      event_kind: ev.event_kind,
+      status_code: status || null,
+      ok,
+      error: err,
+    })
+    await supabaseAdmin
+      .from('core_status_webhooks')
+      .update({
+        last_dispatch_at: nowIso,
+        last_status_code: status || null,
+        last_error: ok ? null : err,
+      })
+      .eq('id', hook.id)
+
+    return { ok, status, error: err }
+  })
