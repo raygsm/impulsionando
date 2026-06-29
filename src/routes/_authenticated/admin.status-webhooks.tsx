@@ -378,6 +378,7 @@ function EditDialog({
                 notify_incidents: v.notify_incidents ?? true,
                 notify_maintenance: v.notify_maintenance ?? true,
                 services: v.services ?? [],
+                categories: v.categories ?? [],
                 active: v.active ?? true,
               })
             }
