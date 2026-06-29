@@ -36,26 +36,23 @@ ENV VITE_SUPABASE_PUBLISHABLE_KEY=$VITE_SUPABASE_PUBLISHABLE_KEY
 COPY . .
 RUN bun run build
 RUN set -eux; \
-  rm -rf /app/docker-public; \
-  mkdir -p /app/docker-public; \
-  for candidate in /app/dist /app/.output/public /app/dist/client /app/build /app/build/client; do \
-    if [ -f "$candidate/index.html" ]; then \
-      cp -a "$candidate"/. /app/docker-public/; \
-      break; \
-    fi; \
-  done; \
-  test -f /app/docker-public/index.html
+  find /app -maxdepth 4 \( -name index.html -o -name index.mjs -o -name server.mjs \) -print; \
+  test -f /app/.output/server/index.mjs \
+    -o -f /app/dist/server/index.mjs \
+    -o -f /app/dist/index.html \
+    -o -f /app/dist/client/index.html \
+    -o -f /app/.output/public/index.html
 
-FROM nginx:1.27-alpine AS runner
+FROM oven/bun:1-slim AS runner
+WORKDIR /app
 
 ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=3000
 ENV LOVABLE_LEGACY_ENABLED=false
 
-COPY deploy/hostinger/nginx.conf /etc/nginx/conf.d/default.conf
-RUN rm -rf /usr/share/nginx/html/*
-COPY --from=build /app/docker-public/ /usr/share/nginx/html/
-RUN test -f /usr/share/nginx/html/index.html && ! grep -qi "Welcome to nginx" /usr/share/nginx/html/index.html
+COPY --from=build /app /app
 
-EXPOSE 80
+EXPOSE 3000
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["bun", "scripts/start-hostinger.mjs"]

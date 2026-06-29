@@ -25,11 +25,12 @@ describe("Hostinger deployment package", () => {
     expect(compose).toContain("VITE_SUPABASE_PUBLISHABLE_KEY:");
   });
 
-  it("serves Vite output through Nginx in production", () => {
-    expect(dockerfile).toContain("FROM nginx:");
-    expect(dockerfile).toContain("COPY --from=build /app/docker-public/ /usr/share/nginx/html/");
-    expect(dockerfile).toContain('! grep -qi "Welcome to nginx" /usr/share/nginx/html/index.html');
-    expect(compose).toContain("loadbalancer.server.port=80");
+  it("serves the built Core without falling back to default Nginx", () => {
+    expect(dockerfile).toContain("FROM oven/bun:1-slim AS runner");
+    expect(dockerfile).toContain('CMD ["bun", "scripts/start-hostinger.mjs"]');
+    expect(dockerfile).toContain("EXPOSE 3000");
+    expect(compose).toContain("PORT: 3000");
+    expect(compose).toContain("loadbalancer.server.port=3000");
   });
 
   it("does not copy local env files into the Docker build context", () => {
