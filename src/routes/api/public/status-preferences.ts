@@ -150,10 +150,12 @@ ${banner}
 
         const notify_incidents = form.get('notify_incidents') === '1'
         const notify_maintenance = form.get('notify_maintenance') === '1'
+        const rawSev = String(form.get('min_severity') ?? 'info').toLowerCase()
+        const min_severity = (['info','minor','major','critical'].includes(rawSev) ? rawSev : 'info')
 
         await supabaseAdmin
           .from('core_status_subscribers')
-          .update({ notify_incidents, notify_maintenance, categories: categories.length > 0 ? categories : null })
+          .update({ notify_incidents, notify_maintenance, min_severity, categories: categories.length > 0 ? categories : null })
           .eq('id', (sub as any).id)
 
         await supabaseAdmin
