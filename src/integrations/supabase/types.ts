@@ -10865,6 +10865,7 @@ export type Database = {
       core_status_subscribers: {
         Row: {
           bounced_at: string | null
+          categories: string[] | null
           confirm_token: string
           confirmed_at: string | null
           created_at: string
@@ -10880,6 +10881,7 @@ export type Database = {
         }
         Insert: {
           bounced_at?: string | null
+          categories?: string[] | null
           confirm_token?: string
           confirmed_at?: string | null
           created_at?: string
@@ -10895,6 +10897,7 @@ export type Database = {
         }
         Update: {
           bounced_at?: string | null
+          categories?: string[] | null
           confirm_token?: string
           confirmed_at?: string | null
           created_at?: string
