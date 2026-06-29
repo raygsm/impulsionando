@@ -39,6 +39,7 @@ function AdminStatusSubscribers() {
   const unsubFn = useServerFn(forceUnsubscribeStatusSubscriber);
   const resendFn = useServerFn(resendStatusConfirmation);
   const broadcastFn = useServerFn(broadcastStatusAnnouncement);
+  const severityFn = useServerFn(setStatusSubscriberSeverity);
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [search, setSearch] = useState("");
