@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 
+type HistoryPoint = { day: string; up_ratio: number | null };
+
 type ServiceRow = {
   scope: string;
   url: string | null;
@@ -22,7 +24,9 @@ type ServiceRow = {
   availability_bps_30d: number | null;
   latency_p95_ms_30d: number | null;
   last_check_at: string | null;
+  history?: HistoryPoint[];
 };
+
 
 type IncidentUpdate = {
   id: string;
@@ -185,7 +189,7 @@ function StatusPage() {
         {/* Services */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Serviços monitorados (30 dias)</CardTitle>
+            <CardTitle className="text-base">Serviços monitorados (uptime 90 dias)</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -193,50 +197,66 @@ function StatusPage() {
             ) : !data?.services.length ? (
               <p className="text-sm text-muted-foreground">Sem checagens públicas no momento.</p>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Serviço</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead className="text-right">Disponibilidade</TableHead>
-                    <TableHead className="text-right">p95 latência</TableHead>
-                    <TableHead className="text-right">Última checagem</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {data.services.map((s, i) => {
-                    const up = s.currently_up !== false;
-                    return (
-                      <TableRow key={`${s.scope}-${s.url ?? s.name ?? i}`}>
-                        <TableCell>
-                          <div className="font-medium">{s.name ?? s.scope}</div>
+              <ul className="divide-y">
+                {data.services.map((s, i) => {
+                  const up = s.currently_up !== false;
+                  const history = s.history ?? [];
+                  return (
+                    <li key={`${s.scope}-${s.url ?? s.name ?? i}`} className="py-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="font-medium truncate">{s.name ?? s.scope}</div>
                           {s.url ? (
-                            <div className="text-xs text-muted-foreground truncate max-w-[280px]">{s.url}</div>
+                            <div className="text-xs text-muted-foreground truncate max-w-[420px]">{s.url}</div>
                           ) : null}
-                        </TableCell>
-                        <TableCell>
-                          <span
-                            className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${
-                              up
-                                ? "bg-emerald-500/15 text-emerald-700"
-                                : "bg-red-500/15 text-red-700"
-                            }`}
-                          >
-                            <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
-                            {up ? "Operacional" : "Indisponível"}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-right tabular-nums">{fmtPct(s.availability_bps_30d)}</TableCell>
-                        <TableCell className="text-right tabular-nums">{fmtMs(s.latency_p95_ms_30d)}</TableCell>
-                        <TableCell className="text-right text-xs text-muted-foreground">{fmtDate(s.last_check_at)}</TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                        </div>
+                        <span
+                          className={`shrink-0 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${
+                            up ? "bg-emerald-500/15 text-emerald-700" : "bg-red-500/15 text-red-700"
+                          }`}
+                        >
+                          <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
+                          {up ? "Operacional" : "Indisponível"}
+                        </span>
+                      </div>
+                      {history.length > 0 && (
+                        <div className="mt-2 flex items-end gap-[2px] h-8" aria-label="Histórico de uptime (90 dias)">
+                          {history.map((h) => {
+                            const r = h.up_ratio;
+                            let cls = "bg-muted";
+                            let title = `${h.day} · sem dados`;
+                            if (r != null) {
+                              if (r >= 0.999) cls = "bg-emerald-500";
+                              else if (r >= 0.99) cls = "bg-emerald-400";
+                              else if (r >= 0.95) cls = "bg-amber-400";
+                              else if (r >= 0.5) cls = "bg-orange-500";
+                              else cls = "bg-red-500";
+                              title = `${h.day} · ${(r * 100).toFixed(2)}% up`;
+                            }
+                            return (
+                              <span
+                                key={h.day}
+                                title={title}
+                                className={`inline-block w-[3px] h-full rounded-sm ${cls}`}
+                              />
+                            );
+                          })}
+                        </div>
+                      )}
+                      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground tabular-nums">
+                        <span>Disp. 30d: <span className="text-foreground">{fmtPct(s.availability_bps_30d)}</span></span>
+                        <span>p95: <span className="text-foreground">{fmtMs(s.latency_p95_ms_30d)}</span></span>
+                        <span>Última checagem: {fmtDate(s.last_check_at)}</span>
+                        <span className="ml-auto">90d ←  → hoje</span>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
             )}
           </CardContent>
         </Card>
+
         {/* Scheduled maintenance */}
         {data?.maintenance && data.maintenance.length > 0 ? (
           <Card>

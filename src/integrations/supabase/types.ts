@@ -31730,6 +31730,16 @@ export type Database = {
         }
         Relationships: []
       }
+      v_core_uptime_daily: {
+        Row: {
+          checks: number | null
+          day: string | null
+          up_checks: number | null
+          up_ratio: number | null
+          url: string | null
+        }
+        Relationships: []
+      }
       v_fiscal_invoices_summary: {
         Row: {
           beneficiary_cnpj: string | null
