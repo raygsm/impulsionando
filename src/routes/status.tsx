@@ -362,7 +362,9 @@ function StatusPage() {
                               );
                             })}
                           </ul>
+                          )}
                         </section>
+
                       );
                     })}
                   </div>
