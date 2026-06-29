@@ -245,6 +245,7 @@ import { Route as DemoNichoSlugRouteImport } from './routes/demo.nicho.$slug'
 import { Route as ApiPublicVersionRouteImport } from './routes/api/public/version'
 import { Route as ApiPublicStatusUnsubscribeRouteImport } from './routes/api/public/status-unsubscribe'
 import { Route as ApiPublicStatusSubscribeRouteImport } from './routes/api/public/status-subscribe'
+import { Route as ApiPublicStatusPreferencesRouteImport } from './routes/api/public/status-preferences'
 import { Route as ApiPublicStatusConfirmRouteImport } from './routes/api/public/status-confirm'
 import { Route as ApiPublicStatusBadgeDotsvgRouteImport } from './routes/api/public/status-badge[.]svg'
 import { Route as ApiPublicStatusRouteImport } from './routes/api/public/status'
@@ -1931,6 +1932,12 @@ const ApiPublicStatusSubscribeRoute =
   ApiPublicStatusSubscribeRouteImport.update({
     id: '/api/public/status-subscribe',
     path: '/api/public/status-subscribe',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicStatusPreferencesRoute =
+  ApiPublicStatusPreferencesRouteImport.update({
+    id: '/api/public/status-preferences',
+    path: '/api/public/status-preferences',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicStatusConfirmRoute = ApiPublicStatusConfirmRouteImport.update({
@@ -5294,6 +5301,7 @@ export interface FileRoutesByFullPath {
   '/api/public/status': typeof ApiPublicStatusRouteWithChildren
   '/api/public/status-badge.svg': typeof ApiPublicStatusBadgeDotsvgRoute
   '/api/public/status-confirm': typeof ApiPublicStatusConfirmRoute
+  '/api/public/status-preferences': typeof ApiPublicStatusPreferencesRoute
   '/api/public/status-subscribe': typeof ApiPublicStatusSubscribeRoute
   '/api/public/status-unsubscribe': typeof ApiPublicStatusUnsubscribeRoute
   '/api/public/version': typeof ApiPublicVersionRoute
@@ -5997,6 +6005,7 @@ export interface FileRoutesByTo {
   '/api/public/status': typeof ApiPublicStatusRouteWithChildren
   '/api/public/status-badge.svg': typeof ApiPublicStatusBadgeDotsvgRoute
   '/api/public/status-confirm': typeof ApiPublicStatusConfirmRoute
+  '/api/public/status-preferences': typeof ApiPublicStatusPreferencesRoute
   '/api/public/status-subscribe': typeof ApiPublicStatusSubscribeRoute
   '/api/public/status-unsubscribe': typeof ApiPublicStatusUnsubscribeRoute
   '/api/public/version': typeof ApiPublicVersionRoute
@@ -6713,6 +6722,7 @@ export interface FileRoutesById {
   '/api/public/status': typeof ApiPublicStatusRouteWithChildren
   '/api/public/status-badge.svg': typeof ApiPublicStatusBadgeDotsvgRoute
   '/api/public/status-confirm': typeof ApiPublicStatusConfirmRoute
+  '/api/public/status-preferences': typeof ApiPublicStatusPreferencesRoute
   '/api/public/status-subscribe': typeof ApiPublicStatusSubscribeRoute
   '/api/public/status-unsubscribe': typeof ApiPublicStatusUnsubscribeRoute
   '/api/public/version': typeof ApiPublicVersionRoute
@@ -7430,6 +7440,7 @@ export interface FileRouteTypes {
     | '/api/public/status'
     | '/api/public/status-badge.svg'
     | '/api/public/status-confirm'
+    | '/api/public/status-preferences'
     | '/api/public/status-subscribe'
     | '/api/public/status-unsubscribe'
     | '/api/public/version'
@@ -8133,6 +8144,7 @@ export interface FileRouteTypes {
     | '/api/public/status'
     | '/api/public/status-badge.svg'
     | '/api/public/status-confirm'
+    | '/api/public/status-preferences'
     | '/api/public/status-subscribe'
     | '/api/public/status-unsubscribe'
     | '/api/public/version'
@@ -8848,6 +8860,7 @@ export interface FileRouteTypes {
     | '/api/public/status'
     | '/api/public/status-badge.svg'
     | '/api/public/status-confirm'
+    | '/api/public/status-preferences'
     | '/api/public/status-subscribe'
     | '/api/public/status-unsubscribe'
     | '/api/public/version'
@@ -9155,6 +9168,7 @@ export interface RootRouteChildren {
   ApiPublicStatusRoute: typeof ApiPublicStatusRouteWithChildren
   ApiPublicStatusBadgeDotsvgRoute: typeof ApiPublicStatusBadgeDotsvgRoute
   ApiPublicStatusConfirmRoute: typeof ApiPublicStatusConfirmRoute
+  ApiPublicStatusPreferencesRoute: typeof ApiPublicStatusPreferencesRoute
   ApiPublicStatusSubscribeRoute: typeof ApiPublicStatusSubscribeRoute
   ApiPublicStatusUnsubscribeRoute: typeof ApiPublicStatusUnsubscribeRoute
   ApiPublicVersionRoute: typeof ApiPublicVersionRoute
@@ -10869,6 +10883,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/status-subscribe'
       fullPath: '/api/public/status-subscribe'
       preLoaderRoute: typeof ApiPublicStatusSubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/status-preferences': {
+      id: '/api/public/status-preferences'
+      path: '/api/public/status-preferences'
+      fullPath: '/api/public/status-preferences'
+      preLoaderRoute: typeof ApiPublicStatusPreferencesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/status-confirm': {
@@ -16096,6 +16117,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicStatusRoute: ApiPublicStatusRouteWithChildren,
   ApiPublicStatusBadgeDotsvgRoute: ApiPublicStatusBadgeDotsvgRoute,
   ApiPublicStatusConfirmRoute: ApiPublicStatusConfirmRoute,
+  ApiPublicStatusPreferencesRoute: ApiPublicStatusPreferencesRoute,
   ApiPublicStatusSubscribeRoute: ApiPublicStatusSubscribeRoute,
   ApiPublicStatusUnsubscribeRoute: ApiPublicStatusUnsubscribeRoute,
   ApiPublicVersionRoute: ApiPublicVersionRoute,
