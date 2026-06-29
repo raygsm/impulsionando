@@ -39,7 +39,7 @@ export const listImpersonationAudit = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => listSchema.parse(data ?? {}))
   .handler(async ({ data, context }) => {
-    const { supabase } = context;
+    const supabase = context.supabase as any;
     let q = supabase
       .from("core_impersonation_audit")
       .select("id, actor_user_id, actor_email, target_company_id, target_company_name, action, reason, user_agent, created_at")
@@ -49,5 +49,6 @@ export const listImpersonationAudit = createServerFn({ method: "GET" })
     if (data.actorUserId) q = q.eq("actor_user_id", data.actorUserId);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    return { rows: rows ?? [] };
+    return { rows: (rows ?? []) as Array<Record<string, any>> };
   });
+
