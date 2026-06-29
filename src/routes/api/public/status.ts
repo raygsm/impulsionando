@@ -57,7 +57,12 @@ export const Route = createFileRoute("/api/public/status")({
               .gte("day", sinceDay)
               .order("day", { ascending: true })
               .limit(20000),
+            supabaseAdmin
+              .from("uptime_state")
+              .select("url,label,show_on_public,sort_order,paused")
+              .order("sort_order", { ascending: true }),
           ]);
+
 
 
           const status = (statusRes.data ?? []) as any[];
