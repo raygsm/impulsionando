@@ -439,6 +439,7 @@ import { Route as AuthenticatedAdminTaxComplianceRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminTalentosCockpitHealthRouteImport } from './routes/_authenticated/admin.talentos-cockpit-health'
 import { Route as AuthenticatedAdminSupportTicketingHealthRouteImport } from './routes/_authenticated/admin.support-ticketing-health'
 import { Route as AuthenticatedAdminSuporteProRouteImport } from './routes/_authenticated/admin.suporte-pro'
+import { Route as AuthenticatedAdminSlaMttrRouteImport } from './routes/_authenticated/admin.sla-mttr'
 import { Route as AuthenticatedAdminSlaComplianceRouteImport } from './routes/_authenticated/admin.sla-compliance'
 import { Route as AuthenticatedAdminSegurancaContinuidadeRouteImport } from './routes/_authenticated/admin.seguranca-continuidade'
 import { Route as AuthenticatedAdminSecurityComplianceRouteImport } from './routes/_authenticated/admin.security-compliance'
@@ -3059,6 +3060,12 @@ const AuthenticatedAdminSuporteProRoute =
     path: '/admin/suporte-pro',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminSlaMttrRoute =
+  AuthenticatedAdminSlaMttrRouteImport.update({
+    id: '/admin/sla-mttr',
+    path: '/admin/sla-mttr',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminSlaComplianceRoute =
   AuthenticatedAdminSlaComplianceRouteImport.update({
     id: '/admin/sla-compliance',
@@ -4960,6 +4967,7 @@ export interface FileRoutesByFullPath {
   '/admin/security-compliance': typeof AuthenticatedAdminSecurityComplianceRoute
   '/admin/seguranca-continuidade': typeof AuthenticatedAdminSegurancaContinuidadeRoute
   '/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
+  '/admin/sla-mttr': typeof AuthenticatedAdminSlaMttrRoute
   '/admin/suporte-pro': typeof AuthenticatedAdminSuporteProRoute
   '/admin/support-ticketing-health': typeof AuthenticatedAdminSupportTicketingHealthRoute
   '/admin/talentos-cockpit-health': typeof AuthenticatedAdminTalentosCockpitHealthRoute
@@ -5644,6 +5652,7 @@ export interface FileRoutesByTo {
   '/admin/security-compliance': typeof AuthenticatedAdminSecurityComplianceRoute
   '/admin/seguranca-continuidade': typeof AuthenticatedAdminSegurancaContinuidadeRoute
   '/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
+  '/admin/sla-mttr': typeof AuthenticatedAdminSlaMttrRoute
   '/admin/suporte-pro': typeof AuthenticatedAdminSuporteProRoute
   '/admin/support-ticketing-health': typeof AuthenticatedAdminSupportTicketingHealthRoute
   '/admin/talentos-cockpit-health': typeof AuthenticatedAdminTalentosCockpitHealthRoute
@@ -6341,6 +6350,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/security-compliance': typeof AuthenticatedAdminSecurityComplianceRoute
   '/_authenticated/admin/seguranca-continuidade': typeof AuthenticatedAdminSegurancaContinuidadeRoute
   '/_authenticated/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
+  '/_authenticated/admin/sla-mttr': typeof AuthenticatedAdminSlaMttrRoute
   '/_authenticated/admin/suporte-pro': typeof AuthenticatedAdminSuporteProRoute
   '/_authenticated/admin/support-ticketing-health': typeof AuthenticatedAdminSupportTicketingHealthRoute
   '/_authenticated/admin/talentos-cockpit-health': typeof AuthenticatedAdminTalentosCockpitHealthRoute
@@ -7039,6 +7049,7 @@ export interface FileRouteTypes {
     | '/admin/security-compliance'
     | '/admin/seguranca-continuidade'
     | '/admin/sla-compliance'
+    | '/admin/sla-mttr'
     | '/admin/suporte-pro'
     | '/admin/support-ticketing-health'
     | '/admin/talentos-cockpit-health'
@@ -7723,6 +7734,7 @@ export interface FileRouteTypes {
     | '/admin/security-compliance'
     | '/admin/seguranca-continuidade'
     | '/admin/sla-compliance'
+    | '/admin/sla-mttr'
     | '/admin/suporte-pro'
     | '/admin/support-ticketing-health'
     | '/admin/talentos-cockpit-health'
@@ -8419,6 +8431,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/security-compliance'
     | '/_authenticated/admin/seguranca-continuidade'
     | '/_authenticated/admin/sla-compliance'
+    | '/_authenticated/admin/sla-mttr'
     | '/_authenticated/admin/suporte-pro'
     | '/_authenticated/admin/support-ticketing-health'
     | '/_authenticated/admin/talentos-cockpit-health'
@@ -11981,6 +11994,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSuporteProRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/sla-mttr': {
+      id: '/_authenticated/admin/sla-mttr'
+      path: '/admin/sla-mttr'
+      fullPath: '/admin/sla-mttr'
+      preLoaderRoute: typeof AuthenticatedAdminSlaMttrRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/sla-compliance': {
       id: '/_authenticated/admin/sla-compliance'
       path: '/admin/sla-compliance'
@@ -14820,6 +14840,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminSecurityComplianceRoute: typeof AuthenticatedAdminSecurityComplianceRoute
   AuthenticatedAdminSegurancaContinuidadeRoute: typeof AuthenticatedAdminSegurancaContinuidadeRoute
   AuthenticatedAdminSlaComplianceRoute: typeof AuthenticatedAdminSlaComplianceRoute
+  AuthenticatedAdminSlaMttrRoute: typeof AuthenticatedAdminSlaMttrRoute
   AuthenticatedAdminSuporteProRoute: typeof AuthenticatedAdminSuporteProRoute
   AuthenticatedAdminSupportTicketingHealthRoute: typeof AuthenticatedAdminSupportTicketingHealthRoute
   AuthenticatedAdminTalentosCockpitHealthRoute: typeof AuthenticatedAdminTalentosCockpitHealthRoute
@@ -15158,6 +15179,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminSegurancaContinuidadeRoute:
     AuthenticatedAdminSegurancaContinuidadeRoute,
   AuthenticatedAdminSlaComplianceRoute: AuthenticatedAdminSlaComplianceRoute,
+  AuthenticatedAdminSlaMttrRoute: AuthenticatedAdminSlaMttrRoute,
   AuthenticatedAdminSuporteProRoute: AuthenticatedAdminSuporteProRoute,
   AuthenticatedAdminSupportTicketingHealthRoute:
     AuthenticatedAdminSupportTicketingHealthRoute,
@@ -15726,13 +15748,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
