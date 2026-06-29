@@ -42,7 +42,7 @@ type SubscriberRow = {
 const SITE = 'https://impulsionando.com.br'
 
 function unsubFooter(unsubscribe_token: string): string {
-  return `\n\n—\nGerencie sua inscrição: ${SITE}/api/public/status-unsubscribe?token=${unsubscribe_token}`
+  return `\n\n—\nPreferências de notificação: ${SITE}/api/public/status-preferences?token=${unsubscribe_token}\nCancelar inscrição: ${SITE}/api/public/status-unsubscribe?token=${unsubscribe_token}`
 }
 
 export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
