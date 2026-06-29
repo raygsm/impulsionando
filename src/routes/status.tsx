@@ -211,10 +211,40 @@ function StatusPage() {
 
         {/* Services */}
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle className="text-base">Serviços monitorados (uptime 90 dias)</CardTitle>
+            {categories.length > 1 ? (
+              <div className="flex flex-wrap gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setActiveCategory("all")}
+                  className={`text-xs px-2.5 py-1 rounded-full border transition ${
+                    activeCategory === "all"
+                      ? "bg-foreground text-background border-foreground"
+                      : "bg-background hover:bg-muted border-border text-muted-foreground"
+                  }`}
+                >
+                  Todas
+                </button>
+                {categories.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setActiveCategory(c)}
+                    className={`text-xs px-2.5 py-1 rounded-full border transition ${
+                      activeCategory === c
+                        ? "bg-foreground text-background border-foreground"
+                        : "bg-background hover:bg-muted border-border text-muted-foreground"
+                    }`}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </CardHeader>
           <CardContent>
+
             {isLoading ? (
               <p className="text-sm text-muted-foreground">Carregando…</p>
             ) : !data?.services.length ? (
