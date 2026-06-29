@@ -199,7 +199,7 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
           for (const s of confirmed) {
             if (!subscriberWantsService(s.id, slug)) continue
             if (!subscriberWantsCategory(s, cat)) continue
-            if (isOpened) {
+            if (isOpened && severityAllowed(s, i.severity)) {
               events.push({
                 subscriber: s,
                 incident_id: i.id,
@@ -211,7 +211,7 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
                   unsubFooter(s.unsubscribe_token),
               })
             }
-            if (isResolved) {
+            if (isResolved && severityAllowed(s, i.severity)) {
               events.push({
                 subscriber: s,
                 incident_id: i.id,
