@@ -58,14 +58,14 @@ export const listPostmortems = createServerFn({ method: "GET" })
       .order("resolved_at", { ascending: false })
       .limit(300);
     if (error) throw new Error(error.message);
-    const rows = (data ?? []).map(shape);
+    const rows: PostmortemRow[] = (data ?? []).map(shape);
     const kpis = {
       total: rows.length,
       published: rows.filter((r) => r.postmortem_published_at).length,
       drafts: rows.filter((r) => r.postmortem_summary && !r.postmortem_published_at).length,
       missing: rows.filter((r) => !r.postmortem_summary).length,
       open_actions: rows.reduce(
-        (s, r) => s + r.postmortem_action_items.filter((a) => !a.done).length,
+        (s, r) => s + r.postmortem_action_items.filter((a: ActionItem) => !a.done).length,
         0,
       ),
     };
