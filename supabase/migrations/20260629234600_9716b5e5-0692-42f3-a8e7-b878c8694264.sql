@@ -1,0 +1,1 @@
+ALTER TABLE public.core_status_webhooks ADD COLUMN IF NOT EXISTS min_severity text NOT NULL DEFAULT 'info' CHECK (min_severity IN ('info','minor','major','critical'));
