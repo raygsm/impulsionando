@@ -215,6 +215,14 @@ function AdminStatusWebhooksPage() {
                           : '—'}
                       </td>
                       <td className="py-2 pr-3 text-right space-x-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => test.mutate(h.id)}
+                          disabled={test.isPending}
+                        >
+                          {test.isPending ? '…' : 'Testar'}
+                        </Button>
                         <Button size="sm" variant="ghost" onClick={() => setLogsFor(h)}>
                           Logs
                         </Button>
