@@ -115,7 +115,7 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
             .from('core_status_subscriber_services' as any)
             .select('subscriber_id,service_slug')
             .in('subscriber_id', subIds)
-          for (const r of (filtRes.data ?? []) as Array<{ subscriber_id: string; service_slug: string }>) {
+          for (const r of ((filtRes.data ?? []) as unknown) as Array<{ subscriber_id: string; service_slug: string }>) {
             const set = filterBySub.get(r.subscriber_id) ?? new Set<string>()
             set.add(r.service_slug)
             filterBySub.set(r.subscriber_id, set)
