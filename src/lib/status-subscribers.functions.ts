@@ -170,7 +170,7 @@ export const broadcastStatusAnnouncement = createServerFn({ method: 'POST' })
       status: 'queued',
       to_address: s.email,
       subject: data.subject,
-      body: `${data.body}\n\n—\nGerencie sua inscrição: ${SITE}/api/public/status-unsubscribe?token=${s.unsubscribe_token}`,
+      body: `${data.body}\n\n—\nPreferências: ${SITE}/api/public/status-preferences?token=${s.unsubscribe_token}\nCancelar inscrição: ${SITE}/api/public/status-unsubscribe?token=${s.unsubscribe_token}`,
       tags: { topic: data.tag, subscriber_id: s.id },
     }))
     const logRows = toSend.map((s) => ({
