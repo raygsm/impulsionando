@@ -74,7 +74,17 @@ export function TenantSwitcher() {
           {isImpersonating && (
             <button
               type="button"
-              onClick={() => { stopImpersonation(); setOpen(false); }}
+              onClick={() => {
+                if (impersonatedCompanyId) {
+                  void safeLog({
+                    targetCompanyId: impersonatedCompanyId,
+                    targetCompanyName: impersonatedCompanyName,
+                    action: "stop",
+                  });
+                }
+                stopImpersonation();
+                setOpen(false);
+              }}
               className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent text-destructive"
             >
               <LogOut className="size-4" /> Sair da impersonação
@@ -93,7 +103,16 @@ export function TenantSwitcher() {
                 key={t.id}
                 type="button"
                 onClick={() => {
+                  const reason = typeof window !== "undefined"
+                    ? window.prompt(`Motivo para impersonar ${t.name}? (opcional)`) ?? null
+                    : null;
                   startImpersonation({ companyId: t.id, companyName: t.name });
+                  void safeLog({
+                    targetCompanyId: t.id,
+                    targetCompanyName: t.name,
+                    action: "start",
+                    reason,
+                  });
                   setOpen(false);
                 }}
                 className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent"
@@ -103,6 +122,7 @@ export function TenantSwitcher() {
                 {active && <Check className="size-4 text-primary" />}
               </button>
             );
+
           })}
         </div>
       </PopoverContent>
