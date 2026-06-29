@@ -141,6 +141,12 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
           if (!slug) return false // incident without resolvable slug → skip filtered subs
           return filter.has(slug)
         }
+        const subscriberWantsCategory = (sub: SubscriberRow, cat: string | null): boolean => {
+          const cats = Array.isArray(sub.categories) ? sub.categories : []
+          if (cats.length === 0) return true
+          if (!cat) return false
+          return cats.includes(cat)
+        }
 
 
         const events: Array<{
