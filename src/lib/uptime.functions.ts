@@ -65,9 +65,13 @@ export const upsertUptimeTarget = createServerFn({ method: 'POST' })
   .inputValidator((input: {
     url: string
     original_url?: string | null
+    label?: string | null
     alert_emails?: string[] | string
     alert_whatsapps?: string[] | string
     alert_after_seconds?: number | null
+    paused?: boolean
+    show_on_public?: boolean
+    sort_order?: number | null
   }) => input)
   .handler(async ({ data, context }) => {
     await assertStaff(context.userId)
@@ -76,10 +80,15 @@ export const upsertUptimeTarget = createServerFn({ method: 'POST' })
 
     const payload = {
       url,
+      label: data.label?.trim() || null,
       alert_emails: parseList(data.alert_emails),
       alert_whatsapps: parseList(data.alert_whatsapps),
       alert_after_seconds: data.alert_after_seconds ?? undefined,
+      paused: data.paused ?? false,
+      show_on_public: data.show_on_public ?? true,
+      sort_order: data.sort_order ?? 100,
     }
+
 
 
     const original = data.original_url?.trim()
