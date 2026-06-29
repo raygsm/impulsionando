@@ -9121,6 +9121,41 @@ export type Database = {
           },
         ]
       }
+      core_incident_updates: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          incident_id: string
+          posted_by: string | null
+          status: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          incident_id: string
+          posted_by?: string | null
+          status: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          incident_id?: string
+          posted_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_incident_updates_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "core_incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       core_incidents: {
         Row: {
           created_at: string
