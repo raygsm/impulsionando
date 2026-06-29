@@ -55,6 +55,11 @@ function AdminStatusSubscribers() {
       logFn({ data: { subscriber_id: selectedId ?? undefined, limit: 100 } }),
   });
 
+  const { data: breakdown } = useQuery({
+    queryKey: ["admin-status-breakdown"],
+    queryFn: () => breakdownFn({ data: {} as any }),
+  });
+
   const unsubMut = useMutation({
     mutationFn: (id: string) => unsubFn({ data: { id } }),
     onSuccess: () => {
