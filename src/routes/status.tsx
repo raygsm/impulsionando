@@ -81,6 +81,7 @@ const OVERALL_LABEL: Record<StatusPayload["overall"], { text: string; cls: strin
   operational: { text: "Todos os sistemas operacionais", cls: "bg-emerald-500/15 text-emerald-700 border-emerald-500/30" },
   degraded: { text: "Operação parcialmente degradada", cls: "bg-amber-500/15 text-amber-700 border-amber-500/30" },
   outage: { text: "Indisponibilidade ativa", cls: "bg-red-500/15 text-red-700 border-red-500/30" },
+  maintenance: { text: "Manutenção programada em curso", cls: "bg-sky-500/15 text-sky-700 border-sky-500/30" },
   unknown: { text: "Status indisponível", cls: "bg-muted text-muted-foreground border-border" },
 };
 
