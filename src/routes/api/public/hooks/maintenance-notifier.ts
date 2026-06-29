@@ -145,6 +145,7 @@ export const Route = createFileRoute('/api/public/hooks/maintenance-notifier')({
           const startsMs = Date.parse(w.starts_at)
           const endsMs = Date.parse(w.ends_at)
           const slug = slugFor(w)
+          const cat = categoryFor(w)
           const scopeLabel = slug ?? w.scope ?? 'platform'
           const sev = (w.severity ?? 'info').toUpperCase()
 
@@ -159,6 +160,7 @@ export const Route = createFileRoute('/api/public/hooks/maintenance-notifier')({
 
           for (const s of subscribers) {
             if (!wants(s.id, slug)) continue
+            if (!wantsCat(s, cat)) continue
             const footer = unsubFooter(s.unsubscribe_token)
             if (isLeadTime) {
               events.push({
