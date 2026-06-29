@@ -171,6 +171,9 @@ function StatusDetailPage() {
             </CardContent>
           </Card>
 
+          <ServiceEmbed slug={data.service.slug} />
+
+
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Incidentes (90d)</CardTitle>
