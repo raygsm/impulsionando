@@ -57,6 +57,25 @@ export const Route = createFileRoute("/api/public/status")({
           const postmortems = (pmRes.data ?? []) as any[];
           const maintenance = (mwRes.data ?? []) as any[];
 
+          // Fetch updates for open incidents (last 90d)
+          const openIds = incidents.filter((i) => i.status !== "resolved").map((i) => i.id);
+          let updatesByIncident: Record<string, any[]> = {};
+          if (openIds.length > 0) {
+            const upRes = await supabaseAdmin
+              .from("core_incident_updates" as any)
+              .select("id,incident_id,status,body,created_at")
+              .in("incident_id", openIds)
+              .order("created_at", { ascending: false })
+              .limit(200);
+            for (const u of (upRes.data ?? []) as any[]) {
+              (updatesByIncident[u.incident_id] ||= []).push(u);
+            }
+          }
+          const incidentsWithUpdates = incidents.map((i) => ({
+            ...i,
+            updates: updatesByIncident[i.id] ?? [],
+          }));
+
           const monitored = status.length;
           const up = status.filter((r) => r.currently_up !== false).length;
           const down = status.filter((r) => r.currently_up === false).length;
@@ -76,7 +95,7 @@ export const Route = createFileRoute("/api/public/status")({
             updated_at: new Date().toISOString(),
             summary: { monitored, up, down, openIncidents, sev1Open, maintenance: inMaintenance },
             services: status,
-            incidents,
+            incidents: incidentsWithUpdates,
             postmortems,
             maintenance,
           };

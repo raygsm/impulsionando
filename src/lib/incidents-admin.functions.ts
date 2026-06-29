@@ -42,3 +42,81 @@ export const resolveIncident = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const createIncident = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: {
+    title: string;
+    description?: string;
+    severity: "sev1" | "sev2" | "sev3" | "sev4";
+    scope?: string;
+    url?: string;
+    source?: string;
+  }) => d)
+  .handler(async ({ data, context }) => {
+    await ensureStaff(context);
+    if (!data.title || data.title.length < 3) throw new Error("Título obrigatório (min 3 caracteres)");
+    const { data: row, error } = await context.supabase
+      .from("core_incidents")
+      .insert({
+        title: data.title,
+        description: data.description ?? null,
+        severity: data.severity,
+        scope: (data.scope ?? "global") as any,
+        url: data.url ?? null,
+        source: (data.source ?? "manual") as any,
+        status: "open",
+        detected_at: new Date().toISOString(),
+        event_count: 1,
+      })
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    return { ok: true, id: row.id };
+  });
+
+export const listIncidentUpdates = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { incident_id: string }) => d)
+  .handler(async ({ data, context }) => {
+    await ensureStaff(context);
+    const { data: rows, error } = await context.supabase
+      .from("core_incident_updates")
+      .select("id, status, body, created_at, posted_by")
+      .eq("incident_id", data.incident_id)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return { updates: rows ?? [] };
+  });
+
+export const addIncidentUpdate = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: {
+    incident_id: string;
+    status: "investigating" | "identified" | "monitoring" | "resolved" | "update";
+    body: string;
+  }) => d)
+  .handler(async ({ data, context }) => {
+    await ensureStaff(context);
+    if (!data.body || data.body.trim().length < 3) throw new Error("Mensagem obrigatória");
+    const { error } = await context.supabase.from("core_incident_updates").insert({
+      incident_id: data.incident_id,
+      status: data.status,
+      body: data.body.trim(),
+      posted_by: context.userId,
+    });
+    if (error) throw new Error(error.message);
+    if (data.status === "resolved") {
+      await context.supabase
+        .from("core_incidents")
+        .update({ status: "resolved", resolved_at: new Date().toISOString() })
+        .eq("id", data.incident_id);
+    } else if (data.status === "monitoring" || data.status === "identified") {
+      await context.supabase
+        .from("core_incidents")
+        .update({ status: "monitoring" })
+        .eq("id", data.incident_id)
+        .eq("status", "open");
+    }
+    return { ok: true };
+  });

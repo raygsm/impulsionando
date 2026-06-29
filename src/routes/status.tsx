@@ -24,6 +24,13 @@ type ServiceRow = {
   last_check_at: string | null;
 };
 
+type IncidentUpdate = {
+  id: string;
+  status: string;
+  body: string;
+  created_at: string;
+};
+
 type IncidentRow = {
   id: string;
   scope: string;
@@ -33,6 +40,7 @@ type IncidentRow = {
   title: string;
   detected_at: string;
   resolved_at: string | null;
+  updates?: IncidentUpdate[];
 };
 
 type PostmortemRow = {
@@ -298,6 +306,21 @@ function StatusPage() {
                         {i.url ? ` · ${i.url}` : ""} · detectado {fmtDate(i.detected_at)}
                         {i.resolved_at ? ` · resolvido ${fmtDate(i.resolved_at)}` : ""}
                       </div>
+                      {i.updates && i.updates.length > 0 && (
+                        <ol className="mt-3 space-y-2 border-l border-border pl-3">
+                          {i.updates.slice(0, 5).map((u) => (
+                            <li key={u.id} className="text-xs">
+                              <div className="flex gap-2 items-center">
+                                <span className="font-semibold uppercase tracking-wide text-[10px] text-primary">
+                                  {u.status}
+                                </span>
+                                <span className="text-muted-foreground">{fmtDate(u.created_at)}</span>
+                              </div>
+                              <div className="mt-0.5 whitespace-pre-wrap text-foreground/90">{u.body}</div>
+                            </li>
+                          ))}
+                        </ol>
+                      )}
                     </li>
                   );
                 })}
@@ -305,6 +328,7 @@ function StatusPage() {
             )}
           </CardContent>
         </Card>
+
 
         {/* Published postmortems */}
         <Card>
