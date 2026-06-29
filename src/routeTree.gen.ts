@@ -240,6 +240,7 @@ import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/em
 import { Route as ImoveisSlugPropertyIdRouteImport } from './routes/imoveis.$slug.$propertyId'
 import { Route as DemoNichoSlugRouteImport } from './routes/demo.nicho.$slug'
 import { Route as ApiPublicVersionRouteImport } from './routes/api/public/version'
+import { Route as ApiPublicStatusRouteImport } from './routes/api/public/status'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiMercadopagoWebhookRouteImport } from './routes/api/mercadopago/webhook'
 import { Route as AuthenticatedWhiteLabelCockpitRouteImport } from './routes/_authenticated/white-label.cockpit'
@@ -1887,6 +1888,11 @@ const DemoNichoSlugRoute = DemoNichoSlugRouteImport.update({
 const ApiPublicVersionRoute = ApiPublicVersionRouteImport.update({
   id: '/api/public/version',
   path: '/api/public/version',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicStatusRoute = ApiPublicStatusRouteImport.update({
+  id: '/api/public/status',
+  path: '/api/public/status',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
@@ -5175,6 +5181,7 @@ export interface FileRoutesByFullPath {
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
+  '/api/public/status': typeof ApiPublicStatusRoute
   '/api/public/version': typeof ApiPublicVersionRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
@@ -5861,6 +5868,7 @@ export interface FileRoutesByTo {
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
+  '/api/public/status': typeof ApiPublicStatusRoute
   '/api/public/version': typeof ApiPublicVersionRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
@@ -6560,6 +6568,7 @@ export interface FileRoutesById {
   '/_authenticated/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
+  '/api/public/status': typeof ApiPublicStatusRoute
   '/api/public/version': typeof ApiPublicVersionRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
@@ -7260,6 +7269,7 @@ export interface FileRouteTypes {
     | '/white-label/cockpit'
     | '/api/mercadopago/webhook'
     | '/api/public/health'
+    | '/api/public/status'
     | '/api/public/version'
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
@@ -7946,6 +7956,7 @@ export interface FileRouteTypes {
     | '/white-label/cockpit'
     | '/api/mercadopago/webhook'
     | '/api/public/health'
+    | '/api/public/status'
     | '/api/public/version'
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
@@ -8644,6 +8655,7 @@ export interface FileRouteTypes {
     | '/_authenticated/white-label/cockpit'
     | '/api/mercadopago/webhook'
     | '/api/public/health'
+    | '/api/public/status'
     | '/api/public/version'
     | '/demo/nicho/$slug'
     | '/imoveis/$slug/$propertyId'
@@ -8938,6 +8950,7 @@ export interface RootRouteChildren {
   TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
   ApiMercadopagoWebhookRoute: typeof ApiMercadopagoWebhookRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRouteWithChildren
+  ApiPublicStatusRoute: typeof ApiPublicStatusRoute
   ApiPublicVersionRoute: typeof ApiPublicVersionRoute
   DemoNichoSlugRoute: typeof DemoNichoSlugRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
@@ -10612,6 +10625,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/version'
       fullPath: '/api/public/version'
       preLoaderRoute: typeof ApiPublicVersionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/status': {
+      id: '/api/public/status'
+      path: '/api/public/status'
+      fullPath: '/api/public/status'
+      preLoaderRoute: typeof ApiPublicStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/health': {
@@ -15706,6 +15726,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
   ApiMercadopagoWebhookRoute: ApiMercadopagoWebhookRoute,
   ApiPublicHealthRoute: ApiPublicHealthRouteWithChildren,
+  ApiPublicStatusRoute: ApiPublicStatusRoute,
   ApiPublicVersionRoute: ApiPublicVersionRoute,
   DemoNichoSlugRoute: DemoNichoSlugRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
@@ -15770,13 +15791,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
