@@ -9130,6 +9130,14 @@ export type Database = {
           id: string
           metadata: Json
           postmortem: string | null
+          postmortem_action_items: Json
+          postmortem_author: string | null
+          postmortem_impact: string | null
+          postmortem_lessons: string | null
+          postmortem_mitigation: string | null
+          postmortem_published_at: string | null
+          postmortem_root_cause: string | null
+          postmortem_summary: string | null
           resolved_at: string | null
           runtime_scope: string | null
           scope: Database["public"]["Enums"]["core_slo_scope"]
@@ -9149,6 +9157,14 @@ export type Database = {
           id?: string
           metadata?: Json
           postmortem?: string | null
+          postmortem_action_items?: Json
+          postmortem_author?: string | null
+          postmortem_impact?: string | null
+          postmortem_lessons?: string | null
+          postmortem_mitigation?: string | null
+          postmortem_published_at?: string | null
+          postmortem_root_cause?: string | null
+          postmortem_summary?: string | null
           resolved_at?: string | null
           runtime_scope?: string | null
           scope: Database["public"]["Enums"]["core_slo_scope"]
@@ -9168,6 +9184,14 @@ export type Database = {
           id?: string
           metadata?: Json
           postmortem?: string | null
+          postmortem_action_items?: Json
+          postmortem_author?: string | null
+          postmortem_impact?: string | null
+          postmortem_lessons?: string | null
+          postmortem_mitigation?: string | null
+          postmortem_published_at?: string | null
+          postmortem_root_cause?: string | null
+          postmortem_summary?: string | null
           resolved_at?: string | null
           runtime_scope?: string | null
           scope?: Database["public"]["Enums"]["core_slo_scope"]
