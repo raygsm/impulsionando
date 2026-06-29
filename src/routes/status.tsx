@@ -270,12 +270,22 @@ function StatusPage() {
                   <div className="space-y-6">
                     {ordered.map(([cat, rows]) => {
                       const allUp = rows.every((s) => s.currently_up !== false);
+                      const isCollapsed = collapsed[cat] === true;
                       return (
                         <section key={cat}>
-                          <header className="flex items-center justify-between mb-2">
-                            <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                              {cat}
-                            </h3>
+                          <header className="flex items-center justify-between mb-2 gap-2">
+                            <button
+                              type="button"
+                              onClick={() => toggle(cat)}
+                              className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground hover:text-foreground"
+                              aria-expanded={!isCollapsed}
+                            >
+                              <span className="inline-block w-3 text-center">{isCollapsed ? "▸" : "▾"}</span>
+                              <span>{cat}</span>
+                              <span className="text-[10px] font-normal normal-case text-muted-foreground/70">
+                                ({rows.length})
+                              </span>
+                            </button>
                             <span
                               className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${
                                 allUp
@@ -286,7 +296,9 @@ function StatusPage() {
                               {allUp ? "Operacional" : "Com incidentes"}
                             </span>
                           </header>
+                          {!isCollapsed && (
                           <ul className="divide-y border rounded-md">
+
                             {rows.map((s, i) => {
                               const up = s.currently_up !== false;
                               const history = s.history ?? [];
