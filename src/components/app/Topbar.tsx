@@ -249,6 +249,7 @@ export function Topbar({ currentUser }: { currentUser: CurrentUser }) {
 
       <div className="flex items-center gap-2 sm:gap-3">
         <AudienceBadge />
+        <TenantSwitcher />
         <QuickActionsButton />
         <OnboardingStatusPill companyId={currentUser.memberships?.[0]?.company_id} />
         <AppearanceMenu />
