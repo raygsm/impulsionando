@@ -22,8 +22,24 @@ type Webhook = {
   notify_maintenance: boolean
   services: string[] | null
   categories: string[] | null
+  min_severity: 'info' | 'minor' | 'major' | 'critical' | null
   active: boolean
 }
+
+const SEVERITY_RANK: Record<string, number> = {
+  info: 0,
+  minor: 1,
+  low: 1,
+  major: 2,
+  high: 2,
+  critical: 3,
+  sev1: 3,
+}
+function severityRank(sev: string | null | undefined): number {
+  if (!sev) return 0
+  return SEVERITY_RANK[sev.toLowerCase()] ?? 0
+}
+
 
 type EventPayload = {
   reference_key: string
