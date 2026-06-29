@@ -665,6 +665,7 @@ import { Route as AuthenticatedAdminIntegracoesMercadoPagoRouteImport } from './
 import { Route as AuthenticatedAdminClientesRiomedRouteImport } from './routes/_authenticated/admin.clientes.riomed'
 import { Route as AuthenticatedAdminClientesSlugRouteImport } from './routes/_authenticated/admin.clientes.$slug'
 import { Route as AuthenticatedAdminClientesSlugIndexRouteImport } from './routes/_authenticated/admin.clientes.$slug.index'
+import { Route as ApiPublicStatusSlugBadgeDotsvgRouteImport } from './routes/api/public/status.$slug.badge[.]svg'
 import { Route as ApiPublicRiomedQuotesColdRouteImport } from './routes/api/public/riomed/quotes/cold'
 import { Route as ApiPublicRiomedFxUpsertRouteImport } from './routes/api/public/riomed/fx/upsert'
 import { Route as ApiPublicRiomedCartsAbandonedRouteImport } from './routes/api/public/riomed/carts/abandoned'
@@ -4406,6 +4407,12 @@ const AuthenticatedAdminClientesSlugIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedAdminClientesSlugRoute,
   } as any)
+const ApiPublicStatusSlugBadgeDotsvgRoute =
+  ApiPublicStatusSlugBadgeDotsvgRouteImport.update({
+    id: '/badge.svg',
+    path: '/badge.svg',
+    getParentRoute: () => ApiPublicStatusSlugRoute,
+  } as any)
 const ApiPublicRiomedQuotesColdRoute =
   ApiPublicRiomedQuotesColdRouteImport.update({
     id: '/api/public/riomed/quotes/cold',
@@ -5386,7 +5393,7 @@ export interface FileRoutesByFullPath {
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
   '/api/public/riomed/events': typeof ApiPublicRiomedEventsRoute
-  '/api/public/status/$slug': typeof ApiPublicStatusSlugRoute
+  '/api/public/status/$slug': typeof ApiPublicStatusSlugRouteWithChildren
   '/api/public/status/rss': typeof ApiPublicStatusRssRoute
   '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
   '/api/public/webhooks/n8n-callback': typeof ApiPublicWebhooksN8nCallbackRoute
@@ -5451,6 +5458,7 @@ export interface FileRoutesByFullPath {
   '/api/public/riomed/carts/abandoned': typeof ApiPublicRiomedCartsAbandonedRoute
   '/api/public/riomed/fx/upsert': typeof ApiPublicRiomedFxUpsertRoute
   '/api/public/riomed/quotes/cold': typeof ApiPublicRiomedQuotesColdRoute
+  '/api/public/status/$slug/badge.svg': typeof ApiPublicStatusSlugBadgeDotsvgRoute
   '/admin/clientes/$slug/': typeof AuthenticatedAdminClientesSlugIndexRoute
   '/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
@@ -6086,7 +6094,7 @@ export interface FileRoutesByTo {
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
   '/api/public/riomed/events': typeof ApiPublicRiomedEventsRoute
-  '/api/public/status/$slug': typeof ApiPublicStatusSlugRoute
+  '/api/public/status/$slug': typeof ApiPublicStatusSlugRouteWithChildren
   '/api/public/status/rss': typeof ApiPublicStatusRssRoute
   '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
   '/api/public/webhooks/n8n-callback': typeof ApiPublicWebhooksN8nCallbackRoute
@@ -6151,6 +6159,7 @@ export interface FileRoutesByTo {
   '/api/public/riomed/carts/abandoned': typeof ApiPublicRiomedCartsAbandonedRoute
   '/api/public/riomed/fx/upsert': typeof ApiPublicRiomedFxUpsertRoute
   '/api/public/riomed/quotes/cold': typeof ApiPublicRiomedQuotesColdRoute
+  '/api/public/status/$slug/badge.svg': typeof ApiPublicStatusSlugBadgeDotsvgRoute
   '/admin/clientes/$slug': typeof AuthenticatedAdminClientesSlugIndexRoute
   '/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
@@ -6801,7 +6810,7 @@ export interface FileRoutesById {
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
   '/api/public/riomed/events': typeof ApiPublicRiomedEventsRoute
-  '/api/public/status/$slug': typeof ApiPublicStatusSlugRoute
+  '/api/public/status/$slug': typeof ApiPublicStatusSlugRouteWithChildren
   '/api/public/status/rss': typeof ApiPublicStatusRssRoute
   '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
   '/api/public/webhooks/n8n-callback': typeof ApiPublicWebhooksN8nCallbackRoute
@@ -6866,6 +6875,7 @@ export interface FileRoutesById {
   '/api/public/riomed/carts/abandoned': typeof ApiPublicRiomedCartsAbandonedRoute
   '/api/public/riomed/fx/upsert': typeof ApiPublicRiomedFxUpsertRoute
   '/api/public/riomed/quotes/cold': typeof ApiPublicRiomedQuotesColdRoute
+  '/api/public/status/$slug/badge.svg': typeof ApiPublicStatusSlugBadgeDotsvgRoute
   '/_authenticated/admin/clientes/$slug/': typeof AuthenticatedAdminClientesSlugIndexRoute
   '/_authenticated/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/_authenticated/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
@@ -7581,6 +7591,7 @@ export interface FileRouteTypes {
     | '/api/public/riomed/carts/abandoned'
     | '/api/public/riomed/fx/upsert'
     | '/api/public/riomed/quotes/cold'
+    | '/api/public/status/$slug/badge.svg'
     | '/admin/clientes/$slug/'
     | '/core/cliente/$id/paginas/$pageId'
     | '/core/cliente/$id/modulo/$slug/configurar'
@@ -8281,6 +8292,7 @@ export interface FileRouteTypes {
     | '/api/public/riomed/carts/abandoned'
     | '/api/public/riomed/fx/upsert'
     | '/api/public/riomed/quotes/cold'
+    | '/api/public/status/$slug/badge.svg'
     | '/admin/clientes/$slug'
     | '/core/cliente/$id/paginas/$pageId'
     | '/core/cliente/$id/modulo/$slug/configurar'
@@ -8995,6 +9007,7 @@ export interface FileRouteTypes {
     | '/api/public/riomed/carts/abandoned'
     | '/api/public/riomed/fx/upsert'
     | '/api/public/riomed/quotes/cold'
+    | '/api/public/status/$slug/badge.svg'
     | '/_authenticated/admin/clientes/$slug/'
     | '/_authenticated/core/cliente/$id/paginas/$pageId'
     | '/_authenticated/core/cliente/$id/modulo/$slug/configurar'
@@ -13786,6 +13799,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientesSlugIndexRouteImport
       parentRoute: typeof AuthenticatedAdminClientesSlugRoute
     }
+    '/api/public/status/$slug/badge.svg': {
+      id: '/api/public/status/$slug/badge.svg'
+      path: '/badge.svg'
+      fullPath: '/api/public/status/$slug/badge.svg'
+      preLoaderRoute: typeof ApiPublicStatusSlugBadgeDotsvgRouteImport
+      parentRoute: typeof ApiPublicStatusSlugRoute
+    }
     '/api/public/riomed/quotes/cold': {
       id: '/api/public/riomed/quotes/cold'
       path: '/api/public/riomed/quotes/cold'
@@ -15900,13 +15920,24 @@ const ApiPublicHealthRouteWithChildren = ApiPublicHealthRoute._addFileChildren(
   ApiPublicHealthRouteChildren,
 )
 
+interface ApiPublicStatusSlugRouteChildren {
+  ApiPublicStatusSlugBadgeDotsvgRoute: typeof ApiPublicStatusSlugBadgeDotsvgRoute
+}
+
+const ApiPublicStatusSlugRouteChildren: ApiPublicStatusSlugRouteChildren = {
+  ApiPublicStatusSlugBadgeDotsvgRoute: ApiPublicStatusSlugBadgeDotsvgRoute,
+}
+
+const ApiPublicStatusSlugRouteWithChildren =
+  ApiPublicStatusSlugRoute._addFileChildren(ApiPublicStatusSlugRouteChildren)
+
 interface ApiPublicStatusRouteChildren {
-  ApiPublicStatusSlugRoute: typeof ApiPublicStatusSlugRoute
+  ApiPublicStatusSlugRoute: typeof ApiPublicStatusSlugRouteWithChildren
   ApiPublicStatusRssRoute: typeof ApiPublicStatusRssRoute
 }
 
 const ApiPublicStatusRouteChildren: ApiPublicStatusRouteChildren = {
-  ApiPublicStatusSlugRoute: ApiPublicStatusSlugRoute,
+  ApiPublicStatusSlugRoute: ApiPublicStatusSlugRouteWithChildren,
   ApiPublicStatusRssRoute: ApiPublicStatusRssRoute,
 }
 
