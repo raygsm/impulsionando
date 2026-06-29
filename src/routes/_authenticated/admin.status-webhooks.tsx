@@ -44,6 +44,7 @@ type Hook = {
   notify_incidents: boolean
   notify_maintenance: boolean
   services: string[] | null
+  categories: string[] | null
   active: boolean
   last_dispatch_at: string | null
   last_status_code: number | null
