@@ -451,6 +451,7 @@ import { Route as AuthenticatedAdminRealestateHealthRouteImport } from './routes
 import { Route as AuthenticatedAdminRealestateCockpitRouteImport } from './routes/_authenticated/admin.realestate-cockpit'
 import { Route as AuthenticatedAdminRealEstateOpsHealthRouteImport } from './routes/_authenticated/admin.real-estate-ops-health'
 import { Route as AuthenticatedAdminRealEstateHealthRouteImport } from './routes/_authenticated/admin.real-estate-health'
+import { Route as AuthenticatedAdminRbacRouteImport } from './routes/_authenticated/admin.rbac'
 import { Route as AuthenticatedAdminQualidadeRouteImport } from './routes/_authenticated/admin.qualidade'
 import { Route as AuthenticatedAdminProjetosParalelosRouteImport } from './routes/_authenticated/admin.projetos-paralelos'
 import { Route as AuthenticatedAdminPricingIntelligenceRouteImport } from './routes/_authenticated/admin.pricing-intelligence'
@@ -3126,6 +3127,11 @@ const AuthenticatedAdminRealEstateHealthRoute =
     path: '/admin/real-estate-health',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminRbacRoute = AuthenticatedAdminRbacRouteImport.update({
+  id: '/admin/rbac',
+  path: '/admin/rbac',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminQualidadeRoute =
   AuthenticatedAdminQualidadeRouteImport.update({
     id: '/admin/qualidade',
@@ -4910,6 +4916,7 @@ export interface FileRoutesByFullPath {
   '/admin/pricing-intelligence': typeof AuthenticatedAdminPricingIntelligenceRoute
   '/admin/projetos-paralelos': typeof AuthenticatedAdminProjetosParalelosRoute
   '/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
+  '/admin/rbac': typeof AuthenticatedAdminRbacRoute
   '/admin/real-estate-health': typeof AuthenticatedAdminRealEstateHealthRoute
   '/admin/real-estate-ops-health': typeof AuthenticatedAdminRealEstateOpsHealthRoute
   '/admin/realestate-cockpit': typeof AuthenticatedAdminRealestateCockpitRoute
@@ -5589,6 +5596,7 @@ export interface FileRoutesByTo {
   '/admin/pricing-intelligence': typeof AuthenticatedAdminPricingIntelligenceRoute
   '/admin/projetos-paralelos': typeof AuthenticatedAdminProjetosParalelosRoute
   '/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
+  '/admin/rbac': typeof AuthenticatedAdminRbacRoute
   '/admin/real-estate-health': typeof AuthenticatedAdminRealEstateHealthRoute
   '/admin/real-estate-ops-health': typeof AuthenticatedAdminRealEstateOpsHealthRoute
   '/admin/realestate-cockpit': typeof AuthenticatedAdminRealestateCockpitRoute
@@ -6281,6 +6289,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/pricing-intelligence': typeof AuthenticatedAdminPricingIntelligenceRoute
   '/_authenticated/admin/projetos-paralelos': typeof AuthenticatedAdminProjetosParalelosRoute
   '/_authenticated/admin/qualidade': typeof AuthenticatedAdminQualidadeRoute
+  '/_authenticated/admin/rbac': typeof AuthenticatedAdminRbacRoute
   '/_authenticated/admin/real-estate-health': typeof AuthenticatedAdminRealEstateHealthRoute
   '/_authenticated/admin/real-estate-ops-health': typeof AuthenticatedAdminRealEstateOpsHealthRoute
   '/_authenticated/admin/realestate-cockpit': typeof AuthenticatedAdminRealestateCockpitRoute
@@ -6974,6 +6983,7 @@ export interface FileRouteTypes {
     | '/admin/pricing-intelligence'
     | '/admin/projetos-paralelos'
     | '/admin/qualidade'
+    | '/admin/rbac'
     | '/admin/real-estate-health'
     | '/admin/real-estate-ops-health'
     | '/admin/realestate-cockpit'
@@ -7653,6 +7663,7 @@ export interface FileRouteTypes {
     | '/admin/pricing-intelligence'
     | '/admin/projetos-paralelos'
     | '/admin/qualidade'
+    | '/admin/rbac'
     | '/admin/real-estate-health'
     | '/admin/real-estate-ops-health'
     | '/admin/realestate-cockpit'
@@ -8344,6 +8355,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/pricing-intelligence'
     | '/_authenticated/admin/projetos-paralelos'
     | '/_authenticated/admin/qualidade'
+    | '/_authenticated/admin/rbac'
     | '/_authenticated/admin/real-estate-health'
     | '/_authenticated/admin/real-estate-ops-health'
     | '/_authenticated/admin/realestate-cockpit'
@@ -12000,6 +12012,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRealEstateHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/rbac': {
+      id: '/_authenticated/admin/rbac'
+      path: '/admin/rbac'
+      fullPath: '/admin/rbac'
+      preLoaderRoute: typeof AuthenticatedAdminRbacRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/qualidade': {
       id: '/_authenticated/admin/qualidade'
       path: '/admin/qualidade'
@@ -14704,6 +14723,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminPricingIntelligenceRoute: typeof AuthenticatedAdminPricingIntelligenceRoute
   AuthenticatedAdminProjetosParalelosRoute: typeof AuthenticatedAdminProjetosParalelosRoute
   AuthenticatedAdminQualidadeRoute: typeof AuthenticatedAdminQualidadeRoute
+  AuthenticatedAdminRbacRoute: typeof AuthenticatedAdminRbacRoute
   AuthenticatedAdminRealEstateHealthRoute: typeof AuthenticatedAdminRealEstateHealthRoute
   AuthenticatedAdminRealEstateOpsHealthRoute: typeof AuthenticatedAdminRealEstateOpsHealthRoute
   AuthenticatedAdminRealestateCockpitRoute: typeof AuthenticatedAdminRealestateCockpitRoute
@@ -15028,6 +15048,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminProjetosParalelosRoute:
     AuthenticatedAdminProjetosParalelosRoute,
   AuthenticatedAdminQualidadeRoute: AuthenticatedAdminQualidadeRoute,
+  AuthenticatedAdminRbacRoute: AuthenticatedAdminRbacRoute,
   AuthenticatedAdminRealEstateHealthRoute:
     AuthenticatedAdminRealEstateHealthRoute,
   AuthenticatedAdminRealEstateOpsHealthRoute:
