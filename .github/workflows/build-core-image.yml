@@ -90,3 +90,4 @@ jobs:
             SUPABASE_ANON_KEY=${{ env.SUPABASE_PUBLISHABLE_KEY }}
             VITE_SUPABASE_URL=${{ env.SUPABASE_URL }}
             VITE_SUPABASE_PUBLISHABLE_KEY=${{ env.SUPABASE_PUBLISHABLE_KEY }}
+            IMPULSIONANDO_IMAGE_VERSION=${{ github.sha }}

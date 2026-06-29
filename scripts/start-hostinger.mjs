@@ -3,6 +3,55 @@ import { extname, join, normalize, resolve } from "node:path";
 
 const host = process.env.HOST || "0.0.0.0";
 const port = Number(process.env.PORT || 3000);
+const runtimeName = "impulsionando-core-bun";
+const imageVersion = process.env.IMPULSIONANDO_IMAGE_VERSION || "local";
+
+function coreHeaders(extra = {}) {
+  return {
+    "cache-control": "no-store",
+    "x-impulsionando-runtime": runtimeName,
+    "x-impulsionando-image-version": imageVersion,
+    ...extra,
+  };
+}
+
+function healthResponse(mode, artifact) {
+  return new Response(`ok\nruntime=${runtimeName}\nmode=${mode}\nversion=${imageVersion}\n`, {
+    headers: coreHeaders({ "content-type": "text/plain; charset=utf-8" }),
+  });
+}
+
+function runtimeResponse(mode, artifact) {
+  return new Response(
+    JSON.stringify(
+      {
+        ok: true,
+        runtime: runtimeName,
+        mode,
+        version: imageVersion,
+        artifact,
+      },
+      null,
+      2,
+    ),
+    {
+      headers: coreHeaders({ "content-type": "application/json; charset=utf-8" }),
+    },
+  );
+}
+
+function attachCoreHeaders(response) {
+  const headers = new Headers(response.headers);
+  for (const [key, value] of Object.entries(coreHeaders())) {
+    headers.set(key, value);
+  }
+
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
 
 const serverEntrypoints = [
   ".output/server/index.mjs",
@@ -24,8 +73,19 @@ for (const entrypoint of serverEntrypoints) {
       Bun.serve({
         hostname: host,
         port,
-        fetch(request) {
-          return handler.fetch(request, process.env, {});
+        async fetch(request) {
+          const url = new URL(request.url);
+
+          if (url.pathname === "/health") {
+            return healthResponse("server", entrypoint);
+          }
+
+          if (url.pathname === "/__impulsionando-runtime") {
+            return runtimeResponse("server", entrypoint);
+          }
+
+          const response = await handler.fetch(request, process.env, {});
+          return attachCoreHeaders(response);
         },
       });
     }
@@ -89,20 +149,28 @@ if (!startedServerEntrypoint) {
 
   function fileResponse(pathname) {
     if (pathname === "/health") {
-      return new Response("ok\n", {
-        headers: { "content-type": "text/plain; charset=utf-8" },
-      });
+      return healthResponse("static", root);
+    }
+
+    if (pathname === "/__impulsionando-runtime") {
+      return runtimeResponse("static", root);
     }
 
     if (pathname.includes(".env") || pathname.includes("..")) {
-      return new Response("Not found\n", { status: 404 });
+      return new Response("Not found\n", {
+        status: 404,
+        headers: coreHeaders({ "content-type": "text/plain; charset=utf-8" }),
+      });
     }
 
     const normalizedPath = normalize(decodeURIComponent(pathname)).replace(/^[/\\]+/, "");
     let filePath = resolve(absoluteRoot, normalizedPath || "index.html");
 
     if (!filePath.startsWith(absoluteRoot)) {
-      return new Response("Not found\n", { status: 404 });
+      return new Response("Not found\n", {
+        status: 404,
+        headers: coreHeaders({ "content-type": "text/plain; charset=utf-8" }),
+      });
     }
 
     if (!existsSync(filePath) || statSync(filePath).isDirectory()) {
@@ -111,7 +179,7 @@ if (!startedServerEntrypoint) {
 
     const type = contentTypes.get(extname(filePath)) || "application/octet-stream";
     return new Response(createReadStream(filePath), {
-      headers: { "content-type": type },
+      headers: coreHeaders({ "content-type": type }),
     });
   }
 
