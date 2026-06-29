@@ -16,8 +16,8 @@ type IncidentRow = {
   status: string | null
   started_at: string
   resolved_at: string | null
-  summary: string | null
-  affected_service: string | null
+  description: string | null
+  scope: string | null
   postmortem_published_at: string | null
   postmortem_summary: string | null
 }
@@ -43,8 +43,9 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
         const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
 
         const since = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString()
+        const sinceMs = Date.parse(since)
 
-        const [{ data: subs }, { data: incidents }] = await Promise.all([
+        const [subsRes, incRes] = await Promise.all([
           supabaseAdmin
             .from('core_status_subscribers')
             .select('id,email,confirm_token,unsubscribe_token,confirmed_at')
@@ -54,15 +55,15 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
           supabaseAdmin
             .from('core_incidents')
             .select(
-              'id,title,severity,status,started_at,resolved_at,summary,affected_service,postmortem_published_at,postmortem_summary',
+              'id,title,severity,status,started_at,resolved_at,description,scope,postmortem_published_at,postmortem_summary',
             )
             .or(`started_at.gte.${since},resolved_at.gte.${since},postmortem_published_at.gte.${since}`)
             .order('started_at', { ascending: false })
             .limit(50),
         ])
 
-        const subscribers = (subs ?? []) as SubscriberRow[]
-        const incidentsList = (incidents ?? []) as IncidentRow[]
+        const subscribers = (subsRes.data ?? []) as unknown as SubscriberRow[]
+        const incidentsList = (incRes.data ?? []) as unknown as IncidentRow[]
 
         const events: Array<{
           subscriber: SubscriberRow
@@ -90,9 +91,10 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
         // 2) Incident updates for confirmed subscribers
         const confirmed = subscribers.filter((x) => x.confirmed_at)
         for (const i of incidentsList) {
-          const isOpened = new Date(i.started_at).getTime() >= Date.parse(since)
-          const isResolved = i.resolved_at && Date.parse(i.resolved_at) >= Date.parse(since)
-          const isPM = i.postmortem_published_at && Date.parse(i.postmortem_published_at) >= Date.parse(since)
+          const isOpened = Date.parse(i.started_at) >= sinceMs
+          const isResolved = i.resolved_at ? Date.parse(i.resolved_at) >= sinceMs : false
+          const isPM = i.postmortem_published_at ? Date.parse(i.postmortem_published_at) >= sinceMs : false
+          const scope = i.scope ?? '—'
 
           for (const s of confirmed) {
             if (isOpened) {
@@ -101,9 +103,9 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
                 incident_id: i.id,
                 event_kind: 'incident_opened',
                 reference_key: `incident_opened:${i.id}`,
-                subject: `[${(i.severity ?? 'sev?').toUpperCase()}] Incidente aberto: ${i.title}`,
+                subject: `[${(i.severity ?? 'sev?').toString().toUpperCase()}] Incidente aberto: ${i.title}`,
                 body:
-                  `Um novo incidente foi aberto no Status Impulsionando.\n\nServiço: ${i.affected_service ?? '—'}\nSeveridade: ${i.severity ?? '—'}\nAberto em: ${i.started_at}\n\nResumo: ${i.summary ?? '(sem resumo)'}\n\nAcompanhe em: ${SITE}/status#incident-${i.id}` +
+                  `Um novo incidente foi aberto no Status Impulsionando.\n\nEscopo: ${scope}\nSeveridade: ${i.severity ?? '—'}\nAberto em: ${i.started_at}\n\nResumo: ${i.description ?? '(sem descrição)'}\n\nAcompanhe em: ${SITE}/status#incident-${i.id}` +
                   unsubFooter(s.unsubscribe_token),
               })
             }
@@ -115,7 +117,7 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
                 reference_key: `incident_resolved:${i.id}`,
                 subject: `Resolvido: ${i.title}`,
                 body:
-                  `O incidente foi marcado como resolvido.\n\nServiço: ${i.affected_service ?? '—'}\nAberto em: ${i.started_at}\nResolvido em: ${i.resolved_at}\n\nResumo: ${i.summary ?? '—'}\n\nDetalhes: ${SITE}/status#incident-${i.id}` +
+                  `O incidente foi marcado como resolvido.\n\nEscopo: ${scope}\nAberto em: ${i.started_at}\nResolvido em: ${i.resolved_at}\n\nResumo: ${i.description ?? '—'}\n\nDetalhes: ${SITE}/status#incident-${i.id}` +
                   unsubFooter(s.unsubscribe_token),
               })
             }
@@ -149,12 +151,13 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
           const { error: outboxErr } = await supabaseAdmin.from('message_outbox').insert({
             channel: 'email',
             status: 'queued',
-            recipient: ev.subscriber.email,
+            event_code: `status.${ev.event_kind}`,
+            recipient_email: ev.subscriber.email,
             subject: ev.subject,
             body: ev.body,
             reference_type: 'status_subscriber',
             reference_id: `${ev.subscriber.id}#${ev.reference_key}`,
-            metadata: { event_kind: ev.event_kind, incident_id: ev.incident_id },
+            payload: { event_kind: ev.event_kind, incident_id: ev.incident_id },
           })
           if (outboxErr) continue
 
