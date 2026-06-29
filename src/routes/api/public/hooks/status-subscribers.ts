@@ -37,6 +37,7 @@ type SubscriberRow = {
   confirm_token: string
   unsubscribe_token: string
   confirmed_at: string | null
+  categories: string[] | null
 }
 
 const SITE = 'https://impulsionando.com.br'
@@ -57,7 +58,7 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
         const [subsRes, incRes] = await Promise.all([
           supabaseAdmin
             .from('core_status_subscribers')
-            .select('id,email,confirm_token,unsubscribe_token,confirmed_at,notify_incidents')
+            .select('id,email,confirm_token,unsubscribe_token,confirmed_at,notify_incidents,categories')
             .is('unsubscribed_at', null)
             .is('bounced_at', null)
             .neq('notify_incidents', false)
@@ -93,19 +94,31 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
         // Resolve service slug per incident (via uptime_state.url)
         const urls = Array.from(new Set(incidentsList.map((i) => i.url).filter(Boolean) as string[]))
         const slugByUrl = new Map<string, string>()
+        const categoryBySlug = new Map<string, string>()
         if (urls.length > 0) {
           const slugRes = await supabaseAdmin
             .from('uptime_state')
-            .select('url,public_slug')
+            .select('url,public_slug,category')
             .in('url', urls)
-          for (const r of (slugRes.data ?? []) as Array<{ url: string; public_slug: string | null }>) {
-            if (r.public_slug) slugByUrl.set(r.url, r.public_slug)
+          for (const r of (slugRes.data ?? []) as Array<{
+            url: string
+            public_slug: string | null
+            category: string | null
+          }>) {
+            if (r.public_slug) {
+              slugByUrl.set(r.url, r.public_slug)
+              if (r.category) categoryBySlug.set(r.public_slug, r.category)
+            }
           }
         }
         const slugForIncident = (id: string): string | null => {
           const inc = incidentById.get(id)
           if (!inc?.url) return null
           return slugByUrl.get(inc.url) ?? null
+        }
+        const categoryForIncident = (id: string): string | null => {
+          const slug = slugForIncident(id)
+          return slug ? categoryBySlug.get(slug) ?? null : null
         }
 
         // Subscriber service filters: subscriber_id -> set of slugs (empty set = all)
@@ -127,6 +140,12 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
           if (!filter || filter.size === 0) return true // no filter = receives everything
           if (!slug) return false // incident without resolvable slug → skip filtered subs
           return filter.has(slug)
+        }
+        const subscriberWantsCategory = (sub: SubscriberRow, cat: string | null): boolean => {
+          const cats = Array.isArray(sub.categories) ? sub.categories : []
+          if (cats.length === 0) return true
+          if (!cat) return false
+          return cats.includes(cat)
         }
 
 
@@ -166,9 +185,11 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
           const isPM = i.postmortem_published_at ? Date.parse(i.postmortem_published_at) >= sinceMs : false
           const scope = i.scope ?? '—'
           const slug = slugForIncident(i.id)
+          const cat = categoryForIncident(i.id)
 
           for (const s of confirmed) {
             if (!subscriberWantsService(s.id, slug)) continue
+            if (!subscriberWantsCategory(s, cat)) continue
             if (isOpened) {
               events.push({
                 subscriber: s,
@@ -215,8 +236,10 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
           const scope = inc?.scope ?? '—'
           const statusLabel = (u.status ?? 'update').toString().toUpperCase()
           const slug = slugForIncident(u.incident_id)
+          const cat = categoryForIncident(u.incident_id)
           for (const s of confirmed) {
             if (!subscriberWantsService(s.id, slug)) continue
+            if (!subscriberWantsCategory(s, cat)) continue
             events.push({
               subscriber: s,
               incident_id: u.incident_id,

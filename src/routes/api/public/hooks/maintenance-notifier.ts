@@ -26,6 +26,7 @@ type SubscriberRow = {
   id: string
   email: string
   unsubscribe_token: string
+  categories: string[] | null
 }
 
 const SITE = 'https://impulsionando.com.br'
@@ -68,7 +69,7 @@ export const Route = createFileRoute('/api/public/hooks/maintenance-notifier')({
         // Confirmed subscribers
         const { data: subsRaw } = await supabaseAdmin
           .from('core_status_subscribers')
-          .select('id,email,unsubscribe_token')
+          .select('id,email,unsubscribe_token,categories')
           .not('confirmed_at', 'is', null)
           .is('unsubscribed_at', null)
           .is('bounced_at', null)
@@ -82,13 +83,28 @@ export const Route = createFileRoute('/api/public/hooks/maintenance-notifier')({
         // Resolve slug per window URL
         const urls = Array.from(new Set(windows.map((w) => w.url).filter(Boolean) as string[]))
         const slugByUrl = new Map<string, string>()
+        const categoryBySlug = new Map<string, string>()
         if (urls.length > 0) {
-          const r = await supabaseAdmin.from('uptime_state').select('url,public_slug').in('url', urls)
-          for (const row of (r.data ?? []) as Array<{ url: string; public_slug: string | null }>) {
-            if (row.public_slug) slugByUrl.set(row.url, row.public_slug)
+          const r = await supabaseAdmin
+            .from('uptime_state')
+            .select('url,public_slug,category')
+            .in('url', urls)
+          for (const row of (r.data ?? []) as Array<{
+            url: string
+            public_slug: string | null
+            category: string | null
+          }>) {
+            if (row.public_slug) {
+              slugByUrl.set(row.url, row.public_slug)
+              if (row.category) categoryBySlug.set(row.public_slug, row.category)
+            }
           }
         }
         const slugFor = (w: WindowRow): string | null => (w.url ? slugByUrl.get(w.url) ?? null : null)
+        const categoryFor = (w: WindowRow): string | null => {
+          const s = slugFor(w)
+          return s ? categoryBySlug.get(s) ?? null : null
+        }
 
         // Per-subscriber service filter
         const subIds = subscribers.map((s) => s.id)
@@ -108,6 +124,12 @@ export const Route = createFileRoute('/api/public/hooks/maintenance-notifier')({
           if (!slug) return false
           return f.has(slug)
         }
+        const wantsCat = (sub: SubscriberRow, cat: string | null): boolean => {
+          const cats = Array.isArray(sub.categories) ? sub.categories : []
+          if (cats.length === 0) return true
+          if (!cat) return false
+          return cats.includes(cat)
+        }
 
         type Event = {
           subscriber: SubscriberRow
@@ -123,6 +145,7 @@ export const Route = createFileRoute('/api/public/hooks/maintenance-notifier')({
           const startsMs = Date.parse(w.starts_at)
           const endsMs = Date.parse(w.ends_at)
           const slug = slugFor(w)
+          const cat = categoryFor(w)
           const scopeLabel = slug ?? w.scope ?? 'platform'
           const sev = (w.severity ?? 'info').toUpperCase()
 
@@ -137,6 +160,7 @@ export const Route = createFileRoute('/api/public/hooks/maintenance-notifier')({
 
           for (const s of subscribers) {
             if (!wants(s.id, slug)) continue
+            if (!wantsCat(s, cat)) continue
             const footer = unsubFooter(s.unsubscribe_token)
             if (isLeadTime) {
               events.push({
