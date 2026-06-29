@@ -46,7 +46,9 @@ type Hook = {
   notify_maintenance: boolean
   services: string[] | null
   categories: string[] | null
+  min_severity: 'info' | 'minor' | 'major' | 'critical' | null
   active: boolean
+
   last_dispatch_at: string | null
   last_status_code: number | null
   last_error: string | null
