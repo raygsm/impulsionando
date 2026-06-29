@@ -236,8 +236,10 @@ export const Route = createFileRoute('/api/public/hooks/status-subscribers')({
           const scope = inc?.scope ?? '—'
           const statusLabel = (u.status ?? 'update').toString().toUpperCase()
           const slug = slugForIncident(u.incident_id)
+          const cat = categoryForIncident(u.incident_id)
           for (const s of confirmed) {
             if (!subscriberWantsService(s.id, slug)) continue
+            if (!subscriberWantsCategory(s, cat)) continue
             events.push({
               subscriber: s,
               incident_id: u.incident_id,
