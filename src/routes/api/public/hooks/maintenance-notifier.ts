@@ -26,6 +26,7 @@ type SubscriberRow = {
   id: string
   email: string
   unsubscribe_token: string
+  categories: string[] | null
 }
 
 const SITE = 'https://impulsionando.com.br'
