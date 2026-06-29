@@ -32,6 +32,7 @@ const upsertSchema = z.object({
   notify_incidents: z.boolean().default(true),
   notify_maintenance: z.boolean().default(true),
   services: z.array(z.string().max(80)).default([]),
+  categories: z.array(z.string().max(80)).default([]),
   active: z.boolean().default(true),
 })
 
