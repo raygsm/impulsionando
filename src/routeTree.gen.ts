@@ -582,6 +582,7 @@ import { Route as DemoRestauranteTenantQrRouteImport } from './routes/demo.resta
 import { Route as ApiPublicWhatsappSendRouteImport } from './routes/api/public/whatsapp/send'
 import { Route as ApiPublicWebhooksN8nCallbackRouteImport } from './routes/api/public/webhooks/n8n-callback'
 import { Route as ApiPublicSupportCreateTicketRouteImport } from './routes/api/public/support/create-ticket'
+import { Route as ApiPublicStatusRssRouteImport } from './routes/api/public/status.rss'
 import { Route as ApiPublicRiomedEventsRouteImport } from './routes/api/public/riomed/events'
 import { Route as ApiPublicRealestateSavedSearchRouteImport } from './routes/api/public/realestate/saved-search'
 import { Route as ApiPublicRealestateInterestRouteImport } from './routes/api/public/realestate/interest'
@@ -3910,6 +3911,11 @@ const ApiPublicSupportCreateTicketRoute =
     path: '/api/public/support/create-ticket',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicStatusRssRoute = ApiPublicStatusRssRouteImport.update({
+  id: '/rss',
+  path: '/rss',
+  getParentRoute: () => ApiPublicStatusRoute,
+} as any)
 const ApiPublicRiomedEventsRoute = ApiPublicRiomedEventsRouteImport.update({
   id: '/api/public/riomed/events',
   path: '/api/public/riomed/events',
@@ -5195,7 +5201,7 @@ export interface FileRoutesByFullPath {
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
-  '/api/public/status': typeof ApiPublicStatusRoute
+  '/api/public/status': typeof ApiPublicStatusRouteWithChildren
   '/api/public/version': typeof ApiPublicVersionRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
@@ -5297,6 +5303,7 @@ export interface FileRoutesByFullPath {
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
   '/api/public/riomed/events': typeof ApiPublicRiomedEventsRoute
+  '/api/public/status/rss': typeof ApiPublicStatusRssRoute
   '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
   '/api/public/webhooks/n8n-callback': typeof ApiPublicWebhooksN8nCallbackRoute
   '/api/public/whatsapp/send': typeof ApiPublicWhatsappSendRoute
@@ -5884,7 +5891,7 @@ export interface FileRoutesByTo {
   '/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
-  '/api/public/status': typeof ApiPublicStatusRoute
+  '/api/public/status': typeof ApiPublicStatusRouteWithChildren
   '/api/public/version': typeof ApiPublicVersionRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
@@ -5985,6 +5992,7 @@ export interface FileRoutesByTo {
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
   '/api/public/riomed/events': typeof ApiPublicRiomedEventsRoute
+  '/api/public/status/rss': typeof ApiPublicStatusRssRoute
   '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
   '/api/public/webhooks/n8n-callback': typeof ApiPublicWebhooksN8nCallbackRoute
   '/api/public/whatsapp/send': typeof ApiPublicWhatsappSendRoute
@@ -6586,7 +6594,7 @@ export interface FileRoutesById {
   '/_authenticated/white-label/cockpit': typeof AuthenticatedWhiteLabelCockpitRoute
   '/api/mercadopago/webhook': typeof ApiMercadopagoWebhookRoute
   '/api/public/health': typeof ApiPublicHealthRouteWithChildren
-  '/api/public/status': typeof ApiPublicStatusRoute
+  '/api/public/status': typeof ApiPublicStatusRouteWithChildren
   '/api/public/version': typeof ApiPublicVersionRoute
   '/demo/nicho/$slug': typeof DemoNichoSlugRoute
   '/imoveis/$slug/$propertyId': typeof ImoveisSlugPropertyIdRoute
@@ -6688,6 +6696,7 @@ export interface FileRoutesById {
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
   '/api/public/riomed/events': typeof ApiPublicRiomedEventsRoute
+  '/api/public/status/rss': typeof ApiPublicStatusRssRoute
   '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
   '/api/public/webhooks/n8n-callback': typeof ApiPublicWebhooksN8nCallbackRoute
   '/api/public/whatsapp/send': typeof ApiPublicWhatsappSendRoute
@@ -7391,6 +7400,7 @@ export interface FileRouteTypes {
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
     | '/api/public/riomed/events'
+    | '/api/public/status/rss'
     | '/api/public/support/create-ticket'
     | '/api/public/webhooks/n8n-callback'
     | '/api/public/whatsapp/send'
@@ -8079,6 +8089,7 @@ export interface FileRouteTypes {
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
     | '/api/public/riomed/events'
+    | '/api/public/status/rss'
     | '/api/public/support/create-ticket'
     | '/api/public/webhooks/n8n-callback'
     | '/api/public/whatsapp/send'
@@ -8781,6 +8792,7 @@ export interface FileRouteTypes {
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
     | '/api/public/riomed/events'
+    | '/api/public/status/rss'
     | '/api/public/support/create-ticket'
     | '/api/public/webhooks/n8n-callback'
     | '/api/public/whatsapp/send'
@@ -8976,7 +8988,7 @@ export interface RootRouteChildren {
   TrabalheConoscoIndexRoute: typeof TrabalheConoscoIndexRoute
   ApiMercadopagoWebhookRoute: typeof ApiMercadopagoWebhookRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRouteWithChildren
-  ApiPublicStatusRoute: typeof ApiPublicStatusRoute
+  ApiPublicStatusRoute: typeof ApiPublicStatusRouteWithChildren
   ApiPublicVersionRoute: typeof ApiPublicVersionRoute
   DemoNichoSlugRoute: typeof DemoNichoSlugRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
@@ -13048,6 +13060,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSupportCreateTicketRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/status/rss': {
+      id: '/api/public/status/rss'
+      path: '/rss'
+      fullPath: '/api/public/status/rss'
+      preLoaderRoute: typeof ApiPublicStatusRssRouteImport
+      parentRoute: typeof ApiPublicStatusRoute
+    }
     '/api/public/riomed/events': {
       id: '/api/public/riomed/events'
       path: '/api/public/riomed/events'
@@ -15641,6 +15660,18 @@ const ApiPublicHealthRouteWithChildren = ApiPublicHealthRoute._addFileChildren(
   ApiPublicHealthRouteChildren,
 )
 
+interface ApiPublicStatusRouteChildren {
+  ApiPublicStatusRssRoute: typeof ApiPublicStatusRssRoute
+}
+
+const ApiPublicStatusRouteChildren: ApiPublicStatusRouteChildren = {
+  ApiPublicStatusRssRoute: ApiPublicStatusRssRoute,
+}
+
+const ApiPublicStatusRouteWithChildren = ApiPublicStatusRoute._addFileChildren(
+  ApiPublicStatusRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -15768,7 +15799,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrabalheConoscoIndexRoute: TrabalheConoscoIndexRoute,
   ApiMercadopagoWebhookRoute: ApiMercadopagoWebhookRoute,
   ApiPublicHealthRoute: ApiPublicHealthRouteWithChildren,
-  ApiPublicStatusRoute: ApiPublicStatusRoute,
+  ApiPublicStatusRoute: ApiPublicStatusRouteWithChildren,
   ApiPublicVersionRoute: ApiPublicVersionRoute,
   DemoNichoSlugRoute: DemoNichoSlugRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,

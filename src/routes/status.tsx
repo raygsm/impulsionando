@@ -116,7 +116,17 @@ function StatusPage() {
             >
               {isFetching ? "atualizando…" : "atualizar agora"}
             </button>
+            {" · "}
+            <a
+              href="/api/public/status.rss"
+              className="underline underline-offset-2 hover:text-foreground"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              RSS
+            </a>
           </p>
+
         </header>
 
         {error ? (
@@ -302,5 +312,14 @@ export const Route = createFileRoute("/status")({
         content: "Uptime, incidentes e postmortems publicados do ecossistema Impulsionando.",
       },
     ],
+    links: [
+      {
+        rel: "alternate",
+        type: "application/rss+xml",
+        title: "Impulsionando — Status & Incidentes",
+        href: "/api/public/status.rss",
+      },
+    ],
   }),
+
 });
