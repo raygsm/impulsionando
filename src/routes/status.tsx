@@ -130,6 +130,26 @@ function StatusPage() {
   const overall = data?.overall ?? "unknown";
   const badge = OVERALL_LABEL[overall];
 
+  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const toggle = (cat: string) =>
+    setCollapsed((prev) => ({ ...prev, [cat]: !prev[cat] }));
+
+  const categories = (() => {
+    const set = new Set<string>();
+    for (const s of data?.services ?? []) {
+      const k = s.category && s.category.trim() ? s.category : "Geral";
+      set.add(k);
+    }
+    return Array.from(set).sort((a, b) => {
+      if (a === "Geral") return 1;
+      if (b === "Geral") return -1;
+      return a.localeCompare(b);
+    });
+  })();
+
+
+
   return (
     <main className="min-h-screen bg-background">
       <div className="mx-auto max-w-5xl px-4 py-10 space-y-8">
