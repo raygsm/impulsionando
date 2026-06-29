@@ -97,6 +97,16 @@ function AdminStatusWebhooksPage() {
     onError: (e: any) => toast.error(e.message),
   })
 
+  const test = useMutation({
+    mutationFn: (id: string) => testFn({ data: { id } }),
+    onSuccess: (r: any) => {
+      if (r?.ok) toast.success(`Ping enviado (HTTP ${r.status})`)
+      else toast.error(`Ping falhou (HTTP ${r?.status ?? 'n/a'}) — ${r?.error ?? ''}`)
+      qc.invalidateQueries({ queryKey: ['status-webhooks'] })
+    },
+    onError: (e: any) => toast.error(e.message),
+  })
+
   const items = (data?.items ?? []) as Hook[]
 
   return (
