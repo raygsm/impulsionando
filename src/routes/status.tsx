@@ -312,5 +312,14 @@ export const Route = createFileRoute("/status")({
         content: "Uptime, incidentes e postmortems publicados do ecossistema Impulsionando.",
       },
     ],
+    links: [
+      {
+        rel: "alternate",
+        type: "application/rss+xml",
+        title: "Impulsionando — Status & Incidentes",
+        href: "/api/public/status.rss",
+      },
+    ],
   }),
+
 });
