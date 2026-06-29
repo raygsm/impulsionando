@@ -328,7 +328,7 @@ function StatusPage() {
             )}
           </CardContent>
         </Card>
-EOF_REPLACE_MARKER
+
 
         {/* Published postmortems */}
         <Card>
