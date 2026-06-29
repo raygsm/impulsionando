@@ -113,10 +113,8 @@ function ExecutivoPage() {
             </CardHeader>
             <CardContent className="space-y-1">
               {data.topCompanies.slice(0, 8).map((c) => (
-                <Link
+                <div
                   key={c.companyId}
-                  to={"/admin/clientes/$slug" as any}
-                  params={{ slug: c.companyId }}
                   className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-accent transition-colors"
                 >
                   <div className="flex items-center gap-2 min-w-0">
@@ -129,7 +127,7 @@ function ExecutivoPage() {
                     <span className="text-sm font-semibold">{fmtBRL(c.revenueCents)}</span>
                     <ArrowUpRight className="h-3 w-3 text-muted-foreground" />
                   </div>
-                </Link>
+                </div>
               ))}
               {data.topCompanies.length === 0 && (
                 <p className="text-xs text-muted-foreground p-3">Nenhuma receita registrada no período.</p>
