@@ -448,6 +448,7 @@ import { Route as AuthenticatedAdminTaxComplianceRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminTalentosCockpitHealthRouteImport } from './routes/_authenticated/admin.talentos-cockpit-health'
 import { Route as AuthenticatedAdminSupportTicketingHealthRouteImport } from './routes/_authenticated/admin.support-ticketing-health'
 import { Route as AuthenticatedAdminSuporteProRouteImport } from './routes/_authenticated/admin.suporte-pro'
+import { Route as AuthenticatedAdminStatusWebhooksRouteImport } from './routes/_authenticated/admin.status-webhooks'
 import { Route as AuthenticatedAdminStatusSubscribersRouteImport } from './routes/_authenticated/admin.status-subscribers'
 import { Route as AuthenticatedAdminSlaMttrRouteImport } from './routes/_authenticated/admin.sla-mttr'
 import { Route as AuthenticatedAdminSlaComplianceRouteImport } from './routes/_authenticated/admin.sla-compliance'
@@ -602,6 +603,7 @@ import { Route as ApiPublicHooksZapiStatusRouteImport } from './routes/api/publi
 import { Route as ApiPublicHooksUptimeWhatsappTestRouteImport } from './routes/api/public/hooks/uptime-whatsapp-test'
 import { Route as ApiPublicHooksUptimeCheckRouteImport } from './routes/api/public/hooks/uptime-check'
 import { Route as ApiPublicHooksTrialReguaRouteImport } from './routes/api/public/hooks/trial-regua'
+import { Route as ApiPublicHooksStatusWebhooksRouteImport } from './routes/api/public/hooks/status-webhooks'
 import { Route as ApiPublicHooksStatusSubscribersMaintenanceRouteImport } from './routes/api/public/hooks/status-subscribers-maintenance'
 import { Route as ApiPublicHooksStatusSubscribersRouteImport } from './routes/api/public/hooks/status-subscribers'
 import { Route as ApiPublicHooksRetentionSweepRouteImport } from './routes/api/public/hooks/retention-sweep'
@@ -3129,6 +3131,12 @@ const AuthenticatedAdminSuporteProRoute =
     path: '/admin/suporte-pro',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminStatusWebhooksRoute =
+  AuthenticatedAdminStatusWebhooksRouteImport.update({
+    id: '/admin/status-webhooks',
+    path: '/admin/status-webhooks',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminStatusSubscribersRoute =
   AuthenticatedAdminStatusSubscribersRouteImport.update({
     id: '/admin/status-subscribers',
@@ -4037,6 +4045,12 @@ const ApiPublicHooksTrialReguaRoute =
   ApiPublicHooksTrialReguaRouteImport.update({
     id: '/api/public/hooks/trial-regua',
     path: '/api/public/hooks/trial-regua',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksStatusWebhooksRoute =
+  ApiPublicHooksStatusWebhooksRouteImport.update({
+    id: '/api/public/hooks/status-webhooks',
+    path: '/api/public/hooks/status-webhooks',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicHooksStatusSubscribersMaintenanceRoute =
@@ -5106,6 +5120,7 @@ export interface FileRoutesByFullPath {
   '/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
   '/admin/sla-mttr': typeof AuthenticatedAdminSlaMttrRoute
   '/admin/status-subscribers': typeof AuthenticatedAdminStatusSubscribersRoute
+  '/admin/status-webhooks': typeof AuthenticatedAdminStatusWebhooksRoute
   '/admin/suporte-pro': typeof AuthenticatedAdminSuporteProRoute
   '/admin/support-ticketing-health': typeof AuthenticatedAdminSupportTicketingHealthRoute
   '/admin/talentos-cockpit-health': typeof AuthenticatedAdminTalentosCockpitHealthRoute
@@ -5406,6 +5421,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
   '/api/public/hooks/status-subscribers': typeof ApiPublicHooksStatusSubscribersRoute
   '/api/public/hooks/status-subscribers-maintenance': typeof ApiPublicHooksStatusSubscribersMaintenanceRoute
+  '/api/public/hooks/status-webhooks': typeof ApiPublicHooksStatusWebhooksRoute
   '/api/public/hooks/trial-regua': typeof ApiPublicHooksTrialReguaRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
@@ -5811,6 +5827,7 @@ export interface FileRoutesByTo {
   '/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
   '/admin/sla-mttr': typeof AuthenticatedAdminSlaMttrRoute
   '/admin/status-subscribers': typeof AuthenticatedAdminStatusSubscribersRoute
+  '/admin/status-webhooks': typeof AuthenticatedAdminStatusWebhooksRoute
   '/admin/suporte-pro': typeof AuthenticatedAdminSuporteProRoute
   '/admin/support-ticketing-health': typeof AuthenticatedAdminSupportTicketingHealthRoute
   '/admin/talentos-cockpit-health': typeof AuthenticatedAdminTalentosCockpitHealthRoute
@@ -6110,6 +6127,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
   '/api/public/hooks/status-subscribers': typeof ApiPublicHooksStatusSubscribersRoute
   '/api/public/hooks/status-subscribers-maintenance': typeof ApiPublicHooksStatusSubscribersMaintenanceRoute
+  '/api/public/hooks/status-webhooks': typeof ApiPublicHooksStatusWebhooksRoute
   '/api/public/hooks/trial-regua': typeof ApiPublicHooksTrialReguaRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
@@ -6529,6 +6547,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/sla-compliance': typeof AuthenticatedAdminSlaComplianceRoute
   '/_authenticated/admin/sla-mttr': typeof AuthenticatedAdminSlaMttrRoute
   '/_authenticated/admin/status-subscribers': typeof AuthenticatedAdminStatusSubscribersRoute
+  '/_authenticated/admin/status-webhooks': typeof AuthenticatedAdminStatusWebhooksRoute
   '/_authenticated/admin/suporte-pro': typeof AuthenticatedAdminSuporteProRoute
   '/_authenticated/admin/support-ticketing-health': typeof AuthenticatedAdminSupportTicketingHealthRoute
   '/_authenticated/admin/talentos-cockpit-health': typeof AuthenticatedAdminTalentosCockpitHealthRoute
@@ -6829,6 +6848,7 @@ export interface FileRoutesById {
   '/api/public/hooks/retention-sweep': typeof ApiPublicHooksRetentionSweepRoute
   '/api/public/hooks/status-subscribers': typeof ApiPublicHooksStatusSubscribersRoute
   '/api/public/hooks/status-subscribers-maintenance': typeof ApiPublicHooksStatusSubscribersMaintenanceRoute
+  '/api/public/hooks/status-webhooks': typeof ApiPublicHooksStatusWebhooksRoute
   '/api/public/hooks/trial-regua': typeof ApiPublicHooksTrialReguaRoute
   '/api/public/hooks/uptime-check': typeof ApiPublicHooksUptimeCheckRoute
   '/api/public/hooks/uptime-whatsapp-test': typeof ApiPublicHooksUptimeWhatsappTestRoute
@@ -7248,6 +7268,7 @@ export interface FileRouteTypes {
     | '/admin/sla-compliance'
     | '/admin/sla-mttr'
     | '/admin/status-subscribers'
+    | '/admin/status-webhooks'
     | '/admin/suporte-pro'
     | '/admin/support-ticketing-health'
     | '/admin/talentos-cockpit-health'
@@ -7548,6 +7569,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/retention-sweep'
     | '/api/public/hooks/status-subscribers'
     | '/api/public/hooks/status-subscribers-maintenance'
+    | '/api/public/hooks/status-webhooks'
     | '/api/public/hooks/trial-regua'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
@@ -7953,6 +7975,7 @@ export interface FileRouteTypes {
     | '/admin/sla-compliance'
     | '/admin/sla-mttr'
     | '/admin/status-subscribers'
+    | '/admin/status-webhooks'
     | '/admin/suporte-pro'
     | '/admin/support-ticketing-health'
     | '/admin/talentos-cockpit-health'
@@ -8252,6 +8275,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/retention-sweep'
     | '/api/public/hooks/status-subscribers'
     | '/api/public/hooks/status-subscribers-maintenance'
+    | '/api/public/hooks/status-webhooks'
     | '/api/public/hooks/trial-regua'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
@@ -8670,6 +8694,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/sla-compliance'
     | '/_authenticated/admin/sla-mttr'
     | '/_authenticated/admin/status-subscribers'
+    | '/_authenticated/admin/status-webhooks'
     | '/_authenticated/admin/suporte-pro'
     | '/_authenticated/admin/support-ticketing-health'
     | '/_authenticated/admin/talentos-cockpit-health'
@@ -8970,6 +8995,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/retention-sweep'
     | '/api/public/hooks/status-subscribers'
     | '/api/public/hooks/status-subscribers-maintenance'
+    | '/api/public/hooks/status-webhooks'
     | '/api/public/hooks/trial-regua'
     | '/api/public/hooks/uptime-check'
     | '/api/public/hooks/uptime-whatsapp-test'
@@ -9218,6 +9244,7 @@ export interface RootRouteChildren {
   ApiPublicHooksRetentionSweepRoute: typeof ApiPublicHooksRetentionSweepRoute
   ApiPublicHooksStatusSubscribersRoute: typeof ApiPublicHooksStatusSubscribersRoute
   ApiPublicHooksStatusSubscribersMaintenanceRoute: typeof ApiPublicHooksStatusSubscribersMaintenanceRoute
+  ApiPublicHooksStatusWebhooksRoute: typeof ApiPublicHooksStatusWebhooksRoute
   ApiPublicHooksTrialReguaRoute: typeof ApiPublicHooksTrialReguaRoute
   ApiPublicHooksUptimeCheckRoute: typeof ApiPublicHooksUptimeCheckRoute
   ApiPublicHooksUptimeWhatsappTestRoute: typeof ApiPublicHooksUptimeWhatsappTestRoute
@@ -12320,6 +12347,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSuporteProRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/status-webhooks': {
+      id: '/_authenticated/admin/status-webhooks'
+      path: '/admin/status-webhooks'
+      fullPath: '/admin/status-webhooks'
+      preLoaderRoute: typeof AuthenticatedAdminStatusWebhooksRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/status-subscribers': {
       id: '/_authenticated/admin/status-subscribers'
       path: '/admin/status-subscribers'
@@ -13396,6 +13430,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/hooks/trial-regua'
       fullPath: '/api/public/hooks/trial-regua'
       preLoaderRoute: typeof ApiPublicHooksTrialReguaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/status-webhooks': {
+      id: '/api/public/hooks/status-webhooks'
+      path: '/api/public/hooks/status-webhooks'
+      fullPath: '/api/public/hooks/status-webhooks'
+      preLoaderRoute: typeof ApiPublicHooksStatusWebhooksRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/status-subscribers-maintenance': {
@@ -15247,6 +15288,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminSlaComplianceRoute: typeof AuthenticatedAdminSlaComplianceRoute
   AuthenticatedAdminSlaMttrRoute: typeof AuthenticatedAdminSlaMttrRoute
   AuthenticatedAdminStatusSubscribersRoute: typeof AuthenticatedAdminStatusSubscribersRoute
+  AuthenticatedAdminStatusWebhooksRoute: typeof AuthenticatedAdminStatusWebhooksRoute
   AuthenticatedAdminSuporteProRoute: typeof AuthenticatedAdminSuporteProRoute
   AuthenticatedAdminSupportTicketingHealthRoute: typeof AuthenticatedAdminSupportTicketingHealthRoute
   AuthenticatedAdminTalentosCockpitHealthRoute: typeof AuthenticatedAdminTalentosCockpitHealthRoute
@@ -15590,6 +15632,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminSlaMttrRoute: AuthenticatedAdminSlaMttrRoute,
   AuthenticatedAdminStatusSubscribersRoute:
     AuthenticatedAdminStatusSubscribersRoute,
+  AuthenticatedAdminStatusWebhooksRoute: AuthenticatedAdminStatusWebhooksRoute,
   AuthenticatedAdminSuporteProRoute: AuthenticatedAdminSuporteProRoute,
   AuthenticatedAdminSupportTicketingHealthRoute:
     AuthenticatedAdminSupportTicketingHealthRoute,
@@ -16181,6 +16224,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksStatusSubscribersRoute: ApiPublicHooksStatusSubscribersRoute,
   ApiPublicHooksStatusSubscribersMaintenanceRoute:
     ApiPublicHooksStatusSubscribersMaintenanceRoute,
+  ApiPublicHooksStatusWebhooksRoute: ApiPublicHooksStatusWebhooksRoute,
   ApiPublicHooksTrialReguaRoute: ApiPublicHooksTrialReguaRoute,
   ApiPublicHooksUptimeCheckRoute: ApiPublicHooksUptimeCheckRoute,
   ApiPublicHooksUptimeWhatsappTestRoute: ApiPublicHooksUptimeWhatsappTestRoute,

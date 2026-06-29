@@ -154,7 +154,7 @@ export const Route = createFileRoute('/api/public/hooks/status-webhooks')({
           postmortem_published_at: string | null
           postmortem_summary: string | null
         }>
-        const updates = (upRes.data ?? []) as Array<{
+        const updates = ((upRes.data ?? []) as unknown) as Array<{
           id: string
           incident_id: string
           status: string | null
