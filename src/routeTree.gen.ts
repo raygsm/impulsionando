@@ -590,6 +590,7 @@ import { Route as ApiPublicWhatsappSendRouteImport } from './routes/api/public/w
 import { Route as ApiPublicWebhooksN8nCallbackRouteImport } from './routes/api/public/webhooks/n8n-callback'
 import { Route as ApiPublicSupportCreateTicketRouteImport } from './routes/api/public/support/create-ticket'
 import { Route as ApiPublicStatusRssRouteImport } from './routes/api/public/status.rss'
+import { Route as ApiPublicStatusSlugRouteImport } from './routes/api/public/status.$slug'
 import { Route as ApiPublicRiomedEventsRouteImport } from './routes/api/public/riomed/events'
 import { Route as ApiPublicRealestateSavedSearchRouteImport } from './routes/api/public/realestate/saved-search'
 import { Route as ApiPublicRealestateInterestRouteImport } from './routes/api/public/realestate/interest'
@@ -3965,6 +3966,11 @@ const ApiPublicStatusRssRoute = ApiPublicStatusRssRouteImport.update({
   path: '/rss',
   getParentRoute: () => ApiPublicStatusRoute,
 } as any)
+const ApiPublicStatusSlugRoute = ApiPublicStatusSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ApiPublicStatusRoute,
+} as any)
 const ApiPublicRiomedEventsRoute = ApiPublicRiomedEventsRouteImport.update({
   id: '/api/public/riomed/events',
   path: '/api/public/riomed/events',
@@ -5373,6 +5379,7 @@ export interface FileRoutesByFullPath {
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
   '/api/public/riomed/events': typeof ApiPublicRiomedEventsRoute
+  '/api/public/status/$slug': typeof ApiPublicStatusSlugRoute
   '/api/public/status/rss': typeof ApiPublicStatusRssRoute
   '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
   '/api/public/webhooks/n8n-callback': typeof ApiPublicWebhooksN8nCallbackRoute
@@ -6071,6 +6078,7 @@ export interface FileRoutesByTo {
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
   '/api/public/riomed/events': typeof ApiPublicRiomedEventsRoute
+  '/api/public/status/$slug': typeof ApiPublicStatusSlugRoute
   '/api/public/status/rss': typeof ApiPublicStatusRssRoute
   '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
   '/api/public/webhooks/n8n-callback': typeof ApiPublicWebhooksN8nCallbackRoute
@@ -6784,6 +6792,7 @@ export interface FileRoutesById {
   '/api/public/realestate/interest': typeof ApiPublicRealestateInterestRoute
   '/api/public/realestate/saved-search': typeof ApiPublicRealestateSavedSearchRoute
   '/api/public/riomed/events': typeof ApiPublicRiomedEventsRoute
+  '/api/public/status/$slug': typeof ApiPublicStatusSlugRoute
   '/api/public/status/rss': typeof ApiPublicStatusRssRoute
   '/api/public/support/create-ticket': typeof ApiPublicSupportCreateTicketRoute
   '/api/public/webhooks/n8n-callback': typeof ApiPublicWebhooksN8nCallbackRoute
@@ -7497,6 +7506,7 @@ export interface FileRouteTypes {
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
     | '/api/public/riomed/events'
+    | '/api/public/status/$slug'
     | '/api/public/status/rss'
     | '/api/public/support/create-ticket'
     | '/api/public/webhooks/n8n-callback'
@@ -8195,6 +8205,7 @@ export interface FileRouteTypes {
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
     | '/api/public/riomed/events'
+    | '/api/public/status/$slug'
     | '/api/public/status/rss'
     | '/api/public/support/create-ticket'
     | '/api/public/webhooks/n8n-callback'
@@ -8907,6 +8918,7 @@ export interface FileRouteTypes {
     | '/api/public/realestate/interest'
     | '/api/public/realestate/saved-search'
     | '/api/public/riomed/events'
+    | '/api/public/status/$slug'
     | '/api/public/status/rss'
     | '/api/public/support/create-ticket'
     | '/api/public/webhooks/n8n-callback'
@@ -13237,6 +13249,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicStatusRssRouteImport
       parentRoute: typeof ApiPublicStatusRoute
     }
+    '/api/public/status/$slug': {
+      id: '/api/public/status/$slug'
+      path: '/$slug'
+      fullPath: '/api/public/status/$slug'
+      preLoaderRoute: typeof ApiPublicStatusSlugRouteImport
+      parentRoute: typeof ApiPublicStatusRoute
+    }
     '/api/public/riomed/events': {
       id: '/api/public/riomed/events'
       path: '/api/public/riomed/events'
@@ -15861,10 +15880,12 @@ const ApiPublicHealthRouteWithChildren = ApiPublicHealthRoute._addFileChildren(
 )
 
 interface ApiPublicStatusRouteChildren {
+  ApiPublicStatusSlugRoute: typeof ApiPublicStatusSlugRoute
   ApiPublicStatusRssRoute: typeof ApiPublicStatusRssRoute
 }
 
 const ApiPublicStatusRouteChildren: ApiPublicStatusRouteChildren = {
+  ApiPublicStatusSlugRoute: ApiPublicStatusSlugRoute,
   ApiPublicStatusRssRoute: ApiPublicStatusRssRoute,
 }
 

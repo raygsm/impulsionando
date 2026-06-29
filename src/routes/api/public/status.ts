@@ -59,7 +59,7 @@ export const Route = createFileRoute("/api/public/status")({
               .limit(20000),
             supabaseAdmin
               .from("uptime_state")
-              .select("url,label,show_on_public,sort_order,paused")
+              .select("url,label,show_on_public,sort_order,paused,public_slug")
               .order("sort_order", { ascending: true }),
           ]);
 
@@ -71,15 +71,17 @@ export const Route = createFileRoute("/api/public/status")({
           const maintenance = (mwRes.data ?? []) as any[];
           const historyRows = (histRes.data ?? []) as any[];
           const visRows = (visRes.data ?? []) as any[];
-          const visibility = new Map<string, { label: string | null; show: boolean; sort: number; paused: boolean }>();
+          const visibility = new Map<string, { label: string | null; show: boolean; sort: number; paused: boolean; slug: string | null }>();
           for (const v of visRows) {
             visibility.set(v.url, {
               label: v.label ?? null,
               show: v.show_on_public !== false,
               sort: typeof v.sort_order === "number" ? v.sort_order : 100,
               paused: !!v.paused,
+              slug: v.public_slug ?? null,
             });
           }
+
 
           // Build 90-day history per url, padding missing days with null
           const historyByUrl: Record<string, Map<string, number | null>> = {};
@@ -113,11 +115,13 @@ export const Route = createFileRoute("/api/public/status")({
               return {
                 ...s,
                 name: v?.label || s.name || s.url,
+                slug: v?.slug ?? null,
                 sort_order: v?.sort ?? 100,
                 history,
               };
             })
             .sort((a, b) => (a.sort_order ?? 100) - (b.sort_order ?? 100));
+
 
 
           // Fetch updates for open incidents (last 90d)
