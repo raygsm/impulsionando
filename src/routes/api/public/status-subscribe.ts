@@ -43,16 +43,46 @@ export const Route = createFileRoute('/api/public/status-subscribe')({
 
         const email = parsed.data.email.trim().toLowerCase()
         const source = parsed.data.source ?? 'status_page'
+        const services = Array.from(new Set((parsed.data.services ?? []).map((s) => s.toLowerCase())))
 
-        const { error } = await supabase
+        const { data: existingRow } = await supabase
           .from('core_status_subscribers')
-          .insert({ email, source })
+          .select('id')
+          .eq('email', email)
+          .maybeSingle()
 
-        if (error && !/duplicate|unique/i.test(error.message)) {
-          return Response.json({ error: 'insert_failed' }, { status: 500 })
+        let subscriberId: string | null = (existingRow as any)?.id ?? null
+
+        if (!subscriberId) {
+          const { data: inserted, error } = await supabase
+            .from('core_status_subscribers')
+            .insert({ email, source })
+            .select('id')
+            .maybeSingle()
+          if (error && !/duplicate|unique/i.test(error.message)) {
+            return Response.json({ error: 'insert_failed' }, { status: 500 })
+          }
+          subscriberId = (inserted as any)?.id ?? null
         }
 
-        // Always respond OK (no enumeration). Confirmation email is sent by cron.
+        // Sync service slug filter (admin client; the public anon client cannot write this table)
+        if (subscriberId) {
+          try {
+            const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+            await supabaseAdmin
+              .from('core_status_subscriber_services' as any)
+              .delete()
+              .eq('subscriber_id', subscriberId)
+            if (services.length > 0) {
+              await supabaseAdmin
+                .from('core_status_subscriber_services' as any)
+                .insert(services.map((slug) => ({ subscriber_id: subscriberId, service_slug: slug })))
+            }
+          } catch {
+            // best-effort; subscription still works as "all services"
+          }
+        }
+
         return Response.json(
           { ok: true, message: 'Verifique seu email para confirmar a inscrição.' },
           { headers: { 'Access-Control-Allow-Origin': '*' } },
