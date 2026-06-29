@@ -120,6 +120,37 @@ function AdminStatusSubscribers() {
 
       <Card>
         <CardHeader>
+          <CardTitle>Cobertura por serviço</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <p className="text-xs text-muted-foreground">
+            Inscritos ativos: <strong>{breakdown?.activeSubscribers ?? 0}</strong>
+            {" • "}Sem filtro (recebem tudo): <strong>{breakdown?.subsAllServices ?? 0}</strong>
+            {" • "}Com filtro: <strong>{breakdown?.subsWithFilter ?? 0}</strong>
+          </p>
+          {(breakdown?.breakdown ?? []).length === 0 ? (
+            <p className="text-muted-foreground text-sm">Nenhum serviço público configurado.</p>
+          ) : (
+            <div className="border rounded-md divide-y text-sm">
+              {(breakdown?.breakdown ?? []).map((b: any) => (
+                <div key={b.slug} className="p-2 flex flex-wrap items-center gap-3">
+                  <span className="font-medium flex-1 min-w-48">{b.label}</span>
+                  <code className="text-xs text-muted-foreground">{b.slug}</code>
+                  {!b.show_on_public && <Badge variant="secondary">oculto</Badge>}
+                  <span className="text-xs text-muted-foreground">
+                    explícito: <strong>{b.explicit_subscribers}</strong>
+                  </span>
+                  <Badge>{b.effective_subscribers} efetivos</Badge>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+
+      <Card>
+        <CardHeader>
           <CardTitle>Broadcast manual</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
