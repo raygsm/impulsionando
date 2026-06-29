@@ -637,6 +637,7 @@ import { Route as AuthenticatedAdminModulosClonagemRouteImport } from './routes/
 import { Route as AuthenticatedAdminIntegracoesMercadoPagoRouteImport } from './routes/_authenticated/admin.integracoes.mercado-pago'
 import { Route as AuthenticatedAdminClientesRiomedRouteImport } from './routes/_authenticated/admin.clientes.riomed'
 import { Route as AuthenticatedAdminClientesSlugRouteImport } from './routes/_authenticated/admin.clientes.$slug'
+import { Route as AuthenticatedAdminClientesSlugIndexRouteImport } from './routes/_authenticated/admin.clientes.$slug.index'
 import { Route as ApiPublicRiomedQuotesColdRouteImport } from './routes/api/public/riomed/quotes/cold'
 import { Route as ApiPublicRiomedFxUpsertRouteImport } from './routes/api/public/riomed/fx/upsert'
 import { Route as ApiPublicRiomedCartsAbandonedRouteImport } from './routes/api/public/riomed/carts/abandoned'
@@ -684,7 +685,13 @@ import { Route as AuthenticatedAdminClientesRiomedAssistenteRouteImport } from '
 import { Route as AuthenticatedAdminClientesRiomedAssistenciaRouteImport } from './routes/_authenticated/admin.clientes.riomed.assistencia'
 import { Route as AuthenticatedAdminClientesRiomedAgentesRouteImport } from './routes/_authenticated/admin.clientes.riomed.agentes'
 import { Route as AuthenticatedAdminClientesSlugPainelRouteImport } from './routes/_authenticated/admin.clientes.$slug.painel'
+import { Route as AuthenticatedAdminClientesSlugModulosRouteImport } from './routes/_authenticated/admin.clientes.$slug.modulos'
+import { Route as AuthenticatedAdminClientesSlugLogsRouteImport } from './routes/_authenticated/admin.clientes.$slug.logs'
+import { Route as AuthenticatedAdminClientesSlugFinanceiroRouteImport } from './routes/_authenticated/admin.clientes.$slug.financeiro'
 import { Route as AuthenticatedAdminClientesSlugDominioRouteImport } from './routes/_authenticated/admin.clientes.$slug.dominio'
+import { Route as AuthenticatedAdminClientesSlugCrmRouteImport } from './routes/_authenticated/admin.clientes.$slug.crm'
+import { Route as AuthenticatedAdminClientesSlugConfiguracoesRouteImport } from './routes/_authenticated/admin.clientes.$slug.configuracoes'
+import { Route as AuthenticatedAdminClientesSlugAutomacoesRouteImport } from './routes/_authenticated/admin.clientes.$slug.automacoes'
 import { Route as AuthenticatedCoreClienteIdPaginasPageIdRouteImport } from './routes/_authenticated/core.cliente.$id.paginas.$pageId'
 import { Route as AuthenticatedCoreClienteIdModuloSlugConfigurarRouteImport } from './routes/_authenticated/core.cliente.$id.modulo.$slug.configurar'
 
@@ -4212,6 +4219,12 @@ const AuthenticatedAdminClientesSlugRoute =
     path: '/admin/clientes/$slug',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminClientesSlugIndexRoute =
+  AuthenticatedAdminClientesSlugIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAdminClientesSlugRoute,
+  } as any)
 const ApiPublicRiomedQuotesColdRoute =
   ApiPublicRiomedQuotesColdRouteImport.update({
     id: '/api/public/riomed/quotes/cold',
@@ -4493,10 +4506,46 @@ const AuthenticatedAdminClientesSlugPainelRoute =
     path: '/painel',
     getParentRoute: () => AuthenticatedAdminClientesSlugRoute,
   } as any)
+const AuthenticatedAdminClientesSlugModulosRoute =
+  AuthenticatedAdminClientesSlugModulosRouteImport.update({
+    id: '/modulos',
+    path: '/modulos',
+    getParentRoute: () => AuthenticatedAdminClientesSlugRoute,
+  } as any)
+const AuthenticatedAdminClientesSlugLogsRoute =
+  AuthenticatedAdminClientesSlugLogsRouteImport.update({
+    id: '/logs',
+    path: '/logs',
+    getParentRoute: () => AuthenticatedAdminClientesSlugRoute,
+  } as any)
+const AuthenticatedAdminClientesSlugFinanceiroRoute =
+  AuthenticatedAdminClientesSlugFinanceiroRouteImport.update({
+    id: '/financeiro',
+    path: '/financeiro',
+    getParentRoute: () => AuthenticatedAdminClientesSlugRoute,
+  } as any)
 const AuthenticatedAdminClientesSlugDominioRoute =
   AuthenticatedAdminClientesSlugDominioRouteImport.update({
     id: '/dominio',
     path: '/dominio',
+    getParentRoute: () => AuthenticatedAdminClientesSlugRoute,
+  } as any)
+const AuthenticatedAdminClientesSlugCrmRoute =
+  AuthenticatedAdminClientesSlugCrmRouteImport.update({
+    id: '/crm',
+    path: '/crm',
+    getParentRoute: () => AuthenticatedAdminClientesSlugRoute,
+  } as any)
+const AuthenticatedAdminClientesSlugConfiguracoesRoute =
+  AuthenticatedAdminClientesSlugConfiguracoesRouteImport.update({
+    id: '/configuracoes',
+    path: '/configuracoes',
+    getParentRoute: () => AuthenticatedAdminClientesSlugRoute,
+  } as any)
+const AuthenticatedAdminClientesSlugAutomacoesRoute =
+  AuthenticatedAdminClientesSlugAutomacoesRouteImport.update({
+    id: '/automacoes',
+    path: '/automacoes',
     getParentRoute: () => AuthenticatedAdminClientesSlugRoute,
   } as any)
 const AuthenticatedCoreClienteIdPaginasPageIdRoute =
@@ -5140,7 +5189,13 @@ export interface FileRoutesByFullPath {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/admin/clientes/$slug/automacoes': typeof AuthenticatedAdminClientesSlugAutomacoesRoute
+  '/admin/clientes/$slug/configuracoes': typeof AuthenticatedAdminClientesSlugConfiguracoesRoute
+  '/admin/clientes/$slug/crm': typeof AuthenticatedAdminClientesSlugCrmRoute
   '/admin/clientes/$slug/dominio': typeof AuthenticatedAdminClientesSlugDominioRoute
+  '/admin/clientes/$slug/financeiro': typeof AuthenticatedAdminClientesSlugFinanceiroRoute
+  '/admin/clientes/$slug/logs': typeof AuthenticatedAdminClientesSlugLogsRoute
+  '/admin/clientes/$slug/modulos': typeof AuthenticatedAdminClientesSlugModulosRoute
   '/admin/clientes/$slug/painel': typeof AuthenticatedAdminClientesSlugPainelRoute
   '/admin/clientes/riomed/agentes': typeof AuthenticatedAdminClientesRiomedAgentesRoute
   '/admin/clientes/riomed/assistencia': typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
@@ -5188,6 +5243,7 @@ export interface FileRoutesByFullPath {
   '/api/public/riomed/carts/abandoned': typeof ApiPublicRiomedCartsAbandonedRoute
   '/api/public/riomed/fx/upsert': typeof ApiPublicRiomedFxUpsertRoute
   '/api/public/riomed/quotes/cold': typeof ApiPublicRiomedQuotesColdRoute
+  '/admin/clientes/$slug/': typeof AuthenticatedAdminClientesSlugIndexRoute
   '/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
 }
@@ -5730,7 +5786,6 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedReportsIndexRoute
   '/saiba-mais': typeof AuthenticatedSaibaMaisIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
-  '/admin/clientes/$slug': typeof AuthenticatedAdminClientesSlugRouteWithChildren
   '/admin/clientes/riomed': typeof AuthenticatedAdminClientesRiomedRouteWithChildren
   '/admin/integracoes/mercado-pago': typeof AuthenticatedAdminIntegracoesMercadoPagoRoute
   '/admin/modulos/clonagem': typeof AuthenticatedAdminModulosClonagemRoute
@@ -5807,7 +5862,13 @@ export interface FileRoutesByTo {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/admin/clientes/$slug/automacoes': typeof AuthenticatedAdminClientesSlugAutomacoesRoute
+  '/admin/clientes/$slug/configuracoes': typeof AuthenticatedAdminClientesSlugConfiguracoesRoute
+  '/admin/clientes/$slug/crm': typeof AuthenticatedAdminClientesSlugCrmRoute
   '/admin/clientes/$slug/dominio': typeof AuthenticatedAdminClientesSlugDominioRoute
+  '/admin/clientes/$slug/financeiro': typeof AuthenticatedAdminClientesSlugFinanceiroRoute
+  '/admin/clientes/$slug/logs': typeof AuthenticatedAdminClientesSlugLogsRoute
+  '/admin/clientes/$slug/modulos': typeof AuthenticatedAdminClientesSlugModulosRoute
   '/admin/clientes/$slug/painel': typeof AuthenticatedAdminClientesSlugPainelRoute
   '/admin/clientes/riomed/agentes': typeof AuthenticatedAdminClientesRiomedAgentesRoute
   '/admin/clientes/riomed/assistencia': typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
@@ -5855,6 +5916,7 @@ export interface FileRoutesByTo {
   '/api/public/riomed/carts/abandoned': typeof ApiPublicRiomedCartsAbandonedRoute
   '/api/public/riomed/fx/upsert': typeof ApiPublicRiomedFxUpsertRoute
   '/api/public/riomed/quotes/cold': typeof ApiPublicRiomedQuotesColdRoute
+  '/admin/clientes/$slug': typeof AuthenticatedAdminClientesSlugIndexRoute
   '/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
 }
@@ -6488,7 +6550,13 @@ export interface FileRoutesById {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/_authenticated/admin/clientes/$slug/automacoes': typeof AuthenticatedAdminClientesSlugAutomacoesRoute
+  '/_authenticated/admin/clientes/$slug/configuracoes': typeof AuthenticatedAdminClientesSlugConfiguracoesRoute
+  '/_authenticated/admin/clientes/$slug/crm': typeof AuthenticatedAdminClientesSlugCrmRoute
   '/_authenticated/admin/clientes/$slug/dominio': typeof AuthenticatedAdminClientesSlugDominioRoute
+  '/_authenticated/admin/clientes/$slug/financeiro': typeof AuthenticatedAdminClientesSlugFinanceiroRoute
+  '/_authenticated/admin/clientes/$slug/logs': typeof AuthenticatedAdminClientesSlugLogsRoute
+  '/_authenticated/admin/clientes/$slug/modulos': typeof AuthenticatedAdminClientesSlugModulosRoute
   '/_authenticated/admin/clientes/$slug/painel': typeof AuthenticatedAdminClientesSlugPainelRoute
   '/_authenticated/admin/clientes/riomed/agentes': typeof AuthenticatedAdminClientesRiomedAgentesRoute
   '/_authenticated/admin/clientes/riomed/assistencia': typeof AuthenticatedAdminClientesRiomedAssistenciaRoute
@@ -6536,6 +6604,7 @@ export interface FileRoutesById {
   '/api/public/riomed/carts/abandoned': typeof ApiPublicRiomedCartsAbandonedRoute
   '/api/public/riomed/fx/upsert': typeof ApiPublicRiomedFxUpsertRoute
   '/api/public/riomed/quotes/cold': typeof ApiPublicRiomedQuotesColdRoute
+  '/_authenticated/admin/clientes/$slug/': typeof AuthenticatedAdminClientesSlugIndexRoute
   '/_authenticated/core/cliente/$id/paginas/$pageId': typeof AuthenticatedCoreClienteIdPaginasPageIdRoute
   '/_authenticated/core/cliente/$id/modulo/$slug/configurar': typeof AuthenticatedCoreClienteIdModuloSlugConfigurarRoute
 }
@@ -7169,7 +7238,13 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/admin/clientes/$slug/automacoes'
+    | '/admin/clientes/$slug/configuracoes'
+    | '/admin/clientes/$slug/crm'
     | '/admin/clientes/$slug/dominio'
+    | '/admin/clientes/$slug/financeiro'
+    | '/admin/clientes/$slug/logs'
+    | '/admin/clientes/$slug/modulos'
     | '/admin/clientes/$slug/painel'
     | '/admin/clientes/riomed/agentes'
     | '/admin/clientes/riomed/assistencia'
@@ -7217,6 +7292,7 @@ export interface FileRouteTypes {
     | '/api/public/riomed/carts/abandoned'
     | '/api/public/riomed/fx/upsert'
     | '/api/public/riomed/quotes/cold'
+    | '/admin/clientes/$slug/'
     | '/core/cliente/$id/paginas/$pageId'
     | '/core/cliente/$id/modulo/$slug/configurar'
   fileRoutesByTo: FileRoutesByTo
@@ -7759,7 +7835,6 @@ export interface FileRouteTypes {
     | '/reports'
     | '/saiba-mais'
     | '/sales'
-    | '/admin/clientes/$slug'
     | '/admin/clientes/riomed'
     | '/admin/integracoes/mercado-pago'
     | '/admin/modulos/clonagem'
@@ -7836,7 +7911,13 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/admin/clientes/$slug/automacoes'
+    | '/admin/clientes/$slug/configuracoes'
+    | '/admin/clientes/$slug/crm'
     | '/admin/clientes/$slug/dominio'
+    | '/admin/clientes/$slug/financeiro'
+    | '/admin/clientes/$slug/logs'
+    | '/admin/clientes/$slug/modulos'
     | '/admin/clientes/$slug/painel'
     | '/admin/clientes/riomed/agentes'
     | '/admin/clientes/riomed/assistencia'
@@ -7884,6 +7965,7 @@ export interface FileRouteTypes {
     | '/api/public/riomed/carts/abandoned'
     | '/api/public/riomed/fx/upsert'
     | '/api/public/riomed/quotes/cold'
+    | '/admin/clientes/$slug'
     | '/core/cliente/$id/paginas/$pageId'
     | '/core/cliente/$id/modulo/$slug/configurar'
   id:
@@ -8516,7 +8598,13 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/_authenticated/admin/clientes/$slug/automacoes'
+    | '/_authenticated/admin/clientes/$slug/configuracoes'
+    | '/_authenticated/admin/clientes/$slug/crm'
     | '/_authenticated/admin/clientes/$slug/dominio'
+    | '/_authenticated/admin/clientes/$slug/financeiro'
+    | '/_authenticated/admin/clientes/$slug/logs'
+    | '/_authenticated/admin/clientes/$slug/modulos'
     | '/_authenticated/admin/clientes/$slug/painel'
     | '/_authenticated/admin/clientes/riomed/agentes'
     | '/_authenticated/admin/clientes/riomed/assistencia'
@@ -8564,6 +8652,7 @@ export interface FileRouteTypes {
     | '/api/public/riomed/carts/abandoned'
     | '/api/public/riomed/fx/upsert'
     | '/api/public/riomed/quotes/cold'
+    | '/_authenticated/admin/clientes/$slug/'
     | '/_authenticated/core/cliente/$id/paginas/$pageId'
     | '/_authenticated/core/cliente/$id/modulo/$slug/configurar'
   fileRoutesById: FileRoutesById
@@ -13148,6 +13237,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientesSlugRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/clientes/$slug/': {
+      id: '/_authenticated/admin/clientes/$slug/'
+      path: '/'
+      fullPath: '/admin/clientes/$slug/'
+      preLoaderRoute: typeof AuthenticatedAdminClientesSlugIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesSlugRoute
+    }
     '/api/public/riomed/quotes/cold': {
       id: '/api/public/riomed/quotes/cold'
       path: '/api/public/riomed/quotes/cold'
@@ -13477,11 +13573,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientesSlugPainelRouteImport
       parentRoute: typeof AuthenticatedAdminClientesSlugRoute
     }
+    '/_authenticated/admin/clientes/$slug/modulos': {
+      id: '/_authenticated/admin/clientes/$slug/modulos'
+      path: '/modulos'
+      fullPath: '/admin/clientes/$slug/modulos'
+      preLoaderRoute: typeof AuthenticatedAdminClientesSlugModulosRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesSlugRoute
+    }
+    '/_authenticated/admin/clientes/$slug/logs': {
+      id: '/_authenticated/admin/clientes/$slug/logs'
+      path: '/logs'
+      fullPath: '/admin/clientes/$slug/logs'
+      preLoaderRoute: typeof AuthenticatedAdminClientesSlugLogsRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesSlugRoute
+    }
+    '/_authenticated/admin/clientes/$slug/financeiro': {
+      id: '/_authenticated/admin/clientes/$slug/financeiro'
+      path: '/financeiro'
+      fullPath: '/admin/clientes/$slug/financeiro'
+      preLoaderRoute: typeof AuthenticatedAdminClientesSlugFinanceiroRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesSlugRoute
+    }
     '/_authenticated/admin/clientes/$slug/dominio': {
       id: '/_authenticated/admin/clientes/$slug/dominio'
       path: '/dominio'
       fullPath: '/admin/clientes/$slug/dominio'
       preLoaderRoute: typeof AuthenticatedAdminClientesSlugDominioRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesSlugRoute
+    }
+    '/_authenticated/admin/clientes/$slug/crm': {
+      id: '/_authenticated/admin/clientes/$slug/crm'
+      path: '/crm'
+      fullPath: '/admin/clientes/$slug/crm'
+      preLoaderRoute: typeof AuthenticatedAdminClientesSlugCrmRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesSlugRoute
+    }
+    '/_authenticated/admin/clientes/$slug/configuracoes': {
+      id: '/_authenticated/admin/clientes/$slug/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/admin/clientes/$slug/configuracoes'
+      preLoaderRoute: typeof AuthenticatedAdminClientesSlugConfiguracoesRouteImport
+      parentRoute: typeof AuthenticatedAdminClientesSlugRoute
+    }
+    '/_authenticated/admin/clientes/$slug/automacoes': {
+      id: '/_authenticated/admin/clientes/$slug/automacoes'
+      path: '/automacoes'
+      fullPath: '/admin/clientes/$slug/automacoes'
+      preLoaderRoute: typeof AuthenticatedAdminClientesSlugAutomacoesRouteImport
       parentRoute: typeof AuthenticatedAdminClientesSlugRoute
     }
     '/_authenticated/core/cliente/$id/paginas/$pageId': {
@@ -14154,16 +14292,37 @@ const AuthenticatedTorreRestaurantesDemoRouteWithChildren =
   )
 
 interface AuthenticatedAdminClientesSlugRouteChildren {
+  AuthenticatedAdminClientesSlugAutomacoesRoute: typeof AuthenticatedAdminClientesSlugAutomacoesRoute
+  AuthenticatedAdminClientesSlugConfiguracoesRoute: typeof AuthenticatedAdminClientesSlugConfiguracoesRoute
+  AuthenticatedAdminClientesSlugCrmRoute: typeof AuthenticatedAdminClientesSlugCrmRoute
   AuthenticatedAdminClientesSlugDominioRoute: typeof AuthenticatedAdminClientesSlugDominioRoute
+  AuthenticatedAdminClientesSlugFinanceiroRoute: typeof AuthenticatedAdminClientesSlugFinanceiroRoute
+  AuthenticatedAdminClientesSlugLogsRoute: typeof AuthenticatedAdminClientesSlugLogsRoute
+  AuthenticatedAdminClientesSlugModulosRoute: typeof AuthenticatedAdminClientesSlugModulosRoute
   AuthenticatedAdminClientesSlugPainelRoute: typeof AuthenticatedAdminClientesSlugPainelRoute
+  AuthenticatedAdminClientesSlugIndexRoute: typeof AuthenticatedAdminClientesSlugIndexRoute
 }
 
 const AuthenticatedAdminClientesSlugRouteChildren: AuthenticatedAdminClientesSlugRouteChildren =
   {
+    AuthenticatedAdminClientesSlugAutomacoesRoute:
+      AuthenticatedAdminClientesSlugAutomacoesRoute,
+    AuthenticatedAdminClientesSlugConfiguracoesRoute:
+      AuthenticatedAdminClientesSlugConfiguracoesRoute,
+    AuthenticatedAdminClientesSlugCrmRoute:
+      AuthenticatedAdminClientesSlugCrmRoute,
     AuthenticatedAdminClientesSlugDominioRoute:
       AuthenticatedAdminClientesSlugDominioRoute,
+    AuthenticatedAdminClientesSlugFinanceiroRoute:
+      AuthenticatedAdminClientesSlugFinanceiroRoute,
+    AuthenticatedAdminClientesSlugLogsRoute:
+      AuthenticatedAdminClientesSlugLogsRoute,
+    AuthenticatedAdminClientesSlugModulosRoute:
+      AuthenticatedAdminClientesSlugModulosRoute,
     AuthenticatedAdminClientesSlugPainelRoute:
       AuthenticatedAdminClientesSlugPainelRoute,
+    AuthenticatedAdminClientesSlugIndexRoute:
+      AuthenticatedAdminClientesSlugIndexRoute,
   }
 
 const AuthenticatedAdminClientesSlugRouteWithChildren =
