@@ -144,7 +144,7 @@ ${banner}
 
         await supabaseAdmin
           .from('core_status_subscribers')
-          .update({ notify_incidents, notify_maintenance })
+          .update({ notify_incidents, notify_maintenance, categories: categories.length > 0 ? categories : null })
           .eq('id', (sub as any).id)
 
         await supabaseAdmin
