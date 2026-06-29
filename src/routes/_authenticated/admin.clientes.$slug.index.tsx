@@ -106,7 +106,7 @@ const updateTenantLocale = createServerFn({ method: "POST" })
   });
 
 
-export const Route = createFileRoute("/_authenticated/admin/clientes/$slug")({
+export const Route = createFileRoute("/_authenticated/admin/clientes/$slug/")({
   head: () => ({ meta: [{ title: "Cliente · Impulsionando" }] }),
   component: TenantOverviewPage,
 });
