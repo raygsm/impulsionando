@@ -16,7 +16,8 @@ export const Route = createFileRoute("/api/public/status")({
       GET: async () => {
         try {
           const since = new Date(Date.now() - 90 * 86400000).toISOString();
-          const [statusRes, incRes, pmRes] = await Promise.all([
+          const horizonEnd = new Date(Date.now() + 30 * 86400000).toISOString();
+          const [statusRes, incRes, pmRes, mwRes] = await Promise.all([
             supabaseAdmin
               .from("v_core_slo_status" as any)
               .select(
@@ -40,11 +41,21 @@ export const Route = createFileRoute("/api/public/status")({
               .gte("postmortem_published_at", since)
               .order("postmortem_published_at", { ascending: false })
               .limit(20),
+            supabaseAdmin
+              .from("core_maintenance_windows")
+              .select("id,title,description,scope,url,severity,starts_at,ends_at,status")
+              .eq("published", true)
+              .in("status", ["scheduled", "in_progress"])
+              .lte("starts_at", horizonEnd)
+              .gte("ends_at", new Date().toISOString())
+              .order("starts_at", { ascending: true })
+              .limit(20),
           ]);
 
           const status = (statusRes.data ?? []) as any[];
           const incidents = (incRes.data ?? []) as any[];
           const postmortems = (pmRes.data ?? []) as any[];
+          const maintenance = (mwRes.data ?? []) as any[];
 
           const monitored = status.length;
           const up = status.filter((r) => r.currently_up !== false).length;
@@ -53,19 +64,23 @@ export const Route = createFileRoute("/api/public/status")({
           const sev1Open = incidents.filter(
             (i) => i.status !== "resolved" && i.severity === "sev1",
           ).length;
+          const inMaintenance = maintenance.filter((m) => m.status === "in_progress").length;
 
-          let overall: "operational" | "degraded" | "outage" = "operational";
+          let overall: "operational" | "degraded" | "outage" | "maintenance" = "operational";
           if (sev1Open > 0 || down >= Math.max(2, Math.ceil(monitored * 0.2))) overall = "outage";
           else if (openIncidents > 0 || down > 0) overall = "degraded";
+          else if (inMaintenance > 0) overall = "maintenance";
 
           const body = {
             overall,
             updated_at: new Date().toISOString(),
-            summary: { monitored, up, down, openIncidents, sev1Open },
+            summary: { monitored, up, down, openIncidents, sev1Open, maintenance: inMaintenance },
             services: status,
             incidents,
             postmortems,
+            maintenance,
           };
+
 
           return new Response(JSON.stringify(body), {
             status: 200,
